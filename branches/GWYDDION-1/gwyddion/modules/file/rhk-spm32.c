@@ -28,8 +28,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "get.h"
-
 #define HEADER_SIZE 512
 
 #define MAGIC "STiMage 3.1"

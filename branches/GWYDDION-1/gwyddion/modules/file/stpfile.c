@@ -30,8 +30,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "get.h"
-
 #define MAGIC "UK SOFT\r\n"
 #define MAGIC_SIZE (sizeof(MAGIC) - 1)
 
