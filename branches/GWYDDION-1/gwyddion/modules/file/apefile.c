@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-
+#define DEBUG 1
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwyddion/gwymath.h>
@@ -32,7 +32,7 @@
 #include "get.h"
 
 /* Just guessing, format has no real magic header */
-#define HEADER_SIZE 12
+#define HEADER_SIZE 240
 
 typedef enum {
     SPM_MODE_SNOM = 0,
@@ -51,7 +51,8 @@ typedef struct {
     gdouble maxr_y;
     guint x_offset;
     guint y_offset;
-    guint size_flag;  /* dimension = 2^(4+size_flag) */
+    guint size_flag;
+    guint res;   /* = 2^(4+size_flag) */
     gdouble acquire_delay;
     gdouble raster_delay;
     gdouble tip_dist;
@@ -135,7 +136,7 @@ apefile_detect(const gchar *filename, gboolean only_name)
 
     if (!(fh = fopen(filename, "rb")))
         return 0;
-    if (!fread(magic, 1, MAGIC_SIZE, fh) == MAGIC_SIZE) {
+    if (!fread(header, 1, HEADER_SIZE, fh) == HEADER_SIZE) {
         fclose(fh);
         return 0;
     }
@@ -143,8 +144,12 @@ apefile_detect(const gchar *filename, gboolean only_name)
     version = *(p++);
     mode = *(p++);
     /* FIXME */
-    if (version >= 1 && version <= 2 && mode < SPM_MODE_LAST)
+    if (version >= 1 && version <= 2 && mode < SPM_MODE_LAST) {
         score = 50;
+        /* This works for new file format only */
+        if (!strncmp(header + 234, "APERES", 6))
+            score = 100;
+    }
 
     return score;
 }
@@ -154,8 +159,9 @@ apefile_load(const gchar *filename)
 {
     APEFile apefile;
     GObject *object = NULL;
-    guchar *buffer = NULL, *p;
-    guint size = 0;
+    guchar *buffer = NULL;
+    const guchar *p;
+    gsize size = 0;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
 
@@ -179,8 +185,9 @@ apefile_load(const gchar *filename)
     apefile.x_offset = get_DWORD(&p);
     apefile.y_offset = get_DWORD(&p);
     apefile.size_flag = get_WORD(&p);
+    apefile.res = 16 << apefile.size_flag;
     apefile.acquire_delay = get_FLOAT(&p);
-    apefile.rasert_delay = get_FLOAT(&p);
+    apefile.raster_delay = get_FLOAT(&p);
     apefile.tip_dist = get_FLOAT(&p);
     apefile.v_ref = get_FLOAT(&p);
     if (apefile.version == 1) {
@@ -209,6 +216,28 @@ apefile_load(const gchar *filename)
     apefile.range_y = get_FLOAT(&p);
     /* reserved */
     p += 44;
+
+    gwy_debug("version = %u, spm_mode = %u", apefile.version, apefile.spm_mode);
+    gwy_debug("maxr_x = %g, maxr_y = %g", apefile.maxr_x, apefile.maxr_y);
+    gwy_debug("x_offset = %u, y_offset = %u",
+              apefile.x_offset, apefile.y_offset);
+    gwy_debug("size_flag = %u", apefile.size_flag);
+    gwy_debug("acquire_delay = %g, raster_delay = %g, tip_dist = %g",
+              apefile.acquire_delay, apefile.raster_delay, apefile.tip_dist);
+    gwy_debug("v_ref = %g, vpmt1 = %g, vpmt2 = %g",
+              apefile.v_ref, apefile.vpmt1, apefile.vpmt2);
+    gwy_debug("x_piezo_factor = %u, y_piezo_factor = %u, z_piezo_factor = %u",
+              apefile.x_piezo_factor, apefile.y_piezo_factor,
+              apefile.z_piezo_factor);
+    gwy_debug("hv_gain = %g, freq_osc_tip = %g, rotate = %g",
+              apefile.hv_gain, apefile.freq_osc_tip, apefile.rotate);
+    gwy_debug("slope_x = %g, slope_y = %g",
+              apefile.slope_x, apefile.slope_y);
+    gwy_debug("topo_means = %u, optical_means = %u, error_means = %u",
+              apefile.topo_means, apefile.optical_means, apefile.error_means);
+    gwy_debug("channel bitmask = %03x", apefile.channels);
+    gwy_debug("range_x = %g, range_y = %g",
+              apefile.range_x, apefile.range_y);
 
     gwy_file_abandon_contents(buffer, size, NULL);
     if (!dfield)
