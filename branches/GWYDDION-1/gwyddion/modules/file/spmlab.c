@@ -47,9 +47,9 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "spmlab",
-    N_("Imports Thermicroscopes SpmLab R4 and R5 data files."),
+    N_("Imports Thermicroscopes SpmLab R4, R5, and R6 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -63,7 +63,7 @@ module_register(const gchar *name)
 {
     static GwyFileFuncInfo spmlab_func_info = {
         "spmlab",
-        N_("Thermicroscopes SpmLab R4, R5 files"),
+        N_("Thermicroscopes SpmLab R4, R5, R6 files"),
         (GwyFileDetectFunc)&spmlab_detect,
         (GwyFileLoadFunc)&spmlab_load,
         NULL
@@ -109,7 +109,7 @@ spmlab_detect(const gchar *filename, gboolean only_name)
         && magic[0] == '#'
         && magic[1] == 'R'
         && (s = memchr(magic+1, '#', sizeof(magic)-1))
-        && (magic[2] == '3' || magic[2] == '4' || magic[2] == '5'))
+        && (magic[2] >= '3' && magic[2] <= '6'))
         score = 15;   /* XXX: must be below plug-in score to allow overriding */
     fclose(fh);
 
@@ -141,6 +141,7 @@ spmlab_load(const gchar *filename)
         case '3':
         case '4':
         case '5':
+        case '6':
         dfield = read_data_field(buffer, size, buffer[2]);
         break;
 
@@ -164,11 +165,11 @@ static GwyDataField*
 read_data_field(const guchar *buffer, guint size, guchar version)
 {
     enum { MIN_REMAINDER = 2620 };
-    /* information offsets in different versions, in r5 relative to data
+    /* information offsets in different versions, in r5+ relative to data
      * start, in order: data offset, pixel dimensions, physical dimensions,
      * value multiplier, multipliers (units) */
-    const guint offsets5[] = { 0x0104, 0x025c, 0x0268, 0x0288, 0x029c };
-    const guint offsets4[] = { 0x0104, 0x0196, 0x01a2, 0x01b2, 0x01be };
+    const guint offsets34[] = { 0x0104, 0x0196, 0x01a2, 0x01b2, 0x01be };
+    const guint offsets56[] = { 0x0104, 0x025c, 0x0268, 0x0288, 0x029c };
     /* there probably more constants, the left and right 1e-6 also serve as
      * defaults after CLAMP() */
     const gdouble zfactors[] = { 1e-6, 1e-9, 1e-10, 1e-6 };
@@ -179,15 +180,15 @@ read_data_field(const guchar *buffer, guint size, guchar version)
     gdouble *data;
     const guint *offset;
     const guchar *p, *r, *last;
-    /* get floats in single precision from r4 but double from r5 */
+    /* get floats in single precision from r4 but double from r5+ */
     gdouble (*getflt)(const guchar**);
 
-    if (version == '5') {
+    if (version == '5' || version == '6') {
         /* There are more data in r5,
          * try to find something that looks like #R5. */
         last = r = buffer;
         while ((p = memchr(r, '#', size - (r - buffer) - MIN_REMAINDER))) {
-            if (p[1] == 'R' && p[2] == '5' && p[3] == '.') {
+            if (p[1] == 'R' && p[2] == version && p[3] == '.') {
                 gwy_debug("pos: %d", p - buffer);
                 last = p;
                 r = p + MIN_REMAINDER-1;
@@ -195,12 +196,12 @@ read_data_field(const guchar *buffer, guint size, guchar version)
             else
                 r = p + 1;
         }
-        offset = &offsets5[0];
+        offset = &offsets56[0];
         buffer = last;
         getflt = &get_DOUBLE;
     }
     else {
-        offset = &offsets4[0];
+        offset = &offsets34[0];
         getflt = &get_FLOAT;
     }
 
@@ -220,6 +221,8 @@ read_data_field(const guchar *buffer, guint size, guchar version)
     p = buffer + *(offset++);
     q = getflt(&p);
     z0 = getflt(&p);
+    gwy_debug("xreal.raw = %g, yreal.raw = %g, q.raw = %g, z0.raw = %g",
+              xreal, yreal, q, z0);
     p = buffer + *(offset++);
     zf = get_WORD(&p);
     lf = get_WORD(&p);
