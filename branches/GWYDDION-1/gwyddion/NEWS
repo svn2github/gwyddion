@@ -1,3 +1,24 @@
+1.10cvs20050329
+
+1.10
+Application:
+- Translations updated: Czech, Italian.
+
+Modules:
+- APEfile (new): Applied Physics and Engineering data file import.
+- BCRfile (new): Image Metrology BCR data file import.
+- RHK SPM32 (new): RHK SPM32 data file import.
+- WSxMfile (new): Nanotec WSxM data file import.
+- Pixmap: False color scale is correct when explicite color range is set.
+- Assing AFM: Supports also save.
+- SPMLab: Supports R6 file format import.
+
+Library:
+- libgwyddion: Marquardt-Levenberg NL fitter fixed parameters actually work
+  now.
+- libprocess: Rotation correction mysteriously broken on Win32 was no less
+  mysteriously fixed.
+
 
 1.9
 Application:
@@ -387,7 +408,7 @@ Modules:
 - Many modules: Memory leaks fixed.
 
 Library:
-- libgwyddion: Marquardt-Levenverg non-linear least square fitter was
+- libgwyddion: Marquardt-Levenberg non-linear least square fitter was
   added (GwyNLFitter).
 - libgwyprocess: Functions for computing fractal dimension and surface area
   added. Functions for correlation, crosscorrelation, outlier detection
