@@ -17,8 +17,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#define DEBUG 1
+
 #include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwymodule/gwymodule.h>
 #include <libprocess/datafield.h>
@@ -30,6 +31,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#if (defined(HAVE_TIME_H) || defined(G_OS_WIN32))
+#include <time.h>
+#endif
+
+#ifdef TM_IN_SYS_TIME
+#include <sys/time.h>
+#endif
 
 #include "get.h"
 
@@ -99,6 +108,7 @@ static void          store_metadata     (APEFile *apefile,
 static guint         select_which_data  (APEFile *apefile);
 static void          selection_changed  (GtkWidget *button,
                                          APEControls *controls);
+static gchar*        format_vt_date     (gdouble vt_date);
 
 static const GwyEnum spm_modes[] = {
     { "SNOM",                  SPM_MODE_SNOM },
@@ -146,8 +156,8 @@ apefile_detect(const gchar *filename, gboolean only_name)
     gint score = 0;
     FILE *fh;
     gchar header[HEADER_SIZE];
-    guchar *p;
-    guint version, mode;
+    const guchar *p;
+    guint version, mode, vbtype;
 
     if (only_name) {
         if (g_str_has_suffix(filename, ".dat"))
@@ -165,9 +175,11 @@ apefile_detect(const gchar *filename, gboolean only_name)
     p = (guchar*)header;
     version = *(p++);
     mode = *(p++);
-    /* FIXME */
-    if (version >= 1 && version <= 2 && mode < SPM_MODE_LAST) {
-        score = 50;
+    vbtype = get_WORD(&p);
+    if (version >= 1 && version <= 2
+        && mode < SPM_MODE_LAST+2  /* reserve */
+        && vbtype == 7) {
+        score = 60;
         /* This works for new file format only */
         if (!strncmp(header + 234, "APERES", 6))
             score = 100;
@@ -202,7 +214,8 @@ apefile_load(const gchar *filename)
     }
 
     apefile.spm_mode = *(p++);
-    apefile.scan_date = 0.0; p += 10; /* FIXME */
+    p += 2;   /* Skip VisualBasic VARIANT type type */
+    apefile.scan_date = get_DOUBLE(&p);
     apefile.maxr_x = get_FLOAT(&p);
     apefile.maxr_y = get_FLOAT(&p);
     apefile.x_offset = get_DWORD(&p);
@@ -248,6 +261,7 @@ apefile_load(const gchar *filename)
     p += 46;
 
     gwy_debug("version = %u, spm_mode = %u", apefile.version, apefile.spm_mode);
+    gwy_debug("scan_date = %f", apefile.scan_date);
     gwy_debug("maxr_x = %g, maxr_y = %g", apefile.maxr_x, apefile.maxr_y);
     gwy_debug("x_offset = %u, y_offset = %u",
               apefile.x_offset, apefile.y_offset);
@@ -273,7 +287,7 @@ apefile_load(const gchar *filename)
     n = (apefile.res + 1)*(apefile.res + 1)*sizeof(float);
     if (size - (p - buffer) != n*apefile.ndata) {
         g_warning("Expected data size %u, but it's %u.",
-                  n*apefile.ndata, size - (p - buffer));
+                  n*apefile.ndata, (guint)(size - (p - buffer)));
         apefile.ndata = MIN(apefile.ndata, (size - (p - buffer))/n);
         if (!apefile.ndata) {
             g_warning("No data");
@@ -350,6 +364,8 @@ store_metadata(APEFile *apefile,
         (container, "/meta/SPM mode",
          g_strdup(gwy_enum_to_string(apefile->spm_mode, spm_modes,
                                      G_N_ELEMENTS(spm_modes))));
+    gwy_container_set_string_by_name(container, "/meta/Date",
+                                     format_vt_date(apefile->scan_date));
 }
 
 static guint
@@ -464,6 +480,243 @@ selection_changed(GtkWidget *button,
     gwy_container_set_object_by_name(controls->data, "/0/data",
                                      G_OBJECT(controls->file->data[i]));
     gwy_data_view_update(GWY_DATA_VIEW(controls->data_view));
+}
+
+/******************** Wine date conversion code *****************************/
+
+typedef guint WORD;
+typedef guint USHORT;
+typedef guint8 BYTE;
+
+typedef struct {
+    WORD wYear;
+    WORD wMonth;
+    WORD wDayOfWeek;
+    WORD wDay;
+    WORD wHour;
+    WORD wMinute;
+    WORD wSecond;
+    WORD wMilliseconds;
+} SYSTEMTIME;
+
+typedef struct {
+    SYSTEMTIME st;
+    USHORT wDayOfYear;
+} UDATE;
+
+#define DATE_MIN -657434
+#define DATE_MAX 2958465
+
+#define IsLeapYear(y) (((y % 4) == 0) && (((y % 100) != 0) || ((y % 400) == 0)))
+
+/* Convert a VT_DATE value to a Julian Date */
+static inline int
+VARIANT_JulianFromDate(int dateIn)
+{
+    int julianDays = dateIn;
+
+    julianDays -= DATE_MIN; /* Convert to + days from 1 Jan 100 AD */
+    julianDays += 1757585;  /* Convert to + days from 23 Nov 4713 BC (Julian) */
+    return julianDays;
+}
+
+/* Convert a Julian Date to a VT_DATE value */
+static inline int
+VARIANT_DateFromJulian(int dateIn)
+{
+    int julianDays = dateIn;
+
+    julianDays -= 1757585;  /* Convert to + days from 1 Jan 100 AD */
+    julianDays += DATE_MIN; /* Convert to +/- days from 1 Jan 1899 AD */
+    return julianDays;
+}
+
+/* Convert a Julian date to Day/Month/Year - from PostgreSQL */
+static inline void
+VARIANT_DMYFromJulian(int jd, USHORT *year, USHORT *month, USHORT *day)
+{
+    int j, i, l, n;
+
+    l = jd + 68569;
+    n = l * 4 / 146097;
+    l -= (n * 146097 + 3) / 4;
+    i = (4000 * (l + 1)) / 1461001;
+    l += 31 - (i * 1461) / 4;
+    j = (l * 80) / 2447;
+    *day = l - (j * 2447) / 80;
+    l = j / 11;
+    *month = (j + 2) - (12 * l);
+    *year = 100 * (n - 49) + i + l;
+}
+
+/* Roll a date forwards or backwards to correct it */
+static gboolean
+VARIANT_RollUdate(UDATE *lpUd)
+{
+    static const BYTE days[] = {
+        0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+
+    /* Years < 100 are treated as 1900 + year */
+    if (lpUd->st.wYear < 100)
+        lpUd->st.wYear += 1900;
+
+    if (!lpUd->st.wMonth) {
+        /* Roll back to December of the previous year */
+        lpUd->st.wMonth = 12;
+        lpUd->st.wYear--;
+    }
+    else while (lpUd->st.wMonth > 12) {
+        /* Roll forward the correct number of months */
+        lpUd->st.wYear++;
+        lpUd->st.wMonth -= 12;
+    }
+
+    if (lpUd->st.wYear > 9999 || lpUd->st.wHour > 23
+        || lpUd->st.wMinute > 59 || lpUd->st.wSecond > 59)
+        return FALSE; /* Invalid values */
+
+    if (!lpUd->st.wDay) {
+        /* Roll back the date one day */
+        if (lpUd->st.wMonth == 1) {
+            /* Roll back to December 31 of the previous year */
+            lpUd->st.wDay   = 31;
+            lpUd->st.wMonth = 12;
+            lpUd->st.wYear--;
+        }
+        else {
+            lpUd->st.wMonth--; /* Previous month */
+            if (lpUd->st.wMonth == 2 && IsLeapYear(lpUd->st.wYear))
+                lpUd->st.wDay = 29; /* Februaury has 29 days on leap years */
+            else
+                /* Last day of the month */
+                lpUd->st.wDay = days[lpUd->st.wMonth];
+        }
+    }
+    else if (lpUd->st.wDay > 28) {
+        int rollForward = 0;
+
+        /* Possibly need to roll the date forward */
+        if (lpUd->st.wMonth == 2 && IsLeapYear(lpUd->st.wYear))
+            /* Februaury has 29 days on leap years */
+            rollForward = lpUd->st.wDay - 29;
+        else
+            rollForward = lpUd->st.wDay - days[lpUd->st.wMonth];
+
+        if (rollForward > 0) {
+            lpUd->st.wDay = rollForward;
+            lpUd->st.wMonth++;
+            if (lpUd->st.wMonth > 12) {
+                /* Roll forward into January of the next year */
+                lpUd->st.wMonth = 1;
+                lpUd->st.wYear++;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+/* WINAPI, prefix with gwy_ */
+static gboolean
+gwy_VarUdateFromDate(double dateIn, UDATE *lpUdate)
+{
+    /* Cumulative totals of days per month */
+    static const USHORT cumulativeDays[] = {
+        0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
+    };
+    double datePart, timePart;
+    int julianDays;
+
+    if (dateIn <= (DATE_MIN - 1.0) || dateIn >= (DATE_MAX + 1.0))
+        return FALSE;
+
+    datePart = dateIn < 0.0 ? ceil(dateIn) : floor(dateIn);
+    /* Compensate for int truncation (always downwards) */
+    timePart = dateIn - datePart + 0.00000000001;
+    if (timePart >= 1.0)
+        timePart -= 0.00000000001;
+
+    /* Date */
+    julianDays = VARIANT_JulianFromDate(dateIn);
+    VARIANT_DMYFromJulian(julianDays, &lpUdate->st.wYear, &lpUdate->st.wMonth,
+                          &lpUdate->st.wDay);
+
+    datePart = (datePart + 1.5) / 7.0;
+    lpUdate->st.wDayOfWeek = (datePart - floor(datePart)) * 7;
+    if (lpUdate->st.wDayOfWeek == 0)
+        lpUdate->st.wDayOfWeek = 5;
+    else if (lpUdate->st.wDayOfWeek == 1)
+        lpUdate->st.wDayOfWeek = 6;
+    else
+        lpUdate->st.wDayOfWeek -= 2;
+
+    if (lpUdate->st.wMonth > 2 && IsLeapYear(lpUdate->st.wYear))
+        lpUdate->wDayOfYear = 1; /* After February, in a leap year */
+    else
+        lpUdate->wDayOfYear = 0;
+
+    lpUdate->wDayOfYear += cumulativeDays[lpUdate->st.wMonth];
+    lpUdate->wDayOfYear += lpUdate->st.wDay;
+
+    /* Time */
+    timePart *= 24.0;
+    lpUdate->st.wHour = timePart;
+    timePart -= lpUdate->st.wHour;
+    timePart *= 60.0;
+    lpUdate->st.wMinute = timePart;
+    timePart -= lpUdate->st.wMinute;
+    timePart *= 60.0;
+    lpUdate->st.wSecond = timePart;
+    timePart -= lpUdate->st.wSecond;
+    lpUdate->st.wMilliseconds = 0;
+    if (timePart > 0.5) {
+        /* Round the milliseconds, adjusting the time/date forward if needed */
+        if (lpUdate->st.wSecond < 59)
+            lpUdate->st.wSecond++;
+        else {
+            lpUdate->st.wSecond = 0;
+            if (lpUdate->st.wMinute < 59)
+                lpUdate->st.wMinute++;
+            else {
+                lpUdate->st.wMinute = 0;
+                if (lpUdate->st.wHour < 23)
+                    lpUdate->st.wHour++;
+                else {
+                    lpUdate->st.wHour = 0;
+                    /* Roll over a whole day */
+                    if (++lpUdate->st.wDay > 28)
+                        VARIANT_RollUdate(lpUdate);
+                }
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+static gchar*
+format_vt_date(gdouble vt_date)
+{
+    struct tm tm;
+    UDATE udate;
+
+    memset(&tm, 0, sizeof(tm));
+    gwy_VarUdateFromDate(vt_date, &udate);
+    gwy_debug("Date: %d-%d-%d %d:%d:%d",
+              udate.st.wYear, udate.st.wMonth, udate.st.wDay,
+              udate.st.wHour, udate.st.wMinute, udate.st.wSecond);
+    tm.tm_year = udate.st.wYear - 1900;
+    tm.tm_mon = udate.st.wMonth - 1;
+    tm.tm_mday = udate.st.wDay;
+    tm.tm_hour = udate.st.wHour;
+    tm.tm_min = udate.st.wMinute;
+    tm.tm_sec = udate.st.wSecond;
+    tm.tm_wday = udate.st.wDayOfWeek;
+    tm.tm_yday = udate.wDayOfYear;
+    tm.tm_isdst = -1;
+
+    return g_strdup(asctime(&tm));
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
