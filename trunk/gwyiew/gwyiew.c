@@ -50,7 +50,6 @@ main(int argc, char *argv[])
     /* Initialize Gwyddion stuff */
     gwy_widgets_type_init();
     g_set_application_name(PACKAGE);
-    gwy_palette_def_setup_presets();
 
     /* Load gwyddion settings.  Maybe not very useful here, except for
      * files mysteriously missing mask color. */

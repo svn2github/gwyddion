@@ -9,16 +9,17 @@ include pkg.mak
 #   make PREFIX=/foo/bar/usr install
 #
 PREFIX = /usr/local
-PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig pkg-config
+PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig:$(PREFIX)/lib64/pkgconfig pkg-config
 GWY = gwyddion
-GTK = gtk+-2.0
 
-GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) $(GTK) --cflags)
-GWY_LDFLAGS = $(shell $(PKGCONFIG) $(GWY) $(GTK) --libs)
+GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) --cflags)
+GWY_LDFLAGS = $(shell $(PKGCONFIG) $(GWY) --libs)
+rp = -Wl,-rpath=
+RPATHS = $(subst -L,$(rp),$(shell $(PKGCONFIG) $(GWY) --libs-only-L))
 MODULE_DIR = $(shell $(PKGCONFIG) $(GWY) --variable=gwymoduledir)
-EXTRA_CFLAGS = -Wall -O2 -march=`uname -m` -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\" -DGWY_MODULE_DIR=\"$(MODULE_DIR)\"
+EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\" -DGWY_MODULE_DIR=\"$(MODULE_DIR)\"
 OBJECTS = $(SOURCES:.c=.o)
-LDFLAGS = $(GWY_LDFLAGS)
+LDFLAGS = $(GWY_LDFLAGS) $(RPATHS)
 
 bindir = $(shell $(PKGCONFIG) $(GWY) --prefix)/bin
 
