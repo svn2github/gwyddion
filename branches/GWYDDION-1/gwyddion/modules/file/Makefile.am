@@ -15,6 +15,7 @@ file_PROGRAMS = \
 	nt-mdt.so \
 	pixmap.so \
 	rawfile.so \
+	rhk-spm32.so \
 	sis.so \
 	spmlab.so \
 	stmprg.so
@@ -55,6 +56,9 @@ pixmap_so_LDFLAGS = $(module_ldflags),pixmap.so
 
 rawfile_so_SOURCES = rawfile.c
 rawfile_so_LDFLAGS = $(module_ldflags),rawfile.so
+
+rhk_spm32_so_SOURCES = rhk-spm32.c
+rhk_spm32_so_LDFLAGS = $(module_ldflags),rhk-spm32.so
 
 sis_so_SOURCES = sis.c
 sis_so_LDFLAGS = $(module_ldflags),sis.so
