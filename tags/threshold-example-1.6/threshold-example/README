@@ -1,0 +1,33 @@
+This is an example standalone Gwyddion module.
+
+It doesn't do anything extremely useful, but is complex enough to demostrate
+basic principles.
+
+
+== Unix ======
+
+If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
+do one of following:
+(a) run make with PREFIX=/home/me/usr
+(b) export PKG_CONFIG_PATH=/home/me/usr/lib/pkgconfig
+
+Otherwise just run make, make install.
+
+If you have Gwyddion installed from rpm (with gwyddion-devel too), it should
+be possible to build a rpm with rpm -tb threshold-example-X.Y.tar.bz2
+
+
+== Windows ======
+
+Edit the top of make.msc and change MSVC, Gtk+, and Gwyddion paths to reflect
+reality.  Run
+
+  nmake -f makefile.msc
+
+to compile the module.  Copy the created DLL to Gwyddion module directory
+appropriate for the module type (that is probably something like
+c:/program files/gwyddion/modules/process).
+
+It is also possible to build an exe installer, if you have Inno Setup 4
+installed.
+
