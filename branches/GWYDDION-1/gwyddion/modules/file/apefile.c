@@ -49,10 +49,12 @@ typedef struct {
     gdouble scan_date;
     gdouble maxr_x;
     gdouble maxr_y;
+    gdouble xreal;   /* computed */
+    gdouble yreal;   /* computed */
     guint x_offset;
     guint y_offset;
     guint size_flag;
-    guint res;   /* = 2^(4+size_flag) */
+    guint res;   /* computed, 2^(4+size_flag) */
     gdouble acquire_delay;
     gdouble raster_delay;
     gdouble tip_dist;
@@ -72,20 +74,20 @@ typedef struct {
     guint optical_means;
     guint error_means;
     guint channels;
-    guint ndata;   /* number of nonzero bits in channels */
+    guint ndata;   /* computed, number of nonzero bits in channels */
     gdouble range_x;
     gdouble range_y;
-    gdouble **data;
+    GwyDataField **data;
 } APEFile;
 
 static gboolean      module_register    (const gchar *name);
-static gint          apefile_detect      (const gchar *filename,
+static gint          apefile_detect     (const gchar *filename,
                                          gboolean only_name);
-static GwyContainer* apefile_load        (const gchar *filename);
-static GwyDataField* read_data_field    (const guchar *buffer,
-                                         guint size,
-                                         guchar version);
-
+static GwyContainer* apefile_load       (const gchar *filename);
+static void          fill_data_fields   (APEFile *apefile,
+                                         const guchar *buffer);
+static void          store_metadata     (APEFile *apefile,
+                                         GwyContainer *container);
 
 /* The module info. */
 static GwyModuleInfo module_info = {
@@ -165,7 +167,7 @@ apefile_load(const gchar *filename)
     gsize size = 0;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
-    guint b;
+    guint b, n;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -219,8 +221,12 @@ apefile_load(const gchar *filename)
         apefile.ndata += (b & 1);
     apefile.range_x = get_FLOAT(&p);
     apefile.range_y = get_FLOAT(&p);
+    apefile.xreal = apefile.maxr_x * apefile.x_piezo_factor * apefile.range_x
+                    * apefile.hv_gain/65535.0 * 1e-9;
+    apefile.yreal = apefile.maxr_y * apefile.y_piezo_factor * apefile.range_y
+                    * apefile.hv_gain/65535.0 * 1e-9;
     /* reserved */
-    p += 44;
+    p += 46;
 
     gwy_debug("version = %u, spm_mode = %u", apefile.version, apefile.spm_mode);
     gwy_debug("maxr_x = %g, maxr_y = %g", apefile.maxr_x, apefile.maxr_y);
@@ -245,105 +251,73 @@ apefile_load(const gchar *filename)
     gwy_debug("range_x = %g, range_y = %g",
               apefile.range_x, apefile.range_y);
 
+    n = (apefile.res + 1)*(apefile.res + 1)*sizeof(float);
+    if (size - (p - buffer) != n*apefile.ndata) {
+        g_warning("Expected data size %u, but it's %u.",
+                  n*apefile.ndata, size - (p - buffer));
+        apefile.ndata = MIN(apefile.ndata, (size - (p - buffer))/n);
+        if (!apefile.ndata) {
+            g_warning("No data");
+            gwy_file_abandon_contents(buffer, size, NULL);
+
+            return NULL;
+        }
+    }
+    fill_data_fields(&apefile, p);
+    /* XXX */
+    dfield = apefile.data[0];
+
     gwy_file_abandon_contents(buffer, size, NULL);
-    if (!dfield)
-        return NULL;
 
     object = gwy_container_new();
     gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
                                      G_OBJECT(dfield));
+    store_metadata(&apefile, GWY_CONTAINER(object));
 
     return (GwyContainer*)object;
 }
 
-static GwyDataField*
-read_data_field(const guchar *buffer, guint size, guchar version)
+static void
+fill_data_fields(APEFile *apefile,
+                 const guchar *buffer)
 {
-    enum { MIN_REMAINDER = 2620 };
-    /* information offsets in different versions, in r5+ relative to data
-     * start, in order: data offset, pixel dimensions, physical dimensions,
-     * value multiplier, multipliers (units) */
-    const guint offsets34[] = { 0x0104, 0x0196, 0x01a2, 0x01b2, 0x01be };
-    const guint offsets56[] = { 0x0104, 0x025c, 0x0268, 0x0288, 0x029c };
-    /* there probably more constants, the left and right 1e-6 also serve as
-     * defaults after CLAMP() */
-    const gdouble zfactors[] = { 1e-6, 1e-9, 1e-10, 1e-6 };
-    const gdouble lfactors[] = { 1e-6, 1e-10, 1e-9, 1e-6 };
-    gint xres, yres, doffset, lf, zf, i;
-    gdouble xreal, yreal, q, z0;
     GwyDataField *dfield;
     gdouble *data;
-    const guint *offset;
-    const guchar *p, *r, *last;
-    /* get floats in single precision from r4 but double from r5+ */
-    gdouble (*getflt)(const guchar**);
+    guint n, i, j;
 
-    if (version == '5' || version == '6') {
-        /* There are more data in r5,
-         * try to find something that looks like #R5. */
-        last = r = buffer;
-        while ((p = memchr(r, '#', size - (r - buffer) - MIN_REMAINDER))) {
-            if (p[1] == 'R' && p[2] == version && p[3] == '.') {
-                gwy_debug("pos: %d", p - buffer);
-                last = p;
-                r = p + MIN_REMAINDER-1;
+    apefile->data = g_new0(GwyDataField*, apefile->ndata);
+    for (n = 0; n < apefile->ndata; n++) {
+        dfield = GWY_DATA_FIELD(gwy_data_field_new(apefile->res,
+                                                   apefile->res,
+                                                   apefile->xreal,
+                                                   apefile->yreal,
+                                                   FALSE));
+        data = gwy_data_field_get_data(dfield);
+        buffer += (apefile->res + 1)*sizeof(float);
+        for (i = 0; i < apefile->res; i++) {
+            buffer += sizeof(float);
+            for (j = 0; j < apefile->res; j++) {
+                *(data++) = get_FLOAT(&buffer);
             }
-            else
-                r = p + 1;
         }
-        offset = &offsets56[0];
-        buffer = last;
-        getflt = &get_DOUBLE;
+        apefile->data[n] = dfield;
+        gwy_data_field_multiply(dfield, apefile->z_piezo_factor * 1e-9);
     }
-    else {
-        offset = &offsets34[0];
-        getflt = &get_FLOAT;
-    }
+}
 
-    p = buffer + *(offset++);
-    doffset = get_DWORD(&p);    /* this appears to be the same number as in
-                                   the ASCII miniheader -- so get it here
-                                   since it's easier */
-    gwy_debug("data offset = %u", doffset);
-    p = buffer + *(offset++);
-    xres = get_DWORD(&p);
-    yres = get_DWORD(&p);
-    p = buffer + *(offset++);
-    xreal = -getflt(&p);
-    xreal += getflt(&p);
-    yreal = -getflt(&p);
-    yreal += getflt(&p);
-    p = buffer + *(offset++);
-    q = getflt(&p);
-    z0 = getflt(&p);
-    gwy_debug("xreal.raw = %g, yreal.raw = %g, q.raw = %g, z0.raw = %g",
-              xreal, yreal, q, z0);
-    p = buffer + *(offset++);
-    zf = get_WORD(&p);
-    lf = get_WORD(&p);
-    gwy_debug("lf = %d, zf = %d", lf, zf);
-    lf = CLAMP(lf, 0, G_N_ELEMENTS(lfactors)-1);
-    xreal *= lfactors[lf];
-    yreal *= lfactors[lf];
-    zf = CLAMP(zf, 0, G_N_ELEMENTS(zfactors)-1);
-    q *= zfactors[zf];
-    z0 *= zfactors[zf];
-    gwy_debug("xres = %d, yres = %d, xreal = %g, yreal = %g, q = %g, z0 = %g",
-              xres, yres, xreal, yreal, q, z0);
+#define HASH_STORE(key, fmt, field) \
+    gwy_container_set_string_by_name(container, "/meta/" key, \
+                                     g_strdup_printf(fmt, apefile->field));
 
-    p = buffer + doffset;
-    if (size - (p - buffer) < 2*xres*yres) {
-        g_warning("Truncated data?");
-        return NULL;
-    }
-
-    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, xreal, yreal,
-                                               FALSE));
-    data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < xres*yres; i++)
-        data[i] = (p[2*i] + 256.0*p[2*i + 1])*q + z0;
-
-    return dfield;
+static void
+store_metadata(APEFile *apefile,
+               GwyContainer *container)
+{
+    HASH_STORE("Version", "%u", version);
+    HASH_STORE("Tip oscilation frequency", "%g Hz", freq_osc_tip);
+    HASH_STORE("Acquire delay", "%.6f s", acquire_delay);
+    HASH_STORE("Raster delay", "%.6f s", raster_delay);
+    HASH_STORE("Tip distance", "%g nm", tip_dist);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
