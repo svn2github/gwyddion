@@ -173,6 +173,7 @@ wsxmfile_load(const gchar *filename)
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
                                          G_OBJECT(dfield));
+        g_object_unref(dfield);
         process_metadata(meta, GWY_CONTAINER(object));
     }
     g_hash_table_destroy(meta);
