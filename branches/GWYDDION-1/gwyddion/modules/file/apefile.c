@@ -368,7 +368,7 @@ store_metadata(APEFile *apefile,
     if (apefile->remark && *apefile->remark
         && (p = g_convert(apefile->remark, strlen(apefile->remark),
                           "UTF-8", "ISO-8859-1", NULL, NULL, NULL)))
-        gwy_container_set_string_by_name(container, "/meta/Comment" p);
+        gwy_container_set_string_by_name(container, "/meta/Comment", p);
     gwy_container_set_string_by_name
         (container, "/meta/SPM mode",
          g_strdup(gwy_enum_to_string(apefile->spm_mode, spm_modes,
