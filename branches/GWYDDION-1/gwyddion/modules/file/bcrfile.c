@@ -68,7 +68,7 @@ static GwyModuleInfo module_info = {
     N_("Imports Image Metrology BCR data files."),
     "Yeti <yeti@gwyddion.net>",
     "0.1",
-    "David Nečas (Yeti) & Petr Klbcrtek",
+    "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
 
