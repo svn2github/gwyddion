@@ -1,0 +1,54 @@
+<!-- ##### SECTION Title ##### -->
+GwySciText
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### TYPEDEF GwySciTextParams ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwySciText ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_sci_text_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_sci_text_get_text ##### -->
+<para>
+
+</para>
+
+@sci_text: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_sci_text_set_text ##### -->
+<para>
+
+</para>
+
+@sci_text: 
+@new_text: 
+
+

@@ -1,0 +1,622 @@
+<!-- ##### SECTION Title ##### -->
+GwyContainer
+
+<!-- ##### SECTION Short_Description ##### -->
+A container with items identified by a GQuark.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+A general-purpose container.  Items in GwyContainer are identified by a GQuark
+(or its string).
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### MACRO GWY_CONTAINER_PATHSEP ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GWY_CONTAINER_PATHSEP_STR ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### USER_FUNCTION GwyContainerNotifyFunc ##### -->
+<para>
+
+</para>
+
+@container: 
+@path: 
+@user_data: 
+
+
+<!-- ##### TYPEDEF GwyKeyVal ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyContainer ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_container_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_value_type ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_contains ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_get_value ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_value ##### -->
+<para>
+
+</para>
+
+@container: 
+@Varargs: 
+
+
+<!-- ##### FUNCTION gwy_container_set_value_by_name ##### -->
+<para>
+
+</para>
+
+@container: 
+@Varargs: 
+
+
+<!-- ##### FUNCTION gwy_container_remove ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_remove_by_prefix ##### -->
+<para>
+
+</para>
+
+@container: 
+@prefix: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_rename ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@newkey: 
+@force: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_foreach ##### -->
+<para>
+
+</para>
+
+@container: 
+@prefix: 
+@function: 
+@user_data: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@foo: 
+
+
+<!-- ##### FUNCTION gwy_container_set_boolean ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_boolean ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_boolean ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_uchar ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_uchar ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_uchar ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_int32 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_int32 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_int32 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_int64 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_int64 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_int64 ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_double ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_double ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_double ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_string ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_string ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_string ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_set_object ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_container_get_object ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_container_gis_object ##### -->
+<para>
+
+</para>
+
+@container: 
+@key: 
+@value: 
+@Returns: 
+
+
+<!-- ##### MACRO gwy_container_value_type_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_contains_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_get_value_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_remove_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_rename_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@nn: 
+@f: 
+
+
+<!-- ##### MACRO gwy_container_set_boolean_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_boolean_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_boolean_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_uchar_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_uchar_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_uchar_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_int32_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_int32_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_int32_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_int64_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_int64_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_int64_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_double_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_double_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_double_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_string_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_string_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_string_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_set_object_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+
+<!-- ##### MACRO gwy_container_get_object_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+
+
+<!-- ##### MACRO gwy_container_gis_object_by_name ##### -->
+<para>
+
+</para>
+
+@c: 
+@n: 
+@v: 
+
+

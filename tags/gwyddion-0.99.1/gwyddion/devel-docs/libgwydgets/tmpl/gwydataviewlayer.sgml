@@ -1,0 +1,76 @@
+<!-- ##### SECTION Title ##### -->
+GwyDataViewLayer
+
+<!-- ##### SECTION Short_Description ##### -->
+A one #GwyDataView layer
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyDataViewLayer ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_data_view_layer_wants_repaint ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_view_layer_plugged ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+
+<!-- ##### FUNCTION gwy_data_view_layer_unplugged ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+
+<!-- ##### FUNCTION gwy_data_view_layer_updated ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+
+<!-- ##### SIGNAL GwyDataViewLayer::plugged ##### -->
+<para>
+
+</para>
+
+@gwydataviewlayer: the object which received the signal.
+
+<!-- ##### SIGNAL GwyDataViewLayer::unplugged ##### -->
+<para>
+
+</para>
+
+@gwydataviewlayer: the object which received the signal.
+
+<!-- ##### SIGNAL GwyDataViewLayer::updated ##### -->
+<para>
+
+</para>
+
+@gwydataviewlayer: the object which received the signal.
+
