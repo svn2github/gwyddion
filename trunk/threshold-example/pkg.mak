@@ -3,7 +3,7 @@
 PACKAGE = threshold-example
 # Module version, it is also defined as a preprocessor macro you are
 # encouraged to use for module registering.
-VERSION = 1.8
+VERSION = 1.9
 # Module type (one of process, file)
 MODULE_TYPE = process
 # Module source files

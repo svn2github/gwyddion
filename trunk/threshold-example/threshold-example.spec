@@ -2,11 +2,11 @@
 
 Summary: An example Gwyddion threshold module
 Name: gwyddion-%{modname}
-Version: 1.7
+Version: 1.9
 Release: 1
 License: GNU GPL
 Group: Applications/Engineering
-Source: http://trific.ath.cx/Ftp/gwyddion/%{modname}-1.7.tar.bz2
+Source: http://trific.ath.cx/Ftp/gwyddion/%{modname}-1.9.tar.bz2
 URL: http://gwyddion.net/
 Prefix: %{_prefix}
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
