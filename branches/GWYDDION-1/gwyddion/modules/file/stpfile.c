@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#define DEBUG 1
+
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwymodule/gwymodule.h>
@@ -308,7 +308,7 @@ process_metadata(STPFile *stpfile,
     GwyDataField *dfield;
     GwySIUnit *siunit;
     gdouble q, r;
-    gchar *p;
+    gchar *p, *s;
     guint mode;
 
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(container,
@@ -376,10 +376,28 @@ process_metadata(STPFile *stpfile,
                                          g_strdup(p));
 
     /* Local metadata */
-    if ((p = g_hash_table_lookup(data->meta, "Date")))
-        gwy_container_set_string_by_name(container, "/meta/Date", g_strdup(p));
-    if ((p = g_hash_table_lookup(data->meta, "time")))
-        gwy_container_set_string_by_name(container, "/meta/Time", g_strdup(p));
+    if ((p = g_hash_table_lookup(data->meta, "Date"))
+        && (s = g_hash_table_lookup(data->meta, "time")))
+        gwy_container_set_string_by_name(container, "/meta/Date",
+                                         g_strconcat(p, " ", s, NULL));
+    if ((p = g_hash_table_lookup(data->meta, "tip_bias")))
+        gwy_container_set_string_by_name(container, "/meta/Bias",
+                                         g_strdup_printf("%s V", p));
+    if ((p = g_hash_table_lookup(data->meta, "tip_bias")))
+        gwy_container_set_string_by_name(container, "/meta/Bias",
+                                         g_strdup_printf("%s V", p));
+    if ((p = g_hash_table_lookup(data->meta, "scan_dir"))) {
+        if (!strcmp(p, "0")) 
+            gwy_container_set_string_by_name(container,
+                                             "/meta/Scanning direction",
+                                             g_strdup("Top to bottom, "
+                                                      "left to right"));
+        else if (strcmp(p, "1"))
+            gwy_container_set_string_by_name(container,
+                                             "/meta/Scanning direction",
+                                             g_strdup("Bottom to top, "
+                                                      "right to left"));
+    }
 }
 
 static void
@@ -387,13 +405,18 @@ read_data_field(GwyDataField *dfield,
                 STPData *stpdata)
 {
     gdouble *data;
-    guint i;
+    const guint16 *row;
+    gint i, j, xres, yres;
 
-    gwy_data_field_resample(dfield, stpdata->xres, stpdata->yres,
-                            GWY_INTERPOLATION_NONE);
+    xres = stpdata->xres;
+    yres = stpdata->yres;
+    gwy_data_field_resample(dfield, xres, yres, GWY_INTERPOLATION_NONE);
     data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < stpdata->xres * stpdata->yres; i++)
-        data[i] = GUINT16_FROM_LE(stpdata->data[i]);
+    for (i = 0; i < yres; i++) {
+        row = stpdata->data + (yres-1 - i)*xres;
+        for (j = 0; j < xres; j++)
+            data[i*xres + j] = GUINT16_FROM_LE(row[j]);
+    }
 }
 
 static guint
