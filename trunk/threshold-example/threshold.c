@@ -26,8 +26,7 @@
 #include <libgwymodule/gwymodule.h>
 #include <libprocess/datafield.h>
 #include <libgwydgets/gwydgets.h>
-#include <app/settings.h>
-#include <app/app.h>
+#include <app/gwyapp.h>
 
 #define THRESHOLD_MOD_NAME PACKAGE
 
@@ -105,7 +104,7 @@ static GwyModuleInfo module_info = {
     "Yeti <yeti@physics.muni.cz>",
     VERSION,
     "David Nečas (Yeti) & Petr Klapetek",
-    "2003",
+    "2004",
 };
 
 /* This is the ONLY exported symbol.  The argument is the module info.
@@ -171,15 +170,14 @@ threshold_do(GwyContainer *data,
 
     switch (args->mode) {
         case THRESHOLD_CHANGE_DATA:
-        gwy_app_undo_checkpoint(data, "/0/data");
+        gwy_app_undo_checkpoint(data, "/0/data", NULL);
         gwy_data_field_threshold(dfield, args->absolute, args->min, args->max);
         break;
 
         case THRESHOLD_CHANGE_MASK:
-        gwy_app_undo_checkpoint(data, "/0/mask");
-        if (gwy_container_contains_by_name(data, "/0/mask")) {
-            mask = GWY_DATA_FIELD(gwy_container_get_object_by_name(data,
-                                                                   "/0/mask"));
+        gwy_app_undo_checkpoint(data, "/0/mask", NULL);
+        if (gwy_container_gis_object_by_name(data, "/0/mask",
+                                             (GObject**)&mask)) {
             gwy_data_field_resample(mask,
                                     gwy_data_field_get_xres(dfield),
                                     gwy_data_field_get_yres(dfield),
@@ -198,10 +196,9 @@ threshold_do(GwyContainer *data,
         break;
 
         case THRESHOLD_CHANGE_PRESENTATION:
-        gwy_app_undo_checkpoint(data, "/0/show");
-        if (gwy_container_contains_by_name(data, "/0/show")) {
-            show = GWY_DATA_FIELD(gwy_container_get_object_by_name(data,
-                                                                   "/0/show"));
+        gwy_app_undo_checkpoint(data, "/0/show", NULL);
+        if (gwy_container_gis_object_by_name(data, "/0/show",
+                                             (GObject**)&show)) {
             gwy_data_field_resample(show,
                                     gwy_data_field_get_xres(dfield),
                                     gwy_data_field_get_yres(dfield),

@@ -13,6 +13,9 @@ do one of following:
 
 Otherwise just run make, make install.
 
+If you have Gwyddion installed from rpm (with gwyddion-devel too), it should
+be possible to build a rpm with rpm -tb threshold-example-X.Y.tar.bz2
+
 
 == Windows ======
 
@@ -24,4 +27,7 @@ reality.  Run
 to compile the module.  Copy the created DLL to Gwyddion module directory
 appropriate for the module type (that is probably something like
 c:/program files/gwyddion/modules/process).
+
+It is also possible to build an exe installer, if you have Inno Setup 4
+installed.
 

@@ -10,6 +10,7 @@ Source: http://trific.ath.cx/Ftp/gwyddion/%{modname}-1.4.tar.bz2
 URL: http://gwyddion.net/
 Prefix: %{_prefix}
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
+Requires: gwyddion
 BuildPrereq: gtk2-devel
 BuildPrereq: gwyddion-devel
 BuildPrereq: libtool
