@@ -1,3 +1,6 @@
+# translation of it.po to 
+# translation of it.po to
+# translation of it.po to
 # translation of gwyddion.po to
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR "David Necas (Yeti) & Petr Klapetek".
@@ -6,10 +9,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: it2\n"
+"Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-03-09 09:18+0100\n"
-"PO-Revision-Date: 2005-03-08 19:41+0100\n"
+"POT-Creation-Date: 2005-03-29 11:21+0200\n"
+"PO-Revision-Date: 2005-03-28 08:49+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -115,7 +118,6 @@ msgid "Hide full controls"
 msgstr "Nascondi comandi completi"
 
 #: libgwydgets/gwy3dwindow.c:347
-#, fuzzy
 msgid "Basic"
 msgstr "Base"
 
@@ -136,7 +138,6 @@ msgid "_Theta:"
 msgstr "_Theta:"
 
 #: libgwydgets/gwy3dwindow.c:360 modules/process/cwt.c:194
-#, fuzzy
 msgid "_Scale:"
 msgstr "_Scala:"
 
@@ -210,7 +211,7 @@ msgid "Si_ze:"
 msgstr "Dimensione:"
 
 #: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:678
-#: modules/file/pixmap.c:1558 modules/file/rawfile.c:496
+#: modules/file/pixmap.c:1560 modules/file/rawfile.c:496
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
@@ -466,6 +467,22 @@ msgstr "Fit quadratico"
 msgid "Fit cubic"
 msgstr "Fit cubico"
 
+#: libgwydgets/gwyoptionmenus.c:1075
+msgid "Vickers"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1076
+msgid "Berkovich"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1077
+msgid "Knoop"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1078
+msgid "Rockwell"
+msgstr ""
+
 #: libgwydgets/gwyvectorshade.c:153
 msgid "_Theta: "
 msgstr "_Theta: "
@@ -541,7 +558,7 @@ msgstr "<b> Altri sviluppatori</b>\n"
 
 #: app/about.c:120
 msgid "<b>Translators</b>\n"
-msgstr ""
+msgstr "<b>Traduttori</b>\n"
 
 #: app/about.c:127
 msgid ""
@@ -826,7 +843,7 @@ msgstr "Rimpicciolisci"
 
 #: app/toolbox.c:206
 msgid "Display a 3D view of data"
-msgstr "Mostra vista 3D dei dati"
+msgstr "Vista 3D "
 
 #: app/toolbox.c:220
 msgid "Data Process"
@@ -869,7 +886,6 @@ msgid "Mark grains by threshold"
 msgstr "Segna grana per soglia"
 
 #: app/toolbox.c:246
-#, fuzzy
 msgid "Mark grains by watershed"
 msgstr "Segna grana per watershed"
 
@@ -894,9 +910,8 @@ msgid "Remove polynomial background"
 msgstr "Rimuovi sottofondo polinomiale"
 
 #: app/toolbox.c:263
-#, fuzzy
 msgid "Remove scars"
-msgstr "Rimuovi danni"
+msgstr "Rimuovi salti"
 
 #: app/toolbox.c:272
 msgid "Graph"
@@ -1033,6 +1048,29 @@ msgstr "px"
 msgid "Please wait"
 msgstr "Attendere"
 
+#: modules/file/apefile.c:128
+msgid "Imports APE (Applied Physics and Engineering) data files."
+msgstr ""
+
+#: modules/file/apefile.c:144
+msgid "APE files (.dat)"
+msgstr ""
+
+#: modules/file/apefile.c:399
+#, c-format
+msgid "Channel %u"
+msgstr ""
+
+#: modules/file/apefile.c:402 modules/file/nanoscope.c:588
+#: modules/file/nt-mdt.c:468 modules/file/sis.c:523
+msgid "Select Data"
+msgstr "Seleziona Dati"
+
+#: modules/file/apefile.c:419 modules/file/nanoscope.c:605
+#: modules/file/nt-mdt.c:485 modules/file/sis.c:540
+msgid "Data to load:"
+msgstr "Dati da caricare:"
+
 #: modules/file/asciiexport.c:47
 msgid "Exports data as simple ASCII matrix."
 msgstr "Esporta i dati come semplice matrice ASCII"
@@ -1041,13 +1079,21 @@ msgstr "Esporta i dati come semplice matrice ASCII"
 msgid "ASCII data matrix (.txt)"
 msgstr "Matrice dati ASCII (.txt)"
 
-#: modules/file/assing-afm.c:69
+#: modules/file/assing-afm.c:71
 msgid "Imports Assing AFM data files."
 msgstr "Importa file dati AFM Assing"
 
-#: modules/file/assing-afm.c:85
+#: modules/file/assing-afm.c:87
 msgid "Assing AFM files (.afm)"
 msgstr "file AFM Assing (.afm)"
+
+#: modules/file/bcrfile.c:68
+msgid "Imports Image Metrology BCR data files."
+msgstr ""
+
+#: modules/file/bcrfile.c:84
+msgid "BCR files (.bcr, .bcrf)"
+msgstr ""
 
 #: modules/file/createc.c:62
 msgid "Imports Createc data files."
@@ -1072,16 +1118,6 @@ msgstr "Importa file dati Veeco Nanoscope."
 #: modules/file/nanoscope.c:144
 msgid "Nanoscope files"
 msgstr "file Nanoscope"
-
-#: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
-#: modules/file/sis.c:523
-msgid "Select Data"
-msgstr "Seleziona Dati"
-
-#: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
-#: modules/file/sis.c:540
-msgid "Data to load:"
-msgstr "Dati da caricare:"
 
 #: modules/file/nt-mdt.c:305
 msgid "Imports NT-MDT data files."
@@ -1186,27 +1222,27 @@ msgstr "Uso"
 msgid "as data"
 msgstr "come dati"
 
-#: modules/file/pixmap.c:1536
+#: modules/file/pixmap.c:1538
 msgid "_Data alone"
 msgstr "Solo dati"
 
-#: modules/file/pixmap.c:1537
+#: modules/file/pixmap.c:1539
 msgid "Data + _rulers"
 msgstr "Dati + scala"
 
-#: modules/file/pixmap.c:1538
+#: modules/file/pixmap.c:1540
 msgid "_Everything"
 msgstr "Tutto"
 
-#: modules/file/pixmap.c:1555
+#: modules/file/pixmap.c:1557
 msgid "Export "
 msgstr "Esporta"
 
-#: modules/file/pixmap.c:1578
+#: modules/file/pixmap.c:1580
 msgid "_Zoom:"
 msgstr "Ingrandisci:"
 
-#: modules/file/pixmap.c:1582
+#: modules/file/pixmap.c:1584
 msgid "Output:"
 msgstr "Output:"
 
@@ -1373,9 +1409,8 @@ msgid "_Reverse bits in bytes"
 msgstr "Trasforma bits in bytes"
 
 #: modules/file/rawfile.c:925
-#, fuzzy
 msgid "Reverse bi_ts in samples"
-msgstr "Trasforma bi_ts in campioni"
+msgstr "uTrasforma bi_ts in campioni"
 
 #: modules/file/rawfile.c:930
 msgid "Samples are si_gned"
@@ -1485,7 +1520,7 @@ msgstr "Mi aspettavo `%s' per saltare più campi in fila  %u, ottenuto `%.16s'"
 
 #: modules/file/rawfile.c:2090 modules/file/rawfile.c:2104
 #: modules/file/rawfile.c:2130
-#, fuzzy, c-format
+#, c-format
 msgid "Garbage `%.16s' in row %u, column %u"
 msgstr "Dati spazzatura `%.16s' nella riga %u, colonna %u"
 
@@ -1501,6 +1536,14 @@ msgid "Expected delimiter `%s' after data in row %u, column %u, got `%.16s'"
 msgstr ""
 "Delimitatore aspettato`%s' dopo dati in fila %u, colonna %u, ottenuto`%.16s'"
 
+#: modules/file/rhk-spm32.c:97
+msgid "Imports RHK Technology SPM32 data files."
+msgstr ""
+
+#: modules/file/rhk-spm32.c:113
+msgid "RHK SPM32 files (.sm2)"
+msgstr ""
+
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
 msgstr "Importa file dati SIS (Surface Imaging Systems)"
@@ -1510,12 +1553,12 @@ msgid "SIS files (.sis)"
 msgstr "file SIS (.sis)"
 
 #: modules/file/spmlab.c:50
-msgid "Imports Thermicroscopes SpmLab R4 and R5 data files."
-msgstr "Importa file dati Thermicroscopes SpmLab R4 e R5"
+msgid "Imports Thermicroscopes SpmLab R4, R5, and R6 data files."
+msgstr ""
 
 #: modules/file/spmlab.c:66
-msgid "Thermicroscopes SpmLab R4, R5 files"
-msgstr "file Thermicroscopes SpmLab R4, R5"
+msgid "Thermicroscopes SpmLab R4, R5, R6 files"
+msgstr ""
 
 #: modules/file/stmprg.c:66
 msgid "Imports Omicron STMPRG data files (tp ta)."
@@ -2159,7 +2202,6 @@ msgid "Universal"
 msgstr "Universale"
 
 #: modules/process/dwtdenoise.c:264
-#, fuzzy
 msgid "Scale adaptive"
 msgstr "Scala adattata"
 
@@ -2309,7 +2351,7 @@ msgstr "Aggiorna dinamicamente"
 
 #: modules/process/fft_filter_1d.c:567
 msgid "Filtered data"
-msgstr ""
+msgstr "Dati filtrati"
 
 #: modules/process/fft_filter_1d.c:577
 msgid "Null"
@@ -2549,7 +2591,6 @@ msgid "_Selection mode:"
 msgstr "_Seleziona modo:"
 
 #: modules/process/grain_wshed.c:109
-#, fuzzy
 msgid "Marks grains by watershed algorithm."
 msgstr "Segna grana usando un algoritmo watershed"
 
@@ -2753,7 +2794,6 @@ msgid "/_Mask/_Extract Mask"
 msgstr "/_Maschere/_Estrai Maschera"
 
 #: modules/process/median-bg.c:85
-#, fuzzy
 msgid "Subtracts background using a rank-based algorithm."
 msgstr "Sottrae sottofondo utilizzando un algoritmo basato sul grado"
 
@@ -2927,7 +2967,7 @@ msgstr "Nuova Altezza:"
 
 #: modules/process/scars.c:102
 msgid "Marks and/or removes scars (horizontal linear artefacts)."
-msgstr "Evidenzia e/o rimuove danni (artefatti lineari orizzontali)"
+msgstr "Evidenzia e/o rimuove salti (artefatti lineari orizzontali)"
 
 #: modules/process/scars.c:118
 msgid "/_Correct Data/M_ark Scars..."
@@ -3039,7 +3079,6 @@ msgid "_Both directions"
 msgstr "Entrambe le direzioni"
 
 #: modules/process/sphere-revolve.c:215
-#, fuzzy
 msgid "Revolve Arc"
 msgstr "Ruota Arco"
 
@@ -3276,7 +3315,6 @@ msgid "<b>Angle</b> [deg]"
 msgstr "<b>Angolo</b> deg"
 
 #: modules/tools/filter.c:84
-#, fuzzy
 msgid ""
 "Filter tool, processes selected part of data with a filter (conservative "
 "denoise, mean, median. Kuwahara, minimum, maximum)."
@@ -3305,7 +3343,6 @@ msgid "_Update preview dynamically"
 msgstr "Aggiorna vista dinamicamente"
 
 #: modules/tools/grain_remove_manually.c:77
-#, fuzzy
 msgid ""
 "Grain removal tool, removes continuous parts of mask and/or underlying data."
 msgstr ""
@@ -3349,7 +3386,6 @@ msgid "_Data removal method:"
 msgstr "Metodo rimozione dati:"
 
 #: modules/tools/icolorange.c:96
-#, fuzzy
 msgid ""
 "Interactive color range tool, allows to select data range false color scale "
 "should map to, either on data or on height distribution histogram."
@@ -3643,3 +3679,9 @@ msgstr "Quantità statistiche"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametri</b>"
+
+#~ msgid "Imports Thermicroscopes SpmLab R4 and R5 data files."
+#~ msgstr "Importa file dati Thermicroscopes SpmLab R4 e R5"
+
+#~ msgid "Thermicroscopes SpmLab R4, R5 files"
+#~ msgstr "file Thermicroscopes SpmLab R4, R5"
