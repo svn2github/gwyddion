@@ -38,8 +38,6 @@ process_PROGRAMS = \
 	nanoindent_adjust.so \
 	outliers.so \
 	polylevel.so \
-	prepnn.so \
-	usenn.so \
 	presentationops.so \
 	rotate.so \
 	scale.so \
@@ -171,11 +169,11 @@ polylevel_so_LDFLAGS = $(module_ldflags),polylevel.so
 presentationops_so_SOURCES = presentationops.c
 presentationops_so_LDFLAGS = $(module_ldflags),presentationops.so
 
-prepnn_so_SOURCES = prepnn.c
-prepnn_so_LDFLAGS = $(module_ldflags),prepnn.so
+#prepnn_so_SOURCES = prepnn.c
+#prepnn_so_LDFLAGS = $(module_ldflags),prepnn.so
 
-usenn_so_SOURCES = usenn.c
-usenn_so_LDFLAGS = $(module_ldflags),usenn.so
+#usenn_so_SOURCES = usenn.c
+#usenn_so_LDFLAGS = $(module_ldflags),usenn.so
 
 rotate_so_SOURCES = rotate.c
 rotate_so_LDFLAGS = $(module_ldflags),rotate.so
