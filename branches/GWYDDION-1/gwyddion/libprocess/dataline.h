@@ -78,7 +78,7 @@ G_END_DECLS
 
 G_BEGIN_DECLS
 
-#define gwy_data_line_duplicate(data_line) ((GwyDataField*)gwy_serializable_duplicate(G_OBJECT(data_line)))
+#define gwy_data_line_duplicate(data_line) ((GwyDataLine*)gwy_serializable_duplicate(G_OBJECT(data_line)))
 
 GType  gwy_data_line_get_type  (void) G_GNUC_CONST;
 
