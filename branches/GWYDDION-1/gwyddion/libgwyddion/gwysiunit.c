@@ -407,9 +407,13 @@ gwy_si_unit_set_unit_string_parse(GwySIUnit *siunit,
 gchar*
 gwy_si_unit_get_unit_string(GwySIUnit *siunit)
 {
-    gwy_debug("");
+    GwySIUnit2 *siunit2;
 
-    return g_strdup(siunit->unitstr);
+    gwy_debug("");
+    siunit2 = (GwySIUnit2*)g_object_get_data((GObject*)siunit, "gwy-si-unit2");
+    siunit2->power10 = 0;
+
+    return gwy_si_unit2_format_as_plain_string(siunit2, &format_style_plain);
 }
 
 /**
