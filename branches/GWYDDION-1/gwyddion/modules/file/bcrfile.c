@@ -47,12 +47,11 @@ static gboolean      module_register       (const gchar *name);
 static gint          bcrfile_detect        (const gchar *filename,
                                             gboolean only_name);
 static GwyContainer* bcrfile_load          (const gchar *filename);
-static GwyDataField* read_data_field_int16 (const guchar *buffer,
+static GwyDataField* read_data_field       (const guchar *buffer,
                                             gint xres,
-                                            gint yres);
-static GwyDataField* read_data_field_float (const guchar *buffer,
-                                            gint xres,
-                                            gint yres);
+                                            gint yres,
+                                            BCRFileType type,
+                                            gboolean little_endian);
 static GHashTable*   load_metadata         (gchar *buffer);
 
 /* The module info. */
@@ -126,6 +125,8 @@ bcrfile_load(const gchar *filename)
     GwyDataField *dfield = NULL;
     GHashTable *meta = NULL;
     gint xres, yres;
+    gboolean intelmode = TRUE;
+    gdouble q;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -165,25 +166,28 @@ bcrfile_load(const gchar *filename)
     }
     yres = atol(s);
 
+    if ((s = g_hash_table_lookup(meta, "intelmode")))
+        intelmode = !!atol(s);
+
     if (size < HEADER_SIZE + xres*yres*type) {
         g_warning("Expected data size %u, but it's %u",
                   xres*yres*type, (guint)(size - HEADER_SIZE));
         goto end;
     }
 
-    switch (type) {
-        case BCR_FILE_INT16:
-        dfield = read_data_field_int16(buffer + HEADER_SIZE, xres, yres);
-        break;
+    dfield = read_data_field(buffer + HEADER_SIZE, xres, yres,
+                             type, intelmode);
 
-        case BCR_FILE_FLOAT:
-        dfield = read_data_field_float(buffer + HEADER_SIZE, xres, yres);
-        break;
-
-        default:
-        g_assert_not_reached();
-        break;
-    }
+    if ((s = g_hash_table_lookup(meta, "xlength"))
+        && (q = g_ascii_strtod(s, NULL)) > 0)
+        gwy_data_field_set_xreal(dfield, 1e-9*q);
+    if ((s = g_hash_table_lookup(meta, "ylength"))
+        && (q = g_ascii_strtod(s, NULL)) > 0)
+        gwy_data_field_set_yreal(dfield, 1e-9*q);
+    if (type == BCR_FILE_INT16
+        && (s = g_hash_table_lookup(meta, "bit2nm"))
+        && (q = g_ascii_strtod(s, NULL)) > 0)
+        gwy_data_field_multiply(dfield, 1e-9*q);
 
     object = gwy_container_new();
     gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
@@ -199,37 +203,50 @@ end:
 }
 
 static GwyDataField*
-read_data_field_int16(const guchar *buffer,
-                      gint xres,
-                      gint yres)
+read_data_field(const guchar *buffer,
+                gint xres,
+                gint yres,
+                BCRFileType type,
+                gboolean little_endian)
 {
     GwyDataField *dfield;
     gdouble *data;
     guint i;
 
-    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1.0, 1.0, FALSE));
+    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6, FALSE));
     data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < xres*yres; i++) {
-        data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
-        buffer += 2;
+    switch (type) {
+        case BCR_FILE_INT16:
+        if (little_endian) {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
+                buffer += 2;
+            }
+        }
+        else {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = (gint)(buffer)[1] + ((signed char)(buffer)[0]*256.0);
+                buffer += 2;
+            }
+        }
+        break;
+
+        case BCR_FILE_FLOAT:
+        if (little_endian) {
+            for (i = 0; i < xres*yres; i++)
+                data[i] = get_FLOAT(&buffer);
+        }
+        else {
+            for (i = 0; i < xres*yres; i++)
+                data[i] = get_FLOAT_BE(&buffer);
+        }
+        gwy_data_field_multiply(dfield, 1e-9);
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
     }
-
-    return dfield;
-}
-
-static GwyDataField*
-read_data_field_float(const guchar *buffer,
-                      gint xres,
-                      gint yres)
-{
-    GwyDataField *dfield;
-    gdouble *data;
-    guint i;
-
-    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1.0, 1.0, FALSE));
-    data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < xres*yres; i++)
-        data[i] = get_FLOAT(&buffer);
 
     return dfield;
 }
