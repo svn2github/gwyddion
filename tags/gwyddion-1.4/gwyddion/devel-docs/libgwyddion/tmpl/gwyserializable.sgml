@@ -1,0 +1,379 @@
+<!-- ##### SECTION Title ##### -->
+GwySerializable
+
+<!-- ##### SECTION Short_Description ##### -->
+Abstract interface for serializable objects.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+GwySerializable is an abstract interface for value-like object that can be
+serialized and deserialized.  You can serialize any object implementing
+this interface with
+<link linkend="gwy-serializable-serialize">gwy_serializable_serialize()</link>
+and the restore (deserialize) it with
+<link linkend="gwy-serializable-deserialize">gwy_serializable_deserialize()</link>.
+It is also posible it duplicate any such object with
+<link linkend="gwy-serializable-duplicate">gwy_serializable_duplicate()</link>.
+</para>
+
+<para>
+There are quite a few helper functions available for implementation of
+serialization and deserialization in you classes, most high-level
+(and thus probably most useful) are
+<link linkend="gwy-serialize-pack-object-struct">gwy_serialize_pack_object_struct()</link>
+and
+<link linkend="gwy-serialize-unpack-object-struct">gwy_serialize_unpack_object_struct()</link>.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwySerializableIface ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@serialize: 
+@deserialize: 
+@duplicate: 
+
+<!-- ##### STRUCT GwySerializable ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GwySerializeFunc ##### -->
+<para>
+
+</para>
+
+@serializable: 
+@buffer: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### USER_FUNCTION GwyDeserializeFunc ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GwyDuplicateFunc ##### -->
+<para>
+
+</para>
+
+@object: 
+@Returns: 
+
+
+<!-- ##### STRUCT GwySerializeSpec ##### -->
+<para>
+
+</para>
+
+@ctype: 
+@name: 
+@value: 
+@array_size: 
+
+<!-- ##### FUNCTION gwy_serializable_serialize ##### -->
+<para>
+
+</para>
+
+@serializable: 
+@buffer: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### FUNCTION gwy_serializable_deserialize ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serializable_duplicate ##### -->
+<para>
+
+</para>
+
+@object: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_store_int32 ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@position: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_serialize_pack ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@templ: 
+@Varargs: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_boolean ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_char ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_char_array ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@asize: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_int32 ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_int32_array ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@asize: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_int64 ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_int64_array ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@asize: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_double ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_double_array ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@asize: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_string ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_check_string ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@compare_to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_pack_struct ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@nspec: 
+@spec: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_struct ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@nspec: 
+@spec: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_pack_object_struct ##### -->
+<para>
+Packs a struct as an object.
+</para>
+
+<para>
+This is a wrapper around gwy_serialize_pack_struct(), taking care of
+adding type name and packed object size.
+</para>
+
+<para>
+Here's how a serialization method of a simple object whose state is described
+by a single real number <structfield>foo</structfield> could look (without
+error checking):
+</para>
+<informalexample><programlisting><![CDATA[
+static guchar*
+my_object_serialize(GObject *obj,
+                    guchar *buffer,
+                    gsize *size)
+{
+    MyObject *my_object = MY_OBJECT(obj);
+    GwySerializeSpec spec[] = {
+        { 'd', "foo", &my_object->foo, NULL, },
+    };
+
+    return gwy_serialize_pack_object_struct(buffer, size,
+                                            "MyObject",
+                                            G_N_ELEMENTS(spec), spec);
+}
+]]></programlisting></informalexample>
+
+@buffer: A buffer to which the serialized components should be appended.
+@object_name: The g_type_name() of the object.
+@nspec: The number of items in @spec.
+@spec: The components to serialize.
+@Returns: The buffer with serialization of @spec components appended.
+<!-- # Unused Parameters # -->
+@size: Current size of @buffer, new size is returned here.
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_object_struct ##### -->
+<para>
+Deserializes an object with named components packed by
+gwy_serialize_pack_object_struct().
+</para>
+
+<para>
+Here's how a deserialization method of a simple object whose state is described
+by a single real number <structfield>foo</structfield> could look (without
+error checking):
+</para>
+<informalexample><programlisting><![CDATA[
+static GObject*
+my_object_deserialize(const guchar *buffer,
+                      gsize size,
+                      gsize *position)
+{
+    double foo = 1.0;
+    GwySerializeSpec spec[] = {
+        { 'd', "foo", &foo, NULL, },
+    };
+    MyObject *my_object;
+
+    gwy_serialize_unpack_object_struct(buffer, size, position,
+                                       "MyObject",
+                                       G_N_ELEMENTS(spec), spec);
+    return my_object_new(foo);
+}
+]]></programlisting></informalexample>
+
+@buffer: A memory location containing a serialized object at position
+         @position.
+@size: Current size of @buffer, new size is returned here.
+@position: The position of the object in @buffer, it's updated to
+           point after it.
+@object_name: The g_type_name() of the object.
+@nspec: The number of items in @spec.
+@spec: The components to deserialize.
+@Returns: Whether the unpacking succeeded
+          (see gwy_serialize_unpack_struct() for definition of success).
+
+

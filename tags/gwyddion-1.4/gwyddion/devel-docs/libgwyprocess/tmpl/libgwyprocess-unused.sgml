@@ -1,0 +1,208 @@
+<!-- ##### SECTION ./tmpl/libgwyprocess.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/libgwyprocess.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/libgwyprocess.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/libgwyprocess.sgml:Title ##### -->
+libgwyprocess
+
+
+<!-- ##### MACRO GWY_ENABLE_DEPRECATED ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GwyFFTOutputType ##### -->
+<para>
+FFT output.
+</para>
+
+@GWY_FFT_OUTPUT_REAL_IMG: real and imaginary
+@GWY_FFT_OUTPUT_MOD_PHASE: module and phase
+@GWY_FFT_OUTPUT_REAL: real
+@GWY_FFT_OUTPUT_IMG: imaginary
+@GWY_FFT_OUTPUT_MOD: module
+@GWY_FFT_OUTPUT_PHASE: phase
+
+<!-- ##### ENUM GwyFractalType ##### -->
+<para>
+
+</para>
+
+@GWY_FRACTAL_PARTITIONING: 
+@GWY_FRACTAL_CUBECOUNTING: 
+@GWY_FRACTAL_TRIANGULATION: 
+@GWY_FRACTAL_PSDF: 
+
+<!-- ##### FUNCTION gwy_data_field_alloc ##### -->
+<para>
+
+</para>
+
+@a: 
+@xres: 
+@yres: 
+
+<!-- ##### FUNCTION gwy_data_field_croscorrelate ##### -->
+<para>
+
+</para>
+
+@data_field1: 
+@data_field2: 
+@x_dist: 
+@y_dist: 
+@score: 
+@search_width: 
+@search_height: 
+@window_width: 
+@window_height: 
+
+<!-- ##### FUNCTION gwy_data_field_croscorrelate_iteration ##### -->
+<para>
+
+</para>
+
+@data_field1: 
+@data_field2: 
+@x_dist: 
+@y_dist: 
+@score: 
+@search_width: 
+@search_height: 
+@window_width: 
+@window_height: 
+@state: 
+@iteration: 
+
+<!-- ##### FUNCTION gwy_data_field_free ##### -->
+<para>
+
+</para>
+
+@a: 
+
+<!-- ##### FUNCTION gwy_data_field_initialize ##### -->
+<para>
+
+</para>
+
+@a: 
+@xres: 
+@yres: 
+@xreal: 
+@yreal: 
+@nullme: 
+
+<!-- ##### FUNCTION gwy_data_field_mark_scars ##### -->
+<para>
+
+</para>
+
+@data_field: 
+@scar_field: 
+@threshold_high: 
+@threshold_low: 
+@min_scar_len: 
+@max_scar_width: 
+
+<!-- ##### FUNCTION gwy_data_field_plane_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@ap: 
+@bp: 
+@cp: 
+
+<!-- ##### FUNCTION gwy_data_line_alloc ##### -->
+<para>
+
+</para>
+
+@a: 
+@res: 
+
+<!-- ##### FUNCTION gwy_data_line_cds ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@target_line: 
+@ymin: 
+@ymax: 
+@nsteps: 
+
+<!-- ##### FUNCTION gwy_data_line_ds ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@target_line: 
+@ymin: 
+@ymax: 
+@nsteps: 
+
+<!-- ##### FUNCTION gwy_data_line_free ##### -->
+<para>
+
+</para>
+
+@a: 
+
+<!-- ##### FUNCTION gwy_data_line_initialize ##### -->
+<para>
+
+</para>
+
+@a: 
+@res: 
+@real: 
+@nullme: 
+
+<!-- ##### FUNCTION gwy_data_line_line_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@av: 
+@bv: 
+
+<!-- ##### FUNCTION gwy_data_line_part_line_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@av: 
+@bv: 
+
+<!-- ##### FUNCTION wfunc_2d ##### -->
+<para>
+
+</para>
+
+@scale: 
+@mval: 
+@xres: 
+@wtype: 
+@Returns: 
+

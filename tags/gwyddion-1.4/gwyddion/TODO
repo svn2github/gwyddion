@@ -1,0 +1,45 @@
+Too many things.  Use
+
+  find . -name \*.\[ch] | xargs grep -ir '\<\(XXX\|TODO\|FIXME\|fuck\|shit\)\>'
+
+to locate them ;-)
+
+Particularly (overall app issues, module issues not listed):
+- Quite a large part of graph functionality
+- Printing
+- User documentation, even better, integrated help
+- Internationalization and localization
+- Associations, drag'n'drop support
+- Palette editor, explicite ranges for palettes
+- Editable metadata
+- Multiple data in one file
+- Use GtkAction (Gtk+ 2.4) for module actions
+- Sessions
+- File module API should be extended to allow (at least): distinguish between
+  cancel and failure, open multiple data windows from a one file
+- ...
+
+Quite a few of these items are intrusive and will have to wait for the next
+unstable version.
+
+============================================================================
+Worst API bugs:
+- libgwymodule does GUI stuff
+- libgwyprocess depends on Gtk+ (GtkOrientation)
+
+============================================================================
+Release checklist:
+- update splashscreen
+- update library versions, if interfaces changed
+- update version in configure.ac
+- update version in gwyddion-keep-up
+- must build on Linux _from tarballs_
+- must build on Windows
+- check NEWS, generate HTML version
+- tag CVS
+- build and upload packages
+- sign packages and upload signatures
+- update gwyddion main page
+- publish on Freshmeat, GnomeFiles
+- add the new version to bugzilla
+
