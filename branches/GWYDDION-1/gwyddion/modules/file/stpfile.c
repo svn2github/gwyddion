@@ -216,7 +216,7 @@ find_data_start(const guchar *buffer,
 
     for (p = buffer;
          p && strncmp(p, DATA_MAGIC, DATA_MAGIC_SIZE);
-         p = memchr(p+1, 'D', size - (p - buffer) - 1))
+         p = memchr(p+1, (DATA_MAGIC)[0], size - (p - buffer) - 1))
         ;
 
     return p ? (p - buffer) + DATA_MAGIC_SIZE : 0;
