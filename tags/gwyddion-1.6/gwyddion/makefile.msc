@@ -1,0 +1,36 @@
+# @(#) $Id$
+
+TOP_SRCDIR = .
+
+!include make.msc
+
+SUBDIRS = \
+	libgwyddion \
+	libprocess \
+	libdraw \
+	libgwydgets \
+	libgwymodule \
+	app \
+	modules \
+	plugins \
+	pixmaps \
+	devel-docs
+
+DOCUMENTS = \
+	COPYING.wri
+
+## targets
+all: sub-all $(DOCUMENTS)
+
+clean:: sub-clean
+
+!include rules.msc
+
+install: all sub-install
+	for %d in ($(DOCUMENTS)) do $(INSTALL) %d "$(DEST_DIR)"
+
+# FIXME:
+COPYING.wri: COPYING
+	copy COPYING COPYING.wri
+
+# vim: ft=make

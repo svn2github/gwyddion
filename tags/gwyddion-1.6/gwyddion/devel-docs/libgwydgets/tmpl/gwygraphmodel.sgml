@@ -1,0 +1,43 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphModel
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_graph_model_new ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_new_from_model ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_model_get_n_curves ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+
