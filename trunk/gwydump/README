@@ -1,0 +1,17 @@
+Gwydump dumps .gwy file structure in a human-readable format.
+
+It supports both old 1.x files and new 2.x files, and also raw serialized
+objects (only new style).  It can print file offsets, component names, types,
+and even values of atomic components.
+
+
+== Installation (Unix) ======
+
+If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
+do one of following:
+(a) run make with PREFIX=/home/me/usr
+(b) export PKG_CONFIG_PATH=/home/me/usr/lib/pkgconfig
+
+Otherwise just run make, make install.
+
+
