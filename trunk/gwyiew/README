@@ -1,0 +1,26 @@
+Gwyiew is a very simple .gwy file viewer.
+
+It was written as an example of standalone application using Gwyddion
+libraies.  Because of that, simplicity is valued more than cool features
+that would make the code harder to understand.
+
+
+== Unix ======
+
+If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
+do one of following:
+(a) run make with PREFIX=/home/me/usr
+(b) export PKG_CONFIG_PATH=/home/me/usr/lib/pkgconfig
+
+Otherwise just run make, make install.
+
+############ DOES NOT WORK [yet] ##############
+
+If you have Gwyddion installed from rpm (with gwyddion-devel too), it should
+be possible to build a rpm with rpm -tb gwyiew-X.Y.tar.bz2
+
+
+== Windows ======
+
+############ DOES NOT WORK [yet] ##############
+

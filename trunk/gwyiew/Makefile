@@ -8,8 +8,7 @@ include pkg.mak
 #
 #   make PREFIX=/foo/bar/usr install
 #
-#PREFIX = /usr/local
-PREFIX = /home/yeti/tmp/usr
+PREFIX = /usr/local
 PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig pkg-config
 GWY = gwyddion
 GTK = gtk+-2.0
