@@ -1,0 +1,76 @@
+<!-- ##### MACRO GWY_ENABLE_DEPRECATED ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_data_field_free ##### -->
+<para>
+
+</para>
+
+@a: 
+
+<!-- ##### FUNCTION gwy_data_field_plane_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@ap: 
+@bp: 
+@cp: 
+
+<!-- ##### FUNCTION gwy_data_line_cds ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@target_line: 
+@ymin: 
+@ymax: 
+@nsteps: 
+
+<!-- ##### FUNCTION gwy_data_line_ds ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@target_line: 
+@ymin: 
+@ymax: 
+@nsteps: 
+
+<!-- ##### FUNCTION gwy_data_line_line_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@av: 
+@bv: 
+
+<!-- ##### FUNCTION gwy_data_line_part_line_coefs ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@av: 
+@bv: 
+
+<!-- ##### FUNCTION wfunc_2d ##### -->
+<para>
+
+</para>
+
+@scale: 
+@mval: 
+@xres: 
+@wtype: 
+@Returns: 
+

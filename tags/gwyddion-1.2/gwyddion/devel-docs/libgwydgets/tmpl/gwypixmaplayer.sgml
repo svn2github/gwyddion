@@ -1,0 +1,41 @@
+<!-- ##### SECTION Title ##### -->
+GwyPixmapLayer
+
+<!-- ##### SECTION Short_Description ##### -->
+Base class for #GwyDataView pixmap layers
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyPixmapLayer ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyPixmapLayerClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@paint: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_pixmap_layer_paint ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+

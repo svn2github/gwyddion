@@ -1,0 +1,216 @@
+<!-- ##### SECTION Title ##### -->
+app
+
+<!-- ##### SECTION Short_Description ##### -->
+Core application interface.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_app_get_current_data ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_get_current ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_set_current ##### -->
+<para>
+
+</para>
+
+@window: 
+<!-- # Unused Parameters # -->
+@data_window: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_remove ##### -->
+<para>
+
+</para>
+
+@window: 
+<!-- # Unused Parameters # -->
+@data_window: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_foreach ##### -->
+<para>
+
+</para>
+
+@func: 
+@user_data: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_create ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_set_untitled ##### -->
+<para>
+
+</para>
+
+@window: 
+@templ: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@data_window: 
+
+
+<!-- ##### FUNCTION gwy_app_data_view_update ##### -->
+<para>
+
+</para>
+
+@data_view: 
+
+
+<!-- ##### FUNCTION gwy_app_change_mask_color_cb ##### -->
+<para>
+
+</para>
+
+@unused: 
+@defaultc: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_list_add_hook ##### -->
+<para>
+
+</para>
+
+@func: 
+@data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_list_remove_hook ##### -->
+<para>
+
+</para>
+
+@hook_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_graph_window_get_current ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_graph_window_set_current ##### -->
+<para>
+
+</para>
+
+@window: 
+
+
+<!-- ##### FUNCTION gwy_app_graph_window_remove ##### -->
+<para>
+
+</para>
+
+@window: 
+
+
+<!-- ##### FUNCTION gwy_app_graph_window_create ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_tool_use_cb ##### -->
+<para>
+
+</para>
+
+@toolname: 
+@button: 
+<!-- # Unused Parameters # -->
+@unused: 
+
+
+<!-- ##### FUNCTION gwy_app_zoom_set_cb ##### -->
+<para>
+
+</para>
+
+@data: 
+
+
+<!-- ##### FUNCTION gwy_app_mask_kill_cb ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gwy_app_show_kill_cb ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gwy_app_main_window_get ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_main_window_set ##### -->
+<para>
+
+</para>
+
+@window: 
+
+
+<!-- ##### FUNCTION gwy_app_quit ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_clean_up_data ##### -->
+<para>
+
+</para>
+
+@data: 
+
+

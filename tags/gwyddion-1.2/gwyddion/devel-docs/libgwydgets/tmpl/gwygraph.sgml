@@ -1,0 +1,235 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraph
+
+<!-- ##### SECTION Short_Description ##### -->
+Widget for displaying graphs
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+GwyGraph is basic widget for displaying graphs.
+It consist of several widgets that can be also used sparately.
+However, it is recomended (and it should be easy)
+to use whole GwyGraph widget and its API for most of the purposes.
+</para>
+<para>
+GwyGraph is still in developement. Basic functionality and API is
+however allready set up. In the future, more API functions will
+be introduced probably.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### TYPEDEF GwyGraphAutoProperties ##### -->
+<para>
+This structure corresponds to settings of display mode of data that
+are added with no specific display mode requests (lines/points, line color, etc.).
+For these data, drawing properties are determined automatically, in order
+to make curves distinguishable. These automatically generated curve properties
+are saved here.
+</para>
+
+
+<!-- ##### STRUCT GwyGraph ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyGraphClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@gwygraph: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_graph_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_add_dataline_with_units ##### -->
+<para>
+
+</para>
+
+@graph: 
+@dataline: 
+@shift: 
+@label: 
+@params: 
+@x_order: 
+@y_order: 
+@x_unit: 
+@y_unit: 
+
+
+<!-- ##### FUNCTION gwy_graph_add_dataline ##### -->
+<para>
+
+</para>
+
+@graph: 
+@dataline: 
+@shift: 
+@label: 
+@params: 
+
+
+<!-- ##### FUNCTION gwy_graph_add_datavalues ##### -->
+<para>
+
+</para>
+
+@graph: 
+@xvals: 
+@yvals: 
+@n: 
+@label: 
+@params: 
+
+
+<!-- ##### FUNCTION gwy_graph_clear ##### -->
+<para>
+
+</para>
+
+@graph: 
+
+
+<!-- ##### FUNCTION gwy_graph_set_autoproperties ##### -->
+<para>
+
+</para>
+
+@graph: 
+@autoproperties: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_autoproperties ##### -->
+<para>
+
+</para>
+
+@graph: 
+@autoproperties: 
+
+
+<!-- ##### FUNCTION gwy_graph_export_ascii ##### -->
+<para>
+
+</para>
+
+@graph: 
+@filename: 
+
+
+<!-- ##### FUNCTION gwy_graph_set_status ##### -->
+<para>
+
+</para>
+
+@graph: 
+@status: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_status ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_status_data ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@status: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_boundaries ##### -->
+<para>
+
+</para>
+
+@graph: 
+@x_min: 
+@x_max: 
+@y_min: 
+@y_max: 
+
+
+<!-- ##### FUNCTION gwy_graph_set_boundaries ##### -->
+<para>
+
+</para>
+
+@graph: 
+@x_min: 
+@x_max: 
+@y_min: 
+@y_max: 
+
+
+<!-- ##### FUNCTION gwy_graph_unzoom ##### -->
+<para>
+
+</para>
+
+@graph: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_data ##### -->
+<para>
+
+</para>
+
+@graph: 
+@xval: 
+@yval: 
+@curve: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_data_size ##### -->
+<para>
+
+</para>
+
+@graph: 
+@curve: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_number_of_curves ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_label ##### -->
+<para>
+
+</para>
+
+@graph: 
+@curve: 
+@Returns: 
+
+

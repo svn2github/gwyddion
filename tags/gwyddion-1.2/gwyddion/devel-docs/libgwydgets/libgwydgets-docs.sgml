@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Widgets Library Reference Manual</title>
+  </bookinfo>
+
+  <chapter id="DataWindowWidgets">
+    <title>Data Window</title>
+    <xi:include href="xml/gwydatawindow.xml"/>
+    <xi:include href="xml/gwydataview.xml"/>
+    <xi:include href="xml/gwydataviewlayer.xml"/>
+    <xi:include href="xml/gwypixmaplayer.xml"/>
+    <xi:include href="xml/gwyvectorlayer.xml"/>
+    <xi:include href="xml/gwylayer-basic.xml"/>
+    <xi:include href="xml/gwylayer-mask.xml"/>
+    <xi:include href="xml/gwycoloraxis.xml"/>
+  </chapter>
+
+  <chapter id="GraphWidgets">
+    <title>Graph</title>
+    <xi:include href="xml/gwyaxis.xml"/>
+    <xi:include href="xml/gwygrapharea.xml"/>
+    <xi:include href="xml/gwygraphcorner.xml"/>
+    <xi:include href="xml/gwygraphlabel.xml"/>
+    <xi:include href="xml/gwygraph.xml"/>
+  </chapter>
+
+  <chapter id="GeneralWidgets">
+    <title>General Widgets</title>
+    <xi:include href="xml/gwycolorbutton.xml"/>
+    <xi:include href="xml/gwyruler.xml"/>
+    <xi:include href="xml/gwyhruler.xml"/>
+    <xi:include href="xml/gwyvruler.xml"/>
+    <xi:include href="xml/gwyscitext.xml"/>
+    <xi:include href="xml/gwystatusbar.xml"/>
+  </chapter>
+
+  <chapter id="ShaderWidgets">
+    <title>Shader</title>
+    <xi:include href="xml/gwyvectorshade.xml"/>
+    <xi:include href="xml/gwygradsphere.xml"/>
+    <xi:include href="xml/gwyspherecoords.xml"/>
+  </chapter>
+
+  <chapter id="WidgetUtilities">
+    <title>Widget Utilities</title>
+    <xi:include href="xml/gwystock.xml"/>
+    <xi:include href="xml/gwydgets.xml"/>
+    <xi:include href="xml/gwyoptionmenus.xml"/>
+    <xi:include href="xml/gwyradiobuttons.xml"/>
+  </chapter>
+</book>
