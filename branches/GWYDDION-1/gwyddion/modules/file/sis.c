@@ -415,7 +415,7 @@ static GwyContainer*
 sis_load(const gchar *filename)
 {
     guchar *buffer;
-    guint size;
+    gsize size;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
     GwyContainer *data = NULL;
