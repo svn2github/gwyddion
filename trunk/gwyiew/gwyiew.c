@@ -34,8 +34,6 @@ static void process_preinit_options(int *argc,
 int
 main(int argc, char *argv[])
 {
-    GdkGeometry geom = { 10, 10, 1000, 1000, 10, 10, 1, 1, 1.0, 1.0, 0 };
-
     GtkWidget *window, *view;
     GwyContainer *data, *settings;
     GwyPixmapLayer *layer;
@@ -80,14 +78,13 @@ main(int argc, char *argv[])
     filename = g_path_get_basename(argv[1]);
     gtk_window_set_title(GTK_WINDOW(window), filename);
     gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
+    g_object_set(window, "allow-shrink", TRUE, NULL);
     g_signal_connect(window, "delete_event", gtk_main_quit, NULL);
     g_free(filename);
 
     /* Data view */
     view = gwy_data_view_new(data);
     gtk_container_add(GTK_CONTAINER(window), view);
-    gtk_window_set_geometry_hints(GTK_WINDOW(window), GTK_WIDGET(view),
-                                  &geom, GDK_HINT_MIN_SIZE);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(view),
                                  GWY_PIXMAP_LAYER(gwy_layer_basic_new()));
 
