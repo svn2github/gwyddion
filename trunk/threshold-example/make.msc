@@ -1,6 +1,7 @@
 # XXX: set following to your Gtk+-Development and MSVC paths
 #GTK_TOP = C:\Dev-C++
-GTK_TOP = C:\msys\1.0\local
+GTK_TOP = C:\Program Files\Common Files\Gtk\2.0
+GTKGLEXT_TOP = $(GTK_TOP)
 MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
 GWY_TOP = C:\Dev-C++
 
@@ -16,14 +17,15 @@ ATK_VER = 1.0
 GDK_PIXBUF_VER = 2.0
 GLIB_VER = 2.0
 GTK_VER = 2.0
+GTKGLEXT_VER = 1.0
 PANGO_VER = 1.0
 
 !IFNDEF DEBUG
 # Full optimization:
 OPTIMIZE = -Ox
 LIB_CRUNTIME = -MD
-PRG_CRUNTIME = -ML
-MOD_CRUNTIME = -MT
+PRG_CRUNTIME = -MD
+MOD_CRUNTIME = -MD
 # Line number debug info only
 DEBUGINFO = -Zd
 LINKDEBUG =
@@ -31,8 +33,8 @@ LINKDEBUG =
 # Debugging:
 OPTIMIZE =
 LIB_CRUNTIME = -MDd
-PRG_CRUNTIME = -MLd
-MOD_CRUNTIME = -MTd
+PRG_CRUNTIME = -MDd
+MOD_CRUNTIME = -MDd
 DEBUGINFO = -Zi -DDEBUG
 LINKDEBUG = /debug
 !ENDIF
@@ -53,6 +55,9 @@ GLIB_LIBS = glib-$(GLIB_VER).lib gmodule-$(GLIB_VER).lib gobject-$(GLIB_VER).lib
 
 GTK_CFLAGS = $(GLIB_CFLAGS) $(ATK_CFLAGS) $(PANGO_CFLAGS) -I "$(GTK_TOP)\include\gtk-$(GTK_VER)" -I "$(GTK_TOP)\lib\gtk-$(GTK_VER)\include"
 GTK_LIBS = $(GLIB_LIBS) $(ATK_LIBS) $(PANGO_LIBS) gtk-win32-$(GTK_VER).lib gdk-win32-$(GTK_VER).lib $(PANGO_LIBS)
+
+GTKGLEXT_CFLAGS = -I "$(GTKGLEXT_TOP)\include\gtkglext-$(GTKGLEXT_VER)" -I "$(GTKGLEXT_TOP)\lib\gtkglext-$(GTKGLEXT_VER)\include"
+GTKGLEXT_LIBS = /libpath:"$(GTKGLEXT_TOP)\lib\gtkglext-$(GTKGLEXT_VER)" gtkglext-win32-$(GTKGLEXT_VER).lib gdkglext-win32-$(GTKGLEXT_VER).lib glu32.lib opengl32.lib
 
 GWY_CFLAGS = -I "$(GWY_TOP)\include"
 GWY_LIBS = /libpath:"$(GWY_TOP)\lib" libgwyapp-$(LIBGWYAPP_VER).lib libgwymodule-$(LIBGWYMODULE_VER).lib libgwydgets-$(LIBGWYDGETS_VER).lib libgwydraw-$(LIBGWYDRAW_VER).lib libgwyprocess-$(LIBGWYPROCESS_VER).lib libgwyddion-$(LIBGWYDDION_VER).lib
