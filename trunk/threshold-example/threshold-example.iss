@@ -1,7 +1,7 @@
 [Setup]
 AppName=Gwyddion Threshold-Example
-AppVersion=1.6
-AppVerName=Gwyddion Threshold-Example 1.6
+AppVersion=1.7
+AppVerName=Gwyddion Threshold-Example 1.7
 AppPublisher=Trific soft.
 AppPublisherURL=http://gwyddion.net/
 AppCopyright=Copyright (C) 2003,2004 David Necas (Yeti)
@@ -11,7 +11,7 @@ WindowShowCaption=yes
 WindowVisible=no
 LicenseFile=COPYING
 Compression=bzip/9
-OutputBaseFilename=Gwyddion-Threshold-Example-1.6
+OutputBaseFilename=Gwyddion-Threshold-Example-1.7
 ; XXX!
 Uninstallable=no
 
