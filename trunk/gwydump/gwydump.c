@@ -1,7 +1,7 @@
 /*
  *  @(#) $Id$
- *  Copyright (C) 2003,2004 David Necas (Yeti), Petr Klapetek.
- *  E-mail: yeti@gwyddion.net, klapetek@gwyddion.net.
+ *  Copyright (C) 2005 David Necas (Yeti)
+ *  E-mail: yeti@gwyddion.net
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,16 +25,15 @@
 #include <errno.h>
 #include <glib.h>
 
-static void print_help                (void);
-static void process_preinit_options   (int *argc, char ***argv);
-static void dump_object               (gchar **buffer, gsize *size);
+static void print_help      (void);
+static void process_options (int *argc, char ***argv);
+static void dump_object     (gchar **buffer, gsize *size);
 
 /* Options */
 static guint opt_indent = 4;
-static gboolean opt_address = TRUE;
+static gboolean opt_address = FALSE;
 static gboolean opt_object_size = FALSE;
-static gboolean opt_value = TRUE;
-static gboolean opt_type = TRUE;
+static gboolean opt_value = FALSE;
 
 /* Global state */
 static gint level;
@@ -49,7 +48,7 @@ main(int argc, char *argv[])
 
     /* Check for --help and --version before rash file loading and GUI
      * initializatioon */
-    process_preinit_options(&argc, &argv);
+    process_options(&argc, &argv);
     if (argc < 2) {
         print_help();
         return 0;
@@ -84,7 +83,7 @@ static gchar*
 indent(void)
 {
     static GString *str = NULL;
-    static gchar spaces[] = "                ";
+    static gchar spaces[] = "                                ";
     gint i;
 
     if (!str)
@@ -139,7 +138,8 @@ dump_boolean(gchar **buffer,
     if (!*size)
         fail(*buffer, "Truncated boolean");
     value = !!**buffer;
-    g_print("boolean: %s\n", value ? "TRUE" : "FALSE");
+    if (opt_value)
+        g_print("boolean: %s", value ? "TRUE" : "FALSE");
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
 }
@@ -153,11 +153,12 @@ dump_char(gchar **buffer,
     if (!*size)
         fail(*buffer, "Truncated char\n");
     value = **buffer;
-    g_print("char: \\x%02x%s%c%s",
-            value,
-            g_ascii_isprint(value) ? "(" : "",
-            g_ascii_isprint(value) ? value : '\n',
-            g_ascii_isprint(value) ? ")\n" : "");
+    if (opt_value) {
+        if (g_ascii_isprint(value))
+            g_print("char: %c", value);
+        else
+            g_print("char: \\%03o", value);
+    }
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
 }
@@ -172,7 +173,8 @@ dump_int32(gchar **buffer,
         fail(*buffer, "Truncated int32");
     memcpy(&value, *buffer, sizeof(gint32));
     value = GINT32_FROM_LE(value);
-    g_print("int32: %d\n", value);
+    if (opt_value)
+        g_print("int32: %d", value);
     *buffer += sizeof(gint32);
     *size -= sizeof(gint32);
 }
@@ -187,7 +189,8 @@ dump_int64(gchar **buffer,
         fail(*buffer, "Truncated int64");
     memcpy(&value, *buffer, sizeof(gint64));
     value = GINT64_FROM_LE(value);
-    g_print("int64: %" G_GINT64_FORMAT "\n", value);
+    if (opt_value)
+        g_print("int64: %" G_GINT64_FORMAT, value);
     *buffer += sizeof(gint64);
     *size -= sizeof(gint64);
 }
@@ -202,7 +205,8 @@ dump_double(gchar **buffer,
         fail(*buffer, "Truncated double");
     memcpy(&value, *buffer, sizeof(gdouble));
     value.i = GUINT64_FROM_LE(value.i);
-    g_print("double: %g\n", value.d);
+    if (opt_value)
+        g_print("double: %g", value.d);
     *buffer += sizeof(gdouble);
     *size -= sizeof(gdouble);
 }
@@ -216,37 +220,11 @@ dump_string(gchar **buffer,
     if (!(p = memchr(*buffer, 0, *size)))
         fail(*buffer, "Truncated string");
     q = g_strescape(*buffer, NULL);
-    g_print("string: \"%s\"\n", q);
+    if (opt_value)
+        g_print("string: \"%s\"", q);
     g_free(q);
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
-}
-
-static void
-dump_object_array(gchar **buffer,
-                  gsize *size,
-                  guint32 n)
-{
-    while (n) {
-        dump_object(buffer, size);
-        n--;
-    }
-}
-
-static void
-dump_string_array(gchar **buffer,
-                  gsize *size,
-                  guint32 n)
-{
-    gchar *p;
-
-    while (n) {
-        if (!(p = memchr(*buffer, 0, *size)))
-            fail(*buffer, "Truncated string");
-        *size -= (p - *buffer) + 1;
-        *buffer = p + 1;
-        n--;
-    }
 }
 
 static void
@@ -256,19 +234,34 @@ dump_array(gchar **buffer,
            const gchar *typename)
 {
     guint32 mysize;
+    gchar *p;
 
     mysize = get_size(buffer, size);
-    if (!strcmp(typename, "object"))
-        dump_object_array(buffer, size, mysize);
-    else if (!strcmp(typename, "string"))
-        dump_string_array(buffer, size, mysize);
+    if (opt_value)
+        g_print("%s array of length %u\n", typename, mysize);
+    else
+        g_print("\n");
+    if (!strcmp(typename, "object")) {
+        while (mysize) {
+            dump_object(buffer, size);
+            mysize--;
+        }
+    }
+    else if (!strcmp(typename, "string")) {
+        while (mysize) {
+            if (!(p = memchr(*buffer, 0, *size)))
+                fail(*buffer, "Truncated string");
+            *size -= (p - *buffer) + 1;
+            *buffer = p + 1;
+            mysize--;
+        }
+    }
     else if (*size < mysize*membersize)
         fail(*buffer, "Truncated %s array", typename);
     else {
         *buffer += mysize*membersize;
         *size -= mysize*membersize;
     }
-    g_print("%s array of size %u\n", typename, mysize);
 }
 
 static void
@@ -304,7 +297,7 @@ dump_hash(gchar *buffer,
             fail(buffer, "Runaway component name");
         if (opt_address)
             g_print("%08x: ", buffer - buffer0);
-        g_print("%s%s, ", indent(), buffer);
+        g_print("%s%s", indent(), buffer);
         size -= (p - buffer) + 1;
         buffer = p + 1;
 
@@ -319,13 +312,21 @@ dump_hash(gchar *buffer,
         handled = FALSE;
         for (i = 0; i < G_N_ELEMENTS(atomic); i++) {
             if (atomic[i].ctype == ctype) {
+                if (opt_value)
+                    g_print(", ");
+                else if (ctype == 'o')
+                    g_print(" ");
                 atomic[i].func(&buffer, &size);
+                if (ctype != 'o')
+                    g_print("\n");
                 handled = TRUE;
                 break;
             }
         }
         for (i = 0; i < G_N_ELEMENTS(array); i++) {
             if (array[i].ctype == ctype) {
+                if (opt_value)
+                    g_print(", ");
                 dump_array(&buffer, &size, array[i].size, array[i].name);
                 handled = TRUE;
                 break;
@@ -346,7 +347,10 @@ dump_object_real(gchar **buffer,
     /* Name */
     if (!(p = memchr(*buffer, 0, *size)))
         fail(*buffer, "Runaway object name");
-    g_print("object: %s\n", *buffer);
+    if (opt_value)
+        g_print("object: %s", *buffer);
+    else
+        g_print("%s", *buffer);
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
 
@@ -355,7 +359,9 @@ dump_object_real(gchar **buffer,
     if (mysize > *size)
         fail(*buffer, "Truncated object data");
     if (opt_object_size)
-        g_print("size: %" G_GSIZE_FORMAT "\n", *size);
+        g_print(", size: %" G_GSIZE_FORMAT "\n", *size);
+    else
+        g_print("\n");
 
     /* Hash */
     *size -= mysize;
@@ -372,37 +378,79 @@ dump_object(gchar **buffer,
     level--;
 }
 
-/* Check for --help and --version and eventually print help or version */
 static void
-process_preinit_options(int *argc,
-                        char ***argv)
+process_options(int *argc,
+                char ***argv)
 {
-    if (*argc == 1)
-        return;
+    static gboolean opt_version = FALSE;
+    static gboolean opt_help = FALSE;
+    static GOptionEntry entries[] = {
+        {
+            "value", 'v', 0,
+            G_OPTION_ARG_NONE, &opt_value, NULL, NULL
+        },
+        {
+            "address", 'a', 0,
+            G_OPTION_ARG_NONE, &opt_address, NULL, NULL
+        },
+        {
+            "object-size", 's', 0,
+            G_OPTION_ARG_NONE, &opt_object_size, NULL, NULL
+        },
+        {
+            "indent", 'i', 0,
+            G_OPTION_ARG_INT, &opt_indent, NULL, NULL
+        },
+        {
+            "version", 'V', 0,
+            G_OPTION_ARG_NONE, &opt_version, NULL, NULL
+        },
+        {
+            "help", 'h', 0,
+            G_OPTION_ARG_NONE, &opt_help, NULL, NULL
+        },
+        { NULL }
+    };
+    GOptionContext *context;
+    GError *err = NULL;
 
-    if (!strcmp((*argv)[1], "--help") || !strcmp((*argv)[1], "-h")) {
-        print_help();
-        exit(0);
+    context = g_option_context_new(NULL);
+    g_option_context_add_main_entries(context, entries, NULL);
+    g_option_context_set_help_enabled(context, FALSE);
+    if (!g_option_context_parse(context, argc, argv, &err)) {
+        g_print("Cannot parse options: %s\n", err->message);
+        g_clear_error(&err);
+        exit(EXIT_FAILURE);
     }
+    g_option_context_free(context);
 
-    if (!strcmp((*argv)[1], "--version") || !strcmp((*argv)[1], "-v")) {
+    if (opt_version)
         g_print("%s %s\n", PACKAGE, VERSION);
-        exit(0);
-    }
+
+    if (opt_help)
+        print_help();
+
+    if (opt_help || opt_version)
+        exit(EXIT_SUCCESS);
+
+    opt_indent = CLAMP(opt_indent, 0, 32);
 }
 
-/* Print help */
 static void
 print_help(void)
 {
     g_print(
-"Usage: gwyiew FILENAME\n"
-"Dumps Gwyddion .gwy file in a text format.\n\n"
+"Usage: gwyiew [OPTIONS...] FILENAME\n"
+"Dump Gwyddion .gwy file in a text format.\n\n"
         );
     g_print(
 "Options:\n"
 " -h, --help                 Print this help and terminate.\n"
-" -v, --version              Print version info and terminate.\n\n"
+" -V, --version              Print version info and terminate.\n"
+" -a, --address              Print addresses in file.\n"
+" -v, --values               Print values of atomic objects.\n"
+" -s, --object-size          Print object sizes.\n"
+" -i, --indent=N             Indent each nesting level by N spaces.\n\n"
         );
     g_print("Please report bugs in Gwyddion bugzilla "
             "http://trific.ath.cx/bugzilla/\n");
