@@ -9,15 +9,24 @@ Modules:
 - BCRfile (new): Image Metrology BCR data file import.
 - RHK SPM32 (new): RHK SPM32 data file import.
 - WSxMfile (new): Nanotec WSxM data file import.
-- Pixmap: False color scale is correct when explicite color range is set.
+- EZDFile (new): Nanosurf EZD data file import.
+- Nanoident analyse (new): Analyses nanoindent structures (volume, surfaces,
+  etc.).
+- Nanoindent adjust (new) Adjusts images of two indentor prints.
+- Pixmap: False color scale is correct when explicite color range is set
+  (bug #43).
 - Assing AFM: Supports also save.
 - SPMLab: Supports R6 file format import.
+- Calibrate: Applying calibrating ratios squared was fixed.
 
 Library:
 - libgwyddion: Marquardt-Levenberg NL fitter fixed parameters actually work
   now.
+- libgwyddion: gwy_si_unit_get_unit_strings() recomposes the string from
+  internal representation so that works for nontrivial units too.
 - libprocess: Rotation correction mysteriously broken on Win32 was no less
   mysteriously fixed.
+- libprocess: Nanoindentation functions.
 
 
 1.9
