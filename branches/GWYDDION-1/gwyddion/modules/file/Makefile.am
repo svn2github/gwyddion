@@ -18,7 +18,8 @@ file_PROGRAMS = \
 	rhk-spm32.so \
 	sis.so \
 	spmlab.so \
-	stmprg.so
+	stmprg.so \
+	wsxmfile.so
 
 noinst_HEADERS = \
 	get.h \
@@ -68,6 +69,9 @@ spmlab_so_LDFLAGS = $(module_ldflags),spmlab.so
 
 stmprg_so_SOURCES = stmprg.c
 stmprg_so_LDFLAGS = $(module_ldflags),stmprg.so
+
+wsxmfile_so_SOURCES = wsxmfile.c
+wsxmfile_so_LDFLAGS = $(module_ldflags),wsxmfile.so
 
 INCLUDES = -I$(top_srcdir)
 AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\" -fPIC
