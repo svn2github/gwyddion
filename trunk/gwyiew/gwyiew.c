@@ -18,7 +18,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
@@ -31,30 +30,84 @@
 static void print_help(void);
 static void process_preinit_options(int *argc,
                                     char ***argv);
+static gint initialize_types(void);
 
 int
 main(int argc, char *argv[])
 {
-    gchar *settings_file;
+    GtkWidget *window, *view;
+    GwyContainer *data, *settings;
+    GwyPixmapLayer *layer;
+    gchar *filename;
 
+    /* Check for --help and --version before rash file loading and GUI
+     * initializatioon */
     process_preinit_options(&argc, &argv);
+    if (argc < 2) {
+        g_printerr("No files to display given.\n");
+        return 0;
+    }
 
-    gtk_init(&argc, &argv);
+    /* Initialize Gwyddion stuff */
+    initialize_types();
+    g_set_application_name(PACKAGE);
+    gwy_palette_def_setup_presets();
 
-    settings_file = gwy_app_settings_get_settings_filename();
-    if (g_file_test(settings_file, G_FILE_TEST_IS_REGULAR))
-        gwy_app_settings_load(settings_file);
+    /* Load gwyddion settings.  Maybe not very useful here, except for
+     * files mysteriously missing mask color. */
+    filename = gwy_app_settings_get_settings_filename();
+    if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
+        gwy_app_settings_load(filename);
+    g_free(filename);
+    settings = gwy_app_settings_get();
 
+    /* Load .gwy file loader */
     gwy_module_register_module(GWY_MODULE_DIR "/file/gwyfile.so");
 
-    /*gwy_app_file_open_initial(argv + 1, argc - 1);*/
+    /* Load the file */
+    data = gwy_file_load(argv[1]);
+    if (!data) {
+        g_printerr("Cannot load `%s'\n", argv[1]);
+        return 1;
+    }
 
+    /* Construct the GUI */
+    gtk_init(&argc, &argv);
+
+    /* Main window */
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    filename = g_path_get_basename(argv[1]);
+    gtk_window_set_title(GTK_WINDOW(window), filename);
+    g_signal_connect(window, "delete_event", gtk_main_quit, NULL);
+    g_free(filename);
+
+    /* Data view */
+    view = gwy_data_view_new(data);
+    gtk_container_add(GTK_CONTAINER(window), view);
+    gwy_data_view_set_base_layer(GWY_DATA_VIEW(view),
+                                 GWY_PIXMAP_LAYER(gwy_layer_basic_new()));
+
+    /* Mask */
+    if (gwy_container_contains_by_name(data, "/0/mask")) {
+        GwyRGBA color = { 1.0, 0.3, 0.0, 0.6 };
+
+        layer = GWY_PIXMAP_LAYER(gwy_layer_mask_new());
+        gwy_data_view_set_alpha_layer(GWY_DATA_VIEW(view), layer);
+        /* Get mask color from Gwyddion settings, if not specified in the
+         * file. */
+        if (!gwy_rgba_get_from_container(&color, data, "/0/mask")) {
+            gwy_rgba_get_from_container(&color, settings, "/mask");
+            gwy_rgba_store_to_container(&color, data, "/0/mask");
+        }
+    }
+
+    gtk_widget_show_all(window);
     gtk_main();
-    g_free(settings_file);
 
     return 0;
 }
 
+/* Check for --help and --version and eventually print help or version */
 static void
 process_preinit_options(int *argc,
                         char ***argv)
@@ -68,37 +121,45 @@ process_preinit_options(int *argc,
     }
 
     if (!strcmp((*argv)[1], "--version") || !strcmp((*argv)[1], "-v")) {
-        printf("%s %s\n", PACKAGE, VERSION);
+        g_print("%s %s\n", PACKAGE, VERSION);
         exit(0);
     }
 }
 
+/* Type system initialization.
+ * FIXME: (a) is ugly (b) should be provided by gwyddion itself(?) */
+static gint
+initialize_types(void)
+{
+    guint optimization_fooler = 42;
+
+    g_type_init();
+    optimization_fooler += gwy_si_unit_get_type();
+    optimization_fooler += gwy_sphere_coords_get_type();
+    optimization_fooler += gwy_data_field_get_type();
+    optimization_fooler += gwy_data_line_get_type();
+    optimization_fooler += gwy_palette_get_type();
+    optimization_fooler += gwy_palette_def_get_type();
+    optimization_fooler += gwy_container_get_type();
+
+    return optimization_fooler;
+}
+
+/* Print help */
 static void
 print_help(void)
 {
-    puts(
-"Usage: gwyddion [OPTIONS...] FILE...\n"
-"An SPM data analysis framework, written in Gtk+.\n"
+    g_print(
+"Usage: gwyiew FILENAME\n"
+"A very simple Gwyddion .gwy file viewer.\n\n"
         );
-    puts(
-"Gwyddion options:\n"
+    g_print(
+"Options:\n"
 " -h, --help                 Print this help and terminate.\n"
-" -v, --version              Print version info and terminate.\n"
-"     --no-splash            Don't show splash screen.\n"
+" -v, --version              Print version info and terminate.\n\n"
         );
-    puts(
-"Gtk+ and Gdk options:\n"
-"     --display=DISPLAY      Set X display to use.\n"
-"     --screen=SCREEN        Set X screen to use.\n"
-"     --sync                 Make X calls synchronous.\n"
-"     --name=NAME            Set program name as used by the window manager.\n"
-"     --class=CLASS          Set program class as used by the window manager.\n"
-"     --gtk-module=MODULE    Load an additional Gtk module MODULE.\n"
-"They may be other Gtk+ and Gdk options, depending on platform, how it was\n"
-"compiled, and loaded modules.  Please see Gtk+ documentation.\n"
-        );
-    puts("Please report bugs in Gwyddion bugzilla "
-         "http://trific.ath.cx/bugzilla/");
+    g_print("Please report bugs in Gwyddion bugzilla "
+            "http://trific.ath.cx/bugzilla/\n");
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
