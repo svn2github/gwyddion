@@ -3,6 +3,7 @@ This is an example standalone Gwyddion module.
 It doesn't do anything extremely useful, but is complex enough to demostrate
 basic principles.
 
+
 == Unix ======
 
 If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
@@ -12,6 +13,7 @@ do one of following:
 
 Otherwise just run make, make install.
 
+
 == Windows ======
 
 Edit the top of make.msc and change MSVC, Gtk+, and Gwyddion paths to reflect
@@ -20,5 +22,6 @@ reality.  Run
   nmake -f makefile.msc
 
 to compile the module.  Copy the created DLL to Gwyddion module directory
-appropriate for the module type.
+appropriate for the module type (that is probably something like
+c:/program files/gwyddion/modules/process).
 

@@ -1,8 +1,8 @@
 /*
  *  threshold.c
  *  @(#) $Id$
- *  Copyright (C) 2003 David Necas (Yeti), Petr Klapetek.
- *  E-mail: yeti@physics.muni.cz, klapetek@physics.muni.cz.
+ *  Copyright (C) 2003,2004 David Necas (Yeti)
+ *  E-mail: yeti@gwyddion.net
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,8 +33,6 @@
 
 #define THRESHOLD_RUN_MODES \
     (GWY_RUN_MODAL | GWY_RUN_NONINTERACTIVE | GWY_RUN_WITH_DEFAULTS)
-
-#define ROUND(x) ((gint)floor((x) + 0.5))
 
 #define THRESHOLD_FMAP_SIZE 1024
 

@@ -18,7 +18,7 @@ EXTRA_CFLAGS = -Wall -O2 -march=`uname -m` -DVERSION=\"$(VERSION)\" -DPACKAGE=\"
 OBJECTS = $(SOURCES:.c=.o)
 
 DNAME = $(PACKAGE)-$(VERSION)
-STD_DIST = Makefile COPYING makefile.msc pkg.mak
+STD_DIST = Makefile COPYING makefile.msc pkg.mak $(PACKAGE).spec
 COMPILE = libtool --mode=compile gcc
 LINK = libtool --mode=link gcc
 INSTALL = libtool --mode=install install
@@ -35,12 +35,19 @@ $(PACKAGE).so: $(OBJECTS)
 	$(LINK) -shared -export-dynamic $(LDFLAGS) -Wl,-soname,$*.so -o $@ $^
 
 install: all
-	$(INSTALL) -s -c $(PACKAGE).so $(MODULE_DIR)
+	mkdir -p $(DESTDIR)$(MODULE_DIR)
+	$(INSTALL) -s -c $(PACKAGE).so $(DESTDIR)$(MODULE_DIR)
 
 uninstall:
 	-rm -f $(MODULE_DIR)/$(PACKAGE).so
 
-dist:
+$(PACKAGE).spec: pkg.mak
+	cp $(PACKAGE).spec $(PACKAGE).spec~
+	sed -e 's/^\(Version: \).*/\1$(VERSION)/' \
+	    -e 's/^\(Source: .*\)-[0-9.]\+\.tar\.bz2/\1-$(VERSION).tar.bz2/' \
+		$(PACKAGE).spec~ >$(PACKAGE).spec
+
+dist: $(PACKAGE).spec
 	-rm -rf $(DNAME)
 	mkdir $(DNAME)
 	chmod a+rx $(DNAME)
