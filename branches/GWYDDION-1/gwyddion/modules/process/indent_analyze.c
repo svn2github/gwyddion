@@ -1034,8 +1034,8 @@ static gboolean indent_analyze_do_the_hard_work(IndentAnalyzeControls *controls)
    }               
 
    /* we do not expect we should use the last coords...ensurance for computing vectors for surface */ 
-   for (i=0; i<dfield->xres-1; i++) {
-       for(j=0; j<dfield->yres-1; j++) {
+   for (i=1; i<dfield->xres-1; i++) {
+       for(j=1; j<dfield->yres-1; j++) {
            height = gwy_data_field_get_val(dfield,i,j);
            mark_it = 0;
            
