@@ -35,7 +35,7 @@ all: $(PACKAGE)
 clean:
 	-rm -f *~ *.o *.lo *.la *.so .libs/* core core.* $(PACKAGE)
 
-%.o: %.c $(HEADERS)
+%.o: %.c $(HEADERS) pkg.mak
 	$(COMPILE) $(GWY_CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS) -c $< -o $@
 
 $(PACKAGE): $(OBJECTS)
