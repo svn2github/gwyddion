@@ -727,7 +727,7 @@ gwy_data_field_area_filter_conservative(GwyDataField *data_field,
         gint ifrom = MAX(0, i + row - (size-1)/2);
         gint ito = MIN(yres-1, i + row + size/2);
 
-        for (j = col; j < col + width; j++) {
+        for (j = 0; j < width; j++) {
             gint jfrom = MAX(0, j + col - (size-1)/2);
             gint jto = MIN(xres-1, j + col + size/2);
 
