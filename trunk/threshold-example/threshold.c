@@ -57,15 +57,15 @@ typedef struct {
     GSList *mode;
     /* interface only */
     GtkObject *absolute;
-    gdouble mag;
-    gint precision;
+    GwySIValueFormat *format;
     gboolean in_update;
 } ThresholdControls;
 
 static gboolean    module_register                (const gchar *name);
 static gboolean    threshold                      (GwyContainer *data,
                                                    GwyRunType run);
-static gboolean    threshold_dialog               (ThresholdArgs *args);
+static gboolean    threshold_dialog               (ThresholdArgs *args,
+                                                   GwyDataField *dfield);
 static void        threshold_do                   (GwyContainer *data,
                                                    GwyDataField *dfield,
                                                    ThresholdArgs *args);
@@ -149,7 +149,7 @@ threshold(GwyContainer *data, GwyRunType run)
     threshold_fmap_fractile_to_abs(&args);
 
     /* eventually present the GUI */
-    ok = (run != GWY_RUN_MODAL) || threshold_dialog(&args);
+    ok = (run != GWY_RUN_MODAL) || threshold_dialog(&args, dfield);
     if (ok) {
         threshold_do(data, dfield, &args);
         if (run != GWY_RUN_WITH_DEFAULTS)
@@ -219,11 +219,13 @@ threshold_do(GwyContainer *data,
 }
 
 static gboolean
-threshold_dialog(ThresholdArgs *args)
+threshold_dialog(ThresholdArgs *args,
+                 GwyDataField *dfield)
 {
     const gchar *modes[] = { "_Data", "_Mask", "_Presentation" };
     GtkWidget *dialog, *table, *spin, *widget;
     GtkRadioButton *group;
+    GwySIValueFormat *fmt;
     ThresholdControls controls;
     enum { RESPONSE_RESET = 1 };
     gint response;
@@ -242,10 +244,6 @@ threshold_dialog(ThresholdArgs *args)
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), table,
                        FALSE, FALSE, 4);
 
-    controls.mag = gwy_math_humanize_numbers((args->max - args->min)/100,
-                                             MAX(fabs(args->min),
-                                                 fabs(args->max)),
-                                             &controls.precision);
     controls.fractile = gtk_adjustment_new(100*args->fractile,
                                            0, 100, 1, 10, 0);
     spin = gwy_table_attach_spinbutton(table, 0, _("_Fractile:"), "%",
@@ -256,18 +254,19 @@ threshold_dialog(ThresholdArgs *args)
     g_signal_connect(controls.fractile, "value_changed",
                      G_CALLBACK(fractile_changed_cb), args);
 
-    controls.absolute = gtk_adjustment_new(args->absolute/controls.mag,
-                                           args->min/controls.mag,
-                                           args->max/controls.mag,
+    controls.format = fmt = gwy_data_field_get_value_format_z(dfield, NULL);
+    controls.absolute = gtk_adjustment_new(args->absolute/fmt->magnitude,
+                                           args->min/fmt->magnitude,
+                                           args->max/fmt->magnitude,
                                            (args->max - args->min)/100
-                                                /controls.mag,
+                                                /fmt->magnitude,
                                            (args->max - args->min)/10
-                                                /controls.mag,
+                                                /fmt->magnitude,
                                            0);
     spin = gwy_table_attach_spinbutton(table, 1, _("Absolute _threshold:"),
-                                       _("FIXME"),
+                                       fmt->units,
                                        controls.absolute);
-    gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), controls.precision);
+    gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), fmt->precision);
     g_object_set_data(G_OBJECT(controls.absolute), "controls", &controls);
     g_signal_connect(controls.absolute, "value_changed",
                      G_CALLBACK(absolute_changed_cb), args);
@@ -301,6 +300,7 @@ threshold_dialog(ThresholdArgs *args)
         switch (response) {
             case GTK_RESPONSE_CANCEL:
             case GTK_RESPONSE_DELETE_EVENT:
+            g_free(controls.format);
             gtk_widget_destroy(dialog);
             case GTK_RESPONSE_NONE:
             return FALSE;
@@ -328,6 +328,7 @@ threshold_dialog(ThresholdArgs *args)
             break;
         }
     }
+    g_free(controls.format);
     gtk_widget_destroy(dialog);
 
     return TRUE;
@@ -361,7 +362,7 @@ absolute_changed_cb(GtkAdjustment *adj,
         return;
 
     controls->in_update = TRUE;
-    args->absolute = gtk_adjustment_get_value(adj)*controls->mag;
+    args->absolute = gtk_adjustment_get_value(adj)*controls->format->magnitude;
     threshold_fmap_abs_to_fractile(args);
     threshold_dialog_update(controls, args);
     controls->in_update = FALSE;
@@ -404,7 +405,7 @@ threshold_dialog_update(ThresholdControls *controls,
     gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->fractile),
                              100*args->fractile);
     gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->absolute),
-                             args->absolute/controls->mag);
+                             args->absolute/controls->format->magnitude);
 
     for (l = controls->mode; l; l = g_slist_next(l)) {
         if (GPOINTER_TO_UINT(g_object_get_data(l->data, "mode")) == args->mode)
