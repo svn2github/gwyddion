@@ -1,0 +1,34 @@
+
+!INCLUDE pkg.mak
+!INCLUDE make.msc
+
+WIN32LIBS = user32.lib advapi32.lib wsock32.lib
+
+MOD_CFLAGS = \
+	-I . $(COMMON_CFLAGS) $(MOD_CRUNTIME) \
+	$(GTK_CFLAGS) \
+	$(GWY_CFLAGS) \
+	$(GTKGLEXT_CFLAGS) \
+	$(PANGOFT2_CFLAGS) \
+	$(INTL_CFLAGS) \
+	-DVERSION=\"$(VERSION)\" \
+	-DPACKAGE=\"$(PACKAGE)\" \
+	-DG_LOG_DOMAIN=\"Module\"
+
+MOD_LINK = \
+	$(COMMON_LDFLAGS) \
+	$(GTKGLEXT_LIBS) \
+	$(GTK_LIBS) \
+	$(PANGOFT2_LIBS) \
+	$(INTL_LIBS) \
+	$(GWY_LIBS)
+
+all: threshold.dll
+
+.c.obj:
+	$(CC) $(CFLAGS) -GD -c $(MOD_CFLAGS) $<
+
+threshold.dll: threshold.obj
+	$(LINK32) threshold.obj $(MOD_LINK) $(WIN32LIBS) $(LDFLAGS) /out:threshold.dll /dll /implib:threshold.lib
+
+# vim: ft=make
