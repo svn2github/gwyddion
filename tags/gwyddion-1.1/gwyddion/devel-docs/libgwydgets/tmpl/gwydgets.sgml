@@ -1,0 +1,49 @@
+<!-- ##### SECTION Title ##### -->
+gwydgets
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_table_attach_spinbutton ##### -->
+<para>
+
+</para>
+
+@table: 
+@row: 
+@name: 
+@units: 
+@adj: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_table_attach_row ##### -->
+<para>
+
+</para>
+
+@table: 
+@row: 
+@name: 
+@units: 
+@middle_widget: 
+
+
+<!-- ##### FUNCTION gwy_dialog_prevent_delete_cb ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+

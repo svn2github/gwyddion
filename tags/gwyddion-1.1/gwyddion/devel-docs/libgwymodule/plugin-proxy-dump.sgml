@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="plugin-proxy-dump" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Dump Format</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Dump Format</refname>
+    <refpurpose>
+      Dumb dump file format used for data exchange between plug-in proxy and
+      plug-ins
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Overall Structure</title>
+    <para>
+      The dump format consists of text lines, except for the actual data
+      samples which are for efficiency reasons stored as arrays of (binary)
+      IEEE double precision numbers.
+    </para>
+    <para>
+      Since dump files contain binary data (along with text lines)
+      they have to be always opened in binary mode to avoid end-of-line
+      conversions (on systems distinguishing between text and binary files).
+      Unix end-of-lines are always used, i.e., lines are always terminated
+      by a single LF (line feed) character, ASCII 0x0a.  Plugin-proxy
+      always writes data with Unix end-of-lines and although it may read
+      dumps with CRLF end-of-lines without problems too, don't count on it.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>String Data</title>
+    <para>The text lines have the form
+      <literal><parameter>key</parameter>=<parameter>value</parameter></literal>.
+      The keys are keys in data <link linkend="GwyContainer">container</link>
+      created for the data, and the values are corresponding values.
+      Except for a few special keys specified below, all values are stored
+      as strings.
+    </para>
+    <para>
+      There are only a few types of data you may expect to find in or 
+      want to write to a dump file:
+      <itemizedlist>
+        <listitem>
+          Data fields.  They use some specific keys and you can read more
+          about them
+          <link linkend="plugin-proxy-dump-data-fields">below</link>.
+        </listitem>
+        <listitem>
+          Metadata about the data.  They start with <literal>/meta/</literal>
+          followed by an arbitrary key string.  Not used directly by
+          Gwyddion, but will appear in Metadata Browser.
+        </listitem>
+        <listitem>
+          Queer stuff (everything else).  It's best to ignore it.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </refsect1>
+  <refsect1>
+    <title id="plugin-proxy-dump-data-fields">Data Fields</title>
+    <para>
+      The data samples themselves are stored as a sequence of binary IEEE
+      double precision floating point numbers in little-endian byte order.
+      The array is
+      preceded by <literal>/0/data=[</literal>, a single LF character, and
+      a single left bracket <literal>[</literal>.  The data samples are
+      closed by a sequence of two right brackets <literal>]]</literal> and
+      a single LF character.
+    </para>
+    <para>
+      The data samples are stored in `screen' order.  That means they are
+      ordered by lines (rows), starting from the uppermost one, and inside
+      lines they are ordered by column, from left to right.
+    </para>
+    <para>
+      The resolutions and physical dimensions are specified using special
+      keys <literal>/0/data/xres</literal>, <literal>/0/data/yres</literal>,
+      <literal>/0/data/xreal</literal>, and <literal>/0/data/yreal</literal>.
+      Since the resolutions must be obviously known before data samples can
+      be read, the lines
+      <literal>/0/data/xres=<parameter>x-resolution</parameter></literal>
+      and
+      <literal>/0/data/yres=<parameter>y-resolution</parameter></literal>
+      must appear somewhere before them in the file.  It is also strongly
+      recommended to specify physical dimensions too, though it is not
+      strictly necessary if you don't mind some bogus default value (like
+      1 meter) is substituted then.
+    </para>
+    <para>
+      All the values are in base SI units, i.e., dimensions are in meters
+      (not micrometers, nanometres, or kilometres), currents in ampers
+      (not picoampers), etc.  The base units can be specified using the
+      <literal>/0/data/unit-xy</literal> (lateral) and
+      <literal>/0/data/unit-z</literal> (value, height) keys.
+      If not specified, meters are assumed.
+    </para>
+    <para>
+      So a dump file could look (replacing the binary data with dots):
+    </para>
+    <informalexample><programlisting><![CDATA[
+/0/data/xres=240
+/0/data/yres=240
+/0/data/xreal=4.1e-08
+/0/data/yreal=4.1e-08
+/0/data/unit-xy=m
+/0/data/unit-z=m
+/0/data=[
+[...
+...
+...]]
+]]></programlisting></informalexample>
+    <para>
+      This file would describe square data of size 240 × 240 samples
+      and physical dimension 41nm × 41nm, with height as value.
+    </para>
+    <para>
+      If you want to pass mask (or presentation) instead of the main data,
+      just replace the <literal>/0/data</literal> with
+      <literal>/0/mask</literal> (or <literal>/0/show</literal>) in the
+      previous description.  If they are present in the data, they are
+      always written to the dump, so you don't need anything special to
+      read them.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Reference Implementations</title>
+    <para>
+      A few sample dump format implementations are included in Gwyddion
+      source distribution.
+    </para>
+    <formalpara>
+      <title>C/C++</title>
+      <para>
+        The plug-in proxy itself is always the most complete reference
+        C/C++ implementation.  See namely
+        <function>text_dump_export()</function> and
+        <function>text_dump_import()</function> functions
+        in <filename>modules/plugin-proxy.c</filename>.
+        Note this file has a special licensing exception, you can
+        freely study it for the purpose of creation of Gwyddion plug-ins
+        without becoming `tainted'.
+      </para>
+    </formalpara>
+    <formalpara>
+      <title>Perl</title>
+      <para>
+        A sample Perl data-processing plug-in is included in the source
+        distribution: <filename>plugins/process/cutoff.pl</filename>.
+        This script is in the public domain.
+      </para>
+    </formalpara>
+    <formalpara>
+      <title>Python</title>
+      <para>
+        A sample Python data-processing plug-in is included in the source
+        distribution: <filename>plugins/process/divide_by_2.py</filename>.
+        This script is in the public domain.
+      </para>
+    </formalpara>
+  </refsect1>
+</refentry>
+

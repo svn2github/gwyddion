@@ -1,0 +1,54 @@
+<!-- ##### SECTION Title ##### -->
+interpolation
+
+<!-- ##### SECTION Short_Description ##### -->
+general fucntions used for interpolation
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### ENUM GwyInterpolationType ##### -->
+<para>
+Interpolation type selection.
+</para>
+
+@GWY_INTERPOLATION_NONE: no interpolation, resulting values should not be directly used
+@GWY_INTERPOLATION_ROUND: round interpolation (nearest neighbour interpolation)
+@GWY_INTERPOLATION_BILINEAR: bilinear interpolation
+@GWY_INTERPOLATION_KEY: Key interpolation
+@GWY_INTERPOLATION_BSPLINE: Bspline interpolation
+@GWY_INTERPOLATION_OMOMS: O-moms interpolation
+@GWY_INTERPOLATION_NNA: nearest neighbour approximation
+
+<!-- ##### FUNCTION gwy_interpolation_get_dval ##### -->
+<para>
+
+</para>
+
+@x: 
+@x1_: 
+@y1_: 
+@x2_: 
+@y2_: 
+@interpolation: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_interpolation_get_dval_of_equidists ##### -->
+<para>
+
+</para>
+
+@x: 
+@data: 
+@interpolation: 
+@Returns: 
+
+

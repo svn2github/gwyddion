@@ -1,0 +1,61 @@
+
+1.1
+Application:
+- Creating mask by correlation (new).  This can be useful for searching
+  for specific patterns on the surface, for example on interferometric
+  grids.
+- Cross-correlation (new).  Matching between two slightly different images
+  of the same feature can be found.
+- A bug preventing new windows from appearing in Data Artithmetic and
+  correlations in some window managers was fixed.
+- Creating mask by outliers detection. It uses 3*sigma criterium
+  for searching an outlier.
+- Fixed: modules not changing data (and creating new windows instead)
+  never became `Last used'.
+- Undo/redo memory leak was fixed.
+
+Modules:
+- Fractal (new): Fractal dimension of the rough surface can be
+  evaluated using partitioning, cube counting, traingulation and power
+  spectrum method.
+- Laplace (new): Removal of data under mask (of any shape). It uses
+  iterative method similar to solving Laplace equation.
+- Pixmap: Can also import data from common bitmap image formats.
+- Rawfile: Supports named presets of import parameters.
+- Rawfile: No longer resets text/binary parameters when switching to
+  the other type.
+- Watershed: It is possible to change mask color.
+- Facet-level: shows progress bas and is cancelable.
+- Filters tool: Bug #7 (preview confused by tool switch) was mostly fixed.
+- Graph points: Bug #15 (bad value formatting) was mostly fixed.
+- Shade: Bug #11 (not undoable) was fixed.
+- Many modules: Memory leaks fixed.
+
+Library:
+- libgwyddion: Marquardt-Levenverg non-linear least square fitter was
+  added (GwyNLFitter).
+- libprocess: Functions for computing fractal dimension and surface area
+  added. Functions for correlation, crosscorrelation, outlier detection
+  and data correction by Laplace solver added.
+- libprocess: Vertical PSDF computation fixed. Some minor bugs having
+  no specific influence on results corrected and code cleaned.
+- libgwymodule: Data process modules can specify sensitivity of their
+  menu entries.
+- libgwyddion: Specific functions for storing enums in GwyContainer were
+  added.
+- libgwyddion: gwy_strkill() and gwy_strreplace() string utility functions
+  were added.
+
+Other:
+- The license of plug-in proxy as a reference dump format implementation
+  was clarified.
+
+
+1.0
+- Data can be exported to bitmaps with rules, units, scale, etc.
+- Physical unit handling was improved.
+- Tons of bugfixes.
+
+
+0.99.1
+- Release candidate 1 for v1.0.

@@ -1,0 +1,22 @@
+Too many things.  Use
+
+  find . -name \*.\[ch] | xargs grep -ir '\<\(XXX\|TODO\|FIXME\|fuck\|shit\)\>'
+
+to locate them ;-)
+
+Particularly (overall app issues, module issues not listed):
+- Quite a large part of graph functionality
+- Printing
+- User documentation, even better, integrated help
+- Internationalization and localization
+- Associations, drag'n'drop support
+- Palette editor, explicite ranges for palettes
+- Editable metadata
+- Multiple data in one file
+- Use GtkAction (Gtk+ 2.4) for module actions
+- Sessions
+- ...
+
+Quite a few of these items are intrusive and will have to wait for the next
+unstable version.
+

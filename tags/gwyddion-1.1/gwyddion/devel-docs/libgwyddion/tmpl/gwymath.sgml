@@ -1,0 +1,94 @@
+<!-- ##### SECTION Title ##### -->
+gwymath
+
+<!-- ##### SECTION Short_Description ##### -->
+Mathematical utility functions
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### MACRO ROUND ##### -->
+<para>
+
+</para>
+
+@x: 
+
+
+<!-- ##### FUNCTION gwy_math_SI_prefix ##### -->
+<para>
+
+</para>
+
+@magnitude: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_humanize_numbers ##### -->
+<para>
+
+</para>
+
+@unit: 
+@maximum: 
+@precision: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_find_nearest_line ##### -->
+<para>
+
+</para>
+
+@x: 
+@y: 
+@d2min: 
+@n: 
+@coords: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_find_nearest_point ##### -->
+<para>
+
+</para>
+
+@x: 
+@y: 
+@d2min: 
+@n: 
+@coords: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_lin_solve ##### -->
+<para>
+
+</para>
+
+@n: 
+@matrix: 
+@rhs: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_lin_solve_rewrite ##### -->
+<para>
+
+</para>
+
+@n: 
+@matrix: 
+@rhs: 
+@result: 
+@Returns: 
+
+
