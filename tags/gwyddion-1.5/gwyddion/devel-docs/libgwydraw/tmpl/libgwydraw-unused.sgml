@@ -1,0 +1,25 @@
+<!-- ##### FUNCTION gwy_palette_def_print ##### -->
+<para>
+
+</para>
+
+@a: 
+
+<!-- ##### FUNCTION gwy_palette_get_color ##### -->
+<para>
+
+</para>
+
+@palette: 
+@i: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_pixfield_mask ##### -->
+<para>
+
+</para>
+
+@pixbuf: 
+@data_field: 
+@color: 
+
