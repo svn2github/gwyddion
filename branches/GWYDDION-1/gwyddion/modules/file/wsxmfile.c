@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "get.h"
+
 #ifndef HAVE_POW10
 #define pow10(x) (exp(G_LN10*(x)))
 #endif
@@ -35,6 +37,11 @@
 #define MAGIC "WSxM file copyright Nanotec Electronica\r\n" \
               "SxM Image file\r\n"
 #define MAGIC_SIZE (sizeof(MAGIC) - 1)
+
+typedef enum {
+    WSXM_DATA_INT16,
+    WSXM_DATA_DOUBLE
+} WSxMDataType;
 
 typedef struct {
     GString *str;
@@ -47,7 +54,8 @@ static gint          wsxmfile_detect        (const gchar *filename,
 static GwyContainer* wsxmfile_load          (const gchar *filename);
 static GwyDataField* read_data_field       (const guchar *buffer,
                                             gint xres,
-                                            gint yres);
+                                            gint yres,
+                                            WSxMDataType type);
 static gboolean      file_read_meta        (GHashTable *meta,
                                             gchar *buffer);
 static void          process_metadata      (GHashTable *meta,
@@ -60,7 +68,7 @@ static GwyModuleInfo module_info = {
     "wsxmfile",
     N_("Imports Nanotec WSxM data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -119,6 +127,7 @@ wsxmfile_load(const gchar *filename)
     GError *err = NULL;
     GwyDataField *dfield = NULL;
     GHashTable *meta = NULL;
+    WSxMDataType type = WSXM_DATA_INT16;
     guint header_size;
     gchar *p;
     gboolean ok;
@@ -159,6 +168,13 @@ wsxmfile_load(const gchar *filename)
         ok = FALSE;
     }
 
+    if ((p = g_hash_table_lookup(meta, "General Info::Image Data Type"))) {
+        if (!strcmp(p, "double"))
+            type = WSXM_DATA_DOUBLE;
+        else
+            g_warning("Unknown data type %s", p);
+    }
+
     if ((guint)size - header_size < 2*xres*yres) {
         g_warning("Expected data size %u, but it's %u",
                   2*xres*yres, (guint)size - header_size);
@@ -166,7 +182,7 @@ wsxmfile_load(const gchar *filename)
     }
 
     if (ok)
-        dfield = read_data_field(buffer + header_size, xres, yres);
+        dfield = read_data_field(buffer + header_size, xres, yres, type);
     gwy_file_abandon_contents(buffer, size, NULL);
 
     if (dfield) {
@@ -323,17 +339,34 @@ process_metadata(GHashTable *meta,
 static GwyDataField*
 read_data_field(const guchar *buffer,
                 gint xres,
-                gint yres)
+                gint yres,
+                WSxMDataType type)
 {
-    const guint16 *p = (const guint16*)buffer;
     GwyDataField *dfield;
     gdouble *data;
     guint i;
 
     dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6, FALSE));
     data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < xres*yres; i++)
-        data[i] = GINT16_FROM_LE(p[i]);
+    switch (type) {
+        case WSXM_DATA_INT16: {
+            const gint16 *p = (const gint16*)buffer;
+
+            for (i = 0; i < xres*yres; i++)
+                data[i] = GINT16_FROM_LE(p[i]);
+        }
+        break;
+
+        case WSXM_DATA_DOUBLE: {
+            for (i = 0; i < xres*yres; i++)
+                data[i] = get_DOUBLE(&buffer);
+        }
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
 
     return dfield;
 }
