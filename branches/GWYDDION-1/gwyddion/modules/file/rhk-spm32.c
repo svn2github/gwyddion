@@ -19,6 +19,7 @@
  */
 #define DEBUG 1
 #include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwymodule/gwymodule.h>
 #include <libprocess/datafield.h>
@@ -35,13 +36,56 @@
 #define MAGIC_SIZE (sizeof(MAGIC) - 1)
 #define EXTENSION ".sm2"
 
+typedef enum {
+    RHK_IMAGE_UNDEFINED     = 0,
+    RHK_IMAGE_TOPOGAPHIC    = 1,
+    RHK_IMAGE_CURRENT       = 2,
+    RHK_IMAGE_AUX           = 3,
+    RHK_IMAGE_FORCE         = 4,
+    RHK_IMAGE_SIGNAL        = 5,
+    RHK_IMAGE_FFT           = 6,
+    RHK_IMAGE_LAST
+} RHKImageType;
+
+typedef struct {
+    gdouble scale;
+    gdouble offset;
+    gchar *units;
+} RHKRange;
+
+typedef struct {
+    gchar *date;
+    guint xres;
+    guint yres;
+    guint type;
+    guint data_type;
+    guint line_type;
+    guint size;
+    guint image_type;
+    RHKRange x;
+    RHKRange y;
+    RHKRange z;
+    gdouble xyskew;
+    gdouble alpha;
+    RHKRange iv;
+    guint id;
+    guint data_offset;
+    gchar *label;
+    gchar *comment;
+} RHKFile;
+
 static gboolean      module_register       (const gchar *name);
-static gint          rhkspm32_detect        (const gchar *filename,
+static gint          rhkspm32_detect       (const gchar *filename,
                                             gboolean only_name);
-static GwyContainer* rhkspm32_load          (const gchar *filename);
-static GwyDataField* file_load_real        (const guchar *buffer,
-                                            gsize size,
-                                            GHashTable *meta);
+static GwyContainer* rhkspm32_load         (const gchar *filename);
+static gboolean      rhkspm32_read_header  (gchar *buffer,
+                                            RHKFile *rhkfile);
+static gboolean      rhkspm32_read_range   (const gchar *buffer,
+                                            const gchar *name,
+                                            RHKRange *range);
+static void          rhkspm32_free         (RHKFile *rhkfile);
+static GwyDataField* rhkspm32_read_data    (const guchar *buffer,
+                                            RHKFile *rhkfile);
 
 /* The module info. */
 static GwyModuleInfo module_info = {
@@ -105,12 +149,13 @@ rhkspm32_detect(const gchar *filename, gboolean only_name)
 static GwyContainer*
 rhkspm32_load(const gchar *filename)
 {
+    RHKFile rhkfile;
     GObject *object = NULL;
     guchar *buffer = NULL;
     gsize size = 0;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
-    guint i;
+    gboolean ok;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -123,11 +168,20 @@ rhkspm32_load(const gchar *filename)
         return NULL;
     }
 
-    for (i = 0; i < HEADER_SIZE/0x20; i++) {
-        gwy_debug("%.32s", buffer + 0x20*i);
+    memset(&rhkfile, 0, sizeof(rhkfile));
+    if (!(ok = rhkspm32_read_header((gchar*)buffer, &rhkfile)))
+        g_warning("Cannot parse file header");
+
+    if (ok) {
+        if (size < rhkfile.data_offset + rhkfile.xres*rhkfile.yres)
+            g_warning("Truncated file");
+        else
+            dfield = rhkspm32_read_data(buffer + rhkfile.data_offset, &rhkfile);
     }
-    dfield = NULL;
+
+    rhkspm32_free(&rhkfile);
     gwy_file_abandon_contents(buffer, size, NULL);
+
     if (dfield) {
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
@@ -138,79 +192,103 @@ rhkspm32_load(const gchar *filename)
     return (GwyContainer*)object;
 }
 
-#if 0
-static GwyDataField*
-file_load_real(const guchar *buffer,
-               gsize size,
-               GHashTable *meta)
+static gboolean
+rhkspm32_read_header(gchar *buffer,
+                     RHKFile *rhkfile)
 {
-    GwyDataField *dfield;
-    gboolean intelmode = TRUE;
-    RHKFileType type;
-    gdouble q;
-    gint xres, yres;
-    guchar *s;
+    gchar *end;
+    guint pos;
 
-    s = g_memdup(buffer, HEADER_SIZE);
-    s[HEADER_SIZE-1] = '\0';
-    load_metadata(s, meta);
-    g_free(s);
+    rhkfile->date = g_strstrip(g_strndup(buffer + MAGIC_SIZE,
+                                        0x20 - MAGIC_SIZE));
+    if (sscanf(buffer + 0x20, "%d %d %d %d %d %d %d",
+               &rhkfile->type, &rhkfile->data_type, &rhkfile->line_type,
+               &rhkfile->xres, &rhkfile->yres, &rhkfile->size,
+               &rhkfile->image_type) != 7
+        || rhkfile->xres <= 0 || rhkfile->yres <= 0)
+        return FALSE;
+    gwy_debug("type = %u, data = %u, line = %u, image = %u",
+              rhkfile->type, rhkfile->data_type, rhkfile->line_type,
+              rhkfile->image_type);
+    gwy_debug("xres = %d, yres = %d", rhkfile->xres, rhkfile->yres);
 
-    if (!(s = g_hash_table_lookup(meta, "fileformat"))) {
-        g_warning("File is not a RHK file");
-        return NULL;
-    }
+    if (!rhkspm32_read_range(buffer + 0x40, "X", &rhkfile->x)
+        || !rhkspm32_read_range(buffer + 0x60, "Y", &rhkfile->y)
+        || !rhkspm32_read_range(buffer + 0x80, "Z", &rhkfile->z))
+        return FALSE;
 
-    if (!strcmp(s, "rhkstm"))
-        type = RHK_FILE_INT16;
-    else if (!strcmp(s, "rhkf"))
-        type = RHK_FILE_FLOAT;
-    else {
-        g_warning("Cannot understand file type header `%s'", s);
-        return NULL;
-    }
-    gwy_debug("File type: %u", type);
+    if (!g_str_has_prefix(buffer + 0xa0, "XY"))
+        return FALSE;
+    pos = 0xa0 + sizeof("XY");
+    rhkfile->xyskew = g_ascii_strtod(buffer + pos, &end);
+    if (end == buffer + pos)
+        return FALSE;
+    pos = (end - buffer) + 2;
+    rhkfile->alpha = g_ascii_strtod(buffer + pos, &end);
+    if (end == buffer + pos)
+        return FALSE;
 
-    if (!(s = g_hash_table_lookup(meta, "xpixels"))) {
-        g_warning("No xpixels (x resolution) info");
-        return NULL;
-    }
-    xres = atol(s);
+    if (!rhkspm32_read_range(buffer + 0xc0, "IV", &rhkfile->iv))
+        return FALSE;
 
-    if (!(s = g_hash_table_lookup(meta, "ypixels"))) {
-        g_warning("No ypixels (y resolution) info");
-        return NULL;
-    }
-    yres = atol(s);
+    /* FIXME: what is at 0xe0? */
 
-    if ((s = g_hash_table_lookup(meta, "intelmode")))
-        intelmode = !!atol(s);
+    if (sscanf(buffer + 0x100, "id %u %u",
+               &rhkfile->id, &rhkfile->data_offset) != 2)
+        return FALSE;
+    gwy_debug("data_offset = %u", rhkfile->data_offset);
+    if (rhkfile->data_offset < HEADER_SIZE)
+        return FALSE;
 
-    if (size < HEADER_SIZE + xres*yres*type) {
-        g_warning("Expected data size %u, but it's %u",
-                  xres*yres*type, (guint)(size - HEADER_SIZE));
-        return NULL;
-    }
+    rhkfile->label = g_strstrip(g_strndup(buffer + 0x140, 0x20));
+    rhkfile->comment = g_strstrip(g_strndup(buffer + 0x160,
+                                           HEADER_SIZE - 0x160));
 
-    dfield = read_data_field(buffer + HEADER_SIZE, xres, yres,
-                             type, intelmode);
-
-    if ((s = g_hash_table_lookup(meta, "xlength"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_set_xreal(dfield, 1e-9*q);
-
-    if ((s = g_hash_table_lookup(meta, "ylength"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_set_yreal(dfield, 1e-9*q);
-
-    if (type == RHK_FILE_INT16
-        && (s = g_hash_table_lookup(meta, "bit2nm"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_multiply(dfield, 1e-9*q);
-
-    return dfield;
+    return TRUE;
 }
 
+static gboolean
+rhkspm32_read_range(const gchar *buffer,
+                    const gchar *name,
+                    RHKRange *range)
+{
+    gchar *end;
+    guint pos;
+
+    if (!g_str_has_prefix(buffer, name))
+        return FALSE;
+    pos = strlen(name) + 1;
+
+    range->scale = fabs(g_ascii_strtod(buffer + pos, &end));
+    if (end == buffer + pos || pos > 0x20)
+        return FALSE;
+    pos = end - buffer;
+
+    range->offset = g_ascii_strtod(buffer + pos, &end);
+    if (end == buffer + pos || pos > 0x20)
+        return FALSE;
+    pos = end - buffer;
+
+    range->units = g_strstrip(g_strndup(buffer + pos, 0x20 - pos));
+    gwy_debug("<%s> %g %g <%s>",
+              name, range->scale, range->offset, range->units);
+
+    return TRUE;
+}
+
+static void
+rhkspm32_free(RHKFile *rhkfile)
+{
+    g_free(rhkfile->date);
+    g_free(rhkfile->x.units);
+    g_free(rhkfile->y.units);
+    g_free(rhkfile->z.units);
+    g_free(rhkfile->iv.units);
+    g_free(rhkfile->label);
+    g_free(rhkfile->comment);
+}
+
+#if 0
 static void
 store_metadata(GHashTable *meta,
                GwyContainer *container)
@@ -250,88 +328,29 @@ store_metadata(GHashTable *meta,
     }
     g_string_free(key, TRUE);
 }
+#endif
 
 static GwyDataField*
-read_data_field(const guchar *buffer,
-                gint xres,
-                gint yres,
-                RHKFileType type,
-                gboolean little_endian)
+rhkspm32_read_data(const guchar *buffer,
+                   RHKFile *rhkfile)
 {
     GwyDataField *dfield;
     gdouble *data;
     guint i;
 
-    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6, FALSE));
+    dfield = GWY_DATA_FIELD(gwy_data_field_new(rhkfile->xres, rhkfile->yres,
+                                               rhkfile->xres * rhkfile->x.scale,
+                                               rhkfile->yres * rhkfile->y.scale,
+                                               FALSE));
     data = gwy_data_field_get_data(dfield);
-    switch (type) {
-        case RHK_FILE_INT16:
-        if (little_endian) {
-            for (i = 0; i < xres*yres; i++) {
-                data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
-                buffer += 2;
-            }
-        }
-        else {
-            for (i = 0; i < xres*yres; i++) {
-                data[i] = (gint)(buffer)[1] + ((signed char)(buffer)[0]*256.0);
-                buffer += 2;
-            }
-        }
-        break;
-
-        case RHK_FILE_FLOAT:
-        if (little_endian) {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT(&buffer);
-        }
-        else {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT_BE(&buffer);
-        }
-        gwy_data_field_multiply(dfield, 1e-9);
-        break;
-
-        default:
-        g_assert_not_reached();
-        break;
+    for (i = 0; i < rhkfile->xres*rhkfile->yres; i++) {
+        data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
+        buffer += 2;
     }
+    gwy_data_field_multiply(dfield, rhkfile->z.scale);
 
     return dfield;
 }
-
-static void
-load_metadata(gchar *buffer,
-              GHashTable *meta)
-{
-    gchar *line, *p;
-    gchar *key, *value;
-
-    while ((line = gwy_str_next_line(&buffer))) {
-        if (line[0] == '%' || line[0] == '#')
-            continue;
-
-        p = strchr(line, '=');
-        if (!p || p == line || !p[1])
-            continue;
-
-        key = g_strstrip(g_strndup(line, p-line));
-        if (!key[0]) {
-            g_free(key);
-            continue;
-        }
-        value = g_strstrip(g_strdup(p+1));
-        if (!value[0]) {
-            g_free(key);
-            g_free(value);
-            continue;
-        }
-
-        g_hash_table_insert(meta, key, value);
-        gwy_debug("<%s> = <%s>", key, value);
-    }
-}
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
 
