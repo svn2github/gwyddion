@@ -59,8 +59,8 @@ typedef struct {
     gdouble v_ref;
     gdouble vpmt1;
     gdouble vpmt2;
-    gchar *remark;  /* 120 chars */
-    guint x_piezo_factor;  /* nm/V */
+    gchar *remark;   /* 120 chars */
+    guint x_piezo_factor;   /* nm/V */
     guint y_piezo_factor;
     guint z_piezo_factor;
     gdouble hv_gain;
@@ -72,6 +72,7 @@ typedef struct {
     guint optical_means;
     guint error_means;
     guint channels;
+    guint ndata;   /* number of nonzero bits in channels */
     gdouble range_x;
     gdouble range_y;
     gdouble **data;
@@ -164,6 +165,7 @@ apefile_load(const gchar *filename)
     gsize size = 0;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
+    guint b;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -212,6 +214,9 @@ apefile_load(const gchar *filename)
     apefile.optical_means = get_WORD(&p);
     apefile.error_means = get_WORD(&p);
     apefile.channels = get_DWORD(&p);
+    apefile.ndata = 0;
+    for (b = apefile.channels; b; b = b >> 1)
+        apefile.ndata += (b & 1);
     apefile.range_x = get_FLOAT(&p);
     apefile.range_y = get_FLOAT(&p);
     /* reserved */
@@ -235,7 +240,8 @@ apefile_load(const gchar *filename)
               apefile.slope_x, apefile.slope_y);
     gwy_debug("topo_means = %u, optical_means = %u, error_means = %u",
               apefile.topo_means, apefile.optical_means, apefile.error_means);
-    gwy_debug("channel bitmask = %03x", apefile.channels);
+    gwy_debug("channel bitmask = %03x, ndata = %u",
+              apefile.channels, apefile.ndata);
     gwy_debug("range_x = %g, range_y = %g",
               apefile.range_x, apefile.range_y);
 
