@@ -986,4 +986,214 @@ gwy_data_field_fractal_correction(GwyDataField *data_field,
 }
 
 
+
+/**
+ * gwy_data_field_partitioning_correction:
+ * @data_field: A data field.
+ * @mask_field: Mask of places to be corrected.
+ * @interpolation: Interpolation type.
+ *
+ * Replaces data under mask with interpolated values using fractal
+ * interpolation.
+ *
+ * Returns: Always %TRUE.
+ *
+ * Since: 1.10
+ **/
+
+#include <stdlib.h>
+
+
+static
+gdouble partitioning_last_step(GwyDataField *z, GwyDataField *mask)
+{
+    gint i, j, ii, jj, gcount, count, xres, yres;         
+    gdouble gvar, var, avrg;
+    
+    xres = z->xres;
+    yres = z->yres;
+   
+    gcount = 0;
+    gvar = 0;
+    for(i = 0; i < (z->xres - 1); i++)
+        for(j = 0; j < (z->yres - 1); j++)
+        {
+            count = 0;
+            avrg = 0;
+            for(ii = 0; ii < 2; ii++)
+                 for(jj = 0; jj < 2; jj++)
+                      if(mask->data[(i + ii) *  xres + j + jj] == 0)
+                      {
+                           avrg += z->data[(i + ii) *  xres + j + jj];
+                           count++;
+                       }
+            if(count > 1)
+            {
+                var = 0;
+                avrg /= count;
+                gcount++;
+                for(ii = 0; ii < 2; ii++)
+                    for(jj = 0; jj < 2; jj++)
+                        if(mask->data[(i + ii) *  xres + j + jj] == 0)
+                            var = var + (z->data[(i + ii) *  xres + j + jj] - avrg) * 
+                                        (z->data[(i + ii) *  xres + j + jj] - avrg);
+                gvar += var;
+            }
+        }
+      
+        
+    return gvar / gcount;            
+}
+
+
+static
+gint range_mask(GwyDataField *mask)
+{
+    gboolean b, c, d, e;
+    gint xrs, yrs, i, j, k, l, ret;
+    gdouble rng;
+    
+    i = 0;
+    d = FALSE;
+    e = TRUE;
+    xrs = mask->xres - 1;
+    yrs = mask->yres - 1;
+    do
+    {
+        j = 0;
+        do
+        {
+            if(mask->data[i * (xrs+1) + j] != 0)
+            {
+                e = FALSE;
+                k = 0;
+                b = FALSE;
+                do
+                {
+                    if(k == MAX(xrs, yrs))
+                         d = TRUE;
+                    if(!d)
+                    {
+                         k++;
+                         rng = G_MAXDOUBLE;
+                         for(l = -k; l < k; l++)
+                         {
+                              c = FALSE;
+                              if(((i+l) <= xrs) && ((i + l) >= 0) && ((j-k) >= 0))
+                                  if(mask->data[(i + l) * (xrs + 1) + j - k] == 0)
+                                      c = TRUE;
+                              if(((i-l) <= xrs) && ((i - l) >= 0) && ((j+k) <= yrs))
+                                  if(mask->data[(i - l) * (xrs + 1) + j + k] == 0)
+                                      c = TRUE;
+                              if(((j-l) <= yrs) && ((j - l) >= 0) && ((i-k) >= 0))
+                                 if(mask->data[(i - k) * (xrs+1) + j - l] == 0)
+                                     c = TRUE;
+                              if(((j+l) <= xrs) && ((j + l) >= 0) && ((i+k) <= xrs))
+                                 if(mask->data[(i + k) * (xrs + 1) + j + l] == 0)
+                                     c = TRUE;                                   
+                              if(c)
+                              {
+                                  if(sqrt(l * l + k * k) < rng)
+                                      rng = sqrt(l * l + k * k);
+                                  b = TRUE;
+                              }
+                         }
+                         if(b)
+                             mask->data[i * (xrs + 1) + j] = rng;
+                    }    
+                }while(!b && !d);
+            }
+            j++;
+        }while(!(j == yrs+1) && !d);
+        i++;
+    }while(!(i == xrs+1) && !d);
+                  
+    ret = 0; 
+    if(e) ret = 0; //neni maska
+    if(!e && d) ret = 1; // cela plocha pod maskou
+    if(!e && !d) ret = 2; //OK
+    return ret;
+}                                             
+    
+
+static    
+gint remove_boundary(GwyDataField *mask)
+{
+    gint i, j;
+    
+    for(i = 0; i < mask->xres; i++)
+        for(j = 0; j < mask->yres; j++)
+            if((mask->data[i * mask->xres + j]==1) /*&& (mask->data[i * mask->xres + j]<2)*/) 
+                mask->data[i * mask->xres + j] = 0;
+    return 0;
+}
+
+static
+gint calculate_point(GwyDataField *z, GwyDataField *mask, gdouble dev)
+{
+    GRand *rng;
+    gint i, j, ii, jj, count, xres, yres;
+    gdouble avrg, r;
+    
+    xres = mask->xres;
+    yres = mask->yres;
+    rng = g_rand_new();
+    
+    for(i = 0; i < xres; i++)
+        for(j = 0; j < yres; j++)
+        {
+              if((mask->data[i * xres + j]==1)/* && (mask->data[i * xres + j]<2)*/)
+              {
+                  avrg = 0;
+                  count = 0;
+                  for(ii = -1; ii < 2; ii++)
+                      for(jj = -1; jj < 2; jj++)
+                      {
+                             if((i + ii >= 0) && (i + ii <= mask->xres-1) &&
+                                (j + jj >= 0) && (j + jj <= mask->yres-1) &&
+                                !((ii == 0) && (jj == 0)))
+                                 if(mask->data[(i + ii) * xres + j + jj] == 0)
+                                 {
+                                     count++;          
+                                     avrg += z->data[(i + ii) * xres + j + jj];
+                                 }
+                      }
+                  r = sqrt(dev) * gaussian_random_number(rng);
+                  z->data[i * xres + j] = avrg / count + r;
+              }
+        }
+    g_rand_free(rng);
+    
+    return 0;
+}             
+
+#include <stdio.h>
+gboolean              
+gwy_data_field_partitioning_correction(GwyDataField *data_field, GwyDataField *mask_field, GwyInterpolationType interpolation)
+{
+    GwyDataField *buffer, *maskbuffer;
+    gint a;
+    gdouble var;
+    
+    buffer = GWY_DATA_FIELD(gwy_serializable_duplicate(G_OBJECT(data_field)));
+    maskbuffer = GWY_DATA_FIELD(gwy_serializable_duplicate(G_OBJECT(mask_field)));
+    
+    a = range_mask(maskbuffer);
+    if(a == 2)
+    {
+        var = partitioning_last_step(buffer, maskbuffer);
+        do
+        {
+            calculate_point(buffer, maskbuffer, var);
+            remove_boundary(maskbuffer);
+            a = range_mask(maskbuffer);
+        }while(a != 0); 
+    }
+    gwy_data_field_copy(buffer, data_field);
+    g_object_unref(buffer);
+    g_object_unref(maskbuffer);              
+    
+    return 0;
+}      
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

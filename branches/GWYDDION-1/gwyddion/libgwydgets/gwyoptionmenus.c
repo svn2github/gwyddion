@@ -1074,7 +1074,10 @@ gwy_option_menu_indentor(GCallback callback,
     static const GwyEnum entries[] = {
         { N_("Vickers"),    GWY_INDENTOR_VICKERS, },
         { N_("Berkovich"),  GWY_INDENTOR_BERKOVICH, },
+        { N_("Berkovich (modified)"),  GWY_INDENTOR_BERKOVICH_M, },
         { N_("Knoop"),      GWY_INDENTOR_KNOOP, },
+        { N_("Brinell"),   GWY_INDENTOR_BRINELL, },
+        { N_("Cube corner"), GWY_INDENTOR_CUBECORNER, },
         { N_("Rockwell"),   GWY_INDENTOR_ROCKWELL, },
     };
 

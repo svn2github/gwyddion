@@ -88,7 +88,7 @@ fraccor(GwyContainer *data, GwyRunType run)
 
         gwy_app_undo_checkpoint(data, "/0/data", "/0/mask", NULL);
 
-        gwy_data_field_fractal_correction(dfield, maskfield,
+        gwy_data_field_partitioning_correction(dfield, maskfield,
                                           GWY_INTERPOLATION_BILINEAR);
 
         gwy_container_remove_by_name(data, "/0/mask");

@@ -70,6 +70,11 @@ gboolean gwy_data_field_fractal_correction(GwyDataField *data_field,
                                            GwyDataField *mask_field,
                                            GwyInterpolationType interpolation);
 
+
+
+gboolean gwy_data_field_partitioning_correction(GwyDataField *data_field,
+                                           GwyDataField *mask_field,
+                                           GwyInterpolationType interpolation);
 G_END_DECLS
 
 #endif /*__GWY_PROCESS_FRACTALS__*/

@@ -26,6 +26,7 @@ process_PROGRAMS = \
 	grain_mark.so \
 	grain_rem_threshold.so \
 	grain_wshed.so \
+	indent_analyze.so \
 	laplace.so \
 	level.so \
 	linecorrect.so \
@@ -34,8 +35,11 @@ process_PROGRAMS = \
 	maskcor.so \
 	maskops.so \
 	median-bg.so \
+	nanoindent_adjust.so \
 	outliers.so \
 	polylevel.so \
+	prepnn.so \
+	usenn.so \
 	presentationops.so \
 	rotate.so \
 	scale.so \
@@ -125,8 +129,8 @@ grain_wshed_so_LDFLAGS = $(module_ldflags),grain_wshed.so
 grain_dist_so_SOURCES = grain_dist.c
 grain_dist_so_LDFLAGS = $(module_ldflags),grain_dist.so
 
-#indent_analyze_so_SOURCES = indent_analyze.c
-#indent_analyze_so_LDFLAGS = $(module_ldflags),indent_analyze.so
+indent_analyze_so_SOURCES = indent_analyze.c
+indent_analyze_so_LDFLAGS = $(module_ldflags),indent_analyze.so
 
 laplace_so_SOURCES = laplace.c
 laplace_so_LDFLAGS = $(module_ldflags),laplace.so
@@ -140,8 +144,11 @@ linecorrect_so_LDFLAGS = $(module_ldflags),linecorrect.so
 local_contrast_so_SOURCES = local_contrast.c
 local_contrast_so_LDFLAGS = $(module_ldflags),local_contrast.so
 
-#nanoindent_adjust_so_SOURCES = nanoindent_adjust.c
-#nanoindent_adjust_so_LDFLAGS = $(module_ldflags),nanoindent_adjust.so
+nanoindent_adjust_so_SOURCES = nanoindent_adjust.c
+nanoindent_adjust_so_LDFLAGS = $(module_ldflags),nanoindent_adjust.so
+
+nanoindent_model_so_SOURCES = nanoindent_model.c
+nanoindent_model_so_LDFLAGS = $(module_ldflags),nanoindent_model.so
 
 mask_grow_shrink_so_SOURCES = mask_grow_shrink.c
 mask_grow_shrink_so_LDFLAGS = $(module_ldflags),mask_grow_shrink.so
@@ -163,6 +170,12 @@ polylevel_so_LDFLAGS = $(module_ldflags),polylevel.so
 
 presentationops_so_SOURCES = presentationops.c
 presentationops_so_LDFLAGS = $(module_ldflags),presentationops.so
+
+prepnn_so_SOURCES = prepnn.c
+prepnn_so_LDFLAGS = $(module_ldflags),prepnn.so
+
+usenn_so_SOURCES = usenn.c
+usenn_so_LDFLAGS = $(module_ldflags),usenn.so
 
 rotate_so_SOURCES = rotate.c
 rotate_so_LDFLAGS = $(module_ldflags),rotate.so

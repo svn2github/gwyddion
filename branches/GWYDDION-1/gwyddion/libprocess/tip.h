@@ -36,8 +36,11 @@ typedef enum {
 typedef enum {
     GWY_INDENTOR_VICKERS     = 0,
     GWY_INDENTOR_BERKOVICH   = 1,
-    GWY_INDENTOR_KNOOP       = 2,
-    GWY_INDENTOR_ROCKWELL    = 3
+    GWY_INDENTOR_BERKOVICH_M = 2,
+    GWY_INDENTOR_KNOOP       = 3,
+    GWY_INDENTOR_BRINELL     = 4,
+    GWY_INDENTOR_ROCKWELL    = 5,
+    GWY_INDENTOR_CUBECORNER  = 6
 } GwyIndentorType;
     
 
