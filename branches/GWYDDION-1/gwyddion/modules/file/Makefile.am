@@ -8,6 +8,7 @@ file_PROGRAMS = \
 	asciiexport.so \
 	apefile.so \
 	assing-afm.so \
+	bcrfile.so \
 	createc.so \
 	gwyfile.so \
 	nanoscope.so \
@@ -33,6 +34,9 @@ apefile_so_LDFLAGS = $(module_ldflags),apefile.so
 
 assing_afm_so_SOURCES = assing-afm.c
 assing_afm_so_LDFLAGS = $(module_ldflags),assing-afm.so
+
+bcrfile_so_SOURCES = bcrfile.c
+bcrfile_so_LDFLAGS = $(module_ldflags),bcrfile.so
 
 createc_so_SOURCES = createc.c
 createc_so_LDFLAGS = $(module_ldflags),createc.so
