@@ -129,83 +129,83 @@ typedef struct {
     const GdkPixbufFormat *pixbuf_format;
 } PixmapFormatInfo;
 
-static gboolean          module_register           (const gchar *name);
-static gint              pixmap_detect             (const gchar *filename,
-                                                    gboolean only_name,
-                                                    const gchar *name);
-static GwyContainer*     pixmap_load               (const gchar *filename,
-                                                    const gchar *name);
-static gboolean          pixmap_load_dialog        (PixmapLoadArgs *args,
-                                                    const gchar *name,
-                                                    gint xres,
-                                                    gint yres,
-                                                    const gboolean mapknown);
-static void              pixmap_load_create_preview(PixmapLoadArgs *args,
-                                                    PixmapLoadControls *controls);
-static void              pixmap_load_map_type_update(GtkWidget *button,
-                                                     PixmapLoadControls *controls);
-static void              xyreal_changed_cb         (GtkAdjustment *adj,
-                                                    PixmapLoadControls *controls);
-static void              xymeasureeq_changed_cb    (PixmapLoadControls *controls);
-static void              pixmap_load_update_controls(PixmapLoadControls *controls,
-                                                    PixmapLoadArgs *args);
-static void              pixmap_load_update_values (PixmapLoadControls *controls,
-                                                    PixmapLoadArgs *args);
-static GtkWidget*        table_attach_heading      (GtkWidget *table,
-                                                    const gchar *text,
-                                                    gint row);
-static GdkPixbuf*        pixmap_draw_pixbuf        (GwyContainer *data,
-                                                    const gchar *format_name);
-static GdkPixbuf*        pixmap_real_draw_pixbuf   (GwyContainer *data,
-                                                    PixmapSaveArgs *args);
-static gboolean          pixmap_save_dialog        (GwyContainer *data,
-                                                    PixmapSaveArgs *args,
-                                                    const gchar *name);
-static gboolean          pixmap_save_png           (GwyContainer *data,
-                                                    const gchar *filename);
-static gboolean          pixmap_save_jpeg          (GwyContainer *data,
-                                                    const gchar *filename);
+static gboolean       module_register           (const gchar *name);
+static gint           pixmap_detect             (const gchar *filename,
+                                                 gboolean only_name,
+                                                 const gchar *name);
+static GwyContainer*  pixmap_load               (const gchar *filename,
+                                                 const gchar *name);
+static gboolean       pixmap_load_dialog        (PixmapLoadArgs *args,
+                                                 const gchar *name,
+                                                 gint xres,
+                                                 gint yres,
+                                                 const gboolean mapknown);
+static void           pixmap_load_create_preview(PixmapLoadArgs *args,
+                                                 PixmapLoadControls *controls);
+static void           pixmap_load_map_type_update(GtkWidget *button,
+                                                  PixmapLoadControls *controls);
+static void           xyreal_changed_cb         (GtkAdjustment *adj,
+                                                 PixmapLoadControls *controls);
+static void           xymeasureeq_changed_cb    (PixmapLoadControls *controls);
+static void           pixmap_load_update_controls(PixmapLoadControls *controls,
+                                                 PixmapLoadArgs *args);
+static void           pixmap_load_update_values (PixmapLoadControls *controls,
+                                                 PixmapLoadArgs *args);
+static GtkWidget*     table_attach_heading      (GtkWidget *table,
+                                                 const gchar *text,
+                                                 gint row);
+static GdkPixbuf*     pixmap_draw_pixbuf        (GwyContainer *data,
+                                                 const gchar *format_name);
+static GdkPixbuf*     pixmap_real_draw_pixbuf   (GwyContainer *data,
+                                                 PixmapSaveArgs *args);
+static gboolean       pixmap_save_dialog        (GwyContainer *data,
+                                                 PixmapSaveArgs *args,
+                                                 const gchar *name);
+static gboolean       pixmap_save_png           (GwyContainer *data,
+                                                 const gchar *filename);
+static gboolean       pixmap_save_jpeg          (GwyContainer *data,
+                                                 const gchar *filename);
 #ifdef HAVE_TIFF
-static gboolean          pixmap_save_tiff          (GwyContainer *data,
-                                                    const gchar *filename);
+static gboolean       pixmap_save_tiff          (GwyContainer *data,
+                                                 const gchar *filename);
 #endif
-static gboolean          pixmap_save_ppm           (GwyContainer *data,
-                                                    const gchar *filename);
-static gboolean          pixmap_save_bmp           (GwyContainer *data,
-                                                    const gchar *filename);
-static gboolean          pixmap_save_targa         (GwyContainer *data,
-                                                    const gchar *filename);
-static GdkPixbuf*        hruler                    (gint size,
-                                                    gint extra,
-                                                    gdouble real,
-                                                    gdouble zoom,
-                                                    GwySIUnit *siunit);
-static GdkPixbuf*        vruler                    (gint size,
-                                                    gint extra,
-                                                    gdouble real,
-                                                    gdouble zoom,
-                                                    GwySIUnit *siunit);
-static GdkPixbuf*        fmscale                   (gint size,
-                                                    gdouble bot,
-                                                    gdouble top,
-                                                    gdouble zoom,
-                                                    GwySIUnit *siunit);
-static GdkDrawable*      prepare_drawable          (gint width,
-                                                    gint height,
-                                                    gint lw,
-                                                    GdkGC **gc);
-static PangoLayout*      prepare_layout            (gdouble zoom);
+static gboolean       pixmap_save_ppm           (GwyContainer *data,
+                                                 const gchar *filename);
+static gboolean       pixmap_save_bmp           (GwyContainer *data,
+                                                 const gchar *filename);
+static gboolean       pixmap_save_targa         (GwyContainer *data,
+                                                 const gchar *filename);
+static GdkPixbuf*     hruler                    (gint size,
+                                                 gint extra,
+                                                 gdouble real,
+                                                 gdouble zoom,
+                                                 GwySIUnit *siunit);
+static GdkPixbuf*     vruler                    (gint size,
+                                                 gint extra,
+                                                 gdouble real,
+                                                 gdouble zoom,
+                                                 GwySIUnit *siunit);
+static GdkPixbuf*     fmscale                   (gint size,
+                                                 gdouble bot,
+                                                 gdouble top,
+                                                 gdouble zoom,
+                                                 GwySIUnit *siunit);
+static GdkDrawable*   prepare_drawable          (gint width,
+                                                 gint height,
+                                                 gint lw,
+                                                 GdkGC **gc);
+static PangoLayout*   prepare_layout            (gdouble zoom);
 static PixmapFormatInfo* find_format               (const gchar *name);
-static void              pixmap_save_load_args     (GwyContainer *container,
-                                                    PixmapSaveArgs *args);
-static void              pixmap_save_save_args     (GwyContainer *container,
-                                                    PixmapSaveArgs *args);
-static void              pixmap_save_sanitize_args (PixmapSaveArgs *args);
-static void              pixmap_load_load_args     (GwyContainer *container,
-                                                    PixmapLoadArgs *args);
-static void              pixmap_load_save_args     (GwyContainer *container,
-                                                    PixmapLoadArgs *args);
-static void              pixmap_load_sanitize_args (PixmapLoadArgs *args);
+static void           pixmap_save_load_args     (GwyContainer *container,
+                                                 PixmapSaveArgs *args);
+static void           pixmap_save_save_args     (GwyContainer *container,
+                                                 PixmapSaveArgs *args);
+static void           pixmap_save_sanitize_args (PixmapSaveArgs *args);
+static void           pixmap_load_load_args     (GwyContainer *container,
+                                                 PixmapLoadArgs *args);
+static void           pixmap_load_save_args     (GwyContainer *container,
+                                                 PixmapLoadArgs *args);
+static void           pixmap_load_sanitize_args (PixmapLoadArgs *args);
 
 static struct {
     const gchar *name;
