@@ -1,0 +1,65 @@
+Too many things.  Use
+
+  find . -name \*.\[ch] | xargs grep -ir '\<\(XXX\|TODO\|FIXME\|provisory\|fuck\|shit\)\>'
+
+to locate them ;-)
+
+Particularly (overall app issues, module issues not listed):
+- Quite a large part of graph functionality
+- Printing
+- User documentation, even better, integrated help
+- Proper associations and drag'n'drop support
+- Palette editor
+- Editable metadata
+- Use GtkAction (Gtk+ 2.4) for module actions
+- Sessions
+- ...
+
+Quite a few of these items are intrusive and will have to wait for the next
+unstable version.
+
+============================================================================
+Worst API bugs and otherwise things that will probably change in 2.0:
+- Specifically, there's no tooltip entry in Process and Graph function info
+  so they are hardcoded in the application
+- GwyDataField function naming is a mess, some are functions don't have _area
+  in name at all, some have it in silly places, there are two different
+  area border conventions; GwyDataLine is not much better
+- gwy_ruler_draw_pos() and gwy_ruler_draw_ticks() got to the public API
+  somehow, but they were never meant to
+- Unitool has no free slots to extend
+- Some things may benefit from being objects after all: e.g., modules
+Elaboration of 2.0 items started on http://gwyddion.net/gwyddion-2/.
+
+============================================================================
+Unimplemented stuff:
+- libprocess/correlation.c: @window_width and @window_height are unused in
+  gwy_data_field_crosscorrelate() and gwy_data_field_crosscorrelate_iteration()
+- libprocess/filters.c: gwy_data_field_area_filter_canny() always filters
+  entire data field
+- libprocess/grains.c: gwy_data_field_grains_get_average() is not implemented
+  at all
+- libgwydgets/gwy3dview.c: gwy_3d_view_get_pixbuf() does not implement
+  @xres, @yres
+
+============================================================================
+Release checklist:
+- update splashscreen
+- update translation(s)
+- make sure global library headers (libfoo.h) include all ohters
+- update library versions, if something changed
+- update version in configure.ac
+- update version in gwyddion-night-build
+- switch object leak debugging and segfault on critical messages off
+- must build on Linux from tarballs
+- must build on Windows
+- check and update NEWS, generate HTML version
+- make sure devel-docs/libfoo/libfoo.types loads all new types
+- generate stable API docs for gwyddion.net and upload them
+- tag CVS
+- build and upload packages
+- sign packages and upload signatures
+- update gwyddion main page
+- publish files on Freshmeat, GnomeFiles, SourceForge
+- add the new version to bugzilla
+
