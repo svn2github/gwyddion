@@ -42,8 +42,7 @@ static GwyDataField* file_load_real        (const guchar *buffer,
                                             GHashTable *meta);
 static GwyDataField* read_data_field       (const guchar *buffer,
                                             gint xres,
-                                            gint yres,
-                                            gboolean little_endian);
+                                            gint yres);
 static gboolean      file_read_meta        (GHashTable *meta,
                                             gchar *buffer);
 static void          load_metadata         (gchar *buffer,
@@ -119,6 +118,8 @@ wsxmfile_load(const gchar *filename)
     GHashTable *meta = NULL;
     guint header_size;
     gchar *p;
+    gboolean ok;
+    gint xres = 0, yres = 0;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -140,11 +141,31 @@ wsxmfile_load(const gchar *filename)
 
     meta = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     p = g_strndup(buffer, header_size);
-    file_read_meta(meta, p);
+    ok = file_read_meta(meta, p);
     g_free(p);
 
-    /*dfield = file_load_real(buffer, size, meta);*/
+    if (!(p = g_hash_table_lookup(meta, "General Info::Number of columns"))
+        || (xres = atol(p)) <= 0) {
+        g_warning("Missing or invalid number of columns");
+        ok = FALSE;
+    }
+
+    if (!(p = g_hash_table_lookup(meta, "General Info::Number of rows"))
+        || (yres = atol(p)) <= 0) {
+        g_warning("Missing or invalid number of rows");
+        ok = FALSE;
+    }
+
+    if ((guint)size - header_size < 2*xres*yres) {
+        g_warning("Expected data size %u, but it's %u",
+                  2*xres*yres, (guint)size - header_size);
+        ok = FALSE;
+    }
+
+    if (ok)
+        dfield = read_data_field(buffer + header_size, xres, yres);
     gwy_file_abandon_contents(buffer, size, NULL);
+
     if (dfield) {
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
@@ -160,8 +181,22 @@ static gboolean
 file_read_meta(GHashTable *meta,
                gchar *buffer)
 {
+    /* If these parameters are missing, use defaults from
+     * http://www.nanotec.es/fileform.htm */
+    static struct {
+        const gchar *key;
+        const gchar *value;
+    }
+    const defaults[] = {
+        { "Control::Signal Gain", "1" },
+        { "Control::Z Gain", "1" },
+        { "Head Settings::Preamp Gain", "1 V/nA" },
+        { "Head Settings::X Calibration", "1 \305/V" },
+        { "Head Settings::Y Calibration", "1 \305/V" },
+        { "Head Settings::Z Calibration", "1 \305/V" },
+    };
     gchar *p, *line, *key, *value, *section = NULL;
-    guint len;
+    guint len, i;
 
     while ((line = gwy_str_next_line(&buffer))) {
         line = g_strstrip(line);
@@ -170,6 +205,7 @@ file_read_meta(GHashTable *meta,
         if (line[0] == '[' && line[len-1] == ']') {
             line[len-1] = '\0';
             section = line + 1;
+            gwy_debug("Section <%s>", section);
             continue;
         }
         /* skip pre-header */
@@ -187,6 +223,17 @@ file_read_meta(GHashTable *meta,
         value = g_strstrip(g_strdup(p));
         gwy_debug("<%s> = <%s>", key, value);
         g_hash_table_replace(meta, key, value);
+    }
+    if (strcmp(section, "Header end")) {
+        g_warning("Missed end of file header");
+        return FALSE;
+    }
+
+    for (i = 0; i < G_N_ELEMENTS(defaults); i++) {
+        if (!g_hash_table_lookup(meta, defaults[i].key))
+            g_hash_table_insert(meta,
+                                g_strdup(defaults[i].key),
+                                g_strdup(defaults[i].value));
     }
 
     return TRUE;
@@ -303,12 +350,12 @@ store_metadata(GHashTable *meta,
     }
     g_string_free(key, TRUE);
 }
+#endif
 
 static GwyDataField*
 read_data_field(const guchar *buffer,
                 gint xres,
-                gint yres,
-                gboolean little_endian)
+                gint yres)
 {
     const guint16 *p = (const guint16*)buffer;
     GwyDataField *dfield;
@@ -317,70 +364,11 @@ read_data_field(const guchar *buffer,
 
     dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6, FALSE));
     data = gwy_data_field_get_data(dfield);
-    switch (type) {
-        case WSXM_FILE_INT16:
-        if (little_endian) {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = GINT16_FROM_LE(p[i]);
-        }
-        else {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = GINT16_FROM_BE(p[i]);
-        }
-        break;
-
-        case WSXM_FILE_FLOAT:
-        if (little_endian) {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT(&buffer);
-        }
-        else {
-            for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT_BE(&buffer);
-        }
-        gwy_data_field_multiply(dfield, 1e-9);
-        break;
-
-        default:
-        g_assert_not_reached();
-        break;
-    }
+    for (i = 0; i < xres*yres; i++)
+        data[i] = GINT16_FROM_LE(p[i]);
 
     return dfield;
 }
-
-static void
-load_metadata(gchar *buffer,
-              GHashTable *meta)
-{
-    gchar *line, *p;
-    gchar *key, *value;
-
-    while ((line = gwy_str_next_line(&buffer))) {
-        if (line[0] == '%' || line[0] == '#')
-            continue;
-
-        p = strchr(line, '=');
-        if (!p || p == line || !p[1])
-            continue;
-
-        key = g_strstrip(g_strndup(line, p-line));
-        if (!key[0]) {
-            g_free(key);
-            continue;
-        }
-        value = g_strstrip(g_strdup(p+1));
-        if (!value[0]) {
-            g_free(key);
-            g_free(value);
-            continue;
-        }
-
-        g_hash_table_insert(meta, key, value);
-        gwy_debug("<%s> = <%s>", key, value);
-    }
-}
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
 
