@@ -277,11 +277,11 @@ GwyEnum what_mark_enum[] = {
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
-    "nonoindent_analyse",
+    "indent_analyse",
     N_("Analyses nanoindentation structure (volumes, surfaces, ...)"),
-    "<chvatal@physics.muni.cz>",
+    "Lukáš Chvátal <chvatal@physics.muni.cz>",
     "0.1",
-    "Lukas Chvatal",
+    "Lukáš Chvátal",
     "2005",
 };
 
@@ -293,7 +293,7 @@ static gboolean
 module_register(const gchar *name)
 {
     static GwyProcessFuncInfo indent_analyze_func_info = {
-        "nonoindent_analyze",
+        "indent_analyze",
         N_("/Indento_r/_Analyze..."),
         (GwyProcessFunc)&indent_analyze,
         INDENT_ANALYZE_RUN_MODES ,
