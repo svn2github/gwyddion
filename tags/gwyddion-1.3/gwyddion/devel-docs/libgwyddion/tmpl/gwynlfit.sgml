@@ -1,0 +1,361 @@
+<!-- ##### SECTION Title ##### -->
+gwynlfit
+
+<!-- ##### SECTION Short_Description ##### -->
+Marquardt-Levenberg nonlinear least square fitter.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### USER_FUNCTION GwyNLFitFunc ##### -->
+<para>
+
+</para>
+
+@x: 
+@n_param: 
+@param: 
+@user_data: 
+@fres: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@n_par: 
+@params: 
+
+
+<!-- ##### USER_FUNCTION GwyNLFitDerFunc ##### -->
+<para>
+
+</para>
+
+@i: 
+@x: 
+@n_param: 
+@param: 
+@fmarq: 
+@user_data: 
+@deriv: 
+@dres: 
+<!-- # Unused Parameters # -->
+@n_par: 
+@dat_x: 
+@params: 
+
+
+<!-- ##### USER_FUNCTION GwyNLFitGuessFunc ##### -->
+<para>
+
+</para>
+
+@x: 
+@y: 
+@n_dat: 
+@param: 
+@user_data: 
+@fres: 
+
+
+<!-- ##### USER_FUNCTION GwyNLFitParamScaleFunc ##### -->
+<para>
+
+</para>
+
+@param: 
+@xscale: 
+@yscale: 
+@dir: 
+
+
+<!-- ##### USER_FUNCTION GwyNLFitWeightFunc ##### -->
+<para>
+
+</para>
+
+@x: 
+@y: 
+@n_dat: 
+@weight: 
+@user_data: 
+
+
+<!-- ##### STRUCT GwyNLFitter ##### -->
+<para>
+
+</para>
+
+@fmarq: 
+@dmarq: 
+@maxiter: 
+@eval: 
+@covar: 
+@dispersion: 
+@mfi: 
+@mdec: 
+@minc: 
+@mtol: 
+
+<!-- ##### STRUCT GwyNLFitPreset ##### -->
+<para>
+
+</para>
+
+@function_name: 
+@group_name: 
+@function_formula: 
+@function: 
+@function_derivation: 
+@function_guess: 
+@parameter_scale: 
+@set_default_weights: 
+@nparams: 
+@param: 
+@_reserved1: 
+
+<!-- ##### STRUCT GwyNLFitParam ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_new ##### -->
+<para>
+
+</para>
+
+@ff: 
+@df: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_free ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_fit ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@n_dat: 
+@x: 
+@y: 
+@weight: 
+@n_param: 
+@param: 
+@user_data: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@n_par: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_fit_with_fixed ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@n_dat: 
+@x: 
+@y: 
+@weight: 
+@n_param: 
+@param: 
+@fixed_param: 
+@user_data: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_max_iterations ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_set_max_iterations ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@maxiter: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_dispersion ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_correlations ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@par1: 
+@par2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_sigma ##### -->
+<para>
+
+</para>
+
+@nlfit: 
+@par: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_derive ##### -->
+<para>
+
+</para>
+
+@i: 
+@x: 
+@n_param: 
+@param: 
+@ff: 
+@user_data: 
+@deriv: 
+@dres: 
+<!-- # Unused Parameters # -->
+@n_par: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_npresets ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset ##### -->
+<para>
+
+</para>
+
+@preset_id: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@type: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_by_name ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_id ##### -->
+<para>
+
+</para>
+
+@preset: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@function: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_value ##### -->
+<para>
+
+</para>
+
+@preset: 
+@params: 
+@x: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_name ##### -->
+<para>
+
+</para>
+
+@preset: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_formula ##### -->
+<para>
+
+</para>
+
+@preset: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_param_name ##### -->
+<para>
+
+</para>
+
+@preset: 
+@param: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_param_default ##### -->
+<para>
+
+</para>
+
+@preset: 
+@param: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_preset_nparams ##### -->
+<para>
+
+</para>
+
+@preset: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_math_nlfit_fit_preset ##### -->
+<para>
+
+</para>
+
+@preset: 
+@n_dat: 
+@x: 
+@y: 
+@n_param: 
+@param: 
+@err: 
+@fixed_param: 
+@user_data: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@function: 
+@weight: 
+
+

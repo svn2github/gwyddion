@@ -1,0 +1,235 @@
+<!-- ##### SECTION Title ##### -->
+GwyAxis
+
+<!-- ##### SECTION Short_Description ##### -->
+Widget for drawing axis
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This widget is used for drawing axis. It is namely used
+within GwyGraph widget, byt it can be also used separately.
+It plots a horizontal or vertical axis with amjor and minor ticks,
+with ranges in the requested interval.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### MACRO GWY_AXIS_NORTH ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GWY_AXIS_SOUTH ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GWY_AXIS_EAST ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GWY_AXIS_WEST ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM GwyAxisScaleFormat ##### -->
+<para>
+
+</para>
+
+@GWY_AXIS_FLOAT: 
+@GWY_AXIS_EXP: 
+@GWY_AXIS_INT: 
+@GWY_AXIS_AUTO: 
+
+<!-- ##### STRUCT GwyTick ##### -->
+<para>
+
+</para>
+
+@value: 
+@scrpos: 
+
+<!-- ##### STRUCT GwyLabeledTick ##### -->
+<para>
+
+</para>
+
+@t: 
+@ttext: 
+
+<!-- ##### STRUCT GwyAxisParams ##### -->
+<para>
+
+</para>
+
+@major_length: 
+@major_thickness: 
+@major_maxticks: 
+@major_printmode: 
+@minor_length: 
+@minor_thickness: 
+@minor_division: 
+@line_thickness: 
+@major_font: 
+@label_font: 
+
+<!-- ##### STRUCT GwyAxis ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyAxisClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+@selected: 
+
+<!-- ##### FUNCTION gwy_axis_new ##### -->
+<para>
+
+</para>
+
+@orientation: 
+@min: 
+@max: 
+@label: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_logarithmic ##### -->
+<para>
+
+</para>
+
+@axis: 
+@is_logarithmic: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_visible ##### -->
+<para>
+
+</para>
+
+@axis: 
+@is_visible: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_auto ##### -->
+<para>
+
+</para>
+
+@axis: 
+@is_auto: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_req ##### -->
+<para>
+
+</para>
+
+@axis: 
+@min: 
+@max: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_style ##### -->
+<para>
+
+</para>
+
+@axis: 
+@style: 
+
+
+<!-- ##### FUNCTION gwy_axis_get_maximum ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_get_minimum ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_get_reqmaximum ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_get_reqminimum ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_label ##### -->
+<para>
+
+</para>
+
+@axis: 
+@label_text: 
+
+
+<!-- ##### FUNCTION gwy_axis_get_label ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_axis_set_unit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@unit: 
+
+
+<!-- ##### FUNCTION gwy_axis_enable_label_edit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@enable: 
+
+
