@@ -121,7 +121,7 @@ module_register(const gchar *name)
 {
     static GwyProcessFuncInfo threshold_func_info = {
         "threshold",
-        "/_Test/_Threshold",
+        "/_Test/_Threshold...",
         (GwyProcessFunc)&threshold,
         THRESHOLD_RUN_MODES,
     };
