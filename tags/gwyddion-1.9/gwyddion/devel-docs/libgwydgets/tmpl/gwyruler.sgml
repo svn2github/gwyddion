@@ -1,0 +1,147 @@
+<!-- ##### SECTION Title ##### -->
+GwyRuler
+
+<!-- ##### SECTION Short_Description ##### -->
+Base class for #GwyHRuler and #GwyVRuler
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+#GwyRuler is a ruler similar to #GtkRuler, but it is more suited for
+a scientific application.  It is scale-independent and thus has no arbitrary
+limits on the ranges or interpretation of displayed values.  It can display
+units on the ruler (this can be controlled with
+gwy_ruler_set_units_placement()) and cooperates with #GwySIUnit (see
+gwy_ruler_set_units()).  It also better follows Gtk+ theme than #GtkRuler.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+#GwyVRuler, #GwyHRuler, #GwySIUnit.
+</para>
+
+<!-- ##### ENUM GwyUnitsPlacement ##### -->
+<para>
+
+</para>
+
+@GWY_UNITS_PLACEMENT_NONE: 
+@GWY_UNITS_PLACEMENT_AT_ZERO: 
+
+<!-- ##### STRUCT GwyRuler ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyRuler:lower ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG GwyRuler:max-size ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG GwyRuler:position ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG GwyRuler:units-placement ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG GwyRuler:upper ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyRulerClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@draw_ticks: 
+@draw_pos: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_ruler_set_range ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@lower: 
+@upper: 
+@position: 
+@max_size: 
+
+
+<!-- ##### FUNCTION gwy_ruler_draw_ticks ##### -->
+<para>
+
+</para>
+
+@ruler: 
+
+
+<!-- ##### FUNCTION gwy_ruler_draw_pos ##### -->
+<para>
+
+</para>
+
+@ruler: 
+
+
+<!-- ##### FUNCTION gwy_ruler_get_range ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@lower: 
+@upper: 
+@position: 
+@max_size: 
+
+
+<!-- ##### FUNCTION gwy_ruler_set_units ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@units: 
+
+
+<!-- ##### FUNCTION gwy_ruler_get_units ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_ruler_get_units_placement ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_ruler_set_units_placement ##### -->
+<para>
+
+</para>
+
+@ruler: 
+@placement: 
+
+

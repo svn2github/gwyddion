@@ -1,0 +1,116 @@
+;; @(#) $Id$
+[Setup]
+AppName=@PACKAGE_NAME@
+AppVersion=@PACKAGE_VERSION@
+AppVerName=@PACKAGE_STRING@
+AppPublisher=Trific soft.
+AppPublisherURL=@PACKAGE_URL@
+AppCopyright=Copyright (C) 2003-2005 David Necas (Yeti), Petr Klapetek
+DefaultDirName={pf}\@PACKAGE_NAME@
+DefaultGroupName=@PACKAGE_NAME@
+DisableStartupPrompt=yes
+WindowShowCaption=yes
+WindowVisible=no
+LicenseFile=COPYING.wri
+Compression=bzip/9
+SourceDir=.
+; this means inst too
+OutputDir=.
+OutputBaseFilename=@PACKAGE_NAME@-@PACKAGE_VERSION@
+ChangesAssociations=yes
+
+[Files]
+Source: "*.dll"; DestDir: "{app}"
+Source: "*.wri"; DestDir: "{app}"
+Source: "@PACKAGE_TARNAME@.exe"; DestDir: "{app}"
+Source: "pixmaps\*.*"; DestDir: "{app}\pixmaps"
+Source: "modules\*.*"; DestDir: "{app}\modules"
+Source: "modules\file\*.*"; DestDir: "{app}\modules\file"
+Source: "modules\graph\*.*"; DestDir: "{app}\modules\graph"
+Source: "modules\layer\*.*"; DestDir: "{app}\modules\layer"
+Source: "modules\process\*.*"; DestDir: "{app}\modules\process"
+Source: "modules\tool\*.*"; DestDir: "{app}\modules\tool"
+Source: "plugins\file\*.*"; DestDir: "{app}\plugins\file"
+Source: "locale\cs\LC_MESSAGES\*.*"; DestDir: "{app}\locale\cs\LC_MESSAGES"
+
+[Icons]
+Name: "{group}\@PACKAGE_NAME@"; Filename: "{app}\@PACKAGE_TARNAME@.exe"; IconFilename: "{app}\pixmaps\@PACKAGE_TARNAME@.ico"
+Name: "{group}\@PACKAGE_NAME@ Website"; Filename: "@PACKAGE_URL@"
+Name: "{group}\Uninstall @PACKAGE_NAME@"; Filename: "{uninstallexe}"
+Name: "{userdesktop}\@PACKAGE_NAME@"; Filename: "{app}\@PACKAGE_TARNAME@.exe"; IconFilename: "{app}\pixmaps\@PACKAGE_TARNAME@.ico"
+
+[Registry]
+; Add Gtk+ libraries to @PACKAGE_TARNAME@.exe's path
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; ValueType: string; ValueData: "{app}\@PACKAGE_TARNAME@.exe"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app};{code:GetGtkPath}\lib;{code:GetGtkPath}\bin"; Flags: uninsdeletevalue
+; Add GtkGLExt libraries to @PACKAGE_TARNAME@.exe's path
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; ValueType: string; ValueData: "{app}\@PACKAGE_TARNAME@.exe"; Flags: uninsdeletevalue
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\@PACKAGE_TARNAME@.exe"; ValueType: string; ValueName: "Path"; ValueData: "{app};{code:GetGtkGLExtPath}\lib;{code:GetGtkGLExtPath}\bin"; Flags: uninsdeletevalue
+; Add @PACKAGE_NAME@ paths to the registry
+Root: HKLM; Subkey: "Software\@PACKAGE_NAME@"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\@PACKAGE_NAME@\1.0"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\@PACKAGE_NAME@\1.0"; ValueType: string; ValueName: "Path"; ValueData: "{app}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\@PACKAGE_NAME@\1.0"; ValueType: string; ValueName: "Version"; ValueData: "@PACKAGE_VERSION@"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\@PACKAGE_NAME@"; Flags: uninsdeletekeyifempty
+Root: HKCU; Subkey: "Software\@PACKAGE_NAME@\1.0"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\@PACKAGE_NAME@\1.0"; ValueType: string; ValueName: "Path"; ValueData: "{app}"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\@PACKAGE_NAME@\1.0"; ValueType: string; ValueName: "Version"; ValueData: "@PACKAGE_VERSION@"; Flags: uninsdeletekey
+; File associations
+Root: HKCR; Subkey: ".gwy"; ValueType: string; ValueName: ""; ValueData: "@PACKAGE_NAME@.NativeData"; Flags: uninsdeletevalue
+Root: HKCR; Subkey: "@PACKAGE_NAME@.NativeData"; ValueType: string; ValueName: ""; ValueData: "@PACKAGE_NAME@ Native Data File"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "@PACKAGE_NAME@.NativeData\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\pixmaps\@PACKAGE_TARNAME@.ico"
+Root: HKCR; Subkey: "@PACKAGE_NAME@.NativeData\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\@PACKAGE_TARNAME@.exe"" ""%1"""
+
+
+[Code]
+var
+  Exists: Boolean;
+  GtkPath: String;
+  GtkGLExtPath: String;
+
+function GetGtkInstalled (): Boolean;
+begin
+  Exists := RegQueryStringValue (HKLM, 'Software\GTK\2.0', 'Path', GtkPath);
+  if not Exists then begin
+    Exists := RegQueryStringValue (HKCU, 'Software\GTK\2.0', 'Path', GtkPath);
+  end;
+  Result := Exists
+end;
+
+function GetGtkPath (S: String): String;
+begin
+    Result := GtkPath;
+end;
+
+function GetGtkGLExtInstalled (): Boolean;
+begin
+  Exists := RegQueryStringValue (HKLM, 'Software\GtkGLExt\1.0\Runtime', 'Path', GtkGLExtPath);
+  if not Exists then begin
+    Exists := RegQueryStringValue (HKCU, 'Software\GtkGLExt\1.0\Runtime', 'Path', GtkGLExtPath);
+  end;
+  if not Exists then begin
+    GtkGLExtPath := GtkPath;
+  end;
+  Result := True;
+end;
+
+function GetGtkGLExtPath (S: String): String;
+begin
+    Result := GtkGLExtPath;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  Result := GetGtkInstalled ();
+  if not Result then begin
+    MsgBox ('Please install the Gtk+ 2.2 (or newer) Runtime Environment before installing @PACKAGE_NAME@.  You can obtain GTK+ from http://www.gimp.org/~tml/gimp/win32/.', mbError, MB_OK);
+  end else begin
+    Result := GetGtkGLextInstalled ();
+    if not Result then begin
+      MsgBox ('Please install the GtkGLExt+ 1.0 (or newer) before installing @PACKAGE_NAME@.  You can obtain GtkGLExt from http://gtkglext.sourceforge.net/.', mbError, MB_OK);
+    end;
+  end;
+end;
+
