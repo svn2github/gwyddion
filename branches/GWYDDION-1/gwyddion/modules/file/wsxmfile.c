@@ -37,17 +37,12 @@ static gboolean      module_register       (const gchar *name);
 static gint          wsxmfile_detect        (const gchar *filename,
                                             gboolean only_name);
 static GwyContainer* wsxmfile_load          (const gchar *filename);
-static GwyDataField* file_load_real        (const guchar *buffer,
-                                            gsize size,
-                                            GHashTable *meta);
 static GwyDataField* read_data_field       (const guchar *buffer,
                                             gint xres,
                                             gint yres);
 static gboolean      file_read_meta        (GHashTable *meta,
                                             gchar *buffer);
-static void          load_metadata         (gchar *buffer,
-                                            GHashTable *meta);
-static void          store_metadata        (GHashTable *meta,
+static void          process_metadata      (GHashTable *meta,
                                             GwyContainer *container);
 
 /* The module info. */
@@ -239,118 +234,15 @@ file_read_meta(GHashTable *meta,
     return TRUE;
 }
 
-#if 0
-static GwyDataField*
-file_load_real(const guchar *buffer,
-               gsize size,
-               GHashTable *meta)
+static void
+process_metadata(GHashTable *meta,
+                 GwyContainer *container)
 {
     GwyDataField *dfield;
-    gboolean intelmode = TRUE;
-    gdouble q;
-    gint xres, yres;
-    guchar *s;
 
-    s = g_memdup(buffer, HEADER_SIZE);
-    s[HEADER_SIZE-1] = '\0';
-    load_metadata(s, meta);
-    g_free(s);
-
-    if (!(s = g_hash_table_lookup(meta, "fileformat"))) {
-        g_warning("File is not a WSXM file");
-        return NULL;
-    }
-
-    if (!strcmp(s, "wsxmstm"))
-        type = WSXM_FILE_INT16;
-    else if (!strcmp(s, "wsxmf"))
-        type = WSXM_FILE_FLOAT;
-    else {
-        g_warning("Cannot understand file type header `%s'", s);
-        return NULL;
-    }
-    gwy_debug("File type: %u", type);
-
-    if (!(s = g_hash_table_lookup(meta, "xpixels"))) {
-        g_warning("No xpixels (x resolution) info");
-        return NULL;
-    }
-    xres = atol(s);
-
-    if (!(s = g_hash_table_lookup(meta, "ypixels"))) {
-        g_warning("No ypixels (y resolution) info");
-        return NULL;
-    }
-    yres = atol(s);
-
-    if ((s = g_hash_table_lookup(meta, "intelmode")))
-        intelmode = !!atol(s);
-
-    if (size < HEADER_SIZE + xres*yres*type) {
-        g_warning("Expected data size %u, but it's %u",
-                  xres*yres*type, (guint)(size - HEADER_SIZE));
-        return NULL;
-    }
-
-    dfield = read_data_field(buffer + HEADER_SIZE, xres, yres,
-                             type, intelmode);
-
-    if ((s = g_hash_table_lookup(meta, "xlength"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_set_xreal(dfield, 1e-9*q);
-
-    if ((s = g_hash_table_lookup(meta, "ylength"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_set_yreal(dfield, 1e-9*q);
-
-    if (type == WSXM_FILE_INT16
-        && (s = g_hash_table_lookup(meta, "bit2nm"))
-        && (q = g_ascii_strtod(s, NULL)) > 0)
-        gwy_data_field_multiply(dfield, 1e-9*q);
-
-    return dfield;
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(container,
+                                                             "/0/data"));
 }
-
-static void
-store_metadata(GHashTable *meta,
-               GwyContainer *container)
-{
-    const struct {
-        const gchar *id;
-        const gchar *unit;
-        const gchar *key;
-    }
-    metakeys[] = {
-        { "scanspeed",   "nm/s",    "Scan speed"        },
-        { "xoffset",     "nm",      "X offset"          },
-        { "yoffset",     "nm",      "Y offset"          },
-        { "bias",        "V",       "Bias voltage"      },
-        { "current",     "nA",      "Tunneling current" },
-        { "starttime",   NULL,      "Scan time"         },
-        /* FIXME: I've seen other stuff, but don't know interpretation */
-    };
-    gchar *value;
-    GString *key;
-    guint i;
-
-    key = g_string_new("");
-    for (i = 0; i < G_N_ELEMENTS(metakeys); i++) {
-        if (!(value = g_hash_table_lookup(meta, metakeys[i].id)))
-            continue;
-
-        g_string_printf(key, "/meta/%s", metakeys[i].key);
-        if (metakeys[i].unit)
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup_printf("%s %s",
-                                                             value,
-                                                             metakeys[i].unit));
-        else
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup(value));
-    }
-    g_string_free(key, TRUE);
-}
-#endif
 
 static GwyDataField*
 read_data_field(const guchar *buffer,
