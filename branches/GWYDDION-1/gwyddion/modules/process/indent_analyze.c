@@ -50,10 +50,10 @@ controls_changed => computed = FALSE
 /* Data for this function. */
 typedef struct {
     
-    int minx;
-    int miny;
-    int maxx;
-    int maxy;
+    gint minx;
+    gint miny;
+    gint maxx;
+    gint maxy;
     
     gdouble max_val;
     gdouble min_val;
@@ -155,15 +155,15 @@ typedef  enum {
 
 typedef struct  
 {
-    double x,y,z;    
+    gdouble x,y,z;    
 } GwyVec;  
  
 typedef struct {
     FloodFillMode mode;
     GwyVec v;     /* normal, direction or  (centre-position) vector */
-    double cos_t1,cos_t2;
-    double cos_f1,cos_f2;
-    int seed;     /* side of averaging sqare */
+    gdouble cos_t1,cos_t2;
+    gdouble cos_f1,cos_f2;
+    gint seed;     /* side of averaging sqare */
 } FloodFillInfo;    
 
 
@@ -181,14 +181,14 @@ static void             how_mark_cb(GtkWidget *item, IndentAnalyzeControls *cont
 static void             what_mark_cb(GtkWidget *item, IndentAnalyzeControls *controls);
 static void             indentor_changed_cb(GtkWidget *item, IndentAnalyzeControls *controls);
 
-static void     set_mask_at (GwyDataField *mask, int x, int y, gdouble  m,  int how );
+static void     set_mask_at (GwyDataField *mask, gint x, gint y, gdouble  m,  gint how );
 static void     level_data (IndentAnalyzeControls *c);
 static void     get_plane_slope_from_border (GwyDataField *dfield, gdouble *a, gdouble *b, gdouble *c);
 static void     get_field_xymin(GwyDataField *dfield, gdouble *min, gint *posx, gint *posy);
 static void     get_field_xymax(GwyDataField *dfield, gdouble *max, gint *posx, gint *posy);
 static GwyVec   data_field_average_normal_vector (GwyDataField *dfield, gint x, gint y, gint r);
 static gdouble  data_field_compute_ds (GwyDataField *dfield, gint x_pos, gint y_pos);
-static void     indentmask_flood_fill (GwyDataField *indentmask, int i, int j, 
+static void     indentmask_flood_fill (GwyDataField *indentmask, gint i, gint j, 
                                        GwyDataField *dfield, FloodFillInfo *ffi);
 static void     compute_expected_indent (IndentAnalyzeControls* c);
 
@@ -208,12 +208,12 @@ static void             save_args                (GwyContainer *container,
 static void             sanitize_args            (IndentAnalyzeArgs *args);
  
 static GwyVec gwy_vec_cross (GwyVec v1, GwyVec v2);
-static double gwy_vec_dot (GwyVec v1, GwyVec v2);
-static GwyVec gwy_vec_times (GwyVec v, double c);
-static double gwy_vec_abs (GwyVec v);
-static double gwy_vec_arg_phi (GwyVec v);
-static double gwy_vec_arg_theta (GwyVec v);
-static double gwy_vec_cos (GwyVec v1, GwyVec v2);
+static gdouble gwy_vec_dot (GwyVec v1, GwyVec v2);
+static GwyVec gwy_vec_times (GwyVec v, gdouble c);
+static gdouble gwy_vec_abs (GwyVec v);
+static gdouble gwy_vec_arg_phi (GwyVec v);
+static gdouble gwy_vec_arg_theta (GwyVec v);
+static gdouble gwy_vec_cos (GwyVec v1, GwyVec v2);
 static void  gwy_vec_normalize (GwyVec *v);
 
 enum {
@@ -294,7 +294,7 @@ module_register(const gchar *name)
 {
     static GwyProcessFuncInfo indent_analyze_func_info = {
         "nonoindent_analyze",
-        N_("/_Nanoindent/_Analyze..."),
+        N_("/Indento_r/_Analyze..."),
         (GwyProcessFunc)&indent_analyze,
         INDENT_ANALYZE_RUN_MODES ,
         0,
@@ -333,9 +333,10 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
     GtkWidget *dialog, *table, *temp, *hbox;
     IndentAnalyzeControls controls;        
     GwyDataField* dfield;
-    int response;
+    gint response;
     enum {
-        RESPONSE_COMPUTE = 1
+        RESPONSE_COMPUTE = 1,
+        RESPONSE_SAVE = 2
     };
     gdouble zoomval;
     GtkObject *layer; 
@@ -348,6 +349,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
     
     dialog = gtk_dialog_new_with_buttons(_("Indentaion statistics"), NULL, 0,                                                
                                          _("_Compute & mark"), RESPONSE_COMPUTE,
+                                         _("_Save statistics"), RESPONSE_SAVE,
                                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,                                         
                                          GTK_STOCK_OK, GTK_RESPONSE_OK,
                                          NULL);
@@ -385,7 +387,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
                                  G_N_ELEMENTS(plane_correct_enum), "menu_plane_correct",
                                  G_CALLBACK(plane_correct_cb), &controls,
                                  args->plane_correct);
-    gwy_table_attach_row(table, row, _("Modify data field?"), "",
+    gwy_table_attach_row(table, row, _("Data field leveling:"), "",
                          controls.w_plane_correct);
     row++;
 
@@ -394,7 +396,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
                                  G_N_ELEMENTS(what_mark_enum), "menu_what_mark",
                                  G_CALLBACK(what_mark_cb), &controls,
                                  args->what_mark);
-    gwy_table_attach_row(table, row, _("What should be marked?"), "",
+    gwy_table_attach_row(table, row, _("Marked areas:"), "",
                          controls.w_what_mark);                         
     row++;
     
@@ -409,7 +411,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
                                  G_N_ELEMENTS(how_mark_enum), "menu_how_mark",
                                  G_CALLBACK(how_mark_cb), &controls,
                                  args->how_mark);
-    gwy_table_attach_row(table, row, _("How set the mask?"), "",controls.w_how_mark);                         
+    gwy_table_attach_row(table, row, _("Mask creation type:"), "",controls.w_how_mark);                         
     row++;
 
     controls.w_plane_tol = gtk_adjustment_new (args->plane_tol, 0, 100, 0.1, 1, 10);
@@ -558,6 +560,10 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
             compute_and_preview(&controls);
             update_data_labels(&controls);
             break;
+
+            case RESPONSE_SAVE:
+            save_statistics_dialog(&controls);
+            break;
             
             default:
             g_assert_not_reached();
@@ -566,8 +572,6 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
     } while (response != GTK_RESPONSE_OK);
 
     indent_analyze_ok(data,&controls);
-    
-    save_statistics_dialog(&controls);  /*saving statistics */
     
     g_object_unref(controls.mydata); 
     gtk_widget_destroy(dialog);
@@ -580,7 +584,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs *args)
 
 static void get_field_slope_from_border (GwyDataField *dfield, gdouble *c, gdouble *bx, gdouble *by)
 {
-      int size = 20;
+      gint size = 20;
       gdouble cc;
       
       gwy_data_field_area_fit_plane(dfield, 0, 0, dfield->xres-1, size, &cc, bx, NULL);
@@ -593,7 +597,7 @@ static void get_field_xymin(GwyDataField *dfield, gdouble *min, gint *posx, gint
 {
    gdouble mm = 1e20;
    gdouble val;
-   int i, j;
+   gint i, j;
    for (i=0; i<dfield->xres; i++) {
        for(j=0; j<dfield->yres; j++) {
            if((val=gwy_data_field_get_val(dfield,i,j)) < mm ) {
@@ -611,7 +615,7 @@ static void get_field_xymax(GwyDataField *dfield, gdouble *max, gint *posx, gint
 {
    gdouble mm = -1e20;
    gdouble val;
-   int i, j;
+   gint i, j;
    for (i=0; i<dfield->xres; i++) {
        for(j=0; j<dfield->yres; j++) {
            if((val=gwy_data_field_get_val(dfield,i,j)) > mm ) {
@@ -627,10 +631,10 @@ static void get_field_xymax(GwyDataField *dfield, gdouble *max, gint *posx, gint
 
 static gdouble data_field_compute_ds (GwyDataField *dfield, gint x_pos, gint y_pos)
 {
-    double y_tr, y_br, y_tl, y_bl, ds;
+    gdouble y_tr, y_br, y_tl, y_bl, ds;
     GwyVec v1, v2, s;
-    double dx = gwy_data_field_get_xreal(dfield)/(double)gwy_data_field_get_xres(dfield);
-    double dy = gwy_data_field_get_yreal(dfield)/(double)gwy_data_field_get_yres(dfield);
+    gdouble dx = gwy_data_field_get_xreal(dfield)/(double)gwy_data_field_get_xres(dfield);
+    gdouble dy = gwy_data_field_get_yreal(dfield)/(double)gwy_data_field_get_yres(dfield);
 
     
                 y_tr = gwy_data_field_get_val(dfield,x_pos+1,y_pos);
@@ -660,8 +664,8 @@ static gdouble data_field_compute_ds (GwyDataField *dfield, gint x_pos, gint y_p
 
 static GwyVec data_field_average_normal_vector (GwyDataField *dfield, gint x, gint y, gint r)
 {
-    double n;
-    int i,j;
+    gdouble n;
+    gint i,j;
     GwyVec v;
 
     v.x = 0;
@@ -708,10 +712,10 @@ fclose(deb);
     return v;
 }    
 
-static void set_mask_at (GwyDataField *mask, int x, int y, gdouble m,  int how )
+static void set_mask_at (GwyDataField *mask, gint x, gint y, gdouble m,  gint how )
 {           
-    int act_mask = (int)gwy_data_field_get_val (mask, x,y);
-    int im = (int) m;
+    gint act_mask = (int)gwy_data_field_get_val (mask, x,y);
+    gint im = (int) m;
     
     switch(how)
     {
@@ -747,7 +751,7 @@ static void set_mask_at (GwyDataField *mask, int x, int y, gdouble m,  int how )
 
 void level_data (IndentAnalyzeControls *c)
 {
-    int iter = 3;        
+    gint iter = 3;        
     IndentAnalyzeArgs *args= c->args;
     GwyDataField *dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(c->mydata, "/0/data"));    
     
@@ -782,8 +786,8 @@ void level_data (IndentAnalyzeControls *c)
 
 
 typedef struct {
-    int x;
-    int y;
+    gint x;
+    gint y;
 } FFPoint;
 
 #define FLOOD_MAX_POINTS    500
@@ -793,21 +797,21 @@ typedef struct {
 
 #define   FLOOD_MAX_DEPTH  1000
 
-static void  indentmask_flood_fill (GwyDataField *indentmask, int i, int j, 
+static void  indentmask_flood_fill (GwyDataField *indentmask, gint i, gint j, 
                                    GwyDataField *dfield, FloodFillInfo* ffi)
 {
-    double val;
-    int test = 0;
-    double c_f, c_t;
+    gdouble val;
+    gint test = 0;
+    gdouble c_f, c_t;
     GwyVec v;
     GwyVec e_z = { 0,0,1 };
     GwyVec r;
     GwyVec tmp;
-    int rr, s;
+    gint rr, s;
 
     FFPoint* pq; /* points queue */
-    FFPoint *tail, *head;     /* head points on free position */
-    int count;
+    FFPoint* tail, *head;     /* head points on free position */
+    gint count;
     
     val = gwy_data_field_get_val(indentmask, i, j);
                                           
@@ -899,23 +903,23 @@ static gboolean indent_analyze_do_the_hard_work(IndentAnalyzeControls *controls)
     IndentAnalyzeArgs *args = controls->args;
     GwyDataLine *derdist;  
       
-    int mark_it = 0;
-    int i, j;
-    double dx,dy,ds;      
-    double total_area = 0;
-    double flat_area = 0;
-    double sx;
-    double sy;
-    double side_r;
-    double side_dir = 0;
-    double minmax;
-    double height;
+    gint mark_it = 0;
+    gint i, j;
+    gdouble dx,dy,ds;      
+    gdouble total_area = 0;
+    gdouble flat_area = 0;
+    gdouble sx;
+    gdouble sy;
+    gdouble side_r;
+    gdouble side_dir = 0;
+    gdouble minmax;
+    gdouble height;
     
     GwyVec avg_vec[10];
-    int avg_diam = 3;   
-    double cos_phi_tol = cos(args->phi_tol*G_PI/180.);      
+    gint avg_diam = 3;   
+    gdouble cos_phi_tol = cos(args->phi_tol*G_PI/180.);      
     
-    double derdist_max;
+    gdouble derdist_max;
     GwyDataField *indentmask = NULL;
     gdouble ok;
     FloodFillInfo ffi;
@@ -1323,7 +1327,7 @@ static void read_data_from_controls (IndentAnalyzeControls *c)
 
 static void update_data_labels (IndentAnalyzeControls *c)
 {
-    char str[50];
+    gchar str[50];
     GwyDataField* dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(c->mydata, "/0/data"));
     GwySIValueFormat* siformat = gwy_data_field_get_value_format_xy (dfield,NULL);
     gdouble mag = siformat->magnitude;
@@ -1362,7 +1366,7 @@ static void update_data_labels (IndentAnalyzeControls *c)
     sprintf (str, "%g", (c->args->volume_above-c->args->volume_below)/mag/mag/mag);
     gtk_label_set_text(GTK_LABEL(c->w_volume_dif), str);                
 
-    sprintf (str, "to be added? %g", c->args->volume_indent/mag/mag/mag);
+    sprintf (str, "%g", c->args->volume_indent/mag/mag/mag);
     gtk_label_set_text(GTK_LABEL(c->w_volume_indent), str);    
     sprintf (str, "%g", c->args->surface_indent/mag/mag);
     gtk_label_set_text(GTK_LABEL(c->w_surface_indent), str);        
@@ -1391,12 +1395,26 @@ static void save_statistics_dialog (IndentAnalyzeControls* c)
     GwyDataField* dfield;
     GwySIValueFormat* siformat;
     GtkFileSelection *dialog;
-    char filename_utf8[200];  /* in UTF-8 */
-    char filename_sys[200];  /* in system (disk) encoding */ 
+    gchar filename_utf8[200];  /* in UTF-8 */
+    gchar filename_sys[200];  /* in system (disk) encoding */ 
     gdouble mag;
     gdouble sxy;
-    int response;
+    gint response;
     FILE *out;
+    GtkWidget *g;
+   
+
+    if (!c->computed) /*nothing to output*/
+    {
+      g = gtk_message_dialog_new (gwy_app_main_window_get(),
+                          GTK_DIALOG_DESTROY_WITH_PARENT,
+                          GTK_MESSAGE_ERROR,
+                          GTK_BUTTONS_CLOSE,
+                         "There is no statistics computed yet.");
+      gtk_dialog_run (GTK_DIALOG (g));
+      gtk_widget_destroy (g);
+      return;
+    }
     
     /* SAVE .TXT statistics */
     dialog = GTK_FILE_SELECTION(gtk_file_selection_new("Save indentation statistics"));
@@ -1440,8 +1458,8 @@ static void save_statistics_dialog (IndentAnalyzeControls* c)
     fprintf (out, "Area (projected) of    plane:             %g (%.1lf %%)\n", c->args->area_plane/mag/mag, 100.*(c->args->area_plane/sxy));
     fprintf (out, "\n");
 
-    fprintf (out, "Area (developed) above%g (+%.1f %%)\n", args->surface_above/mag/mag, 100.*args->surface_above/sxy);    
-    fprintf (out, "Area (developed) above%g (+%.1lf %%)\n", args->surface_below/mag/mag, 100.*args->surface_below/sxy);    
+    fprintf (out, "Area (developed) above %g (+%.1f %%)\n", args->surface_above/mag/mag, 100.*args->surface_above/sxy);    
+    fprintf (out, "Area (developed) above %g (+%.1lf %%)\n", args->surface_below/mag/mag, 100.*args->surface_below/sxy);    
 
     fprintf (out, "Volume above:     %g\n", c->args->volume_above/mag/mag/mag);
     fprintf (out, "Volume below:     %g\n", c->args->volume_below/mag/mag/mag);
@@ -1468,7 +1486,7 @@ static void save_statistics_dialog (IndentAnalyzeControls* c)
 static void compute_expected_indent (IndentAnalyzeControls* c)
 {
        IndentAnalyzeArgs *args = c->args;
-       double h2 = args->min_val* args->min_val;
+       gdouble h2 = args->min_val* args->min_val;
        if(!(c->computed))
               return;
               
@@ -1516,13 +1534,13 @@ GwyVec gwy_vec_cross (GwyVec v1, GwyVec v2)
     result.x = v1.x*v2.y - v2.x*v1.y;
     return result;
 }    
-double gwy_vec_dot (GwyVec v1, GwyVec v2)
+gdouble gwy_vec_dot (GwyVec v1, GwyVec v2)
 {
    return  v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;  
     
 }    
 
-GwyVec gwy_vec_times (GwyVec v, double c)
+GwyVec gwy_vec_times (GwyVec v, gdouble c)
 {
    GwyVec v1;
 
@@ -1533,31 +1551,31 @@ GwyVec gwy_vec_times (GwyVec v, double c)
         
 }    
 
-double gwy_vec_abs (GwyVec v)
+gdouble gwy_vec_abs (GwyVec v)
 {
    return sqrt (gwy_vec_dot (v,v));
 }    
 
-double gwy_vec_arg_phi (GwyVec v)
+gdouble gwy_vec_arg_phi (GwyVec v)
 {
    return atan2(v.z, v.x);
     
 }    
 
-double gwy_vec_arg_theta (GwyVec v)
+gdouble gwy_vec_arg_theta (GwyVec v)
 {
    return atan2(v.y, v.x);
     
 }    
 
-double gwy_vec_cos (GwyVec v1, GwyVec v2)
+gdouble gwy_vec_cos (GwyVec v1, GwyVec v2)
 {
   return (gwy_vec_dot (v1, v2)/
             (gwy_vec_abs(v1)* gwy_vec_abs(v2)) );   
 }    
 void  gwy_vec_normalize (GwyVec *v)
 {
-    double vabs = gwy_vec_abs (*v);
+    gdouble vabs = gwy_vec_abs (*v);
     v->x /= vabs;
     v->y /= vabs;
     v->z /= vabs;    

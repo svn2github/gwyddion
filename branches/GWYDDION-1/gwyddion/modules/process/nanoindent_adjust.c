@@ -108,7 +108,7 @@ module_register(const gchar *name)
 {
     static GwyProcessFuncInfo nanoindent_adjust_func_info = {
         "nanoindent_adjust",
-        N_("/_Nanoindentation/_Adjust..."),
+        N_("/Indento_r/Ad_just..."),
         (GwyProcessFunc)&nanoindent_adjust,
         NANOINDENT_ADJUST_RUN_MODES,
         0,
