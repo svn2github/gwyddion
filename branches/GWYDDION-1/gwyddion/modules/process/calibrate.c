@@ -121,7 +121,7 @@ static GwyModuleInfo module_info = {
     "calibrate",
     N_("Recalibrates scan lateral dimensions or value range."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "2.0",
+    "2.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
