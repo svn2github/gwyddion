@@ -237,6 +237,7 @@ nanoindent_adjust_window_construct(NanoindentAdjustArgs *args)
     gtk_table_attach(GTK_TABLE(table), controls.expand, 0, 4, 4, 5,
                      GTK_EXPAND | GTK_FILL, 0, 2, 2);
 
+    gtk_widget_set_sensitive(controls.expand, FALSE);
    
     controls.interp
              = gwy_option_menu_interpolation(G_CALLBACK(interp_changed_cb),
@@ -470,7 +471,6 @@ data_field_move(GwyDataField *sample, gint xoff, gint yoff)
     brcol = MIN(sample->xres, sample->xres - xoff);
     brrow = MIN(sample->yres, sample->xres - yoff);
    
-    printf("Moving by %d, %d with parameters: ul: %d %d br: %d %d dul: %d %d\n", xoff, yoff, ulcol, ulrow, brcol, brrow, dest_ulcol, dest_ulrow);
     gwy_data_field_area_copy(buffer, sample,
                              ulcol, ulrow, brcol, brrow,
                              dest_ulcol, dest_ulrow);
@@ -490,7 +490,6 @@ gwy_nanoindent_adjust(GwyDataField *model, GwyDataField *sample,
     /*rotate if requested*/
     if (args->rotate) {
         angle = get_rotation_angle(model, sample);
-        printf("rotation angle: %g rad (%g deg)\n", angle, angle*180/G_PI);
 
         gwy_data_field_rotate(sample, angle*G_PI/180, args->interp);
     }
@@ -500,7 +499,6 @@ gwy_nanoindent_adjust(GwyDataField *model, GwyDataField *sample,
         get_weighted_minimum(model, &mod_xmin, &mod_ymin);
         get_weighted_minimum(sample, &sam_xmin, &sam_ymin);
 
-        printf("mc: %d, %d  sc: %d, %d\n", mod_xmin, mod_ymin, sam_xmin, sam_ymin);
     
         data_field_move(sample, mod_xmin - sam_xmin, mod_ymin - sam_ymin);    
     }
