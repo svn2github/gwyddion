@@ -9,17 +9,17 @@ include pkg.mak
 #   make PREFIX=/foo/bar/usr install
 #
 PREFIX = /usr/local
-PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig pkg-config
+PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig:$(PREFIX)/lib64/pkgconfig pkg-config
 GWY = gwyddion
 
 GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) --cflags)
 MODULE_DIR = $(shell $(PKGCONFIG) $(GWY) --variable=gwymoduledir)/$(MODULE_TYPE)
 HOME_MODULE_DIR = $(HOME)/.gwyddion/modules/$(MODULE_TYPE)
-EXTRA_CFLAGS = -Wall -O2 -march=`uname -m` -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
+EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 OBJECTS = $(SOURCES:.c=.o)
 
 DNAME = $(PACKAGE)-$(VERSION)
-STD_DIST = Makefile COPYING makefile.msc pkg.mak $(PACKAGE).spec $(PACKAGE).iss
+STD_DIST = Makefile COPYING makefile.msc make.msc pkg.mak $(PACKAGE).spec $(PACKAGE).iss
 COMPILE = libtool --mode=compile gcc
 LINK = libtool --mode=link gcc
 INSTALL = libtool --mode=install install
