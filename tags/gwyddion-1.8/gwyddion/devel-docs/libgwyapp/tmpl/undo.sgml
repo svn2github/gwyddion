@@ -1,0 +1,104 @@
+<!-- ##### SECTION Title ##### -->
+undo
+
+<!-- ##### SECTION Short_Description ##### -->
+Undo and redo.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+For a module developer, the only two useful undo/redo functions are probably
+<link linkend="gwy-app-undo-checkpoint">gwy_app_undo_checkpoint()</link> and
+<link linkend="gwy-app-undo-checkpointv">gwy_app_undo_checkpointv()</link>
+creating a checkpoint in the undo history to which is possible to return to
+later. You should use these functions before commiting changes to data.
+</para>
+
+<para>
+The other functions actually perform undo or redo, and has little use outside
+main application.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_app_undo_checkpoint ##### -->
+<para>
+
+</para>
+
+@data: 
+@Varargs: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@what: 
+
+
+<!-- ##### FUNCTION gwy_app_undo_checkpointv ##### -->
+<para>
+
+</para>
+
+@data: 
+@n: 
+@keys: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_undo_undo ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gwy_app_undo_undo_window ##### -->
+<para>
+
+</para>
+
+@data_window: 
+
+
+<!-- ##### FUNCTION gwy_app_undo_redo ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION gwy_app_undo_redo_window ##### -->
+<para>
+
+</para>
+
+@data_window: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_has_undo ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_data_window_has_redo ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_undo_clear ##### -->
+<para>
+
+</para>
+
+@data_window: 
+
+
