@@ -10,6 +10,7 @@ file_PROGRAMS = \
 	assing-afm.so \
 	bcrfile.so \
 	createc.so \
+	ezdfile.so \
 	gwyfile.so \
 	nanoscope.so \
 	nt-mdt.so \
@@ -43,6 +44,9 @@ bcrfile_so_LDFLAGS = $(module_ldflags),bcrfile.so
 
 createc_so_SOURCES = createc.c
 createc_so_LDFLAGS = $(module_ldflags),createc.so
+
+ezdfile_so_SOURCES = ezdfile.c
+ezdfile_so_LDFLAGS = $(module_ldflags),ezdfile.so
 
 gwyfile_so_SOURCES = gwyfile.c
 gwyfile_so_LDFLAGS = $(module_ldflags),gwyfile.so
