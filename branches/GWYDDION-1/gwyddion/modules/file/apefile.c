@@ -357,13 +357,18 @@ static void
 store_metadata(APEFile *apefile,
                GwyContainer *container)
 {
+    gchar *p;
+
     HASH_STORE("Version", "%u", version);
     HASH_STORE("Tip oscilation frequency", "%g Hz", freq_osc_tip);
     HASH_STORE("Acquire delay", "%.6f s", acquire_delay);
     HASH_STORE("Raster delay", "%.6f s", raster_delay);
     HASH_STORE("Tip distance", "%g nm", tip_dist);
-    if (apefile->remark && *apefile->remark)
-        HASH_STORE("Comment", "%s", remark);
+
+    if (apefile->remark && *apefile->remark
+        && (p = g_convert(apefile->remark, strlen(apefile->remark),
+                          "UTF-8", "ISO-8859-1", NULL, NULL, NULL)))
+        gwy_container_set_string_by_name(container, "/meta/Comment" p);
     gwy_container_set_string_by_name
         (container, "/meta/SPM mode",
          g_strdup(gwy_enum_to_string(apefile->spm_mode, spm_modes,

@@ -385,7 +385,7 @@ process_metadata(STPFile *stpfile,
         gwy_container_set_string_by_name(container, "/meta/Bias",
                                          g_strdup_printf("%s V", p));
     if ((p = g_hash_table_lookup(data->meta, "scan_dir"))) {
-        if (!strcmp(p, "0")) 
+        if (!strcmp(p, "0"))
             gwy_container_set_string_by_name(container,
                                              "/meta/Scanning direction",
                                              g_strdup("Top to bottom, "
