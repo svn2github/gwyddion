@@ -3,7 +3,7 @@
 PACKAGE = gwydump
 # Module version, it is also defined as a preprocessor macro you are
 # encouraged to use for module registering.
-VERSION = 0.1
+VERSION = 1.0
 # Module type (one of process, file)
 MODULE_TYPE = process
 # Module source files
