@@ -188,6 +188,7 @@ threshold_do(GwyContainer *data,
         else {
             mask = GWY_DATA_FIELD(gwy_serializable_duplicate(G_OBJECT(dfield)));
             gwy_container_set_object_by_name(data, "/0/mask", G_OBJECT(mask));
+            g_object_unref(G_OBJECT(mask));
         }
 
         n = gwy_data_field_get_xres(dfield)*gwy_data_field_get_yres(dfield);
@@ -210,6 +211,7 @@ threshold_do(GwyContainer *data,
         else {
             show = GWY_DATA_FIELD(gwy_serializable_duplicate(G_OBJECT(dfield)));
             gwy_container_set_object_by_name(data, "/0/show", G_OBJECT(show));
+            g_object_unref(G_OBJECT(show));
         }
         gwy_data_field_threshold(show, args->absolute, args->min, args->max);
         break;
