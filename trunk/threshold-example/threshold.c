@@ -59,6 +59,7 @@ typedef struct {
     GtkObject *absolute;
     GwySIValueFormat *format;
     gboolean in_update;
+    ThresholdArgs *args;
 } ThresholdControls;
 
 static gboolean    module_register                (const gchar *name);
@@ -70,17 +71,16 @@ static void        threshold_do                   (GwyContainer *data,
                                                    GwyDataField *dfield,
                                                    ThresholdArgs *args);
 static void        fractile_changed_cb            (GtkAdjustment *adj,
-                                                   ThresholdArgs *args);
+                                                   ThresholdControls *controls);
 static void        absolute_changed_cb            (GtkAdjustment *adj,
-                                                   ThresholdArgs *args);
+                                                   ThresholdControls *controls);
 static void        mode_changed_cb                (GtkWidget *widget,
-                                                   ThresholdArgs *args);
+                                                   ThresholdControls *controls);
 static void        threshold_load_args            (GwyContainer *container,
                                                    ThresholdArgs *args);
 static void        threshold_save_args            (GwyContainer *container,
                                                    ThresholdArgs *args);
-static void        threshold_dialog_update        (ThresholdControls *controls,
-                                                   ThresholdArgs *args);
+static void        threshold_dialog_update        (ThresholdControls *controls);
 static gsize*      threshold_fmap_compute         (GwyDataField *dfield,
                                                    gdouble min,
                                                    gdouble max);
@@ -226,14 +226,20 @@ static gboolean
 threshold_dialog(ThresholdArgs *args,
                  GwyDataField *dfield)
 {
-    const gchar *modes[] = { "_Data", "_Mask", "_Presentation" };
+    static const GwyEnum modes[] = {
+        { "_Data",         THRESHOLD_CHANGE_DATA         },
+        { "_Mask",         THRESHOLD_CHANGE_MASK         },
+        { "_Presentation", THRESHOLD_CHANGE_PRESENTATION },
+    };
     GtkWidget *dialog, *table, *spin, *widget;
-    GtkRadioButton *group;
+    GSList *group;
     GwySIValueFormat *fmt;
     ThresholdControls controls;
     enum { RESPONSE_RESET = 1 };
     gint response;
     gsize i;
+
+    controls.args = args;
 
     dialog = gtk_dialog_new_with_buttons(_("Threshold"),
                                          NULL,
@@ -253,9 +259,8 @@ threshold_dialog(ThresholdArgs *args,
                                        controls.fractile);
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), 0);
     gtk_spin_button_set_snap_to_ticks(GTK_SPIN_BUTTON(spin), TRUE);
-    g_object_set_data(G_OBJECT(controls.fractile), "controls", &controls);
     g_signal_connect(controls.fractile, "value_changed",
-                     G_CALLBACK(fractile_changed_cb), args);
+                     G_CALLBACK(fractile_changed_cb), &controls);
 
     controls.format = fmt = gwy_data_field_get_value_format_z(dfield, NULL);
     controls.absolute = gtk_adjustment_new(args->absolute/fmt->magnitude,
@@ -270,33 +275,20 @@ threshold_dialog(ThresholdArgs *args,
                                        fmt->units,
                                        controls.absolute);
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), fmt->precision);
-    g_object_set_data(G_OBJECT(controls.absolute), "controls", &controls);
     g_signal_connect(controls.absolute, "value_changed",
-                     G_CALLBACK(absolute_changed_cb), args);
+                     G_CALLBACK(absolute_changed_cb), &controls);
 
     widget = gtk_label_new(_("Modify:"));
     gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), widget, 0, 2, 2, 3);
-    group = NULL;
-    for (i = 0; i < G_N_ELEMENTS(modes); i++) {
-        if (group) {
-            widget
-                = gtk_radio_button_new_with_mnemonic_from_widget(group,
-                                                                 _(modes[i]));
-        }
-        else {
-            widget = gtk_radio_button_new_with_mnemonic(NULL, _(modes[i]));
-            group = GTK_RADIO_BUTTON(widget);
-        }
-        g_object_set_data(G_OBJECT(widget), "mode", GUINT_TO_POINTER(i));
-        g_object_set_data(G_OBJECT(widget), "controls", &controls);
-        gtk_table_attach_defaults(GTK_TABLE(table), widget, 1, 3, i+3, i+4);
-        if (i == args->mode)
-            gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), TRUE);
-        g_signal_connect(G_OBJECT(widget), "toggled",
-                         G_CALLBACK(mode_changed_cb), args);
-    }
-    controls.mode = gtk_radio_button_get_group(GTK_RADIO_BUTTON(widget));
+    gtk_table_attach(GTK_TABLE(table), widget, 0, 2, 2, 3,
+                     GTK_EXPAND | GTK_FILL, 0, 2, 2);
+    group = gwy_radio_buttons_create(modes, G_N_ELEMENTS(modes), "mode",
+                                     G_CALLBACK(mode_changed_cb), &controls,
+                                     args->mode);
+    controls.mode = group;
+    for (i = 0; group; i++, group = g_slist_next(group))
+        gtk_table_attach_defaults(GTK_TABLE(table), GTK_WIDGET(group->data),
+                                  1, 3, i+2, i+3);
 
     controls.in_update = FALSE;
 
@@ -319,7 +311,7 @@ threshold_dialog(ThresholdArgs *args,
             args->fractile = threshold_defaults.fractile;
             args->mode = threshold_defaults.mode;
             threshold_fmap_fractile_to_abs(args);
-            threshold_dialog_update(&controls, args);
+            threshold_dialog_update(&controls);
             break;
 
             default:
@@ -336,52 +328,42 @@ threshold_dialog(ThresholdArgs *args,
 
 static void
 fractile_changed_cb(GtkAdjustment *adj,
-                    ThresholdArgs *args)
+                    ThresholdControls *controls)
 {
-    ThresholdControls *controls;
-
-    controls = g_object_get_data(G_OBJECT(adj), "controls");
     if (controls->in_update)
         return;
 
     controls->in_update = TRUE;
-    args->fractile = gtk_adjustment_get_value(adj)/100;
-    threshold_fmap_fractile_to_abs(args);
-    threshold_dialog_update(controls, args);
+    controls->args->fractile = gtk_adjustment_get_value(adj)/100;
+    threshold_fmap_fractile_to_abs(controls->args);
+    threshold_dialog_update(controls);
     controls->in_update = FALSE;
 }
 
 static void
 absolute_changed_cb(GtkAdjustment *adj,
-                    ThresholdArgs *args)
+                    ThresholdControls *controls)
 {
-    ThresholdControls *controls;
-
-    controls = g_object_get_data(G_OBJECT(adj), "controls");
     if (controls->in_update)
         return;
 
     controls->in_update = TRUE;
-    args->absolute = gtk_adjustment_get_value(adj)*controls->format->magnitude;
-    threshold_fmap_abs_to_fractile(args);
-    threshold_dialog_update(controls, args);
+    controls->args->absolute = gtk_adjustment_get_value(adj)
+                               *controls->format->magnitude;
+    threshold_fmap_abs_to_fractile(controls->args);
+    threshold_dialog_update(controls);
     controls->in_update = FALSE;
 }
 
 static void
 mode_changed_cb(GtkWidget *widget,
-                ThresholdArgs *args)
+                ThresholdControls *controls)
 {
-    ThresholdControls *controls;
-
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
         return;
 
-    controls = g_object_get_data(G_OBJECT(widget), "controls");
-    if (controls->in_update)
-        return;
-
-    args->mode = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(widget), "mode"));
+    controls->args->mode = gwy_radio_buttons_get_current(controls->mode,
+                                                         "mode");
 }
 
 static const gchar *fractile_key = "/module/" THRESHOLD_MOD_NAME "/fractile";
@@ -413,11 +395,12 @@ threshold_save_args(GwyContainer *container,
 }
 
 static void
-threshold_dialog_update(ThresholdControls *controls,
-                        ThresholdArgs *args)
+threshold_dialog_update(ThresholdControls *controls)
 {
+    ThresholdArgs *args;
     GSList *l;
 
+    args = controls->args;
     gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->fractile),
                              100*args->fractile);
     gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->absolute),
