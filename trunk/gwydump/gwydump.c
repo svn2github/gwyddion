@@ -19,18 +19,24 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
 
-#define IND 2
+static void print_help                (void);
+static void process_preinit_options   (int *argc, char ***argv);
+static void dump_object               (gchar **buffer, gsize *size);
 
-static void print_help(void);
-static void process_preinit_options(int *argc,
-                                    char ***argv);
-static gboolean dump_object(gchar **buffer,
-                            gsize *size);
+/* Options */
+static guint opt_indent = 4;
+static gboolean opt_address = TRUE;
+static gboolean opt_object_size = FALSE;
+static gboolean opt_value = TRUE;
+static gboolean opt_type = TRUE;
 
+/* Global state */
 static gint level;
 static gchar *buffer0;
 
@@ -40,7 +46,6 @@ main(int argc, char *argv[])
     gsize size;
     gchar *buffer;
     GError *err = NULL;
-    gboolean ok;
 
     /* Check for --help and --version before rash file loading and GUI
      * initializatioon */
@@ -67,234 +72,271 @@ main(int argc, char *argv[])
     level = -1;
     buffer += 4;
     size -= 4;
-    ok = dump_object(&buffer, &size);
+    if (opt_address)
+        g_print("%08x: ", buffer - buffer0);
+    dump_object(&buffer, &size);
+    g_free(buffer0);
 
-    return !ok;
+    return 0;
 }
 
 static gchar*
 indent(void)
 {
     static GString *str = NULL;
+    static gchar spaces[] = "                ";
     gint i;
 
     if (!str)
         str = g_string_new("");
 
-    for (i = str->len/IND; i < level; i++)
-        g_string_append(str, "  ");
-    g_string_truncate(str, IND*level);
+    for (i = str->len/opt_indent; i < level; i++)
+        g_string_append_len(str, spaces, opt_indent);
+    g_string_truncate(str, opt_indent*level);
 
     return str->str;
 }
 
-static inline void
-print_object_name(const gchar *name)
+static void
+fail(gchar *buffer,
+     const gchar *format,
+     ...)
 {
-    g_print("object: %s\n", name);
+    va_list ap;
+
+    fprintf(stderr, "\nERROR at position %08x: ", buffer - buffer0);
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    va_end(ap);
+    fprintf(stderr, "\n");
+
+    g_free(buffer0);
+    exit(EXIT_FAILURE);
 }
 
-static inline void
-print_object_size(guint32 size)
-{
-    /*g_print("size: %u\n", size);*/
-}
-
-static inline void
-print_component_name(const gchar *name)
-{
-    g_print("%s%s, ", indent(), name);
-}
-
-static inline void
-print_component_type(gchar c)
-{
-    /*g_print("%sType: %c\n", indent(), c);*/
-}
-
-static inline gboolean
+static guint32
 get_size(gchar **buffer,
-         gsize *size,
-         guint32 *value)
+         gsize *size)
 {
-    if (*size < sizeof(gint32)) {
-        g_printerr("\nTruncated size\n");
-        return FALSE;
-    }
-    memcpy(value, *buffer, sizeof(gint32));
-    *value = GUINT32_FROM_LE(*value);
+    guint32 value;
+
+    if (*size < sizeof(gint32))
+        fail(*buffer, "Truncated size");
+    memcpy(&value, *buffer, sizeof(gint32));
+    value = GUINT32_FROM_LE(value);
     *buffer += sizeof(gint32);
     *size -= sizeof(gint32);
 
-    return TRUE;
+    return value;
 };
 
-static inline gboolean
+static void
 dump_boolean(gchar **buffer,
              gsize *size)
 {
     gboolean value;
 
-    if (!*size) {
-        g_printerr("\nTruncated boolean\n");
-        return FALSE;
-    }
+    if (!*size)
+        fail(*buffer, "Truncated boolean");
     value = !!**buffer;
     g_print("boolean: %s\n", value ? "TRUE" : "FALSE");
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
-
-    return TRUE;
 }
 
-static inline gboolean
+static void
 dump_char(gchar **buffer,
           gsize *size)
 {
     gchar value;
 
-    if (!*size) {
-        g_printerr("\nTruncated char\n");
-        return FALSE;
-    }
+    if (!*size)
+        fail(*buffer, "Truncated char\n");
     value = **buffer;
-    g_print("char: %02x\n", value);
+    g_print("char: \\x%02x%s%c%s",
+            value,
+            g_ascii_isprint(value) ? "(" : "",
+            g_ascii_isprint(value) ? value : '\n',
+            g_ascii_isprint(value) ? ")\n" : "");
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
-
-    return TRUE;
 }
 
-static inline gboolean
+static void
 dump_int32(gchar **buffer,
            gsize *size)
 {
     gint32 value;
 
-    if (*size < sizeof(gint32)) {
-        g_printerr("\nTruncated int32\n");
-        return FALSE;
-    }
+    if (*size < sizeof(gint32))
+        fail(*buffer, "Truncated int32");
     memcpy(&value, *buffer, sizeof(gint32));
     value = GINT32_FROM_LE(value);
     g_print("int32: %d\n", value);
     *buffer += sizeof(gint32);
     *size -= sizeof(gint32);
-
-    return TRUE;
 }
 
-static inline gboolean
+static void
+dump_int64(gchar **buffer,
+           gsize *size)
+{
+    gint64 value;
+
+    if (*size < sizeof(gint64))
+        fail(*buffer, "Truncated int64");
+    memcpy(&value, *buffer, sizeof(gint64));
+    value = GINT64_FROM_LE(value);
+    g_print("int64: %" G_GINT64_FORMAT "\n", value);
+    *buffer += sizeof(gint64);
+    *size -= sizeof(gint64);
+}
+
+static void
 dump_double(gchar **buffer,
             gsize *size)
 {
-    union {
-        gdouble d;
-        guint64 i;
-    } value;
+    union { gdouble d; guint64 i; } value;
 
-    if (*size < sizeof(gdouble)) {
-        g_printerr("\nTruncated double\n");
-        return FALSE;
-    }
+    if (*size < sizeof(gdouble))
+        fail(*buffer, "Truncated double");
     memcpy(&value, *buffer, sizeof(gdouble));
     value.i = GUINT64_FROM_LE(value.i);
     g_print("double: %g\n", value.d);
     *buffer += sizeof(gdouble);
     *size -= sizeof(gdouble);
-
-    return TRUE;
 }
 
-static inline gboolean
+static void
 dump_string(gchar **buffer,
             gsize *size)
 {
-    gchar *p;
+    gchar *p, *q;
 
-    if (!(p = memchr(*buffer, 0, *size))) {
-        g_printerr("\nTruncated string\n");
-        return FALSE;
-    }
-    g_print("string: %s\n", *buffer);
+    if (!(p = memchr(*buffer, 0, *size)))
+        fail(*buffer, "Truncated string");
+    q = g_strescape(*buffer, NULL);
+    g_print("string: \"%s\"\n", q);
+    g_free(q);
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
-
-    return TRUE;
 }
 
-static inline gboolean
-dump_double_array(gchar **buffer,
-                  gsize *size)
+static void
+dump_object_array(gchar **buffer,
+                  gsize *size,
+                  guint32 n)
+{
+    while (n) {
+        dump_object(buffer, size);
+        n--;
+    }
+}
+
+static void
+dump_string_array(gchar **buffer,
+                  gsize *size,
+                  guint32 n)
+{
+    gchar *p;
+
+    while (n) {
+        if (!(p = memchr(*buffer, 0, *size)))
+            fail(*buffer, "Truncated string");
+        *size -= (p - *buffer) + 1;
+        *buffer = p + 1;
+        n--;
+    }
+}
+
+static void
+dump_array(gchar **buffer,
+           gsize *size,
+           gsize membersize,
+           const gchar *typename)
 {
     guint32 mysize;
 
-    if (!get_size(buffer, size, &mysize))
-        return FALSE;
-
-    if (*size < mysize*sizeof(gdouble)) {
-        g_printerr("\nTruncated double array\n");
-        return FALSE;
+    mysize = get_size(buffer, size);
+    if (!strcmp(typename, "object"))
+        dump_object_array(buffer, size, mysize);
+    else if (!strcmp(typename, "string"))
+        dump_string_array(buffer, size, mysize);
+    else if (*size < mysize*membersize)
+        fail(*buffer, "Truncated %s array", typename);
+    else {
+        *buffer += mysize*membersize;
+        *size -= mysize*membersize;
     }
-    g_print("double array of size %u\n", mysize);
-    *buffer += mysize*sizeof(gdouble);
-    *size -= mysize*sizeof(gdouble);
-
-    return TRUE;
+    g_print("%s array of size %u\n", typename, mysize);
 }
 
-static gboolean
+static void
 dump_hash(gchar *buffer,
           gsize size)
 {
-    gboolean ok = TRUE;
+    static struct {
+        gchar ctype;
+        void (*func)(gchar**, gsize*);
+    } atomic[] = {
+        { 'o', dump_object }, { 'b', dump_boolean }, { 'c', dump_char },
+        { 'i', dump_int32 }, { 'q', dump_int64 }, { 'd', dump_double },
+        { 's', dump_string },
+    };
+    static struct {
+        gchar ctype;
+        const gchar *name;
+        const gsize size;
+    } array[] = {
+        { 'B', "boolean", sizeof(gchar) }, { 'C', "char", sizeof(gchar) },
+        { 'I', "int32", sizeof(gint32) }, { 'Q', "int64", sizeof(gint64) },
+        { 'D', "double", sizeof(gdouble) },
+        { 'S', "string", 0 }, { 'O', "object", 0 },
+    };
+    gboolean handled;
+    guint i;
     gchar ctype;
     gchar *p;
 
     while (size) {
         /* Name */
-        if (!(p = memchr(buffer, 0, size))) {
-            g_printerr("\nRunaway component name\n");
-            return FALSE;
-        }
-        g_print("%08x: ", buffer - buffer0);
-        print_component_name(buffer);
+        if (!(p = memchr(buffer, 0, size)))
+            fail(buffer, "Runaway component name");
+        if (opt_address)
+            g_print("%08x: ", buffer - buffer0);
+        g_print("%s%s, ", indent(), buffer);
         size -= (p - buffer) + 1;
         buffer = p + 1;
 
         /* Type */
-        if (!size) {
-            g_printerr("\nTruncated component type\n");
-            return FALSE;
-        }
+        if (!size)
+            fail(buffer, "Runaway component type");
         ctype = *buffer;
-        print_component_type(ctype);
         buffer += sizeof(gchar);
         size -= sizeof(gchar);
 
         /* Data */
-        switch (ctype) {
-            case 'o': ok = dump_object(&buffer, &size); break;
-            case 'b': ok = dump_boolean(&buffer, &size); break;
-            case 'c': ok = dump_char(&buffer, &size); break;
-            case 'i': ok = dump_int32(&buffer, &size); break;
-            case 'd': ok = dump_double(&buffer, &size); break;
-            case 's': ok = dump_string(&buffer, &size); break;
-            case 'D': ok = dump_double_array(&buffer, &size); break;
-
-            default:
-            g_printerr("\nUnknown component type `%c'\n", ctype);
-            ok = FALSE;
-            break;
+        handled = FALSE;
+        for (i = 0; i < G_N_ELEMENTS(atomic); i++) {
+            if (atomic[i].ctype == ctype) {
+                atomic[i].func(&buffer, &size);
+                handled = TRUE;
+                break;
+            }
         }
-        if (!ok)
-            return FALSE;
+        for (i = 0; i < G_N_ELEMENTS(array); i++) {
+            if (array[i].ctype == ctype) {
+                dump_array(&buffer, &size, array[i].size, array[i].name);
+                handled = TRUE;
+                break;
+            }
+        }
+        if (!handled)
+            fail(buffer, "Unknown type `%c'", ctype);
     }
-
-    return TRUE;
 }
 
-static gboolean
+static void
 dump_object_real(gchar **buffer,
                  gsize *size)
 {
@@ -302,41 +344,32 @@ dump_object_real(gchar **buffer,
     gchar *p;
 
     /* Name */
-    if (!(p = memchr(*buffer, 0, *size))) {
-        g_printerr("\nRunaway object name\n");
-        return FALSE;
-    }
-    print_object_name(*buffer);
+    if (!(p = memchr(*buffer, 0, *size)))
+        fail(*buffer, "Runaway object name");
+    g_print("object: %s\n", *buffer);
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
 
     /* Size */
-    if (!get_size(buffer, size, &mysize))
-        return FALSE;
-
-    if (mysize > *size) {
-        g_printerr("\nTruncated object data\n");
-        return FALSE;
-    }
-    print_object_size(mysize);
+    mysize = get_size(buffer, size);
+    if (mysize > *size)
+        fail(*buffer, "Truncated object data");
+    if (opt_object_size)
+        g_print("size: %" G_GSIZE_FORMAT "\n", *size);
 
     /* Hash */
     *size -= mysize;
     *buffer += mysize;
-    return dump_hash(*buffer - mysize, mysize);
+    dump_hash(*buffer - mysize, mysize);
 }
 
-static gboolean
+static void
 dump_object(gchar **buffer,
             gsize *size)
 {
-    gboolean ok;
-
     level++;
-    ok = dump_object_real(buffer, size);
+    dump_object_real(buffer, size);
     level--;
-
-    return ok;
 }
 
 /* Check for --help and --version and eventually print help or version */
@@ -374,8 +407,6 @@ print_help(void)
     g_print("Please report bugs in Gwyddion bugzilla "
             "http://trific.ath.cx/bugzilla/\n");
 }
-
-/******************** GwySerializable stuff *************************/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
 
