@@ -13,6 +13,9 @@ do one of following:
 
 Otherwise just run make, make install.
 
+If you want to install the module to your home Gwyddion module directory
+(supported since Gwyddion-1.3), use make install-user instead.
+
 If you have Gwyddion installed from rpm (with gwyddion-devel too), it should
 be possible to build a rpm with rpm -tb threshold-example-X.Y.tar.bz2
 
