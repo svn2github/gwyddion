@@ -170,7 +170,6 @@ threshold_do(GwyContainer *data,
     gdouble *p, *q;
     gsize n;
 
-    gwy_debug("%s: %g [%g,%g]", __FUNCTION__, args->absolute);
     switch (args->mode) {
         case THRESHOLD_CHANGE_DATA:
         gwy_app_undo_checkpoint(data, "/0/data");
