@@ -1,0 +1,63 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphCurveModel
+
+<!-- ##### SECTION Short_Description ##### -->
+Representation of a one graph curve.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+#GwyGraphCurveModel represents information about a graph curve necessary to
+fully reconstruct it.  It will be meaningfully used by the new generation of
+graph widgets and should be mostly ignored for now.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyGraphCurveModel ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyGraphCurveModelClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@value_changed: 
+@reserved1: 
+@reserved2: 
+@reserved3: 
+
+<!-- ##### FUNCTION gwy_graph_curve_model_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_curve_model_save_curve ##### -->
+<para>
+
+</para>
+
+@gcmodel: 
+@graph: 
+@index_: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_add_curve_from_model ##### -->
+<para>
+
+</para>
+
+@graph: 
+@gcmodel: 
+
+

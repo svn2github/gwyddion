@@ -1,0 +1,5 @@
+Makefile
+Makefile.in
+gwyddion.pc
+*.iss
+gwyddion.vim

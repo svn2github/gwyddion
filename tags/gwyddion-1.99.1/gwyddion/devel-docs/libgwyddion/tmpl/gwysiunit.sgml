@@ -1,0 +1,194 @@
+<!-- ##### SECTION Title ##### -->
+GwySIUnit
+
+<!-- ##### SECTION Short_Description ##### -->
+SI unit representation, physical quantitiy formatting
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+GwySIUnit object represents a physical SI unit (or any other unit),
+it can be created from a unit string with
+<link linkend="gwy-si-unit-new">gwy_si_unit_new()</link>.
+</para>
+
+<para>
+GwySIUnit is also responsible for prefixes selection and generally formatting
+of physical quantities (see also <link linkend="libgwyddion-gwymath">gwymath</link>
+for pure number formatting functions).  There are several functions computing
+value format (as a <link linkend="GwySIValueFormat">GwySIValueFormat</link>
+structure) with given resolution --
+<link linkend="gwy-si-unit-get-format-with-resolution">gwy_si_unit_get_format_with_resolution()</link>,
+or number of significant digits --
+<link linkend="gwy-si-unit-get-format-with-digits">gwy_si_unit_get_format_with_digits()</link>.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwySIValueFormat ##### -->
+<para>
+
+</para>
+
+@magnitude: 
+@precision: 
+@units: 
+
+<!-- ##### STRUCT GwySIUnit ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwySIUnitClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### MACRO gwy_si_unit_duplicate ##### -->
+<para>
+
+</para>
+
+@siunit: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_new ##### -->
+<para>
+
+</para>
+
+@unit_string: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_new_parse ##### -->
+<para>
+
+</para>
+
+@unit_string: 
+@power10: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_set_unit_string ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@unit_string: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_set_unit_string_parse ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@unit_string: 
+@power10: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_unit_string ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_multiply ##### -->
+<para>
+
+</para>
+
+@siunit1: 
+@siunit2: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_divide ##### -->
+<para>
+
+</para>
+
+@siunit1: 
+@siunit2: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_power ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@power: 
+@result: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_equal ##### -->
+<para>
+
+</para>
+
+@siunit1: 
+@siunit2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_format ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@value: 
+@format: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_format_with_resolution ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@maximum: 
+@resolution: 
+@format: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_format_with_digits ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@maximum: 
+@sdigits: 
+@format: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_si_unit_value_format_free ##### -->
+<para>
+
+</para>
+
+@format: 
+
+

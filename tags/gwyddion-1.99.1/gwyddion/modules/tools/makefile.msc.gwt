@@ -1,0 +1,26 @@
+# @(#) $Id$
+
+TOP_SRCDIR = ../..
+MOD_TYPE = tool
+<[[:MODULES:]]>
+
+!INCLUDE $(TOP_SRCDIR)\make.msc
+
+# NOT MOD_CFLAGS!
+LIB_CFLAGS = \
+	-I . -I $(TOP_SRCDIR) $(COMMON_CFLAGS) $(MOD_CRUNTIME) \
+	$(APP_CFLAGS) \
+	-DG_LOG_DOMAIN=\"Module\"
+
+## targets
+all: mod
+
+mod: $(MODULES)
+
+install: install-mod
+
+!INCLUDE $(TOP_SRCDIR)\rules.msc
+
+<[[:MOD_DLL_RULES:]]>
+
+# vim: ft=make

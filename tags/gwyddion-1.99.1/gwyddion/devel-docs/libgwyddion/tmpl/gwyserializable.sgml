@@ -1,0 +1,259 @@
+<!-- ##### SECTION Title ##### -->
+GwySerializable
+
+<!-- ##### SECTION Short_Description ##### -->
+Abstract interface for serializable objects.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+GwySerializable is an abstract interface for value-like object that can be
+serialized and deserialized.  You can serialize any object implementing
+this interface with
+<link linkend="gwy-serializable-serialize">gwy_serializable_serialize()</link>
+and the restore (deserialize) it with
+<link linkend="gwy-serializable-deserialize">gwy_serializable_deserialize()</link>.
+It is also posible it duplicate any such object with
+<link linkend="gwy-serializable-duplicate">gwy_serializable_duplicate()</link>.
+</para>
+
+<para>
+The only functions that should be used for implementation of serialization
+and deserialization in your classes, are the most high-level ones:
+gwy_serialize_pack_object_struct(), gwy_serialize_unpack_object_struct(),
+gwy_serialize_object_items(), and gwy_deserialize_object_hash().
+The former two are useful for struct-like objects (most objects are of this
+kind), the latter two for hash-like objects, i.e., objects that can contain
+components of arbitrary name and type.
+</para>
+
+<para>
+All the low-level functions are deprecated and will be removed in Gwyddion
+2.0.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwySerializableIface ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@serialize: 
+@deserialize: 
+@duplicate: 
+
+<!-- ##### STRUCT GwySerializable ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GwySerializeFunc ##### -->
+<para>
+
+</para>
+
+@serializable: 
+@buffer: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### USER_FUNCTION GwyDeserializeFunc ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GwyDuplicateFunc ##### -->
+<para>
+
+</para>
+
+@object: 
+@Returns: 
+
+
+<!-- ##### STRUCT GwySerializeSpec ##### -->
+<para>
+
+</para>
+
+@ctype: 
+@name: 
+@value: 
+@array_size: 
+
+<!-- ##### STRUCT GwySerializeItem ##### -->
+<para>
+
+</para>
+
+@ctype: 
+@name: 
+@value: 
+@array_size: 
+
+<!-- ##### FUNCTION gwy_serializable_serialize ##### -->
+<para>
+
+</para>
+
+@serializable: 
+@buffer: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@size: 
+
+
+<!-- ##### FUNCTION gwy_serializable_deserialize ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serializable_duplicate ##### -->
+<para>
+
+</para>
+
+@object: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_serialize_pack_object_struct ##### -->
+<para>
+Appends serialization of object with g_type_name() @object_name and components
+described by @spec to @buffer in gwy-file format.
+</para>
+
+<para>
+Here's how a serialization method of a simple object whose state is described
+by a single real number <structfield>foo</structfield> could look (without
+error checking):
+</para>
+<informalexample><programlisting><![CDATA[
+static guchar*
+my_object_serialize(GObject *obj,
+                    guchar *buffer,
+                    gsize *size)
+{
+    MyObject *my_object = MY_OBJECT(obj);
+    GwySerializeSpec spec[] = {
+        { 'd', "foo", &my_object->foo, NULL, },
+    };
+
+    return gwy_serialize_pack_object_struct(buffer, size,
+                                            "MyObject",
+                                            G_N_ELEMENTS(spec), spec);
+}
+]]></programlisting></informalexample>
+
+@buffer: A buffer to which the serialized components should be appended.
+@object_name: The g_type_name() of the object.
+@nspec: The number of items in @spec.
+@spec: The components to serialize.
+@Returns: The buffer with serialization of @spec components appended.
+
+
+<!-- ##### FUNCTION gwy_serialize_unpack_object_struct ##### -->
+<para>
+Deserializes an object with named components packed into gwy-file format by
+gwy_serialize_pack_object_struct().
+</para>
+
+<para>
+Extra components are ignored (but cause a warning), components of different
+type than expected cause failure, missing components are not detected.
+</para>
+
+<para>
+It is safe to pass pointers to existing non-atomic objects (strings, arrays,
+objects) in @spec values, they will be dereferenced and freed as necessary
+when an unpacked value is about to replace them.
+For the same reason it is an error to pass pointers to unintialized memory
+there, always initialize non-atomic @spec values to %NULL pointers, at
+least.
+</para>
+
+<para>
+Caller is responsible for use/clean-up of these values if deserialization
+succeeds or not.
+</para>
+
+<para>
+Here's how a deserialization method of a simple object whose state is described
+by a single real number <structfield>foo</structfield> could look (without
+error checking):
+</para>
+<informalexample><programlisting><![CDATA[
+static GObject*
+my_object_deserialize(const guchar *buffer,
+                      gsize size,
+                      gsize *position)
+{
+    double foo = 1.0;
+    GwySerializeSpec spec[] = {
+        { 'd', "foo", &foo, NULL, },
+    };
+    MyObject *my_object;
+
+    gwy_serialize_unpack_object_struct(buffer, size, position,
+                                       "MyObject",
+                                       G_N_ELEMENTS(spec), spec);
+    return my_object_new(foo);
+}
+]]></programlisting></informalexample>
+
+@buffer: A memory location containing a serialized object at position
+         @position.
+@size: Current size of @buffer, new size is returned here.
+@position: The position of the object in @buffer, it's updated to
+           point after it.
+@object_name: The g_type_name() of the object.
+@nspec: The number of items in @spec.
+@spec: The components to deserialize.
+@Returns: Whether the unpacking succeeded
+          (see description body for definition of success and failure).
+
+
+<!-- ##### FUNCTION gwy_serialize_object_items ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@object_name: 
+@nitems: 
+@items: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_deserialize_object_hash ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@object_name: 
+@nitems: 
+@Returns: 
+
+

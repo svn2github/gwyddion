@@ -1,0 +1,41 @@
+<!-- ##### SECTION Title ##### -->
+interpolation
+
+<!-- ##### SECTION Short_Description ##### -->
+General interpolation functions
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_interpolation_get_dval ##### -->
+<para>
+
+</para>
+
+@x: 
+@x1_: 
+@y1_: 
+@x2_: 
+@y2_: 
+@interpolation: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_interpolation_get_dval_of_equidists ##### -->
+<para>
+
+</para>
+
+@x: 
+@data: 
+@interpolation: 
+@Returns: 
+
+

@@ -1,0 +1,1786 @@
+<!-- ##### SECTION ./tmpl/gwyglmat.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyglmat.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyglmat.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwyglmat.sgml:Title ##### -->
+gwyglmat
+
+
+<!-- ##### SECTION ./tmpl/gwygradsphere.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygradsphere.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygradsphere.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwygradsphere.sgml:Title ##### -->
+GwyGradSphere
+
+
+<!-- ##### SECTION ./tmpl/gwygraphepitome.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphepitome.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphepitome.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwygraphepitome.sgml:Title ##### -->
+GwyGraphEpitome
+
+
+<!-- ##### SECTION ./tmpl/gwygraphercurvemodel.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphercurvemodel.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphercurvemodel.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwygraphercurvemodel.sgml:Title ##### -->
+GwyGrapherCurveModel
+
+
+<!-- ##### SECTION ./tmpl/gwygraphermodel.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphermodel.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwygraphermodel.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwygraphermodel.sgml:Title ##### -->
+GwyGrapherModel
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-axes.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-axes.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-axes.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-axes.sgml:Title ##### -->
+GwyLayerAxes
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-lines.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-lines.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-lines.sgml:Short_Description ##### -->
+Lines selection layer.
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-lines.sgml:Title ##### -->
+GwyLayerLines
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-pointer.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-pointer.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-pointer.sgml:Short_Description ##### -->
+Simple layer displaying nothing
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-pointer.sgml:Title ##### -->
+GwyLayerPointer
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-points.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-points.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-points.sgml:Short_Description ##### -->
+Points selection layer
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-points.sgml:Title ##### -->
+GwyLayerPoints
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-select.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-select.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-select.sgml:Short_Description ##### -->
+Rectangular selection layer
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-select.sgml:Title ##### -->
+GwyLayerSelect
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-triangle.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-triangle.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-triangle.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwylayer-triangle.sgml:Title ##### -->
+GwyLayerTriangle
+
+
+<!-- ##### SECTION ./tmpl/gwymenubar.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwymenubar.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwymenubar.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwymenubar.sgml:Title ##### -->
+GwyVMenuBar
+
+
+<!-- ##### SECTION ./tmpl/gwymodulemenus.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwymodulemenus.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwymodulemenus.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwymodulemenus.sgml:Title ##### -->
+gwymodulemenus
+
+
+<!-- ##### SECTION ./tmpl/gwyspherecoords.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyspherecoords.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyspherecoords.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwyspherecoords.sgml:Title ##### -->
+GwySphereCoords
+
+
+<!-- ##### SECTION ./tmpl/gwyvectorshade.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyvectorshade.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyvectorshade.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwyvectorshade.sgml:Title ##### -->
+GwyVectorShade
+
+
+<!-- ##### SECTION ./tmpl/gwyvmenubar.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyvmenubar.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/gwyvmenubar.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/gwyvmenubar.sgml:Title ##### -->
+GwyVMenuBar
+
+
+<!-- ##### MACRO GWY_3D_LABELS ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+<!-- ##### MACRO GWY_3D_LABELS_CLASS ##### -->
+<para>
+
+</para>
+
+@klass: 
+
+<!-- ##### MACRO GWY_3D_LABELS_GET_CLASS ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+<!-- ##### MACRO GWY_AXISER_EAST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXISER_NORTH ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXISER_SOUTH ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXISER_WEST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_AUTO ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_EAST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_EXP ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_FLOAT ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_INT ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_NORTH ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_SOUTH ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_AXIS_WEST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_BRASS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_BRONZE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_CHROME ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_COPPER ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_EMERALD ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_GOLD ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_JADE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_NONE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_OBSIDIAN ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_PEARL ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_RUBY ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_SILVER ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GLMATERIAL_TURQUOISE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GL_MATERIAL_CHROME ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GL_MATERIAL_OBSIDIAN ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GL_MATERIAL_RUBY ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_LABEL_NORTHEAST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_LABEL_NORTHWEST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_LABEL_SOUTHEAST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_LABEL_SOUTHWEST ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_CIRCLE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_CROSS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_DIAMOND ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_SQUARE ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_STAR ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_TIMES ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_TRIANGLE_DOWN ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_GRAPH_POINT_TRIANGLE_UP ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_IS_3D_LABELS ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+<!-- ##### MACRO GWY_IS_3D_LABELS_CLASS ##### -->
+<para>
+
+</para>
+
+@klass: 
+
+<!-- ##### MACRO GWY_TYPE_3D_LABELS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO GWY_VMENU_BAR ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+<!-- ##### MACRO GWY_VMENU_BAR_CLASS ##### -->
+<para>
+
+</para>
+
+@klass: 
+
+<!-- ##### MACRO GWY_VMENU_BAR_GET_CLASS ##### -->
+<para>
+
+</para>
+
+@obj: 
+
+<!-- ##### STRUCT Gwy3DLabelDescriptionClass ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GwyAxiserScaleFormat ##### -->
+<para>
+
+</para>
+
+@GWY_AXISER_FLOAT: 
+@GWY_AXISER_EXP: 
+@GWY_AXISER_INT: 
+@GWY_AXISER_AUTO: 
+
+<!-- ##### STRUCT GwyColorAxisParams ##### -->
+<para>
+
+</para>
+
+@tick_length: 
+@textarea: 
+@font: 
+
+<!-- ##### SIGNAL GwyColorButton::color-set ##### -->
+<para>
+
+</para>
+
+@gwycolorbutton: the object which received the signal.
+
+<!-- ##### ARG GwyColorButton:alpha ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyColorButton:title ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyColorButtonPrivate ##### -->
+<para>
+
+</para>
+
+@pixbuf: 
+@gc: 
+@drawing_area: 
+@cs_dialog: 
+@title: 
+@color: 
+@alpha: 
+@use_alpha: 
+
+<!-- ##### SIGNAL GwyDataViewLayer::finished ##### -->
+<para>
+
+</para>
+
+@gwydataviewlayer: the object which received the signal.
+
+<!-- ##### SIGNAL GwyGraphArea::gwygrapharea-selected ##### -->
+<para>
+
+</para>
+
+@gwygrapharea: the object which received the signal.
+
+<!-- ##### STRUCT GwyGraphEpitomeCurve ##### -->
+<para>
+
+</para>
+
+@n: 
+@xdata: 
+@ydata: 
+@params: 
+
+<!-- ##### ENUM GwyGrapherCurveType ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPHER_CURVE_HIDDEN: 
+@GWY_GRAPHER_CURVE_POINTS: 
+@GWY_GRAPHER_CURVE_LINE: 
+@GWY_GRAPHER_CURVE_LINE_POINTS: 
+
+<!-- ##### ENUM GwyGrapherLabelPosition ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPHER_LABEL_NORTHEAST: 
+@GWY_GRAPHER_LABEL_NORTHWEST: 
+@GWY_GRAPHER_LABEL_SOUTHEAST: 
+@GWY_GRAPHER_LABEL_SOUTHWEST: 
+@GWY_GRAPHER_LABEL_USER: 
+
+<!-- ##### ENUM GwyGrapherPointType ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPHER_POINT_SQUARE: 
+@GWY_GRAPHER_POINT_CROSS: 
+@GWY_GRAPHER_POINT_CIRCLE: 
+@GWY_GRAPHER_POINT_STAR: 
+@GWY_GRAPHER_POINT_TIMES: 
+@GWY_GRAPHER_POINT_TRIANGLE_UP: 
+@GWY_GRAPHER_POINT_TRIANGLE_DOWN: 
+@GWY_GRAPHER_POINT_DIAMOND: 
+
+<!-- ##### ENUM GwyGrapherStatusType ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPHER_STATUS_PLAIN: 
+@GWY_GRAPHER_STATUS_CURSOR: 
+@GWY_GRAPHER_STATUS_XSEL: 
+@GWY_GRAPHER_STATUS_YSEL: 
+@GWY_GRAPHER_STATUS_POINTS: 
+@GWY_GRAPHER_STATUS_ZOOM: 
+
+<!-- ##### ARG GwyLayerAxes:max-axes ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyLayerAxes:orientation ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyLayerLines:max-lines ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyLayerPoints:max-points ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyLayerSelect:is-crop ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyOptionMenuEntry ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SIGNAL GwySphereCoords::value-changed ##### -->
+<para>
+
+</para>
+
+@gwyspherecoords: the object which received the signal.
+
+<!-- ##### MACRO P_ ##### -->
+<para>
+
+</para>
+
+@x: 
+
+<!-- ##### MACRO WIN32_LEAN_AND_MEAN ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE gwyGL_mat_none ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_2dcwt_option_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_label_description_get_autoscele ##### -->
+<para>
+
+</para>
+
+@label_description: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_labels_connect_signal ##### -->
+<para>
+
+</para>
+
+@labels: 
+@signal_name: 
+@handler: 
+@user_data: 
+
+<!-- ##### FUNCTION gwy_3d_labels_format_text ##### -->
+<para>
+
+</para>
+
+@labels: 
+@label_name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_labels_get_text ##### -->
+<para>
+
+</para>
+
+@labels: 
+@label_name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_labels_get_type ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_label_description ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@label_name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_lights ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_orthographic ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_palette ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_status ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_get_use_lights ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_3d_view_set_lights ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@enable_labels: 
+
+<!-- ##### FUNCTION gwy_3d_view_set_orthographic ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@orthographic: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_set_palette ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@palette: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_set_status ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@mv: 
+@gwy3dwiew: 
+
+<!-- ##### FUNCTION gwy_3d_view_set_use_lights ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@use_lights: 
+
+<!-- ##### FUNCTION gwy_axis_enable_set_label ##### -->
+<para>
+
+</para>
+
+@axis: 
+@enable: 
+
+<!-- ##### FUNCTION gwy_color_axis_get_palette ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_color_axis_new_default ##### -->
+<para>
+
+</para>
+
+@orientation: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_color_axis_set_palette ##### -->
+<para>
+
+</para>
+
+@axis: 
+@pal: 
+
+<!-- ##### FUNCTION gwy_color_axis_set_unit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@unit: 
+
+<!-- ##### FUNCTION gwy_color_button_get_alpha ##### -->
+<para>
+
+</para>
+
+@color_button: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_color_button_get_title ##### -->
+<para>
+
+</para>
+
+@color_button: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_color_button_set_alpha ##### -->
+<para>
+
+</para>
+
+@color_button: 
+@alpha: 
+
+<!-- ##### FUNCTION gwy_color_button_set_title ##### -->
+<para>
+
+</para>
+
+@color_button: 
+@title: 
+
+<!-- ##### FUNCTION gwy_data_view_get_zoom_mode ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_button_press ##### -->
+<para>
+
+</para>
+
+@layer: 
+@event: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_button_release ##### -->
+<para>
+
+</para>
+
+@layer: 
+@event: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_draw ##### -->
+<para>
+
+</para>
+
+@layer: 
+@drawable: 
+@pixbuf: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_finished ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_is_vector ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_key_press ##### -->
+<para>
+
+</para>
+
+@layer: 
+@event: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_key_release ##### -->
+<para>
+
+</para>
+
+@layer: 
+@event: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_motion_notify ##### -->
+<para>
+
+</para>
+
+@layer: 
+@event: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_layer_paint ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_view_set_zoom_mode ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@zoom_mode: 
+
+<!-- ##### FUNCTION gwy_data_window_get_units ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_data_window_set_units ##### -->
+<para>
+
+</para>
+
+@data_window: 
+@units: 
+
+<!-- ##### FUNCTION gwy_fft_output_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_exists ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_foreach ##### -->
+<para>
+
+</para>
+
+@callback: 
+@user_data: 
+
+<!-- ##### FUNCTION gwy_glmaterial_get_by_name ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_get_name ##### -->
+<para>
+
+</para>
+
+@glmaterial: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_new ##### -->
+<para>
+
+</para>
+
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_set_name ##### -->
+<para>
+
+</para>
+
+@glmaterial: 
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_glmaterial_setup_presets ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_graph_draw_curve ##### -->
+<para>
+
+</para>
+
+@drawable: 
+@gc: 
+@specs: 
+@curvemodel: 
+
+<!-- ##### FUNCTION gwy_graph_draw_line ##### -->
+<para>
+
+</para>
+
+@drawable: 
+@gc: 
+@x_from: 
+@y_from: 
+@x_to: 
+@y_to: 
+@type: 
+@line_style: 
+@size: 
+@color: 
+
+<!-- ##### FUNCTION gwy_graph_draw_selection_areas ##### -->
+<para>
+
+</para>
+
+@drawable: 
+@gc: 
+@specs: 
+@data_areas: 
+@n_of_areas: 
+
+<!-- ##### FUNCTION gwy_graph_draw_selection_points ##### -->
+<para>
+
+</para>
+
+@drawable: 
+@gc: 
+@specs: 
+@data_points: 
+@n_of_points: 
+
+<!-- ##### FUNCTION gwy_graph_enable_axis_label_update ##### -->
+<para>
+
+</para>
+
+@graph: 
+@enable: 
+
+<!-- ##### FUNCTION gwy_graph_epitome_new ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_graph_new_from_epitome ##### -->
+<para>
+
+</para>
+
+@gepitome: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_graph_signal_selected ##### -->
+<para>
+
+</para>
+
+@graph: 
+
+<!-- ##### FUNCTION gwy_grapher_curve_model_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_grapher_curve_model_save_curve ##### -->
+<para>
+
+</para>
+
+@gcmodel: 
+@grapher: 
+@index_: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_grapher_model_add_curve ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@curve: 
+
+<!-- ##### FUNCTION gwy_grapher_model_get_n_curves ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_grapher_model_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+@grapher: 
+
+<!-- ##### FUNCTION gwy_grapher_model_remove_all_curves ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+
+<!-- ##### FUNCTION gwy_grapher_new_from_model ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_interpolation_option_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_axes_get_axes ##### -->
+<para>
+
+</para>
+
+@layer: 
+@axes: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_axes_get_max_axes ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_axes_get_orientation ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_axes_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_axes_set_max_axes ##### -->
+<para>
+
+</para>
+
+@layer: 
+@naxes: 
+
+<!-- ##### FUNCTION gwy_layer_axes_set_orientation ##### -->
+<para>
+
+</para>
+
+@layer: 
+@orientation: 
+
+<!-- ##### FUNCTION gwy_layer_basic_get_palette ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_basic_set_palette ##### -->
+<para>
+
+</para>
+
+@layer: 
+@palette: 
+
+<!-- ##### FUNCTION gwy_layer_cursor_free_or_unref ##### -->
+<para>
+
+</para>
+
+@cursor: 
+
+<!-- ##### FUNCTION gwy_layer_cursor_new_or_ref ##### -->
+<para>
+
+</para>
+
+@cursor: 
+@type: 
+
+<!-- ##### FUNCTION gwy_layer_lines_get_lines ##### -->
+<para>
+
+</para>
+
+@layer: 
+@lines: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_lines_get_max_lines ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_lines_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_lines_set_max_lines ##### -->
+<para>
+
+</para>
+
+@layer: 
+@nlines: 
+
+<!-- ##### FUNCTION gwy_layer_lines_unselect ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+<!-- ##### FUNCTION gwy_layer_pointer_get_point ##### -->
+<para>
+
+</para>
+
+@layer: 
+@x: 
+@y: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_pointer_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_pointer_unselect ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+<!-- ##### FUNCTION gwy_layer_points_get_max_points ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_points_get_points ##### -->
+<para>
+
+</para>
+
+@layer: 
+@points: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_points_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_points_set_max_points ##### -->
+<para>
+
+</para>
+
+@layer: 
+@npoints: 
+
+<!-- ##### FUNCTION gwy_layer_points_unselect ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+<!-- ##### FUNCTION gwy_layer_select_get_is_crop ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_select_get_selection ##### -->
+<para>
+
+</para>
+
+@layer: 
+@xmin: 
+@ymin: 
+@xmax: 
+@ymax: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_select_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_select_set_is_crop ##### -->
+<para>
+
+</para>
+
+@layer: 
+@is_crop: 
+
+<!-- ##### FUNCTION gwy_layer_select_unselect ##### -->
+<para>
+
+</para>
+
+@layer: 
+
+<!-- ##### FUNCTION gwy_layer_triangle_get_selection ##### -->
+<para>
+
+</para>
+
+@layer: 
+@x0: 
+@y0: 
+@x1: 
+@y1: 
+@x2: 
+@y2: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_layer_triangle_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION gwy_menu_palette ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_direction ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_fft_output ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_filter ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_fit_line ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_fractal ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_mergegrain ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_nlfitpreset ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_palette ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_option_menu_zoom_mode ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_palette_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_palette_option_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_radio_buttons_get_current_widget ##### -->
+<para>
+
+</para>
+
+@radio_button: 
+@key: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_radio_buttons_set_current_widget ##### -->
+<para>
+
+</para>
+
+@radio_button: 
+@key: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_shader_set_spherical_angle ##### -->
+<para>
+
+</para>
+
+@shader: 
+@theta: 
+@phi: 
+
+<!-- ##### FUNCTION gwy_sphere_coords_value_changed ##### -->
+<para>
+
+</para>
+
+@sphere_coords: 
+
+<!-- ##### FUNCTION gwy_vector_layer_get_nselected ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_windowing_option_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_zoom_mode_option_menu ##### -->
+<para>
+
+</para>
+
+@callback: 
+@cbdata: 
+@current: 
+@Returns: 
+
+<!-- ##### FUNCTION my_layout_new ##### -->
+<para>
+
+</para>
+
+@hadjustment: 
+@vadjustment: 
+@Returns: 
+

@@ -1,0 +1,401 @@
+<!-- ##### SECTION Title ##### -->
+Gwy3DView
+
+<!-- ##### SECTION Short_Description ##### -->
+OpenGL 3D data display
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+#Gwy3DView displays a data field as a threedimensional heightfield using
+OpenGL. You can create a new 3D view for a data container with
+gwy_3d_view_new().  By default, it
+inherits properties like palette from <link linkend="GwyDataView">data
+view</link> settings, but supports separate settings -- see
+gwy_3d_view_set_palette() et al.
+</para>
+
+<para>
+#Gwy3DView allows the user to interactively rotate, scale, z-scale the data or
+move lights, depending on its <link linkend="Gwy3DMovement">movement
+state</link>. There are no controls provided for mode change, you have to
+provide some yourself and set the movement mode with
+gwy_3d_view_set_status().
+There are #GtkAdjustment's for each view
+parameter, you can fetch them with
+gwy_3d_view_get_rot_x_adjustment(),
+gwy_3d_view_get_rot_y_adjustment(),
+etc.
+</para>
+
+<para>
+Due to lack of real #GwyWatchable
+implementation in data fields, you have to call
+gwy_3d_view_update() to instruct
+the 3D view to update self, when data changes.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+<link linkend="Gwy3DWindow">Gwy3DWindow</link>,
+<link linkend="GwyGLMaterial">GwyGLMaterial</link>
+</para>
+
+<!-- ##### STRUCT Gwy3DView ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG Gwy3DView:movement-type ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG Gwy3DView:projection ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG Gwy3DView:reduced-size ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG Gwy3DView:show-axes ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG Gwy3DView:show-labels ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT Gwy3DViewClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+@reserved3: 
+@reserved4: 
+
+<!-- ##### FUNCTION gwy_3d_view_new ##### -->
+<para>
+
+</para>
+
+@data: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@container: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_update ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_gradient ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_gradient ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@gradient: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_movement_type ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_movement_type ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@movement: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_projection ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_projection ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@projection: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_show_axes ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_show_axes ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@show_axes: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_show_labels ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_show_labels ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@show_labels: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_visualization ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_visualization ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@visual: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_reduced_size ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_reduced_size ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@reduced_size: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_material ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_material ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@material: 
+<!-- # Unused Parameters # -->
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_pixbuf ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@xres: 
+@yres: 
+@gwy3dwiew: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_label ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@label: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_data ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_reset_view ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+<!-- # Unused Parameters # -->
+@gwy3Dview: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_rot_x_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_rot_y_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_view_scale_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_z_deformation_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_light_z_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_light_y_adjustment ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_max_view_scale ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_get_min_view_scale ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_max_view_scale ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@new_max_scale: 
+<!-- # Unused Parameters # -->
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_3d_view_set_min_view_scale ##### -->
+<para>
+
+</para>
+
+@gwy3dview: 
+@new_min_scale: 
+<!-- # Unused Parameters # -->
+@Returns: 
+
+
