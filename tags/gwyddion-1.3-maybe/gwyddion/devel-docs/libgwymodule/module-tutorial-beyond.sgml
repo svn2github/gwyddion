@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="gwymodule-tutorial-beyond" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Beyond The Minimal Module</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Beyond The Minimal Module</refname>
+    <refpurpose>
+      Some common and useful module idioms.
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Multiple Modules, Multiple Function, Multifunctions</title>
+    <para>
+      Often one wants to implement a group of closely related functions that
+      could share quite a bit of code.  There are several posibilities how
+      to do it.
+    </para>
+    <para>
+      The naive approach would be to put the code of all the modules to
+      a one file and share what is shareable.  But alas! there can be only
+      one <link linkend="GWY-MODULE-QUERY-CAPS">GWY_MODULE_QUERY</link> per
+      file, thus a one file can register only a one module and this approach
+      would not work.
+    </para>
+    <para>
+      The prefered solution is to register more than function for the
+      module.  This is as simple as it sounds.  One just has to define more
+      <link linkend="GwyProcessFuncInfo">GwyProcessFuncInfo</link>s
+      (or other func infos) and register the functions one by one in
+      <symbol>module_register()</symbol>.  It is even
+      possible to register functions of different kind in a one module, but
+      usually you don't want to do this.
+    </para>
+    <informalexample><programlisting><![CDATA[
+static gboolean
+module_register(const gchar *name)
+{
+    static GwyProcessFuncInfo foo_func_info = {
+        "foo",
+        "/_Basic Operations/Foo",
+        (GwyProcessFunc)&foo,
+        FOO_RUN_MODES,
+    };
+    static GwyProcessFuncInfo bar_func_info = {
+        "bar",
+        "/_Basic Operations/Bar",
+        (GwyProcessFunc)&bar,
+        BAR_RUN_MODES,
+    };
+
+    gwy_process_func_register(name, &foo_func_info);
+    gwy_process_func_register(name, &bar_func_info);
+
+    return TRUE;
+}
+]]></programlisting></informalexample>
+    <para>
+      The other posibility, generally not recommended but sometimes
+      useful, is to define more
+      <link linkend="GwyProcessFuncInfo">GwyProcessFuncInfo</link>s
+      like before, but make them all points to the same C function.
+      It can then determine from its last argument (<symbol>name</symbol>)
+      what function the caller thinks it is calling.
+      Incidentally, this is exactly how the plugin-proxy module works.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Settings</title>
+    <para>
+      The nice thing about Gwyddion module dialog boxes is that they show
+      the same parameter values as when you last opened them, and they
+      remember the settings even across sessions.  And you of course want
+      this feature in your modules too.
+    </para>
+    <para>
+      Saving and restoring settings usually has sense only for modules with
+      a GUI, simple noninteractive modules like value invert don't have any
+      settings to remember.  We will get to GUI later.
+    </para>
+    <para>
+      There is a one <link linkend="GwyContainer">GwyContainer</link> in
+      Gwyddion containing settings for all modules (and other creatures).
+      The function
+      <link linkend="gwy-app-settings-get">gwy_app_settings_get()</link>
+      will bring it to you.  It is loaded on startup and saved
+      on exit and you don't need to take care about this.
+      So the only thing you have to care about is to read the settings from
+      it when your module starts and store them there on exit.  OK, there
+      are in fact two things you have to care about.  There are no
+      limitations on who can access what in the settings, so to avoid
+      surprises you should use only keys startings with
+      <literal>"/module/<parameter>my-module-name</parameter>/"</literal>.
+    </para>
+    <para>
+      Loading settings could look (remember they may not always exist, for
+      instance when the function is run the first time):
+    </para>
+    <informalexample><programlisting><![CDATA[
+GwyContainer *settings;
+
+settings = gwy_app_settings_get();
+ratio = 1.61803;
+gwy_container_gis_double_by_name(settings,
+                                 "/module/my_module/ratio",
+                                 &ratio);
+]]></programlisting></informalexample>
+    <para>
+      The <link linkend="gwy-container-gis-double-by-name">gwy_container_gis_double_by_name()</link>
+      function updates its last argument only when there is a corresponding
+      value in the container.
+    </para>
+    <para>
+      And saving settings could look:
+    </para>
+    <informalexample><programlisting><![CDATA[
+GwyContainer *settings;
+
+settings = gwy_app_settings_get();
+gwy_container_set_double_by_name(settings,
+                                 "/module/my_module/ratio",
+                                 ratio);
+]]></programlisting></informalexample>
+  </refsect1>
+  <refsect1>
+    <title>Creating New Windows</title>
+    <para>
+      Not always one wants to modify the original data but prefers to create
+      a new data window for the result.  This primarily means one has to
+      clonine the data container.  Fortunately containers are
+      <link linkend="GwySerializable">GwySerializable</link>s so they can
+      be duplicated using
+      <link linkend="gwy-serializable-duplicate">gwy_serializable_duplicate()</link>.
+      We have to get our data field from the newly created container of
+      course, otherwise all the work would be vain.
+      A new gwyddion data window can be created with
+      <link linkend="gwy-app-data-window-create">gwy_app_data_window_create()</link>
+      then. Putting this all together we have:
+    </para>
+    <informalexample><programlisting><![CDATA[
+data = GWY_CONTAINER(gwy_serializable_duplicate(G_OBJECT(data)));
+gwy_app_clean_up_data(data);
+dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data,
+                                                         "/0/data"));
+do_something_with_data_filed(dfield);
+data_window = gwy_app_data_window_create(data);
+gwy_app_data_window_set_untitled(GWY_DATA_WINDOW(data_window), NULL);
+]]></programlisting></informalexample>
+    <para>
+      There are still two things not mentioned before however.
+      First of them is the mysterious
+      <link linkend="gwy-app-clean-up-data">gwy_app_clean_up_data()</link>
+      call. It currently removes some stuff that should not be propagated
+      from the old data to the new one, it can also become no-op in the
+      future, but it does not any harm to use it.
+      The second one,
+      <link linkend="gwy-app-data-window-set-untitled">gwy_app_data_window_set_untitled()</link>
+      simply sets the title of the newly window to an unique
+      <quote>Untitled</quote>.
+      If you pass something else than <literal>NULL</literal> as the
+      second argument, you can create untitled windows of different titles
+      (an oxymoron?), please see
+      <link linkend="gwy-app-data-window-set-untitled">gwy_app_data_window_set_untitled()</link>
+      for details.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Masks And Presentations</title>
+    <para>
+      To highlight some areas in the data (like the grain modules do) you may
+      want to use a mask.  Masks are data fields too, differing only
+      by a few things from the ordinary ones.  They live at
+      <literal>"/0/mask"</literal> instead of <literal>"/0/data"</literal>
+      in the container, they may not be present there, and their units are
+      irrelevant – the value range is always from 0 to 1,
+      0 being fully transparent and 1 the mask color set by user (may not be
+      fully opaque).  To create a mask, just create a new data field and
+      put it to the container with key <literal>"/0/mask"</literal>.  When
+      a mask is already present there, it is more efficient to reuse it.
+    </para>
+    <para>
+      You may also want to conceal the true nature of the data and make
+      gwyddion to display them in a funny way, but without actually modifying
+      them (like the shader module does).  This is possible by putting a
+      <literal>"/0/show"</literal> data field to the container.  When
+      present, it is displayed instead of the data.  It is really only useful
+      for some final presentations, because it is not obviously updated when
+      the data changes.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>File Type Modules</title>
+    <para>
+      File type modules implement loading and saving of files.  They are
+      quite similar to data processing modules.   The function info
+      (<link linkend="libgwymodule-gwymodule-file-GwyFileFuncInfo">GwyFileFuncInfo</link>)
+      contains pointers to three functions instead of one: loading, saving
+      and file type detection.  You don't have to implement all, just
+      set the unimplemented members to <literal>NULL</literal>.  If
+      detection is not implemented, files of this type are loaded or
+      saved only when user explicitely requests it from the Import or Export
+      menu.
+    </para>
+    <para>
+      The loading function gets a file name and returns a container with
+      data from the file; conversely, the saving function gets a container
+      and a file name and writes the data from the container to the file.
+      The exact signatures of the functions are described in the
+      <link linkend="libgwymodule-gwymodule-file">reference</link> part.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Graphical User Interface (GUI)</title>
+    <para>
+      You are encouraged to use the <ulink url="http://gtk.org/">Gtk+</ulink>
+      graphical toolkit for your module GUI.  It has following advantages:
+      <itemizedlist>
+        <listitem>
+          It is available for a variety of platforms, allowing to easily
+          create portable modules.
+        </listitem>
+        <listitem>
+          It is licensed under GNU LGPL (for all the platforms), this meaning
+          namely it is free, with complete source code available and imposing
+          few restrictions on programs using it.
+        </listitem>
+        <listitem>
+          It is used by Gwyddion itself.  Any specialized Gwyddion widgets
+          you could make use of are Gtk+.  Using one graphical toolkit
+          exclusively also means more unique look and feel and less
+          linking problems.
+        </listitem>
+      </itemizedlist>
+      There is an extensive
+      <ulink url="http://gtk.org/tutorial/">Gtk+ Tutorial</ulink>
+      and <ulink url="http://gtk.org/api/">API Reference</ulink> available
+      on the Gtk+ Web site.  You can use existing modules as templates
+      for your module.
+    </para>
+    <para>
+      A very simple GUI dialog asking for a one value (unimaginatively called
+      Amount) could be implemented in Gtk+ as follows:
+    </para>
+    <informalexample><programlisting><![CDATA[
+static gboolean
+slope_dialog(gdouble *amount)
+{
+    GtkWidget *dialog, *table, *spin;
+    GtkObject *adjust;
+    gint response;
+
+    dialog = gtk_dialog_new_with_buttons(_("Frobnicate"), NULL,
+                                         GTK_DIALOG_DESTROY_WITH_PARENT,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                         NULL);
+
+    table = gtk_table_new(1, 3, FALSE);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), table,
+                       FALSE, FALSE, 4);
+
+    adjust = gtk_adjustment_new(*amount, 0, 100, 1, 10, 0);
+    spin = gwy_table_attach_spinbutton(table, 0, _("Amount:"), "percents",
+                                       adjust);
+    gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), 1);
+
+    gtk_widget_show_all(dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    switch (response) {
+        case GTK_RESPONSE_CANCEL:
+        case GTK_RESPONSE_DELETE_EVENT:
+        gtk_widget_destroy(dialog);
+        case GTK_RESPONSE_NONE:
+        break;
+
+        case GTK_RESPONSE_OK:
+        *amount = gtk_adjustment_get_value(GTK_ADJUSTMENT(adjust));
+        gtk_widget_destroy(dialog);
+        break;
+    }
+
+    return response == GTK_RESPONSE_OK;
+}
+]]></programlisting></informalexample>
+    <para>
+      There is no rocket science in here: the dialog is created with some
+      standard buttons, a value entry with a description
+      is placed there, range of allowed values is specified; then the dialog
+      is run. Depending on user's action the value of
+      <varname>amount</varname> is eventually updated, and
+      <literal>TRUE</literal> or <literal>FALSE</literal> is returned to
+      the caller to indicate user's action (we take everything as
+      cancellation, except pressing <guibutton>OK</guibutton>).
+    </para>
+    <para>
+      Note such a module would report <literal>GWY_RUN_MODAL</literal>
+      as its <link linkend="libgwymodule-gwymodule-process-GwyRunMode">run
+      mode</link>, not <literal>GWY_RUN_INTERACTIVE</literal> since the
+      <function>gtk_dialog_run()</function> runs the dialog in a modal
+      (exclusive) mode, blocking the rest of application until the dialog
+      is closed.  This is the simpliest possibility, suficient for most
+      modules (as no race conditions can arise).
+    </para>
+    <para>
+      TODO: other modules types.
+    </para>
+  </refsect1>
+</refentry>
+

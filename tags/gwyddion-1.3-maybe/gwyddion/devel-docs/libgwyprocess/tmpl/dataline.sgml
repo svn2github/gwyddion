@@ -1,0 +1,519 @@
+<!-- ##### SECTION Title ##### -->
+GwyDataLine
+
+<!-- ##### SECTION Short_Description ##### -->
+Array representing 1D data
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This object represents 1D data arrays in Gwyddion.
+It is used for most of the data processing functions
+connected with 1D data, graphs, etc.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### ENUM GwySFOutputType ##### -->
+<para>
+Statistical functions selection.
+</para>
+
+@GWY_SF_OUTPUT_DH: distribution of heights
+@GWY_SF_OUTPUT_CDH: cumulative distribution of heights
+@GWY_SF_OUTPUT_DA: distribution of angles (slopes)
+@GWY_SF_OUTPUT_CDA: cumulative distribution of angles
+@GWY_SF_OUTPUT_ACF: autocorrelation function
+@GWY_SF_OUTPUT_HHCF: height-height correlation function
+@GWY_SF_OUTPUT_PSDF: power spectral density function
+
+<!-- ##### ENUM GwyFitLineType ##### -->
+<para>
+Fit polynomial degree selection.
+</para>
+
+@GWY_FIT_POLY_0: 
+@GWY_FIT_POLY_1: 
+@GWY_FIT_POLY_2: 
+@GWY_FIT_POLY_3: 
+
+<!-- ##### STRUCT GwyDataLine ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyDataLineClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+
+<!-- ##### FUNCTION gwy_data_line_new ##### -->
+<para>
+
+</para>
+
+@res: 
+@real: 
+@nullme: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_resample ##### -->
+<para>
+
+</para>
+
+@a: 
+@res: 
+@interpolation: 
+
+
+<!-- ##### FUNCTION gwy_data_line_resize ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_copy ##### -->
+<para>
+
+</para>
+
+@a: 
+@b: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_data ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_res ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_real ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_set_real ##### -->
+<para>
+
+</para>
+
+@a: 
+@real: 
+
+
+<!-- ##### FUNCTION gwy_data_line_itor ##### -->
+<para>
+
+</para>
+
+@a: 
+@pixval: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_rtoi ##### -->
+<para>
+
+</para>
+
+@a: 
+@realval: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_val ##### -->
+<para>
+
+</para>
+
+@a: 
+@i: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_set_val ##### -->
+<para>
+
+</para>
+
+@a: 
+@i: 
+@value: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_dval ##### -->
+<para>
+
+</para>
+
+@a: 
+@x: 
+@interpolation: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_dval_real ##### -->
+<para>
+
+</para>
+
+@a: 
+@x: 
+@interpolation: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_invert ##### -->
+<para>
+
+</para>
+
+@a: 
+@x: 
+@z: 
+
+
+<!-- ##### FUNCTION gwy_data_line_fill ##### -->
+<para>
+
+</para>
+
+@a: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_multiply ##### -->
+<para>
+
+</para>
+
+@a: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_add ##### -->
+<para>
+
+</para>
+
+@a: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_fill ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_multiply ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_add ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@value: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_max ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_min ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_avg ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_rms ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_sum ##### -->
+<para>
+
+</para>
+
+@a: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_get_max ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_get_min ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_get_avg ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_get_rms ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_get_sum ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_threshold ##### -->
+<para>
+
+</para>
+
+@a: 
+@threshval: 
+@bottom: 
+@top: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_threshold ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@threshval: 
+@bottom: 
+@top: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_line_coeffs ##### -->
+<para>
+
+</para>
+
+@a: 
+@av: 
+@bv: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_line_coeffs ##### -->
+<para>
+
+</para>
+
+@a: 
+@from: 
+@to: 
+@av: 
+@bv: 
+
+
+<!-- ##### FUNCTION gwy_data_line_line_level ##### -->
+<para>
+
+</para>
+
+@a: 
+@av: 
+@bv: 
+
+
+<!-- ##### FUNCTION gwy_data_line_line_rotate ##### -->
+<para>
+
+</para>
+
+@a: 
+@angle: 
+@interpolation: 
+
+
+<!-- ##### FUNCTION gwy_data_line_get_der ##### -->
+<para>
+
+</para>
+
+@a: 
+@i: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_fft ##### -->
+<para>
+
+</para>
+
+@ra: 
+@ia: 
+@rb: 
+@ib: 
+@fft: 
+@windowing: 
+@direction: 
+@interpolation: 
+@preserverms: 
+@level: 
+
+
+<!-- ##### FUNCTION gwy_data_line_fft_hum ##### -->
+<para>
+
+</para>
+
+@direction: 
+@ra: 
+@ia: 
+@rb: 
+@ib: 
+@interpolation: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_fit_polynom ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@n: 
+@coeffs: 
+@from: 
+@to: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_fit_polynom ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@n: 
+@coeffs: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_data_line_part_subtract_polynom ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@n: 
+@coeffs: 
+@from: 
+@to: 
+
+
+<!-- ##### FUNCTION gwy_data_line_subtract_polynom ##### -->
+<para>
+
+</para>
+
+@data_line: 
+@n: 
+@coeffs: 
+
+
