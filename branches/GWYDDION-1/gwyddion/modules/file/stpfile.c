@@ -38,7 +38,11 @@
 #define DATA_MAGIC "Data_section  \r\n"
 #define DATA_MAGIC_SIZE (sizeof(DATA_MAGIC) - 1)
 
+#define EXTENSION ".stp"
+
 #define KEY_LEN 14
+
+#define Angstrom (1e-10)
 
 typedef struct {
     gint id;
@@ -71,7 +75,8 @@ static void          read_data_field       (GwyDataField *dfield,
                                             STPData *stpdata);
 static guint         file_read_header      (STPFile *stpfile,
                                             gchar *buffer);
-static void          store_metadata        (GHashTable *meta,
+static void          process_metadata      (STPFile *stpfile,
+                                            guint id,
                                             GwyContainer *container);
 static guint         select_which_data     (STPFile *stpfile);
 static void          selection_changed     (GtkWidget *button,
@@ -82,7 +87,7 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "stpfile",
-    N_("Import Molecular Imaging STP data files."),
+    N_("Imports Molecular Imaging STP data files."),
     "Yeti <yeti@gwyddion.net>",
     "0.1",
     "David Nečas (Yeti) & Petr Klapetek",
@@ -117,8 +122,12 @@ stpfile_detect(const gchar *filename, gboolean only_name)
     gchar magic[MAGIC_SIZE];
 
     if (only_name) {
-        if (g_str_has_suffix(filename, ".stp"))
-            score = 20;
+        gchar *filename_lc;
+
+        /* FIXME: This extension is used for other files too */
+        filename_lc = g_ascii_strdown(filename, -1);
+        score = g_str_has_suffix(filename_lc, EXTENSION) ? 15 : 0;
+        g_free(filename_lc);
 
         return score;
     }
@@ -146,7 +155,7 @@ stpfile_load(const gchar *filename)
     guint header_size;
     gchar *p;
     gboolean ok;
-    guint i, pos;
+    guint i = 0, pos;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -192,7 +201,7 @@ stpfile_load(const gchar *filename)
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
                                          G_OBJECT(dfield));
-        /*store_metadata(meta, GWY_CONTAINER(object));*/
+        process_metadata(stpfile, i, GWY_CONTAINER(object));
     }
     stpfile_free(stpfile);
 
@@ -252,6 +261,9 @@ file_read_header(STPFile *stpfile,
             data->id = atol(line + KEY_LEN);
             meta = data->meta;
         }
+        if (line[0] == ' ')
+            continue;
+
         key = g_strstrip(g_strndup(line, KEY_LEN));
         value = g_strstrip(g_strdup(line + KEY_LEN));
         g_hash_table_replace(meta, key, value);
@@ -267,34 +279,108 @@ file_read_header(STPFile *stpfile,
     return stpfile->n;
 }
 
-#if 0
+static gboolean
+stpfile_get_double(GHashTable *meta,
+                   const gchar *key,
+                   gdouble *value)
+{
+    gchar *p, *end;
+    gdouble r;
+
+    p = g_hash_table_lookup(meta, key);
+    if (!p)
+        return FALSE;
+
+    r = g_ascii_strtod(p, &end);
+    if (end == p)
+        return FALSE;
+
+    *value = r;
+    return TRUE;
+}
+
 static void
-process_metadata(GHashTable *meta,
+process_metadata(STPFile *stpfile,
+                 guint id,
                  GwyContainer *container)
 {
+    STPData *data;
     GwyDataField *dfield;
-    gchar *value;
-    GString *key;
-    guint i;
+    GwySIUnit *siunit;
+    gdouble q, r;
+    gchar *p;
+    guint mode;
 
-    key = g_string_new("");
-    for (i = 0; i < G_N_ELEMENTS(metakeys); i++) {
-        if (!(value = g_hash_table_lookup(meta, metakeys[i].id)))
-            continue;
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(container,
+                                                             "/0/data"));
 
-        g_string_printf(key, "/meta/%s", metakeys[i].key);
-        if (metakeys[i].unit)
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup_printf("%s %s",
-                                                             value,
-                                                             metakeys[i].unit));
+    data = stpfile->buffers + id;
+    if ((p = g_hash_table_lookup(data->meta, "source_mode")))
+        mode = atol(p);
+    else
+        mode = 1;
+
+    /* Fix value scale */
+    switch (mode) {
+        case 1:
+        case 9:
+        case 10:
+        if (stpfile_get_double(stpfile->meta, "z_v_to_angs", &q)
+            && stpfile_get_double(stpfile->meta, "max_z_volt", &r)) {
+            gwy_data_field_multiply(dfield, q*r/32768*Angstrom);
+            gwy_debug("z_v_to_angs = %g, max_z_volt = %g", q, r);
+        }
         else
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup(value));
+            gwy_data_field_multiply(dfield, Angstrom/32768);
+        break;
+
+        case 2:
+        case 8:
+        case 12:
+        case 13:
+        case 14:
+        r = 1.0;
+        stpfile_get_double(stpfile->meta, "convers_coeff", &r);
+        gwy_data_field_add(dfield, -32768.0);
+        gwy_data_field_multiply(dfield, 10.0/32768.0);
+        siunit = GWY_SI_UNIT(gwy_si_unit_new("V"));
+        gwy_data_field_set_si_unit_z(dfield, siunit);
+        g_object_unref(siunit);
+        break;
+
+        default:
+        g_warning("Unknown mode %u", mode);
+        gwy_data_field_multiply(dfield, Angstrom/32768);
+        break;
     }
-    g_string_free(key, TRUE);
+
+    /* Fix lateral scale */
+    if (!stpfile_get_double(data->meta, "length_x", &r)) {
+        g_warning("Missing or invalid x length");
+        r = 1e-6;
+    }
+    gwy_data_field_set_xreal(dfield, r*Angstrom);
+
+    if (!stpfile_get_double(data->meta, "length_y", &r)) {
+        g_warning("Missing or invalid y length");
+        r = 1e-6;
+    }
+    gwy_data_field_set_yreal(dfield, r*Angstrom);
+
+    /* Metadata */
+    if ((p = g_hash_table_lookup(stpfile->meta, "software")))
+        gwy_container_set_string_by_name(container, "/meta/Software",
+                                         g_strdup(p));
+    if ((p = g_hash_table_lookup(stpfile->meta, "op_mode")))
+        gwy_container_set_string_by_name(container, "/meta/Operation mode",
+                                         g_strdup(p));
+
+    /* Local metadata */
+    if ((p = g_hash_table_lookup(data->meta, "Date")))
+        gwy_container_set_string_by_name(container, "/meta/Date", g_strdup(p));
+    if ((p = g_hash_table_lookup(data->meta, "time")))
+        gwy_container_set_string_by_name(container, "/meta/Time", g_strdup(p));
 }
-#endif
 
 static void
 read_data_field(GwyDataField *dfield,
