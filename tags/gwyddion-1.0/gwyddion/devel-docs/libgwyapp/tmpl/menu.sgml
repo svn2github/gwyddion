@@ -1,0 +1,163 @@
+<!-- ##### SECTION Title ##### -->
+menu
+
+<!-- ##### SECTION Short_Description ##### -->
+Menu functions.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### ENUM GwyMenuSensFlags ##### -->
+<para>
+
+</para>
+
+@GWY_MENU_FLAG_DATA: 
+@GWY_MENU_FLAG_UNDO: 
+@GWY_MENU_FLAG_REDO: 
+@GWY_MENU_FLAG_GRAPH: 
+@GWY_MENU_FLAG_LAST_PROC: 
+@GWY_MENU_FLAG_LAST_GRAPH: 
+@GWY_MENU_FLAG_MASK: 
+
+<!-- ##### STRUCT GwyMenuSensData ##### -->
+<para>
+
+</para>
+
+@flags: 
+@set_to: 
+
+<!-- ##### FUNCTION gwy_app_menu_create_meta_menu ##### -->
+<para>
+
+</para>
+
+@accel_group: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_create_proc_menu ##### -->
+<para>
+
+</para>
+
+@accel_group: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_create_graph_menu ##### -->
+<para>
+
+</para>
+
+@accel_group: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_create_file_menu ##### -->
+<para>
+
+</para>
+
+@accel_group: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_create_edit_menu ##### -->
+<para>
+
+</para>
+
+@accel_group: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_set_sensitive_recursive ##### -->
+<para>
+
+</para>
+
+@widget: 
+@data: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_recent_files_update ##### -->
+<para>
+
+</para>
+
+@recent_files: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_set_flags_recursive ##### -->
+<para>
+
+</para>
+
+@widget: 
+@data: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_set_sensitive_array ##### -->
+<para>
+
+</para>
+
+@item_factory: 
+@root: 
+@items: 
+@flags: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_set_sensitive_both ##### -->
+<para>
+
+</para>
+
+@item: 
+@flags: 
+@state: 
+<!-- # Unused Parameters # -->
+@sens: 
+
+
+<!-- ##### FUNCTION gwy_app_menu_set_recent_files_menu ##### -->
+<para>
+
+</para>
+
+@menu: 
+
+
+<!-- ##### FUNCTION gwy_app_toolbox_update_state ##### -->
+<para>
+
+</para>
+
+@sens_data: 
+
+
+<!-- ##### FUNCTION gwy_app_run_process_func_cb ##### -->
+<para>
+
+</para>
+
+@name: 
+
+
+<!-- ##### FUNCTION gwy_app_run_graph_func_cb ##### -->
+<para>
+
+</para>
+
+@name: 
+
+

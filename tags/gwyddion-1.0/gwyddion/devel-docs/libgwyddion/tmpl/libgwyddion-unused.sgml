@@ -1,0 +1,77 @@
+<!-- ##### SIGNAL GwyWatchable::value-changed ##### -->
+<para>
+Emitted when value changes.
+</para>
+
+
+<!-- ##### FUNCTION gwy_container_freeze_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+
+<!-- ##### FUNCTION gwy_container_thaw_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+
+<!-- ##### FUNCTION gwy_container_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+@path: 
+@callback: 
+@user_data: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_si_unit_copy ##### -->
+<para>
+
+</para>
+
+@target: 
+@example: 
+
+<!-- ##### FUNCTION gwy_si_unit_free ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_prefix ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@value: 
+@prefix: 
+@power: 
+@precision: 
+
+<!-- ##### FUNCTION gwy_si_unit_get_prefixed ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@value: 
+@prefixed: 
+@power: 
+@precision: 
+@prefix: 
+
+<!-- ##### FUNCTION gwy_si_unit_get_unit_for_magnitude ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@magnitude: 
+@Returns: 
+

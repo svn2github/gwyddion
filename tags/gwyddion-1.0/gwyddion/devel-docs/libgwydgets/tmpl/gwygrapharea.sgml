@@ -1,0 +1,169 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphArea
+
+<!-- ##### SECTION Short_Description ##### -->
+Layout for drawing graph curves.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This widget is a part of GwyGraph widget. It is
+recommended to use it within the GwyGraph widget,
+however, it can be used separately. It plots
+a set of data curves with a given plot properties.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### TYPEDEF GwyGraphAreaCurvePoints ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GwyGraphStatusType ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPH_STATUS_PLAIN: 
+@GWY_GRAPH_STATUS_CURSOR: 
+@GWY_GRAPH_STATUS_XSEL: 
+@GWY_GRAPH_STATUS_YSEL: 
+@GWY_GRAPH_STATUS_POINTS: 
+@GWY_GRAPH_STATUS_ZOOM: 
+
+<!-- ##### TYPEDEF GwyGraphDataPoint ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphScrPoint ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphStatus_CursorData ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphStatus_SelData ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphStatus_PointsData ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphStatus_ZoomData ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphAreaCurve ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF GwyGraphAreaParams ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyGraphArea ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_graph_area_new ##### -->
+<para>
+
+</para>
+
+@hadjustment: 
+@vadjustment: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_set_style ##### -->
+<para>
+
+</para>
+
+@area: 
+@style: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_set_boundaries ##### -->
+<para>
+
+</para>
+
+@area: 
+@x_min: 
+@x_max: 
+@y_min: 
+@y_max: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_add_curve ##### -->
+<para>
+
+</para>
+
+@area: 
+@curve: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_clear ##### -->
+<para>
+
+</para>
+
+@area: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_signal_selected ##### -->
+<para>
+
+</para>
+
+@area: 
+
+
+<!-- ##### FUNCTION gwy_graph_area_signal_zoomed ##### -->
+<para>
+
+</para>
+
+@area: 
+
+
+<!-- ##### SIGNAL GwyGraphArea::selected ##### -->
+<para>
+
+</para>
+
+@gwygrapharea: the object which received the signal.
+
+<!-- ##### SIGNAL GwyGraphArea::zoomed ##### -->
+<para>
+
+</para>
+
+@gwygrapharea: the object which received the signal.
+
