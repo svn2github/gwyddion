@@ -30,11 +30,12 @@
 static void print_help(void);
 static void process_preinit_options(int *argc,
                                     char ***argv);
-static gint initialize_types(void);
 
 int
 main(int argc, char *argv[])
 {
+    GdkGeometry geom = { 10, 10, 1000, 1000, 10, 10, 1, 1, 1.0, 1.0, 0 };
+
     GtkWidget *window, *view;
     GwyContainer *data, *settings;
     GwyPixmapLayer *layer;
@@ -44,12 +45,12 @@ main(int argc, char *argv[])
      * initializatioon */
     process_preinit_options(&argc, &argv);
     if (argc < 2) {
-        g_printerr("No files to display given.\n");
+        print_help();
         return 0;
     }
 
     /* Initialize Gwyddion stuff */
-    initialize_types();
+    gwy_widgets_type_init();
     g_set_application_name(PACKAGE);
     gwy_palette_def_setup_presets();
 
@@ -78,12 +79,15 @@ main(int argc, char *argv[])
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     filename = g_path_get_basename(argv[1]);
     gtk_window_set_title(GTK_WINDOW(window), filename);
+    gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
     g_signal_connect(window, "delete_event", gtk_main_quit, NULL);
     g_free(filename);
 
     /* Data view */
     view = gwy_data_view_new(data);
     gtk_container_add(GTK_CONTAINER(window), view);
+    gtk_window_set_geometry_hints(GTK_WINDOW(window), GTK_WIDGET(view),
+                                  &geom, GDK_HINT_MIN_SIZE);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(view),
                                  GWY_PIXMAP_LAYER(gwy_layer_basic_new()));
 
@@ -124,25 +128,6 @@ process_preinit_options(int *argc,
         g_print("%s %s\n", PACKAGE, VERSION);
         exit(0);
     }
-}
-
-/* Type system initialization.
- * FIXME: (a) is ugly (b) should be provided by gwyddion itself(?) */
-static gint
-initialize_types(void)
-{
-    guint optimization_fooler = 42;
-
-    g_type_init();
-    optimization_fooler += gwy_si_unit_get_type();
-    optimization_fooler += gwy_sphere_coords_get_type();
-    optimization_fooler += gwy_data_field_get_type();
-    optimization_fooler += gwy_data_line_get_type();
-    optimization_fooler += gwy_palette_get_type();
-    optimization_fooler += gwy_palette_def_get_type();
-    optimization_fooler += gwy_container_get_type();
-
-    return optimization_fooler;
 }
 
 /* Print help */
