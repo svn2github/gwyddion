@@ -333,7 +333,7 @@ fill_data_fields(APEFile *apefile,
 
 #define HASH_STORE(key, fmt, field) \
     gwy_container_set_string_by_name(container, "/meta/" key, \
-                                     g_strdup_printf(fmt, apefile->field));
+                                     g_strdup_printf(fmt, apefile->field))
 
 static void
 store_metadata(APEFile *apefile,
@@ -344,7 +344,8 @@ store_metadata(APEFile *apefile,
     HASH_STORE("Acquire delay", "%.6f s", acquire_delay);
     HASH_STORE("Raster delay", "%.6f s", raster_delay);
     HASH_STORE("Tip distance", "%g nm", tip_dist);
-    HASH_STORE("Comment", "%s", remark);
+    if (apefile->remark && *apefile->remark)
+        HASH_STORE("Comment", "%s", remark);
     gwy_container_set_string_by_name
         (container, "/meta/SPM mode",
          g_strdup(gwy_enum_to_string(apefile->spm_mode, spm_modes,
