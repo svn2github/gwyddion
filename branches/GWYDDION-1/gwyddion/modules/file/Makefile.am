@@ -19,6 +19,7 @@ file_PROGRAMS = \
 	sis.so \
 	spmlab.so \
 	stmprg.so \
+	stpfile.so \
 	wsxmfile.so
 
 noinst_HEADERS = \
@@ -69,6 +70,9 @@ spmlab_so_LDFLAGS = $(module_ldflags),spmlab.so
 
 stmprg_so_SOURCES = stmprg.c
 stmprg_so_LDFLAGS = $(module_ldflags),stmprg.so
+
+stpfile_so_SOURCES = stpfile.c
+stpfile_so_LDFLAGS = $(module_ldflags),stpfile.so
 
 wsxmfile_so_SOURCES = wsxmfile.c
 wsxmfile_so_LDFLAGS = $(module_ldflags),wsxmfile.so
