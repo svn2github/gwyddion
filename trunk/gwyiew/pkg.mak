@@ -3,7 +3,7 @@
 PACKAGE = gwyiew
 # Module version, it is also defined as a preprocessor macro you are
 # encouraged to use for module registering.
-VERSION = 1.0
+VERSION = 1.1
 # Module type (one of process, file)
 MODULE_TYPE = process
 # Module source files
