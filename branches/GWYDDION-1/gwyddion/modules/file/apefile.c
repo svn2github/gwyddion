@@ -170,10 +170,12 @@ apefile_detect(const gchar *filename, gboolean only_name)
 
     if (!(fh = fopen(filename, "rb")))
         return 0;
-    if (!fread(header, 1, HEADER_SIZE, fh) == HEADER_SIZE) {
+    if (!(fread(header, 1, HEADER_SIZE, fh) == HEADER_SIZE)) {
         fclose(fh);
         return 0;
     }
+    fclose(fh);
+
     p = (guchar*)header;
     version = *(p++);
     mode = *(p++);
