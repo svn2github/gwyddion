@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#define DEBUG 1
+
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
@@ -74,18 +74,20 @@ typedef struct {
     gchar *comment;
 } RHKFile;
 
-static gboolean      module_register       (const gchar *name);
-static gint          rhkspm32_detect       (const gchar *filename,
-                                            gboolean only_name);
-static GwyContainer* rhkspm32_load         (const gchar *filename);
-static gboolean      rhkspm32_read_header  (gchar *buffer,
-                                            RHKFile *rhkfile);
-static gboolean      rhkspm32_read_range   (const gchar *buffer,
-                                            const gchar *name,
-                                            RHKRange *range);
-static void          rhkspm32_free         (RHKFile *rhkfile);
-static GwyDataField* rhkspm32_read_data    (const guchar *buffer,
-                                            RHKFile *rhkfile);
+static gboolean      module_register         (const gchar *name);
+static gint          rhkspm32_detect         (const gchar *filename,
+                                              gboolean only_name);
+static GwyContainer* rhkspm32_load           (const gchar *filename);
+static gboolean      rhkspm32_read_header    (gchar *buffer,
+                                              RHKFile *rhkfile);
+static gboolean      rhkspm32_read_range     (const gchar *buffer,
+                                              const gchar *name,
+                                              RHKRange *range);
+static void          rhkspm32_free           (RHKFile *rhkfile);
+static void          rhkspm32_store_metadata (RHKFile *rhkfile,
+                                              GwyContainer *container);
+static GwyDataField* rhkspm32_read_data      (const guchar *buffer,
+                                              RHKFile *rhkfile);
 
 /* The module info. */
 static GwyModuleInfo module_info = {
@@ -178,16 +180,15 @@ rhkspm32_load(const gchar *filename)
         else
             dfield = rhkspm32_read_data(buffer + rhkfile.data_offset, &rhkfile);
     }
-
-    rhkspm32_free(&rhkfile);
     gwy_file_abandon_contents(buffer, size, NULL);
 
     if (dfield) {
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
                                          G_OBJECT(dfield));
-        /*store_metadata(meta, GWY_CONTAINER(object));*/
+        rhkspm32_store_metadata(&rhkfile, GWY_CONTAINER(object));
     }
+    rhkspm32_free(&rhkfile);
 
     return (GwyContainer*)object;
 }
@@ -288,53 +289,51 @@ rhkspm32_free(RHKFile *rhkfile)
     g_free(rhkfile->comment);
 }
 
-#if 0
 static void
-store_metadata(GHashTable *meta,
-               GwyContainer *container)
+rhkspm32_store_metadata(RHKFile *rhkfile,
+                        GwyContainer *container)
 {
-    const struct {
-        const gchar *id;
-        const gchar *unit;
-        const gchar *key;
-    }
-    metakeys[] = {
-        { "scanspeed",   "nm/s",    "Scan speed"        },
-        { "xoffset",     "nm",      "X offset"          },
-        { "yoffset",     "nm",      "Y offset"          },
-        { "bias",        "V",       "Bias voltage"      },
-        { "current",     "nA",      "Tunneling current" },
-        { "starttime",   NULL,      "Scan time"         },
-        /* FIXME: I've seen other stuff, but don't know interpretation */
+    const GwyEnum image_types[] = {
+        { "Topographic",   RHK_IMAGE_TOPOGAPHIC },
+        { "Current",       RHK_IMAGE_CURRENT },
+        { "Aux",           RHK_IMAGE_AUX },
+        { "Force",         RHK_IMAGE_FORCE },
+        { "Signal",        RHK_IMAGE_SIGNAL },
+        { "FFT transform", RHK_IMAGE_FFT },
     };
-    gchar *value;
-    GString *key;
-    guint i;
+    const gchar *s;
 
-    key = g_string_new("");
-    for (i = 0; i < G_N_ELEMENTS(metakeys); i++) {
-        if (!(value = g_hash_table_lookup(meta, metakeys[i].id)))
-            continue;
+    gwy_container_set_string_by_name(container, "/meta/Tunneling voltage",
+                                     g_strdup_printf("%g mV",
+                                                     1e3*rhkfile->iv.offset));
+    gwy_container_set_string_by_name(container, "/meta/Current",
+                                     g_strdup_printf("%g nA",
+                                                     1e9*rhkfile->iv.scale));
+    gwy_container_set_string_by_name(container, "/meta/Id",
+                                     g_strdup_printf("%u", rhkfile->id));
+    if (rhkfile->date && *rhkfile->date)
+        gwy_container_set_string_by_name(container, "/meta/Date",
+                                         g_strdup(rhkfile->date));
+    if (rhkfile->comment && *rhkfile->comment)
+        gwy_container_set_string_by_name(container, "/meta/Comment",
+                                         g_strdup(rhkfile->comment));
+    if (rhkfile->label && *rhkfile->label)
+        gwy_container_set_string_by_name(container, "/meta/Label",
+                                         g_strdup(rhkfile->label));
 
-        g_string_printf(key, "/meta/%s", metakeys[i].key);
-        if (metakeys[i].unit)
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup_printf("%s %s",
-                                                             value,
-                                                             metakeys[i].unit));
-        else
-            gwy_container_set_string_by_name(container, key->str,
-                                             g_strdup(value));
-    }
-    g_string_free(key, TRUE);
+    s = gwy_enum_to_string(rhkfile->image_type,
+                           image_types, G_N_ELEMENTS(image_types));
+    if (s && *s)
+        gwy_container_set_string_by_name(container, "/meta/Image type",
+                                         g_strdup(s));
 }
-#endif
 
 static GwyDataField*
 rhkspm32_read_data(const guchar *buffer,
                    RHKFile *rhkfile)
 {
     GwyDataField *dfield;
+    GwySIUnit *siunit;
     gdouble *data;
     guint i;
 
@@ -348,6 +347,12 @@ rhkspm32_read_data(const guchar *buffer,
         buffer += 2;
     }
     gwy_data_field_multiply(dfield, rhkfile->z.scale);
+
+    siunit = gwy_data_field_get_si_unit_xy(dfield);
+    gwy_si_unit_set_unit_string(siunit, rhkfile->x.units);
+
+    siunit = gwy_data_field_get_si_unit_z(dfield);
+    gwy_si_unit_set_unit_string(siunit, rhkfile->z.units);
 
     return dfield;
 }
