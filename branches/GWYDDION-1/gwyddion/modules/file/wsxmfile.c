@@ -17,8 +17,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#define DEBUG 1
+
 #include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwymodule/gwymodule.h>
 #include <libprocess/datafield.h>
@@ -29,9 +30,18 @@
 
 #include "get.h"
 
+#ifndef HAVE_POW10
+#define pow10(x) (exp(G_LN10*(x)))
+#endif
+
 #define MAGIC "WSxM file copyright Nanotec Electronica\r\n" \
               "SxM Image file\r\n"
 #define MAGIC_SIZE (sizeof(MAGIC) - 1)
+
+typedef struct {
+    GString *str;
+    GwyContainer *container;
+} StoreMetaData;
 
 static gboolean      module_register       (const gchar *name);
 static gint          wsxmfile_detect        (const gchar *filename,
@@ -165,7 +175,7 @@ wsxmfile_load(const gchar *filename)
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
                                          G_OBJECT(dfield));
-        /*store_metadata(meta, GWY_CONTAINER(object));*/
+        process_metadata(meta, GWY_CONTAINER(object));
     }
     g_hash_table_destroy(meta);
 
@@ -176,22 +186,8 @@ static gboolean
 file_read_meta(GHashTable *meta,
                gchar *buffer)
 {
-    /* If these parameters are missing, use defaults from
-     * http://www.nanotec.es/fileform.htm */
-    static struct {
-        const gchar *key;
-        const gchar *value;
-    }
-    const defaults[] = {
-        { "Control::Signal Gain", "1" },
-        { "Control::Z Gain", "1" },
-        { "Head Settings::Preamp Gain", "1 V/nA" },
-        { "Head Settings::X Calibration", "1 \305/V" },
-        { "Head Settings::Y Calibration", "1 \305/V" },
-        { "Head Settings::Z Calibration", "1 \305/V" },
-    };
     gchar *p, *line, *key, *value, *section = NULL;
-    guint len, i;
+    guint len;
 
     while ((line = gwy_str_next_line(&buffer))) {
         line = g_strstrip(line);
@@ -212,10 +208,20 @@ file_read_meta(GHashTable *meta,
             g_warning("Cannot parse line <%s>", line);
             continue;
         }
+        *p = '\0';
+        p += 2;
 
-        *(p++) = '\0';
+        value = g_convert(p, strlen(p), "UTF-8", "ISO-8859-1",
+                          NULL, NULL, NULL);
+        if (!value)
+            continue;
+        g_strstrip(value);
+        if (!*value) {
+            g_free(value);
+            continue;
+        }
+
         key = g_strconcat(section, "::", line, NULL);
-        value = g_strstrip(g_strdup(p));
         gwy_debug("<%s> = <%s>", key, value);
         g_hash_table_replace(meta, key, value);
     }
@@ -224,24 +230,95 @@ file_read_meta(GHashTable *meta,
         return FALSE;
     }
 
-    for (i = 0; i < G_N_ELEMENTS(defaults); i++) {
-        if (!g_hash_table_lookup(meta, defaults[i].key))
-            g_hash_table_insert(meta,
-                                g_strdup(defaults[i].key),
-                                g_strdup(defaults[i].value));
-    }
-
     return TRUE;
+}
+
+static void
+store_meta(gpointer key,
+           gpointer value,
+           gpointer user_data)
+{
+    StoreMetaData *smd = (StoreMetaData*)user_data;
+
+    g_string_truncate(smd->str, sizeof("/meta/") - 1);
+    g_string_append(smd->str, key);
+    gwy_container_set_string_by_name(smd->container, smd->str->str,
+                                     g_strdup(value));
 }
 
 static void
 process_metadata(GHashTable *meta,
                  GwyContainer *container)
 {
+    const gchar *nometa[] = {
+        "General Info::Z Amplitude",
+        "Control::X Amplitude", "Control::Y Amplitude",
+        "General Info::Number of rows", "General Info::Number of columns",
+    };
+    StoreMetaData smd;
     GwyDataField *dfield;
+    GwySIUnit *siunit;
+    gdouble r;
+    gchar *p, *end;
+    gint power10;
+    guint i;
+    gdouble min, max;
 
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(container,
                                                              "/0/data"));
+
+    /* Fix value scale */
+    if (!(p = g_hash_table_lookup(meta, "General Info::Z Amplitude"))
+        || (r = g_ascii_strtod(p, &end)) <= 0
+        || end == p) {
+        g_warning("Missing or invalid Z Amplitude");
+        gwy_data_field_multiply(dfield, 1e-9);
+    }
+    else {
+        siunit = GWY_SI_UNIT(gwy_si_unit_new_parse(end, &power10));
+        gwy_data_field_set_si_unit_z(dfield, siunit);
+        g_object_unref(siunit);
+        r *= pow10(power10);
+
+        min = gwy_data_field_get_min(dfield);
+        max = gwy_data_field_get_max(dfield);
+        gwy_data_field_multiply(dfield, r/(max - min));
+    }
+
+    /* Fix lateral scale */
+    if (!(p = g_hash_table_lookup(meta, "Control::X Amplitude"))
+        || (r = g_ascii_strtod(p, &end)) <= 0
+        || end == p) {
+        g_warning("Missing or invalid X Amplitude");
+    }
+    else {
+        siunit = GWY_SI_UNIT(gwy_si_unit_new_parse(end, &power10));
+        gwy_data_field_set_si_unit_xy(dfield, siunit);
+        g_object_unref(siunit);
+
+        gwy_data_field_set_xreal(dfield, r*pow10(power10));
+    }
+
+    if (!(p = g_hash_table_lookup(meta, "Control::Y Amplitude"))
+        || (r = g_ascii_strtod(p, &end)) <= 0
+        || end == p) {
+        g_warning("Missing or invalid Y Amplitude");
+        gwy_data_field_set_yreal(dfield, gwy_data_field_get_xreal(dfield));
+    }
+    else {
+        siunit = GWY_SI_UNIT(gwy_si_unit_new_parse(end, &power10));
+        g_object_unref(siunit);
+        gwy_data_field_set_yreal(dfield, r*pow10(power10));
+    }
+
+    /* And store everything else as metadata */
+    for (i = 0; i < G_N_ELEMENTS(nometa); i++)
+        g_hash_table_remove(meta, nometa[i]);
+
+    smd.str = g_string_new("/meta/");
+    smd.container = container;
+    g_hash_table_foreach(meta, store_meta, &smd);
+    g_string_free(smd.str, TRUE);
 }
 
 static GwyDataField*
