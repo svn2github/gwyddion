@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-03-09 09:18+0100\n"
-"PO-Revision-Date: 2005-03-09 09:22+0100\n"
+"POT-Creation-Date: 2005-04-04 14:57+0200\n"
+"PO-Revision-Date: 2005-04-04 15:24+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -202,7 +202,7 @@ msgid "Si_ze:"
 msgstr "Veli_kost:"
 
 #: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:678
-#: modules/file/pixmap.c:1558 modules/file/rawfile.c:496
+#: modules/file/pixmap.c:1560 modules/file/rawfile.c:496
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
@@ -457,6 +457,34 @@ msgstr "Proložit parabolu"
 #: libgwydgets/gwyoptionmenus.c:1046
 msgid "Fit cubic"
 msgstr "Proložit kubiku"
+
+#: libgwydgets/gwyoptionmenus.c:1075
+msgid "Vickers"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1076
+msgid "Berkovich"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1077
+msgid "Berkovich (modified)"
+msgstr "Berkovich (modifikovaný)"
+
+#: libgwydgets/gwyoptionmenus.c:1078
+msgid "Knoop"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1079
+msgid "Brinell"
+msgstr ""
+
+#: libgwydgets/gwyoptionmenus.c:1080
+msgid "Cube corner"
+msgstr "Vrchol krychle"
+
+#: libgwydgets/gwyoptionmenus.c:1081
+msgid "Rockwell"
+msgstr ""
 
 #: libgwydgets/gwyvectorshade.c:153
 msgid "_Theta: "
@@ -1023,6 +1051,31 @@ msgstr "px"
 msgid "Please wait"
 msgstr "Čekej, prosím"
 
+#: modules/file/apefile.c:128
+msgid "Imports APE (Applied Physics and Engineering) data files."
+msgstr "Načítá datové soubory APE (Applied Physics and Engineering)."
+
+#: modules/file/apefile.c:144
+msgid "APE files (.dat)"
+msgstr "APE soubory (.dat)"
+
+#: modules/file/apefile.c:404
+#, c-format
+msgid "Channel %u"
+msgstr "Kanál %u"
+
+#: modules/file/apefile.c:407 modules/file/ezdfile.c:581
+#: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
+#: modules/file/sis.c:523 modules/file/stpfile.c:446
+msgid "Select Data"
+msgstr "Vyber data"
+
+#: modules/file/apefile.c:424 modules/file/ezdfile.c:598
+#: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
+#: modules/file/sis.c:540 modules/file/stpfile.c:463
+msgid "Data to load:"
+msgstr "Data k načtení:"
+
 #: modules/file/asciiexport.c:47
 msgid "Exports data as simple ASCII matrix."
 msgstr "Exportuje data jako jednoduchou textovou matici."
@@ -1031,13 +1084,21 @@ msgstr "Exportuje data jako jednoduchou textovou matici."
 msgid "ASCII data matrix (.txt)"
 msgstr "Textová matice dat (.txt)"
 
-#: modules/file/assing-afm.c:69
+#: modules/file/assing-afm.c:71
 msgid "Imports Assing AFM data files."
 msgstr "Načítá datové soubory Assing AFM."
 
-#: modules/file/assing-afm.c:85
+#: modules/file/assing-afm.c:87
 msgid "Assing AFM files (.afm)"
 msgstr "Soubory Assing AFM (.afm)"
+
+#: modules/file/bcrfile.c:68
+msgid "Imports Image Metrology BCR data files."
+msgstr "Načítá datové soubory BCR Image Metrology."
+
+#: modules/file/bcrfile.c:84
+msgid "BCR files (.bcr, .bcrf)"
+msgstr "BCR soubory (.bcr, .bcrf)"
 
 #: modules/file/createc.c:62
 msgid "Imports Createc data files."
@@ -1045,7 +1106,20 @@ msgstr "Načítá datové soubory Createc."
 
 #: modules/file/createc.c:78
 msgid "Createc files (.dat)"
-msgstr "Soubory Createc (.dat)"
+msgstr "Createc soubory (.dat)"
+
+#: modules/file/ezdfile.c:111
+msgid "Imports Nanosurf EZD data files."
+msgstr "Načítá datové soubory EZD Nanosurf."
+
+#: modules/file/ezdfile.c:127
+msgid "Nanosurf files (.ezd)"
+msgstr "Nanosurf soubory (.ezd)"
+
+#: modules/file/ezdfile.c:574
+#, c-format
+msgid "Group %d, Channel %d"
+msgstr "Skupina %d, kanál %d"
 
 #: modules/file/gwyfile.c:54
 msgid "Loads and saves Gwyddion native data files (serialized objects)."
@@ -1062,17 +1136,7 @@ msgstr "Načítá datové soubory Veeco Nanoscope."
 
 #: modules/file/nanoscope.c:144
 msgid "Nanoscope files"
-msgstr "Soubory Nanoscope"
-
-#: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
-#: modules/file/sis.c:523
-msgid "Select Data"
-msgstr "Vyber data"
-
-#: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
-#: modules/file/sis.c:540
-msgid "Data to load:"
-msgstr "Data k načtení:"
+msgstr "Nanoscope soubory"
 
 #: modules/file/nt-mdt.c:305
 msgid "Imports NT-MDT data files."
@@ -1080,7 +1144,7 @@ msgstr "Načítá datové soubory NT-MDT."
 
 #: modules/file/nt-mdt.c:321
 msgid "NT-MDT files (.mdt)"
-msgstr "Soubory NT-MDT (.mdt)"
+msgstr "NT-MDT soubory (.mdt)"
 
 #: modules/file/nt-mdt.c:392
 msgid "Frame"
@@ -1177,27 +1241,27 @@ msgstr "Použít"
 msgid "as data"
 msgstr "jako data"
 
-#: modules/file/pixmap.c:1536
+#: modules/file/pixmap.c:1538
 msgid "_Data alone"
 msgstr "Jen _data"
 
-#: modules/file/pixmap.c:1537
+#: modules/file/pixmap.c:1539
 msgid "Data + _rulers"
 msgstr "Data + _pravítka"
 
-#: modules/file/pixmap.c:1538
+#: modules/file/pixmap.c:1540
 msgid "_Everything"
 msgstr "_Všechno"
 
-#: modules/file/pixmap.c:1555
+#: modules/file/pixmap.c:1557
 msgid "Export "
 msgstr "Export "
 
-#: modules/file/pixmap.c:1578
+#: modules/file/pixmap.c:1580
 msgid "_Zoom:"
 msgstr "_Zvětšení"
 
-#: modules/file/pixmap.c:1582
+#: modules/file/pixmap.c:1584
 msgid "Output:"
 msgstr "Výstup:"
 
@@ -1497,6 +1561,14 @@ msgstr ""
 "Čekal bych oddělovač „%s“ po datech v řádku %u, sloupci %u, ale narazil jsem "
 "na „%.16s“"
 
+#: modules/file/rhk-spm32.c:95
+msgid "Imports RHK Technology SPM32 data files."
+msgstr "Načítá datové soubory RHK Technology SPM32."
+
+#: modules/file/rhk-spm32.c:111
+msgid "RHK SPM32 files (.sm2)"
+msgstr "RHK SPM32 soubory (.sm2)"
+
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
 msgstr "Načítá datové soubory SIS (Surface Imaging Systems)."
@@ -1506,12 +1578,12 @@ msgid "SIS files (.sis)"
 msgstr "SIS soubory (.sis)"
 
 #: modules/file/spmlab.c:50
-msgid "Imports Thermicroscopes SpmLab R4 and R5 data files."
-msgstr "Načítá datové soubory Thermicroscopes SpmLab R4 a R5."
+msgid "Imports Thermicroscopes SpmLab R4, R5, and R6 data files."
+msgstr "Načítá datové soubory Thermicroscopes SpmLab R4, R5 a R6."
 
 #: modules/file/spmlab.c:66
-msgid "Thermicroscopes SpmLab R4, R5 files"
-msgstr "Soubory Thermicroscopes SpmLab R4, R5"
+msgid "Thermicroscopes SpmLab R4, R5, R6 files"
+msgstr "Thermicroscopes SpmLab R6, R6, R6 soubory"
 
 #: modules/file/stmprg.c:66
 msgid "Imports Omicron STMPRG data files (tp ta)."
@@ -1520,6 +1592,27 @@ msgstr "Načítá datové soubory Omicron STMPRG (tp ta)."
 #: modules/file/stmprg.c:82
 msgid "Omicron STMPRG files (tp ta)"
 msgstr "Soubory Omicron STMPRG (tp ta)"
+
+#: modules/file/stpfile.c:88
+msgid "Imports Molecular Imaging STP data files."
+msgstr "Načítá datové soubory STP Molecular Imaging."
+
+#: modules/file/stpfile.c:104
+msgid "STP files (.stp)"
+msgstr "STP soubory (.stp)"
+
+#: modules/file/stpfile.c:442
+#, c-format
+msgid "Buffer %u"
+msgstr "Datové pole %u"
+
+#: modules/file/wsxmfile.c:61
+msgid "Imports Nanotec WSxM data files."
+msgstr "Načítá datové soubory Nanotec WSxM."
+
+#: modules/file/wsxmfile.c:77
+msgid "WSXM files (.tom)"
+msgstr "WSXM soubory (.tom)"
 
 #: modules/graph/graph_cd.c:121
 msgid "Critical dimension measurements"
@@ -2067,7 +2160,7 @@ msgstr "Zachovej velikost (neškáluj na mocninu 2)"
 #: modules/process/dwtanisotropy.c:209 modules/process/dwtcorrection.c:190
 #: modules/process/dwtdenoise.c:212 modules/process/fft.c:361
 #: modules/process/fft_filter_1d.c:339 modules/process/fractal.c:230
-#: modules/process/nanoindent_adjust.c:244 modules/process/rotate.c:247
+#: modules/process/nanoindent_adjust.c:245 modules/process/rotate.c:247
 #: modules/process/scale.c:207 modules/process/unrotate.c:276
 #: modules/tools/profile.c:272
 msgid "_Interpolation type:"
@@ -2301,7 +2394,7 @@ msgstr "_Dynamicky obnovovat"
 
 #: modules/process/fft_filter_1d.c:567
 msgid "Filtered data"
-msgstr ""
+msgstr "Filtrovaná data"
 
 #: modules/process/fft_filter_1d.c:577
 msgid "Null"
@@ -2588,6 +2681,174 @@ msgstr "Watershed"
 msgid "Marking boundaries"
 msgstr "Označuji hranice"
 
+#: modules/process/indent_analyze.c:226
+msgid "Do nothing"
+msgstr "Nedělat nic"
+
+#: modules/process/indent_analyze.c:227
+msgid "Plane level"
+msgstr "Proložit rovinu"
+
+#: modules/process/indent_analyze.c:228
+msgid "Plane rotate"
+msgstr "Rotovat rovinu"
+
+#: modules/process/indent_analyze.c:241
+msgid "New"
+msgstr ""
+
+#: modules/process/indent_analyze.c:242
+msgid "AND"
+msgstr "A"
+
+#: modules/process/indent_analyze.c:243
+msgid "OR"
+msgstr "Nebo"
+
+#: modules/process/indent_analyze.c:244
+msgid "NOT"
+msgstr "Negace"
+
+#: modules/process/indent_analyze.c:245
+msgid "XOR"
+msgstr "Xor"
+
+#: modules/process/indent_analyze.c:262
+msgid "Nothing"
+msgstr ""
+
+#: modules/process/indent_analyze.c:263
+msgid "Above"
+msgstr ""
+
+#: modules/process/indent_analyze.c:264
+msgid "Bellow"
+msgstr ""
+
+#: modules/process/indent_analyze.c:265
+msgid "Plane"
+msgstr ""
+
+#: modules/process/indent_analyze.c:266
+msgid "Impression"
+msgstr ""
+
+#: modules/process/indent_analyze.c:267
+msgid "Inner Pile-up"
+msgstr ""
+
+#: modules/process/indent_analyze.c:268
+msgid "Outer Pile-up"
+msgstr ""
+
+#: modules/process/indent_analyze.c:269
+msgid "Special points"
+msgstr ""
+
+#: modules/process/indent_analyze.c:270
+msgid "Faces border"
+msgstr ""
+
+#: modules/process/indent_analyze.c:281
+msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
+msgstr ""
+
+#: modules/process/indent_analyze.c:297
+msgid "/Indento_r/_Analyze..."
+msgstr ""
+
+#: modules/process/indent_analyze.c:350
+msgid "Indentaion statistics"
+msgstr ""
+
+#: modules/process/indent_analyze.c:351
+msgid "_Compute & mark"
+msgstr ""
+
+#: modules/process/indent_analyze.c:352
+msgid "_Save statistics"
+msgstr ""
+
+#: modules/process/indent_analyze.c:390
+msgid "Data field leveling:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:399
+msgid "Marked areas:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:406
+msgid "Indentor type:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:414
+msgid "Mask creation type:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:419
+msgid "Ref. plane tolerance:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:424
+msgid "Angle 1 tolerance:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:429
+msgid "Theta range:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:444
+msgid "Indent centre at"
+msgstr ""
+
+#: modules/process/indent_analyze.c:447
+msgid "Maximum at"
+msgstr ""
+
+#: modules/process/indent_analyze.c:450
+msgid "Max-min diference"
+msgstr ""
+
+#: modules/process/indent_analyze.c:457
+msgid "Expected A_d:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:460
+msgid "Expected A_p:"
+msgstr ""
+
+#: modules/process/indent_analyze.c:501
+msgid "Volume above-below"
+msgstr ""
+
+#: modules/process/indent_analyze.c:511
+msgid "Indent. volume"
+msgstr ""
+
+#: modules/process/indent_analyze.c:517
+msgid "Indent. A_d"
+msgstr ""
+
+#: modules/process/indent_analyze.c:520
+msgid "Indent. A_p"
+msgstr ""
+
+#: modules/process/indent_analyze.c:529
+msgid "Inner Pile-Up A_d"
+msgstr ""
+
+#: modules/process/indent_analyze.c:532
+msgid "Inner Pile-Up A_p"
+msgstr ""
+
+#: modules/process/indent_analyze.c:535
+msgid "Outer Pile-Up A_d"
+msgstr ""
+
+#: modules/process/indent_analyze.c:538
+msgid "Outer Pile-Up A_p"
+msgstr ""
+
 #: modules/process/laplace.c:45
 msgid ""
 "Removes data under mask, interpolating them with Laplace equation solution."
@@ -2775,7 +3036,7 @@ msgid "Adjust images of two indentor prints."
 msgstr ""
 
 #: modules/process/nanoindent_adjust.c:111
-msgid "/_Nanoindentation/_Adjust..."
+msgid "/Indento_r/Ad_just..."
 msgstr ""
 
 #: modules/process/nanoindent_adjust.c:177
@@ -2802,7 +3063,7 @@ msgstr ""
 msgid "E_xtrapolate result data out of measured range"
 msgstr ""
 
-#: modules/process/nanoindent_adjust.c:310 modules/process/tip_dilation.c:230
+#: modules/process/nanoindent_adjust.c:311 modules/process/tip_dilation.c:230
 #: modules/process/tip_map.c:232 modules/process/tip_reconstruction.c:230
 msgid ""
 "Tip has different range/resolution ratio than image. Tip will be resampled."
@@ -3619,3 +3880,9 @@ msgstr "Statistické veličiny"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametry</b>"
+
+#~ msgid "Imports Thermicroscopes SpmLab R4 and R5 data files."
+#~ msgstr "Načítá datové soubory Thermicroscopes SpmLab R4 a R5."
+
+#~ msgid "Thermicroscopes SpmLab R4, R5 files"
+#~ msgstr "Soubory Thermicroscopes SpmLab R4, R5"
