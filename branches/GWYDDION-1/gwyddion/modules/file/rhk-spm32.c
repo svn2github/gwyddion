@@ -332,6 +332,7 @@ static GwyDataField*
 rhkspm32_read_data(const guchar *buffer,
                    RHKFile *rhkfile)
 {
+    const guint16 *p = (const guint16*)buffer;
     GwyDataField *dfield;
     GwySIUnit *siunit;
     gdouble *data;
@@ -342,10 +343,9 @@ rhkspm32_read_data(const guchar *buffer,
                                                rhkfile->yres * rhkfile->y.scale,
                                                FALSE));
     data = gwy_data_field_get_data(dfield);
-    for (i = 0; i < rhkfile->xres*rhkfile->yres; i++) {
-        data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
-        buffer += 2;
-    }
+    for (i = 0; i < rhkfile->xres*rhkfile->yres; i++)
+        data[i] = GINT16_FROM_LE(p[i]);
+
     gwy_data_field_multiply(dfield, rhkfile->z.scale);
 
     siunit = gwy_data_field_get_si_unit_xy(dfield);

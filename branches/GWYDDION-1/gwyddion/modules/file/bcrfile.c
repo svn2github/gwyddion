@@ -273,6 +273,7 @@ read_data_field(const guchar *buffer,
                 BCRFileType type,
                 gboolean little_endian)
 {
+    const guint16 *p = (const guint16*)buffer;
     GwyDataField *dfield;
     gdouble *data;
     guint i;
@@ -282,16 +283,12 @@ read_data_field(const guchar *buffer,
     switch (type) {
         case BCR_FILE_INT16:
         if (little_endian) {
-            for (i = 0; i < xres*yres; i++) {
-                data[i] = (gint)(buffer)[0] + ((signed char)(buffer)[1]*256.0);
-                buffer += 2;
-            }
+            for (i = 0; i < xres*yres; i++)
+                data[i] = GINT16_FROM_LE(p[i]);
         }
         else {
-            for (i = 0; i < xres*yres; i++) {
-                data[i] = (gint)(buffer)[1] + ((signed char)(buffer)[0]*256.0);
-                buffer += 2;
-            }
+            for (i = 0; i < xres*yres; i++)
+                data[i] = GINT16_FROM_BE(p[i]);
         }
         break;
 
