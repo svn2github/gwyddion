@@ -33,6 +33,15 @@ typedef enum {
     GWY_TIP_DELTA          = 3
 } GwyTipType;
 
+typedef enum {
+    GWY_INDENTOR_VICKERS     = 0,
+    GWY_INDENTOR_BERKOVICH   = 1,
+    GWY_INDENTOR_KNOOP       = 2,
+    GWY_INDENTOR_ROCKWELL    = 3
+} GwyIndentorType;
+    
+
+
 typedef gboolean (*GwySetFractionFunc)(gdouble fraction);
 typedef gboolean (*GwySetMessageFunc)(const gchar *message);
 

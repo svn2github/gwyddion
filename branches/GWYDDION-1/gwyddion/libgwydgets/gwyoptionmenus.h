@@ -27,6 +27,7 @@
 #include <libgwyddion/gwynlfit.h>
 #include <libprocess/datafield.h>
 #include <libprocess/dwt.h>
+#include <libprocess/tip.h>
 #include <libgwydgets/gwydatawindow.h>
 #include <libgwydgets/gwyglmaterial.h>
 
@@ -94,6 +95,11 @@ GtkWidget* gwy_option_menu_fit_line          (GCallback callback,
                                               gpointer cbdata,
                                               GwyFitLineType current);
 #endif
+
+GtkWidget* gwy_option_menu_indentor         (GCallback callback,
+                                              gpointer cbdata,
+                                              GwyIndentorType current);
+
 GtkWidget* gwy_option_menu_metric_unit       (GCallback callback,
                                               gpointer cbdata,
                                               gint from,
