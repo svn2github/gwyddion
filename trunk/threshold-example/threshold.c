@@ -1,5 +1,6 @@
 /*
  *  threshold.c
+ *  @(#) $Id$
  *  Copyright (C) 2003 David Necas (Yeti), Petr Klapetek.
  *  E-mail: yeti@physics.muni.cz, klapetek@physics.muni.cz.
  *
