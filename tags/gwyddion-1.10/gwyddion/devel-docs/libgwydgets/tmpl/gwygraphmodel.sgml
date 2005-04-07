@@ -1,0 +1,91 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphModel
+
+<!-- ##### SECTION Short_Description ##### -->
+Representation of a graph.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+#GwyGraphModel represents information about a graph necessary to fully
+reconstruct it.  It will be meaningfully used by the new generation of graph
+widgets and should be mostly ignored for now.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyGraphModel ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ARG GwyGraphModel:n ##### -->
+<para>
+
+</para>
+
+<!-- ##### ARG GwyGraphModel:title ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyGraphModelClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@value_changed: 
+@reserved1: 
+@reserved2: 
+@reserved3: 
+@reserved4: 
+@reserved5: 
+
+<!-- ##### FUNCTION gwy_graph_model_new ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_new_from_model ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_model_get_n_curves ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_model_add_curve ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@curve: 
+
+
+<!-- ##### FUNCTION gwy_graph_model_remove_all_curves ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+
+
