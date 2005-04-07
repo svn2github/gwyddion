@@ -33,9 +33,9 @@ level features-leveling.html
 level3 features-leveling.html
 local_contrast features-filters.html
 mark_threshold features-grains.html
-median-bg features-leveling.html
+median_bg features-leveling.html
 nanoscope managing-files.html
-nt-mdt managing-files.html
+mdtfile managing-files.html
 outliers features-filters.html
 pixmap managing-files.html
 poly_level features-leveling.html
@@ -47,7 +47,7 @@ scale data-analysis.html#features-basic
 scars features-edit.html
 sfunctions features-stats.html
 shade features-filters.html
-sis managing-files.html
+sisfile managing-files.html
 slope_dist features-stats.html
 sphere_revolve features-leveling.html
 spmlab managing-files.html
@@ -61,4 +61,7 @@ tip_map features-tip.html
 tip_model features-tip.html
 tip_reconstruction features-tip.html
 wshed_threshold features-grains.html
-wxsmfile managing-files.html
+wsxmfile managing-files.html
+plugin-proxy plugins.html
+maskops presentations-masks.html
+presentationops presentations-masks.html
