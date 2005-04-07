@@ -2,10 +2,10 @@
 disabled=
 pkgname=gwyddion
 basever=1.10
-dont_update_version=
+dont_update_version=no_we_need_no_stinking_version_updates
 arch=$(uname -m)
-projectdir=$HOME/Projects/Gwyddion/$pkgname
-logdir=$HOME/Projects/Gwyddion/buildlog
+projectdir=$HOME/Projects/Gwyddion/$pkgname-1
+logdir=$HOME/Projects/Gwyddion/buildlog-1
 installroot=$HOME/tmp
 gtkdocdir="/share/gtk-doc/html/*"
 gtkdocdirs=(/usr /usr/local $installroot/usr)
@@ -178,6 +178,7 @@ function webify_api() {
 
 
 function help() {
+  echo $0
   sed <$0 -e '1,/^  # LIST-BEGIN/d' \
           -e '/^  # LIST-END/,$d' \
           -e 's/^ *call *//'
@@ -190,9 +191,13 @@ test -d $logdir || mkdir $logdir
 eval $(grep ^VERSION Makefile | tr -d ' ' | tr '[A-Z]' '[a-z]')
 
 if test -n "$1"; then
-  for x in $@; do
-    call $x
-  done
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
 else
   rm -f $logdir/*
   # LIST-BEGIN

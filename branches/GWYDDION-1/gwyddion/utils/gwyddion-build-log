@@ -1,6 +1,6 @@
 #!/bin/bash
 pkgname=gwyddion
-logdir=$HOME/Projects/Gwyddion/buildlog
+logdir=$HOME/Projects/Gwyddion/buildlog-1
 phpswroot=$HOME/PHP/software
 tmplog=tmplog
 
