@@ -1,4 +1,3 @@
-1.10cvs20050329
 
 1.10
 Application:
@@ -27,6 +26,7 @@ Library:
 - libprocess: Rotation correction mysteriously broken on Win32 was no less
   mysteriously fixed.
 - libprocess: Nanoindentation functions.
+- libgwydgets: 3D view reflected with respect to 2D was fixed.
 
 
 1.9
