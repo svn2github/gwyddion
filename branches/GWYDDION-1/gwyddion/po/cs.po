@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-04-04 14:57+0200\n"
+"POT-Creation-Date: 2005-04-06 16:22+0200\n"
 "PO-Revision-Date: 2005-04-04 15:24+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
@@ -1606,11 +1606,11 @@ msgstr "STP soubory (.stp)"
 msgid "Buffer %u"
 msgstr "Datové pole %u"
 
-#: modules/file/wsxmfile.c:61
+#: modules/file/wsxmfile.c:69
 msgid "Imports Nanotec WSxM data files."
 msgstr "Načítá datové soubory Nanotec WSxM."
 
-#: modules/file/wsxmfile.c:77
+#: modules/file/wsxmfile.c:85
 msgid "WSXM files (.tom)"
 msgstr "WSXM soubory (.tom)"
 
