@@ -1039,6 +1039,7 @@ gwy_option_menu_direction
 gwy_option_menu_filter
 gwy_option_menu_mergegrain
 gwy_option_menu_fit_line
+gwy_option_menu_indentor
 gwy_option_menu_metric_unit
 gwy_option_menu_create
 gwy_option_menu_set_history

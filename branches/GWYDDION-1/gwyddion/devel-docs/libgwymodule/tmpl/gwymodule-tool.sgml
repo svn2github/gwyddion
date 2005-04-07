@@ -74,6 +74,8 @@ It is bets to implement interactive tools with the
 @max_width: 
 @first_tool: 
 @Returns: 
+<!-- # Unused Parameters # -->
+@tooltips: 
 
 
 <!-- ##### FUNCTION gwy_tool_func_get_tooltip ##### -->

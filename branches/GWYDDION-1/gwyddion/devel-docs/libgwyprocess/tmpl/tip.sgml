@@ -24,6 +24,19 @@ SPM tip methods
 @GWY_TIP_NONCONTACT: 
 @GWY_TIP_DELTA: 
 
+<!-- ##### ENUM GwyIndentorType ##### -->
+<para>
+
+</para>
+
+@GWY_INDENTOR_VICKERS: 
+@GWY_INDENTOR_BERKOVICH: 
+@GWY_INDENTOR_BERKOVICH_M: 
+@GWY_INDENTOR_KNOOP: 
+@GWY_INDENTOR_BRINELL: 
+@GWY_INDENTOR_ROCKWELL: 
+@GWY_INDENTOR_CUBECORNER: 
+
 <!-- ##### USER_FUNCTION GwySetFractionFunc ##### -->
 <para>
 

@@ -44,6 +44,17 @@ morph_lib
 </para>
 
 
+<!-- ##### ENUM GwyDataFieldCached ##### -->
+<para>
+
+</para>
+
+@GWY_DATA_FIELD_MIN: 
+@GWY_DATA_FIELD_MAX: 
+@GWY_DATA_FIELD_AVG: 
+@GWY_DATA_FIELD_RMS: 
+@GWY_DATA_FIELD_CACHE_SIZE: 
+
 <!-- ##### ENUM GwyFFTOutputType ##### -->
 <para>
 FFT output.
@@ -65,6 +76,14 @@ FFT output.
 @GWY_FRACTAL_CUBECOUNTING: 
 @GWY_FRACTAL_TRIANGULATION: 
 @GWY_FRACTAL_PSDF: 
+
+<!-- ##### ENUM GwyOrientation ##### -->
+<para>
+
+</para>
+
+@GWY_ORIENTATION_HORIZONTAL: 
+@GWY_ORIENTATION_VERTICAL: 
 
 <!-- ##### FUNCTION allocmatrix ##### -->
 <para>
@@ -187,6 +206,14 @@ FFT output.
 @window_height: 
 @state: 
 @iteration: 
+
+<!-- ##### FUNCTION gwy_data_field_filter_canny ##### -->
+<para>
+
+</para>
+
+@data_field: 
+@threshold: 
 
 <!-- ##### FUNCTION gwy_data_field_free ##### -->
 <para>

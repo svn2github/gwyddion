@@ -694,6 +694,16 @@ gwymodulemenus
 @axis: 
 @enable: 
 
+<!-- ##### FUNCTION gwy_color_axis_new_with_range ##### -->
+<para>
+
+</para>
+
+@orientation: 
+@min: 
+@max: 
+@Returns: 
+
 <!-- ##### FUNCTION gwy_color_button_get_alpha ##### -->
 <para>
 

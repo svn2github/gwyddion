@@ -676,6 +676,15 @@ Emitted when value changes.
 @magnitude: 
 @Returns: 
 
+<!-- ##### FUNCTION gwy_str_has_suffix_nocase ##### -->
+<para>
+
+</para>
+
+@s: 
+@suffix: 
+@Returns: 
+
 <!-- ##### FUNCTION machine_zero ##### -->
 <para>
 

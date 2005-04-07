@@ -205,6 +205,7 @@ gwy_data_field_grains_intersect
 <SECTION>
 <FILE>tip</FILE>
 GwyTipType
+GwyIndentorType
 GwySetFractionFunc
 GwySetMessageFunc
 GwyTipModelFunc
@@ -378,6 +379,7 @@ gwy_data_field_fractal_triangulation_dim
 gwy_data_field_fractal_partitioning_dim
 gwy_data_field_fractal_psdf_dim
 gwy_data_field_fractal_correction
+gwy_data_field_partitioning_correction
 </SECTION>
 
 <SECTION>
