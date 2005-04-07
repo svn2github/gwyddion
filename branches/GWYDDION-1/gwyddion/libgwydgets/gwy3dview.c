@@ -1704,9 +1704,9 @@ gwy_3d_make_normals(GwyDataField *dfield, Gwy3DVector *normals)
       for (i = 0; i < xres-1; i++) {
          GLfloat a, b, c, n;
 
-         a = data[(xres-1 - j)*xres + i];
-         b = data[(xres-2 - j)*xres + i];
-         c = data[(xres-1 - j)*xres + i+1];
+         a = data[(yres-1 - j)*xres + i];
+         b = data[(yres-2 - j)*xres + i];
+         c = data[(yres-1 - j)*xres + i+1];
          n = 1.0 / sqrt((a-c)*(a-c) + (b-a)*(b-a) + 1.0);
          norms[j*(xres-1) + i].A.x = (a-c)*n;
          norms[j*(xres-1) + i].A.y = (b-a)*n;
@@ -1714,7 +1714,7 @@ gwy_3d_make_normals(GwyDataField *dfield, Gwy3DVector *normals)
 
          a = b;
          b = c;
-         c = data[(xres-2 - j)*xres + i+1];
+         c = data[(yres-2 - j)*xres + i+1];
          n = 1.0 / sqrt((a-c)*(a-c) + (c-b)*(c-b) + 1.0);
          norms[j*(xres-1) + i].B.x = (a-c)*n;
          norms[j*(xres-1) + i].B.y = (c-b)*n;
@@ -1849,8 +1849,8 @@ gwy_3d_make_list(Gwy3DView *gwy3D,
          for (i = 0; i < xres-1; i++) {
             gdouble a, b;
 
-            a = data[(xres-1 - j)*xres + i];
-            b = data[(xres-2 - j)*xres + i];
+            a = data[(yres-1 - j)*xres + i];
+            b = data[(yres-2 - j)*xres + i];
             glNormal3d(normals[j*xres+i].x,
                        normals[j*xres+i].y,
                        normals[j*xres+i].z);
