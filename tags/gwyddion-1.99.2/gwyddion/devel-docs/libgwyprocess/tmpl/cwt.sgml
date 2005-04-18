@@ -1,0 +1,28 @@
+<!-- ##### SECTION Title ##### -->
+cwt
+
+<!-- ##### SECTION Short_Description ##### -->
+Continuous Wavelet Transform
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### FUNCTION gwy_cwt_wfunc_2d ##### -->
+<para>
+
+</para>
+
+@scale: 
+@mval: 
+@xres: 
+@wtype: 
+@Returns: 
+
+

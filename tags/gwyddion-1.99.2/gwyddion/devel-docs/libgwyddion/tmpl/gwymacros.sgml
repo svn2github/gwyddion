@@ -1,0 +1,93 @@
+<!-- ##### SECTION Title ##### -->
+gwymacros
+
+<!-- ##### SECTION Short_Description ##### -->
+Utility macros.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### MACRO gettext ##### -->
+<para>
+
+</para>
+
+@x: 
+
+
+<!-- ##### MACRO ngettext ##### -->
+<para>
+
+</para>
+
+@sing: 
+@plur: 
+@n: 
+
+
+<!-- ##### MACRO _ ##### -->
+<para>
+
+</para>
+
+@x: 
+
+
+<!-- ##### MACRO N_ ##### -->
+<para>
+
+</para>
+
+@x: 
+
+
+<!-- ##### MACRO gwy_object_unref ##### -->
+<para>
+
+</para>
+
+@obj: 
+<!-- # Unused Parameters # -->
+@x: 
+
+
+<!-- ##### MACRO GWY_SWAP ##### -->
+<para>
+
+</para>
+
+@t: 
+@x: 
+@y: 
+
+
+<!-- ##### MACRO gwy_debug ##### -->
+<para>
+
+</para>
+
+@format...: 
+<!-- # Unused Parameters # -->
+@format: 
+@...: 
+
+
+<!-- ##### FUNCTION gwy_debug_gnu ##### -->
+<para>
+
+</para>
+
+@domain: 
+@fileline: 
+@funcname: 
+@format: 
+@Varargs: 
+
+
