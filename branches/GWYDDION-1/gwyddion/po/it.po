@@ -1,6 +1,7 @@
 # translation of it.po to 
 # translation of it.po to
 # translation of it.po to
+# translation of it.po to
 # translation of gwyddion.po to
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR "David Necas (Yeti) & Petr Klapetek".
@@ -12,7 +13,7 @@ msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
 "POT-Creation-Date: 2005-04-06 16:22+0200\n"
-"PO-Revision-Date: 2005-03-28 08:49+0200\n"
+"PO-Revision-Date: 2005-05-07 15:49+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -337,19 +338,19 @@ msgstr "Rett"
 
 #: libgwydgets/gwyoptionmenus.c:821
 msgid "By square root of 2"
-msgstr "per radice quadrata di 2"
+msgstr ""
 
 #: libgwydgets/gwyoptionmenus.c:822
 msgid "By cubic root of 2"
-msgstr "per radice cubica di 2"
+msgstr ""
 
 #: libgwydgets/gwyoptionmenus.c:823
 msgid "Integer zooms"
-msgstr "Ingrandimenti interi"
+msgstr ""
 
 #: libgwydgets/gwyoptionmenus.c:824
 msgid "Half-integer zooms"
-msgstr "Ingrandimenti semi-interi"
+msgstr ""
 
 #: libgwydgets/gwyoptionmenus.c:853
 msgid "Gaussian"
@@ -469,39 +470,40 @@ msgstr "Fit cubico"
 
 #: libgwydgets/gwyoptionmenus.c:1075
 msgid "Vickers"
-msgstr ""
+msgstr "Vickers"
 
 #: libgwydgets/gwyoptionmenus.c:1076
 msgid "Berkovich"
-msgstr ""
+msgstr "Berkovich"
 
 #: libgwydgets/gwyoptionmenus.c:1077
 msgid "Berkovich (modified)"
-msgstr ""
+msgstr "Berkovich (modificato)"
 
 #: libgwydgets/gwyoptionmenus.c:1078
 msgid "Knoop"
-msgstr ""
+msgstr "Knoop"
 
 #: libgwydgets/gwyoptionmenus.c:1079
 msgid "Brinell"
-msgstr ""
+msgstr "Brinell"
 
 #: libgwydgets/gwyoptionmenus.c:1080
+#, fuzzy
 msgid "Cube corner"
-msgstr ""
+msgstr "Spigolo cubo"
 
 #: libgwydgets/gwyoptionmenus.c:1081
 msgid "Rockwell"
-msgstr ""
+msgstr "Rockwell"
 
 #: libgwydgets/gwyvectorshade.c:153
 msgid "_Theta: "
-msgstr "_Theta: "
+msgstr ""
 
 #: libgwydgets/gwyvectorshade.c:166
 msgid "_Phi: "
-msgstr "_Phi: "
+msgstr ""
 
 #: libgwymodule/gwymodulebrowser.c:66
 msgid "Module Browser"
@@ -1062,16 +1064,16 @@ msgstr "Attendere"
 
 #: modules/file/apefile.c:128
 msgid "Imports APE (Applied Physics and Engineering) data files."
-msgstr ""
+msgstr "Importa file dati APE (Applied Physics and Engineering)"
 
 #: modules/file/apefile.c:144
 msgid "APE files (.dat)"
-msgstr ""
+msgstr "File APE (.dat)"
 
 #: modules/file/apefile.c:404
 #, c-format
 msgid "Channel %u"
-msgstr ""
+msgstr "Canale %u"
 
 #: modules/file/apefile.c:407 modules/file/ezdfile.c:581
 #: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
@@ -1103,11 +1105,11 @@ msgstr "file AFM Assing (.afm)"
 
 #: modules/file/bcrfile.c:68
 msgid "Imports Image Metrology BCR data files."
-msgstr ""
+msgstr "Importa file dati BCR Image Metrology"
 
 #: modules/file/bcrfile.c:84
 msgid "BCR files (.bcr, .bcrf)"
-msgstr ""
+msgstr "File BCR (.bcr, .bcrf)"
 
 #: modules/file/createc.c:62
 msgid "Imports Createc data files."
@@ -1119,16 +1121,16 @@ msgstr "file Createc (.dat)"
 
 #: modules/file/ezdfile.c:111
 msgid "Imports Nanosurf EZD data files."
-msgstr ""
+msgstr "Importafile dati EZD Nanosurf"
 
 #: modules/file/ezdfile.c:127
 msgid "Nanosurf files (.ezd)"
-msgstr ""
+msgstr "File Nanosurf (.ezd)"
 
 #: modules/file/ezdfile.c:574
 #, c-format
 msgid "Group %d, Channel %d"
-msgstr ""
+msgstr "Gruppo %d, Canale %d"
 
 #: modules/file/gwyfile.c:54
 msgid "Loads and saves Gwyddion native data files (serialized objects)."
@@ -1565,11 +1567,11 @@ msgstr ""
 
 #: modules/file/rhk-spm32.c:95
 msgid "Imports RHK Technology SPM32 data files."
-msgstr ""
+msgstr "Importa file dati SPM32 RHK Technology"
 
 #: modules/file/rhk-spm32.c:111
 msgid "RHK SPM32 files (.sm2)"
-msgstr ""
+msgstr "File RHK SPM32 (.sm2)"
 
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
@@ -1581,11 +1583,11 @@ msgstr "file SIS (.sis)"
 
 #: modules/file/spmlab.c:50
 msgid "Imports Thermicroscopes SpmLab R4, R5, and R6 data files."
-msgstr ""
+msgstr "Importa file dati R4, R5, and R6 Thermicroscopes SpmLab"
 
 #: modules/file/spmlab.c:66
 msgid "Thermicroscopes SpmLab R4, R5, R6 files"
-msgstr ""
+msgstr "File Thermicroscopes SpmLab R4, R5, R6"
 
 #: modules/file/stmprg.c:66
 msgid "Imports Omicron STMPRG data files (tp ta)."
@@ -1597,24 +1599,24 @@ msgstr "file Omicron STMPRG (.tp, .ta)"
 
 #: modules/file/stpfile.c:88
 msgid "Imports Molecular Imaging STP data files."
-msgstr ""
+msgstr "Importa file dati STP Molecular Imaging"
 
 #: modules/file/stpfile.c:104
 msgid "STP files (.stp)"
-msgstr ""
+msgstr "File STP (.stp)"
 
 #: modules/file/stpfile.c:442
-#, c-format
+#, fuzzy, c-format
 msgid "Buffer %u"
-msgstr ""
+msgstr "Buffer %u"
 
 #: modules/file/wsxmfile.c:69
 msgid "Imports Nanotec WSxM data files."
-msgstr ""
+msgstr "Importa file dati WSxM Nanotec "
 
 #: modules/file/wsxmfile.c:85
 msgid "WSXM files (.tom)"
-msgstr ""
+msgstr "File WSXM (.tom)"
 
 #: modules/graph/graph_cd.c:121
 msgid "Critical dimension measurements"
@@ -2688,171 +2690,172 @@ msgstr "Marcatura confini"
 
 #: modules/process/indent_analyze.c:226
 msgid "Do nothing"
-msgstr ""
+msgstr "Non fare nulla"
 
 #: modules/process/indent_analyze.c:227
 msgid "Plane level"
-msgstr ""
+msgstr "Livella piano"
 
 #: modules/process/indent_analyze.c:228
 msgid "Plane rotate"
-msgstr ""
+msgstr "Ruota piano"
 
 #: modules/process/indent_analyze.c:241
 msgid "New"
-msgstr ""
+msgstr "Nuovo"
 
 #: modules/process/indent_analyze.c:242
 msgid "AND"
-msgstr ""
+msgstr "E"
 
 #: modules/process/indent_analyze.c:243
 msgid "OR"
-msgstr ""
+msgstr "O"
 
 #: modules/process/indent_analyze.c:244
 msgid "NOT"
-msgstr ""
+msgstr "NON"
 
 #: modules/process/indent_analyze.c:245
 msgid "XOR"
-msgstr ""
+msgstr "XOR"
 
 #: modules/process/indent_analyze.c:262
 msgid "Nothing"
-msgstr ""
+msgstr "Nulla"
 
 #: modules/process/indent_analyze.c:263
 msgid "Above"
-msgstr ""
+msgstr "Sopra"
 
 #: modules/process/indent_analyze.c:264
 msgid "Bellow"
-msgstr ""
+msgstr "Sotto"
 
 #: modules/process/indent_analyze.c:265
 msgid "Plane"
-msgstr ""
+msgstr "Piano"
 
 #: modules/process/indent_analyze.c:266
 msgid "Impression"
-msgstr ""
+msgstr "Impressione"
 
 #: modules/process/indent_analyze.c:267
 msgid "Inner Pile-up"
-msgstr ""
+msgstr "Inner Pile-up"
 
 #: modules/process/indent_analyze.c:268
+#, fuzzy
 msgid "Outer Pile-up"
-msgstr ""
+msgstr "Outer Pile-up"
 
 #: modules/process/indent_analyze.c:269
 msgid "Special points"
-msgstr ""
+msgstr "Ounti speciali"
 
 #: modules/process/indent_analyze.c:270
 msgid "Faces border"
-msgstr ""
+msgstr "Contorno facce"
 
 #: modules/process/indent_analyze.c:281
 msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
-msgstr ""
+msgstr "Analizza struttura nanoindentazione (volumi, superfici, ....)"
 
 #: modules/process/indent_analyze.c:297
 msgid "/Indento_r/_Analyze..."
-msgstr ""
+msgstr "/Indentazione/_Analizza..."
 
 #: modules/process/indent_analyze.c:350
 msgid "Indentaion statistics"
-msgstr ""
+msgstr "Statistiche indentazione"
 
 #: modules/process/indent_analyze.c:351
 msgid "_Compute & mark"
-msgstr ""
+msgstr "_Calcola & segna"
 
 #: modules/process/indent_analyze.c:352
 msgid "_Save statistics"
-msgstr ""
+msgstr "_Salva statistiche"
 
 #: modules/process/indent_analyze.c:390
 msgid "Data field leveling:"
-msgstr ""
+msgstr "Livellamento campo dati:"
 
 #: modules/process/indent_analyze.c:399
 msgid "Marked areas:"
-msgstr ""
+msgstr "Aree segnate:"
 
 #: modules/process/indent_analyze.c:406
 msgid "Indentor type:"
-msgstr ""
+msgstr "Typo indentazione:"
 
 #: modules/process/indent_analyze.c:414
 msgid "Mask creation type:"
-msgstr ""
+msgstr "Creazione maschera:"
 
 #: modules/process/indent_analyze.c:419
 msgid "Ref. plane tolerance:"
-msgstr ""
+msgstr "Ref. tolleranza piano:"
 
 #: modules/process/indent_analyze.c:424
 msgid "Angle 1 tolerance:"
-msgstr ""
+msgstr "Tolleranza angolo 1:"
 
 #: modules/process/indent_analyze.c:429
 msgid "Theta range:"
-msgstr ""
+msgstr "Intervallo theta"
 
 #: modules/process/indent_analyze.c:444
 msgid "Indent centre at"
-msgstr ""
+msgstr "Centra indentazione a:"
 
 #: modules/process/indent_analyze.c:447
 msgid "Maximum at"
-msgstr ""
+msgstr "Massimo a"
 
 #: modules/process/indent_analyze.c:450
 msgid "Max-min diference"
-msgstr ""
+msgstr "Differenza massimo-minimo"
 
 #: modules/process/indent_analyze.c:457
 msgid "Expected A_d:"
-msgstr ""
+msgstr "A_d aspettata:"
 
 #: modules/process/indent_analyze.c:460
 msgid "Expected A_p:"
-msgstr ""
+msgstr "A_p aspettata:"
 
 #: modules/process/indent_analyze.c:501
 msgid "Volume above-below"
-msgstr ""
+msgstr "Volume sopra-sotto"
 
 #: modules/process/indent_analyze.c:511
 msgid "Indent. volume"
-msgstr ""
+msgstr "Volume indent."
 
 #: modules/process/indent_analyze.c:517
 msgid "Indent. A_d"
-msgstr ""
+msgstr "A_d indent."
 
 #: modules/process/indent_analyze.c:520
 msgid "Indent. A_p"
-msgstr ""
+msgstr "A_p indent"
 
 #: modules/process/indent_analyze.c:529
 msgid "Inner Pile-Up A_d"
-msgstr ""
+msgstr "Inner Pile-Up A_d"
 
 #: modules/process/indent_analyze.c:532
 msgid "Inner Pile-Up A_p"
-msgstr ""
+msgstr "Inner Pile-Up A_p"
 
 #: modules/process/indent_analyze.c:535
 msgid "Outer Pile-Up A_d"
-msgstr ""
+msgstr "Outer Pile-Up A_d"
 
 #: modules/process/indent_analyze.c:538
 msgid "Outer Pile-Up A_p"
-msgstr ""
+msgstr "Outer Pile-Up A_p"
 
 #: modules/process/laplace.c:45
 msgid ""
@@ -3045,7 +3048,7 @@ msgstr "Aggiusta le immagini di due stampe "
 
 #: modules/process/nanoindent_adjust.c:111
 msgid "/Indento_r/Ad_just..."
-msgstr ""
+msgstr "/Indentazione/Aggiusta..."
 
 #: modules/process/nanoindent_adjust.c:177
 #, fuzzy
@@ -3895,12 +3898,3 @@ msgstr "Quantità statistiche"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametri</b>"
-
-#~ msgid "/_Nanoindentation/_Adjust..."
-#~ msgstr "/_Nanoindentazione/_Aggiusta..."
-
-#~ msgid "Imports Thermicroscopes SpmLab R4 and R5 data files."
-#~ msgstr "Importa file dati Thermicroscopes SpmLab R4 e R5"
-
-#~ msgid "Thermicroscopes SpmLab R4, R5 files"
-#~ msgstr "file Thermicroscopes SpmLab R4, R5"
