@@ -1,4 +1,22 @@
 
+1.11
+Application:
+- Markup works in metadata browser (bug #49).
+- Translations updated: Italian.
+
+Modules:
+- SPMLab: Imports data with correct units (bug #44).
+- NT-MDT: Incorrect data import was fixed (bug #46).
+- NT-MDT: GUI problems with files containing too many channels were mitigated
+          (bug #42).
+
+Library:
+- libprocess: Grain size distribution x-scale was corrected.
+
+Other:
+- Wrong libtool detection in autogen.sh was fixed (bug #51).
+
+
 1.10
 Application:
 - Translations updated: Czech, Italian.
