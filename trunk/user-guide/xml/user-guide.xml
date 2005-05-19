@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<book xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion user guide</title>
+    <author>
+      <firstname>Petr</firstname>
+      <surname>Klapetek</surname>
+    </author>
+    <copyright>
+      <year>2004</year>
+      <holder>Petr Klapetek &amp; David Nečas</holder>
+    </copyright>
+    <legalnotice id="legalnotice">
+      <para>
+        Permission is granted to copy, distribute and/or modify this document
+        under the terms of the <link linkend="gfdl">GNU Free Documentation
+        License</link>, Version 1.2 or any later version published by the
+        Free Software Foundation; with no Invariant Sections, no Front-Cover
+        Texts, and no Back-Cover Texts. A copy of the license is included
+        in the section entitled <link linkend="gfdl">GNU Free Documentation
+        License</link>.
+     </para>
+    </legalnotice>
+  </bookinfo>
+  <xi:include href="intro.xml"/>
+  <xi:include href="install.xml"/>
+  <xi:include href="getting-started.xml"/>
+  <chapter id="data-analysis">
+    <title>Data processing and analysis</title>
+    <xi:include href="basic.xml"/>
+    <xi:include href="leveling.xml"/>
+    <xi:include href="filters.xml"/>
+    <xi:include href="edit.xml"/>
+    <xi:include href="statistical.xml"/>
+    <xi:include href="grains.xml"/>
+    <xi:include href="inttrans.xml"/>
+    <xi:include href="fractal.xml"/>
+    <xi:include href="tip.xml"/>
+    <xi:include href="graph.xml"/>
+  </chapter>
+  <xi:include href="develop.xml"/>
+  <xi:include href="fdl.xml"/>
+</book>
+

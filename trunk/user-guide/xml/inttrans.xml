@@ -1,0 +1,278 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-inttrans">
+  <title>Integral transforms</title>
+  <para>
+  Currently, two different integral transforms can be used within Gwyddion
+  for 2D data processing.
+  </para>
+  <para>
+  Integral transforms and related modules can be accessed from menu as
+  <menuchoice>
+    <guimenu>Data Process</guimenu><guisubmenu>Integral Transforms</guisubmenu> 
+  </menuchoice>.
+  </para>  
+  <section>
+    <title>Fourier transform</title>
+    <para>
+    Fourier transform can be accessed within FFT module which implements Fast Fourier transform.
+    Fourier transform decomposes signal into its harmonic compoments, it is therefore useful while studying
+    spectral frequencies present in the SPM data.
+    </para>
+    <para>
+    Note that the Fourier transform treats data as being infinite, thus implying some cyclic boundary conditions.
+    As the real data do not have these properties, it is necessary to use some windowing function to suppress
+    the data at the edgest of the image. If you don't do this, FFT treats data as being windowed by rectangular
+    windowing function which has really bad  Fourier image thus leading to corruption of the Fourier spectrum.
+    </para>
+    <para>
+    Winhin Gwyddion several windowing functions are implemented. Most of them are formed by some sine and cosine
+    functions that damp data correctly at the edges. Windowing function can be set within the Fourier Transform module.
+    </para>
+  </section>
+  <section>
+    <title>Wavelet transform</title>
+    <para>
+    The wavelet transform is a transform similar to the Fourier transform (or much more to the windowed Fourier transform) 
+    with a completely different merit function. The main difference is this: Fourier transform decomposes the signal into 
+    sines and cosines - e. g. the functions localized in Fourier space; in contrary the wavelet transform uses functions 
+    that are localized in both the real and Fourier space. Generally, the wavelet transform can be expressed by the following
+    equation:
+    </para>
+    <informalequation>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="300" fileref="wt_eq4.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+    where the * is the complex conjugate symbol and function &psi; is some function which can be different obeying some rules.
+    </para>
+     <para>
+    As it is seen, the Wavelet transform is in fact an infinite set of various transforms, depending on the merit function used 
+    for its computation. This is the main reason, why we can hear the term "wavelet transform" in very different situations and 
+    applications. There are also many ways how to sort the types of the wavelet transforms. Here we show only the division based 
+    on the wavelet orthogonality. We can use <emphasis>orthogonal wavelets</emphasis> for discrete wavelet transform development
+    and <emphasis>non-orthogonal wavelets</emphasis> for continuous wavelet transform developement. These two transforms have
+    the following properties:
+    </para>
+    <orderedlist>
+      <listitem>
+      The discrete wavelet transform returns a data vector of the same length as the input is. Usually, even in this vector 
+      many data are almost zero. This corresponds to the fact that it decomposes into a set of wavelets (functions) that are 
+      orthogonal to its translations and scaling. Therefore we decompose such a signal to a same or lower number of the wavelet 
+      coefficient spectrum as is the number of signal data points. Such a wavelet spectrum is very good for signal processing 
+      and compression, for example, as we get no redundant information here.
+      </listitem>
+      <listitem>
+      The continuous wavelet transform in contrary returns an array one dimension larger thatn the input data. 
+      For a 1D data we obtain an image of the time-frequecy plane. We can easily see the signal frequencies evolution 
+      during the duration of the signal and compare the spectrum with other signals spertra. As here is used the non-orthogonal 
+      set of wavelets, data are correlated highly, so big redundancy is seen here. This helps to see the results in a more humane form.
+      </listitem>
+    </orderedlist>
+    <para>
+    For more details on wavelet transorm see any of the thousands of wavelet resources on the Web, or for example Ref. 1.
+    </para>
+    <para>
+    Within Gwyddion data processing library, both these transforms are implemented and the modules using wavelet transforms can be
+    accessed within 
+    <menuchoice>
+    <guimenu>Data Process</guimenu><guisubmenu>Integral Transforms</guisubmenu> 
+    </menuchoice> menu.     
+    </para>
+    <section>
+      <title>Discrete wavelet transform</title>
+      <para>
+      The discrete wavelet transform (DWT) is an implementation of the wavelet transform using a discrete set of the wavelet scales 
+      and translations obeying some defined rules. In other words, this transform decomposes the signal into mutually orthogonal set 
+      of wavelets, which is the main difference from the continuous wavelet transform (CWT), or its implementation for the discrete 
+      time series sometimes called discrete-time continuous wavelet transform (DT-CWT).
+      </para>
+      <para>
+      The wavelet can be constructed from a scaling function which describes its scaling properties. The restriction that the scaling 
+      functions must be orthogonal to its discrete translations implies some mathematical conditions on them which are mentioned everywhere 
+      e. g. the dilation equation
+      </para>
+      <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="250" fileref="wdwt_eq1.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      where S is a scaling factor (usually chosen as 2). Moreover, the area between the function must be normalized and 
+      scaling function must be ortogonal to its integer translates e. g.
+      </para>
+      <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="300" fileref="wdwt_eq2.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      After introducing some more conditions (as the restrictions above does not produce unique solution) we can obtain results of all 
+      this equations, e. g. finite set of coefficients a_k which define the scaling function and also the wavelet. The wavelet is obtained 
+      from the scaling function as
+      </para>
+       <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="350" fileref="wdwt_eq3.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      where N is an even integer. The set of wavelets than forms an orthonormal basis which we use to decompose signal. Note 
+      that usually only few of the coefficients a_k are nonzero which simplifies the calculations.
+      </para>
+      <para>
+      In the following figure, some wavelet scaling functions and wavelets are plotted. The most known family of orthonormal wavelets 
+      is a family of Daubechies. Her wavelets are usually denominated by the number of nonzero coefficients a_k, so we usually talk 
+      about Daubechies 4, Daubechies 6 etc. wavelets Roughly said, with the increasing number of wavelet coeficients the functions 
+      become more smooth. See the comparison of wavelets Daubechies 4 and 20 below. Another mentioned wavelet is the simplest one, 
+      the Haar wavelet, which uses a box function as the scaling function. 
+      </para>
+       <figure>
+       <title>Haar scaling function (left) and wavelet (right).</title>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata height="20" fileref="whaar.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+       <figure>
+       <title>Daubechies 4 scaling function (left) and wavelet (right).</title>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata height="20" fileref="wdaub4.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+        <figure>
+	<title> Daubechies 20 scaling function (left) and wavelet (right).</title>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata height="20" fileref="wdaub20.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </figure>
+       <para>
+      There are several types of implementation of the DWT algorithm. The oldest and most known one is the Malaat (pyramidal) algoritm. 
+      In this algorithm two filters - smoothing and non-smoothing one are constructed from the wavelet coefficients and those filters 
+      are recurrently used to obtain data for all the scales. If the total number of data D=2<superscript>N</superscript> is 
+      used and signal length is L, first 
+      D/2 data at scale L/2<superscript>(N-1)</superscript> are computed, than (D/2)/2 data at scale 
+      L/2<superscript>(N-2)</superscript>, ... etc up to finally obtaining 2 data at scale 
+      L/2. The result of this algorithm is an array of the same length as the input one, where the data are usually sorted from the 
+      largest scales to the smallest ones.      
+      </para>
+      <para>
+      Within Gwyddion the pyramidal algorithm is used for computing the discrete wavelet transform. Discrete wavelet transform in 2D can be
+      accessed using DWT module.
+      </para>
+      <para>
+      Discrete wavelet transform can be used for easy and fast denoising of a noisy signal. If we take only a limited number of 
+      highest coefficients of the discrete wavelet transform spectrum, and we perform an inverse transform (with the same wavelet basis) 
+      we can obtain more or less denoised signal. There are several ways how to choose the coefficients that will be keeped. 
+      Within Gwyddion, the universal thresholding, scale adaptive thresholding [2] and scale and space adaptive thresholding [3] is implemented.
+      For threshold determination within these methods we first determine the noise variance
+      guess given by
+      </para>
+       <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="150" fileref="wdenoise_eq0.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      where $Y_{ij}$ corresponds to all the coefficients of the highst scale subband of the decomposition
+      (where most of the noise is assumend to be present). Alternatively, the noise variance can be obtained
+      in an independent way, for example from the AFM signal variance while not scanning.
+      For the highest frequency subband (universal thresholding) or for each subband (for scale adaptive thresholding) 
+      or for each pixel neighbourhood within subband
+      (for scale and space adaptive thresholding) the variance is the computed as
+      </para>      
+       <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="180" fileref="wdenoise_eq1.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      Treshold value is finally computed as
+      </para>
+       <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="180" fileref="wdenoise_eq2.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>
+      <para>
+      where 
+       <informalequation>
+        <mediaobject>
+	  <imageobject>
+	    <imagedata width="250" fileref="wdenoise_eq3.png" format="PNG"/>
+	  </imageobject>
+	</mediaobject>
+      </informalequation>      
+      When threshold for given scale is known, we can remove all the coefficients smaller than threshold value
+      (hard thresholding) or we can lower the absolute value of these coefficients by threshold value (soft thresholding).            
+      </para>
+      <para>
+      DWT denoising can be accessed within the DWT denoise module.
+      </para>
+      </section>
+    <section>
+      <title>Continuous wavelet transform</title>
+      <para>
+      Continuous wavelet transform (CWT) is an implementaion of the wavelet transform using an arbitrary scales and almost arbitrary 
+      wavelets. The wavelets used are not orthogonal and the data obtained by this transform are highly correlated. For the disctete 
+      time series we can uset this transform as well, with the limitation that the smallest wavelet translations must be equal to the 
+      data sampling. This is sometimes called Discrete Time Continuous Wavelet Transform (DT-CWT) and it is the mostly used way of 
+      computing CWT in real applications.
+      </para>
+      <para>
+      In principle the continuous wavelet transform works by using directly the definition of the wavelet transform - 
+      e. g. we are computing a convolution of the signal with the scaled wavelet. For each scale we obtain by this way an array of the 
+      same length N as the signal has. By using M arbitrarily chosen scales we obtain a field NxM which represents the time-frequency 
+      plane directly. The algoritm used for this computaion can be based on a direct convolution or on a convolution by means of 
+      multiplication in Fourier space (this is sometimes called Fast wavelet transform).
+      </para>
+      <para>
+      The choice of the wavelet that is used for time-frequency decomposition is the most important thing. By this choice we can inlfuence 
+      the time and frequency resolution of the result. We cannot change the main features of WT by this way 
+      (low frequencies have good frequecny and bad time resolution; high frequencies have good time and bad frequency resolution), 
+      but we can somehow increase the total frequency of total time resolution. This is directly proportional to the width of the 
+      used wavelet in real and Fourier space. If we use the Morlet wavelet for example (real part - damped cosine function) we can expect high 
+      frequency resolution as such a wavelet is very well localized in frequencies. In contrary, using Derivative of Gaussian (DOG) wavelet 
+      will result in good time localization, but poor one in frequencies. 
+      </para>
+      <para>
+      Within Gwyddion, several 2D wavelets are implemented within CWT module.
+      </para>
+    </section>
+  </section>
+  <section>
+     <title>References</title>
+     <para>
+     [1] A. Bultheel: Bull. Belg. Math. Soc.: (1995)  2
+     </para>
+     <para>
+     [2] S. G. Chang, B. Yu, M. Vetterli: IEEE Trans. Image Processing, (2000) 9 p. 1532
+     </para>
+     <para>
+     [3] S. G. Chang, B. Yu, M. Vetterli: IEEE Trans. Image Processing, (2000) 9 p. 1522
+     </para>
+  </section>
+</section>
+

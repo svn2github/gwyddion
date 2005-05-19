@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="keyboard-shortcuts">
+  <title>Keyboard shortcuts</title>
+    <table frame='topbot' id="table-keyboard-shortcuts"><title>Keyboard shortcuts</title>
+      <tgroup cols='4' align='left'>
+        <thead>
+          <row>
+            <entry>Shortcut</entry>
+            <entry>Menu equivalent</entry>
+            <entry>Context</entry>
+            <entry>Action</entry>
+          </row>
+        </thead>
+        <tbody valign='top'>
+          <row>
+            <entry><keycap>Ctrl-Q</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Quit</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>Quit <application>Gwyddion</application>.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-O</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Open</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>Open a data file.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-S</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Save</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>Save current data (you will be prompted for a file name if none is associated yet).</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Shift-S</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Save As</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>
+              Save current data under a different name. The file name associated with the data
+              changes to the new name.
+            </entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-W</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Close</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, tool window</entry>
+            <entry>
+              Close current data window.  Associated 3D and graph windows are kept, but any
+              any changes in them can be no longer saved.
+            </entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Z</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Edit</guimenu>
+                <guimenuitem>Undo</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>Undo the last processing step applied on current data.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Y</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Edit</guimenu>
+                <guimenuitem>Redo</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>Redo the last processing step applied on current data.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-D</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Edit</guimenu>
+                <guimenuitem>Duplicate</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>
+              Duplicate data in current data window, including all associated information
+              except file name.
+            </entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-K</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Edit</guimenu>
+                <guimenuitem>Remove Mask</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool windows</entry>
+            <entry>Remove mask from current data window.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Shift-K</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Edit</guimenu>
+                <guimenuitem>Remove Presentation</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool windows</entry>
+            <entry>Remove presentation from current data window.</entry>
+          </row>
+          <row>
+            <entry><keycap>+</keycap></entry>
+            <entry></entry>
+            <entry>data window</entry>
+            <entry>Zoom current data window in.</entry>
+          </row>
+          <row>
+            <entry><keycap>=</keycap></entry>
+            <entry></entry>
+            <entry>data window</entry>
+            <entry>Zoom current data window in.</entry>
+          </row>
+          <row>
+            <entry><keycap>-</keycap></entry>
+            <entry></entry>
+            <entry>data window</entry>
+            <entry>Zoom current data window out.</entry>
+          </row>
+          <row>
+            <entry><keycap>Z</keycap></entry>
+            <entry></entry>
+            <entry>data window</entry>
+            <entry>Zoom current data window 1:1.</entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-F</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Data Process</guimenu>
+                <guimenuitem>Repeat Last</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool windows</entry>
+            <entry>
+              Repeat last data processing function with the last used parameters,
+              on current data.  Normally the operation is repeated silently, but if the
+              processing step cannot be carried out without a human interaction,
+              a dialog is shown.
+            </entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Shift-F</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>Data Process</guimenu>
+                <guimenuitem>Re-Show Last</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool windows</entry>
+            <entry>
+              Re-show parameter dialog of the last data processing function.
+              If the operation has no parameters to set, it is performed immediately.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+</section>

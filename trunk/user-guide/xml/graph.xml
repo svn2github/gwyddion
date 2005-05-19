@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-graph">
+  <title>Graph processing</title>
+  <para>
+  Many of the Gwyddion data processing modules produce graph as a output.
+  Graphs can be exported into ASCII files or further analyzed within Gwyddion by
+  several graph processing modules. These modules can be found in the Graph
+  menu in the Gwyddion main window. Note that the number of graph modules is
+  really limited now and consists of basic modules for doing things that
+  are very frequent within SPM data analysis. For more analytical tools
+  you can use your favorite graph processing program.
+  </para>  
+  <para>
+  In this section the graph modules present in Gwyddion are shortly presented
+  </para>
+  <section>
+     <title>Basic operations</title>
+     <para>
+     First of all there are zooming and data reading modules in Graph menu. 
+     </para>
+     <itemizedlist>
+        <listitem>
+	Zoom in and zoom out - simply draw are that should be zoomed by mouse
+	and zoom. Zoom out restores state whne all data can be seen.
+	</listitem>
+        <listitem>
+	Read value - prints X and Y value under cursor
+	</listitem>
+        <listitem>
+	Measure distances - enables user to select several points within graph and
+	prints out their distances and angles between them.
+	</listitem>		
+     </itemizedlist>
+  </section>
+  <section>
+     <title>Fit graph</title>
+     <para>
+     This module is designed namely for fitting the statistical function by means of
+     functions mostly used in roughness parameters evaluation. This influences
+     the possible functions to be fitted that are currently namely various statistical
+     functions for surface having Gaussian or exponential autocorrelation function.
+     </para>
+     <para>
+     Within fit module you can select area that should be fitted (by mouse or by entries),
+     try some initial parameters (or let the module to guess them) and fit the data
+     using Marquardt-Levenberg algorithm.
+     </para>
+     <para>
+     As a result you obtain fit and set of its parameters. These can be saved into a file.
+     </para>
+     <figure>
+       <title>Fit graph module screenshot</title>
+       <mediaobject>
+         <imageobject>
+	   <imagedata fileref="graph_fit.png" format="PNG"/>
+	 </imageobject>
+       </mediaobject>
+     </figure>
+  </section>
+  <section>
+     <title>Critical dimension</title>
+     <para>
+     Critical dimension module can be used to fit some "typical" objects that
+     can be often found while analyzing microchips and related surfaces. These
+     objects are found in the graph and their properties are evaluated.
+     </para>
+     <para>
+     User interface of this module is practically same as for the graph fit module.
+     </para>
+     <figure>
+       <title>Critical dimension module screenshot</title>
+       <mediaobject>
+         <imageobject>
+	   <imagedata fileref="graph_cd.png" format="PNG"/>
+	 </imageobject>
+       </mediaobject>
+     </figure>
+  </section>
+</section>
+

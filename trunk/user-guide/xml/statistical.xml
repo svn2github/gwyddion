@@ -1,0 +1,315 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-stats">
+  <title>Statistical analysis</title>
+  <para>
+  While analyzing randomly rough surfaces we often need a statistical approach to determine
+  some set of representative quantities. Within Gwyddion, there are several ways of doing this
+  (e. g. "statistical quantities" and "statistical functions" tools and 2D slope and angle statistics)
+  Here, the basic equations which were used to develop algorithms present in Gwyddion are presented.
+  </para>
+  <para>
+  Atomic force microscopy data are usually represented as a two-dimensional
+  data field of size <phrase role="math">N x M</phrase>, where <phrase role="math">N</phrase> and/or <phrase role="math">M</phrase> represents the number of rows and/or
+  columns within the data field. The real size of the field is denoted as
+  <phrase role="math">L<subscript>x</subscript> x L<subscript>y</subscript></phrase> where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase> are the sizes of the respective axes.
+  Sampling interval (distance between two adjacent points within the scan) is
+  denoted &Delta;. We assume that the sampling interval is the same in
+  both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase> direction. We assume
+  that the surface height in a given point <phrase role="math">x</phrase>,<phrase role="math">y</phrase> can be described by a random function
+  &xi; <phrase role="math">(x,y)</phrase> that has given statistical properties.
+  </para>
+  <para>
+  Note that the AFM data are usually collected as a line scans in the <phrase role="math">x</phrase> axis that are
+  forming the two-dimensional image. Therefore, the scanning speed in the <phrase role="math">x</phrase> direction
+  is considerably higher than the scanning speed in the <phrase role="math">y</phrase> direction.
+  Therefore, the statistical properties of AFM data are usually collected
+  along the <phrase role="math">x</phrase> profiles as these are less affected by low frequency noise and thermal drift
+  of the sample.
+  </para>
+  <section>
+    <title>Statistical quantities</title>
+    <para>
+    Statistical quantities include basic properties of the height values distribution, including
+    its variance, skewness and kurtosis. The quantities accesible within Gwyddion by means of
+    the "statistical quantities" tool are as follows:
+    </para>
+    <orderedlist>
+       <listitem>
+       RMS value of the height irregularities: this quantity is computed from data variance.
+       </listitem>
+       <listitem>
+       Ra value of the height irregularities: this quantity is similar to RMS value with the only difference in exponent (power)
+       within the data variance sum. As for the RMS this exponent is <phrase role="math">q=2</phrase>,
+       the Ra value is computed with exponent <phrase role="math">q=1</phrase>
+       and absolute values of the data (zero mean),
+       </listitem>
+       <listitem>
+       Height distribution skewness: again this is computed as 3rd power of the data values (zero mean)
+       </listitem>
+       <listitem>
+       Height distribution kurtosis: computed as 4th power of the data values (zero mean)
+       </listitem>
+     </orderedlist>
+  </section>
+  <section>
+    <title>Statistical functions</title>
+    <para>
+    One-dimensional statistical functions can be accesed by using "statistical functions" tool.
+    The functions can be computed using both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase> direction. As stated above,
+    we recommend using the fast scanning axis direction for statistical functions evaluation.
+    </para>
+    <para>
+    The simplest statistical functions are the height and slope distribution functions.
+    These can be computed as non-cumulative or cumulative. These functions are computed as normalized histograms
+    of the height or slope (obtained by <phrase role="math">x</phrase> or <phrase role="math">y</phrase> derivation) values.
+    </para>
+    <para>
+    The height and slope quantities belong to the first-order statistical quantities,
+    describing only the statistical properties of the individual points.
+    However, for the complete description of the surface properties it
+    is necessary to study higher order functions. Usually, second-order statistical
+    quantities observing mutual relationship of two points on the surface
+    are employed. These functions are namely autocorrelation function,
+    power spectral density function and height-height correlation function.
+    </para>
+    <section>
+       <title>Autocorrelation function</title>
+       <para>
+       Autocorrelation function is given by
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_acf1.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">z<subscript>1</subscript></phrase> and <phrase role="math">z<subscript>2</subscript></phrase>
+       are concrete values of heights at points [x<subscript>1</subscript>, y<subscript>1</subscript>],
+       [x<subscript>2</subscript>, y<subscript>2</subscript>], <phrase role="math">&tau;<subscript>x</subscript>=x<subscript>1</subscript>
+       - x<subscript>2</subscript></phrase>
+       and <phrase role="math">&tau;<subscript>y</subscript>=y<subscript>1</subscript> - y<subscript>2</subscript></phrase>.
+       Function <phrase role="math">w(z<subscript>1</subscript>,z<subscript>2</subscript>, &tau;<subscript>x</subscript>,
+				      &tau;<subscript>y</subscript>)</phrase>
+       denotes two-dimensional probability density of random function <phrase role="math">&xi;>(x,y)</phrase>
+       corresponding to points [x<subscript>1</subscript>, y<subscript>1</subscript>], [x<subscript>2</subscript>, y<subscript>2</subscript>]
+       and the distance between
+       these points <phrase role="math">&tau;</phrase>.
+       </para>
+       <para>
+       Within the AFM measurements we usually evaluate the one-dimensional
+       autocorrelation function determined only from profiles in the fast
+       scanning axis
+       which can be evaluated from the discrete AFM data values
+       as
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject role="html">
+             <imagedata fileref="eq_acf2.png" format="PNG"/>
+           </imageobject>
+           <textobject role="tex">
+             <phrase>$\displaystyle G_x(\tau_x) = {1\over N(M-m)}
+               \sum_{l=1}^N \sum_{n=1}^{M-m} z_{n+m,l} z_{n,l}$</phrase>
+           </textobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">m=&tau;<subscript>x</subscript>/&Delta;</phrase>. Function thus can be evaluated in a discrete set
+       of values of $\tau$ separated by the sampling interval <phrase role="math">&Delta;</phrase>.
+       </para>
+       <para>
+       The one-dimensional autocorrelation function is often supposed as being
+       Gaussian, i. e. given by the following relation
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_acf3.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">&sigma;</phrase> and/or <phrase role="math">T</phrase> denotes the root mean square deviation of
+       the heights and/or the autocorrelation length.
+       </para>
+       <para>
+       For the exponential autocorrelation function we have the following relation
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_acf2.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       Note that in optical measurements (e. g. spectroscopic reflectometry, ellipsometry)
+       Gaussian autocorrelation function is usually expected to be in good
+       agreement with the surface properties. However, some articles related with
+       surface growth \cite{jordan} and oxidation \cite{yoshinobu} usually assume that the exponential form is
+       closer to the reality.
+       </para>
+    </section>
+    <section>
+       <title>Height-height correlation function</title>
+       <para>
+       The difference between height-height correlation function and autocorrelation
+       function is only very small. As within autocorrelation function we sum multiples
+       of two different values (for different distances between points representing these values),
+       for height-height correlation function evaluation we use power of difference between
+       these two values.
+       </para>
+       <para>
+       Within the AFM measurements we usually evaluate the one-dimensional
+       height-height correlation function determined only from profiles in the fast
+       scanning axis
+       which can be evaluated from the discrete AFM data values
+       as
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_hhcf2.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">m=&tau;<subscript>x</subscript>/&Delta;</phrase>. Function thus can be evaluated in a discrete set
+       of values of $\tau$ separated by the sampling interval <phrase role="math">&Delta;</phrase>.
+       </para>
+       <para>
+       As stated above, the one-dimensional autocorrelation function is often supposed as being
+       Gaussian, i. e. given by the following relation for the height-height correlation function
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_hhcf3.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">&sigma;</phrase> and/or <phrase role="math">T</phrase> denotes the root mean square deviation of
+       the heights and/or the autocorrelation length.
+       </para>
+       <para>
+       For the exponential autocorrelation function we have the following relation for the
+       height-height correlation function
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_hhcf2.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       In Fig. 1 the height-height correlation function and autocorrelation function obtained for
+       simulated surface having Gaussian autocorrelation function are plotted. These functions
+       are fitted by means of least-squares method using the formulae shown above. The resulting
+       values of <phrase role="math">&sigma;</phrase> and <phrase role="math">T</phrase> were practically same for both the approaches.
+       </para>
+       <figure>
+         <title>Height-height correlation function and autocorrelation function obtained for
+	         simulated surface having Gaussian autocorrelation function.</title>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="fig_cf.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </figure>
+     </section>
+    <section>
+       <title></title>
+       <para>
+       Two-dimensional power spectral density function can be written in terms of Fourier transform of the
+       autocorrelation function
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf1.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       Similarly to autocorrelation function, also here we
+       usually evaluate the one-dimensional
+       power spectral density function which is given by equation
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf2.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+        </informalequation>
+        <para>
+       This function can be evaluated by means of the Fast Fourier transform as follows:
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf3.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       where <phrase role="math">P<subscript>j</subscript>(K<subscript>x</subscript>)</phrase> is the Fourier coefficient
+       of the <phrase role="math">j-</phrase>th row, i. e.
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf4.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       If we have chosen the Gaussian ACF, the corresponding Gaussian relation for the PSDF is
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf5.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       For the surface with exponential ACF we have
+       </para>
+       <informalequation>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="eq_psdf6.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </informalequation>
+       <para>
+       In Figure 2 the resulting PSDF and its fit for the same surface as used in Fig. 1 are plotted.
+       We can see that the function can be again fitted by Gaussian PSDF. The resulting values of
+       <phrase role="math">&sigma;</phrase> and <phrase role="math">T</phrase> were practically same as those from the HHCF and ACF fit.
+       </para>
+       <figure>
+         <title>PSDF obtained for data simulated with gaussian autocorrelation function. Points represent
+	        computed data, line represents its fit.
+		</title>
+         <mediaobject>
+           <imageobject>
+             <imagedata fileref="fig_psdf.png" format="PNG"/>
+           </imageobject>
+         </mediaobject>
+       </figure>
+       <para>
+       Note that within Gwyddion you can fit all statistical function presented here
+       by their gaussian and exponential forms. For this, evaluate the statistical function
+       (and put it into graph) and fit this by choosing "graph fit" module.
+       </para>
+     </section>
+  </section>
+</section>
