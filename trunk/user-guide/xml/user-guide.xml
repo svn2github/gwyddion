@@ -41,6 +41,11 @@
     <xi:include href="tip.xml"/>
     <xi:include href="graph.xml"/>
   </chapter>
+  <chapter id="summaries">
+    <title>Summaries and tables</title>
+    <xi:include href="keyboard-shortcuts.xml"/>
+    <xi:include href="expressions.xml"/>
+  </chapter>
   <xi:include href="develop.xml"/>
   <xi:include href="fdl.xml"/>
 </book>

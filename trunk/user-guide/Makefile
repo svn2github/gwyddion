@@ -15,6 +15,7 @@ XML_SOURCES = \
 	xml/basic.xml \
 	xml/develop.xml \
 	xml/edit.xml \
+	xml/expressions.xml \
 	xml/fdl.xml \
 	xml/filters.xml \
 	xml/fractal.xml \
