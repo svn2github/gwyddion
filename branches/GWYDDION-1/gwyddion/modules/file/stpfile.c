@@ -427,10 +427,10 @@ select_which_data(STPFile *stpfile)
     GwyEnum *choices;
     GtkObject *layer;
     GSList *radio, *rl;
-    guint i, b;
+    guint i, b = (guint)-1;
 
     if (!stpfile->n)
-        return (guint)-1;
+        return b;
 
     if (stpfile->n == 1)
         return 0;
@@ -500,7 +500,6 @@ select_which_data(STPFile *stpfile)
         case GTK_RESPONSE_DELETE_EVENT:
         gtk_widget_destroy(dialog);
         case GTK_RESPONSE_NONE:
-        b = (guint)-1;
         break;
 
         case GTK_RESPONSE_OK:
