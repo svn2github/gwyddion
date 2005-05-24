@@ -8,6 +8,7 @@ Modules:
 - RHK SPM32: Supports multipage files.
 - SPMLab: Imports data with correct units (bug #44).
 - NT-MDT: Incorrect data import was fixed (bug #46).
+- STPFile: Incorrect height data import was fixed.
 - NT-MDT: GUI problems with files containing too many channels were mitigated
           (bug #42).
 - Assing AFM: compilation failure on big endian architectures was fixed.
@@ -28,6 +29,7 @@ Modules:
 - BCRfile (new): Image Metrology BCR data file import.
 - RHK SPM32 (new): RHK SPM32 data file import.
 - WSxMfile (new): Nanotec WSxM data file import.
+- STPFile (new): Molecular Imaging STP file import.
 - EZDFile (new): Nanosurf EZD data file import.
 - Nanoident analyse (new): Analyses nanoindent structures (volume, surfaces,
   etc.).
