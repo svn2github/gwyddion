@@ -35,15 +35,42 @@
 #define EXTENSION ".sm2"
 
 typedef enum {
-    RHK_IMAGE_UNDEFINED     = 0,
-    RHK_IMAGE_TOPOGAPHIC    = 1,
-    RHK_IMAGE_CURRENT       = 2,
-    RHK_IMAGE_AUX           = 3,
-    RHK_IMAGE_FORCE         = 4,
-    RHK_IMAGE_SIGNAL        = 5,
-    RHK_IMAGE_FFT           = 6,
+    RHK_TYPE_IMAGE =            0,
+    RHK_TYPE_LINE =             1,
+    RHK_TYPE_ANNOTATED_LINE =   3
+} RHKDataType;
+
+typedef enum {
+    RHK_IMAGE_UNDEFINED                = 0,
+    RHK_IMAGE_TOPOGAPHIC               = 1,
+    RHK_IMAGE_CURRENT                  = 2,
+    RHK_IMAGE_AUX                      = 3,
+    RHK_IMAGE_FORCE                    = 4,
+    RHK_IMAGE_SIGNAL                   = 5,
+    RHK_IMAGE_FFT                      = 6,
+    RHK_IMAGE_NOISE_POWER_SPECTRUM     = 7,
+    RHK_IMAGE_LINE_TEST                = 8,
+    RHK_IMAGE_OSCILLOSCOPE             = 9,
+    RHK_IMAGE_IV_SPECTRA               = 10,
+    RHK_IMAGE_IV_4x4                   = 11,
+    RHK_IMAGE_IV_8x8                   = 12,
+    RHK_IMAGE_IV_16x16                 = 13,
+    RHK_IMAGE_IV_32x32                 = 14,
+    RHK_IMAGE_IV_CENTER                = 15,
+    RHK_IMAGE_INTERACTIVE_SPECTRA      = 16,
+    RHK_IMAGE_AUTOCORRELATION          = 17,
+    RHK_IMAGE_IZ_SPECTRA               = 18,
+    RHK_IMAGE_4_GAIN_TOPOGRAPHY        = 19,
+    RHK_IMAGE_8_GAIN_TOPOGRAPHY        = 20,
+    RHK_IMAGE_4_GAIN_CURRENT           = 21,
+    RHK_IMAGE_8_GAIN_CURRENT           = 22,
+    RHK_IMAGE_IV_64x64                 = 23,
+    RHK_IMAGE_AUTOCORRELATION_SPECTRUM = 24,
+    RHK_IMAGE_COUNTER                  = 25,
+    RHK_IMAGE_MULTICHANNEL_ANALYSER    = 26,
+    RHK_IMAGE_AFM_100                  = 27,
     RHK_IMAGE_LAST
-} RHKImageType;
+} RHKPageType;
 
 typedef struct {
     gdouble scale;
@@ -55,17 +82,19 @@ typedef struct {
     gchar *date;
     guint xres;
     guint yres;
-    guint type;
+    RHKDataType type;
     guint data_type;
     guint line_type;
     guint size;
-    guint image_type;
+    RHKPageType page_type;
     RHKRange x;
     RHKRange y;
     RHKRange z;
     gdouble xyskew;
     gdouble alpha;
     RHKRange iv;
+    guint scan;
+    gdouble period;
     guint id;
     guint data_offset;
     gchar *label;
@@ -94,7 +123,7 @@ static GwyModuleInfo module_info = {
     "rhk-spm32",
     N_("Imports RHK Technology SPM32 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -202,22 +231,26 @@ rhkspm32_read_header(gchar *buffer,
     rhkfile->date = g_strstrip(g_strndup(buffer + MAGIC_SIZE,
                                         0x20 - MAGIC_SIZE));
     if (sscanf(buffer + 0x20, "%d %d %d %d %d %d %d",
-               &rhkfile->type, &rhkfile->data_type, &rhkfile->line_type,
+               (gint*)&rhkfile->type, &rhkfile->data_type, &rhkfile->line_type,
                &rhkfile->xres, &rhkfile->yres, &rhkfile->size,
-               &rhkfile->image_type) != 7
+               (gint*)&rhkfile->page_type) != 7
         || rhkfile->xres <= 0 || rhkfile->yres <= 0)
         return FALSE;
     gwy_debug("type = %u, data = %u, line = %u, image = %u",
               rhkfile->type, rhkfile->data_type, rhkfile->line_type,
-              rhkfile->image_type);
+              rhkfile->page_type);
     gwy_debug("xres = %d, yres = %d", rhkfile->xres, rhkfile->yres);
+    if (rhkfile->type != RHK_TYPE_IMAGE) {
+        g_warning("Cannot read non-image files");
+        return FALSE;
+    }
 
     if (!rhkspm32_read_range(buffer + 0x40, "X", &rhkfile->x)
         || !rhkspm32_read_range(buffer + 0x60, "Y", &rhkfile->y)
         || !rhkspm32_read_range(buffer + 0x80, "Z", &rhkfile->z))
         return FALSE;
 
-    if (!g_str_has_prefix(buffer + 0xa0, "XY"))
+    if (!g_str_has_prefix(buffer + 0xa0, "XY "))
         return FALSE;
     pos = 0xa0 + sizeof("XY");
     rhkfile->xyskew = g_ascii_strtod(buffer + pos, &end);
@@ -231,7 +264,15 @@ rhkspm32_read_header(gchar *buffer,
     if (!rhkspm32_read_range(buffer + 0xc0, "IV", &rhkfile->iv))
         return FALSE;
 
-    /* FIXME: what is at 0xe0? */
+    if (!g_str_has_prefix(buffer + 0xe0, "scan "))
+    pos = 0xe0 + sizeof("scan");
+    rhkfile->scan = strtol(buffer + pos, &end, 10);
+    if (end == buffer + pos)
+        return FALSE;
+    pos = (end - buffer);
+    rhkfile->period = g_ascii_strtod(buffer + pos, &end);
+    if (end == buffer + pos)
+        return FALSE;
 
     if (sscanf(buffer + 0x100, "id %u %u",
                &rhkfile->id, &rhkfile->data_offset) != 2)
@@ -292,13 +333,34 @@ static void
 rhkspm32_store_metadata(RHKFile *rhkfile,
                         GwyContainer *container)
 {
-    const GwyEnum image_types[] = {
-        { "Topographic",   RHK_IMAGE_TOPOGAPHIC },
-        { "Current",       RHK_IMAGE_CURRENT },
-        { "Aux",           RHK_IMAGE_AUX },
-        { "Force",         RHK_IMAGE_FORCE },
-        { "Signal",        RHK_IMAGE_SIGNAL },
-        { "FFT transform", RHK_IMAGE_FFT },
+    const GwyEnum page_types[] = {
+        { "Topographic",              RHK_IMAGE_TOPOGAPHIC               },
+        { "Current",                  RHK_IMAGE_CURRENT                  },
+        { "Aux",                      RHK_IMAGE_AUX                      },
+        { "Force",                    RHK_IMAGE_FORCE                    },
+        { "Signal",                   RHK_IMAGE_SIGNAL                   },
+        { "FFT transform",            RHK_IMAGE_FFT                      },
+        { "Noise power spectrum",     RHK_IMAGE_NOISE_POWER_SPECTRUM     },
+        { "Line test",                RHK_IMAGE_LINE_TEST                },
+        { "Oscilloscope",             RHK_IMAGE_OSCILLOSCOPE             },
+        { "IV spectra",               RHK_IMAGE_IV_SPECTRA               },
+        { "Image IV 4x4",             RHK_IMAGE_IV_4x4                   },
+        { "Image IV 8x8",             RHK_IMAGE_IV_8x8                   },
+        { "Image IV 16x16",           RHK_IMAGE_IV_16x16                 },
+        { "Image IV 32x32",           RHK_IMAGE_IV_32x32                 },
+        { "Image IV Center",          RHK_IMAGE_IV_CENTER                },
+        { "Interactive spectra",      RHK_IMAGE_INTERACTIVE_SPECTRA      },
+        { "Autocorrelation",          RHK_IMAGE_AUTOCORRELATION          },
+        { "IZ spectra",               RHK_IMAGE_IZ_SPECTRA               },
+        { "4 gain topography",        RHK_IMAGE_4_GAIN_TOPOGRAPHY        },
+        { "8 gain topography",        RHK_IMAGE_8_GAIN_TOPOGRAPHY        },
+        { "4 gain current",           RHK_IMAGE_4_GAIN_CURRENT           },
+        { "8 gain current",           RHK_IMAGE_8_GAIN_CURRENT           },
+        { "Image IV 64x64",           RHK_IMAGE_IV_64x64                 },
+        { "Autocorrelation spectrum", RHK_IMAGE_AUTOCORRELATION_SPECTRUM },
+        { "Counter data",             RHK_IMAGE_COUNTER                  },
+        { "Multichannel analyser",    RHK_IMAGE_MULTICHANNEL_ANALYSER    },
+        { "AFM using AFM-100",        RHK_IMAGE_AFM_100                  },
     };
     const gchar *s;
 
@@ -320,8 +382,8 @@ rhkspm32_store_metadata(RHKFile *rhkfile,
         gwy_container_set_string_by_name(container, "/meta/Label",
                                          g_strdup(rhkfile->label));
 
-    s = gwy_enum_to_string(rhkfile->image_type,
-                           image_types, G_N_ELEMENTS(image_types));
+    s = gwy_enum_to_string(rhkfile->page_type,
+                           page_types, G_N_ELEMENTS(page_types));
     if (s && *s)
         gwy_container_set_string_by_name(container, "/meta/Image type",
                                          g_strdup(s));
