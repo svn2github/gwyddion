@@ -5,10 +5,12 @@ Application:
 - Translations updated: Italian.
 
 Modules:
+- RHK SPM32: Supports multipage files.
 - SPMLab: Imports data with correct units (bug #44).
 - NT-MDT: Incorrect data import was fixed (bug #46).
 - NT-MDT: GUI problems with files containing too many channels were mitigated
           (bug #42).
+- Assing AFM: compilation failure on big endian architectures was fixed.
 
 Library:
 - libprocess: Grain size distribution x-scale was corrected.
