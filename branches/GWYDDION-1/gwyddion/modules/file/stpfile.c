@@ -80,6 +80,12 @@ static guint         select_which_data     (STPFile *stpfile);
 static void          selection_changed     (GtkWidget *button,
                                             STPControls *controls);
 
+static const GwyEnum channels[] = {
+    { N_("Topography"), 1  },
+    { N_("Amplitude"),  2  },
+    { N_("Phase"),      13 },
+};
+
 /* The module info. */
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
@@ -87,7 +93,7 @@ static GwyModuleInfo module_info = {
     "stpfile",
     N_("Imports Molecular Imaging STP data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -308,14 +314,20 @@ process_metadata(STPFile *stpfile,
     GwySIUnit *siunit;
     gdouble q, r;
     gchar *p, *s;
+    const gchar *title;
     guint mode;
 
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(container,
                                                              "/0/data"));
 
     data = stpfile->buffers + id;
-    if ((p = g_hash_table_lookup(data->meta, "source_mode")))
+    if ((p = g_hash_table_lookup(data->meta, "source_mode"))) {
         mode = atol(p);
+        title = gwy_enum_to_string(mode, channels, G_N_ELEMENTS(channels));
+        if (title)
+            gwy_container_set_string_by_name(container, "/filename/title",
+                                             g_strdup(title));
+    }
     else
         mode = 1;
 
@@ -385,17 +397,18 @@ process_metadata(STPFile *stpfile,
     if ((p = g_hash_table_lookup(data->meta, "tip_bias")))
         gwy_container_set_string_by_name(container, "/meta/Bias",
                                          g_strdup_printf("%s V", p));
+    if ((p = g_hash_table_lookup(data->meta, "line_freq")))
+        gwy_container_set_string_by_name(container, "/meta/Line frequency",
+                                         g_strdup_printf("%s Hz", p));
     if ((p = g_hash_table_lookup(data->meta, "scan_dir"))) {
         if (!strcmp(p, "0"))
             gwy_container_set_string_by_name(container,
                                              "/meta/Scanning direction",
-                                             g_strdup("Top to bottom, "
-                                                      "left to right"));
+                                             g_strdup("Top to bottom"));
         else if (strcmp(p, "1"))
             gwy_container_set_string_by_name(container,
                                              "/meta/Scanning direction",
-                                             g_strdup("Bottom to top, "
-                                                      "right to left"));
+                                             g_strdup("Bottom to top"));
     }
 }
 
@@ -422,12 +435,15 @@ static guint
 select_which_data(STPFile *stpfile)
 {
     STPControls controls;
+    STPData *data;
     GtkWidget *dialog, *label, *vbox, *hbox, *align;
     GwyDataField *dfield;
     GwyEnum *choices;
     GtkObject *layer;
     GSList *radio, *rl;
-    guint i, b = (guint)-1;
+    guint i, mode, b = (guint)-1;
+    gchar *p;
+    const gchar *title;
 
     if (!stpfile->n)
         return b;
@@ -438,9 +454,19 @@ select_which_data(STPFile *stpfile)
     controls.file = stpfile;
     choices = g_new(GwyEnum, stpfile->n);
     for (i = 0; i < stpfile->n; i++) {
+        data = stpfile->buffers + i;
         choices[i].value = i;
-        choices[i].name = g_strdup_printf(_("Buffer %u"),
-                                          stpfile->buffers[i].id);
+        title = NULL;
+        if ((p = g_hash_table_lookup(data->meta, "source_mode"))) {
+            mode = atol(p);
+            title = gwy_enum_to_string(mode, channels, G_N_ELEMENTS(channels));
+        }
+        if (title)
+            choices[i].name = g_strdup_printf(_("Buffer %u (%s)"),
+                                              stpfile->buffers[i].id, title);
+        else
+            choices[i].name = g_strdup_printf(_("Buffer %u"),
+                                              stpfile->buffers[i].id);
     }
 
     dialog = gtk_dialog_new_with_buttons(_("Select Data"), NULL, 0,
