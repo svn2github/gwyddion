@@ -45,7 +45,7 @@ static GwyModuleInfo module_info = {
     N_("Levels data by simple plane subtraction or by rotation, "
        "and fixes minimal or mean value to zero."),
     "Yeti <yeti@gwyddion.net>",
-    "1.2",
+    "1.2.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -135,11 +135,17 @@ static gboolean
 fix_zero(GwyContainer *data, GwyRunType run)
 {
     GwyDataField *dfield;
+    gdouble shift, x;
 
     g_return_val_if_fail(run & LEVEL_RUN_MODES, FALSE);
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/data"));
     gwy_app_undo_checkpoint(data, "/0/data", NULL);
-    gwy_data_field_add(dfield, -gwy_data_field_get_min(dfield));
+    shift = -gwy_data_field_get_min(dfield);
+    gwy_data_field_add(dfield, shift);
+    if (gwy_container_gis_double_by_name(data, "/0/base/min", &x))
+        gwy_container_set_double_by_name(data, "/0/base/min", x+shift);
+    if (gwy_container_gis_double_by_name(data, "/0/base/max", &x))
+        gwy_container_set_double_by_name(data, "/0/base/max", x+shift);
 
     return TRUE;
 }
@@ -148,11 +154,17 @@ static gboolean
 zero_mean(GwyContainer *data, GwyRunType run)
 {
     GwyDataField *dfield;
+    gdouble shift, x;
 
     g_return_val_if_fail(run & LEVEL_RUN_MODES, FALSE);
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/data"));
     gwy_app_undo_checkpoint(data, "/0/data", NULL);
-    gwy_data_field_add(dfield, -gwy_data_field_get_avg(dfield));
+    shift = -gwy_data_field_get_avg(dfield);
+    gwy_data_field_add(dfield, shift);
+    if (gwy_container_gis_double_by_name(data, "/0/base/min", &x))
+        gwy_container_set_double_by_name(data, "/0/base/min", x+shift);
+    if (gwy_container_gis_double_by_name(data, "/0/base/max", &x))
+        gwy_container_set_double_by_name(data, "/0/base/max", x+shift);
 
     return TRUE;
 }
