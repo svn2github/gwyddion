@@ -12,8 +12,11 @@ Modules:
 - NT-MDT: Incorrect data import was fixed (bug #46).
 - STPFile: Incorrect height data import was fixed.
 - NT-MDT: GUI problems with files containing too many channels were mitigated
-          (bug #42).
-- Assing AFM: compilation failure on big endian architectures was fixed.
+  (bug #42).
+- Assing AFM: compilation failure on big endian architectures was fixed
+  (bug #52).
+- Fix zero, zero mean value: Move fixed color range together with data
+  (if it exists).
 
 Library:
 - libprocess: Grain size distribution x-scale was corrected.
