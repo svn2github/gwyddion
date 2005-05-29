@@ -33,6 +33,10 @@
 
 #include "get.h"
 
+#ifndef HAVE_POW10
+#define pow10(x) (exp(G_LN10*(x)))
+#endif
+
 static gboolean      module_register    (const gchar *name);
 static gint          spmlab_detect      (const gchar *filename,
                                          gboolean only_name);

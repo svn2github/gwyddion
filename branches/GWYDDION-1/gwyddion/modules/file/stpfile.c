@@ -49,6 +49,10 @@
 
 #define Angstrom (1e-10)
 
+#ifndef HAVE_POW10
+#define pow10(x) (exp(G_LN10*(x)))
+#endif
+
 typedef struct {
     gint id;
     gint xres;
