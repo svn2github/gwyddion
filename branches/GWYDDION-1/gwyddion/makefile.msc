@@ -20,6 +20,10 @@ SUBDIRS = \
 DOCUMENTS = \
 	COPYING.wri
 
+ISS_DATA = \
+	data\gwyddion.iss \
+	data\gwyddion-devel.iss
+
 ## targets
 all: sub-all $(DOCUMENTS)
 
@@ -29,6 +33,7 @@ clean:: sub-clean
 
 install: all "$(TOP_SRCDIR)\inst.stamp" sub-install
 	for %d in ($(DOCUMENTS)) do $(INSTALL) %d "$(DEST_DIR)"
+	for %d in ($(ISS_DATA)) do $(INSTALL) %d "$(DEST_DIR)"
 
 # FIXME:
 COPYING.wri: COPYING
