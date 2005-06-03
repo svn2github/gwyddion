@@ -4,7 +4,7 @@ Application:
 - Markup works in metadata browser (bug #49).
 - Toolbox is not restored to off-screen position after quitting app minimized
   (bug #54).
-- Translations updated: Italian.
+- Translations updated: Italian, Czech.
 
 Modules:
 - RHK SPM32: Supports multipage files.
