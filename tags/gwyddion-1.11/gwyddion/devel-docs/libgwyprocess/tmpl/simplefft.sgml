@@ -1,0 +1,53 @@
+<!-- ##### SECTION Title ##### -->
+simplefft
+
+<!-- ##### SECTION Short_Description ##### -->
+Simple FFT algorithm
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### ENUM GwyWindowingType ##### -->
+<para>
+Selection of windowing applied before FFT (if requested).
+</para>
+
+@GWY_WINDOWING_NONE: no windowing
+@GWY_WINDOWING_HANN: Hann windowing
+@GWY_WINDOWING_HAMMING: Hamming windowing
+@GWY_WINDOWING_BLACKMANN: Blackmann windowing
+@GWY_WINDOWING_LANCZOS: Lanczos windowing
+@GWY_WINDOWING_WELCH: Welch windowing
+@GWY_WINDOWING_RECT: Rectangular windowing
+
+<!-- ##### FUNCTION gwy_fft_hum ##### -->
+<para>
+
+</para>
+
+@dir: 
+@re_in: 
+@im_in: 
+@re_out: 
+@im_out: 
+@n: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_fft_window ##### -->
+<para>
+
+</para>
+
+@data: 
+@n: 
+@windowing: 
+
+

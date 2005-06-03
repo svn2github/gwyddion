@@ -1,0 +1,42 @@
+# @(#) $Id$
+
+TOP_SRCDIR = ..
+LIBRARY = libgwymodule
+XLIBRARY = $(LIBRARY)
+LIB_VER = $(LIBGWYMODULE_VER)
+
+!INCLUDE $(TOP_SRCDIR)\make.msc
+
+LIB_CFLAGS = \
+	-I . -I $(TOP_SRCDIR) $(COMMON_CFLAGS) $(LIB_CRUNTIME) \
+	$(APP_CFLAGS) \
+	-DG_LOG_DOMAIN=\"GwyModule\"
+
+LIB_LINK = \
+	$(COMMON_LDFLAGS) \
+	$(APP_LIBS) \
+	/libpath:$(TOP_SRCDIR)\libgwyddion \
+	/libpath:$(TOP_SRCDIR)\libprocess \
+	/libpath:$(TOP_SRCDIR)\libdraw \
+	/libpath:$(TOP_SRCDIR)\libgwydgets \
+	libgwydgets-$(LIBGWYDGETS_VER).lib \
+	libgwydraw-$(LIBGWYDRAW_VER).lib \
+	libgwyprocess-$(LIBGWYPROCESS_VER).lib \
+	libgwyddion-$(LIBGWYDDION_VER).lib
+
+<[[:LIB_OBJECTS:]]>
+
+<[[:LIB_HEADERS:]]>
+
+## targets
+all: lib
+
+lib: $(LIBRARY)-$(LIB_VER).dll
+
+# Install install every .h file
+install: install-lib
+	del "$(DEST_DIR)\include\$(XLIBRARY)\gwymoduleinternal.h"
+
+!INCLUDE $(TOP_SRCDIR)\rules.msc
+
+# vim: ft=make
