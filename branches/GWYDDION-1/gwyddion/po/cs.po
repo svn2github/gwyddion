@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-04-06 16:22+0200\n"
+"POT-Creation-Date: 2005-05-29 18:51+0200\n"
 "PO-Revision-Date: 2005-04-04 15:24+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
@@ -588,7 +588,7 @@ msgstr ""
 "kterékoli pozdější verze. Plné znění licence najdeš v souboru COPYING v "
 "balíku se zdrojovým kódem.</small>"
 
-#: app/app.c:211
+#: app/app.c:217
 #, c-format
 msgid ""
 "Some data are unsaved:\n"
@@ -599,56 +599,56 @@ msgstr ""
 "%s\n"
 "Opravdu skončit?"
 
-#: app/app.c:688
+#: app/app.c:694
 msgid "Untitled Graph"
 msgstr "Nepojmenovaný graf"
 
-#: app/app.c:818
+#: app/app.c:824
 msgid "Export"
 msgstr "Export"
 
-#: app/app.c:822
+#: app/app.c:828
 msgid "Export 3D view to PNG image"
 msgstr "Exportovat trojrozměrný pohled do PNG obrázku"
 
-#: app/app.c:1147 app/app.c:1159
+#: app/app.c:1153 app/app.c:1165
 #, c-format
 msgid "Untitled %d"
 msgstr "Nepojmenovaný %d"
 
-#: app/app.c:1177 app/toolbox.c:645
+#: app/app.c:1183 app/toolbox.c:645
 msgid "/Remove _Mask"
 msgstr "/Odstranit _masku"
 
-#: app/app.c:1178 app/toolbox.c:661
+#: app/app.c:1184 app/toolbox.c:661
 msgid "/Mask _Color"
 msgstr "/_Barva masky"
 
-#: app/app.c:1179
+#: app/app.c:1185
 msgid "/Fix _Zero"
 msgstr "/Opravit _nulu"
 
-#: app/app.c:1180
+#: app/app.c:1186
 msgid "/Reset Color _Range"
 msgstr "/Srovnat _rozsah barev"
 
-#: app/app.c:1181 app/toolbox.c:653
+#: app/app.c:1187 app/toolbox.c:653
 msgid "/Remove _Presentation"
 msgstr "/Odstranit _presentaci"
 
-#: app/app.c:1182
+#: app/app.c:1188
 msgid "/_Level"
 msgstr "/_Vyrovnat"
 
-#: app/app.c:1183
+#: app/app.c:1189
 msgid "/Zoom _1:1"
 msgstr "/Zvětšení _1:1"
 
-#: app/app.c:1406
+#: app/app.c:1412
 msgid "Export 3D View"
 msgstr "Exportovat trojrozměrný pohled"
 
-#: app/app.c:1433
+#: app/app.c:1439
 msgid "Change Default Mask Color"
 msgstr "Změnit předvolenou barvu masky"
 
@@ -1066,13 +1066,15 @@ msgstr "Kanál %u"
 
 #: modules/file/apefile.c:407 modules/file/ezdfile.c:581
 #: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
-#: modules/file/sis.c:523 modules/file/stpfile.c:446
+#: modules/file/rhk-spm32.c:512 modules/file/sis.c:523
+#: modules/file/stpfile.c:553
 msgid "Select Data"
 msgstr "Vyber data"
 
 #: modules/file/apefile.c:424 modules/file/ezdfile.c:598
 #: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
-#: modules/file/sis.c:540 modules/file/stpfile.c:463
+#: modules/file/rhk-spm32.c:529 modules/file/sis.c:540
+#: modules/file/stpfile.c:570
 msgid "Data to load:"
 msgstr "Data k načtení:"
 
@@ -1561,13 +1563,18 @@ msgstr ""
 "Čekal bych oddělovač „%s“ po datech v řádku %u, sloupci %u, ale narazil jsem "
 "na „%.16s“"
 
-#: modules/file/rhk-spm32.c:95
+#: modules/file/rhk-spm32.c:143
 msgid "Imports RHK Technology SPM32 data files."
 msgstr "Načítá datové soubory RHK Technology SPM32."
 
-#: modules/file/rhk-spm32.c:111
+#: modules/file/rhk-spm32.c:159
 msgid "RHK SPM32 files (.sm2)"
 msgstr "RHK SPM32 soubory (.sm2)"
+
+#: modules/file/rhk-spm32.c:507
+#, c-format
+msgid "Page %u (%s)"
+msgstr ""
 
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
@@ -1577,11 +1584,11 @@ msgstr "Načítá datové soubory SIS (Surface Imaging Systems)."
 msgid "SIS files (.sis)"
 msgstr "SIS soubory (.sis)"
 
-#: modules/file/spmlab.c:50
+#: modules/file/spmlab.c:54
 msgid "Imports Thermicroscopes SpmLab R4, R5, and R6 data files."
 msgstr "Načítá datové soubory Thermicroscopes SpmLab R4, R5 a R6."
 
-#: modules/file/spmlab.c:66
+#: modules/file/spmlab.c:70
 msgid "Thermicroscopes SpmLab R4, R5, R6 files"
 msgstr "Thermicroscopes SpmLab R6, R6, R6 soubory"
 
@@ -1593,15 +1600,56 @@ msgstr "Načítá datové soubory Omicron STMPRG (tp ta)."
 msgid "Omicron STMPRG files (tp ta)"
 msgstr "Soubory Omicron STMPRG (tp ta)"
 
-#: modules/file/stpfile.c:88
+#: modules/file/stpfile.c:101
+msgid "Topography"
+msgstr ""
+
+#: modules/file/stpfile.c:102
+msgid "Current or Deflection"
+msgstr ""
+
+#: modules/file/stpfile.c:103
+msgid "Electrochemical voltage"
+msgstr ""
+
+#: modules/file/stpfile.c:104
+msgid "Topography and SPS"
+msgstr ""
+
+#: modules/file/stpfile.c:105
+msgid "Topography and SPS scripted"
+msgstr ""
+
+#: modules/file/stpfile.c:106
+msgid "Electrochemical current"
+msgstr ""
+
+#: modules/file/stpfile.c:107
+msgid "Friction"
+msgstr ""
+
+#: modules/file/stpfile.c:108
+msgid "AUX in BNC"
+msgstr ""
+
+#: modules/file/stpfile.c:109
+msgid "External"
+msgstr ""
+
+#: modules/file/stpfile.c:117
 msgid "Imports Molecular Imaging STP data files."
 msgstr "Načítá datové soubory STP Molecular Imaging."
 
-#: modules/file/stpfile.c:104
+#: modules/file/stpfile.c:133
 msgid "STP files (.stp)"
 msgstr "STP soubory (.stp)"
 
-#: modules/file/stpfile.c:442
+#: modules/file/stpfile.c:546
+#, c-format
+msgid "Buffer %u (%s)"
+msgstr ""
+
+#: modules/file/stpfile.c:549
 #, c-format
 msgid "Buffer %u"
 msgstr "Datové pole %u"

@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-04-06 16:22+0200\n"
+"POT-Creation-Date: 2005-05-29 18:51+0200\n"
 "PO-Revision-Date: 2005-05-07 15:49+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
@@ -598,7 +598,7 @@ msgstr ""
 "versione 2 o (a scelta) ogni versione successiva. Per il testo completo "
 "della licenza vedi il COPYING incluso nel pacchetto sorgente</small>"
 
-#: app/app.c:211
+#: app/app.c:217
 #, c-format
 msgid ""
 "Some data are unsaved:\n"
@@ -609,56 +609,56 @@ msgstr ""
 "%s\n"
 "Uscire ugualmente?"
 
-#: app/app.c:688
+#: app/app.c:694
 msgid "Untitled Graph"
 msgstr "Grafico senza titolo"
 
-#: app/app.c:818
+#: app/app.c:824
 msgid "Export"
 msgstr "Esporta"
 
-#: app/app.c:822
+#: app/app.c:828
 msgid "Export 3D view to PNG image"
 msgstr "Esporta veduta 3D come immagine PNG"
 
-#: app/app.c:1147 app/app.c:1159
+#: app/app.c:1153 app/app.c:1165
 #, c-format
 msgid "Untitled %d"
 msgstr "Senza titolo %d"
 
-#: app/app.c:1177 app/toolbox.c:645
+#: app/app.c:1183 app/toolbox.c:645
 msgid "/Remove _Mask"
 msgstr "/Rimuovi _Maschera"
 
-#: app/app.c:1178 app/toolbox.c:661
+#: app/app.c:1184 app/toolbox.c:661
 msgid "/Mask _Color"
 msgstr "/_Colore Maschera"
 
-#: app/app.c:1179
+#: app/app.c:1185
 msgid "/Fix _Zero"
 msgstr "/Fissa _Zero"
 
-#: app/app.c:1180
+#: app/app.c:1186
 msgid "/Reset Color _Range"
 msgstr "/Azzera Intervallo Colore"
 
-#: app/app.c:1181 app/toolbox.c:653
+#: app/app.c:1187 app/toolbox.c:653
 msgid "/Remove _Presentation"
 msgstr "/Rimuovi _Presentazione"
 
-#: app/app.c:1182
+#: app/app.c:1188
 msgid "/_Level"
 msgstr "/_Livella"
 
-#: app/app.c:1183
+#: app/app.c:1189
 msgid "/Zoom _1:1"
 msgstr "/Zoom _1:1"
 
-#: app/app.c:1406
+#: app/app.c:1412
 msgid "Export 3D View"
 msgstr "Esporta vista 3D"
 
-#: app/app.c:1433
+#: app/app.c:1439
 msgid "Change Default Mask Color"
 msgstr "Cambia Colore Predefinito Maschera"
 
@@ -1077,13 +1077,15 @@ msgstr "Canale %u"
 
 #: modules/file/apefile.c:407 modules/file/ezdfile.c:581
 #: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
-#: modules/file/sis.c:523 modules/file/stpfile.c:446
+#: modules/file/rhk-spm32.c:512 modules/file/sis.c:523
+#: modules/file/stpfile.c:553
 msgid "Select Data"
 msgstr "Seleziona Dati"
 
 #: modules/file/apefile.c:424 modules/file/ezdfile.c:598
 #: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
-#: modules/file/sis.c:540 modules/file/stpfile.c:463
+#: modules/file/rhk-spm32.c:529 modules/file/sis.c:540
+#: modules/file/stpfile.c:570
 msgid "Data to load:"
 msgstr "Dati da caricare:"
 
@@ -1565,13 +1567,18 @@ msgid "Expected delimiter `%s' after data in row %u, column %u, got `%.16s'"
 msgstr ""
 "Delimitatore aspettato`%s' dopo dati in fila %u, colonna %u, ottenuto`%.16s'"
 
-#: modules/file/rhk-spm32.c:95
+#: modules/file/rhk-spm32.c:143
 msgid "Imports RHK Technology SPM32 data files."
 msgstr "Importa file dati SPM32 RHK Technology"
 
-#: modules/file/rhk-spm32.c:111
+#: modules/file/rhk-spm32.c:159
 msgid "RHK SPM32 files (.sm2)"
 msgstr "File RHK SPM32 (.sm2)"
+
+#: modules/file/rhk-spm32.c:507
+#, c-format
+msgid "Page %u (%s)"
+msgstr ""
 
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
@@ -1581,11 +1588,11 @@ msgstr "Importa file dati SIS (Surface Imaging Systems)"
 msgid "SIS files (.sis)"
 msgstr "file SIS (.sis)"
 
-#: modules/file/spmlab.c:50
+#: modules/file/spmlab.c:54
 msgid "Imports Thermicroscopes SpmLab R4, R5, and R6 data files."
 msgstr "Importa file dati R4, R5, and R6 Thermicroscopes SpmLab"
 
-#: modules/file/spmlab.c:66
+#: modules/file/spmlab.c:70
 msgid "Thermicroscopes SpmLab R4, R5, R6 files"
 msgstr "File Thermicroscopes SpmLab R4, R5, R6"
 
@@ -1597,15 +1604,56 @@ msgstr "Importa file dati Omicron STMPRG (tp ta)."
 msgid "Omicron STMPRG files (tp ta)"
 msgstr "file Omicron STMPRG (.tp, .ta)"
 
-#: modules/file/stpfile.c:88
+#: modules/file/stpfile.c:101
+msgid "Topography"
+msgstr ""
+
+#: modules/file/stpfile.c:102
+msgid "Current or Deflection"
+msgstr ""
+
+#: modules/file/stpfile.c:103
+msgid "Electrochemical voltage"
+msgstr ""
+
+#: modules/file/stpfile.c:104
+msgid "Topography and SPS"
+msgstr ""
+
+#: modules/file/stpfile.c:105
+msgid "Topography and SPS scripted"
+msgstr ""
+
+#: modules/file/stpfile.c:106
+msgid "Electrochemical current"
+msgstr ""
+
+#: modules/file/stpfile.c:107
+msgid "Friction"
+msgstr ""
+
+#: modules/file/stpfile.c:108
+msgid "AUX in BNC"
+msgstr ""
+
+#: modules/file/stpfile.c:109
+msgid "External"
+msgstr ""
+
+#: modules/file/stpfile.c:117
 msgid "Imports Molecular Imaging STP data files."
 msgstr "Importa file dati STP Molecular Imaging"
 
-#: modules/file/stpfile.c:104
+#: modules/file/stpfile.c:133
 msgid "STP files (.stp)"
 msgstr "File STP (.stp)"
 
-#: modules/file/stpfile.c:442
+#: modules/file/stpfile.c:546
+#, c-format
+msgid "Buffer %u (%s)"
+msgstr ""
+
+#: modules/file/stpfile.c:549
 #, fuzzy, c-format
 msgid "Buffer %u"
 msgstr "Buffer %u"
