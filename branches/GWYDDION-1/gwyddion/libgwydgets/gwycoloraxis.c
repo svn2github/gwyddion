@@ -599,7 +599,8 @@ gwy_color_axis_draw_label(GtkWidget *widget)
     }
     g_object_unref(mygc);
     g_object_unref(layout);
-    gwy_si_unit_value_format_free(format);
+    if (format)
+        gwy_si_unit_value_format_free(format);
     g_string_free(strmin, TRUE);
     g_string_free(strmax, TRUE);
 }

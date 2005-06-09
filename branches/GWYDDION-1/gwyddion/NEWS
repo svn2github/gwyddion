@@ -1,4 +1,11 @@
 
+1.12
+Library:
+- libgwydgets: Color axis crash when data minimum and maximum were both 0 was
+  fixed (bug #56).
+
+
+
 1.11
 Application:
 - Markup works in metadata browser (bug #49).
