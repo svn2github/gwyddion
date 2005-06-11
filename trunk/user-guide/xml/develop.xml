@@ -21,7 +21,7 @@
       at <ulink url="http://gwyddion.net/documentation/">Gwyddion web pages</ulink>.
     </para>
   </section>
-  <section>
+  <section id="bug-reports">
     <title>Bug reports</title>
     <para>
       We will be very happy if you send as bug reports if you find errors in Gwyddion. For doing this,

@@ -67,6 +67,10 @@
     </tgroup>
   </table>
   <para>
+    Note <literal>-3^2</literal> is 9, that is <literal>(-3)^2</literal>,
+    like in <command>bc</command>, but unlike in Perl or Python.
+  </para>
+  <para>
     Available operators and functions are listed in following table.
   </para>
   <table frame='none'>
@@ -118,6 +122,14 @@
         <row>
           <entry><literal>abs</literal></entry>
           <entry>absolute value</entry>
+        </row>
+        <row>
+          <entry><literal>floor</literal></entry>
+          <entry>rounding down to nearest integer</entry>
+        </row>
+        <row>
+          <entry><literal>ceil</literal></entry>
+          <entry>rounding up to nearest integer</entry>
         </row>
         <row>
           <entry><literal>sqrt</literal></entry>
@@ -182,6 +194,18 @@
         <row>
           <entry><literal>tanh</literal></entry>
           <entry>hyperbolic tangent function</entry>
+        </row>
+        <row>
+          <entry><literal>asinh</literal></entry>
+          <entry>inverse hyperbolic sine function</entry>
+        </row>
+        <row>
+          <entry><literal>acosh</literal></entry>
+          <entry>inverse hyperbolic cosine function</entry>
+        </row>
+        <row>
+          <entry><literal>atanh</literal></entry>
+          <entry>inverse hyperbolic tangent function</entry>
         </row>
         <row>
           <entry><literal>pow</literal></entry>

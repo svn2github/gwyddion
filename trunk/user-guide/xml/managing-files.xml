@@ -16,9 +16,9 @@
   </para>
   <para>
     Other data file formats can be handled with appropriate loading and
-    saving modules or plugins. Currently, a lot of simple file formats can be
-    used with Gwyddion. This means namely graphical file types (JPEG, PNG,
-    PPM, TIFF, BMP) and raw binary and ASCII data.
+    saving modules or plugins. Beside several file formats used in
+    microscopy, graphical file types (JPEG, PNG, PPM, TIFF, BMP) and raw
+    binary and ASCII data can be imported too.
   </para>
   <para>
     We expect that more file IO modules and plugins will be written,
@@ -99,6 +99,13 @@
           <entry>gwyfile module</entry>
           <entry>Yes</entry>
           <entry>Yes</entry>
+        </row>
+        <row>
+          <entry>JPK Instruments</entry>
+          <entry>.jpk</entry>
+          <entry>jpkscan module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Molecular Imaging</entry>
