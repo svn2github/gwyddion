@@ -26,6 +26,7 @@
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwymodule/gwymodule.h>
+#include <libgwydgets/gwylayer-basic.h>
 #include <libprocess/stats.h>
 
 #include "jpk.h"
@@ -106,7 +107,7 @@ static GwyModuleInfo module_info =
   "jpkscan",
   N_("Imports JPK image scans."),
   "Sven Neumann <neumann@jpk.com>",
-  "0.1",
+  "0.2",
   "JPK Instruments AG",
   "2005",
 };
@@ -168,6 +169,7 @@ jpkscan_load (const gchar *filename)
 {
   GwyContainer *container;
   GObject      *object;
+  GQuark        key = g_quark_from_string ("/0/data");
   gint          idx = 0;
 
   gwy_debug ("Loading <%s>", filename);
@@ -189,37 +191,26 @@ jpkscan_load (const gchar *filename)
       idx = jpkscan_dialog (container, filename, idx);
     }
 
-  if (idx < 0)       /*  user cancelled loading                    */
+  if (idx < 0)  /*  user cancelled loading   */
     {
       g_object_unref (container);
       return NULL;
     }
-  else if (idx > 0)  /*  rename the selected channel to "/0/data"  */
-    {
-      gwy_container_rename (container,
-                            jpkscan_data_key (idx), jpkscan_data_key (0),
-                            TRUE);
-    }
+
+  /*  rename the selected channel to "/0/data"  */
+  gwy_container_rename (container, jpkscan_data_key (idx), key, TRUE);
+
+  /*  remove the other channels  */
+  gwy_container_remove_by_prefix (container, "/jpk/");
 
   /*  add the name of the selected channel to the container meta data  */
-  object = gwy_container_get_object (container, jpkscan_data_key (0));
+  object = gwy_container_get_object (container, key);
   if (object)
     {
       const gchar *name = g_object_get_data (object, "channel-name");
 
       gwy_container_set_string (container,
                                 jpkscan_meta_key ("Channel"), g_strdup (name));
-    }
-
-  /*  remove all other channels  */
-  for (idx = 1;; idx++)
-    {
-      GQuark  key = jpkscan_data_key (idx);
-
-      if (gwy_container_contains (container, key))
-        gwy_container_remove (container, key);
-      else
-        break;
     }
 
   return container;
@@ -696,7 +687,7 @@ meta_store_double (GwyContainer *container,
 static GQuark
 jpkscan_data_key (gint idx)
 {
-  gchar  *key   = g_strdup_printf ("/%d/data", idx);
+  gchar  *key   = g_strdup_printf ("/jpk/%d/data", idx);
   GQuark  quark = g_quark_from_string (key);
 
   g_free (key);
@@ -719,6 +710,21 @@ jpkscan_meta_key (const gchar *desc)
 
 /*  dialog  */
 
+static void
+jpkscan_combo_changed (GtkOptionMenu *menu,
+                       GwyDataView   *view)
+{
+  GwyContainer *container = GWY_CONTAINER (view->data);
+  GQuark        key;
+
+  key = jpkscan_data_key (gtk_option_menu_get_history (menu));
+
+  gwy_container_set_object_by_name (container, "/0/data",
+                                    gwy_container_get_object (container, key));
+
+  gwy_data_view_update (view);
+}
+
 static gint
 jpkscan_dialog (GwyContainer *container,
                 const gchar  *filename,
@@ -727,9 +733,13 @@ jpkscan_dialog (GwyContainer *container,
   GtkWidget *dialog;
   GtkWidget *vbox;
   GtkWidget *hbox;
+  GtkWidget *hbox2;
+  GtkWidget *vbox2;
   GtkWidget *label;
   GtkWidget *combo;
   GtkWidget *menu;
+  GtkWidget *view;
+  GtkObject *layer;
   gchar     *name;
   gchar     *text;
   gint       i;
@@ -762,19 +772,38 @@ jpkscan_dialog (GwyContainer *container,
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
 
-  hbox = gtk_hbox_new (FALSE, 6);
+  hbox = gtk_hbox_new (FALSE, 12);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
+  vbox2 = gtk_vbox_new (FALSE, 6);
+  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
+  gtk_widget_show (vbox2);
+
+  hbox2 = gtk_hbox_new (FALSE, 6);
+  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 0);
+  gtk_widget_show (hbox2);
+
   label = gtk_label_new_with_mnemonic (_("Ch_annel:"));
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
 
   combo = gtk_option_menu_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), combo, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox2), combo, TRUE, TRUE, 0);
   gtk_widget_show (combo);
 
   gtk_label_set_mnemonic_widget (GTK_LABEL (label), combo);
+
+  gwy_container_set_object_by_name (container, "/0/data",
+                                    gwy_container_get_object (container,
+                                                              jpkscan_data_key (idx)));
+
+  view = gwy_data_view_new (container);
+  gtk_box_pack_start (GTK_BOX (hbox), view, FALSE, FALSE, 0);
+  gtk_widget_show (view);
+
+  layer = gwy_layer_basic_new ();
+  gwy_data_view_set_base_layer (GWY_DATA_VIEW (view), GWY_PIXMAP_LAYER (layer));
 
   menu = gtk_menu_new ();
 
@@ -787,15 +816,29 @@ jpkscan_dialog (GwyContainer *container,
       if (! gwy_container_contains (container, key))
         break;
 
-      object = gwy_container_get_object (container, jpkscan_data_key (i));
+      object = gwy_container_get_object (container, key);
 
       item = gtk_menu_item_new_with_label (g_object_get_data (object,
                                                               "channel-name"));
       gtk_menu_shell_append  (GTK_MENU_SHELL (menu), item);
       gtk_widget_show (item);
+
+      if (i == 0)
+        {
+          gint xres = gwy_data_field_get_xres (GWY_DATA_FIELD (object));
+          gint yres = gwy_data_field_get_yres (GWY_DATA_FIELD (object));
+
+          gwy_data_view_set_zoom (GWY_DATA_VIEW (view),
+                                  120.0 / MAX (xres, yres));
+        }
     }
 
   gtk_option_menu_set_menu (GTK_OPTION_MENU (combo), menu);
+
+  g_signal_connect (combo, "changed",
+                    G_CALLBACK (jpkscan_combo_changed),
+                    view);
+
   gtk_option_menu_set_history (GTK_OPTION_MENU (combo), idx);
 
   if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_OK)
