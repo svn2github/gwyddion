@@ -15,6 +15,7 @@ process_PROGRAMS = \
 	dwtanisotropy.so \
 	dwtdenoise.so \
 	edge.so \
+	facet_analysis.so \
 	facet-level.so \
 	fft.so \
 	fft_filter_1d.so \
@@ -88,23 +89,26 @@ dwtanisotropy_so_LDFLAGS = $(module_ldflags),dwtanisotropy.so
 #dwtcorrection_so_SOURCES = dwtcorrection.c
 #dwtcorrection_so_LDFLAGS = $(module_ldflags),dwtcorrection.so
 
-fft_filter_1d_so_SOURCES = fft_filter_1d.c
-fft_filter_1d_so_LDFLAGS = $(module_ldflags),fft_filter_1d.so 
-
 dwtdenoise_so_SOURCES = dwtdenoise.c
 dwtdenoise_so_LDFLAGS = $(module_ldflags),dwtdenoise.so
 
 edge_so_SOURCES = edge.c
 edge_so_LDFLAGS = $(module_ldflags),edge.so
 
+facet_analysis_so_SOURCES = facet_analysis.c
+facet_analysis_so_LDFLAGS = $(module_ldflags),facet_analysis.so
+
 facet_level_so_SOURCES = facet-level.c
 facet_level_so_LDFLAGS = $(module_ldflags),facet-level.so
+
+fft_so_SOURCES = fft.c
+fft_so_LDFLAGS = $(module_ldflags),fft.so
 
 fit_2d_so_SOURCES = fit_2d.c
 fit_2d_so_LDFLAGS = $(module_ldflags),fit_2d.so
 
-fft_so_SOURCES = fft.c
-fft_so_LDFLAGS = $(module_ldflags),fft.so
+fft_filter_1d_so_SOURCES = fft_filter_1d.c
+fft_filter_1d_so_LDFLAGS = $(module_ldflags),fft_filter_1d.so 
 
 fractal_so_SOURCES = fractal.c
 fractal_so_LDFLAGS = $(module_ldflags),fractal.so
