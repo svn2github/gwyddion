@@ -28,7 +28,7 @@
 #include <app/gwyapp.h>
 
 #define FACETS_RUN_MODES \
-    (GWY_RUN_MODAL | GWY_RUN_NONINTERACTIVE | GWY_RUN_WITH_DEFAULTS)
+    (GWY_RUN_MODAL)
 
 enum {
     PREVIEW_SIZE = 320,
@@ -41,11 +41,14 @@ typedef struct {
 } FacetsArgs;
 
 typedef struct {
+    gboolean in_update;
     GtkWidget *inverted;
     GtkWidget *view;
     GtkWidget *fview;
     GtkWidget *theta_label;
     GtkWidget *phi_label;
+    GtkWidget *mtheta_label;
+    GtkWidget *mphi_label;
     GtkObject *threshold_high;
     GtkObject *threshold_low;
     GtkObject *min_len;
@@ -74,6 +77,8 @@ static void     facets_mark_dialog_update_values   (FacetsControls *controls,
 static void     facets_mark_dialog_update_thresholds(GtkObject *adj,
                                                     FacetsControls *controls);
 static void     facet_view_selection_updated      (GwyVectorLayer *layer,
+                                                   FacetsControls *controls);
+static void     preview_selection_updated         (GwyVectorLayer *layer,
                                                    FacetsControls *controls);
 static void     mask_color_change_cb              (GtkWidget *color_button,
                                                    FacetsControls *controls);
@@ -118,7 +123,7 @@ module_register(const gchar *name)
 {
     static GwyProcessFuncInfo facet_analysis_func_info = {
         "facet_analysis",
-        N_("/_Statistics/_Facet Analysis..."),
+        N_("/_Statistics/Facet _Analysis..."),
         (GwyProcessFunc)&facets_mark,
         FACETS_RUN_MODES,
         0,
@@ -137,21 +142,17 @@ facets_mark(GwyContainer *data, GwyRunType run)
     gboolean ok = FALSE;
 
     g_return_val_if_fail(run & FACETS_RUN_MODES, FALSE);
-    if (run == GWY_RUN_WITH_DEFAULTS)
-        args = facets_defaults;
-    else
-        facets_mark_load_args(gwy_app_settings_get(), &args);
-
-    ok = (run != GWY_RUN_MODAL) || facets_mark_dialog(&args, data);
-    if (run == GWY_RUN_MODAL)
-        facets_mark_save_args(gwy_app_settings_get(), &args);
+    g_return_val_if_fail(g_type_from_name("GwyLayerPoints"), FALSE);
+    facets_mark_load_args(gwy_app_settings_get(), &args);
+    ok = facets_mark_dialog(&args, data);
+    facets_mark_save_args(gwy_app_settings_get(), &args);
     if (!ok)
         return FALSE;
 
     gwy_app_undo_checkpoint(data, "/0/mask", NULL);
     facets_mark_do(&args, data);
 
-    return ok;
+    return TRUE;
 }
 
 static void
@@ -173,11 +174,36 @@ facets_mark_do(G_GNUC_UNUSED FacetsArgs *args, GwyContainer *data)
                               */
 }
 
+static GtkWidget*
+add_angle_label(GtkWidget *table,
+                const gchar *name,
+                gint *row)
+{
+    GtkWidget *label;
+    GtkRequisition req;
+
+    label = gtk_label_new("-188.00 deg");
+    gtk_widget_size_request(label, &req);
+
+    gtk_label_set_text(GTK_LABEL(label), name);
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, *row, *row+1,
+                     GTK_FILL, 0, 2, 2);
+
+    label = gtk_label_new(NULL);
+    gtk_widget_set_size_request(label, req.width, -1);
+    gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label, 1, 2, *row, *row+1,
+                     GTK_EXPAND | GTK_FILL, 0, 2, 2);
+    (*row)++;
+
+    return label;
+}
+
 static gboolean
 facets_mark_dialog(FacetsArgs *args, GwyContainer *data)
 {
-    GtkWidget *dialog, *table, *spin, *hbox, *hbox2, *vbox, *label;
-    GtkRequisition req;
+    GtkWidget *dialog, *table, *hbox, *hbox2, *vbox, *label;
     FacetsControls controls;
     enum {
         RESPONSE_RESET = 1,
@@ -186,10 +212,11 @@ facets_mark_dialog(FacetsArgs *args, GwyContainer *data)
     gint response;
     gdouble zoomval;
     GtkObject *layer;
-    GtkObject *flayer;
+    GtkObject *vlayer;
     GwyDataField *dfield;
     gint row;
 
+    controls.in_update = FALSE;
     controls.args = args;
     dialog = gtk_dialog_new_with_buttons(_("Mark Facets"),
                                          NULL,
@@ -223,6 +250,13 @@ facets_mark_dialog(FacetsArgs *args, GwyContainer *data)
                                         gwy_data_field_get_yres(dfield));
     gwy_data_view_set_zoom(GWY_DATA_VIEW(controls.view), zoomval);
 
+    vlayer = g_object_new(g_type_from_name("GwyLayerPoints"), NULL);
+    g_object_set(G_OBJECT(vlayer), "max_points", 1, NULL);
+    gwy_data_view_set_top_layer(GWY_DATA_VIEW(controls.view),
+                                GWY_VECTOR_LAYER(vlayer));
+    g_signal_connect(vlayer, "updated",
+                     G_CALLBACK(preview_selection_updated), &controls);
+
     gtk_box_pack_start(GTK_BOX(hbox), controls.view, FALSE, FALSE, 4);
 
     vbox = gtk_vbox_new(FALSE, 0);
@@ -243,14 +277,15 @@ facets_mark_dialog(FacetsArgs *args, GwyContainer *data)
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.fview),
                                  GWY_PIXMAP_LAYER(layer));
 
-    flayer = g_object_new(g_type_from_name("GwyLayerPoints"), NULL);
-    g_object_set(G_OBJECT(flayer), "max_points", 1, NULL);
+    vlayer = g_object_new(g_type_from_name("GwyLayerPoints"), NULL);
+    g_object_set(G_OBJECT(vlayer), "max_points", 1, NULL);
     gwy_data_view_set_top_layer(GWY_DATA_VIEW(controls.fview),
-                                GWY_VECTOR_LAYER(flayer));
-    g_signal_connect(flayer, "updated",
+                                GWY_VECTOR_LAYER(vlayer));
+    g_signal_connect(vlayer, "updated",
                      G_CALLBACK(facet_view_selection_updated), &controls);
 
-    table = gtk_table_new(4, 2, FALSE);
+    /* Info table */
+    table = gtk_table_new(6, 2, FALSE);
     gtk_box_pack_start(GTK_BOX(hbox2), table, TRUE, TRUE, 4);
     row = 0;
 
@@ -261,34 +296,19 @@ facets_mark_dialog(FacetsArgs *args, GwyContainer *data)
                      GTK_FILL, 0, 2, 2);
     row++;
 
-    /* Theta */
-    label = gtk_label_new("-180.00 deg");
-    gtk_widget_size_request(label, &req);
+    controls.theta_label = add_angle_label(table, _("Theta:"), &row);
+    controls.phi_label = add_angle_label(table, _("Phi:"), &row);
+    gtk_table_set_row_spacing(GTK_TABLE(table), row-1, 8);
 
-    gtk_label_set_text(GTK_LABEL(label), _("Theta:"));
+    label = gtk_label_new("");
+    gtk_label_set_markup(GTK_LABEL(label), _("<b>Mean Inclination</b>"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
+    gtk_table_attach(GTK_TABLE(table), label, 0, 2, row, row+1,
                      GTK_FILL, 0, 2, 2);
-
-    controls.theta_label = gtk_label_new(NULL);
-    gtk_widget_set_size_request(controls.theta_label, req.width, -1);
-    gtk_misc_set_alignment(GTK_MISC(controls.theta_label), 1.0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), controls.theta_label, 1, 2, row, row+1,
-                     GTK_EXPAND | GTK_FILL, 0, 2, 2);
     row++;
 
-    /* Phi */
-    label = gtk_label_new(_("Phi:"));
-    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
-                     GTK_FILL, 0, 2, 2);
-
-    controls.phi_label = gtk_label_new(NULL);
-    gtk_widget_set_size_request(controls.phi_label, req.width, -1);
-    gtk_misc_set_alignment(GTK_MISC(controls.phi_label), 1.0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), controls.phi_label, 1, 2, row, row+1,
-                     GTK_EXPAND | GTK_FILL, 0, 2, 2);
-    row++;
+    controls.mtheta_label = add_angle_label(table, _("Theta:"), &row);
+    controls.mphi_label = add_angle_label(table, _("Phi:"), &row);
 
     table = gtk_table_new(10, 4, FALSE);
     gtk_box_pack_start(GTK_BOX(vbox), table, TRUE, TRUE, 4);
@@ -418,7 +438,6 @@ facet_view_selection_updated(GwyVectorLayer *layer,
 
     q = gwy_container_get_double_by_name(controls->fdata, "/q");
     gwy_vector_layer_get_selection(layer, selection);
-    g_printerr("%g %g\n", selection[0], selection[1]);
     /* q/G_SQRT2/G_SQRT2 is correction to coordinate of pixel centre instead
      * of edge */
     x = selection[0] - G_SQRT2/q + q/G_SQRT2/FDATA_RES;
@@ -429,6 +448,48 @@ facet_view_selection_updated(GwyVectorLayer *layer,
     gtk_label_set_text(GTK_LABEL(controls->theta_label), s);
     g_snprintf(s, sizeof(s), "%.2f deg", 180.0/G_PI*phi);
     gtk_label_set_text(GTK_LABEL(controls->phi_label), s);
+
+    if (!controls->in_update) {
+        layer = gwy_data_view_get_top_layer(GWY_DATA_VIEW(controls->view));
+        if (gwy_vector_layer_get_selection(layer, NULL))
+            gwy_vector_layer_unselect(layer);
+    }
+}
+
+static void
+preview_selection_updated(GwyVectorLayer *layer,
+                          FacetsControls *controls)
+{
+    GwyDataField *dfield;
+    gdouble selection[2];
+    gdouble theta, phi, x, y, q;
+    gint i, j;
+
+    if (controls->in_update)
+        return;
+
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->mydata,
+                                                             "/0/data"));
+    if (!gwy_vector_layer_get_selection(layer, selection))
+        return;
+
+    controls->in_update = TRUE;
+    j = gwy_data_field_rtoj(dfield, selection[0]);
+    i = gwy_data_field_rtoi(dfield, selection[1]);
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->fdata,
+                                                             "/theta"));
+    theta = gwy_data_field_get_val(dfield, j, i);
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->fdata,
+                                                             "/phi"));
+    phi = gwy_data_field_get_val(dfield, j, i);
+
+    angles_to_xy(theta, phi, &x, &y);
+    q = gwy_container_get_double_by_name(controls->fdata, "/q");
+    selection[0] = x + G_SQRT2/q - q/G_SQRT2/FDATA_RES;
+    selection[1] = y + G_SQRT2/q - q/G_SQRT2/FDATA_RES;
+    layer = gwy_data_view_get_top_layer(GWY_DATA_VIEW(controls->fview));
+    gwy_vector_layer_set_selection(layer, 1, selection);
+    controls->in_update = FALSE;
 }
 
 static void
