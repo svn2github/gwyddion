@@ -540,6 +540,7 @@ gwy_layer_points_unselect(GwyVectorLayer *layer)
         gwy_layer_points_undraw(layer, parent->window);
     points_layer->nselected = 0;
     gwy_layer_points_save(points_layer, -1);
+    gwy_vector_layer_updated(layer);
 }
 
 static void
@@ -551,8 +552,10 @@ gwy_layer_points_set_selection(GwyVectorLayer *layer,
     GtkWidget *parent;
 
     gwy_debug("n = %d", n);
-    if (!n)
+    if (!n) {
         gwy_layer_points_unselect(layer);
+        return;
+    }
     g_return_if_fail(selection);
     g_return_if_fail(GWY_IS_LAYER_POINTS(layer));
     points_layer = GWY_LAYER_POINTS(layer);
@@ -568,7 +571,10 @@ gwy_layer_points_set_selection(GwyVectorLayer *layer,
 
     if (parent)
         gwy_layer_points_draw(layer, parent->window);
-    gwy_vector_layer_selection_finished(layer);
+
+    gwy_vector_layer_updated(layer);
+    if (points_layer->nselected == points_layer->npoints)
+        gwy_vector_layer_selection_finished(layer);
 }
 
 static void
