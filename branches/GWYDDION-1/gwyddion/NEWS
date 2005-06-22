@@ -1,9 +1,16 @@
 
 1.12
+Application:
+- Translations updated: Italian.
+
 Library:
 - libgwydgets: Color axis crash when data minimum and maximum were both 0 was
   fixed (bug #56).
 
+Modules:
+- JPK Scan (new): JPK data file import (bug #57).
+- Assing AFM: Wrong z scale in import and export was fixed.
+- Points layer: Supports set_selection().
 
 
 1.11
