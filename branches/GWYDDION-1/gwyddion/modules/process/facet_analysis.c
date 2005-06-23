@@ -32,7 +32,8 @@
 
 enum {
     PREVIEW_SIZE = 320,
-    FDATA_RES = 201,
+    /* XXX: don't change */
+    FDATA_RES = 189,
     MAX_LENGTH = 1024
 };
 
@@ -74,6 +75,9 @@ static void     facets_mark_dialog_update_controls  (FacetsControls *controls,
                                                      FacetsArgs *args);
 static void     facets_mark_dialog_update_values    (FacetsControls *controls,
                                                      FacetsArgs *args);
+static void     facet_view_select_angle             (FacetsControls *controls,
+                                                     gdouble theta,
+                                                     gdouble phi);
 static void     facet_view_selection_updated        (GwyVectorLayer *layer,
                                                      FacetsControls *controls);
 static void     preview_selection_updated           (GwyVectorLayer *layer,
@@ -223,7 +227,7 @@ facets_mark_dialog(FacetsArgs *args,
     dialog = gtk_dialog_new_with_buttons(_("Mark Facets"),
                                          NULL,
                                          GTK_DIALOG_DESTROY_WITH_PARENT,
-                                         _("_Update preview"), RESPONSE_PREVIEW,
+                                         _("_Mark"), RESPONSE_PREVIEW,
                                          _("_Reset"), RESPONSE_RESET,
                                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                          GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -274,6 +278,8 @@ facets_mark_dialog(FacetsArgs *args,
                                                               "/theta"));
     *dphi = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls.fdata,
                                                             "/phi"));
+    args->theta0 = gwy_container_get_double_by_name(controls.fdata, "/theta0");
+    args->phi0 = gwy_container_get_double_by_name(controls.fdata, "/phi0");
 
     controls.fview = gwy_data_view_new(controls.fdata);
     g_object_unref(controls.fdata);
@@ -338,6 +344,7 @@ facets_mark_dialog(FacetsArgs *args,
                      G_CALLBACK(mask_color_change_cb), &controls);
 
     gtk_widget_show_all(dialog);
+    facet_view_select_angle(&controls, args->theta0, args->phi0);
     do {
         response = gtk_dialog_run(GTK_DIALOG(dialog));
         switch (response) {
@@ -354,6 +361,10 @@ facets_mark_dialog(FacetsArgs *args,
 
             case RESPONSE_RESET:
             *args = facets_defaults;
+            args->theta0 = gwy_container_get_double_by_name(controls.fdata,
+                                                            "/theta0");
+            args->phi0 = gwy_container_get_double_by_name(controls.fdata,
+                                                          "/phi0");
             facets_mark_dialog_update_controls(&controls, args);
             break;
 
@@ -402,20 +413,43 @@ xy_to_angles(gdouble x, gdouble y,
 }
 
 static void
+facet_view_select_angle(FacetsControls *controls,
+                        gdouble theta,
+                        gdouble phi)
+{
+    gdouble x, y, q, corr;
+    gdouble selection[2];
+    GwyVectorLayer *layer;
+
+    angles_to_xy(theta, -phi, &x, &y);
+    controls->in_update = TRUE;
+    q = gwy_container_get_double_by_name(controls->fdata, "/q");
+    /* G_SQRT2/q/FDATA_RES is correction to coordinate of pixel centre instead
+     * of edge */
+    corr = G_SQRT2/q*(1.0 - 1.0/FDATA_RES);
+    selection[0] = x + corr;
+    selection[1] = corr - y;
+    layer = gwy_data_view_get_top_layer(GWY_DATA_VIEW(controls->fview));
+    gwy_vector_layer_set_selection(layer, 1, selection);
+    controls->in_update = FALSE;
+}
+
+static void
 facet_view_selection_updated(GwyVectorLayer *layer,
                              FacetsControls *controls)
 {
     GwyDataField *dtheta, *dphi;
     gdouble selection[2];
-    gdouble theta, phi, x, y, q;
+    gdouble theta, phi, x, y, q, corr;
     gchar s[24];
 
     q = gwy_container_get_double_by_name(controls->fdata, "/q");
     gwy_vector_layer_get_selection(layer, selection);
-    /* q/G_SQRT2/G_SQRT2 is correction to coordinate of pixel centre instead
+    /* G_SQRT2/q/FDATA_RES is correction to coordinate of pixel centre instead
      * of edge */
-    x = selection[0] - G_SQRT2/q + q/G_SQRT2/FDATA_RES;
-    y = G_SQRT2/q - selection[1] - q/G_SQRT2/FDATA_RES;
+    corr = G_SQRT2/q*(1.0 - 1.0/FDATA_RES);
+    x = selection[0] - corr;
+    y = corr - selection[1];
     xy_to_angles(x, y, &theta, &phi);
 
     g_snprintf(s, sizeof(s), "%.2f deg", 180.0/G_PI*theta);
@@ -453,7 +487,7 @@ preview_selection_updated(GwyVectorLayer *layer,
 {
     GwyDataField *dfield;
     gdouble selection[2];
-    gdouble theta, phi, x, y, q;
+    gdouble theta, phi;
     gint i, j;
 
     if (controls->in_update)
@@ -464,7 +498,6 @@ preview_selection_updated(GwyVectorLayer *layer,
     if (!gwy_vector_layer_get_selection(layer, selection))
         return;
 
-    controls->in_update = TRUE;
     j = gwy_data_field_rtoj(dfield, selection[0]);
     i = gwy_data_field_rtoi(dfield, selection[1]);
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->fdata,
@@ -473,16 +506,7 @@ preview_selection_updated(GwyVectorLayer *layer,
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->fdata,
                                                              "/phi"));
     phi = gwy_data_field_get_val(dfield, j, i);
-
-    angles_to_xy(theta, phi, &x, &y);
-    q = gwy_container_get_double_by_name(controls->fdata, "/q");
-    /* q/G_SQRT2/G_SQRT2 is correction to coordinate of pixel centre instead
-     * of edge */
-    selection[0] = x + G_SQRT2/q - q/G_SQRT2/FDATA_RES;
-    selection[1] = y + G_SQRT2/q - q/G_SQRT2/FDATA_RES;
-    layer = gwy_data_view_get_top_layer(GWY_DATA_VIEW(controls->fview));
-    gwy_vector_layer_set_selection(layer, 1, selection);
-    controls->in_update = FALSE;
+    facet_view_select_angle(controls, theta, phi);
 }
 
 static void
@@ -590,8 +614,9 @@ gwy_data_field_facet_distribution(GwyDataField *dfield,
     GwyDataField *dtheta, *dphi, *dist;
     GwySIUnit *siunit;
     gdouble *xd, *yd, *data;
-    gdouble q;
-    gint res, hres, i, xres, yres;
+    const gdouble *xdc, *ydc;
+    gdouble q, max;
+    gint res, hres, i, j, mi, mj, xres, yres;
 
     dtheta = GWY_DATA_FIELD(gwy_data_field_new_alike(dfield, FALSE));
     dphi = GWY_DATA_FIELD(gwy_data_field_new_alike(dfield, FALSE));
@@ -628,22 +653,55 @@ gwy_data_field_facet_distribution(GwyDataField *dfield,
     hres = (res - 1)/2;
     data = gwy_data_field_get_data(dist);
 
-    xd = gwy_data_field_get_data(dtheta);
-    yd = gwy_data_field_get_data(dphi);
-    for (i = xres*yres; i; i--, xd++, yd++) {
+    xdc = gwy_data_field_get_data_const(dtheta);
+    ydc = gwy_data_field_get_data_const(dphi);
+    for (i = xres*yres; i; i--, xdc++, ydc++) {
         gdouble x, y;
         gint xx, yy;
 
-        angles_to_xy(*xd, *yd, &x, &y);
+        angles_to_xy(*xdc, *ydc, &x, &y);
         xx = ROUND(q*x/G_SQRT2*hres) + hres;
         yy = ROUND(q*y/G_SQRT2*hres) + hres;
         data[yy*res + xx] += 1.0;
+    }
+
+    /* Find maxima */
+    mi = mj = hres;
+    max = 0;
+    for (i = 1; i+1 < res; i++) {
+        for (j = 1; j+1 < res; j++) {
+            gdouble z;
+
+            z = data[i*res + j]
+                + 0.3*(data[i*xres + j - 1]
+                       + data[i*xres + j + 1]
+                       + data[i*xres - xres + j]
+                       + data[i*xres + xres + j])
+                + 0.1*(data[i*xres - xres + j - 1]
+                       + data[i*xres - xres + j + 1]
+                       + data[i*xres + xres + j - 1]
+                       + data[i*xres + xres + j + 1]);
+            if (G_UNLIKELY(z > max)) {
+                max = z;
+                mi = i;
+                mj = j;
+            }
+        }
     }
 
     for (i = res*res; i; i--, data++)
         *data = pow(*data, 0.25);
 
     gwy_container_set_double_by_name(container, "/q", q);
+    {
+        gdouble x, y, theta, phi;
+
+        x = (mj - hres)*G_SQRT2/(q*hres);
+        y = (mi - hres)*G_SQRT2/(q*hres);
+        xy_to_angles(x, y, &theta, &phi);
+        gwy_container_set_double_by_name(container, "/theta0", theta);
+        gwy_container_set_double_by_name(container, "/phi0", phi);
+    }
     gwy_container_set_object_by_name(container, "/0/data", (GObject*)dist);
     g_object_unref(dist);
     gwy_container_set_object_by_name(container, "/theta", (GObject*)dtheta);
