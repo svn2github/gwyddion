@@ -125,7 +125,7 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "facet_analysis",
-    N_(""),
+    N_("Visualizes, marks and measures facet orientation."),
     "Yeti <yeti@gwyddion.net>",
     "1.0",
     "David Nečas (Yeti) & Petr Klapetek",
