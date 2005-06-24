@@ -78,7 +78,7 @@ gwy_option_menu_data_window(GCallback callback,
 }
 
 /**
- * gwy_option_menu_data_window:
+ * gwy_option_menu_data_window_filtered:
  * @callback: A callback called when a menu item is activated (or %NULL for
  *            no callback).
  * @cbdata: User data passed to the callback.
