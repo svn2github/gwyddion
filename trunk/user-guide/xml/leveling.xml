@@ -1,158 +1,178 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
-               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-leveling">
   <title>Data Leveling and Background Subtraction</title>
   <section>
-     <title>Leveling</title>
-     <para>
-     Data obtained from SPM microscope are very often not leveled at all -
-     microscope outputs directly raw data values computed from piezoscanner voltage,
-     strain gauge, interferometer or other detection system values. This way of exporting
-     data enables user to choose his/her own way of leveling data.
-     </para>
-     <para>
-     Choosing the leveling mode should be done depending on your SPM system configuration.
-     Basically, for systems with independent scanner(s) for each axis plane leveling should
-     be sufficient and for systems with scanner(s) moving in all three axes (tube scanners)
-     2nd order polynomial leveling should be used.
-     </para>
-     <para>
-     Of course, you can use higher order leveling for any data, however, this can
-     supress real features on the surface (namely waviness of the surface) and therefore
-     alter the statistical functions and quantities evaluated from the surface.
-     </para>
-     <para>
-     The simplest modules that ace connected with data leveling are Fix Zero and
-     Zero Mean Value that simply set the average height of the data to put minimum
-     to zero (Fix Zero) or mean value to zero (Zero Mean Value). These modules can be
-     accessed through the following menu choices:
-     <para>
-       <menuchoice>
-         <guimenu>Data Process</guimenu>
-         <guisubmenu>Level</guisubmenu>
-         <guimenuitem>Fix Zero</guimenuitem>
-       </menuchoice>
-     </para>
-     <para>
-       <menuchoice>
-         <guimenu>Data Process</guimenu>
-         <guisubmenu>Level</guisubmenu>
-         <guimenuitem>Level</guimenuitem>
-       </menuchoice>
-     </para>
-
-     </para>
-      <section>
-        <title id="process-level-plane">Plane Level</title>
-        <para>
-          <menuchoice>
-            <guimenu>Data Process</guimenu>
-            <guisubmenu>Level</guisubmenu>
-            <guimenuitem>Zero Mean Value</guimenuitem>
-          </menuchoice>
-        </para>
-	<para>
-	Plane leveling is usually one of the firsts function applied to raw SPM data. The plane is
-	computed from all the image points and is subtracted from the data.
-	</para>
-      </section>
-      <section>
-        <title id="process-level-three">Three point leveling</title>
-        <para>
-	Three point leveling tool can be used for leveling very complicated surface structures.
-	User can simply mark three points in the image that should be at the same level.
-	Plane is computed from these three points and is subtracted from data.
-        </para>
-       </section>
-      <section>
-        <title id="module-facet-level">Facet Level</title>
-        <para>
-          <menuchoice>
-            <guimenu>Data Process</guimenu>
-            <guisubmenu>Level</guisubmenu>
-            <guimenuitem>Facet Level</guimenuitem>
-          </menuchoice>
-        </para>
-        <para>
-          Levels data by subtracting a plane like the standard Level function does.
-          However, the plane is determined differently: it makes facets of the surface as horizontal as possible.
-          Thus for surfaces with flat horizontal areas it leads to much better results than the standard Level.
-          On the other hand, for random surfaces it can behave much worse compared to Level.
-        </para>
-        <figure float="0">
-          <title>Facet Level example. The first image shows uncorrected, sloping data;
-            the second image shows data leveled by standard plane fitting (Level);
-            the last one shows data level by Facet Level.</title>
-          <inlinemediaobject>
-            <imageobject>
-              <imagedata fileref="module-facet-level-uncorrected.png" format="PNG"/>
-            </imageobject>
-          </inlinemediaobject>
-          <inlinemediaobject>
-            <imageobject>
-              <imagedata fileref="module-facet-level-leveled.png" format="PNG"/>
-            </imageobject>
-          </inlinemediaobject>
-          <inlinemediaobject>
-            <imageobject>
-              <imagedata fileref="module-facet-level-fleveled.png" format="PNG"/>
-            </imageobject>
-          </inlinemediaobject>
-        </figure>
-      </section>
-      <section>
-        <title>Level Rotate</title>
-        <para>
-          <menuchoice>
-            <guimenu>Data Process</guimenu>
-            <guisubmenu>Level</guisubmenu>
-            <guimenuitem>Level Rotate</guimenuitem>
-          </menuchoice>
-        </para>
- 	<para>
-	Does similar things as plane leveling, however does not simply subtract the fitted plane from the data.
-	Instead of it, this module takes the plane parameters and rotates image data by given amount to make it lying in plane.
-	In comparison to plane level, this modules should therefore preserve angles in the data.
-	</para>
-      </section>
+    <title>Leveling</title>
+    <para>
+      Data obtained from SPM microscope are very often not leveled at all -
+      microscope outputs directly raw data values computed from piezoscanner voltage,
+      strain gauge, interferometer or other detection system values. This way of exporting
+      data enables user to choose his/her own way of leveling data.
+    </para>
+    <para>
+      Choosing the leveling mode should be done depending on your SPM system configuration.
+      Basically, for systems with independent scanner(s) for each axis plane leveling should
+      be sufficient and for systems with scanner(s) moving in all three axes (tube scanners)
+      2nd order polynomial leveling should be used.
+    </para>
+    <para>
+      Of course, you can use higher order leveling for any data, however, this can
+      supress real features on the surface (namely waviness of the surface) and therefore
+      alter the statistical functions and quantities evaluated from the surface.
+    </para>
+    <para>
+      The simplest modules that ace connected with data leveling are Fix Zero and
+      Zero Mean Value that simply set the average height of the data to put minimum
+      to zero (Fix Zero) or mean value to zero (Zero Mean Value). These modules can be
+      accessed through the following menu choices:
+    </para>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Level</guisubmenu>
+        <guimenuitem>Fix Zero</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Level</guisubmenu>
+        <guimenuitem>Level</guimenuitem>
+      </menuchoice>
+    </para>
+    <section>
+      <title id="process-level-plane">Plane Level</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Pleane Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Plane leveling is usually one of the firsts function applied to raw SPM data. The plane is
+        computed from all the image points and is subtracted from the data.
+      </para>
+    </section>
+    <section>
+      <title id="process-level-three">Three point leveling</title>
+      <para>
+        Three point leveling tool can be used for leveling very complicated surface structures.
+        User can simply mark three points in the image that should be at the same level.
+        Plane is computed from these three points and is subtracted from data.
+      </para>
+    </section>
+    <section>
+      <title id="module-facet-level">Facet Level</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Facet Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Levels data by subtracting a plane like the standard Level function does.
+        However, the plane is determined differently: it makes facets of the surface as
+        horizontal as possible.  Thus for surfaces with flat horizontal areas it leads to much
+        better results than the standard Level.  On the other hand, for random surfaces it can
+        behave much worse compared to Level.
+      </para>
+      <figure float="0">
+        <title>
+          Facet Level example. The first image shows uncorrected, sloping data;
+          the second image shows data leveled by standard plane fitting (Level);
+          the last one shows data level by Facet Level.
+        </title>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="module-facet-level-uncorrected.png" format="PNG"/>
+          </imageobject>
+        </inlinemediaobject>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="module-facet-level-leveled.png" format="PNG"/>
+          </imageobject>
+        </inlinemediaobject>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref="module-facet-level-fleveled.png" format="PNG"/>
+          </imageobject>
+        </inlinemediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Level Rotate</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Level Rotate</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Does similar things as plane leveling, however does not simply subtract the fitted plane
+        from the data. Instead of it, this module takes the plane parameters and rotates image
+        data by given amount to make it lying in plane. In comparison to plane level, this
+        modules should therefore preserve angles in the data.
+      </para>
+    </section>
   </section>
   <section>
-     <title>Background subtraction</title>
-     <para>
-     Basically, background can be extracted using many modules generating some filtered data,
-     using the Data Arithmetics module. However, there are special modules for backgrund
-     subtraction too implemented in Gwyddion.
-     </para>
-     <section>
-       <title>Polynomial background</title>
-        <para>
-          <menuchoice>
-            <guimenu>Data Process</guimenu>
-            <guisubmenu>Level</guisubmenu>
-            <guimenuitem>Polynomial Background</guimenuitem>
-          </menuchoice>
-        </para>
-	<para>
-	Fits data by polynom of given order (generally the order can be different for X and Y axis) and
-	subtracts this polynom. If requested, the polynom can be extracted into a separate data window.
-	</para>
-      </section>
-     <section>
-       <title>Revolve arc</title>
-        <para>
-          <menuchoice>
-            <guimenu>Data Process</guimenu>
-            <guisubmenu>Level</guisubmenu>
-            <guimenuitem>Revolve Arc</guimenuitem>
-          </menuchoice>
-        </para>
-	<para>
-	Revolves virtual `arc' of given radius horizontally of vertically over data. Envelope of this arcs
-	is treated as a background.
-	</para>
-      </section>
+    <title>Background subtraction</title>
+    <para>
+      Basically, background can be extracted using many modules generating some filtered data,
+      using the Data Arithmetics module. However, there are special modules for backgrund
+      subtraction too implemented in Gwyddion.  All allow to extract subtracted background
+      to a separate data window.
+    </para>
+    <section>
+      <title>Polynomial Background</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Polynomial Background</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fits data by polynom of given order (generally the order can be different for X and
+        Y axis) and subtracts this polynom.
+      </para>
+    </section>
+    <section>
+      <title>Revolve Arc</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Revolve Arc</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Revolves virtual `arc' of given radius horizontally of vertically over (or under) data.
+        Envelope of this arcs is treated as a background, resulting in removal of features
+        larger than arc radius (approximately).
+      </para>
+    </section>
+    <section>
+      <title>Median Level</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Median Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Filters data with a median filter with large kernel and treats the result as
+        background, keeping only features smaller than approximately kernel size.  This method
+        is very slow.
+      </para>
+    </section>
   </section>
 </section>
 
