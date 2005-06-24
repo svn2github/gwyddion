@@ -40,6 +40,9 @@
     </para>
     <orderedlist>
       <listitem>
+        Mean value, minimum, maximum and median.
+      </listitem>
+      <listitem>
         RMS value of the height irregularities: this quantity is computed from data variance.
       </listitem>
       <listitem>
@@ -53,6 +56,12 @@
       </listitem>
       <listitem>
         Height distribution kurtosis: computed from 4th central moment of data values.
+      </listitem>
+      <listitem>
+        Projected surface area and surface area: computed by simple triangulation.
+      </listitem>
+      <listitem>
+        Mean inclination of facets in area: computed by averaging normalized facet direction vectors.
       </listitem>
     </orderedlist>
     <para>
