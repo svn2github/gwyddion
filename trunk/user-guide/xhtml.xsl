@@ -7,9 +7,7 @@
 <xsl:param name="toc.section.depth" select="1"/>
 <xsl:param name="use.id.as.filename" select="1"/>
 <xsl:param name="phrase.propagates.style" select="1"/>
-<!--
 <xsl:param name="html.stylesheet.type">text/css</xsl:param>
-<xsl:param name="html.stylesheet">foo.css</xsl:param>
--->
+<xsl:param name="html.stylesheet">user-guide.css</xsl:param>
 
 </xsl:stylesheet>
