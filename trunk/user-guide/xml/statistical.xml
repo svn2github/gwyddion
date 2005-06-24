@@ -36,7 +36,7 @@
     <para>
       Statistical quantities include basic properties of the height values distribution, including
       its variance, skewness and kurtosis. The quantities accesible within Gwyddion by means of
-      the "statistical quantities" tool are as follows:
+      the Statistical Quantities tool are as follows:
     </para>
     <orderedlist>
       <listitem>
@@ -49,12 +49,39 @@
         and absolute values of the data (zero mean),
       </listitem>
       <listitem>
-        Height distribution skewness: again this is computed as 3rd power of the data values (zero mean)
+        Height distribution skewness: again this is computed from 3rd central moment of data values.
       </listitem>
       <listitem>
-        Height distribution kurtosis: computed as 4th power of the data values (zero mean)
+        Height distribution kurtosis: computed from 4th central moment of data values.
       </listitem>
     </orderedlist>
+    <para>
+      More precisely, RMS (σ), skewness (γ<subscript>1</subscript>), and kurtosis (γ<subscript>2</subscript>) are computed
+      from central moments of <phrase role="math">i</phrase>-th order <phrase role="math">μ<subscript>i</subscript></phrase>
+      according to following formulas
+    </para>
+    <informalequation>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="eq-statistical-quantities.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      Surface area is estimated by following method. Let <phrase role="math">z<subscript>i</subscript></phrase> for
+      <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in four neighbour points (pixel corners), and
+      <phrase role="math">h<subscript>x</subscript></phrase> and <phrase role="math">h<subscript>y</subscript></phrase>
+      pixel dimensions along corresponding axes.  Placing an additional point to the center of the rectangle with mean
+      value of corners four triangles are formed and surface area can be approximated by summing their areas.  This leads
+      to following formula for area of one triangle and surface area of one pixel
+    </para>
+    <informalequation>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="eq-area-calculation.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </informalequation>
   </section>
   <section>
     <title>Statistical functions</title>
