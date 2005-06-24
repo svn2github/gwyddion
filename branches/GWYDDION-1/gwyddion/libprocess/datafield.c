@@ -260,9 +260,9 @@ gwy_data_field_deserialize(const guchar *buffer,
                            gsize size,
                            gsize *position)
 {
-    guint32 fsize;
+    guint32 fsize, cachesize = 0, cachebits = 0;
     gint xres, yres;
-    gdouble xreal, yreal, *data = NULL;
+    gdouble xreal, yreal, *data = NULL, *cache = NULL;
     GwySIUnit *si_unit_xy = NULL, *si_unit_z = NULL;
     GwyDataField *data_field;
     GwySerializeSpec spec[] = {
@@ -273,12 +273,16 @@ gwy_data_field_deserialize(const guchar *buffer,
         { 'o', "si_unit_xy", &si_unit_xy, NULL, },
         { 'o', "si_unit_z", &si_unit_z, NULL, },
         { 'D', "data", &data, &fsize, },
+        { 'i', "cache_bits", &cachebits, NULL, },
+        { 'D', "cache_data", &cache, &cachesize, },
     };
 
     gwy_debug("");
 
     si_unit_z = NULL;
     si_unit_xy = NULL;
+    /* Ignore cache -- but deserialize it -- to avoid lots of warnings. */
+    g_free(cache);
 
     g_return_val_if_fail(buffer, NULL);
 
