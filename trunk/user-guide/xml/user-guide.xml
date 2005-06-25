@@ -9,20 +9,40 @@
       <firstname>Petr</firstname>
       <surname>Klapetek</surname>
     </author>
+    <author>
+      <firstname>David</firstname>
+      <surname>Nečas</surname>
+    </author>
     <copyright>
-      <year>2004</year>
+      <year>2004, 2005</year>
       <holder>Petr Klapetek &amp; David Nečas</holder>
     </copyright>
     <legalnotice id="legalnotice">
       <para>
         Permission is granted to copy, distribute and/or modify this document
-        under the terms of the <link linkend="gfdl">GNU Free Documentation
-        License</link>, Version 1.2 or any later version published by the
-        Free Software Foundation; with no Invariant Sections, no Front-Cover
-        Texts, and no Back-Cover Texts. A copy of the license is included
-        in the section entitled <link linkend="gfdl">GNU Free Documentation
-        License</link>.
-     </para>
+        under the terms of either
+        <itemizedlist>
+          <listitem>
+            <para>
+              The <link linkend="gfdl">GNU Free Documentation License</link>,
+              Version 1.2 or any later version published by the
+              Free Software Foundation; with no Invariant Sections,
+              no Front-Cover Texts, and no Back-Cover Texts.
+              A copy of the license is included in the section entitled
+              <link linkend="gfdl">GNU Free Documentation License</link>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <link linkend="gpl">GNU General Public License</link>,
+              Version 2 or any later version published by the
+              Free Software Foundation. A copy of the license is included
+              in the section entitled
+              <link linkend="gpl">GNU General Public License</link>.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
     </legalnotice>
   </bookinfo>
   <xi:include href="intro.xml"/>
@@ -47,6 +67,7 @@
     <xi:include href="expressions.xml"/>
   </chapter>
   <xi:include href="develop.xml"/>
+  <xi:include href="gpl.xml"/>
   <xi:include href="fdl.xml"/>
 </book>
 
