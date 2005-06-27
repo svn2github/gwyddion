@@ -108,5 +108,29 @@
      </ulink>
      </para>
   </section>
+  <!--  Doesn't work well, needs serious formatting improvements.
+  <bibliography>
+    <biblioentry>
+      <biblioset relation='article'>
+        <authorgroup>
+          <author><firstname>Petr</firstname><surname>Klapetek</surname></author>
+          <author><firstname>Ivan</firstname><surname>Ohlídal</surname></author>
+          <author><firstname>Daniel</firstname><surname>Franta</surname></author>
+          <author><firstname>Alberto</firstname><surname>Montaigne-Ramil</surname></author>
+          <author><firstname>Alberta</firstname><surname>Bonanni</surname></author>
+          <author><firstname>David</firstname><surname>Stifter</surname></author>
+          <author><firstname>Helmut</firstname><surname>Stifter</surname></author>
+        </authorgroup>
+        <title>Atomic force microscopy characterization of ZnTe epitaxial films</title>
+      </biblioset>
+      <biblioset relation='journal'>
+        <title>Acta Physica Slovaca</title>
+        <volumenum>3</volumenum>
+        <pagenums>223-230</pagenums>
+        <pubdate>2003</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+  -->
 </section>
 
