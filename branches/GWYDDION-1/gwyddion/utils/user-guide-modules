@@ -46,7 +46,7 @@ plugin-proxy plugins.html
 poly_level features-leveling.html
 presentationops presentations-masks.html
 profile data-analysis.html#features-basic
-rawfile managing-files.html
+rawfile raw-file-import.html
 remove_threshold features-grains.html
 rhk-spm32 managing-files.html
 rotate data-analysis.html#features-basic
