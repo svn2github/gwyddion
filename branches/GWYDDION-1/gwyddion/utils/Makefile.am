@@ -12,6 +12,7 @@ EXTRA_DIST = \
 	modules-web.xsl \
 	update-msvc.py \
 	update-potfiles.sh \
+	user-guide-modules \
 	vim-syn-gen.py
 
 module-list: modules.xml module-list.html module-list-nocss.html
@@ -32,8 +33,8 @@ dump_modules_LDADD = @GTKGLEXT_LIBS@ \
 
 INCLUDES = -I$(top_srcdir)
 
-modules.xml: dump-modules $(moduledir)/*.c $(moduledir)/*/*.c
-	./dump-modules >modules.xml
+modules.xml: dump-modules user-guide-modules $(moduledir)/*.c $(moduledir)/*/*.c
+	./dump-modules user-guide-modules foo bar >modules.xml
 
 module-list.html: modules.xml modules-web.xsl
 	$(XSLTPROC) modules-web.xsl modules.xml >module-list.html
