@@ -50,6 +50,7 @@
     </figure>
   </section>
   <xi:include href="managing-files.xml"/>
+  <xi:include href="raw-file-import.xml"/>
   <section id="data-windows">
     <title>Data windows</title>
     <para>
@@ -166,7 +167,10 @@
     <para>
       Masks are used for displaying special areal selections (e. g. grains). Masks can have any shape and within data window
       can be expressed by any chosen color. Masks can be created by different
-      modules or directly by user using Mask selection tool.
+      modules or directly by user using Mask selection tool.  It it possible
+      to invert, grow, and shrink masks, or extract them to a separate data
+      window using module functions in
+      <menuchoice><guimenu>Data Process</guimenu><guisubmenu>Mask</guisubmenu></menuchoice> menu.
     </para>
     <figure float="0">
       <title>
