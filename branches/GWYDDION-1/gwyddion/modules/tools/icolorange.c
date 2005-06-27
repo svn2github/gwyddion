@@ -274,6 +274,8 @@ dialog_update(GwyUnitoolState *state,
     GwyContainer *data;
     GwyDataField *dfield;
     ToolControls *controls;
+    gboolean has_range = FALSE;
+    gboolean do_apply;
     gint isel[4];
 
     controls = (ToolControls*)state->user_data;
@@ -346,8 +348,6 @@ dialog_update(GwyUnitoolState *state,
     }
 
     if (controls->initial_use) {
-        gboolean has_range;
-
         has_range = gwy_container_gis_double(data, controls->key_min,
                                              &controls->min);
         has_range |= gwy_container_gis_double(data, controls->key_max,
@@ -434,10 +434,10 @@ dialog_update(GwyUnitoolState *state,
                                  controls->datamax);
     }
 
+    do_apply = controls->do_preview && !(controls->initial_use && !has_range);
     controls->initial_use = FALSE;
     controls->in_update = FALSE;
-
-    if (controls->do_preview)
+    if (do_apply)
         apply(state);
 }
 
@@ -461,6 +461,7 @@ apply(GwyUnitoolState *state)
     ToolControls *controls;
     GwyContainer *data;
 
+    gwy_debug(" ");
     controls = (ToolControls*)state->user_data;
     if (controls->in_update)
         return;
