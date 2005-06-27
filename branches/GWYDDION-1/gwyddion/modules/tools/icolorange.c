@@ -468,8 +468,16 @@ apply(GwyUnitoolState *state)
 
     controls->in_update = TRUE;
     data = gwy_data_window_get_data(state->data_window);
-    gwy_container_set_double(data, controls->key_min, controls->min);
-    gwy_container_set_double(data, controls->key_max, controls->max);
+
+    if (controls->min == controls->datamin
+        && controls->max == controls->datamax) {
+        gwy_container_remove(data, controls->key_min);
+        gwy_container_remove(data, controls->key_max);
+    }
+    else {
+        gwy_container_set_double(data, controls->key_min, controls->min);
+        gwy_container_set_double(data, controls->key_max, controls->max);
+    }
 
     gwy_data_view_update
         (GWY_DATA_VIEW(gwy_data_window_get_data_view
