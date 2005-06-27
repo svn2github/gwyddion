@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-fractal">
+  <title>Fractal analysis</title>
+  <para>
+  In practice objects exhibiting random properties are encountered.
+  It is often assumed that these objects exhibit the self-affine
+  properties in a certain range of scales. Self-affinity is a generalization
+  of self-similarity which is the basic property of most of the deterministic
+  fractals. A part of self-affine object is similar to whole object after
+  anisotropic scaling. Many randomly rough surfaces are assumed to belong
+  to the random objects that exhibit the self-affine properties and they are
+  treated self-affine statistical fractals. Of course, these surfaces can be
+  studied using atomic force microscopy (AFM). The results of the fractal
+  analysis of the self-affine random surfaces using AFM are often used to
+  classify these surfaces prepared by various technological procedures [1-4].
+  </para>
+  <para>
+  Within Gwyddion, there are different methods of fractal analysis implemented
+  within
+  <menuchoice>
+    <guimenu>Data Process</guimenu><guisubmenu>Statistics</guisubmenu>
+    <guimenuitem>Fractal analysis</guimenuitem>
+  </menuchoice>.
+  </para>
+  <orderedlist>
+    <listitem>
+    Cube counting method [1,2] is derived directly from a definition of box-counting fractal dimension.
+    The algorithm is based on the following steps: a cubic lattice with lattice constant l is superimposed
+    on the <phrase role="math">z</phrase>-expanded surface. Initially <phrase role="math">l</phrase> is set
+    at <phrase role="math">X/2</phrase> (where <phrase role="math">X</phrase> is length of
+    edge of the surface), resulting in a lattice of 2x2x2=8 cubes. <phrase role="math">N(l)</phrase> is then number of all cubes that
+    contain at least one pixel of the image. Lattice constant <phrase role="math">l</phrase> is then reduced stepwise by factor of
+    2 and the process repeated until <phrase role="math">l</phrase> is equal to distance between two adjacent pixels. The slope
+    of a plot of <phrase role="math">log (N(l))</phrase> versus <phrase role="math">log(1/l)</phrase>
+    gives fractal dimension <phrase role="math">D<subscript>f</subscript></phrase> directly.
+    </listitem>
+    <listitem>
+    Triangulation method [1] is very similar to cube counting method and is also based
+    directly on the box-counting fractal dimension definition. The method works as follows:
+    A grid of unit dimension <phrase role="math">l</phrase> is placed on the surface. This defines the location of the
+    vertices of a number of triangles. When <phrase role="math">l=X/4</phrase>, for example, the surface is covered by
+    32 triangles of different areas inclined at various angles with respect to the <phrase role="math">x-y</phrase> plane.
+    The areas of all triangles are calculated and summed to obtain an approximation of the surface area
+    <phrase role="math">S(l)</phrase> corresponding to <phrase role="math">l</phrase>. The grid size is then decreased by successive factor of 2,
+    as before, and the process continued until <phrase role="math">l</phrase> corresponds to distance between two adjacent
+    pixel points. The slope of a plot of <phrase role="math">log (S(l))</phrase> versus <phrase role="math">log(1/l)</phrase> is then corresponding to
+    <phrase role="math">D<subscript>f</subscript>-2</phrase>.
+    </listitem>
+     <listitem>
+     The variance method [3,4] is based on the scale dependence of the variance of fractional Brownian motion.
+     In practice, in the variance method one divides the full surface into equal-sized squared boxes, and the
+     variance (power of RMS value of heights), is calculated for particular box size. Fractal dimension is
+     evaluated from the slope <phrase role="math">beta</phrase>  of a least-square regression line fit to the data points in log-log
+     plot of variance  as <phrase role="math">D<subscript>f</subscript> = 3-&beta;/2</phrase>.
+    </listitem>
+     <listitem>
+     Power spectrum method [3, 4, 5] is based on the power spectrum dependence of fractional Brownian motion.
+     In the power spectrum method, every line height profiles that forms the image is Fourier transformed and
+     the power spectrum evaluated and then all these power spectra are averaged. Fractal dimension is evaluated
+     from the slope In the power spectrum method, every line height profiles that forms the image is Fourier
+     transformed and the power spectrum evaluated and then all these power spectra are averaged. Fractal
+     dimension is evaluated from the slope <phrase role="math">beta</phrase> of a least-square regression line fit to the data
+     points in log-log plot of power spectrum as <phrase role="math">D<subscript>f</subscript>=7/2-&beta;/2</phrase>.
+    </listitem>
+  </orderedlist>
+  <para>
+  Note, that results of different methods differ. This fact is caused by systematic error of different
+  fractal analysis approaches.
+  </para>
+  <figure>
+    <title>Fractal analysis dialog.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="fractal.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+  Moreover, the results of the fractal analysis can be influenced strongly by the tip convolution.
+  We recommned therefore to check the certainty map before fractal analysis. In cases when the surface is
+  influenced a lot by tip imaging, the results of the fractal analysis can be misrepresented strongly.
+  </para>
+  <para>
+  Note, that algorithms that can be used within the fractal analysis module are also used in "Fractal correction" module
+  ad "Fractal correction" option of "Remove spots" tool.
+  </para>
+  <section>
+  <title>References</title>
+  <para>
+  [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal character of cold-deposited
+  silver films determined by low-temperature scanning tunneling microscopy. Physical
+  Review B, Volume 51, Number 16, 15 april 1995, 51
+  </para><para>
+  [2] W. Zahn, A. Z\uffffsch: The dependance of fractal dimension on measuring conditions of
+  scanning probe microscopy. Fresenius J Analen Chem (1999) 365: 168-172
+  </para><para>
+  [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken: Quantitative
+  characerization of individual particle sutfaces by fractal analysis of scanning electron
+  microscope images. Fresenius J Analen Chem (1994) 350: 440-447
+  </para><para>
+  [4] A. Mannelquist, N. Almquist, S. Fredriksson: Influence of tip geometry on fractal analysis
+  of atomic force microscopy images. Appl. Phys. A 66,1998, 891-895
+  </para><para>
+  [5] W. Zahn, A. Z\uffffsch: Characterization of thin film surfaces by fractal geometry. Fresenius J
+  Anal Chem (1997) 358: 119-121
+  </para>
+  </section>
+</section>
+

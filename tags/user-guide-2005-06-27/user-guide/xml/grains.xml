@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-grains">
+  <title>Grain analysis</title>
+  <para>
+  There are several grain-related algorithms implemented in Gwyddion.
+  First of all, simple thresholding algorithms can be used (height, slope or curvature
+  thresholding). These procedures can be very efficient namely within particle
+  analysis (to mark particles located on flat surface).
+  </para>
+  <para>
+  Thresholding methods can be accessed within Gwyddion as
+  <menuchoice>
+    <guimenu>Data Process</guimenu><guisubmenu>Grains</guisubmenu>
+    <guimenuitem>Mark by Threshold</guimenuitem>
+  </menuchoice>.
+  Height, slope and curvature thresholding is implemented within this module. The results
+  of each individual thresholding methods can be merged together using several operators.
+  </para>
+  <para>
+  Similarily, the grains can be removed from the mask using
+  <menuchoice>
+    <guimenu>Data Process</guimenu><guisubmenu>Grains</guisubmenu>
+    <guimenuitem>Remove Grains</guimenuitem>
+  </menuchoice> menu choice.
+  Maximum height and/or size thresholding methods can be used to eliminate false grains
+  occured by noise or some dust particles, for example. You can use also interactive grain
+  removal tool for doing this manually.
+  </para>
+  <para>
+  For more complicated data structures the effectiveness of thresholding
+  algorithms can be very poor. For these data a <emphasis>watershed algorithm</emphasis> can be used more
+  effectively for grain or particle marking.
+  </para>
+  <para>
+  The watershed algorithm is usually employed for local minima
+  determination and image segmentation in image processing. As the problem
+  of determining the grain positions can be understood as the problem of finding local extremes on the surface
+  this algorithm can be used also for purposes of grain segmentation or marking.
+  For convenience in the following we will
+  treat the data inverted in the <emphasis>z</emphasis> direction while describing the algorithm
+  (i.e. the grain tops are forming local minima in the following text).
+  We applied two stages of the grain analysis (see Ref. [1]):
+  </para>
+  <orderedlist>
+    <listitem>
+    At each point of the inverted surface the virtual water drop was placed. In the case that
+    the drop was not allready in a local minimum it followed the steepest descent path to
+    minimize its potential energy. As soon as the drop reached any local minimum it stopped here
+    and rested on the surface. In this way it filled the local minimum partially by its volume (see Fig 2 and the figure caption).
+    This process was repeated several times. As the result a system of lakes of different sizes
+    filling the inverted surface depressions was obtained.
+    Then the area of each of the lakes was evaluated and the smallest lakes were removed under
+    assumption that they were formed in the local minima originated by noise. The larger lakes
+    were used to identify the positions of the grains.
+    In this way the noise in the AFM data was eliminated.
+    </listitem>
+    <listitem>
+    The grains found in the step 1 were marked (each one by a different number).
+    The water drops continued in falling to the surface and filling the local minima. As the grains
+    were already identified and marked after the first step, the next five situations could happen as soon as the
+    drop reached a local minimum.
+    <orderedlist>
+      <listitem>
+      the drop reached the place previously marked as a concrete grain. In this case the drop was
+      merged with the grain, i. e. it was marked as a part of the same grain.
+      </listitem>
+      <listitem>
+      the drop reached the place where no grain was found but a concrete grain was found in the closest neighbourhood
+      of the drop. In this case the drop was merged with the grain again.
+      </listitem>
+      <listitem>
+      the drop reached the place where no grain was found and no grain was found even in the closest neighbourhood
+      of the drop. In that case the drop was not marked at all.
+      </listitem>
+      <listitem>
+      the drop reached the place where no grain was found but more than one concrete grain was found in the closest neighbourhood
+      (e. g. two different grains were found in the neighbourhood). In this case the drop was marked as the grain boundary.
+      </listitem>
+      <listitem>
+      the drop reached the place marked as grain boundary. In this case the drop was marked as the grain boundary too.
+      </listitem>
+    </orderedlist>
+    </listitem>
+  </orderedlist>
+  <para>
+  In this way we can identify the grain positions and then determine the volume occupied
+  by each grain separately.
+  </para>
+  <figure>
+    <title>Image of grain-like surface structure (a) and corresponding results of height thresholding (b), curvature thresholding (c),
+                  and watershed (d) algorithm. Within watershed algorithm it is possible to segment image even further.
+		  </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="allgrains.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <section>
+     <title>References</title>
+     <para>
+     [1] <ulink url="http://klapetek.cz/download.html">
+     Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
+     Acta Physica Slovaca, 3 (223-230), 2003
+     </ulink>
+     </para>
+  </section>
+  <!--  Doesn't work well, needs serious formatting improvements.
+  <bibliography>
+    <biblioentry>
+      <biblioset relation='article'>
+        <authorgroup>
+          <author><firstname>Petr</firstname><surname>Klapetek</surname></author>
+          <author><firstname>Ivan</firstname><surname>Ohlídal</surname></author>
+          <author><firstname>Daniel</firstname><surname>Franta</surname></author>
+          <author><firstname>Alberto</firstname><surname>Montaigne-Ramil</surname></author>
+          <author><firstname>Alberta</firstname><surname>Bonanni</surname></author>
+          <author><firstname>David</firstname><surname>Stifter</surname></author>
+          <author><firstname>Helmut</firstname><surname>Stifter</surname></author>
+        </authorgroup>
+        <title>Atomic force microscopy characterization of ZnTe epitaxial films</title>
+      </biblioset>
+      <biblioset relation='journal'>
+        <title>Acta Physica Slovaca</title>
+        <volumenum>3</volumenum>
+        <pagenums>223-230</pagenums>
+        <pubdate>2003</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+  -->
+</section>
+

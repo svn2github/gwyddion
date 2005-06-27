@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-edit">
+  <title>Data edit</title>
+  <para>
+  There are several modules that enable direct or indirect editing of the
+  SPM data. In principal, most of the data processing modules do some "data edit"
+  as they change the data.
+  However, in this chapter we would like to describe the modules and tools
+  that can be used for removing locally all the information from the data field
+  and substituting it by some other information.  This includes functions for
+  removing spots, scars and general data under mask.
+  </para>
+  <section>
+     <title>Remove spots</title>
+     <para>
+     Remove spots tool can be used for removing very small parts of the image that
+     are considered as scanning error, dust particle or anything else that should not
+     be present in the data. Note that doing so can dramatically alter the resulting
+     statistical parameters of the surface, so be sure not to remove things that
+     are really present on the surface.
+     </para>
+     <para>
+     Within the tool you can select rectangle around the area that should be removed.
+     You can use then several methods for creating data in place of former spot:
+     </para>
+     <itemizedlist>
+        <listitem>
+	Hyperbolic flatten - uses information from selected area boundaries to interpolate
+	the information inside area.
+	</listitem>
+	<listitem>
+	Pseudo-laplace and Laplace solver - solves Laplace equation to find out data inside
+	area; the boundary is treated as virtual source.
+	</listitem>
+	<listitem>
+	Fractal correction - uses whole image to determine fractal dimension. Then tries
+	to create randomly rough data that have the same fractal dimension and put them into the area.
+	</listitem>
+     </itemizedlist>
+  </section>
+  <section>
+     <title>Remove scars</title>
+     <para>
+     Scars (or stripes) are parts of the image that are corrupted by very common scanning error - local
+     fault of the closed loop. As the scanning highly probably does not happen in the previous and following
+     scan line we obtain a line defect paralell to the fast scanning axis in the image. This line defect
+     can be found and removed using the neighbourhood lines within this module.
+     </para>
+     <para>
+     Similarly, the Mark scars module can create mask of the points treated as scars.
+     </para>
+  </section>
+  <section>
+     <title>Remove data under mask</title>
+     <para>
+     This module tries to substitute data under mask by solving Laplacian equation. Unmasked data are used
+     as virtual source and information in the masked regions is iterativelyh computed.
+     </para>
+  </section>
+  <section>
+     <title>Fractal correction</title>
+     <para>
+     Fractal correction module has the same output as "Remove data under mask" module, however using
+     a different approach. Fractal dimension of the whole image is first computed and the areas under
+     mask are substituted by randomly rough surface having the same fractal dimension as the surface.
+     Moreover, also root mean square value of the height irregularities (roughness) is not changed
+     by apllying this module.
+     </para>
+     <para>
+     Note that running this module on data that do not have fractal properties itself causes really crazy
+     results.
+     </para>
+  </section>
+</section>
+

@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<chapter id="installation">
+  <title>Installing Gwyddion</title>
+  <para>
+    <application>Gwyddion</application> source code and binaries can be downloaded from the web pages of the project
+    (<ulink url="http://gwyddion.net/">http://gwyddion.net/</ulink>).
+    The instalation sligtly varies depending on the operating system used.
+    However, basically it consist of two steps:
+    <itemizedlist>
+      <listitem>
+        <para>Installing the Gtk+ enviroment (if not already done).</para>
+      </listitem>
+      <listitem>
+        <para>Installing Gwyddion</para>
+      </listitem>
+    </itemizedlist>
+    The first step is necessary namely on operating systems other than Linux at first <application>Gwyddion</application> installation.
+    The version of Gtk+ enviroment necessary for your system is desribed in the next sections. Generally,
+    you need a Gtk+ development package for <application>Gwyddion</application> developement and Gtk+ libraries (runtime package)
+    for running <application>Gwyddion</application>. Note that Gtk+ package including GtkGLExt library is necessary as this library
+    is used for pseudo 3D visualization.
+  </para>
+  <para>
+    We recommend you to download example <application>Gwyddion</application> files too. These are in native <application>Gwyddion</application> format
+    and represent typical AFM data. Also these files can be downloaded from <application>Gwyddion</application> web pages.
+  </para>
+  <section id="installation-linux-rpm">
+    <title>Linux packages</title>
+    <para>
+      RPM files (usually compiled on <ulink url="http://fedora.redhat.com/">Fedora Core Linux</ulink>)
+      can be downloaded from <application>Gwyddion</application> pages. Usually,
+      each version of <application>Gwyddion</application> is compiled and packed into RPM distribution. Moreover, also nightly
+      builds from CVS can be downloaded. However, these can be really unstable (or at least some
+      functions can be).
+    </para>
+    <para>
+      If you want to install <application>Gwyddion</application> precompiled RPM file, you can simply type
+      <userinput>rpm -Uhv gwyddion.X.Y.rpm</userinput>.
+    </para>
+  </section>
+  <section id="installation-linux-source">
+    <title>Linux/FreeBSD from source tarball</title>
+    <para>
+      The follwing detailed procedure (and even more) can be found in <filename>INSTALL</filename> file in the source tarball.
+    </para>
+    <para>
+      The <command>configure</command> shell script attempts to guess correct values for
+      various system-dependent variables used during compilation.  It uses
+      those values to create a <filename>Makefile</filename> in each directory of the package.
+      It may also create one or more <filename>.h</filename> files containing system-dependent
+      definitions.  Finally, it creates a shell script <command>config.status</command> that
+      you can run in the future to recreate the current configuration, and a
+      file <filename>config.log</filename> containing compiler output (useful mainly for
+      debugging <command>configure</command>).
+    </para>
+    <para>
+      It can also use an optional file (typically called <filename>config.cache</filename>
+      and enabled with <option>--cache-file=config.cache</option> or simply <option>-C</option>) that saves
+      the results of its tests to speed up reconfiguring.  (Caching is
+      disabled by default to prevent problems with accidental use of stale
+      cache files.)
+    </para>
+    <para>
+      If you need to do unusual things to compile the package, please try
+      to figure out how <command>configure</command> could check whether to do them, and mail
+      diffs or instructions to the address given in the <filename>README</filename> so they can
+      be considered for the next release.  If you are using the cache, and at
+      some point <filename>config.cache</filename> contains results you don't want to keep, you
+      may remove or edit it.
+    </para>
+    <para>
+      The file <filename>configure.ac</filename> (or <filename>configure.in</filename>) is used to create
+      <command>configure</command> by a program called <command>autoconf</command>.  You only need
+      <filename>configure.ac</filename> if you want to change it or regenerate <command>configure</command> using
+      a newer version of <command>autoconf</command>.
+    </para>
+    <para>
+      The simplest way to compile <application>Gwyddion</application> is:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <command>cd</command> to the directory containing the package's source code and type
+        <userinput>./configure</userinput> to configure the package for your system.  If you're
+        using <command>csh</command> on an old version of System V, you might need to type
+        <userinput>sh ./configure</userinput> instead to prevent <command>csh</command> from trying to execute
+        <command>configure</command> itself.
+      </listitem>
+      <listitem>
+        Type <userinput>make</userinput> to compile the package.
+      </listitem>
+      <listitem>
+        Type <userinput>make install</userinput> to install the programs and any data files and
+        documentation.
+      </listitem>
+      <listitem>
+        You can remove the program binaries and object files from the
+        source code directory by typing <userinput>make clean</userinput>.  To also remove the
+        files that <command>configure</command> created (so you can compile the package for
+        a different kind of computer), type <userinput>make distclean</userinput>.  There is
+        also a <userinput>make maintainer-clean</userinput> target, but that is intended mainly
+        for the package's developers.  If you use it, you may have to get
+        all sorts of other programs in order to regenerate files that came
+        with the distribution.
+      </listitem>
+    </itemizedlist>
+    <para>
+      For more details about compilers, options, and other installation and compiling
+      issues please see the <filename>INSTALL</filename> file in the source tarball.
+    </para>
+  </section>
+  <section id="installation-ms-windows">
+    <title>Windows version</title>
+    <para>
+      If you never had any Gtk+ based application on your system (for example bitmap editor <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>)
+      you will probably need to install Gtk+ runtime enviroment on your computer. Gtk+ is a library
+      designed for portable creating of graphical user interface (windows, buttons, etc.) that
+      is available on many operating systems. Therefore applications using Gtk+ can be ported
+      to various operating systems, including Microsoft Windows.
+    </para>
+    <para>
+      Note that there are several Gtk+ packages for Windows operating systems available on the internet.
+      Some of them include GtkGLExt library and some of them do not. GtkGLExt library is an OpenGL
+      extension of Gtk+ and is used in <application>Gwyddion</application> for creating presudo 3D view on data. Therefore,
+      you will need the version that includes GtkGLExt (see below) or (if you already have some Gtk+ installed)
+      you will need to install GtkGLExt separately. However, having GtkGLExt in a different location than
+      Gtk+ now can cause problems during <application>Gwyddion</application> startup, so we recommend installing Gtk+ including
+      GtkGLExt.
+    </para>
+    <para>
+      For installing <application>Gwyddion</application> please follow these steps:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Download the Gtk+ runtime enviroment (including GtkGLExt library) and install it (e. g. from
+        <ulink url="http://gladewin32.sourceforge.net/modules.php?name=Downloads&and;d_op=viewdownload&and;cid=4">
+          GladeWin</ulink> pages).
+      </listitem>
+      <listitem>
+        Download <application>Gwyddion</application> installer and install <application>Gwyddion</application>.
+      </listitem>
+      <listitem>
+        If you want to read some file formats not supported directly within <application>Gwyddion</application> package but as a separate
+        plugin (currently it is only <application>io_tm</application> plugin designed for reading Thermomicroscopes
+        file formats) please download the plugin instalers and install them.
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section id="installation-linux-devel">
+    <title>Linux/FreeBSD for developers</title>
+    <para>
+      The installation for developers on Linux is exactly same as the usual installation from source tarball.
+      If you installed <application>Gwyddion</application> in this way you can directly edit anything and recompile <application>Gwyddion</application> when you want.
+      Do not forget to install <application>Gwyddion</application> after each compile to get the modules and plugins apparatus working.
+      Good luck.
+    </para>
+    <para>
+      Some more instructions for developers (not operating system dependent) are in the chapter
+      <link linkend="development">Developing Gwyddion</link>.
+    </para>
+  </section>
+  <section id="installation-ms-windows-devel">
+    <title>Windows version for developers</title>
+    <para>
+      If you want to become developer, you can use Microsoft Visual C++ compiler to compile the application
+      and subsequently to develop your code.
+      Use source tarball in that case
+      and compile application using <command>nmake</command> command. In this case you will need Gtk development enviromet installed on your system.
+      You will probably need to change paths to Gtk+ and MSVC toplevel directories in the make.msc file.
+      The default paths are (see first few lines of make.msc):
+      <programlisting>
+        # XXX: set following to your Gtk+-Development and MSVC paths
+        GTK_TOP = C:\Dev-C++
+        MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
+      </programlisting>
+    </para>
+    <para>
+      Some more instructions for developers (not operating system dependent) are in the chapter
+      <link linkend="development">Developing Gwyddion</link>.
+    </para>
+  </section>
+</chapter>
