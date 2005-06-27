@@ -1,8 +1,8 @@
 PLAINTEX = tex
 CONVERT = convert
+IDENTIFY = identify
 DVIPS = dvips
 GS = gs
-BC = bc
 
 FORMULAS = $(wildcard eq-*.tex)
 PNGS = $(subst .tex,.png,$(FORMULAS))
@@ -19,22 +19,22 @@ png-images: $(PNGS)
 
 %.png: %.tex $(TEMPLATES)
 	cat defs.tex header.tex $< footer.tex >$(T)$<
-	tex --jobname $(T)$* --interaction=batchmode $(T)$<
+	$(TEX) --jobname $(T)$* --interaction=batchmode $(T)$<
 	dvips -q -E -o $(T)$*.ps $(T)$*.dvi
 	. $(T)$*.bbox; sed -ri "s/^(%%BoundingBox:).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
-	gs -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
+	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
 	@{ \
-	    eval $$(identify $(T)$*.png \
-	            | sed -e 's/.* PNG \([0-9]*\)x\([0-9]*\)+0+0 .*/w=\1 h=\2/'); \
+	    eval $$($(IDENTIFY) $(T)$*.png \
+	            | sed -e 's/.* \([0-9]*\)x\([0-9]*\)+0+0 .*/w=\1 h=\2/'); \
 	    if test $$h -gt 1600; then \
 	        echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2; \
 	        . $(T)$*.bbox; \
 	        eval $$(sed -n '/^\\.size=/{s/^\\//;s/pt$$//;p}' header.tex); \
 	        w=$$((($$w*($$x1 - $$x0) + $$hsize/2)/$$hsize)); \
 	        h=$$((($$h*($$y1 - $$y0) + $$vsize/2)/$$vsize)); \
-	        convert -type Grayscale -crop $${w}x$$h -scale 38.2% $(T)$*.png $@; \
+	        $(CONVERT) -type Grayscale -crop $${w}x$$h -scale 38.2% $(T)$*.png $@; \
 	    else \
-	        convert -type Grayscale -scale 38.2% $(T)$*.png $@; \
+	        $(CONVERT) -type Grayscale -scale 38.2% $(T)$*.png $@; \
 	    fi; \
 	}
 	rm $(T)$*.*
