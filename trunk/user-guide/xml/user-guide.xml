@@ -65,6 +65,7 @@
     <title>Summaries and tables</title>
     <xi:include href="keyboard-shortcuts.xml"/>
     <xi:include href="expressions.xml"/>
+    <xi:include href="gwyfile-format.xml"/>
   </chapter>
   <xi:include href="develop.xml"/>
   <xi:include href="gpl.xml"/>
