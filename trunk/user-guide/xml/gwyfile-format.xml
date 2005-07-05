@@ -146,10 +146,10 @@
       </tgroup>
     </informaltable>
     <para>
-      Each atomic type has its array counterpart, its type character is
-      uppercase of corresponding atomic type.  Arrays are stored as
-      unsigned 32bit array length (number of items), followed by item values.
-      Array data types are listed in following table:
+      Each atomic type (except boolean) has its array counterpart, its type
+      character is uppercase of corresponding atomic type.  Arrays are stored
+      as unsigned 32bit array length (number of items), followed by item
+      values. Array data types are listed in following table:
     </para>
     <informaltable>
       <tgroup cols='3'>
@@ -161,13 +161,6 @@
           </row>
         </thead>
         <tbody>
-          <row>
-            <entry>array of booleans</entry>
-            <entry><literal>B</literal></entry>
-            <entry>
-              Each item is stored as a byte
-            </entry>
-          </row>
           <row>
             <entry>array of characters</entry>
             <entry><literal>C</literal></entry>
