@@ -2,6 +2,7 @@
 1.12
 Application:
 - Translations updated: Italian.
+- Invisible keyboard focus in 3D windows was fixed.
 
 Library:
 - libgwydgets: Color axis crash when data minimum and maximum were both 0 was
@@ -9,8 +10,13 @@ Library:
 
 Modules:
 - JPK Scan (new): JPK data file import (bug #57).
+- Facet Analysis (new): Visualizes, marks and measures facet orientations.
 - Assing AFM: Wrong z scale in import and export was fixed.
-- Points layer: Supports set_selection().
+- NT-MDT: Bogus data import when x and y resolution differs was fixed.
+- Color Range: `Instant apply' aggressivity was somewhat reduced (bug #58).
+- Presentation operations: Can attach one data to another as presentation.
+- Points layer: Supports set_selection(), if selection is one point it does
+  not have to be dragged, click is enough to move it.
 
 
 1.11
