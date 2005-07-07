@@ -274,7 +274,7 @@ dialog_update(GwyUnitoolState *state,
     GwyContainer *data;
     GwyDataField *dfield;
     ToolControls *controls;
-    gboolean has_range = FALSE;
+    gdouble min, max;
     gboolean do_apply;
     gint isel[4];
 
@@ -347,11 +347,20 @@ dialog_update(GwyUnitoolState *state,
         break;
     }
 
+    min = controls->datamin;
+    max = controls->datamax;
     if (controls->initial_use) {
-        has_range = gwy_container_gis_double(data, controls->key_min,
-                                             &controls->min);
-        has_range |= gwy_container_gis_double(data, controls->key_max,
-                                              &controls->max);
+        gboolean has_range = FALSE;
+
+        if (gwy_container_gis_double(data, controls->key_min, &min)) {
+            controls->min = min;
+            has_range = TRUE;
+        }
+        if (gwy_container_gis_double(data, controls->key_max, &max)) {
+            controls->max = max;
+            has_range = TRUE;
+        }
+
         if (has_range) {
             gwy_debug("reusing: min = %g, max = %g",
                       controls->min, controls->max);
@@ -434,7 +443,9 @@ dialog_update(GwyUnitoolState *state,
                                  controls->datamax);
     }
 
-    do_apply = controls->do_preview && !(controls->initial_use && !has_range);
+    do_apply = controls->do_preview
+               && !(controls->initial_use
+                    && controls->min == min && controls->max == max);
     controls->initial_use = FALSE;
     controls->in_update = FALSE;
     if (do_apply)
