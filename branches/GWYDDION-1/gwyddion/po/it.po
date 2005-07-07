@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-05-29 18:51+0200\n"
+"POT-Creation-Date: 2005-06-24 00:26+0200\n"
 "PO-Revision-Date: 2005-06-12 21:42+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
@@ -211,15 +211,16 @@ msgstr "Dimensione:"
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
-#: modules/process/dwtdenoise.c:186 modules/process/fft.c:335
-#: modules/process/fractal.c:209 modules/process/grain_mark.c:203
-#: modules/process/grain_rem_threshold.c:175 modules/process/grain_wshed.c:176
-#: modules/process/local_contrast.c:136 modules/process/mask_grow_shrink.c:175
-#: modules/process/median-bg.c:180 modules/process/polylevel.c:192
-#: modules/process/rotate.c:222 modules/process/scale.c:164
-#: modules/process/scars.c:407 modules/process/shade.c:191
-#: modules/process/slope_dist.c:197 modules/process/sphere-revolve.c:216
-#: modules/process/tip_model.c:180 modules/process/unrotate.c:218
+#: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:241
+#: modules/process/fft.c:335 modules/process/fractal.c:209
+#: modules/process/grain_mark.c:203 modules/process/grain_rem_threshold.c:175
+#: modules/process/grain_wshed.c:176 modules/process/local_contrast.c:136
+#: modules/process/mask_grow_shrink.c:175 modules/process/median-bg.c:180
+#: modules/process/polylevel.c:192 modules/process/rotate.c:222
+#: modules/process/scale.c:164 modules/process/scars.c:407
+#: modules/process/shade.c:191 modules/process/slope_dist.c:197
+#: modules/process/sphere-revolve.c:216 modules/process/tip_model.c:180
+#: modules/process/unrotate.c:218
 msgid "_Reset"
 msgstr "_Ripristina"
 
@@ -771,7 +772,7 @@ msgstr ""
 "\n"
 "Le preferenze non saranno salvate fino a che non sarà riparato o rimosso."
 
-#: app/menu-windowlist.c:97
+#: app/menu-windowlist.c:141
 msgid "(none)"
 msgstr "(nessuno)"
 
@@ -1136,6 +1137,52 @@ msgstr "Carica e salva file dati nativi Gwyddion (oggetti serializzati)."
 #: modules/file/gwyfile.c:70
 msgid "Gwyddion native format (.gwy)"
 msgstr "formato nativo Gwyddion (.gwy)"
+
+#: modules/file/jpkscan.c:108
+msgid "Imports JPK image scans."
+msgstr ""
+
+#: modules/file/jpkscan.c:126
+msgid "JPK image scans (.jpk)"
+msgstr ""
+
+#: modules/file/jpkscan.c:242
+msgid "Cannot load JPK Scan!"
+msgstr ""
+
+#: modules/file/jpkscan.c:243
+msgid ""
+"Either the file you are trying to open is not a JPK scan file, or it is "
+"somehow corrupt."
+msgstr ""
+
+#: modules/file/jpkscan.c:331
+msgid "LibTIFF too old!"
+msgstr ""
+
+#: modules/file/jpkscan.c:332
+#, c-format
+msgid "You are using %s. Please update to libtiff version %d.%d or newer."
+msgstr ""
+
+#: modules/file/jpkscan.c:747
+msgid "Open JPK Image"
+msgstr ""
+
+#: modules/file/jpkscan.c:761
+#, c-format
+msgid ""
+"Select a channel to load from\n"
+"<b>%s</b>"
+msgstr ""
+
+#: modules/file/jpkscan.c:787
+msgid "Ch_annel:"
+msgstr ""
+
+#: modules/file/jpkscan.c:918
+msgid "(invalid filename encoding)"
+msgstr ""
 
 #: modules/file/nanoscope.c:128
 msgid "Imports Veeco Nanoscope data files."
@@ -1940,7 +1987,7 @@ msgstr ""
 "Permette la selezione di un singolo punto, più precisamente legge le "
 "coordinate del puntatore"
 
-#: modules/layer/points.c:123
+#: modules/layer/points.c:126
 msgid "Layer allowing selection of several points, displayed as crosses."
 msgstr "Permette la selezione di punti differenti mostrati come croci "
 
@@ -1961,6 +2008,14 @@ msgstr ""
 #: modules/plugin-proxy.c:466
 msgid "/_Plug-Ins"
 msgstr "/_Plug-In"
+
+#: modules/process/FFT2D.c:77 modules/process/FFT2D.c:155
+msgid "2D FFT Filtering"
+msgstr ""
+
+#: modules/process/FFT2D.c:91
+msgid "/_Correct Data/_2D FFT filtering..."
+msgstr ""
 
 #: modules/process/angle_dist.c:105
 msgid ""
@@ -2346,6 +2401,54 @@ msgstr "/_Livella/_Facet Level"
 msgid "Facet-levelling"
 msgstr "Facet-levelling"
 
+#: modules/process/facet_analysis.c:128
+msgid "Visualizes, marks and measures facet orientation."
+msgstr ""
+
+#: modules/process/facet_analysis.c:144
+msgid "/_Statistics/Facet _Analysis..."
+msgstr ""
+
+#: modules/process/facet_analysis.c:237
+msgid "Mark Facets"
+msgstr ""
+
+#: modules/process/facet_analysis.c:240
+msgid "_Mark"
+msgstr ""
+
+#: modules/process/facet_analysis.c:310
+msgid "<b>Inclination</b>"
+msgstr ""
+
+#: modules/process/facet_analysis.c:316 modules/process/facet_analysis.c:327
+msgid "Theta:"
+msgstr ""
+
+#: modules/process/facet_analysis.c:317 modules/process/facet_analysis.c:328
+msgid "Phi:"
+msgstr ""
+
+#: modules/process/facet_analysis.c:321
+msgid "<b>Mean Inclination</b>"
+msgstr ""
+
+#: modules/process/facet_analysis.c:336
+msgid "Tolerance:"
+msgstr ""
+
+#: modules/process/facet_analysis.c:345 modules/process/grain_mark.c:283
+#: modules/process/grain_rem_threshold.c:260 modules/process/grain_wshed.c:289
+#: modules/process/scars.c:479
+msgid "_Mask color:"
+msgstr "Colore _Maschera:"
+
+#: modules/process/facet_analysis.c:354
+msgid ""
+"Warning: Lateral and value units differ. Angles are not physically "
+"meaningful."
+msgstr ""
+
 #: modules/process/fft.c:107
 msgid "Two-dimensional FFT (Fast Fourier Transform)."
 msgstr "FFT (Fast Fourier Transform) in due dimensioni"
@@ -2657,11 +2760,6 @@ msgstr "_Inverti altezza"
 #: modules/process/grain_mark.c:274
 msgid "Mer_ge mode:"
 msgstr "Fusione:"
-
-#: modules/process/grain_mark.c:283 modules/process/grain_rem_threshold.c:260
-#: modules/process/grain_wshed.c:289 modules/process/scars.c:479
-msgid "_Mask color:"
-msgstr "Colore _Maschera:"
 
 #: modules/process/grain_rem_threshold.c:104
 msgid "Removes grains by thresholding (height, size)."
@@ -3170,17 +3268,29 @@ msgstr "Grado polinomio verticale:"
 msgid "_Same degrees"
 msgstr "Gradi uguali"
 
-#: modules/process/presentationops.c:40
+#: modules/process/presentationops.c:50
 msgid "Basic operations with presentation: extraction, removal."
 msgstr "Operazioni base di presentazione: estrazione, rimozione."
 
-#: modules/process/presentationops.c:56
+#: modules/process/presentationops.c:66
 msgid "/_Display/_Remove Presentation"
 msgstr "/Mostra/_Rimuovi Presentazione"
 
-#: modules/process/presentationops.c:63
+#: modules/process/presentationops.c:73
 msgid "/_Display/E_xtract Presentation"
 msgstr "/Mostra/E_strai Presentazione"
+
+#: modules/process/presentationops.c:80
+msgid "/_Display/_Attach Presentation..."
+msgstr ""
+
+#: modules/process/presentationops.c:154
+msgid "Attach Presentation"
+msgstr ""
+
+#: modules/process/presentationops.c:166
+msgid "_Data to attach:"
+msgstr ""
 
 #: modules/process/rotate.c:86
 msgid "Rotates data by arbitrary angle."
