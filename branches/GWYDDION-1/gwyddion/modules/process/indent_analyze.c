@@ -197,7 +197,7 @@ static gboolean indent_analyze_dialog(GwyContainer *data,
 static void dialog_update(IndentAnalyzeControls *controls,
                           IndentAnalyzeArgs *args);
 
-static void plane_correct_cb(GtkWidget *item, IndentAnalyzeControls *controls);
+/*static void plane_correct_cb(GtkWidget *item, IndentAnalyzeControls *controls);*/
 static void how_mark_cb(GtkWidget *item, IndentAnalyzeControls *controls);
 static void what_mark_cb(GtkWidget *item, IndentAnalyzeControls *controls);
 static void indentor_changed_cb(GtkWidget *item,
@@ -374,6 +374,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     gtk_box_pack_start(GTK_BOX(hbox), table, FALSE, FALSE, 4);
     row = 0;
 
+    /*
     controls.w_plane_correct
         = gwy_option_menu_create(plane_correct_enum,
                                  G_N_ELEMENTS(plane_correct_enum),
@@ -384,6 +385,7 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
                             GTK_OBJECT(controls.w_plane_correct),
                             GWY_HSCALE_WIDGET);
     row++;
+    */
 
     controls.w_what_mark
         = gwy_option_menu_create(what_mark_enum,
