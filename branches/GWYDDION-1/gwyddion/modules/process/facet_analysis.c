@@ -742,7 +742,7 @@ gwy_data_field_facet_distribution(GwyDataField *dfield,
     }
 
     for (i = res*res; i; i--, data++)
-        *data = pow(*data, 0.25);
+        *data = pow(*data, 0.35);
 
     gwy_container_set_double_by_name(container, "/q", q);
     {
