@@ -1,0 +1,96 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphLabel
+
+<!-- ##### SECTION Short_Description ##### -->
+Graph label
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This widget should be probabaly used only within
+the GwyGraph widget. It plots a curves legend.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyGraphLabel ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyGraphLabelClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@selected: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_graph_label_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_refresh ##### -->
+<para>
+
+</para>
+
+@label: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_change_model ##### -->
+<para>
+
+</para>
+
+@label: 
+@gmodel: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_draw_label_on_drawable ##### -->
+<para>
+
+</para>
+
+@drawable: 
+@gc: 
+@layout: 
+@x: 
+@y: 
+@width: 
+@height: 
+@label: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_export_vector ##### -->
+<para>
+
+</para>
+
+@label: 
+@x: 
+@y: 
+@width: 
+@height: 
+@fontsize: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_enable_user_input ##### -->
+<para>
+
+</para>
+
+@label: 
+@enable: 
+
+

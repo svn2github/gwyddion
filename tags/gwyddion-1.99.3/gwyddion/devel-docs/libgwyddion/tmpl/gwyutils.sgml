@@ -1,0 +1,227 @@
+<!-- ##### SECTION Title ##### -->
+gwyutils
+
+<!-- ##### SECTION Short_Description ##### -->
+Various utility functions
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Various utility functions: creating GLib lists from hash tables
+(<link linkend="gwy-hash-table-to-list-cb">gwy_hash_table_to_list_cb()</link>),
+converting between enums and flags and their string representations
+(<link linkend="gwy-string-to-enum">gwy_string_to_enum()</link>),
+protably finding Gwyddion application directories
+(<link linkend="gwy-find-self-dir">gwy_find_self_dir()</link>),
+string functions
+(<link linkend="gwy-strreplace">gwy_strreplace()</link>),
+path manipulation
+(<link linkend="gwy-canonicalize-path">gwy_canonicalize_path()</link>).
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyEnum ##### -->
+<para>
+
+</para>
+
+@name: 
+@value: 
+
+<!-- ##### FUNCTION gwy_hash_table_to_slist_cb ##### -->
+<para>
+
+</para>
+
+@unused_key: 
+@value: 
+@user_data: 
+
+
+<!-- ##### FUNCTION gwy_hash_table_to_list_cb ##### -->
+<para>
+
+</para>
+
+@unused_key: 
+@value: 
+@user_data: 
+
+
+<!-- ##### FUNCTION gwy_string_to_enum ##### -->
+<para>
+
+</para>
+
+@str: 
+@enum_table: 
+@n: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_enum_to_string ##### -->
+<para>
+
+</para>
+
+@enumval: 
+@enum_table: 
+@n: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_string_to_flags ##### -->
+<para>
+
+</para>
+
+@str: 
+@enum_table: 
+@n: 
+@delimiter: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_flags_to_string ##### -->
+<para>
+
+</para>
+
+@enumval: 
+@enum_table: 
+@n: 
+@glue: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@delimiter: 
+
+
+<!-- ##### FUNCTION gwy_strkill ##### -->
+<para>
+
+</para>
+
+@s: 
+@killchars: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_strreplace ##### -->
+<para>
+
+</para>
+
+@haystack: 
+@needle: 
+@replacement: 
+@maxrepl: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_strdiffpos ##### -->
+<para>
+
+</para>
+
+@s1: 
+@s2: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_file_get_contents ##### -->
+<para>
+
+</para>
+
+@filename: 
+@buffer: 
+@size: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_file_abandon_contents ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_find_self_dir ##### -->
+<para>
+
+</para>
+
+@dirname: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_find_self_set_argv0 ##### -->
+<para>
+
+</para>
+
+@argv0: 
+
+
+<!-- ##### FUNCTION gwy_get_user_dir ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_get_home_dir ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_canonicalize_path ##### -->
+<para>
+
+</para>
+
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_sgettext ##### -->
+<para>
+
+</para>
+
+@msgid: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_setenv ##### -->
+<para>
+
+</para>
+
+@variable: 
+@value: 
+@overwrite: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_str_next_line ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@Returns: 
+
+

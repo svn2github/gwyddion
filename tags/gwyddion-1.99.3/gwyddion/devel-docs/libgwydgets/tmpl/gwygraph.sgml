@@ -1,0 +1,306 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraph
+
+<!-- ##### SECTION Short_Description ##### -->
+Widget for displaying graphs
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+GwyGraph is basic widget for displaying graphs.
+It consist of several widgets that can be also used sparately.
+However, it is recomended (and it should be easy)
+to use whole GwyGraph widget and its API for most of the purposes.
+</para>
+<para>
+GwyGraph is still in developement. Basic functionality and API is
+however allready set up. In the future, more API functions will
+be introduced probably.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### STRUCT GwyGraph ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SIGNAL GwyGraph::mouse-moved ##### -->
+<para>
+
+</para>
+
+@gwygraph: the object which received the signal.
+
+<!-- ##### SIGNAL GwyGraph::selected ##### -->
+<para>
+
+</para>
+
+@:
+
+@gwygraph: the object which received the signal.
+
+<!-- ##### SIGNAL GwyGraph::zoomed ##### -->
+<para>
+
+</para>
+
+@:
+
+@gwygraph: the object which received the signal.
+
+<!-- ##### STRUCT GwyGraphClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@gwygraph: 
+@selected: 
+@mouse_moved: 
+@zoomed: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_graph_new ##### -->
+<para>
+
+</para>
+
+@gmodel: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_refresh ##### -->
+<para>
+
+</para>
+
+@graph: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_change_model ##### -->
+<para>
+
+</para>
+
+@graph: 
+@gmodel: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_set_status ##### -->
+<para>
+
+</para>
+
+@graph: 
+@status: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_status ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_model ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_signal_selected ##### -->
+<para>
+
+</para>
+
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_signal_mouse_moved ##### -->
+<para>
+
+</para>
+
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_signal_zoomed ##### -->
+<para>
+
+</para>
+
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_selection_number ##### -->
+<para>
+
+</para>
+
+@graph: 
+@Returns: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_selection ##### -->
+<para>
+
+</para>
+
+@graph: 
+@selection: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_clear_selection ##### -->
+<para>
+
+</para>
+
+@graph: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_cursor ##### -->
+<para>
+
+</para>
+
+@graph: 
+@x_cursor: 
+@y_cursor: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_request_x_range ##### -->
+<para>
+
+</para>
+
+@graph: 
+@x_min_req: 
+@x_max_req: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_request_y_range ##### -->
+<para>
+
+</para>
+
+@graph: 
+@y_min_req: 
+@y_max_req: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_x_range ##### -->
+<para>
+
+</para>
+
+@graph: 
+@x_min: 
+@x_max: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_get_y_range ##### -->
+<para>
+
+</para>
+
+@graph: 
+@y_min: 
+@y_max: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_enable_user_input ##### -->
+<para>
+
+</para>
+
+@graph: 
+@enable: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_export_pixmap ##### -->
+<para>
+
+</para>
+
+@graph: 
+@filename: 
+@export_title: 
+@export_axis: 
+@export_labels: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_export_postscript ##### -->
+<para>
+
+</para>
+
+@graph: 
+@filename: 
+@export_title: 
+@export_axis: 
+@export_labels: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_zoom_in ##### -->
+<para>
+
+</para>
+
+@graph: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
+<!-- ##### FUNCTION gwy_graph_zoom_out ##### -->
+<para>
+
+</para>
+
+@graph: 
+<!-- # Unused Parameters # -->
+@grapher: 
+
+
