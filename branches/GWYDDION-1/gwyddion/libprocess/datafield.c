@@ -152,8 +152,6 @@ gwy_data_field_finalize(GObject *object)
     GwyDataField *data_field = (GwyDataField*)object;
 
     gwy_debug("%p is dying!", data_field);
-    g_object_unref(data_field->si_unit_xy);
-    g_object_unref(data_field->si_unit_z);
     _gwy_data_field_free(data_field);
 
     G_OBJECT_CLASS(parent_class)->finalize(object);
@@ -409,6 +407,8 @@ void
 _gwy_data_field_free(GwyDataField *a)
 {
     gwy_debug("");
+    gwy_object_unref(a->si_unit_xy);
+    gwy_object_unref(a->si_unit_z);
     g_free(a->data);
 }
 
