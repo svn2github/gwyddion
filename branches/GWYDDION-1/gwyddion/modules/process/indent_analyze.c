@@ -243,29 +243,29 @@ static gdouble gwy_vec_cos(GwyVec v1, GwyVec v2);
 static void gwy_vec_normalize(GwyVec *v);
 
 GwyEnum plane_correct_enum[] = {
-    { N_("Do nothing"), GWY_PLANE_NONE },
-    { N_("Plane level"), GWY_PLANE_LEVEL },
+    { N_("Do nothing"),   GWY_PLANE_NONE   },
+    { N_("Plane level"),  GWY_PLANE_LEVEL  },
     { N_("Plane rotate"), GWY_PLANE_ROTATE },
 };
 
 GwyEnum how_mark_enum[] = {
     { N_("New"), GWY_HOW_MARK_NEW },
     { N_("AND"), GWY_HOW_MARK_AND },
-    { N_("OR"), GWY_HOW_MARK_OR },
+    { N_("OR"),  GWY_HOW_MARK_OR  },
     { N_("NOT"), GWY_HOW_MARK_NOT },
-    { N_("XOR"), GWY_HOW_MARK_XOR}
+    { N_("XOR"), GWY_HOW_MARK_XOR },
 };
 
 GwyEnum what_mark_enum[] = {
-    { N_("Nothing"), GWY_WHAT_MARK_NOTHING },
-    { N_("Above"), GWY_WHAT_MARK_ABOVE },
-    { N_("Bellow"), GWY_WHAT_MARK_BELOW },
-    { N_("Plane"), GWY_WHAT_MARK_PLANE },
-    { N_("Impression"), GWY_WHAT_MARK_INDENTATION },
-    { N_("Inner Pile-up"), GWY_WHAT_MARK_INNERPILEUP },
-    { N_("Outer Pile-up"), GWY_WHAT_MARK_OUTERPILEUP },
-    { N_("Special points"), GWY_WHAT_MARK_POINTS },
-    { N_("Faces border"), GWY_WHAT_MARK_FACESBORDER },
+    { N_("Nothing"),        GWY_WHAT_MARK_NOTHING     },
+    { N_("Above"),          GWY_WHAT_MARK_ABOVE       },
+    { N_("Bellow"),         GWY_WHAT_MARK_BELOW       },
+    { N_("Plane"),          GWY_WHAT_MARK_PLANE       },
+    { N_("Impression"),     GWY_WHAT_MARK_INDENTATION },
+    { N_("Inner Pile-up"),  GWY_WHAT_MARK_INNERPILEUP },
+    { N_("Outer Pile-up"),  GWY_WHAT_MARK_OUTERPILEUP },
+    { N_("Special points"), GWY_WHAT_MARK_POINTS      },
+    { N_("Faces border"),   GWY_WHAT_MARK_FACESBORDER },
 };
 
 /* The module info. */
@@ -275,7 +275,7 @@ static GwyModuleInfo module_info = {
     "indent_analyse",
     N_("Analyses nanoindentation structure (volumes, surfaces, ...)."),
     "Lukáš Chvátal <chvatal@physics.muni.cz>",
-    "0.1",
+    "0.1.1",
     "Lukáš Chvátal",
     "2005",
 };
@@ -284,8 +284,8 @@ static GwyModuleInfo module_info = {
  * NO semicolon after. */
 GWY_MODULE_QUERY(module_info)
 
-     static gboolean
-       module_register(const gchar *name)
+static gboolean
+module_register(const gchar *name)
 {
     static GwyProcessFuncInfo indent_analyze_func_info = {
         "indent_analyze",
@@ -324,7 +324,7 @@ static gboolean
 indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
 {
 
-    GtkWidget *dialog, *table, *hbox, *spin;
+    GtkWidget *dialog, *table, *hbox, *spin, *align;
     IndentAnalyzeControls controls;
     GwyDataField *dfield;
     gint response;
@@ -335,10 +335,11 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     gdouble zoomval;
     GtkObject *layer;
 
-    gchar siu[30];
     GwySIValueFormat *siformat;
+    GString *siu;
     gint row;
 
+    siu = g_string_new("");
     controls.args = args;
 
     dialog = gtk_dialog_new_with_buttons(_("Indentaion statistics"), NULL, 0,
@@ -365,7 +366,9 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     else
         zoomval = PREVIEW_SIZE/(gdouble)gwy_data_field_get_yres(dfield);
     gwy_data_view_set_zoom(GWY_DATA_VIEW(controls.view), zoomval);
-    gtk_box_pack_start(GTK_BOX(hbox), controls.view, FALSE, FALSE, 4);
+    align = gtk_alignment_new(0.0, 0.0, 0.0, 0.0);
+    gtk_container_add(GTK_CONTAINER(align), controls.view);
+    gtk_box_pack_start(GTK_BOX(hbox), align, FALSE, TRUE, 4);
 
     /* TABLE */
     table = gtk_table_new(8, 3, FALSE);
@@ -439,29 +442,29 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     /* "statistical" labels */
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/data"));
     siformat = gwy_data_field_get_value_format_xy(dfield, NULL);
-    strcpy(siu, siformat->units);
+    g_string_assign(siu, siformat->units);
 
     controls.w_min_xy = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Indent centre at"), siu,
+    gwy_table_attach_row(table, row, _("Indent centre at"), siu->str,
                          controls.w_min_xy);
     row++;
     controls.w_max_xy = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Maximum at"), siu, controls.w_max_xy);
+    gwy_table_attach_row(table, row, _("Maximum at"), siu->str,
+                         controls.w_max_xy);
     row++;
     controls.w_minmax = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Max-min diference"), siu,
+    gwy_table_attach_row(table, row, _("Max-min diference"), siu->str,
                          controls.w_minmax);
     row++;
 
-    strcpy(siu, siformat->units);
-    strcat(siu, "^2");
+    g_string_append(siu, "<sup>2</sup>");
 
     controls.w_surface_indent_exp = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Expected A_d:"), siu,
+    gwy_table_attach_row(table, row, _("Expected A<sub>d</sub>:"), siu->str,
                          controls.w_surface_indent_exp);
     row++;
     controls.w_area_indent_exp = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Expected A_p:"), siu,
+    gwy_table_attach_row(table, row, _("Expected A<sub>p</sub>:"), siu->str,
                          controls.w_area_indent_exp);
     row++;
 
@@ -475,35 +478,35 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
 /*
     controls.w_area_above = gtk_label_new ("");
     gtk_label_set_justify( &controls.w_area_above, GTK_JUSTIFY_RIGHT);
-    gwy_table_attach_row(table, row, _("Area above"), siu,controls.w_area_above);
+    gwy_table_attach_row(table, row, _("Area above"), siu->str,controls.w_area_above);
     row++;
     controls.w_area_below = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Area below"), siu,controls.w_area_below);
+    gwy_table_attach_row(table, row, _("Area below"), siu->str,controls.w_area_below);
     row++;
     controls.w_area_plane = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Area of plane"), siu,controls.w_area_plane);
+    gwy_table_attach_row(table, row, _("Area of plane"), siu->str,controls.w_area_plane);
     row++;
 
     controls.w_surface_above = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Surface above"), siu,controls.w_surface_above);
+    gwy_table_attach_row(table, row, _("Surface above"), siu->str,controls.w_surface_above);
     row++;
     controls.w_surface_below = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Surface below"), siu,controls.w_surface_below);
+    gwy_table_attach_row(table, row, _("Surface below"), siu->str,controls.w_surface_below);
     row++;
 */
 
-    strcpy(siu, siformat->units);
-    strcat(siu, "^3");
+    g_string_assign(siu, siformat->units);
+    g_string_append(siu, "<sup>3</sup>");
 /*
     controls.w_volume_above = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Volume above"), siu,controls.w_volume_above);
+    gwy_table_attach_row(table, row, _("Volume above"), siu->str,controls.w_volume_above);
     row++;
     controls.w_volume_below = gtk_label_new ("");
-    gwy_table_attach_row(table, row, _("Volume below"), siu,controls.w_volume_below);
+    gwy_table_attach_row(table, row, _("Volume below"), siu->str,controls.w_volume_below);
     row++;
 */
     controls.w_volume_dif = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Volume above-below"), siu,
+    gwy_table_attach_row(table, row, _("Volume above-below"), siu->str,
                          controls.w_volume_dif);
     row++;
 
@@ -514,18 +517,18 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     row++;
 
     controls.w_volume_indent = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Indent. volume"), siu,
+    gwy_table_attach_row(table, row, _("Indent. volume"), siu->str,
                          controls.w_volume_indent);
     row++;
 
-    strcpy(siu, siformat->units);
-    strcat(siu, "^2");
+    g_string_assign(siu, siformat->units);
+    g_string_append(siu, "<sup>2</sup>");
     controls.w_surface_indent = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Indent. A_d"), siu,
+    gwy_table_attach_row(table, row, _("Indent. A<sub>d</sub>"), siu->str,
                          controls.w_surface_indent);
     row++;
     controls.w_area_indent = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Indent. A_p"), siu,
+    gwy_table_attach_row(table, row, _("Indent. A<sub>p</sub>"), siu->str,
                          controls.w_area_indent);
     row++;
 
@@ -535,22 +538,23 @@ indent_analyze_dialog(GwyContainer *data, IndentAnalyzeArgs * args)
     row++;
 
     controls.w_surface_innerpileup = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Inner Pile-Up A_d"), siu,
+    gwy_table_attach_row(table, row, _("Inner Pile-Up A<sub>d</sub>"), siu->str,
                          controls.w_surface_innerpileup);
     row++;
     controls.w_area_innerpileup = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Inner Pile-Up A_p"), siu,
+    gwy_table_attach_row(table, row, _("Inner Pile-Up A<sub>p</sub>"), siu->str,
                          controls.w_area_innerpileup);
     row++;
     controls.w_surface_outerpileup = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Outer Pile-Up A_d"), siu,
+    gwy_table_attach_row(table, row, _("Outer Pile-Up A<sub>d</sub>"), siu->str,
                          controls.w_surface_outerpileup);
     row++;
     controls.w_area_outerpileup = gtk_label_new("");
-    gwy_table_attach_row(table, row, _("Outer Pile-Up A_p"), siu,
+    gwy_table_attach_row(table, row, _("Outer Pile-Up A<sub>p</sub>"), siu->str,
                          controls.w_area_outerpileup);
     row++;
 
+    g_string_free(siu, TRUE);
     gwy_si_unit_value_format_free(siformat);
 
     controls.computed = FALSE;
@@ -1329,15 +1333,19 @@ load_args(GwyContainer *container, IndentAnalyzeArgs * args)
 static void
 save_args(GwyContainer *container, IndentAnalyzeArgs * args)
 {
+    /*
     gwy_container_set_enum_by_name(container, plane_correct_key,
                                    args->plane_correct);
+                                   */
     gwy_container_set_enum_by_name(container, what_mark_key, args->what_mark);
     gwy_container_set_enum_by_name(container, how_mark_key, args->how_mark);
     gwy_container_set_enum_by_name(container, indentor_key, args->indentor);
 
     gwy_container_set_double_by_name(container, plane_tol_key, args->plane_tol);
+    /*
     gwy_container_set_double_by_name(container, phi_tol_key, args->phi_tol);
     gwy_container_set_double_by_name(container, theta_tol_key, args->theta_tol);
+    */
 }
 
 
@@ -1348,9 +1356,9 @@ read_data_from_controls(IndentAnalyzeControls *c)
         gtk_adjustment_get_value(GTK_ADJUSTMENT(c->w_plane_tol));
     /*
     c->args->phi_tol = gtk_adjustment_get_value(GTK_ADJUSTMENT(c->w_phi_tol));
-     */
     c->args->theta_tol =
         gtk_adjustment_get_value(GTK_ADJUSTMENT(c->w_theta_tol));
+     */
 }
 
 static void

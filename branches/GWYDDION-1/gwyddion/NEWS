@@ -1,3 +1,4 @@
+1.11cvs20050707
 
 1.12
 Application:
@@ -7,6 +8,8 @@ Application:
 Library:
 - libgwydgets: Color axis crash when data minimum and maximum were both 0 was
   fixed (bug #56).
+- libgwyapp: It is possible to apply a filter to data window option menu
+  items.
 
 Modules:
 - JPK Scan (new): JPK data file import (bug #57).
@@ -17,6 +20,8 @@ Modules:
 - Presentation operations: Can attach one data to another as presentation.
 - Points layer: Supports set_selection(), if selection is one point it does
   not have to be dragged, click is enough to move it.
+- Pixmap: Import from TIFF images was enables on MS Windows too.
+- Nanoindent analyse: Useless controls were removed from the dialog.
 
 
 1.11
