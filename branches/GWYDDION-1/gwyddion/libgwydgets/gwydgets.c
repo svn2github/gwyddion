@@ -191,6 +191,8 @@ gwy_table_attach_row(GtkWidget *table,
     }
 
     label = gtk_label_new_with_mnemonic(name);
+    if (name && strchr(name, '<'))
+        gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
     gtk_table_attach(GTK_TABLE(table), label,
                      0, 1, row, row+1, GTK_FILL, 0, 2, 2);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
