@@ -1,7 +1,6 @@
 /*
- *  fft_filter_2d.c v0.9.2 7-12-2005 2:23 PM
  *  $Id$
- *  Copyright (C) 2005 Molecular Imaging, Corp
+ *  Copyright (C) 2005 Christopher Anderson, Molecular Imaging Corp.
  *  E-mail: Chris Anderson (sidewinder.asu@gmail.com)
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -179,7 +178,7 @@ static GwyModuleInfo module_info = {
     N_("2D FFT Filtering"),
     "Chris Anderson <sidewinder.asu@gmail.com>",
     "0.9.3",
-    "Chris Anderson",
+    "Chris Anderson, Molecular Imaging Corp.",
     "2005",
 };
 
