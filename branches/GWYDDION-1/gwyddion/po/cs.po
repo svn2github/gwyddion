@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-05-29 18:51+0200\n"
-"PO-Revision-Date: 2005-06-03 14:47+0200\n"
+"POT-Creation-Date: 2005-07-14 14:46+0200\n"
+"PO-Revision-Date: 2005-07-14 20:24+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -201,12 +201,13 @@ msgstr "_Automaticky uprav velikost"
 msgid "Si_ze:"
 msgstr "Veli_kost:"
 
-#: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:678
-#: modules/file/pixmap.c:1560 modules/file/rawfile.c:496
+#: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:680
+#: modules/file/pixmap.c:1562 modules/file/rawfile.c:496
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
-#: modules/process/dwtdenoise.c:186 modules/process/fft.c:335
+#: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:252
+#: modules/process/fft.c:335 modules/process/fft_filter_2d.c:359
 #: modules/process/fractal.c:209 modules/process/grain_mark.c:203
 #: modules/process/grain_rem_threshold.c:175 modules/process/grain_wshed.c:176
 #: modules/process/local_contrast.c:136 modules/process/mask_grow_shrink.c:175
@@ -218,7 +219,7 @@ msgstr "Veli_kost:"
 msgid "_Reset"
 msgstr "_Obnovit"
 
-#: libgwydgets/gwydgets.c:578
+#: libgwydgets/gwydgets.c:580
 msgid "Change Mask Color"
 msgstr "Změna barvy masky"
 
@@ -460,11 +461,11 @@ msgstr "Proložit kubiku"
 
 #: libgwydgets/gwyoptionmenus.c:1075
 msgid "Vickers"
-msgstr ""
+msgstr "Vickers"
 
 #: libgwydgets/gwyoptionmenus.c:1076
 msgid "Berkovich"
-msgstr ""
+msgstr "Berkovich"
 
 #: libgwydgets/gwyoptionmenus.c:1077
 msgid "Berkovich (modified)"
@@ -472,11 +473,11 @@ msgstr "Berkovich (modifikovaný)"
 
 #: libgwydgets/gwyoptionmenus.c:1078
 msgid "Knoop"
-msgstr ""
+msgstr "Knoop"
 
 #: libgwydgets/gwyoptionmenus.c:1079
 msgid "Brinell"
-msgstr ""
+msgstr "Brinell"
 
 #: libgwydgets/gwyoptionmenus.c:1080
 msgid "Cube corner"
@@ -484,7 +485,7 @@ msgstr "Vrchol krychle"
 
 #: libgwydgets/gwyoptionmenus.c:1081
 msgid "Rockwell"
-msgstr ""
+msgstr "Rockwell"
 
 #: libgwydgets/gwyvectorshade.c:153
 msgid "_Theta: "
@@ -599,56 +600,56 @@ msgstr ""
 "%s\n"
 "Opravdu skončit?"
 
-#: app/app.c:694
+#: app/app.c:698
 msgid "Untitled Graph"
 msgstr "Nepojmenovaný graf"
 
-#: app/app.c:824
+#: app/app.c:828
 msgid "Export"
 msgstr "Export"
 
-#: app/app.c:828
+#: app/app.c:832
 msgid "Export 3D view to PNG image"
 msgstr "Exportovat trojrozměrný pohled do PNG obrázku"
 
-#: app/app.c:1153 app/app.c:1165
+#: app/app.c:1161 app/app.c:1173
 #, c-format
 msgid "Untitled %d"
 msgstr "Nepojmenovaný %d"
 
-#: app/app.c:1183 app/toolbox.c:645
+#: app/app.c:1191 app/toolbox.c:645
 msgid "/Remove _Mask"
 msgstr "/Odstranit _masku"
 
-#: app/app.c:1184 app/toolbox.c:661
+#: app/app.c:1192 app/toolbox.c:661
 msgid "/Mask _Color"
 msgstr "/_Barva masky"
 
-#: app/app.c:1185
+#: app/app.c:1193
 msgid "/Fix _Zero"
 msgstr "/Opravit _nulu"
 
-#: app/app.c:1186
+#: app/app.c:1194
 msgid "/Reset Color _Range"
 msgstr "/Srovnat _rozsah barev"
 
-#: app/app.c:1187 app/toolbox.c:653
+#: app/app.c:1195 app/toolbox.c:653
 msgid "/Remove _Presentation"
 msgstr "/Odstranit _presentaci"
 
-#: app/app.c:1188
+#: app/app.c:1196
 msgid "/_Level"
 msgstr "/_Vyrovnat"
 
-#: app/app.c:1189
+#: app/app.c:1197
 msgid "/Zoom _1:1"
 msgstr "/Zvětšení _1:1"
 
-#: app/app.c:1412
+#: app/app.c:1420
 msgid "Export 3D View"
 msgstr "Exportovat trojrozměrný pohled"
 
-#: app/app.c:1439
+#: app/app.c:1447
 msgid "Change Default Mask Color"
 msgstr "Změnit předvolenou barvu masky"
 
@@ -765,7 +766,7 @@ msgstr ""
 "\n"
 "Nastavení se nebude ukládat, dokud nebude opraven či odstraněn."
 
-#: app/menu-windowlist.c:97
+#: app/menu-windowlist.c:141
 msgid "(none)"
 msgstr "(nic)"
 
@@ -812,7 +813,7 @@ msgstr " je svobodný software uvolněný pod GNU GPL."
 msgid "_File"
 msgstr "_Soubor"
 
-#: app/toolbox.c:174
+#: app/toolbox.c:174 modules/process/fft_filter_2d.c:447
 msgid "_Edit"
 msgstr "Úpr_avy"
 
@@ -1041,7 +1042,7 @@ msgid "Height"
 msgstr "Výška"
 
 #: app/unitool.c:823 app/unitool.c:827 app/unitool.c:834 app/unitool.c:841
-#: modules/file/pixmap.c:702 modules/file/pixmap.c:709
+#: modules/file/pixmap.c:704 modules/file/pixmap.c:711
 #: modules/tools/level3.c:199 modules/tools/pointer.c:180
 #: modules/tools/profile.c:255
 msgid "px"
@@ -1132,6 +1133,55 @@ msgstr ""
 msgid "Gwyddion native format (.gwy)"
 msgstr "Přirozený formát Gwyddionu (.gwy) "
 
+#: modules/file/jpkscan.c:108
+msgid "Imports JPK image scans."
+msgstr "Načítá skeny ve formátu JPK."
+
+#: modules/file/jpkscan.c:126
+msgid "JPK image scans (.jpk)"
+msgstr "JPK sken (.jpk)"
+
+#: modules/file/jpkscan.c:242
+msgid "Cannot load JPK Scan!"
+msgstr "Nemohu načíst JPK sken!"
+
+#: modules/file/jpkscan.c:243
+msgid ""
+"Either the file you are trying to open is not a JPK scan file, or it is "
+"somehow corrupt."
+msgstr ""
+"Soubor, jejž se pokoušíš otevřít, není JPK sken nebo je nějak poškozen."
+
+#: modules/file/jpkscan.c:331
+msgid "LibTIFF too old!"
+msgstr "Příliš stará LibTIFF!"
+
+#: modules/file/jpkscan.c:332
+#, c-format
+msgid "You are using %s. Please update to libtiff version %d.%d or newer."
+msgstr "Používáš %s. Aktualizuj prosím libtiff na versi %d.%d nebo novější."
+
+#: modules/file/jpkscan.c:747
+msgid "Open JPK Image"
+msgstr "Otevřít obrázek JPK"
+
+#: modules/file/jpkscan.c:761
+#, c-format
+msgid ""
+"Select a channel to load from\n"
+"<b>%s</b>"
+msgstr ""
+"Vyber kanál, který se má načíst z\n"
+"<b>%s</b>"
+
+#: modules/file/jpkscan.c:787
+msgid "Ch_annel:"
+msgstr "K_anál:"
+
+#: modules/file/jpkscan.c:918
+msgid "(invalid filename encoding)"
+msgstr "(neplatné kódování souboru)"
+
 #: modules/file/nanoscope.c:128
 msgid "Imports Veeco Nanoscope data files."
 msgstr "Načítá datové soubory Veeco Nanoscope."
@@ -1152,31 +1202,31 @@ msgstr "NT-MDT soubory (.mdt)"
 msgid "Frame"
 msgstr "Obraz"
 
-#: modules/file/pixmap.c:219
+#: modules/file/pixmap.c:221
 msgid "Portable Network Graphics (.png)"
 msgstr "Portable Network Graphics (.png)"
 
-#: modules/file/pixmap.c:225
+#: modules/file/pixmap.c:227
 msgid "JPEG (.jpeg,.jpg)"
 msgstr "JPEG (.jpeg,.jpg)"
 
-#: modules/file/pixmap.c:232
+#: modules/file/pixmap.c:234
 msgid "TIFF (.tiff,.tif)"
 msgstr "TIFF (.tiff,.tif)"
 
-#: modules/file/pixmap.c:239
+#: modules/file/pixmap.c:241
 msgid "Portable Pixmap (.ppm,.pnm)"
 msgstr "Portable Pixmap (.ppm,.pnm)"
 
-#: modules/file/pixmap.c:245
+#: modules/file/pixmap.c:247
 msgid "Windows or OS2 Bitmap (.bmp)"
 msgstr "Bitmapa Windows či OS2 (.bmp)"
 
-#: modules/file/pixmap.c:251
+#: modules/file/pixmap.c:253
 msgid "TARGA (.tga,.targa)"
 msgstr "TARGA (.tga,.targa)"
 
-#: modules/file/pixmap.c:274
+#: modules/file/pixmap.c:276
 msgid ""
 "Exports data as as pixmap images and imports data from pixmap images. "
 "Supports following image formats for export: PNG, JPEG, TIFF (if available), "
@@ -1188,82 +1238,82 @@ msgstr ""
 "dostupný), PPM, BPM, TARGA. Import se spoléhá na GDK a tudíž se jeho "
 "možnosti mohou u různých instalací lišit."
 
-#: modules/file/pixmap.c:675
+#: modules/file/pixmap.c:677
 msgid "Import "
 msgstr "Načtení "
 
-#: modules/file/pixmap.c:697 modules/file/rawfile.c:691
+#: modules/file/pixmap.c:699 modules/file/rawfile.c:691
 msgid "<b>Resolution</b>"
 msgstr "<b>Rozlišení</b>"
 
-#: modules/file/pixmap.c:702 modules/file/rawfile.c:696
+#: modules/file/pixmap.c:704 modules/file/rawfile.c:696
 msgid "_Horizontal size:"
 msgstr "_Vodorovný rozměr:"
 
-#: modules/file/pixmap.c:709 modules/file/rawfile.c:703
+#: modules/file/pixmap.c:711 modules/file/rawfile.c:703
 msgid "_Vertical size:"
 msgstr "_Svislý rozměr:"
 
-#: modules/file/pixmap.c:725 modules/file/rawfile.c:714
+#: modules/file/pixmap.c:727 modules/file/rawfile.c:714
 msgid "<b>Physical dimensions</b>"
 msgstr "<b>Fyzické rozměry</b>"
 
-#: modules/file/pixmap.c:733
+#: modules/file/pixmap.c:735
 msgid "_Width"
 msgstr "Šířk_a"
 
-#: modules/file/pixmap.c:754
+#: modules/file/pixmap.c:756
 msgid "H_eight"
 msgstr "_Výška"
 
-#: modules/file/pixmap.c:761 modules/file/rawfile.c:751
+#: modules/file/pixmap.c:763 modules/file/rawfile.c:751
 msgid "Identical _measures"
 msgstr "Stejná _měřítka"
 
-#: modules/file/pixmap.c:773
+#: modules/file/pixmap.c:775
 msgid "_Z-scale"
 msgstr "_Z-škála"
 
-#: modules/file/pixmap.c:781 modules/file/rawfile.c:772
+#: modules/file/pixmap.c:783 modules/file/rawfile.c:772
 msgid "m/sample unit"
 msgstr "m/jednotku vzorku"
 
-#: modules/file/pixmap.c:789
+#: modules/file/pixmap.c:791
 msgid ""
 "Warning: Colorful images cannot be reliably mapped to meaningful values."
 msgstr ""
 "Varování: Barevné obrázky nemohou být bezpečně převedeny na smysluplné "
 "hodnoty."
 
-#: modules/file/pixmap.c:804
+#: modules/file/pixmap.c:806
 msgid "Use"
 msgstr "Použít"
 
-#: modules/file/pixmap.c:804
+#: modules/file/pixmap.c:806
 msgid "as data"
 msgstr "jako data"
 
-#: modules/file/pixmap.c:1538
+#: modules/file/pixmap.c:1540
 msgid "_Data alone"
 msgstr "Jen _data"
 
-#: modules/file/pixmap.c:1539
+#: modules/file/pixmap.c:1541
 msgid "Data + _rulers"
 msgstr "Data + _pravítka"
 
-#: modules/file/pixmap.c:1540
+#: modules/file/pixmap.c:1542
 msgid "_Everything"
 msgstr "_Všechno"
 
-#: modules/file/pixmap.c:1557
+#: modules/file/pixmap.c:1559
 msgid "Export "
 msgstr "Export "
 
-#: modules/file/pixmap.c:1580
+#: modules/file/pixmap.c:1582
 msgid "_Zoom:"
 msgstr "_Zvětšení"
 
-#: modules/file/pixmap.c:1584
+#: modules/file/pixmap.c:1586
 msgid "Output:"
 msgstr "Výstup:"
 
@@ -1940,7 +1990,7 @@ msgid ""
 msgstr ""
 "Vrstva umožňující výběr jednoho bodu, přesněji jen čtení souřadnic myši."
 
-#: modules/layer/points.c:123
+#: modules/layer/points.c:126
 msgid "Layer allowing selection of several points, displayed as crosses."
 msgstr "Vrstva umožňující výběr několika bodů zobrazených jako křížky."
 
@@ -2344,6 +2394,60 @@ msgstr "/_Vyrovnání/Vyrovnání podle p_lošek"
 msgid "Facet-levelling"
 msgstr "Vyrovnávám podle plošek"
 
+#: modules/process/facet_analysis.c:139
+msgid "Visualizes, marks and measures facet orientation."
+msgstr "Zobrazuje, označuje a měří orientaci polšek."
+
+#: modules/process/facet_analysis.c:155
+msgid "/_Statistics/Facet _Analysis..."
+msgstr "/_Statistika/Analýza _plošek"
+
+#: modules/process/facet_analysis.c:248
+msgid "Mark Facets"
+msgstr "Označení plošek"
+
+#: modules/process/facet_analysis.c:251
+msgid "_Mark"
+msgstr "_Označit"
+
+#: modules/process/facet_analysis.c:321
+msgid "<b>Normal</b>"
+msgstr "<b>Normála</b>"
+
+#: modules/process/facet_analysis.c:327 modules/process/facet_analysis.c:345
+msgid "Theta:"
+msgstr "Théta:"
+
+#: modules/process/facet_analysis.c:328 modules/process/facet_analysis.c:346
+msgid "Phi:"
+msgstr "Fí:"
+
+#: modules/process/facet_analysis.c:330
+msgid "_Find Maximum"
+msgstr "_Najít maximum"
+
+#: modules/process/facet_analysis.c:339
+msgid "<b>Mean Normal</b>"
+msgstr "<b>Střední normála</b>"
+
+#: modules/process/facet_analysis.c:354
+msgid "_Tolerance:"
+msgstr "_Tolerance:"
+
+#: modules/process/facet_analysis.c:363 modules/process/grain_mark.c:283
+#: modules/process/grain_rem_threshold.c:260 modules/process/grain_wshed.c:289
+#: modules/process/scars.c:479
+msgid "_Mask color:"
+msgstr "Barva _masky"
+
+#: modules/process/facet_analysis.c:372
+msgid ""
+"Warning: Lateral and value units differ. Angles are not physically "
+"meaningful."
+msgstr ""
+"Pozor: Jednotky podélných rozměrů a hodnot se liší. Úhly nedávají fyzikálně "
+"smysl."
+
 #: modules/process/fft.c:107
 msgid "Two-dimensional FFT (Fast Fourier Transform)."
 msgstr "Dvourozměrná FFT (rychlá Fourierova transformace)."
@@ -2459,6 +2563,111 @@ msgstr "označené"
 #: modules/process/fft_filter_1d.c:591
 msgid "Unmarked"
 msgstr "neoznačené"
+
+#: modules/process/fft_filter_2d.c:179 modules/process/fft_filter_2d.c:358
+msgid "2D FFT Filtering"
+msgstr "Dvourozměrné filtrování pomocí FFT"
+
+#: modules/process/fft_filter_2d.c:194
+msgid "/_Correct Data/_2D FFT filtering..."
+msgstr "/_Korekce dat/_2D FFT filtrování..."
+
+#: modules/process/fft_filter_2d.c:259 modules/process/fft_filter_2d.c:302
+msgid "Filtered FFT"
+msgstr "Filtrovaná FFT"
+
+#: modules/process/fft_filter_2d.c:265 modules/process/fft_filter_2d.c:301
+msgid "Filtered Image"
+msgstr "Filtrovaná data"
+
+#: modules/process/fft_filter_2d.c:303
+msgid "Both"
+msgstr "Obojí"
+
+#: modules/process/fft_filter_2d.c:388
+msgid "<b>Filter Drawing</b>"
+msgstr "<b>Kreslení filtru</b>"
+
+#: modules/process/fft_filter_2d.c:455
+msgid "Re_move"
+msgstr "O_dstranit"
+
+#: modules/process/fft_filter_2d.c:465
+msgid "_Snap to origin"
+msgstr "Přichytit k _počátku"
+
+#: modules/process/fft_filter_2d.c:478
+msgid "Remove _All"
+msgstr "Odstranit _vše"
+
+#: modules/process/fft_filter_2d.c:489
+msgid "<b>Preview Options</b>"
+msgstr "<b>Volby náhledu</b>"
+
+#: modules/process/fft_filter_2d.c:509
+msgid "Color Ran_ge:"
+msgstr "Rozsah _barev:"
+
+#: modules/process/fft_filter_2d.c:517
+msgid "Display mode:"
+msgstr "Mód zobrazení:"
+
+#: modules/process/fft_filter_2d.c:523
+msgid "Filter _Drawing"
+msgstr "_Kreslení filtru"
+
+#: modules/process/fft_filter_2d.c:532
+msgid "Filtered _Image Preview"
+msgstr "_Náhled filtrovaných dat"
+
+#: modules/process/fft_filter_2d.c:541
+msgid "Filtered _FFT Preview"
+msgstr "Náhled filtrované _FFT"
+
+#: modules/process/fft_filter_2d.c:551
+msgid "<b>Output Options</b>"
+msgstr "<b>Volby výstupu</b>"
+
+#: modules/process/fft_filter_2d.c:564
+msgid "Output _type:"
+msgstr "Typ _výstupu:"
+
+#: modules/process/fft_filter_2d.c:640
+msgid "Draw a new inclusive circle marker."
+msgstr "Kreslit novou zahrnující kružnici."
+
+#: modules/process/fft_filter_2d.c:642
+msgid "Draw a new inclusive rectangle marker."
+msgstr "Kreslit nový zahrnující obdélník."
+
+#: modules/process/fft_filter_2d.c:644
+msgid "Draw a new exclusive circle marker."
+msgstr "Kreslit novou vylučující kružnici."
+
+#: modules/process/fft_filter_2d.c:646
+msgid "Draw a new exclusive rectangle marker."
+msgstr "Kreslit nový vylučující obdélník."
+
+#: modules/process/fft_filter_2d.c:648
+msgid "Click and drag a marker to resize. Hold Shift to move marker."
+msgstr ""
+"Kliknutím na objekt a tažením ho zvětšíš.  Se Shiftem s ním můžeš pohybovat."
+
+#: modules/process/fft_filter_2d.c:650
+msgid "Click on a marker to remove it."
+msgstr "Kliknutím na objekt ho odstraníš."
+
+#: modules/process/fft_filter_2d.c:652
+msgid "Removes all markers."
+msgstr "Odstranit všechny objekty."
+
+#: modules/process/fft_filter_2d.c:654
+msgid "Forces new markers to center around the origin."
+msgstr "Vystředování nových objektů kolem počátku."
+
+#: modules/process/fft_filter_2d.c:656
+msgid "Changes the range of values displayed in the FFT."
+msgstr "Změna rozsahu hodnot zobrazených ve FFT."
 
 #: modules/process/fit_2d.c:148
 msgid "2D fitting"
@@ -2656,11 +2865,6 @@ msgstr "_Invertovat výšku"
 msgid "Mer_ge mode:"
 msgstr "Spo_jení kritérií:"
 
-#: modules/process/grain_mark.c:283 modules/process/grain_rem_threshold.c:260
-#: modules/process/grain_wshed.c:289 modules/process/scars.c:479
-msgid "_Mask color:"
-msgstr "Barva _masky"
-
 #: modules/process/grain_rem_threshold.c:104
 msgid "Removes grains by thresholding (height, size)."
 msgstr "Odstraňuje zrna podle prahu (výšky, velikosti)."
@@ -2729,173 +2933,173 @@ msgstr "Watershed"
 msgid "Marking boundaries"
 msgstr "Označuji hranice"
 
-#: modules/process/indent_analyze.c:226
+#: modules/process/indent_analyze.c:246
 msgid "Do nothing"
 msgstr "Nedělat nic"
 
-#: modules/process/indent_analyze.c:227
+#: modules/process/indent_analyze.c:247
 msgid "Plane level"
 msgstr "Proložit rovinu"
 
-#: modules/process/indent_analyze.c:228
+#: modules/process/indent_analyze.c:248
 msgid "Plane rotate"
 msgstr "Rotovat rovinu"
 
-#: modules/process/indent_analyze.c:241
+#: modules/process/indent_analyze.c:252
 msgid "New"
 msgstr "Nový"
 
-#: modules/process/indent_analyze.c:242
+#: modules/process/indent_analyze.c:253
 msgid "AND"
 msgstr "A"
 
-#: modules/process/indent_analyze.c:243
+#: modules/process/indent_analyze.c:254
 msgid "OR"
 msgstr "Nebo"
 
-#: modules/process/indent_analyze.c:244
+#: modules/process/indent_analyze.c:255
 msgid "NOT"
 msgstr "Negace"
 
-#: modules/process/indent_analyze.c:245
+#: modules/process/indent_analyze.c:256
 msgid "XOR"
 msgstr "Xor"
 
-#: modules/process/indent_analyze.c:262
+#: modules/process/indent_analyze.c:260
 msgid "Nothing"
 msgstr "Nic"
 
-#: modules/process/indent_analyze.c:263
+#: modules/process/indent_analyze.c:261
 msgid "Above"
 msgstr "Objem nad"
 
-#: modules/process/indent_analyze.c:264
+#: modules/process/indent_analyze.c:262
 msgid "Bellow"
 msgstr "Objem pod"
 
-#: modules/process/indent_analyze.c:265
+#: modules/process/indent_analyze.c:263
 msgid "Plane"
 msgstr "Rovinu"
 
-#: modules/process/indent_analyze.c:266
+#: modules/process/indent_analyze.c:264
 msgid "Impression"
 msgstr "Vtisk"
 
-#: modules/process/indent_analyze.c:267
+#: modules/process/indent_analyze.c:265
 msgid "Inner Pile-up"
 msgstr "Vnitřní část vytlačení"
 
-#: modules/process/indent_analyze.c:268
+#: modules/process/indent_analyze.c:266
 msgid "Outer Pile-up"
 msgstr "Vnější část vytlačení"
 
-#: modules/process/indent_analyze.c:269
+#: modules/process/indent_analyze.c:267
 msgid "Special points"
 msgstr "Speciální body"
 
-#: modules/process/indent_analyze.c:270
+#: modules/process/indent_analyze.c:268
 msgid "Faces border"
 msgstr "Rozhraní stěn"
 
-#: modules/process/indent_analyze.c:281
-msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
-msgstr "Analýza vtisků indentoru"
+#: modules/process/indent_analyze.c:276
+msgid "Analyses nanoindentation structure (volumes, surfaces, ...)."
+msgstr "Analyzuje nanoindentační strukturu (objemy, povrchy, ...)."
 
-#: modules/process/indent_analyze.c:297
+#: modules/process/indent_analyze.c:292
 msgid "/Indento_r/_Analyze..."
 msgstr "/Indento_r/_Analyzovat..."
 
-#: modules/process/indent_analyze.c:350
+#: modules/process/indent_analyze.c:345
 msgid "Indentaion statistics"
 msgstr "Statistika"
 
-#: modules/process/indent_analyze.c:351
+#: modules/process/indent_analyze.c:346
 msgid "_Compute & mark"
 msgstr "Počítat a označit"
 
-#: modules/process/indent_analyze.c:352
+#: modules/process/indent_analyze.c:347
 msgid "_Save statistics"
 msgstr "Uložit _statistiku"
 
-#: modules/process/indent_analyze.c:390
-msgid "Data field leveling:"
-msgstr "Proložení dat:"
+#: modules/process/indent_analyze.c:398
+msgid "Marked _areas:"
+msgstr "Označné _plochy:"
 
-#: modules/process/indent_analyze.c:399
-msgid "Marked areas:"
-msgstr "Označené plochy:"
+#: modules/process/indent_analyze.c:407
+msgid "_Indentor type:"
+msgstr "Typ _indentoru:"
 
-#: modules/process/indent_analyze.c:406
-msgid "Indentor type:"
-msgstr "Typ indentoru"
-
-#: modules/process/indent_analyze.c:414
-msgid "Mask creation type:"
-msgstr "Vytvoření masky:"
-
-#: modules/process/indent_analyze.c:419
-msgid "Ref. plane tolerance:"
-msgstr "Tolerance ref. roviny:"
+#: modules/process/indent_analyze.c:417
+msgid "_Mask creation type:"
+msgstr "Způsob přidání _masky"
 
 #: modules/process/indent_analyze.c:424
-msgid "Angle 1 tolerance:"
-msgstr "Úhlová tolerance:"
+msgid "Ref. plane _tolerance:"
+msgstr "_Tolerance ref. roviny:"
 
-#: modules/process/indent_analyze.c:429
-msgid "Theta range:"
-msgstr "Rozsah úhlu theta:"
+#: modules/process/indent_analyze.c:430
+msgid "Angle _1 tolerance:"
+msgstr "Tolerance _prvního úhlu:"
 
-#: modules/process/indent_analyze.c:444
+#: modules/process/indent_analyze.c:448
 msgid "Indent centre at"
 msgstr "Střed vtisku v bodě"
 
-#: modules/process/indent_analyze.c:447
+#: modules/process/indent_analyze.c:452
 msgid "Maximum at"
 msgstr "Maimumv bodě"
 
-#: modules/process/indent_analyze.c:450
+#: modules/process/indent_analyze.c:456
 msgid "Max-min diference"
 msgstr "Z-ový rozsah"
 
-#: modules/process/indent_analyze.c:457
-msgid "Expected A_d:"
-msgstr "Očekávané A_d:"
+#: modules/process/indent_analyze.c:463
+msgid "Expected A<sub>d</sub>:"
+msgstr "Očekávaná A<sub>d</sub>:"
 
-#: modules/process/indent_analyze.c:460
-msgid "Expected A_p:"
-msgstr "Očekávané A_p:"
+#: modules/process/indent_analyze.c:467
+msgid "Expected A<sub>p</sub>:"
+msgstr "Očekávaná A<sub>p</sub>:"
 
-#: modules/process/indent_analyze.c:501
+#: modules/process/indent_analyze.c:509
 msgid "Volume above-below"
 msgstr "Objem nad-pod"
 
-#: modules/process/indent_analyze.c:511
+#: modules/process/indent_analyze.c:520
 msgid "Indent. volume"
 msgstr "Objem vtisku"
 
-#: modules/process/indent_analyze.c:517
-msgid "Indent. A_d"
-msgstr "A_d vtisku"
+#: modules/process/indent_analyze.c:527
+msgid "Indent. A<sub>d</sub>"
+msgstr "A<sub>d</sub> vtisku"
 
-#: modules/process/indent_analyze.c:520
-msgid "Indent. A_p"
-msgstr "A_p vtisku"
+#: modules/process/indent_analyze.c:531
+msgid "Indent. A<sub>p</sub>"
+msgstr "A<sub>p</sub> vtisku"
 
-#: modules/process/indent_analyze.c:529
-msgid "Inner Pile-Up A_d"
-msgstr "A_d vnitřní části vytlačení"
+#: modules/process/indent_analyze.c:541
+msgid "Inner Pile-Up A<sub>d</sub>"
+msgstr "A<sub>d</sub> vnitřního vytlačení"
 
-#: modules/process/indent_analyze.c:532
-msgid "Inner Pile-Up A_p"
-msgstr "A_p vnitřní části vytlačení"
+#: modules/process/indent_analyze.c:545
+msgid "Inner Pile-Up A<sub>p</sub>"
+msgstr "A<sub>p</sub> vnitřního vytlačení"
 
-#: modules/process/indent_analyze.c:535
-msgid "Outer Pile-Up A_d"
-msgstr "A_d vnější části vytlačení"
+#: modules/process/indent_analyze.c:549
+msgid "Outer Pile-Up A<sub>d</sub>"
+msgstr "A<sub>d</sub> vnějšího vytlačení"
 
-#: modules/process/indent_analyze.c:538
-msgid "Outer Pile-Up A_p"
-msgstr "A_p vnější části vytlačení"
+#: modules/process/indent_analyze.c:553
+msgid "Outer Pile-Up A<sub>p</sub>"
+msgstr "A<sub>p</sub> vnějšího vytlačení"
+
+#: modules/process/indent_analyze.c:1450
+msgid "No statistics has benn computed yet."
+msgstr ""
+
+#: modules/process/indent_analyze.c:1458
+msgid "Save Indentation Statistics"
+msgstr ""
 
 #: modules/process/laplace.c:45
 msgid ""
@@ -3097,7 +3301,7 @@ msgstr "Modelování vtisku indentoru"
 
 #: modules/process/nanoindent_adjust.c:203
 msgid "Imprint to be _adjusted:"
-msgstr ""
+msgstr "_Srovnat vtisk:"
 
 #: modules/process/nanoindent_adjust.c:214
 msgid "_Move data"
@@ -3161,17 +3365,29 @@ msgstr "Stupeň _svislého polynomu:"
 msgid "_Same degrees"
 msgstr "S_tejné stupně"
 
-#: modules/process/presentationops.c:40
+#: modules/process/presentationops.c:50
 msgid "Basic operations with presentation: extraction, removal."
 msgstr "Základní operace s presentacemi: extrakce, odstranění."
 
-#: modules/process/presentationops.c:56
+#: modules/process/presentationops.c:66
 msgid "/_Display/_Remove Presentation"
 msgstr "/_Zobrazení/Odst_ranit presentaci"
 
-#: modules/process/presentationops.c:63
+#: modules/process/presentationops.c:73
 msgid "/_Display/E_xtract Presentation"
 msgstr "/_Zobrazení/_Extrahovat presentaci"
+
+#: modules/process/presentationops.c:80
+msgid "/_Display/_Attach Presentation..."
+msgstr "/_Zobrazení/Připo_jit presentaci"
+
+#: modules/process/presentationops.c:154
+msgid "Attach Presentation"
+msgstr "Připojit presentation"
+
+#: modules/process/presentationops.c:166
+msgid "_Data to attach:"
+msgstr "_Připojit data:"
 
 #: modules/process/rotate.c:86
 msgid "Rotates data by arbitrary angle."
@@ -3928,3 +4144,51 @@ msgstr "Statistické veličiny"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametry</b>"
+
+#~ msgid "Expected A_d:"
+#~ msgstr "Očekávané A_d:"
+
+#~ msgid "Expected A_p:"
+#~ msgstr "Očekávané A_p:"
+
+#~ msgid "Indent. A_d"
+#~ msgstr "A_d vtisku"
+
+#~ msgid "Indent. A_p"
+#~ msgstr "A_p vtisku"
+
+#~ msgid "Inner Pile-Up A_d"
+#~ msgstr "A_d vnitřní části vytlačení"
+
+#~ msgid "Inner Pile-Up A_p"
+#~ msgstr "A_p vnitřní části vytlačení"
+
+#~ msgid "Outer Pile-Up A_d"
+#~ msgstr "A_d vnější části vytlačení"
+
+#~ msgid "Outer Pile-Up A_p"
+#~ msgstr "A_p vnější části vytlačení"
+
+#~ msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
+#~ msgstr "Analýza vtisků indentoru"
+
+#~ msgid "Data field leveling:"
+#~ msgstr "Proložení dat:"
+
+#~ msgid "Marked areas:"
+#~ msgstr "Označené plochy:"
+
+#~ msgid "Indentor type:"
+#~ msgstr "Typ indentoru"
+
+#~ msgid "Mask creation type:"
+#~ msgstr "Vytvoření masky:"
+
+#~ msgid "Ref. plane tolerance:"
+#~ msgstr "Tolerance ref. roviny:"
+
+#~ msgid "Angle 1 tolerance:"
+#~ msgstr "Úhlová tolerance:"
+
+#~ msgid "Theta range:"
+#~ msgstr "Rozsah úhlu theta:"
