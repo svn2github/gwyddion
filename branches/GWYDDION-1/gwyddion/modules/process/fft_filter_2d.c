@@ -506,7 +506,7 @@ run_dialog(ControlsType *controls)
     gtk_box_pack_end(GTK_BOX(hbox2), scale_fft, TRUE, TRUE, 0);
     controls->scale_fft = scale_fft;
 
-    label = gtk_label_new_with_mnemonic(_("Color Ran_ge: "));
+    label = gtk_label_new_with_mnemonic(_("Color Ran_ge:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), scale_fft);
     gtk_box_pack_start(GTK_BOX(hbox2), label, FALSE, FALSE, 0);
@@ -514,17 +514,17 @@ run_dialog(ControlsType *controls)
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 5);
     row++;
 
-    label = gtk_label_new(_("Display mode: "));
+    label = gtk_label_new(_("Display mode:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.05);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
-                     GTK_FILL, GTK_FILL, 0, 0);
+                     GTK_FILL, GTK_FILL, 0, 2);
     row++;
 
     button = gtk_radio_button_new_with_mnemonic(NULL, _("Filter _Drawing"));
     g_signal_connect(button, "toggled",
                      G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
-                     GTK_FILL, GTK_FILL, 0, 0);
+                     GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft = button;
     row++;
 
@@ -533,7 +533,7 @@ run_dialog(ControlsType *controls)
     g_signal_connect(button, "toggled",
                      G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
-                     GTK_FILL, GTK_FILL, 0, 0);
+                     GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_image_preview = button;
     row++;
 
@@ -542,7 +542,7 @@ run_dialog(ControlsType *controls)
     g_signal_connect(button, "toggled",
                      G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
-                     GTK_FILL, GTK_FILL, 0, 0);
+                     GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft_preview = button;
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 15);
     row++;
@@ -561,7 +561,7 @@ run_dialog(ControlsType *controls)
                      GTK_EXPAND | GTK_FILL, 0, 0, 0);
     controls->combo_output = combo;
 
-    label = gtk_label_new_with_mnemonic(_("Output _type: "));
+    label = gtk_label_new_with_mnemonic(_("Output _type:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), combo);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
