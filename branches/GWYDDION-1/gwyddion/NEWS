@@ -1,4 +1,3 @@
-1.11cvs20050707
 
 1.12
 Application:
@@ -10,9 +9,11 @@ Library:
   fixed (bug #56).
 - libgwyapp: It is possible to apply a filter to data window option menu
   items.
+- libgwyddion: Possible crash in expression evaluation was fixed.
 
 Modules:
 - JPK Scan (new): JPK data file import (bug #57).
+- 2D FFT filtering (new).
 - Facet Analysis (new): Visualizes, marks and measures facet orientations.
 - Assing AFM: Wrong z scale in import and export was fixed.
 - NT-MDT: Bogus data import when x and y resolution differs was fixed.
