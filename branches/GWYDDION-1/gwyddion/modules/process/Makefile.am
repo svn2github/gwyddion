@@ -19,6 +19,7 @@ process_PROGRAMS = \
 	facet-level.so \
 	fft.so \
 	fft_filter_1d.so \
+	fft_filter_2d.so \
 	fit_2d.so \
 	fraccor.so \
 	fractal.so \
@@ -108,7 +109,10 @@ fit_2d_so_SOURCES = fit_2d.c
 fit_2d_so_LDFLAGS = $(module_ldflags),fit_2d.so
 
 fft_filter_1d_so_SOURCES = fft_filter_1d.c
-fft_filter_1d_so_LDFLAGS = $(module_ldflags),fft_filter_1d.so 
+fft_filter_1d_so_LDFLAGS = $(module_ldflags),fft_filter_1d.so
+
+fft_filter_2d_so_SOURCES = fft_filter_2d.c
+fft_filter_2d_so_LDFLAGS = $(module_ldflags),fft_filter_2d.so
 
 fractal_so_SOURCES = fractal.c
 fractal_so_LDFLAGS = $(module_ldflags),fractal.so
