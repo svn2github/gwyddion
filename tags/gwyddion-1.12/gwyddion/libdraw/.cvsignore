@@ -1,0 +1,11 @@
+Makefile
+Makefile.in
+test
+*.lo
+*.la
+.libs
+.deps
+test
+core.*
+*.def
+makefile.msc
