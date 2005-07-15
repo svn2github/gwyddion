@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-07-14 14:46+0200\n"
+"POT-Creation-Date: 2005-07-15 13:16+0200\n"
 "PO-Revision-Date: 2005-07-14 20:24+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
@@ -207,7 +207,7 @@ msgstr "Veli_kost:"
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
 #: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:252
-#: modules/process/fft.c:335 modules/process/fft_filter_2d.c:359
+#: modules/process/fft.c:335 modules/process/fft_filter_2d.c:377
 #: modules/process/fractal.c:209 modules/process/grain_mark.c:203
 #: modules/process/grain_rem_threshold.c:175 modules/process/grain_wshed.c:176
 #: modules/process/local_contrast.c:136 modules/process/mask_grow_shrink.c:175
@@ -813,7 +813,7 @@ msgstr " je svobodný software uvolněný pod GNU GPL."
 msgid "_File"
 msgstr "_Soubor"
 
-#: app/toolbox.c:174 modules/process/fft_filter_2d.c:447
+#: app/toolbox.c:174 modules/process/fft_filter_2d.c:465
 msgid "_Edit"
 msgstr "Úpr_avy"
 
@@ -2564,108 +2564,108 @@ msgstr "označené"
 msgid "Unmarked"
 msgstr "neoznačené"
 
-#: modules/process/fft_filter_2d.c:179 modules/process/fft_filter_2d.c:358
+#: modules/process/fft_filter_2d.c:197 modules/process/fft_filter_2d.c:376
 msgid "2D FFT Filtering"
 msgstr "Dvourozměrné filtrování pomocí FFT"
 
-#: modules/process/fft_filter_2d.c:194
+#: modules/process/fft_filter_2d.c:212
 msgid "/_Correct Data/_2D FFT filtering..."
 msgstr "/_Korekce dat/_2D FFT filtrování..."
 
-#: modules/process/fft_filter_2d.c:259 modules/process/fft_filter_2d.c:302
+#: modules/process/fft_filter_2d.c:277 modules/process/fft_filter_2d.c:320
 msgid "Filtered FFT"
 msgstr "Filtrovaná FFT"
 
-#: modules/process/fft_filter_2d.c:265 modules/process/fft_filter_2d.c:301
+#: modules/process/fft_filter_2d.c:283 modules/process/fft_filter_2d.c:319
 msgid "Filtered Image"
 msgstr "Filtrovaná data"
 
-#: modules/process/fft_filter_2d.c:303
+#: modules/process/fft_filter_2d.c:321
 msgid "Both"
 msgstr "Obojí"
 
-#: modules/process/fft_filter_2d.c:388
+#: modules/process/fft_filter_2d.c:406
 msgid "<b>Filter Drawing</b>"
 msgstr "<b>Kreslení filtru</b>"
 
-#: modules/process/fft_filter_2d.c:455
+#: modules/process/fft_filter_2d.c:473
 msgid "Re_move"
 msgstr "O_dstranit"
 
-#: modules/process/fft_filter_2d.c:465
+#: modules/process/fft_filter_2d.c:483
 msgid "_Snap to origin"
 msgstr "Přichytit k _počátku"
 
-#: modules/process/fft_filter_2d.c:478
+#: modules/process/fft_filter_2d.c:496
 msgid "Remove _All"
 msgstr "Odstranit _vše"
 
-#: modules/process/fft_filter_2d.c:489
+#: modules/process/fft_filter_2d.c:507
 msgid "<b>Preview Options</b>"
 msgstr "<b>Volby náhledu</b>"
 
-#: modules/process/fft_filter_2d.c:509
+#: modules/process/fft_filter_2d.c:527
 msgid "Color Ran_ge:"
 msgstr "Rozsah _barev:"
 
-#: modules/process/fft_filter_2d.c:517
+#: modules/process/fft_filter_2d.c:535
 msgid "Display mode:"
 msgstr "Mód zobrazení:"
 
-#: modules/process/fft_filter_2d.c:523
+#: modules/process/fft_filter_2d.c:541
 msgid "Filter _Drawing"
 msgstr "_Kreslení filtru"
 
-#: modules/process/fft_filter_2d.c:532
+#: modules/process/fft_filter_2d.c:550
 msgid "Filtered _Image Preview"
 msgstr "_Náhled filtrovaných dat"
 
-#: modules/process/fft_filter_2d.c:541
+#: modules/process/fft_filter_2d.c:559
 msgid "Filtered _FFT Preview"
 msgstr "Náhled filtrované _FFT"
 
-#: modules/process/fft_filter_2d.c:551
+#: modules/process/fft_filter_2d.c:569
 msgid "<b>Output Options</b>"
 msgstr "<b>Volby výstupu</b>"
 
-#: modules/process/fft_filter_2d.c:564
+#: modules/process/fft_filter_2d.c:582
 msgid "Output _type:"
 msgstr "Typ _výstupu:"
 
-#: modules/process/fft_filter_2d.c:640
+#: modules/process/fft_filter_2d.c:658
 msgid "Draw a new inclusive circle marker."
 msgstr "Kreslit novou zahrnující kružnici."
 
-#: modules/process/fft_filter_2d.c:642
+#: modules/process/fft_filter_2d.c:660
 msgid "Draw a new inclusive rectangle marker."
 msgstr "Kreslit nový zahrnující obdélník."
 
-#: modules/process/fft_filter_2d.c:644
+#: modules/process/fft_filter_2d.c:662
 msgid "Draw a new exclusive circle marker."
 msgstr "Kreslit novou vylučující kružnici."
 
-#: modules/process/fft_filter_2d.c:646
+#: modules/process/fft_filter_2d.c:664
 msgid "Draw a new exclusive rectangle marker."
 msgstr "Kreslit nový vylučující obdélník."
 
-#: modules/process/fft_filter_2d.c:648
+#: modules/process/fft_filter_2d.c:666
 msgid "Click and drag a marker to resize. Hold Shift to move marker."
 msgstr ""
 "Kliknutím na objekt a tažením ho zvětšíš.  Se Shiftem s ním můžeš pohybovat."
 
-#: modules/process/fft_filter_2d.c:650
+#: modules/process/fft_filter_2d.c:668
 msgid "Click on a marker to remove it."
 msgstr "Kliknutím na objekt ho odstraníš."
 
-#: modules/process/fft_filter_2d.c:652
+#: modules/process/fft_filter_2d.c:670
 msgid "Removes all markers."
 msgstr "Odstranit všechny objekty."
 
-#: modules/process/fft_filter_2d.c:654
+#: modules/process/fft_filter_2d.c:672
 msgid "Forces new markers to center around the origin."
 msgstr "Vystředování nových objektů kolem počátku."
 
-#: modules/process/fft_filter_2d.c:656
+#: modules/process/fft_filter_2d.c:674
 msgid "Changes the range of values displayed in the FFT."
 msgstr "Změna rozsahu hodnot zobrazených ve FFT."
 

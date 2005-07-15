@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-06-24 00:26+0200\n"
+"POT-Creation-Date: 2005-07-15 13:16+0200\n"
 "PO-Revision-Date: 2005-06-12 21:42+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
@@ -206,25 +206,25 @@ msgstr "Ridimensiona _automaticamente"
 msgid "Si_ze:"
 msgstr "Dimensione:"
 
-#: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:678
-#: modules/file/pixmap.c:1560 modules/file/rawfile.c:496
+#: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:680
+#: modules/file/pixmap.c:1562 modules/file/rawfile.c:496
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
 #: modules/process/cwt.c:179 modules/process/dwt.c:178
 #: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
-#: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:241
-#: modules/process/fft.c:335 modules/process/fractal.c:209
-#: modules/process/grain_mark.c:203 modules/process/grain_rem_threshold.c:175
-#: modules/process/grain_wshed.c:176 modules/process/local_contrast.c:136
-#: modules/process/mask_grow_shrink.c:175 modules/process/median-bg.c:180
-#: modules/process/polylevel.c:192 modules/process/rotate.c:222
-#: modules/process/scale.c:164 modules/process/scars.c:407
-#: modules/process/shade.c:191 modules/process/slope_dist.c:197
-#: modules/process/sphere-revolve.c:216 modules/process/tip_model.c:180
-#: modules/process/unrotate.c:218
+#: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:252
+#: modules/process/fft.c:335 modules/process/fft_filter_2d.c:377
+#: modules/process/fractal.c:209 modules/process/grain_mark.c:203
+#: modules/process/grain_rem_threshold.c:175 modules/process/grain_wshed.c:176
+#: modules/process/local_contrast.c:136 modules/process/mask_grow_shrink.c:175
+#: modules/process/median-bg.c:180 modules/process/polylevel.c:192
+#: modules/process/rotate.c:222 modules/process/scale.c:164
+#: modules/process/scars.c:407 modules/process/shade.c:191
+#: modules/process/slope_dist.c:197 modules/process/sphere-revolve.c:216
+#: modules/process/tip_model.c:180 modules/process/unrotate.c:218
 msgid "_Reset"
 msgstr "_Ripristina"
 
-#: libgwydgets/gwydgets.c:578
+#: libgwydgets/gwydgets.c:580
 msgid "Change Mask Color"
 msgstr "Cambia colore maschera"
 
@@ -605,56 +605,56 @@ msgstr ""
 "%s\n"
 "Uscire ugualmente?"
 
-#: app/app.c:694
+#: app/app.c:698
 msgid "Untitled Graph"
 msgstr "Grafico senza titolo"
 
-#: app/app.c:824
+#: app/app.c:828
 msgid "Export"
 msgstr "Esporta"
 
-#: app/app.c:828
+#: app/app.c:832
 msgid "Export 3D view to PNG image"
 msgstr "Esporta veduta 3D come immagine PNG"
 
-#: app/app.c:1153 app/app.c:1165
+#: app/app.c:1161 app/app.c:1173
 #, c-format
 msgid "Untitled %d"
 msgstr "Senza titolo %d"
 
-#: app/app.c:1183 app/toolbox.c:645
+#: app/app.c:1191 app/toolbox.c:645
 msgid "/Remove _Mask"
 msgstr "/Rimuovi _Maschera"
 
-#: app/app.c:1184 app/toolbox.c:661
+#: app/app.c:1192 app/toolbox.c:661
 msgid "/Mask _Color"
 msgstr "/_Colore Maschera"
 
-#: app/app.c:1185
+#: app/app.c:1193
 msgid "/Fix _Zero"
 msgstr "/Fissa _Zero"
 
-#: app/app.c:1186
+#: app/app.c:1194
 msgid "/Reset Color _Range"
 msgstr "/Azzera Intervallo Colore"
 
-#: app/app.c:1187 app/toolbox.c:653
+#: app/app.c:1195 app/toolbox.c:653
 msgid "/Remove _Presentation"
 msgstr "/Rimuovi _Presentazione"
 
-#: app/app.c:1188
+#: app/app.c:1196
 msgid "/_Level"
 msgstr "/_Livella"
 
-#: app/app.c:1189
+#: app/app.c:1197
 msgid "/Zoom _1:1"
 msgstr "/Zoom _1:1"
 
-#: app/app.c:1412
+#: app/app.c:1420
 msgid "Export 3D View"
 msgstr "Esporta vista 3D"
 
-#: app/app.c:1439
+#: app/app.c:1447
 msgid "Change Default Mask Color"
 msgstr "Cambia Colore Predefinito Maschera"
 
@@ -819,7 +819,7 @@ msgstr " è un software libero rilasciato sotto GNU GPL."
 msgid "_File"
 msgstr "_File"
 
-#: app/toolbox.c:174
+#: app/toolbox.c:174 modules/process/fft_filter_2d.c:465
 msgid "_Edit"
 msgstr "_Modifica"
 
@@ -1048,7 +1048,7 @@ msgid "Height"
 msgstr "Altezza"
 
 #: app/unitool.c:823 app/unitool.c:827 app/unitool.c:834 app/unitool.c:841
-#: modules/file/pixmap.c:702 modules/file/pixmap.c:709
+#: modules/file/pixmap.c:704 modules/file/pixmap.c:711
 #: modules/tools/level3.c:199 modules/tools/pointer.c:180
 #: modules/tools/profile.c:255
 msgid "px"
@@ -1204,31 +1204,31 @@ msgstr "file NT-MDT (.mdt)"
 msgid "Frame"
 msgstr "Cornice"
 
-#: modules/file/pixmap.c:219
+#: modules/file/pixmap.c:221
 msgid "Portable Network Graphics (.png)"
 msgstr "Portable Network Graphics (.png)"
 
-#: modules/file/pixmap.c:225
+#: modules/file/pixmap.c:227
 msgid "JPEG (.jpeg,.jpg)"
 msgstr "JPEG (.jpeg,.jpg)"
 
-#: modules/file/pixmap.c:232
+#: modules/file/pixmap.c:234
 msgid "TIFF (.tiff,.tif)"
 msgstr "TIFF (.tiff,.tif)"
 
-#: modules/file/pixmap.c:239
+#: modules/file/pixmap.c:241
 msgid "Portable Pixmap (.ppm,.pnm)"
 msgstr "Portable Pixmap (.ppm,.pnm)"
 
-#: modules/file/pixmap.c:245
+#: modules/file/pixmap.c:247
 msgid "Windows or OS2 Bitmap (.bmp)"
 msgstr "Windows or OS2 Bitmap (.bmp)"
 
-#: modules/file/pixmap.c:251
+#: modules/file/pixmap.c:253
 msgid "TARGA (.tga,.targa)"
 msgstr "TARGA (.tga,.targa)"
 
-#: modules/file/pixmap.c:274
+#: modules/file/pixmap.c:276
 msgid ""
 "Exports data as as pixmap images and imports data from pixmap images. "
 "Supports following image formats for export: PNG, JPEG, TIFF (if available), "
@@ -1240,82 +1240,82 @@ msgstr ""
 "formati PPM, BMP, TARGA. utilizza il GDK in conseguenza potrebbe essere "
 "dipendente dall'installazione."
 
-#: modules/file/pixmap.c:675
+#: modules/file/pixmap.c:677
 msgid "Import "
 msgstr "Importa"
 
-#: modules/file/pixmap.c:697 modules/file/rawfile.c:691
+#: modules/file/pixmap.c:699 modules/file/rawfile.c:691
 msgid "<b>Resolution</b>"
 msgstr "<b>Risoluzione</b>"
 
-#: modules/file/pixmap.c:702 modules/file/rawfile.c:696
+#: modules/file/pixmap.c:704 modules/file/rawfile.c:696
 msgid "_Horizontal size:"
 msgstr "Dimensione orizzontale:"
 
-#: modules/file/pixmap.c:709 modules/file/rawfile.c:703
+#: modules/file/pixmap.c:711 modules/file/rawfile.c:703
 msgid "_Vertical size:"
 msgstr "Dimensione verticale:"
 
-#: modules/file/pixmap.c:725 modules/file/rawfile.c:714
+#: modules/file/pixmap.c:727 modules/file/rawfile.c:714
 msgid "<b>Physical dimensions</b>"
 msgstr "<b>Dimensioni fisiche</b>"
 
-#: modules/file/pixmap.c:733
+#: modules/file/pixmap.c:735
 msgid "_Width"
 msgstr "Larghezza"
 
-#: modules/file/pixmap.c:754
+#: modules/file/pixmap.c:756
 msgid "H_eight"
 msgstr "Altezza"
 
-#: modules/file/pixmap.c:761 modules/file/rawfile.c:751
+#: modules/file/pixmap.c:763 modules/file/rawfile.c:751
 msgid "Identical _measures"
 msgstr "Misure Identiche"
 
-#: modules/file/pixmap.c:773
+#: modules/file/pixmap.c:775
 msgid "_Z-scale"
 msgstr "Asse Z"
 
-#: modules/file/pixmap.c:781 modules/file/rawfile.c:772
+#: modules/file/pixmap.c:783 modules/file/rawfile.c:772
 msgid "m/sample unit"
 msgstr "m/untità campione"
 
-#: modules/file/pixmap.c:789
+#: modules/file/pixmap.c:791
 msgid ""
 "Warning: Colorful images cannot be reliably mapped to meaningful values."
 msgstr ""
 "Attenzione: Immagini molto colorate non possono essere convertite in modo "
 "affidabile ad una mappatura che abbia valori significativi"
 
-#: modules/file/pixmap.c:804
+#: modules/file/pixmap.c:806
 msgid "Use"
 msgstr "Uso"
 
-#: modules/file/pixmap.c:804
+#: modules/file/pixmap.c:806
 msgid "as data"
 msgstr "come dati"
 
-#: modules/file/pixmap.c:1538
+#: modules/file/pixmap.c:1540
 msgid "_Data alone"
 msgstr "Solo dati"
 
-#: modules/file/pixmap.c:1539
+#: modules/file/pixmap.c:1541
 msgid "Data + _rulers"
 msgstr "Dati + scala"
 
-#: modules/file/pixmap.c:1540
+#: modules/file/pixmap.c:1542
 msgid "_Everything"
 msgstr "Tutto"
 
-#: modules/file/pixmap.c:1557
+#: modules/file/pixmap.c:1559
 msgid "Export "
 msgstr "Esporta"
 
-#: modules/file/pixmap.c:1580
+#: modules/file/pixmap.c:1582
 msgid "_Zoom:"
 msgstr "Ingrandisci:"
 
-#: modules/file/pixmap.c:1584
+#: modules/file/pixmap.c:1586
 msgid "Output:"
 msgstr "Output:"
 
@@ -2009,14 +2009,6 @@ msgstr ""
 msgid "/_Plug-Ins"
 msgstr "/_Plug-In"
 
-#: modules/process/FFT2D.c:77 modules/process/FFT2D.c:155
-msgid "2D FFT Filtering"
-msgstr ""
-
-#: modules/process/FFT2D.c:91
-msgid "/_Correct Data/_2D FFT filtering..."
-msgstr ""
-
 #: modules/process/angle_dist.c:105
 msgid ""
 "Calculates two-dimensional distribution of angles, that is projections of "
@@ -2401,49 +2393,53 @@ msgstr "/_Livella/_Facet Level"
 msgid "Facet-levelling"
 msgstr "Facet-levelling"
 
-#: modules/process/facet_analysis.c:128
+#: modules/process/facet_analysis.c:139
 msgid "Visualizes, marks and measures facet orientation."
 msgstr ""
 
-#: modules/process/facet_analysis.c:144
+#: modules/process/facet_analysis.c:155
 msgid "/_Statistics/Facet _Analysis..."
 msgstr ""
 
-#: modules/process/facet_analysis.c:237
+#: modules/process/facet_analysis.c:248
 msgid "Mark Facets"
 msgstr ""
 
-#: modules/process/facet_analysis.c:240
+#: modules/process/facet_analysis.c:251
 msgid "_Mark"
 msgstr ""
 
-#: modules/process/facet_analysis.c:310
-msgid "<b>Inclination</b>"
+#: modules/process/facet_analysis.c:321
+msgid "<b>Normal</b>"
 msgstr ""
 
-#: modules/process/facet_analysis.c:316 modules/process/facet_analysis.c:327
+#: modules/process/facet_analysis.c:327 modules/process/facet_analysis.c:345
 msgid "Theta:"
 msgstr ""
 
-#: modules/process/facet_analysis.c:317 modules/process/facet_analysis.c:328
+#: modules/process/facet_analysis.c:328 modules/process/facet_analysis.c:346
 msgid "Phi:"
 msgstr ""
 
-#: modules/process/facet_analysis.c:321
-msgid "<b>Mean Inclination</b>"
+#: modules/process/facet_analysis.c:330
+msgid "_Find Maximum"
 msgstr ""
 
-#: modules/process/facet_analysis.c:336
-msgid "Tolerance:"
+#: modules/process/facet_analysis.c:339
+msgid "<b>Mean Normal</b>"
 msgstr ""
 
-#: modules/process/facet_analysis.c:345 modules/process/grain_mark.c:283
+#: modules/process/facet_analysis.c:354
+msgid "_Tolerance:"
+msgstr ""
+
+#: modules/process/facet_analysis.c:363 modules/process/grain_mark.c:283
 #: modules/process/grain_rem_threshold.c:260 modules/process/grain_wshed.c:289
 #: modules/process/scars.c:479
 msgid "_Mask color:"
 msgstr "Colore _Maschera:"
 
-#: modules/process/facet_analysis.c:354
+#: modules/process/facet_analysis.c:372
 msgid ""
 "Warning: Lateral and value units differ. Angles are not physically "
 "meaningful."
@@ -2564,6 +2560,110 @@ msgstr "Segnato"
 #: modules/process/fft_filter_1d.c:591
 msgid "Unmarked"
 msgstr "Non segnato"
+
+#: modules/process/fft_filter_2d.c:197 modules/process/fft_filter_2d.c:376
+msgid "2D FFT Filtering"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:212
+msgid "/_Correct Data/_2D FFT filtering..."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:277 modules/process/fft_filter_2d.c:320
+msgid "Filtered FFT"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:283 modules/process/fft_filter_2d.c:319
+msgid "Filtered Image"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:321
+msgid "Both"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:406
+msgid "<b>Filter Drawing</b>"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:473
+msgid "Re_move"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:483
+msgid "_Snap to origin"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:496
+msgid "Remove _All"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:507
+msgid "<b>Preview Options</b>"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:527
+msgid "Color Ran_ge:"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:535
+msgid "Display mode:"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:541
+msgid "Filter _Drawing"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:550
+msgid "Filtered _Image Preview"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:559
+msgid "Filtered _FFT Preview"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:569
+msgid "<b>Output Options</b>"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:582
+msgid "Output _type:"
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:658
+msgid "Draw a new inclusive circle marker."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:660
+msgid "Draw a new inclusive rectangle marker."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:662
+msgid "Draw a new exclusive circle marker."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:664
+msgid "Draw a new exclusive rectangle marker."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:666
+msgid "Click and drag a marker to resize. Hold Shift to move marker."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:668
+msgid "Click on a marker to remove it."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:670
+msgid "Removes all markers."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:672
+msgid "Forces new markers to center around the origin."
+msgstr ""
+
+#: modules/process/fft_filter_2d.c:674
+msgid "Changes the range of values displayed in the FFT."
+msgstr ""
 
 #: modules/process/fit_2d.c:148
 msgid "2D fitting"
@@ -2829,174 +2929,174 @@ msgstr "Watershed"
 msgid "Marking boundaries"
 msgstr "Marcatura confini"
 
-#: modules/process/indent_analyze.c:226
+#: modules/process/indent_analyze.c:246
 msgid "Do nothing"
 msgstr "Non fare nulla"
 
-#: modules/process/indent_analyze.c:227
+#: modules/process/indent_analyze.c:247
 msgid "Plane level"
 msgstr "Livella piano"
 
-#: modules/process/indent_analyze.c:228
+#: modules/process/indent_analyze.c:248
 msgid "Plane rotate"
 msgstr "Ruota piano"
 
-#: modules/process/indent_analyze.c:241
+#: modules/process/indent_analyze.c:252
 msgid "New"
 msgstr "Nuovo"
 
-#: modules/process/indent_analyze.c:242
+#: modules/process/indent_analyze.c:253
 msgid "AND"
 msgstr "E"
 
-#: modules/process/indent_analyze.c:243
+#: modules/process/indent_analyze.c:254
 msgid "OR"
 msgstr "O"
 
-#: modules/process/indent_analyze.c:244
+#: modules/process/indent_analyze.c:255
 msgid "NOT"
 msgstr "NON"
 
-#: modules/process/indent_analyze.c:245
+#: modules/process/indent_analyze.c:256
 msgid "XOR"
 msgstr "XOR"
 
-#: modules/process/indent_analyze.c:262
+#: modules/process/indent_analyze.c:260
 msgid "Nothing"
 msgstr "Nulla"
 
-#: modules/process/indent_analyze.c:263
+#: modules/process/indent_analyze.c:261
 msgid "Above"
 msgstr "Sopra"
 
-#: modules/process/indent_analyze.c:264
+#: modules/process/indent_analyze.c:262
 msgid "Bellow"
 msgstr "Sotto"
 
-#: modules/process/indent_analyze.c:265
+#: modules/process/indent_analyze.c:263
 msgid "Plane"
 msgstr "Piano"
 
-#: modules/process/indent_analyze.c:266
+#: modules/process/indent_analyze.c:264
 msgid "Impression"
 msgstr "Impressione"
 
-#: modules/process/indent_analyze.c:267
+#: modules/process/indent_analyze.c:265
 msgid "Inner Pile-up"
 msgstr "Inner Pile-up"
 
-#: modules/process/indent_analyze.c:268
+#: modules/process/indent_analyze.c:266
 #, fuzzy
 msgid "Outer Pile-up"
 msgstr "Outer Pile-up"
 
-#: modules/process/indent_analyze.c:269
+#: modules/process/indent_analyze.c:267
 msgid "Special points"
 msgstr "Ounti speciali"
 
-#: modules/process/indent_analyze.c:270
+#: modules/process/indent_analyze.c:268
 msgid "Faces border"
 msgstr "Contorno facce"
 
-#: modules/process/indent_analyze.c:281
-msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
-msgstr "Analizza struttura nanoindentazione (volumi, superfici, ....)"
+#: modules/process/indent_analyze.c:276
+msgid "Analyses nanoindentation structure (volumes, surfaces, ...)."
+msgstr ""
 
-#: modules/process/indent_analyze.c:297
+#: modules/process/indent_analyze.c:292
 msgid "/Indento_r/_Analyze..."
 msgstr "/Indentazione/_Analizza..."
 
-#: modules/process/indent_analyze.c:350
+#: modules/process/indent_analyze.c:345
 msgid "Indentaion statistics"
 msgstr "Statistiche indentazione"
 
-#: modules/process/indent_analyze.c:351
+#: modules/process/indent_analyze.c:346
 msgid "_Compute & mark"
 msgstr "_Calcola & segna"
 
-#: modules/process/indent_analyze.c:352
+#: modules/process/indent_analyze.c:347
 msgid "_Save statistics"
 msgstr "_Salva statistiche"
 
-#: modules/process/indent_analyze.c:390
-msgid "Data field leveling:"
-msgstr "Livellamento campo dati:"
+#: modules/process/indent_analyze.c:398
+msgid "Marked _areas:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:399
-msgid "Marked areas:"
-msgstr "Aree segnate:"
+#: modules/process/indent_analyze.c:407
+msgid "_Indentor type:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:406
-msgid "Indentor type:"
-msgstr "Typo indentazione:"
-
-#: modules/process/indent_analyze.c:414
-msgid "Mask creation type:"
-msgstr "Creazione maschera:"
-
-#: modules/process/indent_analyze.c:419
-msgid "Ref. plane tolerance:"
-msgstr "Ref. tolleranza piano:"
+#: modules/process/indent_analyze.c:417
+msgid "_Mask creation type:"
+msgstr ""
 
 #: modules/process/indent_analyze.c:424
-msgid "Angle 1 tolerance:"
-msgstr "Tolleranza angolo 1:"
+msgid "Ref. plane _tolerance:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:429
-msgid "Theta range:"
-msgstr "Intervallo theta"
+#: modules/process/indent_analyze.c:430
+msgid "Angle _1 tolerance:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:444
+#: modules/process/indent_analyze.c:448
 msgid "Indent centre at"
 msgstr "Centra indentazione a:"
 
-#: modules/process/indent_analyze.c:447
+#: modules/process/indent_analyze.c:452
 msgid "Maximum at"
 msgstr "Massimo a"
 
-#: modules/process/indent_analyze.c:450
+#: modules/process/indent_analyze.c:456
 msgid "Max-min diference"
 msgstr "Differenza massimo-minimo"
 
-#: modules/process/indent_analyze.c:457
-msgid "Expected A_d:"
-msgstr "A_d aspettata:"
+#: modules/process/indent_analyze.c:463
+msgid "Expected A<sub>d</sub>:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:460
-msgid "Expected A_p:"
-msgstr "A_p aspettata:"
+#: modules/process/indent_analyze.c:467
+msgid "Expected A<sub>p</sub>:"
+msgstr ""
 
-#: modules/process/indent_analyze.c:501
+#: modules/process/indent_analyze.c:509
 msgid "Volume above-below"
 msgstr "Volume sopra-sotto"
 
-#: modules/process/indent_analyze.c:511
+#: modules/process/indent_analyze.c:520
 msgid "Indent. volume"
 msgstr "Volume indent."
 
-#: modules/process/indent_analyze.c:517
-msgid "Indent. A_d"
-msgstr "A_d indent."
+#: modules/process/indent_analyze.c:527
+msgid "Indent. A<sub>d</sub>"
+msgstr ""
 
-#: modules/process/indent_analyze.c:520
-msgid "Indent. A_p"
-msgstr "A_p indent"
+#: modules/process/indent_analyze.c:531
+msgid "Indent. A<sub>p</sub>"
+msgstr ""
 
-#: modules/process/indent_analyze.c:529
-msgid "Inner Pile-Up A_d"
-msgstr "Inner Pile-Up A_d"
+#: modules/process/indent_analyze.c:541
+msgid "Inner Pile-Up A<sub>d</sub>"
+msgstr ""
 
-#: modules/process/indent_analyze.c:532
-msgid "Inner Pile-Up A_p"
-msgstr "Inner Pile-Up A_p"
+#: modules/process/indent_analyze.c:545
+msgid "Inner Pile-Up A<sub>p</sub>"
+msgstr ""
 
-#: modules/process/indent_analyze.c:535
-msgid "Outer Pile-Up A_d"
-msgstr "Outer Pile-Up A_d"
+#: modules/process/indent_analyze.c:549
+msgid "Outer Pile-Up A<sub>d</sub>"
+msgstr ""
 
-#: modules/process/indent_analyze.c:538
-msgid "Outer Pile-Up A_p"
-msgstr "Outer Pile-Up A_p"
+#: modules/process/indent_analyze.c:553
+msgid "Outer Pile-Up A<sub>p</sub>"
+msgstr ""
+
+#: modules/process/indent_analyze.c:1450
+msgid "No statistics has benn computed yet."
+msgstr ""
+
+#: modules/process/indent_analyze.c:1458
+msgid "Save Indentation Statistics"
+msgstr ""
 
 #: modules/process/laplace.c:45
 msgid ""
@@ -4050,3 +4150,51 @@ msgstr "Quantità statistiche"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametri</b>"
+
+#~ msgid "Expected A_d:"
+#~ msgstr "A_d aspettata:"
+
+#~ msgid "Expected A_p:"
+#~ msgstr "A_p aspettata:"
+
+#~ msgid "Indent. A_d"
+#~ msgstr "A_d indent."
+
+#~ msgid "Indent. A_p"
+#~ msgstr "A_p indent"
+
+#~ msgid "Inner Pile-Up A_d"
+#~ msgstr "Inner Pile-Up A_d"
+
+#~ msgid "Inner Pile-Up A_p"
+#~ msgstr "Inner Pile-Up A_p"
+
+#~ msgid "Outer Pile-Up A_d"
+#~ msgstr "Outer Pile-Up A_d"
+
+#~ msgid "Outer Pile-Up A_p"
+#~ msgstr "Outer Pile-Up A_p"
+
+#~ msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
+#~ msgstr "Analizza struttura nanoindentazione (volumi, superfici, ....)"
+
+#~ msgid "Data field leveling:"
+#~ msgstr "Livellamento campo dati:"
+
+#~ msgid "Marked areas:"
+#~ msgstr "Aree segnate:"
+
+#~ msgid "Indentor type:"
+#~ msgstr "Typo indentazione:"
+
+#~ msgid "Mask creation type:"
+#~ msgstr "Creazione maschera:"
+
+#~ msgid "Ref. plane tolerance:"
+#~ msgstr "Ref. tolleranza piano:"
+
+#~ msgid "Angle 1 tolerance:"
+#~ msgstr "Tolleranza angolo 1:"
+
+#~ msgid "Theta range:"
+#~ msgstr "Intervallo theta"
