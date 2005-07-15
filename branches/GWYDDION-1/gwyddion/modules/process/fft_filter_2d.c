@@ -57,7 +57,7 @@
     GWY_DATA_FIELD(gwy_container_get_object_by_name(obj, "/0/data"))
 
 #define get_distance(x1, x2, y1, y2) \
-    sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2))
+    sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 enum {
     MARKER_CIRCLE,
@@ -135,40 +135,59 @@ typedef struct {
 
 /* Gwyddion Module Routines */
 static gboolean     module_register     (const gchar *name);
-static gboolean     run_main            (GwyContainer *data, GwyRunType run);
+static gboolean     run_main            (GwyContainer *data,
+                                         GwyRunType run);
 
 /* Signal handlers */
-static gboolean     paint_fft           (GtkWidget *widget, GdkEventExpose *event,
+static gboolean     paint_fft           (GtkWidget *widget,
+                                         GdkEventExpose *event,
                                          ControlsType *controls);
-static gboolean     mouse_down_fft      (GtkWidget *widget, GdkEventButton *event,
+static gboolean     mouse_down_fft      (ControlsType *controls,
+                                         GdkEventButton *event);
+static gboolean     mouse_up_fft        (ControlsType *controls,
+                                         GdkEventButton *event);
+static gboolean     mouse_move_fft      (GtkWidget *widget,
+                                         GdkEventMotion *event,
                                          ControlsType *controls);
-static gboolean     mouse_up_fft        (GtkWidget *widget, GdkEventButton *event,
+static void         scale_changed_fft   (GtkRange *range,
                                          ControlsType *controls);
-static gboolean     mouse_move_fft      (GtkWidget *widget, GdkEventMotion *event,
-                                         ControlsType *controls);
-static void         scale_changed_fft   (GtkRange *range, ControlsType *controls);
-static void         remove_all_clicked  (GtkButton *button, ControlsType *controls);
-static void         display_mode_changed(GtkToggleButton *button, ControlsType *controls);
+static void         remove_all_clicked  (ControlsType *controls);
+static void         display_mode_changed(ControlsType *controls);
 
 /* Helper Functions */
 static gboolean     run_dialog          (ControlsType *controls);
 static void         build_tooltips      (GHashTable *hash_tips);
 static void         save_settings       (ControlsType *controls);
-static void         load_settings       (ControlsType *controls, gboolean load_defaults);
-static void         fft_filter_2d       (GwyDataField *input, GwyDataField *output_image,
-                                         GwyDataField *output_fft, GSList *markers);
+static void         load_settings       (ControlsType *controls,
+                                         gboolean load_defaults);
+static void         fft_filter_2d       (GwyDataField *input,
+                                         GwyDataField *output_image,
+                                         GwyDataField *output_fft,
+                                         GSList *markers);
 static void         do_fft              (GwyDataField *dataInput,
                                          GwyDataField *dataOutput);
-static void         set_dfield_modulus  (GwyDataField *re, GwyDataField *im,
+static void         set_dfield_modulus  (GwyDataField *re,
+                                         GwyDataField *im,
                                          GwyDataField *target);
-static void         draw_marker         (GdkDrawable *pix_target, MarkerType *marker,
-                                         GdkFunction function, ControlsType *controls);
-static void         draw_markers        (GdkPixmap *pix_target, ControlsType *controls);
-static MarkerType*  get_selected_marker (gdouble x, gdouble y, ControlsType *controls);
+static void         draw_marker         (GdkDrawable *pix_target,
+                                         MarkerType *marker,
+                                         GdkFunction function,
+                                         ControlsType *controls);
+static void         draw_markers        (GdkPixmap *pix_target,
+                                         ControlsType *controls);
+static MarkerType*  get_selected_marker (gdouble x,
+                                         gdouble y,
+                                         ControlsType *controls);
 static void         calc_circle_box     (MarkerType *marker);
-static GdkColor     get_color_from_rgb  (gint red, gint green, gint blue);
-static void         screen_to_dfield    (gdouble *x, gdouble *y, ControlsType *controls);
-static void         dfield_to_screen    (gdouble *x, gdouble *y, ControlsType *controls);
+static GdkColor     get_color_from_rgb  (gint red,
+                                         gint green,
+                                         gint blue);
+static void         screen_to_dfield    (gdouble *x,
+                                         gdouble *y,
+                                         ControlsType *controls);
+static void         dfield_to_screen    (gdouble *x,
+                                         gdouble *y,
+                                         ControlsType *controls);
 
 /* The module info. */
 static GwyModuleInfo module_info = {
@@ -478,8 +497,8 @@ run_dialog(ControlsType *controls)
     gtk_tooltips_set_tip(GTK_TOOLTIPS(tips), button,
                          g_hash_table_lookup(hash_tips, "remove_all"), "");
     gtk_container_add(GTK_CONTAINER(hbox2), button);
-    g_signal_connect(button, "clicked",
-                     G_CALLBACK(remove_all_clicked), controls);
+    g_signal_connect_swapped(button, "clicked",
+                             G_CALLBACK(remove_all_clicked), controls);
 
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 15);
     row++;
@@ -520,8 +539,8 @@ run_dialog(ControlsType *controls)
     row++;
 
     button = gtk_radio_button_new_with_mnemonic(NULL, _("Filter _Drawing"));
-    g_signal_connect(button, "toggled",
-                     G_CALLBACK(display_mode_changed), controls);
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft = button;
@@ -529,8 +548,8 @@ run_dialog(ControlsType *controls)
 
     button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
                                                             _("Filtered _Image Preview"));
-    g_signal_connect(button, "toggled",
-                     G_CALLBACK(display_mode_changed), controls);
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_image_preview = button;
@@ -538,8 +557,8 @@ run_dialog(ControlsType *controls)
 
     button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
                                                             _("Filtered _FFT Preview"));
-    g_signal_connect(button, "toggled",
-                     G_CALLBACK(display_mode_changed), controls);
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft_preview = button;
@@ -574,10 +593,10 @@ run_dialog(ControlsType *controls)
                      G_CALLBACK(scale_changed_fft), controls);
     g_signal_connect(controls->draw_fft, "expose_event",
                      G_CALLBACK(paint_fft), controls);
-    g_signal_connect(controls->draw_fft, "button_press_event",
-                     G_CALLBACK(mouse_down_fft), controls);
-    g_signal_connect(controls->draw_fft, "button_release_event",
-                     G_CALLBACK(mouse_up_fft), controls);
+    g_signal_connect_swapped(controls->draw_fft, "button_press_event",
+                             G_CALLBACK(mouse_down_fft), controls);
+    g_signal_connect_swapped(controls->draw_fft, "button_release_event",
+                             G_CALLBACK(mouse_up_fft), controls);
     g_signal_connect(controls->draw_fft, "motion_notify_event",
                      G_CALLBACK(mouse_move_fft), controls);
     gtk_widget_set_events(controls->draw_fft,
@@ -986,9 +1005,7 @@ dfield_to_screen(gdouble *x, gdouble *y, ControlsType *controls)
 }
 
 static gboolean
-mouse_down_fft(G_GNUC_UNUSED GtkWidget *widget,
-               GdkEventButton *event,
-               ControlsType *controls)
+mouse_down_fft(ControlsType *controls, GdkEventButton *event)
 {
     gdouble x, y;
     MarkerType *marker;
@@ -1036,9 +1053,7 @@ mouse_down_fft(G_GNUC_UNUSED GtkWidget *widget,
 }
 
 static gboolean
-mouse_up_fft(G_GNUC_UNUSED GtkWidget *widget,
-             G_GNUC_UNUSED GdkEventButton *event,
-             ControlsType *controls)
+mouse_up_fft(ControlsType *controls, G_GNUC_UNUSED GdkEventButton *event)
 {
     MarkerType *marker;
     GSList *list;
@@ -1062,7 +1077,7 @@ mouse_up_fft(G_GNUC_UNUSED GtkWidget *widget,
     }
 
     /* XOR Marker (clear it away) */
-    draw_marker(widget->window, marker, GDK_XOR, controls);
+    draw_marker(controls->draw_fft->window, marker, GDK_XOR, controls);
 
     /* Remove Marker if remove button selected, or if the user resized the
      * marker to be zero sized */
@@ -1076,7 +1091,7 @@ mouse_up_fft(G_GNUC_UNUSED GtkWidget *widget,
         controls->preview_invalid = TRUE;
     } else {
         /* Redraw marker with proper color */
-        draw_marker(widget->window, marker, GDK_COPY, controls);
+        draw_marker(controls->draw_fft->window, marker, GDK_COPY, controls);
     }
 
     controls->marker_selected = NULL;
@@ -1220,8 +1235,7 @@ scale_changed_fft(GtkRange *range, ControlsType *controls)
 }
 
 static void
-remove_all_clicked(G_GNUC_UNUSED GtkButton *button,
-                   ControlsType *controls)
+remove_all_clicked(ControlsType *controls)
 {
     GSList *list;
 
@@ -1239,8 +1253,7 @@ remove_all_clicked(G_GNUC_UNUSED GtkButton *button,
 }
 
 static void
-display_mode_changed(G_GNUC_UNUSED GtkToggleButton *button,
-                     ControlsType *controls)
+display_mode_changed(ControlsType *controls)
 {
     GwyDataField *dfield;
     GwyGradient *gradient_fft;
