@@ -103,7 +103,9 @@ gwy_app_toolbox_update_state
 
 <SECTION>
 <FILE>menu-windowlist</FILE>
+GwyDataWindowMenuFilterFunc
 gwy_option_menu_data_window
+gwy_option_menu_data_window_filtered
 gwy_option_menu_data_window_set_history
 gwy_option_menu_data_window_get_history
 </SECTION>

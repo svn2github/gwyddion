@@ -64,6 +64,7 @@ gwy_data_field_get_yder
 gwy_data_field_get_angder
 gwy_data_field_shade
 gwy_data_field_fit_lines
+gwy_data_field_elliptic_area_fill
 <SUBSECTION Standard>
 GWY_DATA_FIELD
 GWY_IS_DATA_FIELD

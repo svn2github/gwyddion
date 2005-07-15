@@ -80,10 +80,14 @@ HTML_IMAGES = \
 	$(top_srcdir)/pixmaps/gwy_light_rotate-24.png \
 	$(top_srcdir)/pixmaps/gwy_line_correction-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_add-24.png \
+	$(top_srcdir)/pixmaps/gwy_mask_circle_exclusive-24.png \
+	$(top_srcdir)/pixmaps/gwy_mask_circle_inclusive-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_editor-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_grow-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_intersect-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_invert-24.png \
+	$(top_srcdir)/pixmaps/gwy_mask_rect_exclusive-24.png \
+	$(top_srcdir)/pixmaps/gwy_mask_rect_inclusive-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_remove-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_set-24.png \
 	$(top_srcdir)/pixmaps/gwy_mask_shrink-24.png \

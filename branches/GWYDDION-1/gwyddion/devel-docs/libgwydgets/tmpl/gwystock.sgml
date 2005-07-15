@@ -310,6 +310,30 @@ Since: 1.7
 
 
 
+<!-- ##### MACRO GWY_STOCK_MASK_CIRCLE_INCLUSIVE ##### -->
+<para>
+The "Mask-Circle-Inclusive" stock icon.
+<inlinegraphic fileref="gwy_mask_circle_inclusive-24.png" format="PNG"></inlinegraphic>
+</para>
+
+<para>
+Since: 1.12
+</para>
+
+
+
+<!-- ##### MACRO GWY_STOCK_MASK_CIRCLE_EXCLUSIVE ##### -->
+<para>
+The "Mask-Circle-Exclusive" stock icon.
+<inlinegraphic fileref="gwy_mask_circle_exclusive-24.png" format="PNG"></inlinegraphic>
+</para>
+
+<para>
+Since: 1.12
+</para>
+
+
+
 <!-- ##### MACRO GWY_STOCK_MASK_GROW ##### -->
 <para>
 The "Mask-Grow" stock icon.
@@ -354,6 +378,30 @@ The "Mask-Invert" stock icon.
 
 <para>
 Since: 1.7
+</para>
+
+
+
+<!-- ##### MACRO GWY_STOCK_MASK_RECT_INCLUSIVE ##### -->
+<para>
+The "Mask-Rect-Inclusive" stock icon.
+<inlinegraphic fileref="gwy_mask_rect_inclusive-24.png" format="PNG"></inlinegraphic>
+</para>
+
+<para>
+Since: 1.12
+</para>
+
+
+
+<!-- ##### MACRO GWY_STOCK_MASK_RECT_EXCLUSIVE ##### -->
+<para>
+The "Mask-Rect-Exclusive" stock icon.
+<inlinegraphic fileref="gwy_mask_rect_inclusive-24.png" format="PNG"></inlinegraphic>
+</para>
+
+<para>
+Since: 1.12
 </para>
 
 

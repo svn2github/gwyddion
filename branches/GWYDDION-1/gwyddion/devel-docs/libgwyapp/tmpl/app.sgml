@@ -149,6 +149,7 @@ Core application interface.
 </para>
 
 @window: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gwy_app_3d_window_create ##### -->
@@ -182,6 +183,7 @@ Core application interface.
 </para>
 
 @window: 
+@Returns: 
 
 
 <!-- ##### FUNCTION gwy_app_get_current_window ##### -->
