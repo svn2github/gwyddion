@@ -123,7 +123,8 @@ typedef struct {
 
     GSList *markers;
     MarkerType *marker_selected;
-
+    gboolean can_change_marker;
+    
     gint xres;
     gdouble color_range;
     gboolean preview;
@@ -253,7 +254,7 @@ run_main(GwyContainer *data, GwyRunType run)
 
     response = run_dialog(&controls);
 
-    if (response && g_slist_length(controls.markers) > 0) {
+    if (response && controls.markers) {
         dfield = get_container_data(data);
 
         if (controls.preview_invalid)
@@ -346,7 +347,8 @@ run_dialog(ControlsType *controls)
     controls->markers = NULL;
     controls->marker_selected = NULL;
     controls->preview_invalid = FALSE;
-
+    controls->can_change_marker = FALSE;
+    
     /* Setup container and data field */
     cont_fft = controls->cont_fft;
     data_fft = get_container_data(cont_fft);
@@ -950,16 +952,21 @@ draw_markers(GdkPixmap *pix_target, ControlsType *controls)
 {
     GSList *list;
     MarkerType *marker;
+    MarkerType *marker_selected;
 
+    marker_selected = NULL;
     list = controls->markers;
     while (list) {
         marker = list->data;
         if (marker == controls->marker_selected)
-            draw_marker(pix_target, marker, GDK_XOR, controls);
+            marker_selected = marker;
         else
             draw_marker(pix_target, marker, GDK_COPY, controls);
         list = g_slist_next(list);
     }
+
+    if (marker_selected != NULL)    
+        draw_marker(pix_target, marker_selected, GDK_XOR, controls);
 }
 
 static void
@@ -1019,6 +1026,8 @@ mouse_down_fft(ControlsType *controls, GdkEventButton *event)
     if (get_toggled(controls->button_drag)
         || get_toggled(controls->button_remove)) {
         controls->marker_selected = get_selected_marker(x, y, controls);
+        if (controls->marker_selected != NULL)
+            controls->can_change_marker = TRUE;
         gtk_widget_queue_draw_area(controls->draw_fft, 0, 0,
                                    PREVIEW_SIZE, PREVIEW_SIZE);
     }
@@ -1047,6 +1056,7 @@ mouse_down_fft(ControlsType *controls, GdkEventButton *event)
         /* Add marker to linked list */
         controls->markers = g_slist_append(controls->markers, marker);
         controls->preview_invalid = TRUE;
+        controls->can_change_marker = TRUE;
     }
 
     return TRUE;
@@ -1068,7 +1078,7 @@ mouse_up_fft(ControlsType *controls, G_GNUC_UNUSED GdkEventButton *event)
     if (editing && controls->marker_selected) {
         marker = controls->marker_selected;
     }
-    else if (!editing && g_slist_length(controls->markers) > 0) {
+    else if (!editing && controls->markers) {
         list = g_slist_last(controls->markers);
         marker = list->data;
     }
@@ -1095,7 +1105,8 @@ mouse_up_fft(ControlsType *controls, G_GNUC_UNUSED GdkEventButton *event)
     }
 
     controls->marker_selected = NULL;
-
+    controls->can_change_marker = FALSE;
+    
     return TRUE;
 }
 
@@ -1130,7 +1141,8 @@ mouse_move_fft(GtkWidget *widget, GdkEventMotion *event, ControlsType *controls)
 
     }
     else if ((state & GDK_BUTTON1_MASK)
-             && g_slist_length(controls->markers) > 0) {
+             && controls->markers
+             && controls->can_change_marker) {
         if (get_toggled(controls->button_remove))
             return TRUE;
         screen_to_dfield(&x, &y, controls);
