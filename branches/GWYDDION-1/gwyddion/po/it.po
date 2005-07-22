@@ -1,3 +1,4 @@
+# translation of it.po to 
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR "David Necas (Yeti) & Petr Klapetek".
 # hyperlink <hyperlink@katamail.com>, 2005.
@@ -8,7 +9,7 @@ msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
 "POT-Creation-Date: 2005-07-15 13:16+0200\n"
-"PO-Revision-Date: 2005-06-12 21:42+0200\n"
+"PO-Revision-Date: 2005-07-21 19:01+0200\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1140,34 +1141,36 @@ msgstr "formato nativo Gwyddion (.gwy)"
 
 #: modules/file/jpkscan.c:108
 msgid "Imports JPK image scans."
-msgstr ""
+msgstr "Importa scansioni immagini JPK"
 
 #: modules/file/jpkscan.c:126
 msgid "JPK image scans (.jpk)"
-msgstr ""
+msgstr "Scansioni immagini JPK (.jpk)"
 
 #: modules/file/jpkscan.c:242
 msgid "Cannot load JPK Scan!"
-msgstr ""
+msgstr "Non posso caricare la scansione JPK!"
 
 #: modules/file/jpkscan.c:243
 msgid ""
 "Either the file you are trying to open is not a JPK scan file, or it is "
 "somehow corrupt."
 msgstr ""
+"Il file che state cercando di aprire o non è una scansione JPK o è stato "
+"corrotto"
 
 #: modules/file/jpkscan.c:331
 msgid "LibTIFF too old!"
-msgstr ""
+msgstr "LibTIFF troppo vecchia!!!"
 
 #: modules/file/jpkscan.c:332
 #, c-format
 msgid "You are using %s. Please update to libtiff version %d.%d or newer."
-msgstr ""
+msgstr "Stai usando %s. Aggiornare alla verisone %d.%d o superiore di libtiff "
 
 #: modules/file/jpkscan.c:747
 msgid "Open JPK Image"
-msgstr ""
+msgstr "Apri immagine JPK"
 
 #: modules/file/jpkscan.c:761
 #, c-format
@@ -1175,14 +1178,16 @@ msgid ""
 "Select a channel to load from\n"
 "<b>%s</b>"
 msgstr ""
+"Seleziona un canale da cui caricare\n"
+"<b>%s</b>"
 
 #: modules/file/jpkscan.c:787
 msgid "Ch_annel:"
-msgstr ""
+msgstr "C_anale:"
 
 #: modules/file/jpkscan.c:918
 msgid "(invalid filename encoding)"
-msgstr ""
+msgstr "(encoding nomefile non valido)"
 
 #: modules/file/nanoscope.c:128
 msgid "Imports Veeco Nanoscope data files."
@@ -2239,9 +2244,9 @@ msgstr "/Trasformate _Integrali/_2D CWT..."
 #: modules/process/cwt.c:128 modules/process/dwt.c:126
 #: modules/process/dwtanisotropy.c:131 modules/process/dwtcorrection.c:121
 #: modules/process/dwtdenoise.c:133 modules/process/fft.c:156
-#, fuzzy, c-format
+#, c-format
 msgid "%s: Data must be square."
-msgstr "%s: I Dati devono essere square"
+msgstr "%s: I Dati devono essere quadrati"
 
 #: modules/process/cwt.c:178
 msgid "2D CWT"
@@ -2394,44 +2399,45 @@ msgid "Facet-levelling"
 msgstr "Facet-levelling"
 
 #: modules/process/facet_analysis.c:139
+#, fuzzy
 msgid "Visualizes, marks and measures facet orientation."
-msgstr ""
+msgstr "Visualizza i contorni e le misure dell'orientazione facet"
 
 #: modules/process/facet_analysis.c:155
 msgid "/_Statistics/Facet _Analysis..."
-msgstr ""
+msgstr "/_Statistica/ Analisi_Facet..."
 
 #: modules/process/facet_analysis.c:248
 msgid "Mark Facets"
-msgstr ""
+msgstr "Segna Facets"
 
 #: modules/process/facet_analysis.c:251
 msgid "_Mark"
-msgstr ""
+msgstr "_Segna"
 
 #: modules/process/facet_analysis.c:321
 msgid "<b>Normal</b>"
-msgstr ""
+msgstr "<b>Normale</b>"
 
 #: modules/process/facet_analysis.c:327 modules/process/facet_analysis.c:345
 msgid "Theta:"
-msgstr ""
+msgstr "Theta:"
 
 #: modules/process/facet_analysis.c:328 modules/process/facet_analysis.c:346
 msgid "Phi:"
-msgstr ""
+msgstr "Phi:"
 
 #: modules/process/facet_analysis.c:330
 msgid "_Find Maximum"
-msgstr ""
+msgstr "_Trova Massimo"
 
 #: modules/process/facet_analysis.c:339
 msgid "<b>Mean Normal</b>"
-msgstr ""
+msgstr "<b>Media Normale</b>"
 
 #: modules/process/facet_analysis.c:354
 msgid "_Tolerance:"
-msgstr ""
+msgstr "_Tolleranza:"
 
 #: modules/process/facet_analysis.c:363 modules/process/grain_mark.c:283
 #: modules/process/grain_rem_threshold.c:260 modules/process/grain_wshed.c:289
@@ -2444,6 +2450,8 @@ msgid ""
 "Warning: Lateral and value units differ. Angles are not physically "
 "meaningful."
 msgstr ""
+"Attenzione: le unità laterali e di valore differiscono. Gli angoli non hanno "
+"significato fisico."
 
 #: modules/process/fft.c:107
 msgid "Two-dimensional FFT (Fast Fourier Transform)."
@@ -2563,107 +2571,109 @@ msgstr "Non segnato"
 
 #: modules/process/fft_filter_2d.c:197 modules/process/fft_filter_2d.c:376
 msgid "2D FFT Filtering"
-msgstr ""
+msgstr "Filtro 2D FFT"
 
 #: modules/process/fft_filter_2d.c:212
 msgid "/_Correct Data/_2D FFT filtering..."
-msgstr ""
+msgstr "/_Correzione dati/_Filtro 2D FFT ..."
 
 #: modules/process/fft_filter_2d.c:277 modules/process/fft_filter_2d.c:320
 msgid "Filtered FFT"
-msgstr ""
+msgstr "Filtrato FFT "
 
 #: modules/process/fft_filter_2d.c:283 modules/process/fft_filter_2d.c:319
 msgid "Filtered Image"
-msgstr ""
+msgstr "Immagine filtrata"
 
 #: modules/process/fft_filter_2d.c:321
 msgid "Both"
-msgstr ""
+msgstr "Entrambi"
 
 #: modules/process/fft_filter_2d.c:406
 msgid "<b>Filter Drawing</b>"
-msgstr ""
+msgstr "<b>Filtra disegno</b>"
 
 #: modules/process/fft_filter_2d.c:473
 msgid "Re_move"
-msgstr ""
+msgstr "Ri_muovi"
 
 #: modules/process/fft_filter_2d.c:483
 msgid "_Snap to origin"
-msgstr ""
+msgstr "_Snap to origin"
 
 #: modules/process/fft_filter_2d.c:496
 msgid "Remove _All"
-msgstr ""
+msgstr "Rimuovi_tutto"
 
 #: modules/process/fft_filter_2d.c:507
 msgid "<b>Preview Options</b>"
-msgstr ""
+msgstr "<b>Opzioni Anteprima</b>"
 
 #: modules/process/fft_filter_2d.c:527
 msgid "Color Ran_ge:"
-msgstr ""
+msgstr "Intervallo Colore:"
 
 #: modules/process/fft_filter_2d.c:535
 msgid "Display mode:"
-msgstr ""
+msgstr "Display mode:"
 
 #: modules/process/fft_filter_2d.c:541
 msgid "Filter _Drawing"
-msgstr ""
+msgstr "Disegna Filtro:"
 
 #: modules/process/fft_filter_2d.c:550
 msgid "Filtered _Image Preview"
-msgstr ""
+msgstr "Anteprima _Immagine filtrata"
 
 #: modules/process/fft_filter_2d.c:559
 msgid "Filtered _FFT Preview"
-msgstr ""
+msgstr "Anteprima Filtro _FFT"
 
 #: modules/process/fft_filter_2d.c:569
 msgid "<b>Output Options</b>"
-msgstr ""
+msgstr "<b>Opzioni di output</b>"
 
 #: modules/process/fft_filter_2d.c:582
 msgid "Output _type:"
-msgstr ""
+msgstr "Tipo di output:"
 
 #: modules/process/fft_filter_2d.c:658
 msgid "Draw a new inclusive circle marker."
-msgstr ""
+msgstr "Disegna una nuova selezione circolare di inclusione"
 
 #: modules/process/fft_filter_2d.c:660
 msgid "Draw a new inclusive rectangle marker."
-msgstr ""
+msgstr "Disegna una nuova selezione rettangolare di inclusione"
 
 #: modules/process/fft_filter_2d.c:662
 msgid "Draw a new exclusive circle marker."
-msgstr ""
+msgstr "Disegna una nuova selezione circolare di esclusione"
 
 #: modules/process/fft_filter_2d.c:664
 msgid "Draw a new exclusive rectangle marker."
-msgstr ""
+msgstr "Disegna una nuova selezione rettangolare di esclusione"
 
 #: modules/process/fft_filter_2d.c:666
 msgid "Click and drag a marker to resize. Hold Shift to move marker."
 msgstr ""
+"Seleziona e trascina un marker per ridimensionarlo. Premere Shift per "
+"spostarlo."
 
 #: modules/process/fft_filter_2d.c:668
 msgid "Click on a marker to remove it."
-msgstr ""
+msgstr "Clicca su un marker per rimuoverlo"
 
 #: modules/process/fft_filter_2d.c:670
 msgid "Removes all markers."
-msgstr ""
+msgstr "Rimuove tutti i marker"
 
 #: modules/process/fft_filter_2d.c:672
 msgid "Forces new markers to center around the origin."
-msgstr ""
+msgstr "Forza nuovi markers con centro attorno all'origine"
 
 #: modules/process/fft_filter_2d.c:674
 msgid "Changes the range of values displayed in the FFT."
-msgstr ""
+msgstr "Cambia l'intervallo di valori mostrati nell'FFT"
 
 #: modules/process/fit_2d.c:148
 msgid "2D fitting"
@@ -2988,7 +2998,7 @@ msgstr "Inner Pile-up"
 #: modules/process/indent_analyze.c:266
 #, fuzzy
 msgid "Outer Pile-up"
-msgstr "Outer Pile-up"
+msgstr "Pile-up Esterno"
 
 #: modules/process/indent_analyze.c:267
 msgid "Special points"
@@ -3000,7 +3010,7 @@ msgstr "Contorno facce"
 
 #: modules/process/indent_analyze.c:276
 msgid "Analyses nanoindentation structure (volumes, surfaces, ...)."
-msgstr ""
+msgstr "Analizza struttura di nanoindentzione (volumes, superfici, ...)."
 
 #: modules/process/indent_analyze.c:292
 msgid "/Indento_r/_Analyze..."
@@ -3020,23 +3030,24 @@ msgstr "_Salva statistiche"
 
 #: modules/process/indent_analyze.c:398
 msgid "Marked _areas:"
-msgstr ""
+msgstr "Aree _segnate:"
 
 #: modules/process/indent_analyze.c:407
 msgid "_Indentor type:"
-msgstr ""
+msgstr "_Tipo di indentazione:"
 
 #: modules/process/indent_analyze.c:417
 msgid "_Mask creation type:"
-msgstr ""
+msgstr "_Creazione tipo di maschera_"
 
 #: modules/process/indent_analyze.c:424
+#, fuzzy
 msgid "Ref. plane _tolerance:"
-msgstr ""
+msgstr "Ref. tolleranza _piano:"
 
 #: modules/process/indent_analyze.c:430
 msgid "Angle _1 tolerance:"
-msgstr ""
+msgstr "Angolo _1 tolleranza:"
 
 #: modules/process/indent_analyze.c:448
 msgid "Indent centre at"
@@ -3052,11 +3063,11 @@ msgstr "Differenza massimo-minimo"
 
 #: modules/process/indent_analyze.c:463
 msgid "Expected A<sub>d</sub>:"
-msgstr ""
+msgstr "Aspettata A<sub>d</sub>:"
 
 #: modules/process/indent_analyze.c:467
 msgid "Expected A<sub>p</sub>:"
-msgstr ""
+msgstr "Aspettatata A<sub>p</sub>:"
 
 #: modules/process/indent_analyze.c:509
 msgid "Volume above-below"
@@ -3068,35 +3079,39 @@ msgstr "Volume indent."
 
 #: modules/process/indent_analyze.c:527
 msgid "Indent. A<sub>d</sub>"
-msgstr ""
+msgstr "Indent. A<sub>d</sub>"
 
 #: modules/process/indent_analyze.c:531
 msgid "Indent. A<sub>p</sub>"
-msgstr ""
+msgstr "Indent. A<sub>p</sub>"
 
 #: modules/process/indent_analyze.c:541
+#, fuzzy
 msgid "Inner Pile-Up A<sub>d</sub>"
-msgstr ""
+msgstr "Inner Pile-Up A<sub>d</sub>"
 
 #: modules/process/indent_analyze.c:545
+#, fuzzy
 msgid "Inner Pile-Up A<sub>p</sub>"
-msgstr ""
+msgstr "Inner Pile-Up A<sub>p</sub>"
 
 #: modules/process/indent_analyze.c:549
+#, fuzzy
 msgid "Outer Pile-Up A<sub>d</sub>"
-msgstr ""
+msgstr "Outer Pile-Up A<sub>d</sub>"
 
 #: modules/process/indent_analyze.c:553
+#, fuzzy
 msgid "Outer Pile-Up A<sub>p</sub>"
-msgstr ""
+msgstr "Outer Pile-Up A<sub>p</sub>"
 
 #: modules/process/indent_analyze.c:1450
 msgid "No statistics has benn computed yet."
-msgstr ""
+msgstr "Non è stata ancora calcolata alcuna statistica"
 
 #: modules/process/indent_analyze.c:1458
 msgid "Save Indentation Statistics"
-msgstr ""
+msgstr "Salva le statistiche di indentazione"
 
 #: modules/process/laplace.c:45
 msgid ""
@@ -3382,15 +3397,15 @@ msgstr "/Mostra/E_strai Presentazione"
 
 #: modules/process/presentationops.c:80
 msgid "/_Display/_Attach Presentation..."
-msgstr ""
+msgstr "/_Mostra/_Allega Presentazione..."
 
 #: modules/process/presentationops.c:154
 msgid "Attach Presentation"
-msgstr ""
+msgstr "Allega Presentazione"
 
 #: modules/process/presentationops.c:166
 msgid "_Data to attach:"
-msgstr ""
+msgstr "_Dati da allegare:"
 
 #: modules/process/rotate.c:86
 msgid "Rotates data by arbitrary angle."
@@ -4151,50 +4166,65 @@ msgstr "Quantità statistiche"
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametri</b>"
 
-#~ msgid "Expected A_d:"
-#~ msgstr "A_d aspettata:"
+#, fuzzy
+msgid "Expected A_d:"
+msgstr "Aspettata A<sub>d</sub>:"
 
-#~ msgid "Expected A_p:"
-#~ msgstr "A_p aspettata:"
+#, fuzzy
+msgid "Expected A_p:"
+msgstr "Aspettatata A<sub>p</sub>:"
 
-#~ msgid "Indent. A_d"
-#~ msgstr "A_d indent."
+#, fuzzy
+msgid "Indent. A_d"
+msgstr "Volume indent."
 
-#~ msgid "Indent. A_p"
-#~ msgstr "A_p indent"
+#, fuzzy
+msgid "Indent. A_p"
+msgstr "Volume indent."
 
-#~ msgid "Inner Pile-Up A_d"
-#~ msgstr "Inner Pile-Up A_d"
+#, fuzzy
+msgid "Inner Pile-Up A_d"
+msgstr "Inner Pile-up"
 
-#~ msgid "Inner Pile-Up A_p"
-#~ msgstr "Inner Pile-Up A_p"
+#, fuzzy
+msgid "Inner Pile-Up A_p"
+msgstr "Inner Pile-up"
 
-#~ msgid "Outer Pile-Up A_d"
-#~ msgstr "Outer Pile-Up A_d"
+#, fuzzy
+msgid "Outer Pile-Up A_d"
+msgstr "Pile-up Esterno"
 
-#~ msgid "Outer Pile-Up A_p"
-#~ msgstr "Outer Pile-Up A_p"
+#, fuzzy
+msgid "Outer Pile-Up A_p"
+msgstr "Pile-up Esterno"
 
-#~ msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
-#~ msgstr "Analizza struttura nanoindentazione (volumi, superfici, ....)"
+#, fuzzy
+msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
+msgstr "Analizza struttura di nanoindentzione (volumes, superfici, ...)."
 
-#~ msgid "Data field leveling:"
-#~ msgstr "Livellamento campo dati:"
+msgid "Data field leveling:"
+msgstr "Livellamento campo dati:"
 
-#~ msgid "Marked areas:"
-#~ msgstr "Aree segnate:"
+#, fuzzy
+msgid "Marked areas:"
+msgstr "Aree _segnate:"
 
-#~ msgid "Indentor type:"
-#~ msgstr "Typo indentazione:"
+#, fuzzy
+msgid "Indentor type:"
+msgstr "_Tipo di indentazione:"
 
-#~ msgid "Mask creation type:"
-#~ msgstr "Creazione maschera:"
+#, fuzzy
+msgid "Mask creation type:"
+msgstr "_Creazione tipo di maschera_"
 
-#~ msgid "Ref. plane tolerance:"
-#~ msgstr "Ref. tolleranza piano:"
+#, fuzzy
+msgid "Ref. plane tolerance:"
+msgstr "Ref. tolleranza _piano:"
 
-#~ msgid "Angle 1 tolerance:"
-#~ msgstr "Tolleranza angolo 1:"
+#, fuzzy
+msgid "Angle 1 tolerance:"
+msgstr "Angolo _1 tolleranza:"
 
-#~ msgid "Theta range:"
-#~ msgstr "Intervallo theta"
+#, fuzzy
+msgid "Theta range:"
+msgstr "Intervallo X:"
