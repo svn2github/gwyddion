@@ -1,4 +1,16 @@
 
+1.13
+Application:
+- Translations updated: Italian.
+
+Modules:
+- 2D FFT filtering: Drawing artefacts were fixed.
+- BCR file: Unit support was improved, support for zmin added.
+
+Other:
+- Missing Italic stock icon was added.
+
+
 1.12
 Application:
 - Translations updated: Italian, Czech.
