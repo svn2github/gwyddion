@@ -47,7 +47,10 @@ typedef enum {
     GWY_SF_OUTPUT_CDA   = 3,
     GWY_SF_OUTPUT_ACF   = 4,
     GWY_SF_OUTPUT_HHCF  = 5,
-    GWY_SF_OUTPUT_PSDF  = 6
+    GWY_SF_OUTPUT_PSDF  = 6,
+    GWY_SF_OUTPUT_MINKOWSKI_VOLUME = 7,
+    GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY = 8,
+    GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY = 9
 } GwySFOutputType;
 
 /* FIXME: simply use a number? */

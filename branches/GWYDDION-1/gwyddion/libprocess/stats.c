@@ -33,6 +33,15 @@ void            _gwy_data_line_free              (GwyDataLine *a);
 static gdouble  square_area                      (GwyDataField *data_field,
                                                   gint ulcol, gint ulrow,
                                                   gint brcol, gint brrow);
+static void get_minkowski_volume                 (GwyDataField *data_field, 
+                                                  GwyDataLine *target_line, 
+                                                  gint nstats);
+static void get_minkowski_boundary               (GwyDataField *data_field, 
+                                                  GwyDataLine *target_line, 
+                                                  gint nstats);
+static void get_minkowski_connectivity           (GwyDataField *data_field, 
+                                                  GwyDataLine *target_line, 
+                                                  gint nstats);
 
 /**
  * gwy_data_field_get_max:
@@ -647,8 +656,30 @@ gwy_data_field_get_line_stat_function(GwyDataField *data_field,
             }
         }
     }
+    /*compute statistical functions that are not related to profiles*/
+    
+    switch (type) {
+        case GWY_SF_OUTPUT_MINKOWSKI_VOLUME:
+        get_minkowski_volume(data_field, target_line, nstats);
+        return 1;
+        break;
 
-    /*average over profiles*/
+        case GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY:
+        get_minkowski_boundary(data_field, target_line, nstats);
+        return 1;
+        break;
+        
+        case GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY:
+        get_minkowski_connectivity(data_field, target_line, nstats);
+        return 1;
+        break;
+
+        default:
+        break;
+    } 
+
+    
+    /*average statistical functions over profiles*/
     if (orientation == GTK_ORIENTATION_HORIZONTAL) {
         size = brcol-ulcol;
         if (size < 10) {
@@ -1234,6 +1265,109 @@ gwy_data_field_get_inclination(GwyDataField *data_field,
                                         data_field->xres, data_field->yres,
                                         theta,
                                         phi);
+}
+static void 
+get_minkowski_volume(GwyDataField *data_field, 
+                     GwyDataLine *target_line, 
+                     gint nstats)
+{
+    gint i, j, cnt, n;
+    gdouble min, max, step;
+   
+    if (gwy_data_line_get_res(target_line) != nstats)
+        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+
+    
+    min = gwy_data_field_get_min(data_field);
+    max = gwy_data_field_get_max(data_field);
+    step = (max - min)/nstats;
+    n = data_field->xres*data_field->yres;
+    
+    for (i=0; i<nstats; i++)
+    {
+        cnt = 0;
+        for (j=0; j<n; j++)
+            if (data_field->data[j] > (min + i*step)) cnt++; 
+       
+        target_line->data[i] = (gdouble)cnt/(gdouble)n;
+    }
+
+}
+
+
+static gboolean
+is_boundary(GwyDataField *data_field, gint col, gint row, gdouble threshold)
+{
+    if ((data_field->data[col + data_field->xres*row]>threshold 
+        && data_field->data[col + 1 + data_field->xres*row]<=threshold) ||
+       (data_field->data[col + data_field->xres*row]<threshold 
+        && data_field->data[col + 1 + data_field->xres*row]>=threshold) ||
+       (data_field->data[col + data_field->xres*row]>threshold 
+        && data_field->data[col + data_field->xres*(row+1)]<=threshold) ||
+       (data_field->data[col + data_field->xres*row]<threshold 
+        && data_field->data[col + data_field->xres*(row+1)]>=threshold))
+        return TRUE;
+
+    return FALSE;
+}
+
+static void 
+get_minkowski_boundary(GwyDataField *data_field, 
+                       GwyDataLine *target_line, 
+                       gint nstats)
+{
+    gint row, col, i;
+    gint n, cnt; 
+    gdouble min, max, step;
+
+    if (gwy_data_line_get_res(target_line) != nstats)
+        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+
+    
+    min = gwy_data_field_get_min(data_field);
+    max = gwy_data_field_get_max(data_field);
+    step = (max - min)/nstats;
+    n = data_field->xres*data_field->yres;
+    
+    for (i=0; i<nstats; i++)
+    {
+        cnt = 0;
+        for (row=0; row<(data_field->yres-1); row++)
+            for (col=0; col<(data_field->xres-1); col++)
+                if (is_boundary(data_field, col, row, (min + i*step))) cnt++; 
+       
+        target_line->data[i] = (gdouble)cnt/(gdouble)n;
+    }
+}
+static void 
+get_minkowski_connectivity(GwyDataField *data_field, 
+                           GwyDataLine *target_line, 
+                           gint nstats)
+{
+    GwyDataField *grainfield;
+    gint *grains;
+    gint i, j;
+    gint n, cnt;
+
+    if (gwy_data_line_get_res(target_line) != nstats)
+        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+
+    n = data_field->xres*data_field->yres;
+
+    grainfield = gwy_data_field_new_alike(data_field, FALSE);
+    grains = (gint *)g_malloc(n*sizeof(gint));
+    
+    for (i=0; i<nstats; i++)
+    {
+        gwy_data_field_fill(grainfield, 0);
+        for (j=0; j<n; j++) grains[j]=0;
+        gwy_data_field_grains_mark_height(data_field, grainfield, 100.0*(gdouble)i/(gdouble)nstats, 0);
+        cnt = gwy_data_field_number_grains(grainfield, grains);
+        target_line->data[i] = (gdouble)cnt/(gdouble)n;
+    }
+
+    g_object_unref(grainfield);
+    g_free(grains);
 }
 
 

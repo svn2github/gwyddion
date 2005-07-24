@@ -118,6 +118,8 @@ void gwy_data_field_grains_add(GwyDataField *grain_field,
 
 void gwy_data_field_grains_intersect(GwyDataField *grain_field,
                                      GwyDataField *intersect_field);
+gint gwy_data_field_number_grains(GwyDataField *mask_field,
+				  gint *grains);
 
 
 G_END_DECLS
