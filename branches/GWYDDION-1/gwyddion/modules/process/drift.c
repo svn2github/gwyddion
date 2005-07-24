@@ -97,7 +97,8 @@ static void        drift_save_args              (GwyContainer *container,
 static void        drift_sanitize_args         (DriftArgs *args);
 static void         mask_process               (GwyDataField *dfield, 
                                                 GwyDataField *maskfield, 
-                                                DriftArgs *args);
+                                                DriftArgs *args,
+                                                DriftControls *controls);
 
 
 static const GwyEnum methods[] = {
@@ -226,6 +227,8 @@ drift_dialog(DriftArgs *args, GwyContainer *data)
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls.mydata,
                                                              "/0/data"));
 
+    controls.result = GWY_DATA_LINE(gwy_data_line_new(dfield->yres, dfield->yreal, TRUE));
+    
     if (gwy_data_field_get_xres(dfield) >= gwy_data_field_get_yres(dfield))
         zoomval = PREVIEW_SIZE/(gdouble)gwy_data_field_get_xres(dfield);
     else
@@ -494,7 +497,7 @@ preview(DriftControls *controls,
 
     }
 
-    mask_process(dfield, GWY_DATA_FIELD(maskfield), args);
+    mask_process(dfield, GWY_DATA_FIELD(maskfield), args, controls);
     controls->computed = TRUE;
     gwy_data_view_update(GWY_DATA_VIEW(controls->view));
 }
@@ -509,8 +512,31 @@ drift_ok(DriftControls *controls,
 static void
 mask_process(GwyDataField *dfield,
              GwyDataField *maskfield,
-             DriftArgs *args)
+             DriftArgs *args,
+             DriftControls *controls)
 {
+    gint i;
+    gwy_data_field_get_drift_from_correlation(dfield, 
+                                              controls->result,
+                                              args->sensitivity/10.0,
+                                              args->smoothing);
+    gwy_data_field_fill(maskfield, 0);
+    for (i=0; i<(dfield->yres - args->sensitivity/10.0); i++)
+    {
+        printf("%d %d %d\n", i, (gint)gwy_data_field_rtoi(dfield, controls->result->data[i]),
+               (gint)(dfield->xres/2 +
+                gwy_data_field_rtoi(dfield, controls->result->data[i])
+                + 0)
+               );
+        maskfield->data[(gint)(dfield->xres/2 + 
+                               gwy_data_field_rtoi(dfield, controls->result->data[i])
+                               + i*dfield->xres)] 
+            = 1;
+        maskfield->data[(gint)(dfield->xres/2 + 1 + 
+                               gwy_data_field_rtoi(dfield, controls->result->data[i]) 
+                               + i*dfield->xres)] 
+            = 1;
+    }
 }
 
 static const gchar *iscorrect_key = "/module/drift/iscorrect";
