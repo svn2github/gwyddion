@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-filters">
+  <title>Filters and presentations</title>
+  <section>
+    <title>Filters</title>
+    <para>
+      Filters are often used for data denoising. Of course, this way of altering
+      real mesured data has to be done very carefully. These are several simple
+      filters implemented in Gwyddion, filter tool.
+    </para>
+    <itemizedlist>
+      <listitem>
+        Mean filter – takes the mean value of neigbourhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem>
+        Median filter – takes the median value of neigbourhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem>
+        Conservative denoise filter – checks whether the value is not extreme
+        within the neigbourhood. If yes, filter substitutes the value by
+        of the next highest (lowest) value.
+      </listitem>
+      <listitem>
+        Kuwahara filter – is an edge-preserving smoothing filter.
+      </listitem>
+      <listitem>
+        Minimum filter – also known as erode filter, replaces values by
+        minimum found in neigbourhood.
+      </listitem>
+      <listitem>
+        Maximum filter – also known as dilate filter, replaces values by
+        maximum found in neigbourhood.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Note that within the filter tool you can select the region in which filter will be applied.
+      This can be usefull for corecting some badly measured area within good image.
+    </para>
+    <figure>
+      <title>Filtering screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="700" fileref="filter.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Moreover, there are more denoising fucntions in Gwyddion, for example DWT denoising.
+      For details see setion Integral Transforms.
+    </para>
+    <para>
+      If you need to only supress some values at the SPM data that are obviously wrong,
+      you can try also the "Mask of outliers" module and some "remove data under mask"
+      module. This way should mark only the outliers, e. g. values more far than 3 times
+      the squared variance of the data.
+    </para>
+  </section>
+  <section>
+    <title>Presentations</title>
+    <para>
+      Presentations are special filters that output the result field into
+      Gwyddion data container as "/0/view" instead of directly changing
+      the field data. Therefore, data window widget can plot the created presentation
+      to help user seeing some details on his/her data
+      but the data processing modules and tools can use the original data.
+    </para>
+    <para>
+      Currently, the following presentation filters are implemented in Gwyddion:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Shading – simple and very useful way of seeing data as illuminated from some
+        direction. The direction can be set by user.
+      </listitem>
+      <listitem>
+        Gradient detection – Sobel X and Y gradient filter and Prewitt X and Y gradient
+        filter create similar images as shading, however, they output data as a result
+        of convolution of data with relatively standardized kernel. Thus, they can be
+        used for further presentation processing for example.
+      </listitem>
+      <listitem>
+        Edge detection – Canny edge detector can be used to extract image of sharp edges
+        on the data.  Some rather experimental edge detection algorithms are available too:
+        RMS and RMS Edge basically visualize areas with high local value variation;
+        Local Nonlinearity visualizes areas which are locally very non-planar.
+      </listitem>
+    </itemizedlist>
+    <figure>
+      <title>
+        Presentation examples (left to right): shading, Canny edge detection,
+        Sobel vertical gradient filter.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="1000" fileref="presentations.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+</section>
+

@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-tip">
+  <title>Tip convolution artefacts</title>
+  <para>
+  Tip convolution artefact is one of the most important error sources in SPM.
+  As the SPM tip is never ideal (like delta function) we often observe a certain
+  degree of image distortion due to this effect. We can even see some SPM tips imaged on the
+  surface scan while sharp features are present on the surface.
+  </para>
+  <para>
+    <figure>
+    <title>Images of ZnSe surface measured with four different SPM tips (more or less broken ones).</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="500" fileref="alltips.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </para>
+  <para>
+  We can fortunately simulate and/or correct the tip efects using algorithms of dilation
+  and/or erosion, respectively. These algorithms were published by Villarubia (see Ref. [1]).
+  </para>
+  <section>
+    <title id="fetures-tip-get">Obtaining the tip geometry</title>
+    <para>
+    For studying the tip influence on the data we need to know tip geometry firts. In general,
+    the geometry of the SPM tip can be determined in these ways:
+    </para>
+    <orderedlist>
+      <listitem>
+      use manufacturer's specifications (tip geometry, apex radiius and angle)
+      </listitem>
+      <listitem>
+      use scanning electron microscope of other independent technique to determine
+      tip properties.
+      </listitem>
+      <listitem>
+      use known tip characterizer sample (with steep edges)
+      </listitem>
+      <listitem>
+      use blind tip estimation algorithm together with tip characterizers or other
+      suitable samples
+      </listitem>
+    </orderedlist>
+    <para>
+    Within Gwyddion, we can use the firts and the last approach of the mentioned ones.
+    Using tip modelling (
+	<menuchoice>
+	   <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
+	    <guimenuitem>Model Tip</guimenuitem>
+	</menuchoice>
+    ) most of the tips with simple geometries can be simulated. This way
+    of tip geometry specification can be very efficient namely when we need to check only
+    certainty map of perform tip convolution simulation. To obtain more detailed (and more realistic)
+    tip structure blind tip estimation algorithm can be used (
+	<menuchoice>
+	   <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
+	    <guimenuitem>Blind Estimation</guimenuitem>
+	</menuchoice>
+      ).
+    </para>
+    <para>
+    Blind tip estimation algorithm is an extension of the well-known fact that on some surface data we can see images of
+    certain parts of tip directly. The algortihm iterates over all the surface data and at each point
+    tries to refine each tip point according to steepest slope in the direction between
+    concrete tip point and tip apex.
+    </para>
+    <para>
+    We can use two modification of this algorithm within Gwyddion: <emphasis>partial</emphasis> tip estimation that uses
+    only limited number of highest points on the image and <emphasis>full</emphasis> tip estimation taht uses full image
+    (and is much slower therefore). Within Gwyddion tip estimation module we can use also partial
+    tip estimation results as starting point for full estimation. This shlould improve the full
+    tip estimation algorithm speed.
+    </para>
+    <figure>
+      <title>SPM tips obtained from data of Figure 1 using blind estimation algorithm.</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="1000" fileref="alltips2.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+  <section>
+    <title id="fetures-tip-use">Tip convolution and surface reconstruction</title>
+    <para>
+    When we know tip geometry, we can use tip convolution (dilation) algorithm to simulate data acquisition
+    process. For doing this use Dilation module
+    (
+	<menuchoice>
+	   <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
+	    <guimenuitem>Dilation</guimenuitem>
+	</menuchoice>
+
+     ). This can be in particular useful when working with data being result of some numerical modelling
+    (see e. g. Ref. 2).
+    </para>
+    <figure>
+      <title>Simulated fractal surface before (left) and after (right) tip convolution.</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="600" fileref="fractaltips.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The opposite of the tip convolution is surface reconstruction (erosion) that can be used to correct partially the tip influence
+    on image data. For doing this, use Surface Reconstruction module
+       (
+	<menuchoice>
+	   <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
+	    <guimenuitem>Surface Reconstruction</guimenuitem>
+	</menuchoice>
+     ).
+    Of course, the data corresponding to point in image not touched by tip (e. g. pores) cannot be reconstructed
+    as there is no information about these points.
+    </para>
+    <figure>
+      <title>
+      Original and reconstructed image of ZnSe imaged by broken SPM tip.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="600" fileref="reconstruction.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+    As it can be seen, the most problematic parts of SPM image are data points, where tip did not touch the surface
+    in a single point, mut in multiple points. There is a loss of information in these points. Certainty map algorithm
+    can identify these data points and mark them.
+    </para>
+    <figure>
+      <title>
+      Certainty map obtained from columnar surface (having large pores). (A) - sample,
+               (B) sample with marked certainty map.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="400" fileref="cmap.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+    Certainty map algortihm can be therefore used to mark data in the SPM image that are corrupted by
+    tip convolution in an irreversible way. For SPM data analysis on surfaces with large slopes it is important
+    to check always presence of these points. Within Gwyddion you can use Ceratinty map module for creating
+    these maps
+    (
+	<menuchoice>
+	   <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
+	    <guimenuitem>Certainty Map</guimenuitem>
+	</menuchoice>
+     ).
+    </para>
+  </section>
+  <section>
+     <title>References</title>
+     <para>
+     [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
+     </para>
+     <para>
+     [2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
+     </para>
+  </section>
+</section>
+

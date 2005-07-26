@@ -1,0 +1,19 @@
+\endgroup$\hskip\hmargin}%
+\immediate\openout1=\jobname.bbox
+\newcount\xc
+\xc=\ht0
+\advance\xc by\dp0
+\advance\xc by\vmargin
+\advance\xc by\vmargin
+\divide\xc by65536
+\advance\xc by-792
+\multiply\xc by-1
+\immediate\write1{y0=\the\xc}
+\immediate\write1{y1=792}
+\xc=\wd0
+\divide\xc by65536
+\immediate\write1{x0=0}
+\immediate\write1{x1=\the\xc}
+\closeout1
+\leavevmode\vbox{\vskip\vmargin\box0\vskip\vmargin}\par
+\bye
