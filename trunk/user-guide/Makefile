@@ -8,7 +8,10 @@ PDFXMLTEX = pdfxmltex
 HTML2TXT = lynx -force_html -dump -nolist
 
 PACKAGE = user-guide
-DISTNAME = gwyddion-user-guide
+VERSION = 2005-07-26
+BASENAME = gwyddion-user-guide
+DISTNAME = $(BASENAME)-$(VERSION)
+DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES = $(wildcard xml/*.xml)
 FORMULA_SOURCES = $(wildcard formulas/*.tex)
@@ -62,10 +65,14 @@ dist:
 	rm -rf $(DISTNAME)
 
 dist-xhtml: xhtml
-	-rm -rf $(DISTNAME)-xhtml
-	cp -a xhtml $(DISTNAME)-xhtml
-	tar -zcf $(DISTNAME)-xhtml.tar.gz $(DISTNAME)-xhtml
-	-rm -rf $(DISTNAME)-xhtml
+	-rm -rf $(DISTNAMEXHTML)-xhtml
+	cp -a xhtml $(DISTNAMEXHTML)-xhtml
+	tar -zcf $(DISTNAMEXHTML)-xhtml.tar.gz $(DISTNAMEXHTML)-xhtml
+	-rm -rf $(DISTNAMEXHTML)-xhtml
+
+version:
+	d=`date --iso`; \
+	sed -i 's/\(VERSION = \)[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1'$$d/ Makefile
 
 help:
 	@echo "xhtml        Compile User guide to XHTML"
@@ -73,4 +80,4 @@ help:
 	@echo "dist         Create tarball with source code"
 	@echo "dist-xhtml   Create tarball with ready-to-read XHTML User guide"
 
-.PHONY: all clean dist pdf xhtml dist-xhtml help
+.PHONY: all clean dist pdf xhtml dist-xhtml help version
