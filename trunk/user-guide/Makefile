@@ -65,10 +65,10 @@ dist:
 	rm -rf $(DISTNAME)
 
 dist-xhtml: xhtml
-	-rm -rf $(DISTNAMEXHTML)-xhtml
-	cp -a xhtml $(DISTNAMEXHTML)-xhtml
-	tar -zcf $(DISTNAMEXHTML)-xhtml.tar.gz $(DISTNAMEXHTML)-xhtml
-	-rm -rf $(DISTNAMEXHTML)-xhtml
+	-rm -rf $(DISTNAMEXHTML)
+	cp -a xhtml $(DISTNAMEXHTML)
+	tar -zcf $(DISTNAMEXHTML).tar.gz $(DISTNAMEXHTML)
+	-rm -rf $(DISTNAMEXHTML)
 
 version:
 	d=`date --iso`; \
