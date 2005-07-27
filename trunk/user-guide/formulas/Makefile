@@ -25,7 +25,7 @@ png-images: $(PNGS)
 	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
 	@{ \
 	    eval $$($(IDENTIFY) $(T)$*.png \
-	            | sed -e 's/.* \([0-9]*\)x\([0-9]*\)+0+0 .*/w=\1 h=\2/'); \
+	        | sed -e 's/.* PNG \([0-9]*\)x\([0-9]*\)\(+0+0\)* .*/w=\1 h=\2/'); \
 	    if test $$h -gt 1600; then \
 	        echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2; \
 	        . $(T)$*.bbox; \
@@ -45,3 +45,10 @@ clean:
 dist:
 	mkdir ../$(DISTNAME)/formulas
 	cp Makefile $(FORMULAS) $(TEMPLATES) ../$(DISTNAME)/formulas
+
+.PHONY: clean dist formulas all
+
+# Various `identify' output formats
+# FC4: eq-area-calculation.png PNG 512x82 512x82+0+0 PseudoClass 256c 5kb
+# SuSE9.2: eq-area-calculation.png PNG 512x82+0+0 PseudoClass 256c 8-bit 4.5kb 0.000u 0:01
+# Debian3.1: eq-area-calculation.png PNG 512x82 PseudoClass 256c 4kb 0.000u 0:01
