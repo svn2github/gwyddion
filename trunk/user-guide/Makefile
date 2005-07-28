@@ -35,7 +35,7 @@ xhtml: formulas xhtml.stamp
 
 xhtml.stamp: $(XML_SOURCES) xhtml.xsl
 	test -d xhtml || mkdir xhtml
-	cd ./xhtml && $(XSLTPROC) ../xhtml.xsl ../$(MAIN_XML_SOURCE)
+	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 	cp images/*.png xhtml
 	cp user-guide.css xhtml
 	touch $@
@@ -79,5 +79,6 @@ help:
 	@echo "all          The same"
 	@echo "dist         Create tarball with source code"
 	@echo "dist-xhtml   Create tarball with ready-to-read XHTML User guide"
+	@echo "version      Update version number to current date"
 
 .PHONY: all clean dist pdf xhtml dist-xhtml help version
