@@ -4,50 +4,51 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-filters">
   <title>Filters and Presentations</title>
-  <section>
+  <section id="basic_filters">
     <title>
       Basic Filters Tool
       <guiicon><inlinegraphic fileref="icon_filters.png"/></guiicon>
     </title>
     <para>
-      The <classname>Basic Filters Tool</classname> lets you apply several simple
+      The <link linkend="basic_filters">Basic Filters</link> tool
+      lets you apply several simple
       filters to your image. This can be very useful for data denoising; however,
       the real measured data will get altered in the process, so great care
       should be taken not to destroy important features of the image.
     </para>
     <itemizedlist>
       <listitem>
-        Mean filter – takes the mean value of neighborhood of the
+        Mean filter - takes the mean value of neighborhood of the
         filtered value as the value.
       </listitem>
       <listitem>
-        Median filter – takes the median value of neighborhood of the
+        Median filter - takes the median value of neighborhood of the
         filtered value as the value.
       </listitem>
       <listitem>
-        Conservative denoise filter – checks whether the value is not extreme
+        Conservative denoise filter - checks whether the value is not extreme
         within the neighborhood. If yes, filter substitutes the value by
         of the next highest (lowest) value.
       </listitem>
       <listitem>
-        Kuwahara filter – is an edge-preserving smoothing filter.
+        Kuwahara filter - is an edge-preserving smoothing filter.
       </listitem>
       <listitem>
-        Minimum filter – also known as erode filter, replaces values by
+        Minimum filter - also known as erode filter, replaces values by
         minimum found in neighborhood.
       </listitem>
       <listitem>
-        Maximum filter – also known as dilate filter, replaces values by
+        Maximum filter - also known as dilate filter, replaces values by
         maximum found in neighborhood.
       </listitem>
     </itemizedlist>
-    <para>
-      <emphasis>Note: By default, these filters will be applied to the entire 
+    <tip>
+      By default, these filters will be applied to the entire 
       image. However, you can apply a filter to a specific region within your 
       image by selecting it with the mouse. This can be useful for correcting
       badly measured areas within a good image. To apply a filter to the entire
-      image again, just click once anywhere within the image window.</emphasis>
-    </para>
+      image again, just click once anywhere within the image window.
+    </tip>
     <figure>
       <title>Filtering screenshot</title>
       <mediaobject>
@@ -59,59 +60,28 @@
     <para>
       Moreover, there are more denoising functions in Gwyddion, for example 
       DWT denoising and FFT filtering.
-      <!--<emphasis>TODO: Think about moving 1D,2D FFT Filters into the Integral Transforms menu</emphasis>-->
+      <!--TODO: Think about moving 1D,2D FFT Filters into the Integral Transforms menu-->
       For details see the <link linkend="features-inttrans">Integral Transforms</link> section.
     </para>
     <para>
       If you need to only suppress some values in the SPM data that are obviously wrong,
-      you can also try the <classname>Mask of Outliers</classname> module and the 
-      <classname>Remove Data Under Mask</classname> module.
-      
-      <!--<emphasis>TODO: Actually document the above mentioned modules</emphasis>-->
-      <!-- TODO: Move this text: This way should mark only the outliers, e. g. values more far than 3 times
-      the squared variance of the data. -->
-      
-      For details see the <link linkend="">Data Correction</link> section. 
-      <!--<emphasis>TODO: Add a Data Correction section.</emphasis>-->
+      you can also try the
+      <link linkend="">Mask of Outliers<!--TODO: Add Mask of Outliers section--></link> 
+      module and the 
+      <link linkend="remove_data_under_mask">Remove Data Under Mask</link> module.     
+      For details see the <link linkend="features-edit">Data Edit</link> section. 
     </para>
   </section>
-  
-  <!-- TODO: Move to appropriate section 
-  <section>
-    <title>FFT Filters</title>
-    <para>
-      Sometimes it is useful to be able to filter an image in the frequency
-      domain rather than in the spatial domain. To accomplish this, Gwyddion
-      takes the Fast Fourier Transform (FFT) of the image, applies the user's
-      filter, and then performs the inverse FFT.      
-      <emphasis>TODO: Talk more about why this happens, give examples. </emphasis>
-      Gwyddion has two modules
-      
-      One excellent way of removing this type of noise from an image is to
-      use Fourier filtering. First, the Fourier transform of the image is
-      calculated. Next, a filter is applied to this transform. Finally, the
-      inverse transform is applied to obtain a filtered image. Gwyddion uses
-      the Fast Fourier Transform (or FFT) to make this intensive calculation
-      much faster. There are two FFT filtering modules, the
-      <classname>1D FFT Filter</classname> and the
-      <classname>2D FFT Filter</classname>.
-    </para>
-    <section>
-      <title>1D FFT Filter</title>
-      <para>
-        <emphasis>TODO: Info about 1D FFT Filter goes here</emphasis>
-      </para>
-    </section>
-    <section>
-      <title>2D FFT Filter</title>
-      <para>
-        <emphasis>TODO: Info about 2D FFT Filter goes here (chris will do)</emphasis>
-      </para>
-    </section>
-  </section> -->
-  
   <section>
     <title>Presentations</title>
+    <!--TODO: "Display" aught to be changed to "Presentations". It is confusing
+    for "Display" to be the menu name, when we are really dealing with presentations-->
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Display</guisubmenu>
+      </menuchoice>
+    </para>
     <para>
       Presentations are special filters that output their results into a separate
       layer that displays on top of the original data. Unlike the filters mentioned
@@ -119,29 +89,25 @@
       safely apply various data visualizations. The other data processing modules 
       and tools will still operate on the original data. To remove a presentation, 
       just right click on the data window, and select <guimenuitem>Remove Presentation</guimenuitem>.
-    </para>      
-      <!--
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Level</guisubmenu>
-        <guimenuitem>Fix Zero</guimenuitem>
-      </menuchoice>-->
+    </para>
     <para>
       Currently, the following presentation filters are implemented in Gwyddion:
     </para>
+    <!--TODO: The menu paths need to be listed here for each filter. Also, we might
+    want to change this list into seperate sections, one fore each type -->
     <itemizedlist>
       <listitem>
-        Shading – simple and very useful way of seeing data as illuminated from some
+        Shading - simple and very useful way of seeing data as illuminated from some
         direction. The direction can be set by user.
       </listitem>
       <listitem>
-        Gradient detection – Sobel X and Y gradient filter and Prewitt X and Y gradient
+        Gradient detection - Sobel X and Y gradient filter and Prewitt X and Y gradient
         filter create similar images as shading, however, they output data as a result
         of convolution of data with relatively standardized kernel. Thus, they can be
         used for further presentation processing for example.
       </listitem>
       <listitem>
-        Edge detection – Canny edge detector can be used to extract image of sharp edges
+        Edge detection - Canny edge detector can be used to extract image of sharp edges
         on the data.  Some rather experimental edge detection algorithms are available too:
         RMS and RMS Edge basically visualize areas with high local value variation;
         Local Non-linearity visualizes areas which are locally very non-planar.

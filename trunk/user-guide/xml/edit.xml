@@ -2,77 +2,162 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+
+<!-- TODO: Put this text in the Mask of Outliers section:
+     This way should mark only the outliers, e. g. values more far than 3 times
+     the squared variance of the data. -->
+      
 <section id="features-edit">
-  <title>Data edit</title>
+  <title>Data Edit</title>
   <para>
-  There are several modules that enable direct or indirect editing of the
-  SPM data. In principal, most of the data processing modules do some "data edit"
-  as they change the data.
-  However, in this chapter we would like to describe the modules and tools
-  that can be used for removing locally all the information from the data field
-  and substituting it by some other information.  This includes functions for
-  removing spots, scars and general data under mask.
+    There are several modules that enable direct or indirect editing of the
+    SPM data. In principal, most of the data processing modules change the data
+    in one way or another. However, in this section we would like to describe
+    the modules and tools that are specifically designed to correct local
+    defects in an image. The functions below remove "bad" data from an image,
+    and then fill it in using an interpolation algorithm.  
   </para>
-  <section>
-     <title>Remove spots</title>
-     <para>
-     Remove spots tool can be used for removing very small parts of the image that
-     are considered as scanning error, dust particle or anything else that should not
-     be present in the data. Note that doing so can dramatically alter the resulting
-     statistical parameters of the surface, so be sure not to remove things that
-     are really present on the surface.
-     </para>
-     <para>
-     Within the tool you can select rectangle around the area that should be removed.
-     You can use then several methods for creating data in place of former spot:
-     </para>
-     <itemizedlist>
-        <listitem>
-	Hyperbolic flatten - uses information from selected area boundaries to interpolate
-	the information inside area.
-	</listitem>
-	<listitem>
-	Pseudo-laplace and Laplace solver - solves Laplace equation to find out data inside
-	area; the boundary is treated as virtual source.
-	</listitem>
-	<listitem>
-	Fractal correction - uses whole image to determine fractal dimension. Then tries
-	to create randomly rough data that have the same fractal dimension and put them into the area.
-	</listitem>
-     </itemizedlist>
+  <section id="remove_spots">
+    <title>
+      Remove Spots Tool
+      <guiicon><inlinegraphic fileref="icon_remove_spots.png"/></guiicon>
+    </title>
+    <para>
+      The <link linkend="remove_spots">Remove Spots</link> tool can be used 
+      for removing very 
+      small parts of the image that are considered a scanning error, dust particle 
+      or anything else that should not be present in the data. Note that doing so 
+      can dramatically alter the resulting statistical parameters of the surface, 
+      so be sure not to remove things that are really present on the surface.
+    </para>
+    <para>
+      While using this tool you can select a rectangle around the area that should 
+      be removed. You can then select one of several interpolation methods for 
+      creating data in place of the former "spot":
+    </para>    
+    <itemizedlist>
+      <listitem>
+        Hyperbolic flatten - uses information from selected area boundaries to interpolate
+        the information inside area.
+      </listitem>
+      <listitem>
+        Pseudo-Laplace and Laplace solver - solves Laplace equation to calculate data inside
+        area; the boundary is treated as virtual source.
+      </listitem>
+      <listitem>
+        Fractal correction - uses whole image to determine fractal dimension. Then tries
+        to create randomly rough data that have the same fractal dimension and put them into the area.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Clicking <guibutton>Apply</guibutton> will execute the selected algorithm.
+    </para>
+    <para>
+      <note>
+      Spot removal will only work for regions of size 64x64 pixels or
+      smaller. To remove larger regions, create a mask using the 
+      <link>Mask Edit<!--TODO: fix link --></link> tool, then use 
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem><link linkend="remove_data_under_mask">Remove Data Under Mask</link></guimenuitem>
+      </menuchoice>.
+      </note>
+    </para>
   </section>
-  <section>
-     <title>Remove scars</title>
-     <para>
-     Scars (or stripes) are parts of the image that are corrupted by very common scanning error - local
-     fault of the closed loop. As the scanning highly probably does not happen in the previous and following
-     scan line we obtain a line defect paralell to the fast scanning axis in the image. This line defect
-     can be found and removed using the neighbourhood lines within this module.
-     </para>
-     <para>
-     Similarly, the Mark scars module can create mask of the points treated as scars.
-     </para>
+  <section id="remove_scars">
+    <title>Remove Scars</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Remove Scars</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Scars (or stripes) are parts of the image that are corrupted by a very common 
+      scanning error: local fault of the closed loop. Line defects are usually 
+      parallel to the fast scanning axis in the image. This module will automatically
+      find and remove these scars, using neighbourhood lines to "fill-in" the gaps.
+    </para>
   </section>
-  <section>
-     <title>Remove data under mask</title>
-     <para>
-     This module tries to substitute data under mask by solving Laplacian equation. Unmasked data are used
-     as virtual source and information in the masked regions is iterativelyh computed.
-     </para>
+  <section id="mark_scars">
+    <title>Mark Scars</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Mark Scars</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Similarly, the <classname>Mark Scars</classname> module can create a mask 
+      of the points treated as scars. Unlike 
+      <link linkend="remove_scars">Remove Scars</link>
+      which works automatically, this module lets you set several parameters 
+      which can fine-tune the scar selection process:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Maximum width - only scars that are as thin or thinner than this value (in pixels) will be marked.
+      </listitem>
+      <listitem>
+        Minimum length - only scars that are as long or longer than this value (in pixels) will be marked.
+      </listitem>
+      <listitem>
+        Hard threshold - <!--TODO: Document this -->
+      </listitem>
+      <listitem>
+        Soft threshold - <!--TODO: Document this -->
+      </listitem>
+      <listitem>
+        Negative - <!--TODO: Document this -->
+      </listitem>
+    </itemizedlist>
+    <para>
+      After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
+      to the image. Other modules or tools can then be run to edit this data.
+    </para>
   </section>
-  <section>
-     <title>Fractal correction</title>
-     <para>
-     Fractal correction module has the same output as "Remove data under mask" module, however using
-     a different approach. Fractal dimension of the whole image is first computed and the areas under
-     mask are substituted by randomly rough surface having the same fractal dimension as the surface.
-     Moreover, also root mean square value of the height irregularities (roughness) is not changed
-     by apllying this module.
-     </para>
-     <para>
-     Note that running this module on data that do not have fractal properties itself causes really crazy
-     results.
-     </para>
+  <section id="remove_data_under_mask">
+    <title>Remove Data Under Mask</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Remove Data Under Mask</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      This module tries to substitute data under the mask by solving the Laplacian 
+      equation. Unmasked data are used as the virtual source and information in 
+      the masked regions is iteratively computed.
+    </para>
+  </section>
+  <section id="fractal_correction">
+    <title>Fractal Correction</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Fractal Correction</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      The <link linkend="fractal_correction">Fractal Correction</link> module, like
+      the
+      <link linkend="remove_data_under_mask">Remove Data Under Mask</link>
+      module, replaces data under the mask. However, it uses
+      a different algorithm to come up with the new data: The fractal dimension 
+      of the whole image is first computed, and then the areas under the mask 
+      are substituted by a randomly rough surface having the same fractal dimension.
+      The root mean square value of the height irregularities (roughness) 
+      is not changed by using this module.
+    </para>
+    <note>This calculation can take some time, so please be patient.</note>
+    <warning>
+      Running this module on data that do not have fractal properties can cause
+      really crazy results. <!--TODO: Is "crazy" an adequately professional term? -->
+    </warning>
   </section>
 </section>
-
