@@ -274,7 +274,7 @@ drift_dialog(DriftArgs *args, GwyContainer *data)
 
    
     controls.sensitivity = gtk_adjustment_new(args->sensitivity, 0.0, 100.0, 0.1, 5, 0);
-    spin = gwy_table_attach_hscale(table, row, "sensitivity:", "%", controls.sensitivity,
+    spin = gwy_table_attach_hscale(table, row, "sensitivity:", "", controls.sensitivity,
                                                GWY_HSCALE_DEFAULT);
     gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), 1);
     g_signal_connect(controls.sensitivity, "value_changed", 

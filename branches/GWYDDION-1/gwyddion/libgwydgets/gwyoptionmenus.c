@@ -921,7 +921,10 @@ gwy_option_menu_sfunctions_output(GCallback callback,
         { N_("Autocorrelation"),        GWY_SF_OUTPUT_ACF,  },
         { N_("Height-height cor."),     GWY_SF_OUTPUT_HHCF, },
         { N_("Power spectral density"), GWY_SF_OUTPUT_PSDF, },
-    };
+        { N_("Minkowski volume"),       GWY_SF_OUTPUT_MINKOWSKI_VOLUME, },
+        { N_("Minkowski boundary"),       GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY, },
+        { N_("Minkowski connectivity"),       GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY, },
+     };
 
     return gwy_option_menu_create(entries, G_N_ELEMENTS(entries),
                                   "sf-output-type", callback, cbdata,
