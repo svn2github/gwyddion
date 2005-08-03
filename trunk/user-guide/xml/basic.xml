@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-basic">
-  <title>Basic operations</title>
+  <title>Basic Operations</title>
   <para>
   Basic geometrical operations are the core of any data processing programme. Also Gwyddion
   has a wide set of modules and functions for data scaling, rotation, resampling or profile extraction.
@@ -13,12 +13,14 @@
   <section>
      <title>Interpolation</title>
      <para>
-     Large number the morphological operations in Gwyddion is connected with data interpolation.
-     As the SPM data are relatively coarsely sampled comparing to measured details
-     (full image having few hudreds of pixels X and Y size) the interpolation method can
+     A large number of the morphological operations in Gwyddion are dependent on
+     data interpolation. As the SPM data are relatively coarsely sampled 
+     compared to measured details (full images are typically only a few hundred
+     pixels in width and height), the interpolation method used can
      become critical for proper quantitative analysis of data properties.
-     There are several interpolation methods in 1D and 2D implemented in Gwyddion and user can
-     choose one of these methods i nmost of the modules using interpolation.
+     There are several interpolation methods in 1D and 2D implemented in 
+     Gwyddion and the user can choose which method to use for most of the 
+     modules using interpolation.
      </para>
      <para>
      Here, we describe 1D interpolation method principles. Nearly all interpolation methods in 2D are simply composed of these

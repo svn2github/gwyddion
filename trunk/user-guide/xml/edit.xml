@@ -2,6 +2,11 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<!-- TODO: Add these sections:
+              -Mask of Outliers
+              -Median Line Correction
+              -Modus Line Correction
+              -Unrotate -->
 
 <!-- TODO: Put this text in the Mask of Outliers section:
      This way should mark only the outliers, e. g. values more far than 3 times

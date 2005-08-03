@@ -75,7 +75,11 @@
   <section>
     <title>Presentations</title>
     <!--TODO: "Display" aught to be changed to "Presentations". It is confusing
-    for "Display" to be the menu name, when we are really dealing with presentations-->
+    for "Display" to be the menu name, when we are really dealing with presentations.-->
+    
+    <!--TODO: Add these sections:
+                -Extract Presentation/Remove Presentation
+                -Local Contrast -->
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -93,7 +97,7 @@
     <para>
       Currently, the following presentation filters are implemented in Gwyddion:
     </para>
-    <!--TODO: The menu paths need to be listed here for each filter. Also, we might
+    <!--TODO: CLEANING: The menu paths need to be listed here for each filter. Also, we might
     want to change this list into seperate sections, one fore each type -->
     <itemizedlist>
       <listitem>

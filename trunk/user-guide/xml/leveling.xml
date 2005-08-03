@@ -4,18 +4,22 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-leveling">
   <title>Data Leveling and Background Subtraction</title>
+  <!--TODO: Need a section for "Fit Sphere..."-->
+    
+  <!--TODO: Clean up section id's and links -->
   <section>
     <title>Leveling</title>
     <para>
-      Data obtained from SPM microscope are very often not leveled at all -
-      microscope outputs directly raw data values computed from piezoscanner voltage,
-      strain gauge, interferometer or other detection system values. This way of exporting
-      data enables user to choose his/her own way of leveling data.
+      The data obtained from SPM microscopes are <!--TODO: should it be "are" or "is"?-->
+      very often not leveled at all; the microscope directly outputs raw data 
+      values computed from piezoscanner voltage, strain gauge, interferometer or 
+      other detection system values. This way of exporting data enables the user 
+      to choose his/her own method of leveling data.
     </para>
     <para>
-      Choosing the leveling mode should be done depending on your SPM system configuration.
-      Basically, for systems with independent scanner(s) for each axis plane leveling should
-      be sufficient and for systems with scanner(s) moving in all three axes (tube scanners)
+      The choice of leveling method should be based on your SPM system configuration.
+      Basically, for systems with independent scanner(s) for each axis, plane leveling should
+      be sufficient. For systems with scanner(s) moving in all three axes (tube scanners)
       2nd order polynomial leveling should be used.
     </para>
     <para>
@@ -23,46 +27,61 @@
       supress real features on the surface (namely waviness of the surface) and therefore
       alter the statistical functions and quantities evaluated from the surface.
     </para>
-    <para>
-      The simplest modules that ace connected with data leveling are Fix Zero and
-      Zero Mean Value that simply set the average height of the data to put minimum
-      to zero (Fix Zero) or mean value to zero (Zero Mean Value). These modules can be
-      accessed through the following menu choices:
-    </para>
-    <para>
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Level</guisubmenu>
-        <guimenuitem>Fix Zero</guimenuitem>
-      </menuchoice>
-    </para>
-    <para>
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Level</guisubmenu>
-        <guimenuitem>Level</guimenuitem>
-      </menuchoice>
-    </para>
+    <section id="fix_zero">
+      <title>Fix Zero and Zero Mean Value</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Fix Zero</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Zero Mean Value</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        The simplest modules that are connected with data leveling are
+        <link linkend="fix_zero">Fix Zero</link> and
+        <link linkend="fix_zero">Zero Mean Value</link>
+        that simply set the average height of the data to put the minimum
+        to zero (Fix Zero) or mean value to zero (Zero Mean Value).
+      </para>
+    </section>
     <section>
       <title id="process-level-plane">Plane Level</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Level</guisubmenu>
-          <guimenuitem>Pleane Level</guimenuitem>
+          <!--TODO: Consider changing "Level" menu item to "Plane Level"-->
+          <guimenuitem>Level</guimenuitem>
         </menuchoice>
       </para>
       <para>
-        Plane leveling is usually one of the firsts function applied to raw SPM data. The plane is
-        computed from all the image points and is subtracted from the data.
+        Plane leveling is usually one of the first functions applied to raw SPM 
+        data. The plane is computed from all the image points and is subtracted
+        from the data.
       </para>
+      <tip>
+        You can quickly apply plane leveling by simply right-clicking on
+        the image window and selecting <guimenuitem>Level</guimenuitem>.
+      </tip>
     </section>
     <section>
-      <title id="process-level-three">Three point leveling</title>
+      <title id="process-level-three">
+        Three Point Leveling Tool
+        <guiicon><inlinegraphic fileref="icon_3pt_level.png"/></guiicon>
+      </title>
       <para>
-        Three point leveling tool can be used for leveling very complicated surface structures.
-        User can simply mark three points in the image that should be at the same level.
-        Plane is computed from these three points and is subtracted from data.
+        The <link linkend="process-level-three">Three Point Leveling</link>
+        tool can be used for leveling very complicated surface structures.
+        The user can simply mark three points in the image that should be at 
+        the same level, and then click <guibutton>Apply</guibutton>. The plane 
+        is computed from these three points and is subtracted from the data.
       </para>
     </section>
     <section>
@@ -75,17 +94,20 @@
         </menuchoice>
       </para>
       <para>
-        Levels data by subtracting a plane like the standard Level function does.
-        However, the plane is determined differently: it makes facets of the surface as
-        horizontal as possible.  Thus for surfaces with flat horizontal areas it leads to much
-        better results than the standard Level.  On the other hand, for random surfaces it can
-        behave much worse compared to Level.
+        <link linkend="module-facet-level">Facet Level</link> levels data by 
+        subtracting a plane like the standard
+        <link linkend="process-level-plane">Plane Level</link> function does.
+        However, the plane is determined differently: it makes facets of the 
+        surface as horizontal as possible. Thus for surfaces with flat horizontal 
+        areas it leads to much better results than the standard
+        <link linkend="process-level-plane">Plane Level</link>.
+        On the other hand, for random surfaces, it can behave much worse.
       </para>
       <figure float="0">
         <title>
           Facet Level example. The first image shows uncorrected, sloping data;
-          the second image shows data leveled by standard plane fitting (Level);
-          the last one shows data level by Facet Level.
+          the second image shows data leveled by standard plane fitting (Plane Level);
+          the last one shows data leveled by Facet Level.
         </title>
         <inlinemediaobject>
           <imageobject>
@@ -104,7 +126,7 @@
         </inlinemediaobject>
       </figure>
     </section>
-    <section>
+    <section id="level_rotate">
       <title>Level Rotate</title>
       <para>
         <menuchoice>
@@ -114,21 +136,28 @@
         </menuchoice>
       </para>
       <para>
-        Does similar things as plane leveling, however does not simply subtract the fitted plane
-        from the data. Instead of it, this module takes the plane parameters and rotates image
-        data by given amount to make it lying in plane. In comparison to plane level, this
-        modules should therefore preserve angles in the data.
+        <link linkend="level_rotate">Level Rotate</link> behaves similarly to
+        <link linkend="process-level-plane">Plane Level</link>, however it does
+        not simply subtract the fitted plane from the data. Instead, this module
+        takes the fitted plane parameters and rotates the image data by a
+        calculated amount to make it lie in a plane. So unlike
+        <link linkend="process-level-plane">Plane Level</link>, this
+        module should therefore preserve angle data in the image.
       </para>
     </section>
   </section>
   <section>
     <title>Background subtraction</title>
     <para>
-      Basically, background can be extracted using many modules generating some filtered data,
-      using the Data Arithmetics module. However, there are special modules for backgrund
-      subtraction too implemented in Gwyddion.  All allow to extract subtracted background
-      to a separate data window.
+      Gwyddion has several special modules for background subtraction.
+      All allow you to extract the subtracted background to a separate data window.
     </para>
+    <tip>
+      For finer control, you can use any of Gwyddion's 
+      <link linkend="basic_filters">filtering tools</link> on an image,
+      and then use the <link linkend="">Data Arithmetic</link><!--TODO: fix link-->
+      module to subtract the results from your original image.
+    </tip>
     <section>
       <title>Polynomial Background</title>
       <para>
@@ -139,8 +168,8 @@
         </menuchoice>
       </para>
       <para>
-        Fits data by polynom of given order (generally the order can be different for X and
-        Y axis) and subtracts this polynom.
+        Fits data by a polynomial of the given order (generally the order can be 
+        different for X and Y axis) and subtracts this polynomial.
       </para>
     </section>
     <section>
@@ -153,9 +182,10 @@
         </menuchoice>
       </para>
       <para>
-        Revolves virtual `arc' of given radius horizontally of vertically over (or under) data.
-        Envelope of this arcs is treated as a background, resulting in removal of features
-        larger than arc radius (approximately).
+        Revolves virtual 'arc' of given radius horizontally or vertically over
+        (or under) the data. The envelope of this arc is treated as a 
+        background, resulting in removal of features larger than the arc radius 
+        (approximately).
       </para>
     </section>
     <section>
@@ -168,10 +198,11 @@
         </menuchoice>
       </para>
       <para>
-        Filters data with a median filter with large kernel and treats the result as
-        background, keeping only features smaller than approximately kernel size.  This method
-        is very slow.
+        Filters data with a median filter using a large kernel and treats the 
+        result as background. Only features smaller than approximately the 
+        kernel size will be kept.
       </para>
+      <note>This method can be very slow.</note>
     </section>
   </section>
 </section>

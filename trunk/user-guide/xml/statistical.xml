@@ -3,40 +3,56 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-stats">
-  <title>Statistical analysis</title>
+  <!--TODO: Clean up line breaks. The equation sections are esp. messy -->
+  
+  <title>Statistical Analysis</title>
   <para>
-    While analyzing randomly rough surfaces we often need a statistical approach to determine
-    some set of representative quantities. Within Gwyddion, there are several ways of doing this
-    (e. g. "statistical quantities" and "statistical functions" tools and 2D slope and angle statistics)
-    Here, the basic equations which were used to develop algorithms present in Gwyddion are presented.
+    While analyzing randomly rough surfaces we often need a statistical approach 
+    to determine some set of representative quantities. Within Gwyddion, there 
+    are several ways of doing this. In this section we will explain the various 
+    statistical tools and modules offered in Gwyddion, and also present the 
+    basic equations which were used to develop the algorithms they utilize.
   </para>
   <para>
+    <!--TODO: Should this be more general, aka "Scanning probe microscopy data"?-->
     Atomic force microscopy data are usually represented as a two-dimensional
     data field of size <phrase role="math">N</phrase> × <phrase role="math">M</phrase>,
-    where <phrase role="math">N</phrase> and/or <phrase role="math">M</phrase> represents the number of rows and/or
-    columns within the data field. The real size of the field is denoted as
+    where <phrase role="math">N</phrase> and/or <phrase role="math">M</phrase>
+    represents the number of rows and/or columns within the data field. The real 
+    size of the field is denoted as
     <phrase role="math">L<subscript>x</subscript></phrase> × <phrase role="math">L<subscript>y</subscript></phrase>
-    where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase> are the sizes of the respective axes.
-    Sampling interval (distance between two adjacent points within the scan) is
+    where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase>
+    are the sizes of the respective axes.
+    The sampling interval (distance between two adjacent points within the scan) is
     denoted &Delta;. We assume that the sampling interval is the same in
-    both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase> direction. We assume
-    that the surface height in a given point <phrase role="math">x</phrase>,<phrase role="math">y</phrase> can be described by a random function
-    <phrase role="math">&xi;</phrase>(<phrase role="math">x</phrase>,<phrase role="math">y</phrase>) that has given statistical properties.
+    both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase> 
+    direction. We assume that the surface height at a given point 
+    <phrase role="math">x</phrase>,<phrase role="math">y</phrase> 
+    can be described by a random function
+    <phrase role="math">&xi;</phrase>(<phrase role="math">x</phrase>,<phrase role="math">y</phrase>) 
+    that has given statistical properties.
   </para>
   <para>
-    Note that the AFM data are usually collected as a line scans in the <phrase role="math">x</phrase> axis that are
-    forming the two-dimensional image. Therefore, the scanning speed in the <phrase role="math">x</phrase> direction
-    is considerably higher than the scanning speed in the <phrase role="math">y</phrase> direction.
-    Therefore, the statistical properties of AFM data are usually collected
-    along the <phrase role="math">x</phrase> profiles as these are less affected by low frequency noise and thermal drift
-    of the sample.
+    Note that the AFM data are usually collected as line scans along the 
+    <phrase role="math">x</phrase> axis that are concatenated together to form the
+    two-dimensional image. Therefore, the scanning speed in the 
+    <phrase role="math">x</phrase> direction is considerably higher than the 
+    scanning speed in the <phrase role="math">y</phrase> direction.
+    As a result, the statistical properties of AFM data are usually collected
+    along the <phrase role="math">x</phrase> profiles as these are less affected 
+    by low frequency noise and thermal drift of the sample.
   </para>
-  <section>
-    <title>Statistical quantities</title>
+  <section id="stat_quantities">
+    <title>
+      Statistical Quantities Tool
+      <guiicon><inlinegraphic fileref="icon_stat_quantities.png"/></guiicon>
+    </title>
     <para>
-      Statistical quantities include basic properties of the height values distribution, including
-      its variance, skewness and kurtosis. The quantities accesible within Gwyddion by means of
-      the Statistical Quantities tool are as follows:
+      Statistical quantities include basic properties of the height values 
+      distribution, including its variance, skewness and kurtosis. The 
+      quantities accesible within Gwyddion by means of the 
+      <link linkend="stat_quantities">Statistical Quantities</link>
+      tool are as follows:
     </para>
     <orderedlist>
       <listitem>
@@ -46,13 +62,16 @@
         RMS value of the height irregularities: this quantity is computed from data variance.
       </listitem>
       <listitem>
-        Ra value of the height irregularities: this quantity is similar to RMS value with the only difference in exponent (power)
-        within the data variance sum. As for the RMS this exponent is <phrase role="math">q</phrase> = 2,
-        the Ra value is computed with exponent <phrase role="math">q</phrase> = 1
-        and absolute values of the data (zero mean),
+        Ra value of the height irregularities: this quantity is similar to 
+        RMS value with the only difference in exponent (power)
+        within the data variance sum. As for the RMS this exponent is 
+        <phrase role="math">q</phrase> = 2,
+        the Ra value is computed with exponent 
+        <phrase role="math">q</phrase> = 1
+        and absolute values of the data (zero mean).
       </listitem>
       <listitem>
-        Height distribution skewness: again this is computed from 3rd central moment of data values.
+        Height distribution skewness: computed from 3rd central moment of data values.
       </listitem>
       <listitem>
         Height distribution kurtosis: computed from 4th central moment of data values.
@@ -64,10 +83,18 @@
         Mean inclination of facets in area: computed by averaging normalized facet direction vectors.
       </listitem>
     </orderedlist>
+    <tip>
+      By default, the Statistical Quantities tool will display figures based
+      on the entire image. If you would like to analyze a certain region within
+      the image, simply click and drag a rectangle around it. The tool window
+      will update with new numbers based on this new region. If you want you see
+      the stats for the entire image again, just click once within the data 
+      window and the tool will reset.
+    </tip>
     <para>
       More precisely, RMS (σ), skewness (γ<subscript>1</subscript>), and kurtosis (γ<subscript>2</subscript>) are computed
       from central moments of <phrase role="math">i</phrase>-th order <phrase role="math">μ<subscript>i</subscript></phrase>
-      according to following formulas
+      according to the following formulas:
     </para>
     <informalequation>
       <mediaobject>
@@ -77,12 +104,18 @@
       </mediaobject>
     </informalequation>
     <para>
-      Surface area is estimated by following method. Let <phrase role="math">z<subscript>i</subscript></phrase> for
-      <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in four neighbour points (pixel corners), and
-      <phrase role="math">h<subscript>x</subscript></phrase> and <phrase role="math">h<subscript>y</subscript></phrase>
-      pixel dimensions along corresponding axes.  Placing an additional point to the center of the rectangle with mean
-      value of corners four triangles are formed and surface area can be approximated by summing their areas.  This leads
-      to following formula for area of one triangle and surface area of one pixel
+      The surface area is estimated by the following method. 
+      Let <phrase role="math">z<subscript>i</subscript></phrase> for
+      <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in 
+      four neighbour points (pixel corners), and
+      <phrase role="math">h<subscript>x</subscript></phrase> and 
+      <phrase role="math">h<subscript>y</subscript></phrase>
+      pixel dimensions along corresponding axes.  If an additional point is 
+      placed in the center of the rectangle (using the mean value of the 
+      corners), four triangles are formed and the surface area can be 
+      approximated by summing their areas. This leads to the following formulas
+      for the area of one triangle (top) and the surface area of one 
+      pixel (bottom):
     </para>
     <informalequation>
       <mediaobject>
@@ -92,31 +125,61 @@
       </mediaobject>
     </informalequation>
   </section>
-  <section>
-    <title>Statistical functions</title>
+  <section id="stat_functions">
+    <title>
+      Statistical Functions Tool
+      <guiicon><inlinegraphic fileref="icon_stat_functions.png"/></guiicon>
+    </title>
     <para>
-      One-dimensional statistical functions can be accesed by using "statistical functions" tool.
-      The functions can be computed using both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase> direction. As stated above,
-      we recommend using the fast scanning axis direction for statistical functions evaluation.
+      One-dimensional statistical functions can be accesed by using the
+      <link linkend="stat_functions">Statistical Functions</link> tool.
+      Within the tool window, you can select which function to evaluate using
+      the selection box on the left labeled <guilabel>Output Type</guilabel>. 
+      The graph preview will update automatically. You can select in which
+      direction to evaluate 
+      (<phrase role="math">x</phrase> or <phrase role="math">y</phrase>), 
+      but as stated above, we recommend using the fast scanning axis direction. 
+      You can also select which interpolation method to use 
+      (see <link>Interpolation<!--TODO: Fix link--></link>).
+      When you are finished, click <guibutton>Apply</guibutton> to close the 
+      tool window and output a new graph window containing the statistical data. 
     </para>
-    <para>
-      The simplest statistical functions are the height and slope distribution functions.
-      These can be computed as non-cumulative or cumulative. These functions are computed as normalized histograms
-      of the height or slope (obtained by <phrase role="math">x</phrase> or <phrase role="math">y</phrase> derivation) values.
-    </para>
-    <para>
-      The height and slope quantities belong to the first-order statistical quantities,
-      describing only the statistical properties of the individual points.
-      However, for the complete description of the surface properties it
-      is necessary to study higher order functions. Usually, second-order statistical
-      quantities observing mutual relationship of two points on the surface
-      are employed. These functions are namely autocorrelation function,
-      power spectral density function and height-height correlation function.
-    </para>
+    <tip>
+      Similar to the
+      <link linkend="stat_quantities">Statistical Quantities</link>
+      tool, this tool evaluates for the entire image by default, but you can 
+      select a sub-region to analyze if you wish.
+    </tip>
     <section>
-      <title>Autocorrelation function</title>
+      <!--TODO: It appears that within the actual tool, "slope" functions are
+                referred to as "angle" functions. Need to rectify this. -->
+      <title>Height and Slope Distribution Functions</title>
       <para>
-        Autocorrelation function is given by
+        The simplest statistical functions are the height and slope distribution 
+        functions. These can be computed as non-cumulative or cumulative. These 
+        functions are computed as normalized histograms of the height or slope 
+        (obtained by <phrase role="math">x</phrase> or 
+        <phrase role="math">y</phrase> derivation) values.
+      </para>
+    </section>
+    <section>
+      <title>First-order vs. Second-order Quantities</title>
+      <para>
+        The height and slope distribution quantities belong to the first-order 
+        statistical quantities, describing only the statistical properties of 
+        the individual points. However, for the complete description of the 
+        surface properties it is necessary to study higher order functions. 
+        Usually, second-order statistical quantities observing mutual 
+        relationship of two points on the surface are employed. These functions 
+        are namely the autocorrelation function, the height-height correlation 
+        function, and the power spectral density function.
+        A description of each of these follows:
+      </para>
+    </section>
+    <section>
+      <title>Autocorrelation Function</title>
+      <para>
+        The autocorrelation function is given by
       </para>
       <informalequation>
         <mediaobject>
@@ -126,23 +189,31 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">z</phrase><subscript>1</subscript> and <phrase role="math">z</phrase><subscript>2</subscript>
-        are concrete values of heights at points [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
+        where <phrase role="math">z</phrase><subscript>1</subscript> and 
+              <phrase role="math">z</phrase><subscript>2</subscript>
+        are concrete values of heights at points 
+        [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>],
-        <phrase role="math">&tau;<subscript>x</subscript></phrase> = <phrase role="math">x</phrase><subscript>1</subscript> - <phrase role="math">x</phrase><subscript>2</subscript>
-        and <phrase role="math">&tau;<subscript>y</subscript></phrase> = <phrase role="math">y</phrase><subscript>1</subscript> - <phrase role="math">y</phrase><subscript>2</subscript>.
-        Function <phrase role="math">w</phrase>(<phrase role="math">z</phrase><subscript>1</subscript>, <phrase role="math">z</phrase><subscript>2</subscript>,
+        <phrase role="math">&tau;<subscript>x</subscript></phrase> = 
+        <phrase role="math">x</phrase><subscript>1</subscript> - 
+        <phrase role="math">x</phrase><subscript>2</subscript> and 
+        <phrase role="math">&tau;<subscript>y</subscript></phrase> = 
+        <phrase role="math">y</phrase><subscript>1</subscript> - 
+        <phrase role="math">y</phrase><subscript>2</subscript>.
+        The function 
+        <phrase role="math">w</phrase>(<phrase role="math">z</phrase><subscript>1</subscript>, <phrase role="math">z</phrase><subscript>2</subscript>,
         <phrase role="math">&tau;<subscript>x</subscript></phrase>, <phrase role="math">&tau;<subscript>y</subscript></phrase>)
-        denotes two-dimensional probability density of random function <phrase role="math">&xi;</phrase> &gt; (<phrase role="math">x</phrase>,<phrase role="math">y</phrase>)
+        denotes the two-dimensional probability density of the random function <phrase role="math">&xi;</phrase> &gt; (<phrase role="math">x</phrase>,<phrase role="math">y</phrase>)
         corresponding to points [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>]
         and the distance between
         these points <phrase role="math">&tau;</phrase>.
       </para>
       <para>
-        Within the AFM measurements we usually evaluate the one-dimensional
-        autocorrelation function determined only from profiles in the fast
-        scanning axis which can be evaluated from the discrete AFM data values as
+        For AFM measurements, we usually evaluate the one-dimensional
+        autocorrelation function based only on profiles along the fast
+        scanning axis. It can therefore be evaluated from the discrete AFM data 
+        values as
       </para>
       <informalequation>
         <mediaobject>
@@ -156,12 +227,12 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. Function thus can be evaluated in a discrete set
+        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. The function can thus be evaluated in a discrete set
         of values of <phrase role="math">&tau;</phrase> separated by the sampling interval <phrase role="math">&Delta;</phrase>.
       </para>
       <para>
-        The one-dimensional autocorrelation function is often supposed as being
-        Gaussian, i. e. given by the following relation
+        The one-dimensional autocorrelation function is often assumed to have the
+        form of a Gaussian, i.e. it can be given by the following relation
       </para>
       <informalequation>
         <mediaobject>
@@ -171,8 +242,9 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">&sigma;</phrase> and/or <phrase role="math">T</phrase> denotes the root mean square deviation of
-        the heights and/or the autocorrelation length.
+        <!--TODO: Tried to fix this sentence, but my not be correct -->
+        where <phrase role="math">&sigma;</phrase> denotes the root mean square deviation of
+        the heights and <phrase role="math">T</phrase> represents the autocorrelation length.
       </para>
       <para>
         For the exponential autocorrelation function we have the following relation
@@ -184,27 +256,30 @@
           </imageobject>
         </mediaobject>
       </informalequation>
-      <para>
-        Note that in optical measurements (e. g. spectroscopic reflectometry, ellipsometry)
-        Gaussian autocorrelation function is usually expected to be in good
+      <note>
+        For optical measurements (e. g. spectroscopic reflectometry, ellipsometry)
+        the Gaussian autocorrelation function is usually expected to be in good
         agreement with the surface properties. However, some articles related with
-        surface growth \cite{jordan} and oxidation \cite{yoshinobu} usually assume that the exponential form is
-        closer to the reality.
-      </para>
+        surface growth \cite{jordan} and oxidation \cite{yoshinobu} 
+        <!--TODO: These artical citations are not correct. -->
+        usually assume that the exponential form is closer to the reality.
+      </note>
     </section>
     <section>
-      <title>Height-height correlation function</title>
+      <title>Height-Height Correlation Function</title>
       <para>
-        The difference between height-height correlation function and autocorrelation
-        function is only very small. As within autocorrelation function we sum multiples
-        of two different values (for different distances between points representing these values),
-        for height-height correlation function evaluation we use power of difference between
-        these two values.
+        The difference between the height-height correlation function and the 
+        autocorrelation function is very small. As with the autocorrelation 
+        function, we sum the multiplication of two different values. For the
+        autocorrelation function, these values represented the different
+        distances between points. For the height-height correlation function,
+        we instead use the power of difference between the points.
       </para>
       <para>
-        Within the AFM measurements we usually evaluate the one-dimensional
-        height-height correlation function determined only from profiles in the fast
-        scanning axis which can be evaluated from the discrete AFM data values as
+        For AFM measurements, we usually evaluate the one-dimensional
+        height-height correlation function based only on profiles along the fast
+        scanning axis. It can therefore be evaluated from the discrete AFM data 
+        values as
       </para>
       <informalequation>
         <mediaobject>
@@ -214,12 +289,12 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. Function thus can be evaluated in a discrete set
-        of values of $\tau$ separated by the sampling interval <phrase role="math">&Delta;</phrase>.
+        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. The function thus can be evaluated in a discrete set
+        of values of <phrase role="math">&tau;</phrase> separated by the sampling interval <phrase role="math">&Delta;</phrase>.
       </para>
       <para>
-        As stated above, the one-dimensional autocorrelation function is often supposed as being
-        Gaussian, i. e. given by the following relation for the height-height correlation function
+        The one-dimensional height-height correlation function is often assumed to be
+        Gaussian, i.e. given by the following relation
       </para>
       <informalequation>
         <mediaobject>
@@ -229,12 +304,15 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">&sigma;</phrase> and/or <phrase role="math">T</phrase> denotes the root mean square deviation of
-        the heights and/or the autocorrelation length.
+        <!--TODO: Tried to fix this sentence, but my not be correct -->
+        where <phrase role="math">&sigma;</phrase> denotes the root mean square deviation of
+        the heights and <phrase role="math">T</phrase> denotes the autocorrelation length.
+        <!--TODO: Does T donote the autocorrelation length, or the height-height
+                  corelation length? Looks like a mistake as a result of copying from the 
+                  previous section -->
       </para>
       <para>
-        For the exponential autocorrelation function we have the following relation for the
-        height-height correlation function
+        For the exponential height-height correlation function we have the following relation
       </para>
       <informalequation>
         <mediaobject>
@@ -244,6 +322,7 @@
         </mediaobject>
       </informalequation>
       <para>
+        <!--TODO: Fix this paragraph, as well as the accompanying figure -->
         In Fig. 1 the height-height correlation function and autocorrelation function obtained for
         simulated surface having Gaussian autocorrelation function are plotted. These functions
         are fitted by means of least-squares method using the formulae shown above. The resulting
@@ -262,9 +341,10 @@
       </figure>
     </section>
     <section>
+      <title>Power Spectral Density Function</title>
       <para>
-        Two-dimensional power spectral density function can be written in terms of Fourier transform of the
-        autocorrelation function
+        The two-dimensional power spectral density function can be written in 
+        terms of the Fourier transform of the autocorrelation function
       </para>
       <informalequation>
         <mediaobject>
@@ -274,9 +354,9 @@
         </mediaobject>
       </informalequation>
       <para>
-        Similarly to autocorrelation function, also here we
-        usually evaluate the one-dimensional
-        power spectral density function which is given by equation
+        Similarly to the autocorrelation function, we also usually evaluate 
+        the one-dimensional power spectral density function which is given by 
+        the equation
       </para>
       <informalequation>
         <mediaobject>
@@ -286,7 +366,7 @@
         </mediaobject>
       </informalequation>
       <para>
-        This function can be evaluated by means of the Fast Fourier transform as follows:
+        This function can be evaluated by means of the Fast Fourier Transform as follows:
       </para>
       <informalequation>
         <mediaobject>
@@ -297,7 +377,7 @@
       </informalequation>
       <para>
         where <phrase role="math">P<subscript>j</subscript></phrase>(<phrase role="math">K<subscript>x</subscript></phrase>) is the Fourier coefficient
-        of the <phrase role="math">j</phrase>-th row, i. e.
+        of the <phrase role="math">j</phrase>-th row, i.e.
       </para>
       <informalequation>
         <mediaobject>
@@ -327,6 +407,7 @@
         </mediaobject>
       </informalequation>
       <para>
+        <!--TODO: Fix this paragraph, and figure -->
         In Figure 2 the resulting PSDF and its fit for the same surface as used in Fig. 1 are plotted.
         We can see that the function can be again fitted by Gaussian PSDF. The resulting values of
         <phrase role="math">&sigma;</phrase> and <phrase role="math">T</phrase> were practically same as those from the HHCF and ACF fit.
@@ -342,11 +423,18 @@
           </imageobject>
         </mediaobject>
       </figure>
-      <para>
-        Note that within Gwyddion you can fit all statistical function presented here
-        by their gaussian and exponential forms. For this, evaluate the statistical function
-        (and put it into graph) and fit this by choosing "graph fit" module.
-      </para>
+      <tip>
+        Within Gwyddion you can fit all statistical functions presented here
+        by their gaussian and exponential forms. To do this, fist click 
+        <guibutton>Apply</guibutton> within the 
+        <link linkend="stat_functions">Statistical Functions</link> tool window.
+        This will create a new graph window. With this new window selected, click
+        on 
+        <menuchoice>
+          <guimenu>Graph</guimenu>
+          <guimenuitem><link linkend=""><!--TODO: Fix Link-->Fit Graph</link></guimenuitem>
+        </menuchoice>.
+      </tip>
     </section>
   </section>
 </section>
