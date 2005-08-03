@@ -399,6 +399,7 @@ dialog_update(GwyUnitoolState *state,
     z_mag = pow(10, 3*ROUND(((gint)(log10(fabs(z_max))))/3.0) - 3);
     z_unit = g_strconcat(gwy_math_SI_prefix(z_mag), "m", NULL);
 
+    controls->isnpoints = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controls->isnofpoints));    
     gwy_graph_clear(GWY_GRAPH(controls->graph));
     if (nselected) {
         j = 0;
@@ -418,7 +419,7 @@ dialog_update(GwyUnitoolState *state,
             {
                 lineres = controls->npoints;
             }
-            
+
             if (!gwy_data_field_get_data_line_averaged(dfield, controls->dtl->pdata[i],
                                               xl1, yl1, xl2, yl2, lineres, controls->size,
                                               controls->interp))
@@ -555,12 +556,14 @@ npoints_changed_cb(ToolControls *controls)
 {
     controls->npoints
                = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->nofpoints));
+    
     dialog_update(controls->state, GWY_UNITOOL_UPDATED_CONTROLS);
 }
 
 static void
 isnofpoints_changed_cb(GtkToggleButton *button, ToolControls *controls)
 {
+    
     dialog_update(controls->state, GWY_UNITOOL_UPDATED_CONTROLS);
 }
 

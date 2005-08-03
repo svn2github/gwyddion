@@ -40,9 +40,11 @@ typedef struct {
     GtkWidget *interpolation;
     GtkWidget *output;
     GtkWidget *direction;
+    GObject *size;
     GwyInterpolationType interp;
     GwySFOutputType out;
     GtkOrientation dir;
+    gint siz;
 } ToolControls;
 
 static gboolean   module_register      (const gchar *name);
@@ -60,6 +62,8 @@ static void       output_changed_cb    (GObject *item,
                                         ToolControls *controls);
 static void       direction_changed_cb (GObject *item,
                                         ToolControls *controls);
+static void       size_changed_cb      (GObject *adjustment,
+                                        ToolControls *controls);
 static void       load_args            (GwyContainer *container,
                                         ToolControls *controls);
 static void       save_args            (GwyContainer *container,
@@ -68,6 +72,7 @@ static void       save_args            (GwyContainer *container,
 static const gchar *interp_key = "/tool/sfunctions/interp";
 static const gchar *out_key = "/tool/sfunctions/out";
 static const gchar *dir_key = "/tool/sfunctions/dir";
+static const gchar *siz_key = "/tool/sfunctions/siz";
 
 /* The module info. */
 static GwyModuleInfo module_info = {
@@ -156,7 +161,7 @@ dialog_create(GwyUnitoolState *state)
 {
     ToolControls *controls;
     GwyContainer *settings;
-    GtkWidget *dialog, *table, *label, *vbox, *frame, *hbox;
+    GtkWidget *spin, *dialog, *table, *label, *vbox, *frame, *hbox;
     gint row;
 
     gwy_debug("");
@@ -224,6 +229,18 @@ dialog_create(GwyUnitoolState *state)
                      GTK_EXPAND | GTK_FILL, 0, 2, 2);
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 4);
     row++;
+        
+    controls->size
+                = gtk_adjustment_new(controls->siz, 20, 1000, 1, 10, 0);
+
+    spin = gwy_table_attach_hscale(table, row, "size:", "", controls->size,
+                                                        GWY_HSCALE_DEFAULT);
+    gtk_spin_button_set_digits(GTK_SPIN_BUTTON(spin), 0);
+    g_signal_connect(controls->size, "value_changed",
+                                     G_CALLBACK(size_changed_cb), controls);
+                
+
+    row++;
 
     label = gtk_label_new_with_mnemonic(_("Interpolation type:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
@@ -287,7 +304,7 @@ dialog_update(GwyUnitoolState *state,
                                               controls->dir,
                                               controls->interp,
                                               GWY_WINDOWING_HANN,
-                                              100))
+                                              controls->siz))
         gwy_graph_add_dataline(GWY_GRAPH(controls->graph), dataline,
                                0, lab, NULL);
     g_string_free(lab, TRUE);
@@ -386,6 +403,13 @@ direction_changed_cb(GObject *item, ToolControls *controls)
     dialog_update(controls->state, GWY_UNITOOL_UPDATED_CONTROLS);
 }
 
+static void
+size_changed_cb(GObject *adjustment, ToolControls *controls)
+{
+    controls->siz = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->size));
+    dialog_update(controls->state, GWY_UNITOOL_UPDATED_CONTROLS);
+}
+
 
 static void
 load_args(GwyContainer *container, ToolControls *controls)
@@ -393,16 +417,22 @@ load_args(GwyContainer *container, ToolControls *controls)
     controls->dir = GTK_ORIENTATION_HORIZONTAL;
     controls->out = GWY_SF_OUTPUT_DH;
     controls->interp = GWY_INTERPOLATION_BILINEAR;
-
+    controls->siz = 100;
+    
+    
     gwy_container_gis_enum_by_name(container, dir_key, &controls->dir);
     gwy_container_gis_enum_by_name(container, out_key, &controls->out);
     gwy_container_gis_enum_by_name(container, interp_key, &controls->interp);
-
+    gwy_container_gis_int32_by_name(container, siz_key, &controls->siz);
+    
+    
     /* sanitize */
     controls->dir = MIN(controls->dir, GTK_ORIENTATION_VERTICAL);
     controls->out = MIN(controls->out, GWY_SF_OUTPUT_PSDF);
     controls->interp = CLAMP(controls->interp,
                              GWY_INTERPOLATION_ROUND, GWY_INTERPOLATION_NNA);
+
+    
 }
 
 static void
@@ -411,6 +441,7 @@ save_args(GwyContainer *container, ToolControls *controls)
     gwy_container_set_enum_by_name(container, interp_key, controls->interp);
     gwy_container_set_enum_by_name(container, dir_key, controls->dir);
     gwy_container_set_enum_by_name(container, out_key, controls->out);
+    gwy_container_set_int32_by_name(container, siz_key, controls->siz);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
