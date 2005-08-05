@@ -37,7 +37,8 @@
     (GWY_RUN_MODAL | GWY_RUN_NONINTERACTIVE | GWY_RUN_WITH_DEFAULTS)
 
 #define PREVIEW_SIZE 384
-#define COLOR_RANGE_DEFAULT 5
+#define CR_DEFAULT 5
+#define CR_MAX 200
 
 /* Convenience macros */
 #define is_marker_zero_sized(marker) \
@@ -369,7 +370,7 @@ run_dialog(ControlsType *controls)
     controls->bbuf_fft = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
                                         PREVIEW_SIZE, PREVIEW_SIZE);
     min = gwy_data_field_get_min(data_fft);
-    max = gwy_data_field_get_rms(data_fft) * COLOR_RANGE_DEFAULT;
+    max = gwy_data_field_get_rms(data_fft);
     controls->color_range = max;
     gwy_pixbuf_draw_data_field_with_range(controls->buf_fft, data_fft,
                                           gradient_fft, min, max);
@@ -517,8 +518,10 @@ run_dialog(ControlsType *controls)
     gtk_table_attach(GTK_TABLE(table), hbox2, 0, 2, row, row+1,
                      GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
-    scale_fft = gtk_hscale_new(GTK_ADJUSTMENT(gtk_adjustment_new(COLOR_RANGE_DEFAULT,
-                                                                 0.1, 20, 0.1, 1, 1)));
+    scale_fft = gtk_hscale_new(GTK_ADJUSTMENT(gtk_adjustment_new(CR_DEFAULT,
+                                                                 0.1,
+                                                                 CR_MAX,
+                                                                 0.1, 1, 1)));
     gtk_scale_set_digits(GTK_SCALE(scale_fft), 3);
     gtk_scale_set_draw_value(GTK_SCALE(scale_fft), FALSE);
     gtk_tooltips_set_tip(GTK_TOOLTIPS(tips), scale_fft,
@@ -704,7 +707,7 @@ load_settings(ControlsType *controls, gboolean load_defaults)
     /* Set defaults */
     output = 2;
     origin = FALSE;
-    color = COLOR_RANGE_DEFAULT;
+    color = CR_DEFAULT;
 
     /* Load settings */
     if (!load_defaults) {
