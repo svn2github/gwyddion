@@ -1,19 +1,20 @@
 PLAINTEX = tex
 CONVERT = convert
-IDENTIFY = identify
 DVIPS = dvips
 GS = gs
 
 FORMULAS = $(wildcard eq-*.tex)
 PNGS = $(subst .tex,.png,$(FORMULAS))
 TEMPLATES = header.tex footer.tex defs.tex
-DISTFILES = Makefile $(FORMULAS) $(TEMPLATES)
+DISTFILES = Makefile pngsize.c $(FORMULAS) $(TEMPLATES)
 
 T = TEMP-
 
 all: formulas
 
-formulas: png-images
+formulas: pngsize png-images
+
+pngsize: pngsize.c
 
 png-images: $(PNGS)
 
@@ -24,8 +25,7 @@ png-images: $(PNGS)
 	. $(T)$*.bbox; sed -ri "s/^(%%BoundingBox:).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
 	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
 	@{ \
-	    eval $$($(IDENTIFY) $(T)$*.png \
-	        | sed -e 's/.* PNG \([0-9]*\)x\([0-9]*\)\(+0+0\)* .*/w=\1 h=\2/'); \
+	    eval $$(./pngsize <$(T)$*.png); \
 	    if test $$h -gt 1600; then \
 	        echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2; \
 	        . $(T)$*.bbox; \
@@ -40,15 +40,10 @@ png-images: $(PNGS)
 	rm $(T)$*.*
 
 clean:
-	-rm -f eq-*.png $(T)* *~
+	-rm -f eq-*.png pngsize $(T)* *~
 
 dist:
 	mkdir ../$(DISTNAME)/formulas
 	cp Makefile $(FORMULAS) $(TEMPLATES) ../$(DISTNAME)/formulas
 
 .PHONY: clean dist formulas all
-
-# Various `identify' output formats
-# FC4: eq-area-calculation.png PNG 512x82 512x82+0+0 PseudoClass 256c 5kb
-# SuSE9.2: eq-area-calculation.png PNG 512x82+0+0 PseudoClass 256c 8-bit 4.5kb 0.000u 0:01
-# Debian3.1: eq-area-calculation.png PNG 512x82 PseudoClass 256c 4kb 0.000u 0:01
