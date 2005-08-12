@@ -18,6 +18,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
 
+/*TODO: Update mnemonics */
+
 #include <math.h>
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -36,7 +38,7 @@
 #define FFT2D_RUN_MODES \
     (GWY_RUN_MODAL | GWY_RUN_NONINTERACTIVE | GWY_RUN_WITH_DEFAULTS)
 
-#define PREVIEW_SIZE 384
+#define PREVIEW_SIZE 400.0
 #define CR_DEFAULT 5
 #define CR_MAX 200
 
@@ -56,6 +58,9 @@
 
 #define get_container_data(obj) \
     GWY_DATA_FIELD(gwy_container_get_object_by_name(obj, "/0/data"))
+
+#define radio_new gtk_radio_button_new_with_mnemonic_from_widget
+#define check_new gtk_check_button_new_with_mnemonic
 
 #define get_distance(x1, x2, y1, y2) \
     sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
@@ -104,6 +109,8 @@ typedef struct {
     GdkPixbuf *bbuf_fft;
     GdkPixbuf *buf_preview_fft;
     GdkPixbuf *buf_preview_image;
+    GdkPixbuf *buf_original_image;
+    GdkPixbuf *buf_preview_diff;
 
     GtkWidget *dialog;
 
@@ -114,24 +121,28 @@ typedef struct {
     GtkWidget *button_drag;
     GtkWidget *button_remove;
 
+    GtkWidget *check_zoom;
     GtkWidget *check_origin;
 
     GtkWidget *button_show_fft;
+    GtkWidget *button_show_original_image;
     GtkWidget *button_show_fft_preview;
     GtkWidget *button_show_image_preview;
+    GtkWidget *button_show_diff_preview;
 
     GtkWidget *combo_output;
 
     GSList *markers;
     MarkerType *marker_selected;
     gboolean can_change_marker;
-    
+
     gint xres;
     gdouble color_range;
     gboolean preview;
     gboolean preview_invalid;
     gboolean output_image;
     gboolean output_fft;
+    gdouble zoom_factor;
 
 } ControlsType;
 
@@ -155,6 +166,7 @@ static void         scale_changed_fft   (GtkRange *range,
                                          ControlsType *controls);
 static void         remove_all_clicked  (ControlsType *controls);
 static void         display_mode_changed(ControlsType *controls);
+static void         zoom_toggled        (ControlsType *controls);
 
 /* Helper Functions */
 static gboolean     run_dialog          (ControlsType *controls);
@@ -300,6 +312,8 @@ run_main(GwyContainer *data, GwyRunType run)
     g_object_unref(controls.bbuf_fft);
     g_object_unref(controls.buf_preview_fft);
     g_object_unref(controls.buf_preview_image);
+    g_object_unref(controls.buf_original_image);
+    g_object_unref(controls.buf_preview_diff);
     g_object_unref(controls.cont_fft);
 
     /* Free markers */
@@ -324,6 +338,7 @@ run_dialog(ControlsType *controls)
     };
     GtkWidget *dialog;
     GtkWidget *table, *hbox, *hbox2, *hbox3;
+    GtkWidget *table2;
     GtkWidget *label;
     GtkWidget *scale_fft;
     GtkWidget *image;
@@ -333,8 +348,11 @@ run_dialog(ControlsType *controls)
     GHashTable *hash_tips;
     GdkCursor *cursor;
     GwyDataField *data_fft;
+    GwyDataField *data_original;
     GwyContainer *cont_fft;
     GwyGradient *gradient_fft;
+    GwyGradient *gradient;
+    const guchar *gradient_name = NULL;
     gint response;
     gint i;
     gint xres;
@@ -349,12 +367,16 @@ run_dialog(ControlsType *controls)
     controls->marker_selected = NULL;
     controls->preview_invalid = FALSE;
     controls->can_change_marker = FALSE;
-    
-    /* Setup container and data field */
+
+    /* Setup containers and data fields */
+    data_original = get_container_data(controls->cont_data);
     cont_fft = controls->cont_fft;
     data_fft = get_container_data(cont_fft);
     xres = gwy_data_field_get_xres(data_fft);
     controls->xres = xres;
+    /* TODO: possibly add zoom options:
+               100%, 200%, 300%, etc, Auto*/
+    controls->zoom_factor = ((gdouble)xres / 128.0) * 0.8;
 
     /* Do the fft (for preview window) */
     do_fft(data_fft, data_fft);
@@ -363,10 +385,15 @@ run_dialog(ControlsType *controls)
     gradient_fft = gwy_gradients_get_gradient("DFit");
     controls->buf_fft = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
                                        xres, xres);
+    controls->buf_original_image = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
+                                                  FALSE, 8,
+                                                  xres, xres);
     controls->buf_preview_fft = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
                                                xres, xres);
     controls->buf_preview_image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
                                                  xres, xres);
+    controls->buf_preview_diff = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
+                                                xres, xres);
     controls->bbuf_fft = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
                                         PREVIEW_SIZE, PREVIEW_SIZE);
     min = gwy_data_field_get_min(data_fft);
@@ -374,6 +401,13 @@ run_dialog(ControlsType *controls)
     controls->color_range = max;
     gwy_pixbuf_draw_data_field_with_range(controls->buf_fft, data_fft,
                                           gradient_fft, min, max);
+    gwy_container_gis_string_by_name(controls->cont_data, "/0/base/palette",
+                                     &gradient_name);
+    if (!gradient_name)
+        gradient_name = GWY_GRADIENT_DEFAULT;
+    gradient = gwy_gradients_get_gradient(gradient_name);
+    gwy_pixbuf_draw_data_field(controls->buf_original_image, data_original,
+                               gradient);
 
     /* Setup the dialog window */
     dialog = gtk_dialog_new_with_buttons(_("2D FFT Filtering"), NULL, 0,
@@ -401,7 +435,7 @@ run_dialog(ControlsType *controls)
                           PREVIEW_SIZE, PREVIEW_SIZE);
     gtk_box_pack_start(GTK_BOX(hbox), controls->draw_fft, FALSE, FALSE, 5);
 
-    table = gtk_table_new(9, 2, FALSE);
+    table = gtk_table_new(20, 2, FALSE);
     gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 10);
     row = 0;
 
@@ -464,16 +498,14 @@ run_dialog(ControlsType *controls)
     hbox3 = gtk_hbox_new(TRUE, 0);
     gtk_box_pack_start(GTK_BOX(hbox2), hbox3, FALSE, FALSE, 5);
 
-    button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
-                                                            _("_Edit"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("_Edit"));
     gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(button), FALSE);
     gtk_tooltips_set_tip(GTK_TOOLTIPS(tips), button,
                          g_hash_table_lookup(hash_tips, "drag"), "");
     gtk_container_add(GTK_CONTAINER(hbox3), button);
     controls->button_drag = button;
 
-    button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
-                                                            _("Re_move"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Re_move"));
     gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(button), FALSE);
     gtk_tooltips_set_tip(GTK_TOOLTIPS(tips), button,
                          g_hash_table_lookup(hash_tips, "remove"), "");
@@ -483,7 +515,7 @@ run_dialog(ControlsType *controls)
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 5);
     row++;
 
-    controls->check_origin = gtk_check_button_new_with_mnemonic(_("_Snap to origin"));
+    controls->check_origin = check_new(_("_Snap to origin"));
     gtk_tooltips_set_tip(GTK_TOOLTIPS(tips), controls->check_origin,
                          g_hash_table_lookup(hash_tips, "origin"), "");
     gtk_table_attach(GTK_TABLE(table), controls->check_origin, 0, 2, row, row+1,
@@ -517,7 +549,6 @@ run_dialog(ControlsType *controls)
     hbox2 = gtk_hbox_new(FALSE, 0);
     gtk_table_attach(GTK_TABLE(table), hbox2, 0, 2, row, row+1,
                      GTK_EXPAND | GTK_FILL, 0, 0, 0);
-
     scale_fft = gtk_hscale_new(GTK_ADJUSTMENT(gtk_adjustment_new(CR_DEFAULT,
                                                                  0.1,
                                                                  CR_MAX,
@@ -537,34 +568,56 @@ run_dialog(ControlsType *controls)
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 5);
     row++;
 
+    button = gtk_check_button_new_with_mnemonic(_("Zoom"));
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(zoom_toggled), controls);
+    gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
+                     GTK_FILL, GTK_FILL, 0, 2);
+    controls->check_zoom = button;
+    row++;
+
     label = gtk_label_new(_("Display mode:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.05);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
                      GTK_FILL, GTK_FILL, 0, 2);
     row++;
 
-    button = gtk_radio_button_new_with_mnemonic(NULL, _("Filter _Drawing"));
+    table2 = gtk_table_new(3, 2, FALSE);
+    gtk_table_attach(GTK_TABLE(table), table2, 0, 2, row, row+1,
+                     GTK_FILL, GTK_FILL, 0, 2);
+
+    button = gtk_radio_button_new_with_mnemonic(NULL, _("Original FFT"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
-    gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
+    gtk_table_attach(GTK_TABLE(table2), button, 0, 1, 0, 1,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft = button;
-    row++;
 
-    button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
-                                                            _("Filtered _Image Preview"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Original Image"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
-    gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
+    gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 0, 1,
+                     GTK_FILL, GTK_FILL, 0, 2);
+    controls->button_show_original_image = button;
+
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Filtered _Image"));
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(display_mode_changed), controls);
+    gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 1, 2,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_image_preview = button;
-    row++;
 
-    button = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(button),
-                                                            _("Filtered _FFT Preview"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Image Difference"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
-    gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
+    gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 2, 3,
+                     GTK_FILL, GTK_FILL, 0, 2);
+    controls->button_show_diff_preview = button;
+
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Filtered _FFT"));
+    g_signal_connect_swapped(button, "toggled",
+                             G_CALLBACK(display_mode_changed), controls);
+    gtk_table_attach(GTK_TABLE(table2), button, 0, 1, 1, 2,
                      GTK_FILL, GTK_FILL, 0, 2);
     controls->button_show_fft_preview = button;
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 15);
@@ -692,8 +745,11 @@ save_settings(ControlsType *controls)
                                       "/module/fft_filter_2d/check_origin",
                                       get_toggled(controls->check_origin));
     gwy_container_set_double_by_name(settings,
-                                     "/module/fft_filter_2d/color_range",
-                                     gtk_range_get_value(GTK_RANGE(controls->scale_fft)));
+                    "/module/fft_filter_2d/color_range",
+                    gtk_range_get_value(GTK_RANGE(controls->scale_fft)));
+    gwy_container_set_boolean_by_name(settings,
+                                      "/module/fft_filter_2d/zoom",
+                                      get_toggled(controls->check_zoom));
 }
 
 static void
@@ -703,30 +759,36 @@ load_settings(ControlsType *controls, gboolean load_defaults)
     gint output;
     gboolean origin;
     gdouble color;
+    gboolean zoom;
 
     /* Set defaults */
     output = 2;
     origin = FALSE;
     color = CR_DEFAULT;
+    zoom = FALSE;
 
     /* Load settings */
     if (!load_defaults) {
-       settings = gwy_app_settings_get();
-       gwy_container_gis_int32_by_name(settings,
-                                       "/module/fft_filter_2d/combo_output",
-                                       &output);
-       gwy_container_gis_boolean_by_name(settings,
-                                         "/module/fft_filter_2d/check_origin",
-                                         &origin);
-       gwy_container_gis_double_by_name(settings,
-                                        "/module/fft_filter_2d/color_range",
-                                        &color);
+        settings = gwy_app_settings_get();
+        gwy_container_gis_int32_by_name(settings,
+                                        "/module/fft_filter_2d/combo_output",
+                                        &output);
+        gwy_container_gis_boolean_by_name(settings,
+                                          "/module/fft_filter_2d/check_origin",
+                                          &origin);
+        gwy_container_gis_double_by_name(settings,
+                                         "/module/fft_filter_2d/color_range",
+                                         &color);
+        gwy_container_gis_boolean_by_name(settings,
+                                          "/module/fft_filter_2d/zoom",
+                                          &zoom);
     }
 
     /* Change controls to match settings */
     set_combo_index(controls->combo_output, "output-type", output);
     set_toggled(controls->check_origin, origin);
     gtk_range_set_value(GTK_RANGE(controls->scale_fft), color);
+    set_toggled(controls->check_zoom, zoom);
 }
 
 static gboolean
@@ -735,26 +797,52 @@ paint_fft(GtkWidget *widget,
           ControlsType *controls)
 {
     GdkPixmap *pix_work;
-    GdkPixbuf *buf_temp;
+    GdkPixbuf *buf_temp = NULL;
     GdkPixbuf *buf_source;
+    gboolean zoom = FALSE;
+    gdouble offset, scale;
+    zoom = get_toggled(controls->check_zoom);
 
     /* Create temp drawable so we can draw shapes onto the FFT image */
     pix_work = gdk_pixmap_new(widget->window, PREVIEW_SIZE, PREVIEW_SIZE, -1);
 
-    /* Resize the stored buffer to the preview size */
+    /* Create a temp pixbuf for scaling operations (only if zooming) */
+    if (zoom)
+        buf_temp = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
+                                  PREVIEW_SIZE, PREVIEW_SIZE);
+
+    /* Pick what our source buffer is (depending on preview mode) */
     if (controls->preview) {
         if (get_toggled(controls->button_show_fft_preview))
             buf_source = controls->buf_preview_fft;
         else if (get_toggled(controls->button_show_image_preview))
             buf_source = controls->buf_preview_image;
+        else if (get_toggled(controls->button_show_original_image))
+            buf_source = controls->buf_original_image;
+        else if (get_toggled(controls->button_show_diff_preview))
+            buf_source = controls->buf_preview_diff;
         else
             buf_source = controls->buf_fft;
     } else {
         buf_source = controls->buf_fft;
     }
 
-    buf_temp = gdk_pixbuf_scale_simple(buf_source, PREVIEW_SIZE, PREVIEW_SIZE,
-                                       GDK_INTERP_BILINEAR);
+    /* Resize the stored buffer to the preview size */
+    if (zoom && buf_temp) {
+        offset = -(gdouble)PREVIEW_SIZE*(controls->zoom_factor - 1.0)/2.0;
+        scale = controls->zoom_factor *
+                ((gdouble)PREVIEW_SIZE/(gdouble)controls->xres);
+
+        gdk_pixbuf_scale(buf_source, buf_temp, 0, 0,
+                         PREVIEW_SIZE, PREVIEW_SIZE,
+                         offset, offset, scale, scale,
+                         GDK_INTERP_BILINEAR);
+    }
+    else {
+        buf_temp = gdk_pixbuf_scale_simple(buf_source,
+                                           PREVIEW_SIZE, PREVIEW_SIZE,
+                                           GDK_INTERP_BILINEAR);
+    }
 
     /* Draw the resized pixbuf onto pix_work */
     gdk_draw_pixbuf(pix_work, NULL, buf_temp, 0, 0, 0, 0,
@@ -968,7 +1056,7 @@ draw_markers(GdkPixmap *pix_target, ControlsType *controls)
         list = g_slist_next(list);
     }
 
-    if (marker_selected != NULL)    
+    if (marker_selected != NULL)
         draw_marker(pix_target, marker_selected, GDK_XOR, controls);
 }
 
@@ -997,21 +1085,55 @@ get_color_from_rgb(gint red, gint green, gint blue)
 static void
 screen_to_dfield(gdouble *x, gdouble *y, ControlsType *controls)
 {
+    gboolean zoom = FALSE;
     gdouble scale_factor;
+    gdouble zoom_factor = 1.0;
+    gdouble offset;
+
+    /* Setup zooming */
+    zoom = get_toggled(controls->check_zoom);
+    if (zoom)
+        zoom_factor = controls->zoom_factor;
+
+    /* Subtract off zoom offset */
+    if (zoom) {
+        offset = (gdouble)PREVIEW_SIZE *
+                 (controls->zoom_factor - 1.0)/2.0;
+        *x += offset;
+        *y += offset;
+    }
+
     /* Convert from screen coordinates to dfield coordinates */
     scale_factor = ((gdouble)controls->xres/(gdouble)PREVIEW_SIZE);
-    *x *= scale_factor;
-    *y *= scale_factor;
+    *x *= scale_factor / zoom_factor;
+    *y *= scale_factor / zoom_factor;
 }
 
 static void
 dfield_to_screen(gdouble *x, gdouble *y, ControlsType *controls)
 {
+    gboolean zoom = FALSE;
     gdouble scale_factor;
+    gdouble zoom_factor = 1.0;
+    gdouble offset;
+
+    /* Setup zooming */
+    zoom = get_toggled(controls->check_zoom);
+    if (zoom)
+        zoom_factor = controls->zoom_factor;
+
     /* Convert from dfield coordinates to screen coordinates */
-    scale_factor = ((gdouble)PREVIEW_SIZE/(gdouble)controls->xres);
-    *x *= scale_factor;
-    *y *= scale_factor;
+    scale_factor = ((gdouble)PREVIEW_SIZE/((gdouble)controls->xres));
+    *x *= scale_factor * zoom_factor;
+    *y *= scale_factor * zoom_factor;
+
+    /* Add in zoom offset */
+    if (zoom) {
+        offset = -(gdouble)PREVIEW_SIZE *
+                  (controls->zoom_factor - 1.0)/2.0;
+        *x += offset;
+        *y += offset;
+    }
 }
 
 static gboolean
@@ -1109,7 +1231,7 @@ mouse_up_fft(ControlsType *controls, G_GNUC_UNUSED GdkEventButton *event)
 
     controls->marker_selected = NULL;
     controls->can_change_marker = FALSE;
-    
+
     return TRUE;
 }
 
@@ -1271,6 +1393,9 @@ static void
 display_mode_changed(ControlsType *controls)
 {
     GwyDataField *dfield;
+    GwyContainer *cont_diff;
+    GwyDataField *data_diff;
+    GwyGradient *gradient;
     GwyGradient *gradient_fft;
     const guchar *gradient_name = NULL;
     gdouble min, max;
@@ -1281,19 +1406,24 @@ display_mode_changed(ControlsType *controls)
                                    PREVIEW_SIZE, PREVIEW_SIZE);
     } else {
         if (controls->preview_invalid) {
+            /* Run the 2d fft filter on the original data */
             dfield = get_container_data(controls->cont_data);
             fft_filter_2d(dfield, controls->data_output_image,
                           controls->data_output_fft,
                           controls->markers);
+
+            /* Paint the filtered image output into preview pixbuf */
             gwy_container_gis_string_by_name(controls->cont_data,
                                              "/0/base/palette",
                                              &gradient_name);
             if (gradient_name == NULL)
                 gradient_name = GWY_GRADIENT_DEFAULT;
-            gradient_fft = gwy_gradients_get_gradient(gradient_name);
+            gradient = gwy_gradients_get_gradient(gradient_name);
             gwy_pixbuf_draw_data_field(controls->buf_preview_image,
                                        controls->data_output_image,
-                                       gradient_fft);
+                                       gradient);
+
+            /* Paint the filtered fft output into preview pixbuf */
             gradient_fft = gwy_gradients_get_gradient("DFit");
             min = gwy_data_field_get_min(controls->data_output_fft);
             max = controls->color_range;
@@ -1301,6 +1431,19 @@ display_mode_changed(ControlsType *controls)
                                                   controls->data_output_fft,
                                                   gradient_fft,
                                                   min, max);
+
+            /* Calculate the difference between original image, and filtered
+               image, and paint it into preview pixbuf */
+            cont_diff = gwy_container_duplicate_by_prefix(controls->cont_data,
+                                                          "/0/data", NULL);
+            data_diff = get_container_data(cont_diff);
+            gwy_data_field_subtract_fields(data_diff,
+                                           controls->data_output_image,
+                                           data_diff);
+            gwy_pixbuf_draw_data_field(controls->buf_preview_diff,
+                                       data_diff,
+                                       gradient);
+            g_object_unref(cont_diff);
         }
 
         controls->preview = TRUE;
@@ -1308,6 +1451,13 @@ display_mode_changed(ControlsType *controls)
         gtk_widget_queue_draw_area(controls->draw_fft, 0, 0,
                                    PREVIEW_SIZE, PREVIEW_SIZE);
     }
+}
+
+static void
+zoom_toggled(ControlsType *controls)
+{
+    gtk_widget_queue_draw_area(controls->draw_fft, 0, 0,
+                               PREVIEW_SIZE, PREVIEW_SIZE);
 }
 
 static void
@@ -1344,10 +1494,12 @@ do_fft(GwyDataField *data_input, GwyDataField *data_output)
     r_out = GWY_DATA_FIELD(gwy_data_field_new_alike(data_input, TRUE));
     i_out = GWY_DATA_FIELD(gwy_data_field_new_alike(data_input, TRUE));
 
+
     gwy_data_field_2dfft(data_input, i_in, r_out, i_out, gwy_data_line_fft_hum,
                          window, 1, interp, 0, 0);
     gwy_data_field_2dffthumanize(r_out);
     gwy_data_field_2dffthumanize(i_out);
+
     set_dfield_modulus(r_out, i_out, data_output);
 
     g_object_unref(i_out);
