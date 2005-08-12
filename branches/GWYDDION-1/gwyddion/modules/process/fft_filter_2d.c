@@ -19,7 +19,7 @@
  */
 
 /*TODO: Update mnemonics */
-
+/*TODO: Only allow 2^n sized images */
 #include <math.h>
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -210,7 +210,7 @@ static GwyModuleInfo module_info = {
     "fft_filter_2d",
     N_("2D FFT Filtering"),
     "Chris Anderson <sidewinder.asu@gmail.com>",
-    "0.9.3",
+    "1.0",
     "Chris Anderson, Molecular Imaging Corp.",
     "2005",
 };
@@ -590,35 +590,35 @@ run_dialog(ControlsType *controls)
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 0, 1, 0, 1,
-                     GTK_FILL, GTK_FILL, 0, 2);
+                     GTK_FILL, GTK_FILL, 0, 1);
     controls->button_show_fft = button;
 
     button = radio_new(GTK_RADIO_BUTTON(button), _("Original Image"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 0, 1,
-                     GTK_FILL, GTK_FILL, 0, 2);
+                     GTK_FILL, GTK_FILL, 5, 1);
     controls->button_show_original_image = button;
 
     button = radio_new(GTK_RADIO_BUTTON(button), _("Filtered _Image"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 1, 2,
-                     GTK_FILL, GTK_FILL, 0, 2);
+                     GTK_FILL, GTK_FILL, 5, 1);
     controls->button_show_image_preview = button;
 
     button = radio_new(GTK_RADIO_BUTTON(button), _("Image Difference"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 2, 3,
-                     GTK_FILL, GTK_FILL, 0, 2);
+                     GTK_FILL, GTK_FILL, 5, 1);
     controls->button_show_diff_preview = button;
 
     button = radio_new(GTK_RADIO_BUTTON(button), _("Filtered _FFT"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 0, 1, 1, 2,
-                     GTK_FILL, GTK_FILL, 0, 2);
+                     GTK_FILL, GTK_FILL, 0, 1);
     controls->button_show_fft_preview = button;
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 15);
     row++;
@@ -1523,6 +1523,18 @@ fft_filter_2d(GwyDataField *input, GwyDataField *output_image,
     /* Prepare the mask dfield */
     xres = gwy_data_field_get_xres(input);
     mask = GWY_DATA_FIELD(gwy_data_field_new_alike(input, TRUE));
+    /* Check to see if there are any inclusive markers.
+       If there are, the mask should be 0's by default.
+       If there are not, it should be 1's by default    */
+    list = markers;
+    if (g_slist_length(list) > 0) {
+        marker = list->data;
+        if (!marker->inclusive)
+            gwy_data_field_fill(mask, 1);
+    }
+    else
+        gwy_data_field_fill(mask, 1);
+    /* Draw the markers onto the mask */
     list = markers;
     while (list) {
         marker = list->data;
