@@ -6,6 +6,7 @@ Application:
 Modules:
 - 2D FFT filtering: Drawing artefacts were fixed.
 - BCR file: Unit support was improved, support for zmin added.
+- Profile: Maximum profile width was increased to 100.
 
 Other:
 - Missing Italic stock icon was added.
