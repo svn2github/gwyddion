@@ -18,7 +18,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
 
-/*TODO: Update mnemonics */
 /*TODO: Only allow 2^n sized images */
 #include <math.h>
 #include <gtk/gtk.h>
@@ -568,7 +567,7 @@ run_dialog(ControlsType *controls)
     gtk_table_set_row_spacing(GTK_TABLE(table), row, 5);
     row++;
 
-    button = gtk_check_button_new_with_mnemonic(_("Zoom"));
+    button = gtk_check_button_new_with_mnemonic(_("_Zoom"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(zoom_toggled), controls);
     gtk_table_attach(GTK_TABLE(table), button, 0, 1, row, row+1,
@@ -586,14 +585,14 @@ run_dialog(ControlsType *controls)
     gtk_table_attach(GTK_TABLE(table), table2, 0, 2, row, row+1,
                      GTK_FILL, GTK_FILL, 0, 2);
 
-    button = gtk_radio_button_new_with_mnemonic(NULL, _("Original FFT"));
+    button = gtk_radio_button_new_with_mnemonic(NULL, _("Original _FFT"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 0, 1, 0, 1,
                      GTK_FILL, GTK_FILL, 0, 1);
     controls->button_show_fft = button;
 
-    button = radio_new(GTK_RADIO_BUTTON(button), _("Original Image"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Original _Image"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 0, 1,
@@ -607,7 +606,7 @@ run_dialog(ControlsType *controls)
                      GTK_FILL, GTK_FILL, 5, 1);
     controls->button_show_image_preview = button;
 
-    button = radio_new(GTK_RADIO_BUTTON(button), _("Image Difference"));
+    button = radio_new(GTK_RADIO_BUTTON(button), _("Image _Difference"));
     g_signal_connect_swapped(button, "toggled",
                              G_CALLBACK(display_mode_changed), controls);
     gtk_table_attach(GTK_TABLE(table2), button, 1, 2, 2, 3,
