@@ -42,6 +42,11 @@ static void get_minkowski_boundary               (GwyDataField *data_field,
 static void get_minkowski_connectivity           (GwyDataField *data_field, 
                                                   GwyDataLine *target_line, 
                                                   gint nstats);
+static void gwy_data_field_area_minkowski_boundary(GwyDataField *data_field,
+                                                   GwyDataLine *target_line,
+                                                   gint col, gint row,
+                                                   gint width, gint height,
+                                                   gint nstats);
 
 /**
  * gwy_data_field_get_max:
@@ -674,6 +679,15 @@ gwy_data_field_get_line_stat_function(GwyDataField *data_field,
         return 1;
         break;
 
+        case GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY2:
+        gwy_data_field_area_minkowski_boundary(data_field, target_line,
+                                               ulcol, ulrow,
+                                               brcol - ulcol,
+                                               brrow - ulrow,
+                                               nstats);
+        return 1;
+        break;
+        
         default:
         break;
     } 
@@ -1339,6 +1353,62 @@ get_minkowski_boundary(GwyDataField *data_field,
         target_line->data[i] = (gdouble)cnt/(gdouble)n;
     }
 }
+
+static void
+gwy_data_field_area_minkowski_boundary(GwyDataField *data_field,
+                                       GwyDataLine *target_line,
+                                       gint col, gint row,
+                                       gint width, gint height,
+                                       gint nstats)
+{
+    const gdouble *data;
+    gdouble *line;
+    gdouble min, max;
+    gint xres, i, j, k, k0, kr, kd, from, to;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width > 0 && height > 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    if (nstats < 1) {
+        nstats = floor(3.49*pow(width*height, 1.0/3.0) + 0.5);
+        nstats = MAX(nstats, 2);
+    }
+
+    xres = data_field->xres;
+    gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+    /* XXX: Not in GWYDDION-1: gwy_data_line_clear(target_line); */
+    gwy_data_line_fill(target_line, 0.0);
+    min = gwy_data_field_area_get_min(data_field, col, row, width, height);
+    max = gwy_data_field_area_get_max(data_field, col, row, width, height);
+    line = target_line->data;
+
+    for (i = 0; i < height-1; i++) {
+        for (j = 0; j < width-1; j++) {
+            data = data_field->data + (i + row)*xres + (col + j);
+
+            k0 = (gint)((data[0] - min)/(max - min)*nstats);
+            kr = (gint)((data[1] - min)/(max - min)*nstats);
+            kd = (gint)((data[xres] - min)/(max - min)*nstats);
+
+            from = MIN(kr, kd) + 1;    /* +1 matches Peter's choice of > and <=
+                                          although it would be simplier to use
+                                          >= and < convention */
+            to = MIN(k0, nstats-1);    /* Fixes rounding error */
+            for (k = from; k <= to; k++)
+                line[k] += 1;
+
+            from = k + 1;
+            to = MIN(MAX(kr, kd), nstats-1);
+            for (k = from; k <= to; k++)
+                line[k] += 1;
+        }
+    }
+}
+
 static void 
 get_minkowski_connectivity(GwyDataField *data_field, 
                            GwyDataLine *target_line, 
