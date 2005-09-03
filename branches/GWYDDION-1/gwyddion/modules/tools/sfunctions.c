@@ -106,6 +106,9 @@ static const GwyEnum sf_types[] =  {
     { N_("ACF"),                      GWY_SF_OUTPUT_ACF },
     { N_("HHCF"),                     GWY_SF_OUTPUT_HHCF },
     { N_("PSDF"),                     GWY_SF_OUTPUT_PSDF },
+    { N_("Minkowski volume"),         GWY_SF_OUTPUT_MINKOWSKI_VOLUME },
+    { N_("Minkowski boundary"),       GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY },
+    { N_("Minkowski connectivity"),   GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY },
 };
 
 /* This is the ONLY exported symbol.  The argument is the module info.
