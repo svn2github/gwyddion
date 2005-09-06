@@ -345,9 +345,9 @@ gwy_data_field_xfft_real(GwyDataField *ra, GwyDataField *rb,
 
         /*extract back the two profiles FFTs*/
         rft1->data[0] = rout->data[0];
-        ift1->data[0] = iout->data[0];
+        ift1->data[0] = 0;
         rft2->data[0] = iout->data[0];
-        ift2->data[0] = -rout->data[0];
+        ift2->data[0] = 0;
         for (j = 1; j < ra->xres; j++) {
             rft1->data[j] = (rout->data[j] + rout->data[ra->xres - j])/2;
             ift1->data[j] = (iout->data[j] - iout->data[ra->xres - j])/2;
