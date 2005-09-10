@@ -632,27 +632,26 @@ gwy_data_line_get_dval_real(GwyDataLine *a, gdouble x, gint interpolation)
  * and valleys to peaks).
  **/
 void
-gwy_data_line_invert(GwyDataLine *a, gboolean x, gboolean z)
+gwy_data_line_invert(GwyDataLine *data_line,
+                     gboolean x,
+                     gboolean z)
 {
     gint i;
     gdouble avg;
-    GwyDataLine b;
+    gdouble *data;
 
-    gwy_debug("");
+    g_return_if_fail(GWY_IS_DATA_LINE(data_line));
+    data = data_line->data;
     if (x) {
-        b.res = a->res;
-        b.data = g_new(gdouble, a->res);
-        gwy_data_line_copy(a, &b);
+        for (i = 0; i < data_line->res/2; i++)
+            GWY_SWAP(gdouble, data[i], data[data_line->res-1 - i]);
+    }
 
-        for (i = 0; i < a->res; i++)
-            a->data[i] = b.data[i - a->res - 1];
-    }
     if (z) {
-        avg = gwy_data_line_get_avg(a);
-        for (i = 0; i < a->res; i++)
-            a->data[i] = 2*avg - a->data[i];
+        avg = gwy_data_line_get_avg(data_line);
+        for (i = 0; i < data_line->res; i++)
+            data[i] = 2*avg - data[i];
     }
-    g_free(b.data);
 }
 
 /**

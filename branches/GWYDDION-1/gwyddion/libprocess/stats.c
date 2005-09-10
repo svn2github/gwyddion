@@ -30,18 +30,64 @@ void            _gwy_data_line_initialize        (GwyDataLine *a,
                                                   gboolean nullme);
 void            _gwy_data_line_free              (GwyDataLine *a);
 
-static gdouble  square_area                      (GwyDataField *data_field,
-                                                  gint ulcol, gint ulrow,
-                                                  gint brcol, gint brrow);
-static void get_minkowski_volume                 (GwyDataField *data_field, 
-                                                  GwyDataLine *target_line, 
-                                                  gint nstats);
-static void get_minkowski_boundary               (GwyDataField *data_field, 
-                                                  GwyDataLine *target_line, 
-                                                  gint nstats);
-static void get_minkowski_connectivity           (GwyDataField *data_field, 
-                                                  GwyDataLine *target_line, 
-                                                  gint nstats);
+static gdouble square_area                           (GwyDataField *data_field,
+                                                      gint ulcol,
+                                                      gint ulrow,
+                                                      gint brcol,
+                                                      gint brrow);
+static void    gwy_data_field_area_dh                (GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gint nstats);
+static void    gwy_data_field_area_cdh               (GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gint nstats);
+static void    gwy_data_field_area_minkowski_volume  (GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gint nstats);
+static void    gwy_data_field_area_minkowski_boundary(GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gint nstats);
+static void    gwy_data_field_area_minkowski_euler   (GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gint nstats);
+static void    gwy_data_field_area_grains_tgnd       (GwyDataField *data_field,
+                                                      GwyDataLine *target_line,
+                                                      gint col,
+                                                      gint row,
+                                                      gint width,
+                                                      gint height,
+                                                      gboolean below,
+                                                      gint nstats);
+static gint    gwy_data_field_fill_one_grain         (gint xres,
+                                                      gint yres,
+                                                      const gint *data,
+                                                      gint col,
+                                                      gint row,
+                                                      gint *visited,
+                                                      gint grain_no,
+                                                      gint *listv,
+                                                      gint *listh);
+static void    gwy_data_line_cumulate                (GwyDataLine *data_line);
 
 /**
  * gwy_data_field_get_max:
@@ -624,6 +670,36 @@ gwy_data_field_get_line_stat_function(GwyDataField *data_field,
     if (ulrow > brrow)
         GWY_SWAP(gint, ulrow, brrow);
 
+    /* compute statistical functions that are not related to profiles */
+    switch (type) {
+        case GWY_SF_OUTPUT_MINKOWSKI_VOLUME:
+        gwy_data_field_area_minkowski_volume(data_field, target_line,
+                                             ulcol, ulrow,
+                                             brcol - ulcol, brrow - ulrow,
+                                             nstats);
+        return TRUE;
+        break;
+
+        case GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY:
+        gwy_data_field_area_minkowski_boundary(data_field, target_line,
+                                               ulcol, ulrow,
+                                               brcol - ulcol, brrow - ulrow,
+                                               nstats);
+        return TRUE;
+        break;
+
+        case GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY:
+        gwy_data_field_area_minkowski_euler(data_field, target_line,
+                                            ulcol, ulrow,
+                                            brcol - ulcol, brrow - ulrow,
+                                            nstats);
+        return TRUE;
+        break;
+
+        default: /* hi, gcc */
+        break;
+    }
+
     /* precompute settings if necessary */
     if (type == GWY_SF_OUTPUT_DH || type == GWY_SF_OUTPUT_CDH) {
         min = gwy_data_field_area_get_min(data_field,
@@ -656,29 +732,8 @@ gwy_data_field_get_line_stat_function(GwyDataField *data_field,
             }
         }
     }
-    /*compute statistical functions that are not related to profiles*/
-    
-    switch (type) {
-        case GWY_SF_OUTPUT_MINKOWSKI_VOLUME:
-        get_minkowski_volume(data_field, target_line, nstats);
-        return 1;
-        break;
 
-        case GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY:
-        get_minkowski_boundary(data_field, target_line, nstats);
-        return 1;
-        break;
-        
-        case GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY:
-        get_minkowski_connectivity(data_field, target_line, nstats);
-        return 1;
-        break;
 
-        default:
-        break;
-    } 
-
-    
     /*average statistical functions over profiles*/
     if (orientation == GTK_ORIENTATION_HORIZONTAL) {
         size = brcol-ulcol;
@@ -1266,110 +1321,494 @@ gwy_data_field_get_inclination(GwyDataField *data_field,
                                         theta,
                                         phi);
 }
-static void 
-get_minkowski_volume(GwyDataField *data_field, 
-                     GwyDataLine *target_line, 
-                     gint nstats)
-{
-    gint i, j, cnt, n;
-    gdouble min, max, step;
-   
-    if (gwy_data_line_get_res(target_line) != nstats)
-        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
 
-    
-    min = gwy_data_field_get_min(data_field);
-    max = gwy_data_field_get_max(data_field);
-    step = (max - min)/nstats;
-    n = data_field->xres*data_field->yres;
-    
-    for (i=0; i<nstats; i++)
-    {
-        cnt = 0;
-        for (j=0; j<n; j++)
-            if (data_field->data[j] > (min + i*step)) cnt++; 
-       
-        target_line->data[i] = (gdouble)cnt/(gdouble)n;
+/********* Minkowski backport **********************************************/
+
+static void
+gwy_data_field_area_minkowski_volume(GwyDataField *data_field,
+                                     GwyDataLine *target_line,
+                                     gint col, gint row,
+                                     gint width, gint height,
+                                     gint nstats)
+{
+    gwy_data_field_area_cdh(data_field, target_line, col, row, width, height,
+                            nstats);
+    gwy_data_line_multiply(target_line, -1.0);
+    gwy_data_line_add(target_line, 1.0);
+}
+
+static void
+gwy_data_field_area_minkowski_boundary(GwyDataField *data_field,
+                                       GwyDataLine *target_line,
+                                       gint col, gint row,
+                                       gint width, gint height,
+                                       gint nstats)
+{
+    const gdouble *data;
+    gdouble *line;
+    gdouble min, max, q;
+    gint xres, i, j, k, k0, kr, kd;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width >= 0 && height >= 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    if (nstats < 1) {
+        nstats = floor(3.49*cbrt(width*height) + 0.5);
+        nstats = MAX(nstats, 2);
     }
 
+    gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+    gwy_data_line_fill(target_line, 0);
+    min = gwy_data_field_area_get_min(data_field, col, row, width, height);
+    max = gwy_data_field_area_get_max(data_field, col, row, width, height);
+    /* There are no boundaries on a totally flat sufrace */
+    if (min == max || width == 0 || height == 0)
+        return;
+
+    xres = data_field->xres;
+    q = nstats/(max - min);
+    line = target_line->data;
+
+    for (i = 0; i < height-1; i++) {
+        kr = (gint)((data_field->data[i*xres + col] - min)*q);
+        for (j = 0; j < width-1; j++) {
+            data = data_field->data + (i + row)*xres + (col + j);
+
+            k0 = kr;
+
+            kr = (gint)((data[1] - min)*q);
+            for (k = MAX(MIN(k0, kr), 0); k < MIN(MAX(k0, kr), nstats); k++)
+                line[k] += 1;
+
+            kd = (gint)((data[xres] - min)*q);
+            for (k = MAX(MIN(k0, kd), 0); k < MIN(MAX(k0, kd), nstats); k++)
+                line[k] += 1;
+        }
+    }
+
+    gwy_data_line_multiply(target_line, 1.0/(width*height));
+    gwy_data_line_set_real(target_line, max - min);
 }
 
-
-static gboolean
-is_boundary(GwyDataField *data_field, gint col, gint row, gdouble threshold)
+static void
+gwy_data_field_area_minkowski_euler(GwyDataField *data_field,
+                                    GwyDataLine *target_line,
+                                    gint col, gint row,
+                                    gint width, gint height,
+                                    gint nstats)
 {
-    if ((data_field->data[col + data_field->xres*row]>threshold 
-        && data_field->data[col + 1 + data_field->xres*row]<=threshold) ||
-       (data_field->data[col + data_field->xres*row]<threshold 
-        && data_field->data[col + 1 + data_field->xres*row]>=threshold) ||
-       (data_field->data[col + data_field->xres*row]>threshold 
-        && data_field->data[col + data_field->xres*(row+1)]<=threshold) ||
-       (data_field->data[col + data_field->xres*row]<threshold 
-        && data_field->data[col + data_field->xres*(row+1)]>=threshold))
-        return TRUE;
+    GwyDataLine *tmp_line;
+    gint i;
 
-    return FALSE;
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width >= 0 && height >= 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    if (nstats < 1) {
+        nstats = floor(3.49*pow(width*height, 1.0/3.0) + 0.5);
+        nstats = MAX(nstats, 2);
+    }
+
+    gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+    tmp_line = GWY_DATA_LINE(gwy_data_line_new_alike(target_line, FALSE));
+
+    gwy_data_field_area_grains_tgnd(data_field, target_line,
+                                    col, row, width, height,
+                                    FALSE, nstats);
+    gwy_data_field_area_grains_tgnd(data_field, tmp_line,
+                                    col, row, width, height,
+                                    TRUE, nstats);
+
+    for (i = 0; i < nstats; i++)
+        target_line->data[i] -= tmp_line->data[nstats-1 - i];
+    g_object_unref(tmp_line);
+
+    gwy_data_line_multiply(target_line, 1.0/(width*height));
+    gwy_data_line_invert(target_line, TRUE, FALSE);
 }
 
-static void 
-get_minkowski_boundary(GwyDataField *data_field, 
-                       GwyDataLine *target_line, 
+static inline void
+resolve_grain_map(gint *m, gint i, gint j)
+{
+    gint ii, jj, k;
+
+    for (ii = i; m[ii] != ii; ii = m[ii])
+        ;
+    for (jj = j; m[jj] != jj; jj = m[jj])
+        ;
+    k = MIN(ii, jj);
+
+    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
+        m[i] = k;
+        i = ii;
+    }
+    m[ii] = k;
+    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
+        m[j] = k;
+        j = jj;
+    }
+    m[jj] = k;
+}
+
+static void
+gwy_data_field_area_grains_tgnd(GwyDataField *data_field,
+                                GwyDataLine *target_line,
+                                gint col, gint row,
+                                gint width, gint height,
+                                gboolean below,
+                                gint nstats)
+{
+    gint *heights, *hindex, *nh, *grains, *listv, *listh, *m, *mm;
+    gdouble min, max, q;
+    gint i, j, k, h, n;
+    gint grain_no, last_grain_no;
+    guint msize;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width >= 0 && height >= 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    if (nstats < 1) {
+        nstats = floor(3.49*cbrt(width*height) + 0.5);
+        nstats = MAX(nstats, 2);
+    }
+
+    gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+
+    min = gwy_data_field_area_get_min(data_field, col, row, width, height);
+    max = gwy_data_field_area_get_max(data_field, col, row, width, height);
+
+    n = width*height;
+    if (max == min || n == 0) {
+        gwy_data_line_fill(target_line, 0.0);
+        return;
+    }
+    gwy_data_line_set_real(target_line, max - min);
+
+    heights = g_new(gint, n);
+    q = (nstats - 1.0)/(max - min);
+    for (i = 0; i < height; i++) {
+        const gdouble *drow = data_field->data
+                              + (i + row)*data_field->xres + col;
+
+        if (below) {
+            for (j = 0; j < width; j++) {
+                k = (gint)((drow[j] - min)*q + 1);
+                heights[i*width + j] = CLAMP(k, 0, nstats-1);
+            }
+        }
+        else {
+            for (j = 0; j < width; j++) {
+                k = (gint)((max - drow[j])*q + 1);
+                heights[i*width + j] = CLAMP(k, 0, nstats-1);
+            }
+        }
+    }
+
+    nh = g_new0(gint, 2*nstats);
+    for (i = 0; i < n; i++)
+        nh[heights[i]]++;
+    for (i = 1; i < nstats; i++)
+        nh[i] += nh[i-1];
+    for (i = nstats-1; i; i--)
+        nh[i] = nh[i-1];
+    nh[0] = 0;
+
+    hindex = g_new(gint, n);
+    for (i = 0; i < n; i++) {
+        h = heights[i];
+        hindex[nh[h] + nh[h + nstats]] = i;
+        nh[h + nstats]++;
+    }
+    nh[nstats] = n;
+
+    grains = g_new0(gint, n);
+    listv = g_new(gint, n/2 + 2);
+    listh = g_new(gint, n/2 + 2);
+
+    m = g_new(gint, 1);
+    mm = m;
+    msize = 0;
+
+    last_grain_no = 0;
+    target_line->data[0] = 0;
+    for (h = 0; h < nstats; h++) {
+        grain_no = last_grain_no;
+        gwy_debug("Height %d, number of old grains: %d", h, grain_no);
+        for (i = nh[h]; i < nh[h+1]; i++) {
+            j = hindex[i];
+            if (!grains[j]) {
+                grain_no++;
+                gwy_data_field_fill_one_grain(width, height, heights,
+                                              j % width, j/width,
+                                              grains, grain_no, listv, listh);
+            }
+        }
+
+        if (grain_no == last_grain_no) {
+            if (h)
+                target_line->data[h] = target_line->data[h-1];
+            continue;
+        }
+
+        if (grain_no+1 > msize) {
+            g_free(m);
+            m = g_new(gint, 2*(grain_no+1));
+            mm = m + grain_no+1;
+        }
+        for (i = 0; i <= grain_no; i++) {
+            m[i] = i;
+            mm[i] = 0;
+        }
+
+        for (i = nh[h]; i < nh[h+1]; i++) {
+            j = hindex[i];
+            if (j % width && grains[j-1]
+                && m[grains[j]] != m[grains[j-1]])
+                resolve_grain_map(m, grains[j], grains[j-1]);
+            if ((j+1) % width && grains[j+1]
+                && m[grains[j]] != m[grains[j+1]])
+                resolve_grain_map(m, grains[j], grains[j+1]);
+            if (j/width && grains[j-width]
+                && m[grains[j]] != m[grains[j-width]])
+                resolve_grain_map(m, grains[j], grains[j-width]);
+
+            if (j/width < height-1 && grains[j+width]
+                && m[grains[j]] != m[grains[j+width]])
+                resolve_grain_map(m, grains[j], grains[j+width]);
+        }
+
+        for (i = 1; i <= grain_no; i++)
+            m[i] = m[m[i]];
+
+        k = 0;
+        for (i = 1; i <= grain_no; i++) {
+            if (!mm[m[i]]) {
+                k++;
+                mm[m[i]] = k;
+            }
+            m[i] = mm[m[i]];
+        }
+
+        for (i = 0; i < n; i++)
+            grains[i] = m[grains[i]];
+
+        target_line->data[h] = k;
+        last_grain_no = k;
+    }
+
+    g_free(m);
+    g_free(listv);
+    g_free(listh);
+    g_free(grains);
+    g_free(hindex);
+    g_free(nh);
+    g_free(heights);
+}
+
+static gint
+gwy_data_field_fill_one_grain(gint xres,
+                              gint yres,
+                              const gint *data,
+                              gint col, gint row,
+                              gint *visited,
+                              gint grain_no,
+                              gint *listv,
+                              gint *listh)
+{
+    gint n, count;
+    gint nh, nv;
+    gint i, p, j;
+    gint initial;
+    gint look_for;
+
+    g_return_val_if_fail(grain_no, 0);
+    initial = row*xres + col;
+    look_for = data[initial];
+
+    /* check for a single point */
+    visited[initial] = grain_no;
+    count = 1;
+    if ((!col || data[initial - 1] != look_for)
+        && (!row || data[initial - xres] != look_for)
+        && (col + 1 == xres || data[initial + 1] != look_for)
+        && (row + 1 == yres || data[initial + xres] != look_for)) {
+
+        return count;
+    }
+
+    n = xres*yres;
+    listv[0] = listv[1] = initial;
+    nv = 2;
+    listh[0] = listh[1] = initial;
+    nh = 2;
+
+    while (nv) {
+        /* go through vertical lines and expand them horizontally */
+        for (i = 0; i < nv; i += 2) {
+            for (p = listv[i]; p <= listv[i + 1]; p += xres) {
+                gint start, stop;
+
+                /* scan left */
+                start = p - 1;
+                stop = (p/xres)*xres;
+                for (j = start; j >= stop; j--) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j < start) {
+                    listh[nh++] = j + 1;
+                    listh[nh++] = start;
+                }
+
+                /* scan right */
+                start = p + 1;
+                stop = (p/xres + 1)*xres;
+                for (j = start; j < stop; j++) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j > start) {
+                    listh[nh++] = start;
+                    listh[nh++] = j - 1;
+                }
+            }
+        }
+        nv = 0;
+
+        /* go through horizontal lines and expand them vertically */
+        for (i = 0; i < nh; i += 2) {
+            for (p = listh[i]; p <= listh[i + 1]; p++) {
+                gint start, stop;
+
+                /* scan up */
+                start = p - xres;
+                stop = p % xres;
+                for (j = start; j >= stop; j -= xres) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j < start) {
+                    listv[nv++] = j + xres;
+                    listv[nv++] = start;
+                }
+
+                /* scan down */
+                start = p + xres;
+                stop = p % xres + n;
+                for (j = start; j < stop; j += xres) {
+                    if (visited[j] || data[j] != look_for)
+                        break;
+                    visited[j] = grain_no;
+                    count++;
+                }
+                if (j > start) {
+                    listv[nv++] = start;
+                    listv[nv++] = j - xres;
+                }
+            }
+        }
+        nh = 0;
+    }
+
+    return count;
+}
+
+static void
+gwy_data_field_area_dh(GwyDataField *data_field,
+                       GwyDataLine *target_line,
+                       gint col, gint row,
+                       gint width, gint height,
                        gint nstats)
 {
-    gint row, col, i;
-    gint n, cnt; 
-    gdouble min, max, step;
+    gdouble min, max;
+    gdouble *drow;
+    gint i, j, k;
 
-    if (gwy_data_line_get_res(target_line) != nstats)
-        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width >= 1 && height >= 1
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
 
-    
-    min = gwy_data_field_get_min(data_field);
-    max = gwy_data_field_get_max(data_field);
-    step = (max - min)/nstats;
-    n = data_field->xres*data_field->yres;
-    
-    for (i=0; i<nstats; i++)
-    {
-        cnt = 0;
-        for (row=0; row<(data_field->yres-1); row++)
-            for (col=0; col<(data_field->xres-1); col++)
-                if (is_boundary(data_field, col, row, (min + i*step))) cnt++; 
-       
-        target_line->data[i] = (gdouble)cnt/(gdouble)n;
+    if (nstats < 1) {
+        nstats = floor(3.49*pow(width*height, 1.0/3.0) + 0.5);
+        nstats = MAX(nstats, 2);
     }
+
+    gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
+    gwy_data_line_fill(target_line, 0.0);
+    min = gwy_data_field_area_get_min(data_field, col, row, width, height);
+    max = gwy_data_field_area_get_max(data_field, col, row, width, height);
+
+    if (min == max) {
+        gwy_data_line_set_real(target_line, min ? max : 1.0);
+        target_line->data[0] = nstats/gwy_data_line_get_real(target_line);
+        return;
+    }
+
+    gwy_data_line_set_real(target_line, max - min);
+    for (i = 0; i < height; i++) {
+        drow = data_field->data + (i + row)*data_field->xres + col;
+
+        for (j = 0; j < width; j++) {
+            k = (gint)((drow[j] - min)/(max - min)*nstats);
+            if (G_UNLIKELY(k >= nstats))
+                k = nstats-1;
+
+            target_line->data[k] += 1;
+        }
+    }
+
+    gwy_data_line_multiply(target_line, nstats/(max - min)/(width*height));
 }
 
-static void 
-get_minkowski_connectivity(GwyDataField *data_field, 
-                           GwyDataLine *target_line, 
-                           gint nstats)
+static void
+gwy_data_field_area_cdh(GwyDataField *data_field,
+                        GwyDataLine *target_line,
+                        gint col, gint row,
+                        gint width, gint height,
+                        gint nstats)
 {
-    GwyDataField *grainfield;
-    gint *grains;
-    gint i, j;
-    gint n, cnt;
-
-    if (gwy_data_line_get_res(target_line) != nstats)
-        gwy_data_line_resample(target_line, nstats, GWY_INTERPOLATION_NONE);
-
-    n = data_field->xres*data_field->yres;
-
-    grainfield = gwy_data_field_new_alike(data_field, FALSE);
-    grains = (gint *)g_malloc(n*sizeof(gint));
-    
-    for (i=0; i<nstats; i++)
-    {
-        gwy_data_field_fill(grainfield, 0);
-        for (j=0; j<n; j++) grains[j]=0;
-        gwy_data_field_grains_mark_height(data_field, grainfield, 100.0*(gdouble)i/(gdouble)nstats, 0);
-        cnt = gwy_data_field_number_grains(grainfield, grains);
-        target_line->data[i] = (gdouble)cnt/(gdouble)n;
-    }
-
-    g_object_unref(grainfield);
-    g_free(grains);
+    gwy_data_field_area_dh(data_field, target_line,
+                           col, row, width, height,
+                           nstats);
+    gwy_data_line_cumulate(target_line);
+    gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
 }
 
+static void
+gwy_data_line_cumulate(GwyDataLine *data_line)
+{
+    gdouble sum;
+    gdouble *data;
+    gint i;
+
+    g_return_if_fail(GWY_IS_DATA_LINE(data_line));
+
+    data = data_line->data;
+    sum = 0.0;
+    for (i = 0; i < data_line->res; i++) {
+        sum += data[i];
+        data[i] = sum;
+    }
+}
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

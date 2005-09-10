@@ -1167,7 +1167,6 @@ gint calculate_point(GwyDataField *z, GwyDataField *mask, gdouble dev)
     return 0;
 }             
 
-#include <stdio.h>
 gboolean              
 gwy_data_field_partitioning_correction(GwyDataField *data_field, GwyDataField *mask_field, GwyInterpolationType interpolation)
 {
