@@ -48,6 +48,7 @@ void gwy_data_field_mask_outliers(GwyDataField *data_field,
                                   GwyDataField *mask_field,
                                   gdouble thresh);
 
+/*
 void gwy_data_field_get_drift_from_isotropy(GwyDataField *data_field,
 				      GwyDataLine *drift,
 				      gint window_size,
@@ -67,6 +68,7 @@ void gwy_data_field_get_drift_from_sample(GwyDataField *data_field,
 void gwy_data_field_correct_drift(GwyDataField *data_field,
 				  GwyDataLine *drift,
 				  gboolean crop);
+*/
 
 /*
 void gwy_data_field_mark_scars(GwyDataField *data_field,
