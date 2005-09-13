@@ -87,7 +87,7 @@ static GwyModuleInfo module_info = {
     "profile",
     N_("Profile tool, creates profile graphs from selected lines."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "1.4",
+    "1.5",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -261,14 +261,14 @@ dialog_create(GwyUnitoolState *state)
     row++;
 
     controls->linesize = gtk_adjustment_new(controls->size, 1, MAX_WIDTH, 1, 5, 0);
-    gwy_table_attach_spinbutton(table, row, _("Thickness:"), _("px"),
+    gwy_table_attach_spinbutton(table, row, _("Thickness:"), "px",
                                 controls->linesize);
     g_signal_connect_swapped(controls->linesize, "value-changed",
                              G_CALLBACK(size_changed_cb), controls);
     row++;
 
     controls->nofpoints = gtk_adjustment_new(controls->npoints, 10, 100, 1, 5, 0);
-    gwy_table_attach_hscale(table, row, _("fix res.:"), _(""),
+    gwy_table_attach_hscale(table, row, _("Fix res.:"), NULL,
                                   controls->nofpoints, GWY_HSCALE_CHECK);
     g_signal_connect_swapped(controls->nofpoints, "value-changed",
                                   G_CALLBACK(npoints_changed_cb), controls);
