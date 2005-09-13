@@ -2,8 +2,6 @@
 
 toolsdir = $(pkglibdir)/modules/tool
 
-module_ldflags = -shared -Wl,-soname
-
 tools_LTLIBRARIES = \
 	distance.la \
 	crop.la \
