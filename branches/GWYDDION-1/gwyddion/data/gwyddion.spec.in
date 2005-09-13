@@ -15,11 +15,13 @@ BuildPrereq: gtk2-devel >= 2.2
 BuildPrereq: gtkglext-devel >= 1.0
 BuildPrereq: libpng-devel
 BuildPrereq: libjpeg-devel
+BuildPrereq: libtiff-devel >= 3.6
 BuildPrereq: gtk-doc >= 1.0
 BuildPrereq: python >= 2.2
 BuildPrereq: ruby >= 1.8
 BuildPrereq: perl >= 5.005
 BuildPrereq: gettext
+BuildPrereq: sed
 
 %package devel
 Summary: Headers, libraries and tools for Gwyddion module development.
@@ -63,8 +65,9 @@ your own plug-ins.
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %__rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-%__strip $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*/*.so
-%__strip $RPM_BUILD_ROOT%{_libdir}/%{name}/modules/*.so
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/modules -name \*.so | xargs strip
+# We don't need these
+find $RPM_BUILD_ROOT%{_libdir}/%{name}/modules -name \*.la | xargs rm
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && %__rm -rf $RPM_BUILD_ROOT
