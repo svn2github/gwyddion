@@ -32,8 +32,8 @@ cat >make_dists.ignore <<':'
 ^+
 ^cp: cannot stat `\./html/\*\.css': No such file or directory
 ^make\[3\]: \[dist-hook\] Error 1 (ignored)
-^libtool: install: warning: `.*\.la' has not been installed in `/usr/lib'
-^libtool: install: warning: remember to run `libtool --finish /usr/lib'
+^libtool: install: warning: `.*\.la' has not been installed in `/usr/lib
+^libtool: install: warning: remember to run `libtool --finish /usr/lib
 \.\{6,\}
 ^[0-9]\+ blocks
 ':'

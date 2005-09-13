@@ -1,7 +1,7 @@
 #!/bin/bash
 disabled=
 pkgname=gwyddion
-basever=1.12
+basever=1.13
 dont_update_version=no_we_need_no_stinking_version_updates
 arch=$(uname -m)
 projectdir=$HOME/Projects/Gwyddion/$pkgname-1
