@@ -1636,6 +1636,11 @@ gwy_data_line_get_modus(GwyDataLine *data_line,
  * @GWY_SF_OUTPUT_ACF: Autocorrelation fucntions.
  * @GWY_SF_OUTPUT_HHCF: Height-height correlation function.
  * @GWY_SF_OUTPUT_PSDF: Power spectral density fucntion.
+ * @GWY_SF_OUTPUT_MINKOWSKI_VOLUME: Minkowski volume functional (Since: 1.13).
+ * @GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY: Minkowski boundary functional
+ *                                    (Since: 1.13).
+ * @GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY: Minkowski connectivity functional
+ *                                        (Since: 1.13).
  *
  * Statistical function type.
  **/
