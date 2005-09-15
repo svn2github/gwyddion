@@ -22,6 +22,9 @@ defining points between them the colors are interpolated.
 #GwyPaletteDef, #GwyGradient.
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwyPalette ##### -->
 <para>
 

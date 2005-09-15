@@ -23,6 +23,9 @@ main application.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### FUNCTION gwy_app_undo_checkpoint ##### -->
 <para>
 

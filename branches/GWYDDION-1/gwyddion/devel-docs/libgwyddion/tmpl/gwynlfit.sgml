@@ -51,6 +51,9 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### USER_FUNCTION GwyNLFitFunc ##### -->
 <para>
 

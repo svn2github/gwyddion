@@ -28,6 +28,9 @@ so to debug their lifetime rules, just enable it.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyDebugObjectsDumpFlags ##### -->
 <para>
 

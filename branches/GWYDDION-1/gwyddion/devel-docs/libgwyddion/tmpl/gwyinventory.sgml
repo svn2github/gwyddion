@@ -14,6 +14,9 @@ Ordered item inventory, indexed by both name and position.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwyItemType ##### -->
 <para>
 

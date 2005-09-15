@@ -14,6 +14,9 @@ Simple FFT algorithm
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyWindowingType ##### -->
 <para>
 Selection of windowing applied before FFT (if requested).

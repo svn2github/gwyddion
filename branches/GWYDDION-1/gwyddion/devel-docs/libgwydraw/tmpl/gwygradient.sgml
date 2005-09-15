@@ -38,6 +38,9 @@ queried with gwy_gradient_is_modifiable().
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### MACRO GWY_GRADIENT_DEFAULT ##### -->
 <para>
 

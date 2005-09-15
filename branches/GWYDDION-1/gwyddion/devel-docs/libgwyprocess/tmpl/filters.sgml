@@ -14,6 +14,9 @@ Convolution and other data filters
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyFilterType ##### -->
 <para>
 Filtering type. Possibilities constist of simple statisical

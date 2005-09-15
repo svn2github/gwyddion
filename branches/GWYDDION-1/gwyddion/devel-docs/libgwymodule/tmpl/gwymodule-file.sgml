@@ -26,6 +26,9 @@ and the signatures of particular file operations:
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyFileOperation ##### -->
 <para>
 

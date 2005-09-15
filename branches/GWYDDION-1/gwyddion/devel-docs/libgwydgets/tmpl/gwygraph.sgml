@@ -22,6 +22,9 @@ be introduced probably.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwyGraphAutoProperties ##### -->
 <para>
 This structure corresponds to settings of display mode of data that

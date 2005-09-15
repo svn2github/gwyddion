@@ -14,6 +14,9 @@ Base class for #GwyDataView vector (interactive) layers
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwyVectorLayer ##### -->
 <para>
 

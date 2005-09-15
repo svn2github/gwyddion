@@ -15,6 +15,9 @@ the GwyGraph widget. It plots a curves legend.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyGraphLabelPosition ##### -->
 <para>
 

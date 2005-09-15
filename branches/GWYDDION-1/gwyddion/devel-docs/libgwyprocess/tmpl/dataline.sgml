@@ -16,6 +16,9 @@ connected with 1D data, graphs, etc.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwySFOutputType ##### -->
 <para>
 
@@ -28,6 +31,9 @@ connected with 1D data, graphs, etc.
 @GWY_SF_OUTPUT_ACF: 
 @GWY_SF_OUTPUT_HHCF: 
 @GWY_SF_OUTPUT_PSDF: 
+@GWY_SF_OUTPUT_MINKOWSKI_VOLUME: 
+@GWY_SF_OUTPUT_MINKOWSKI_BOUNDARY: 
+@GWY_SF_OUTPUT_MINKOWSKI_CONNECTIVITY: 
 
 <!-- ##### ENUM GwyFitLineType ##### -->
 <para>

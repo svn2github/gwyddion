@@ -14,6 +14,9 @@ Grain detection and processing
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### ENUM GwyMergeType ##### -->
 <para>
 Mask processing merging (namely used in grain processing).
@@ -226,5 +229,15 @@ Mask processing merging (namely used in grain processing).
 
 @grain_field: 
 @intersect_field: 
+
+
+<!-- ##### FUNCTION gwy_data_field_number_grains ##### -->
+<para>
+
+</para>
+
+@mask_field: 
+@grains: 
+@Returns: 
 
 

@@ -20,6 +20,9 @@ interpolated to get a #GwyPalette.
 #GwyPalette, #GwyGradient.
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### MACRO GWY_PALETTE_BLUE ##### -->
 <para>
 

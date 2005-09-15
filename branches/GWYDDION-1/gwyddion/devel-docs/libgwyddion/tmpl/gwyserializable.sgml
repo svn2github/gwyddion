@@ -36,6 +36,9 @@ All the low-level functions are deprecated and will be removed in Gwyddion
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwySerializableIface ##### -->
 <para>
 

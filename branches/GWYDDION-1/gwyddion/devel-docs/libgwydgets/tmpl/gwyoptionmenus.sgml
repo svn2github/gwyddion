@@ -60,6 +60,9 @@ gwy_option_menu_gl_material() (or gwy_menu_gl_material() for a normal menu).
 <link linkend="libgwydgets-gwyradiobuttons">Radio button constructors</link>
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### FUNCTION gwy_menu_palette ##### -->
 <para>
 

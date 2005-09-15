@@ -201,6 +201,7 @@ gwy_data_field_grains_get_average
 gwy_data_field_grains_get_distribution
 gwy_data_field_grains_add
 gwy_data_field_grains_intersect
+gwy_data_field_number_grains
 </SECTION>
 
 <SECTION>

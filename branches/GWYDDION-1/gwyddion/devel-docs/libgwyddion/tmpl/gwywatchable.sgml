@@ -26,6 +26,9 @@ In Gwyddion 2.0 this interface may either become actually used, or be removed.
 
 </para>
 
+<!-- ##### SECTION Stability_Level ##### -->
+
+
 <!-- ##### STRUCT GwyWatchableIface ##### -->
 <para>
 
