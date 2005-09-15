@@ -426,8 +426,8 @@ read_data_field(GwyDataField *dfield,
     for (i = 0; i < yres; i++) {
         row = midata->data + (yres-1 - i)*xres;
         for (j = 0; j < xres; j++)
-            data[i*xres + j] = row[j];
-            //data[i*xres + j] = GUINT16_FROM_LE(row[j]);
+            /* data[i*xres + j] = row[j]; */
+            data[i*xres + j] = GUINT16_FROM_LE(row[j]);
     }
 }
 
