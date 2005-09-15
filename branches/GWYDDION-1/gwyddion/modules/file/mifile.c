@@ -427,7 +427,7 @@ read_data_field(GwyDataField *dfield,
         row = midata->data + (yres-1 - i)*xres;
         for (j = 0; j < xres; j++)
             /* data[i*xres + j] = row[j]; */
-            data[i*xres + j] = GUINT16_FROM_LE(row[j]);
+            data[i*xres + j] = GINT16_FROM_LE(row[j]);
     }
 }
 
@@ -493,7 +493,7 @@ process_metadata(MIFile *mifile,
         { "yOffset", "yOffset", "%s" },
         { "xLength", "xLength", "%s" },
         { "yLength", "yLength", "%s" },
-        //{ "scanUp", "scanUp", "%s" },
+        /*{ "scanUp", "scanUp", "%s" },*/
         { "scanSpeed", "scanSpeed", "%s" },
         { "scanAngle", "scanAngle", "%s" },
         { "servoSetpoint", "servoSetpoint", "%s" },
