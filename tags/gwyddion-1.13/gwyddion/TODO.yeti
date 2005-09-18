@@ -1,0 +1,35 @@
+- Fix Createc warnings if Rok Zitko doesn't fix them
+- Add preview to: artithmetic
+- Find out why rectangular selections sometimes leaves a dot, and fix it
+- Kill WIN32-LEAN-AND-MEAN-CAPS: postponed to 2.0, where we can break binary
+  compatibility and get rid of GL types in headers, thus we can also get rid
+  of GL header inclusion in public headers, thus the problems solves itself
+  Related:
+- Make things actually compile with --disable-gl, also improve GL/gl.h,
+  GL/glu.h checking
+- Check or rework filename handling to work with Gtk+ 2.6
+- Invent some initialization for Laplace solver so that it can only converge
+  for near final state
+- Convert Logarithmic scale value to logarithmic presentation
+- Do something reasonable with results of pow10, hypot, etc. detection
+- Add Clear to Icolorange -- that's convoluted, cannot be Unitool's clear
+- Rawfile presets setable as new filetype -- may need to wait to GtkUIManager,
+  as now the menu updates would be messy
+- Display whether data are unchanged/modified/new somewhere
+- Swap undo levels to disk
+- Add SPMlab-inspired palettes, need better palette selector first
+- Fix creating temporary data by duplicating whole container!
+- Do nightly CVS build from a clean checkout, this will also stop the silly
+  configure and NEWS modifications; should be done as a part of move to sf
+- Make Ctrl-S save data associated with current window of whatever type, not
+  with current data window -- or maybe better, switch data windows when other
+  windows are switched
+- Remember app dialog sizes
+- GwyShader background is shifted in pixmap themes
+- Make keyboard zoom shortcuts work in graphs, 3D
+- Finish Spot remove
+- Add some guessing to Rawfile
+- Do something with `Remove mask' in Edit menu
+- Unitool: Make data windows switchable in tool dialog.
+- Use gtk_paint_* to keep style in widgets.
+- gwyddion-remote

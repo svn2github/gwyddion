@@ -1,0 +1,147 @@
+<!-- ##### SECTION Title ##### -->
+GwyGraphLabel
+
+<!-- ##### SECTION Short_Description ##### -->
+Graph label
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+This widget should be probabaly used only within
+the GwyGraph widget. It plots a curves legend.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### ENUM GwyGraphLabelPosition ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPH_LABEL_NORTHEAST: 
+@GWY_GRAPH_LABEL_NORTHWEST: 
+@GWY_GRAPH_LABEL_SOUTHEAST: 
+@GWY_GRAPH_LABEL_SOUTHWEST: 
+@GWY_GRAPH_LABEL_USER: 
+
+<!-- ##### ENUM GwyGraphPointType ##### -->
+<para>
+
+</para>
+
+@GWY_GRAPH_POINT_SQUARE: 
+@GWY_GRAPH_POINT_CROSS: 
+@GWY_GRAPH_POINT_CIRCLE: 
+@GWY_GRAPH_POINT_STAR: 
+@GWY_GRAPH_POINT_TIMES: 
+@GWY_GRAPH_POINT_TRIANGLE_UP: 
+@GWY_GRAPH_POINT_TRIANGLE_DOWN: 
+@GWY_GRAPH_POINT_DIAMOND: 
+
+<!-- ##### STRUCT GwyGraphAreaCurveParams ##### -->
+<para>
+
+</para>
+
+@is_line: 
+@is_point: 
+@point_size: 
+@point_type: 
+@line_style: 
+@line_size: 
+@description: 
+@color: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### STRUCT GwyGraphLabelParams ##### -->
+<para>
+
+</para>
+
+@is_frame: 
+@frame_thickness: 
+@position: 
+@font: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### STRUCT GwyGraphLabel ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyGraphLabelClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@selected: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_graph_label_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_set_visible ##### -->
+<para>
+
+</para>
+
+@label: 
+@is_visible: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_set_style ##### -->
+<para>
+
+</para>
+
+@label: 
+@style: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_add_curve ##### -->
+<para>
+
+</para>
+
+@label: 
+@params: 
+
+
+<!-- ##### FUNCTION gwy_graph_label_clear ##### -->
+<para>
+
+</para>
+
+@label: 
+
+
+<!-- ##### FUNCTION gwy_graph_draw_point ##### -->
+<para>
+
+</para>
+
+@window: 
+@gc: 
+@i: 
+@j: 
+@type: 
+@size: 
+@color: 
+@clear: 
+
+

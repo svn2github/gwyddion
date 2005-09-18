@@ -1,0 +1,40 @@
+<!-- ##### SECTION Title ##### -->
+GwyHRuler
+
+<!-- ##### SECTION Short_Description ##### -->
+Horizontal ruler, similar to #GtkRuler
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Please see #GwyRuler for differences from #GtkHRuler.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwyHRuler ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyHRulerClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+
+<!-- ##### FUNCTION gwy_hruler_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+

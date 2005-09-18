@@ -1,0 +1,40 @@
+<!-- ##### SECTION Title ##### -->
+GwyVRuler
+
+<!-- ##### SECTION Short_Description ##### -->
+Vertical ruler, similar to #GtkRuler
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Please see #GwyRuler for differences from #GtkVRuler.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwyVRuler ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyVRulerClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+
+<!-- ##### FUNCTION gwy_vruler_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
