@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-07-15 13:16+0200\n"
-"PO-Revision-Date: 2005-07-14 20:24+0200\n"
+"POT-Creation-Date: 2005-09-13 12:39+0200\n"
+"PO-Revision-Date: 2005-09-13 14:08+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -204,18 +204,19 @@ msgstr "Veli_kost:"
 #: libgwydgets/gwy3dwindow.c:549 modules/file/pixmap.c:680
 #: modules/file/pixmap.c:1562 modules/file/rawfile.c:496
 #: modules/process/angle_dist.c:185 modules/process/calibrate.c:219
-#: modules/process/cwt.c:179 modules/process/dwt.c:178
-#: modules/process/dwtanisotropy.c:192 modules/process/dwtcorrection.c:174
-#: modules/process/dwtdenoise.c:186 modules/process/facet_analysis.c:252
-#: modules/process/fft.c:335 modules/process/fft_filter_2d.c:377
-#: modules/process/fractal.c:209 modules/process/grain_mark.c:203
-#: modules/process/grain_rem_threshold.c:175 modules/process/grain_wshed.c:176
-#: modules/process/local_contrast.c:136 modules/process/mask_grow_shrink.c:175
-#: modules/process/median-bg.c:180 modules/process/polylevel.c:192
-#: modules/process/rotate.c:222 modules/process/scale.c:164
-#: modules/process/scars.c:407 modules/process/shade.c:191
-#: modules/process/slope_dist.c:197 modules/process/sphere-revolve.c:216
-#: modules/process/tip_model.c:180 modules/process/unrotate.c:218
+#: modules/process/cwt.c:179 modules/process/drift.c:210
+#: modules/process/dwt.c:178 modules/process/dwtanisotropy.c:192
+#: modules/process/dwtcorrection.c:174 modules/process/dwtdenoise.c:186
+#: modules/process/facet_analysis.c:252 modules/process/fft.c:335
+#: modules/process/fft_filter_2d.c:413 modules/process/fractal.c:209
+#: modules/process/grain_mark.c:203 modules/process/grain_rem_threshold.c:175
+#: modules/process/grain_wshed.c:176 modules/process/local_contrast.c:136
+#: modules/process/mask_grow_shrink.c:175 modules/process/median-bg.c:180
+#: modules/process/polylevel.c:192 modules/process/rotate.c:222
+#: modules/process/scale.c:164 modules/process/scars.c:407
+#: modules/process/shade.c:191 modules/process/slope_dist.c:197
+#: modules/process/sphere-revolve.c:216 modules/process/tip_model.c:180
+#: modules/process/unrotate.c:218
 msgid "_Reset"
 msgstr "_Obnovit"
 
@@ -403,87 +404,99 @@ msgstr "Korelace výška-výška"
 msgid "Power spectral density"
 msgstr "Spektrální hustota"
 
-#: libgwydgets/gwyoptionmenus.c:951
+#: libgwydgets/gwyoptionmenus.c:924 modules/tools/sfunctions.c:109
+msgid "Minkowski volume"
+msgstr "Minkovského objem"
+
+#: libgwydgets/gwyoptionmenus.c:925 modules/tools/sfunctions.c:110
+msgid "Minkowski boundary"
+msgstr "Minkovského hranice"
+
+#: libgwydgets/gwyoptionmenus.c:926 modules/tools/sfunctions.c:111
+msgid "Minkowski connectivity"
+msgstr "Minkovského spojitost"
+
+#: libgwydgets/gwyoptionmenus.c:954
 msgid "Horizontal"
 msgstr "Vodorovný"
 
-#: libgwydgets/gwyoptionmenus.c:952
+#: libgwydgets/gwyoptionmenus.c:955
 msgid "Vertical"
 msgstr "Svislý"
 
-#: libgwydgets/gwyoptionmenus.c:981
+#: libgwydgets/gwyoptionmenus.c:984
 msgid "Mean value"
 msgstr "Střední hodnota"
 
-#: libgwydgets/gwyoptionmenus.c:982
+#: libgwydgets/gwyoptionmenus.c:985
 msgid "Median value"
 msgstr "Medián"
 
-#: libgwydgets/gwyoptionmenus.c:983
+#: libgwydgets/gwyoptionmenus.c:986
 msgid "Conservative denoise"
 msgstr "Konzervativní odšumění"
 
-#: libgwydgets/gwyoptionmenus.c:984 modules/tools/stats.c:183
+#: libgwydgets/gwyoptionmenus.c:987 modules/tools/stats.c:183
 msgid "Minimum"
 msgstr "Minimum"
 
-#: libgwydgets/gwyoptionmenus.c:985 modules/tools/stats.c:184
+#: libgwydgets/gwyoptionmenus.c:988 modules/tools/stats.c:184
 msgid "Maximum"
 msgstr "Maximum"
 
-#: libgwydgets/gwyoptionmenus.c:986
+#: libgwydgets/gwyoptionmenus.c:989
 msgid "Kuwahara"
 msgstr "Kuwahara"
 
-#: libgwydgets/gwyoptionmenus.c:1014
+#: libgwydgets/gwyoptionmenus.c:1017
 msgid "Union"
 msgstr "Sjednocení"
 
-#: libgwydgets/gwyoptionmenus.c:1015
+#: libgwydgets/gwyoptionmenus.c:1018
 msgid "Intersection"
 msgstr "Průnik"
 
-#: libgwydgets/gwyoptionmenus.c:1043
+#: libgwydgets/gwyoptionmenus.c:1046
 msgid "Fit height"
 msgstr "Proložit konstantu"
 
-#: libgwydgets/gwyoptionmenus.c:1044
+#: libgwydgets/gwyoptionmenus.c:1047
 msgid "Fit linear"
 msgstr "Proložit přímku"
 
-#: libgwydgets/gwyoptionmenus.c:1045
+#: libgwydgets/gwyoptionmenus.c:1048
 msgid "Fit quadratic"
 msgstr "Proložit parabolu"
 
-#: libgwydgets/gwyoptionmenus.c:1046
+#: libgwydgets/gwyoptionmenus.c:1049
 msgid "Fit cubic"
 msgstr "Proložit kubiku"
 
-#: libgwydgets/gwyoptionmenus.c:1075
+#: libgwydgets/gwyoptionmenus.c:1078
 msgid "Vickers"
 msgstr "Vickers"
 
-#: libgwydgets/gwyoptionmenus.c:1076
+#: libgwydgets/gwyoptionmenus.c:1079
 msgid "Berkovich"
 msgstr "Berkovich"
 
-#: libgwydgets/gwyoptionmenus.c:1077
+#: libgwydgets/gwyoptionmenus.c:1080
 msgid "Berkovich (modified)"
 msgstr "Berkovich (modifikovaný)"
 
-#: libgwydgets/gwyoptionmenus.c:1078
+#: libgwydgets/gwyoptionmenus.c:1081
 msgid "Knoop"
 msgstr "Knoop"
 
-#: libgwydgets/gwyoptionmenus.c:1079
+#: libgwydgets/gwyoptionmenus.c:1082
 msgid "Brinell"
 msgstr "Brinell"
 
-#: libgwydgets/gwyoptionmenus.c:1080
+#: libgwydgets/gwyoptionmenus.c:1083
 msgid "Cube corner"
 msgstr "Vrchol krychle"
 
-#: libgwydgets/gwyoptionmenus.c:1081
+#: libgwydgets/gwyoptionmenus.c:1084
 msgid "Rockwell"
 msgstr "Rockwell"
 
@@ -813,7 +826,7 @@ msgstr " je svobodný software uvolněný pod GNU GPL."
 msgid "_File"
 msgstr "_Soubor"
 
-#: app/toolbox.c:174 modules/process/fft_filter_2d.c:465
+#: app/toolbox.c:174 modules/process/fft_filter_2d.c:500
 msgid "_Edit"
 msgstr "Úpr_avy"
 
@@ -1044,7 +1057,6 @@ msgstr "Výška"
 #: app/unitool.c:823 app/unitool.c:827 app/unitool.c:834 app/unitool.c:841
 #: modules/file/pixmap.c:704 modules/file/pixmap.c:711
 #: modules/tools/level3.c:199 modules/tools/pointer.c:180
-#: modules/tools/profile.c:255
 msgid "px"
 msgstr "px"
 
@@ -1066,16 +1078,16 @@ msgid "Channel %u"
 msgstr "Kanál %u"
 
 #: modules/file/apefile.c:407 modules/file/ezdfile.c:581
-#: modules/file/nanoscope.c:588 modules/file/nt-mdt.c:468
-#: modules/file/rhk-spm32.c:512 modules/file/sis.c:523
-#: modules/file/stpfile.c:553
+#: modules/file/mifile.c:319 modules/file/nanoscope.c:588
+#: modules/file/nt-mdt.c:468 modules/file/rhk-spm32.c:512
+#: modules/file/sis.c:523 modules/file/stpfile.c:553
 msgid "Select Data"
 msgstr "Vyber data"
 
 #: modules/file/apefile.c:424 modules/file/ezdfile.c:598
-#: modules/file/nanoscope.c:605 modules/file/nt-mdt.c:485
-#: modules/file/rhk-spm32.c:529 modules/file/sis.c:540
-#: modules/file/stpfile.c:570
+#: modules/file/mifile.c:336 modules/file/nanoscope.c:605
+#: modules/file/nt-mdt.c:485 modules/file/rhk-spm32.c:529
+#: modules/file/sis.c:540 modules/file/stpfile.c:570
 msgid "Data to load:"
 msgstr "Data k načtení:"
 
@@ -1095,11 +1107,11 @@ msgstr "Načítá datové soubory Assing AFM."
 msgid "Assing AFM files (.afm)"
 msgstr "Soubory Assing AFM (.afm)"
 
-#: modules/file/bcrfile.c:68
+#: modules/file/bcrfile.c:73
 msgid "Imports Image Metrology BCR data files."
 msgstr "Načítá datové soubory BCR Image Metrology."
 
-#: modules/file/bcrfile.c:84
+#: modules/file/bcrfile.c:89
 msgid "BCR files (.bcr, .bcrf)"
 msgstr "BCR soubory (.bcr, .bcrf)"
 
@@ -1181,6 +1193,24 @@ msgstr "K_anál:"
 #: modules/file/jpkscan.c:918
 msgid "(invalid filename encoding)"
 msgstr "(neplatné kódování souboru)"
+
+#: modules/file/mifile.c:104
+msgid "Imports Molecular Imaging MI data files."
+msgstr "Načítá datové soubory MI Molecular Imaging."
+
+#: modules/file/mifile.c:120
+msgid "PicoView Data Files (.mi)"
+msgstr "PicoView soubory (.mi)"
+
+#: modules/file/mifile.c:314 modules/file/stpfile.c:546
+#, c-format
+msgid "Buffer %u (%s)"
+msgstr "Datové pole %u (%s)"
+
+#: modules/file/mifile.c:316 modules/file/stpfile.c:549
+#, c-format
+msgid "Buffer %u"
+msgstr "Datové pole %u"
 
 #: modules/file/nanoscope.c:128
 msgid "Imports Veeco Nanoscope data files."
@@ -1655,8 +1685,8 @@ msgid "Topography"
 msgstr "Topografie"
 
 #: modules/file/stpfile.c:102
-msgid "Current or Deflection"
-msgstr "Proud nebo výchylka"
+msgid "Current or Deflection or Amplitude"
+msgstr "Proud nebo výchylka nebo amplituda"
 
 #: modules/file/stpfile.c:103
 msgid "Electrochemical voltage"
@@ -1675,8 +1705,8 @@ msgid "Electrochemical current"
 msgstr "Elektrochemický proud"
 
 #: modules/file/stpfile.c:107
-msgid "Friction"
-msgstr "Tření"
+msgid "Friction or Phase"
+msgstr "Tření nebo fáze"
 
 #: modules/file/stpfile.c:108
 msgid "AUX in BNC"
@@ -1693,16 +1723,6 @@ msgstr "Načítá datové soubory STP Molecular Imaging."
 #: modules/file/stpfile.c:133
 msgid "STP files (.stp)"
 msgstr "STP soubory (.stp)"
-
-#: modules/file/stpfile.c:546
-#, c-format
-msgid "Buffer %u (%s)"
-msgstr "Datové pole %u (%s)"
-
-#: modules/file/stpfile.c:549
-#, c-format
-msgid "Buffer %u"
-msgstr "Datové pole %u"
 
 #: modules/file/wsxmfile.c:69
 msgid "Imports Nanotec WSxM data files."
@@ -2212,7 +2232,7 @@ msgstr "Velikost okna"
 
 #: modules/process/crosscor.c:265 modules/process/fft.c:372
 #: modules/process/fractal.c:245 modules/process/maskcor.c:189
-#: modules/tools/sfunctions.c:200
+#: modules/tools/sfunctions.c:208
 msgid "_Output type:"
 msgstr "Typ _výstupu:"
 
@@ -2260,7 +2280,7 @@ msgstr "Zachovej velikost (neškáluj na mocninu 2)"
 #: modules/process/fft_filter_1d.c:339 modules/process/fractal.c:230
 #: modules/process/nanoindent_adjust.c:245 modules/process/rotate.c:247
 #: modules/process/scale.c:207 modules/process/unrotate.c:276
-#: modules/tools/profile.c:272
+#: modules/tools/profile.c:296
 msgid "_Interpolation type:"
 msgstr "Typ _interpolace:"
 
@@ -2269,6 +2289,62 @@ msgstr "Typ _interpolace:"
 #: modules/process/dwtdenoise.c:218
 msgid "_Wavelet type:"
 msgstr "Typ _waveletu:"
+
+#: modules/process/drift.c:105
+msgid "Scan lines correlation"
+msgstr ""
+
+#: modules/process/drift.c:106
+msgid "Local isotropy"
+msgstr ""
+
+#: modules/process/drift.c:107
+msgid "Calibration sample"
+msgstr ""
+
+#: modules/process/drift.c:127
+msgid "Evaluate/correct thermal drift in fast scan axis."
+msgstr ""
+
+#: modules/process/drift.c:143
+msgid "/_Correct Data/_Compensate drift..."
+msgstr ""
+
+#: modules/process/drift.c:208
+msgid "Correct drift"
+msgstr ""
+
+#: modules/process/drift.c:209 modules/process/grain_mark.c:202
+#: modules/process/grain_rem_threshold.c:174 modules/process/grain_wshed.c:175
+#: modules/process/tip_model.c:179
+msgid "_Update Preview"
+msgstr "A_ktualizuj náhled"
+
+#: modules/process/drift.c:245
+msgid "_Method:"
+msgstr ""
+
+#: modules/process/drift.c:261
+msgid "_Interpolation:"
+msgstr ""
+
+#: modules/process/drift.c:299 modules/process/facet_analysis.c:363
+#: modules/process/grain_mark.c:283 modules/process/grain_rem_threshold.c:261
+#: modules/process/grain_wshed.c:289 modules/process/scars.c:479
+msgid "_Mask color:"
+msgstr "Barva _masky"
+
+#: modules/process/drift.c:307
+msgid "_Extract drift graph"
+msgstr ""
+
+#: modules/process/drift.c:316
+msgid "_Correct data"
+msgstr ""
+
+#: modules/process/drift.c:325
+msgid "_Crop out unknown data"
+msgstr ""
 
 #: modules/process/dwt.c:79
 msgid "Two-dimensional DWT (Discrete Wavelet Transform)."
@@ -2320,11 +2396,11 @@ msgstr "DWT korekce"
 
 #: modules/process/dwtcorrection.c:173
 msgid "2D DWT Correction"
-msgstr ""
+msgstr "Dvourozměrná DWT korekce"
 
 #: modules/process/dwtdenoise.c:86
 msgid "2D DWT denoising module"
-msgstr ""
+msgstr "Dvourozměrné DWT odšumění"
 
 #: modules/process/dwtdenoise.c:102
 msgid "/_Integral Transforms/DWT De_noise..."
@@ -2433,12 +2509,6 @@ msgstr "<b>Střední normála</b>"
 #: modules/process/facet_analysis.c:354
 msgid "_Tolerance:"
 msgstr "_Tolerance:"
-
-#: modules/process/facet_analysis.c:363 modules/process/grain_mark.c:283
-#: modules/process/grain_rem_threshold.c:260 modules/process/grain_wshed.c:289
-#: modules/process/scars.c:479
-msgid "_Mask color:"
-msgstr "Barva _masky"
 
 #: modules/process/facet_analysis.c:372
 msgid ""
@@ -2564,108 +2634,120 @@ msgstr "označené"
 msgid "Unmarked"
 msgstr "neoznačené"
 
-#: modules/process/fft_filter_2d.c:197 modules/process/fft_filter_2d.c:376
+#: modules/process/fft_filter_2d.c:210 modules/process/fft_filter_2d.c:412
 msgid "2D FFT Filtering"
 msgstr "Dvourozměrné filtrování pomocí FFT"
 
-#: modules/process/fft_filter_2d.c:212
+#: modules/process/fft_filter_2d.c:225
 msgid "/_Correct Data/_2D FFT filtering..."
 msgstr "/_Korekce dat/_2D FFT filtrování..."
 
-#: modules/process/fft_filter_2d.c:277 modules/process/fft_filter_2d.c:320
+#: modules/process/fft_filter_2d.c:290 modules/process/fft_filter_2d.c:335
 msgid "Filtered FFT"
 msgstr "Filtrovaná FFT"
 
-#: modules/process/fft_filter_2d.c:283 modules/process/fft_filter_2d.c:319
+#: modules/process/fft_filter_2d.c:296 modules/process/fft_filter_2d.c:334
 msgid "Filtered Image"
 msgstr "Filtrovaná data"
 
-#: modules/process/fft_filter_2d.c:321
+#: modules/process/fft_filter_2d.c:336
 msgid "Both"
 msgstr "Obojí"
 
-#: modules/process/fft_filter_2d.c:406
+#: modules/process/fft_filter_2d.c:442
 msgid "<b>Filter Drawing</b>"
 msgstr "<b>Kreslení filtru</b>"
 
-#: modules/process/fft_filter_2d.c:473
+#: modules/process/fft_filter_2d.c:507
 msgid "Re_move"
 msgstr "O_dstranit"
 
-#: modules/process/fft_filter_2d.c:483
+#: modules/process/fft_filter_2d.c:517
 msgid "_Snap to origin"
 msgstr "Přichytit k _počátku"
 
-#: modules/process/fft_filter_2d.c:496
+#: modules/process/fft_filter_2d.c:530
 msgid "Remove _All"
 msgstr "Odstranit _vše"
 
-#: modules/process/fft_filter_2d.c:507
+#: modules/process/fft_filter_2d.c:541
 msgid "<b>Preview Options</b>"
 msgstr "<b>Volby náhledu</b>"
 
-#: modules/process/fft_filter_2d.c:527
+#: modules/process/fft_filter_2d.c:562
 msgid "Color Ran_ge:"
 msgstr "Rozsah _barev:"
 
-#: modules/process/fft_filter_2d.c:535
+#: modules/process/fft_filter_2d.c:570
+msgid "_Zoom"
+msgstr "_Zvětšení"
+
+#: modules/process/fft_filter_2d.c:578
 msgid "Display mode:"
 msgstr "Mód zobrazení:"
 
-#: modules/process/fft_filter_2d.c:541
-msgid "Filter _Drawing"
-msgstr "_Kreslení filtru"
+#: modules/process/fft_filter_2d.c:588
+msgid "Original _FFT"
+msgstr "_Původní FFT"
 
-#: modules/process/fft_filter_2d.c:550
-msgid "Filtered _Image Preview"
-msgstr "_Náhled filtrovaných dat"
+#: modules/process/fft_filter_2d.c:595
+msgid "Original _Image"
+msgstr "Původní o_braz"
 
-#: modules/process/fft_filter_2d.c:559
-msgid "Filtered _FFT Preview"
-msgstr "Náhled filtrované _FFT"
+#: modules/process/fft_filter_2d.c:602
+msgid "Filtered _Image"
+msgstr "Filtrovaný o_braz"
 
-#: modules/process/fft_filter_2d.c:569
+#: modules/process/fft_filter_2d.c:609
+msgid "Image _Difference"
+msgstr "_Rozdíl obrazů"
+
+#: modules/process/fft_filter_2d.c:616
+msgid "Filtered _FFT"
+msgstr "_Filtrovaná FFT"
+
+#: modules/process/fft_filter_2d.c:626
 msgid "<b>Output Options</b>"
 msgstr "<b>Volby výstupu</b>"
 
-#: modules/process/fft_filter_2d.c:582
+#: modules/process/fft_filter_2d.c:639
 msgid "Output _type:"
 msgstr "Typ _výstupu:"
 
-#: modules/process/fft_filter_2d.c:658
+#: modules/process/fft_filter_2d.c:715
 msgid "Draw a new inclusive circle marker."
 msgstr "Kreslit novou zahrnující kružnici."
 
-#: modules/process/fft_filter_2d.c:660
+#: modules/process/fft_filter_2d.c:717
 msgid "Draw a new inclusive rectangle marker."
 msgstr "Kreslit nový zahrnující obdélník."
 
-#: modules/process/fft_filter_2d.c:662
+#: modules/process/fft_filter_2d.c:719
 msgid "Draw a new exclusive circle marker."
 msgstr "Kreslit novou vylučující kružnici."
 
-#: modules/process/fft_filter_2d.c:664
+#: modules/process/fft_filter_2d.c:721
 msgid "Draw a new exclusive rectangle marker."
 msgstr "Kreslit nový vylučující obdélník."
 
-#: modules/process/fft_filter_2d.c:666
+#: modules/process/fft_filter_2d.c:723
 msgid "Click and drag a marker to resize. Hold Shift to move marker."
 msgstr ""
 "Kliknutím na objekt a tažením ho zvětšíš.  Se Shiftem s ním můžeš pohybovat."
 
-#: modules/process/fft_filter_2d.c:668
+#: modules/process/fft_filter_2d.c:725
 msgid "Click on a marker to remove it."
 msgstr "Kliknutím na objekt ho odstraníš."
 
-#: modules/process/fft_filter_2d.c:670
+#: modules/process/fft_filter_2d.c:727
 msgid "Removes all markers."
 msgstr "Odstranit všechny objekty."
 
-#: modules/process/fft_filter_2d.c:672
+#: modules/process/fft_filter_2d.c:729
 msgid "Forces new markers to center around the origin."
 msgstr "Vystředování nových objektů kolem počátku."
 
-#: modules/process/fft_filter_2d.c:674
+#: modules/process/fft_filter_2d.c:731
 msgid "Changes the range of values displayed in the FFT."
 msgstr "Změna rozsahu hodnot zobrazených ve FFT."
 
@@ -2833,11 +2915,6 @@ msgstr "/_Zrna/_Označit zrna..."
 msgid "Mark Grains by Threshold"
 msgstr "Vyznačení zrn podle prahu"
 
-#: modules/process/grain_mark.c:202 modules/process/grain_rem_threshold.c:174
-#: modules/process/grain_wshed.c:175 modules/process/tip_model.c:179
-msgid "_Update Preview"
-msgstr "A_ktualizuj náhled"
-
 #: modules/process/grain_mark.c:237 modules/process/grain_rem_threshold.c:212
 msgid "<b>Threshold By</b>"
 msgstr "<b>Označit podle prahu</b>"
@@ -2850,13 +2927,13 @@ msgstr "_Sklon:"
 msgid "_Curvature:"
 msgstr "_Křivost:"
 
-#: modules/process/grain_mark.c:257 modules/process/grain_rem_threshold.c:237
-#: modules/process/grain_wshed.c:269 modules/tools/profile.c:248
-#: modules/tools/sfunctions.c:194
+#: modules/process/grain_mark.c:257 modules/process/grain_rem_threshold.c:238
+#: modules/process/grain_wshed.c:269 modules/tools/profile.c:257
+#: modules/tools/sfunctions.c:202
 msgid "<b>Options</b>"
 msgstr "<b>Volby</b>"
 
-#: modules/process/grain_mark.c:263 modules/process/grain_rem_threshold.c:243
+#: modules/process/grain_mark.c:263 modules/process/grain_rem_threshold.c:244
 #: modules/process/grain_wshed.c:275
 msgid "_Invert height"
 msgstr "_Invertovat výšku"
@@ -2877,11 +2954,11 @@ msgstr "/_Zrna/Odstranit podle velikosti..."
 msgid "Remove Grains by Threshold"
 msgstr "Odstranění zrn podle prahu"
 
-#: modules/process/grain_rem_threshold.c:229
+#: modules/process/grain_rem_threshold.c:230
 msgid "_Area:"
 msgstr "_Plocha:"
 
-#: modules/process/grain_rem_threshold.c:251
+#: modules/process/grain_rem_threshold.c:252
 msgid "_Selection mode:"
 msgstr "Způsob výběru:"
 
@@ -3970,40 +4047,44 @@ msgstr "V_yjmi vybranou oblast"
 msgid "(otherwise will be used for fitting)"
 msgstr "(jinak bude použit jen výběr)"
 
-#: modules/tools/profile.c:79
+#: modules/tools/profile.c:88
 msgid "Profile tool, creates profile graphs from selected lines."
 msgstr "Nástroj profil, vytváří grafy profilů z vybraných úseček."
 
-#: modules/tools/profile.c:106
+#: modules/tools/profile.c:115
 msgid "Extract profiles from data."
 msgstr "Vybrat profily z dat"
 
-#: modules/tools/profile.c:168
+#: modules/tools/profile.c:177
 msgid "Extract Profile"
 msgstr "Vybrat profil"
 
-#: modules/tools/profile.c:192
+#: modules/tools/profile.c:201
 msgid "<b>Profile Positions</b> [pixels]"
 msgstr "<b>Polohy profilů</b> [v pixelech]"
 
-#: modules/tools/profile.c:232
+#: modules/tools/profile.c:241
 #, c-format
 msgid "Profile %d"
 msgstr "Profil %d"
 
-#: modules/tools/profile.c:255
+#: modules/tools/profile.c:264
 msgid "Thickness:"
 msgstr "Tloušťka:"
 
-#: modules/tools/profile.c:262
+#: modules/tools/profile.c:271
+msgid "Fix res.:"
+msgstr "Rozlišení:"
+
+#: modules/tools/profile.c:286
 msgid "_Separate profiles"
 msgstr "_Oddělit profily"
 
-#: modules/tools/profile.c:464
+#: modules/tools/profile.c:504
 msgid "Profiles"
 msgstr "Profily"
 
-#: modules/tools/sfunctions.c:77
+#: modules/tools/sfunctions.c:82
 msgid ""
 "Statistical function tool, calculates one-dimensional statistical functions "
 "(height distribution, correlations, PSDF) of selected part of data."
@@ -4011,47 +4092,47 @@ msgstr ""
 "Nástroj statistické funkce, počítá jednorozměrné statistické funkce "
 "(rozdělení výšek, korelace, spektrální hustotu) vybrané části dat."
 
-#: modules/tools/sfunctions.c:97
+#: modules/tools/sfunctions.c:102
 msgid "Height distribution"
 msgstr "Rozdělení výšek"
 
-#: modules/tools/sfunctions.c:98
+#: modules/tools/sfunctions.c:103
 msgid "Cum. height distribution"
 msgstr "Kumul. rozdělení výšek"
 
-#: modules/tools/sfunctions.c:99
+#: modules/tools/sfunctions.c:104
 msgid "Distribution of angles"
 msgstr "Rozdělení úhlů"
 
-#: modules/tools/sfunctions.c:100
+#: modules/tools/sfunctions.c:105
 msgid "Cum. distribution of angles"
 msgstr "Kumul. rozdělení úhlů"
 
-#: modules/tools/sfunctions.c:101
+#: modules/tools/sfunctions.c:106
 msgid "ACF"
 msgstr "ACF"
 
-#: modules/tools/sfunctions.c:102
+#: modules/tools/sfunctions.c:107
 msgid "HHCF"
 msgstr "HHCF"
 
-#: modules/tools/sfunctions.c:103
+#: modules/tools/sfunctions.c:108
 msgid "PSDF"
 msgstr "PSDF"
 
-#: modules/tools/sfunctions.c:116
+#: modules/tools/sfunctions.c:124
 msgid "Compute 1D statistical functions."
 msgstr "Spočíst 1D statistické funkce"
 
-#: modules/tools/sfunctions.c:167
+#: modules/tools/sfunctions.c:175
 msgid "Statistical Functions"
 msgstr "Statistické funkce"
 
-#: modules/tools/sfunctions.c:214
+#: modules/tools/sfunctions.c:222
 msgid "Computation _direction:"
 msgstr "S_měr výpočtu:"
 
-#: modules/tools/sfunctions.c:228
+#: modules/tools/sfunctions.c:248
 msgid "Interpolation type:"
 msgstr "Typ interpolace:"
 
@@ -4144,6 +4225,21 @@ msgstr "Statistické veličiny"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametry</b>"
+
+#~ msgid "Current or Deflection"
+#~ msgstr "Proud nebo výchylka"
+
+#~ msgid "Friction"
+#~ msgstr "Tření"
+
+#~ msgid "Filter _Drawing"
+#~ msgstr "_Kreslení filtru"
+
+#~ msgid "Filtered _Image Preview"
+#~ msgstr "_Náhled filtrovaných dat"
+
+#~ msgid "Filtered _FFT Preview"
+#~ msgstr "Náhled filtrované _FFT"
 
 #~ msgid "Expected A_d:"
 #~ msgstr "Očekávané A_d:"
