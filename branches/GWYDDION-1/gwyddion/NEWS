@@ -7,6 +7,7 @@ Library:
 - libprocess: Minkowski functionals were added to line stat. function.
 
 Modules:
+- MI file (new): PicoView MI data file import.
 - 2D FFT filtering: Drawing artefacts were fixed, color range was fixed, zoom
   option added, "Original" and "Difference" display modes added,
   inclusion/exclusion behavior fixed (more user friendly).
@@ -14,11 +15,11 @@ Modules:
   characteristics) functionals were added.
 - BCR file: Unit support was improved, support for zmin added.
 - STP file: Channel labels fixed.
-- MI file (new): PicoView MI data file import.
 - Statistical functions, Profile: Allow to select number of sampling points.
 - Profile: Maximum profile width was increased to 100.
 
 Other:
+- Modules are built with libtool, fixing portability problems to Mac OS X.
 - Missing Italic stock icon was added.
 
 
