@@ -108,7 +108,14 @@
           <entry>No</entry>
         </row>
         <row>
-          <entry>Molecular Imaging</entry>
+          <entry>Molecular Imaging MI</entry>
+          <entry>.mi</entry>
+          <entry>mifile module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Molecular Imaging STP</entry>
           <entry>.stp</entry>
           <entry>stpfile module</entry>
           <entry>Yes</entry>
