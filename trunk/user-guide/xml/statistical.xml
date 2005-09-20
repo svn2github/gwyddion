@@ -436,5 +436,44 @@
         </menuchoice>.
       </tip>
     </section>
+    <section>
+      <title>Minkowski functionals</title>
+      <para>
+        The Minkowski functionals are used to describe global geometric characteristics
+        of structures.  Two-dimensional discrete variants of
+        volume <phrase role="math">V</phrase>,
+        surface <phrase role="math">S</phrase>,
+        and connectivity (Euler-Poincaré Characteristic) <phrase role="math">χ</phrase>
+        are calculated according to following formulas:
+      </para>
+      <informalequation>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-minkowski-functionals.png" format="PNG"/>
+          </imageobject>
+        </mediaobject>
+      </informalequation>
+      <para>
+        Here <phrase role="math">N</phrase> denotes the total number of pixels,
+        <phrase role="math">N<subscript>white</subscript></phrase> denotes
+        the number of “white” pixels, that is pixels above threshold (pixels below
+        threshold are referred to as “black”).
+        The symbol <phrase role="math">N<subscript>bound</subscript></phrase> denotes
+        the number of white-black pixel boundaries.
+        Finally <phrase role="math">C<subscript>white</subscript></phrase> and
+        <phrase role="math">C<subscript>black</subscript></phrase> denote the number of
+        continuous sets of white and black pixels respectively.
+      </para>
+      <para>
+        For an image with continuous set of values the functionals are parametrized by
+        the height threshold value <phrase role="math">ϑ</phrase> that divides white pixels
+        from black, that is they can be viewed as functions of this parameter.
+        And these functions
+        <phrase role="math">V</phrase>(<phrase role="math">ϑ</phrase>),
+        <phrase role="math">S</phrase>(<phrase role="math">ϑ</phrase>), and
+        <phrase role="math">χ</phrase>(<phrase role="math">ϑ</phrase>)
+        are what is actually plotted.
+      </para>
+    </section>
   </section>
 </section>
