@@ -13,9 +13,13 @@
       <firstname>David</firstname>
       <surname>Nečas</surname>
     </author>
+    <author>
+      <firstname>Christopher</firstname>
+      <surname>Anderson</surname>
+    </author>
     <copyright>
       <year>2004, 2005</year>
-      <holder>Petr Klapetek &amp; David Nečas</holder>
+      <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
     </copyright>
     <legalnotice id="legalnotice">
       <para>
