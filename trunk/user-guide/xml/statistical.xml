@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-stats">
+<section id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
   <!--TODO: Clean up line breaks. The equation sections are esp. messy -->
   
   <title>Statistical Analysis</title>
@@ -476,4 +476,5 @@
       </para>
     </section>
   </section>
+  <xi:include href="facet-analysis.xml"/>
 </section>
