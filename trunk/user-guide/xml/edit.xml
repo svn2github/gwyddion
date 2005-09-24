@@ -12,7 +12,7 @@
      This way should mark only the outliers, e. g. values more far than 3 times
      the squared variance of the data. -->
       
-<section id="features-edit">
+<section id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Data Edit</title>
   <para>
     There are several modules that enable direct or indirect editing of the
@@ -165,4 +165,5 @@
       really crazy results. <!--TODO: Is "crazy" an adequately professional term? -->
     </warning>
   </section>
+  <xi:include href="unrotate.xml"/>
 </section>
