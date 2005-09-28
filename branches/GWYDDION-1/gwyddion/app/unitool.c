@@ -117,7 +117,7 @@ gwy_unitool_use(GwyUnitoolState *state,
         gtk_dialog_set_has_separator(GTK_DIALOG(state->dialog), FALSE);
         gtk_window_set_position(GTK_WINDOW(state->dialog), GTK_WIN_POS_NONE);
         gtk_window_set_type_hint(GTK_WINDOW(state->dialog),
-                                 GDK_WINDOW_TYPE_HINT_UTILITY);
+                                 GDK_WINDOW_TYPE_HINT_NORMAL);
         gtk_widget_show_all(GTK_DIALOG(state->dialog)->vbox);
         state->is_visible = FALSE;
     }
