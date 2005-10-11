@@ -39,6 +39,10 @@
 #include <string.h>
 #include "gwyutils.h"
 
+#ifdef G_OS_WIN32
+static const gchar* gwy_get_base_dir(void);
+#endif
+
 static gchar *gwy_argv0 = NULL;
 
 static GQuark error_domain = 0;
@@ -517,44 +521,65 @@ gchar*
 gwy_find_self_dir(const gchar *dirname)
 {
 #ifdef G_OS_WIN32
-    gchar *p, *q, *b;
-
-    /* TODO: to be sure, we should put the path to the registry, too */
-    /* argv[0] */
-    p = g_strdup(gwy_argv0);
-    if (!g_path_is_absolute(p)) {
-        b = g_get_current_dir();
-        q = g_build_filename(b, p, NULL);
-        g_free(p);
-        g_free(b);
-        p = q;
-    }
-    /* now p contains an absolute path, the dir should be there */
-    gwy_debug("gwyddion full path seems to be `%s'", p);
-    q = g_path_get_dirname(p);
-    g_free(p);
-    p = q;
-    q = g_build_filename(p, dirname, NULL);
-    g_free(p);
-
-    return q;
-#endif /* G_OS_WIN32 */
+    return g_build_filename(gwy_get_base_dir(), dirname, NULL);
+#endif    /* G_OS_WIN32 */
 
 #ifdef G_OS_UNIX
-    static const struct { gchar *id; gchar *path; } paths[] = {
-        { "modules",   GWY_MODULE_DIR },
-        { "pixmaps",   GWY_PIXMAP_DIR },
-        { "plugins",   GWY_PLUGIN_DIR },
+    static const struct {
+        const gchar *id;
+        const gchar *base;
+        const gchar *env;
+        const gchar *dir;
+    }
+    paths[] = {
+        {
+            "modules",
+            GWY_LIBDIR,
+            "GWYDDION_LIBDIR",
+            "gwyddion/modules"
+        },
+        {
+            "plugins",
+            GWY_LIBEXECDIR,
+            "GWYDDION_LIBEXECDIR",
+            "gwyddion/plugins"
+        },
+        {
+            "pixmaps",
+            GWY_DATADIR,
+            "GWYDDION_DATADIR",
+            "gwyddion/pixmaps",
+        },
+        {
+            "data",
+            GWY_DATADIR,
+            "GWYDDION_DATADIR",
+            "gwyddion",
+        },
+        {
+            "locale",
+            GWY_LOCALEDIR,
+            "GWYDDION_LOCALEDIR",
+            NULL,
+        },
     };
     gsize i;
+    const gchar *base;
 
     for (i = 0; i < G_N_ELEMENTS(paths); i++) {
-        if (strcmp(dirname, paths[i].id) == 0)
-            return g_strdup(paths[i].path);
+        if (strcmp(dirname, paths[i].id))
+            continue;
+
+        if (!(base = g_getenv(paths[i].env)))
+            base = paths[i].base;
+
+        gwy_debug("for <%s> base = <%s>, dir = <%s>",
+                  dirname, base, paths[i].dir);
+        return g_build_filename(base, paths[i].dir, NULL);
     }
     g_critical("Cannot find directory for `%s'", dirname);
     return NULL;
-#endif /* G_OS_UNIX */
+#endif    /* G_OS_UNIX */
 }
 
 /**
@@ -569,6 +594,43 @@ gwy_find_self_set_argv0(const gchar *argv0)
     g_free(gwy_argv0);
     gwy_argv0 = g_strdup(argv0);
 }
+
+#ifdef G_OS_WIN32
+static const gchar*
+gwy_get_base_dir(void)
+{
+    static gchar *basedir = NULL;
+
+    if (!basedir) {
+        gchar *p, *q;
+
+        if (!gwy_argv0) {
+            g_critical("Set argv0 with gwy_find_self_set_argv0() first.");
+            return NULL;
+        }
+
+        /* TODO: to be sure, we should put the path to the registry, too */
+        /* argv[0] */
+        p = g_strdup(gwy_argv0);
+        if (!g_path_is_absolute(p)) {
+            gchar *b;
+
+            b = g_get_current_dir();
+            q = g_build_filename(b, p, NULL);
+            g_free(p);
+            g_free(b);
+            p = gwy_canonicalize_path(q);
+            g_free(q);
+        }
+        /* now p contains an absolute path, the dir should be there */
+        basedir = g_path_get_dirname(p);
+        gwy_debug("gwyddion installation directory seems to be `%s'", p);
+        g_free(p);
+    }
+
+    return basedir;
+}
+#endif    /* G_OS_WIN32 */
 
 /**
  * gwy_get_user_dir:
