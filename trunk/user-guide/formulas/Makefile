@@ -1,4 +1,4 @@
-PLAINTEX = tex
+TEX = tex
 CONVERT = convert
 DVIPS = dvips
 GS = gs
