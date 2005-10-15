@@ -43,7 +43,14 @@
 #define DATA_MAGIC "#!"
 #define DATA_MAGIC_SIZE (sizeof(DATA_MAGIC) - 1)
 
-#define EXTENSION ".ezd"
+#define EXTENSION1 ".ezd"
+#define EXTENSION2 ".nid"
+
+typedef enum {
+    SCAN_UNKNOWN = 0,
+    SCAN_FORWARD = 1,
+    SCAN_BACKWARD = -1
+} ScanDirection;
 
 typedef struct {
     gchar *name;
@@ -56,6 +63,7 @@ typedef struct {
     gchar *name;
     GHashTable *meta;
     /* following fields are meaningful only for data */
+    ScanDirection direction;
     gint group;
     gint channel;
     gint xres;
@@ -108,9 +116,9 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "ezdfile",
-    N_("Imports Nanosurf EZD data files."),
+    N_("Imports Nanosurf EZD and NID data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -124,7 +132,7 @@ module_register(const gchar *name)
 {
     static GwyFileFuncInfo ezdfile_func_info = {
         "ezdfile",
-        N_("Nanosurf files (.ezd)"),
+        N_("Nanosurf files (.ezd, .nid)"),
         (GwyFileDetectFunc)&ezdfile_detect,
         (GwyFileLoadFunc)&ezdfile_load,
         NULL
@@ -146,7 +154,8 @@ ezdfile_detect(const gchar *filename, gboolean only_name)
         gchar *filename_lc;
 
         filename_lc = g_ascii_strdown(filename, -1);
-        score = g_str_has_suffix(filename_lc, EXTENSION) ? 20 : 0;
+        score = (g_str_has_suffix(filename_lc, EXTENSION1)
+                 || g_str_has_suffix(filename_lc, EXTENSION2)) ? 20 : 0;
         g_free(filename_lc);
 
         return score;
@@ -185,7 +194,7 @@ ezdfile_load(const gchar *filename)
     }
     if (strncmp(buffer, MAGIC, MAGIC_SIZE)
         || !(header_size = find_data_start(buffer, size))) {
-        g_warning("File %s is not a EZD file", filename);
+        g_warning("File %s is not a EZD/NID file", filename);
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
@@ -314,12 +323,17 @@ file_read_header(GPtrArray *ezdfile,
             else
                 g_warning("SaveOrder is not Intel, this is not supported");
         }
+        else if (!strcmp(line, "Frame")) {
+            if (!strcmp(p, "Scan forward"))
+                section->direction = SCAN_FORWARD;
+            else if (!strcmp(p, "Scan backward"))
+                section->direction = SCAN_BACKWARD;
+        }
         else if (!strcmp(line, "Points"))
             section->xres = atol(p);
         else if (!strcmp(line, "Lines"))
             section->yres = atol(p);
-        /* FIXME: this is ugly and eventually incorrect, if dimensions can
-         * be exchanged */
+        /* FIXME: this is ugly, and incorrect for non-2D data */
         else if (!strcmp(line, "Dim0Name"))
             section->xrange.name = g_strdup(p);
         else if (!strcmp(line, "Dim1Name"))
@@ -413,8 +427,13 @@ find_data_offsets(const gchar *buffer,
             /* Compute data position */
             gwy_debug("Data %s at offset %u from data start",
                       grkey->str, required_size);
-            gwy_debug("xres = %d, yres = %d, bpp = %d",
-                      section->xres, section->yres, section->bitdepth);
+            gwy_debug("xres = %d, yres = %d, bpp = %d, z-name = %s",
+                      section->xres, section->yres, section->bitdepth,
+                      section->zrange.name);
+            if (section->yres < 2) {
+                gwy_debug("Skipping 1D data Gr%d-Ch%d. FIXME.", i, j);
+                continue;
+            }
             ndata++;
             section->data = buffer + required_size;
             required_size += section->xres * section->yres
@@ -557,6 +576,7 @@ select_which_data(GPtrArray *ezdfile,
     GtkObject *layer;
     GSList *radio, *rl;
     guint i, b;
+    const gchar *s;
 
     if (!ndata)
         return (guint)-1;
@@ -571,8 +591,22 @@ select_which_data(GPtrArray *ezdfile,
         if (!section->data)
             continue;
         choices[b].value = i;
-        choices[b].name = g_strdup_printf(_("Group %d, Channel %d"),
-                                          section->group, section->channel);
+        switch (section->direction) {
+            case SCAN_FORWARD:
+            s = " forward";
+            break;
+
+            case SCAN_BACKWARD:
+            s = " backward";
+            break;
+
+            default:
+            s = "";
+            break;
+        }
+        choices[b].name = g_strdup_printf(_("Group %d, Channel %d (%s%s)"),
+                                          section->group, section->channel,
+                                          section->zrange.name, s);
         b++;
     }
     b = choices[0].value;
