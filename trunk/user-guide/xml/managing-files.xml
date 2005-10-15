@@ -130,7 +130,7 @@
         </row>
         <row>
           <entry>Nanosurf</entry>
-          <entry>.ezd</entry>
+          <entry>.ezd, .nid</entry>
           <entry>ezdfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
