@@ -283,7 +283,7 @@ static GwyModuleInfo module_info = {
        "TARGA. "
        "Import support relies on GDK and thus may be installation-dependent."),
     "Yeti <yeti@gwyddion.net>",
-    "4.6.3",
+    "4.6.4",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -1827,20 +1827,18 @@ fmscale(gint size,
         gdouble zoom,
         GwySIUnit *siunit)
 {
-    enum { bufsize = 64 };
     PangoRectangle logical1, logical2;
     PangoLayout *layout;
     GdkDrawable *drawable;
     GdkPixbuf *pixbuf;
     GdkGC *gc;
-    gdouble x;
-    GwySIValueFormat *format;
-    gchar *s;
+    GwySIValueFormat *format = NULL;
+    GString *strmin, *strmax;
     gint l, tick, width, lw;
 
-    s = g_new(gchar, bufsize);
     layout = prepare_layout(zoom);
 
+    /*
     x = MAX(fabs(bot), fabs(top));
     format = gwy_si_unit_get_format_with_resolution(siunit, x, x/120, NULL);
 
@@ -1853,6 +1851,47 @@ fmscale(gint size,
                format->precision, bot/format->magnitude, format->units);
     pango_layout_set_markup(layout, s, -1);
     pango_layout_get_extents(layout, NULL, &logical2);
+    */
+    /* BEGIN GwyColorAxis code */
+    /*compute minimum and maximum numbers*/
+    strmax = g_string_new(" ");
+    if (top == 0) {
+        if (bot == 0)
+            g_string_printf(strmax, "0.0");
+        else {
+            format = gwy_si_unit_get_format(siunit, top, NULL);
+            g_string_printf(strmax, "0.0 ");
+            g_string_append(strmax, format->units);
+        }
+    }
+    else {
+        format = gwy_si_unit_get_format(siunit, top, NULL);
+        g_string_printf(strmax, "%3.1f ", top/format->magnitude);
+        g_string_append(strmax, format->units);
+    }
+
+    strmin = g_string_new(" ");
+    if (bot == 0) {
+        if (top == 0)
+            g_string_printf(strmin, "0.0");
+        else {
+            format = gwy_si_unit_get_format(siunit, top, format);
+            g_string_printf(strmin, "0.0 ");
+            g_string_append(strmin, format->units);
+        }
+    }
+    else {
+        /*yes, realy top*/
+        format = gwy_si_unit_get_format(siunit, top, format);
+        g_string_printf(strmin, "%3.1f ", bot/format->magnitude);
+        g_string_append(strmin, format->units);
+    }
+    /* END GwyColorAxis code */
+
+    pango_layout_set_markup(layout, strmin->str, -1);
+    pango_layout_get_extents(layout, NULL, &logical1);
+    pango_layout_set_markup(layout, strmax->str, -1);
+    pango_layout_get_extents(layout, NULL, &logical2);
 
     l = MAX(PANGO_PIXELS(logical1.width), PANGO_PIXELS(logical2.width));
     tick = zoom*TICK_LENGTH;
@@ -1860,9 +1899,7 @@ fmscale(gint size,
     width = l + 2*zoom + tick + 2;
     drawable = prepare_drawable(width, size, lw, &gc);
 
-    g_snprintf(s, bufsize, "%.*f %s",
-               format->precision, bot/format->magnitude, format->units);
-    pango_layout_set_markup(layout, s, -1);
+    pango_layout_set_markup(layout, strmin->str, -1);
     pango_layout_get_extents(layout, NULL, &logical1);
     gdk_draw_layout(drawable, gc,
                     width - PANGO_PIXELS(logical1.width) - 2,
@@ -1870,9 +1907,7 @@ fmscale(gint size,
                     layout);
     gdk_draw_line(drawable, gc, 0, size - (lw + 1)/2, tick, size - (lw + 1)/2);
 
-    g_snprintf(s, bufsize, "%.*f %s",
-               format->precision, top/format->magnitude, format->units);
-    pango_layout_set_markup(layout, s, -1);
+    pango_layout_set_markup(layout, strmax->str, -1);
     pango_layout_get_extents(layout, NULL, &logical1);
     gdk_draw_layout(drawable, gc,
                     width - PANGO_PIXELS(logical1.width) - 2, 1,
@@ -1884,11 +1919,13 @@ fmscale(gint size,
     pixbuf = gdk_pixbuf_get_from_drawable(NULL, drawable, NULL,
                                           0, 0, 0, 0, width, size);
 
-    gwy_si_unit_value_format_free(format);
+    if (format)
+        gwy_si_unit_value_format_free(format);
     g_object_unref(gc);
     g_object_unref(drawable);
     g_object_unref(layout);
-    g_free(s);
+    g_string_free(strmin, TRUE);
+    g_string_free(strmax, TRUE);
 
     return pixbuf;
 }
