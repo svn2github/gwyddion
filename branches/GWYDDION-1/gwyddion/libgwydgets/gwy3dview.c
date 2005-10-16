@@ -1951,20 +1951,12 @@ gwy_3d_draw_axes(Gwy3DView * widget)
             glVertex3f(Cx , Cy, 0.0f);
             glVertex3f(Cx - (Ax-Bx)*0.02, Cy - (Ay-By)*0.02, 0.0f );
 
-            glPushMatrix();
-            glTranslatef(Cx*cos(widget->rot_x->value * DIG_2_RAD)
-                         - Cy*sin(widget->rot_x->value * DIG_2_RAD),
-                         Cx*sin(widget->rot_x->value * DIG_2_RAD)
-                         + Cy*cos(widget->rot_x->value * DIG_2_RAD), 0.0f);
-            glRotatef(-widget->rot_x->value, 0.0f, 0.0f, 1.0f);
-            glTranslatef(-Cx, -Cy, 0.0f);
             glVertex3f(Cx , Cy, widget->data_max - widget->data_min);
             glVertex3f(Cx - (Ax-Bx)*0.02, Cy - (Ay-By)*0.02,
                      widget->data_max - widget->data_min);
             glVertex3f(Cx , Cy, (widget->data_max - widget->data_min)/2);
             glVertex3f(Cx - (Ax-Bx)*0.02, Cy - (Ay-By)*0.02,
                        (widget->data_max-widget->data_min)/2);
-            glPopMatrix();
         glEnd();
 
         /*
