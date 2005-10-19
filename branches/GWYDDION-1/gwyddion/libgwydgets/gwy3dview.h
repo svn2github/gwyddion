@@ -142,8 +142,8 @@ struct _Gwy3DView {
 struct _Gwy3DViewClass {
     GtkDrawingAreaClass parent_class;
 
-    gpointer reserved1;             /* reserved for future use (signals) */
-    gpointer reserved2;
+    gpointer list_pool;
+    gpointer reserved2;             /* reserved for future use (signals) */
     gpointer reserved3;
     gpointer reserved4;
 };

@@ -45,8 +45,6 @@
 #define BITS_PER_SAMPLE 8
 #define GWY_3D_VIEW_DEFAULT_SIZE_X 260
 #define GWY_3D_VIEW_DEFAULT_SIZE_Y 260
-#define GWY_3D_SHAPE_AFM     0
-#define GWY_3D_SHAPE_REDUCED 1
 
 #define  GWY_3D_ORTHO_CORRECTION   2.0
 #define  GWY_3D_Z_DEFORMATION     1.01
@@ -55,9 +53,21 @@
 
 #define GWY_3D_TIMEOUT_DELAY      1000
 
+enum {
+    GWY_3D_SHAPE_AFM = 0,
+    GWY_3D_SHAPE_REDUCED = 1,
+    GWY_3D_N_LISTS
+};
+
 typedef struct {
     GLfloat x, y, z;
 } Gwy3DVector;
+
+typedef struct {
+    guint shape_list_base;
+    guint list_pool_size;
+    guint64 list_pool;
+} Gwy3DListPool;
 
 /* Forward declarations */
 
@@ -118,6 +128,9 @@ static void          gwy_3d_print_text          (Gwy3DView      *gwy3dview,
                                                  gint           displacement_y,
                                                  gfloat         rotation);
 
+static void          gwy_3d_view_class_make_list_pool(Gwy3DViewClass *klass);
+static void          gwy_3d_view_assign_lists   (Gwy3DView *gwy3dview);
+static void          gwy_3d_view_release_lists  (Gwy3DView *gwy3dview);
 
 /* Local data */
 
@@ -178,6 +191,8 @@ gwy_3d_view_class_init(Gwy3DViewClass *klass)
     widget_class->button_press_event = gwy_3d_view_button_press;
     widget_class->button_release_event = gwy_3d_view_button_release;
     widget_class->motion_notify_event = gwy_3d_view_motion_notify;
+
+    klass->list_pool = g_new0(Gwy3DListPool, 1);
 }
 
 static void
@@ -399,11 +414,8 @@ gwy_3d_view_finalize(GObject *object)
     gwy_object_unref(gwy3dview->gradient);
     gwy_object_unref(gwy3dview->palette);
 
-    if (gwy3dview->shape_list_base >= 0) {
-        glDeleteLists(gwy3dview->shape_list_base, 2);
-        gwy3dview->shape_list_base = -1;
-    }
-
+    if (gwy3dview->shape_list_base > 0)
+        gwy_3d_view_release_lists(gwy3dview);
 
     G_OBJECT_CLASS(parent_class)->finalize(object);
 
@@ -423,10 +435,8 @@ gwy_3d_view_unrealize(GtkWidget *widget)
                                          G_SIGNAL_MATCH_DATA,
                                          0, 0, NULL, NULL, gwy3dview);
 
-    if (gwy3dview->shape_list_base >= 0) {
-        glDeleteLists(gwy3dview->shape_list_base, 2);
-        gwy3dview->shape_list_base = -1;
-    }
+    if (gwy3dview->shape_list_base > 0)
+        gwy_3d_view_release_lists(gwy3dview);
 
     g_object_unref(G_OBJECT(gwy3dview->ft2_context));
     g_object_unref(G_OBJECT(gwy3dview->ft2_font_map));
@@ -2179,7 +2189,7 @@ gwy_3d_view_realize_gl (Gwy3DView *widget)
     glDepthFunc(GL_LESS);
 
     /* Shape display lists */
-    widget->shape_list_base = glGenLists(2);
+    gwy_3d_view_assign_lists(widget);
     gwy_3d_make_list(widget, widget->data, GWY_3D_SHAPE_AFM);
     gwy_3d_make_list(widget, widget->downsampled, GWY_3D_SHAPE_REDUCED);
 
@@ -2392,6 +2402,100 @@ gwy_3d_print_text(Gwy3DView      *gwy3dview,
     g_object_unref(G_OBJECT(layout));
 
     return ;
+}
+
+/**
+ * gwy_3d_view_class_make_list_pool:
+ * @klass: 3D view class.
+ *
+ * Allocates a pool of OpenGL lists to assign list numbers from.
+ *
+ * We are only able to get GLContext-unique list id's from glGenLists(),
+ * but lists with the same id's seem to interfere across GLContexts.  See
+ * bug #53 for more.
+ *
+ * We store the pool in bits of one 64bit integer.
+ **/
+static void
+gwy_3d_view_class_make_list_pool(Gwy3DViewClass *klass)
+{
+    Gwy3DListPool *pool;
+    guint try_size = 64;
+
+    pool = klass->list_pool;
+    while (try_size >= 1) {
+        glGetError();
+        pool->shape_list_base = glGenLists(GWY_3D_N_LISTS*try_size);
+        if (!glGetError()) {
+            gwy_debug("Allocated a pool with %u items (%u lists)",
+                      try_size, GWY_3D_N_LISTS*try_size);
+            pool->list_pool_size = try_size;
+            return;
+        }
+        try_size = (try_size*2)/3;
+    }
+    g_warning("Cannot get any OpenGL lists");
+    pool->shape_list_base = 0;
+}
+
+/**
+ * gwy_3d_view_allocate_lists:
+ * @gwy3dview: A 3D data view widget.
+ *
+ * Allocates a block of free OpenGL lists from pool for this 3D view to use.
+ **/
+static void
+gwy_3d_view_assign_lists(Gwy3DView *gwy3dview)
+{
+    Gwy3DViewClass *klass;
+    Gwy3DListPool *pool;
+    guint64 b;
+    guint i;
+
+    klass = GWY_3D_VIEW_GET_CLASS(gwy3dview);
+    pool = klass->list_pool;
+    if (!pool->list_pool) {
+        g_return_if_fail(GTK_WIDGET_REALIZED(gwy3dview));
+        gwy_3d_view_class_make_list_pool(klass);
+    }
+    g_return_if_fail(pool->list_pool_size > 0);
+
+    b = 1;
+    for (i = 0; i < pool->list_pool_size && (pool->list_pool & b); i++)
+        b <<= 1;
+    if (i == pool->list_pool_size) {
+        g_critical("No more free OpenGL lists");
+        return;
+    }
+
+    gwy_debug("Assigned list #%u", i);
+    pool->list_pool |= b;
+    gwy3dview->shape_list_base = pool->shape_list_base + i*GWY_3D_N_LISTS;
+}
+
+/**
+ * gwy_3d_view_release_lists:
+ * @gwy3dview: A 3D data view widget.
+ *
+ * Returns OpenGL lists in use by this 3D view back to the pool.
+ **/
+static void
+gwy_3d_view_release_lists(Gwy3DView *gwy3dview)
+{
+    Gwy3DViewClass *klass;
+    Gwy3DListPool *pool;
+    guint i;
+    guint64 b = 1;
+
+    klass = GWY_3D_VIEW_GET_CLASS(gwy3dview);
+    pool = klass->list_pool;
+    g_return_if_fail(gwy3dview->shape_list_base >= pool->shape_list_base);
+
+    i = (gwy3dview->shape_list_base - pool->shape_list_base)/GWY_3D_N_LISTS;
+    gwy_debug("Released list #%u", i);
+    b <<= i;
+    pool->list_pool &= ~b;
+    gwy3dview->shape_list_base = 0;
 }
 
 /************************** Documentation ****************************/
