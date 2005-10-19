@@ -414,42 +414,36 @@ void gwy_3d_labels_update(Gwy3DLabels * labels, GwySIUnit * si_unit)
  *
  * Since: 1.5
  **/
-gchar * gwy_3d_labels_expand_text(Gwy3DLabels * labels, Gwy3DLabelName label_name)
+gchar*
+gwy_3d_labels_expand_text(Gwy3DLabels *labels, Gwy3DLabelName label_name)
 {
-#   define LABEL_BUFFER_SIZE 500
+    enum { LABEL_BUFFER_SIZE = 500 };
     gchar buffer[LABEL_BUFFER_SIZE];
-    gchar *i, *j, *k = NULL;
+    gchar *i, *j;
     guint p;
-    gchar * lb;
+    gchar *lb;
 
     lb = gwy_3d_labels_get_description(labels, label_name)->text;
     g_return_val_if_fail(lb != NULL, NULL);
 
-    gwy_debug("text:%s" , lb);
-    for (i = lb, j = buffer ; *i != '\0'; ++i, ++j)
-    {
+    gwy_debug("text: <%s>", lb);
+    for (i = lb, j = buffer ; *i != '\0'; ++i, ++j) {
         if (*i != '$')
             *j = *i;
-        else
-        {
-            for (p = 0; p < labels->variables_count; p++)
-                if (g_ascii_strncasecmp(i+1, labels->keys[p], strlen(labels->keys[p])) == 0)
-                {
-                   k = labels->values[p];
-                   i += strlen(labels->keys[p]) ;
-                   break;
+        else {
+            for (p = 0; p < labels->variables_count; p++) {
+                if (g_ascii_strncasecmp(i+1, labels->keys[p],
+                                        strlen(labels->keys[p])) == 0) {
+
+                    i += strlen(labels->keys[p]);
+                    j += g_strlcpy(j, labels->values[p],
+                                   LABEL_BUFFER_SIZE - (j - lb));
+                    break;
                 }
-            if (k != NULL)
-            {
-                for ( ; *k != '\0' && (j-lb < LABEL_BUFFER_SIZE - 1); ++k, ++j)
-                    *j = *k;
-                k = NULL;
-                --j;
             }
         }
-        if (j-lb > LABEL_BUFFER_SIZE - 1)
-        {
-            j = lb + LABEL_BUFFER_SIZE - 1;
+        if (j - buffer > LABEL_BUFFER_SIZE - 1) {
+            j = buffer + LABEL_BUFFER_SIZE - 1;
             break;
         }
     }
@@ -457,7 +451,7 @@ gchar * gwy_3d_labels_expand_text(Gwy3DLabels * labels, Gwy3DLabelName label_nam
 
     g_free(labels->text);
     labels->text = g_strdup(buffer);
-#   undef LABEL_BUFFER_SIZE
+    gwy_debug("expanded: <%s>", labels->text);
     return labels->text;
 }
 

@@ -1974,63 +1974,6 @@ gwy_3d_draw_axes(Gwy3DView * widget)
               into display lists and draw here
         */
         if (widget->show_labels) {
-#if 0
-            gdouble xreal = gwy_data_field_get_xreal(widget->data);
-            gdouble yreal = gwy_data_field_get_yreal(widget->data);
-            gdouble range, maximum;
-            GwySIValueFormat * format;
-            guint size;
-
-            size = GTK_WIDGET(widget)->allocation.width
-                   < GTK_WIDGET(widget)->allocation.height
-                   ? GTK_WIDGET(widget)->allocation.width
-                   : GTK_WIDGET(widget)->allocation.height;
-            range = fabs(widget->data_max - widget->data_min);
-            maximum = MAX(fabs(widget->data_min), fabs(widget->data_max));
-            /*FIXME are the parameters all right?*/
-            format = gwy_si_unit_get_format_with_resolution(
-                         widget->si_unit,
-                         yfirst ? yreal : xreal,
-                         yfirst ? yreal/3 : xreal/3,
-                         NULL);
-            g_snprintf(text, sizeof(text), "%c: %1.1f %s",
-                       yfirst ? 'y' : 'x',
-                       (yfirst ? yreal : xreal)/format->magnitude,
-                       format->units);
-            gwy_debug("label 1: %s", text);
-            gwy_3d_print_text(widget, text, (Ax+2*Bx)/3 - (Cx-Bx)*0.1,
-                              (Ay+2*By)/3 - (Cy-By)*0.1, -0.0f, (int) (sqrt(size)*0.8),
-                              1, 1, 0, 0, 0.0f);
-            gwy_si_unit_get_format_with_resolution(
-                widget->si_unit,
-                !yfirst ? yreal : xreal,
-                !yfirst ? yreal/3 : xreal/3,
-                format);
-            g_snprintf(text, sizeof(text), "%c: %1.1f %s",
-                       !yfirst ? 'y' : 'x',
-                       (!yfirst ? yreal : xreal)/format->magnitude,
-                       format->units);
-            gwy_3d_print_text(widget, text, (2*Bx+Cx)/3 - (Ax-Bx)*0.1,
-                          (2*By+Cy)/3 - (Ay-By)*0.1, -0.0f, (int) (sqrt(size)*0.8),
-                          1, -1, 0,0, 0.0f);
-            gwy_si_unit_get_format_with_resolution(widget->si_unit,
-                                                   maximum, range/3, format);
-            g_snprintf(text, sizeof(text), "%1.0f %s",
-                       widget->data_max / format->magnitude,
-                       format->units);
-            gwy_3d_print_text(widget, text, Cx - (Ax-Bx)*0.1, Cy - (Ay-By)*0.1,
-                          (widget->data_max - widget->data_min), (int) (sqrt(size)*0.8),
-                          0, -1, 0, 0, 0.0f);
-            g_snprintf(text, sizeof(text), "%1.0f %s",
-                       widget->data_min / format->magnitude,
-                       format->units);
-            gwy_3d_print_text(widget, text, Cx - (Ax-Bx)*0.1, Cy - (Ay-By)*0.1,
-                              -0.0f, (int) (sqrt(size)*0.8),
-                               0, -1, 0, 0, 0.0f);
-
-
-            gwy_si_unit_value_format_free(format);
-#else
             guint view_size;
             gint size;
             guint label;
@@ -2100,7 +2043,6 @@ gwy_3d_draw_axes(Gwy3DView * widget)
                                                         GWY_3D_VIEW_LABEL_MIN),
                               gwy_3d_labels_get_rotation(widget->labels,
                                                          GWY_3D_VIEW_LABEL_MIN));
-#endif
         }
     }
 
@@ -2350,6 +2292,7 @@ gwy_3d_print_text(Gwy3DView      *gwy3dview,
     GLfloat text_w, text_h;
     guint hlp = 0;
 
+    gwy_debug("text: <%s>", text);
     g_return_if_fail(GWY_IS_3D_VIEW(gwy3dview));
     /* Font */
     /* FIXME: is it possible for pango to write on trasnparent background? */
