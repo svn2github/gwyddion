@@ -11,6 +11,10 @@ Library:
 
 Modules:
 - RHK-SM3 (new): RTH Technology SM3 file import.
+- WITfile (new): WITec WIT file import.
+- SDFile (new): Surfstand Surface Data File (SDF) import.
+- Hitachi AFM (new): Hitachi AFM file import.
+- Unisoku (new): Unisoku HDR + DAT file import.
 - EZDfile: Explict support for NID files was added, some bugs fixed.
 
 
