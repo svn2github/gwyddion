@@ -122,7 +122,7 @@ static GwyModuleInfo module_info = {
     "unisoku",
     N_("Imports Unisoku data files (two-part .hdr + .dat)."),
     "Yeti <yeti@gwyddion.net>",
-    "0.2",
+    "0.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
