@@ -15,6 +15,7 @@ file_LTLIBRARIES = \
 	createc.la	\
 	ezdfile.la	\
 	gwyfile.la	\
+	mifile.la	\
 	nanoscope.la	\
 	nt-mdt.la	\
 	pixmap.la	\
@@ -25,7 +26,7 @@ file_LTLIBRARIES = \
 	spmlab.la	\
 	stmprg.la	\
 	stpfile.la	\
-	mifile.la	\
+	witfile.la	\
 	wsxmfile.la	\
 	$(tiff_modules)
 
@@ -90,6 +91,9 @@ jpkscan_la_SOURCES = jpk.h jpkscan.c
 jpkscan_la_LIBADD = $(module_libadd) $(MODULE_LIBTIFF)
 endif
 
+mifile_la_SOURCES = mifile.c
+mifile_la_LIBADD = $(module_libadd)
+
 nanoscope_la_SOURCES = nanoscope.c
 nanoscope_la_LIBADD = $(module_libadd)
 
@@ -120,8 +124,8 @@ stmprg_la_LIBADD = $(module_libadd)
 stpfile_la_SOURCES = stpfile.c
 stpfile_la_LIBADD = $(module_libadd)
 
-mifile_la_SOURCES = mifile.c
-mifile_la_LIBADD = $(module_libadd)
+witfile_la_SOURCES = witfile.c
+witfile_la_LIBADD = $(module_libadd)
 
 wsxmfile_la_SOURCES = wsxmfile.c
 wsxmfile_la_LIBADD = $(module_libadd)
