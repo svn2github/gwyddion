@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-09-13 12:39+0200\n"
-"PO-Revision-Date: 2005-09-13 14:08+0200\n"
+"POT-Creation-Date: 2005-10-27 09:55+0200\n"
+"PO-Revision-Date: 2005-10-28 16:54+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -579,11 +579,11 @@ msgstr "<b>Překladatelé</b>\n"
 
 #: app/about.c:127
 msgid ""
-"Development is supported by the Czech Metrology Insitute (<i>http://www.cmi."
+"Development is supported by the Czech Metrology Institute (<i>http://www.cmi."
 "cz/</i>).\n"
 msgstr ""
-"Vývoj programu podporuje Český metrologický institut (<i>http://www.cmi.cz/</"
-"i>).\n"
+"Vývoj programu podporuje Český metrologický institut (<i>http://www.cmi."
+"cz/</i>).\n"
 
 #: app/about.c:140
 #, c-format
@@ -1034,27 +1034,27 @@ msgstr "/Vytvořit _kopii"
 msgid "/Default Mask _Color"
 msgstr "/Předvolená ba_rva masky"
 
-#: app/unitool.c:448
+#: app/unitool.c:450
 msgid "_Hide"
 msgstr "S_krýt"
 
-#: app/unitool.c:706
+#: app/unitool.c:708
 msgid "<b>Origin</b>"
 msgstr "<b>Počátek</b>"
 
-#: app/unitool.c:722
+#: app/unitool.c:724
 msgid "<b>Size</b>"
 msgstr "<b>Rozměry</b>"
 
-#: app/unitool.c:727
+#: app/unitool.c:729
 msgid "Width"
 msgstr "Šířka"
 
-#: app/unitool.c:732 modules/graph/graph_points.c:209
+#: app/unitool.c:734 modules/graph/graph_points.c:209
 msgid "Height"
 msgstr "Výška"
 
-#: app/unitool.c:823 app/unitool.c:827 app/unitool.c:834 app/unitool.c:841
+#: app/unitool.c:825 app/unitool.c:829 app/unitool.c:836 app/unitool.c:843
 #: modules/file/pixmap.c:704 modules/file/pixmap.c:711
 #: modules/tools/level3.c:199 modules/tools/pointer.c:180
 msgid "px"
@@ -1077,17 +1077,19 @@ msgstr "APE soubory (.dat)"
 msgid "Channel %u"
 msgstr "Kanál %u"
 
-#: modules/file/apefile.c:407 modules/file/ezdfile.c:581
+#: modules/file/apefile.c:407 modules/file/ezdfile.c:615
 #: modules/file/mifile.c:319 modules/file/nanoscope.c:588
-#: modules/file/nt-mdt.c:468 modules/file/rhk-spm32.c:512
-#: modules/file/sis.c:523 modules/file/stpfile.c:553
+#: modules/file/nt-mdt.c:468 modules/file/rhk-sm3.c:698
+#: modules/file/rhk-spm32.c:512 modules/file/sis.c:523
+#: modules/file/stpfile.c:553 modules/file/witfile.c:681
 msgid "Select Data"
 msgstr "Vyber data"
 
-#: modules/file/apefile.c:424 modules/file/ezdfile.c:598
+#: modules/file/apefile.c:424 modules/file/ezdfile.c:632
 #: modules/file/mifile.c:336 modules/file/nanoscope.c:605
-#: modules/file/nt-mdt.c:485 modules/file/rhk-spm32.c:529
-#: modules/file/sis.c:540 modules/file/stpfile.c:570
+#: modules/file/nt-mdt.c:485 modules/file/rhk-sm3.c:715
+#: modules/file/rhk-spm32.c:529 modules/file/sis.c:540
+#: modules/file/stpfile.c:570 modules/file/witfile.c:698
 msgid "Data to load:"
 msgstr "Data k načtení:"
 
@@ -1123,18 +1125,18 @@ msgstr "Načítá datové soubory Createc."
 msgid "Createc files (.dat)"
 msgstr "Createc soubory (.dat)"
 
-#: modules/file/ezdfile.c:111
-msgid "Imports Nanosurf EZD data files."
-msgstr "Načítá datové soubory EZD Nanosurf."
+#: modules/file/ezdfile.c:119
+msgid "Imports Nanosurf EZD and NID data files."
+msgstr "Načítá EZD a NID soubory Nanosurfu."
 
-#: modules/file/ezdfile.c:127
-msgid "Nanosurf files (.ezd)"
-msgstr "Nanosurf soubory (.ezd)"
+#: modules/file/ezdfile.c:135
+msgid "Nanosurf files (.ezd, .nid)"
+msgstr "Soubory Nanosurfu (.ezd, .nid)"
 
-#: modules/file/ezdfile.c:574
+#: modules/file/ezdfile.c:607
 #, c-format
-msgid "Group %d, Channel %d"
-msgstr "Skupina %d, kanál %d"
+msgid "Group %d, Channel %d (%s%s)"
+msgstr "Skupina %d, kanál %d (%s%s)"
 
 #: modules/file/gwyfile.c:54
 msgid "Loads and saves Gwyddion native data files (serialized objects)."
@@ -1144,6 +1146,14 @@ msgstr ""
 #: modules/file/gwyfile.c:70
 msgid "Gwyddion native format (.gwy)"
 msgstr "Přirozený formát Gwyddionu (.gwy) "
+
+#: modules/file/hitachi-afm.c:56
+msgid "Imports Hitachi AFM files."
+msgstr "Načítá AFM soubory Hitachi."
+
+#: modules/file/hitachi-afm.c:72
+msgid "Hitachi AFM files"
+msgstr "AFM soubory Hitachi"
 
 #: modules/file/jpkscan.c:108
 msgid "Imports JPK image scans."
@@ -1643,18 +1653,39 @@ msgstr ""
 "Čekal bych oddělovač „%s“ po datech v řádku %u, sloupci %u, ale narazil jsem "
 "na „%.16s“"
 
+#: modules/file/rhk-sm3.c:213
+msgid "Imports RHK Technology SM3 data files."
+msgstr "Načítá datové soubory RHK Technology typu SM3."
+
+#: modules/file/rhk-sm3.c:273
+msgid "RHK SM3 files (.sm3)"
+msgstr "RHK SM3 soubory (.sm3)"
+
+#: modules/file/rhk-sm3.c:691 modules/file/rhk-spm32.c:507
+#, c-format
+msgid "Page %u (%s)"
+msgstr "Stránka %u (%s)"
+
+#: modules/file/rhk-sm3.c:694
+#, c-format
+msgid "Page %u"
+msgstr "Stránka %u"
+
 #: modules/file/rhk-spm32.c:143
 msgid "Imports RHK Technology SPM32 data files."
-msgstr "Načítá datové soubory RHK Technology SPM32."
+msgstr "Načítá datové soubory RHK Technology typu SPM32."
 
 #: modules/file/rhk-spm32.c:159
 msgid "RHK SPM32 files (.sm2)"
 msgstr "RHK SPM32 soubory (.sm2)"
 
-#: modules/file/rhk-spm32.c:507
-#, c-format
-msgid "Page %u (%s)"
-msgstr "Stránka %u (%s)"
+#: modules/file/sdfile.c:106
+msgid "Imports Surfstand group SDF (Surface Data File) files."
+msgstr "Načítá soubory SDF (Surface Data File) skupiny Surfstand."
+
+#: modules/file/sdfile.c:124
+msgid "Surfstand SDF files"
+msgstr "SDF soubory Surfstandu"
 
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
@@ -1723,6 +1754,27 @@ msgstr "Načítá datové soubory STP Molecular Imaging."
 #: modules/file/stpfile.c:133
 msgid "STP files (.stp)"
 msgstr "STP soubory (.stp)"
+
+#: modules/file/unisoku.c:123
+msgid "Imports Unisoku data files (two-part .hdr + .dat)."
+msgstr "Načítá datové soubory Unisoku (dvoudílné: .hdr + .dat)"
+
+#: modules/file/unisoku.c:141
+msgid "Unisoku files (.hdr + .dat)"
+msgstr "Unisoku soubory (.hdr + .dat)"
+
+#: modules/file/witfile.c:224
+msgid "Imports WITec WIT data files."
+msgstr "Načítá datové soubory WIT WITecu."
+
+#: modules/file/witfile.c:240
+msgid "WITec files (.wit)"
+msgstr "WITec soubory (.wit)"
+
+#: modules/file/witfile.c:677
+#, c-format
+msgid "Channel %u (%s)"
+msgstr "Kanál %u (%s)"
 
 #: modules/file/wsxmfile.c:69
 msgid "Imports Nanotec WSxM data files."
@@ -4225,6 +4277,20 @@ msgstr "Statistické veličiny"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametry</b>"
+
+#~ msgid ""
+#~ "Development is supported by the Czech Metrology Insitute (<i>http://www."
+#~ "cmi.cz/</i>).\n"
+#~ msgstr ""
+
+#~ msgid "Imports Nanosurf EZD data files."
+#~ msgstr "Načítá datové soubory EZD Nanosurf."
+
+#~ msgid "Nanosurf files (.ezd)"
+#~ msgstr "Nanosurf soubory (.ezd)"
+
+#~ msgid "Group %d, Channel %d"
+#~ msgstr "Skupina %d, kanál %d"
 
 #~ msgid "Current or Deflection"
 #~ msgstr "Proud nebo výchylka"
