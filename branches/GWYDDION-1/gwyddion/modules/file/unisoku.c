@@ -84,10 +84,10 @@ typedef struct {
     gboolean log_flag_y;
     gboolean ineq_flag;
     gchar *unit_z;
-    gdouble min_z;
-    gdouble max_z;
     gdouble min_raw_z;
     gdouble max_raw_z;
+    gdouble min_z;
+    gdouble max_z;
     gboolean log_flag_z;
     gdouble stm_voltage;
     gdouble stm_current;
@@ -122,7 +122,7 @@ static GwyModuleInfo module_info = {
     "unisoku",
     N_("Imports Unisoku data files (two-part .hdr + .dat)."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -323,8 +323,8 @@ unisoku_read_header(gchar *buffer,
 
     NEXT(buffer, line);
     if (unisoku_sscanf(line, "ddddi",
-                       &ufile->max_z, &ufile->min_z,
                        &ufile->max_raw_z, &ufile->min_raw_z,
+                       &ufile->max_z, &ufile->min_z,
                        &ufile->log_flag_z) != 5)
         return FALSE;
 
@@ -401,7 +401,7 @@ unisoku_read_data_field(const guchar *buffer,
     const gchar *unit;
     GwyDataField *dfield;
     GwySIUnit *siunit;
-    gdouble q, min, max;
+    gdouble q, pmin, pmax, rmin, rmax;
     gdouble *data;
 
     n = ufile->xres * ufile->yres;
@@ -421,12 +421,12 @@ unisoku_read_data_field(const guchar *buffer,
     switch (ufile->data_type) {
         case UNISOKU_UINT8:
         for (i = 0; i < n; i++)
-            data[i] = buffer[i]/256.0;
+            data[i] = buffer[i];
         break;
 
         case UNISOKU_SINT8:
         for (i = 0; i < n; i++)
-            data[i] = (signed char)buffer[i]/256.0;
+            data[i] = (signed char)buffer[i];
         break;
 
         case UNISOKU_UINT16:
@@ -434,7 +434,7 @@ unisoku_read_data_field(const guchar *buffer,
             const guint16 *pdata = (const guint16*)buffer;
 
             for (i = 0; i < n; i++)
-                data[i] = GUINT16_FROM_LE(pdata[i])/65536.0;
+                data[i] = GUINT16_FROM_LE(pdata[i]);
         }
         break;
 
@@ -443,7 +443,7 @@ unisoku_read_data_field(const guchar *buffer,
             const gint16 *pdata = (const gint16*)buffer;
 
             for (i = 0; i < n; i++)
-                data[i] = GINT16_FROM_LE(pdata[i])/65536.0;
+                data[i] = GINT16_FROM_LE(pdata[i]);
         }
         break;
 
@@ -471,16 +471,13 @@ unisoku_read_data_field(const guchar *buffer,
     /* XXX: No fallback yet, just make z unitless */
     siunit = GWY_SI_UNIT(gwy_si_unit_new_parse(unit, &power10));
     gwy_data_field_set_si_unit_z(dfield, siunit);
-    min = gwy_data_field_get_min(dfield);
-    max = gwy_data_field_get_max(dfield);
-    if (min == max)
-        gwy_data_field_fill(dfield, 0.0);
-    else {
-        gwy_data_field_add(dfield, -min);
-        gwy_data_field_multiply(dfield, 1.0/(max - min));
-    }
     q = pow10((gdouble)power10);
-    gwy_data_field_multiply(dfield, q*(ufile->max_raw_z - ufile->min_raw_z));
+    pmin = q*ufile->min_z;
+    pmax = q*ufile->max_z;
+    rmin = ufile->min_raw_z;
+    rmax = ufile->max_raw_z;
+    gwy_data_field_multiply(dfield, (pmax - pmin)/(rmax - rmin));
+    gwy_data_field_add(dfield, (pmin*rmax - pmax*rmin)/(rmax - rmin));
     g_object_unref(siunit);
 
     return dfield;
