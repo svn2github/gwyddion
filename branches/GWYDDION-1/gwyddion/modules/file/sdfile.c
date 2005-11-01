@@ -105,7 +105,7 @@ static GwyModuleInfo module_info = {
     "sdfile",
     N_("Imports Surfstand group SDF (Surface Data File) files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -185,7 +185,8 @@ sdfile_detect(const gchar *filename,
             return 100;
         }
     }
-    fclose(fh);
+    else
+        fclose(fh);
     g_free(header);
 
     return 0;
