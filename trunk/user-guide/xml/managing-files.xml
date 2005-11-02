@@ -101,6 +101,13 @@
           <entry>Yes</entry>
         </row>
         <row>
+          <entry>Hitachi AFM</entry>
+          <entry>.afm</entry>
+          <entry>hitachi-afm module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>JPK Instruments</entry>
           <entry>.jpk</entry>
           <entry>jpkscan module</entry>
@@ -173,6 +180,20 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>RHK Technology SM3</entry>
+          <entry>.sm3</entry>
+          <entry>rhk-sm3 module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Surfstand Surface Data File</entry>
+          <entry>.sdf</entry>
+          <entry>sdfile module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Surface Imaging Systems</entry>
           <entry>.sis</entry>
           <entry>sis module</entry>
@@ -180,7 +201,7 @@
           <entry>No</entry>
         </row>
         <row>
-          <entry>SPMLab</entry>
+          <entry>Veeco Instruments</entry>
           <entry>.zfr, .tfr, .zfp, …</entry>
           <entry>
             io_tm_common plug-in, spmlab module
@@ -201,6 +222,20 @@
           <entry>STMPRG</entry>
           <entry></entry>
           <entry>stmprg module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Unisoku</entry>
+          <entry>.hdr + .dat</entry>
+          <entry>unisoku module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>WITec</entry>
+          <entry>.wit</entry>
+          <entry>witfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
