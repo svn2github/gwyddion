@@ -57,7 +57,8 @@
       Data window is used for 2D data presentation to user. It is the main widget used for working with Gwyddion.
       The data are presented to user as a field of false colors correponding to heights. Color axis that represents mapping
       the colors to real height values is also part of the data window. Color palette used to represent height data can be
-      changed by clicking on the color axis and selecting appropriate palette fro mthe list of palettes.
+      changed by clicking on the color axis with right mouse button and selecting appropriate palette from the list of
+      palettes.
     </para>
     <para>
       Graph window is used for 1D data processing. You can get it only by using appropriate tools or modules that
@@ -66,7 +67,7 @@
     </para>
     <figure float="0">
       <title>
-        Data window (left) with pallette chooser and Graph window (right).
+        Data window (left) with palette chooser and Graph window (right).
       </title>
       <mediaobject>
         <imageobject>
@@ -89,87 +90,128 @@
     <itemizedlist>
       <listitem>
         <para>
-          Read value under cursor - reads x,y,z values at the position of mouse click. You can average more points around the point
+          Read value under cursor – reads x,y,z values at the position of mouse click. You can average more points around the point
           where you clicked.
         </para>
       </listitem>
       <listitem>
         <para>
-          Crop - cuts part of the data and puts it to new window.
+          Crop – cuts part of the data and puts it to new window.
         </para>
       </listitem>
       <listitem>
         <para>
-          Three-point leveling - levels data by plane obtained by clicking on three points wihin data window.
+          Three-point leveling – levels data by plane obtained by clicking on three points wihin data window.
         </para>
       </listitem>
       <listitem>
         <para>
-          Statistical quantities - computes basic statistical quantities (RMS, Ra, etc.) from selection of full data field.
+          Statistical quantities – computes basic statistical quantities (RMS, Ra, etc.) from selection of full data
+          field.
         </para>
       </listitem>
       <listitem>
         <para>
-          Statistical functions - computes basic statistical functions (distribution of heights, autocorrelation function, etc.)
-          from selection of full data field.
+          Statistical functions – computes basic statistical functions (distribution of heights, autocorrelation
+          function, etc.) from selection of full data field.
         </para>
       </listitem>
       <listitem>
         <para>
-          Profile extraction - extracts profiles of the data field and puts them to separate graphs. These graphs can be
-          further processed with commands from the Graph menu.
+          Profile extraction – extracts profiles of the data field and puts them to separate graphs. These graphs can
+          be further processed with commands from the Graph menu.
         </para>
       </listitem>
       <listitem>
         <para>
-          Measure distances - similarly to Read value tool enables user to read distance and angle between points in the
-          data field.
+          Measure distances – similarly to Read value tool enables user to read distance and angle between points in
+          the data field.
         </para>
       </listitem>
       <listitem>
         <para>
-          Fit X/Y profiles by polynom - very frequently used tool for basic processing of raw SPM data. Profiles taken in
-          the fast scanning axis (usually X-axis) can be mutually shifted by some amount or having slightly different slope.
-          Fit X/Y profiles tool can fix this discrepancy.
+          Fit X/Y profiles by polynom – very frequently used tool for basic processing of raw SPM data. Profiles
+          taken in the fast scanning axis (usually X-axis) can be mutually shifted by some amount or having slightly
+          different slope. Fit X/Y profiles tool can fix this discrepancy.
         </para>
       </listitem>
       <listitem>
         <para>
-          Basic filters - mean, median, conservative denoise and similar simple filters to reduce noise in the data.
+          Basic filters – mean, median, conservative denoise and similar simple filters to reduce noise in the data.
         </para>
       </listitem>
       <listitem>
         <para>
-          Manually remove grains - remove continuous parts of the mask by clicking on mask point.
+          Manually remove grains – remove continuous parts of the mask by clicking on mask point.
         </para>
       </listitem>
       <listitem>
         <para>
-          Manually remove spots - draw rectangle around defect in AFM data image and remove the defect using chosen interpolation
-          method.
+          Manually remove spots – draw rectangle around defect in AFM data image and remove the defect using chosen
+          interpolation method.
         </para>
       </listitem>
       <listitem>
         <para>
-          Stretch color range - enables user to change the false color representation range (by default from data minimum to data maximum).
+          Stretch color range – enables user to change the false color representation range (by default from data
+          minimum to data maximum).
         </para>
       </listitem>
     </itemizedlist>
   </section>
+  <section id="selections">
+    <title>Working with selections</title>
+    <para>
+      All interactive <link linkend="modules-tools">tools</link> and some other processing methods allow to select
+      geometrical shapes on data with mouse: points, lines, rectangles, circles/ellipses.
+    </para>
+    <para>
+      Each tool generally uses only one type of selection and when it is activated on a data window, it sets the
+      selection mode to this type.  Selections of other types than currently displayed are remembered and they
+      are recalled when a tool which uses them is activated again.  E.g., when you select several lines with Profile
+      extraction tool, then switch to Statistical quantities (the lines disappear) and select a rectangular area to
+      calculate statistical characteristics of, and then switch back to Profile extraction, the rectangle disappear
+      and the lines appear again.
+    </para>
+    <para>
+      Tools that use the same type of selection – e.g., both Statistical functions and Statistical quantities use
+      rectangular selection – share it.  To calculate height distribution of the same rectangle you have
+      selected for statistical quantities, it is sufficient to switch the tool.
+    </para>
+    <para>
+      If you save data in Gwyddion native file format (.gwy), all selections are saved together with data and
+      recalled the next time the file is opened and appropriate tool chosen.
+    </para>
+    <para>
+      <!-- FIXME: This is actually true only in 2.0 -->
+      Pressing Shift during selection restricts the degrees of freedom of the shape, making it easier to draw shapes
+      form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
+      restricts line directions to multiples of 15 ° in line selections.
+    </para>
+    <figure float="0">
+      <title>
+        Data window with three selected lines, two horizontal and one vertical.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="369" fileref="selections-vlsi.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
   <section id="presentations-masks">
     <title>Presentations and masks</title>
     <para>
-      Presentations can be used to show the height field in other way than as false colors map of heights.
-      Several presentation methods are implemented, including shading, gradient filters and edge detectors. When you use
-      data with superposed presentation within data processing modules or tools the results will be computed from
-      original data - presentation is thus only visualization mode.
+      Presentations can be used to show the height field in other way than as false colors map of heights. Several
+      presentation methods are implemented, including shading, gradient filters and edge detectors. When you use data
+      with superposed presentation within data processing modules or tools the results will be computed from original
+      data – presentation is thus only visualization mode.
     </para>
     <para>
-      Masks are used for displaying special areal selections (e. g. grains). Masks can have any shape and within data window
-      can be expressed by any chosen color. Masks can be created by different
-      modules or directly by user using Mask selection tool.  It it possible
-      to invert, grow, and shrink masks, or extract them to a separate data
-      window using module functions in
+      Masks are used for displaying special areal selections (e. g. grains). Masks can have any shape and within data
+      window can be expressed by any chosen color. Masks can be created by different modules or directly by user
+      using Mask selection tool.  It it possible to invert, grow, and shrink masks, or extract them to a separate
+      data window using module functions in
       <menuchoice><guimenu>Data Process</guimenu><guisubmenu>Mask</guisubmenu></menuchoice> menu.
     </para>
     <figure float="0">
