@@ -66,7 +66,7 @@ struct _GwyDataWindow {
     GwySIValueFormat *value_format;
 
     GtkWidget *ul_corner;
-    gpointer reserved2;
+    GtkAllocation *old_allocation;
 };
 
 struct _GwyDataWindowClass {
