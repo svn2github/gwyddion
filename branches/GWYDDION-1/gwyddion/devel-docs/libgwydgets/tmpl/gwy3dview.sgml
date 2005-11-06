@@ -66,7 +66,7 @@ the 3D view to update self, when data changes.
 </para>
 
 @parent_class: 
-@reserved1: 
+@list_pool: 
 @reserved2: 
 @reserved3: 
 @reserved4: 
