@@ -1,0 +1,80 @@
+<!-- ##### SECTION Title ##### -->
+GwyLayerBasic
+
+<!-- ##### SECTION Short_Description ##### -->
+Display data colored with a gradient
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwyLayerBasic ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyLayerBasicClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_layer_basic_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+<!-- # Unused Parameters # -->
+@data: 
+
+
+<!-- ##### FUNCTION gwy_layer_basic_set_palette ##### -->
+<para>
+
+</para>
+
+@layer: 
+@palette: 
+
+
+<!-- ##### FUNCTION gwy_layer_basic_get_palette ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_layer_basic_set_gradient ##### -->
+<para>
+
+</para>
+
+@layer: 
+@gradient: 
+
+
+<!-- ##### FUNCTION gwy_layer_basic_get_gradient ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+
