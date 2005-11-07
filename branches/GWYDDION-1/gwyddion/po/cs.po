@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2005-10-27 09:55+0200\n"
+"POT-Creation-Date: 2005-11-06 23:45+0100\n"
 "PO-Revision-Date: 2005-10-28 16:54+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
@@ -582,8 +582,8 @@ msgid ""
 "Development is supported by the Czech Metrology Institute (<i>http://www.cmi."
 "cz/</i>).\n"
 msgstr ""
-"Vývoj programu podporuje Český metrologický institut (<i>http://www.cmi."
-"cz/</i>).\n"
+"Vývoj programu podporuje Český metrologický institut (<i>http://www.cmi.cz/</"
+"i>).\n"
 
 #: app/about.c:140
 #, c-format
@@ -1078,7 +1078,7 @@ msgid "Channel %u"
 msgstr "Kanál %u"
 
 #: modules/file/apefile.c:407 modules/file/ezdfile.c:615
-#: modules/file/mifile.c:319 modules/file/nanoscope.c:588
+#: modules/file/mifile.c:330 modules/file/nanoscope.c:588
 #: modules/file/nt-mdt.c:468 modules/file/rhk-sm3.c:698
 #: modules/file/rhk-spm32.c:512 modules/file/sis.c:523
 #: modules/file/stpfile.c:553 modules/file/witfile.c:681
@@ -1086,7 +1086,7 @@ msgid "Select Data"
 msgstr "Vyber data"
 
 #: modules/file/apefile.c:424 modules/file/ezdfile.c:632
-#: modules/file/mifile.c:336 modules/file/nanoscope.c:605
+#: modules/file/mifile.c:347 modules/file/nanoscope.c:605
 #: modules/file/nt-mdt.c:485 modules/file/rhk-sm3.c:715
 #: modules/file/rhk-spm32.c:529 modules/file/sis.c:540
 #: modules/file/stpfile.c:570 modules/file/witfile.c:698
@@ -1204,20 +1204,20 @@ msgstr "K_anál:"
 msgid "(invalid filename encoding)"
 msgstr "(neplatné kódování souboru)"
 
-#: modules/file/mifile.c:104
+#: modules/file/mifile.c:110
 msgid "Imports Molecular Imaging MI data files."
 msgstr "Načítá datové soubory MI Molecular Imaging."
 
-#: modules/file/mifile.c:120
+#: modules/file/mifile.c:126
 msgid "PicoView Data Files (.mi)"
 msgstr "PicoView soubory (.mi)"
 
-#: modules/file/mifile.c:314 modules/file/stpfile.c:546
+#: modules/file/mifile.c:325 modules/file/stpfile.c:546
 #, c-format
 msgid "Buffer %u (%s)"
 msgstr "Datové pole %u (%s)"
 
-#: modules/file/mifile.c:316 modules/file/stpfile.c:549
+#: modules/file/mifile.c:327 modules/file/stpfile.c:549
 #, c-format
 msgid "Buffer %u"
 msgstr "Datové pole %u"
@@ -3450,14 +3450,6 @@ msgid ""
 "Tip has different range/resolution ratio than image. Tip will be resampled."
 msgstr "Hrot má jiný poměr rozlišení ku reálné velikosti. Bude převzorkován."
 
-#: modules/process/nanoindent_mark.c:46
-msgid "Creates mask of nanoindentation hole."
-msgstr ""
-
-#: modules/process/nanoindent_mark.c:62
-msgid "/_Nanoindentation/_Mask of nanoindentation"
-msgstr ""
-
 #: modules/process/outliers.c:44
 msgid "Creates mask of outliers."
 msgstr "Vytváří masku z vybočujících hodnot."
@@ -4277,11 +4269,6 @@ msgstr "Statistické veličiny"
 #: modules/tools/stats.c:215
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametry</b>"
-
-#~ msgid ""
-#~ "Development is supported by the Czech Metrology Insitute (<i>http://www."
-#~ "cmi.cz/</i>).\n"
-#~ msgstr ""
 
 #~ msgid "Imports Nanosurf EZD data files."
 #~ msgstr "Načítá datové soubory EZD Nanosurf."
