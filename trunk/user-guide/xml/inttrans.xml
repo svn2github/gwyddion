@@ -67,6 +67,67 @@
       Winhin Gwyddion several windowing functions are implemented. Most of them are formed by some sine and cosine
       functions that damp data correctly at the edges. Windowing function can be set within the Fourier Transform module.
     </para>
+    <table frame='none'>
+      <title>Windowing types</title>
+      <tgroup cols='2'>
+        <colspec align='left'/>
+        <colspec align='left'/>
+        <thead>
+          <row>
+            <entry>Name</entry>
+            <entry>Formula</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>None</entry>
+            <entry>1 (no windowing)</entry>
+          </row>
+          <row>
+            <entry>Rect</entry>
+            <entry>0.5 at edge points, 1 everywhere else</entry>
+          </row>
+          <row>
+            <entry>Hann</entry>
+            <entry>
+              <inlinegraphic fileref="eq-windowing-hann.png" format="PNG"/>
+            </entry>
+          </row>
+          <row>
+            <entry>Hamming</entry>
+            <entry>
+              <inlinegraphic fileref="eq-windowing-hamming.png" format="PNG"/>
+            </entry>
+          </row>
+          <row>
+            <entry>Blackman</entry>
+            <entry>
+              <inlinegraphic fileref="eq-windowing-blackman.png" format="PNG"/>
+            </entry>
+          </row>
+          <row>
+            <entry>Lanczos</entry>
+            <entry>
+              <inlinegraphic fileref="eq-windowing-lanczos.png" format="PNG"/>
+            </entry>
+          </row>
+          <row>
+            <entry>Welch</entry>
+            <entry>
+              <inlinegraphic fileref="eq-windowing-welch.png" format="PNG"/>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+    <figure>
+      <title>Window functions: Hann, Hamming, Blackman, Lanczos, Welch.</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="windowing-types.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
   <section>
     <title>Wavelet transform</title>
