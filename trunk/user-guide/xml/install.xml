@@ -172,7 +172,7 @@
       The default paths are (see first few lines of make.msc):
       <programlisting>
         # XXX: set following to your Gtk+-Development and MSVC paths
-        GTK_TOP = C:\Dev-C++
+        GTK_TOP = C:\Gtk
         MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
       </programlisting>
     </para>
