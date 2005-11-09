@@ -18,27 +18,27 @@
     </para>
     <itemizedlist>
       <listitem>
-        Mean filter - takes the mean value of neighborhood of the
+        Mean filter – takes the mean value of neighborhood of the
         filtered value as the value.
       </listitem>
       <listitem>
-        Median filter - takes the median value of neighborhood of the
+        Median filter – takes the median value of neighborhood of the
         filtered value as the value.
       </listitem>
       <listitem>
-        Conservative denoise filter - checks whether the value is not extreme
+        Conservative denoise filter – checks whether the value is not extreme
         within the neighborhood. If yes, filter substitutes the value by
         of the next highest (lowest) value.
       </listitem>
       <listitem>
-        Kuwahara filter - is an edge-preserving smoothing filter.
+        Kuwahara filter – is an edge-preserving smoothing filter.
       </listitem>
       <listitem>
-        Minimum filter - also known as erode filter, replaces values by
+        Minimum filter – also known as erode filter, replaces values by
         minimum found in neighborhood.
       </listitem>
       <listitem>
-        Maximum filter - also known as dilate filter, replaces values by
+        Maximum filter – also known as dilate filter, replaces values by
         maximum found in neighborhood.
       </listitem>
     </itemizedlist>
@@ -101,17 +101,26 @@
     want to change this list into seperate sections, one fore each type -->
     <itemizedlist>
       <listitem>
-        Shading - simple and very useful way of seeing data as illuminated from some
+        Shading – simple and very useful way of seeing data as illuminated from some
         direction. The direction can be set by user.
       </listitem>
       <listitem>
-        Gradient detection - Sobel X and Y gradient filter and Prewitt X and Y gradient
+        Gradient detection – Sobel X and Y gradient filter and Prewitt X and Y gradient
         filter create similar images as shading, however, they output data as a result
         of convolution of data with relatively standardized kernel. Thus, they can be
-        used for further presentation processing for example.
+        used for further presentation processing for example.  The kernels for horizontal
+        filters are listed below, vertical kernels differ only by reflection about
+        main diagonal.
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-sobel-prewitt.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
       </listitem>
       <listitem>
-        Edge detection - Canny edge detector can be used to extract image of sharp edges
+        Edge detection – Canny edge detector can be used to extract image of sharp edges
         on the data.  Some rather experimental edge detection algorithms are available too:
         RMS and RMS Edge basically visualize areas with high local value variation;
         Local Non-linearity visualizes areas which are locally very non-planar.
