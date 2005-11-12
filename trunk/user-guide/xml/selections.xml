@@ -23,16 +23,6 @@
     rectangular selection – share it.  To calculate height distribution of the same rectangle you have
     selected for statistical quantities, it is sufficient to switch the tool.
   </para>
-  <para>
-    If you save data in Gwyddion native file format (.gwy), all selections are saved together with data and
-    recalled the next time the file is opened and appropriate tool chosen.
-  </para>
-  <para>
-    <!-- FIXME: This is actually true only in 2.0 -->
-    Pressing Shift during selection restricts the degrees of freedom of the shape, making it easier to draw shapes
-    form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
-    restricts line directions to multiples of 15 ° in line selections.
-  </para>
   <figure float="0">
     <title>
       Data window with three selected lines, two horizontal and one vertical.
@@ -43,4 +33,14 @@
       </imageobject>
     </mediaobject>
   </figure>
+  <para>
+    If you save data in Gwyddion native file format (.gwy), all selections are saved together with data and
+    recalled the next time the file is opened and appropriate tool chosen.
+  </para>
+  <para>
+    <!-- FIXME: This is actually true only in 2.0 -->
+    Pressing Shift during selection restricts the degrees of freedom of the shape, making it easier to draw shapes
+    form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
+    restricts line directions to multiples of 15 ° in line selections.
+  </para>
 </section>

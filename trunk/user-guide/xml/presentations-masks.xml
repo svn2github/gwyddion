@@ -8,7 +8,8 @@
     Presentations can be used to show the height field in other way than as false colors map of heights. Several
     presentation methods are implemented, including shading, gradient filters and edge detectors. When you use data
     with superposed presentation within data processing modules or tools the results will be computed from original
-    data – presentation is thus only visualization mode.
+    data – presentation is thus only visualization mode.  Presentations can be computationaly intensive
+    to calculate, therefore they are not automatically updated when the underlying data change.
   </para>
   <para>
     Masks are used for displaying special areal selections (e. g. grains). Masks can have any shape and within data

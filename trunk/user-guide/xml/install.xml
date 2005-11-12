@@ -40,6 +40,13 @@
       If you want to install <application>Gwyddion</application> precompiled RPM file, you can simply type
       <userinput>rpm -Uhv gwyddion.X.Y.rpm</userinput>.
     </para>
+    <para>
+      Gentoo Linux users can install Gwyddion via Portage, <userinput>emerge gwyddion</userinput>
+      should be sufficient.  It might be necessary to add <userinput>sci-misc/gwyddion</userinput>
+      to <filename>/etc/portage/package.keywords</filename> in the case the package is masked.  See
+      <ulink url="http://packages.gentoo.org/packages/?category=sci-misc;name=gwyddion">sci-misc/gwyddion</ulink>
+      for current package status.
+    </para>
   </section>
   <section id="installation-linux-source">
     <title>Linux/FreeBSD from source tarball</title>
