@@ -131,9 +131,9 @@
         </informalequation>
         Some rather experimental edge detection algorithms are available too.
         RMS and RMS Edge visualize areas with high local value variation:
-        RMS calculates the value of root mean square in squares 5 × 5 pixels centered
-        around each sample; RMS Edge essentially postprocess RMS output with a filter
-        similar to Laplacian.
+        RMS calculates the value of root mean square of deviations in squares
+        5 × 5 pixels centered around each sample; RMS Edge essentially postprocess
+        RMS output with a filter similar to Laplacian.
         Local Non-linearity filter visualizes areas which are locally very non-planar.
         It fits a plane through squares 5 × 5 pixels centered around each sample and
         then calculates residual sum of squares of this fit (reduced to plane slope).
