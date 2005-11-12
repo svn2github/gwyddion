@@ -1,0 +1,17 @@
+body {
+  background-color: white;
+  color: black;
+}
+div.navheader, div.navfooter {
+  background-color: #f0b43f;
+  border: 1px solid #af3614;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.math { font-style: italic; }
+a { text-decoration: underline; }
+a:link { color: black; }
+a:visited { color: #5b1508; }
+a:hover { color: #ab2f11; }
+img { border: 1px solid white; }
+a img:hover { border: 1px solid #ab2f11; }

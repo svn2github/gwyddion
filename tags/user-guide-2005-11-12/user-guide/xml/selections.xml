@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="selections">
+  <title>Working with selections</title>
+  <para>
+    All interactive <link linkend="modules-tools">tools</link> and some other processing methods allow to select
+    geometrical shapes on data with mouse: points, lines, rectangles, circles/ellipses.  Existing selections can
+    be similarly modified by dragging corners, endpoints, or complete selections.  When mouse cursor is moved
+    near to an editable point of a selection, is changes its shape to indicate the possibility to edit this point.
+  </para>
+  <para>
+    Each tool generally uses only one type of selection and when it is activated on a data window, it sets the
+    selection mode to this type.  Selections of other types than currently displayed are remembered and they
+    are recalled when a tool which uses them is activated again.  E.g., when you select several lines with Profile
+    extraction tool, then switch to Statistical quantities (the lines disappear) and select a rectangular area to
+    calculate statistical characteristics of, and then switch back to Profile extraction, the rectangle disappears
+    and the lines appear again.
+  </para>
+  <para>
+    Tools that use the same type of selection – e.g., both Statistical functions and Statistical quantities use
+    rectangular selection – share it.  To calculate height distribution of the same rectangle you have
+    selected for statistical quantities, it is sufficient to switch the tool.
+  </para>
+  <figure float="0">
+    <title>
+      Data window with three selected lines, two horizontal and one vertical.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="369" fileref="selections-vlsi.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    If you save data in Gwyddion native file format (.gwy), all selections are saved together with data and
+    recalled the next time the file is opened and appropriate tool chosen.
+  </para>
+  <para>
+    <!-- FIXME: This is actually true only in 2.0 -->
+    Pressing Shift during selection restricts the degrees of freedom of the shape, making it easier to draw shapes
+    form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
+    restricts line directions to multiples of 15 ° in line selections.
+  </para>
+</section>

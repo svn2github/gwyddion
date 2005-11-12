@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="unrotate">
+  <title>Unrotate</title>
+  <para>
+    Unrotate can automatically make principal directions in an image
+    parallel with horizontal and/or vertical image edges.  For that to work,
+    the data need to have some principal directions, therefore it is most
+    useful for scans of artifical and possibly crystallic structures.
+  </para>
+  <para>
+    The rotation necessary to straighten the image – displayed
+    as <guilabel>Correction</guilabel> – is calculated from peaks
+    in angular slope distribution
+    <!-- TODO: link to Slope distribution -->
+    assuming a prevalent type of structure, or symmetry.
+    The symmetry can be estimated automatically too, but it is possible to
+    select a particular symmetry type manually and let the module calculate
+    only corresponding rotation correction.  Note if you assume a
+    structure type that does not match the actual structure, the calculated
+    rotation is rarely meaningful.
+  </para>
+  <para>
+    It is recommended to level (or facet-level<!-- TODO: link -->) the data
+    first as overall slope can skew the calculated rotations.
+  </para>
+  <figure>
+    <title>
+      Unrotate dialog with automatically estimated type of structure and
+      rotation.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="unrotate.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    The assumed structure type can be set with <guilabel>Assume</guilabel>
+    selector.  Following choices are possible:
+    <variablelist>
+      <varlistentry>
+        <term>
+          Detected
+        </term>
+        <listitem>
+          <para>
+            Automatically detected symmetry type, displayed above as
+            <guilabel>Detected</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Parallel
+        </term>
+        <listitem>
+          <para>
+            Parallel lines, one prevalent direction.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Triangular
+        </term>
+        <listitem>
+          <para>
+            Triangular symmetry, three prevalent directions (unilateral) by
+            120 degrees.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Square
+        </term>
+        <listitem>
+          <para>
+            Square symmetry, two prevalent directions oriented
+            approximately along image sides.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Rhombic
+        </term>
+        <listitem>
+          <para>
+            Rhombic symmetry, two prevalent directions oriented approximately
+            along diagonals.  The only difference from Square is the
+            preferred diagonal orientation (as opposed to parallel with
+            sides).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Hexagonal
+        </term>
+        <listitem>
+          <para>
+            Hexagonal symmetry, three prevalent directions (bilateral) by 120
+            degrees.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+</section>
+

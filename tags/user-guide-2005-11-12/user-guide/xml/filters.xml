@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-filters">
+  <title>Filters and Presentations</title>
+  <section id="basic_filters">
+    <title>
+      Basic Filters Tool
+      <guiicon><inlinegraphic fileref="icon_filters.png"/></guiicon>
+    </title>
+    <para>
+      The <link linkend="basic_filters">Basic Filters</link> tool
+      lets you apply several simple
+      filters to your image. This can be very useful for data denoising; however,
+      the real measured data will get altered in the process, so great care
+      should be taken not to destroy important features of the image.
+    </para>
+    <itemizedlist>
+      <listitem>
+        Mean filter – takes the mean value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem>
+        Median filter – takes the median value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem>
+        Conservative denoise filter – checks whether the value is not extreme
+        within the neighborhood. If yes, filter substitutes the value by
+        of the next highest (lowest) value.
+      </listitem>
+      <listitem>
+        Kuwahara filter – is an edge-preserving smoothing filter.
+      </listitem>
+      <listitem>
+        Minimum filter – also known as erode filter, replaces values by
+        minimum found in neighborhood.
+      </listitem>
+      <listitem>
+        Maximum filter – also known as dilate filter, replaces values by
+        maximum found in neighborhood.
+      </listitem>
+    </itemizedlist>
+    <tip>
+      By default, these filters will be applied to the entire 
+      image. However, you can apply a filter to a specific region within your 
+      image by selecting it with the mouse. This can be useful for correcting
+      badly measured areas within a good image. To apply a filter to the entire
+      image again, just click once anywhere within the image window.
+    </tip>
+    <figure>
+      <title>Filtering screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="700" fileref="filter.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Moreover, there are more denoising functions in Gwyddion, for example 
+      DWT denoising and FFT filtering.
+      <!--TODO: Think about moving 1D,2D FFT Filters into the Integral Transforms menu-->
+      For details see the <link linkend="features-inttrans">Integral Transforms</link> section.
+    </para>
+    <para>
+      If you need to only suppress some values in the SPM data that are obviously wrong,
+      you can also try the
+      <link linkend="">Mask of Outliers<!--TODO: Add Mask of Outliers section--></link> 
+      module and the 
+      <link linkend="remove_data_under_mask">Remove Data Under Mask</link> module.     
+      For details see the <link linkend="features-edit">Data Edit</link> section. 
+    </para>
+  </section>
+  <section>
+    <title>Presentations</title>
+    <!--TODO: "Display" aught to be changed to "Presentations". It is confusing
+    for "Display" to be the menu name, when we are really dealing with presentations.-->
+    
+    <!--TODO: Add these sections:
+                -Extract Presentation/Remove Presentation
+                -Local Contrast -->
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Display</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Presentations are special filters that output their results into a separate
+      layer that displays on top of the original data. Unlike the filters mentioned
+      above, presentation filters preserve the measured data. This allows the user to
+      safely apply various data visualizations. The other data processing modules 
+      and tools will still operate on the original data. To remove a presentation, 
+      just right click on the data window, and select <guimenuitem>Remove Presentation</guimenuitem>.
+    </para>
+    <para>
+      Currently, the following presentation filters are implemented in Gwyddion:
+    </para>
+    <!--TODO: CLEANING: The menu paths need to be listed here for each filter. Also, we might
+    want to change this list into seperate sections, one fore each type -->
+    <itemizedlist>
+      <listitem>
+        Shading – simple and very useful way of seeing data as illuminated from some
+        direction. The direction can be set by user.
+      </listitem>
+      <listitem>
+        Gradient detection – Sobel X and Y gradient filter and Prewitt X and Y gradient
+        filter create similar images as shading, however, they output data as a result
+        of convolution of data with relatively standardized kernel. Thus, they can be
+        used for further presentation processing for example.  The kernels for horizontal
+        filters are listed below, vertical kernels differ only by reflection about
+        main diagonal.
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-sobel-prewitt.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+      <listitem>
+        Edge detection – Canny edge detector can be used to extract image of sharp edges
+        on the data.  Laplacian presents a simple convolution with following kernel:
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        Some rather experimental edge detection algorithms are available too.
+        RMS and RMS Edge visualize areas with high local value variation:
+        RMS calculates the value of root mean square of deviations in squares
+        5 × 5 pixels centered around each sample; RMS Edge essentially postprocess
+        RMS output with a filter similar to Laplacian.
+        Local Non-linearity filter visualizes areas which are locally very non-planar.
+        It fits a plane through squares 5 × 5 pixels centered around each sample and
+        then calculates residual sum of squares of this fit (reduced to plane slope).
+      </listitem>
+      <listitem>
+        Local contrast – a method to visualize features in areas with low and high value
+        variation at the same time.  This is achieved by calculation of local value
+        range, or variation, around each data sample and stretching it to equalize
+        this variation over all data.
+      </listitem>
+    </itemizedlist>
+    <figure>
+      <title>
+        Presentation examples: (a) Original data, (b) Shading, (c) vertical Prewitt
+        gradient, (d) Canny edge detection, (d) Local non-linearity edge detection,
+        (f) Local contrast improvement.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width="604" fileref="presentations.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+</section>
+
