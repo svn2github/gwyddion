@@ -8,7 +8,7 @@ PDFXMLTEX = pdfxmltex
 HTML2TXT = lynx -force_html -dump -nolist
 
 PACKAGE = user-guide
-VERSION = 2005-11-11
+VERSION = 2005-11-12
 BASENAME = gwyddion-user-guide
 DISTNAME = $(BASENAME)-$(VERSION)
 DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
