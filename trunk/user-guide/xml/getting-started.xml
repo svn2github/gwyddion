@@ -44,7 +44,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="400" fileref="main_window.png" format="PNG"/>
+          <imagedata width="564" fileref="main_window.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -222,7 +222,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="1000" fileref="mask.png" format="PNG"/>
+          <imagedata width="858" fileref="mask.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
