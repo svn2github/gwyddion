@@ -163,7 +163,9 @@
     <title>Working with selections</title>
     <para>
       All interactive <link linkend="modules-tools">tools</link> and some other processing methods allow to select
-      geometrical shapes on data with mouse: points, lines, rectangles, circles/ellipses.
+      geometrical shapes on data with mouse: points, lines, rectangles, circles/ellipses.  Existing selections can
+      be similarly modified by dragging corners, endpoints, or complete selections.  When mouse cursor is moved
+      near to an editable point of a selection, is changes its shape to indicate the possibility to edit this point.
     </para>
     <para>
       Each tool generally uses only one type of selection and when it is activated on a data window, it sets the

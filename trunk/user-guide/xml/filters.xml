@@ -121,19 +121,39 @@
       </listitem>
       <listitem>
         Edge detection – Canny edge detector can be used to extract image of sharp edges
-        on the data.  Some rather experimental edge detection algorithms are available too:
-        RMS and RMS Edge basically visualize areas with high local value variation;
-        Local Non-linearity visualizes areas which are locally very non-planar.
+        on the data.  Laplacian presents a simple convolution with following kernel:
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        Some rather experimental edge detection algorithms are available too.
+        RMS and RMS Edge visualize areas with high local value variation:
+        RMS calculates the value of root mean square in squares 5 × 5 pixels centered
+        around each sample; RMS Edge essentially postprocess RMS output with a filter
+        similar to Laplacian.
+        Local Non-linearity filter visualizes areas which are locally very non-planar.
+        It fits a plane through squares 5 × 5 pixels centered around each sample and
+        then calculates residual sum of squares of this fit (reduced to plane slope).
+      </listitem>
+      <listitem>
+        Local contrast – a method to visualize features in areas with low and high value
+        variation at the same time.  This is achieved by calculation of local value
+        range, or variation, around each data sample and stretching it to equalize
+        this variation over all data.
       </listitem>
     </itemizedlist>
     <figure>
       <title>
-        Presentation examples (left to right): shading, Canny edge detection,
-        Sobel vertical gradient filter.
+        Presentation examples: (a) Original data, (b) Shading, (c) vertical Prewitt
+        gradient, (d) Canny edge detection, (d) Local non-linearity edge detection,
+        (f) Local contrast improvement.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="1000" fileref="presentations.png" format="PNG"/>
+          <imagedata width="604" fileref="presentations.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
