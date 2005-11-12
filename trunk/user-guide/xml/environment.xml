@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="environment-variables">
-  <title>Environment Variables</title>
+  <title>Environment variables</title>
   <para>
     On Linux/Unix, following environment variables can be used to override compiled-in
     installation paths (MS Windows version always looks to directories relative to path where it

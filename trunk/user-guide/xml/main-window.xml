@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="main-window">
+  <title>Main window</title>
+  <para>
+    The main window is the only Gwyddion part that appears after start with no parameters. It consist of set of
+    Gwyddion menus: <menuchoice><guimenu>File</guimenu></menuchoice>, <menuchoice><guimenu>Edit</guimenu></menuchoice>,
+    <menuchoice><guimenu>Data Process</guimenu></menuchoice>, <menuchoice><guimenu>Graph</guimenu></menuchoice>
+    and <menuchoice><guimenu>Meta</guimenu></menuchoice>, and from several rows of buttons connected with tools
+    and modules (accessible also by menus).
+  </para>
+  <para>
+    <menuchoice><guimenu>File</guimenu></menuchoice> menu associates commands that are used for file input and output.
+    Global commands (e. g. Exit) are located here too. Submenu command names are self-explanatory (Load, Save, etc.).
+  </para>
+  <para>
+    <menuchoice><guimenu>Edit</guimenu></menuchoice> menu constist of commands that are applicable on more data windows
+    (e. g. Data arithmetic) and commands that change status of data window presentation or selection. Masks and presentations
+    options can be also set here.
+  </para>
+  <para>
+    <menuchoice><guimenu>Data process</guimenu></menuchoice> menu is build automatically from all the modules available
+    at the Gwyddion modules directory (depending on operating system). Modules are responsible for all the data processing,
+    so this menu item associates most of the commands you will need at analyzing your SPM data.
+  </para>
+  <para>
+    <menuchoice><guimenu>Graph</guimenu></menuchoice> menu consist of commands that are applicable on graphs. Graph processing
+    includes reading values of graphs, measuring profile distances etc.
+  </para>
+  <para>
+    <menuchoice><guimenu>Meta</guimenu></menuchoice> are commands that provide information about height field metadata
+    (e. g. scanning speed, tip voltage, etc.) and information about the Gwyddion (About).
+  </para>
+  <para>
+    Finally, you can find some rows of buttons in the main window. These buttons represent tools and some of the modules.
+  </para>
+  <figure float="0">
+    <title>
+      Main window with data view showing microchip surface (Gwyddion sample file).
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="564" fileref="main_window.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</section>

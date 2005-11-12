@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="modules-tools">
+  <title>Modules and tools</title>
+  <para>
+    Modules are responsible for most of the Gwyddion features. They mostly include data processing fucntions
+    as leveling, rotations, integral transforms, etc. See Data process menu for list of available modules.
+  </para>
+  <para>
+    Tools are a special kind of modules that can work with selections. Tools are used for interactive selecting areas
+    or lines of the data and processing them. Tools can be lounched only from tools button rows located in the main window.
+    Currently, Gwyddion includes at least these tools:
+  </para>
+  <itemizedlist>
+    <listitem id="tool-read-value">
+      <para>
+        Read value under cursor – reads x,y,z values at the position of mouse click. You can average more points around the point
+        where you clicked.
+      </para>
+    </listitem>
+    <listitem id="tool-crop">
+      <para>
+        Crop – cuts part of the data and puts it to new window.
+      </para>
+    </listitem>
+    <listitem id="tool-level3">
+      <para>
+        Three-point leveling – levels data by plane obtained by clicking on three points wihin data window.
+      </para>
+    </listitem>
+    <listitem id="tool-stats">
+      <para>
+        Statistical quantities – computes basic statistical quantities (RMS, Ra, etc.) from selection of full data
+        field.
+      </para>
+    </listitem>
+    <listitem id="tool-sfunctions">
+      <para>
+        Statistical functions – computes basic statistical functions (distribution of heights, autocorrelation
+        function, etc.) from selection of full data field.
+      </para>
+    </listitem>
+    <listitem id="tool-profile">
+      <para>
+        Profile extraction – extracts profiles of the data field and puts them to separate graphs. These graphs can
+        be further processed with commands from the Graph menu.
+      </para>
+    </listitem>
+    <listitem id="tool-distance">
+      <para>
+        Measure distances – similarly to Read value tool enables user to read distance and angle between points in
+        the data field.
+      </para>
+    </listitem>
+    <listitem id="tool-polynom">
+      <para>
+        Fit X/Y profiles by polynom – very frequently used tool for basic processing of raw SPM data. Profiles
+        taken in the fast scanning axis (usually X-axis) can be mutually shifted by some amount or having slightly
+        different slope. Fit X/Y profiles tool can fix this discrepancy.
+      </para>
+    </listitem>
+    <listitem id="tool-filters">
+      <para>
+        Basic filters – mean, median, conservative denoise and similar simple filters to reduce noise in the data.
+      </para>
+    </listitem>
+    <listitem id="tool-remove-grains">
+      <para>
+        Manually remove grains – remove continuous parts of the mask by clicking on mask point.
+      </para>
+    </listitem>
+    <listitem id="tool-remove-spots">
+      <para>
+        Manually remove spots – draw rectangle around defect in AFM data image and remove the defect using chosen
+        interpolation method.
+      </para>
+    </listitem>
+    <listitem id="tool-color-range">
+      <para>
+        Stretch color range – enables user to change the false color representation range (by default from data
+        minimum to data maximum).
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>

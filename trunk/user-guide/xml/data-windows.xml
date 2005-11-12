@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="data-windows">
+  <title>Data windows</title>
+  <para>
+    Data window is used for 2D data presentation to user. It is the main widget used for working with Gwyddion.
+    The data are presented to user as a field of false colors correponding to heights. Color axis that represents mapping
+    the colors to real height values is also part of the data window. Color palette used to represent height data can be
+    changed by clicking on the color axis with right mouse button and selecting appropriate palette from the list of
+    palettes.
+  </para>
+  <para>
+    Graph window is used for 1D data processing. You can get it only by using appropriate tools or modules that
+    extract some graphs from height field data. Currently, it is not possible to load graphs into application as the main
+    intent of Gwyddion is to provide tools for analyzing height fields, not graphs.
+  </para>
+  <figure float="0">
+    <title>
+      Data window (left) with palette chooser and Graph window (right).
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="1000" fileref="colors.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</section>

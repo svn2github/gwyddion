@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="opengl-3d-view">
+  <title>OpenGL 3D data display</title>
+  <para>
+    Three-dimensional OpenGL display of current data window can be invoked
+    with the button with symbol of cube in <guilabel>View</guilabel> button
+    row of main window.
+  </para>
+  <para>
+    The 3D window has two possible forms: with basic and expanded controls.
+    It starts with basic constrols only, this form is displayed on
+    <link linkend="opengl-3d-view-screenshot">following figure</link>.
+    It can be switched to the expanded form (and back) with an expander button
+    it the upper right corner.
+  </para>
+  <figure id="opengl-3d-view-screenshot" float="0">
+    <title>
+      Three-dimensional OpenGL data display window with basic controls.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="399" fileref="opengl-3d-view.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <section>
+    <title>Basic controls</title>
+    <para>
+      Basic 3D window contains interaction mode controls at the right side of
+      the view.  By default, dragging the view with mouse rotates it
+      horizontally and vertically.  All possible modes are listed below:
+      <itemizedlist>
+        <listitem>
+          Rotation – this is the default.  Dragging the view horizontally
+          rotates it around <phrase role="math">z</phrase>-axis, vertical drag
+          rotates it around horizontal axis parallel with the plane of view.
+        </listitem>
+        <listitem>
+          Scale – dragging the view right and down enlarges it, drag in the
+          opposite direction makes it smaller.
+        </listitem>
+        <listitem>
+          Z-scale – dragging the view up (down) increases (decreases) the
+          <phrase role="math">z</phrase>-scale, making the hills and valleys
+          more or less pronounced.
+        </listitem>
+        <listitem>
+          Light rotation – this possibility is available only in lighting
+          visualization mode.  Dragging the view changes position of light
+          source similarly to rotation of data in normal rotation mode.
+        </listitem>
+      </itemizedlist>
+      The basic controls also include an image export button.
+    </para>
+  </section>
+  <section>
+    <title>Full controls</title>
+    <para>
+      In expanded controls the mode buttons are located in top row, however
+      their function does not change.  In addition, there are several tabs
+      with options below them:
+      <itemizedlist>
+        <listitem>
+          <guilabel>Basic</guilabel> – controls to set rotations and scales
+          numerically and to switch on an off axes, axis labels, and
+          perspective projection.
+        </listitem>
+        <listitem>
+          <guilabel>Light &amp; Material</guilabel> – visualization settings.
+          Gwyddion 3D view has two basic visualization modes: gradient, in
+          which the data are simply colored with a false color scale exactly
+          like in normal 2D view; and material, in which the data are
+          presented as an OpenGL material rendered accoring to light
+          position.  This tab also contains controls to set light position
+          numerically.
+        </listitem>
+        <listitem>
+          <guilabel>Labels</guilabel> – fine tuning of sizes, positions,
+          and other properties of axis labels.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </section>
+</section>

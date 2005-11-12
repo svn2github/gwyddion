@@ -51,7 +51,18 @@
   </bookinfo>
   <xi:include href="intro.xml"/>
   <xi:include href="install.xml"/>
-  <xi:include href="getting-started.xml"/>
+  <chapter id="getting-started">
+    <title>Getting started</title>
+    <xi:include href="main-window.xml"/>
+    <xi:include href="managing-files.xml"/>
+    <xi:include href="data-windows.xml"/>
+    <xi:include href="modules-tools.xml"/>
+    <xi:include href="presentations-masks.xml"/>
+    <xi:include href="selections.xml"/>
+    <xi:include href="opengl-3d-view.xml"/>
+    <xi:include href="raw-file-import.xml"/>
+    <xi:include href="plugins.xml"/>
+  </chapter>
   <chapter id="data-analysis">
     <title>Data processing and analysis</title>
     <xi:include href="basic.xml"/>
