@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *  Copyright (C) 2005 David Necas (Yeti), Petr Klapetek.
- *  E-mail: yeti@gwyddion.net, klrhktek@gwyddion.net.
+ *  E-mail: yeti@gwyddion.net, klapetek@gwyddion.net.
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
