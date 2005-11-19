@@ -224,7 +224,7 @@ static GwyModuleInfo module_info = {
     "witfile",
     N_("Imports WITec WIT data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };

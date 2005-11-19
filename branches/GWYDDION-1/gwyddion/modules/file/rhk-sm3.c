@@ -213,7 +213,7 @@ static GwyModuleInfo module_info = {
     "rhk-sm3",
     N_("Imports RHK Technology SM3 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
