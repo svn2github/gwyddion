@@ -34,6 +34,7 @@ static void process_preinit_options(int *argc,
 int
 main(int argc, char *argv[])
 {
+    GwyResourceClass *klass;
     GtkWidget *window, *view;
     GwyContainer *data, *settings;
     GwyPixmapLayer *layer;
@@ -50,6 +51,11 @@ main(int argc, char *argv[])
     /* Initialize Gwyddion stuff */
     gwy_widgets_type_init();
     g_set_application_name(PACKAGE);
+
+    /* Load color gradients from disk */
+    klass = g_type_class_ref(GWY_TYPE_GRADIENT);
+    gwy_resource_class_load(klass);
+    g_type_class_unref(klass);
 
     /* Load gwyddion settings.  Maybe not very useful here, except for
      * files mysteriously missing mask color. */
@@ -84,14 +90,17 @@ main(int argc, char *argv[])
     /* Data view */
     view = gwy_data_view_new(data);
     gtk_container_add(GTK_CONTAINER(window), view);
-    gwy_data_view_set_base_layer(GWY_DATA_VIEW(view),
-                                 GWY_PIXMAP_LAYER(gwy_layer_basic_new()));
+    layer = gwy_layer_basic_new();
+    gwy_pixmap_layer_set_data_key(layer, "/0/data");
+    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    gwy_data_view_set_base_layer(GWY_DATA_VIEW(view), layer);
 
     /* Mask */
     if (gwy_container_contains_by_name(data, "/0/mask")) {
         GwyRGBA color = { 1.0, 0.3, 0.0, 0.6 };
 
-        layer = GWY_PIXMAP_LAYER(gwy_layer_mask_new());
+        layer = gwy_layer_mask_new();
+        gwy_pixmap_layer_set_data_key(layer, "/0/mask");
         gwy_data_view_set_alpha_layer(GWY_DATA_VIEW(view), layer);
         /* Get mask color from Gwyddion settings, if not specified in the
          * file. */
