@@ -1,4 +1,5 @@
-# translation of it.po to 
+# translation of it1.14.po to 
+# translation of it.po to
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR "David Necas (Yeti) & Petr Klapetek".
 # hyperlink <hyperlink@katamail.com>, 2005.
@@ -6,10 +7,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: it\n"
+"Project-Id-Version: it1.14\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
 "POT-Creation-Date: 2005-11-06 23:45+0100\n"
-"PO-Revision-Date: 2005-07-21 19:01+0200\n"
+"PO-Revision-Date: 2005-11-26 17:40+0100\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -412,15 +413,15 @@ msgstr "Densità potere spettrale"
 
 #: libgwydgets/gwyoptionmenus.c:924 modules/tools/sfunctions.c:109
 msgid "Minkowski volume"
-msgstr ""
+msgstr "volume di Minkowski "
 
 #: libgwydgets/gwyoptionmenus.c:925 modules/tools/sfunctions.c:110
 msgid "Minkowski boundary"
-msgstr ""
+msgstr "Confine di Minkowski "
 
 #: libgwydgets/gwyoptionmenus.c:926 modules/tools/sfunctions.c:111
 msgid "Minkowski connectivity"
-msgstr ""
+msgstr "Connettività di Minkowski"
 
 #: libgwydgets/gwyoptionmenus.c:954
 msgid "Horizontal"
@@ -589,6 +590,8 @@ msgid ""
 "Development is supported by the Czech Metrology Institute (<i>http://www.cmi."
 "cz/</i>).\n"
 msgstr ""
+"Lo sviluppo è sostenuto dall'Istitituto Cecoslovacco di Metrologia \"Czech "
+"Metrology Institute\" (<i>http://www.cmi.cz/</i>).\n"
 
 #: app/about.c:140
 #, c-format
@@ -1132,16 +1135,16 @@ msgstr "file Createc (.dat)"
 
 #: modules/file/ezdfile.c:119
 msgid "Imports Nanosurf EZD and NID data files."
-msgstr ""
+msgstr "Importa file dati Nanosurf EZD e NID."
 
 #: modules/file/ezdfile.c:135
 msgid "Nanosurf files (.ezd, .nid)"
-msgstr ""
+msgstr "File Nanosurf (.ezd, .nid)"
 
 #: modules/file/ezdfile.c:607
 #, c-format
 msgid "Group %d, Channel %d (%s%s)"
-msgstr ""
+msgstr "Gruppo %d, Canale %d (%s%s)"
 
 #: modules/file/gwyfile.c:54
 msgid "Loads and saves Gwyddion native data files (serialized objects)."
@@ -1153,11 +1156,11 @@ msgstr "formato nativo Gwyddion (.gwy)"
 
 #: modules/file/hitachi-afm.c:56
 msgid "Imports Hitachi AFM files."
-msgstr ""
+msgstr "Importa file AFM Hitachi."
 
 #: modules/file/hitachi-afm.c:72
 msgid "Hitachi AFM files"
-msgstr ""
+msgstr "File  AFM Hitachi"
 
 #: modules/file/jpkscan.c:108
 msgid "Imports JPK image scans."
@@ -1211,11 +1214,11 @@ msgstr "(encoding nomefile non valido)"
 
 #: modules/file/mifile.c:110
 msgid "Imports Molecular Imaging MI data files."
-msgstr ""
+msgstr "Importa file dati MI  Molecular Imaging."
 
 #: modules/file/mifile.c:126
 msgid "PicoView Data Files (.mi)"
-msgstr ""
+msgstr "File dati PicoView(.mi)"
 
 #: modules/file/mifile.c:325 modules/file/stpfile.c:546
 #, c-format
@@ -1654,11 +1657,11 @@ msgstr ""
 
 #: modules/file/rhk-sm3.c:213
 msgid "Imports RHK Technology SM3 data files."
-msgstr ""
+msgstr "Importa file dati SM3 RHK Technology ."
 
 #: modules/file/rhk-sm3.c:273
 msgid "RHK SM3 files (.sm3)"
-msgstr ""
+msgstr "File SM3 RHK (.sm3)"
 
 #: modules/file/rhk-sm3.c:691 modules/file/rhk-spm32.c:507
 #, c-format
@@ -1668,7 +1671,7 @@ msgstr "Pagina %u (%s)"
 #: modules/file/rhk-sm3.c:694
 #, c-format
 msgid "Page %u"
-msgstr ""
+msgstr "Pagina %u"
 
 #: modules/file/rhk-spm32.c:143
 msgid "Imports RHK Technology SPM32 data files."
@@ -1680,11 +1683,11 @@ msgstr "File RHK SPM32 (.sm2)"
 
 #: modules/file/sdfile.c:106
 msgid "Imports Surfstand group SDF (Surface Data File) files."
-msgstr ""
+msgstr "Importa file SDF Surfstand group(Surface Data File)."
 
 #: modules/file/sdfile.c:124
 msgid "Surfstand SDF files"
-msgstr ""
+msgstr "File SDF Surfstand"
 
 #: modules/file/sis.c:357
 msgid "Imports SIS (Surface Imaging Systems) data files."
@@ -1716,7 +1719,7 @@ msgstr "Topografia"
 
 #: modules/file/stpfile.c:102
 msgid "Current or Deflection or Amplitude"
-msgstr ""
+msgstr "Corrente o Deflessione o Ampiezza"
 
 #: modules/file/stpfile.c:103
 msgid "Electrochemical voltage"
@@ -1736,7 +1739,7 @@ msgstr "Corrente elettrochimica"
 
 #: modules/file/stpfile.c:107
 msgid "Friction or Phase"
-msgstr ""
+msgstr "Frizione o Fase"
 
 #: modules/file/stpfile.c:108
 msgid "AUX in BNC"
@@ -1756,24 +1759,24 @@ msgstr "File STP (.stp)"
 
 #: modules/file/unisoku.c:123
 msgid "Imports Unisoku data files (two-part .hdr + .dat)."
-msgstr ""
+msgstr "Importa file dati Unisoku (two-part .hdr + .dat)."
 
 #: modules/file/unisoku.c:141
 msgid "Unisoku files (.hdr + .dat)"
-msgstr ""
+msgstr "File Unisoku (.hdr + .dat)"
 
 #: modules/file/witfile.c:224
 msgid "Imports WITec WIT data files."
-msgstr ""
+msgstr "Importa file datiWITec WIT."
 
 #: modules/file/witfile.c:240
 msgid "WITec files (.wit)"
-msgstr ""
+msgstr "File WITec (.wit)"
 
 #: modules/file/witfile.c:677
 #, c-format
 msgid "Channel %u (%s)"
-msgstr ""
+msgstr "Canale %u (%s)"
 
 #: modules/file/wsxmfile.c:69
 msgid "Imports Nanotec WSxM data files."
@@ -2345,27 +2348,27 @@ msgstr "Tipo _Wavelet:"
 
 #: modules/process/drift.c:105
 msgid "Scan lines correlation"
-msgstr ""
+msgstr "Correlazione linee di scansione"
 
 #: modules/process/drift.c:106
 msgid "Local isotropy"
-msgstr ""
+msgstr "Isotropia locale"
 
 #: modules/process/drift.c:107
 msgid "Calibration sample"
-msgstr ""
+msgstr "Campione di calibrazione"
 
 #: modules/process/drift.c:127
 msgid "Evaluate/correct thermal drift in fast scan axis."
-msgstr ""
+msgstr "Valuta/Corregge la deriva termica sull'asse di scansione veloce"
 
 #: modules/process/drift.c:143
 msgid "/_Correct Data/_Compensate drift..."
-msgstr ""
+msgstr "/_Correzione Dati/_Compensazione deriva..."
 
 #: modules/process/drift.c:208
 msgid "Correct drift"
-msgstr ""
+msgstr "Correzione deriva"
 
 #: modules/process/drift.c:209 modules/process/grain_mark.c:202
 #: modules/process/grain_rem_threshold.c:174 modules/process/grain_wshed.c:175
@@ -2375,11 +2378,11 @@ msgstr "Aggiorna Anteprima"
 
 #: modules/process/drift.c:245
 msgid "_Method:"
-msgstr ""
+msgstr "_Metodo:"
 
 #: modules/process/drift.c:261
 msgid "_Interpolation:"
-msgstr ""
+msgstr "_Interpolazione:"
 
 #: modules/process/drift.c:299 modules/process/facet_analysis.c:363
 #: modules/process/grain_mark.c:283 modules/process/grain_rem_threshold.c:261
@@ -2389,15 +2392,15 @@ msgstr "Colore _Maschera:"
 
 #: modules/process/drift.c:307
 msgid "_Extract drift graph"
-msgstr ""
+msgstr "_Estrazione grafico deriva"
 
 #: modules/process/drift.c:316
 msgid "_Correct data"
-msgstr ""
+msgstr "_Correzione dati"
 
 #: modules/process/drift.c:325
 msgid "_Crop out unknown data"
-msgstr ""
+msgstr "_Taglio dati sconosciuti"
 
 #: modules/process/dwt.c:79
 msgid "Two-dimensional DWT (Discrete Wavelet Transform)."
@@ -2525,9 +2528,8 @@ msgid "Facet-levelling"
 msgstr "Facet-levelling"
 
 #: modules/process/facet_analysis.c:139
-#, fuzzy
 msgid "Visualizes, marks and measures facet orientation."
-msgstr "Visualizza i contorni e le misure dell'orientazione facet"
+msgstr "Visualizzazione, delimitazione e misura orientazione facet"
 
 #: modules/process/facet_analysis.c:155
 msgid "/_Statistics/Facet _Analysis..."
@@ -2735,7 +2737,7 @@ msgstr "Intervallo Colore:"
 
 #: modules/process/fft_filter_2d.c:570
 msgid "_Zoom"
-msgstr ""
+msgstr "_Zoom"
 
 #: modules/process/fft_filter_2d.c:578
 msgid "Display mode:"
@@ -2743,23 +2745,23 @@ msgstr "Display mode:"
 
 #: modules/process/fft_filter_2d.c:588
 msgid "Original _FFT"
-msgstr ""
+msgstr "FFT_Originale"
 
 #: modules/process/fft_filter_2d.c:595
 msgid "Original _Image"
-msgstr ""
+msgstr "Immagine_Originale"
 
 #: modules/process/fft_filter_2d.c:602
 msgid "Filtered _Image"
-msgstr ""
+msgstr "Immagine_Filtrata"
 
 #: modules/process/fft_filter_2d.c:609
 msgid "Image _Difference"
-msgstr ""
+msgstr "Differenza_Immagini"
 
 #: modules/process/fft_filter_2d.c:616
 msgid "Filtered _FFT"
-msgstr ""
+msgstr "FFT_Filtrata"
 
 #: modules/process/fft_filter_2d.c:626
 msgid "<b>Output Options</b>"
@@ -3168,7 +3170,6 @@ msgid "_Mask creation type:"
 msgstr "_Creazione tipo di maschera_"
 
 #: modules/process/indent_analyze.c:424
-#, fuzzy
 msgid "Ref. plane _tolerance:"
 msgstr "Ref. tolleranza _piano:"
 
@@ -3433,14 +3434,12 @@ msgid "/Indento_r/Ad_just..."
 msgstr "/Indentazione/Aggiusta..."
 
 #: modules/process/nanoindent_adjust.c:177
-#, fuzzy
 msgid "Imprints adjustment"
-msgstr "Imprints adjustment"
+msgstr "Adattamento Impronta"
 
 #: modules/process/nanoindent_adjust.c:192
-#, fuzzy
 msgid "_Indentor model imprint:"
-msgstr "_Indentor model imprint:"
+msgstr "_Impronta modello indentazione:"
 
 #: modules/process/nanoindent_adjust.c:203
 msgid "Imprint to be _adjusted:"
@@ -4137,7 +4136,7 @@ msgstr "Spessore:"
 
 #: modules/tools/profile.c:271
 msgid "Fix res.:"
-msgstr ""
+msgstr "Fix res.:"
 
 #: modules/tools/profile.c:286
 msgid "_Separate profiles"
@@ -4289,102 +4288,112 @@ msgstr "Quantità statistiche"
 msgid "<b>Parameters</b>"
 msgstr "<b>Parametri</b>"
 
-#~ msgid "Creates mask of nanoindentation hole."
-#~ msgstr "Crea maschera di buco di nanoindentazione."
+#, fuzzy
+msgid "Creates mask of nanoindentation hole."
+msgstr "Crea maschera di outliers."
 
-#~ msgid "/_Nanoindentation/_Mask of nanoindentation"
-#~ msgstr "/_Nanoindentazione/_Maschera di nanoindentazione"
-
-#~ msgid ""
-#~ "Development is supported by the Czech Metrology Insitute (<i>http://www."
-#~ "cmi.cz/</i>).\n"
-#~ msgstr ""
-#~ "Lo sviluppo del programma è sostenuto dall'Istituto di Metrologia Ceco \" "
-#~ "Czech Metrology Institute\" (<i>http://www.cmi.cz/</i>).\n"
-
-#~ msgid "Imports Nanosurf EZD data files."
-#~ msgstr "Importafile dati EZD Nanosurf"
-
-#~ msgid "Nanosurf files (.ezd)"
-#~ msgstr "File Nanosurf (.ezd)"
-
-#~ msgid "Group %d, Channel %d"
-#~ msgstr "Gruppo %d, Canale %d"
-
-#~ msgid "Current or Deflection"
-#~ msgstr "Corrente o Deflessione"
-
-#~ msgid "Friction"
-#~ msgstr "Frizione"
-
-#~ msgid "Filter _Drawing"
-#~ msgstr "Disegna Filtro:"
-
-#~ msgid "Filtered _Image Preview"
-#~ msgstr "Anteprima _Immagine filtrata"
-
-#~ msgid "Filtered _FFT Preview"
-#~ msgstr "Anteprima Filtro _FFT"
+msgid "/_Nanoindentation/_Mask of nanoindentation"
+msgstr "/_Nanoindentazione/_Maschera di nanoindentazione"
 
 #, fuzzy
-#~ msgid "Expected A_d:"
-#~ msgstr "Aspettata A<sub>d</sub>:"
+msgid ""
+"Development is supported by the Czech Metrology Insitute (<i>http://www.cmi."
+"cz/</i>).\n"
+msgstr ""
+"Lo sviluppo è sostenuto dall'Istitituto Cecoslovacco di Metrologia \"Czech "
+"Metrology Institute\" (<i>http://www.cmi.cz/</i>).\n"
 
 #, fuzzy
-#~ msgid "Expected A_p:"
-#~ msgstr "Aspettatata A<sub>p</sub>:"
+msgid "Imports Nanosurf EZD data files."
+msgstr "Importa file dati Nanosurf EZD e NID."
 
 #, fuzzy
-#~ msgid "Indent. A_d"
-#~ msgstr "Volume indent."
+msgid "Nanosurf files (.ezd)"
+msgstr "File Nanosurf (.ezd, .nid)"
 
 #, fuzzy
-#~ msgid "Indent. A_p"
-#~ msgstr "Volume indent."
+msgid "Group %d, Channel %d"
+msgstr "Gruppo %d, Canale %d (%s%s)"
 
 #, fuzzy
-#~ msgid "Inner Pile-Up A_d"
-#~ msgstr "Inner Pile-up"
+msgid "Current or Deflection"
+msgstr "Corrente o Deflessione o Ampiezza"
 
 #, fuzzy
-#~ msgid "Inner Pile-Up A_p"
-#~ msgstr "Inner Pile-up"
+msgid "Friction"
+msgstr "Fitting"
 
 #, fuzzy
-#~ msgid "Outer Pile-Up A_d"
-#~ msgstr "Pile-up Esterno"
+msgid "Filter _Drawing"
+msgstr "<b>Filtra disegno</b>"
 
 #, fuzzy
-#~ msgid "Outer Pile-Up A_p"
-#~ msgstr "Pile-up Esterno"
+msgid "Filtered _Image Preview"
+msgstr "Immagine_Filtrata"
 
 #, fuzzy
-#~ msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
-#~ msgstr "Analizza struttura di nanoindentzione (volumes, superfici, ...)."
-
-#~ msgid "Data field leveling:"
-#~ msgstr "Livellamento campo dati:"
+msgid "Filtered _FFT Preview"
+msgstr "FFT_Filtrata"
 
 #, fuzzy
-#~ msgid "Marked areas:"
-#~ msgstr "Aree _segnate:"
+msgid "Expected A_d:"
+msgstr "Aspettata A<sub>d</sub>:"
 
 #, fuzzy
-#~ msgid "Indentor type:"
-#~ msgstr "_Tipo di indentazione:"
+msgid "Expected A_p:"
+msgstr "Aspettatata A<sub>p</sub>:"
 
 #, fuzzy
-#~ msgid "Mask creation type:"
-#~ msgstr "_Creazione tipo di maschera_"
+msgid "Indent. A_d"
+msgstr "Volume indent."
 
 #, fuzzy
-#~ msgid "Ref. plane tolerance:"
-#~ msgstr "Ref. tolleranza _piano:"
+msgid "Indent. A_p"
+msgstr "Volume indent."
 
 #, fuzzy
-#~ msgid "Angle 1 tolerance:"
-#~ msgstr "Angolo _1 tolleranza:"
+msgid "Inner Pile-Up A_d"
+msgstr "Inner Pile-up"
 
 #, fuzzy
-#~ msgid "Theta range:"
-#~ msgstr "Intervallo X:"
+msgid "Inner Pile-Up A_p"
+msgstr "Inner Pile-up"
+
+#, fuzzy
+msgid "Outer Pile-Up A_d"
+msgstr "Pile-up Esterno"
+
+#, fuzzy
+msgid "Outer Pile-Up A_p"
+msgstr "Pile-up Esterno"
+
+#, fuzzy
+msgid "Analyses nanoindentation structure (volumes, surfaces, ...)"
+msgstr "Analizza struttura di nanoindentzione (volumes, superfici, ...)."
+
+msgid "Data field leveling:"
+msgstr "Livellamento campo dati:"
+
+#, fuzzy
+msgid "Marked areas:"
+msgstr "Aree _segnate:"
+
+#, fuzzy
+msgid "Indentor type:"
+msgstr "_Tipo di indentazione:"
+
+#, fuzzy
+msgid "Mask creation type:"
+msgstr "_Creazione tipo di maschera_"
+
+#, fuzzy
+msgid "Ref. plane tolerance:"
+msgstr "Ref. tolleranza _piano:"
+
+#, fuzzy
+msgid "Angle 1 tolerance:"
+msgstr "Angolo _1 tolleranza:"
+
+#, fuzzy
+msgid "Theta range:"
+msgstr "Intervallo X:"
