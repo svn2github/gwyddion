@@ -1,4 +1,13 @@
 
+1.15
+Application:
+- Compilation on Mac OS X was fixed (bug #64).
+- Translations updated: Italian.
+
+Modules:
+- BCR file: Wrong y scale on files that do not have explicit units was fixed.
+
+
 1.14
 Application:
 - Unix installations are relocatable via environment variables.
