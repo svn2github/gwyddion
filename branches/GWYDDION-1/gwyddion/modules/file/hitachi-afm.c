@@ -55,7 +55,7 @@ static GwyModuleInfo module_info = {
     "hitachi_afm",
     N_("Imports Hitachi AFM files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.0.2",
+    "0.0.3",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -191,7 +191,7 @@ read_data_field(const guchar *buffer, guint size)
     for (i = 0; i < yres; i++) {
         row = data + (yres-1 - i)*xres;
         for (j = 0; j < xres; j++)
-            row[j] = GINT16_TO_LE(pdata[i*xres + j])/65536.0*q;
+            row[j] = GUINT16_TO_LE(pdata[i*xres + j])/65536.0*q;
     }
 
     siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
