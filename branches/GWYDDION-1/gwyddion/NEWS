@@ -7,7 +7,10 @@ Application:
 Modules:
 - BCR file: Wrong y scale on files that do not have explicit units was fixed.
 - Hitachi AFM file: Reading raw data as signed instead of unsinged was fixed.
-- Plugin-proxy: Missing byte reordering on big-endian machines was added.
+- Plugin-proxy: Missing byte reordering on big-endian machines was added
+  (bug #65).
+- Basicops: Can resample data in one direction to make samples square.
+- Grain distribution: Simple grain statistics (count, mean area, ...).
 
 
 1.14
