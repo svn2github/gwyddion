@@ -948,7 +948,7 @@ fit_exp_psdf(gdouble x,
 {
     gdouble c;
 
-    if (b[3] == 0) {
+    if (b[1] == 0) {
         *fres = FALSE;
         return 0;
     }
