@@ -193,7 +193,7 @@ stats(GwyContainer *data, GwyRunType run)
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.0);
     gtk_table_attach(GTK_TABLE(table), label, 0, 1, row, row+1,
                      GTK_FILL, 0, 2, 2);
-    g_string_printf(str, "%.2f %%", 100.0*npix*area/(xres*yres));
+    g_string_printf(str, "%.2f %%", 100.0*npix/(xres*yres));
     label = gtk_label_new(str->str);
     gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
     gtk_table_attach(GTK_TABLE(table), label, 1, 2, row, row+1,
