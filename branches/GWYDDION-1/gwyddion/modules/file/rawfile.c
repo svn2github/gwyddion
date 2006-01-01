@@ -1211,7 +1211,9 @@ rawfile_warn_too_short_file(GtkWidget *parent,
                                       "long file (at least), "
                                       "but the length of `%s' "
                                       "is only %u bytes."),
-                                    reqsize, file->filename, file->filesize),
+                                    reqsize, file->filename, file->filesize);
+    gtk_widget_show_all(dialog);
+    gtk_window_present(GTK_WINDOW(dialog));
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
@@ -1230,7 +1232,9 @@ rawfile_warn_parse_error(GtkWidget *parent,
                                     GTK_BUTTONS_OK,
                                     _("Parsing of %s failed:\n"
                                       "%s."),
-                                     file->filename, err->message),
+                                     file->filename, err->message);
+    gtk_widget_show_all(dialog);
+    gtk_window_present(GTK_WINDOW(dialog));
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
 }
@@ -1552,22 +1556,24 @@ preset_validate_name(RawFileControls *controls,
                      const gchar *name,
                      gboolean show_warning)
 {
-    GtkWidget *dlg;
+    GtkWidget *dialog;
 
     if (*name && !strchr(name, '/'))
         return TRUE;
     if (!show_warning)
         return FALSE;
 
-    dlg = gtk_message_dialog_new(GTK_WINDOW(controls->dialog),
+    dialog = gtk_message_dialog_new(GTK_WINDOW(controls->dialog),
                                     GTK_DIALOG_MODAL
                                         | GTK_DIALOG_DESTROY_WITH_PARENT,
                                     GTK_MESSAGE_INFO,
                                     GTK_BUTTONS_CLOSE,
                                     _("The name `%s' is invalid."),
                                     name);
-    gtk_dialog_run(GTK_DIALOG(dlg));
-    gtk_widget_destroy(dlg);
+    gtk_widget_show_all(dialog);
+    gtk_window_present(GTK_WINDOW(dialog));
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 
     return FALSE;
 }
