@@ -11,6 +11,7 @@ Modules:
   (bug #65).
 - Basicops: Can resample data in one direction to make samples square.
 - Grain distribution: Simple grain statistics (count, mean area, ...).
+- Rawfile: Message dialogs forced above main dialog (bug #66).
 
 
 1.14
