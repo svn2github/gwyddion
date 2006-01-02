@@ -1212,10 +1212,10 @@ rawfile_warn_too_short_file(GtkWidget *parent,
                                       "but the length of `%s' "
                                       "is only %u bytes."),
                                     reqsize, file->filename, file->filesize);
-    gtk_widget_show_all(dialog);
-    gtk_window_present(GTK_WINDOW(dialog));
+    gtk_window_set_modal(GTK_WINDOW(parent), FALSE);  /* Bug #66 workaround. */
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
+    gtk_window_set_modal(GTK_WINDOW(parent), TRUE);  /* Bug #66 workaround. */
 }
 
 static void
@@ -1233,10 +1233,10 @@ rawfile_warn_parse_error(GtkWidget *parent,
                                     _("Parsing of %s failed:\n"
                                       "%s."),
                                      file->filename, err->message);
-    gtk_widget_show_all(dialog);
-    gtk_window_present(GTK_WINDOW(dialog));
+    gtk_window_set_modal(GTK_WINDOW(parent), FALSE);  /* Bug #66 workaround. */
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
+    gtk_window_set_modal(GTK_WINDOW(parent), TRUE);  /* Bug #66 workaround. */
 }
 
 static void
@@ -1556,24 +1556,25 @@ preset_validate_name(RawFileControls *controls,
                      const gchar *name,
                      gboolean show_warning)
 {
-    GtkWidget *dialog;
+    GtkWidget *dialog, *parent;
 
     if (*name && !strchr(name, '/'))
         return TRUE;
     if (!show_warning)
         return FALSE;
 
-    dialog = gtk_message_dialog_new(GTK_WINDOW(controls->dialog),
+    parent = controls->dialog;
+    dialog = gtk_message_dialog_new(GTK_WINDOW(parent),
                                     GTK_DIALOG_MODAL
-                                        | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                    | GTK_DIALOG_DESTROY_WITH_PARENT,
                                     GTK_MESSAGE_INFO,
                                     GTK_BUTTONS_CLOSE,
                                     _("The name `%s' is invalid."),
                                     name);
-    gtk_widget_show_all(dialog);
-    gtk_window_present(GTK_WINDOW(dialog));
+    gtk_window_set_modal(GTK_WINDOW(parent), FALSE);  /* Bug #66 workaround. */
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
+    gtk_window_set_modal(GTK_WINDOW(parent), TRUE);  /* Bug #66 workaround. */
 
     return FALSE;
 }
