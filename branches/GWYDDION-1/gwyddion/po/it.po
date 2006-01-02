@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it1.14\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2006-01-01 11:43+0100\n"
+"POT-Creation-Date: 2006-01-02 13:57+0100\n"
 "PO-Revision-Date: 2005-11-26 17:40+0100\n"
 "Last-Translator: hyperlink <hyperlink@katamail.com>\n"
 "Language-Team:  <it@li.org>\n"
@@ -1611,45 +1611,45 @@ msgstr ""
 "Analisi di %s fallita:\n"
 "%s."
 
-#: modules/file/rawfile.c:1571
+#: modules/file/rawfile.c:1572
 #, c-format
 msgid "The name `%s' is invalid."
 msgstr "Il nome `%s' non è valido"
 
-#: modules/file/rawfile.c:2027
+#: modules/file/rawfile.c:2028
 #, c-format
 msgid "Not enough lines (%d) for offset (%d)"
 msgstr "Non abbastanza linee (%d) per l'offset (%d)"
 
-#: modules/file/rawfile.c:2052
+#: modules/file/rawfile.c:2053
 #, c-format
 msgid "Expected whitespace to skip more fields in row %u, got `%.16s'"
 msgstr ""
 "Mi aspettavo uno spazio per saltare più campi in fila  %u, ottenuto `%.16s'"
 
-#: modules/file/rawfile.c:2065
+#: modules/file/rawfile.c:2066
 #, c-format
 msgid "Expected `%c' to skip more fields in row %u, got `%.16s'"
 msgstr "Mi aspettavo `%c' per saltare più campi in fila  %u, ottenuto `%.16s'"
 
-#: modules/file/rawfile.c:2079
+#: modules/file/rawfile.c:2080
 #, c-format
 msgid "Expected `%s' to skip more fields in row %u, got `%.16s'"
 msgstr "Mi aspettavo `%s' per saltare più campi in fila  %u, ottenuto `%.16s'"
 
-#: modules/file/rawfile.c:2096 modules/file/rawfile.c:2110
-#: modules/file/rawfile.c:2136
+#: modules/file/rawfile.c:2097 modules/file/rawfile.c:2111
+#: modules/file/rawfile.c:2137
 #, c-format
 msgid "Garbage `%.16s' in row %u, column %u"
 msgstr "Dati spazzatura `%.16s' nella riga %u, colonna %u"
 
-#: modules/file/rawfile.c:2122
+#: modules/file/rawfile.c:2123
 #, c-format
 msgid "Expected delimiter `%c' after data in row %u, column %u, got `%c'"
 msgstr ""
 "Delimitatore aspettato`%c' dopo dati in fila %u, colonna %u, ottenuto`%c'"
 
-#: modules/file/rawfile.c:2148
+#: modules/file/rawfile.c:2149
 #, c-format
 msgid "Expected delimiter `%s' after data in row %u, column %u, got `%.16s'"
 msgstr ""
