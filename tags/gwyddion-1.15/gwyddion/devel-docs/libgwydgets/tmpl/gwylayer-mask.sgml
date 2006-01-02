@@ -1,0 +1,60 @@
+<!-- ##### SECTION Title ##### -->
+GwyLayerMask
+
+<!-- ##### SECTION Short_Description ##### -->
+Mask color layer
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwyLayerMask ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyLayerMaskClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_layer_mask_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_layer_mask_set_color ##### -->
+<para>
+
+</para>
+
+@layer: 
+@color: 
+
+
+<!-- ##### FUNCTION gwy_layer_mask_get_color ##### -->
+<para>
+
+</para>
+
+@layer: 
+@Returns: 
+
+
