@@ -38,7 +38,9 @@ main(int argc, char *argv[])
     GtkWidget *window, *view;
     GwyContainer *data, *settings;
     GwyPixmapLayer *layer;
-    gchar *filename;
+    gchar *modulepath, *filename;
+    const gchar *paths[3];
+    GError *err = NULL;
 
     /* Check for --help and --version before rash file loading and GUI
      * initializatioon */
@@ -65,13 +67,21 @@ main(int argc, char *argv[])
     g_free(filename);
     settings = gwy_app_settings_get();
 
-    /* Load .gwy file loader */
-    gwy_module_register_module(GWY_MODULE_DIR "/file/gwyfile.so");
+    /* Load layer and file modules.
+     * Layer modules are not strictly required but the file is likely to
+     * contain selections and they would not cause unrecognized object warning
+     * when the corresponding layers are not loaded. */
+    modulepath = gwy_find_self_dir("modules");
+    paths[0] = g_build_filename(modulepath, "layer", NULL);
+    paths[1] = g_build_filename(modulepath, "file", NULL);
+    paths[2] = NULL;
+    gwy_module_register_modules(paths);
+    /* Paths should be freed here, let the operating system do it at exit. */
 
     /* Load the file */
-    data = gwy_file_load(argv[1]);
+    data = gwy_file_load(argv[1], GWY_RUN_NONINTERACTIVE, &err);
     if (!data) {
-        g_printerr("Cannot load `%s'\n", argv[1]);
+        g_printerr("Cannot load `%s': %s\n", argv[1], err->message);
         return 1;
     }
 
