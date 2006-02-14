@@ -947,7 +947,7 @@ gwy_data_field_number_grains(GwyDataField *mask_field,
     grain_no = 0;
 
     for (i = 0; i < n; i++) {
-        if (mask_field->data[i] && !grains[i]) {
+        if (mask_field->data[i] > 0 && !grains[i]) {
             grain_no++;
             gwy_data_field_fill_one_grain(mask_field, i % xres, i/xres,
                                           grains, grain_no, listv, listh);
