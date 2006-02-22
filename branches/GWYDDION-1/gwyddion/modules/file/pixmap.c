@@ -467,7 +467,7 @@ pixmap_detect(const gchar *filename,
         return 0;
 
     if (gdk_pixbuf_loader_write(loader, pixmap_ping_buf, n, &err))
-        score = 100;
+        score = 80;
     else {
         gwy_debug("%s", err->message);
         g_clear_error(&err);
