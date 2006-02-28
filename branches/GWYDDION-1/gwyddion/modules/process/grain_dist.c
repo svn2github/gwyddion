@@ -30,7 +30,9 @@
     (GWY_RUN_NONINTERACTIVE | GWY_RUN_WITH_DEFAULTS)
 
 static gboolean    module_register            (const gchar *name);
-static gboolean    dist                       (GwyContainer *data,
+static gboolean    size_dist                  (GwyContainer *data,
+                                               GwyRunType run);
+static gboolean    height_dist                (GwyContainer *data,
                                                GwyRunType run);
 static gboolean    stats                      (GwyContainer *data,
                                                GwyRunType run);
@@ -41,9 +43,9 @@ static GwyModuleInfo module_info = {
     &module_register,
     "grain_dist",
     N_("Evaluates distribution of grains (continuous parts of mask)."),
-    "Petr Klapetek <petr@klapetek.cz>",
+    "Petr Klapetek <petr@klapetek.cz>, Sven Neumann <neumann@jpk.com>",
     "1.2",
-    "David Nečas (Yeti) & Petr Klapetek",
+    "David Nečas (Yeti) & Petr Klapetek & Sven Neumann",
     "2003",
 };
 
@@ -54,10 +56,17 @@ GWY_MODULE_QUERY(module_info)
 static gboolean
 module_register(const gchar *name)
 {
-    static GwyProcessFuncInfo dist_func_info = {
+    static GwyProcessFuncInfo size_dist_func_info = {
         "grain_dist",
         N_("/_Grains/_Size Distribution"),
-        (GwyProcessFunc)&dist,
+        (GwyProcessFunc)&size_dist,
+        DIST_RUN_MODES,
+        GWY_MENU_FLAG_DATA_MASK,
+    };
+    static GwyProcessFuncInfo height_dist_func_info = {
+        "grain_height_dist",
+        N_("/_Grains/_Height Distribution"),
+        (GwyProcessFunc)&height_dist,
         DIST_RUN_MODES,
         GWY_MENU_FLAG_DATA_MASK,
     };
@@ -69,14 +78,15 @@ module_register(const gchar *name)
         GWY_MENU_FLAG_DATA_MASK,
     };
 
-    gwy_process_func_register(name, &dist_func_info);
+    gwy_process_func_register(name, &size_dist_func_info);
+    gwy_process_func_register(name, &height_dist_func_info);
     gwy_process_func_register(name, &stats_func_info);
 
     return TRUE;
 }
 
 static gboolean
-dist(GwyContainer *data, GwyRunType run)
+size_dist(GwyContainer *data, GwyRunType run)
 {
     GString *lab;
     GtkWidget *graph;
@@ -98,7 +108,7 @@ dist(GwyContainer *data, GwyRunType run)
 
     dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/mask"));
     dataline = (GwyDataLine*)gwy_data_line_new(10, 10, TRUE);
-    gwy_data_field_grains_get_distribution(dfield, dataline);
+    gwy_data_field_grains_get_size_distribution(dfield, dataline);
 
     lab = g_string_new(_("Grain size histogram"));
     units = gwy_si_unit_get_format(dfield->si_unit_xy, dataline->real, NULL);
@@ -108,6 +118,49 @@ dist(GwyContainer *data, GwyRunType run)
     data_window = gwy_app_data_window_get_for_data(data);
     gwy_app_graph_window_create_for_window(GWY_GRAPH(graph), data_window,
                                            _("Grain size distribution"));
+
+    g_string_free(lab, TRUE);
+    g_object_unref(dataline);
+    g_free(units);
+
+    return FALSE;
+}
+
+static gboolean
+height_dist(GwyContainer *data, GwyRunType run)
+{
+    GString *lab;
+    GtkWidget *graph;
+    GwyDataWindow *data_window;
+    GwyGraphAutoProperties prop;
+    GwyDataLine *dataline;
+    GwyDataField *dfield;
+    GwyDataField *mfield;
+    GwySIValueFormat *units;
+
+    g_return_val_if_fail(run & DIST_RUN_MODES, FALSE);
+    g_return_val_if_fail(gwy_container_contains_by_name(data, "/0/mask"),
+                         FALSE);
+
+    graph = gwy_graph_new();
+    gwy_graph_get_autoproperties(GWY_GRAPH(graph), &prop);
+    prop.is_point = 0;
+    prop.is_line = 1;
+    gwy_graph_set_autoproperties(GWY_GRAPH(graph), &prop);
+
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/data"));
+    mfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, "/0/mask"));
+    dataline = (GwyDataLine*)gwy_data_line_new(10, 10, TRUE);
+    gwy_data_field_grains_get_height_distribution(dfield, mfield, dataline);
+
+    lab = g_string_new(_("Grain height histogram"));
+    units = gwy_si_unit_get_format(dfield->si_unit_xy, dataline->real, NULL);
+    gwy_graph_add_dataline_with_units(GWY_GRAPH(graph), dataline, 0, lab, NULL,
+                                        units->magnitude, 1, units->units, " ");
+
+    data_window = gwy_app_data_window_get_for_data(data);
+    gwy_app_graph_window_create_for_window(GWY_GRAPH(graph), data_window,
+                                           _("Grain height distribution"));
 
     g_string_free(lab, TRUE);
     g_object_unref(dataline);
