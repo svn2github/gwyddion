@@ -1,4 +1,13 @@
 
+1.16
+Library:
+- Grain statistics were fixed.
+
+Modules:
+- BCR file: Void pixel handling was improved (bug #68).
+- Grain distribution: Height distribution was added (bug #69).
+
+
 1.15
 Application:
 - Compilation on Mac OS X was fixed (bug #64).
