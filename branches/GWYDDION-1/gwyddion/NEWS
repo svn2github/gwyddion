@@ -6,6 +6,7 @@ Library:
 Modules:
 - BCR file: Void pixel handling was improved (bug #68).
 - Grain distribution: Height distribution was added (bug #69).
+- RHK SPM32: Value offsets are respected.
 
 
 1.15

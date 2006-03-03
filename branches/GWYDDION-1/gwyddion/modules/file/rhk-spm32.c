@@ -142,7 +142,7 @@ static GwyModuleInfo module_info = {
     "rhk-spm32",
     N_("Imports RHK Technology SPM32 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1.1",
+    "0.1.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -471,6 +471,7 @@ rhkspm32_read_data(RHKPage *rhkpage,
         data[i] = GINT16_FROM_LE(p[i]);
 
     gwy_data_field_multiply(dfield, rhkpage->z.scale);
+    gwy_data_field_add(dfield, rhkpage->z.offset);
 
     siunit = gwy_data_field_get_si_unit_xy(dfield);
     gwy_si_unit_set_unit_string(siunit, rhkpage->x.units);
