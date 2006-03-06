@@ -43,9 +43,7 @@
 #endif
 
 #include "get.h"
-
-/* Just guessing, format has no real magic header */
-#define HEADER_SIZE 240
+#include <stdio.h>
 
 typedef enum {
     SURF_PC = 0,
@@ -101,16 +99,17 @@ typedef enum {
 
 typedef struct {
     SurfFormatType format;
-    guint nobjects;    
-    guint version;
+    gint nobjects;    
+    gint version;
+    SurfObjectType type;
     gchar object_name[30];
     gchar operator_name[30];
     gint material_code;
-    SurfAcqusitionType acquisiton;
+    SurfAcqusitionType acquisition;
     SurfRangeType range;
     SurfSpecialPointsType special_points;
     gboolean absolute;
-    guint pointsize;
+    gint pointsize;
     gint zmin;
     gint zmax;
     gint xres; /*number of points per line*/
@@ -119,18 +118,18 @@ typedef struct {
     gdouble dx;
     gdouble dy;
     gdouble dz;
-    gchar xaxis[15];
-    gchar yaxis[15];
-    gchar zaxis[15];
-    gchar dx_unit[15];
-    gchar dy_unit[15];
-    gchar dz_unit[15];
-    gchar xlength_unit[15];
-    gchar ylength_unit[15];
-    gchar zlength_unit[15];
-    gint xunit_ratio;
-    gint yunit_ratio;
-    gint zunit_ratio;
+    gchar *xaxis;
+    gchar *yaxis;
+    gchar *zaxis;
+    gchar *dx_unit;
+    gchar *dy_unit;
+    gchar *dz_unit;
+    gchar *xlength_unit;
+    gchar *ylength_unit;
+    gchar *zlength_unit;
+    gdouble xunit_ratio;
+    gdouble yunit_ratio;
+    gdouble zunit_ratio;
     gint imprint;
     SurfInversionType inversion;
     SurfLevelingType leveling;
@@ -164,9 +163,6 @@ static void          fill_data_fields   (SurfFile *surffile,
                                          const guchar *buffer);
 static void          store_metadata     (SurfFile *surffile,
                                          GwyContainer *container);
-static guint         select_which_data  (SurfFile *surffile);
-static void          selection_changed  (GtkWidget *button,
-                                         SurfControls *controls);
 
 
 /* The module info. */
@@ -175,7 +171,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     "surffile",
     N_("Imports Surf (Applied Physics and Engineering) data files."),
-    "Yeti <yeti@gwyddion.net>",
+    "Petr Klapetek <klapetek@gwyddion.net>",
     "0.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
@@ -207,8 +203,6 @@ surffile_detect(const gchar *filename, gboolean only_name)
     gint score = 0;
     FILE *fh;
     gchar header[12];
-    const guchar *p;
-    guint version, mode, vbtype;
 
     if (only_name) {
         if (g_str_has_suffix(filename, ".sur"))
@@ -241,7 +235,7 @@ surffile_load(const gchar *filename)
     gsize size = 0;
     GError *err = NULL;
     GwyDataField *dfield = NULL;
-    guint b, n;
+    gchar signature[12];
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -249,96 +243,114 @@ surffile_load(const gchar *filename)
         return NULL;
     }
     p = buffer;
-    surffile.version = *(p++);
-    if (size < 1294) {
+    
+    get_CHARS(signature, &p, 12);
+    if (strcmp(signature, "DIGITAL SURF") != 0) {
         g_warning("File %s is not a Surf file", filename);
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
 
-    surffile.spm_mode = *(p++);
-    p += 2;   /* Skip VisualBasic VARIANT type type */
-    surffile.scan_date = get_DOUBLE(&p);
-    surffile.maxr_x = get_FLOAT(&p);
-    surffile.maxr_y = get_FLOAT(&p);
-    surffile.x_offset = get_DWORD(&p);
-    surffile.y_offset = get_DWORD(&p);
-    surffile.size_flag = get_WORD(&p);
-    surffile.res = 16 << surffile.size_flag;
-    surffile.acquire_delay = get_FLOAT(&p);
-    surffile.raster_delay = get_FLOAT(&p);
-    surffile.tip_dist = get_FLOAT(&p);
-    surffile.v_ref = get_FLOAT(&p);
-    if (surffile.version == 1) {
-        surffile.vpmt1 = get_WORD(&p);
-        surffile.vpmt2 = get_WORD(&p);
-    }
-    else {
-        surffile.vpmt1 = get_FLOAT(&p);
-        surffile.vpmt2 = get_FLOAT(&p);
-    }
-    surffile.remark = g_strndup(p, 120);
-    p += 120;
-    surffile.x_piezo_factor = get_DWORD(&p);
-    surffile.y_piezo_factor = get_DWORD(&p);
-    surffile.z_piezo_factor = get_DWORD(&p);
-    surffile.hv_gain = get_FLOAT(&p);
-    surffile.freq_osc_tip = get_DOUBLE(&p);
-    surffile.rotate = get_FLOAT(&p);
-    surffile.slope_x = get_FLOAT(&p);
-    surffile.slope_y = get_FLOAT(&p);
-    surffile.topo_means = get_WORD(&p);
-    surffile.optical_means = get_WORD(&p);
-    surffile.error_means = get_WORD(&p);
-    surffile.channels = get_DWORD(&p);
-    surffile.ndata = 0;
-    for (b = surffile.channels; b; b = b >> 1)
-        surffile.ndata += (b & 1);
-    surffile.range_x = get_FLOAT(&p);
-    surffile.range_y = get_FLOAT(&p);
-    surffile.xreal = surffile.maxr_x * surffile.x_piezo_factor * surffile.range_x
-                    * surffile.hv_gain/65535.0 * 1e-9;
-    surffile.yreal = surffile.maxr_y * surffile.y_piezo_factor * surffile.range_y
-                    * surffile.hv_gain/65535.0 * 1e-9;
-    /* reserved */
-    p += 46;
+    surffile.format = get_WORD(&p);
+    surffile.nobjects = get_WORD(&p);
+    surffile.version = get_WORD(&p);
+    surffile.type = get_WORD(&p);
+    get_CHARS(surffile.object_name, &p, 30);
+    get_CHARS(surffile.operator_name, &p, 30);
+    surffile.material_code = get_WORD(&p);
+    surffile.acquisition = get_WORD(&p);
+    surffile.range = get_WORD(&p);
+    surffile.special_points = get_WORD(&p);
+    surffile.absolute = get_WORD(&p);
+    /*reserved*/
+    p += 8;
+    surffile.pointsize = get_WORD(&p);
+    surffile.zmin = get_DWORD(&p); 
+    surffile.zmax = get_DWORD(&p);
+    surffile.xres = get_DWORD(&p);
+    surffile.yres = get_DWORD(&p);
+    surffile.nofpoints = get_DWORD(&p);
+    
+    //surffile.dx = get_FLOAT(&p);
+    //surffile.dy = get_FLOAT(&p);
+    //surffile.dz = get_FLOAT(&p);
+    p += 12; /*FIXME if get_FLOATs are here, module fails unexpectedly*/
+    surffile.xaxis = g_strndup(p, 16);
+    p += 16;
+    surffile.yaxis = g_strndup(p, 16);
+    p += 16;
+    surffile.zaxis = g_strndup(p, 16);
+    p += 16;
+    surffile.dx_unit = g_strndup(p, 16);
+    p += 16;
+    surffile.dy_unit = g_strndup(p, 16);
+    p += 16;
+    surffile.dz_unit = g_strndup(p, 16);
+    p += 16;
+    surffile.xlength_unit = g_strndup(p, 16);
+    p += 16;
+    surffile.ylength_unit = g_strndup(p, 16);
+    p += 16;
+    surffile.zlength_unit = g_strndup(p, 16);
+    p += 16;
+     
+    //surffile.xunit_ratio = get_FLOAT(&p); 
+    p += 4;
+    //surffile.yunit_ratio = get_FLOAT(&p); 
+    p += 4;
+    //surffile.zunit_ratio = get_FLOAT(&p); 
+    p += 4;
+    surffile.imprint = get_WORD(&p);
+    surffile.inversion = get_WORD(&p);
+    surffile.leveling = get_WORD(&p);
+    surffile.seconds = get_WORD(&p);
+    surffile.minutes = get_WORD(&p);
+    surffile.hours = get_WORD(&p);
+    surffile.day = get_WORD(&p);
+    surffile.month = get_WORD(&p);
+    surffile.year = get_WORD(&p);
+    surffile.measurement_duration = get_WORD(&p);
+    surffile.comment_size = get_WORD(&p);
+    surffile.private_size = get_WORD(&p);
 
-    gwy_debug("version = %u, spm_mode = %u", surffile.version, surffile.spm_mode);
-    gwy_debug("scan_date = %f", surffile.scan_date);
-    gwy_debug("maxr_x = %g, maxr_y = %g", surffile.maxr_x, surffile.maxr_y);
-    gwy_debug("x_offset = %u, y_offset = %u",
-              surffile.x_offset, surffile.y_offset);
-    gwy_debug("size_flag = %u", surffile.size_flag);
-    gwy_debug("acquire_delay = %g, raster_delay = %g, tip_dist = %g",
-              surffile.acquire_delay, surffile.raster_delay, surffile.tip_dist);
-    gwy_debug("v_ref = %g, vpmt1 = %g, vpmt2 = %g",
-              surffile.v_ref, surffile.vpmt1, surffile.vpmt2);
-    gwy_debug("x_piezo_factor = %u, y_piezo_factor = %u, z_piezo_factor = %u",
-              surffile.x_piezo_factor, surffile.y_piezo_factor,
-              surffile.z_piezo_factor);
-    gwy_debug("hv_gain = %g, freq_osc_tip = %g, rotate = %g",
-              surffile.hv_gain, surffile.freq_osc_tip, surffile.rotate);
-    gwy_debug("slope_x = %g, slope_y = %g",
-              surffile.slope_x, surffile.slope_y);
-    gwy_debug("topo_means = %u, optical_means = %u, error_means = %u",
-              surffile.topo_means, surffile.optical_means, surffile.error_means);
-    gwy_debug("channel bitmask = %03x, ndata = %u",
-              surffile.channels, surffile.ndata);
-    gwy_debug("range_x = %g, range_y = %g",
-              surffile.range_x, surffile.range_y);
+    memcpy(surffile.client_zone, p, 128);
+    p += 128;
+    
+    //surffile.XOffset = get_FLOAT(&p);
+    p += 4;
+    //surffile.YOffset = get_FLOAT(&p);
+    p += 4;
+    //surffile.ZOffset = get_FLOAT(&p);
+    p += 4;
 
-    n = (surffile.res + 1)*(surffile.res + 1)*sizeof(float);
-    if (size - (p - buffer) != n*surffile.ndata) {
-        g_warning("Expected data size %u, but it's %u.",
-                  n*surffile.ndata, (guint)(size - (p - buffer)));
-        surffile.ndata = MIN(surffile.ndata, (size - (p - buffer))/n);
-        if (!surffile.ndata) {
-            g_warning("No data");
-            gwy_file_abandon_contents(buffer, size, NULL);
-
-            return NULL;
-        }
-    }
+    /*reserved*/
+    p += 33;            
+    
+     
+    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n", 
+              surffile.format, surffile.nobjects, surffile.version, surffile.type); 
+    gwy_debug("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
+     
+    gwy_debug("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
+    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range, 
+           surffile.special_points, (gint)surffile.absolute);
+    gwy_debug("data point size: %d\n", surffile.pointsize);
+    gwy_debug("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
+    gwy_debug("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
+    gwy_debug("total number of points: %d\n", surffile.nofpoints);
+    gwy_debug("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
+    gwy_debug("X axis name: %s\n", surffile.xaxis);
+    gwy_debug("Y axis name: %s\n", surffile.yaxis);
+    gwy_debug("Z axis name: %s\n", surffile.zaxis);
+    gwy_debug("dx unit: %s\n", surffile.dx_unit);
+    gwy_debug("dy unit: %s\n", surffile.dy_unit);
+    gwy_debug("dz unit: %s\n", surffile.dz_unit);
+    gwy_debug("X axis unit: %s\n", surffile.xlength_unit);
+    gwy_debug("Y axis unit: %s\n", surffile.ylength_unit);
+    gwy_debug("Z axis unit: %s\n", surffile.zlength_unit);
+    gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
+    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling); 
+    
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
@@ -348,12 +360,9 @@ surffile_load(const gchar *filename)
                                          G_OBJECT(surffile.dfield));
         store_metadata(&surffile, GWY_CONTAINER(object));
     }
-    for (b = 0; b < surffile.ndata; b++)
-        g_object_unref(surffile.data[b]);
-
-    g_free(surffile.remark);
-
     return (GwyContainer*)object;
+    
+    return NULL;
 }
 
 static void
@@ -363,21 +372,23 @@ fill_data_fields(SurfFile *surffile,
     gdouble *data;
     guint n, i, j;
 
-    surffile->dfield = GWY_DATA_FIELD(gwy_data_field_new(surffile->res,
-                                                   surffile->res,
-                                                   surffile->xreal,
-                                                   surffile->yreal,
-                                                   FALSE));
+    surffile->dfield = GWY_DATA_FIELD(gwy_data_field_new(surffile->xres,
+                                                   surffile->yres,
+                                                   surffile->xres,
+                                                   surffile->yres,
+                                                   TRUE));
+    
     data = gwy_data_field_get_data(surffile->dfield);
-    buffer += (surffile->res + 1)*sizeof(float);
-    for (i = 0; i < surffile->res; i++) {
-        buffer += sizeof(float);
-        for (j = 0; j < surffile->res; j++) {
-            *(data++) = get_WORD(&buffer);
+    buffer += (surffile->xres + 1)*surffile->pointsize;
+    for (i = 0; i < surffile->xres; i++) {
+        buffer += sizeof(surffile->pointsize);
+        for (j = 0; j < surffile->yres; j++) {
+            if (surffile->pointsize == 16)
+                *(data++) = get_WORD(&buffer);
+            else 
+                *(data++) = get_DWORD(&buffer);
         }
     }
-    gwy_data_field_multiply(surffile->dfield, 1e-9);
-    
 }
 
 #define HASH_STORE(key, fmt, field) \
@@ -388,24 +399,13 @@ static void
 store_metadata(SurfFile *surffile,
                GwyContainer *container)
 {
+    
     gchar *p;
 
     HASH_STORE("Version", "%u", version);
-    HASH_STORE("Tip oscilation frequency", "%g Hz", freq_osc_tip);
-    HASH_STORE("Acquire delay", "%.6f s", acquire_delay);
-    HASH_STORE("Raster delay", "%.6f s", raster_delay);
-    HASH_STORE("Tip distance", "%g nm", tip_dist);
-
-    if (surffile->remark && *surffile->remark
-        && (p = g_convert(surffile->remark, strlen(surffile->remark),
-                          "UTF-8", "ISO-8859-1", NULL, NULL, NULL)))
-        gwy_container_set_string_by_name(container, "/meta/Comment", p);
-    gwy_container_set_string_by_name
-        (container, "/meta/SPM mode",
-         g_strdup(gwy_enum_to_string(surffile->spm_mode, spm_modes,
-                                     G_N_ELEMENTS(spm_modes))));
-    gwy_container_set_string_by_name(container, "/meta/Date",
-                                     format_vt_date(surffile->scan_date));
+    HASH_STORE("Operator name", "%s", operator_name);
+    HASH_STORE("Object name", "%s", object_name);
+    HASH_STORE("Measurement duration", "%d s", measurement_duration);
 }
 
 
