@@ -33,17 +33,21 @@
 
 #include "get.h"
 
-/* Ugly Microsfot UTF-16... */
+/* Ugly Microsoft UTF-16...
+ * It reads: `STiMage 004.NNN N', but we do not check the NNN N */
 static const guchar MAGIC[] = {
-  0x9e, 0x00, 0x53, 0x00, 0x54, 0x00, 0x69, 0x00, 0x4d, 0x00, 0x61, 0x00,
-  0x67, 0x00, 0x65, 0x00, 0x20, 0x00, 0x30, 0x00, 0x30, 0x00, 0x34, 0x00,
-  0x2e, 0x00, 0x30, 0x00, 0x30, 0x00, 0x31, 0x00, 0x20, 0x00, 0x31, 0x00
+  0x53, 0x00, 0x54, 0x00, 0x69, 0x00, 0x4d, 0x00, 0x61, 0x00, 0x67, 0x00,
+  0x65, 0x00, 0x20, 0x00, 0x30, 0x00, 0x30, 0x00, 0x34, 0x00, 0x2e, 0x00,
 };
-#define MAGIC_SIZE (G_N_ELEMENTS(MAGIC))
 
 #define EXTENSION ".sm3"
 
-enum { HEADER_SIZE = MAGIC_SIZE + 2*4 + 15*4 + 11*4 + 16 };
+enum {
+    MAGIC_OFFSET = 2,
+    MAGIC_SIZE = G_N_ELEMENTS(MAGIC),
+    MAGIC_TOTAL_SIZE = 36,   /* including the version part we do not check */
+    HEADER_SIZE = 2 + MAGIC_TOTAL_SIZE + 2*4 + 15*4 + 11*4 + 16
+};
 
 typedef enum {
     RHK_TYPE_IMAGE          = 0,
@@ -213,7 +217,7 @@ static GwyModuleInfo module_info = {
     "rhk-sm3",
     N_("Imports RHK Technology SM3 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1.1",
+    "0.1.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -288,7 +292,7 @@ rhk_sm3_detect(const gchar *filename,
 {
     gint score = 0;
     FILE *fh;
-    gchar magic[MAGIC_SIZE];
+    gchar magic[MAGIC_OFFSET + MAGIC_SIZE];
 
     if (only_name) {
         gchar *filename_lc;
@@ -302,8 +306,8 @@ rhk_sm3_detect(const gchar *filename,
 
     if (!(fh = fopen(filename, "rb")))
         return 0;
-    if (fread(magic, 1, MAGIC_SIZE, fh) == MAGIC_SIZE
-        && memcmp(magic, MAGIC, MAGIC_SIZE) == 0)
+    if (fread(magic, 1, MAGIC_SIZE+MAGIC_OFFSET, fh) == MAGIC_SIZE+MAGIC_OFFSET
+        && memcmp(magic + MAGIC_OFFSET, MAGIC, MAGIC_SIZE) == 0)
         score = 100;
     fclose(fh);
 
@@ -367,7 +371,7 @@ rhk_sm3_read_page(const guchar **buffer,
         g_warning("Page header truncated");
         return NULL;
     }
-    if (memcmp(*buffer, MAGIC, MAGIC_SIZE) != 0) {
+    if (memcmp(p + MAGIC_OFFSET, MAGIC, MAGIC_SIZE) != 0) {
         g_warning("Magic doesn't match");
         return NULL;
     }
@@ -379,9 +383,9 @@ rhk_sm3_read_page(const guchar **buffer,
         g_warning("Real page header truncated");
         goto FAIL;
     }
-    /* Convert to UTF-8 */
-    memcpy(page->version, p, 36);
-    p += 36;
+    /* TODO: Convert to UTF-8, store to meta */
+    memcpy(page->version, p, MAGIC_TOTAL_SIZE);
+    p += MAGIC_TOTAL_SIZE;
     page->string_count = get_WORD(&p);
     gwy_debug("string_count = %u", page->string_count);
     page->type = get_DWORD(&p);
