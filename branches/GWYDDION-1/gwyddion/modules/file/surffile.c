@@ -70,7 +70,7 @@ typedef enum {
     SURF_ACQ_INTERFEROMETER = 9,
     SURF_ACQ_LIGHT = 10,
 } SurfAcqusitionType;
-    
+
 
 typedef enum {
     SURF_RANGE_NORMAL = 0,
@@ -99,7 +99,7 @@ typedef enum {
 
 typedef struct {
     SurfFormatType format;
-    gint nobjects;    
+    gint nobjects;
     gint version;
     SurfObjectType type;
     gchar object_name[30];
@@ -243,9 +243,9 @@ surffile_load(const gchar *filename)
         return NULL;
     }
     p = buffer;
-    
-    get_CHARS(signature, &p, 12);
-    if (strcmp(signature, "DIGITAL SURF") != 0) {
+
+    get_CHARARRAY(signature, &p);
+    if (strncmp(signature, "DIGITAL SURF", 12) != 0) {
         g_warning("File %s is not a Surf file", filename);
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
@@ -255,8 +255,8 @@ surffile_load(const gchar *filename)
     surffile.nobjects = get_WORD(&p);
     surffile.version = get_WORD(&p);
     surffile.type = get_WORD(&p);
-    get_CHARS(surffile.object_name, &p, 30);
-    get_CHARS(surffile.operator_name, &p, 30);
+    get_CHARARRAY(surffile.object_name, &p);
+    get_CHARARRAY(surffile.operator_name, &p);
     surffile.material_code = get_WORD(&p);
     surffile.acquisition = get_WORD(&p);
     surffile.range = get_WORD(&p);
@@ -265,16 +265,15 @@ surffile_load(const gchar *filename)
     /*reserved*/
     p += 8;
     surffile.pointsize = get_WORD(&p);
-    surffile.zmin = get_DWORD(&p); 
+    surffile.zmin = get_DWORD(&p);
     surffile.zmax = get_DWORD(&p);
     surffile.xres = get_DWORD(&p);
     surffile.yres = get_DWORD(&p);
     surffile.nofpoints = get_DWORD(&p);
-    
-    //surffile.dx = get_FLOAT(&p);
-    //surffile.dy = get_FLOAT(&p);
-    //surffile.dz = get_FLOAT(&p);
-    p += 12; /*FIXME if get_FLOATs are here, module fails unexpectedly*/
+
+    surffile.dx = get_FLOAT(&p);
+    surffile.dy = get_FLOAT(&p);
+    surffile.dz = get_FLOAT(&p);
     surffile.xaxis = g_strndup(p, 16);
     p += 16;
     surffile.yaxis = g_strndup(p, 16);
@@ -293,13 +292,10 @@ surffile_load(const gchar *filename)
     p += 16;
     surffile.zlength_unit = g_strndup(p, 16);
     p += 16;
-     
-    //surffile.xunit_ratio = get_FLOAT(&p); 
-    p += 4;
-    //surffile.yunit_ratio = get_FLOAT(&p); 
-    p += 4;
-    //surffile.zunit_ratio = get_FLOAT(&p); 
-    p += 4;
+
+    surffile.xunit_ratio = get_FLOAT(&p);
+    surffile.yunit_ratio = get_FLOAT(&p);
+    surffile.zunit_ratio = get_FLOAT(&p);
     surffile.imprint = get_WORD(&p);
     surffile.inversion = get_WORD(&p);
     surffile.leveling = get_WORD(&p);
@@ -313,26 +309,22 @@ surffile_load(const gchar *filename)
     surffile.comment_size = get_WORD(&p);
     surffile.private_size = get_WORD(&p);
 
-    memcpy(surffile.client_zone, p, 128);
-    p += 128;
-    
-    //surffile.XOffset = get_FLOAT(&p);
-    p += 4;
-    //surffile.YOffset = get_FLOAT(&p);
-    p += 4;
-    //surffile.ZOffset = get_FLOAT(&p);
-    p += 4;
+    get_CHARARRAY(surffile.client_zone, &p);
+
+    surffile.XOffset = get_FLOAT(&p);
+    surffile.YOffset = get_FLOAT(&p);
+    surffile.ZOffset = get_FLOAT(&p);
 
     /*reserved*/
-    p += 33;            
-    
-     
-    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n", 
-              surffile.format, surffile.nobjects, surffile.version, surffile.type); 
+    p += 33;
+
+
+    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
+              surffile.format, surffile.nobjects, surffile.version, surffile.type);
     gwy_debug("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
-     
+
     gwy_debug("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
-    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range, 
+    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range,
            surffile.special_points, (gint)surffile.absolute);
     gwy_debug("data point size: %d\n", surffile.pointsize);
     gwy_debug("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
@@ -349,8 +341,8 @@ surffile_load(const gchar *filename)
     gwy_debug("Y axis unit: %s\n", surffile.ylength_unit);
     gwy_debug("Z axis unit: %s\n", surffile.zlength_unit);
     gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
-    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling); 
-    
+    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
+
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
@@ -361,7 +353,7 @@ surffile_load(const gchar *filename)
         store_metadata(&surffile, GWY_CONTAINER(object));
     }
     return (GwyContainer*)object;
-    
+
     return NULL;
 }
 
@@ -377,7 +369,7 @@ fill_data_fields(SurfFile *surffile,
                                                    surffile->xres,
                                                    surffile->yres,
                                                    TRUE));
-    
+
     data = gwy_data_field_get_data(surffile->dfield);
     buffer += (surffile->xres + 1)*surffile->pointsize;
     for (i = 0; i < surffile->xres; i++) {
@@ -385,7 +377,7 @@ fill_data_fields(SurfFile *surffile,
         for (j = 0; j < surffile->yres; j++) {
             if (surffile->pointsize == 16)
                 *(data++) = get_WORD(&buffer);
-            else 
+            else
                 *(data++) = get_DWORD(&buffer);
         }
     }
@@ -399,7 +391,7 @@ static void
 store_metadata(SurfFile *surffile,
                GwyContainer *container)
 {
-    
+
     gchar *p;
 
     HASH_STORE("Version", "%u", version);
