@@ -234,7 +234,6 @@ surffile_load(const gchar *filename)
     const guchar *p;
     gsize size = 0;
     GError *err = NULL;
-    GwyDataField *dfield = NULL;
     gchar signature[12];
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
@@ -362,7 +361,7 @@ fill_data_fields(SurfFile *surffile,
                  const guchar *buffer)
 {
     gdouble *data;
-    guint n, i, j;
+    guint i, j;
 
     surffile->dfield = GWY_DATA_FIELD(gwy_data_field_new(surffile->xres,
                                                    surffile->yres,
@@ -391,9 +390,6 @@ static void
 store_metadata(SurfFile *surffile,
                GwyContainer *container)
 {
-
-    gchar *p;
-
     HASH_STORE("Version", "%u", version);
     HASH_STORE("Operator name", "%s", operator_name);
     HASH_STORE("Object name", "%s", object_name);
