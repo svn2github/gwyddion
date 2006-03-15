@@ -12,6 +12,7 @@ file_LTLIBRARIES = \
 	apefile.la	\
 	assing-afm.la	\
 	bcrfile.la	\
+	burleigh.la	\
 	createc.la	\
 	ezdfile.la	\
 	gwyfile.la	\
@@ -81,6 +82,9 @@ assing_afm_la_LIBADD = $(module_libadd)
 
 bcrfile_la_SOURCES = bcrfile.c
 bcrfile_la_LIBADD = $(module_libadd)
+
+burleigh_la_SOURCES = burleigh.c
+burleigh_la_LIBADD = $(module_libadd)
 
 createc_la_SOURCES = createc.c
 createc_la_LIBADD = $(module_libadd)
