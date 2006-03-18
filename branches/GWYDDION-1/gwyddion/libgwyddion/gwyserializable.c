@@ -1633,7 +1633,7 @@ gwy_serialize_unpack_int32_array(const guchar *buffer,
 #else
     value = g_new(gint32, newasize);
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
-                         sizeof(gint32), newasize, (1 << sizeof(gint32)) - 1);
+                         sizeof(gint32), newasize, sizeof(gint32) - 1);
 #endif
     *position += newasize*sizeof(gint32);
     *asize = newasize;
@@ -1708,7 +1708,7 @@ gwy_serialize_unpack_int64_array(const guchar *buffer,
 #else
     value = g_new(gint64, newasize);
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
-                         sizeof(gint64), newasize, (1 << sizeof(gint64)) - 1);
+                         sizeof(gint64), newasize, sizeof(gint64) - 1);
 #endif
     *position += newasize*sizeof(gint64);
     *asize = newasize;
@@ -1787,7 +1787,7 @@ gwy_serialize_unpack_double_array(const guchar *buffer,
 #else
     value = g_new(gdouble, newasize);
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
-                         sizeof(gdouble), newasize, (1 << sizeof(gdouble)) - 1);
+                         sizeof(gdouble), newasize, sizeof(gdouble) - 1);
 #endif
     *position += newasize*sizeof(gdouble);
     *asize = newasize;
