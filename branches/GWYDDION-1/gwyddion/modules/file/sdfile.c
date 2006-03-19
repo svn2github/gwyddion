@@ -46,6 +46,9 @@
 #include "get.h"
 
 #define EXTENSION ".sdf"
+#define MICROMAP_EXTENSION ".sdfa"
+
+#define Micrometer (1e-6)
 
 enum {
     SDF_HEADER_SIZE_BIN = 8 + 10 + 2*12 + 2*2 + 4*8 + 3*1
@@ -93,8 +96,11 @@ static gint          sdfile_detect_bin      (const gchar *filename,
                                              gboolean only_name);
 static gint          sdfile_detect_text     (const gchar *filename,
                                              gboolean only_name);
+static gint          micromap_detect        (const gchar *filename,
+                                             gboolean only_name);
 static GwyContainer* sdfile_load_bin        (const gchar *filename);
 static GwyContainer* sdfile_load_text       (const gchar *filename);
+static GwyContainer* micromap_load          (const gchar *filename);
 static gboolean      check_params           (const SDFile *sdfile,
                                              guint len);
 static gboolean      sdfile_read_header_bin (const guchar **p,
@@ -114,7 +120,7 @@ static GwyModuleInfo module_info = {
     "sdfile",
     N_("Imports Surfstand group SDF (Surface Data File) files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1.2",
+    "0.1.3",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -140,9 +146,18 @@ module_register(const gchar *name)
         (GwyFileLoadFunc)&sdfile_load_text,
         NULL
     };
+    /* A specific variant reported by a guy from Layertec */
+    static GwyFileFuncInfo micromap_func_info = {
+        "micromap",
+        N_("Micromap SDF files (.sdfa)"),
+        (GwyFileDetectFunc)&micromap_detect,
+        (GwyFileLoadFunc)&micromap_load,
+        NULL
+    };
 
     gwy_file_func_register(name, &sdfile_bin_func_info);
     gwy_file_func_register(name, &sdfile_text_func_info);
+    gwy_file_func_register(name, &micromap_func_info);
 
     return TRUE;
 }
@@ -239,6 +254,53 @@ sdfile_detect_text(const gchar *filename,
     return score;
 }
 
+/* This perform a generic SDF test first, then check for Micromap */
+static gint
+micromap_detect(const gchar *filename,
+                gboolean only_name)
+{
+    SDFile sdfile;
+    gchar *header, *p;
+    gsize len;
+    FILE *fh;
+    gint score = 0;
+
+    if (only_name) {
+        gchar *filename_lc;
+
+        filename_lc = g_ascii_strdown(filename, -1);
+        score = g_str_has_suffix(filename_lc, MICROMAP_EXTENSION) ? 18 : 0;
+        g_free(filename_lc);
+
+        return score;
+    }
+
+    if (!(fh = fopen(filename, "rb")))
+        return 0;
+
+    header = g_new0(gchar, SDF_PING_SIZE);
+    len = fread(header, 1, SDF_PING_SIZE-1, fh);
+    fclose(fh);
+    if (len < SDF_MIN_TEXT_SIZE-1 || header[0] != 'a') {
+        g_free(header);
+        return 0;
+    }
+
+    p = header;
+    if (sdfile_read_header_text(&p, &len, &sdfile)
+        && !sdfile.compression
+        && !sdfile.check_type) {
+        /* FIXME: This is gross.  But I'm lazy to read file footer, in 2.0
+         * we can do that more easily */
+        if (strncmp(sdfile.manufacturer, "Micromap", sizeof("Micromap")-1) == 0)
+            score = 100;
+    }
+
+    g_free(header);
+
+    return score;
+}
+
 static void
 sdfile_set_units(SDFile *sdfile,
                  GwyDataField *dfield)
@@ -321,6 +383,85 @@ sdfile_load_text(const gchar *filename)
     }
 
     sdfile_set_units(&sdfile, dfield);
+
+    container = GWY_CONTAINER(gwy_container_new());
+    gwy_container_set_object_by_name(container, "/0/data", (GObject*)dfield);
+    g_object_unref(dfield);
+
+    g_free(buffer);
+    if (sdfile.extras)
+        g_hash_table_destroy(sdfile.extras);
+
+    return container;
+}
+
+/* Perform a generic SDF load, then tweak the sizes:
+ *
+ * X [um] = NumPoints x OBJECTIVEMAG x TUBEMAG x CAMERAXPIXEL
+ * Y [um] = NumProfiles x OBJECTIVEMAG x TUBEMAG x CAMERAXPIXEL
+ */
+static GwyContainer*
+micromap_load(const gchar *filename)
+{
+    SDFile sdfile;
+    GwyContainer *container = NULL;
+    gchar *p, *buffer = NULL;
+    gsize len, size = 0;
+    GError *err = NULL;
+    GwyDataField *dfield = NULL;
+    const gchar *val;
+    gdouble objectivemag = 0.0 + sizeof("Die, die, gcc");
+    gdouble tubemag = 0.0 + sizeof("Die, die, gcc");
+    gdouble cameraxpixel = 0.0 + sizeof("Die, die, gcc");
+    gdouble cameraypixel = 0.0 + sizeof("Die, die, gcc");
+    gboolean ok;
+
+    if (!g_file_get_contents(filename, &buffer, &size, &err)) {
+        g_clear_error(&err);
+        g_warning("Cannot get file contents");
+        return NULL;
+    }
+    len = size;
+    p = buffer;
+    if (sdfile_read_header_text(&p, &len, &sdfile)) {
+        if (check_params(&sdfile, len))
+            dfield = sdfile_read_data_text(&sdfile);
+    }
+    ok = (dfield != NULL);
+
+    if (ok && (val = g_hash_table_lookup(sdfile.extras, "OBJECTIVEMAG")))
+        objectivemag = g_ascii_strtod(val, NULL);
+    else
+        ok = FALSE;
+
+    if (ok && (val = g_hash_table_lookup(sdfile.extras, "TUBEMAG")))
+        tubemag = g_ascii_strtod(val, NULL);
+    else
+        ok = FALSE;
+
+    if (ok && (val = g_hash_table_lookup(sdfile.extras, "CAMERAXPIXEL")))
+        cameraxpixel = g_ascii_strtod(val, NULL);
+    else
+        ok = FALSE;
+
+    if (ok && (val = g_hash_table_lookup(sdfile.extras, "CAMERAYPIXEL")))
+        cameraypixel = g_ascii_strtod(val, NULL);
+    else
+        ok = FALSE;
+
+    if (!ok) {
+        gwy_object_unref(dfield);
+        g_free(buffer);
+        return NULL;
+    }
+
+    sdfile_set_units(&sdfile, dfield);
+    gwy_data_field_set_xreal(dfield,
+                             Micrometer * sdfile.xres * objectivemag
+                             * tubemag * cameraxpixel);
+    gwy_data_field_set_yreal(dfield,
+                             Micrometer * sdfile.yres * objectivemag
+                             * tubemag * cameraypixel);
 
     container = GWY_CONTAINER(gwy_container_new());
     gwy_container_set_object_by_name(container, "/0/data", (GObject*)dfield);
