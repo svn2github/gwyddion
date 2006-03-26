@@ -62,3 +62,11 @@ Mindaugas Rackaitis, Penn State University
     ReadSTP Matlab method helped us in writing our stpfile import module,
     although we wrote it from scratch.
 
+Markus Pristovsek
+    The Omicron module was written using the source code of Snomputz,
+    See the module for more information.
+
+Hans-Peter Doerr
+    The Burleigh file module was written using the source code of the readimg
+    library.
+
