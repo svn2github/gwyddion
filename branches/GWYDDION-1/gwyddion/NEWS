@@ -2,12 +2,21 @@
 1.16
 Library:
 - Grain statistics were fixed.
+- gwy_math_humanize_numbers() behaves reasonably for zero values (bug #70).
 
 Modules:
+- Omicron (new): Omicron (Scala) file import.
+- Surffile (new): Surf file import.
+- Burleigh (new): Burleigh IMG v2.1 file import.
 - BCR file: Void pixel handling was improved (bug #68).
+- SDFile: Import support was significantly improved.
 - Grain distribution: Height distribution was added (bug #69).
 - RHK SPM32: Value offsets are respected.
 - RHK SM3: Can import newer files (XPMPro 1.1.0.9) (bug #71).
+- Line correction: Step correction function (new, experimental).
+
+Other:
+- JPK import module previously omitted in Win32 binaries was added.
 
 
 1.15
