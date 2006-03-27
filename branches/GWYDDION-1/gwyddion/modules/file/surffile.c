@@ -118,15 +118,15 @@ typedef struct {
     gdouble dx;
     gdouble dy;
     gdouble dz;
-    gchar *xaxis;
-    gchar *yaxis;
-    gchar *zaxis;
-    gchar *dx_unit;
-    gchar *dy_unit;
-    gchar *dz_unit;
-    gchar *xlength_unit;
-    gchar *ylength_unit;
-    gchar *zlength_unit;
+    gchar xaxis[16];
+    gchar yaxis[16];
+    gchar zaxis[16];
+    gchar dx_unit[16];
+    gchar dy_unit[16];
+    gchar dz_unit[16];
+    gchar xlength_unit[16];
+    gchar ylength_unit[16];
+    gchar zlength_unit[16];
     gdouble xunit_ratio;
     gdouble yunit_ratio;
     gdouble zunit_ratio;
@@ -254,8 +254,8 @@ surffile_load(const gchar *filename)
     surffile.nobjects = get_WORD(&p);
     surffile.version = get_WORD(&p);
     surffile.type = get_WORD(&p);
-    get_CHARARRAY(surffile.object_name, &p);
-    get_CHARARRAY(surffile.operator_name, &p);
+    get_CHARS0(surffile.object_name, &p, 30);
+    get_CHARS0(surffile.operator_name, &p, 30);
     surffile.material_code = get_WORD(&p);
     surffile.acquisition = get_WORD(&p);
     surffile.range = get_WORD(&p);
@@ -270,27 +270,20 @@ surffile_load(const gchar *filename)
     surffile.yres = get_DWORD(&p);
     surffile.nofpoints = get_DWORD(&p);
 
+    //surffile.xres = 200; surffile.yres = 200;
+    
     surffile.dx = get_FLOAT(&p);
     surffile.dy = get_FLOAT(&p);
     surffile.dz = get_FLOAT(&p);
-    surffile.xaxis = g_strndup(p, 16);
-    p += 16;
-    surffile.yaxis = g_strndup(p, 16);
-    p += 16;
-    surffile.zaxis = g_strndup(p, 16);
-    p += 16;
-    surffile.dx_unit = g_strndup(p, 16);
-    p += 16;
-    surffile.dy_unit = g_strndup(p, 16);
-    p += 16;
-    surffile.dz_unit = g_strndup(p, 16);
-    p += 16;
-    surffile.xlength_unit = g_strndup(p, 16);
-    p += 16;
-    surffile.ylength_unit = g_strndup(p, 16);
-    p += 16;
-    surffile.zlength_unit = g_strndup(p, 16);
-    p += 16;
+    get_CHARS0(surffile.xaxis, &p, 16);
+    get_CHARS0(surffile.yaxis, &p, 16);
+    get_CHARS0(surffile.zaxis, &p, 16);
+    get_CHARS0(surffile.dx_unit, &p, 16);
+    get_CHARS0(surffile.dy_unit, &p, 16);
+    get_CHARS0(surffile.dz_unit, &p, 16);
+    get_CHARS0(surffile.xlength_unit, &p, 16);
+    get_CHARS0(surffile.ylength_unit, &p, 16);
+    get_CHARS0(surffile.zlength_unit, &p, 16);
 
     surffile.xunit_ratio = get_FLOAT(&p);
     surffile.yunit_ratio = get_FLOAT(&p);
@@ -315,33 +308,36 @@ surffile_load(const gchar *filename)
     surffile.ZOffset = get_FLOAT(&p);
 
     /*reserved*/
-    p += 33;
+    p += 34;
 
 
-    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
+    printf("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
               surffile.format, surffile.nobjects, surffile.version, surffile.type);
-    gwy_debug("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
+    printf("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
 
-    gwy_debug("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
-    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range,
+    printf("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
+    printf("range type: %d, special points: %d, absolute: %d\n", surffile.range,
            surffile.special_points, (gint)surffile.absolute);
-    gwy_debug("data point size: %d\n", surffile.pointsize);
-    gwy_debug("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
-    gwy_debug("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
-    gwy_debug("total number of points: %d\n", surffile.nofpoints);
-    gwy_debug("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
-    gwy_debug("X axis name: %s\n", surffile.xaxis);
-    gwy_debug("Y axis name: %s\n", surffile.yaxis);
-    gwy_debug("Z axis name: %s\n", surffile.zaxis);
-    gwy_debug("dx unit: %s\n", surffile.dx_unit);
-    gwy_debug("dy unit: %s\n", surffile.dy_unit);
-    gwy_debug("dz unit: %s\n", surffile.dz_unit);
-    gwy_debug("X axis unit: %s\n", surffile.xlength_unit);
-    gwy_debug("Y axis unit: %s\n", surffile.ylength_unit);
-    gwy_debug("Z axis unit: %s\n", surffile.zlength_unit);
-    gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
-    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
-
+    printf("data point size: %d\n", surffile.pointsize);
+    printf("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
+    printf("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
+    printf("total number of points: %d\n", surffile.nofpoints);
+    printf("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
+    printf("X axis name: %16s\n", surffile.xaxis);
+    printf("Y axis name: %16s\n", surffile.yaxis);
+    printf("Z axis name: %16s\n", surffile.zaxis);
+    printf("dx unit: %16s\n", surffile.dx_unit);
+    printf("dy unit: %16s\n", surffile.dy_unit);
+    printf("dz unit: %16s\n", surffile.dz_unit);
+    printf("X axis unit: %16s\n", surffile.xlength_unit);
+    printf("Y axis unit: %16s\n", surffile.ylength_unit);
+    printf("Z axis unit: %16s\n", surffile.zlength_unit);
+    printf("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
+    printf("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
+    printf("Time: %d:%d:%d, Date: %d.%d.%d\n", surffile.hours, surffile.minutes, surffile.seconds,
+           surffile.day, surffile.month, surffile.year);
+    
+    p = buffer + 500;
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
@@ -365,19 +361,21 @@ fill_data_fields(SurfFile *surffile,
 
     surffile->dfield = GWY_DATA_FIELD(gwy_data_field_new(surffile->xres,
                                                    surffile->yres,
-                                                   surffile->xres,
-                                                   surffile->yres,
+                                                   surffile->xres*surffile->dx,
+                                                   surffile->yres*surffile->dy,
                                                    TRUE));
 
     data = gwy_data_field_get_data(surffile->dfield);
-    buffer += (surffile->xres + 1)*surffile->pointsize;
-    for (i = 0; i < surffile->xres; i++) {
-        buffer += sizeof(surffile->pointsize);
+    for (i = 0; i < surffile->xres; i++) { 
         for (j = 0; j < surffile->yres; j++) {
-            if (surffile->pointsize == 16)
-                *(data++) = get_WORD(&buffer);
-            else
-                *(data++) = get_DWORD(&buffer);
+            if (surffile->pointsize == 16) {
+                *(data++) = (gdouble)*(gint16*)buffer*surffile->dz;
+                buffer += 2;
+            }
+            else {
+                *(data++) = ((gdouble)*(gint32*)buffer)*surffile->dz;
+                buffer += 4;
+            }
         }
     }
 }
