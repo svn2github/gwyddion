@@ -80,6 +80,21 @@ gwy_math_humanize_numbers(gdouble unit,
 {
     gdouble lm, lu, mag, range, min;
 
+    g_return_val_if_fail(unit >= 0.0, 0.0);
+    g_return_val_if_fail(maximum >= 0.0, 0.0);
+
+    if (G_UNLIKELY(unit == 0.0 || maximum == 0.0)) {
+        if (unit > 0.0)
+            maximum = unit;
+        else if (maximum > 0.0)
+            unit = maximum;
+        else {
+            if (precision)
+                *precision = 1;
+            return 1.0;
+        }
+    }
+
     lm = log10(maximum);
     lu = log10(unit);
     mag = 3.0*floor((lm + lu)/6.0);
