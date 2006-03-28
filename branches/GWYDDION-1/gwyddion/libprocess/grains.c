@@ -590,6 +590,8 @@ gwy_data_field_grains_get_average(GwyDataField *grain_field)
  *
  * Puts number of grains vs. grain size (in real units) data into
  * @distribution.  Grain size means grain side if it was square.
+ *
+ * Since: 1.16
  **/
 void
 gwy_data_field_grains_get_size_distribution(GwyDataField *grain_field,
@@ -668,6 +670,8 @@ gwy_data_field_grains_get_distribution(GwyDataField *grain_field,
  *
  * Puts number of grains vs. grain height (in real units) data into
  * @distribution.
+ *
+ * Since: 1.16
  **/
 void
 gwy_data_field_grains_get_height_distribution(GwyDataField *data_field,
