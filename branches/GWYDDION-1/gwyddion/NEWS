@@ -1,12 +1,23 @@
+1.15cvs20060403
 
 1.16
+Application:
+- Gwyddion now depends on libxml2 used for SPML import (optionally, if you
+  compile it from source code).
+
 Library:
-- Grain statistics were fixed.
-- gwy_math_humanize_numbers() behaves reasonably for zero values (bug #70).
+- libgwydddion: Memory corruption on big-endian machines in serialization and
+  deserialization was fixed (bug #73).
+- libgwyprocess: Grain statistics were fixed.
+- libgwyddion: gwy_math_humanize_numbers() behaves reasonably for zero values
+  (bug #70).
+- libgwydgets: Gwy3DView displays correct units on all axes.
 
 Modules:
 - Omicron (new): Omicron (Scala) file import.
 - Surffile (new): Surf file import.
+- Nanotop (new): Nanotop SPM file import.
+- SPML (new): SMPL file import.
 - Burleigh (new): Burleigh IMG v2.1 file import.
 - BCR file: Void pixel handling was improved (bug #68).
 - SDFile: Import support was significantly improved.
