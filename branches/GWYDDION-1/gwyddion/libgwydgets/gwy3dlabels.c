@@ -327,17 +327,42 @@ gwy_3d_labels_get_description(Gwy3DLabels *gwy3dlabels,
 }
 
 /**
- * gwy_3d_labels_get_update:
+ * gwy_3d_labels_update:
  * @labels: 3D label collection object
  * @si_unit: SI Unit appended to the numerical values of variables in @text
  *          field of #Gwy3DLabelDescription
  *
- * Updates the numerical values of the variables in @text field of
- * #Gwy3DLabelDescription. Also appends the SI unit to this numerical values.
+ * Updates the 3D labels.
+ *
+ * See and use gwy_3d_labels_update_with_units() instead.  This function
+ * cannot distinguish between lateral and height units.
  *
  * Since: 1.5
  **/
-void gwy_3d_labels_update(Gwy3DLabels * labels, GwySIUnit * si_unit)
+void
+gwy_3d_labels_update(Gwy3DLabels *labels, GwySIUnit *si_unit)
+{
+    gwy_3d_labels_update_with_units(labels, si_unit, si_unit);
+
+}
+
+/**
+ * gwy_3d_labels_update_with_units:
+ * @labels: 3D label collection object
+ * @si_unit_xy: SI Unit appended to the numerical values of variables in @text
+ *              field of #Gwy3DLabelDescription for lateral values.
+ * @si_unit_y: SI Unit appended to the numerical values of variables in @text
+ *              field of #Gwy3DLabelDescription for height values.
+ *
+ * Updates the numerical values of the variables in @text field of
+ * #Gwy3DLabelDescription. Also appends the SI unit to this numerical values.
+ *
+ * Since: 1.16
+ **/
+void
+gwy_3d_labels_update_with_units(Gwy3DLabels *labels,
+                                GwySIUnit *si_unit_xy,
+                                GwySIUnit *si_unit_z)
 {
     GwySIValueFormat * format;
     gchar buffer[50];
@@ -360,31 +385,22 @@ void gwy_3d_labels_update(Gwy3DLabels * labels, GwySIUnit * si_unit)
     range = fabs(data_max - data_min);
     maximum = MAX(fabs(data_min), fabs(data_max));
 
-    format = gwy_si_unit_get_format_with_resolution(
-                     si_unit,
-                     xreal,
-                     xreal/3,
-                     NULL);
+    format = gwy_si_unit_get_format_with_resolution(si_unit_xy, xreal, xreal/3,
+                                                    NULL);
     g_snprintf(buffer, sizeof(buffer), "%1.1f %s",
-                   xreal/format->magnitude,
-                   format->units);
+               xreal/format->magnitude,
+               format->units);
     labels->values[0] = g_strdup(buffer); /* $X */
 
-    gwy_si_unit_get_format_with_resolution(
-                     si_unit,
-                     yreal,
-                     yreal/3,
-                     format);
+    gwy_si_unit_get_format_with_resolution(si_unit_xy, yreal, yreal/3,
+                                           format);
     g_snprintf(buffer, sizeof(buffer), "%1.1f %s",
-                   yreal/format->magnitude,
-                   format->units);
+               yreal/format->magnitude,
+               format->units);
     labels->values[1] = g_strdup(buffer); /* $Y */
 
-    gwy_si_unit_get_format_with_resolution(
-                     si_unit,
-                     maximum,
-                     range/3,
-                     format);
+    gwy_si_unit_get_format_with_resolution(si_unit_z, maximum, range/3,
+                                           format);
     g_snprintf(buffer, sizeof(buffer), "%1.0f %s",
                    data_min/format->magnitude,
                    format->units);

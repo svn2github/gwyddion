@@ -99,8 +99,13 @@ struct _Gwy3DLabelsClass {
 GType                   gwy_3d_labels_get_type             (void) G_GNUC_CONST;
 
 Gwy3DLabels*            gwy_3d_labels_new            (GwyContainer *container);
+#ifndef GWY_DISABLE_DEPRECATED
 void                    gwy_3d_labels_update         (Gwy3DLabels *labels,
                                                        GwySIUnit *si_unit);
+#endif
+void                    gwy_3d_labels_update_with_units(Gwy3DLabels *labels,
+                                                       GwySIUnit *si_unit_xy,
+                                                       GwySIUnit *si_unit_z);
 gchar*                  gwy_3d_labels_expand_text    (Gwy3DLabels *labels,
                                                        Gwy3DLabelName label_name);
 

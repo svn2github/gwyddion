@@ -350,11 +350,14 @@ gwy_3d_view_new(GwyContainer *data)
                                  TRUE,
                                  GDK_GL_RGBA_TYPE);
 
+    /* XXX: this is not used for anything, just keep it set for compatibility */
     gwy3dview->si_unit = (GwySIUnit*) gwy_si_unit_new("m");
     gwy3dview->labels = gwy_3d_labels_new(gwy3dview->container);
     g_signal_connect(gwy3dview->labels, "label_changed",
                      G_CALLBACK(gwy_3d_labels_value_changed), gwy3dview);
-    gwy_3d_labels_update(gwy3dview->labels, gwy3dview->si_unit);
+    gwy_3d_labels_update_with_units(gwy3dview->labels,
+                                    gwy_data_field_get_si_unit_xy(dfield),
+                                    gwy_data_field_get_si_unit_z(dfield));
     gwy_debug("labels:%p", gwy3dview->labels);
     return widget;
 }
@@ -524,7 +527,10 @@ gwy_3d_view_update(Gwy3DView *gwy3dview)
 
         gwy3dview->data_min  = gwy_data_field_get_min(gwy3dview->data);
         gwy3dview->data_max  = gwy_data_field_get_max(gwy3dview->data);
-        gwy_3d_labels_update(gwy3dview->labels, gwy3dview->si_unit);
+        gwy_3d_labels_update_with_units
+            (gwy3dview->labels,
+             gwy_data_field_get_si_unit_xy(gwy3dview->downsampled),
+             gwy_data_field_get_si_unit_z(gwy3dview->downsampled));
     }
 
     if (!update_due_to_gradient && update_data)
