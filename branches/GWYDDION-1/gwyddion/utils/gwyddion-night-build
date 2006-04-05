@@ -10,9 +10,7 @@ installroot=$HOME/tmp
 gtkdocdir="/share/gtk-doc/html/*"
 gtkdocdirs=(/usr /usr/local $installroot/usr)
 gtkdocdirs=${gtkdocdirs[@]/%/$gtkdocdir}
-gnainsindex=$HOME/lib/gtk.gnains
 phpswroot=$HOME/PHP/software
-rpmtopdir=$(rpm --showrc | grep '^-[0-9]\+: _topdir' | cut -f2)
 host=$($HOME/bin/Ftpcp)
 
 source $HOME/.bashrc
@@ -67,7 +65,7 @@ function update_version() {
 function autostuff() {
   rm -fv config.cache
   rm mkinstalldirs
-  ./autogen.sh --config-cache --disable-desktop-file-update --prefix=$installroot/usr
+  ./autogen.sh --config-cache --disable-desktop-file-update --prefix=$installroot/usr2
   make -C po gwyddion.pot
 }
 
@@ -112,7 +110,6 @@ function install_to_tmp() {
 
 
 function make_dists() {
-  rm -f .releaseme
   toremove=$pkgname-${basever}cvs*.tar.*
   for f in $toremove; do
     rm -fv $f
@@ -120,43 +117,7 @@ function make_dists() {
 
   make dist
   test -s $pkgname-$version.tar.bz2 \
-    && rpmbuild -ta --clean --target $arch $pkgname-$version.tar.bz2 \
-    && touch .releaseme
-}
-
-
-function release_dists() {
-  if ! test -f .releaseme; then
-    return
-  fi
-
-  pcvs=$pkgname-cvs
-  pver=$pkgname-$version
-  for f in $toremove; do
-    $HOME/bin/Ftprm $pkgname/$f
-  done
-
-  archdir=$rpmtopdir/RPMS/$arch
-  $HOME/bin/Ftpcp $pkgname $pver.tar.*
-  $HOME/bin/Ftpcp $pkgname \
-    $archdir/$pkgname-{,devel-,plugins-,debuginfo-}$version-1.$arch.rpm \
-    $rpmtopdir/SRPMS/$pver-1.src.rpm
-  if test -f $phpswroot/$pkgname/main.xhtml; then
-    pkgpage=$phpswroot/$pkgname/main.xhtml
-  else
-    pkgpage= $phpswroot/$pkgname.xhtml
-  fi
-  sed -ri -e "2s/\\<1\\.[0-9][0-9.cvs]*/$version/" $pkgpage
-
-  cd Ftp/$pkgname && rm -f $pcvs.tar.* && tar -jxf $pver.tar.bz2 && mv $pver $pcvs && tar -jcf $pcvs.tar.bz2 $pcvs && tar -zcf $pcvs.tar.gz $pcvs; rm -rf $pcvs $pver
-  ssh $host "cd Ftp/$pkgname && rm -f $pcvs.tar.* && tar -jxf $pver.tar.bz2 && mv $pver $pcvs && tar -jcf $pcvs.tar.bz2 $pcvs && tar -zcf $pcvs.tar.gz $pcvs; rm -rf $pcvs $pver"
-  rm -f .releaseme
-}
-
-
-function gnains_index() {
-  which gnains-mkindex || return
-  gnains-mkindex -f $gnainsindex $gtkdocdirs
+    && rpmbuild -ta --clean --target $arch $pkgname-$version.tar.bz2
 }
 
 
@@ -209,8 +170,6 @@ else
   call check_coding_style
   call install_to_tmp
   call make_dists
-  call release_dists
-  call gnains_index
   call webify_api
   # LIST-END
 fi

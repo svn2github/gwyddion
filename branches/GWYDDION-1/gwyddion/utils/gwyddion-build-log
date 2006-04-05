@@ -39,12 +39,6 @@ cat >make_dists.ignore <<':'
 ':'
 :
 
-cat >gnains_index.ignore <<':'
-*** gnains-mkindex-Warning: Cannot decide what to do with <.*>
-*** gnains-mkindex-Warning: Duplicit key <.*>
-':'
-:
-
 function printerr() {
   f=$1
   shift
@@ -109,8 +103,6 @@ printerr check_coding_style
 coding_style_report
 printerr install_to_tmp grep -vFf build_project.err
 printerr make_dists grep -vFf build_project.err
-printerr release_dists
-printerr gnains_index
 printerr webify_api
 
 rm *.ignore $tmplog
