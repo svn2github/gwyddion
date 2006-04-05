@@ -351,8 +351,10 @@ gwy_byteswapped_append(guint8 *source,
         return;
     }
 
-    buffer = dest->data + dest->len;
+    i = dest->len;
+    /* This can cause dest->data to change (bug #73) */
     g_byte_array_set_size(dest, dest->len + size*len);
+    buffer = dest->data + i;
     for (i = 0; i < len; i++) {
         guint8 *b = buffer + i*size;
 
@@ -1631,7 +1633,7 @@ gwy_serialize_unpack_int32_array(const guchar *buffer,
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
     value = g_memdup(buffer + *position, newasize*sizeof(gint32));
 #else
-    value = g_new(gint32, newasize);
+    value = g_new(gint32, newasize*sizeof(gint32));
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
                          sizeof(gint32), newasize, sizeof(gint32) - 1);
 #endif
@@ -1706,7 +1708,7 @@ gwy_serialize_unpack_int64_array(const guchar *buffer,
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
     value = g_memdup(buffer + *position, newasize*sizeof(gint64));
 #else
-    value = g_new(gint64, newasize);
+    value = g_new(gint64, newasize*sizeof(gint64));
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
                          sizeof(gint64), newasize, sizeof(gint64) - 1);
 #endif
@@ -1785,7 +1787,7 @@ gwy_serialize_unpack_double_array(const guchar *buffer,
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
     value = g_memdup(buffer + *position, newasize*sizeof(gdouble));
 #else
-    value = g_new(gdouble, newasize);
+    value = g_new(gdouble, newasize*sizeof(gdouble));
     gwy_byteswapped_copy(buffer + *position, (guint8*)value,
                          sizeof(gdouble), newasize, sizeof(gdouble) - 1);
 #endif
