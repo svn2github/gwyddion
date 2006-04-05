@@ -127,7 +127,7 @@ static GwyModuleInfo module_info = {
     "nanoscope",
     N_("Imports Veeco Nanoscope data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.9.1",
+    "0.9.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -580,7 +580,10 @@ select_which_data(GList *list)
     for (l = controls.list; l; l = g_list_next(l)) {
         ndata = (NanoscopeData*)l->data;
         val = g_hash_table_lookup(ndata->hash, "@2:Image Data");
-        choices[i].name = val->hard_value_str;
+        if (val)
+            choices[i].name = val->hard_value_str;
+        else
+            choices[i].name = "Unknown channel";
         choices[i].value = i;
         i++;
     }
