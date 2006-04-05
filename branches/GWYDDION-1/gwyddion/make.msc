@@ -1,12 +1,16 @@
 # @(#) $Id$
-# XXX: set following to your Gtk+-Development and MSVC paths
-# The uncommented paths should work for GladeWin32 All-in-one,
-# if you have separate Gtk+ and GtkGLext, defined GTKGLEXT_TOP accordingly
-#GTK_TOP = C:\Dev-C++
-#GTK_TOP = C:\Program Files\Common Files\Gtk\2.0
+#
+# XXX: Set following to your Gtk+-Development and MSVC paths
+#
+# The uncommented paths should work for default MSVC 6 installation and for
+# default GladeWin32 installation.
+# If you have separate Gtk+ and GtkGLext, define GTKGLEXT_TOP accordingly.
+# If you have separate Gtk+ and LibXML2, define LIBXML2_TOP accordingly.
 GTK_TOP = C:\Gtk
-#GTKGLEXT_TOP = C:\GtkGLExt\1.0
 GTKGLEXT_TOP = $(GTK_TOP)
+LIBXML2_TOP = $(GTK_TOP)
+#GTKGLEXT_TOP = C:\GtkGLExt\1.0
+#LIBXML2_TOP = C:\libxml2
 MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
 
 # Don't change this it's used by iss too
@@ -95,8 +99,16 @@ PNG_LIBS = libpng.lib $(ZLIB_LIBS)
 TIFF_CFLAGS =
 TIFF_LIBS = libtiff.lib $(JPEG_LIBS) $(ZLIB_LIBS) user32.lib
 
+SPML_CFLAGS = $(ZLIB_CFLAGS) $(LIBXML2_CFLAGS)
+SPML_LDFLAGS = $(ZLIB_LDFLAGS) $(LIBXML2_LDFLAGS)
+SPML_LIBS = $(ZLIB_LIBS) $(LIBXML2_LIBS)
+
 ZLIB_CFLAGS =
 ZLIB_LIBS = libz.lib
+
+LIBXML2_CFLAGS = -I "$(LIBXML2_TOP)\include"
+LIBXML2_LDFLAGS = /libpath:"$(LIBXML2_TOP)\lib"
+LIBXML2_LIBS = libxml2.lib
 
 INSTALL = copy
 LINK32 = link.exe

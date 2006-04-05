@@ -16,6 +16,7 @@ BuildPrereq: gtkglext-devel >= 1.0
 BuildPrereq: libpng-devel
 BuildPrereq: libjpeg-devel
 BuildPrereq: libtiff-devel >= 3.6
+BuildPrereq: libxml2-devel
 BuildPrereq: gtk-doc >= 1.0
 BuildPrereq: python >= 2.2
 BuildPrereq: ruby >= 1.8

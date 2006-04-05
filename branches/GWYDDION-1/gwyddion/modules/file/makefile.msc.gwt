@@ -1,6 +1,7 @@
 # @(#) $Id$
 
 tiff_modules = jpkscan
+spml_modules = spml
 
 TOP_SRCDIR = ..\..
 MOD_TYPE = file
@@ -15,6 +16,7 @@ LIB_CFLAGS = \
 	$(JPEG_CFLAGS) \
 	$(PNG_CFLAGS) \
 	$(TIFF_CFLAGS) \
+	$(SPML_CFLAGS) \
 	-DG_LOG_DOMAIN=\"Module\"
 
 MOD_LINK = \
@@ -23,6 +25,7 @@ MOD_LINK = \
 	$(JPEG_LIBS) \
 	$(PNG_LIBS) \
 	$(TIFF_LIBS) \
+	$(SPML_LIBS) \
 	/libpath:$(TOP_SRCDIR)\libgwyddion \
 	/libpath:$(TOP_SRCDIR)\libprocess \
 	/libpath:$(TOP_SRCDIR)\libdraw \

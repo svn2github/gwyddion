@@ -1,9 +1,22 @@
 # @(#) $Id$ */
 
+# When libTIFF is disabled, put the sources to EXTRA_DIST to include them in
+# make dist.
 if HAVE_TIFF
 tiff_modules = jpkscan.la
+tiff_sources =
+else
+tiff_modules =
+tiff_sources = jpk.h jpkscan.c
 endif
 
+if HAVE_XML2
+spml_modules = spml.la
+spml_sources =
+else
+spml_modules =
+spml_sources = spml.c
+endif
 
 filedir = $(pkglibdir)/modules/file
 
@@ -28,6 +41,7 @@ file_LTLIBRARIES = \
 	rhk-spm32.la	\
 	sdfile.la		\
 	sis.la		\
+	$(spml_modules) \
 	spmlab.la	\
 	stmprg.la	\
 	stpfile.la	\
@@ -43,12 +57,14 @@ noinst_HEADERS = \
 	stmprg.h
 
 EXTRA_DIST = \
+	$(tiff_sources) \
+	$(spml_sources) \
 	makefile.msc
 
 
 INCLUDES = -I$(top_srcdir)
 
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\" -fPIC
+AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\"
 
 
 if OS_WIN32
@@ -136,6 +152,12 @@ sdfile_la_LIBADD = $(module_libadd)
 
 sis_la_SOURCES = sis.c
 sis_la_LIBADD = $(module_libadd)
+
+if HAVE_XML2
+spml_la_SOURCES = spml.c spml-utils.h
+spml_la_CFLAGS = @XML2_CFLAGS@
+spml_la_LIBADD = $(module_libadd) @XML2_LIBS@
+endif
 
 spmlab_la_SOURCES = spmlab.c
 spmlab_la_LIBADD = $(module_libadd)

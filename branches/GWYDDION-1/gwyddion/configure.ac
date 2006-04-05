@@ -1,7 +1,7 @@
 # @(#) $Id$
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Gwyddion, 1.16, [klapetek@gwyddion.net])
+AC_INIT(Gwyddion, 1.15cvs20060403, [klapetek@gwyddion.net])
 PACKAGE_URL="http://gwyddion.net/"
 AC_PREREQ(2.52)
 AC_CONFIG_SRCDIR(app/app.c)
@@ -276,6 +276,19 @@ if test x$enable_libtiff != xno && test -n "$LIBTIFF"; then
 fi
 AM_CONDITIONAL([HAVE_TIFF],[test x$enable_libtiff != xno && test -n "$LIBTIFF"])
 AC_SUBST(LIBTIFF)
+
+#############################################################################
+# SPML importer
+# Only if you want to have support for spml importer compiled
+GWY_WITH([spml],,[SPML importer (libxml2 required)])
+if test "x$enable_spml" != "xno"; then
+  PKG_CHECK_MODULES(XML2, [libxml-2.0 >= 2.6],
+                    [AC_DEFINE(HAVE_XML2,1,
+                               [Define if we have the libxml2 package.])],
+                    enable_gl=no)
+
+fi
+AM_CONDITIONAL([HAVE_XML2],[test x$enable_spml != xno])
 
 #############################################################################
 # Check for header files.
