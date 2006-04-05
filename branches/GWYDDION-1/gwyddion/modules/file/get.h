@@ -17,28 +17,51 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#ifndef __GWY_GET_H__
-#define __GWY_GET_H__
+#ifndef __GWY_FILE_GET_H__
+#define __GWY_GILE_GET_H__
 
-static inline gsize
-get_WORD(const guchar **p)
+/* Compatibility */
+#define get_WORD   get_WORD_LE
+#define get_DWORD  get_DWORD_LE
+#define get_FLOAT  get_FLOAT_LE
+#define get_DOUBLE get_DOUBLE_LE
+
+static inline gulong
+get_WORD_LE(const guchar **p)
 {
-    gsize z = (gsize)(*p)[0] + ((gsize)(*p)[1] << 8);
+    gulong z = (gulong)(*p)[0] + ((gulong)(*p)[1] << 8);
     *p += 2;
     return z;
 }
 
-static inline gsize
-get_DWORD(const guchar **p)
+static inline gulong
+get_WORD_BE(const guchar **p)
 {
-    gsize z = (gsize)(*p)[0] + ((gsize)(*p)[1] << 8)
-              + ((gsize)(*p)[2] << 16) + ((gsize)(*p)[3] << 24);
+    gulong z = (gulong)((*p)[0] << 8) + (gulong)(*p)[1];
+    *p += 2;
+    return z;
+}
+
+static inline gulong
+get_DWORD_LE(const guchar **p)
+{
+    gulong z = (gulong)(*p)[0] + ((gulong)(*p)[1] << 8)
+              + ((gulong)(*p)[2] << 16) + ((gulong)(*p)[3] << 24);
+    *p += 4;
+    return z;
+}
+
+static inline gulong
+get_DWORD_BE(const guchar **p)
+{
+    gulong z = ((gulong)(*p)[0] << 24) + ((gulong)(*p)[1] << 16)
+              + ((gulong)(*p)[2] << 8) + (gulong)(*p)[3];
     *p += 4;
     return z;
 }
 
 static inline gdouble
-get_FLOAT(const guchar **p)
+get_FLOAT_LE(const guchar **p)
 {
     union { guchar pp[4]; float f; } z;
 
@@ -72,7 +95,7 @@ get_FLOAT_BE(const guchar **p)
 }
 
 static inline gdouble
-get_DOUBLE(const guchar **p)
+get_DOUBLE_LE(const guchar **p)
 {
     union { guchar pp[8]; double d; } z;
 
@@ -92,7 +115,26 @@ get_DOUBLE(const guchar **p)
     return z.d;
 }
 
+static inline gdouble
+get_DOUBLE_BE(const guchar **p)
+{
+    union { guchar pp[8]; double d; } z;
+
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+    memcpy(z.pp, *p, sizeof(double));
+#else
+    z.pp[0] = (*p)[7];
+    z.pp[1] = (*p)[6];
+    z.pp[2] = (*p)[5];
+    z.pp[3] = (*p)[4];
+    z.pp[4] = (*p)[3];
+    z.pp[5] = (*p)[2];
+    z.pp[6] = (*p)[1];
+    z.pp[7] = (*p)[0];
 #endif
+    *p += sizeof(double);
+    return z.d;
+}
 
 static inline void
 get_CHARS(gchar *dest, const guchar **p, guint size)
@@ -121,5 +163,33 @@ get_BBOOLEAN(const guchar **p)
     (*p)++;
     return b;
 }
+
+/* Get a non-terminated string preceded by one byte containing the length.
+ * Size is the size of buffer pointer by *p.  Returns %NULL if size is too
+ * small. */
+static inline gchar*
+get_PASCAL_STRING(const guchar **p,
+                  gsize size)
+{
+    guint len;
+    gchar *s;
+
+    if (!size)
+        return NULL;
+
+    len = **p;
+    (*p)++;
+    if (size < len + 1)
+        return NULL;
+
+    s = g_new(gchar, len+1);
+    memcpy(s, *p, len);
+    s[len] = '\0';
+    *p += len;
+
+    return s;
+}
+
+#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
