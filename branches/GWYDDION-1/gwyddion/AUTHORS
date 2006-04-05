@@ -24,6 +24,10 @@ Sven Neumann <neumann@jpk.com>
     JPK file import, miscellaneous improvements.
 Christopher Anderson <sidewinder.asu@gmail.com>
     2D FFT filtering, MI file import.
+Jan Horák <xhorak@gmail.com>
+    SPML import module.
+Александр Ковалев <av_kov@tut.by>
+    Nanotop import module.
 
 
 === Translators ===
