@@ -43,7 +43,6 @@
 #endif
 
 #include "get.h"
-#include <stdio.h>
 
 typedef enum {
     SURF_PC = 0,
@@ -326,30 +325,30 @@ surffile_load(const gchar *filename)
     surffile.YOffset = get_FLOAT(&p);
     surffile.ZOffset = get_FLOAT(&p);
 
-    printf("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
+    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
               surffile.format, surffile.nobjects, surffile.version, surffile.type);
-    printf("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
+    gwy_debug("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
 
-    printf("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
-    printf("range type: %d, special points: %d, absolute: %d\n", surffile.range,
+    gwy_debug("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
+    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range,
            surffile.special_points, (gint)surffile.absolute);
-    printf("data point size: %d\n", surffile.pointsize);
-    printf("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
-    printf("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
-    printf("total number of points: %d\n", surffile.nofpoints);
-    printf("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
-    printf("X axis name: %16s\n", surffile.xaxis);
-    printf("Y axis name: %16s\n", surffile.yaxis);
-    printf("Z axis name: %16s\n", surffile.zaxis);
-    printf("dx unit: %16s\n", surffile.dx_unit);
-    printf("dy unit: %16s\n", surffile.dy_unit);
-    printf("dz unit: %16s\n", surffile.dz_unit);
-    printf("X axis unit: %16s\n", surffile.xlength_unit);
-    printf("Y axis unit: %16s\n", surffile.ylength_unit);
-    printf("Z axis unit: %16s\n", surffile.zlength_unit);
-    printf("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
-    printf("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
-    printf("Time: %d:%d:%d, Date: %d.%d.%d\n", surffile.hours, surffile.minutes, surffile.seconds,
+    gwy_debug("data point size: %d\n", surffile.pointsize);
+    gwy_debug("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
+    gwy_debug("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
+    gwy_debug("total number of points: %d\n", surffile.nofpoints);
+    gwy_debug("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
+    gwy_debug("X axis name: %16s\n", surffile.xaxis);
+    gwy_debug("Y axis name: %16s\n", surffile.yaxis);
+    gwy_debug("Z axis name: %16s\n", surffile.zaxis);
+    gwy_debug("dx unit: %16s\n", surffile.dx_unit);
+    gwy_debug("dy unit: %16s\n", surffile.dy_unit);
+    gwy_debug("dz unit: %16s\n", surffile.dz_unit);
+    gwy_debug("X axis unit: %16s\n", surffile.xlength_unit);
+    gwy_debug("Y axis unit: %16s\n", surffile.ylength_unit);
+    gwy_debug("Z axis unit: %16s\n", surffile.zlength_unit);
+    gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
+    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
+    gwy_debug("Time: %d:%d:%d, Date: %d.%d.%d\n", surffile.hours, surffile.minutes, surffile.seconds,
            surffile.day, surffile.month, surffile.year);
     
     p = buffer + 500;
