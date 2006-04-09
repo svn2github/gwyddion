@@ -63,6 +63,7 @@ typedef enum {
     SURF_ACQ_STYLUS = 1,
     SURF_ACQ_OPTICAL = 2,
     SURF_ACQ_THERMOCOUPLE = 3,
+    SURF_ACQ_UNKNOWN_TOO = 4,
     SURF_ACQ_STYLUS_SKID = 5,
     SURF_ACQ_AFM = 6,
     SURF_ACQ_STM = 7,
@@ -70,6 +71,20 @@ typedef enum {
     SURF_ACQ_INTERFEROMETER = 9,
     SURF_ACQ_LIGHT = 10,
 } SurfAcqusitionType;
+
+static const GwyEnum acq_modes[] = {
+   { "Unknown",                     SURF_ACQ_UNKNOWN },
+   { "Contact stylus",              SURF_ACQ_STYLUS },
+   { "Scanning optical gauge",      SURF_ACQ_OPTICAL },
+   { "Thermocouple",                SURF_ACQ_THERMOCOUPLE },
+   { "Unknown",                     SURF_ACQ_UNKNOWN_TOO },
+   { "Contact stylus with skid",    SURF_ACQ_STYLUS_SKID },
+   { "AFM",                         SURF_ACQ_AFM },
+   { "STM",                         SURF_ACQ_STM },
+   { "Video",                       SURF_ACQ_VIDEO },
+   { "Interferometer",              SURF_ACQ_INTERFEROMETER },
+   { "Structured light projection", SURF_ACQ_LIGHT },
+};
 
 
 typedef enum {
@@ -170,7 +185,7 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "surffile",
-    N_("Imports Surf (Applied Physics and Engineering) data files."),
+    N_("Imports Surf data files."),
     "Petr Klapetek <klapetek@gwyddion.net>",
     "0.1",
     "David Nečas (Yeti) & Petr Klapetek",
@@ -235,6 +250,7 @@ surffile_load(const gchar *filename)
     gsize size = 0;
     GError *err = NULL;
     gchar signature[12];
+    gdouble max, min;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -291,6 +307,9 @@ surffile_load(const gchar *filename)
     surffile.imprint = get_WORD(&p);
     surffile.inversion = get_WORD(&p);
     surffile.leveling = get_WORD(&p);
+    
+    p += 12;
+    
     surffile.seconds = get_WORD(&p);
     surffile.minutes = get_WORD(&p);
     surffile.hours = get_WORD(&p);
@@ -306,10 +325,6 @@ surffile_load(const gchar *filename)
     surffile.XOffset = get_FLOAT(&p);
     surffile.YOffset = get_FLOAT(&p);
     surffile.ZOffset = get_FLOAT(&p);
-
-    /*reserved*/
-    p += 34;
-
 
     printf("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
               surffile.format, surffile.nobjects, surffile.version, surffile.type);
@@ -341,6 +356,26 @@ surffile_load(const gchar *filename)
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
+    if (surffile.absolute == 0)
+    {
+        max = gwy_data_field_get_max(surffile.dfield);
+        min = gwy_data_field_get_min(surffile.dfield);
+        gwy_data_field_add(surffile.dfield, -min);
+        
+        gwy_data_field_multiply(surffile.dfield, 
+                                (surffile.zmax - surffile.zmin)/(max-min));
+    }
+
+    if (surffile.inversion == 1) 
+        gwy_data_field_invert(surffile.dfield, FALSE, FALSE, TRUE);
+    
+    if (surffile.inversion == 2) 
+        gwy_data_field_invert(surffile.dfield, FALSE, TRUE, TRUE);
+
+    if (surffile.inversion == 3) 
+        gwy_data_field_invert(surffile.dfield, TRUE, FALSE, TRUE);
+      
+    
     if (surffile.dfield) {
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
@@ -378,6 +413,15 @@ fill_data_fields(SurfFile *surffile,
             }
         }
     }
+
+    if (surffile->dx > surffile->dy)
+        gwy_data_field_resample(surffile->dfield, (gint)((gdouble)(surffile->xres)*surffile->dx/surffile->dy),
+                                surffile->yres, GWY_INTERPOLATION_BILINEAR);
+
+    else if (surffile->dy > surffile->dx)
+        gwy_data_field_resample(surffile->dfield, surffile->xres,
+                                (gint)((gdouble)(surffile->yres)*surffile->dy/surffile->dx),
+                                GWY_INTERPOLATION_BILINEAR);
 }
 
 #define HASH_STORE(key, fmt, field) \
@@ -388,10 +432,22 @@ static void
 store_metadata(SurfFile *surffile,
                GwyContainer *container)
 {
+    char date[20];
+
+    g_snprintf(date, sizeof(date), "%d. %d. %d", surffile->day, surffile->month, surffile->year);
+    
     HASH_STORE("Version", "%u", version);
     HASH_STORE("Operator name", "%s", operator_name);
     HASH_STORE("Object name", "%s", object_name);
-    HASH_STORE("Measurement duration", "%d s", measurement_duration);
+    gwy_container_set_string_by_name(container, "/meta/Date", g_strdup(date));
+    gwy_container_set_string_by_name
+                (container, "/meta/Acquisition type",
+                   g_strdup(gwy_enum_to_string(surffile->acquisition, acq_modes,
+                                                        G_N_ELEMENTS(acq_modes))));
+    
+                                     
+    
+    
 }
 
 
