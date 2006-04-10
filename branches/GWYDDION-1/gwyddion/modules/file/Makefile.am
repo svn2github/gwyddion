@@ -30,6 +30,7 @@ file_LTLIBRARIES = \
 	ezdfile.la	\
 	gwyfile.la	\
 	hitachi-afm.la	\
+	metropro.la	\
 	mifile.la	\
 	nanoscope.la	\
 	nanotop.la	\
@@ -119,6 +120,9 @@ if HAVE_TIFF
 jpkscan_la_SOURCES = jpk.h jpkscan.c
 jpkscan_la_LIBADD = $(module_libadd) $(MODULE_LIBTIFF)
 endif
+
+metropro_la_SOURCES = metropro.c
+metropro_la_LIBADD = $(module_libadd)
 
 mifile_la_SOURCES = mifile.c
 mifile_la_LIBADD = $(module_libadd)
