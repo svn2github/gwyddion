@@ -229,18 +229,20 @@ read_data_field(SPMFile *spmfile, const guchar *ptr)
     for (i = 0; i < n; i++)
         *(data++) = GINT16_FROM_LE(*(p++));
 
+    unit = GWY_SI_UNIT(gwy_si_unit_new("m"));
+    gwy_data_field_set_si_unit_xy(dfield, unit);
+    g_object_unref(unit);
+
     if (strcmp(spmfile->ZUnit, "deg") != 0) {
-      gwy_data_field_multiply(dfield, spmfile->Kz*nanometer);
-      unit = GWY_SI_UNIT(gwy_si_unit_new("m"));
-      gwy_data_field_set_si_unit_xy(dfield, unit);
-      g_object_unref(unit);
+        gwy_data_field_multiply(dfield, spmfile->Kz*nanometer);
+        unit = GWY_SI_UNIT(gwy_si_unit_new("m"));
     }
     else {
-      gwy_data_field_multiply(dfield, spmfile->Kz);
-      unit = GWY_SI_UNIT(gwy_si_unit_new("deg"));
-      gwy_data_field_set_si_unit_z(dfield, unit);
-      g_object_unref(unit);
+        gwy_data_field_multiply(dfield, spmfile->Kz);
+        unit = GWY_SI_UNIT(gwy_si_unit_new("deg"));
     }
+    gwy_data_field_set_si_unit_z(dfield, unit);
+    g_object_unref(unit);
 
     return dfield;
 }
