@@ -39,6 +39,11 @@
 
 #define HEADER_SIZE 834
 
+typedef enum {
+    MPRO_PHASE_RES_NORMAL = 0,
+    MPRO_PHASE_RES_HIGH   = 1,
+} MProPhaseResType;
+
 typedef struct {
     gchar magic[4];
     gint header_format;
@@ -79,12 +84,12 @@ typedef struct {
     gdouble target_range;
     gint min_mod;
     gint min_mod_pts;
-    gint phase_res;
+    MProPhaseResType phase_res;
     gint min_area_size;
     gint discon_action;
     gdouble discon_filter;
     gint connection_order;
-    gint data_sign;
+    gboolean data_inverted;
     gint camera_width;
     gint camera_height;
     gint system_type;
@@ -128,6 +133,12 @@ typedef struct {
     gint surface_filter;
     gchar sys_err_file[28];
     gchar zoom_desc[8];
+
+    /* Our stuff */
+    GwyDataField *intensity_data;
+    GwyDataField *intensity_mask;
+    GwyDataField *phase_data;
+    GwyDataField *phase_mask;
 } MProFile;
 
 typedef struct {
@@ -136,17 +147,20 @@ typedef struct {
     GtkWidget *data_view;
 } MProControls;
 
-static gboolean      module_register    (const gchar *name);
+static gboolean      module_register     (const gchar *name);
 static gint          mprofile_detect     (const gchar *filename,
-                                         gboolean only_name);
+                                          gboolean only_name);
 static GwyContainer* mprofile_load       (const gchar *filename);
-static void          fill_data_fields   (MProFile *mprofile,
-                                         const guchar *buffer);
-static void          store_metadata     (MProFile *mprofile,
-                                         GwyContainer *container);
-static guint         select_which_data  (MProFile *mprofile);
-static void          selection_changed  (GtkWidget *button,
-                                         MProControls *controls);
+static gboolean      mprofile_read_header(const guchar *buffer,
+                                          gsize size,
+                                          MProFile *mprofile);
+static void          fill_data_fields    (MProFile *mprofile,
+                                          const guchar *buffer);
+static void          store_metadata      (MProFile *mprofile,
+                                          GwyContainer *container);
+static guint         select_which_data   (MProFile *mprofile);
+static void          selection_changed   (GtkWidget *button,
+                                          MProControls *controls);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
@@ -211,211 +225,410 @@ mprofile_load(const gchar *filename)
 {
     MProFile mprofile;
     GwyContainer *container = NULL;
+    GwyDataField *dfield = NULL, *vpmask = NULL;
     guchar *buffer = NULL;
-    const guchar *p;
     gsize size = 0;
     GError *err = NULL;
-    GwyDataField *dfield = NULL;
-    guint i;
+    gsize expected;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
         g_clear_error(&err);
         return NULL;
     }
-    p = buffer;
-    if (size < HEADER_SIZE + 2) {
-        g_warning("File is too short");
-        gwy_file_abandon_contents(buffer, size, NULL);
-        return NULL;
-    }
-    get_CHARARRAY(mprofile.magic, &p);
-    if (memcmp(mprofile.magic, MAGIC, MAGIC_SIZE) != 0) {
-        g_warning("File magic header mistmatch");
+
+    if (!mprofile_read_header(buffer, size, &mprofile)) {
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
 
-    mprofile.header_format = get_WORD_BE(&p);
-    mprofile.header_size = get_DWORD_BE(&p);
-    gwy_debug("header_format: %d, header_size: %d",
-              mprofile.header_format, mprofile.header_size);
-    if (mprofile.header_size < 570) {
-        g_warning("File header is too short");
+    expected = mprofile.header_size
+               + 2*mprofile.nbuckets*mprofile.intens_xres*mprofile.intens_yres
+               + 4*mprofile.phase_xres*mprofile.phase_yres;
+    if (expected != size) {
+        g_warning("Calculated file size %lu does not match real size %lu",
+                  (gulong)expected, (gulong)size);
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
-    if (mprofile.header_size > size) {
-        g_warning("File header is larger than file");
-        gwy_file_abandon_contents(buffer, size, NULL);
-        return NULL;
-    }
-    mprofile.software_type = get_WORD_BE(&p);
-    get_CHARARRAY0(mprofile.software_date, &p);
-    gwy_debug("software_type: %d, software_date: %s",
-              mprofile.software_type, mprofile.software_date);
 
-    mprofile.version_major = get_WORD_BE(&p);
-    mprofile.version_minor = get_WORD_BE(&p);
-    mprofile.version_micro = get_WORD_BE(&p);
-    gwy_debug("version: %d.%d.%d",
-              mprofile.version_major,
-              mprofile.version_minor,
-              mprofile.version_micro);
-
-    mprofile.intens_xoff = get_WORD_BE(&p);
-    mprofile.intens_yoff = get_WORD_BE(&p);
-    mprofile.intens_xres = get_WORD_BE(&p);
-    mprofile.intens_yres = get_WORD_BE(&p);
-    gwy_debug("INTENS xres: %d, yres: %d, xoff: %d, yoff: %d",
-              mprofile.intens_xres, mprofile.intens_yres,
-              mprofile.intens_xoff, mprofile.intens_yoff);
-    mprofile.nbuckets = get_WORD_BE(&p);
-    mprofile.intens_range = get_WORD_BE(&p);
-    mprofile.intens_nbytes = get_DWORD_BE(&p);
-
-    mprofile.phase_xoff = get_WORD_BE(&p);
-    mprofile.phase_yoff = get_WORD_BE(&p);
-    mprofile.phase_xres = get_WORD_BE(&p);
-    mprofile.phase_yres = get_WORD_BE(&p);
-    gwy_debug("PHASE xres: %d, yres: %d, xoff: %d, yoff: %d",
-              mprofile.phase_xres, mprofile.phase_yres,
-              mprofile.phase_xoff, mprofile.phase_yoff);
-    mprofile.phase_nbytes = get_DWORD_BE(&p);
-
-    mprofile.timestamp = get_DWORD_BE(&p);
-    get_CHARARRAY0(mprofile.comment, &p);
-    gwy_debug("comment: %s", mprofile.comment);
-    mprofile.source = get_WORD_BE(&p);
-
-    mprofile.scale_factor = get_FLOAT_BE(&p);
-    mprofile.wavelength_in = get_FLOAT_BE(&p);
-    mprofile.numeric_aperture = get_FLOAT_BE(&p);
-    mprofile.obliquity_factor = get_FLOAT_BE(&p);
-    mprofile.magnification = get_FLOAT_BE(&p);
-    mprofile.camera_res = get_FLOAT_BE(&p);
-
-    mprofile.acquire_mode = get_WORD_BE(&p);
-    mprofile.intens_avgs = get_WORD_BE(&p);
-    mprofile.pzt_cal = get_WORD_BE(&p);
-    mprofile.pzt_gain_tolerance = get_WORD_BE(&p);
-    mprofile.pzt_gain = get_WORD_BE(&p);
-    mprofile.part_thickness = get_FLOAT_BE(&p);
-    mprofile.agc = get_WORD_BE(&p);
-    mprofile.target_range = get_FLOAT_BE(&p);
-
-    p += 2;
-    mprofile.min_mod = get_DWORD_BE(&p);
-    mprofile.min_mod_pts = get_DWORD_BE(&p);
-    mprofile.phase_res = get_WORD_BE(&p);
-    mprofile.min_area_size = get_DWORD_BE(&p);
-    mprofile.discon_action = get_WORD_BE(&p);
-    mprofile.discon_filter = get_FLOAT_BE(&p);
-    mprofile.connection_order = get_WORD_BE(&p);
-    mprofile.data_sign = get_WORD_BE(&p);
-    mprofile.camera_width = get_WORD_BE(&p);
-    mprofile.camera_height = get_WORD_BE(&p);
-    mprofile.system_type = get_WORD_BE(&p);
-    mprofile.system_board = get_WORD_BE(&p);
-    mprofile.system_serial = get_WORD_BE(&p);
-    mprofile.instrument_id = get_WORD_BE(&p);
-    get_CHARARRAY0(mprofile.objective_name, &p);
-    get_CHARARRAY0(mprofile.part_num, &p);
-    mprofile.code_vtype = get_WORD_BE(&p);
-    mprofile.phase_avgs = get_WORD_BE(&p);
-    mprofile.subtract_sys_err = get_WORD_BE(&p);
-    p += 16;
-    get_CHARARRAY0(mprofile.part_set_num, &p);
-    mprofile.refactive_index = get_FLOAT_BE(&p);
-    mprofile.remove_tilt_bias = get_WORD_BE(&p);
-    mprofile.remove_fringes = get_WORD_BE(&p);
-    mprofile.max_area_size = get_DWORD_BE(&p);
-    mprofile.setup_type = get_WORD_BE(&p);
-    p += 2;
-    mprofile.pre_connect_filter = get_FLOAT_BE(&p);
-
-    mprofile.wavelength2 = get_FLOAT_BE(&p);
-    mprofile.wavelength_fold = get_WORD_BE(&p);
-    mprofile.wavelength1 = get_FLOAT_BE(&p);
-    mprofile.wavelength3 = get_FLOAT_BE(&p);
-    mprofile.wavelength4 = get_FLOAT_BE(&p);
-    get_CHARARRAY0(mprofile.wavelength_select, &p);
-    mprofile.fda_res = get_WORD_BE(&p);
-    get_CHARARRAY0(mprofile.scan_description, &p);
-    gwy_debug("scan_description: %s", mprofile.scan_description);
-
-    mprofile.nfiducials = get_WORD_BE(&p);
-    for (i = 0; i < G_N_ELEMENTS(mprofile.fiducials); i++)
-        mprofile.fiducials[i] = get_FLOAT_BE(&p);
-
-    mprofile.pixel_width = get_FLOAT_BE(&p);
-    mprofile.pixel_height = get_FLOAT_BE(&p);
-    mprofile.exit_pupil_diam = get_FLOAT_BE(&p);
-    mprofile.light_level_pct = get_FLOAT_BE(&p);
-    mprofile.coords_state = get_DWORD_BE(&p);
-    mprofile.xpos = get_FLOAT_BE(&p);
-    mprofile.ypos = get_FLOAT_BE(&p);
-    mprofile.zpos = get_FLOAT_BE(&p);
-    mprofile.xrot = get_FLOAT_BE(&p);
-    mprofile.yrot = get_FLOAT_BE(&p);
-    mprofile.zrot = get_FLOAT_BE(&p);
-    mprofile.coherence_mode = get_WORD_BE(&p);
-    mprofile.surface_filter = get_WORD_BE(&p);
-    get_CHARARRAY0(mprofile.sys_err_file, &p);
-    get_CHARARRAY0(mprofile.zoom_desc, &p);
-
-    p = buffer + mprofile.header_size;
-
-    fill_data_fields(&mprofile, p);
+    fill_data_fields(&mprofile, buffer);
     gwy_file_abandon_contents(buffer, size, NULL);
 
     /*
     n = select_which_data(&mprofile);
     if (n != (guint)-1)
         dfield = mprofile.data[n];
-
+    */
+    dfield = mprofile.phase_data;
+    vpmask = mprofile.phase_mask;
     if (dfield) {
         container = GWY_CONTAINER(gwy_container_new());
         gwy_container_set_object_by_name(container, "/0/data",
                                          G_OBJECT(dfield));
-        store_metadata(&mprofile, GWY_CONTAINER(object));
+        if (vpmask)
+            gwy_container_set_object_by_name(container, "/0/mask",
+                                             G_OBJECT(vpmask));
+        store_metadata(&mprofile, container);
     }
-    */
+
+    gwy_object_unref(mprofile.intensity_data);
+    gwy_object_unref(mprofile.phase_data);
 
     return container;
+}
+
+static gboolean
+mprofile_read_header(const guchar *buffer,
+                     gsize size,
+                     MProFile *mprofile)
+{
+    const guchar *p;
+    guint i;
+
+    p = buffer;
+    if (size < HEADER_SIZE + 2) {
+        g_warning("File is too short");
+        return FALSE;
+    }
+    get_CHARARRAY(mprofile->magic, &p);
+    if (memcmp(mprofile->magic, MAGIC, MAGIC_SIZE) != 0) {
+        g_warning("File magic header mistmatch");
+        return FALSE;
+    }
+
+    mprofile->header_format = get_WORD_BE(&p);
+    if (mprofile->header_format != 1) {
+        g_warning("Only files with format version 1 are supported");
+        return FALSE;
+    }
+    mprofile->header_size = get_DWORD_BE(&p);
+    gwy_debug("header_format: %d, header_size: %d",
+              mprofile->header_format, mprofile->header_size);
+    if (mprofile->header_size < 570) {
+        g_warning("File header is too short");
+        return FALSE;
+    }
+    if (mprofile->header_size > size) {
+        g_warning("File header is larger than file");
+        return FALSE;
+    }
+    mprofile->software_type = get_WORD_BE(&p);
+    get_CHARARRAY0(mprofile->software_date, &p);
+    gwy_debug("software_type: %d, software_date: %s",
+              mprofile->software_type, mprofile->software_date);
+
+    mprofile->version_major = get_WORD_BE(&p);
+    mprofile->version_minor = get_WORD_BE(&p);
+    mprofile->version_micro = get_WORD_BE(&p);
+    gwy_debug("version: %d.%d.%d",
+              mprofile->version_major,
+              mprofile->version_minor,
+              mprofile->version_micro);
+
+    mprofile->intens_xoff = get_WORD_BE(&p);
+    mprofile->intens_yoff = get_WORD_BE(&p);
+    mprofile->intens_xres = get_WORD_BE(&p);
+    mprofile->intens_yres = get_WORD_BE(&p);
+    gwy_debug("INTENS xres: %d, yres: %d, xoff: %d, yoff: %d",
+              mprofile->intens_xres, mprofile->intens_yres,
+              mprofile->intens_xoff, mprofile->intens_yoff);
+    mprofile->nbuckets = get_WORD_BE(&p);
+    if (mprofile->nbuckets != 0 && mprofile->nbuckets != 1)
+        g_warning("Only 1 NBuckets is supported");
+    mprofile->intens_range = get_WORD_BE(&p);
+    mprofile->intens_nbytes = get_DWORD_BE(&p);
+    gwy_debug("intens_nbytes: %d, expecting: %d",
+              mprofile->intens_nbytes,
+              2*mprofile->intens_xres*mprofile->intens_yres*mprofile->nbuckets);
+
+    mprofile->phase_xoff = get_WORD_BE(&p);
+    mprofile->phase_yoff = get_WORD_BE(&p);
+    mprofile->phase_xres = get_WORD_BE(&p);
+    mprofile->phase_yres = get_WORD_BE(&p);
+    gwy_debug("PHASE xres: %d, yres: %d, xoff: %d, yoff: %d",
+              mprofile->phase_xres, mprofile->phase_yres,
+              mprofile->phase_xoff, mprofile->phase_yoff);
+    mprofile->phase_nbytes = get_DWORD_BE(&p);
+    gwy_debug("phase_nbytes: %d, expecting: %d",
+              mprofile->phase_nbytes,
+              4*mprofile->phase_xres*mprofile->phase_yres);
+
+    mprofile->timestamp = get_DWORD_BE(&p);
+    get_CHARARRAY0(mprofile->comment, &p);
+    gwy_debug("comment: %s", mprofile->comment);
+    mprofile->source = get_WORD_BE(&p);
+
+    mprofile->scale_factor = get_FLOAT_BE(&p);
+    mprofile->wavelength_in = get_FLOAT_BE(&p);
+    mprofile->numeric_aperture = get_FLOAT_BE(&p);
+    mprofile->obliquity_factor = get_FLOAT_BE(&p);
+    mprofile->magnification = get_FLOAT_BE(&p);
+    mprofile->camera_res = get_FLOAT_BE(&p);
+
+    mprofile->acquire_mode = get_WORD_BE(&p);
+    gwy_debug("acquire_mode: %d", mprofile->acquire_mode);
+    mprofile->intens_avgs = get_WORD_BE(&p);
+    mprofile->pzt_cal = get_WORD_BE(&p);
+    mprofile->pzt_gain_tolerance = get_WORD_BE(&p);
+    mprofile->pzt_gain = get_WORD_BE(&p);
+    mprofile->part_thickness = get_FLOAT_BE(&p);
+    mprofile->agc = get_WORD_BE(&p);
+    mprofile->target_range = get_FLOAT_BE(&p);
+
+    p += 2;
+    mprofile->min_mod = get_DWORD_BE(&p);
+    mprofile->min_mod_pts = get_DWORD_BE(&p);
+    mprofile->phase_res = get_WORD_BE(&p);
+    mprofile->min_area_size = get_DWORD_BE(&p);
+    mprofile->discon_action = get_WORD_BE(&p);
+    mprofile->discon_filter = get_FLOAT_BE(&p);
+    mprofile->connection_order = get_WORD_BE(&p);
+    mprofile->data_inverted = get_WORD_BE(&p);
+    mprofile->camera_width = get_WORD_BE(&p);
+    mprofile->camera_height = get_WORD_BE(&p);
+    mprofile->system_type = get_WORD_BE(&p);
+    mprofile->system_board = get_WORD_BE(&p);
+    mprofile->system_serial = get_WORD_BE(&p);
+    mprofile->instrument_id = get_WORD_BE(&p);
+    get_CHARARRAY0(mprofile->objective_name, &p);
+    get_CHARARRAY0(mprofile->part_num, &p);
+    gwy_debug("part_num: %s", mprofile->part_num);
+    mprofile->code_vtype = get_WORD_BE(&p);
+    mprofile->phase_avgs = get_WORD_BE(&p);
+    mprofile->subtract_sys_err = get_WORD_BE(&p);
+    p += 16;
+    get_CHARARRAY0(mprofile->part_set_num, &p);
+    mprofile->refactive_index = get_FLOAT_BE(&p);
+    mprofile->remove_tilt_bias = get_WORD_BE(&p);
+    mprofile->remove_fringes = get_WORD_BE(&p);
+    mprofile->max_area_size = get_DWORD_BE(&p);
+    mprofile->setup_type = get_WORD_BE(&p);
+    p += 2;
+    mprofile->pre_connect_filter = get_FLOAT_BE(&p);
+
+    mprofile->wavelength2 = get_FLOAT_BE(&p);
+    mprofile->wavelength_fold = get_WORD_BE(&p);
+    mprofile->wavelength1 = get_FLOAT_BE(&p);
+    mprofile->wavelength3 = get_FLOAT_BE(&p);
+    mprofile->wavelength4 = get_FLOAT_BE(&p);
+    get_CHARARRAY0(mprofile->wavelength_select, &p);
+    mprofile->fda_res = get_WORD_BE(&p);
+    get_CHARARRAY0(mprofile->scan_description, &p);
+    gwy_debug("scan_description: %s", mprofile->scan_description);
+
+    mprofile->nfiducials = get_WORD_BE(&p);
+    for (i = 0; i < G_N_ELEMENTS(mprofile->fiducials); i++)
+        mprofile->fiducials[i] = get_FLOAT_BE(&p);
+
+    mprofile->pixel_width = get_FLOAT_BE(&p);
+    mprofile->pixel_height = get_FLOAT_BE(&p);
+    mprofile->exit_pupil_diam = get_FLOAT_BE(&p);
+    mprofile->light_level_pct = get_FLOAT_BE(&p);
+    mprofile->coords_state = get_DWORD_BE(&p);
+    mprofile->xpos = get_FLOAT_BE(&p);
+    mprofile->ypos = get_FLOAT_BE(&p);
+    mprofile->zpos = get_FLOAT_BE(&p);
+    mprofile->xrot = get_FLOAT_BE(&p);
+    mprofile->yrot = get_FLOAT_BE(&p);
+    mprofile->zrot = get_FLOAT_BE(&p);
+    mprofile->coherence_mode = get_WORD_BE(&p);
+    mprofile->surface_filter = get_WORD_BE(&p);
+    get_CHARARRAY0(mprofile->sys_err_file, &p);
+    get_CHARARRAY0(mprofile->zoom_desc, &p);
+
+    return TRUE;
+}
+
+static void
+fix_void_pixels(GwyDataField *dfield,
+                GwyDataField *vpmask,
+                gdouble avg)
+{
+    GwySIUnit *siunit;
+    const gdouble *mask;
+    gdouble *data;
+    gint i, n;
+
+    data = gwy_data_field_get_data(dfield);
+    mask = gwy_data_field_get_data_const(vpmask);
+    n = gwy_data_field_get_xres(dfield)*gwy_data_field_get_yres(dfield);
+    for (i = 0; i < n; i++) {
+        if (mask[i])
+            data[i] = avg;
+    }
+
+    siunit = gwy_data_field_get_si_unit_xy(dfield);
+    siunit = gwy_si_unit_duplicate(siunit);
+    gwy_data_field_set_si_unit_xy(vpmask, siunit);
+    g_object_unref(siunit);
+
+    siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
+    gwy_data_field_set_si_unit_z(vpmask, siunit);
+    g_object_unref(siunit);
 }
 
 static void
 fill_data_fields(MProFile *mprofile,
                  const guchar *buffer)
 {
-    /*
-    GwyDataField *dfield;
-    gdouble *data;
-    guint n, i, j;
+    GwyDataField *dfield, *vpmask;
+    GwySIUnit *siunit;
+    gdouble *data, *mask;
+    gdouble xreal, yreal, q, avg;
+    const guchar *p;
+    guint n, i, j, nvoid;
 
-    mprofile->data = g_new0(GwyDataField*, mprofile->ndata);
-    for (n = 0; n < mprofile->ndata; n++) {
-        dfield = GWY_DATA_FIELD(gwy_data_field_new(mprofile->res,
-                                                   mprofile->res,
-                                                   mprofile->xreal,
-                                                   mprofile->yreal,
+    mprofile->intensity_data = NULL;
+    mprofile->phase_data = NULL;
+
+    p = buffer + mprofile->header_size;
+
+    /* Intensity data */
+    n = mprofile->intens_xres * mprofile->intens_yres;
+    if (n) {
+        const guint16 *d16;
+        guint16 d;
+
+        q = mprofile->data_inverted ? -1.0 : 1.0;
+
+        if (mprofile->camera_res) {
+            xreal = mprofile->intens_xres * mprofile->camera_res;
+            yreal = mprofile->intens_yres * mprofile->camera_res;
+        }
+        else {
+            /* whatever */
+            xreal = mprofile->intens_xres;
+            yreal = mprofile->intens_yres;
+        }
+        dfield = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
+                                                   mprofile->intens_yres,
+                                                   xreal, yreal,
                                                    FALSE));
+        vpmask = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
+                                                   mprofile->intens_yres,
+                                                   xreal, yreal,
+                                                   TRUE));
         data = gwy_data_field_get_data(dfield);
-        buffer += (mprofile->res + 1)*sizeof(float);
-        for (i = 0; i < mprofile->res; i++) {
-            buffer += sizeof(float);
-            for (j = 0; j < mprofile->res; j++) {
-                *(data++) = get_FLOAT(&buffer);
+        mask = gwy_data_field_get_data(vpmask);
+        d16 = (const guint16*)p;
+        avg = 0.0;
+        nvoid = 0;
+        for (i = 0; i < mprofile->intens_yres; i++) {
+            for (j = 0; j < mprofile->intens_xres; j++) {
+                d = q*GUINT16_FROM_BE(*d16);
+                *data = q*d;
+                if (*d16 >= 65412) {
+                    nvoid++;
+                    mask[i*mprofile->intens_xres + j] = 1.0;
+                }
+                else
+                    avg += *data;
+                d16++;
+                data++;
             }
         }
-        mprofile->data[n] = dfield;
-        gwy_data_field_multiply(dfield, mprofile->z_piezo_factor * 1e-9);
+
+        if (mprofile->camera_res)
+            siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
+        else
+            siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
+        gwy_data_field_set_si_unit_xy(dfield, siunit);
+        g_object_unref(siunit);
+
+        siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
+        gwy_data_field_set_si_unit_z(dfield, siunit);
+        g_object_unref(siunit);
+
+        gwy_debug("intens_nvoid: %u", nvoid);
+        if (nvoid)
+            fix_void_pixels(dfield, vpmask,
+                            nvoid == n ? 0.0 : avg/(n - nvoid));
+        else
+            gwy_object_unref(vpmask);
+
+        mprofile->intensity_data = dfield;
+        mprofile->intensity_mask = vpmask;
+        p += sizeof(guint16)*n*mprofile->nbuckets;
     }
-    */
+
+    /* Phase data */
+    n = mprofile->phase_xres * mprofile->phase_yres;
+    if (n) {
+        const gint32 *d32;
+        gint32 d;
+
+        i = 4096;
+        if (mprofile->phase_res == 1)
+            i = 32768;
+
+        q = mprofile->scale_factor * mprofile->obliquity_factor
+            * mprofile->wavelength_in/i;
+        if (mprofile->data_inverted)
+            q = -q;
+        gwy_debug("q: %g", q);
+
+        if (mprofile->camera_res) {
+            xreal = mprofile->phase_xres * mprofile->camera_res;
+            yreal = mprofile->phase_yres * mprofile->camera_res;
+        }
+        else {
+            /* whatever */
+            xreal = mprofile->phase_xres;
+            yreal = mprofile->phase_yres;
+        }
+        dfield = GWY_DATA_FIELD(gwy_data_field_new(mprofile->phase_xres,
+                                                   mprofile->phase_yres,
+                                                   xreal, yreal,
+                                                   FALSE));
+        vpmask = GWY_DATA_FIELD(gwy_data_field_new(mprofile->phase_xres,
+                                                   mprofile->phase_yres,
+                                                   xreal, yreal,
+                                                   TRUE));
+        data = gwy_data_field_get_data(dfield);
+        mask = gwy_data_field_get_data(vpmask);
+        d32 = (const gint32*)p;
+        avg = 0.0;
+        nvoid = 0;
+        for (i = 0; i < mprofile->phase_yres; i++) {
+            for (j = 0; j < mprofile->phase_xres; j++) {
+                d = GINT32_FROM_BE(*d32);
+                *data = q*d;
+                if (d >= 2147483640) {
+                    nvoid++;
+                    mask[i*mprofile->intens_xres + j] = 1.0;
+                }
+                else
+                    avg += *data;
+                d32++;
+                data++;
+            }
+        }
+
+        if (mprofile->camera_res)
+            siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
+        else
+            siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
+        gwy_data_field_set_si_unit_xy(dfield, siunit);
+        g_object_unref(siunit);
+
+        siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
+        gwy_data_field_set_si_unit_z(dfield, siunit);
+        g_object_unref(siunit);
+
+        gwy_debug("phase_nvoid: %u", nvoid);
+        if (nvoid)
+            fix_void_pixels(dfield, vpmask,
+                            nvoid == n ? 0.0 : avg/(n - nvoid));
+        else
+            gwy_object_unref(vpmask);
+
+        mprofile->phase_data = dfield;
+        mprofile->phase_mask = vpmask;
+        p += sizeof(gint32)*n;
+    }
 }
 
-#if 0
 #define HASH_STORE(key, fmt, field) \
     gwy_container_set_string_by_name(container, "/meta/" key, \
                                      g_strdup_printf(fmt, mprofile->field))
@@ -424,6 +637,7 @@ static void
 store_metadata(MProFile *mprofile,
                GwyContainer *container)
 {
+    /*
     gchar *p;
 
     HASH_STORE("Version", "%u", version);
@@ -442,8 +656,10 @@ store_metadata(MProFile *mprofile,
                                      G_N_ELEMENTS(spm_modes))));
     gwy_container_set_string_by_name(container, "/meta/Date",
                                      format_vt_date(mprofile->scan_date));
+                                     */
 }
 
+#if 0
 static guint
 select_which_data(MProFile *mprofile)
 {
