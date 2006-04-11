@@ -238,7 +238,7 @@ apefile_load(const gchar *filename)
         apefile.vpmt1 = get_FLOAT(&p);
         apefile.vpmt2 = get_FLOAT(&p);
     }
-    apefile.remark = g_strndup(p, 120);
+    apefile.remark = g_strndup((const gchar*)p, 120);
     p += 120;
     apefile.x_piezo_factor = get_DWORD(&p);
     apefile.y_piezo_factor = get_DWORD(&p);
@@ -373,8 +373,9 @@ store_metadata(APEFile *apefile,
         (container, "/meta/SPM mode",
          g_strdup(gwy_enum_to_string(apefile->spm_mode, spm_modes,
                                      G_N_ELEMENTS(spm_modes))));
-    gwy_container_set_string_by_name(container, "/meta/Date",
-                                     format_vt_date(apefile->scan_date));
+    p = format_vt_date(apefile->scan_date);
+    if (p)
+        gwy_container_set_string_by_name(container, "/meta/Date", p);
 }
 
 static guint
@@ -728,8 +729,10 @@ format_vt_date(gdouble vt_date)
     struct tm tm;
     UDATE udate;
 
+    if (!gwy_VarUdateFromDate(vt_date, &udate))
+        return NULL;
+
     memset(&tm, 0, sizeof(tm));
-    gwy_VarUdateFromDate(vt_date, &udate);
     gwy_debug("Date: %d-%d-%d %d:%d:%d",
               udate.st.wYear, udate.st.wMonth, udate.st.wDay,
               udate.st.wHour, udate.st.wMinute, udate.st.wSecond);
