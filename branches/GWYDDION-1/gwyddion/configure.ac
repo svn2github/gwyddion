@@ -195,6 +195,7 @@ AM_CONDITIONAL([HAVE_PASCAL], [test "$PASCAL" != : -a "$enable_pascal" != no])
 if test "$GCC" = yes; then
   GWY_PROG_CC_OPTION([WNO_EMPTY_FMT],[-Wno-format-zero-length],,)
   GWY_PROG_CC_OPTION([WNO_SIGN_COMPARE],[-Wno-sign-compare],,)
+  GWY_PROG_CC_OPTION([WNO_POINTER_SIGN],[-Wno-pointer-sign],,)
   GWY_PROG_CC_OPTION([WNO_SYS_HEADERS],[-Wno-system-headers],,)
   GWY_PROG_CC_OPTION([ERR_IFD],[-Werror-implicit-function-declaration],,)
   # FIXME: GLib headers don't compile cleanly with this warning
@@ -203,7 +204,7 @@ if test "$GCC" = yes; then
   # FIXME: We would like an error, but gcc can't make one w/o -std, which is
   # too much.
   GWY_PROG_CC_OPTION([WMIXED_DECL],[-Wdeclaration-after-statement],,)
-  WARNING_CFLAGS="-Wall -W -Wshadow -Wpointer-arith $PROG_CC_ERR_IFD $PROG_CC_WNO_SYS_HEADERS $PROG_CC_WREDUNDANT $PROG_CC_WNO_EMPTY_FMT $PROG_CC_WNO_SIGN_COMPARE $PROG_CC_WMIXED_DECL"
+  WARNING_CFLAGS="-Wall -W -Wshadow -Wpointer-arith $PROG_CC_ERR_IFD $PROG_CC_WNO_SYS_HEADERS $PROG_CC_WREDUNDANT $PROG_CC_WNO_EMPTY_FMT $PROG_CC_WNO_SIGN_COMPARE $PROG_CC_WNO_POINTER_SIGN $PROG_CC_WMIXED_DECL"
 fi
 
 case $target_os in
