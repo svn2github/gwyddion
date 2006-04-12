@@ -54,31 +54,35 @@ static gint          bcrfile_detect        (const gchar *filename,
 static GwyContainer* bcrfile_load          (const gchar *filename);
 static GwyDataField* file_load_real        (const guchar *buffer,
                                             gsize size,
-                                            GHashTable *meta);
+                                            GHashTable *meta,
+                                            GwyDataField **voidmask);
 static GwyDataField* read_data_field       (const guchar *buffer,
                                             gint xres,
                                             gint yres,
                                             BCRFileType type,
                                             gboolean little_endian);
+static GwyDataField* read_data_field_with_voids(const guchar *buffer,
+                                                gint xres,
+                                                gint yres,
+                                                BCRFileType type,
+                                                gboolean little_endian,
+                                                GwyDataField **voidmask);
 static void          load_metadata         (gchar *buffer,
                                             GHashTable *meta);
 static void          store_metadata        (GHashTable *meta,
                                             GwyContainer *container);
 
-/* The module info. */
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "bcrfile",
     N_("Imports Image Metrology BCR data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1.2",
+    "0.1.3",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
 
-/* This is the ONLY exported symbol.  The argument is the module info.
- * NO semicolon after. */
 GWY_MODULE_QUERY(module_info)
 
 static gboolean
@@ -127,11 +131,11 @@ bcrfile_detect(const gchar *filename, gboolean only_name)
 static GwyContainer*
 bcrfile_load(const gchar *filename)
 {
-    GObject *object = NULL;
+    GwyContainer *container = NULL;
     guchar *buffer = NULL;
     gsize size = 0;
     GError *err = NULL;
-    GwyDataField *dfield = NULL;
+    GwyDataField *dfield = NULL, *voidmask = NULL;
     GHashTable *meta = NULL;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
@@ -146,28 +150,34 @@ bcrfile_load(const gchar *filename)
     }
 
     meta = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-    dfield = file_load_real(buffer, size, meta);
+    dfield = file_load_real(buffer, size, meta, &voidmask);
     gwy_file_abandon_contents(buffer, size, NULL);
     if (dfield) {
-        object = gwy_container_new();
-        gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
+        container = GWY_CONTAINER(gwy_container_new());
+        gwy_container_set_object_by_name(container, "/0/data",
                                          G_OBJECT(dfield));
         g_object_unref(dfield);
-        store_metadata(meta, GWY_CONTAINER(object));
+        if (voidmask) {
+            gwy_container_set_object_by_name(container, "/0/mask",
+                                             G_OBJECT(voidmask));
+            g_object_unref(voidmask);
+        }
+        store_metadata(meta, container);
     }
     g_hash_table_destroy(meta);
 
-    return (GwyContainer*)object;
+    return container;
 }
 
 static GwyDataField*
 file_load_real(const guchar *buffer,
                gsize size,
-               GHashTable *meta)
+               GHashTable *meta,
+               GwyDataField **voidmask)
 {
     GwyDataField *dfield;
     GwySIUnit *siunit1 = NULL, *siunit2 = NULL;
-    gboolean intelmode = TRUE;
+    gboolean intelmode = TRUE, voidpixels = FALSE;
     BCRFileType type;
     gdouble q, qq;
     gint xres, yres, power10;
@@ -208,14 +218,22 @@ file_load_real(const guchar *buffer,
     if ((s = g_hash_table_lookup(meta, "intelmode")))
         intelmode = !!atol(s);
 
+    /* This is in fact an int, but we only care whether it's nonzero */
+    if ((s = g_hash_table_lookup(meta, "voidpixels")))
+        voidpixels = !!atol(s);
+
     if (size < HEADER_SIZE + xres*yres*type) {
         g_warning("Expected data size %u, but it's %u",
                   xres*yres*type, (guint)(size - HEADER_SIZE));
         return NULL;
     }
 
-    dfield = read_data_field(buffer + HEADER_SIZE, xres, yres,
-                             type, intelmode);
+    if (voidpixels)
+        dfield = read_data_field_with_voids(buffer + HEADER_SIZE, xres, yres,
+                                            type, intelmode, voidmask);
+    else
+        dfield = read_data_field(buffer + HEADER_SIZE, xres, yres,
+                                 type, intelmode);
 
     if ((s = g_hash_table_lookup(meta, "xlength"))
         && (q = g_ascii_strtod(s, NULL)) > 0) {
@@ -262,6 +280,17 @@ file_load_real(const guchar *buffer,
     if ((s = g_hash_table_lookup(meta, "zmin"))
         && (qq = g_ascii_strtod(s, NULL)) > 0)
         gwy_data_field_add(dfield, q*qq - gwy_data_field_get_min(dfield));
+
+    if (voidpixels) {
+        gwy_data_field_set_xreal(*voidmask, gwy_data_field_get_xreal(dfield));
+        gwy_data_field_set_yreal(*voidmask, gwy_data_field_get_yreal(dfield));
+        siunit1 = gwy_si_unit_duplicate(gwy_data_field_get_si_unit_xy(dfield));
+        gwy_data_field_set_si_unit_xy(*voidmask, siunit1);
+        g_object_unref(siunit1);
+        siunit1 = gwy_si_unit_duplicate(gwy_data_field_get_si_unit_z(dfield));
+        gwy_data_field_set_si_unit_z(*voidmask, siunit1);
+        g_object_unref(siunit1);
+    }
 
     return dfield;
 }
@@ -347,6 +376,103 @@ read_data_field(const guchar *buffer,
         default:
         g_assert_not_reached();
         break;
+    }
+
+    return dfield;
+}
+
+static GwyDataField*
+read_data_field_with_voids(const guchar *buffer,
+                           gint xres,
+                           gint yres,
+                           BCRFileType type,
+                           gboolean little_endian,
+                           GwyDataField **voidmask)
+{
+    const guint16 *p = (const guint16*)buffer;
+    GwyDataField *dfield;
+    gdouble *data, *voids;
+    gdouble sum;
+    guint i, ngood;
+
+    dfield = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6, FALSE));
+    *voidmask = GWY_DATA_FIELD(gwy_data_field_new(xres, yres, 1e-6, 1e-6,
+                                                  TRUE));
+    data = gwy_data_field_get_data(dfield);
+    voids = gwy_data_field_get_data(*voidmask);
+    ngood = 0;
+    sum = 0.0;
+    switch (type) {
+        case BCR_FILE_INT16:
+        if (little_endian) {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = GINT16_FROM_LE(p[i]);
+                if (data[i] == 32767.0)
+                    voids[i] = 1.0;
+                else {
+                    ngood++;
+                    sum += data[i];
+                }
+            }
+        }
+        else {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = GINT16_FROM_BE(p[i]);
+                if (data[i] == 32767.0)
+                    voids[i] = 1.0;
+                else {
+                    ngood++;
+                    sum += data[i];
+                }
+            }
+        }
+        break;
+
+        case BCR_FILE_FLOAT:
+        if (little_endian) {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = get_FLOAT(&buffer);
+                if (data[i] > 1.7e38)
+                    voids[i] = 1.0;
+                else {
+                    ngood++;
+                    sum += data[i];
+                }
+            }
+        }
+        else {
+            for (i = 0; i < xres*yres; i++) {
+                data[i] = get_FLOAT_BE(&buffer);
+                if (data[i] > 1.7e38)
+                    voids[i] = 1.0;
+                else {
+                    ngood++;
+                    sum += data[i];
+                }
+            }
+        }
+        gwy_data_field_multiply(dfield, 1e-9);
+        break;
+
+        default:
+        g_assert_not_reached();
+        break;
+    }
+
+    if (!ngood || ngood == xres*yres) {
+        if (!ngood) {
+            g_warning("Data contain no valid pixels.");
+            gwy_data_field_clear(dfield);
+        }
+        gwy_object_unref(*voidmask);
+        return dfield;
+    }
+
+    /* Replace void data with mean value */
+    sum /= ngood;
+    for (i = 0; i < xres*yres; i++) {
+        if (voids[i])
+            data[i] = sum;
     }
 
     return dfield;
