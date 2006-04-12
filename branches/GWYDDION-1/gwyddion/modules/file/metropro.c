@@ -135,8 +135,8 @@ typedef struct {
     gchar zoom_desc[8];
 
     /* Our stuff */
-    GwyDataField *intensity_data;
-    GwyDataField *intensity_mask;
+    GwyDataField **intensity_data;
+    GwyDataField **intensity_mask;
     GwyDataField *phase_data;
     GwyDataField *phase_mask;
 } MProFile;
@@ -230,6 +230,7 @@ mprofile_load(const gchar *filename)
     gsize size = 0;
     GError *err = NULL;
     gsize expected;
+    guint n;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         g_warning("Cannot read file %s", filename);
@@ -255,13 +256,19 @@ mprofile_load(const gchar *filename)
     fill_data_fields(&mprofile, buffer);
     gwy_file_abandon_contents(buffer, size, NULL);
 
-    /*
     n = select_which_data(&mprofile);
-    if (n != (guint)-1)
-        dfield = mprofile.data[n];
-    */
-    dfield = mprofile.phase_data;
-    vpmask = mprofile.phase_mask;
+    gwy_debug("selected: %u", n);
+    if (n != (guint)-1) {
+        if (n < mprofile.nbuckets) {
+            dfield = mprofile.intensity_data[n];
+            vpmask = mprofile.intensity_mask[n];
+        }
+        else {
+            g_assert(n == mprofile.nbuckets);
+            dfield = mprofile.phase_data;
+            vpmask = mprofile.phase_mask;
+        }
+    }
     if (dfield) {
         container = GWY_CONTAINER(gwy_container_new());
         gwy_container_set_object_by_name(container, "/0/data",
@@ -272,8 +279,12 @@ mprofile_load(const gchar *filename)
         store_metadata(&mprofile, container);
     }
 
-    gwy_object_unref(mprofile.intensity_data);
+    for (n = 0; n < mprofile.nbuckets; n++) {
+        gwy_object_unref(mprofile.intensity_data[n]);
+        gwy_object_unref(mprofile.intensity_mask[n]);
+    }
     gwy_object_unref(mprofile.phase_data);
+    gwy_object_unref(mprofile.phase_mask);
 
     return container;
 }
@@ -334,8 +345,6 @@ mprofile_read_header(const guchar *buffer,
               mprofile->intens_xres, mprofile->intens_yres,
               mprofile->intens_xoff, mprofile->intens_yoff);
     mprofile->nbuckets = get_WORD_BE(&p);
-    if (mprofile->nbuckets != 0 && mprofile->nbuckets != 1)
-        g_warning("Only 1 NBuckets is supported");
     mprofile->intens_range = get_WORD_BE(&p);
     mprofile->intens_nbytes = get_DWORD_BE(&p);
     gwy_debug("intens_nbytes: %d, expecting: %d",
@@ -441,6 +450,25 @@ mprofile_read_header(const guchar *buffer,
 }
 
 static void
+set_units(GwyDataField *dfield,
+          const MProFile *mprofile,
+          const gchar *zunit)
+{
+    GwySIUnit *siunit;
+
+    if (mprofile->camera_res)
+        siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
+    else
+        siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
+    gwy_data_field_set_si_unit_xy(dfield, siunit);
+    g_object_unref(siunit);
+
+    siunit = GWY_SI_UNIT(gwy_si_unit_new(zunit));
+    gwy_data_field_set_si_unit_z(dfield, siunit);
+    g_object_unref(siunit);
+}
+
+static void
 fix_void_pixels(GwyDataField *dfield,
                 GwyDataField *vpmask,
                 gdouble avg)
@@ -473,22 +501,32 @@ fill_data_fields(MProFile *mprofile,
                  const guchar *buffer)
 {
     GwyDataField *dfield, *vpmask;
-    GwySIUnit *siunit;
     gdouble *data, *mask;
     gdouble xreal, yreal, q, avg;
     const guchar *p;
-    guint n, i, j, nvoid;
+    guint n, id, i, j, nvoid;
 
     mprofile->intensity_data = NULL;
+    mprofile->intensity_mask = NULL;
     mprofile->phase_data = NULL;
+    mprofile->phase_mask = NULL;
 
     p = buffer + mprofile->header_size;
 
     /* Intensity data */
     n = mprofile->intens_xres * mprofile->intens_yres;
-    if (n) {
+    /* Enorce consistency */
+    if (!n && mprofile->nbuckets) {
+        g_warning("nbuckets > 0, but intensity data have zero dimension");
+        mprofile->nbuckets = 0;
+    }
+
+    if (mprofile->nbuckets) {
         const guint16 *d16;
         guint16 d;
+
+        mprofile->intensity_data = g_new(GwyDataField*, mprofile->nbuckets);
+        mprofile->intensity_mask = g_new(GwyDataField*, mprofile->nbuckets);
 
         q = mprofile->data_inverted ? -1.0 : 1.0;
 
@@ -501,55 +539,48 @@ fill_data_fields(MProFile *mprofile,
             xreal = mprofile->intens_xres;
             yreal = mprofile->intens_yres;
         }
-        dfield = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
-                                                   mprofile->intens_yres,
-                                                   xreal, yreal,
-                                                   FALSE));
-        vpmask = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
-                                                   mprofile->intens_yres,
-                                                   xreal, yreal,
-                                                   TRUE));
-        data = gwy_data_field_get_data(dfield);
-        mask = gwy_data_field_get_data(vpmask);
-        d16 = (const guint16*)p;
-        avg = 0.0;
-        nvoid = 0;
-        for (i = 0; i < mprofile->intens_yres; i++) {
-            for (j = 0; j < mprofile->intens_xres; j++) {
-                d = q*GUINT16_FROM_BE(*d16);
-                *data = q*d;
-                if (*d16 >= 65412) {
-                    nvoid++;
-                    mask[i*mprofile->intens_xres + j] = 1.0;
+
+        for (id = 0; id < mprofile->nbuckets; id++) {
+            dfield = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
+                                                       mprofile->intens_yres,
+                                                       xreal, yreal,
+                                                       FALSE));
+            vpmask = GWY_DATA_FIELD(gwy_data_field_new(mprofile->intens_xres,
+                                                       mprofile->intens_yres,
+                                                       xreal, yreal,
+                                                       TRUE));
+            data = gwy_data_field_get_data(dfield);
+            mask = gwy_data_field_get_data(vpmask);
+            d16 = (const guint16*)p;
+            avg = 0.0;
+            nvoid = 0;
+            for (i = 0; i < mprofile->intens_yres; i++) {
+                for (j = 0; j < mprofile->intens_xres; j++) {
+                    d = q*GUINT16_FROM_BE(*d16);
+                    *data = q*d;
+                    if (*d16 >= 65412) {
+                        nvoid++;
+                        mask[i*mprofile->intens_xres + j] = 1.0;
+                    }
+                    else
+                        avg += *data;
+                    d16++;
+                    data++;
                 }
-                else
-                    avg += *data;
-                d16++;
-                data++;
             }
+
+            gwy_debug("intens_nvoid[%u]: %u", id, nvoid);
+            set_units(dfield, mprofile, "");
+            if (nvoid)
+                fix_void_pixels(dfield, vpmask,
+                                nvoid == n ? 0.0 : avg/(n - nvoid));
+            else
+                gwy_object_unref(vpmask);
+
+            mprofile->intensity_data[id] = dfield;
+            mprofile->intensity_mask[id] = vpmask;
+            p += sizeof(guint16)*n;
         }
-
-        if (mprofile->camera_res)
-            siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
-        else
-            siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
-        gwy_data_field_set_si_unit_xy(dfield, siunit);
-        g_object_unref(siunit);
-
-        siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
-        gwy_data_field_set_si_unit_z(dfield, siunit);
-        g_object_unref(siunit);
-
-        gwy_debug("intens_nvoid: %u", nvoid);
-        if (nvoid)
-            fix_void_pixels(dfield, vpmask,
-                            nvoid == n ? 0.0 : avg/(n - nvoid));
-        else
-            gwy_object_unref(vpmask);
-
-        mprofile->intensity_data = dfield;
-        mprofile->intensity_mask = vpmask;
-        p += sizeof(guint16)*n*mprofile->nbuckets;
     }
 
     /* Phase data */
@@ -605,18 +636,8 @@ fill_data_fields(MProFile *mprofile,
             }
         }
 
-        if (mprofile->camera_res)
-            siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
-        else
-            siunit = GWY_SI_UNIT(gwy_si_unit_new(""));
-        gwy_data_field_set_si_unit_xy(dfield, siunit);
-        g_object_unref(siunit);
-
-        siunit = GWY_SI_UNIT(gwy_si_unit_new("m"));
-        gwy_data_field_set_si_unit_z(dfield, siunit);
-        g_object_unref(siunit);
-
         gwy_debug("phase_nvoid: %u", nvoid);
+        set_units(dfield, mprofile, "m");
         if (nvoid)
             fix_void_pixels(dfield, vpmask,
                             nvoid == n ? 0.0 : avg/(n - nvoid));
@@ -659,7 +680,6 @@ store_metadata(MProFile *mprofile,
                                      */
 }
 
-#if 0
 static guint
 select_which_data(MProFile *mprofile)
 {
@@ -668,23 +688,30 @@ select_which_data(MProFile *mprofile)
     GwyEnum *choices;
     GtkObject *layer;
     GSList *radio, *rl;
-    guint i, b;
+    gboolean has_phase;
+    guint i, j, ndata;
 
-    if (!mprofile->ndata)
+    has_phase = (mprofile->phase_data != NULL);
+    ndata = mprofile->nbuckets + (has_phase ? 1 : 0);
+    gwy_debug("%d intensity data, %d phase data => %u total",
+              mprofile->nbuckets, (has_phase ? 1 : 0), ndata);
+
+    if (!ndata)
         return (guint)-1;
 
-    if (mprofile->ndata == 1)
+    if (ndata == 1)
         return 0;
 
     controls.file = mprofile;
-    choices = g_new(GwyEnum, mprofile->ndata);
-    b = 0;
-    for (i = 0; i < mprofile->ndata; i++) {
-        while (!((1 << b) & mprofile->channels))
-            b++;
-        b++;
+    choices = g_new(GwyEnum, ndata);
+
+    for (i = 0; i < mprofile->nbuckets; i++) {
         choices[i].value = i;
-        choices[i].name = g_strdup_printf(_("Channel %u"), b);
+        choices[i].name = g_strdup_printf(_("Intensity channel %u"), i+1);
+    }
+    if (has_phase) {
+        choices[i].value = i;
+        choices[i].name = g_strdup_printf(_("Phase channel"));
     }
 
     dialog = gtk_dialog_new_with_buttons(_("Select Data"), NULL, 0,
@@ -708,7 +735,7 @@ select_which_data(MProFile *mprofile)
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
     gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
 
-    radio = gwy_radio_buttons_create(choices, mprofile->ndata, "data",
+    radio = gwy_radio_buttons_create(choices, ndata, "data",
                                      G_CALLBACK(selection_changed), &controls,
                                      0);
     for (i = 0, rl = radio; rl; i++, rl = g_slist_next(rl))
@@ -719,13 +746,15 @@ select_which_data(MProFile *mprofile)
     gtk_box_pack_start(GTK_BOX(hbox), align, TRUE, TRUE, 0);
 
     controls.data = GWY_CONTAINER(gwy_container_new());
+    /* XXX: There is at most one phase data, so if we get here we have more
+     * than one data, therefore intensity_data[0] exists */
     gwy_container_set_object_by_name(controls.data, "/0/data",
-                                     G_OBJECT(mprofile->data[0]));
+                                     G_OBJECT(mprofile->intensity_data[0]));
 
     controls.data_view = gwy_data_view_new(controls.data);
     g_object_unref(controls.data);
     gwy_data_view_set_zoom(GWY_DATA_VIEW(controls.data_view),
-                           120.0/mprofile->res);
+                           120.0/mprofile->intens_xres);
     layer = gwy_layer_basic_new();
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.data_view),
                                  GWY_PIXMAP_LAYER(layer));
@@ -738,11 +767,11 @@ select_which_data(MProFile *mprofile)
         case GTK_RESPONSE_DELETE_EVENT:
         gtk_widget_destroy(dialog);
         case GTK_RESPONSE_NONE:
-        b = (guint)-1;
+        i = (guint)-1;
         break;
 
         case GTK_RESPONSE_OK:
-        b = GPOINTER_TO_UINT(gwy_radio_buttons_get_current(radio, "data"));
+        i = GPOINTER_TO_UINT(gwy_radio_buttons_get_current(radio, "data"));
         gtk_widget_destroy(dialog);
         break;
 
@@ -751,17 +780,18 @@ select_which_data(MProFile *mprofile)
         break;
     }
 
-    for (i = 0; i < mprofile->ndata; i++)
-        g_free((gpointer)choices[i].name);
+    for (j = 0; j < ndata; j++)
+        g_free((gpointer)choices[j].name);
     g_free(choices);
 
-    return b;
+    return i;
 }
 
 static void
 selection_changed(GtkWidget *button,
                   MProControls *controls)
 {
+    GwyDataField *dfield;
     guint i;
 
     if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
@@ -769,11 +799,16 @@ selection_changed(GtkWidget *button,
 
     i = gwy_radio_buttons_get_current_from_widget(button, "data");
     g_assert(i != (guint)-1);
+    if (i < controls->file->nbuckets)
+        dfield = controls->file->intensity_data[i];
+    else {
+        g_assert(i == controls->file->nbuckets);
+        dfield = controls->file->phase_data;
+    }
     gwy_container_set_object_by_name(controls->data, "/0/data",
-                                     G_OBJECT(controls->file->data[i]));
+                                     G_OBJECT(dfield));
     gwy_data_view_update(GWY_DATA_VIEW(controls->data_view));
 }
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
 
