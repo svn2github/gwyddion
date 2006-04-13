@@ -495,7 +495,7 @@ omicron_read_data(OmicronFile *ofile,
     gwy_data_field_set_si_unit_z(dfield, siunit);
     g_object_unref(siunit);
     if (power10)
-        gwy_data_field_multiply(dfield, pow10(power10));
+        gwy_data_field_multiply(dfield, pow(10.0, power10));
 
     return dfield;
 }
