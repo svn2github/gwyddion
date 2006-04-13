@@ -20,7 +20,6 @@
 /*xmlTextReaderGetAttribute  !!!!! check leaks */
 /* #define DEBUG */
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

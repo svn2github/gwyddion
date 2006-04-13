@@ -24,7 +24,6 @@
  * http://www.weizmann.ac.il/Chemical_Research_Support/surflab/peter/headers/burl.html
  */
 
-#include "config.h"
 #include <string.h>
 #include <stdio.h>
 #include <libgwyddion/gwymacros.h>
