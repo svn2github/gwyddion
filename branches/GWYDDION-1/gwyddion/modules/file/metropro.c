@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
-#define DEBUG 1
+
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "get.h"
 
@@ -86,8 +87,8 @@ typedef struct {
     gint min_mod_pts;
     MProPhaseResType phase_res;
     gint min_area_size;
-    gint discon_action;
-    gdouble discon_filter;
+    gint discont_action;
+    gdouble discont_filter;
     gint connection_order;
     gboolean data_inverted;
     gint camera_width;
@@ -101,7 +102,7 @@ typedef struct {
     gint code_vtype;
     gint phase_avgs;
     gint subtract_sys_err;
-    gchar part_set_num[40];
+    gchar part_ser_num[40];
     gdouble refactive_index;
     gint remove_tilt_bias;
     gint remove_fringes;
@@ -166,7 +167,7 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "metropro",
-    N_("Imports MetroPro (Zygo) data files."),
+    N_("Imports binary MetroPro (Zygo) data files."),
     "Yeti <yeti@gwyddion.net>",
     "0.1",
     "David Nečas (Yeti) & Petr Klapetek",
@@ -378,6 +379,8 @@ mprofile_read_header(const guchar *buffer,
     mprofile->acquire_mode = get_WORD_BE(&p);
     gwy_debug("acquire_mode: %d", mprofile->acquire_mode);
     mprofile->intens_avgs = get_WORD_BE(&p);
+    if (!mprofile->intens_avgs)
+        mprofile->intens_avgs = 1;
     mprofile->pzt_cal = get_WORD_BE(&p);
     mprofile->pzt_gain_tolerance = get_WORD_BE(&p);
     mprofile->pzt_gain = get_WORD_BE(&p);
@@ -390,8 +393,8 @@ mprofile_read_header(const guchar *buffer,
     mprofile->min_mod_pts = get_DWORD_BE(&p);
     mprofile->phase_res = get_WORD_BE(&p);
     mprofile->min_area_size = get_DWORD_BE(&p);
-    mprofile->discon_action = get_WORD_BE(&p);
-    mprofile->discon_filter = get_FLOAT_BE(&p);
+    mprofile->discont_action = get_WORD_BE(&p);
+    mprofile->discont_filter = get_FLOAT_BE(&p);
     mprofile->connection_order = get_WORD_BE(&p);
     mprofile->data_inverted = get_WORD_BE(&p);
     mprofile->camera_width = get_WORD_BE(&p);
@@ -407,7 +410,7 @@ mprofile_read_header(const guchar *buffer,
     mprofile->phase_avgs = get_WORD_BE(&p);
     mprofile->subtract_sys_err = get_WORD_BE(&p);
     p += 16;
-    get_CHARARRAY0(mprofile->part_set_num, &p);
+    get_CHARARRAY0(mprofile->part_ser_num, &p);
     mprofile->refactive_index = get_FLOAT_BE(&p);
     mprofile->remove_tilt_bias = get_WORD_BE(&p);
     mprofile->remove_fringes = get_WORD_BE(&p);
@@ -654,30 +657,111 @@ fill_data_fields(MProFile *mprofile,
     gwy_container_set_string_by_name(container, "/meta/" key, \
                                      g_strdup_printf(fmt, mprofile->field))
 
+#define HASH_STORE_ENUM(key, field, e) \
+    s = gwy_enum_to_string(mprofile->field, e, G_N_ELEMENTS(e)); \
+    if (s && *s) \
+        gwy_container_set_string_by_name(container, "/meta/" key, \
+                                         g_strdup(s));
+
+static void
+store_meta_string(GwyContainer *container,
+                  const gchar *key,
+                  gchar *field)
+{
+    gchar *p;
+
+    g_strstrip(field);
+    if (field[0]
+        && (p = g_locale_to_utf8(field, strlen(field), NULL, NULL, NULL)))
+        gwy_container_set_string_by_name(container, key, p);
+}
+
+/* Quite incomplete... */
 static void
 store_metadata(MProFile *mprofile,
                GwyContainer *container)
 {
-    /*
+    static const GwyEnum yesno[] = { { "No", 0, }, { "Yes", 1, } };
+    static const GwyEnum software_types[] = {
+        { "MetroPro",   1, },
+        { "MetroBasic", 2, },
+        { "dbug",       3, },
+    };
+    static const GwyEnum discont_actions[] = {
+        { "Delete", 0, },
+        { "Filter", 1, },
+        { "Ignore", 2, },
+    };
+    static const GwyEnum system_types[] = {
+        { "softwate generated data", 0, },
+        { "Mark IVxp",               1, },
+        { "Maxim 3D",                2, },
+        { "Maxim NT",                3, },
+        { "GPI-XP",                  4, },
+        { "NewView",                 5, },
+        { "Maxim GP",                6, },
+        { "NewView/GP",              7, },
+        { "Mark to GPI conversion",  8, },
+    };
+    time_t tp;
+    struct tm *tm;
+    const gchar *s;
+    gchar buffer[24];
     gchar *p;
 
-    HASH_STORE("Version", "%u", version);
-    HASH_STORE("Tip oscilation frequency", "%g Hz", freq_osc_tip);
-    HASH_STORE("Acquire delay", "%.6f s", acquire_delay);
-    HASH_STORE("Raster delay", "%.6f s", raster_delay);
-    HASH_STORE("Tip distance", "%g nm", tip_dist);
+    /* Version */
+    p = g_strdup_printf("%d.%d.%d",
+                        mprofile->version_major,
+                        mprofile->version_minor,
+                        mprofile->version_micro);
+    gwy_container_set_string_by_name(container, "/meta/Version", p);
 
-    if (mprofile->remark && *mprofile->remark
-        && (p = g_convert(mprofile->remark, strlen(mprofile->remark),
-                          "UTF-8", "ISO-8859-1", NULL, NULL, NULL)))
-        gwy_container_set_string_by_name(container, "/meta/Comment", p);
-    gwy_container_set_string_by_name
-        (container, "/meta/SPM mode",
-         g_strdup(gwy_enum_to_string(mprofile->spm_mode, spm_modes,
-                                     G_N_ELEMENTS(spm_modes))));
-    gwy_container_set_string_by_name(container, "/meta/Date",
-                                     format_vt_date(mprofile->scan_date));
-                                     */
+    /* Timestamp */
+    tp = mprofile->timestamp;
+    tm = localtime(&tp);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm);
+    gwy_container_set_string_by_name(container, "/meta/Date", g_strdup(buffer));
+
+    /* Comments */
+    store_meta_string(container, "/meta/Software date",
+                      mprofile->software_date);
+    store_meta_string(container, "/meta/Comment",
+                      mprofile->comment);
+    store_meta_string(container, "/meta/Objective name",
+                      mprofile->objective_name);
+    store_meta_string(container, "/meta/Part measured",
+                      mprofile->part_num);
+    store_meta_string(container, "/meta/Part serial number",
+                      mprofile->part_ser_num);
+    store_meta_string(container, "/meta/Description",
+                      mprofile->scan_description);
+    store_meta_string(container, "/meta/System error file",
+                      mprofile->sys_err_file);
+    store_meta_string(container, "/meta/Zoom description",
+                      mprofile->zoom_desc);
+    store_meta_string(container, "/meta/Wavelength select",
+                      mprofile->wavelength_select);
+
+    /* Misc */
+    HASH_STORE_ENUM("Software type", software_type, software_types);
+    HASH_STORE("Wavelength", "%g m", wavelength_in);
+    HASH_STORE("Intensity averages", "%d", intens_avgs);
+    HASH_STORE("Minimum modulation points", "%d", min_mod_pts);
+    HASH_STORE_ENUM("Automatic gain control", agc, yesno);
+    HASH_STORE_ENUM("Discontinuity action", discont_action, discont_actions);
+    HASH_STORE("Discontinuity filter", "%g %%", discont_filter);
+    HASH_STORE_ENUM("System type", system_type, system_types);
+    HASH_STORE("System board", "%d", system_board);
+    HASH_STORE("System serial", "%d", system_serial);
+    HASH_STORE("Instrument id", "%d", instrument_id);
+    HASH_STORE_ENUM("System error subtracted", subtract_sys_err, yesno);
+    HASH_STORE("Refractive index", "%g", refactive_index);
+    HASH_STORE_ENUM("Removed tilt bias", remove_tilt_bias, yesno);
+    HASH_STORE_ENUM("Removed fringes", remove_fringes, yesno);
+    HASH_STORE_ENUM("Wavelength folding", wavelength_fold, yesno);
+
+    p = g_strdup_printf("%.2g", mprofile->min_mod/10.23);
+    gwy_container_set_string_by_name(container, "/meta/Minimum modulation", p);
 }
 
 static guint
