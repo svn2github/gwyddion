@@ -1139,8 +1139,8 @@ spml_load(const gchar *filename)
     /* create and allocate datafield of given dimensions and given physical
        dimensions */
     dfield = GWY_DATA_FIELD(gwy_data_field_new(dimensions[0], dimensions[1],
-                                               x_dimen * pow10(x_power10),
-                                               y_dimen * pow10(y_power10),
+                                               x_dimen * pow(10.0, x_power10),
+                                               y_dimen * pow(10.0, y_power10),
                                                FALSE));
 
     gwy_data = gwy_data_field_get_data(dfield);
@@ -1155,7 +1155,7 @@ spml_load(const gchar *filename)
     siunit = gwy_si_unit_new_parse(unit, &z_power10);
     gwy_data_field_set_si_unit_z(dfield, siunit);
     g_object_unref(siunit);
-    gwy_data_field_multiply(dfield, pow10(z_power10));
+    gwy_data_field_multiply(dfield, pow(10.0, z_power10));
 
     object = GWY_CONTAINER(gwy_container_new());
     gwy_container_set_object_by_name(object, "/0/data", (GObject *)dfield);
