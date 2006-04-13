@@ -351,7 +351,7 @@ gwy_3d_labels_update(Gwy3DLabels *labels, GwySIUnit *si_unit)
  * @labels: 3D label collection object
  * @si_unit_xy: SI Unit appended to the numerical values of variables in @text
  *              field of #Gwy3DLabelDescription for lateral values.
- * @si_unit_y: SI Unit appended to the numerical values of variables in @text
+ * @si_unit_z: SI Unit appended to the numerical values of variables in @text
  *              field of #Gwy3DLabelDescription for height values.
  *
  * Updates the numerical values of the variables in @text field of
