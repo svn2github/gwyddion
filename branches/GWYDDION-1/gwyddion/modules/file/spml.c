@@ -59,7 +59,8 @@ static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     "spml",
-    N_("Loads and saves SPML data files."),
+    N_("Loads and saves SPML (Scanning Probe Microscopy Markup Language) "
+       "data files."),
     "Jan Horak <xhorak@gmail.com>",
     "0.1.1",
     "Jan Horak",
@@ -75,7 +76,7 @@ GWY_MODULE_QUERY(module_info)
 {
     static GwyFileFuncInfo gwyfile_func_info = {
         "spml",
-        N_("SPML: Scanning Probe Microscopy Markup Language (.xml)"),
+        N_("SPML files (.xml)"),
         (GwyFileDetectFunc) & spml_detect,
         (GwyFileLoadFunc) & spml_load,
         NULL,
