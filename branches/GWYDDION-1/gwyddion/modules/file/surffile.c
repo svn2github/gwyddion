@@ -36,7 +36,6 @@
 
 #include "get.h"
 
-
 #define EXTENSION ".sur"
 
 typedef enum {
@@ -213,7 +212,7 @@ surffile_detect(const gchar *filename, gboolean only_name)
     FILE *fh;
     gchar header[12];
 
-    if (only_name) 
+    if (only_name)
         return g_str_has_suffix(filename, EXTENSION) ? 15 : 0;
 
     if (!(fh = fopen(filename, "rb")))
@@ -262,8 +261,8 @@ surffile_load(const gchar *filename)
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
-                        
-    
+
+
     surffile.format = get_WORD_LE(&p);
     surffile.nobjects = get_WORD_LE(&p);
     surffile.version = get_WORD_LE(&p);
@@ -285,7 +284,7 @@ surffile_load(const gchar *filename)
     surffile.nofpoints = get_DWORD(&p);
 
     //surffile.xres = 200; surffile.yres = 200;
-    
+
     surffile.dx = get_FLOAT_LE(&p);
     surffile.dy = get_FLOAT_LE(&p);
     surffile.dz = get_FLOAT_LE(&p);
@@ -305,9 +304,9 @@ surffile_load(const gchar *filename)
     surffile.imprint = get_WORD_LE(&p);
     surffile.inversion = get_WORD_LE(&p);
     surffile.leveling = get_WORD_LE(&p);
-    
+
     p += 12;
-    
+
     surffile.seconds = get_WORD_LE(&p);
     surffile.minutes = get_WORD_LE(&p);
     surffile.hours = get_WORD_LE(&p);
@@ -324,42 +323,42 @@ surffile_load(const gchar *filename)
     surffile.YOffset = get_FLOAT_LE(&p);
     surffile.ZOffset = get_FLOAT_LE(&p);
 
-    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
+    gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d",
               surffile.format, surffile.nobjects, surffile.version, surffile.type);
-    gwy_debug("object name: %s\noperator name: %s\n", surffile.object_name, surffile.operator_name);
+    gwy_debug("object name: %s", surffile.object_name);
+    gwy_debug("operator name: %s", surffile.operator_name);
 
-    gwy_debug("material code: %d, acquisition type: %d\n", surffile.material_code, surffile.acquisition);
-    gwy_debug("range type: %d, special points: %d, absolute: %d\n", surffile.range,
+    gwy_debug("material code: %d, acquisition type: %d", surffile.material_code, surffile.acquisition);
+    gwy_debug("range type: %d, special points: %d, absolute: %d", surffile.range,
            surffile.special_points, (gint)surffile.absolute);
-    gwy_debug("data point size: %d\n", surffile.pointsize);
-    gwy_debug("zmin: %d, zmax: %d\n", surffile.zmin, surffile.zmax);
-    gwy_debug("xres: %d, yres: %d (xres*yres = %d)\n", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
-    gwy_debug("total number of points: %d\n", surffile.nofpoints);
-    gwy_debug("dx: %g, dy: %g, dz: %g\n", surffile.dx, surffile.dy, surffile.dz);
-    gwy_debug("X axis name: %16s\n", surffile.xaxis);
-    gwy_debug("Y axis name: %16s\n", surffile.yaxis);
-    gwy_debug("Z axis name: %16s\n", surffile.zaxis);
-    gwy_debug("dx unit: %16s\n", surffile.dx_unit);
-    gwy_debug("dy unit: %16s\n", surffile.dy_unit);
-    gwy_debug("dz unit: %16s\n", surffile.dz_unit);
-    gwy_debug("X axis unit: %16s\n", surffile.xlength_unit);
-    gwy_debug("Y axis unit: %16s\n", surffile.ylength_unit);
-    gwy_debug("Z axis unit: %16s\n", surffile.zlength_unit);
-    gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g\n", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
-    gwy_debug("imprint: %d, inversion: %d, leveling: %d\n", surffile.imprint, surffile.inversion, surffile.leveling);
-    gwy_debug("Time: %d:%d:%d, Date: %d.%d.%d\n", surffile.hours, surffile.minutes, surffile.seconds,
+    gwy_debug("data point size: %d", surffile.pointsize);
+    gwy_debug("zmin: %d, zmax: %d", surffile.zmin, surffile.zmax);
+    gwy_debug("xres: %d, yres: %d (xres*yres = %d)", surffile.xres, surffile.yres, (surffile.xres*surffile.yres));
+    gwy_debug("total number of points: %d", surffile.nofpoints);
+    gwy_debug("dx: %g, dy: %g, dz: %g", surffile.dx, surffile.dy, surffile.dz);
+    gwy_debug("X axis name: %16s", surffile.xaxis);
+    gwy_debug("Y axis name: %16s", surffile.yaxis);
+    gwy_debug("Z axis name: %16s", surffile.zaxis);
+    gwy_debug("dx unit: %16s", surffile.dx_unit);
+    gwy_debug("dy unit: %16s", surffile.dy_unit);
+    gwy_debug("dz unit: %16s", surffile.dz_unit);
+    gwy_debug("X axis unit: %16s", surffile.xlength_unit);
+    gwy_debug("Y axis unit: %16s", surffile.ylength_unit);
+    gwy_debug("Z axis unit: %16s", surffile.zlength_unit);
+    gwy_debug("xunit_ratio: %g, yunit_ratio: %g, zunit_ratio: %g", surffile.xunit_ratio, surffile.yunit_ratio, surffile.zunit_ratio);
+    gwy_debug("imprint: %d, inversion: %d, leveling: %d", surffile.imprint, surffile.inversion, surffile.leveling);
+    gwy_debug("Time: %d:%d:%d, Date: %d.%d.%d", surffile.hours, surffile.minutes, surffile.seconds,
            surffile.day, surffile.month, surffile.year);
-    
-    p = buffer + 500;
 
-    estsize = 500 + surffile.pointsize*surffile.xres*surffile.yres/8;
+    p = buffer + 512;
+
+    estsize = 512 + surffile.pointsize*surffile.xres*surffile.yres/8;
     if (size < estsize) {
         g_warning("File %s is too short to contain Surf data %d %d", filename, (int)size, (int)estsize);
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
     }
 
-    
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
@@ -368,21 +367,21 @@ surffile_load(const gchar *filename)
         max = gwy_data_field_get_max(surffile.dfield);
         min = gwy_data_field_get_min(surffile.dfield);
         gwy_data_field_add(surffile.dfield, -min);
-        
-        gwy_data_field_multiply(surffile.dfield, 
+
+        gwy_data_field_multiply(surffile.dfield,
                                 (surffile.zmax - surffile.zmin)/(max-min));
     }
 
-    if (surffile.inversion == 1) 
+    if (surffile.inversion == 1)
         gwy_data_field_invert(surffile.dfield, FALSE, FALSE, TRUE);
-    
-    if (surffile.inversion == 2) 
+
+    if (surffile.inversion == 2)
         gwy_data_field_invert(surffile.dfield, FALSE, TRUE, TRUE);
 
-    if (surffile.inversion == 3) 
+    if (surffile.inversion == 3)
         gwy_data_field_invert(surffile.dfield, TRUE, FALSE, TRUE);
-      
-    
+
+
     if (surffile.dfield) {
         object = gwy_container_new();
         gwy_container_set_object_by_name(GWY_CONTAINER(object), "/0/data",
@@ -415,7 +414,7 @@ fill_data_fields(SurfFile *surffile,
             const gint16 *row, *d16 = (const gint16*)buffer;
 
             for (i = 0; i < surffile->xres; i++) {
-                row = d16 + i*surffile->xres;
+                row = d16 + i*surffile->yres;
                 for (j = 0; j < surffile->yres; j++)
                     *(data++) = GINT16_FROM_LE(row[j]) * surffile->dz;
             }
@@ -427,7 +426,7 @@ fill_data_fields(SurfFile *surffile,
             const gint32 *row, *d32 = (const gint32*)buffer;
 
             for (i = 0; i < surffile->xres; i++) {
-                row = d32 + i*surffile->xres;
+                row = d32 + i*surffile->yres;
                 for (j = 0; j < surffile->yres; j++)
                     *(data++) = GINT32_FROM_LE(row[j]) * surffile->dz;
             }
@@ -439,10 +438,10 @@ fill_data_fields(SurfFile *surffile,
         break;
     }
 
-    
-    /* 
+
+    /*
     data = gwy_data_field_get_data(surffile->dfield);
-    for (i = 0; i < surffile->xres; i++) { 
+    for (i = 0; i < surffile->xres; i++) {
         for (j = 0; j < surffile->yres; j++) {
             if (surffile->pointsize == 16) {
                 *(data++) = (gdouble)*(gint16*)buffer*surffile->dz;
@@ -477,7 +476,7 @@ store_metadata(SurfFile *surffile,
     char date[20];
 
     g_snprintf(date, sizeof(date), "%d. %d. %d", surffile->day, surffile->month, surffile->year);
-    
+
     HASH_STORE("Version", "%u", version);
     HASH_STORE("Operator name", "%s", operator_name);
     HASH_STORE("Object name", "%s", object_name);
@@ -486,10 +485,10 @@ store_metadata(SurfFile *surffile,
                 (container, "/meta/Acquisition type",
                    g_strdup(gwy_enum_to_string(surffile->acquisition, acq_modes,
                                                         G_N_ELEMENTS(acq_modes))));
-    
-                                     
-    
-    
+
+
+
+
 }
 
 
