@@ -34,15 +34,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#if (defined(HAVE_TIME_H) || defined(G_OS_WIN32))
-#include <time.h>
-#endif
-
-#ifdef TM_IN_SYS_TIME
-#include <sys/time.h>
-#endif
-
 #include "get.h"
+
+
+#define EXTENSION ".sur"
 
 typedef enum {
     SURF_PC = 0,
@@ -218,12 +213,8 @@ surffile_detect(const gchar *filename, gboolean only_name)
     FILE *fh;
     gchar header[12];
 
-    if (only_name) {
-        if (g_str_has_suffix(filename, ".sur"))
-            score = 10;
-
-        return score;
-    }
+    if (only_name) 
+        return g_str_has_suffix(filename, EXTENSION) ? 15 : 0;
 
     if (!(fh = fopen(filename, "rb")))
         return 0;
@@ -247,6 +238,7 @@ surffile_load(const gchar *filename)
     guchar *buffer = NULL;
     const guchar *p;
     gsize size = 0;
+    gsize estsize;
     GError *err = NULL;
     gchar signature[12];
     gdouble max, min;
@@ -265,20 +257,27 @@ surffile_load(const gchar *filename)
         return NULL;
     }
 
-    surffile.format = get_WORD(&p);
-    surffile.nobjects = get_WORD(&p);
-    surffile.version = get_WORD(&p);
-    surffile.type = get_WORD(&p);
+    if (size < 500) {
+        g_warning("File %s is too short to be Surf file", filename);
+        gwy_file_abandon_contents(buffer, size, NULL);
+        return NULL;
+    }
+                        
+    
+    surffile.format = get_WORD_LE(&p);
+    surffile.nobjects = get_WORD_LE(&p);
+    surffile.version = get_WORD_LE(&p);
+    surffile.type = get_WORD_LE(&p);
     get_CHARS0(surffile.object_name, &p, 30);
     get_CHARS0(surffile.operator_name, &p, 30);
-    surffile.material_code = get_WORD(&p);
-    surffile.acquisition = get_WORD(&p);
-    surffile.range = get_WORD(&p);
-    surffile.special_points = get_WORD(&p);
-    surffile.absolute = get_WORD(&p);
+    surffile.material_code = get_WORD_LE(&p);
+    surffile.acquisition = get_WORD_LE(&p);
+    surffile.range = get_WORD_LE(&p);
+    surffile.special_points = get_WORD_LE(&p);
+    surffile.absolute = get_WORD_LE(&p);
     /*reserved*/
     p += 8;
-    surffile.pointsize = get_WORD(&p);
+    surffile.pointsize = get_WORD_LE(&p);
     surffile.zmin = get_DWORD(&p);
     surffile.zmax = get_DWORD(&p);
     surffile.xres = get_DWORD(&p);
@@ -287,9 +286,9 @@ surffile_load(const gchar *filename)
 
     //surffile.xres = 200; surffile.yres = 200;
     
-    surffile.dx = get_FLOAT(&p);
-    surffile.dy = get_FLOAT(&p);
-    surffile.dz = get_FLOAT(&p);
+    surffile.dx = get_FLOAT_LE(&p);
+    surffile.dy = get_FLOAT_LE(&p);
+    surffile.dz = get_FLOAT_LE(&p);
     get_CHARS0(surffile.xaxis, &p, 16);
     get_CHARS0(surffile.yaxis, &p, 16);
     get_CHARS0(surffile.zaxis, &p, 16);
@@ -300,30 +299,30 @@ surffile_load(const gchar *filename)
     get_CHARS0(surffile.ylength_unit, &p, 16);
     get_CHARS0(surffile.zlength_unit, &p, 16);
 
-    surffile.xunit_ratio = get_FLOAT(&p);
-    surffile.yunit_ratio = get_FLOAT(&p);
-    surffile.zunit_ratio = get_FLOAT(&p);
-    surffile.imprint = get_WORD(&p);
-    surffile.inversion = get_WORD(&p);
-    surffile.leveling = get_WORD(&p);
+    surffile.xunit_ratio = get_FLOAT_LE(&p);
+    surffile.yunit_ratio = get_FLOAT_LE(&p);
+    surffile.zunit_ratio = get_FLOAT_LE(&p);
+    surffile.imprint = get_WORD_LE(&p);
+    surffile.inversion = get_WORD_LE(&p);
+    surffile.leveling = get_WORD_LE(&p);
     
     p += 12;
     
-    surffile.seconds = get_WORD(&p);
-    surffile.minutes = get_WORD(&p);
-    surffile.hours = get_WORD(&p);
-    surffile.day = get_WORD(&p);
-    surffile.month = get_WORD(&p);
-    surffile.year = get_WORD(&p);
-    surffile.measurement_duration = get_WORD(&p);
-    surffile.comment_size = get_WORD(&p);
-    surffile.private_size = get_WORD(&p);
+    surffile.seconds = get_WORD_LE(&p);
+    surffile.minutes = get_WORD_LE(&p);
+    surffile.hours = get_WORD_LE(&p);
+    surffile.day = get_WORD_LE(&p);
+    surffile.month = get_WORD_LE(&p);
+    surffile.year = get_WORD_LE(&p);
+    surffile.measurement_duration = get_WORD_LE(&p);
+    surffile.comment_size = get_WORD_LE(&p);
+    surffile.private_size = get_WORD_LE(&p);
 
     get_CHARARRAY(surffile.client_zone, &p);
 
-    surffile.XOffset = get_FLOAT(&p);
-    surffile.YOffset = get_FLOAT(&p);
-    surffile.ZOffset = get_FLOAT(&p);
+    surffile.XOffset = get_FLOAT_LE(&p);
+    surffile.YOffset = get_FLOAT_LE(&p);
+    surffile.ZOffset = get_FLOAT_LE(&p);
 
     gwy_debug("fileformat: %d,  n_of_objects: %d, version: %d, object_type: %d\n",
               surffile.format, surffile.nobjects, surffile.version, surffile.type);
@@ -352,6 +351,15 @@ surffile_load(const gchar *filename)
            surffile.day, surffile.month, surffile.year);
     
     p = buffer + 500;
+
+    estsize = 500 + surffile.pointsize*surffile.xres*surffile.yres/8;
+    if (size < estsize) {
+        g_warning("File %s is too short to contain Surf data %d %d", filename, (int)size, (int)estsize);
+        gwy_file_abandon_contents(buffer, size, NULL);
+        return NULL;
+    }
+
+    
     fill_data_fields(&surffile, p);
     gwy_file_abandon_contents(buffer, size, NULL);
 
@@ -399,6 +407,40 @@ fill_data_fields(SurfFile *surffile,
                                                    surffile->yres*surffile->dy,
                                                    TRUE));
 
+
+    data = gwy_data_field_get_data(surffile->dfield);
+    switch (surffile->pointsize) {
+        case 16:
+        {
+            const gint16 *row, *d16 = (const gint16*)buffer;
+
+            for (i = 0; i < surffile->xres; i++) {
+                row = d16 + i*surffile->xres;
+                for (j = 0; j < surffile->yres; j++)
+                    *(data++) = GINT16_FROM_LE(row[j]) * surffile->dz;
+            }
+        }
+        break;
+
+        case 32:
+        {
+            const gint32 *row, *d32 = (const gint32*)buffer;
+
+            for (i = 0; i < surffile->xres; i++) {
+                row = d32 + i*surffile->xres;
+                for (j = 0; j < surffile->yres; j++)
+                    *(data++) = GINT32_FROM_LE(row[j]) * surffile->dz;
+            }
+        }
+        break;
+
+        default:
+        g_warning("Wrong data size: %d", surffile->pointsize);
+        break;
+    }
+
+    
+    /* 
     data = gwy_data_field_get_data(surffile->dfield);
     for (i = 0; i < surffile->xres; i++) { 
         for (j = 0; j < surffile->yres; j++) {
@@ -412,6 +454,7 @@ fill_data_fields(SurfFile *surffile,
             }
         }
     }
+    */
 
     if (surffile->dx > surffile->dy)
         gwy_data_field_resample(surffile->dfield, (gint)((gdouble)(surffile->xres)*surffile->dx/surffile->dy),
