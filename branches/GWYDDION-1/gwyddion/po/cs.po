@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: http://trific.ath.cx/bugzilla/\n"
-"POT-Creation-Date: 2006-04-14 15:56+0200\n"
-"PO-Revision-Date: 2006-04-14 15:58+0200\n"
+"POT-Creation-Date: 2006-04-18 08:53+0200\n"
+"PO-Revision-Date: 2006-04-14 16:14+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
 "MIME-Version: 1.0\n"
@@ -1764,7 +1764,7 @@ msgstr "Načítá datové soubory Thermicroscopes SpmLab R4, R5 a R6."
 
 #: modules/file/spmlab.c:70
 msgid "Thermicroscopes SpmLab R4, R5, R6 files"
-msgstr "Thermicroscopes SpmLab R6, R6, R6 soubory"
+msgstr "Thermicroscopes SpmLab R4, R5, R6 soubory"
 
 #: modules/file/stmprg.c:66
 msgid "Imports Omicron STMPRG data files (tp ta)."
@@ -1818,11 +1818,11 @@ msgstr "Načítá datové soubory STP Molecular Imaging."
 msgid "STP files (.stp)"
 msgstr "STP soubory (.stp)"
 
-#: modules/file/surffile.c:187
+#: modules/file/surffile.c:181
 msgid "Imports Surf data files."
 msgstr "Načátí datové soubory Surf."
 
-#: modules/file/surffile.c:203
+#: modules/file/surffile.c:197
 msgid "Surf files (.sur)"
 msgstr "Surf soubory (.sur)"
 
