@@ -25,10 +25,6 @@ Draw GwyDataFields to GdkPixbufs
 @pixbuf: 
 @data_field: 
 @palette: 
-<!-- # Unused Parameters # -->
-@g: 
-@f: 
-@pal: 
 
 
 <!-- ##### FUNCTION gwy_pixfield_do_with_range ##### -->

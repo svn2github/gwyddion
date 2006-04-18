@@ -108,8 +108,6 @@ queried with gwy_gradient_is_modifiable().
 @gradient: 
 @x: 
 @color: 
-<!-- # Unused Parameters # -->
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_gradient_get_samples ##### -->

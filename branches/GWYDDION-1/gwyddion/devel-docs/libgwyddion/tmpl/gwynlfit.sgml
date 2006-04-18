@@ -65,9 +65,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 @user_data: 
 @fres: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@n_par: 
-@params: 
 
 
 <!-- ##### USER_FUNCTION GwyNLFitDerFunc ##### -->
@@ -83,10 +80,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 @user_data: 
 @deriv: 
 @dres: 
-<!-- # Unused Parameters # -->
-@n_par: 
-@dat_x: 
-@params: 
 
 
 <!-- ##### USER_FUNCTION GwyNLFitGuessFunc ##### -->
@@ -196,8 +189,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 @param: 
 @user_data: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@n_par: 
 
 
 <!-- ##### FUNCTION gwy_math_nlfit_fit_with_fixed ##### -->
@@ -278,8 +269,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 @user_data: 
 @deriv: 
 @dres: 
-<!-- # Unused Parameters # -->
-@n_par: 
 
 
 <!-- ##### FUNCTION gwy_math_nlfit_get_npresets ##### -->
@@ -297,8 +286,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 
 @preset_id: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@type: 
 
 
 <!-- ##### FUNCTION gwy_math_nlfit_get_preset_by_name ##### -->
@@ -317,8 +304,6 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 
 @preset: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@function: 
 
 
 <!-- ##### FUNCTION gwy_math_nlfit_get_preset_value ##### -->
@@ -394,8 +379,5 @@ or <link linkend="gwy-math-nlfit-get-preset-formula">gwy_math_nlfit_get_preset_f
 @fixed_param: 
 @user_data: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@function: 
-@weight: 
 
 

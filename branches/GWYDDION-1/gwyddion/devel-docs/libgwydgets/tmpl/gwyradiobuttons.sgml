@@ -64,8 +64,6 @@ of radio button group, which is described in #GtkRadioButton reference.
 @key: 
 @current: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@radio_button: 
 
 
 <!-- ##### FUNCTION gwy_radio_buttons_get_current_from_widget ##### -->
@@ -76,7 +74,5 @@ of radio button group, which is described in #GtkRadioButton reference.
 @widget: 
 @key: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@radio_button: 
 
 

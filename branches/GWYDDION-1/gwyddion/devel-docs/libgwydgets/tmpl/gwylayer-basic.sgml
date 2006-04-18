@@ -38,8 +38,6 @@ Display data colored with a gradient
 </para>
 
 @Returns: 
-<!-- # Unused Parameters # -->
-@data: 
 
 
 <!-- ##### FUNCTION gwy_layer_basic_set_palette ##### -->

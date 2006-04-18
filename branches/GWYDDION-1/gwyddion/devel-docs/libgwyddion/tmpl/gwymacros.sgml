@@ -57,8 +57,6 @@ Utility macros.
 </para>
 
 @obj: 
-<!-- # Unused Parameters # -->
-@x: 
 
 
 <!-- ##### MACRO GWY_SWAP ##### -->
@@ -97,10 +95,14 @@ Utility macros.
 
 </para>
 
+@format...:
+
+@format...:
+
 @format...: 
 <!-- # Unused Parameters # -->
 @format: 
-@...: 
+@...:
 
 
 <!-- ##### FUNCTION gwy_debug_gnu ##### -->

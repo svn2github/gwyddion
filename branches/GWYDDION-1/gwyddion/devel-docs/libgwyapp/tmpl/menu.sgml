@@ -95,8 +95,6 @@ If there are no conditions defined, the widget is sensitive always.
 @item: 
 @flags: 
 @state: 
-<!-- # Unused Parameters # -->
-@sens: 
 
 
 <!-- ##### FUNCTION gwy_app_toolbox_update_state ##### -->

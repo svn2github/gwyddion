@@ -98,8 +98,6 @@ path manipulation
 @n: 
 @glue: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@delimiter: 
 
 
 <!-- ##### FUNCTION gwy_strkill ##### -->

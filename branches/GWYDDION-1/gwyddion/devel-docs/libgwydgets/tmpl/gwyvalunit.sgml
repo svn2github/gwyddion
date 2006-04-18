@@ -48,8 +48,6 @@ Value entry with unit and selection of unit prefix
 @label_text: 
 @si_unit: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@unit: 
 
 
 <!-- ##### FUNCTION gwy_val_unit_set_value ##### -->

@@ -29,6 +29,24 @@ Ordered item inventory, indexed by both name and position.
 @compare: 
 @rename: 
 
+<!-- ##### STRUCT GwyInventory ##### -->
+<para>
+
+</para>
+
+@parent_instance: 
+@item_type: 
+@needs_reindex: 
+@is_sorted: 
+@is_object: 
+@is_watchable: 
+@can_make_copies: 
+@has_default: 
+@default_key: 
+@items: 
+@idx: 
+@hash: 
+
 <!-- ##### FUNCTION gwy_inventory_new ##### -->
 <para>
 
@@ -134,8 +152,6 @@ Ordered item inventory, indexed by both name and position.
 @inventory: 
 @function: 
 @user_data: 
-<!-- # Unused Parameters # -->
-@funcition: 
 
 
 <!-- ##### FUNCTION gwy_inventory_set_default_item ##### -->
@@ -145,8 +161,6 @@ Ordered item inventory, indexed by both name and position.
 
 @inventory: 
 @name: 
-<!-- # Unused Parameters # -->
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_inventory_get_default_item ##### -->

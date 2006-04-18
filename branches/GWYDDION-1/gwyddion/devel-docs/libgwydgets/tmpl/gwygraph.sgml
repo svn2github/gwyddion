@@ -165,8 +165,6 @@ are saved here.
 
 @graph: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@status: 
 
 
 <!-- ##### FUNCTION gwy_graph_get_boundaries ##### -->

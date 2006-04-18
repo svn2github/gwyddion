@@ -45,6 +45,7 @@ GWY_WATCHABLE_GET_IFACE
 <FILE>gwyinventory</FILE>
 GwyItemType
 <TITLE>GwyInventory</TITLE>
+GwyInventory
 gwy_inventory_new
 gwy_inventory_new_filled
 gwy_inventory_get_n_items

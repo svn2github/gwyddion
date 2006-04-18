@@ -78,8 +78,6 @@ the 3D view to update self, when data changes.
 
 @data: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@container: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_update ##### -->
@@ -88,8 +86,6 @@ the 3D view to update self, when data changes.
 </para>
 
 @gwy3dview: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_palette ##### -->
@@ -99,8 +95,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_palette ##### -->
@@ -110,8 +104,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @palette: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_gradient ##### -->
@@ -139,8 +131,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_status ##### -->
@@ -150,8 +140,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @mv: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_orthographic ##### -->
@@ -161,8 +149,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_orthographic ##### -->
@@ -172,8 +158,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @orthographic: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_show_axes ##### -->
@@ -183,8 +167,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_show_axes ##### -->
@@ -194,8 +176,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @show_axes: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_show_labels ##### -->
@@ -205,8 +185,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_show_labels ##### -->
@@ -216,8 +194,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @show_labels: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_use_lights ##### -->
@@ -245,8 +221,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_reduced_size ##### -->
@@ -256,8 +230,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @reduced_size: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_material ##### -->
@@ -267,8 +239,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_set_material ##### -->
@@ -278,8 +248,6 @@ the 3D view to update self, when data changes.
 
 @gwy3dview: 
 @material: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_pixbuf ##### -->
@@ -291,8 +259,6 @@ the 3D view to update self, when data changes.
 @xres: 
 @yres: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@gwy3dwiew: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_data ##### -->
@@ -310,8 +276,6 @@ the 3D view to update self, when data changes.
 </para>
 
 @gwy3dview: 
-<!-- # Unused Parameters # -->
-@gwy3Dview: 
 
 
 <!-- ##### FUNCTION gwy_3d_view_get_rot_x_adjustment ##### -->

@@ -63,8 +63,6 @@ are provided.
 
 @rgba: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@color: 
 
 
 <!-- ##### FUNCTION gwy_rgba_free ##### -->
@@ -73,8 +71,6 @@ are provided.
 </para>
 
 @rgba: 
-<!-- # Unused Parameters # -->
-@color: 
 
 
 <!-- ##### FUNCTION gwy_rgba_to_gdk_color ##### -->

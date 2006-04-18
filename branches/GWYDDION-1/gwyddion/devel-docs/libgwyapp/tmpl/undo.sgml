@@ -34,8 +34,6 @@ main application.
 @data: 
 @Varargs: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@what: 
 
 
 <!-- ##### FUNCTION gwy_app_undo_checkpointv ##### -->

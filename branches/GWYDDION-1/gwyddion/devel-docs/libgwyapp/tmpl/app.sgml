@@ -50,8 +50,6 @@ Core application interface.
 
 @window: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@data_window: 
 
 
 <!-- ##### FUNCTION gwy_app_data_window_remove ##### -->
@@ -60,8 +58,6 @@ Core application interface.
 </para>
 
 @window: 
-<!-- # Unused Parameters # -->
-@data_window: 
 
 
 <!-- ##### FUNCTION gwy_app_data_window_foreach ##### -->
@@ -206,8 +202,6 @@ Core application interface.
 @window: 
 @templ: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@data_window: 
 
 
 <!-- ##### FUNCTION gwy_app_data_view_update ##### -->

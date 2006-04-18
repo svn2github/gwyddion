@@ -24,8 +24,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_min ##### -->
@@ -35,8 +33,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_avg ##### -->
@@ -46,8 +42,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_rms ##### -->
@@ -57,8 +51,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_sum ##### -->
@@ -68,8 +60,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_median ##### -->
@@ -79,8 +69,6 @@ stats
 
 @data_field: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_surface_area ##### -->
@@ -91,8 +79,6 @@ stats
 @data_field: 
 @interpolation: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_max ##### -->
@@ -106,13 +92,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_min ##### -->
@@ -126,13 +105,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_avg ##### -->
@@ -146,13 +118,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_rms ##### -->
@@ -166,13 +131,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_sum ##### -->
@@ -186,13 +144,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_median ##### -->
@@ -206,8 +157,6 @@ stats
 @width: 
 @height: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_surface_area ##### -->
@@ -222,13 +171,6 @@ stats
 @height: 
 @interpolation: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@a: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_stats ##### -->
@@ -259,12 +201,6 @@ stats
 @rms: 
 @skew: 
 @kurtosis: 
-<!-- # Unused Parameters # -->
-@dfield: 
-@ulcol: 
-@ulrow: 
-@brcol: 
-@brrow: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_line_stat_function ##### -->
@@ -294,8 +230,6 @@ stats
 @data_field: 
 @derdist: 
 @kernel_size: 
-<!-- # Unused Parameters # -->
-@dfield: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_normal_coeffs ##### -->
@@ -308,9 +242,6 @@ stats
 @ny: 
 @nz: 
 @normalize1: 
-<!-- # Unused Parameters # -->
-@a: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_normal_coeffs ##### -->
@@ -327,9 +258,6 @@ stats
 @ny: 
 @nz: 
 @normalize1: 
-<!-- # Unused Parameters # -->
-@a: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_data_field_area_get_inclination ##### -->
@@ -344,10 +272,6 @@ stats
 @height: 
 @theta: 
 @phi: 
-<!-- # Unused Parameters # -->
-@thetadeg: 
-@phideg: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_inclination ##### -->
@@ -358,10 +282,6 @@ stats
 @data_field: 
 @theta: 
 @phi: 
-<!-- # Unused Parameters # -->
-@thetadeg: 
-@phideg: 
-@Returns: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_max ##### -->
@@ -375,8 +295,6 @@ stats
 @brcol: 
 @brrow: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_min ##### -->
@@ -390,8 +308,6 @@ stats
 @brcol: 
 @brrow: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_avg ##### -->
@@ -405,8 +321,6 @@ stats
 @brcol: 
 @brrow: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_rms ##### -->
@@ -420,8 +334,6 @@ stats
 @brcol: 
 @brrow: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_sum ##### -->
@@ -435,8 +347,6 @@ stats
 @brcol: 
 @brrow: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_surface_area ##### -->
@@ -451,8 +361,6 @@ stats
 @brrow: 
 @interpolation: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_field_get_area_stats ##### -->

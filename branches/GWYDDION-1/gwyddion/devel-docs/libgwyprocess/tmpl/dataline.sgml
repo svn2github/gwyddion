@@ -95,8 +95,6 @@ Fit polynomial degree selection.
 @data_line: 
 @res: 
 @interpolation: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_resize ##### -->
@@ -108,8 +106,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_copy ##### -->
@@ -120,8 +116,6 @@ Fit polynomial degree selection.
 @data_line: 
 @b: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_data ##### -->
@@ -131,8 +125,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_data_const ##### -->
@@ -151,8 +143,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_real ##### -->
@@ -162,8 +152,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_set_real ##### -->
@@ -173,8 +161,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @real: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_itor ##### -->
@@ -185,8 +171,6 @@ Fit polynomial degree selection.
 @data_line: 
 @pixval: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_rtoi ##### -->
@@ -197,8 +181,6 @@ Fit polynomial degree selection.
 @data_line: 
 @realval: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_val ##### -->
@@ -209,8 +191,6 @@ Fit polynomial degree selection.
 @data_line: 
 @i: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_set_val ##### -->
@@ -222,8 +202,6 @@ Fit polynomial degree selection.
 @i: 
 @value: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_dval ##### -->
@@ -235,8 +213,6 @@ Fit polynomial degree selection.
 @x: 
 @interpolation: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_dval_real ##### -->
@@ -248,8 +224,6 @@ Fit polynomial degree selection.
 @x: 
 @interpolation: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_invert ##### -->
@@ -260,8 +234,6 @@ Fit polynomial degree selection.
 @data_line: 
 @x: 
 @z: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_fill ##### -->
@@ -271,8 +243,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_multiply ##### -->
@@ -282,8 +252,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_add ##### -->
@@ -293,8 +261,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_fill ##### -->
@@ -306,8 +272,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_multiply ##### -->
@@ -319,8 +283,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_add ##### -->
@@ -332,8 +294,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @value: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_max ##### -->
@@ -343,8 +303,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_min ##### -->
@@ -354,8 +312,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_avg ##### -->
@@ -365,8 +321,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_rms ##### -->
@@ -376,8 +330,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_sum ##### -->
@@ -387,8 +339,6 @@ Fit polynomial degree selection.
 
 @data_line: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_get_max ##### -->
@@ -400,8 +350,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_get_min ##### -->
@@ -413,8 +361,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_get_avg ##### -->
@@ -426,8 +372,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_get_rms ##### -->
@@ -439,8 +383,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_get_sum ##### -->
@@ -452,8 +394,6 @@ Fit polynomial degree selection.
 @from: 
 @to: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_threshold ##### -->
@@ -466,8 +406,6 @@ Fit polynomial degree selection.
 @bottom: 
 @top: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_threshold ##### -->
@@ -482,8 +420,6 @@ Fit polynomial degree selection.
 @bottom: 
 @top: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_line_coeffs ##### -->
@@ -494,8 +430,6 @@ Fit polynomial degree selection.
 @data_line: 
 @av: 
 @bv: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_part_line_coeffs ##### -->
@@ -508,8 +442,6 @@ Fit polynomial degree selection.
 @to: 
 @av: 
 @bv: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_line_level ##### -->
@@ -520,8 +452,6 @@ Fit polynomial degree selection.
 @data_line: 
 @av: 
 @bv: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_line_rotate ##### -->
@@ -532,8 +462,6 @@ Fit polynomial degree selection.
 @data_line: 
 @angle: 
 @interpolation: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_get_der ##### -->
@@ -544,8 +472,6 @@ Fit polynomial degree selection.
 @data_line: 
 @i: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@a: 
 
 
 <!-- ##### FUNCTION gwy_data_line_fft ##### -->

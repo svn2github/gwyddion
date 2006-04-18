@@ -87,8 +87,16 @@ and $MAX). Other variables are ignored.
 
 @labels: 
 @si_unit: 
-<!-- # Unused Parameters # -->
-@container: 
+
+
+<!-- ##### FUNCTION gwy_3d_labels_update_with_units ##### -->
+<para>
+
+</para>
+
+@labels: 
+@si_unit_xy: 
+@si_unit_z: 
 
 
 <!-- ##### FUNCTION gwy_3d_labels_expand_text ##### -->

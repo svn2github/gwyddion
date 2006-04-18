@@ -68,6 +68,7 @@ GWY_GL_MATERIAL_GET_CLASS
 <SECTION>
 <FILE>gwygrapherlabel</FILE>
 <TITLE>GwyGrapherLabel</TITLE>
+GwyGrapherLabel
 gwy_grapher_label_new
 gwy_grapher_label_refresh
 gwy_grapher_label_change_model
@@ -210,6 +211,7 @@ GwyAxiserTick
 GwyAxiserLabeledTick
 GwyAxiserParams
 <TITLE>GwyAxiser</TITLE>
+GwyAxiser
 gwy_axiser_new
 gwy_axiser_set_logarithmic
 gwy_axiser_set_visible
@@ -237,6 +239,7 @@ GWY_AXISER_GET_CLASS
 <SECTION>
 <FILE>gwygraphercorner</FILE>
 <TITLE>GwyGrapherCorner</TITLE>
+GwyGrapherCorner
 gwy_grapher_corner_new
 <SUBSECTION Standard>
 GWY_GRAPHER_CORNER
@@ -276,6 +279,7 @@ GwyGrapherStatus_AreasData
 GwyGrapherStatus_ZoomData
 GwyGrapherAreaCurve
 <TITLE>GwyGrapherArea</TITLE>
+GwyGrapherArea
 gwy_grapher_area_new
 gwy_grapher_area_signal_selected
 gwy_grapher_area_signal_zoomed
@@ -297,6 +301,7 @@ GWY_GRAPHER_AREA_GET_CLASS
 <FILE>gwygrapher</FILE>
 GwyGrapherAutoProperties
 <TITLE>GwyGrapher</TITLE>
+GwyGrapher
 gwy_grapher_new
 gwy_grapher_refresh
 gwy_grapher_change_model
@@ -316,6 +321,7 @@ GWY_GRAPHER_GET_CLASS
 <SECTION>
 <FILE>gwygrapherareadialog</FILE>
 <TITLE>GwyGrapherAreaDialog</TITLE>
+GwyGrapherAreaDialog
 gwy_grapher_area_dialog_new
 gwy_grapher_area_dialog_set_curve_data
 <SUBSECTION Standard>
@@ -409,6 +415,7 @@ GWY_STATUSBAR_GET_CLASS
 <SECTION>
 <FILE>gwygrapherlabeldialog</FILE>
 <TITLE>GwyGrapherLabelDialog</TITLE>
+GwyGrapherLabelDialog
 gwy_grapher_label_dialog_new
 gwy_grapher_label_dialog_set_graph_data
 <SUBSECTION Standard>
@@ -766,6 +773,7 @@ Gwy3DLabels
 Gwy3DLabelsClass
 gwy_3d_labels_new
 gwy_3d_labels_update
+gwy_3d_labels_update_with_units
 gwy_3d_labels_expand_text
 gwy_3d_labels_get_description
 gwy_3d_label_description_set_text

@@ -33,8 +33,6 @@ Document history manipulation and GUI
 @data_window: 
 @filename_utf8: 
 @filename_sys: 
-<!-- # Unused Parameters # -->
-@filelist: 
 
 
 <!-- ##### FUNCTION gwy_app_recent_file_list_load ##### -->

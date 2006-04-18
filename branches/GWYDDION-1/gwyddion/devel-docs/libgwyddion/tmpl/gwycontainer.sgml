@@ -219,8 +219,6 @@ gwy_container_set_double_by_name().
 @function: 
 @user_data: 
 @Returns: 
-<!-- # Unused Parameters # -->
-@foo: 
 
 
 <!-- ##### FUNCTION gwy_container_set_boolean ##### -->
