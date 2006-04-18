@@ -1,9 +1,9 @@
-1.15cvs20060403
 
 1.16
 Application:
 - Gwyddion now depends on libxml2 used for SPML import (optionally, if you
   compile it from source code).
+- Translations updated: Czech.
 
 Library:
 - libgwydddion: Memory corruption on big-endian machines in serialization and
@@ -18,7 +18,8 @@ Modules:
 - Surffile (new): Surf file import.
 - Nanotop (new): Nanotop SPM file import.
 - SPML (new): SMPL file import.
-- Burleigh (new): Burleigh IMG v2.1 file import.
+- MetroPro (new): Binary Zygo MetroPro file import.
+- Burleigh (new): Burleigh IMG v2.1 file import (experimental).
 - SDFile: Import support was significantly improved.
 - BCR file: Void pixel handling was improved (bug #67).
 - Grain distribution: Height distribution was added (bug #69).
