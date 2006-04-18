@@ -106,7 +106,7 @@ function InitializeSetup(): Boolean;
 begin
   Result := GetGtkInstalled ();
   if not Result then begin
-    MsgBox ('Please install the Gtk+ 2.2 (or newer) Runtime Environment before installing @PACKAGE_NAME@.  You can obtain GTK+ from http://www.gimp.org/~tml/gimp/win32/.', mbError, MB_OK);
+    MsgBox ('Please install the Gtk+ 2.4 Runtime Environment before installing @PACKAGE_NAME@.  You can obtain GTK+ from http://gladewin32.sourceforge.net/.', mbError, MB_OK);
   end else begin
     Result := GetGtkGLextInstalled ();
     if not Result then begin
