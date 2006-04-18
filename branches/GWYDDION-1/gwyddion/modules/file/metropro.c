@@ -169,7 +169,7 @@ static GwyModuleInfo module_info = {
     "metropro",
     N_("Imports binary MetroPro (Zygo) data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.1",
+    "0.1.1",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -630,7 +630,7 @@ fill_data_fields(MProFile *mprofile,
                 *data = q*d;
                 if (d >= 2147483640) {
                     nvoid++;
-                    mask[i*mprofile->intens_xres + j] = 1.0;
+                    mask[i*mprofile->phase_xres + j] = 1.0;
                 }
                 else
                     avg += *data;
