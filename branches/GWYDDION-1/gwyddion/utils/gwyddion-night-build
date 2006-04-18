@@ -1,7 +1,7 @@
 #!/bin/bash
 disabled=
 pkgname=gwyddion
-basever=1.15
+basever=1.16
 dont_update_version=no_we_need_no_stinking_version_updates
 arch=$(uname -m)
 projectdir=$HOME/Projects/Gwyddion/$pkgname-1
@@ -10,7 +10,6 @@ installroot=$HOME/tmp
 gtkdocdir="/share/gtk-doc/html/*"
 gtkdocdirs=(/usr /usr/local $installroot/usr)
 gtkdocdirs=${gtkdocdirs[@]/%/$gtkdocdir}
-phpswroot=$HOME/PHP/software
 host=$($HOME/bin/Ftpcp)
 
 source $HOME/.bashrc
@@ -121,23 +120,6 @@ function make_dists() {
 }
 
 
-function webify_api() {
-  libs="libgwyddion libgwyapp libgwymodule libgwydgets libgwyprocess libgwydraw"
-  ./utils/gendoc.pl
-  for d in $libs; do
-    rm -vf $phpswroot/$pkgname/$d/main.xhtml
-    sed -i '5i<link rel="shortcut icon" type="image/x-icon" href="/Img/favicon.ico"/>' $phpswroot/$pkgname/$d/*.xhtml
-    ln -s index.xhtml $phpswroot/$pkgname/$d/main.xhtml
-  done
-  for d in libgwydgets; do
-    dir=Img/software/$pkgname/$d
-    sed -i 's#src="\(.*\.png\)"#src="/'$dir'/\1"#' $phpswroot/$pkgname/$d/*.xhtml
-    cp devel-docs/$d/html/*.png $HOME/$dir
-    rsync --recursive --rsh=ssh $HOME/$dir $host:Img/software/$pkgname
-  done
-}
-
-
 function help() {
   echo $0
   sed <$0 -e '1,/^  # LIST-BEGIN/d' \
@@ -170,6 +152,5 @@ else
   call check_coding_style
   call install_to_tmp
   call make_dists
-  call webify_api
   # LIST-END
 fi
