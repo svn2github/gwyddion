@@ -75,7 +75,7 @@ function InitializeSetup(): Boolean;
 begin
   Result := GetGtkInstalled ();
   if not Result then begin
-    MsgBox ('Please install the GTK+ 2.0 Runtime Environment before installing @PACKAGE_NAME@.  You can obtain GTK+ from http://www.dropline.net/gtk.', mbError, MB_OK);
+    MsgBox ('Please install the GTK+ 2.2 Development Environment before installing @PACKAGE_NAME@.  You can obtain GTK+ from http://gladewin32.sourceforge.net/.', mbError, MB_OK);
   end;
 end;
 
