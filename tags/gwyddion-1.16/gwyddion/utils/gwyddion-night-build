@@ -1,0 +1,156 @@
+#!/bin/bash
+disabled=
+pkgname=gwyddion
+basever=1.16
+dont_update_version=no_we_need_no_stinking_version_updates
+arch=$(uname -m)
+projectdir=$HOME/Projects/Gwyddion/$pkgname-1
+logdir=$HOME/Projects/Gwyddion/buildlog-1
+installroot=$HOME/tmp
+gtkdocdir="/share/gtk-doc/html/*"
+gtkdocdirs=(/usr /usr/local $installroot/usr)
+gtkdocdirs=${gtkdocdirs[@]/%/$gtkdocdir}
+host=$($HOME/bin/Ftpcp)
+
+source $HOME/.bashrc
+source $HOME/.ssh/current-ssh-agent
+export CFLAGS="-ggdb -O"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  exec >$logdir/$1.log
+  exec 2>$logdir/$1.err
+  cd $projectdir
+  for x in $disabled; do
+    if test "$1" = "$x"; then
+      echo disabled
+      return
+    fi
+  done
+  $@
+}
+
+# extract makefile-style list $2 from $1
+function getlist() {
+  test -f $1 || return
+  grep --quiet "^$2" $1 || return
+  sed -n -e '/^'"$2"' *= *\\/,/[^\\]$/H' \
+         -e '/^'"$2"' *= *[a-zA-Z0-9]/H' \
+         -e '${g;s/\\[[:space:]]*//g;s/.*= *//;p}' $1
+}
+
+# =====[ components ]========================================================
+function update_tags() {
+  ctags *
+  subdirs=$(getlist Makefile.am SUBDIRS)
+  for d in $subdirs; do
+    cd ./$d && { update_tags; cd ..; }
+  done
+}
+
+
+function update_version() {
+  version=${basever}
+  test -n "$dont_update_version" && return
+  version=${version}cvs$(date +%Y%m%d)
+  cp -fv NEWS NEWS~
+  cp -fv configure.ac configure.ac~
+  sed -ri -e "1s/^[^ ]*/$version/" NEWS
+  sed -ri -e "s/(AC_INIT\\([A-Za-z0-9]+,) [^ ,]+,/\\1 $version,/" configure.ac
+}
+
+
+function autostuff() {
+  rm -fv config.cache
+  rm mkinstalldirs
+  ./autogen.sh --config-cache --disable-desktop-file-update --prefix=$installroot/usr2
+  make -C po gwyddion.pot
+}
+
+
+function build_project() {
+  make -k clean
+  make -k
+  ./utils/update-msvc.py
+}
+
+
+function build_documentation() {
+  cd ./devel-docs
+  rm -fv */*.stamp */*-sections.txt */*-decl-list.txt
+  # A bit dirty, rebuild only subdirs with objects
+  for x in libgwyddion libgwyprocess libgwydraw libgwydgets; do
+    make -C $x -k docs &>/dev/null
+  done
+  touch */*-decl-list.txt
+  make -k docs
+}
+
+function check_coding_style() {
+  find -name \*.c | grep -Ev '/(main|test|wtest)\.c' \
+    | xargs ./utils/check-coding-style.py \
+    | cat --squeeze-blank >$logdir/coding-style.log
+  find -name \*.def | while read lib; do
+    l=$(basename $lib .def)
+    sed -e $'/^\tgwy_\|^EXPORTS/d' -e 's/^/Evil symbol ('$l'): /' $lib 1>&2
+  done
+  find modules -name \*.so | while read mod; do
+    m=$(basename $mod .so)
+    nm $mod \
+      | sed -re 's/^[0-9a-f]+ T +([A-Za-z0-9_]+)$/Evil symbol ('$m'): \1/;t;d' \
+      | grep -Ev ' _(fini|init|gwy_module_query)$' 1>&2
+  done
+}
+
+function install_to_tmp() {
+  make -k install
+}
+
+
+function make_dists() {
+  toremove=$pkgname-${basever}cvs*.tar.*
+  for f in $toremove; do
+    rm -fv $f
+  done
+
+  make dist
+  test -s $pkgname-$version.tar.bz2 \
+    && rpmbuild -ta --clean --target $arch $pkgname-$version.tar.bz2
+}
+
+
+function help() {
+  echo $0
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call *//'
+}
+
+# =====[ main ]==============================================================
+cd $projectdir
+test -d $logdir || mkdir $logdir
+# Set version from Makefile if we don't do update_version
+eval $(grep ^VERSION Makefile | tr -d ' ' | tr '[A-Z]' '[a-z]')
+
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  rm -f $logdir/*
+  # LIST-BEGIN
+  call update_tags
+  call update_version
+  call autostuff
+  call build_project
+  call build_documentation
+  call check_coding_style
+  call install_to_tmp
+  call make_dists
+  # LIST-END
+fi

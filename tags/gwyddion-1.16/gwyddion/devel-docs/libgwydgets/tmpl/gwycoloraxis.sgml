@@ -1,0 +1,147 @@
+<!-- ##### SECTION Title ##### -->
+GwyColorAxis
+
+<!-- ##### SECTION Short_Description ##### -->
+Simple axis with a false color scale
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwyColorAxisParams ##### -->
+<para>
+
+</para>
+
+@tick_length: 
+@textarea: 
+@font: 
+
+<!-- ##### STRUCT GwyColorAxis ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwyColorAxisClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_color_axis_new ##### -->
+<para>
+
+</para>
+
+@orientation: 
+@min: 
+@max: 
+@pal: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_new_default ##### -->
+<para>
+
+</para>
+
+@orientation: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_get_range ##### -->
+<para>
+
+</para>
+
+@axis: 
+@min: 
+@max: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_set_range ##### -->
+<para>
+
+</para>
+
+@axis: 
+@min: 
+@max: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_get_si_unit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_set_si_unit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@unit: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_set_gradient ##### -->
+<para>
+
+</para>
+
+@axis: 
+@gradient: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_get_gradient ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_set_unit ##### -->
+<para>
+
+</para>
+
+@axis: 
+@unit: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_set_palette ##### -->
+<para>
+
+</para>
+
+@axis: 
+@pal: 
+
+
+<!-- ##### FUNCTION gwy_color_axis_get_palette ##### -->
+<para>
+
+</para>
+
+@axis: 
+@Returns: 
+
+

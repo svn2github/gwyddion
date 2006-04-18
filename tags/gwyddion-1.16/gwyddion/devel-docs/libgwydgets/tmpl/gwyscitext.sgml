@@ -1,0 +1,69 @@
+<!-- ##### SECTION Title ##### -->
+GwySciText
+
+<!-- ##### SECTION Short_Description ##### -->
+Text entry with markup and special symbol entity helpers
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GwySciTextParams ##### -->
+<para>
+
+</para>
+
+@ent_text: 
+@utf_text: 
+@label_font: 
+
+<!-- ##### STRUCT GwySciText ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### STRUCT GwySciTextClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@reserved1: 
+@reserved2: 
+
+<!-- ##### FUNCTION gwy_sci_text_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_sci_text_get_text ##### -->
+<para>
+
+</para>
+
+@sci_text: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gwy_sci_text_set_text ##### -->
+<para>
+
+</para>
+
+@sci_text: 
+@new_text: 
+
+

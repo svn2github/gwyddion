@@ -1,0 +1,811 @@
+<!-- ##### SECTION ./tmpl/choleski.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/choleski.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/choleski.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/choleski.sgml:Title ##### -->
+choleski
+
+
+<!-- ##### SECTION ./tmpl/marquardt.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/marquardt.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/marquardt.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/marquardt.sgml:Title ##### -->
+marquardt
+
+
+<!-- ##### SECTION ./tmpl/nlfit.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/nlfit.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/nlfit.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/nlfit.sgml:Title ##### -->
+nlfit
+
+
+<!-- ##### SECTION ./tmpl/types.sgml:Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/types.sgml:See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION ./tmpl/types.sgml:Short_Description ##### -->
+
+
+
+<!-- ##### SECTION ./tmpl/types.sgml:Title ##### -->
+types
+
+
+<!-- ##### ENUM BOOLEAN ##### -->
+<para>
+
+</para>
+
+@FALSE: 
+@TRUE: 
+
+<!-- ##### MACRO COMPLEX_DATA ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF DATA ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION DFUN ##### -->
+<para>
+
+</para>
+
+@i: 
+@dat_x: 
+@n_par: 
+@var_par: 
+@b: 
+@d: 
+
+<!-- ##### MACRO ENABLE_NLS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO EPS ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION FITFUN ##### -->
+<para>
+
+</para>
+
+@x: 
+@n_par: 
+@b: 
+@Returns: 
+
+<!-- ##### MACRO FREE ##### -->
+<para>
+
+</para>
+
+@x: 
+
+<!-- ##### MACRO FitMachEps ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO FitSqrtMachEps ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### USER_FUNCTION GwyDeserializeStructFunc ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@object_name: 
+@nspec: 
+@spec: 
+@Returns: 
+
+<!-- ##### TYPEDEF GwyNLFitPresetFunction ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM GwyNLFitPresetType ##### -->
+<para>
+
+</para>
+
+@GWY_NLFIT_PRESET_GAUSSIAN: 
+@GWY_NLFIT_PRESET_GAUSSIAN_PSDF: 
+@GWY_NLFIT_PRESET_GAUSSIAN_ACF: 
+@GWY_NLFIT_PRESET_GAUSSIAN_HHCF: 
+@GWY_NLFIT_PRESET_EXPONENTIAL: 
+@GWY_NLFIT_PRESET_EXPONENTIAL_PSDF: 
+@GWY_NLFIT_PRESET_EXPONENTIAL_ACF: 
+@GWY_NLFIT_PRESET_EXPONENTIAL_HHCF: 
+@GWY_NLFIT_PRESET_POLY_0: 
+@GWY_NLFIT_PRESET_POLY_1: 
+@GWY_NLFIT_PRESET_POLY_2: 
+@GWY_NLFIT_PRESET_POLY_3: 
+
+<!-- ##### STRUCT GwyNLFitState ##### -->
+<para>
+
+</para>
+
+@fmarq: 
+@dmarq: 
+@maxiter: 
+@eval: 
+@covar: 
+@dispersion: 
+@mfi: 
+@mdec: 
+@minc: 
+@mtol: 
+
+<!-- ##### STRUCT GwySerializableClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@serialize: 
+@deserialize: 
+@duplicate: 
+
+<!-- ##### USER_FUNCTION GwySerializeHashFunc ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@object_name: 
+@nitems: 
+@items: 
+@Returns: 
+
+<!-- ##### USER_FUNCTION GwySerializeStructFunc ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@object_name: 
+@nspec: 
+@spec: 
+@Returns: 
+
+<!-- ##### SIGNAL GwyWatchable::value-changed ##### -->
+<para>
+Emitted when value changes.
+</para>
+
+
+<!-- ##### STRUCT GwyWatchableClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@value_changed: 
+
+<!-- ##### MACRO INCLAM ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO INFINITY ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION IndexLongMat ##### -->
+<para>
+
+</para>
+
+@I: 
+@J: 
+@Returns: 
+
+<!-- ##### FUNCTION InvSymMatice ##### -->
+<para>
+
+</para>
+
+@N: 
+@A: 
+
+<!-- ##### MACRO MAXINT ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### ENUM MERENI ##### -->
+<para>
+
+</para>
+
+@ODRAZ: 
+@RHO: 
+
+<!-- ##### MACRO M_PI ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION Marq ##### -->
+<para>
+
+</para>
+
+@n_dat: 
+@x: 
+@y: 
+@n_par: 
+@b: 
+@Returns: 
+
+<!-- ##### TYPEDEF NEZ ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF PARAM ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF Param ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO SQR ##### -->
+<para>
+
+</para>
+
+@x: 
+
+<!-- ##### MACRO S_ ##### -->
+<para>
+
+</para>
+
+@x: 
+
+<!-- ##### USER_FUNCTION VYSTUP ##### -->
+<para>
+
+</para>
+
+@b: 
+
+<!-- ##### VARIABLE bOutParamErrors ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE cderiv ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE cfitfun ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION chodec ##### -->
+<para>
+
+</para>
+
+@dimA: 
+@A: 
+
+<!-- ##### FUNCTION chosol ##### -->
+<para>
+
+</para>
+
+@dimA: 
+@A: 
+@B: 
+
+<!-- ##### VARIABLE citer ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE compare_file ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE covar ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE covar_filled ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE covar_size ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE cprint ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE cresid ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE dmarq ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE fmarq ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE formal_par ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### MACRO ftruncate ##### -->
+<para>
+
+</para>
+
+@file: 
+@size: 
+
+<!-- ##### TYPEDEF gdouble ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION get_disperze ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### FUNCTION get_korel_koef ##### -->
+<para>
+
+</para>
+
+@Par1: 
+@Par2: 
+@Returns: 
+
+<!-- ##### FUNCTION get_sigma ##### -->
+<para>
+
+</para>
+
+@Par: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_container_freeze_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+
+<!-- ##### FUNCTION gwy_container_thaw_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+
+<!-- ##### FUNCTION gwy_container_watch ##### -->
+<para>
+
+</para>
+
+@container: 
+@path: 
+@callback: 
+@user_data: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_inventory_is_constant ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_inventory_item_is_modifable ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_inventory_nth_item_is_modifable ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@name: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_inventory_ref_item ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@name: 
+
+<!-- ##### FUNCTION gwy_inventory_ref_nth_item ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@n: 
+
+<!-- ##### FUNCTION gwy_inventory_unref_item ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@name: 
+
+<!-- ##### FUNCTION gwy_inventory_unref_nth_item ##### -->
+<para>
+
+</para>
+
+@inventory: 
+@n: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_equation ##### -->
+<para>
+
+</para>
+
+@function: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_name ##### -->
+<para>
+
+</para>
+
+@function: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_nparams ##### -->
+<para>
+
+</para>
+
+@function: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_param_default ##### -->
+<para>
+
+</para>
+
+@function: 
+@param: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_param_name ##### -->
+<para>
+
+</para>
+
+@function: 
+@param: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_math_nlfit_get_function_value ##### -->
+<para>
+
+</para>
+
+@function: 
+@params: 
+@x: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_serialize_unpack_object ##### -->
+<para>
+
+</para>
+
+@buffer: 
+@size: 
+@position: 
+@object_name: 
+@nspec: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_si_unit_copy ##### -->
+<para>
+
+</para>
+
+@target: 
+@example: 
+
+<!-- ##### FUNCTION gwy_si_unit_free ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gwy_si_unit_get_prefix ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@value: 
+@prefix: 
+@power: 
+@precision: 
+
+<!-- ##### FUNCTION gwy_si_unit_get_prefixed ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@value: 
+@prefixed: 
+@power: 
+@precision: 
+@prefix: 
+
+<!-- ##### FUNCTION gwy_si_unit_get_unit_for_magnitude ##### -->
+<para>
+
+</para>
+
+@siunit: 
+@magnitude: 
+@Returns: 
+
+<!-- ##### FUNCTION gwy_str_has_suffix_nocase ##### -->
+<para>
+
+</para>
+
+@s: 
+@suffix: 
+@Returns: 
+
+<!-- ##### FUNCTION machine_zero ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+<!-- ##### VARIABLE mdat ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mdec ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mfi ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE minc ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mlambda ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mmax ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mpar ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mtol ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE mvpar ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### TYPEDEF number ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE param_file ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE print ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION print_compare ##### -->
+<para>
+
+</para>
+
+@cmp_file: 
+@n_dat: 
+@x: 
+@y: 
+@n_par: 
+@b: 
+@run: 
+
+<!-- ##### FUNCTION print_params ##### -->
+<para>
+
+</para>
+
+@par_file: 
+@lambda: 
+@residuum: 
+@n_par: 
+@b: 
+@run: 
+
+<!-- ##### FUNCTION sgettext ##### -->
+<para>
+
+</para>
+
+@msgid: 
+@Returns: 
+
+<!-- ##### VARIABLE sumr ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE vystup ##### -->
+<para>
+
+</para>
+
+

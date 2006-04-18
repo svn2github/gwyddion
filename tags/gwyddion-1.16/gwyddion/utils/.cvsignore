@@ -1,0 +1,7 @@
+Makefile
+Makefile.in
+dump-modules
+.libs
+.deps
+core.*
+*.html
