@@ -1,0 +1,44 @@
+- Check where we lost support for offsets during tool reworking
+- Fix current-data race conditions in modules, must take all current items
+  on startup, windows can be switched while module is running
+- Ruler:
+  - When range is all negative, units are not placed anywhere
+- Why DWT methods have return values?
+- 3D View still not MVCized
+- 3D:
+  light source grid not visible on some machines?
+- GwyColorAxis needs overhaul
+- Graphs:
+  graph titles don't work
+  property get/set not implemented
+  kill global last_status in gwygraphwindow
+  gwy_graph_model_get_*_siunit return copies -- why? (set() also sets copies)
+  selection API is strange and partially duplicated between Graph and GraphArea
+  stray "layout-updated" signal in GwyGraphModel
+- Use Pango FT2 to render fonts in pixmap instead of the ugly hack, needs
+  complete pixmap export bpp clean-up -- wait for Cairo?
+- Fix enum documentation after rename, write missing
+  libprocess: GwyWatershedStateType, Gwy2DCWTWaveletType,
+              GwyComputationStateType, GwyDWTDenoiseType, GwyTipType
+  libgwydgets: GwyAxisScaleFormat, GwyUnitsPlacement, GwyGraphStatusType,
+               GwyGraphPointType, GwyGraphCurveType, GwyGraphLabelPosition
+- Check whether we always emit notification when object properties change
+- Add preview to: artithmetic
+- It should be possible to export measurement from Distance tool
+- Invent some initialization for Laplace solver so that it can only converge
+  for near final state
+- Write a Postscript export module based on JP's work -- or wait for Cairo?
+- Rawfile presets setable as new filetype -- may need to wait to GtkUIManager,
+  as now the menu updates would be messy
+- Display whether data are unchanged/modified/new somewhere
+- Swap undo levels to disk
+- Do nightly CVS build from a clean checkout, this will also stop the silly
+  configure and NEWS modifications; should be done as a part of move to sf
+- Make Ctrl-S save data associated with current window of whatever type, not
+  with current data window -- or maybe better, switch data windows when other
+  windows are switched
+- GwyShader background is shifted in pixmap themes
+- Make keyboard zoom shortcuts work in graphs, 3D
+- Finish Spot remove
+- Add some guessing to Rawfile
+- Use gtk_paint_* to keep style in widgets.

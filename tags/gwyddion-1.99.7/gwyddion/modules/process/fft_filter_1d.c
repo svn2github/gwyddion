@@ -1,0 +1,690 @@
+/*
+ *  @(#) $Id$
+ *  Copyright (C) 2004 David Necas (Yeti), Petr Klapetek.
+ *  E-mail: yeti@gwyddion.net, klapetek@gwyddion.net.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
+ */
+
+#include "config.h"
+#include <gtk/gtk.h>
+#include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
+#include <libprocess/inttrans.h>
+#include <libprocess/stats.h>
+#include <libprocess/linestats.h>
+#include <libprocess/arithmetic.h>
+#include <libgwydgets/gwydgets.h>
+#include <libgwymodule/gwymodule-process.h>
+#include <app/gwyapp.h>
+
+#define FFTF_1D_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
+
+#define MAX_PARAMS 4
+
+typedef enum {
+    GWY_FFTF_1D_SUPPRESS_NULL         = 0,
+    GWY_FFTF_1D_SUPPRESS_NEIGBOURHOOD = 1
+} GwyFftf1dSuppressType;
+
+typedef enum {
+    GWY_FFTF_1D_VIEW_MARKED   = 0,
+    GWY_FFTF_1D_VIEW_UNMARKED = 1
+} GwyFftf1dViewType;
+
+enum { MAX_PREV = 200 };
+
+typedef struct {
+    GwyContainer *data;
+    GwyContainer *original;
+    GwyContainer *result;
+    GwyContainer *original_vdata;
+    GwyContainer *result_vdata;
+    GwyFftf1dSuppressType suppress;
+    GwyFftf1dViewType view_type;
+    GwyInterpolationType interpolation;
+    GwyOrientation direction;
+    gboolean update;
+    GwyDataLine *weights;
+    gint original_xres;
+    gint original_yres;
+} Fftf1dArgs;
+
+typedef struct {
+    gint vxres;
+    gint vyres;
+    GtkWidget *view_original;
+    GtkWidget *view_result;
+    GtkWidget *type;
+    GtkWidget *update;
+    GtkWidget *menu_direction;
+    GtkWidget *menu_interpolation;
+    GtkWidget *menu_suppress;
+    GtkWidget *menu_view_type;
+    GtkWidget *graph;
+    GwyGraphModel *gmodel;
+} Fftf1dControls;
+
+static gboolean   module_register         (void);
+static void       fftf_1d                 (GwyContainer *data,
+                                           GwyRunType run);
+static gboolean   fftf_1d_dialog          (Fftf1dArgs *args,
+                                           GwyContainer *data);
+static void       restore_ps              (Fftf1dControls *controls,
+                                           Fftf1dArgs *args);
+static void       fftf_1d_load_args       (GwyContainer *container,
+                                           Fftf1dArgs *args);
+static void       fftf_1d_save_args       (GwyContainer *container,
+                                           Fftf1dArgs *args);
+static void       fftf_1d_sanitize_args   (Fftf1dArgs *args);
+static void       fftf_1d_run             (Fftf1dControls *controls,
+                                           Fftf1dArgs *args);
+static void       fftf_1d_do              (Fftf1dControls *controls,
+                                           Fftf1dArgs *args);
+static void       fftf_1d_dialog_abandon  (Fftf1dControls *controls,
+                                           Fftf1dArgs *args);
+static void       suppress_changed_cb     (GtkWidget *combo,
+                                           Fftf1dArgs *args);
+static void       view_type_changed_cb    (GtkWidget *combo,
+                                           Fftf1dArgs *args);
+static void       direction_changed_cb    (GtkWidget *combo,
+                                           Fftf1dArgs *args);
+static void       interpolation_changed_cb(GtkWidget *combo,
+                                           Fftf1dArgs *args);
+static void       update_changed_cb       (GtkToggleButton *button,
+                                           Fftf1dArgs *args);
+static void       update_view             (Fftf1dControls *controls,
+                                           Fftf1dArgs *args);
+static void       graph_selected          (GwyGraphArea *area,
+                                           Fftf1dArgs *args);
+
+
+static GwyModuleInfo module_info = {
+    GWY_MODULE_ABI_VERSION,
+    &module_register,
+    N_("FFT filtering"),
+    "Petr Klapetek <petr@klapetek.cz>",
+    "1.0",
+    "David Nečas (Yeti) & Petr Klapetek",
+    "2004",
+};
+
+/* XXX XXX XXX XXX XXX */
+Fftf1dControls *pcontrols;
+
+GWY_MODULE_QUERY(module_info)
+
+static gboolean
+module_register(void)
+{
+    gwy_process_func_register("fft_filter_1d",
+                              (GwyProcessFunc)&fftf_1d,
+                              N_("/_Correct Data/1D _FFT filtering..."),
+                              NULL,
+                              FFTF_1D_RUN_MODES,
+                              GWY_MENU_FLAG_DATA,
+                              N_("1D FFT Filtering"));
+    return TRUE;
+}
+
+static void
+fftf_1d(GwyContainer *data, GwyRunType run)
+{
+    Fftf1dArgs args;
+
+    g_return_if_fail(run & FFTF_1D_RUN_MODES);
+
+    fftf_1d_load_args(gwy_app_settings_get(), &args);
+    fftf_1d_dialog(&args, data);
+    fftf_1d_save_args(gwy_app_settings_get(), &args);
+}
+
+/* FIXME: What is the return value good for when fftf_1d_dialog() does all the
+ * work itself? */
+static gboolean
+fftf_1d_dialog(Fftf1dArgs *args, GwyContainer *data)
+{
+    static const GwyEnum view_types[] = {
+        { N_("Marked"),    GWY_FFTF_1D_VIEW_MARKED,    },
+        { N_("Unmarked"),  GWY_FFTF_1D_VIEW_UNMARKED,  },
+    };
+    static const GwyEnum suppress_types[] = {
+        { N_("Null"),      GWY_FFTF_1D_SUPPRESS_NULL,         },
+        { N_("Suppress"),  GWY_FFTF_1D_SUPPRESS_NEIGBOURHOOD, },
+    };
+    GtkWidget *dialog, *table, *hbox, *vbox;
+    Fftf1dControls controls;
+    enum {
+        RESPONSE_RUN = 1,
+        RESPONSE_RESTORE = 2
+    };
+    gint response, newsize;
+    GwyPixmapLayer *layer;
+    GwyDataField *orig_dfield, *dfield;
+    gint oldid;
+    GtkWidget *label;
+
+    dialog = gtk_dialog_new_with_buttons(_("1D FFT filter"), NULL, 0,
+                                         _("_Run"), RESPONSE_RUN,
+                                         _("_Restore PS"), RESPONSE_RESTORE,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                         NULL);
+    gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+
+
+    hbox = gtk_hbox_new(FALSE, 3);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,
+                       FALSE, FALSE, 4);
+
+    controls.vxres = 200;
+    controls.vyres = 200;
+    pcontrols = &controls;
+
+    /*#### Copy/Setup Data Containers ####*/
+
+    /* store pointer to data container */
+    args->data = data;
+
+    /*setup original container*/
+    gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD, &orig_dfield,
+                                     GWY_APP_DATA_FIELD_ID, &oldid,
+                                     0);
+    dfield = gwy_data_field_duplicate(orig_dfield);
+    args->original_xres = dfield->xres;
+    args->original_yres = dfield->yres;
+    newsize = gwy_fft_find_nice_size(MAX(dfield->xres, dfield->yres));
+    gwy_data_field_resample(dfield, newsize, newsize, args->interpolation);
+    args->original = gwy_container_new();
+    gwy_container_set_object_by_name(args->original, "/0/data", dfield);
+    gwy_app_copy_data_items(data, args->original, oldid, 0,
+                            GWY_DATA_ITEM_GRADIENT,
+                            GWY_DATA_ITEM_RANGE,
+                            GWY_DATA_ITEM_MASK_COLOR,
+                            0);
+    g_object_unref(dfield);
+
+    /*setup result container*/
+    dfield = gwy_data_field_new_alike(orig_dfield, TRUE);
+    args->result = gwy_container_new();
+    gwy_container_set_object_by_name(args->result, "/0/data", dfield);
+    gwy_app_copy_data_items(data, args->result, oldid, 0,
+                            GWY_DATA_ITEM_GRADIENT,
+                            GWY_DATA_ITEM_RANGE,
+                            GWY_DATA_ITEM_MASK_COLOR,
+                            0);
+    g_object_unref(dfield);
+
+    /*setup original_vdata container*/
+    dfield = gwy_data_field_duplicate(orig_dfield);
+    gwy_data_field_resample(dfield, controls.vxres, controls.vyres,
+                            GWY_INTERPOLATION_ROUND);
+    args->original_vdata = gwy_container_new();
+    gwy_container_set_object_by_name(args->original_vdata, "/0/data", dfield);
+    gwy_app_copy_data_items(data, args->original_vdata, oldid, 0,
+                            GWY_DATA_ITEM_GRADIENT,
+                            GWY_DATA_ITEM_RANGE,
+                            GWY_DATA_ITEM_MASK_COLOR,
+                            0);
+    g_object_unref(dfield);
+
+    /*setup result_vdata container*/
+    dfield = gwy_data_field_new_alike(orig_dfield, TRUE);
+    gwy_data_field_resample(dfield, controls.vxres, controls.vyres,
+                            GWY_INTERPOLATION_ROUND);
+    args->result_vdata = gwy_container_new();
+    gwy_container_set_object_by_name(args->result_vdata, "/0/data", dfield);
+    gwy_app_copy_data_items(data, args->result_vdata, oldid, 0,
+                            GWY_DATA_ITEM_GRADIENT,
+                            GWY_DATA_ITEM_RANGE,
+                            GWY_DATA_ITEM_MASK_COLOR,
+                            0);
+    g_object_unref(dfield);
+
+    /*#### End Copy/Setup Data Containers ####*/
+
+
+    args->weights = NULL;
+
+    vbox = gtk_vbox_new(FALSE, 3);
+    /*set up rescaled image of the surface*/
+    controls.view_original = gwy_data_view_new(args->original_vdata);
+    layer = gwy_layer_basic_new();
+    gwy_pixmap_layer_set_data_key(layer, "/0/data");
+    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view_original), layer);
+
+    /*set up fit controls*/
+    gtk_box_pack_start(GTK_BOX(vbox), controls.view_original, FALSE, FALSE, 4);
+
+    /*set up rescaled image of the result*/
+    controls.view_result = gwy_data_view_new(args->result_vdata);
+    layer = gwy_layer_basic_new();
+    gwy_pixmap_layer_set_data_key(layer, "/0/data");
+    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view_result), layer);
+
+    gtk_box_pack_start(GTK_BOX(vbox), controls.view_result, FALSE, FALSE, 4);
+    gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 4);
+
+
+    /*settings*/
+    vbox = gtk_vbox_new(FALSE, 3);
+    gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 4);
+
+    label = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label),
+                         _("<b>Power spectrum (select areas by mouse):</b>"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 4);
+
+    controls.gmodel = gwy_graph_model_new();
+    controls.graph = gwy_graph_new(controls.gmodel);
+    gwy_axis_set_visible(GWY_GRAPH(controls.graph)->axis_top, FALSE);
+    gwy_axis_set_visible(GWY_GRAPH(controls.graph)->axis_left, FALSE);
+    gwy_axis_set_visible(GWY_GRAPH(controls.graph)->axis_bottom, FALSE);
+    gwy_axis_set_visible(GWY_GRAPH(controls.graph)->axis_right, FALSE);
+    gwy_graph_set_status(GWY_GRAPH(controls.graph), GWY_GRAPH_STATUS_XSEL);
+
+    g_signal_connect(GWY_GRAPH(controls.graph)->area, "selected",
+                               G_CALLBACK(graph_selected), args);
+
+
+    gtk_box_pack_start(GTK_BOX(vbox), controls.graph, FALSE, FALSE, 4);
+
+
+    label = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(label), _("<b>Settings:</b>"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, FALSE, 4);
+
+    table = gtk_table_new(2, 7, FALSE);
+
+    label = gtk_label_new_with_mnemonic(_("Suppress type:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
+
+    controls.menu_suppress
+        = gwy_enum_combo_box_new(suppress_types, G_N_ELEMENTS(suppress_types),
+                                 G_CALLBACK(suppress_changed_cb), args,
+                                 args->suppress, TRUE);
+
+    gtk_table_attach(GTK_TABLE(table), controls.menu_suppress, 1, 2, 0, 1,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
+
+    label = gtk_label_new_with_mnemonic(_("Preview type:"));
+
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+
+    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
+
+    controls.menu_view_type
+        = gwy_enum_combo_box_new(view_types, G_N_ELEMENTS(view_types),
+                                 G_CALLBACK(view_type_changed_cb), args,
+                                 args->view_type, TRUE);
+    gtk_table_attach(GTK_TABLE(table), controls.menu_view_type, 1, 2, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
+
+    gtk_container_add(GTK_CONTAINER(vbox), table);
+
+    controls.menu_interpolation
+        = gwy_enum_combo_box_new(gwy_interpolation_type_get_enum(), -1,
+                                 G_CALLBACK(interpolation_changed_cb), args,
+                                 args->interpolation, TRUE);
+    gwy_table_attach_row(table, 4, _("_Interpolation type:"), "",
+                         controls.menu_interpolation);
+
+
+    controls.menu_direction
+        = gwy_enum_combo_box_new(gwy_orientation_get_enum(), -1,
+                                 G_CALLBACK(direction_changed_cb), args,
+                                 args->direction, TRUE);
+    gwy_table_attach_row(table, 5, _("_Direction:"), "",
+                         controls.menu_direction);
+
+    controls.update
+               = gtk_check_button_new_with_mnemonic(_("_Update dynamically"));
+
+    gtk_table_attach(GTK_TABLE(table), controls.update, 0, 4, 6, 7,
+                      GTK_EXPAND | GTK_FILL, 0, 2, 2);
+
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(controls.update),
+                                 args->update);
+
+    g_signal_connect(controls.update, "toggled",
+                     G_CALLBACK(update_changed_cb), args);
+
+    args->update = 0;
+    restore_ps(&controls, args);
+    update_view(&controls, args);
+
+    gtk_widget_show_all(dialog);
+    do {
+        response = gtk_dialog_run(GTK_DIALOG(dialog));
+        switch (response) {
+            case GTK_RESPONSE_CANCEL:
+            case GTK_RESPONSE_DELETE_EVENT:
+            gtk_widget_destroy(dialog);
+            case GTK_RESPONSE_NONE:
+            return FALSE;
+            break;
+
+            case GTK_RESPONSE_OK:
+            fftf_1d_do(&controls, args);
+            break;
+
+            case RESPONSE_RUN:
+            fftf_1d_run(&controls, args);
+            break;
+
+            case RESPONSE_RESTORE:
+            restore_ps(&controls, args);
+            break;
+
+            default:
+            g_assert_not_reached();
+            break;
+        }
+    } while (response != GTK_RESPONSE_OK);
+
+    gtk_widget_destroy(dialog);
+    fftf_1d_dialog_abandon(&controls, args);
+
+    return TRUE;
+}
+
+static void
+fftf_1d_dialog_abandon(G_GNUC_UNUSED Fftf1dControls *controls,
+                       Fftf1dArgs *args)
+{
+    g_object_unref(args->original_vdata);
+    g_object_unref(args->result_vdata);
+}
+
+/*update preview depending on user's wishes*/
+static void
+update_view(G_GNUC_UNUSED Fftf1dControls *controls,
+            Fftf1dArgs *args)
+{
+    GwyDataField *dfield, *rfield, *rvfield;
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(args->original,
+                                                             "/0/data"));
+    rfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(args->result,
+                                                             "/0/data"));
+    rvfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(args->result_vdata,
+                                                             "/0/data"));
+
+    gwy_data_field_resample(rfield, dfield->xres, dfield->yres,
+                            args->interpolation);
+
+    gwy_data_field_fft_filter_1d(dfield, rfield, args->weights, args->direction,
+                                 args->interpolation);
+
+    gwy_data_field_resample(rfield, rvfield->xres, rvfield->yres,
+                            args->interpolation);
+
+    gwy_data_field_copy(rfield, rvfield, FALSE);
+    gwy_data_field_data_changed(rvfield);
+}
+
+static void
+restore_ps(Fftf1dControls *controls, Fftf1dArgs *args)
+{
+    GwyDataField *dfield;
+    GwyDataLine *dline;
+    GwyGraphCurveModel *cmodel;
+    GwyGraphArea *graph_area;
+    //gdouble xdata[200];
+    //gint i
+    gint nofselection;
+
+    dline = gwy_data_line_new(MAX_PREV, MAX_PREV, FALSE);
+    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(args->original,
+                                                             "/0/data"));
+
+    gwy_data_field_psdf(dfield, dline, args->direction, args->interpolation,
+                        GWY_WINDOWING_RECT, MAX_PREV);
+    if (!args->weights)
+        args->weights = gwy_data_line_new(dline->res, dline->real, FALSE);
+    gwy_data_line_fill(args->weights, 1);
+ //   gwy_data_line_resample(dline, MAX_PREV, args->interpolation);
+
+//    for (i = 0; i < MAX_PREV; i++)
+//        xdata[i] = ((gdouble)i)/MAX_PREV;
+//    gwy_data_line_multiply(dline, 1.0/gwy_data_line_get_max(dline));
+
+    //for (i = 0; i < dline->res; i++) printf("%g\n", dline->data[i]);
+
+    gwy_graph_model_remove_all_curves(controls->gmodel);
+
+    cmodel = gwy_graph_curve_model_new();
+    gwy_graph_curve_model_set_data_from_dataline(cmodel, dline, 0, 0);
+    gwy_graph_curve_model_set_curve_type(cmodel, GWY_GRAPH_CURVE_LINE);
+    gwy_graph_curve_model_set_description(cmodel, "PSDF");
+
+    gwy_graph_model_add_curve(controls->gmodel, cmodel);
+
+    graph_area = GWY_GRAPH_AREA(gwy_graph_get_area(GWY_GRAPH(controls->graph)));
+    nofselection = gwy_graph_area_get_selection_number(graph_area);
+    if (nofselection != 0)
+        gwy_graph_area_clear_selection(graph_area);
+
+    if (args->update)
+        update_view(controls, args);
+}
+
+static void
+graph_selected(G_GNUC_UNUSED GwyGraphArea *area,
+               Fftf1dArgs *args)
+{
+    gint i, nofselection;
+    gdouble beg, end;
+    gdouble *selection;
+    GwyGraphArea *graph_area;
+    gint fill_from, fill_to;
+
+    /*get graph selection*/
+    graph_area = GWY_GRAPH_AREA(gwy_graph_get_area(GWY_GRAPH(pcontrols->graph)));
+    nofselection = gwy_graph_area_get_selection_number(graph_area);
+    if (nofselection == 0) {
+        restore_ps(pcontrols, args);
+    }
+    else {
+        selection = (gdouble *)g_malloc(2*nofselection*sizeof(gdouble));
+        gwy_graph_area_get_selection(graph_area, selection);
+
+        /*setup weights for inverse FFT computation*/
+        if (args->weights == NULL)
+            args->weights = gwy_data_line_new(MAX_PREV, MAX_PREV, FALSE);
+
+        if (args->view_type == GWY_FFTF_1D_VIEW_UNMARKED) {
+            gwy_data_line_fill(args->weights, 1);
+
+            for (i = 0; i < nofselection; i++) {
+                beg = selection[2*i];
+                end = selection[2*i+1];
+                fill_from = MAX(0, gwy_data_line_rtoi(args->weights, beg));
+                fill_from = MIN(args->weights->res, fill_from);
+                fill_to = MIN(args->weights->res,
+                              gwy_data_line_rtoi(args->weights, end));
+
+                if (args->suppress == GWY_FFTF_1D_SUPPRESS_NULL)
+                    gwy_data_line_part_fill(args->weights,
+                                            fill_from, fill_to, 0);
+                else /*TODO put here at least some linear interpolation*/
+                    gwy_data_line_part_fill(args->weights,
+                                            fill_from, fill_to, 0.3);
+            }
+            if (args->update) update_view(pcontrols, args);
+        }
+        if (args->view_type == GWY_FFTF_1D_VIEW_MARKED) {
+            gwy_data_line_fill(args->weights, 0);
+
+            for (i = 0; i < nofselection; i++) {
+                beg = selection[2*i];
+                end = selection[2*i+1];
+
+                fill_from = MAX(0, gwy_data_line_rtoi(args->weights, beg));
+                fill_from = MIN(args->weights->res, fill_from);
+                fill_to = MIN(args->weights->res,
+                              gwy_data_line_rtoi(args->weights, end));
+
+                gwy_data_line_part_fill(args->weights, fill_from, fill_to, 1);
+            }
+
+            if (args->update)
+                update_view(pcontrols, args);
+        }
+
+    }
+}
+
+
+/*fit data*/
+static void
+fftf_1d_run(Fftf1dControls *controls,
+            Fftf1dArgs *args)
+{
+    update_view(controls, args);
+}
+
+/*dialog finished, export result data*/
+static void
+fftf_1d_do(G_GNUC_UNUSED Fftf1dControls *controls,
+           Fftf1dArgs *args)
+{
+    GwyDataField *rfield;
+    gint newid;
+
+    rfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(args->result,
+                            "/0/data"));
+    gwy_data_field_resample(rfield, args->original_xres, args->original_yres,
+                            args->interpolation);
+    newid = gwy_app_data_browser_add_data_field(rfield, args->data, TRUE);
+    gwy_app_copy_data_items(args->result, args->data, 0, newid,
+                            GWY_DATA_ITEM_GRADIENT,
+                            GWY_DATA_ITEM_MASK_COLOR,
+                            0);
+    g_object_unref(args->result);
+    gwy_app_set_data_field_title(args->data, newid, _("1D FFT Filtered Data"));
+}
+
+static void
+update_changed_cb(GtkToggleButton *button, Fftf1dArgs *args)
+{
+    args->update = gtk_toggle_button_get_active(button);
+}
+
+static void
+suppress_changed_cb(GtkWidget *combo,
+                    Fftf1dArgs *args)
+{
+    args->suppress = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    if (args->suppress == GWY_FFTF_1D_SUPPRESS_NEIGBOURHOOD) {
+        args->view_type = GWY_FFTF_1D_VIEW_UNMARKED;
+        gwy_enum_combo_box_set_active(GTK_COMBO_BOX(pcontrols->menu_view_type),
+                                      args->view_type);
+        gtk_widget_set_sensitive(pcontrols->menu_view_type, FALSE);
+    }
+    else
+        gtk_widget_set_sensitive(pcontrols->menu_view_type, TRUE);
+    graph_selected(GWY_GRAPH_AREA(GWY_GRAPH(pcontrols->graph)->area), args);
+    update_view(pcontrols, args);
+}
+
+static void
+view_type_changed_cb(GtkWidget *combo,
+                     Fftf1dArgs *args)
+{
+    args->view_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    graph_selected(GWY_GRAPH_AREA(GWY_GRAPH(pcontrols->graph)->area), args);
+    update_view(pcontrols, args);
+}
+
+static void
+direction_changed_cb(GtkWidget *combo,
+                     Fftf1dArgs *args)
+{
+    args->direction = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    restore_ps(pcontrols, args);
+}
+
+static void
+interpolation_changed_cb(GtkWidget *combo,
+                         Fftf1dArgs *args)
+{
+    args->interpolation = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    update_view(pcontrols, args);
+}
+
+static const gchar suppress_key[]      = "/module/fft_filter_1d/suppress";
+static const gchar update_key[]        = "/module/fft_filter_1d/update";
+static const gchar view_key[]          = "/module/fft_filter_1d/view";
+static const gchar direction_key[]     = "/module/fft_filter_1d/direction";
+static const gchar interpolation_key[] = "/module/fft_filter_1d/interpolation";
+
+static void
+fftf_1d_sanitize_args(Fftf1dArgs *args)
+{
+    args->suppress = MIN(args->suppress, GWY_FFTF_1D_SUPPRESS_NEIGBOURHOOD);
+    args->view_type = MIN(args->view_type, GWY_FFTF_1D_VIEW_UNMARKED);
+    args->direction = MIN(args->direction, GWY_ORIENTATION_VERTICAL);
+    args->interpolation = MIN(args->interpolation, GWY_INTERPOLATION_NNA);
+    args->update = !!args->update;
+
+    if (args->suppress == GWY_FFTF_1D_SUPPRESS_NEIGBOURHOOD)
+        args->view_type = GWY_FFTF_1D_VIEW_UNMARKED;
+
+}
+
+static void
+fftf_1d_load_args(GwyContainer *container,
+                  Fftf1dArgs *args)
+{
+    args->interpolation = GWY_INTERPOLATION_BILINEAR;
+    args->direction = GWY_ORIENTATION_HORIZONTAL;
+    args->suppress = GWY_FFTF_1D_SUPPRESS_NULL;
+
+    gwy_container_gis_enum_by_name(container, suppress_key, &args->suppress);
+    gwy_container_gis_enum_by_name(container, view_key, &args->view_type);
+    gwy_container_gis_enum_by_name(container, direction_key, &args->direction);
+    gwy_container_gis_enum_by_name(container, interpolation_key, &args->interpolation);
+    gwy_container_gis_boolean_by_name(container, update_key, &args->update);
+
+    fftf_1d_sanitize_args(args);
+}
+
+static void
+fftf_1d_save_args(GwyContainer *container,
+                    Fftf1dArgs *args)
+{
+    gwy_container_set_enum_by_name(container, suppress_key, args->suppress);
+    gwy_container_set_enum_by_name(container, view_key, args->view_type);
+    gwy_container_set_enum_by_name(container, direction_key, args->direction);
+    gwy_container_set_enum_by_name(container, interpolation_key, args->interpolation);
+    gwy_container_set_boolean_by_name(container, update_key, args->update);
+}
+
+
+
+/* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
+
+
+
+

@@ -1,0 +1,20 @@
+# @(#) $Id$
+
+TOP_SRCDIR = ..
+
+!INCLUDE $(TOP_SRCDIR)\make.msc
+
+SUBDIRS = \
+	glmaterials \
+	gradients
+
+## targets
+all: sub-all
+
+clean:: sub-clean
+
+!INCLUDE $(TOP_SRCDIR)\rules.msc
+
+install: sub-install
+
+# vim: ft=make

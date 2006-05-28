@@ -1,0 +1,4 @@
+Makefile
+Makefile.in
+Gwyddion::dump.3pm
+man3.stamp

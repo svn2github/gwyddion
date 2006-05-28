@@ -1,0 +1,13 @@
+Makefile
+Makefile.in
+test
+*.lo
+*.la
+.libs
+.deps
+core.*
+*.def
+makefile.msc
+gwyprocesstypes.c
+gwyprocesstypes.h
+stamp-gwyprocesstypes.h
