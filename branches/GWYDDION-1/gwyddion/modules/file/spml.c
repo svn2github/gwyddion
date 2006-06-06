@@ -1174,7 +1174,7 @@ spml_detect(const gchar *filename, gboolean only_name)
 {
     FILE *fh;
     gchar head[HEAD_SIZE];
-    gint score = 0;
+    gint n, score = 0;
 
     gwy_debug("%s", filename);
     if (g_str_has_suffix(filename, ".xml")) {
@@ -1185,8 +1185,9 @@ spml_detect(const gchar *filename, gboolean only_name)
         return score;
     if (!(fh = fopen(filename, "rb")))
         return 0;
-    fread(head, 1, HEAD_SIZE, fh);
-    if (strstr("<SPML", head)) {
+    n = fread(head, 1, HEAD_SIZE, fh);
+    head[MAX(n-1, 0)] = '\0';
+    if (strstr(head, "<SPML")) {
         gwy_debug("Score += 50");
         score += 50;
     }
