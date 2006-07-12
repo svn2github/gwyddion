@@ -45,6 +45,8 @@ if test "$GS" = no; then
   AC_MSG_ERROR([gs is required to build user guide (install ghostscript)])
 fi
 
+dnl FIXME: How to check for Docbook XSL stylesheets?
+
 AC_CHECK_PROGS([PDFXMLTEX],[pdfxmltex],[no])
 AC_CHECK_PROGS([LYNX],[lynx],[no])
 
