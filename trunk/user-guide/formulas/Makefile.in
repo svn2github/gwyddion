@@ -1,7 +1,8 @@
-TEX = tex
-CONVERT = convert
-DVIPS = dvips
-GS = gs
+TEX = @TEX@
+CONVERT = @CONVERT@
+DVIPS = @DVIPS@
+GS = @GS@
+CC = @CC@
 
 FORMULAS = $(wildcard eq-*.tex)
 PNGS = $(subst .tex,.png,$(FORMULAS))
@@ -15,13 +16,14 @@ all: formulas
 formulas: pngsize png-images
 
 pngsize: pngsize.c
+	$(CC) -o pngsize pngsize.c
 
 png-images: $(PNGS)
 
 %.png: %.tex $(TEMPLATES)
 	cat defs.tex header.tex $< footer.tex >$(T)$<
 	$(TEX) --jobname $(T)$* --interaction=batchmode $(T)$<
-	dvips -q -E -o $(T)$*.ps $(T)$*.dvi
+	$(DVIPS) -q -E -o $(T)$*.ps $(T)$*.dvi
 	. $(T)$*.bbox; sed -ri "s/^(%%BoundingBox:).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
 	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
 	@{ \
@@ -44,6 +46,9 @@ clean:
 
 dist:
 	mkdir ../$(DISTNAME)/formulas
-	cp Makefile $(FORMULAS) $(TEMPLATES) ../$(DISTNAME)/formulas
+	cp Makefile.in pngsize.c $(FORMULAS) $(TEMPLATES) ../$(DISTNAME)/formulas
 
-.PHONY: clean dist formulas all
+distclean: clean
+	-rm -f Makefile
+
+.PHONY: clean dist formulas all distclean
