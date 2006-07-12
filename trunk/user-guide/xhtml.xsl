@@ -4,6 +4,7 @@
 
 <xsl:import href="http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl"/>
 
+<xsl:param name="chunker.output.encoding" select="'utf-8'"/>
 <xsl:param name="toc.section.depth" select="1"/>
 <xsl:param name="use.id.as.filename" select="1"/>
 <xsl:param name="phrase.propagates.style" select="1"/>
