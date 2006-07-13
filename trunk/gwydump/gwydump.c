@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <glib.h>
 
-/* Borrow types from GLIB to convert old GwyContainers */
+/* Borrow types from GObject to convert old GwyContainers */
 #define G_TYPE_FUNDAMENTAL_SHIFT (2)
 #define G_TYPE_MAKE_FUNDAMENTAL(x) (((x) << G_TYPE_FUNDAMENTAL_SHIFT))
 
@@ -68,7 +68,7 @@ main(int argc, char *argv[])
     }
 
     if (!g_file_get_contents(argv[1], &buffer, &size, &err)) {
-        g_printerr("Cannot open `%s': %s\n", argv[1], g_strerror(errno));
+        fprintf(stderr, "Cannot open `%s': %s\n", argv[1], g_strerror(errno));
         return 1;
     }
 
@@ -77,22 +77,22 @@ main(int argc, char *argv[])
     if (!opt_raw) {
         if (size < 10
             || (strncmp(buffer, "GWYP", 4) && strncmp(buffer, "GWYO", 4))) {
-            g_printerr("File `%s' is not a Gwyddion file\n", argv[1]);
+            fprintf(stderr, "File `%s' is not a Gwyddion file\n", argv[1]);
             return 1;
         }
         if (!strncmp(buffer, "GWYO", 4))
             v1file = TRUE;
 
         if (opt_offset)
-            g_print("%08x: Header %.4s\n", 0, buffer);
+            printf("%08x: Header %.4s\n", 0, buffer);
         else
-            g_print("Header %.4s\n", buffer);
+            printf("Header %.4s\n", buffer);
         buffer += 4;
         size -= 4;
     }
     level = -1;
     if (opt_offset)
-        g_print("%08x: ", buffer - buffer0);
+        printf("%08x: ", (guint)(buffer - buffer0));
     dump_object(&buffer, &size);
     g_free(buffer0);
 
@@ -126,7 +126,7 @@ fail(gchar *buffer,
 {
     va_list ap;
 
-    fprintf(stderr, "\nERROR at position %08x: ", buffer - buffer0);
+    fprintf(stderr, "\nERROR at position %08x: ", (guint)(buffer - buffer0));
     va_start(ap, format);
     vfprintf(stderr, format, ap);
     va_end(ap);
@@ -162,9 +162,9 @@ dump_boolean(gchar **buffer,
         fail(*buffer, "Truncated boolean");
     value = !!**buffer;
     if (opt_value)
-        g_print("%s%s", opt_type ? "boolean=" : "", value ? "TRUE" : "FALSE");
+        printf("%s%s", opt_type ? "boolean=" : "", value ? "TRUE" : "FALSE");
     else if (opt_type)
-        g_print("boolean");
+        printf("boolean");
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
 }
@@ -180,12 +180,12 @@ dump_char(gchar **buffer,
     value = **buffer;
     if (opt_value) {
         if (g_ascii_isprint(value))
-            g_print("%s%c", opt_type ? "char=" : "", value);
+            printf("%s%c", opt_type ? "char=" : "", value);
         else
-            g_print("%s\\%03o", opt_type ? "char=" : "", value);
+            printf("%s\\%03o", opt_type ? "char=" : "", value);
     }
     else if (opt_type)
-        g_print("char");
+        printf("char");
     *buffer += sizeof(gchar);
     *size -= sizeof(gchar);
 }
@@ -201,9 +201,9 @@ dump_int32(gchar **buffer,
     memcpy(&value, *buffer, sizeof(gint32));
     value = GINT32_FROM_LE(value);
     if (opt_value)
-        g_print("%s%d", opt_type ? "int32=" : "", value);
+        printf("%s%d", opt_type ? "int32=" : "", value);
     else if (opt_type)
-        g_print("int32");
+        printf("int32");
     *buffer += sizeof(gint32);
     *size -= sizeof(gint32);
 }
@@ -219,9 +219,9 @@ dump_int64(gchar **buffer,
     memcpy(&value, *buffer, sizeof(gint64));
     value = GINT64_FROM_LE(value);
     if (opt_value)
-        g_print("%s%" G_GINT64_FORMAT, opt_type ? "int64=" : "", value);
+        printf("%s%" G_GINT64_FORMAT, opt_type ? "int64=" : "", value);
     else if (opt_type)
-        g_print("int64");
+        printf("int64");
     *buffer += sizeof(gint64);
     *size -= sizeof(gint64);
 }
@@ -237,9 +237,9 @@ dump_double(gchar **buffer,
     memcpy(&value, *buffer, sizeof(gdouble));
     value.i = GUINT64_FROM_LE(value.i);
     if (opt_value)
-        g_print("%s%g", opt_type ? "double=" : "", value.d);
+        printf("%s%g", opt_type ? "double=" : "", value.d);
     else if (opt_type)
-        g_print("double");
+        printf("double");
     *buffer += sizeof(gdouble);
     *size -= sizeof(gdouble);
 }
@@ -254,9 +254,9 @@ dump_string(gchar **buffer,
         fail(*buffer, "Runaway string");
     q = g_strescape(*buffer, NULL);
     if (opt_value)
-        g_print("%s\"%s\"", opt_type ? "string=" : "", q);
+        printf("%s\"%s\"", opt_type ? "string=" : "", q);
     else if (opt_type)
-        g_print("string");
+        printf("string");
     g_free(q);
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
@@ -274,17 +274,22 @@ dump_array(gchar **buffer,
     mysize = get_size(buffer, size);
     if (opt_value || opt_type) {
         if (opt_type)
-            g_print("%s ", typename);
-        g_print("array");
+            printf("%s ", typename);
+        printf("array");
         if (opt_value)
-            g_print(" of length %u", mysize);
+            printf(" of length %u", mysize);
     }
-    g_print("\n");
+    printf("\n");
 
     if (!strcmp(typename, "object")) {
         while (mysize) {
+            level++;
+            if (opt_offset)
+                printf("%08x: ", (guint)(*buffer - buffer0));
+            printf("%s", indent());
             dump_object(buffer, size);
             mysize--;
+            level--;
         }
     }
     else if (!strcmp(typename, "string")) {
@@ -350,7 +355,7 @@ dump_hash(gchar *buffer,
 
     while (size) {
         if (opt_offset)
-            g_print("%08x: ", buffer - buffer0);
+            printf("%08x: ", (guint)(buffer - buffer0));
 
         /* Type for old files */
         if (oldfile) {
@@ -363,7 +368,7 @@ dump_hash(gchar *buffer,
         if (!(p = memchr(buffer, 0, size)))
             fail(buffer, "Runaway component name");
         q = g_strescape(buffer, NULL);
-        g_print("%s\"%s\"", indent(), q);
+        printf("%s\"%s\"", indent(), q);
         g_free(q);
         size -= (p - buffer) + 1;
         buffer = p + 1;
@@ -382,12 +387,12 @@ dump_hash(gchar *buffer,
         for (i = 0; i < G_N_ELEMENTS(atomic); i++) {
             if (atomic[i].ctype == ctype) {
                 if (opt_value)
-                    g_print(", ");
+                    printf(", ");
                 else if (ctype == 'o' || opt_type)
-                    g_print(" ");
+                    printf(" ");
                 atomic[i].func(&buffer, &size);
                 if (ctype != 'o')
-                    g_print("\n");
+                    printf("\n");
                 handled = TRUE;
                 break;
             }
@@ -395,7 +400,7 @@ dump_hash(gchar *buffer,
         for (i = 0; i < G_N_ELEMENTS(array); i++) {
             if (array[i].ctype == ctype) {
                 if (opt_value)
-                    g_print(", ");
+                    printf(", ");
                 dump_array(&buffer, &size, array[i].size, array[i].name);
                 handled = TRUE;
                 break;
@@ -418,9 +423,9 @@ dump_object_real(gchar **buffer,
     if (!(p = memchr(*buffer, 0, *size)))
         fail(*buffer, "Runaway object name");
     if (opt_value)
-        g_print("%s%s", opt_type ? "object=" : "", *buffer);
+        printf("%s%s", opt_type ? "object=" : "", *buffer);
     else if (opt_type)
-        g_print("object");
+        printf("object");
     container = !strcmp(*buffer, "GwyContainer");
     *size -= (p - *buffer) + 1;
     *buffer = p + 1;
@@ -430,9 +435,9 @@ dump_object_real(gchar **buffer,
     if (mysize > *size)
         fail(*buffer, "Truncated object data");
     if (opt_object_size)
-        g_print(", size: %" G_GSIZE_FORMAT "\n", *size);
+        printf(" size=%" G_GSIZE_FORMAT "\n", *size);
     else
-        g_print("\n");
+        printf("\n");
 
     /* Hash */
     *size -= mysize;
@@ -475,14 +480,14 @@ process_options(int *argc,
     g_option_context_add_main_entries(context, entries, NULL);
     g_option_context_set_help_enabled(context, FALSE);
     if (!g_option_context_parse(context, argc, argv, &err)) {
-        g_print("Cannot parse options: %s\n", err->message);
+        fprintf(stderr, "Cannot parse options: %s\n", err->message);
         g_clear_error(&err);
         exit(EXIT_FAILURE);
     }
     g_option_context_free(context);
 
     if (opt_version)
-        g_print("%s %s\n", PACKAGE, VERSION);
+        printf("%s %s\n", PACKAGE, VERSION);
 
     if (opt_help)
         print_help();
@@ -498,11 +503,11 @@ process_options(int *argc,
 static void
 print_help(void)
 {
-    g_print(
-"Usage: gwyiew [OPTIONS...] FILENAME\n"
-"Dump Gwyddion .gwy file in a text format.\n\n"
+    printf(
+"Usage: gwdump [OPTIONS...] FILENAME\n"
+"Dump Gwyddion .gwy file in a human readable text format.\n\n"
         );
-    g_print(
+    printf(
 "Options:\n"
 " -o, --offset         Print offsets in file.\n"
 " -t, --type           Print component types.\n"
@@ -514,8 +519,7 @@ print_help(void)
 " -h, --help           Print this help and terminate.\n"
 " -V, --version        Print version info and terminate.\n\n"
         );
-    g_print("Please report bugs in Gwyddion bugzilla "
-            "http://trific.ath.cx/bugzilla/\n");
+    printf("Please report bugs to Yeti <yeti@gwyddion.net>\n");
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
