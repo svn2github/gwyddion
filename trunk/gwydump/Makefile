@@ -21,7 +21,7 @@ LDFLAGS = $(GWY_LDFLAGS)
 bindir = $(shell $(PKGCONFIG) $(GLIB) --prefix)/bin
 
 DNAME = $(PACKAGE)-$(VERSION)
-STD_DIST = Makefile COPYING pkg.mak
+STD_DIST = Makefile COPYING pkg.mak makefile.msc
 COMPILE = gcc
 LINK = gcc
 INSTALL = install
