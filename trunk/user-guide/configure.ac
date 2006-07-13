@@ -11,7 +11,7 @@ AC_SUBST(PACKAGE_SHORTNAME)
 AC_PROG_CC
 AC_CHECK_PROGS([GMAKE],[gmake make],[no])
 if test "$GMAKE" != no; then
-  AC_MSG_CHECKING([if $GMAKE is GNU make])
+  AC_MSG_CHECKING([whether $GMAKE is GNU make])
   if make --version 2>/dev/null | grep '^GNU Make' >/dev/null; then
     AC_MSG_RESULT([seems so])
   else
@@ -45,7 +45,10 @@ if test "$GS" = no; then
   AC_MSG_ERROR([gs is required to build user guide (install ghostscript)])
 fi
 
-dnl FIXME: How to check for Docbook XSL stylesheets?
+JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.2//EN],
+                     [DocBook XML DTD V4.2])
+JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl],
+                     [DocBook XSL Stylesheets])
 
 AC_CHECK_PROGS([PDFXMLTEX],[pdfxmltex],[no])
 AC_CHECK_PROGS([LYNX],[lynx],[no])
