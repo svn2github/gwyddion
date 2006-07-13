@@ -416,7 +416,7 @@ dump_object_real(gchar **buffer,
                  gsize *size)
 {
     gboolean container;
-    gint32 mysize;
+    guint32 mysize;
     gchar *p;
 
     /* Name */

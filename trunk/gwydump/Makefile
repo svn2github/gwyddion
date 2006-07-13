@@ -14,14 +14,13 @@ GLIB = glib-2.0
 
 GWY_CFLAGS = $(shell $(PKGCONFIG) $(GLIB) --cflags)
 GWY_LDFLAGS = $(shell $(PKGCONFIG) $(GLIB) --libs)
-EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\" -DGWY_MODULE_DIR=\"$(MODULE_DIR)\"
+EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 OBJECTS = $(SOURCES:.c=.o)
 LDFLAGS = $(GWY_LDFLAGS)
 
 bindir = $(shell $(PKGCONFIG) $(GLIB) --prefix)/bin
 
 DNAME = $(PACKAGE)-$(VERSION)
-#STD_DIST = Makefile COPYING makefile.msc pkg.mak $(PACKAGE).spec $(PACKAGE).iss
 STD_DIST = Makefile COPYING pkg.mak
 COMPILE = gcc
 LINK = gcc
@@ -45,20 +44,6 @@ install: all
 uninstall:
 	-rm -f $(DESTDIR)$(bindir)/$(PACKAGE)
 
-$(PACKAGE).spec: pkg.mak
-	cp $(PACKAGE).spec $(PACKAGE).spec~
-	sed -e 's/^\(Version: \).*/\1$(VERSION)/' \
-	    -e 's/^\(Source: .*\)-[0-9.]\+\.tar\.bz2/\1-$(VERSION).tar.bz2/' \
-	    $(PACKAGE).spec~ >$(PACKAGE).spec
-
-$(PACKAGE).iss: pkg.mak
-	cp $(PACKAGE).iss $(PACKAGE).iss~
-	sed -e 's/^\(AppVersion=\).*/\1$(VERSION)/' \
-	    -e 's/^\(AppVerName=.* \)[0-9.]\+/\1$(VERSION)/' \
-	    -e 's/^\(OutputBaseFilename=.*\)-[0-9.]\+/\1-$(VERSION)/' \
-	    $(PACKAGE).iss~ >$(PACKAGE).iss
-
-#dist: $(PACKAGE).spec $(PACKAGE).iss
 dist:
 	-rm -rf $(DNAME)
 	mkdir $(DNAME)
