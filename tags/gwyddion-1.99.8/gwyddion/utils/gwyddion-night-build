@@ -1,0 +1,194 @@
+#!/bin/bash
+# @(#) $Id$
+disabled=
+pkgname=gwyddion
+basever=1.99.8
+dont_update_version=dont_update_no_stinking_version
+projectdir=$HOME/Projects/Gwyddion/$pkgname
+logdir=$HOME/Projects/Gwyddion/buildlog
+docdir=$HOME/Projects/Gwyddion/devel-docs
+installprefix=$HOME/opt/gwyddion
+gtkdocdir="/share/gtk-doc/html/*"
+gtkdocdirs=(/usr /usr/local /opt/gnome $installprefix)
+gnainsindex=$HOME/lib/gtk.gnains
+host=$($HOME/bin/Ftpcp)
+
+source $HOME/.bashrc
+source $HOME/.ssh/current-ssh-agent
+export CFLAGS="-ggdb -O"
+PATH="$HOME/bin:$PATH"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  exec >$logdir/$1.log
+  exec 2>$logdir/$1.err
+  cd $projectdir
+  for x in $disabled; do
+    if test "$1" = "$x"; then
+      echo disabled
+      return
+    fi
+  done
+  $@
+}
+
+# extract makefile-style list $2 from $1
+function getlist() {
+  test -f $1 || return
+  grep --quiet "^$2" $1 || return
+  sed -n -e '/^'"$2"' *= *\\/,/[^\\]$/H' \
+         -e '/^'"$2"' *= *[a-zA-Z0-9]/H' \
+         -e '${g;s/\\[[:space:]]*//g;s/.*= *//;p}' $1
+}
+
+# =====[ components ]========================================================
+function update_version() {
+  version=$basever
+  test -n "$dont_update_version" && return
+  xver=.$(date +%Y%m%d)
+  version=$version$xver
+  cp -fv NEWS NEWS~
+  cp -fv configure.ac configure.ac~
+  sed -ri -e "1s/^[^ ]*/$version/" NEWS
+  sed -ri -e "/m4_define\\(\[gwy_version_string/s/(minor\\.[0-9]+)\\.?[0-9]*/\\1$xver/" configure.ac
+}
+
+
+function autostuff() {
+  make -k maintainer-clean
+  ./autogen.sh \
+    --config-cache \
+    --disable-desktop-file-update \
+    --enable-gtk-doc \
+    --prefix=$installprefix
+  make -C po gwyddion.pot
+}
+
+
+function build_project() {
+  make -k clean
+  make -k
+  # Use ctags to build tags
+  # Prevent automake from exporting CTAGS some garbage in CTAGS
+  make -k tags ETAGS=ctags CTAGS="$CTAGS"
+  pushd po
+  make -k update-gmo
+  for x in $(sed '/^POFILES/s/\(.*=\|\.po\)//g;t;d' Makefile); do
+    echo -n "TRANSLATION $x: " 1>&2
+    msgfmt --statistics $x.po
+  done
+  echo -n "TRANSLATION total: " 1>&2
+  grep -c ^msgstr $pkgname.pot 1>&2
+  popd
+  ./utils/update-msvc.py
+}
+
+
+function build_documentation() {
+  # Note this need build_project() to pass
+  cd ./devel-docs
+  make -k clean >/dev/null
+  # This is removed by maintainer-clean, but that would require to rerun all
+  # the autostuff
+  rm -fv */*-sections.txt */*-decl-list.txt
+  make -k docs
+}
+
+
+function check_coding_style() {
+  # Note this need build_documentation() to pass
+  # Source coding style
+  find -name \*.c | grep -Ev '^\./gwyddion-|/(main|test|wtest)\.c' \
+    | xargs ./utils/check-coding-style.py \
+    | cat --squeeze-blank >$logdir/coding-style.log
+
+  # Libraries
+  find . -path \*.libs/libgwy\*.so | grep -v '[0-9]\.[0-9]' | while read lib; do
+    d=${lib##./}
+    d=${d%%/*}
+    l=$(basename $lib .so)
+    nm $lib \
+      | sed -re 's/^[0-9a-f]+ T +([A-Za-z0-9_]+)$/\1/;t;d' \
+      | grep -v '^_' \
+      | sort -u -o evil-symbols-defined.tmp
+    sed -n '/<FUNCTION>/,/<\/FUNCTION>/{s/<\/\?NAME>//g;t1;d;:1;p}' \
+      devel-docs/$l/$l-decl.txt \
+      | sort -u -o evil-symbols-declared.tmp
+    diff evil-symbols-declared.tmp evil-symbols-defined.tmp \
+      | grep '^<' \
+      | sed -re 's/< (.*)/Declared undefined symbol ('$l'): \1/' 1>&2
+    diff evil-symbols-defined.tmp evil-symbols-declared.tmp \
+      | grep '^<' \
+      | sed -re 's/< (.*)/Exported undeclared symbol ('$l'): \1/' 1>&2
+  done
+  rm -f evil-symbols-{defined,declared}.tmp
+
+  # Extra symbols in modules
+  find modules -path \*.libs/\*.so | while read mod; do
+    m=$(basename $mod .so)
+    nm $mod \
+      | sed -re 's/^[0-9a-f]+ T +([A-Za-z0-9_]+)$/Evil symbol ('$m'): \1/;t;d' \
+      | grep -Ev ' _(fini|init|gwy_module_query)$' 1>&2
+  done
+}
+
+
+function install_to_tmp() {
+  make -k install
+}
+
+
+function make_dists() {
+  rm -f .releaseme
+
+  make dist
+  if test -s $pkgname-$version.tar.bz2; then
+    rpmbuild -ta --clean $pkgname-$version.tar.bz2 && touch .releaseme
+    mv $pkgname-$version.tar.bz2 $pkgname-head.tar.bz2
+    mv $pkgname-$version.tar.gz $pkgname-head.tar.gz
+  fi
+}
+
+
+function gnains_index() {
+  which gnains-mkindex || return
+  for d in ${gtkdocdirs[@]/%/$gtkdocdir}; do
+    test -f "$d/index.sgml" && echo $d
+  done | xargs gnains-mkindex -f $gnainsindex
+}
+
+
+function help() {
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call *//'
+}
+
+# =====[ main ]==============================================================
+cd $projectdir
+test -d $logdir || mkdir $logdir
+# Set version from Makefile if we don't do update_version
+eval $(grep ^VERSION Makefile | tr -d ' ' | tr '[A-Z]' '[a-z]')
+
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  rm -f $logdir/*
+  # LIST-BEGIN
+  call update_version
+  call autostuff
+  call build_project
+  call build_documentation
+  call check_coding_style
+  call install_to_tmp
+  call make_dists
+  call gnains_index
+  # LIST-END
+fi
