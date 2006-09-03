@@ -1,11 +1,12 @@
 
 Gwydump dumps .gwy file structure in a human-readable text format.
+It can also extract individual data components.
 
 It does not depend on anything beyond GLib, namely it is completely
 independent of Gwyddion.
 
-It supports both old 1.x files and new 2.x files, and also raw serialized
-objects (only new style).  It can print offsets, component names, types,
+Both old 1.x files and new 2.x files are supported, and also raw serialized
+objects (only new 2.x style).  It can print offsets, component names, types,
 and even values of atomic components.
 
 Web: http://gwyddion.net/download.php#tools-toys
@@ -13,12 +14,12 @@ Web: http://gwyddion.net/download.php#tools-toys
 
 == Installation (Unix) ======
 
-1. Install GLib.
+1. Install GLib, including development parts.
 2. Run `make'.
 
 
 == Installation (MSVC) ======
 
-1. Install GLib.
+1. Install GLib, including development parts.
 2. Run `nmake -f makefile.msc'
 

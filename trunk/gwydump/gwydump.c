@@ -1,6 +1,6 @@
 /*
  *  @(#) $Id$
- *  Copyright (C) 2005 David Necas (Yeti)
+ *  Copyright (C) 2005,2006 David Necas (Yeti)
  *  E-mail: yeti@gwyddion.net
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <glib.h>
 
-/* Borrow types from GObject to convert old GwyContainers */
+/* Borrow types from GObject to convert old 1.x GwyContainers */
 #define G_TYPE_FUNDAMENTAL_SHIFT (2)
 #define G_TYPE_MAKE_FUNDAMENTAL(x) (((x) << G_TYPE_FUNDAMENTAL_SHIFT))
 
@@ -37,28 +37,39 @@
 #define G_TYPE_STRING G_TYPE_MAKE_FUNDAMENTAL (16)
 #define G_TYPE_OBJECT G_TYPE_MAKE_FUNDAMENTAL (20)
 
+typedef struct {
+    gboolean v1file;
+    gboolean extract_succeeded;
+    gchar *buffer0;
+    gchar *buffer;
+    GString *path;
+    GArray *stack;
+} DumpState;
+
 static void print_help      (void);
 static void process_options (int *argc, char ***argv);
-static void dump_object     (gchar **buffer, gsize *size);
+static void dump_object     (DumpState *state, gsize *size);
+static void print           (DumpState *state,
+                             const gchar *format,
+                             ...);
 
 /* Options */
 static guint opt_indent = 4;
+static gint opt_array_length = 0;
+static gint opt_depth = -1;
 static gboolean opt_offset = FALSE;
 static gboolean opt_object_size = FALSE;
 static gboolean opt_type = FALSE;
 static gboolean opt_value = FALSE;
 static gboolean opt_raw = FALSE;
-
-/* Global state */
-static gint level;
-static gchar *buffer0;
-static gboolean v1file = FALSE;
+static gboolean opt_path = FALSE;
+static gchar *opt_extract = NULL;
 
 int
 main(int argc, char *argv[])
 {
+    DumpState state;
     gsize size;
-    gchar *buffer;
     GError *err = NULL;
 
     process_options(&argc, &argv);
@@ -67,246 +78,391 @@ main(int argc, char *argv[])
         return 0;
     }
 
-    if (!g_file_get_contents(argv[1], &buffer, &size, &err)) {
+    if (!g_file_get_contents(argv[1], &state.buffer0, &size, &err)) {
         fprintf(stderr, "Cannot open `%s': %s\n", argv[1], g_strerror(errno));
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    buffer0 = buffer;
+    state.buffer = state.buffer0;
+    state.v1file = FALSE;
+    state.extract_succeeded = FALSE;
+    state.path = g_string_new(NULL);
+    state.stack = g_array_new(FALSE, FALSE, sizeof(gint));
     /* Detect file type, if not raw */
     if (!opt_raw) {
         if (size < 10
-            || (strncmp(buffer, "GWYP", 4) && strncmp(buffer, "GWYO", 4))) {
+            || (strncmp(state.buffer0, "GWYP", 4)
+                && strncmp(state.buffer0, "GWYO", 4))) {
             fprintf(stderr, "File `%s' is not a Gwyddion file\n", argv[1]);
-            return 1;
+            return EXIT_FAILURE;
         }
-        if (!strncmp(buffer, "GWYO", 4))
-            v1file = TRUE;
+        if (strncmp(state.buffer0, "GWYO", 4) == 0)
+            state.v1file = TRUE;
 
         if (opt_offset)
-            printf("%08x: Header %.4s\n", 0, buffer);
-        else
-            printf("Header %.4s\n", buffer);
-        buffer += 4;
+            print(&state, "%08x: ", (guint)(state.buffer - state.buffer0));
+        print(&state, "Header %.4s\n", state.buffer0);
+        state.buffer += 4;
         size -= 4;
     }
-    level = -1;
+
+    /* Special case this, object that has no component name breaks all the
+     * normal printing assumptions. */
     if (opt_offset)
-        printf("%08x: ", (guint)(buffer - buffer0));
-    dump_object(&buffer, &size);
-    g_free(buffer0);
+        print(&state, "%08x: ", (guint)(state.buffer - state.buffer0));
+    print(&state, "\"\"");
+    dump_object(&state, &size);
 
-    return 0;
-}
-
-static gchar*
-indent(void)
-{
-    static GString *str = NULL;
-    static gchar spaces[] = "                                ";
-    gint i;
-
-    if (!opt_indent)
-        return "";
-
-    if (!str)
-        str = g_string_new("");
-
-    for (i = str->len/opt_indent; i < level; i++)
-        g_string_append_len(str, spaces, opt_indent);
-    g_string_truncate(str, opt_indent*level);
-
-    return str->str;
+    return (opt_extract && !state.extract_succeeded) ? 2 : EXIT_SUCCESS;
 }
 
 static void G_GNUC_NORETURN
-fail(gchar *buffer,
+fail(DumpState *state,
      const gchar *format,
      ...)
 {
     va_list ap;
 
-    fprintf(stderr, "\nERROR at position %08x: ", (guint)(buffer - buffer0));
+    fprintf(stderr, "\nError at position %08x: ",
+            (guint)(state->buffer - state->buffer0));
     va_start(ap, format);
     vfprintf(stderr, format, ap);
     va_end(ap);
     fprintf(stderr, "\n");
 
-    g_free(buffer0);
     exit(EXIT_FAILURE);
 }
 
+/* Print to stdout, except when disabled by options */
+static void
+print(DumpState *state,
+      const gchar *format,
+      ...)
+{
+    va_list ap;
+
+    if (opt_extract
+        || state->stack->len > opt_depth)
+        return;
+
+    va_start(ap, format);
+    vprintf(format, ap);
+    va_end(ap);
+}
+
+/* Print indentation corresponding to the current state->stack nesting level */
+static void
+print_indent(DumpState *state)
+{
+    static gchar *spacer = NULL;
+    guint i;
+
+    if (!opt_indent
+        || opt_extract
+        || state->stack->len >= opt_depth)
+        return;
+
+    if (!spacer) {
+        spacer = g_new(gchar, opt_indent + 1);
+        memset(spacer, ' ', opt_indent);
+        spacer[opt_indent] = '\0';
+    }
+
+    for (i = 0; i <= state->stack->len; i++)
+        fputs(spacer, stdout);
+}
+
+/* Push one component/item to component stack */
+static void
+push(DumpState *state,
+     const gchar *format,
+     ...)
+{
+    va_list ap;
+    gchar *s;
+    guint len;
+
+    va_start(ap, format);
+    s = g_strdup_vprintf(format, ap);
+    va_end(ap);
+
+    len = state->path->len;
+    g_array_append_val(state->stack, len);
+    g_string_append_c(state->path, '/');
+    g_string_append(state->path, s);
+
+    print(state, "%s", opt_path ? state->path->str : s);
+    g_free(s);
+}
+
+/* Pop one component/item from component stack */
+static void
+pop(DumpState *state)
+{
+    guint len;
+
+    if (!state->stack->len)
+        fail(state, "Internal error, no more levels to pop");
+    len = g_array_index(state->stack, guint, state->stack->len-1);
+    if (len > state->path->len)
+        fail(state, "Internal error, deeper path is shorter");
+    g_array_set_size(state->stack, state->stack->len-1);
+    g_string_truncate(state->path, len);
+}
+
+static void
+print_offset(DumpState *state)
+{
+    if (opt_extract
+        || state->stack->len >= opt_depth)
+        return;
+
+    if (opt_offset)
+        printf("%08x: ", (guint)(state->buffer - state->buffer0));
+    print_indent(state);
+}
+
+static void
+print_value(DumpState *state,
+            const gchar *type,
+            const gchar *format,
+            ...)
+{
+    va_list ap;
+
+    if (opt_extract
+        || state->stack->len > opt_depth)
+        return;
+
+    if (opt_type || opt_value)
+        putchar(' ');
+
+    if (opt_type)
+        fputs(type, stdout);
+    if (!opt_value) {
+        putchar('\n');
+        return;
+    }
+
+    if (opt_type)
+        putchar('=');
+    va_start(ap, format);
+    vprintf(format, ap);
+    va_end(ap);
+
+    putchar('\n');
+}
+
+static inline void
+get_value_real(DumpState *state,
+               gsize *size,
+               guint typesize,
+               const gchar *typename,
+               gchar *value)
+{
+    if (*size < typesize)
+        fail(state, "Truncated %s", typename);
+    memcpy(value, state->buffer, typesize);
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+    {
+        guint i;
+        gchar x;
+
+        for (i = 0; i < typesize/2; i++) {
+            x = value[i];
+            value[i] = value[typesize-1 - i];
+            value[typesize-1 - i] = x;
+        }
+    }
+#endif
+    state->buffer += typesize;
+    *size -= typesize;
+}
+
+#define get_value(state, size, type, name, value) \
+    get_value_real(state, size, sizeof(type), name, (void*)&value)
+
+#define dump_value(state, size, type, name, format, toprint) \
+    do { \
+        type value; \
+        if (opt_extract && strcmp(state->path->str, opt_extract) == 0) { \
+            fwrite(state->buffer, 1, sizeof(type), stdout); \
+            state->extract_succeeded = TRUE; \
+        } \
+        get_value_real(state, size, sizeof(type), name, (void*)&value); \
+        print_value(state, name, format, toprint); \
+    } while (0)
+
 static guint32
-get_size(gchar **buffer,
+get_size(DumpState *state,
          gsize *size)
 {
     guint32 value;
-
-    if (*size < sizeof(gint32))
-        fail(*buffer, "Truncated int32");
-    memcpy(&value, *buffer, sizeof(gint32));
-    value = GUINT32_FROM_LE(value);
-    *buffer += sizeof(gint32);
-    *size -= sizeof(gint32);
-
+    get_value(state, size, guint32, "int32", value);
     return value;
 };
 
 static void
-dump_boolean(gchar **buffer,
+dump_boolean(DumpState *state,
              gsize *size)
 {
-    gboolean value;
-
-    if (!*size)
-        fail(*buffer, "Truncated boolean");
-    value = !!**buffer;
-    if (opt_value)
-        printf("%s%s", opt_type ? "boolean=" : "", value ? "TRUE" : "FALSE");
-    else if (opt_type)
-        printf("boolean");
-    *buffer += sizeof(gchar);
-    *size -= sizeof(gchar);
+    dump_value(state, size, gchar, "boolean", "%s", value ? "TRUE" : "FALSE");
 }
 
 static void
-dump_char(gchar **buffer,
+dump_char(DumpState *state,
           gsize *size)
 {
-    gchar value;
-
-    if (!*size)
-        fail(*buffer, "Truncated char\n");
-    value = **buffer;
-    if (opt_value) {
-        if (g_ascii_isprint(value))
-            printf("%s%c", opt_type ? "char=" : "", value);
-        else
-            printf("%s\\%03o", opt_type ? "char=" : "", value);
-    }
-    else if (opt_type)
-        printf("char");
-    *buffer += sizeof(gchar);
-    *size -= sizeof(gchar);
+    dump_value(state, size, gchar, "char",
+               g_ascii_isprint(value) ? "%c" : "\\%03o", value);
 }
 
 static void
-dump_int32(gchar **buffer,
+dump_int32(DumpState *state,
            gsize *size)
 {
-    gint32 value;
-
-    if (*size < sizeof(gint32))
-        fail(*buffer, "Truncated int32");
-    memcpy(&value, *buffer, sizeof(gint32));
-    value = GINT32_FROM_LE(value);
-    if (opt_value)
-        printf("%s%d", opt_type ? "int32=" : "", value);
-    else if (opt_type)
-        printf("int32");
-    *buffer += sizeof(gint32);
-    *size -= sizeof(gint32);
+    dump_value(state, size, gint32, "int32", "%d", value);
 }
 
 static void
-dump_int64(gchar **buffer,
+dump_int64(DumpState *state,
            gsize *size)
 {
-    gint64 value;
-
-    if (*size < sizeof(gint64))
-        fail(*buffer, "Truncated int64");
-    memcpy(&value, *buffer, sizeof(gint64));
-    value = GINT64_FROM_LE(value);
-    if (opt_value)
-        printf("%s%" G_GINT64_FORMAT, opt_type ? "int64=" : "", value);
-    else if (opt_type)
-        printf("int64");
-    *buffer += sizeof(gint64);
-    *size -= sizeof(gint64);
+    dump_value(state, size, gint64, "int64", "%" G_GINT64_FORMAT, value);
 }
 
 static void
-dump_double(gchar **buffer,
+dump_double(DumpState *state,
             gsize *size)
 {
-    union { gdouble d; guint64 i; } value;
-
-    if (*size < sizeof(gdouble))
-        fail(*buffer, "Truncated double");
-    memcpy(&value, *buffer, sizeof(gdouble));
-    value.i = GUINT64_FROM_LE(value.i);
-    if (opt_value)
-        printf("%s%g", opt_type ? "double=" : "", value.d);
-    else if (opt_type)
-        printf("double");
-    *buffer += sizeof(gdouble);
-    *size -= sizeof(gdouble);
+    dump_value(state, size, gdouble, "double", "%g", value);
 }
 
 static void
-dump_string(gchar **buffer,
+dump_string(DumpState *state,
             gsize *size)
 {
     gchar *p, *q;
 
-    if (!(p = memchr(*buffer, 0, *size)))
-        fail(*buffer, "Runaway string");
-    q = g_strescape(*buffer, NULL);
-    if (opt_value)
-        printf("%s\"%s\"", opt_type ? "string=" : "", q);
-    else if (opt_type)
-        printf("string");
+    if (!(p = memchr(state->buffer, 0, *size)))
+        fail(state, "Runaway string");
+    if (opt_extract && strcmp(state->path->str, opt_extract) == 0) {
+        printf("%s", state->buffer);
+        putchar('\0');
+        state->extract_succeeded = TRUE;
+    }
+    q = g_strescape(state->buffer, NULL);
+    print_value(state, "string", "\"%s\"", q);
     g_free(q);
-    *size -= (p - *buffer) + 1;
-    *buffer = p + 1;
+    *size -= (p - state->buffer) + 1;
+    state->buffer = p + 1;
 }
 
-static void
-dump_array(gchar **buffer,
+static gboolean
+dump_array(DumpState *state,
            gsize *size,
-           gsize membersize,
-           const gchar *typename)
+           gchar ctype)
 {
-    guint32 mysize;
-    gchar *p;
+    static struct {
+        gchar ctype;
+        const gchar *name;
+        const gsize size;
+        void (*func)(DumpState*, gsize*);
+    } array[] = {
+        { 'B', "boolean", sizeof(gchar),   dump_boolean, },
+        { 'C', "char",    sizeof(gchar),   dump_char,    },
+        { 'D', "double",  sizeof(gdouble), dump_double,  },
+        { 'I', "int32",   sizeof(gint32),  dump_int32,   },
+        { 'O', "object",  0,               dump_object,  },
+        { 'Q', "int64",   sizeof(gint64),  dump_int64,   },
+        { 'S', "string",  0,               dump_string,  },
+    };
 
-    mysize = get_size(buffer, size);
+    guint32 mysize, i, limit, type;
+    gchar *p, *start;
+
+    /* Find the type */
+    for (type = 0; type < G_N_ELEMENTS(array); type++) {
+        if (array[type].ctype == ctype)
+            break;
+    }
+    if (type == G_N_ELEMENTS(array))
+        return FALSE;
+
+    /* Print the header line */
+    mysize = get_size(state, size);
     if (opt_value || opt_type) {
         if (opt_type)
-            printf("%s ", typename);
-        printf("array");
+            print(state, " %s", array[type].name);
+        print(state, " array");
         if (opt_value)
-            printf(" of length %u", mysize);
+            print(state, " of length %u", mysize);
     }
-    printf("\n");
+    print(state, "\n");
 
-    if (!strcmp(typename, "object")) {
-        while (mysize) {
-            level++;
-            if (opt_offset)
-                printf("%08x: ", (guint)(*buffer - buffer0));
-            printf("%s", indent());
-            dump_object(buffer, size);
-            mysize--;
-            level--;
+    /* Check sizes */
+    start = state->buffer;
+    limit = (ctype == 'O') ? mysize : MIN(mysize, opt_array_length);
+    if (*size < mysize*array[type].size)
+        fail(state, "Truncated %s array", array[type].name);
+
+    /* Extract individual array items; this is a bit crude, we simply force
+     * individual processing of the items to extract and let the particular
+     * dump function take care about the actual extraction */
+    if (opt_extract && g_str_has_prefix(opt_extract, state->path->str)) {
+        p = opt_extract + state->path->len;
+        if (sscanf(p, "/[%u]", &i) == 1
+            && (p = strchr(p, ']'))
+            && p[1] == '\0'
+            && i < mysize)
+            limit = MAX(limit, i + 1);
+    }
+
+    /* Print at most limit array items */
+    for (i = 0; i < limit; i++) {
+        print_offset(state);
+        push(state, "[%u]", i);
+        array[type].func(state, size);
+        pop(state);
+    }
+    /* Print ellipsis for remaining items */
+    if (opt_array_length && i < mysize) {
+        print_offset(state);
+        push(state, "[%u..%u]", i, mysize-1);
+        print_value(state, array[type].name, "...");
+        pop(state);
+    }
+
+    /* Skip remaining items */
+    switch (ctype) {
+        case 'O':
+        /* Objects are always printed all */
+        if (i < mysize)
+            fail(state, "Internal error, not all objects processed");
+        break;
+
+        case 'S':
+        for ( ; i < mysize; i++) {
+            if (!(p = memchr(state->buffer, 0, *size)))
+                fail(state, "Runaway string");
+            *size -= (p - state->buffer) + 1;
+            state->buffer = p + 1;
         }
+        break;
+
+        default:
+        state->buffer += (mysize - i)*array[type].size;
+        *size -= (mysize - i)*array[type].size;
+        break;
     }
-    else if (!strcmp(typename, "string")) {
-        while (mysize) {
-            if (!(p = memchr(*buffer, 0, *size)))
-                fail(*buffer, "Runaway string");
-            *size -= (p - *buffer) + 1;
-            *buffer = p + 1;
-            mysize--;
-        }
+
+    /* Extract */
+    if (opt_extract && strcmp(state->path->str, opt_extract) == 0) {
+        fwrite(start, 1, state->buffer - start, stdout);
+        state->extract_succeeded = TRUE;
     }
-    else if (*size < mysize*membersize)
-        fail(*buffer, "Truncated %s array", typename);
-    else {
-        *buffer += mysize*membersize;
-        *size -= mysize*membersize;
-    }
+
+    return TRUE;
 }
 
 static gchar
@@ -325,27 +481,21 @@ gtype_to_ctype(guint32 gtype)
 }
 
 static void
-dump_hash(gchar *buffer,
+dump_hash(DumpState *state,
           gsize size,
           gboolean oldfile)
 {
     static struct {
         gchar ctype;
-        void (*func)(gchar**, gsize*);
+        void (*func)(DumpState*, gsize*);
     } atomic[] = {
-        { 'o', dump_object }, { 'b', dump_boolean }, { 'c', dump_char },
-        { 'i', dump_int32 }, { 'q', dump_int64 }, { 'd', dump_double },
-        { 's', dump_string },
-    };
-    static struct {
-        gchar ctype;
-        const gchar *name;
-        const gsize size;
-    } array[] = {
-        { 'B', "boolean", sizeof(gchar) }, { 'C', "char", sizeof(gchar) },
-        { 'I', "int32", sizeof(gint32) }, { 'Q', "int64", sizeof(gint64) },
-        { 'D', "double", sizeof(gdouble) },
-        { 'S', "string", 0 }, { 'O', "object", 0 },
+        { 'b', dump_boolean, },
+        { 'c', dump_char,    },
+        { 'd', dump_double,  },
+        { 'i', dump_int32,   },
+        { 'o', dump_object,  },
+        { 'q', dump_int64,   },
+        { 's', dump_string,  },
     };
     gboolean handled;
     guint i;
@@ -354,31 +504,30 @@ dump_hash(gchar *buffer,
     gchar *p, *q;
 
     while (size) {
-        if (opt_offset)
-            printf("%08x: ", (guint)(buffer - buffer0));
+        print_offset(state);
 
         /* Type for old files */
         if (oldfile) {
-            gtype = get_size(&buffer, &size);
+            gtype = get_size(state, &size);
             if (!(ctype = gtype_to_ctype(gtype)))
-                fail(buffer, "Unknown GLib type %u", gtype);
+                fail(state, "Unknown GLib type %u", gtype);
         }
 
         /* Name */
-        if (!(p = memchr(buffer, 0, size)))
-            fail(buffer, "Runaway component name");
-        q = g_strescape(buffer, NULL);
-        printf("%s\"%s\"", indent(), q);
+        if (!(p = memchr(state->buffer, 0, size)))
+            fail(state, "Runaway component name");
+        q = g_strescape(state->buffer, NULL);
+        push(state, "\"%s\"", q);
         g_free(q);
-        size -= (p - buffer) + 1;
-        buffer = p + 1;
+        size -= (p - state->buffer) + 1;
+        state->buffer = p + 1;
 
         /* Type for new files */
         if (!oldfile) {
             if (!size)
-                fail(buffer, "Truncated component type");
-            ctype = *buffer;
-            buffer += sizeof(gchar);
+                fail(state, "Truncated component type");
+            ctype = *state->buffer;
+            state->buffer += sizeof(gchar);
             size -= sizeof(gchar);
         }
 
@@ -386,72 +535,64 @@ dump_hash(gchar *buffer,
         handled = FALSE;
         for (i = 0; i < G_N_ELEMENTS(atomic); i++) {
             if (atomic[i].ctype == ctype) {
-                if (opt_value)
-                    printf(", ");
-                else if (ctype == 'o' || opt_type)
-                    printf(" ");
-                atomic[i].func(&buffer, &size);
-                if (ctype != 'o')
-                    printf("\n");
-                handled = TRUE;
-                break;
-            }
-        }
-        for (i = 0; i < G_N_ELEMENTS(array); i++) {
-            if (array[i].ctype == ctype) {
-                if (opt_value)
-                    printf(", ");
-                dump_array(&buffer, &size, array[i].size, array[i].name);
+                atomic[i].func(state, &size);
                 handled = TRUE;
                 break;
             }
         }
         if (!handled)
-            fail(buffer, "Unknown type `%c'", ctype);
+            handled = dump_array(state, &size, ctype);
+        if (!handled)
+            fail(state, "Unknown type `%c'", ctype);
+        pop(state);
     }
 }
 
 static void
-dump_object_real(gchar **buffer,
-                 gsize *size)
+dump_object(DumpState *state,
+            gsize *size)
 {
     gboolean container;
     guint32 mysize;
-    gchar *p;
+    gchar *p, *start;
 
     /* Name */
-    if (!(p = memchr(*buffer, 0, *size)))
-        fail(*buffer, "Runaway object name");
+    start = state->buffer;
+    if (!(p = memchr(state->buffer, 0, *size)))
+        fail(state, "Runaway object name");
     if (opt_value)
-        printf("%s%s", opt_type ? "object=" : "", *buffer);
+        print(state, " %s%s", opt_type ? "object=" : "", state->buffer);
     else if (opt_type)
-        printf("object");
-    container = !strcmp(*buffer, "GwyContainer");
-    *size -= (p - *buffer) + 1;
-    *buffer = p + 1;
+        print(state, " object");
+    container = (strcmp(state->buffer, "GwyContainer") == 0);
+    *size -= (p - state->buffer) + 1;
+    state->buffer = p + 1;
 
     /* Size */
-    mysize = get_size(buffer, size);
+    mysize = get_size(state, size);
     if (mysize > *size)
-        fail(*buffer, "Truncated object data");
+        fail(state, "Truncated object data");
     if (opt_object_size)
-        printf(" size=%" G_GSIZE_FORMAT "\n", *size);
-    else
-        printf("\n");
+        print(state, " size=%" G_GSIZE_FORMAT, mysize);
+    print(state, "\n");
+
+    /* Extract */
+    if (opt_extract && strcmp(state->path->str, opt_extract) == 0) {
+        fwrite(start, 1, (state->buffer + mysize) - start, stdout);
+        state->extract_succeeded = TRUE;
+    }
 
     /* Hash */
     *size -= mysize;
-    *buffer += mysize;
-    dump_hash(*buffer - mysize, mysize, v1file && container);
-}
-
-static void
-dump_object(gchar **buffer,
-            gsize *size)
-{
-    level++;
-    dump_object_real(buffer, size);
-    level--;
+    p = state->buffer + mysize;
+    dump_hash(state, mysize, state->v1file && container);
+    if (state->buffer > p)
+        fail(state, "Internal error, object managed to escape jail");
+    if (state->buffer < p) {
+        fprintf(stderr, "Warning: padding of length %u found",
+                (guint)(p - state->buffer));
+        state->buffer = p;
+    }
 }
 
 static void
@@ -464,10 +605,14 @@ process_options(int *argc,
     static GOptionEntry entries[] = {
         { "all", 'a', 0, G_OPTION_ARG_NONE, &opt_all, NULL, NULL },
         { "value", 'v', 0, G_OPTION_ARG_NONE, &opt_value, NULL, NULL },
-        { "offset", 'o', 0, G_OPTION_ARG_NONE, &opt_offset, NULL, NULL },
-        { "type", 't', 0, G_OPTION_ARG_NONE, &opt_type, NULL, NULL },
-        { "object-size", 's', 0, G_OPTION_ARG_NONE, &opt_object_size, NULL, NULL },
+        { "offsets", 'o', 0, G_OPTION_ARG_NONE, &opt_offset, NULL, NULL },
+        { "types", 't', 0, G_OPTION_ARG_NONE, &opt_type, NULL, NULL },
+        { "sizes", 's', 0, G_OPTION_ARG_NONE, &opt_object_size, NULL, NULL },
+        { "length", 'l', 0, G_OPTION_ARG_INT, &opt_array_length, NULL, NULL },
+        { "depth", 'd', 0, G_OPTION_ARG_INT, &opt_depth, NULL, NULL },
         { "indent", 'i', 0, G_OPTION_ARG_INT, &opt_indent, NULL, NULL },
+        { "paths", 'p', 0, G_OPTION_ARG_NONE, &opt_path, NULL, NULL },
+        { "extract", 'x', 0, G_OPTION_ARG_STRING, &opt_extract, NULL, NULL },
         { "raw", 'r', 0, G_OPTION_ARG_NONE, &opt_raw, NULL, NULL },
         { "version", 'V', 0, G_OPTION_ARG_NONE, &opt_version, NULL, NULL },
         { "help", 'h', 0, G_OPTION_ARG_NONE, &opt_help, NULL, NULL },
@@ -495,9 +640,18 @@ process_options(int *argc,
     if (opt_help || opt_version)
         exit(EXIT_SUCCESS);
 
-    opt_indent = CLAMP(opt_indent, 0, 32);
+    opt_indent = CLAMP(opt_indent, 0, 65536);
+    if (opt_depth == -1)
+        opt_depth = G_MAXINT;
+    if (opt_array_length == -1)
+        opt_array_length = G_MAXINT;
     if (opt_all)
         opt_value = opt_offset = opt_type = opt_object_size = TRUE;
+    if (opt_extract) {
+        /* Improve scanning speed */
+        opt_array_length = 0;
+        opt_value = opt_offset = opt_type = opt_object_size = FALSE;
+    }
 }
 
 static void
@@ -509,13 +663,18 @@ print_help(void)
         );
     printf(
 "Options:\n"
-" -o, --offset         Print offsets in file.\n"
-" -t, --type           Print component types.\n"
+" -o, --offsets        Print offsets in file.\n"
+" -t, --types          Print component types.\n"
 " -v, --values         Print values of atomic objects.\n"
-" -s, --object-size    Print serialized object sizes.\n"
+" -s, --sizes          Print serialized object sizes.\n"
 " -a, --all            Print all above.\n"
-" -i, --indent=N       Indent each nesting level by N spaces [0-32].\n"
-" -r, --raw            File is raw serialized data, no header.\n\n"
+" -l, --length=N       Print N initial items of atomic arrays, -1 for all.\n"
+" -d, --depth=N        Print only up to nesting depth N, -1 for all.\n"
+" -i, --indent=N       Indent each nesting level by N spaces.\n"
+" -p, --paths          Print full paths as component names.\n\n"
+" -r, --raw            File is raw serialized data, no header.\n"
+" -x, --extract=PATH   Extract component PATH to standard output (as raw binary\n"
+"                      data) in stead of printing.\n\n"
 " -h, --help           Print this help and terminate.\n"
 " -V, --version        Print version info and terminate.\n\n"
         );
