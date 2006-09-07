@@ -1,0 +1,61 @@
+# @(#) $Id$
+
+jpkscan_module = jpkscan.la
+spml_module = spml.la
+
+TOP_SRCDIR = ..\..
+MOD_TYPE = file
+<[[:MODULES:]]>
+
+!INCLUDE $(TOP_SRCDIR)\make.msc
+
+MOD_CFLAGS = \
+	-I . -I $(TOP_SRCDIR) $(COMMON_CFLAGS) $(MOD_CRUNTIME) \
+	$(APP_CFLAGS) \
+	$(JPEG_CFLAGS) \
+	$(PNG_CFLAGS) \
+	$(TIFF_CFLAGS) \
+	$(SPML_CFLAGS) \
+	-DG_LOG_DOMAIN=\"Module\"
+
+MOD_LINK = \
+	$(COMMON_LDFLAGS) \
+	$(SPML_LDFLAGS) \
+	$(APP_LIBS) \
+	$(JPEG_LIBS) \
+	$(PNG_LIBS) \
+	$(TIFF_LIBS) \
+	$(SPML_LIBS) \
+	/libpath:$(TOP_SRCDIR)\libgwyddion \
+	/libpath:$(TOP_SRCDIR)\libprocess \
+	/libpath:$(TOP_SRCDIR)\libdraw \
+	/libpath:$(TOP_SRCDIR)\libgwydgets \
+	/libpath:$(TOP_SRCDIR)\libgwymodule \
+	/libpath:$(TOP_SRCDIR)\app \
+	libgwyapp-$(LIBGWYAPP_VER).lib \
+	libgwymodule-$(LIBGWYMODULE_VER).lib \
+	libgwydgets-$(LIBGWYDGETS_VER).lib \
+	libgwydraw-$(LIBGWYDRAW_VER).lib \
+	libgwyprocess-$(LIBGWYPROCESS_VER).lib \
+	libgwyddion-$(LIBGWYDDION_VER).lib
+
+## targets
+all: unistd.h mod
+
+mod: $(MODULES)
+
+install: install-mod
+
+# XXX: Work around misconfigured zlib in GladeWin32 2.4 versions where zconf.h
+# unconditionally includes sys/types.h (fortunately available) and unistd.h
+# (unavailable).
+unistd.h:
+	echo. >unistd.h
+
+!INCLUDE $(TOP_SRCDIR)\rules.msc
+
+<[[:MOD_OBJ_RULES:]]>
+
+<[[:MOD_DLL_RULES:]]>
+
+# vim: ft=make

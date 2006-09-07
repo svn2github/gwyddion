@@ -1,0 +1,251 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="standard-vector-layers" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Standard Vector Layers</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Standard Vector Layers</refname>
+    <refpurpose>
+      Vector layers that are distributed with <application>Gwyddion</application>
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Overview</title>
+    <para>
+      Vector layers, implementing means how user can draw on data views, are
+      provided by <link linkend="libgwymodule-gwymodule-layer">layer modules</link>, so that third party tools (implemented by
+      <link linkend="libgwymodule-gwymodule-tool">tool modules</link>)
+      can define their own means of user interaction.
+    </para>
+    <para>
+      There are several standard layers distributed with <application>Gwyddion</application>,
+      and their features and interface is the subject of this section.
+      All layers are subclasses of <link linkend="GwyVectorLayer">GwyVectorLayer</link>
+      sharing its basic interface.
+      Each layer lets the user draw or select different shapes, therefore each module also
+      defines its own selection object type determining the format of selection data.
+      All selections are subclasses of <link linkend="GwySelection">GwySelection</link>.
+      By convention, layer type Foo is called GwyLayerFoo and the corresponding selection
+      type GwySelectionFoo.
+    </para>
+    <para>
+      Layers and selections sometimes have additional object properties not present in the
+      base classes, these are described here too.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>GwyLayerAxis, GwySelectionAxis</title>
+    <synopsis>
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwyLayerAxis"), NULL);
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwySelectionAxis"), NULL);
+    </synopsis>
+    <para>
+      Layer allows to select one or more horizontal or vertical (full-width or
+      full-height) lines, called axes.  It can be also viewes as a way to
+      select separate x or y coordinates.
+    </para>
+    <para>
+      Selection data consists of single coordinates.
+      More precisely, of y-coordinates for horizontal axes and x-coordinates for vertical
+      axes.  Each coordinate represents a selected axis.
+    </para>
+    <sect2>
+      <title>GwyLayerAxis properties</title>
+      <para>None.</para>
+    </sect2>
+    <sect2>
+      <title>GwySelectionAxis properties</title>
+      <variablelist>
+        <varlistentry><term><anchor id="GwySelectionAxis--orientation"/>&quot;<literal>orientation</literal>&quot; (<link linkend="GwyOrientation">GwyOrientation</link> : Read / Write)</term>
+          <listitem>
+            <para>
+              Line orientation: horizontal or vertical.
+              Default orientation is horizontal.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+  </refsect1>
+  <refsect1>
+    <title>GwyLayerEllipse, GwySelectionEllipse</title>
+    <synopsis>
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwyLayerEllipse"), NULL);
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwySelectionEllipse"), NULL);
+    </synopsis>
+    <para>
+      Layer allows to select a number of ellipses.
+    </para>
+    <para>
+      Selection data consists of quadruples of coordinates (x<subscript>0</subscript>,
+      y<subscript>0</subscript>, x<subscript>1</subscript>, y<subscript>1</subscript>),
+      each representing one selected ellipse, where
+      x<subscript>0</subscript> and y<subscript>0</subscript> are coordinates of one
+      bounding box corner and x<subscript>1</subscript> and y<subscript>1</subscript>
+      of the opposite corner. Each one can be any of the four bounding box corners, there
+      is no guarantee one is for example always top-left.
+    </para>
+    <sect2>
+      <title>GwyLayerEllipse properties</title>
+      <variablelist>
+        <varlistentry><term><anchor id="GwyLayerEllipse--draw-reflection"/>&quot;<literal>draw-reflection</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether central reflection of selection should be drawn too.
+              The default is to not draw reflection.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry><term><anchor id="GwyLayerEllipse--snap-to-center"/>&quot;<literal>snap-to-center</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether the selection should snap to the center. Default is to
+              not snap.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+    <sect2>
+      <title>GwySelectionEllipse properties</title>
+      <para>None.</para>
+    </sect2>
+  </refsect1>
+  <refsect1>
+    <title>GwyLayerLine, GwySelectionLine</title>
+    <synopsis>
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwyLayerLine"), NULL);
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwySelectionLine"), NULL);
+    </synopsis>
+    <para>
+      Layer allows to select one or more lines of arbitrary orientation and length,
+      optionally can display line numbers next to each line.
+    </para>
+    <para>
+      Selection data consists of quadruples of coordinates (x<subscript>0</subscript>,
+      y<subscript>0</subscript>, x<subscript>1</subscript>, y<subscript>1</subscript>),
+      each representing one selected line, where
+      x<subscript>0</subscript> and y<subscript>0</subscript> are
+      coordinates of one line end and x<subscript>1</subscript> and y<subscript>1</subscript>
+      of the other end.
+    </para>
+    <sect2>
+      <title>GwyLayerLine properties</title>
+      <variablelist>
+        <varlistentry><term><anchor id="GwyLayerLine--line-numbers"/>&quot;<literal>line-numbers</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether line numbers should be displayed next to them.
+              Default is to show line numbers.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+    <sect2>
+      <title>GwySelectionLine properties</title>
+      <para>None.</para>
+    </sect2>
+  </refsect1>
+  <refsect1>
+    <title>GwyLayerPoint, GwySelectionPoint</title>
+    <synopsis>
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwyLayerPoint"), NULL);
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwySelectionPoint"), NULL);
+    </synopsis>
+    <para>
+      Layer allows to select a number of points, either displayed as crosses,
+      crosses with concentric circles, or with no graphical representation (the
+      latter mainly useful with only one selected point).
+    </para>
+    <para>
+      Selection data consists of coordinate pairs (x, y) representing selected points.
+    </para>
+    <sect2>
+      <title>GwyLayerPoint properties</title>
+      <variablelist>
+        <varlistentry><term><anchor id="GwyLayerPoint--draw-marker"/>&quot;<literal>draw-marker</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              If set to TRUE, points will be displayed. Otherwise they will be invisible.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry><term><anchor id="GwyLayerPoint--marker-radius"/>&quot;<literal>marker-radius</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Specifies the radius of the circle to draw around all selected points.
+              If set to zero and/or if &quot;<literal>draw-marker</literal>&quot; is
+              set to FALSE, no circle will be drawn.
+              Default is a radius of zero.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+    <sect2>
+      <title>GwySelectionPoint properties</title>
+      <para>None.</para>
+    </sect2>
+  </refsect1>
+  <refsect1>
+    <title>GwyLayerRectangle, GwySelectionRectangle</title>
+    <synopsis>
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwyLayerRectangle"), NULL);
+<link linkend="GObject">GObject*</link>    <link linkend="g-object-new">g_object_new</link>(<link linkend="g-type-from-name">g_type_from_name</link>("GwySelectionRectangle"), NULL);
+    </synopsis>
+    <para>
+      Layer allows to select a number of rectangles, that can be drawn with a couple of
+      fancy/special styles.
+    </para>
+    <para>
+      Selection data consists of quadruples of coordinates (x<subscript>0</subscript>,
+      y<subscript>0</subscript>, x<subscript>1</subscript>, y<subscript>1</subscript>),
+      each representing one selected rectangle, where
+      x<subscript>0</subscript> and y<subscript>0</subscript> are coordinates of one corner
+      and x<subscript>1</subscript> and y<subscript>1</subscript>
+      of the opposite corner. Each one can be any of the four rectangle corners, there
+      is no guarantee one is for example always top-left.
+    </para>
+    <sect2>
+      <title>GwyLayerRectangle properties</title>
+      <variablelist>
+        <varlistentry><term><anchor id="GwyLayerRectangle--is-crop"/>&quot;<literal>is-crop</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether lines should be drawn always from border to border, as in the Crop tool.
+              The default is to draw just outline of the selected rectangle.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry><term><anchor id="GwyLayerRectangle--draw-reflection"/>&quot;<literal>draw-reflection</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether central reflection of selection should be drawn too.
+              The default is to not draw reflection.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry><term><anchor id="GwyLayerRectangle--snap-to-center"/>&quot;<literal>snap-to-center</literal>&quot; (gboolean : Read / Write)</term>
+          <listitem>
+            <para>
+              Whether the selection should snap to the center. Default is to
+              not snap.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </sect2>
+    <sect2>
+      <title>GwySelectionRectangle properties</title>
+      <para>None.</para>
+    </sect2>
+  </refsect1>
+</refentry>
+
