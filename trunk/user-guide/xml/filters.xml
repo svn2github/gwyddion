@@ -66,7 +66,7 @@
     <para>
       If you need to only suppress some values in the SPM data that are obviously wrong,
       you can also try the
-      <link linkend="">Mask of Outliers<!--TODO: Add Mask of Outliers section--></link> 
+      <link linkend="">Mask of Outliers</link> 
       module and the 
       <link linkend="remove_data_under_mask">Remove Data Under Mask</link> module.     
       For details see the <link linkend="features-edit">Data Edit</link> section. 
@@ -74,16 +74,10 @@
   </section>
   <section>
     <title>Presentations</title>
-    <!--TODO: "Display" aught to be changed to "Presentations". It is confusing
-    for "Display" to be the menu name, when we are really dealing with presentations.-->
-    
-    <!--TODO: Add these sections:
-                -Extract Presentation/Remove Presentation
-                -Local Contrast -->
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
-        <guisubmenu>Display</guisubmenu>
+        <guisubmenu>Presentation</guisubmenu>
       </menuchoice>
     </para>
     <para>
@@ -97,15 +91,31 @@
     <para>
       Currently, the following presentation filters are implemented in Gwyddion:
     </para>
-    <!--TODO: CLEANING: The menu paths need to be listed here for each filter. Also, we might
-    want to change this list into seperate sections, one fore each type -->
-    <itemizedlist>
-      <listitem>
-        Shading – simple and very useful way of seeing data as illuminated from some
+    <section>
+      <title>Shading</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Shading</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Simple and very useful way of seeing data as illuminated from some
         direction. The direction can be set by user.
-      </listitem>
-      <listitem>
-        Gradient detection – Sobel X and Y gradient filter and Prewitt X and Y gradient
+      </para>
+    </section>
+    <section>
+      <title>Gradient detection presentations</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Gradient...</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Sobel X and Y gradient filter and Prewitt X and Y gradient
         filter create similar images as shading, however, they output data as a result
         of convolution of data with relatively standardized kernel. Thus, they can be
         used for further presentation processing for example.  The kernels for horizontal
@@ -118,8 +128,18 @@
             </imageobject>
           </mediaobject>
         </informalequation>
-      </listitem>
-      <listitem>
+      </para>
+    </section>
+    <section>
+     <title>Edge detection presentations</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Edge detection...</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
         Edge detection – Canny edge detector can be used to extract image of sharp edges
         on the data.  Laplacian presents a simple convolution with following kernel:
         <informalequation>
@@ -137,14 +157,84 @@
         Local Non-linearity filter visualizes areas which are locally very non-planar.
         It fits a plane through squares 5 × 5 pixels centered around each sample and
         then calculates residual sum of squares of this fit (reduced to plane slope).
-      </listitem>
-      <listitem>
-        Local contrast – a method to visualize features in areas with low and high value
+      </para>
+    </section>
+    <section>
+    <title>Local contrast</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Local contrast...</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        A method to visualize features in areas with low and high value
         variation at the same time.  This is achieved by calculation of local value
         range, or variation, around each data sample and stretching it to equalize
         this variation over all data.
-      </listitem>
-    </itemizedlist>
+      </para>
+    </section>
+    <section>
+    <title>Logscale</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Logscale</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+	Logarithmic scale is used for false colors data presentation.
+      </para>
+    </section>
+    <para>
+      Moreover, there are the following presentation manipulation commands in presentations menu:
+    </para>
+    <section>
+      <title>Attach presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Attach presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Attaches other data (height or other physical quantity field) as a presenation
+	to the actual data. Note that this useful option can be particulary confusing
+	while evaluating anything from the data as all the computed values are evaluated
+        from the data (not from the presentation, even if it looks like data).
+      </para>
+    </section>
+    <section>
+      <title>Remove presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Remove presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+	Removes presentation from the actual data window.
+      </para>
+    </section>
+    <section>
+      <title>Extract presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Extract presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+	Extracts presentation from the actual data window making copy of the presentation
+	being one channel in the Gwyddion native file format (container). In this way we
+        can get presentation data for further processing.
+      </para>
+    </section>
     <figure>
       <title>
         Presentation examples: (a) Original data, (b) Shading, (c) vertical Prewitt

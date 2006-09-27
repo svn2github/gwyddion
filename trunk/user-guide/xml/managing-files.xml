@@ -8,7 +8,8 @@
     Gwyddion uses its internal data format (.gwy) to store data. The main
     advantage of this format is fact, that it stores complete state of
     processing of concrete data, including selections and other tool and
-    processing fucntion settings. Therefore we recommned to use this format
+    processing function settings. It can also store more channels and graphs
+    that have any relation in one single file. Therefore we recommned to use this format
     for saving processed files. If you open our example files, you can see
     that each one is plotted in different false color palette. This is direct
     consequence of the fact that Gwyddion stores full state of the data

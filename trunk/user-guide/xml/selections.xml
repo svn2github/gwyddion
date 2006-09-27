@@ -38,7 +38,6 @@
     recalled the next time the file is opened and appropriate tool chosen.
   </para>
   <para>
-    <!-- FIXME: This is actually true only in 2.0 -->
     Pressing Shift during selection restricts the degrees of freedom of the shape, making it easier to draw shapes
     form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
     restricts line directions to multiples of 15 ° in line selections.

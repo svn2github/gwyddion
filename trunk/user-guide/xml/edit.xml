@@ -3,15 +3,9 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <!-- TODO: Add these sections:
-              -Mask of Outliers
               -Median Line Correction
               -Modus Line Correction
               -Unrotate -->
-
-<!-- TODO: Put this text in the Mask of Outliers section:
-     This way should mark only the outliers, e. g. values more far than 3 times
-     the squared variance of the data. -->
-      
 <section id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Data Edit</title>
   <para>
@@ -36,7 +30,8 @@
       so be sure not to remove things that are really present on the surface.
     </para>
     <para>
-      While using this tool you can select a rectangle around the area that should 
+      While using this tool you can pick up position of the spot to magnify its neighbourhood
+      in the tool window. Then, in the tool window, select a rectangle around the area that should 
       be removed. You can then select one of several interpolation methods for 
       creating data in place of the former "spot":
     </para>    
@@ -162,8 +157,23 @@
     <note>This calculation can take some time, so please be patient.</note>
     <warning>
       Running this module on data that do not have fractal properties can cause
-      really crazy results. <!--TODO: Is "crazy" an adequately professional term? -->
+      really unrealistic results and is strictly not recommended.
     </warning>
   </section>
-  <xi:include href="unrotate.xml"/>
+  <section id="mask_of_outliers">
+    <title>Mask of Outliers</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Mask of Outliers</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      This module creates mask of areas in the data that not pass the 3*sigma
+      criterium. All the values above and below this confidence interval
+      are marked in mask and can be edited or processed by other modules afterwards.
+    </para>
+  </section>
+   <xi:include href="unrotate.xml"/>
 </section>

@@ -3,18 +3,34 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="data-windows">
-  <title>Data windows</title>
+  <title>Data window</title>
   <para>
     Data window is used for 2D data presentation to user. It is the main widget used for working with Gwyddion.
     The data are presented to user as a field of false colors correponding to heights. Color axis that represents mapping
-    the colors to real height values is also part of the data window. Color palette used to represent height data can be
-    changed by clicking on the color axis with right mouse button and selecting appropriate palette from the list of
-    palettes.
+    the colors to real height values is also part of the data window. 
   </para>
+  <para>
+    Color palette used to represent height data can be
+    changed by clicking on the color axis with right mouse button (i. e. invoking context menu) and selecting appropriate palette from the list of
+    palettes. Mostly used palettes are available directly in the context menu; however you can reach much more of the possible palettes using the
+    <menuchoice><guimenu>More...</guimenu></menuchoice> menu entry. Moreover, you can use color gradients editor to create your own palettes
+    available at <menuchoice><guimenu>Edit</guimenu><guisubmenu>Color Gradients...</guisubmenu></menuchoice>
+  </para>
+  <para>
+    There is a context menu available also for the data area. This menu consist of basic data and presentation operations. To reach all the
+    possible operations use <menuchoice><guimenu>Data process...</guimenu></menuchoice> menu at the Gwyddion main window, or use some of the
+    tools available at the "Tools" set of buttons at the Gwyddion main window.
+  </para>
+  <title>Graph window</title>
   <para>
     Graph window is used for 1D data processing. You can get it only by using appropriate tools or modules that
     extract some graphs from height field data. Currently, it is not possible to load graphs into application as the main
     intent of Gwyddion is to provide tools for analyzing height fields, not graphs.
+  </para>
+  <para>
+    Graph window consist of two tabs representing graphical and data view on the 1D data. There are several tools connected with
+    viewing 1D data directly in the graph window toolbar, namely zoom buttons and logarithmic axis buttons. To reach all the
+    possible operations use <menuchoice><guimenu>Graph...</guimenu></menuchoice> menu at the Gwyddion main window.
   </para>
   <figure float="0">
     <title>

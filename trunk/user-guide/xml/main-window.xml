@@ -5,36 +5,39 @@
 <section id="main-window">
   <title>Main window</title>
   <para>
-    The main window is the only Gwyddion part that appears after start with no parameters. It consist of set of
+    The main window is one of two Gwyddion parts that appears after start with no parameters. Main window consist of set of
     Gwyddion menus: <menuchoice><guimenu>File</guimenu></menuchoice>, <menuchoice><guimenu>Edit</guimenu></menuchoice>,
     <menuchoice><guimenu>Data Process</guimenu></menuchoice>, <menuchoice><guimenu>Graph</guimenu></menuchoice>
     and <menuchoice><guimenu>Meta</guimenu></menuchoice>, and from several rows of buttons connected with tools
-    and modules (accessible also by menus).
+    and modules (modules are accessible also by menus).
   </para>
   <para>
     <menuchoice><guimenu>File</guimenu></menuchoice> menu associates commands that are used for file input and output.
     Global commands (e. g. Exit) are located here too. Submenu command names are self-explanatory (Load, Save, etc.).
   </para>
   <para>
-    <menuchoice><guimenu>Edit</guimenu></menuchoice> menu constist of commands that are applicable on more data windows
-    (e. g. Data arithmetic) and commands that change status of data window presentation or selection. Masks and presentations
-    options can be also set here.
+    <menuchoice><guimenu>Edit</guimenu></menuchoice> menu constist of history manipulation commands (Undo, Redo) and 
+    commands that can be used to change some of the global program parameters, like setting mask color or editing
+    gradients and materials for false color and 3D data representation.
   </para>
   <para>
     <menuchoice><guimenu>Data process</guimenu></menuchoice> menu is build automatically from all the modules available
     at the Gwyddion modules directory (depending on operating system). Modules are responsible for all the data processing,
-    so this menu item associates most of the commands you will need at analyzing your SPM data.
+    so this menu item associates most of the commands you will need at analyzing your SPM data. Note that all the tools
+    (special class of modules connected with mouse selections) are accessible only though Tools panel of buttons in the
+    main window, not though this menu.
   </para>
   <para>
     <menuchoice><guimenu>Graph</guimenu></menuchoice> menu consist of commands that are applicable on graphs. Graph processing
-    includes reading values of graphs, measuring profile distances etc.
+    includes reading values of graphs, measuring profile distances, exporting graphs etc.
   </para>
   <para>
     <menuchoice><guimenu>Meta</guimenu></menuchoice> are commands that provide information about height field metadata
     (e. g. scanning speed, tip voltage, etc.) and information about the Gwyddion (About).
   </para>
   <para>
-    Finally, you can find some rows of buttons in the main window. These buttons represent tools and some of the modules.
+    Finally, you can find some rows of buttons in the main window. These buttons represent tools and some of the modules (selection
+    of the mostly used ones).
   </para>
   <figure float="0">
     <title>

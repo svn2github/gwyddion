@@ -111,10 +111,10 @@
      profiles in the image (up to 4) that can be further moved and adjusted. Profile graph preview can be seen in
      the profile tool dialog. Profiles can be of different "thickness" which means that more neigbour data perpendicular
      to profile direction are used for evaluation of one profile point for thicker profiles. This can be very useful
-     for noise suppression while emasuring some regular objects.
+     for noise suppression while measuring some regular objects.
      </para>
      <para>
-     After profiles are chosen, they can be extracted to graphs (separate of merged) that can be further analysed
+     After profiles are chosen, they can be extracted to graphs (separate of merged in one Graph window) that can be further analysed
      using Graph modules.
      </para>
   </section>

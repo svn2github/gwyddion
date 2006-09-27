@@ -17,6 +17,12 @@
     using Mask selection tool.  It it possible to invert, grow, and shrink masks, or extract them to a separate
     data window using module functions in
     <menuchoice><guimenu>Data Process</guimenu><guisubmenu>Mask</guisubmenu></menuchoice> menu.
+    There are also tools for managing masks in the main window Tools row of buttons. These can be used for
+    creating and removing masks manually.
+  </para>
+  <para>
+    Note that both the masks and presentations can be removed from data window by right-click on the displayed
+    data and selecting appropriate command from the context menu.
   </para>
   <figure float="0">
     <title>

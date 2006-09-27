@@ -18,7 +18,7 @@
       <surname>Anderson</surname>
     </author>
     <copyright>
-      <year>2004, 2005</year>
+      <year>2004, 2005, 2006</year>
       <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
     </copyright>
     <legalnotice id="legalnotice">
@@ -54,6 +54,7 @@
   <chapter id="getting-started">
     <title>Getting started</title>
     <xi:include href="main-window.xml"/>
+    <xi:include href="data-browser.xml"/>
     <xi:include href="managing-files.xml"/>
     <xi:include href="data-windows.xml"/>
     <xi:include href="modules-tools.xml"/>
