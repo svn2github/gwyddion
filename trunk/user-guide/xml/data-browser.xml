@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="data-browser">
+  <title>Data browser</title>
+  <para>
+    Data browser is a window that displays the actually focused Gwyddion native file (*.gwy) structure.
+    As the Gwyddion native file format supports more channels for height (or other physical parameters) data
+    and more graphs to be present in one file, data browser is a tool for browsing and managing all the available channels
+    and graphs.
+  </para>
+  <para>
+    As data browser displays all the time the structure of actually focused file, its content is switching
+    if the user switches between different windows (belonging to different files). If user loads new file (any type), 
+    it is automatically treated as a new Gwyddion file too.
+  </para>
+  <para>
+    Individual channels of graphs can be deleted, duplicated or extracted to new Gwyddion native file using data browser buttons.
+  </para>
+  <para>
+    Data browser can be closed by user and afterwards recalled back using the 
+    <menuchoice><guimenu>Meta</guimenu><guimenuitem>Show Data Browser</guimenuitem></menuchoice> command.
+  </para>
+  <para>
+  </para>
+  <figure float="0">
+    <title>
+      Data browser displaying several open channels.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="564" fileref="data_browser.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</section>
