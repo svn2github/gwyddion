@@ -88,9 +88,23 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Burleigh v2.1</entry>
+          <entry>.img</entry>
+          <entry>burleigh module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Createc</entry>
           <entry>.dat</entry>
           <entry>createc module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>ECS</entry>
+          <entry>.img</entry>
+          <entry>ecsfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -102,9 +116,23 @@
           <entry>Yes</entry>
         </row>
         <row>
+          <entry>PSI HDF4</entry>
+          <entry>.hdf</entry>
+          <entry>hdf4file module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Hitachi AFM</entry>
           <entry>.afm</entry>
           <entry>hitachi-afm module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Zygo binary MetroPro</entry>
+          <entry>.dat</entry>
+          <entry>metropro module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -130,6 +158,13 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Nanonis</entry>
+          <entry>.sxm</entry>
+          <entry>nanonis module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Nanoscope</entry>
           <entry></entry>
           <entry>nanoscope module</entry>
@@ -144,9 +179,30 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Nanotop</entry>
+          <entry>.spm</entry>
+          <entry>nanotop module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>NT-MDT</entry>
           <entry>.mdt</entry>
           <entry>nt-mdt module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Omicron Scala</entry>
+          <entry>.par + data</entry>
+          <entry>omicron module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Pacific Nanotechnology PNI</entry>
+          <entry>.pni</entry>
+          <entry>pnifile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -174,6 +230,13 @@
           </entry>
         </row>
         <row>
+          <entry>PSIA</entry>
+          <entry>.tiff</entry>
+          <entry>psia module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>RHK Technology SPM32</entry>
           <entry>.sm2</entry>
           <entry>rhk-spm32 module</entry>
@@ -188,9 +251,30 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Seiko</entry>
+          <entry>.xqd</entry>
+          <entry>seiko module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Scanning Probe Microscopy Markup Langugae</entry>
+          <entry>.xml</entry>
+          <entry>spml module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Surfstand Surface Data File</entry>
           <entry>.sdf</entry>
           <entry>sdfile module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>CSM Surf</entry>
+          <entry>.sur</entry>
+          <entry>surffile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -204,18 +288,7 @@
         <row>
           <entry>Veeco Instruments</entry>
           <entry>.zfr, .tfr, .zfp, …</entry>
-          <entry>
-            io_tm_common plug-in, spmlab module
-            <footnote>
-              <para>
-                io_tm_common is a closed-source plug-in that supports the
-                file format quite completely, but must be downloaded
-                separately.  On the other hand spmlab module provides only
-                basic support, but is software libre and is distributed
-                directly with Gwyddion.
-              </para>
-            </footnote>
-          </entry>
+          <entry>spmlab module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
