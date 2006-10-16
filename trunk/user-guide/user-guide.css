@@ -5,6 +5,7 @@ body {
 div.navheader, div.navfooter {
   background-color: #f0b43f;
   border: 1px solid #af3614;
+  margin-top: 12px;
   padding-left: 12px;
   padding-right: 12px;
 }
