@@ -12,14 +12,22 @@
   </para>
   <para>
     As data browser displays all the time the structure of actually focused file, its content is switching
-    if the user switches between different windows (belonging to different files). If user loads new file (any type), 
+    if the user switches between different windows (belonging to different files).  If user loads new file (any type),
     it is automatically treated as a new Gwyddion file too.
   </para>
   <para>
-    Individual channels of graphs can be deleted, duplicated or extracted to new Gwyddion native file using data browser buttons.
+    The check left of the channel or graph name controls whether it is displayed in a window.  When all windows belonging
+    to a file (i.e., showing items of this file) are closed the file is closed too.  The browser displays some auxiliary
+    information right to the name, it is specific to each item type.  For channels it indicates the presence of masks
+    (M) and presentations (P), the graph list shows the number of curves in the graph.
   </para>
   <para>
-    Data browser can be closed by user and afterwards recalled back using the 
+    Individual channels of graphs can be deleted, duplicated or extracted to new Gwyddion native file using data browser buttons.
+    It is also possible to copy a graph or channel to another file by dragging a data browser row to any window belonging to the
+    target file.
+  </para>
+  <para>
+    Data browser can be closed by user and afterwards recalled back using the
     <menuchoice><guimenu>Meta</guimenu><guimenuitem>Show Data Browser</guimenuitem></menuchoice> command.
   </para>
   <para>
