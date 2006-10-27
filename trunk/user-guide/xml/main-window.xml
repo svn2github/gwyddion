@@ -45,7 +45,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="564" fileref="main_window.png" format="PNG"/>
+        <imagedata fileref="main_window.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>

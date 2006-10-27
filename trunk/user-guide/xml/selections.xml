@@ -29,7 +29,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="369" fileref="selections-vlsi.png" format="PNG"/>
+        <imagedata fileref="selections-vlsi.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>

@@ -38,7 +38,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="564" fileref="data_browser.png" format="PNG"/>
+        <imagedata fileref="data_browser.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>

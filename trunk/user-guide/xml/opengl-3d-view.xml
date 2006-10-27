@@ -22,7 +22,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="399" fileref="opengl-3d-view.png" format="PNG"/>
+        <imagedata fileref="opengl-3d-view.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>

@@ -15,7 +15,7 @@
     <title>Images of ZnSe surface measured with four different SPM tips (more or less broken ones).</title>
       <mediaobject>
         <imageobject>
-          <imagedata width="500" fileref="alltips.png" format="PNG"/>
+          <imagedata width="600" fileref="alltips.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -80,7 +80,7 @@
       <title>SPM tips obtained from data of Figure 1 using blind estimation algorithm.</title>
       <mediaobject>
         <imageobject>
-          <imagedata width="1000" fileref="alltips2.png" format="PNG"/>
+          <imagedata fileref="alltips2.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -103,7 +103,7 @@
       <title>Simulated fractal surface before (left) and after (right) tip convolution.</title>
       <mediaobject>
         <imageobject>
-          <imagedata width="600" fileref="fractaltips.png" format="PNG"/>
+          <imagedata fileref="fractaltips.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -125,7 +125,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="600" fileref="reconstruction.png" format="PNG"/>
+          <imagedata fileref="reconstruction.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -141,7 +141,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="400" fileref="cmap.png" format="PNG"/>
+          <imagedata width="600" fileref="cmap.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>

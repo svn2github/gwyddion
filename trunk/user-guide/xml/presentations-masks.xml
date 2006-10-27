@@ -30,7 +30,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="858" fileref="mask.png" format="PNG"/>
+        <imagedata fileref="mask.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>

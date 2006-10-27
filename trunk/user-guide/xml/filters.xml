@@ -53,7 +53,7 @@
       <title>Filtering screenshot</title>
       <mediaobject>
         <imageobject>
-          <imagedata width="700" fileref="filter.png" format="PNG"/>
+          <imagedata fileref="filter.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -243,7 +243,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="604" fileref="presentations.png" format="PNG"/>
+          <imagedata fileref="presentations.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
