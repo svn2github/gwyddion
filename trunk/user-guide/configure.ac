@@ -1,4 +1,4 @@
-AC_INIT([Gwyddion user guide], [2006-07-12], [klapetek@gwyddion.net])
+AC_INIT([Gwyddion user guide], [2006-10-28], [klapetek@gwyddion.net])
 AC_CONFIG_SRCDIR(xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
@@ -54,3 +54,5 @@ AC_CHECK_PROGS([PDFXMLTEX],[pdfxmltex],[no])
 AC_CHECK_PROGS([LYNX],[lynx],[no])
 
 AC_OUTPUT
+
+echo "Run 'make help' for some help."
