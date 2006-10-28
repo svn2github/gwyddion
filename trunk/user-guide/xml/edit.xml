@@ -171,7 +171,7 @@
     </para>
     <para>
       This module creates mask of areas in the data that not pass the 3*sigma
-      criterium. All the values above and below this confidence interval
+      criterion. All the values above and below this confidence interval
       are marked in mask and can be edited or processed by other modules afterwards.
     </para>
   </section>

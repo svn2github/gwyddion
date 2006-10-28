@@ -20,13 +20,13 @@
   of each individual thresholding methods can be merged together using several operators.
   </para>
   <para>
-  Similarily, the grains can be removed from the mask using
+  Similarly, the grains can be removed from the mask using
   <menuchoice>
     <guimenu>Data Process</guimenu><guisubmenu>Grains</guisubmenu>
     <guimenuitem>Remove Grains</guimenuitem>
   </menuchoice> menu choice.
   Maximum height and/or size thresholding methods can be used to eliminate false grains
-  occured by noise or some dust particles, for example. You can use also interactive grain
+  occurred by noise or some dust particles, for example. You can use also interactive grain
   removal tool for doing this manually.
   </para>
   <para>
@@ -47,7 +47,7 @@
   <orderedlist>
     <listitem>
     At each point of the inverted surface the virtual water drop was placed. In the case that
-    the drop was not allready in a local minimum it followed the steepest descent path to
+    the drop was not already in a local minimum it followed the steepest descent path to
     minimize its potential energy. As soon as the drop reached any local minimum it stopped here
     and rested on the surface. In this way it filled the local minimum partially by its volume (see Fig 2 and the figure caption).
     This process was repeated several times. As the result a system of lakes of different sizes

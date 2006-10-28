@@ -10,7 +10,7 @@
     <ulink url="http://gwyddion.net/download.php">download</ulink>
     web page of the project, or alternatively from raw
     <ulink url="http://sourceforge.net/project/showfiles.php?group_id=121723">SourceForge.net download page</ulink>.
-    The instalation sligtly varies depending on the operating system used.
+    The installation slightly varies depending on the operating system used.
     However, basically it consist of two steps:
     <itemizedlist>
       <listitem>
@@ -26,13 +26,13 @@
     The first step is necessary at first <application>Gwyddion</application>
     installation on operating systems that do not come with Gtk+.
     The version of Gtk+ necessary for your system (and where to obtain it) is
-    desribed in the next sections.
+    described in the next sections.
   </para>
   <para>
-    Generally, one needs Gtk+ libraries (runtime package) for running
+    Generally, one needs Gtk+ libraries (run-time package) for running
     <application>Gwyddion</application>
     and a Gtk+ development package for <application>Gwyddion</application>
-    compilation from source code and developement.
+    compilation from source code and development.
   </para>
   <para>
     We recommend to download
@@ -60,7 +60,7 @@
       If you never had any Gtk+ based application on your system (for example
       bitmap editor
       <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>)
-      you will need to install Gtk+ runtime enviroment on your computer prior
+      you will need to install Gtk+ run-time environment on your computer prior
       to <application>Gwyddion</application> installation.
       Gtk+ is a library designed for portable creating of graphical user
       interface (windows, buttons, etc.) that is available on many operating
@@ -81,7 +81,7 @@
     </para>
     <itemizedlist>
       <listitem>
-        Download the Gtk+ runtime enviroment installer from
+        Download the Gtk+ run-time environment installer from
         <ulink url="http://gladewin32.sourceforge.net/">Gladewin32</ulink>,
         version 2.8 or higher, and install it.
       </listitem>
@@ -462,8 +462,8 @@ make install</userinput></literallayout>
       In addition to MSVC you need to install Gtk+ development environment.
       Again, we recommend to use the
       <ulink url="http://gladewin32.sourceforge.net/">GladeWin32</ulink>
-      package.  Note it also contains the runtime environment, therefore
-      you do not need to install the runtime package if you install the
+      package.  Note it also contains the run-time environment, therefore
+      you do not need to install the run-time package if you install the
       development one.
     </para>
     <section>
@@ -585,7 +585,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         the same as of the final installation.  Therefore you can also run
         <application>Gwyddion</application> directly from it
         (<filename>gwyddion.exe</filename> is found directly in
-        <filename>instal</filename>).  Except if you have never run
+        <filename>inst</filename>).  Except if you have never run
         <application>Gwyddion</application> before, it will not find the
         run-time Gtk+ libraries (DLLs) it needs.  Run
         <command>regedit</command>, create in

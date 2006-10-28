@@ -50,7 +50,7 @@
     <para>
       Statistical quantities include basic properties of the height values 
       distribution, including its variance, skewness and kurtosis. The 
-      quantities accesible within Gwyddion by means of the 
+      quantities accessible within Gwyddion by means of the 
       <link linkend="stat_quantities">Statistical Quantities</link>
       tool are as follows:
     </para>
@@ -143,7 +143,7 @@
       <guiicon><inlinegraphic fileref="icon_stat_functions.png"/></guiicon>
     </title>
     <para>
-      One-dimensional statistical functions can be accesed by using the
+      One-dimensional statistical functions can be accessed by using the
       <link linkend="stat_functions">Statistical Functions</link> tool.
       Within the tool window, you can select which function to evaluate using
       the selection box on the left labeled <guilabel>Output Type</guilabel>. 
@@ -426,7 +426,7 @@
       </para>
       <figure>
         <title>
-          PSDF obtained for data simulated with gaussian autocorrelation function. Points represent
+          PSDF obtained for data simulated with Gaussian autocorrelation function. Points represent
           computed data, line represents its fit.
         </title>
         <mediaobject>
@@ -437,7 +437,7 @@
       </figure>
       <tip>
         Within Gwyddion you can fit all statistical functions presented here
-        by their gaussian and exponential forms. To do this, fist click 
+        by their Gaussian and exponential forms. To do this, fist click 
         <guibutton>Apply</guibutton> within the 
         <link linkend="stat_functions">Statistical Functions</link> tool window.
         This will create a new graph window. With this new window selected, click

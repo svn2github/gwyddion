@@ -24,7 +24,7 @@
      <itemizedlist>
         <listitem>
 	Zoom in and zoom out - simply draw are that should be zoomed by mouse
-	and zoom. Zoom out restores state whne all data can be seen.
+	and zoom. Zoom out restores state when all data can be seen.
 	</listitem>
         <listitem>
 	Read value - prints X and Y value under cursor

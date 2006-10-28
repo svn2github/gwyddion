@@ -6,7 +6,7 @@
   <title>Data window</title>
   <para>
     Data window is used for 2D data presentation to user. It is the main widget used for working with Gwyddion.
-    The data are presented to user as a field of false colors correponding to heights. Color axis that represents mapping
+    The data are presented to user as a field of false colors corresponding to heights. Color axis that represents mapping
     the colors to real height values is also part of the data window. 
   </para>
   <para>

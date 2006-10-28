@@ -5,12 +5,12 @@
 <section id="modules-tools">
   <title>Modules and tools</title>
   <para>
-    Modules are responsible for most of the Gwyddion features. They mostly include data processing fucntions
+    Modules are responsible for most of the Gwyddion features. They mostly include data processing functions
     as leveling, rotations, integral transforms, etc. See Data process menu for list of available modules.
   </para>
   <para>
     Tools are a special kind of modules that can work with selections. Tools are used for interactive selecting areas
-    or lines of the data and processing them. Tools can be lounched only from tools button rows located in the main window.
+    or lines of the data and processing them. Tools can be launched only from tools button rows located in the main window.
     Currently, Gwyddion includes at least these tools:
   </para>
   <itemizedlist>
@@ -27,7 +27,7 @@
     </listitem>
     <listitem id="tool-level3">
       <para>
-        Three-point leveling – levels data by plane obtained by clicking on three points wihin data window.
+        Three-point leveling – levels data by plane obtained by clicking on three points within data window.
       </para>
     </listitem>
     <listitem id="tool-stats">
@@ -56,7 +56,7 @@
     </listitem>
     <listitem id="tool-polynom">
       <para>
-        Fit X/Y profiles by polynom – very frequently used tool for basic processing of raw SPM data. Profiles
+        Fit X/Y profiles by polynomial – very frequently used tool for basic processing of raw SPM data. Profiles
         taken in the fast scanning axis (usually X-axis) can be mutually shifted by some amount or having slightly
         different slope. Fit X/Y profiles tool can fix this discrepancy.
       </para>

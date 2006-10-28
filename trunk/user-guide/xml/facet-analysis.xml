@@ -36,7 +36,7 @@
   </para>
   <para>
     The <guibutton>Find Maximum</guibutton> button sets facet view selection
-    to slope disribution maximum (the initial selection position).
+    to slope distribution maximum (the initial selection position).
   </para>
   <para>
     The <guibutton>Mark</guibutton> button updates the mask of areas with slope

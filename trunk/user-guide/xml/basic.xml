@@ -8,7 +8,7 @@
   Basic geometrical operations are the core of any data processing programme. Also Gwyddion
   has a wide set of modules and functions for data scaling, rotation, resampling or profile extraction.
   In this section the main algorithms behind these functions will be described and the list of
-  avalilable modules will be presented.
+  available modules will be presented.
   </para>
   <section>
      <title>Interpolation</title>
@@ -109,7 +109,7 @@
      <para>
      Profile extraction tool can be accessed from the tools menu bar. You can use mouse to drag several
      profiles in the image (up to 4) that can be further moved and adjusted. Profile graph preview can be seen in
-     the profile tool dialog. Profiles can be of different "thickness" which means that more neigbour data perpendicular
+     the profile tool dialog. Profiles can be of different "thickness" which means that more neighbour data perpendicular
      to profile direction are used for evaluation of one profile point for thicker profiles. This can be very useful
      for noise suppression while measuring some regular objects.
      </para>

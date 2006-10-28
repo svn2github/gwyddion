@@ -201,8 +201,8 @@
         </menuchoice>
       </para>
       <para>
-        Attaches other data (height or other physical quantity field) as a presenation
-	to the actual data. Note that this useful option can be particulary confusing
+        Attaches other data (height or other physical quantity field) as a presentation
+	to the actual data. Note that this useful option can be particularly confusing
 	while evaluating anything from the data as all the computed values are evaluated
         from the data (not from the presentation, even if it looks like data).
       </para>
