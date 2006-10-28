@@ -107,12 +107,13 @@
       The surface area is estimated by the following method. 
       Let <phrase role="math">z<subscript>i</subscript></phrase> for
       <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in 
-      four neighbour points (pixel corners), and
+      four neighbour points (pixel centers), and
       <phrase role="math">h<subscript>x</subscript></phrase> and 
       <phrase role="math">h<subscript>y</subscript></phrase>
       pixel dimensions along corresponding axes.  If an additional point is 
-      placed in the center of the rectangle (using the mean value of the 
-      corners), four triangles are formed and the surface area can be 
+      placed in the center of the rectangle which corresponds to the common
+      corner of the four pixels (using the mean value of the pixels),
+      four triangles are formed and the surface area can be 
       approximated by summing their areas. This leads to the following formulas
       for the area of one triangle (top) and the surface area of one 
       pixel (bottom):
@@ -124,6 +125,17 @@
         </imageobject>
       </mediaobject>
     </informalequation>
+    <para>
+      The method is now well-defined for inner pixels of the region.  Each
+      value participates on eight triangles, two with each of the four
+      neighbour values.  Half of each of these triangles lies in one pixel, the
+      other half in the other pixel.  By counting in the area that lies inside
+      each pixel, the total area is defined also for grains and masked areas.
+      It remains to define it for boundary pixels of the whole data field. We
+      do this by virtually extending the data field with a copy of the border
+      row of pixels on each side for the purpose of surface area calculation,
+      thus making all pixels of interest inner.
+    </para>
   </section>
   <section id="stat_functions">
     <title>
