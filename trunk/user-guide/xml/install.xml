@@ -96,8 +96,8 @@
     <title>Build dependencies</title>
     <para>
       The following table lists packages required to build
-      <application>Gwyddion</application> from source code.  It does not
-      include common compilation prerequisites like the compiler or
+      <application>Gwyddion</application> from source code.  The table does not
+      include common software compilation prerequisites like the C compiler or
       <command>make</command>.  Operating system specifics are described
       in following sections dedicated to building on particular operating
       systems.
@@ -189,8 +189,8 @@
           </para>
           <para>
             Speeds up various integral transforms, power spectrum and
-            correlation operations.  Also enables to process data fields of
-            much more sizes without rescaling.
+            correlation operations.  It also allows to apply these operations
+            on data fields of much more sizes without rescaling.
           </para>
           <para>
             Building with FFTW3 enabled is currently unsupported on MS Windows,
@@ -199,25 +199,11 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
-        <term>
-          <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>
-          ≥ 4, MS Windows only
-        </term>
-        <listitem>
-          <para>
-            <emphasis>Optional.</emphasis>
-          </para>
-          <para>
-            Enables creation of executable installers on MS Windows.
-          </para>
-        </listitem>
-      </varlistentry>
     </variablelist>
   </section>
 
   <section id="installation-unix-source">
-    <title>Linux/Unix from source tarball</title>
+    <title>Linux/Unix from source code tarball</title>
     <para>
       <application>Gwyddion</application> Unix build system is based on
       GNU autotools
@@ -236,7 +222,7 @@
       Since this file comes with a particular version of
       <application>Gwyddion</application> it may contain more concrete or
       up-to-date information and you should follow it instead of this general
-      guide if they contradict.
+      guide if they contradict each other.
     </para>
     <section>
       <title>Quick instructions</title>
@@ -264,6 +250,15 @@ make install</userinput></literallayout>
         replacing 2.1 with the actual version number. It will create directory
         <filename>gwyddion-2.1</filename> (again, with the actual version
         number in place of 2.1), <command>cd</command> to this directory.
+      </para>
+      <para>
+        Tarballs compressed with
+        <ulink url="http://www.bzip.org/">bzip2</ulink>
+        (<filename>.bz2</filename>) are considerably smaller than
+        <ulink url="http://www.gzip.org/">gzip</ulink>
+        compressed tarballs (<filename>.gz</filename>) but they need bzip2,
+        which used to be less widespread than gzip, to decompress.
+        However, modern Unix and Unix-like systems should contain both.
       </para>
     </section>
     <section>
@@ -449,6 +444,184 @@ make install</userinput></literallayout>
     </section>
   </section>
 
+  <section id="installation-ms-windows-source">
+    <title>MS Windows from source code tarball</title>
+    <para>
+      <application>Gwyddion</application> MS Windows build system uses the
+      <application>Microsoft Visual C++</application> (MSVC) compiler
+      (version 6 is tested and recommended, albeit it is a bit older).  It
+      primarily consists of a set of <command>nmake</command> makefiles,
+      that is the compilation is done from the command line.  This approach
+      has several advantages for reproducibility and automation of the process
+      and it enables easy synchronization of Unix and MS Windows build systems.
+      The necessity to use command line may be considered a disadvantage,
+      though you should find the compilation process quite simple even you are
+      not used to use the command line much.
+    </para>
+    <para>
+      In addition to MSVC you need to install Gtk+ development environment.
+      Again, we recommend to use the
+      <ulink url="http://gladewin32.sourceforge.net/">GladeWin32</ulink>
+      package.  Note it also contains the runtime environment, therefore
+      you do not need to install the runtime package if you install the
+      development one.
+    </para>
+    <section>
+      <title>Unpacking</title>
+      <para>
+        Unpack the source code tarball with your favorite (de)compression
+        program or file manager. Tarballs compressed with
+        <ulink url="http://www.bzip.org/">bzip2</ulink>
+        (<filename>.bz2</filename>)
+        are considerably smaller than
+        <ulink url="http://www.gzip.org/">gzip</ulink> compressed tarballs
+        (<filename>.gz</filename>), however support for bzip2 compression used
+        to be less widespread than gzip compression support in MS Windows
+        programs. Most recent programs support both, for example
+        <ulink url="http://www.7-zip.org/"><application>7zip</application></ulink>
+        which is also Free Software.
+      </para>
+      <para>
+        The unpacking will create directory
+        <filename>gwyddion-2.1</filename> (with 2.1 replaced with the actual
+        version number) where all other compilation actions will take place.
+      </para>
+    </section>
+    <section>
+      <title>Configuration</title>
+      <para>
+        Open file <filename>make.msc</filename> in a text editor.  It starts
+        approximately as follows:
+      </para>
+      <informalexample>
+        <programlisting><![CDATA[
+# @(#) $Id$
+#
+# XXX: Set following to your Gtk+-Development and MSVC paths
+#
+# The uncommented paths should work for default MSVC 6 installation and for
+# default GladeWin32 installation.
+# If you have GtkGLext separate from Gtk+, define GTKGLEXT_TOP accordingly.
+# If you have LibXML2 separate from Gtk+, define LIBXML2_TOP accordingly.
+GTK_TOP = C:\Gtk
+GTKGLEXT_TOP = $(GTK_TOP)
+LIBXML2_TOP = $(GTK_TOP)
+#GTKGLEXT_TOP = C:\GtkGLExt\1.0
+#LIBXML2_TOP = C:\libxml2
+MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
+]]></programlisting>
+      </informalexample>
+      <para>
+        Check and correct the paths according to the instructions.  Often,
+        no modifications are necessary as the paths in the file represent the
+        default installation directories of each program.
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><envar>GTK_TOP</envar></term>
+          <listitem>
+            It should point to the top-level directory of Gtk+ installation,
+            that is the directory containing <filename>bin</filename>,
+            <filename>lib</filename>, <filename>share</filename>, etc.
+            subdirectories.  We will refer to its value as to
+            <envar>$(GTK_TOP)</envar> below.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>GTKGLEXT_TOP</envar></term>
+          <listitem>
+            It should point to the corresponding top-level directory of
+            GtkGLExt installation.  This differs from <envar>$(GTK_TOP)</envar>
+            only if you do not use GladeWin32 and have installed
+            GtkGLExt separately.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>LIBXML2_TOP</envar></term>
+          <listitem>
+            It should point to the corresponding top-level directory of
+            LibXML2 installation.  This differs from <envar>$(GTK_TOP)</envar>
+            only if you do not use GladeWin32 and have installed
+            LibXML2 separately.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>MSC_TOP</envar></term>
+          <listitem>
+            It should point to the top-level directory of MSVC installation.
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Run a shell (command line, MS-DOS prompt), switch to the source
+        directory and run <command>vcvars32.bat</command> there.
+        This batch file is provided by MSVC and ensures its program directories
+        are present in <envar>PATH</envar>.  (It may not be in
+        <envar>PATH</envar> itself but it should be easy to locate.)
+      </para>
+    </section>
+    <section>
+      <title>Compilation</title>
+      <para>
+        Run
+        <informalexample>
+          <userinput>nmake -f makefile.msc</userinput>
+        </informalexample>
+        to compile Gwyddion and
+        <informalexample>
+          <userinput>nmake -f makefile.msc install</userinput>
+        </informalexample>
+        to install it into a staging area, namely subdirectory
+        <filename>inst</filename> (created by this command).  If something
+        goes wrong with the second step and you wish to start it again,
+        remove directory <filename>inst</filename> and file
+        <filename>inst.stamp</filename> first for a clean start.
+      </para>
+    </section>
+    <section>
+      <title>Installation</title>
+      <para>
+        The layout of the staging area in <filename>inst</filename> exactly
+        the same as of the final installation.  Therefore you can also run
+        <application>Gwyddion</application> directly from it
+        (<filename>gwyddion.exe</filename> is found directly in
+        <filename>instal</filename>).  Except if you have never run
+        <application>Gwyddion</application> before, it will not find the
+        run-time Gtk+ libraries (DLLs) it needs.  Run
+        <command>regedit</command>, create in
+        <informalexample>
+          <literal>HKEY_LOCAL_MACHINE→Software→Microsoft→Windows→Current Version→App Paths→Gwyddion.exe</literal>
+        </informalexample>
+        a string key <literal>Path</literal> and put
+        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> there.  If you
+        have separate GtkGLExt and/or LibXML2, add also their
+        <filename>lib</filename> and <filename>bin</filename> directories,
+        separated by semicolons.  If you cannot edit global registry under
+        <literal>HKEY_LOCAL_MACHINE</literal>, set the path under
+        <literal>HKEY_CURRENT_USER</literal> for the current user only.
+      </para>
+      <para>
+        Now you can either run <application>Gwyddion</application> from
+        <filename>inst</filename> or copy the directory elsewhere, possibly
+        renaming it.
+      </para>
+    </section>
+    <section>
+      <title>Executable installers</title>
+      <para>
+        To create an executable installer you need 
+        <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
+        version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
+        build the installer, it will create
+        <filename>Gwyddion-2.1.exe</filename> (with 2.1 replaced with the
+        actual version number), again in <filename>inst</filename>.  You can
+        repeat this procedure with <filename>inst/gwyddion-devel.iss</filename>
+        to obtain <filename>Gwyddion-Development-2.1.exe</filename>, should
+        you ever need it.
+      </para>
+    </section>
+  </section>
+
   <section id="installation-linux-devel">
     <title>Linux/FreeBSD for developers</title>
     <para>
@@ -458,26 +631,6 @@ make install</userinput></literallayout>
       anything and recompile <application>Gwyddion</application> when you want.
       Do not forget to install <application>Gwyddion</application> after each
       compile to get the modules and plugins apparatus working. Good luck.
-    </para>
-    <para>
-      Some more instructions for developers (not operating system dependent) are in the chapter
-      <link linkend="development">Developing Gwyddion</link>.
-    </para>
-  </section>
-  <section id="installation-ms-windows-devel">
-    <title>Windows version for developers</title>
-    <para>
-      If you want to become developer, you can use Microsoft Visual C++ compiler to compile the application
-      and subsequently to develop your code.
-      Use source tarball in that case
-      and compile application using <command>nmake</command> command. In this case you will need Gtk development enviromet installed on your system.
-      You will probably need to change paths to Gtk+ and MSVC toplevel directories in the make.msc file.
-      The default paths are (see first few lines of make.msc):
-      <programlisting>
-        # XXX: set following to your Gtk+-Development and MSVC paths
-        GTK_TOP = C:\Gtk
-        MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
-      </programlisting>
     </para>
     <para>
       Some more instructions for developers (not operating system dependent) are in the chapter
