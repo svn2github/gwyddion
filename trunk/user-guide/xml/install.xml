@@ -733,7 +733,10 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
       </para>
       <para>
         MSVC files are built with <userinput>./utils/update-msvc.py</userinput>
-        which must be run from the top-level source directory.  This tool
+        which must be run from the top-level source directory (if you have
+        Python interpret installed elsewhere than in
+        <filename>/usr/bin</filename>, run it as
+        <userinput>python ./utils/update-msvc.py</userinput>).  This tool
         takes care of keeping MSVC makefiles and other files up to date with
         Unix files that are taken as the primary source.  More precisely
         <command>update-msvc.py</command> reads
