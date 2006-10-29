@@ -63,20 +63,6 @@
             </entry>
           </row>
           <row>
-            <entry><keycap>Ctrl-W</keycap></entry>
-            <entry>
-              <menuchoice>
-                <guimenu>File</guimenu>
-                <guimenuitem>Close</guimenuitem>
-              </menuchoice>
-            </entry>
-            <entry>toolbox, data window, tool window</entry>
-            <entry>
-              Close current data window.  Associated 3D and graph windows are kept, but any
-              any changes in them can be no longer saved.
-            </entry>
-          </row>
-          <row>
             <entry><keycap>Ctrl-Z</keycap></entry>
             <entry>
               <menuchoice>
@@ -98,6 +84,7 @@
             <entry>toolbox, data window, 3D window, graph window, tool window</entry>
             <entry>Redo the last processing step applied on current data.</entry>
           </row>
+          <!-- FIXME: doesn't work after databrowserization
           <row>
             <entry><keycap>Ctrl-D</keycap></entry>
             <entry>
@@ -112,6 +99,7 @@
               except file name.
             </entry>
           </row>
+          -->
           <row>
             <entry><keycap>Ctrl-K</keycap></entry>
             <entry>

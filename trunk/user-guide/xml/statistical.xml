@@ -103,7 +103,7 @@
         </imageobject>
       </mediaobject>
     </informalequation>
-    <para>
+    <para id="surface-area-calculation">
       The surface area is estimated by the following method. 
       Let <phrase role="math">z<subscript>i</subscript></phrase> for
       <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in 
@@ -136,6 +136,16 @@
       row of pixels on each side for the purpose of surface area calculation,
       thus making all pixels of interest inner.
     </para>
+    <figure>
+      <title>
+        Surface area calculation triangulation scheme.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="surface_area_vertices.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
   <section id="stat_functions">
     <title>

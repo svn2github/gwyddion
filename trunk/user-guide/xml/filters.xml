@@ -43,8 +43,8 @@
       </listitem>
     </itemizedlist>
     <tip>
-      By default, these filters will be applied to the entire 
-      image. However, you can apply a filter to a specific region within your 
+      By default, these filters will be applied to the entire
+      image. However, you can apply a filter to a specific region within your
       image by selecting it with the mouse. This can be useful for correcting
       badly measured areas within a good image. To apply a filter to the entire
       image again, just click once anywhere within the image window.
@@ -58,7 +58,7 @@
       </mediaobject>
     </figure>
     <para>
-      Moreover, there are more denoising functions in Gwyddion, for example 
+      Moreover, there are more denoising functions in Gwyddion, for example
       DWT denoising and FFT filtering.
       <!--TODO: Think about moving 1D,2D FFT Filters into the Integral Transforms menu-->
       For details see the <link linkend="features-inttrans">Integral Transforms</link> section.
@@ -66,10 +66,10 @@
     <para>
       If you need to only suppress some values in the SPM data that are obviously wrong,
       you can also try the
-      <link linkend="">Mask of Outliers</link> 
-      module and the 
-      <link linkend="remove_data_under_mask">Remove Data Under Mask</link> module.     
-      For details see the <link linkend="features-edit">Data Edit</link> section. 
+      <link linkend="mask-of-outliers">Mask of Outliers</link>
+      module and the
+      <link linkend="remove_data-under-mask">Remove Data Under Mask</link> module.
+      For details see the <link linkend="features-edit">Data Edit</link> section.
     </para>
   </section>
   <section>
@@ -84,8 +84,8 @@
       Presentations are special filters that output their results into a separate
       layer that displays on top of the original data. Unlike the filters mentioned
       above, presentation filters preserve the measured data. This allows the user to
-      safely apply various data visualizations. The other data processing modules 
-      and tools will still operate on the original data. To remove a presentation, 
+      safely apply various data visualizations. The other data processing modules
+      and tools will still operate on the original data. To remove a presentation,
       just right click on the data window, and select <guimenuitem>Remove Presentation</guimenuitem>.
     </para>
     <para>

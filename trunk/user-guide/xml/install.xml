@@ -43,7 +43,7 @@
   </para>
 
   <section id="installation-unix">
-    <title>Linux/Unix packages</title>
+    <title>Linux/Unix Packages</title>
     <para>
       Some Linux and Unix systems may provide binary packages of Gwyddion.
       The <ulink url="http://gwyddion.net/download.php">download</ulink> page
@@ -55,7 +55,7 @@
   </section>
 
   <section id="installation-ms-windows">
-    <title>MS Windows packages</title>
+    <title>MS Windows Packages</title>
     <para>
       If you never had any Gtk+ based application on your system (for example
       bitmap editor
@@ -93,7 +93,7 @@
   </section>
 
   <section id="installation-dependencies">
-    <title>Build dependencies</title>
+    <title>Build Dependencies</title>
     <para>
       The following table lists packages required to build
       <application>Gwyddion</application> from source code.  The table does not
@@ -103,7 +103,7 @@
       systems.
     </para>
     <variablelist>
-      <title>Build dependencies</title>
+      <title>Build Dependencies</title>
       <varlistentry>
         <term>
           <ulink url="http://www.gtk.org/">Gtk+</ulink>
@@ -203,7 +203,7 @@
   </section>
 
   <section id="installation-unix-source">
-    <title>Linux/Unix from source code tarball</title>
+    <title>Linux/Unix from Source Code Tarball</title>
     <para>
       <application>Gwyddion</application> Unix build system is based on
       GNU autotools
@@ -225,7 +225,7 @@
       guide if they contradict each other.
     </para>
     <section>
-      <title>Quick instructions</title>
+      <title>Quick Instructions</title>
       <para>
         If you know the drill:
       </para>
@@ -237,7 +237,7 @@ make install</userinput></literallayout>
       </informalexample>
     </section>
     <section>
-      <title>Source unpacking</title>
+      <title>Source Unpacking</title>
       <para>
         Unpack the source code tarball with
         <informalexample>
@@ -432,7 +432,7 @@ make install</userinput></literallayout>
       </para>
     </section>
     <section>
-      <title>RPM packages</title>
+      <title>RPM Packages</title>
       <para>
         It is possible to build RPM packages on RPM-based GNU/Linux
         distributions directly from source code tarballs with
@@ -445,7 +445,7 @@ make install</userinput></literallayout>
   </section>
 
   <section id="installation-ms-windows-source">
-    <title>MS Windows from source code tarball</title>
+    <title>MS Windows from Source Code Tarball</title>
     <para>
       <application>Gwyddion</application> MS Windows build system uses the
       <application>Microsoft Visual C++</application> (MSVC) compiler
@@ -607,7 +607,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
       </para>
     </section>
     <section>
-      <title>Executable installers</title>
+      <title>Executable Installers</title>
       <para>
         To create an executable installer you need 
         <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
@@ -623,7 +623,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
   </section>
 
   <section id="installation-linux-devel">
-    <title>Subversion checkout, development</title>
+    <title>Subversion Checkout, Development</title>
     <para>
       <application>Gwyddion</application> uses
       <ulink url="http://subversion.tigris.org/">Subversion</ulink>

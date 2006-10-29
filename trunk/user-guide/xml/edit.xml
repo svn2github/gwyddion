@@ -14,7 +14,7 @@
     in one way or another. However, in this section we would like to describe
     the modules and tools that are specifically designed to correct local
     defects in an image. The functions below remove "bad" data from an image,
-    and then fill it in using an interpolation algorithm.  
+    and then fill it in using an interpolation algorithm.
   </para>
   <section id="remove_spots">
     <title>
@@ -22,19 +22,19 @@
       <guiicon><inlinegraphic fileref="icon_remove_spots.png"/></guiicon>
     </title>
     <para>
-      The <link linkend="remove_spots">Remove Spots</link> tool can be used 
-      for removing very 
-      small parts of the image that are considered a scanning error, dust particle 
-      or anything else that should not be present in the data. Note that doing so 
-      can dramatically alter the resulting statistical parameters of the surface, 
+      The <link linkend="remove_spots">Remove Spots</link> tool can be used
+      for removing very
+      small parts of the image that are considered a scanning error, dust particle
+      or anything else that should not be present in the data. Note that doing so
+      can dramatically alter the resulting statistical parameters of the surface,
       so be sure not to remove things that are really present on the surface.
     </para>
     <para>
       While using this tool you can pick up position of the spot to magnify its neighbourhood
-      in the tool window. Then, in the tool window, select a rectangle around the area that should 
-      be removed. You can then select one of several interpolation methods for 
+      in the tool window. Then, in the tool window, select a rectangle around the area that should
+      be removed. You can then select one of several interpolation methods for
       creating data in place of the former "spot":
-    </para>    
+    </para>
     <itemizedlist>
       <listitem>
         Hyperbolic flatten - uses information from selected area boundaries to interpolate
@@ -55,12 +55,12 @@
     <para>
       <note>
       Spot removal will only work for regions of size 64x64 pixels or
-      smaller. To remove larger regions, create a mask using the 
-      <link>Mask Edit<!--TODO: fix link --></link> tool, then use 
+      smaller. To remove larger regions, create a mask using the
+      <link>Mask Edit<!--TODO: fix link --></link> tool, then use
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Correct Data</guisubmenu>
-        <guimenuitem><link linkend="remove_data_under_mask">Remove Data Under Mask</link></guimenuitem>
+        <guimenuitem><link linkend="remove-data-under-mask">Remove Data Under Mask</link></guimenuitem>
       </menuchoice>.
       </note>
     </para>
@@ -75,8 +75,8 @@
       </menuchoice>
     </para>
     <para>
-      Scars (or stripes) are parts of the image that are corrupted by a very common 
-      scanning error: local fault of the closed loop. Line defects are usually 
+      Scars (or stripes) are parts of the image that are corrupted by a very common
+      scanning error: local fault of the closed loop. Line defects are usually
       parallel to the fast scanning axis in the image. This module will automatically
       find and remove these scars, using neighbourhood lines to "fill-in" the gaps.
     </para>
@@ -91,10 +91,10 @@
       </menuchoice>
     </para>
     <para>
-      Similarly, the <classname>Mark Scars</classname> module can create a mask 
-      of the points treated as scars. Unlike 
+      Similarly, the <classname>Mark Scars</classname> module can create a mask
+      of the points treated as scars. Unlike
       <link linkend="remove_scars">Remove Scars</link>
-      which works automatically, this module lets you set several parameters 
+      which works automatically, this module lets you set several parameters
       which can fine-tune the scar selection process:
     </para>
     <itemizedlist>
@@ -119,7 +119,7 @@
       to the image. Other modules or tools can then be run to edit this data.
     </para>
   </section>
-  <section id="remove_data_under_mask">
+  <section id="remove-data-under-mask">
     <title>Remove Data Under Mask</title>
     <para>
       <menuchoice>
@@ -129,12 +129,12 @@
       </menuchoice>
     </para>
     <para>
-      This module tries to substitute data under the mask by solving the Laplacian 
-      equation. Unmasked data are used as the virtual source and information in 
+      This module tries to substitute data under the mask by solving the Laplacian
+      equation. Unmasked data are used as the virtual source and information in
       the masked regions is iteratively computed.
     </para>
   </section>
-  <section id="fractal_correction">
+  <section id="fractal-correction">
     <title>Fractal Correction</title>
     <para>
       <menuchoice>
@@ -144,14 +144,13 @@
       </menuchoice>
     </para>
     <para>
-      The <link linkend="fractal_correction">Fractal Correction</link> module, like
-      the
-      <link linkend="remove_data_under_mask">Remove Data Under Mask</link>
+      The Fractal Correction module, like the
+      <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
       module, replaces data under the mask. However, it uses
-      a different algorithm to come up with the new data: The fractal dimension 
-      of the whole image is first computed, and then the areas under the mask 
+      a different algorithm to come up with the new data: The fractal dimension
+      of the whole image is first computed, and then the areas under the mask
       are substituted by a randomly rough surface having the same fractal dimension.
-      The root mean square value of the height irregularities (roughness) 
+      The root mean square value of the height irregularities (roughness)
       is not changed by using this module.
     </para>
     <note>This calculation can take some time, so please be patient.</note>
@@ -160,7 +159,7 @@
       really unrealistic results and is strictly not recommended.
     </warning>
   </section>
-  <section id="mask_of_outliers">
+  <section id="mask-of-outliers">
     <title>Mask of Outliers</title>
     <para>
       <menuchoice>
@@ -175,5 +174,46 @@
       are marked in mask and can be edited or processed by other modules afterwards.
     </para>
   </section>
-   <xi:include href="unrotate.xml"/>
+  <section id="features-line-correction">
+    <title>Line Correction</title>
+    <para>
+      Several functions can be used for line correction: The Polynomial tool
+      and then several procedures under
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+      </menuchoice>
+      menu.  The Polynomial tool can fit and subtract line polynomials
+      (both horizontal and vertical) up to the second order.  It also permits
+      to select an area for exclusion from the fit.
+    </para>
+    <para>
+      Line correction functions in <guisubmenu>Correct Data</guisubmenu>
+      perform only line corrections, therefore one has to rotate the image
+      to perform column-wise correction.  They include:
+      <guimenuitem>Match Line Correction</guimenuitem>,
+      <guimenuitem>Median Line Correction</guimenuitem>,
+      <guimenuitem>Modus Line Correction</guimenuitem>, and
+      <guimenuitem>Step Line Correction</guimenuitem>.
+      The first three are very similar, they all align rows of the data field
+      to minimize some quantity.  As the names indicate,
+      <guimenuitem>Median Line Correction</guimenuitem> matches line medians
+      while <guimenuitem>Modus Line Correction</guimenuitem> attempts to match
+      line (pseudo)modus.
+      <guimenuitem>Match Line Correction</guimenuitem> minimizes certain
+      line difference function that gives more weight to flat areas and less
+      weight to areas with large slopes.  The effect of all three functions
+      is often very similar, although some can be more suitable for certain
+      type of data than others.
+    </para>
+    <para>
+      Function <guimenuitem>Step Line Correction</guimenuitem> differs from
+      them.  It attempts to identify misaligned segments in the rows and
+      correct the height of each such segment individually.  Therefore it
+      is often able to correct data with discontinuities in the middle of
+      a row.  This function is rather experimental and the exact way it
+      works can be subject of futher changes.
+    </para>
+  </section>
+  <xi:include href="unrotate.xml"/>
 </section>
