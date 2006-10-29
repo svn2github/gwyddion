@@ -622,7 +622,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     </section>
   </section>
 
-  <section id="installation-linux-devel">
+  <section id="installation-devel">
     <title>Subversion Checkout, Development</title>
     <para>
       <application>Gwyddion</application> uses
@@ -684,6 +684,39 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         thus they are not generated during normal compilation).  Generally, you
         should always use this <command>configure</command> option when you
         intend to change the program in a non-trivial way.
+      </para>
+      <para>
+        <command>autogen.sh</command> can fail even if you have sufficient
+        versions of autotools installed.  Some operating system do not install
+        general <command>autoconf</command> or <command>automake</command>
+        commands, only versioned commands as <command>autoconf259</command>
+        or <command>automake19</command>.  This makes particularly hard to
+        find for example <quote><command>automake</command> 1.9 or
+          newer</quote> and therefore <command>autogen.sh</command> does not
+        attempt it at all.  You can either create unversioned symbolic links to
+        the versioned commands or run <command>autogen.sh</command> as
+        follows:
+        <informalexample>
+          <userinput>
+            AUTOCONF=autoconf259 AUTOHEADER=autoheader259 ./autogen.sh
+          </userinput>
+        </informalexample>
+        You may need to set the following variables
+        <envar>ACLOCAL</envar>,
+        <envar>AUTOCONF</envar>,
+        <envar>AUTOHEADER</envar>,
+        <envar>AUTOMAKE</envar>,
+        <envar>LIBTOOLIZE</envar>.
+        In addition, some operating systems may install
+        <command>configure</command> macros in a place
+        <command>aclocal</command> does not find them by default.  This can
+        be fixed by setting variable <envar>ACLOCAL_FLAGS</envar> to give
+        <command>aclocal</command> additional search paths:
+        <informalexample>
+          <userinput>
+            ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh
+          </userinput>
+        </informalexample>
       </para>
       <para>
         If <command>autogen.sh</command> passes you can compile the program
