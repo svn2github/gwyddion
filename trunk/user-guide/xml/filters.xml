@@ -68,7 +68,7 @@
       you can also try the
       <link linkend="mask-of-outliers">Mask of Outliers</link>
       module and the
-      <link linkend="remove_data-under-mask">Remove Data Under Mask</link> module.
+      <link linkend="remove-data-under-mask">Remove Data Under Mask</link> module.
       For details see the <link linkend="features-edit">Data Edit</link> section.
     </para>
   </section>
