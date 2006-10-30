@@ -5,8 +5,17 @@
 <section id="facet-analysis">
   <title>Facet Analysis</title>
   <para>
-    The left view displays data with preview of marked facets.
-    The right smaller view, called facet view below, displays two-dimensional
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Statistics</guisubmenu>
+      <guimenuitem>Facet Analysis</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>
+    Facet analysis enables to interactively study orientations of facets
+    occuring in the data and mark facets of specific orientations on the
+    image. The left view displays data with preview of marked facets. The
+    right smaller view, called facet view below, displays two-dimensional
     slope distribution.
   </para>
   <para>

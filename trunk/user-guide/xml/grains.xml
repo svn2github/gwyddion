@@ -277,11 +277,13 @@
       are plotted.
     </para>
     <para>
-      Raw data export is for experts who need for example to correlate
+      Raw data export is useful for experts who need for example to correlate
       properties of individual grains.  In this mode selected grain
       characteristics are calculated and dumped to a text file table where each
       row corresponds to one grain and columns correspond to requested
-      quantities.
+      quantities.  The order of the colums is the same as the relative order
+      of the quantities in the dialog; all values are written in base SI units,
+      as is usual in <application>Gwyddion</application>.
     </para>
   </section>
   <section>

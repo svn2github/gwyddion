@@ -5,10 +5,11 @@
 <section id="features-basic">
   <title>Basic Operations</title>
   <para>
-  Basic geometrical operations are the core of any data processing programme. Also Gwyddion
-  has a wide set of modules and functions for data scaling, rotation, resampling or profile extraction.
-  In this section the main algorithms behind these functions will be described and the list of
-  available modules will be presented.
+    Basic geometrical operations are the core of any data processing
+    programme. Also Gwyddion has a wide set of modules and functions for data
+    scaling, rotation, resampling or profile extraction. In this section the
+    main algorithms behind these functions will be described and the list of
+    available modules will be presented.
   </para>
   <section>
      <title>Interpolation</title>
@@ -23,99 +24,113 @@
      modules using interpolation.
      </para>
      <para>
-     Here, we describe 1D interpolation method principles. Nearly all interpolation methods in 2D are simply composed of these
-     methods currently. The interpolation methods that can be applied on data are as follows
+       Here, we describe 1D interpolation method principles. Nearly all
+       interpolation methods in 2D are simply composed of these methods
+       currently. The interpolation methods that can be applied on data are as
+       follows
      </para>
      <orderedlist>
-        <listitem>
-	Round interpolation (within API accessed as GWY_INTERPOLATION_ROUND) is the simplest method
-	- it just takes round value of the expected position and finds therefore the closest "integer" data value.
-	</listitem>
-	<listitem>
-	Bilinear interpolation (within API accessed as GWY_INTERPOLATION_BILINEAR) is a linear interpolation
-	between the two closest data values.
-	</listitem>
-	<listitem>
-	Key interpolation (within API accessed as GWY_INTERPOLATION_KEY) is funny.
-	</listitem>
-	<listitem>
-	Bspline interpolation (within API accessed as GWY_INTERPOLATION_BSPLINE) is funny.
-	</listitem>
-	<listitem>
-	Omoms interpolation (within API accessed as GWY_INTERPOLATION_OMOMS) is funny.
-	</listitem>
-	<listitem>
-	Nearest neighbour approximation (within API accessed as GWY_INTERPOLATION_NNA) is a weighted
-	average of the closest four data values.
-	</listitem>
-	<listitem>
-	None interpolation is a special choice within API for doing no interpolation at all as it is expected
-	that data (e. g. after resample) will be anyway set by some other function to different values.
-	</listitem>
+       <listitem>
+         Round interpolation is the simplest method - it just takes round
+         value of the expected position and finds therefore the closest
+         data value at integer position.
+       </listitem>
+       <listitem>
+         Bilinear interpolation is a linear interpolation
+         between the two closest data values.
+       </listitem>
+       <listitem>
+         <!-- FIXME: This is not an adequate description -->
+         Key interpolation is funny.
+       </listitem>
+       <listitem>
+         <!-- FIXME: This is not an adequate description -->
+         Bspline interpolation is funny.
+       </listitem>
+       <listitem>
+         <!-- FIXME: This is not an adequate description -->
+         Omoms interpolation is funny.
+       </listitem>
+       <listitem>
+         Nearest neighbour approximation is a weighted average of the closest
+         four data values.
+       </listitem>
      </orderedlist>
-  </section>
-  <section>
+   </section>
+   <section>
      <title>Basic 2D data operation modules</title>
      <para>
-     Within basic modules it is possible to perform the following operations with 2D data field:
+       Within basic modules it is possible to perform the following
+       operations with 2D data field:
      </para>
      <orderedlist>
-        <listitem>
-           Scale data using chosen result dimension and chosen interpolation method by
-           <menuchoice>
-             <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-             <guimenuitem>Scale</guimenuitem>
-           </menuchoice>.
-        </listitem>
-        <listitem>
-           Crop data using the Crop tool (at the Tools menu bar).
-        </listitem>
-         <listitem>
-           Rotate data by 90 degrees or by user-specified amount using some of the rotate
-	   modules:
-           <menuchoice>
-             <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-             <guimenuitem>Rotate clockwise</guimenuitem>
-           </menuchoice>, or
-            <menuchoice>
-             <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-             <guimenuitem>Rotate anticlockwise</guimenuitem>
-           </menuchoice>, or
-            <menuchoice>
-             <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-             <guimenuitem>Rotate</guimenuitem>
-           </menuchoice>.
-         </listitem>
-         <listitem>
-           Invert data around X, Y or Z axis using the Invert module:
-	   <menuchoice>
-             <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-             <guimenuitem>Invert</guimenuitem>
-           </menuchoice>.
-        </listitem>
-      </orderedlist>
+       <listitem>
+         Scale data using chosen result dimension and chosen interpolation
+         method by
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic operations</guisubmenu>
+           <guimenuitem>Scale</guimenuitem>
+         </menuchoice>.
+       </listitem>
+       <listitem>
+         Crop data using the Crop tool (at the Tools menu bar).
+       </listitem>
+       <listitem>
+         Rotate data by 90 degrees or by user-specified amount using some
+         of the rotate modules:
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic operations</guisubmenu>
+           <guimenuitem>Rotate clockwise</guimenuitem>
+         </menuchoice>, or
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic operations</guisubmenu>
+           <guimenuitem>Rotate anticlockwise</guimenuitem>
+         </menuchoice>, or
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic operations</guisubmenu>
+           <guimenuitem>Rotate</guimenuitem>
+         </menuchoice>.
+       </listitem>
+       <listitem>
+         Invert data around X, Y or Z axis using the Invert module:
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic operations</guisubmenu>
+           <guimenuitem>Invert</guimenuitem>
+         </menuchoice>.
+       </listitem>
+     </orderedlist>
      <para>
-     Moreover, calibration module can be used for changing the information about image physical dimensions and changing
-     the data values calibration:
-     <menuchoice>
-       <guimenu>Data Process</guimenu><guisubmenu>Basic operations</guisubmenu>
-       <guimenuitem>Calibrate</guimenuitem>
-     </menuchoice>.
-
+       Moreover, calibration module can be used for changing the information
+       about image physical dimensions and changing the data values
+       calibration:
+       <menuchoice>
+         <guimenu>Data Process</guimenu>
+         <guisubmenu>Basic operations</guisubmenu>
+         <guimenuitem>Calibrate</guimenuitem>
+       </menuchoice>.
      </para>
-  </section>
+   </section>
   <section>
      <title>Profile extraction</title>
      <para>
-     Profile extraction tool can be accessed from the tools menu bar. You can use mouse to drag several
-     profiles in the image (up to 4) that can be further moved and adjusted. Profile graph preview can be seen in
-     the profile tool dialog. Profiles can be of different "thickness" which means that more neighbour data perpendicular
-     to profile direction are used for evaluation of one profile point for thicker profiles. This can be very useful
-     for noise suppression while measuring some regular objects.
+       Profile extraction tool can be accessed from the tools menu bar. You
+       can use mouse to drag several profiles in the image that can
+       be further moved and adjusted. Profile graph preview can be seen in
+       the profile tool dialog. Profiles can be of different "thickness"
+       which means that more neighbour data perpendicular to profile
+       direction are used for evaluation of one profile point for thicker
+       profiles. This can be very useful for noise suppression while
+       measuring some regular objects.
      </para>
      <para>
-     After profiles are chosen, they can be extracted to graphs (separate of merged in one Graph window) that can be further analysed
-     using Graph modules.
+       After profiles are chosen, they can be extracted to graphs (separate
+       of merged in one Graph window) that can be further analysed using
+       Graph modules.
      </para>
   </section>
 </section>
