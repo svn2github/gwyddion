@@ -5,15 +5,13 @@
 <section id="gwyfile-format">
   <title>Format of Gwyddion files</title>
   <para>
-    Gwyddion native data files consists of tree-like structure of serialized
-    objects.  Generally, these objects can be of various kind and contain other
-    embedded objects (hence the tree-like structure).  It is instructive to
-    play with <application>gwydump</application>) a simple file structure
-    visualizer available in
-    <ulink url="http://gwyddion.net/download.php#tools-toys">
-      Tools and toys section
-    </ulink>
-    of Gwyddion download page) for a while.
+    <application>Gwyddion</application> native data files consists of
+    a tree-like structure of serialized objects.  Generally, these objects
+    can be of various kind and contain other embedded objects (hence the
+    tree-like structure).  It can be instructive to play with
+    <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>,
+    a simple file structure visualizer available in on the project's web,
+    for a while and examine the contents of various files.
   </para>
   <para>
     First of all, we will describe physical file structure without regard to
@@ -22,13 +20,14 @@
   <section>
     <title>Byte order</title>
     <para>
-      All data is stored in little-endian (also known as Intel) byte order.
+      All data is stored in little-endian (also known as LSB or Intel) byte
+      order.
     </para>
   </section>
   <section>
     <title>File header</title>
     <para>
-      File header consists of four bytes (magic number) with the
+      The file header consists of four bytes (magic number) with the
       values of ASCII characters <literal>GWYP</literal>.
     </para>
     <para>
@@ -40,7 +39,7 @@
   <section>
     <title>File data</title>
     <para>
-      The rest of file consists of a serialized <type>GwyContainer</type>
+      The rest of the file consists of a serialized <type>GwyContainer</type>
       object that contains all the data.  It is stored exactly the same way
       as any other object, that is as described in the next section.
     </para>
@@ -48,15 +47,15 @@
   <section>
     <title>Object layout</title>
     <para>
-      An object consists of three parts (in following order):
+      An object consists of three parts (in the following order):
       <itemizedlist>
         <listitem>
-          Type name, stored as <constant>NUL</constant>-terminated string of
+          Type name, stored as a <constant>NUL</constant>-terminated string of
           ASCII characters.  This is the type name in GObject type system.
         </listitem>
         <listitem>
           Serialized data size, stored as an unsigned 32bit integer.  It does
-          not include size of type name and size of itself.
+          not include the size of the type name and the size of self.
         </listitem>
         <listitem>
           Component list.  Components are named parts of object data, each of
@@ -69,10 +68,10 @@
   <section>
     <title>Components</title>
     <para>
-      Each component consits of three parts (in following order):
+      Each component consits of three parts (in the following order):
       <itemizedlist>
         <listitem>
-          Name, stored as <constant>NUL</constant>-terminated string.
+          Name, stored as a <constant>NUL</constant>-terminated string.
         </listitem>
         <listitem>
           Type, stored as a signle unsigned byte (character).  The table of
@@ -146,10 +145,11 @@
       </tgroup>
     </informaltable>
     <para>
-      Each atomic type (except boolean) has its array counterpart, its type
-      character is uppercase of corresponding atomic type.  Arrays are stored
-      as unsigned 32bit array length (number of items), followed by item
-      values. Array data types are listed in following table:
+      Each atomic type except boolean has its array counterpart.  The type
+      character of array types is the same as of the corresponding atomic
+      type, except it is uppercase. Arrays are stored as unsigned 32bit array
+      length (the number of items), followed by the item values. Array data
+      types are listed in following table:
     </para>
     <informaltable>
       <tgroup cols='3'>
