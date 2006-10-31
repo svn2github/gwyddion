@@ -361,7 +361,11 @@ make install</userinput></literallayout>
         <filename>share</filename>, etc. subdirectories (they will be created
         if they do not exist). More detailed control is possible with options
         specifying particular subdirectories as <option>--bindir</option>,
-        <option>--libdir</option>.
+        <option>--libdir</option>.  The default prefix is
+        <filename>/usr/local/bin</filename>, to install
+        <application>Gwyddion</application> to your home directory you
+        may want to use for instance
+        <userinput>--prefix=$HOME/opt/gwyddion</userinput>.
       </para>
       <para>
         Optional features can be enabled/disabled with options as
@@ -496,13 +500,12 @@ make install</userinput></literallayout>
       <title>Fink</title>
       <para>
         Get and install Fink,
-        <!-- XXX: some more words about fink
-             XXX: add link -->
+        <!-- XXX: some more words about fink -->
         after you installed Fink do:
         <informalexample>
           <userinput>apt-get update</userinput>
         </informalexample>
-        to get the knowledge of new libs <!-- XXX -->
+        to get the knowledge of new libs <!-- XXX: ugh -->
         and
         <informalexample>
           <userinput>apt-get install gtk2 gtkglext fftw-3</userinput>
@@ -517,24 +520,28 @@ make install</userinput></literallayout>
         you should download the gwyddion-source and
         extract it.
       </para>
-      <!--- XXX: Again. -->
+      <!--- XXX: Again, generic. -->
       <para>
         Cd to the folder where you extracted gwyddion,
         do (the cd is for example if you have extracted
         gwyddion to ~/Source/gwyddion-2.0 (~ means
         you're User Folder))
-      <informalexample>
-        <literallayout><userinput>cd ~/Source/gwyddion-2.0
+        <informalexample>
+          <!-- XXX: Why explicit /usr/local, it's the default!
+               Moreover, there's more about prefix in the generic Unix
+               section. -->
+          <literallayout><userinput>cd ~/Source/gwyddion-2.0
 ./configure --prefix=/usr/local
 make
 sudo make install</userinput></literallayout>
-      </informalexample>
+        </informalexample>
         from Terminal.App.
         After this you find gwyddion below
         <filename>/usr/local/bin</filename>.
       </para>
       <para>
         Start your <application>X11.App</application>, type
+        <!-- XXX: Don't people have /usr/local/bin in PATH on OS X? -->
         <informalexample>
           <literallayout><userinput>export DISPLAY=":0"
 /usr/local/bin/gwyddion</userinput></literallayout>
@@ -568,9 +575,11 @@ sudo make install</userinput></literallayout>
           <literallayout><userinput>cd ~/Sources
 sudo port install</userinput></literallayout>
         </informalexample>
-        have some lunch/meeting/a good time ...
+        have some lunch/meeting/a good time ... <!-- XXX: ugh -->
         After everyting is done, you find gwddion
         below /opt/local/bin ...
+        <!-- XXX: Even if it is not accepted yet, the port installation
+             should be described here -->
       </para>
       <!-- XXX: This is duplicite with Fink, refactor running to a common
            section -->
