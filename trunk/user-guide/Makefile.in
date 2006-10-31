@@ -59,7 +59,7 @@ clean:
 dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
-	cp Makefile.in configure configure.ac $(DISTNAME)
+	cp Makefile.in configure configure.ac README $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) $(DISTNAME)
 	cp images/*.png $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
