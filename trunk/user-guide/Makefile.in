@@ -6,6 +6,7 @@ VERSION = @PACKAGE_VERSION@
 BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
 
+GMAKE = @GMAKE@
 XSLTPROC = @XSLTPROC@ --xinclude
 PDFXMLTEX = @PDFXMLTEX@
 HTML2TXT = @LYNX@ -force_html -dump -nolist
@@ -45,13 +46,13 @@ xhtml.stamp: $(XML_SOURCES) xhtml.xsl
 formulas: formulas.stamp
 
 formulas.stamp: $(FORMULA_SOURCES)
-	cd ./formulas && make
+	cd ./formulas && $(GMAKE)
 	test -d xhtml || mkdir xhtml
 	cp formulas/eq-*.png xhtml
 	touch $@
 
 clean:
-	cd ./formulas && make clean
+	cd ./formulas && $(GMAKE) clean
 	-rm -rf xhtml *.stamp xml/*~ *~
 	-rm -f *.aux *.log *.out $(PACKAGE).fo $(PACKAGE).xml
 
@@ -62,7 +63,7 @@ dist:
 	cp $(XSL_STYLES) $(CSS_STYLES) $(DISTNAME)
 	cp images/*.png $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
-	cd ./formulas && make dist
+	cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
 
@@ -78,7 +79,7 @@ version:
 	autoconf && ./configure
 
 distclean: clean
-	cd ./formulas && make distclean
+	cd ./formulas && $(GMAKE) distclean
 	-rm -fr Makefile config.status config.log autom4te.cache
 
 help:

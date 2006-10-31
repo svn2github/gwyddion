@@ -12,7 +12,7 @@ AC_PROG_CC
 AC_CHECK_PROGS([GMAKE],[gmake make],[no])
 if test "$GMAKE" != no; then
   AC_MSG_CHECKING([whether $GMAKE is GNU make])
-  if make --version 2>/dev/null | grep '^GNU Make' >/dev/null; then
+  if $GMAKE --version 2>/dev/null | grep '^GNU Make' >/dev/null; then
     AC_MSG_RESULT([seems so])
   else
     AC_MSG_RESULT([no])
@@ -55,4 +55,4 @@ AC_CHECK_PROGS([LYNX],[lynx],[no])
 
 AC_OUTPUT
 
-echo "Run 'make help' for some help."
+echo "Run '$GMAKE help' for some help."
