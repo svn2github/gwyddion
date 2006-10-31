@@ -508,6 +508,8 @@ make install</userinput></literallayout>
         to get the knowledge of new libs <!-- XXX: ugh -->
         and
         <informalexample>
+          <!-- XXX: Is this correct? Olivier lists completely different names:
+               gtk+2 gtkglext1 fftw3 -->
           <userinput>apt-get install gtk2 gtkglext fftw-3</userinput>
         </informalexample>
         to install the dependencies.
