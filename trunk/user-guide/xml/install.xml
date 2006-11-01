@@ -405,7 +405,11 @@ make install</userinput></literallayout>
         </informalexample>
         to install <application>Gwyddion</application> to the target directory.
         If you install <application>Gwyddion</application> to a system
-        directory you have to become root for running this command.
+        directory you have to become root for running this command, for
+        example using sudo:
+        <informalexample>
+          <userinput>sudo make install</userinput>
+        </informalexample>
         Note <application>Gwyddion</application> has to be installed to be run,
         it is not possible to run it uninstalled.
       </para>
@@ -452,163 +456,155 @@ make install</userinput></literallayout>
   <section id="installation-osx">
     <title>Mac OS X</title>
     <para>
-      Most of the previous generic
+      Much of the previous generic
       <link linkend="installation-unix-source">Unix/Linux installation
         section</link> applies also to OS X.  Therefore this section deals
-      mainly with specifics of OS X installation, some of the steps listed
-      here are explained in more detail in the generic Unix section.
+      mainly with the specifics of OS X installation, some of the steps
+      listed here are explained in more detail in the generic Unix section.
     </para>
     <para>
-      At this time there are three ways to install
-      <application>Gwyddion</application>:
+      Beside building everything on your own (good luck), at this time there
+      are two ways to install <application>Gwyddion</application>:
       <itemizedlist>
         <listitem>
-          using Fink and compiling <application>Gwyddion</application>
-          the common Unix way,
+          using <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
+          compiling <application>Gwyddion</application> the common Unix way,
         </listitem>
         <listitem>
-          Using Macports (formerly darwinports),
-        </listitem>
-        <listitem>
-          Build everything on your own (the real hard way).
+          using <ulink url="http://www.macports.org/">Macports</ulink>
+          (formerly Darwinports) and building from a Portfile.
         </listitem>
       </itemizedlist>
     </para>
     <section>
-      <title>Preparation (All Methods)</title>
+      <title>Preparation</title>
       <para>
         To install and run <application>Gwyddion</application> you need the
         XCode Tools and X (SDK and App) installed. They where located on your
         CDs/DVDs.
         <!-- XXX rowue: look where you find it -->
         Also you should have some experience using
+        <application>Terminal.App</application>.  All the commands in the
+        the rest of this section are to be entered and run in
         <application>Terminal.App</application>.
       </para>
       <para>
-        To compile <application>Gwyddion</application> you need (at least)
-        the following libraries (including their dependencies):
-        <!-- XXX: This is not true, only gtk2 is needed.
-             XXX: We have a generic dependencies section before. -->
+        See <link linkend="installation-dependencies">installation
+          dependencies</link> section for an overview of required and
+        optional packages to install prior to
+        <application>Gwyddion</application> installation. The following table
+        summarizes how they are called in the two software collections:
+        <informaltable frame='none'>
+          <tgroup cols='3'>
+            <thead>
+              <row>
+                <entry>Package</entry>
+                <entry>Fink</entry>
+                <entry>Macports</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>Gtk+</entry>
+                <entry>gtk+2</entry>
+                <entry>gtk2</entry>
+              </row>
+              <row>
+                <entry>GtkGLExt</entry>
+                <entry>gtkglext1</entry>
+                <entry>gtkglext</entry>
+              </row>
+              <row>
+                <entry>FFTW3</entry>
+                <entry>fftw3</entry>
+                <entry>fftw-3</entry>
+              </row>
+              <row>
+                <entry>LibXML2</entry>
+                <entry>libxml2</entry>
+                <entry>libxml2</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
       </para>
-      <literallayout><!-- XXX -->
-        gtk2    (needed for gui)
-        fftw-3 (needed for fourier transforms)
-        gtkglext (opengl extensions for gtk - used for 3D view)
-      </literallayout>
     </section>
     <section>
       <title>Fink</title>
       <para>
-        Get and install Fink,
-        <!-- XXX: some more words about fink -->
-        after you installed Fink do:
+        <!-- XXX: a few more words about fink -->
+        Get and install
+        <ulink url="http://fink.sourceforge.net/">Fink</ulink>.
+        After you installed Fink run
         <informalexample>
           <userinput>apt-get update</userinput>
         </informalexample>
-        to get the knowledge of new libs <!-- XXX: ugh -->
-        and
+        to update the database of available packages and install the
+        dependencies (the following list is an example, you can choose
+        a different set of optional packages):
         <informalexample>
-          <!-- XXX: Is this correct? Olivier lists completely different names:
-               gtk+2 gtkglext1 fftw3 -->
-          <userinput>apt-get install gtk2 gtkglext fftw-3</userinput>
+          <userinput>apt-get install gtk+2 gtkglext1 fftw3 libxml2</userinput>
         </informalexample>
-        to install the dependencies.
-      </para>
-      <!--- XXX: This is generic, reduce and refer to the Unix section? -->
-      <para>
-        If everything is installed
-        <!-- XXX: Olivier: did fink install binaries or sources and compile?
-        -->
-        you should download the gwyddion-source and
-        extract it.
-      </para>
-      <!--- XXX: Again, generic. -->
-      <para>
-        Cd to the folder where you extracted gwyddion,
-        do (the cd is for example if you have extracted
-        gwyddion to ~/Source/gwyddion-2.0 (~ means
-        you're User Folder))
-        <informalexample>
-          <!-- XXX: Why explicit /usr/local, it's the default!
-               Moreover, there's more about prefix in the generic Unix
-               section. -->
-          <literallayout><userinput>cd ~/Source/gwyddion-2.0
-./configure --prefix=/usr/local
-make
-sudo make install</userinput></literallayout>
-        </informalexample>
-        from Terminal.App.
-        After this you find gwyddion below
-        <filename>/usr/local/bin</filename>.
       </para>
       <para>
-        Start your <application>X11.App</application>, type
-        <!-- XXX: Don't people have /usr/local/bin in PATH on OS X? -->
-        <informalexample>
-          <literallayout><userinput>export DISPLAY=":0"
-/usr/local/bin/gwyddion</userinput></literallayout>
-        </informalexample>
-        in your Terminal.App and enjoy  gwyddion.
-        If you enjoy gwyddion, you can configure X11.App
-        to run gwyddion via mouse click - (X11.App,
-        Applications, Customize).
+        When everything is installed, download
+        <application>Gwyddion</application> source code, and follow the
+        <link linkend="installation-unix-source">Unix installation
+          section</link> instructions.
       </para>
     </section>
     <section>
-      <title>Macports/Darwinports</title>
+      <title>Macports</title>
       <para>
-        Get and install macports (http://www,macports.org)
-        after you installed macports, open Terminal.App
-        and type:
+        <!-- XXX: a few more words about macports -->
+        Get and install
+        <ulink url="http://www.macports.org/">Macports</ulink>.
+        After you installed Macports, run
         <informalexample>
           <userinput>sudo port selfupdate</userinput>
         </informalexample>
-        to get the newest version of macports and libs).
-        Even gwyddion is submitted to macports it is
-        unknown when gwyddion will be part of the
-        Portbase
-        <!-- XXX: Yeti: because after the initial portfile
-             I only submit diffs to macports it can be fine
-             to locate the Portfile on the Website --> – you
-        have to get the Portfile by .... (diff, something
-        else). Store the Portfile to some Folder
-        (in this Example ~/Sources) do
-        <informalexample>
-          <literallayout><userinput>cd ~/Sources
-sudo port install</userinput></literallayout>
-        </informalexample>
-        have some lunch/meeting/a good time ... <!-- XXX: ugh -->
-        After everyting is done, you find gwddion
-        below /opt/local/bin ...
-        <!-- XXX: Even if it is not accepted yet, the port installation
-             should be described here -->
+        to update Macports to the latest version.
       </para>
-      <!-- XXX: This is duplicite with Fink, refactor running to a common
-           section -->
       <para>
-        Start your <application>X11.App</application>, type
+        <application>Gwyddion</application> has been submitted to Macports
+        therefore it should be eventually installable simply
         <informalexample>
-          <literallayout><userinput>export DISPLAY=":0"
-/usr/local/bin/gwyddion</userinput></literallayout>
+          <userinput>sudo port install gwyddion</userinput>
         </informalexample>
-        in your Terminal.App and enjoy  gwyddion.
-        If you enjoy gwyddion, you can configure X11.App
-        to run gwyddion via mouse click - (X11.App,
-        Applications, Customize).
+        However, at the time of writing this it is not a part of Portbase yet
+        and it is not known when it will be.  Therefore you need to obtain
+        a <filename>Portfile</filename> from the project's web.
+        <!-- XXX: link missing -->
+        Store the <filename>Portfile</filename> to a folder,
+        <command>cd</command> to this folder, run
+        <informalexample>
+          <userinput>sudo port install</userinput>
+        </informalexample>
+        and wait until everything builds (it will take some time).
+        The result will appear in <filename>/opt/local</filename> as any
+        other Macports software.
       </para>
     </section>
     <section>
-      <!-- XXX: this does not contain any useful information, remove
-           completely? -->
-      <title>From Scratch</title>
+      <title>Running</title>
       <para>
-        If you're a very experienced user, you can build
-        gwyddion and all dependencies (gtk2, gtkglext,
-        fftw-3) on your own ...
-        But if you're a very experienced user you shouldn't
-        need a documentation for doing this ;)
-        We recomend using fink or macports until we where
-        able to build   an Application Bundle.
+        Start <application>X11.App</application> and type
+        in <application>Terminal.App</application>
+        <informalexample>
+          <userinput>export DISPLAY=":0"</userinput>
+        </informalexample>
+        Then run <application>Gwyddion</application> from the folder it
+        was installed to.  This is typically
+        <filename>/opt/local/bin</filename> for Macports and
+        <filename>/usr/local/bin</filename> for Fink.  So for example for
+        Macports run:
+        <informalexample>
+          <userinput>/usr/local/bin/gwyddion</userinput>
+        </informalexample>
+        You can also configure <application>X11.App</application>
+        to run <application>Gwyddion</application> via mouse click:
+        <!-- XXX: what these names denote? what should one do? -->
+        X11.App, Applications, Customize.
       </para>
     </section>
   </section>
