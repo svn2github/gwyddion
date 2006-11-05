@@ -572,9 +572,9 @@ make install</userinput></literallayout>
           <userinput>sudo port install gwyddion</userinput>
         </informalexample>
         However, at the time of writing this it is not a part of Portbase yet
-        and it is not known when it will be.  Therefore you need to obtain
-        a <filename>Portfile</filename> from the project's web.
-        <!-- XXX: link missing -->
+        and it is not known when it will be.  Therefore you need to obtain a
+        <ulink url="http://gwyddion.net/download/test/Portfile"><filename>Portfile</filename></ulink>
+        from the project's web.
         Store the <filename>Portfile</filename> to a folder,
         <command>cd</command> to this folder, run
         <informalexample>
@@ -602,7 +602,7 @@ make install</userinput></literallayout>
           <userinput>/usr/local/bin/gwyddion</userinput>
         </informalexample>
         You can also configure <application>X11.App</application>
-        to run <application>Gwyddion</application> via mouse click:
+        to run <application>Gwyddion</application> via:
         <!-- XXX: what these names denote? what should one do? -->
         X11.App, Applications, Customize.
       </para>
