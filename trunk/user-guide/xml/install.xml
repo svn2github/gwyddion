@@ -282,9 +282,7 @@ make install</userinput></literallayout>
         you can run in the future to recreate the current configuration, and
         a file <filename>config.log</filename>.  This file contains the details
         of the detection process and it is helpful to include it in compilation
-        related bug reports.  The end of <command>configure</command> output
-        also contains a brief summary of enabled and disabled optional
-        features.
+        related bug reports.
       </para>
       <para>
         If <command>configure</command> reports missing required packages,
@@ -323,7 +321,7 @@ make install</userinput></literallayout>
             <listitem>
               <para>
                 It may be necessary to adjust these variables to include
-                nonstandard directories with executables and libraries of
+                non-standard directories with executables and libraries of
                 relevant packages, respectively.
               </para>
             </listitem>
@@ -336,7 +334,7 @@ make install</userinput></literallayout>
             <listitem>
               <para>
                 It may be necessary to adjust these variables to include
-                nonstandard directories with header files and libraries of
+                non-standard directories with header files and libraries of
                 packages that do not come with pkg-config files, for example
                 for libTIFF in <filename>/usr/local</filename> one can do
                 <userinput>CFLAGS=-I/usr/local/include; export CFLAGS</userinput>
@@ -355,8 +353,8 @@ make install</userinput></literallayout>
         <informalexample>
           <userinput>./configure --help</userinput>
         </informalexample>
-        Option <option>--prefix=…</option> sets the base installation
-        directory. The program will be installed into its
+        Option <option>--prefix</option> sets the base installation
+        directory. Program components will be installed into its
         <filename>bin</filename>, <filename>lib</filename>,
         <filename>share</filename>, etc. subdirectories (they will be created
         if they do not exist). More detailed control is possible with options
@@ -374,7 +372,8 @@ make install</userinput></literallayout>
         <option>--with-tiff</option>/<option>--without-tiff</option>
         (for LibTIFF).
         By default all optional features are enabled if their prerequisites
-        are found.
+        are found.  A brief summary enabled and distable optional features is
+        printed near the end of <command>configure</command> output.
       </para>
     </section>
     <section>
@@ -391,9 +390,8 @@ make install</userinput></literallayout>
       <para>
         If you need to do unusual things to compile the package, please try to
         figure out how <command>configure</command> could check whether to do
-        them, and mail diffs or instructions to the address given in the
-        <filename>README</filename> so they can be considered for the next
-        release.
+        them, and e-mail patches or instructions to the bug-report address
+        so they can be considered for the next release.
       </para>
     </section>
     <section>

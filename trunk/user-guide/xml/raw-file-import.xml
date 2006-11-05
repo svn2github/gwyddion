@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="raw-file-import">
-  <title>Raw data file import</title>
+  <title>Raw Data File Import</title>
   <para>
     Both raw ASCII and binary data files and files in unsupported formats
     can be imported with rawfile module – with some effort.
@@ -69,7 +69,7 @@
     </para>
   </section>
   <section>
-    <title>Data format</title>
+    <title>Data Format</title>
     <para>
       On the second tab, <guilabel>Data Format</guilabel>, particular data
       format can be chosen. There are two independent possibilities:

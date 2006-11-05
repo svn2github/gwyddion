@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="modules-tools">
-  <title>Modules and tools</title>
+  <title>Modules and Tools</title>
   <para>
     Modules are responsible for most of the Gwyddion features. They mostly
     include data processing functions as leveling, rotations, integral

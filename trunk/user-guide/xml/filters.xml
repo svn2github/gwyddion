@@ -118,7 +118,7 @@
       </para>
     </section>
     <section>
-      <title>Gradient detection presentations</title>
+      <title>Gradient Detection Presentations</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -143,7 +143,7 @@
       </para>
     </section>
     <section>
-     <title>Edge detection presentations</title>
+     <title>Edge Detection Presentations</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -173,7 +173,7 @@
       </para>
     </section>
     <section>
-    <title>Local contrast</title>
+    <title>Local Contrast</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -205,7 +205,7 @@
       Moreover, there are the following presentation manipulation commands in presentations menu:
     </para>
     <section>
-      <title>Attach presentation</title>
+      <title>Attach Presentation</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -221,7 +221,7 @@
       </para>
     </section>
     <section>
-      <title>Remove presentation</title>
+      <title>Remove Presentation</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -234,7 +234,7 @@
       </para>
     </section>
     <section>
-      <title>Extract presentation</title>
+      <title>Extract Presentation</title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>

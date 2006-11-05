@@ -3,23 +3,24 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-fractal">
-  <title>Fractal analysis</title>
+  <title>Fractal Analysis</title>
   <para>
-  In practice objects exhibiting random properties are encountered.
-  It is often assumed that these objects exhibit the self-affine
-  properties in a certain range of scales. Self-affinity is a generalization
-  of self-similarity which is the basic property of most of the deterministic
-  fractals. A part of self-affine object is similar to whole object after
-  anisotropic scaling. Many randomly rough surfaces are assumed to belong
-  to the random objects that exhibit the self-affine properties and they are
-  treated self-affine statistical fractals. Of course, these surfaces can be
-  studied using atomic force microscopy (AFM). The results of the fractal
-  analysis of the self-affine random surfaces using AFM are often used to
-  classify these surfaces prepared by various technological procedures [1-4].
+    In practice objects exhibiting random properties are encountered. It is
+    often assumed that these objects exhibit the self-affine properties in
+    a certain range of scales. Self-affinity is a generalization of
+    self-similarity which is the basic property of most of the deterministic
+    fractals. A part of self-affine object is similar to whole object after
+    anisotropic scaling. Many randomly rough surfaces are assumed to belong
+    to the random objects that exhibit the self-affine properties and they
+    are treated self-affine statistical fractals. Of course, these surfaces
+    can be studied using atomic force microscopy (AFM). The results of the
+    fractal analysis of the self-affine random surfaces using AFM are often
+    used to classify these surfaces prepared by various technological
+    procedures [1-4].
   </para>
   <para>
-  Within Gwyddion, there are different methods of fractal analysis implemented
-  within
+    Within Gwyddion, there are different methods of fractal analysis
+    implemented within
   <menuchoice>
     <guimenu>Data Process</guimenu><guisubmenu>Statistics</guisubmenu>
     <guimenuitem>Fractal analysis</guimenuitem>

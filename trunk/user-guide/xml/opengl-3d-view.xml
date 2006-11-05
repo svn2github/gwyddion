@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="opengl-3d-view">
-  <title>OpenGL 3D data display</title>
+  <title>OpenGL 3D Data Display</title>
   <para>
     Three-dimensional OpenGL display of current data window can be invoked
     with the button with symbol of cube in <guilabel>View</guilabel> button
@@ -27,7 +27,7 @@
     </mediaobject>
   </figure>
   <section>
-    <title>Basic controls</title>
+    <title>Basic Controls</title>
     <para>
       Basic 3D window contains interaction mode controls at the right side of
       the view.  By default, dragging the view with mouse rotates it
@@ -57,7 +57,7 @@
     </para>
   </section>
   <section>
-    <title>Full controls</title>
+    <title>Full Controls</title>
     <para>
       In expanded controls the mode buttons are located in top row, however
       their function does not change.  In addition, there are several tabs

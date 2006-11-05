@@ -55,7 +55,7 @@
   <xi:include href="intro.xml"/>
   <xi:include href="install.xml"/>
   <chapter id="getting-started">
-    <title>Getting started</title>
+    <title>Getting Started</title>
     <xi:include href="main-window.xml"/>
     <xi:include href="data-browser.xml"/>
     <xi:include href="managing-files.xml"/>
@@ -69,7 +69,7 @@
     <xi:include href="plugins.xml"/>
   </chapter>
   <chapter id="data-analysis">
-    <title>Data processing and analysis</title>
+    <title>Data Processing and Analysis</title>
     <xi:include href="basic.xml"/>
     <xi:include href="leveling.xml"/>
     <xi:include href="filters.xml"/>
@@ -82,7 +82,7 @@
     <xi:include href="graph.xml"/>
   </chapter>
   <chapter id="summaries">
-    <title>Summaries and tables</title>
+    <title>Summaries and Tables</title>
     <xi:include href="keyboard-shortcuts.xml"/>
     <xi:include href="expressions.xml"/>
     <xi:include href="environment.xml"/>

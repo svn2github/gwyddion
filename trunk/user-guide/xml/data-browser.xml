@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="data-browser">
-  <title>Data browser</title>
+  <title>Data Browser</title>
   <para>
     Data browser is a window that displays the actually focused Gwyddion native file (*.gwy) structure.
     As the Gwyddion native file format supports more channels for height (or other physical parameters) data

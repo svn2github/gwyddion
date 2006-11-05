@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="presentations-masks">
-  <title>Presentations and masks</title>
+  <title>Presentations and Masks</title>
   <para>
     Presentations can be used to show the height field in other way than as false colors map of heights. Several
     presentation methods are implemented, including shading, gradient filters and edge detectors. When you use data

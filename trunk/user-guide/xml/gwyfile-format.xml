@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="gwyfile-format">
-  <title>Format of Gwyddion files</title>
+  <title>Format of Gwyddion Files</title>
   <para>
     <application>Gwyddion</application> native data files consists of
     a tree-like structure of serialized objects.  Generally, these objects
@@ -18,14 +18,14 @@
     possible interpretation of contained data.
   </para>
   <section>
-    <title>Byte order</title>
+    <title>Byte Order</title>
     <para>
       All data is stored in little-endian (also known as LSB or Intel) byte
       order.
     </para>
   </section>
   <section>
-    <title>File header</title>
+    <title>File Header</title>
     <para>
       The file header consists of four bytes (magic number) with the
       values of ASCII characters <literal>GWYP</literal>.
@@ -37,7 +37,7 @@
     </para>
   </section>
   <section>
-    <title>File data</title>
+    <title>File Data</title>
     <para>
       The rest of the file consists of a serialized <type>GwyContainer</type>
       object that contains all the data.  It is stored exactly the same way
@@ -45,7 +45,7 @@
     </para>
   </section>
   <section>
-    <title>Object layout</title>
+    <title>Object Layout</title>
     <para>
       An object consists of three parts (in the following order):
       <itemizedlist>
@@ -84,7 +84,7 @@
     </para>
   </section>
   <section>
-    <title>Data types</title>
+    <title>Data Types</title>
     <para>
       Available atomic data types are listed in following table:
     </para>
@@ -198,7 +198,7 @@
     </informaltable>
   </section>
   <section>
-    <title>Particular objects</title>
+    <title>Particular Objects</title>
     <para>
       To be written.
     </para>

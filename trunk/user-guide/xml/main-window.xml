@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="main-window">
-  <title>Main window</title>
+  <title>Main Window</title>
   <para>
     The main window is one of two Gwyddion parts that appears after start with no parameters. Main window consist of set of
     Gwyddion menus: <menuchoice><guimenu>File</guimenu></menuchoice>, <menuchoice><guimenu>Edit</guimenu></menuchoice>,

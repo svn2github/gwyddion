@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="managing-files">
-  <title>Managing files</title>
+  <title>Managing Files</title>
   <para>
     Gwyddion uses its internal data format (.gwy) to store data. The main
     advantage of this format is fact, that it stores complete state of

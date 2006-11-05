@@ -38,7 +38,7 @@
   </section> -->
 
 <section id="features-inttrans">
-  <title>Integral transforms</title>
+  <title>Integral Transforms</title>
   <para>
     Currently, two different integral transforms can be used within Gwyddion
     for 2D data processing.
@@ -51,7 +51,7 @@
     </menuchoice>.
   </para>
   <section>
-    <title>Fourier transform</title>
+    <title>Fourier Transform</title>
     <para>
       Fourier transform can be accessed within FFT module which implements Fast Fourier transform.
       Fourier transform decomposes signal into its harmonic compoments, it is therefore useful while studying
@@ -130,7 +130,7 @@
     </figure>
   </section>
   <section>
-    <title>Wavelet transform</title>
+    <title>Wavelet Transform</title>
     <para>
       The wavelet transform is a transform similar to the Fourier transform (or much more to the windowed Fourier transform)
       with a completely different merit function. The main difference is this: Fourier transform decomposes the signal into
@@ -183,7 +183,7 @@
       menu.
     </para>
     <section>
-      <title>Discrete wavelet transform</title>
+      <title>Discrete Wavelet Transform</title>
       <para>
         The discrete wavelet transform (DWT) is an implementation of the wavelet transform using a discrete set of the wavelet scales
         and translations obeying some defined rules. In other words, this transform decomposes the signal into mutually orthogonal set
@@ -331,7 +331,7 @@
       </para>
     </section>
     <section>
-      <title>Continuous wavelet transform</title>
+      <title>Continuous Wavelet Transform</title>
       <para>
         Continuous wavelet transform (CWT) is an implementaion of the wavelet transform using an arbitrary scales and almost arbitrary
         wavelets. The wavelets used are not orthogonal and the data obtained by this transform are highly correlated. For the disctete
