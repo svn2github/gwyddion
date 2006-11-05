@@ -18,9 +18,12 @@
       <surname>Anderson</surname>
     </author>
     <copyright>
-      <year>2004, 2005, 2006</year>
+      <year>2004–2006</year>
       <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
     </copyright>
+    <releaseinfo>
+      Version 2006-11-05.  This guide is work in progress.
+    </releaseinfo>
     <legalnotice id="legalnotice">
       <para>
         Permission is granted to copy, distribute and/or modify this document

@@ -471,7 +471,7 @@ make install</userinput></literallayout>
           compiling <application>Gwyddion</application> the common Unix way,
         </listitem>
         <listitem>
-          using <ulink url="http://www.macports.org/">Macports</ulink>
+          using <ulink url="http://www.macports.org/">MacPorts</ulink>
           (formerly Darwinports) and building from a Portfile.
         </listitem>
       </itemizedlist>
@@ -480,13 +480,18 @@ make install</userinput></literallayout>
       <title>Preparation</title>
       <para>
         To install and run <application>Gwyddion</application> you need the
-        XCode Tools and X (SDK and App) installed. They where located on your
-        CDs/DVDs.
-        <!-- XXX rowue: look where you find it -->
+        Xcode Tools and X (SDK and App) installed. They where located on your
+        CDs/DVDs. The Xcode Tools where located on the first DVD as
+        XcodeTools.mpkg below Xcode Tools, the X11SDK is located as
+        X11SDK.pkg below the Packages Folder within Xcode Tools. X11 is
+        localted as X11User.pkg below
+        <filename>System/Installation/Packages</filename> even on the first
+        DVD. If you have an CD Set the Discs may differ.
+        <!-- XXX rowue: look where you find it on ppc -->
         Also you should have some experience using
-        <application>Terminal.App</application>.  All the commands in the
+        <application>Terminal.app</application>.  All the commands in the
         the rest of this section are to be entered and run in
-        <application>Terminal.App</application>.
+        <application>Terminal.app</application>.
       </para>
       <para>
         See <link linkend="installation-dependencies">installation
@@ -500,7 +505,7 @@ make install</userinput></literallayout>
               <row>
                 <entry>Package</entry>
                 <entry>Fink</entry>
-                <entry>Macports</entry>
+                <entry>MacPorts</entry>
               </row>
             </thead>
             <tbody>
@@ -554,19 +559,24 @@ make install</userinput></literallayout>
       </para>
     </section>
     <section>
-      <title>Macports</title>
+      <title>MacPorts</title>
       <para>
-        <!-- XXX: a few more words about macports -->
+        MacPorts is an <application>Port</application> based System for
+        porting and installing open source/gnu software to OS X. It's based
+        on using installation files called "Portfiles" which where describing
+        the steps to compile and install an application. So it's far easy
+        to port software to OS X using MacPorts but every computer has to 
+        compile the application. 
         Get and install
-        <ulink url="http://www.macports.org/">Macports</ulink>.
-        After you installed Macports, run
+        <ulink url="http://www.macports.org/">MacPorts</ulink>.
+        After you installed MacPorts, run
         <informalexample>
           <userinput>sudo port selfupdate</userinput>
         </informalexample>
-        to update Macports to the latest version.
+        to update MacPorts to the latest version.
       </para>
       <para>
-        <application>Gwyddion</application> has been submitted to Macports
+        <application>Gwyddion</application> has been submitted to MacPorts
         therefore it should be eventually installable simply
         <informalexample>
           <userinput>sudo port install gwyddion</userinput>
@@ -582,29 +592,32 @@ make install</userinput></literallayout>
         </informalexample>
         and wait until everything builds (it will take some time).
         The result will appear in <filename>/opt/local</filename> as any
-        other Macports software.
+        other MacPorts software.
       </para>
     </section>
     <section>
       <title>Running</title>
       <para>
-        Start <application>X11.App</application> and type
-        in <application>Terminal.App</application>
+        Start <application>X11.app</application> and type
+        in <application>Terminal.app</application>
         <informalexample>
           <userinput>export DISPLAY=":0"</userinput>
         </informalexample>
         Then run <application>Gwyddion</application> from the folder it
         was installed to.  This is typically
-        <filename>/opt/local/bin</filename> for Macports and
+        <filename>/opt/local/bin</filename> for MacPorts and
         <filename>/usr/local/bin</filename> for Fink.  So for example for
-        Macports run:
+        MacPorts run:
         <informalexample>
           <userinput>/usr/local/bin/gwyddion</userinput>
         </informalexample>
-        You can also configure <application>X11.App</application>
+        You can also configure <application>X11.app</application>
         to run <application>Gwyddion</application> via:
-        <!-- XXX: what these names denote? what should one do? -->
-        X11.App, Applications, Customize.
+        Locate X11.app in your dock, open the menu, choose Applications,
+        choose Customize from the next menu. Here you can choose add and
+        enter the name (gwyddion for example) as "Menu Name" and the complete
+        path to gwddion (/usr/local/bin/gwyddion f.e.) as "Command". After this you
+        can choose gwyddion from the X11 menue.
       </para>
     </section>
   </section>
