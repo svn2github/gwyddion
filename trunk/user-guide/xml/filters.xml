@@ -11,10 +11,10 @@
     </title>
     <para>
       The <link linkend="basic_filters">Basic Filters</link> tool
-      lets you apply several simple
-      filters to your image. This can be very useful for data denoising; however,
-      the real measured data will get altered in the process, so great care
-      should be taken not to destroy important features of the image.
+      lets you apply several simple filters to your image. This can be very
+      useful for data denoising; however, the real measured data will get
+      altered in the process, so great care should be taken not to destroy
+      important features of the image.
     </para>
     <itemizedlist>
       <listitem>
@@ -40,6 +40,18 @@
       <listitem>
         Maximum filter – also known as dilate filter, replaces values by
         maximum found in neighborhood.
+      </listitem>
+      <listitem>
+        Dechecker filter – a smoothing filter specially designed to remove
+        checker pattern from the image while preserving other details.  It is
+        a convolution filter with kernel
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-dechecker.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
       </listitem>
     </itemizedlist>
     <tip>
