@@ -1,13 +1,23 @@
 body {
+  margin: 0px 18px;
+  padding: 0px;
   background-color: white;
   color: black;
 }
-div.navheader, div.navfooter {
-  background-color: #f6cd7a;
-  border: 1px solid #ab2f11;
-  margin-top: 12px;
-  padding-left: 12px;
-  padding-right: 12px;
+@media screen {
+  div.navheader, div.navfooter {
+    background-color: #f6cd7a;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin: 0px -18px;
+  }
+  div.navheader { border-bottom: 1px solid #ab2f11; }
+  div.navfooter { border-top: 1px solid #ab2f11; margin-top: 12px; }
+}
+@media print {
+  div.navheader, div.navfooter {
+    visibility: collapse; display: none;
+  }
 }
 .math { font-style: italic; }
 a { text-decoration: underline; }
