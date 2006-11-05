@@ -57,6 +57,7 @@
     <xi:include href="data-browser.xml"/>
     <xi:include href="managing-files.xml"/>
     <xi:include href="data-windows.xml"/>
+    <xi:include href="graph-windows.xml"/>
     <xi:include href="modules-tools.xml"/>
     <xi:include href="presentations-masks.xml"/>
     <xi:include href="selections.xml"/>

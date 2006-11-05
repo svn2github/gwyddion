@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="graph-windows">
+  <title>Graph Window</title>
+  <para>
+    Graph window is used for 1D data processing. You can get it only by using
+    appropriate tools or modules that extract some graphs from height field
+    data. Currently, it is not possible to load graphs into application as
+    the main intent of Gwyddion is to provide tools for analyzing height
+    fields, not graphs.
+  </para>
+  <para>
+    Graph window consist of two tabs representing graphical and data view on
+    the 1D data. There are several tools connected with viewing 1D data
+    directly in the graph window toolbar, namely zoom buttons and logarithmic
+    axis buttons. To reach all the possible operations use
+    <menuchoice>
+      <guimenu>Graph...</guimenu>
+    </menuchoice>
+    menu at the Gwyddion main window.
+  </para>
+  <figure float="0">
+    <title>
+      A Graph window with two profiles.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="graph_window.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</section>
