@@ -3,6 +3,7 @@ body {
   padding: 0px;
   background-color: white;
   color: black;
+  font-family: serif;
 }
 @media screen {
   div.navheader, div.navfooter {
@@ -26,3 +27,7 @@ a:visited { color: #5b1508; }
 a:hover { color: #ab2f11; }
 img { border: 1px solid white; }
 a img:hover { border: 1px solid #ab2f11; }
+h1, h2, h3, h4, div.navheader, div.navfooter { font-family: sans-serif; }
+h1 { margin-bottom: 6px; }
+h2, h3, h4 { margin-bottom: 0px; }
+h3.author { margin-top: 2px; }
