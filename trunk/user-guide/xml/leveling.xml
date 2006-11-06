@@ -4,8 +4,6 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-leveling">
   <title>Data Leveling and Background Subtraction</title>
-  <!--TODO: Need a section for "Fit Sphere..."-->
-
   <!--TODO: Clean up section id's and links -->
   <section>
     <title>Leveling</title>
@@ -168,8 +166,30 @@
         </menuchoice>
       </para>
       <para>
-        Fits data by a polynomial of the given order (generally the order can be
-        different for X and Y axis) and subtracts this polynomial.
+        Fits data by a polynomial of the given order and subtracts this
+        polynomial.  In the <guilabel>Independent degree</guilabel> mode
+        the horizontal and vertical polynomial orders can be generally set
+        separately, i.e. the fitted polynomial is
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-polynomial-independent-degree.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        where <phrase role="math">m</phrase> and <phrase role="math">n</phrase>
+        are the selected horizontal and vertical polynomial degrees,
+        respectively.  In the <guilabel>Limited total degree</guilabel> mode
+        the fitted polynomial is
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-polynomial-total-degree.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        where <phrase role="math">n</phrase> is the selected total polynomial
+        degree.
       </para>
     </section>
     <section>
@@ -214,9 +234,9 @@
         </menuchoice>
       </para>
       <para>
-        Fits part of sphere surface on the data. Sphere orientation (i. e. center position)
-        and initial fit values can be preset before fitting. Marquardt-Levenberg fitting
-        routine is used to calculate the result.
+        Fits part of sphere surface on the data. Sphere orientation (i. e.
+        center position) and initial fit values can be preset before fitting.
+        Marquardt-Levenberg fitting routine is used to calculate the result.
       </para>
     </section>
    </section>
