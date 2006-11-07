@@ -22,7 +22,8 @@
     Within Gwyddion, there are different methods of fractal analysis
     implemented within
   <menuchoice>
-    <guimenu>Data Process</guimenu><guisubmenu>Statistics</guisubmenu>
+    <guimenu>Data Process</guimenu>
+    <guisubmenu>Statistics</guisubmenu>
     <guimenuitem>Fractal analysis</guimenuitem>
   </menuchoice>.
   </para>
@@ -125,7 +126,7 @@
     1995, 51
   </para>
   <para>
-    [2] W. Zahn, A. Z\uffffsch: The dependance of fractal dimension on
+    [2] W. Zahn, A. Zösch: The dependance of fractal dimension on
     measuring conditions of scanning probe microscopy. Fresenius J Analen Chem
     (1999) 365: 168-172
   </para>
@@ -141,7 +142,7 @@
     A 66,1998, 891-895
   </para>
   <para>
-    [5] W. Zahn, A. Z\uffffsch: Characterization of thin film surfaces by
+    [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
     fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
   </para>
   </section>
