@@ -69,7 +69,7 @@ dist:
 
 dist-xhtml: xhtml
 	@fail=; \
-	for x in $$(sed 's/.*<imagedata [^>]*\<fileref="\([^/"]*\)".*/\1/;t;d' xml/*.xml); do \
+	for x in $$(sed -e 's/.*<imagedata [^>]*fileref="\([^/"]*\)".*/\1/' -e t -e d xml/*.xml); do \
 		if test \! -f xhtml/$$x; then \
 			echo Missing image: $$x 1>&2; \
 			fail=fail; \
