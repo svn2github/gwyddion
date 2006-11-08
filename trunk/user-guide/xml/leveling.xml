@@ -72,7 +72,7 @@
     <section>
       <title id="process-level-three">
         Three Point Leveling Tool
-        <guiicon><inlinegraphic fileref="icon_3pt_level.png"/></guiicon>
+        <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </title>
       <para>
         The <link linkend="process-level-three">Three Point Leveling</link>

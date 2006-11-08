@@ -7,7 +7,7 @@
   <section id="basic_filters">
     <title>
       Basic Filters Tool
-      <guiicon><inlinegraphic fileref="icon_filters.png"/></guiicon>
+      <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
     </title>
     <para>
       The <link linkend="basic_filters">Basic Filters</link> tool

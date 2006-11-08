@@ -19,7 +19,7 @@
   <section id="remove_spots">
     <title>
       Remove Spots Tool
-      <guiicon><inlinegraphic fileref="icon_remove_spots.png"/></guiicon>
+      <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
     </title>
     <para>
       The <link linkend="remove_spots">Remove Spots</link> tool can be used

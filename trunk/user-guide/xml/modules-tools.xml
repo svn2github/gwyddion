@@ -16,91 +16,179 @@
     tools button rows located in the main window. Gwyddion includes these
     tools:
   </para>
-  <itemizedlist>
-    <listitem id="tool-read-value">
-      <para>
-        Read value under cursor – reads x,y,z values at the position of mouse
-        click. You can average more points around the point where you
-        clicked.
-      </para>
-    </listitem>
-    <listitem id="tool-distance">
-      <para>
-        Measure distances – similarly to Read value tool enables user to read
-        distance and angle between points in the data field.
-      </para>
-    </listitem>
-    <listitem id="tool-polynom">
-      <para>
-        Fit X/Y profiles by polynomial – very frequently used tool for basic
-        processing of raw SPM data. Profiles taken in the fast scanning axis
-        (usually X-axis) can be mutually shifted by some amount or having
-        slightly different slope. Fit X/Y profiles tool can fix this
-        discrepancy.
-      </para>
-    </listitem>
-    <listitem id="tool-crop">
-      <para>
-        Crop – cuts part of the data and puts it to new window.
-      </para>
-    </listitem>
-    <listitem id="tool-level3">
-      <para>
-        Three-point leveling – levels data by plane obtained by clicking on
-        three points within data window.
-      </para>
-    </listitem>
-    <listitem id="tool-stats">
-      <para>
-        Statistical quantities – computes basic statistical quantities (RMS,
-        Ra, etc.) from selection of full data field.
-      </para>
-    </listitem>
-    <listitem id="tool-sfunctions">
-      <para>
-        Statistical functions – computes basic statistical functions
-        (distribution of heights, autocorrelation function, etc.) from
-        selection of full data field.
-      </para>
-    </listitem>
-    <listitem id="tool-profile">
-      <para>
-        Profile extraction – extracts profiles of the data field and puts
-        them to separate graphs. These graphs can be further processed with
-        commands from the Graph menu.
-      </para>
-    </listitem>
-    <listitem id="tool-filters">
-      <para>
-        Basic filters – mean, median, conservative denoise and similar simple
-        filters to reduce noise in the data.
-      </para>
-    </listitem>
-    <listitem id="tool-remove-grains">
-      <para>
-        Manually remove grains – remove continuous parts of the mask by
-        clicking on mask point.
-      </para>
-    </listitem>
-    <listitem id="tool-remove-spots">
-      <para>
-        Manually remove spots – draw rectangle around defect in AFM data
-        image and remove the defect using chosen interpolation method.
-      </para>
-    </listitem>
-    <listitem id="tool-color-range">
-      <para>
-        Stretch color range – enables user to change the false color
-        representation range (by default from data minimum to data maximum).
-      </para>
-    </listitem>
-    <listitem id="tool-mask-editor">
-      <para>
-        Mask editor – manual editing of masks: creation, exclusion,
-        intersection, inversion, growing and shrinking, …
-      </para>
-    </listitem>
-  </itemizedlist>
+  <variablelist>
+    <varlistentry>
+      <term>
+        Read Value
+        <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-read-value">
+        <para>
+          Reads
+          <phrase role="math">x</phrase>,
+          <phrase role="math">y</phrase>,
+          <phrase role="math">z</phrase> values at the position of mouse
+          click. You can average more points around the point where you
+          clicked.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Distance
+        <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-distance">
+        <para>
+          Measures distances – similarly to Read value it tool enables user to
+          measure horizontal, vertical and Euclidean distance and angle between
+          points in the data field.  In addition it displays the difference of
+          data values between points.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Polynomial Profile Fit
+        <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-polynom">
+        <para>
+          Fits horizontal or vertical profiles by polynomial – very frequently
+          used tool for basic processing of raw SPM data. Profiles taken in the
+          fast scanning axis (usually <phrase role="math">x</phrase>-axis)
+          can be mutually shifted by some amount or having slightly different
+          slope. Polynomial Profile Fit tool can fix this discrepancy.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Crop
+        <guiicon><inlinegraphic fileref="gwy_crop-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-crop">
+        <para>
+          Cuts part of the data, possibly putting the result to new window.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Filter
+        <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-filters">
+        <para>
+          Basic filters – mean, median, conservative denoise, minimum, maximum
+          and similar simple filters to reduce noise in the data.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Three Point Level
+        <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-level3">
+        <para>
+          Levels data by plane obtained by clicking on three points within
+          data window.  The three values can be averaged over a small
+          area around the selected point.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Statistical Quantities
+        <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-stats">
+        <para>
+          Computes basic statistical quantities (RMS, Ra, minimum, maximum,
+          projected and surface area, etc.) from a selection of full data
+          field. It can also calculate them only the masked area, or even
+          combine these two types of selection of area of interest.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Statistical Functions
+        <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-sfunctions">
+        <para>
+          Computes basic statistical functions (distribution of heights or
+          slopes, autocorrelation function, power spectrum density function,
+          etc.) from a selection of full data field.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Profile
+        <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-profile">
+        <para>
+          Extracts profiles of the data field and puts them to separate graphs.
+          These graphs can be further processed with commands from the
+          <guimenu>Graph</guimenu> menu.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Grain Remover
+        <guiicon><inlinegraphic fileref="gwy_grains_remove-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-remove-grains">
+        <para>
+          Removes continuous parts of the mask by clicking on mask point and/or
+          interpolates (removes) data under a continuous part of mask.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Spot Remover
+        <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-remove-spots">
+        <para>
+          Manually removes spots.  Select a point on a data window, mark
+          an area to interpolate on the zoomed view and remove the defect
+          using chosen interpolation method.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Color Range
+        <guiicon><inlinegraphic fileref="gwy_color_range-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-color-range">
+        <para>
+          Stretches color range or changes false color mapping type.
+          It enables the user to change the false color representation range
+          (by default from data minimum to data maximum).
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Mask Editor
+        <guiicon><inlinegraphic fileref="gwy_mask_editor-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-mask-editor">
+        <para>
+          Manual editing of masks: creation, exclusion, intersection,
+          inversion, growing and shrinking, …
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
   <para>
     Tool dialogs can be closed (or more precisely hidden, as the current tool
     is still active even if its dialog is not visible), beside activating the

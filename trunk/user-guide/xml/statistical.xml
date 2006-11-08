@@ -44,7 +44,7 @@
   <section id="stat_quantities">
     <title>
       Statistical Quantities Tool
-      <guiicon><inlinegraphic fileref="icon_stat_quantities.png"/></guiicon>
+      <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
     </title>
     <para>
       Statistical quantities include basic properties of the height values
@@ -154,7 +154,7 @@
   <section id="stat_functions">
     <title>
       Statistical Functions Tool
-      <guiicon><inlinegraphic fileref="icon_stat_functions.png"/></guiicon>
+      <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
     </title>
     <para>
       One-dimensional statistical functions can be accessed by using the
