@@ -68,6 +68,14 @@ dist:
 	rm -rf $(DISTNAME)
 
 dist-xhtml: xhtml
+	@fail=; \
+	for x in $$(sed 's/.*<imagedata [^>]*\<fileref="\([^/"]*\)".*/\1/;t;d' xml/*.xml); do \
+		if test \! -f xhtml/$$x; then \
+			echo Missing image: $$x 1>&2; \
+			fail=fail; \
+		fi; \
+	done; \
+	test -z "$$fail"
 	-rm -rf $(DISTNAMEXHTML)
 	cp -a xhtml $(DISTNAMEXHTML)
 	tar -zcf $(DISTNAMEXHTML).tar.gz $(DISTNAMEXHTML)
@@ -80,7 +88,7 @@ version:
 
 distclean: clean
 	cd ./formulas && $(GMAKE) distclean
-	-rm -fr Makefile config.status config.log autom4te.cache
+	-rm -fr Makefile aclocal.m4 config.status config.log autom4te.cache
 
 help:
 	@echo "xhtml        Compile User guide to XHTML"
