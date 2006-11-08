@@ -56,6 +56,18 @@
          four data values.
        </listitem>
      </itemizedlist>
+     <figure float="0">
+       <title>
+         Demonstration of the available interpolation types on an equidistant
+         one-dimensional data.  Values outside the displayed abscissa range
+         (used in higher order interpolation types) are zero.
+       </title>
+       <mediaobject>
+         <imageobject>
+           <imagedata fileref="interpolation.png" format="PNG"/>
+         </imageobject>
+       </mediaobject>
+     </figure>
    </section>
    <section>
      <title>Basic 2D Data Operation Modules</title>
