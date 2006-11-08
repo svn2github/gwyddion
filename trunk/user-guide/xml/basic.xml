@@ -5,23 +5,23 @@
 <section id="features-basic">
   <title>Basic Operations</title>
   <para>
-    Basic geometrical operations are the core of any data processing
-    programme. Also Gwyddion has a wide set of modules and functions for data
-    scaling, rotation, resampling or profile extraction. In this section the
-    main algorithms behind these functions will be described and the list of
+    Basic geometrical operations are the core of any data processing program.
+    Also Gwyddion has a wide set of modules and functions for data scaling,
+    rotation, resampling or profile extraction. In this section the main
+    algorithms behind these functions will be described and the list of
     available modules will be presented.
   </para>
   <section>
      <title>Interpolation</title>
      <para>
-     A large number of the morphological operations in Gwyddion are dependent on
-     data interpolation. As the SPM data are relatively coarsely sampled 
-     compared to measured details (full images are typically only a few hundred
-     pixels in width and height), the interpolation method used can
-     become critical for proper quantitative analysis of data properties.
-     There are several interpolation methods in 1D and 2D implemented in 
-     Gwyddion and the user can choose which method to use for most of the 
-     modules using interpolation.
+       A large number of the morphological operations in Gwyddion are
+       dependent on data interpolation.  As the SPM data are relatively
+       coarsely sampled compared to measured details (full images are
+       typically only a few hundred pixels in width and height), the
+       interpolation method used can become critical for proper quantitative
+       analysis of data properties. There are several interpolation methods
+       in 1D and 2D implemented in Gwyddion and the user can choose which
+       method to use for most of the modules using interpolation.
      </para>
      <para>
        Here, we describe 1D interpolation method principles. Nearly all
@@ -29,7 +29,7 @@
        currently. The interpolation methods that can be applied on data are as
        follows
      </para>
-     <orderedlist>
+     <itemizedlist>
        <listitem>
          Round interpolation is the simplest method - it just takes round
          value of the expected position and finds therefore the closest
@@ -55,21 +55,21 @@
          Nearest neighbour approximation is a weighted average of the closest
          four data values.
        </listitem>
-     </orderedlist>
+     </itemizedlist>
    </section>
    <section>
-     <title>Basic 2D data operation modules</title>
+     <title>Basic 2D Data Operation Modules</title>
      <para>
        Within basic modules it is possible to perform the following
        operations with 2D data field:
      </para>
-     <orderedlist>
+     <itemizedlist>
        <listitem>
          Scale data using chosen result dimension and chosen interpolation
          method by
          <menuchoice>
            <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic operations</guisubmenu>
+           <guisubmenu>Basic Operations</guisubmenu>
            <guimenuitem>Scale</guimenuitem>
          </menuchoice>.
        </listitem>
@@ -81,29 +81,65 @@
          of the rotate modules:
          <menuchoice>
            <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic operations</guisubmenu>
+           <guisubmenu>Basic Operations</guisubmenu>
            <guimenuitem>Rotate clockwise</guimenuitem>
-         </menuchoice>, or
+         </menuchoice>,
+         or
          <menuchoice>
            <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic operations</guisubmenu>
+           <guisubmenu>Basic Operations</guisubmenu>
            <guimenuitem>Rotate anticlockwise</guimenuitem>
-         </menuchoice>, or
+         </menuchoice>,
+         or
          <menuchoice>
            <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic operations</guisubmenu>
+           <guisubmenu>Basic Operations</guisubmenu>
            <guimenuitem>Rotate</guimenuitem>
          </menuchoice>.
        </listitem>
        <listitem>
-         Invert data around X, Y or Z axis using the Invert module:
+         Flip data horizontally (i.e. about the vertical axis) and vertically
+         (i.e. about the horizontal axis) with
          <menuchoice>
            <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic operations</guisubmenu>
+           <guisubmenu>Basic Operations</guisubmenu>
+           <guimenuitem>Flip Horizontally</guimenuitem>
+         </menuchoice>
+         and
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic Operations</guisubmenu>
+           <guimenuitem>Flip Vertically</guimenuitem>
+         </menuchoice>,
+         respectively.
+       </listitem>
+       <listitem>
+         Flip data about the center with
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic Operations</guisubmenu>
+           <guimenuitem>Flip Both</guimenuitem>
+         </menuchoice>.
+       </listitem>
+       <listitem>
+         Invert data about the mean value the <guimenuitem>Invert
+           Value</guimenuitem> function:
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic Operations</guisubmenu>
            <guimenuitem>Invert</guimenuitem>
          </menuchoice>.
        </listitem>
-     </orderedlist>
+       <listitem>
+         Upsample data to make pixels square with
+         <menuchoice>
+           <guimenu>Data Process</guimenu>
+           <guisubmenu>Basic Operations</guisubmenu>
+           <guimenuitem>Square Samples</guimenuitem>
+         </menuchoice>.
+         (This is no-op on most data as they have square pixels.)
+       </listitem>
+     </itemizedlist>
      <para>
        Moreover, calibration module can be used for changing the information
        about image physical dimensions and changing the data values
@@ -134,4 +170,3 @@
      </para>
   </section>
 </section>
-
