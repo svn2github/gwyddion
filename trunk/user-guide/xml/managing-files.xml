@@ -9,11 +9,11 @@
     advantage of this format is fact, that it stores complete state of
     processing of concrete data, including selections and other tool and
     processing function settings. It can also store more channels and graphs
-    that have any relation in one single file. Therefore we recommned to use this format
-    for saving processed files. If you open our example files, you can see
-    that each one is plotted in different false color palette. This is direct
-    consequence of the fact that Gwyddion stores full state of the data
-    window including its palette.
+    that have any relation in one single file. Therefore we recommned to use
+    this format for saving processed files. If you open our example files,
+    you can see that each one is plotted in different false color palette.
+    This is direct consequence of the fact that Gwyddion stores full state of
+    the data window including its palette.
   </para>
   <para>
     Other data file formats can be handled with appropriate loading and
@@ -213,7 +213,7 @@
             <footnote>
               <para>
                 And others, namely for import. The exact list depends on
-                formats supported by libraries on particular platform.
+                formats supported by libraries on a particular platform.
               </para>
             </footnote>
           </entry>
@@ -223,7 +223,7 @@
             Yes
             <footnote>
               <para>
-                Though this is usually lossy. Export to pixmap graphics is
+                Alhough this is usually lossy. Export to pixmap graphics is
                 intended for presentational purpose mainly.
               </para>
             </footnote>
@@ -323,5 +323,71 @@
       </tbody>
     </tgroup>
   </table>
+  <section>
+    <title>File Loading</title>
+    <para>
+      By default, Gwyddion detects the file format automatically based on
+      file contents (i.e. file names and extensions are irrelevant).  This
+      usually works well and you will hopefully never need to change it.
+      Please see <link linkend="raw-file-import">Raw Data File Import</link>
+      for details of import of data from unsupported formats and from
+      <link linkend="pixmap-file-import">pixmap images</link>.
+    </para>
+    <para>
+      If the automatic detection fails it is possible to enforce an attempt
+      to load the file as a particular format by expanding the <guilabel>File
+        type</guilabel> selector and choosing a file type.  However, if the
+      file format is not detected automatically it is very unlikely the file
+      can be loaded.
+    </para>
+    <para>
+      By enabling <guilabel>Show only loadable files of selected
+        type</guilabel> the file list can be limited only to the selected
+      type.  The file type label then indicates the filtering by appending
+      <guilabel>filtered</guilabel> to the end.  In the case of
+      <guilabel>Automatically detected</guilabel> file type this means
+      the list to files is limited to those Gwyddion thinks it can load.
+      This can be very convenient, on the other hand it can slow down listing
+      of directories with many files.
+    </para>
+    <para>
+      Once a file type is selected it remains selected even in subsequent
+      file open dialog invocations.  If you seem to be suddenly unable to
+      load a file, please check the file type is set to the corresponding
+      type, or to <guilabel>Automatically detected</guilabel>.
+    </para>
+    <figure>
+      <title>
+        File open dialog with expanded file type options.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="file-open.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+  <section>
+    <title>File Saving</title>
+    <para>
+      Much of the previous section applies to file saving too.  One of the
+      differences is the reliability of automatic file type determination.
+      While loading can and does examine the file contents, saving depends
+      on file name and extension.  Combined with the large number of
+      different file types using the same extension as
+      <filename>.img</filename>, <filename>.afm</filename> or
+      <filename>.dat</filename> it gives raise to ambiguities.  Select the
+      file type explicitly upon save if you are unsure.
+    </para>
+    <para>
+      Since the only file type able to fully represent Gwyddion data
+      structures is its native data format, saving to
+      a <filename>.gwy</filename> file is the only actual saving.  Saving to
+      other file formats essentially consists of exporting of a limited
+      subset of the data, typically only the active channel (without masks
+      and presentations).  Therefore it does <emphasis>not</emphasis>
+      change the file name of the current file to the just saved file name.
+    </para>
+  </section>
 </section>
 

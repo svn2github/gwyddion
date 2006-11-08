@@ -7,13 +7,12 @@
   <para>
     Both raw ASCII and binary data files and files in unsupported formats
     can be imported with rawfile module – with some effort.
-    It automatically appears when you try to open a file in an unknown
-    format, however it can be also explicitely invoked as
-    <menuchoice>
-      <guimenu>File</guimenu>
-      <guisubmenu>Import From</guisubmenu>
-      <guimenuitem>Raw data files</guimenuitem>
-    </menuchoice>.
+    Raw data import can be explicitly invoked by selecting
+    <guilabel>Raw data files</guilabel> type in the file open dialog.
+    It can be also set to appear automatically when you try to open a file
+    in an unknown format.  This is controlled in the raw file dialog by
+    option <guilabel>Automatically offer raw data import of unknown
+      files</guilabel>.
   </para>
   <section>
     <title>Information</title>
@@ -61,7 +60,7 @@
           <term><guilabel>Z-scale (per sample unit)</guilabel></term>
           <listitem>
             <para>
-              The number to multiply raw data with to get physical values.
+              The factor to multiply raw data with to get physical values.
             </para>
           </listitem>
         </varlistentry>
@@ -256,6 +255,19 @@
       specified name, <guibutton>Delete</guibutton> deletes selected preset,
       and <guibutton>Load</guibutton> replaced current import setting with
       selected preset.
+    </para>
+  </section>
+  <section id="pixmap-file-import">
+    <title>Import from Graphics Formats</title>
+    <para>
+      Importing data from image formats such as PNG, TIFF, JPEG or BMP is
+      similar to import from raw/unknown file formats, only simplier.
+      It is simplier because the file structure is known, although its
+      interpretation is unknown.  The Pixmap import dialog therefore
+      resembles the <guilabel>Information</guilabel> tab of raw file,
+      requiring you to set the physical dimensions and value scale manually.
+      Note the physical dimensions suggested there are not obtained from
+      the file, they are simply the last values used.
     </para>
   </section>
 </section>
