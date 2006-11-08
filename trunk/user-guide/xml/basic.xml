@@ -155,13 +155,13 @@
      <title>Profile Extraction</title>
      <para>
        Profile extraction tool can be accessed from the tools menu bar. You
-       can use mouse to drag several profiles in the image that can
-       be further moved and adjusted. Profile graph preview can be seen in
-       the profile tool dialog. Profiles can be of different "thickness"
-       which means that more neighbour data perpendicular to profile
-       direction are used for evaluation of one profile point for thicker
-       profiles. This can be very useful for noise suppression while
-       measuring some regular objects.
+       can use mouse to drag several profiles in the image that can be
+       further moved and adjusted. Profile graph preview can be seen in the
+       profile tool dialog. Profiles can be of different
+       <quote>thickness</quote> which means that more neighbour data
+       perpendicular to profile direction are used for evaluation of one
+       profile point for thicker profiles. This can be very useful for noise
+       suppression while measuring some regular objects.
      </para>
      <para>
        After profiles are chosen, they can be extracted to graphs (separate

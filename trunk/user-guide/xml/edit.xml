@@ -13,27 +13,28 @@
     SPM data. In principal, most of the data processing modules change the data
     in one way or another. However, in this section we would like to describe
     the modules and tools that are specifically designed to correct local
-    defects in an image. The functions below remove "bad" data from an image,
-    and then fill it in using an interpolation algorithm.
+    defects in an image. The functions below remove <quote>bad</quote> data
+    from an image, and then fill it in using an interpolation algorithm.
   </para>
-  <section id="remove_spots">
+  <section id="remove-spots">
     <title>
       Remove Spots Tool
       <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
     </title>
     <para>
-      The <link linkend="remove_spots">Remove Spots</link> tool can be used
-      for removing very
-      small parts of the image that are considered a scanning error, dust particle
-      or anything else that should not be present in the data. Note that doing so
-      can dramatically alter the resulting statistical parameters of the surface,
-      so be sure not to remove things that are really present on the surface.
+      The <link linkend="remove-spots">Remove Spots</link> tool can be used
+      for removing very small parts of the image that are considered
+      a scanning error, dust particle or anything else that should not be
+      present in the data. Note that doing so can dramatically alter the
+      resulting statistical parameters of the surface, so be sure not to
+      remove things that are really present on the surface.
     </para>
     <para>
-      While using this tool you can pick up position of the spot to magnify its neighbourhood
-      in the tool window. Then, in the tool window, select a rectangle around the area that should
-      be removed. You can then select one of several interpolation methods for
-      creating data in place of the former "spot":
+      While using this tool you can pick up position of the spot to magnify
+      its neighbourhood in the tool window. Then, in the tool window, select
+      a rectangle around the area that should be removed. You can then select
+      one of several interpolation methods for creating data in place of the
+      former <quote>spot</quote>:
     </para>
     <itemizedlist>
       <listitem>
@@ -75,10 +76,11 @@
       </menuchoice>
     </para>
     <para>
-      Scars (or stripes) are parts of the image that are corrupted by a very common
-      scanning error: local fault of the closed loop. Line defects are usually
-      parallel to the fast scanning axis in the image. This module will automatically
-      find and remove these scars, using neighbourhood lines to "fill-in" the gaps.
+      Scars (or stripes, strokes) are parts of the image that are corrupted
+      by a very common scanning error: local fault of the closed loop. Line
+      defects are usually parallel to the fast scanning axis in the image.
+      This module will automatically find and remove these scars, using
+      neighbourhood lines to <quote>fill-in</quote> the gaps.
     </para>
   </section>
   <section id="mark_scars">

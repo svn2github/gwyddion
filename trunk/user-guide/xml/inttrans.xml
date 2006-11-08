@@ -150,7 +150,7 @@
     </para>
     <para>
       As it is seen, the Wavelet transform is in fact an infinite set of various transforms, depending on the merit function used
-      for its computation. This is the main reason, why we can hear the term "wavelet transform" in very different situations and
+      for its computation. This is the main reason, why we can hear the term <quote>wavelet transform</quote> in very different situations and
       applications. There are also many ways how to sort the types of the wavelet transforms. Here we show only the division based
       on the wavelet orthogonality. We can use <emphasis>orthogonal wavelets</emphasis> for discrete wavelet transform development
       and <emphasis>non-orthogonal wavelets</emphasis> for continuous wavelet transform developement. These two transforms have

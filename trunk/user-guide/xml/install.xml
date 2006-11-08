@@ -561,10 +561,10 @@ make install</userinput></literallayout>
       <para>
         MacPorts is an <application>Port</application> based System for
         porting and installing open source/gnu software to OS X. It's based
-        on using installation files called "Portfiles" which where describing
-        the steps to compile and install an application. So it's far easy
-        to port software to OS X using MacPorts but every computer has to 
-        compile the application. 
+        on using installation files called <quote>Portfiles</quote> which
+        where describing the steps to compile and install an application. So
+        it's far easy to port software to OS X using MacPorts but every
+        computer has to compile the application.
         Get and install
         <ulink url="http://www.macports.org/">MacPorts</ulink>.
         After you installed MacPorts, run
@@ -613,8 +613,9 @@ make install</userinput></literallayout>
         to run <application>Gwyddion</application> via:
         Locate X11.app in your dock, open the menu, choose Applications,
         choose Customize from the next menu. Here you can choose add and
-        enter the name (gwyddion for example) as "Menu Name" and the complete
-        path to gwddion (/usr/local/bin/gwyddion f.e.) as "Command". After this you
+        enter the name (gwyddion for example) as <guilabel>Menu Name</guilabel>
+        and the complete path to gwddion (e.g. /usr/local/bin/gwyddion)
+        as <guilabel>Command</guilabel>. After this you
         can choose gwyddion from the X11 menue.
       </para>
     </section>
@@ -785,7 +786,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     <section>
       <title>Executable Installers</title>
       <para>
-        To create an executable installer you need 
+        To create an executable installer you need
         <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
         version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
         build the installer, it will create

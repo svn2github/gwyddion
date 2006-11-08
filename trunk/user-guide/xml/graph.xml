@@ -65,10 +65,10 @@
   <section>
     <title>Critical Dimension</title>
     <para>
-      Critical dimension module can be used to fit some "typical" objects
-      that can be often found while analyzing microchips and related
-      surfaces. These objects are found in the graph and their properties are
-      evaluated.
+      Critical dimension module can be used to fit some
+      <quote>typical</quote> objects that can be often found while analyzing
+      microchips and related surfaces. These objects are found in the graph
+      and their properties are evaluated.
     </para>
     <para>
       User interface of this module is practically same as for the graph fit
