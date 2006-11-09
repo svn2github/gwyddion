@@ -59,7 +59,7 @@ clean:
 dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
-	cp Makefile.in configure configure.ac README $(DISTNAME)
+	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) $(DISTNAME)
 	cp images/*.png $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
@@ -90,7 +90,7 @@ version:
 
 distclean: clean
 	cd ./formulas && $(GMAKE) distclean
-	-rm -fr Makefile aclocal.m4 config.status config.log autom4te.cache
+	-rm -fr Makefile config.status config.log autom4te.cache
 
 help:
 	@echo "xhtml        Compile User guide to XHTML"
