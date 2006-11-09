@@ -36,24 +36,63 @@
         data value at integer position.
       </listitem>
       <listitem>
-        Bilinear interpolation is a linear interpolation
-        between the two closest data values.
+        (Bi)linear interpolation is a linear interpolation
+        between the two closest data values. The value
+        <phrase role="math">z</phrase> at point of relative
+        position <phrase role="math">x</phrase> is obtained as
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-linear.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        where <phrase role="math">z</phrase><subscript>0</subscript>
+        and <phrase role="math">z</phrase><subscript>1</subscript> and
+        values at the preceding and following points, respectively.
       </listitem>
       <listitem>
-        <!-- FIXME: This is not an adequate description -->
-        Key interpolation is funny.
+        Key interpolation makes use also of values in the before-preceding
+        and after-following points
+        <phrase role="math">z</phrase><subscript>-1</subscript>
+        and <phrase role="math">z</phrase><subscript>2</subscript>,
+        respectively.  The value is then obtained as
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-w1234.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        where
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-key.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        are the interpolation coefficients.
       </listitem>
       <listitem>
-        <!-- FIXME: This is not an adequate description -->
-        Bspline interpolation is funny.
+        Nearest neighbour approximation is again calculated from the closest
+        four data values.  The interpolation coefficients are
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-nna.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        for <phrase role="math">k</phrase> = -1, 0, 1, 2, where
+        <phrase role="math">r</phrase><subscript>-1</subscript> = 1 + <phrase role="math">x</phrase>,
+        <phrase role="math">r</phrase><subscript>0</subscript> = <phrase role="math">x</phrase>,
+        <phrase role="math">r</phrase><subscript>1</subscript> = 1 − <phrase role="math">x</phrase>,
+        <phrase role="math">r</phrase><subscript>2</subscript> = 2 − <phrase role="math">x</phrase>.
       </listitem>
       <listitem>
-        <!-- FIXME: This is not an adequate description -->
-        Omoms interpolation is funny.
-      </listitem>
-      <listitem>
-        Nearest neighbour approximation is a weighted average of the closest
-        four data values.
+        Bspline and Omoms interpolations are misimplemented and should not
+        be used.
       </listitem>
     </itemizedlist>
     <figure float="0">
@@ -163,6 +202,7 @@
       </menuchoice>.
     </para>
   </section>
+  <!-- FIXME: Does it belong here? -->
   <section>
     <title>Profile Extraction</title>
     <para>
