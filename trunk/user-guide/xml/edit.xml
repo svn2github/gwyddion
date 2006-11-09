@@ -56,9 +56,9 @@
     </para>
     <para>
       <note>
-      Spot removal will only work for regions of size 64x64 pixels or
+      Spot removal will only work for regions of size 64 × 64 pixels or
       smaller. To remove larger regions, create a mask using the
-      <link>Mask Edit<!--TODO: fix link --></link> tool, then use
+      <link linkend="tool-mask-editor">Mask Editor</link> tool, then use
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Correct Data</guisubmenu>
