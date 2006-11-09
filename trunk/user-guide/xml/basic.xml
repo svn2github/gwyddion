@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
-               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-basic">
   <title>Basic Operations</title>
   <para>
@@ -12,173 +12,173 @@
     available modules will be presented.
   </para>
   <section>
-     <title>Interpolation</title>
-     <para>
-       A large number of the morphological operations in Gwyddion are
-       dependent on data interpolation.  As the SPM data are relatively
-       coarsely sampled compared to measured details (full images are
-       typically only a few hundred pixels in width and height), the
-       interpolation method used can become critical for proper quantitative
-       analysis of data properties. There are several interpolation methods
-       in 1D and 2D implemented in Gwyddion and the user can choose which
-       method to use for most of the modules using interpolation.
-     </para>
-     <para>
-       Here, we describe 1D interpolation method principles. Nearly all
-       interpolation methods in 2D are simply composed of these methods
-       currently. The interpolation methods that can be applied on data are as
-       follows
-     </para>
-     <itemizedlist>
-       <listitem>
-         Round interpolation is the simplest method - it just takes round
-         value of the expected position and finds therefore the closest
-         data value at integer position.
-       </listitem>
-       <listitem>
-         Bilinear interpolation is a linear interpolation
-         between the two closest data values.
-       </listitem>
-       <listitem>
-         <!-- FIXME: This is not an adequate description -->
-         Key interpolation is funny.
-       </listitem>
-       <listitem>
-         <!-- FIXME: This is not an adequate description -->
-         Bspline interpolation is funny.
-       </listitem>
-       <listitem>
-         <!-- FIXME: This is not an adequate description -->
-         Omoms interpolation is funny.
-       </listitem>
-       <listitem>
-         Nearest neighbour approximation is a weighted average of the closest
-         four data values.
-       </listitem>
-     </itemizedlist>
-     <figure float="0">
-       <title>
-         Demonstration of the available interpolation types on an equidistant
-         one-dimensional data.  Values outside the displayed abscissa range
-         (used in higher order interpolation types) are zero.
-       </title>
-       <mediaobject>
-         <imageobject>
-           <imagedata fileref="interpolation.png" format="PNG"/>
-         </imageobject>
-       </mediaobject>
-     </figure>
-   </section>
-   <section>
-     <title>Basic 2D Data Operation Modules</title>
-     <para>
-       Within basic modules it is possible to perform the following
-       operations with 2D data field:
-     </para>
-     <itemizedlist>
-       <listitem>
-         Scale data using chosen result dimension and chosen interpolation
-         method by
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Scale</guimenuitem>
-         </menuchoice>.
-       </listitem>
-       <listitem>
-         Crop data using the Crop tool (at the Tools menu bar).
-       </listitem>
-       <listitem>
-         Rotate data by 90 degrees or by user-specified amount using some
-         of the rotate modules:
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Rotate clockwise</guimenuitem>
-         </menuchoice>,
-         or
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Rotate anticlockwise</guimenuitem>
-         </menuchoice>,
-         or
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Rotate</guimenuitem>
-         </menuchoice>.
-       </listitem>
-       <listitem>
-         Flip data horizontally (i.e. about the vertical axis) and vertically
-         (i.e. about the horizontal axis) with
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Flip Horizontally</guimenuitem>
-         </menuchoice>
-         and
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Flip Vertically</guimenuitem>
-         </menuchoice>,
-         respectively.
-       </listitem>
-       <listitem>
-         Flip data about the center with
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Flip Both</guimenuitem>
-         </menuchoice>.
-       </listitem>
-       <listitem>
-         Invert data about the mean value the <guimenuitem>Invert
-           Value</guimenuitem> function:
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Invert</guimenuitem>
-         </menuchoice>.
-       </listitem>
-       <listitem>
-         Upsample data to make pixels square with
-         <menuchoice>
-           <guimenu>Data Process</guimenu>
-           <guisubmenu>Basic Operations</guisubmenu>
-           <guimenuitem>Square Samples</guimenuitem>
-         </menuchoice>.
-         (This is no-op on most data as they have square pixels.)
-       </listitem>
-     </itemizedlist>
-     <para>
-       Moreover, calibration module can be used for changing the information
-       about image physical dimensions and changing the data values
-       calibration:
-       <menuchoice>
-         <guimenu>Data Process</guimenu>
-         <guisubmenu>Basic operations</guisubmenu>
-         <guimenuitem>Calibrate</guimenuitem>
-       </menuchoice>.
-     </para>
-   </section>
+    <title>Interpolation</title>
+    <para>
+      A large number of the morphological operations in Gwyddion are
+      dependent on data interpolation.  As the SPM data are relatively
+      coarsely sampled compared to measured details (full images are
+      typically only a few hundred pixels in width and height), the
+      interpolation method used can become critical for proper quantitative
+      analysis of data properties. There are several interpolation methods
+      in 1D and 2D implemented in Gwyddion and the user can choose which
+      method to use for most of the modules using interpolation.
+    </para>
+    <para>
+      Here, we describe 1D interpolation method principles. Nearly all
+      interpolation methods in 2D are simply composed of these methods
+      currently. The interpolation methods that can be applied on data are as
+      follows
+    </para>
+    <itemizedlist>
+      <listitem>
+        Round interpolation is the simplest method - it just takes round
+        value of the expected position and finds therefore the closest
+        data value at integer position.
+      </listitem>
+      <listitem>
+        Bilinear interpolation is a linear interpolation
+        between the two closest data values.
+      </listitem>
+      <listitem>
+        <!-- FIXME: This is not an adequate description -->
+        Key interpolation is funny.
+      </listitem>
+      <listitem>
+        <!-- FIXME: This is not an adequate description -->
+        Bspline interpolation is funny.
+      </listitem>
+      <listitem>
+        <!-- FIXME: This is not an adequate description -->
+        Omoms interpolation is funny.
+      </listitem>
+      <listitem>
+        Nearest neighbour approximation is a weighted average of the closest
+        four data values.
+      </listitem>
+    </itemizedlist>
+    <figure float="0">
+      <title>
+        Demonstration of the available interpolation types on an equidistant
+        one-dimensional data.  Values outside the displayed abscissa range
+        (used in higher order interpolation types) are zero.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="interpolation.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
   <section>
-     <title>Profile Extraction</title>
-     <para>
-       Profile extraction tool can be accessed from the tools menu bar. You
-       can use mouse to drag several profiles in the image that can be
-       further moved and adjusted. Profile graph preview can be seen in the
-       profile tool dialog. Profiles can be of different
-       <quote>thickness</quote> which means that more neighbour data
-       perpendicular to profile direction are used for evaluation of one
-       profile point for thicker profiles. This can be very useful for noise
-       suppression while measuring some regular objects.
-     </para>
-     <para>
-       After profiles are chosen, they can be extracted to graphs (separate
-       of merged in one Graph window) that can be further analysed using
-       Graph modules.
-     </para>
+    <title>Basic 2D Data Operation Modules</title>
+    <para>
+      Within basic modules it is possible to perform the following
+      operations with 2D data field:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Scale data using chosen result dimension and chosen interpolation
+        method by
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Scale</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem>
+        Crop data using the Crop tool (at the Tools menu bar).
+      </listitem>
+      <listitem>
+        Rotate data by 90 degrees or by user-specified amount using some
+        of the rotate modules:
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Rotate clockwise</guimenuitem>
+        </menuchoice>,
+        or
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Rotate anticlockwise</guimenuitem>
+        </menuchoice>,
+        or
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Rotate</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem>
+        Flip data horizontally (i.e. about the vertical axis) and vertically
+        (i.e. about the horizontal axis) with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Flip Horizontally</guimenuitem>
+        </menuchoice>
+        and
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Flip Vertically</guimenuitem>
+        </menuchoice>,
+        respectively.
+      </listitem>
+      <listitem>
+        Flip data about the center with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Flip Both</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem>
+        Invert data about the mean value the <guimenuitem>Invert
+          Value</guimenuitem> function:
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Invert</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem>
+        Upsample data to make pixels square with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Square Samples</guimenuitem>
+        </menuchoice>.
+        (This is no-op on most data as they have square pixels.)
+      </listitem>
+    </itemizedlist>
+    <para>
+      Moreover, calibration module can be used for changing the information
+      about image physical dimensions and changing the data values
+      calibration:
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Basic operations</guisubmenu>
+        <guimenuitem>Calibrate</guimenuitem>
+      </menuchoice>.
+    </para>
+  </section>
+  <section>
+    <title>Profile Extraction</title>
+    <para>
+      Profile extraction tool can be accessed from the tools menu bar. You
+      can use mouse to drag several profiles in the image that can be
+      further moved and adjusted. Profile graph preview can be seen in the
+      profile tool dialog. Profiles can be of different
+      <quote>thickness</quote> which means that more neighbour data
+      perpendicular to profile direction are used for evaluation of one
+      profile point for thicker profiles. This can be very useful for noise
+      suppression while measuring some regular objects.
+    </para>
+    <para>
+      After profiles are chosen, they can be extracted to graphs (separate
+      of merged in one Graph window) that can be further analysed using
+      Graph modules.
+    </para>
   </section>
 </section>
