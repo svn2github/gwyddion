@@ -15,15 +15,17 @@
       to choose his/her own method of leveling data.
     </para>
     <para>
-      The choice of leveling method should be based on your SPM system configuration.
-      Basically, for systems with independent scanner(s) for each axis, plane leveling should
-      be sufficient. For systems with scanner(s) moving in all three axes (tube scanners)
-      2nd order polynomial leveling should be used.
+      The choice of leveling method should be based on your SPM system
+      configuration. Basically, for systems with independent scanner(s) for
+      each axis, plane leveling should be sufficient. For systems with
+      scanner(s) moving in all three axes (tube scanners) 2nd order polynomial
+      leveling should be used.
     </para>
     <para>
-      Of course, you can use higher order leveling for any data, however, this can
-      supress real features on the surface (namely waviness of the surface) and therefore
-      alter the statistical functions and quantities evaluated from the surface.
+      Of course, you can use higher order leveling for any data, however, this
+      can supress real features on the surface (namely waviness of the surface)
+      and therefore alter the statistical functions and quantities evaluated
+      from the surface.
     </para>
     <section id="fix_zero">
       <title>Fix Zero and Zero Mean Value</title>
@@ -50,7 +52,10 @@
       </para>
     </section>
     <section>
-      <title id="process-level-plane">Plane Level</title>
+      <title id="process-level-plane">
+        Plane Level
+        <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
+      </title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -83,7 +88,10 @@
       </para>
     </section>
     <section>
-      <title id="module-facet-level">Facet Level</title>
+      <title id="module-facet-level">
+        Facet Level
+        <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
+      </title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -103,25 +111,16 @@
       </para>
       <figure float="0">
         <title>
-          Facet Level example. The first image shows uncorrected, sloping data;
-          the second image shows data leveled by standard plane fitting (Plane Level);
-          the last one shows data leveled by Facet Level.
+          Facet Level example:
+          (a) uncorrected, sloping data;
+          (b) data leveled by standard plane fitting (Plane Level);
+          (c) data leveled by Facet Level.
         </title>
-        <inlinemediaobject>
+        <mediaobject>
           <imageobject>
-            <imagedata fileref="module-facet-level-uncorrected.png" format="PNG"/>
+            <imagedata fileref="level-plane-facet.png" format="PNG"/>
           </imageobject>
-        </inlinemediaobject>
-        <inlinemediaobject>
-          <imageobject>
-            <imagedata fileref="module-facet-level-leveled.png" format="PNG"/>
-          </imageobject>
-        </inlinemediaobject>
-        <inlinemediaobject>
-          <imageobject>
-            <imagedata fileref="module-facet-level-fleveled.png" format="PNG"/>
-          </imageobject>
-        </inlinemediaobject>
+        </mediaobject>
       </figure>
     </section>
     <section id="level_rotate">
@@ -147,17 +146,20 @@
   <section>
     <title>Background Subtraction</title>
     <para>
-      Gwyddion has several special modules for background subtraction.
-      All allow you to extract the subtracted background to a separate data window.
+      Gwyddion has several special modules for background subtraction. All
+      allow you to extract the subtracted background to a separate data window.
     </para>
     <tip>
       For finer control, you can use any of Gwyddion's
-      <link linkend="basic_filters">filtering tools</link> on an image,
+      <link linkend="basic-filters">filtering tools</link> on an image,
       and then use the <link linkend="">Data Arithmetic</link><!--TODO: fix link-->
       module to subtract the results from your original image.
     </tip>
     <section>
-      <title>Polynomial Background</title>
+      <title>
+        Polynomial Background
+        <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
+      </title>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>

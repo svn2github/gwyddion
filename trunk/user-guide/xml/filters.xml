@@ -4,13 +4,13 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-filters">
   <title>Filters and Presentations</title>
-  <section id="basic_filters">
+  <section id="basic-filters">
     <title>
       Basic Filters Tool
       <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
     </title>
     <para>
-      The <link linkend="basic_filters">Basic Filters</link> tool
+      The <link linkend="basic-filters">Basic Filters</link> tool
       lets you apply several simple filters to your image. This can be very
       useful for data denoising; however, the real measured data will get
       altered in the process, so great care should be taken not to destroy
@@ -93,12 +93,13 @@
       </menuchoice>
     </para>
     <para>
-      Presentations are special filters that output their results into a separate
-      layer that displays on top of the original data. Unlike the filters mentioned
-      above, presentation filters preserve the measured data. This allows the user to
-      safely apply various data visualizations. The other data processing modules
-      and tools will still operate on the original data. To remove a presentation,
-      just right click on the data window, and select <guimenuitem>Remove Presentation</guimenuitem>.
+      Presentations are special filters that output their results into
+      a separate layer that displays on top of the original data. Unlike the
+      filters mentioned above, presentation filters preserve the measured data.
+      This allows the user to safely apply various data visualizations. The
+      other data processing modules and tools will still operate on the
+      original data. To remove a presentation, just right click on the data
+      window, and select <guimenuitem>Remove Presentation</guimenuitem>.
     </para>
     <para>
       Currently, the following presentation filters are implemented in Gwyddion:
@@ -114,7 +115,9 @@
       </para>
       <para>
         Simple and very useful way of seeing data as illuminated from some
-        direction. The direction can be set by user.
+        direction. The direction can be set by user.  It is also possible to
+        mix the shaded and original images for presentational purposes (the
+        resulting image is meaningless from the physical point of view).
       </para>
     </section>
     <section>
@@ -127,11 +130,12 @@
         </menuchoice>
       </para>
       <para>
-        Sobel X and Y gradient filter and Prewitt X and Y gradient
-        filter create similar images as shading, however, they output data as a result
-        of convolution of data with relatively standardized kernel. Thus, they can be
-        used for further presentation processing for example.  The kernels for horizontal
-        filters are listed below, vertical kernels differ only by reflection about
+        Sobel horizontal and vertical gradient filter and Prewitt horizontal
+        and vertical gradient filter create similar images as shading, however,
+        they output data as a result of convolution of data with relatively
+        standardized kernel. Thus, they can be used for further presentation
+        processing for example.  The kernels for horizontal filters are listed
+        below, vertical kernels differ only by reflection about
         main diagonal.
         <informalequation>
           <mediaobject>
@@ -152,8 +156,9 @@
         </menuchoice>
       </para>
       <para>
-        Edge detection – Canny edge detector can be used to extract image of sharp edges
-        on the data.  Laplacian presents a simple convolution with following kernel:
+        Edge detection – Canny edge detector can be used to extract image of
+        sharp edges on the data.  Laplacian presents a simple convolution with
+        the following kernel:
         <informalequation>
           <mediaobject>
             <imageobject>
@@ -161,16 +166,57 @@
             </imageobject>
           </mediaobject>
         </informalequation>
-        Some rather experimental edge detection algorithms are available too.
-        RMS and RMS Edge visualize areas with high local value variation: RMS
-        calculates the value of root mean square of deviations in squares
-        5 × 5 pixels centered around each sample; RMS Edge essentially
-        postprocessese RMS output with a filter similar to Laplacian. Local
-        Non-linearity filter visualizes areas which are locally very
-        non-planar. It fits a plane through squares 5 × 5 pixels centered
-        around each sample and then calculates residual sum of squares of
-        this fit (reduced to plane slope).
       </para>
+      <para>
+        Some rather experimental edge detection algorithms are available too:
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term>
+            <guilabel>RMS</guilabel>
+          </term>
+          <listitem>
+            <para>
+              Visualizes areas with high local value variation.  The root
+              mean square of deviations from the mean value in squares 5 × 5
+              pixels centered around each sample is calculated and displayed.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <guilabel>RMS Edge</guilabel>
+          </term>
+          <listitem>
+            <para>
+              This function essentially postprocesses RMS output with a filter
+              similar to Laplacian to emphasize boundaries of areas with high
+              local value variation.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <guilabel>Local Non-Linearity</guilabel>
+          </term>
+          <listitem>
+            <para>
+              Visualizes areas that are locally very non-planar. It fits
+              a plane through squares 5 × 5 pixels centered around each sample
+              and then calculates residual sum of squares of this fit reduced
+              to plane slope, i.e. divided by
+              1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+              where
+              <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
+              and
+              <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+              are the plane coefficients in <phrase role="math">x</phrase>
+              and <phrase role="math">y</phrase> directions, respectively.
+              The square root is then displayed.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
     </section>
     <section>
     <title>Local Contrast</title>

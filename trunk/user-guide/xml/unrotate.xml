@@ -3,7 +3,10 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="unrotate">
-  <title>Unrotate</title>
+  <title>
+    Unrotate
+    <guiicon><inlinegraphic fileref="gwy_unrotate-24.png"/></guiicon>
+  </title>
   <para>
     Unrotate can automatically make principal directions in an image
     parallel with horizontal and/or vertical image edges.  For that to work,

@@ -38,16 +38,17 @@
     </para>
     <itemizedlist>
       <listitem>
-        Hyperbolic flatten - uses information from selected area boundaries to interpolate
-        the information inside area.
+        Hyperbolic flatten - uses information from selected area boundaries to
+        interpolate the information inside area.
       </listitem>
       <listitem>
-        Pseudo-Laplace and Laplace solver - solves Laplace equation to calculate data inside
-        area; the boundary is treated as virtual source.
+        Pseudo-Laplace and Laplace solver - solves Laplace equation to
+        calculate data inside area; the boundary is treated as virtual source.
       </listitem>
       <listitem>
-        Fractal correction - uses whole image to determine fractal dimension. Then tries
-        to create randomly rough data that have the same fractal dimension and put them into the area.
+        Fractal correction - uses whole image to determine fractal dimension.
+        Then tries to create randomly rough data that have the same fractal
+        dimension and put them into the area.
       </listitem>
     </itemizedlist>
     <para>
@@ -66,8 +67,11 @@
       </note>
     </para>
   </section>
-  <section id="remove_scars">
-    <title>Remove Scars</title>
+  <section id="remove-scars">
+    <title>
+      Remove Scars
+      <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>
+    </title>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -79,11 +83,13 @@
       Scars (or stripes, strokes) are parts of the image that are corrupted
       by a very common scanning error: local fault of the closed loop. Line
       defects are usually parallel to the fast scanning axis in the image.
-      This module will automatically find and remove these scars, using
-      neighbourhood lines to <quote>fill-in</quote> the gaps.
+      This function will automatically find and remove these scars, using
+      neighbourhood lines to <quote>fill-in</quote> the gaps.  The method
+      is run with the last settings used in <link linkend="mark-scars">Mark
+        Scars</link>.
     </para>
   </section>
-  <section id="mark_scars">
+  <section id="mark-scars">
     <title>Mark Scars</title>
     <para>
       <menuchoice>
@@ -95,25 +101,35 @@
     <para>
       Similarly, the <classname>Mark Scars</classname> module can create a mask
       of the points treated as scars. Unlike
-      <link linkend="remove_scars">Remove Scars</link>
-      which works automatically, this module lets you set several parameters
-      which can fine-tune the scar selection process:
+      <link linkend="remove-scars">Remove Scars</link>
+      which directly interpolates the located defects, this module lets you
+      interactively set several parameters which can fine-tune the scar
+      selection process:
     </para>
     <itemizedlist>
       <listitem>
-        Maximum width - only scars that are as thin or thinner than this value (in pixels) will be marked.
+        Maximum width – only scars that are as thin or thinner than this value
+        (in pixels) will be marked.
       </listitem>
       <listitem>
-        Minimum length - only scars that are as long or longer than this value (in pixels) will be marked.
+        Minimum length – only scars that are as long or longer than this value
+        (in pixels) will be marked.
       </listitem>
       <listitem>
-        Hard threshold - <!--TODO: Document this -->
+        Hard threshold – the minimum difference of the value from the
+        neighbouring upper and lower lines to be considered a defect.
+        The units are relative to image RMS.
       </listitem>
       <listitem>
-        Soft threshold - <!--TODO: Document this -->
+        Soft threshold – values differing at least this much do not form
+        defects themselves, but they are attached to defects obtained from
+        the hard threshold if they touch one.
       </listitem>
       <listitem>
-        Negative - <!--TODO: Document this -->
+        Positive, Negative, Both – the type of defects to remove.  Positive
+        means defects with outlying values above the normal values (peaks),
+        negative means defects with outlying values below the normal values
+        (holes).
       </listitem>
     </itemizedlist>
     <para>
@@ -177,7 +193,10 @@
     </para>
   </section>
   <section id="features-line-correction">
-    <title>Line Correction</title>
+    <title>
+      Line Correction
+      <guiicon><inlinegraphic fileref="gwy_line_level-24.png"/></guiicon>
+    </title>
     <para>
       Several functions can be used for line correction: The Polynomial tool
       and then several procedures under
