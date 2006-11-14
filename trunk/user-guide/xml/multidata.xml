@@ -22,7 +22,7 @@
       data fields (currently up to five).  And although it is not its primary
       function it can be also used as a calculator with immediate expression
       evaluation.  The expression syntax is described in section
-      <link linkend="expression-syntax">Expression</link>.
+      <link linkend="expression-syntax">Expressions</link>.
     </para>
     <para>
       The data fields to operate on are called <guilabel>Operands</guilabel>
