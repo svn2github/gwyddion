@@ -94,11 +94,17 @@
     </listitem>
   </orderedlist>
   <para>
+    The axes in Fractal Dimension graphs always show already logarithmed
+    quantities, therefore the linear dependences mentioned above corresponds
+    to straight lines there.  The measure of the axes should be treated as
+    arbitrary.
+  </para>
+  <para>
     Note, that results of different methods differ. This fact is caused by
     systematic error of different fractal analysis approaches.
   </para>
   <figure>
-    <title>Fractal analysis dialog.</title>
+    <title>Fractal Dimension dialog.</title>
     <mediaobject>
       <imageobject>
         <imagedata fileref="fractal.png" format="PNG"/>
