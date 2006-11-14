@@ -9,6 +9,51 @@
   </para>
   <section id="data-arithmetic">
     <title>Arithmetic</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Arithmetic</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Data Arithmetic module makes possible to perform arbitrary point-wise
+      operations on a single data field or corresponding points of several
+      data fields (currently up to five).  And although it is not its primary
+      function it can be also used as a calculator with immediate expression
+      evaluation.  The expression syntax is described in section
+      <link linkend="expression-syntax">Expression</link>.
+    </para>
+    <para>
+      The data fields to operate on are called <guilabel>Operands</guilabel>
+      and they are denoted <guilabel>d1</guilabel>, …, <guilabel>d5</guilabel>.
+      The data fields that actually appear in the expression have to be
+      compatible, i.e. their dimensions (both pixel and physical) have to be
+      identical.  Other data fields (i.e. those not actually entering the
+      expression) are irrelevant.  The result is always put into a newly
+      created data field.
+    </para>
+    <para>
+      Examples:
+      <informalexample>
+        <userinput>-d1</userinput>
+      </informalexample>
+      performs value inversion – very similar to Invert Value, except that
+      Invert Value reflects about the mean value while now we simply change
+      all values to negative,
+      <informalexample>
+        <userinput>(d1 - d2)^2</userinput>
+      </informalexample>
+      calculates squared difference between two data fields.
+    </para>
+    <para>
+      In the calculator mode the expression is immediately evaluated as it is
+      typed and the result is displayed below Expression entry.  No special
+      action is necessary to switch between data field expressions and
+      calculator: expressions containing only numeric quantities are
+      immediately evaluated, expressions referring to data fields are used to
+      calculate a new data field.
+    </para>
   </section>
   <section>
     <title>Merging and Immersion</title>
