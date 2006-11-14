@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<section id="features-multidata">
+  <title>Multiple Data</title>
+  <para>
+    To be written.
+  </para>
+  <section id="data-arithmetic">
+    <title>Arithmetic</title>
+  </section>
+  <section>
+    <title>Merging and Immersion</title>
+  </section>
+  <section>
+    <title>Cross-Correlation</title>
+  </section>
+  <section>
+    <title>Mask by Correlation</title>
+  </section>
+</section>
+
