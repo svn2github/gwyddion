@@ -52,7 +52,9 @@
         values at the preceding and following points, respectively.
       </listitem>
       <listitem>
-        Key interpolation makes use also of values in the before-preceding
+        Key interpolation (more precisely Key's interpolation with
+        <phrase role="math">a</phrase> = -1/2 which has the highest
+        interpolation order) makes use also of values in the before-preceding
         and after-following points
         <phrase role="math">z</phrase><subscript>-1</subscript>
         and <phrase role="math">z</phrase><subscript>2</subscript>,
