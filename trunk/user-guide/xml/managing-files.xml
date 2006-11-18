@@ -102,6 +102,13 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>DME Rasterscope</entry>
+          <entry>.img</entry>
+          <entry>dmefile module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>ECS</entry>
           <entry>.img</entry>
           <entry>ecsfile module</entry>
