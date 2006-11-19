@@ -207,7 +207,7 @@ omicron_load(const gchar *filename,
 
     container = gwy_container_new();
     
-	// First Load the Topographic Data
+	/* First Load the Topographic Data */
 	for (i = 0; i < ofile.topo_channels->len; i++) {
         OmicronTopoChannel *channel;
 
@@ -282,7 +282,7 @@ omicron_load(const gchar *filename,
 	        
 		    if ( strstr(channel->filename, ".sf") || strstr(channel->filename, ".sb") )
 			{
-	            // FIXME
+	            /* FIXME */
 		    }
 
 		}
@@ -748,10 +748,12 @@ omicron_read_cs_data(OmicronFile *ofile,
                 }
 
                 val2=line+16;
-                x=g_ascii_strtod(line,&val2);
-                y=g_ascii_strtod(val2,NULL);
+                siunit = gwy_si_unit_new_parse("nm", &power10);             
+                x=g_ascii_strtod(line,&val2) * pow10(power10);
+                y=g_ascii_strtod(val2,NULL) * pow10(power10);
                 
-                gwy_debug("Coord %i: x:%d y:%d",i,x,y);
+                
+                gwy_debug("Coord %i: x:%g y:%g",i,x,y);
                 
                 coords[2*i]=x;
                 coords[2*i+1]=y;

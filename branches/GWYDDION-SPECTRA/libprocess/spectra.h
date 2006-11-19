@@ -1,7 +1,7 @@
 /*
  *  @(#) $Id:$
  *  Copyright (C) 2003 Owain Davies, David Necas (Yeti), Petr Klapetek.
- *  E-mail: owain.davies@blueyonder.co.uk 
+ *  E-mail: owain.davies@blueyonder.co.uk
  *               yeti@gwyddion.net, klapetek@gwyddion.net.
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -54,9 +54,9 @@ struct _GwySpectra {
 
     GwySIUnit *si_unit_xy;
 
-    gdouble 	double1;
-	gpointer 	reserved1;
-    gint 		int1;
+    gdouble     double1;
+    gpointer    reserved1;
+    gint        int1;
 };
 
 struct _GwySpectraClass {
@@ -69,7 +69,7 @@ struct _GwySpectraClass {
 #define gwy_spectra_duplicate(spectra) \
         (GWY_SPECTRA(gwy_serializable_duplicate(G_OBJECT(spectra))))
 
-GType  			gwy_spectra_get_type  (void) G_GNUC_CONST;
+GType           gwy_spectra_get_type  (void) G_GNUC_CONST;
 
 GwySpectra*     gwy_spectra_new                    ();
 GwySpectra*     gwy_spectra_new_alike              (GwySpectra *model);
@@ -100,21 +100,20 @@ GwyDataLine*    gwy_spectra_get_spectrum           (GwySpectra *spectra,
 void            gwy_spectra_set_spectrum           (GwySpectra *spectra,
                                                     guint i,
                                                     GwyDataLine *new_spectrum);
-gint	        gwy_spectra_nearest			       (GwySpectra *spectra,
+gint            gwy_spectra_nearest                (GwySpectra *spectra,
                                                     guint** plist,
-													gdouble real_x,
-													gdouble real_y);
-void			gwy_spectra_add_spectrum		   (GwySpectra *spectra,
-													GwyDataLine *new_spectrum,
-													gdouble x,
-													gdouble y);
-void			gwy_spectra_remove_spectrum		   (GwySpectra *spectra,
-													guint i);
+                                                    gdouble real_x,
+                                                    gdouble real_y);
+void            gwy_spectra_add_spectrum           (GwySpectra *spectra,
+                                                    GwyDataLine *new_spectrum,
+                                                    gdouble x,
+                                                    gdouble y);
+void            gwy_spectra_remove_spectrum        (GwySpectra *spectra,
+                                                    guint i);
 GwyDataLine*    gwy_spectra_get_spectra_interp     (GwySpectra *spectra,
                                                     gdouble x,
-													gdouble y);
+                                                    gdouble y);
 void            gwy_spectra_empty                  (GwySpectra *spectra);
-
 
 G_END_DECLS
 

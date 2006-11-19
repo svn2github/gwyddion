@@ -1,5 +1,5 @@
 /*
- *  @(#) $Id: $
+ *  $Id: spectra.c 6957 2006-11-08 14:44:11Z owaind $
  *  Copyright (C) 2003 Owain Davies, David Necas (Yeti), Petr Klapetek.
  *  E-mail: owain.davies@blueyonder.co.uk
  *          yeti@gwyddion.net, klapetek@gwyddion.net.
@@ -104,19 +104,19 @@ static void
 gwy_spectra_finalize(GObject *object)
 {
     gint i;
-	GwySpectra *spectra = (GwySpectra*)object;
+    GwySpectra *spectra = (GwySpectra*)object;
     GwyDataLine *spec;
 
     gwy_object_unref(spectra->si_unit_xy);
     gwy_debug("");
 
-	for (i=0; i<spectra->spectrum->len;i++){ 
-		spec=g_ptr_array_index(spectra->spectrum,i);
-		gwy_object_unref(spec);
-	}
-    g_ptr_array_free(spectra->spectrum,TRUE);
-    g_array_free(spectra->x_pos,TRUE);
-    g_array_free(spectra->y_pos,TRUE);
+    for (i = 0; i < spectra->spectrum->len; i++) {
+        spec = g_ptr_array_index(spectra->spectrum, i);
+        gwy_object_unref(spec);
+    }
+    g_ptr_array_free(spectra->spectrum, TRUE);
+    g_array_free(spectra->x_pos, TRUE);
+    g_array_free(spectra->y_pos, TRUE);
     G_OBJECT_CLASS(gwy_spectra_parent_class)->finalize(object);
 }
 
@@ -129,26 +129,27 @@ gwy_spectra_finalize(GObject *object)
  **/
 
 GwySpectra*
-gwy_spectra_new(){
-    
+gwy_spectra_new() {
+
     GwySpectra *spectra;
 
     gwy_debug("");
     spectra = g_object_new(GWY_TYPE_SPECTRA, NULL);
-    
-    spectra->spectrum=g_ptr_array_new();
-    spectra->x_pos=g_array_new(FALSE,TRUE,sizeof(gdouble));
-    spectra->y_pos=g_array_new(FALSE,TRUE,sizeof(gdouble));
-    
+
+    spectra->spectrum = g_ptr_array_new();
+    spectra->x_pos = g_array_new(FALSE, TRUE, sizeof(gdouble));
+    spectra->y_pos = g_array_new(FALSE, TRUE, sizeof(gdouble));
+
     return spectra;
 }
 
 /**
  * gwy_spectra_new_alike:
  * @model: A Spectra object to take units from.
- * 
- * Creates a new Spectra object similar to an existing one, but containing zero spectra.
- * The same amount of memory preallocated to the arrays, but they contain zero 
+ *
+ * Creates a new Spectra object similar to an existing one, but containing zero
+ * spectra. The same amount of memory preallocated to the arrays, but they
+ * contain zero.
  *
  * Use gwy_spectra_duplicate() if you want to copy a spectra object including
  * the spectra in it.
@@ -163,13 +164,19 @@ gwy_spectra_new_alike(GwySpectra *model)
     g_return_val_if_fail(GWY_IS_SPECTRA(model), NULL);
     spectra = g_object_new(GWY_TYPE_SPECTRA, NULL);
 
-    spectra->spectrum=g_ptr_array_new();
-    spectra->x_pos=g_array_sized_new(FALSE,TRUE,sizeof(gdouble),model->x_pos->len);
-    spectra->y_pos=g_array_sized_new(FALSE,TRUE,sizeof(gdouble),model->y_pos->len);
-    
+    spectra->spectrum = g_ptr_array_new();
+    spectra->x_pos = g_array_sized_new(FALSE,
+                                       TRUE,
+                                       sizeof(gdouble),
+                                       model->x_pos->len);
+    spectra->y_pos = g_array_sized_new(FALSE,
+                                       TRUE,
+                                       sizeof(gdouble),
+                                       model->y_pos->len);
+
     if (model->si_unit_xy)
         spectra->si_unit_xy = gwy_si_unit_duplicate(model->si_unit_xy);
-    
+
     return spectra;
 }
 
@@ -190,7 +197,8 @@ gwy_spectra_serialize(GObject *obj,
         GwySerializeSpec spec[] = {
             { 'D', "x_pos", &spectra->x_pos->data, &spectra->x_pos->len, },
             { 'D', "y_pos", &spectra->y_pos->data, &spectra->y_pos->len, },
-            { 'O', "spectrum", &spectra->spectrum->pdata, &spectra->spectrum->len, },
+            { 'O', "spectrum", &spectra->spectrum->pdata,
+                               &spectra->spectrum->len, },
             { 'o', "si_unit_xy", &spectra->si_unit_xy, NULL, },
         };
 
@@ -212,10 +220,11 @@ gwy_spectra_get_size(GObject *obj)
     if (!spectra->si_unit_xy)
         spectra->si_unit_xy = gwy_si_unit_new("");
     {
+        GPtrArray* spc = spectra->spectrum;
         GwySerializeSpec spec[] = {
             { 'D', "x_pos", &spectra->x_pos->data, &spectra->x_pos->len, },
             { 'D', "y_pos", &spectra->y_pos->data, &spectra->y_pos->len, },
-            { 'O', "spectrum", &spectra->spectrum->pdata, &spectra->spectrum->len, },
+            { 'O', "spectrum", &spc->pdata, &spc->len, },
             { 'o', "si_unit_xy", &spectra->si_unit_xy, NULL, },
         };
 
@@ -230,9 +239,9 @@ gwy_spectra_deserialize(const guchar *buffer,
                         gsize *position)
 {
     guint32 n_x_pos, n_y_pos, n_spectrum;
-    gdouble *x_pos=NULL, *y_pos=NULL;
+    gdouble *x_pos = NULL, *y_pos = NULL;
     GwySIUnit *si_unit_xy = NULL;
-    GwyDataLine *spectrum=NULL;
+    GwyDataLine *spectrum = NULL;
     GwySpectra *spectra;
 
     GwySerializeSpec spec[] = {
@@ -254,7 +263,7 @@ gwy_spectra_deserialize(const guchar *buffer,
         gwy_object_unref(si_unit_xy);
         return NULL;
     }
-    if ( !((n_x_pos == n_y_pos) && (n_x_pos == n_spectrum)) ) {   
+    if (!((n_x_pos == n_y_pos) && (n_x_pos == n_spectrum))) {
         g_critical("Serialized %s size mismatch (%u,%u,%u) not equal.",
               GWY_SPECTRA_TYPE_NAME, n_x_pos, n_y_pos, n_spectrum);
         g_free(x_pos);
@@ -265,32 +274,32 @@ gwy_spectra_deserialize(const guchar *buffer,
     }
 
     spectra = gwy_spectra_new();
-    
+
     g_free(spectra->spectrum->pdata);
-    spectra->spectrum->pdata=(gpointer*)spectrum;
-    spectra->spectrum->len=n_spectrum;
-    
+    spectra->spectrum->pdata = (gpointer*)spectrum;
+    spectra->spectrum->len = n_spectrum;
+
     g_free(spectra->x_pos->data);
-    spectra->x_pos->data=(gchar*)x_pos;
-    spectra->x_pos->len=n_x_pos;
+    spectra->x_pos->data = (gchar*)x_pos;
+    spectra->x_pos->len = n_x_pos;
 
     g_free(spectra->y_pos->data);
-    spectra->y_pos->data=(gchar*)y_pos;
-    spectra->y_pos->len=n_y_pos;
+    spectra->y_pos->data = (gchar*)y_pos;
+    spectra->y_pos->len = n_y_pos;
 
     if (si_unit_xy) {
         if (spectra->si_unit_xy != NULL)
             gwy_object_unref(spectra->si_unit_xy);
         spectra->si_unit_xy = si_unit_xy;
     }
-    
+
     return (GObject*)spectra;
 }
 
 static GObject*
 gwy_spectra_duplicate_real(GObject *object)
 {
-    gint i;    
+    gint i;
     GwySpectra *spectra, *duplicate;
     GwyDataLine *data_line;
 
@@ -298,15 +307,20 @@ gwy_spectra_duplicate_real(GObject *object)
     spectra = GWY_SPECTRA(object);
     duplicate = gwy_spectra_new_alike(spectra);
     /* duplicate the co-ordinates of the spectra */
-    memcpy(duplicate->x_pos->data, spectra->x_pos->data, spectra->x_pos->len*sizeof(gdouble));
-    memcpy(duplicate->y_pos->data, spectra->y_pos->data, spectra->y_pos->len*sizeof(gdouble));
+    memcpy(duplicate->x_pos->data,
+           spectra->x_pos->data,
+           spectra->x_pos->len*sizeof(gdouble));
+    memcpy(duplicate->y_pos->data,
+           spectra->y_pos->data,
+           spectra->y_pos->len*sizeof(gdouble));
     duplicate->x_pos->len = spectra->x_pos->len;
     duplicate->y_pos->len = spectra->y_pos->len;
-    
-    /* Duplicate the spectra themselves */    
-    for (i=0;i<spectra->spectrum->len; i++){
-        data_line=(GwyDataLine*)g_ptr_array_index(spectra->spectrum,i);
-        g_ptr_array_add(duplicate->spectrum,gwy_data_line_duplicate(data_line));
+
+    /* Duplicate the spectra themselves */
+    for (i = 0; i < spectra->spectrum->len; i++) {
+        data_line = (GwyDataLine*)g_ptr_array_index(spectra->spectrum, i);
+        g_ptr_array_add(duplicate->spectrum,
+        gwy_data_line_duplicate(data_line));
     }
     return (GObject*)duplicate;
 }
@@ -323,14 +337,18 @@ gwy_spectra_clone_real(GObject *source, GObject *copy)
     clone = GWY_SPECTRA(copy);
 
     if (spectra->x_pos->len != clone->x_pos->len) {
-        g_array_set_size(clone->x_pos,spectra->x_pos->len);
+        g_array_set_size(clone->x_pos, spectra->x_pos->len);
     }
     if (spectra->y_pos->len != clone->y_pos->len) {
-        g_array_set_size(clone->y_pos,spectra->y_pos->len);
+        g_array_set_size(clone->y_pos, spectra->y_pos->len);
     }
-    
-    memcpy(clone->x_pos->data, spectra->x_pos->data, spectra->x_pos->len*sizeof(gdouble));
-    memcpy(clone->y_pos->data, spectra->y_pos->data, spectra->y_pos->len*sizeof(gdouble));    
+
+    memcpy(clone->x_pos->data,
+           spectra->x_pos->data,
+           spectra->x_pos->len*sizeof(gdouble));
+    memcpy(clone->y_pos->data,
+           spectra->y_pos->data,
+           spectra->y_pos->len*sizeof(gdouble));
 
     /* SI Units can be NULL */
     if (spectra->si_unit_xy && clone->si_unit_xy)
@@ -359,17 +377,17 @@ gwy_spectra_data_changed(GwySpectra *spectra)
  * @a: Source Spectra object.
  * @b: Destination Spectra object.
  *
- * Copies the contents of a spectra object a to another already allocated spectra object b.
- * It employs the clone method, and any data in b is lost.
+ * Copies the contents of a spectra object a to another already allocated
+ * spectra object b. It employs the clone method, and any data in b is lost.
  *
  **/
 void
 gwy_spectra_copy(GwySpectra *a, GwySpectra *b)
 {
-    g_return_if_fail(GWY_IS_SPECTRA(a));    
     g_return_if_fail(GWY_IS_SPECTRA(a));
- 
-    gwy_spectra_clone_real((GObject*)a,(GObject*)b);
+    g_return_if_fail(GWY_IS_SPECTRA(a));
+
+    gwy_spectra_clone_real((GObject*)a, (GObject*)b);
 }
 
 /**
@@ -378,8 +396,8 @@ gwy_spectra_copy(GwySpectra *a, GwySpectra *b)
  *
  * Returns SI unit used for the location co-ordinates of spectra.
  *
- * Returns: SI unit corresponding to the  the location co-ordinates of spectra object.
- * Its reference count is not incremented.
+ * Returns: SI unit corresponding to the  the location co-ordinates of spectra
+ * object. Its reference count is not incremented.
  **/
 GwySIUnit*
 gwy_spectra_get_si_unit_xy(GwySpectra *spectra)
@@ -397,14 +415,15 @@ gwy_spectra_get_si_unit_xy(GwySpectra *spectra)
  * @spectra: A Spectra object.
  * @si_unit: SI unit to be set.
  *
- * Sets the SI unit corresponding to the  the location co-ordinates of spectra object.
+ * Sets the SI unit corresponding to the location co-ordinates of the spectra
+ * object.
  *
  * It does not assume a reference on @si_unit, instead it adds its own
  * reference.
  **/
 void
 gwy_spectra_set_si_unit_xy(GwySpectra *spectra,
-                          GwySIUnit *si_unit)
+                           GwySIUnit *si_unit)
 {
     g_return_if_fail(GWY_IS_SPECTRA(spectra));
     g_return_if_fail(GWY_IS_SI_UNIT(si_unit));
@@ -439,8 +458,8 @@ gdouble
 gwy_spectra_itox (GwySpectra *spectra, guint i)
 {
     g_return_val_if_fail(GWY_IS_SPECTRA(spectra), 0.0);
-    
-    if (i >= spectra->x_pos->len){
+
+    if (i >= spectra->x_pos->len) {
         return 0.0;
     }
     return g_array_index(spectra->x_pos, gdouble, i);
@@ -459,8 +478,8 @@ gdouble
 gwy_spectra_itoy (GwySpectra *spectra, guint i)
 {
     g_return_val_if_fail(GWY_IS_SPECTRA(spectra), 0.0);
-    
-    if (i >= spectra->y_pos->len){
+
+    if (i >= spectra->y_pos->len) {
         return 0.0;
     }
     return g_array_index(spectra->y_pos, gdouble, i);
@@ -480,11 +499,11 @@ gwy_spectra_itoy (GwySpectra *spectra, guint i)
 guint
 gwy_spectra_xytoi (GwySpectra *spectra, gdouble real_x, gdouble real_y)
 {
-    gdouble r,x,y,rmin=0;
-    guint i=0,n,imin=0;
-    
-    g_return_val_if_fail(GWY_IS_SPECTRA(spectra), 0);
-    
+    gdouble r, x, y, rmin = 0;
+    guint i = 0, n, imin = 0;
+
+    g_return_val_if_fail(GWY_IS_SPECTRA(spectra),  0);
+
     if (spectra->x_pos->len != spectra->y_pos->len) {
         g_critical("Numer of elements in x_pos and y_pos different.");
         return 0;
@@ -492,30 +511,32 @@ gwy_spectra_xytoi (GwySpectra *spectra, gdouble real_x, gdouble real_y)
     if (spectra->x_pos->len == 0) {
         g_critical("Spectra Object contains no spectra.");
         return 0;
-    }                
-    
-    n=spectra->x_pos->len;
-    
+    }
+
+    n = spectra->x_pos->len;
+
     r = 0;
-    for (i=0;i<n;i++){
-        x=g_array_index(spectra->x_pos,gdouble,i);
-        y=g_array_index(spectra->y_pos,gdouble,i);
-        r=sqrt((x-real_x)*(x-real_x)+(y-real_y)*(y-real_y));
-        if ((r<rmin) || (i=0)) {
-            rmin=r;
-            imin=i;
+    for (i = 0; i < n; i++) {
+        x = g_array_index(spectra->x_pos, gdouble, i);
+        y = g_array_index(spectra->y_pos, gdouble, i);
+        r = sqrt((x-real_x)*(x-real_x)+(y-real_y)*(y-real_y));
+        if ((r < rmin) || (i = 0)) {
+            rmin = r;
+            imin = i;
         }
     }
     return imin;
 }
 
-gint CompFunc_r(gconstpointer a, gconstpointer b){
-    coord_pos *A,*B;
-    A=(coord_pos*)a;
-    B=(coord_pos*)b;
-    
-    if (A->r < B->r) return -1;
-    if (A->r > B->r) return 1;
+gint CompFunc_r(gconstpointer a, gconstpointer b) {
+    coord_pos *A, *B;
+    A = (coord_pos*)a;
+    B = (coord_pos*)b;
+
+    if (A->r < B->r)
+        return -1;
+    if (A->r > B->r)
+        return 1;
     return 0; /* Equal */
 }
 
@@ -527,22 +548,25 @@ gint CompFunc_r(gconstpointer a, gconstpointer b){
  * @real_y: The y coordinate.
  *
  * Gets a list of the indices to spectra ordered by their
- * distance from x_real,y_real. A newly created array is allocated and the list of
- * indicies is stored there.The calling function must ensure
+ * distance from x_real, y_real. A newly created array is allocated and the
+ * list of indicies is stored there.The calling function must ensure
  * the memory is freed once the list is finished with.
  *
- * Returns: The number of elements in the @plist array. 
+ * Returns: The number of elements in the @plist array.
  **/
 gint
-gwy_spectra_nearest (GwySpectra *spectra, guint** plist, gdouble real_x, gdouble real_y)
+gwy_spectra_nearest (GwySpectra *spectra,
+                     guint** plist,
+                     gdouble real_x,
+                     gdouble real_y)
 {
     GArray* points;
-    guint i=0;
+    guint i = 0;
     coord_pos item;
-    gdouble x,y;
+    gdouble x, y;
 
     g_return_val_if_fail(GWY_IS_SPECTRA(spectra), 0);
-    
+
     if (spectra->x_pos->len != spectra->y_pos->len) {
         g_critical("Numer of elements in x_pos and y_pos different.");
         return 0;
@@ -551,26 +575,28 @@ gwy_spectra_nearest (GwySpectra *spectra, guint** plist, gdouble real_x, gdouble
         g_critical("Spectra Object contains no spectra.");
         return 0;
     }
-    if (plist==NULL) {
+    if (plist == NULL) {
         g_critical("Nowhere to create array");
         return 0;
     }
-    
-    points=g_array_sized_new(FALSE,TRUE,sizeof(coord_pos),spectra->x_pos->len);
-    for (i=0; i<spectra->x_pos->len; i++)
-    {
-        x=g_array_index(spectra->x_pos,gdouble,i);
-        y=g_array_index(spectra->y_pos,gdouble,i);
-        item.index=i;
-        item.r=sqrt((x-real_x)*(x-real_x)+(y-real_y)*(y-real_y));
+
+    points = g_array_sized_new(FALSE,
+                               TRUE,
+                               sizeof(coord_pos),
+                               spectra->x_pos->len);
+    for (i = 0; i < spectra->x_pos->len; i++) {
+        x = g_array_index(spectra->x_pos, gdouble, i);
+        y = g_array_index(spectra->y_pos, gdouble, i);
+        item.index = i;
+        item.r = sqrt((x-real_x)*(x-real_x)+(y-real_y)*(y-real_y));
         g_array_append_val(points, item);
     }
     g_array_sort(points, CompFunc_r);
-    *(plist)=g_new(guint, points->len);
-    for (i=0; i<points->len; i++)
-        *(*(plist)+i)=(g_array_index(points,coord_pos,i)).r;
+    *(plist) = g_new(guint, points->len);
+    for (i = 0; i < points->len; i++)
+        *(*(plist)+i) = (g_array_index(points, coord_pos, i)).r;
 
-    g_array_free(points,TRUE);
+    g_array_free(points, TRUE);
 
     return points->len;
 }
@@ -581,35 +607,35 @@ gwy_spectra_nearest (GwySpectra *spectra, guint** plist, gdouble real_x, gdouble
  * @real_x: The new x coordinate of the location of the spectrum.
  * @real_y: The new y coordinate of the location of the spectrum.
  * @i: The index of a spectrum.
- * 
- * Sets the location coordinates of a spectrum. 
+ *
+ * Sets the location coordinates of a spectrum.
  *
  **/
 void
-gwy_spectra_setpos (GwySpectra *spectra, gdouble real_x, 
+gwy_spectra_setpos (GwySpectra *spectra, gdouble real_x,
                     gdouble real_y, guint i)
 {
     g_return_if_fail(GWY_IS_SPECTRA(spectra));
-    
+
     if (spectra->x_pos->len != spectra->y_pos->len) {
         g_critical("Numer of elements in x_pos and y_pos different.");
         return;
     }
-    
-    if (i >= spectra->y_pos->len){
+
+    if (i >= spectra->y_pos->len) {
         return;
     }
-    
-    g_array_index(spectra->x_pos,gdouble,i)=real_x;
-    g_array_index(spectra->y_pos,gdouble,i)=real_y;
-    return;   
+
+    g_array_index(spectra->x_pos, gdouble, i) = real_x;
+    g_array_index(spectra->y_pos, gdouble, i) = real_y;
+    return;
 }
 
 /**
  * gwy_spectra_get_spectrum:
  * @spectra: A Spectra object
  * @i: Index of a spectrum
- * 
+ *
  * Gets a dataline that contains the spectrum at index i.
  *
  * Returns: A #GwyDataLine containing the spectrum, and increases
@@ -618,14 +644,14 @@ gwy_spectra_setpos (GwySpectra *spectra, gdouble real_x,
 GwyDataLine*
 gwy_spectra_get_spectrum (GwySpectra *spectra, gint i)
 {
-    GwyDataLine* data_line;    
+    GwyDataLine* data_line;
     g_return_val_if_fail(GWY_IS_SPECTRA(spectra), NULL);
-    
-    if (i >= spectra->y_pos->len){
-        g_critical("Invalid spectrum index");        
+
+    if (i >= spectra->y_pos->len) {
+        g_critical("Invalid spectrum index");
         return NULL;
     }
-    data_line=g_ptr_array_index(spectra->spectrum,i);
+    data_line = g_ptr_array_index(spectra->spectrum, i);
     g_object_unref(data_line);
     return data_line;
 }
@@ -634,28 +660,31 @@ gwy_spectra_get_spectrum (GwySpectra *spectra, gint i)
  * gwy_spectra_set_spectrum:
  * @spectra: A Spectra Object
  * @i: Index of a spectrum to replace
- * @new_spectrum: A #GwyDataLine Object containing the new spectrum. 
- * 
- * Replaces the ith spectrum in the spectra object with a the 
+ * @new_spectrum: A #GwyDataLine Object containing the new spectrum.
+ *
+ * Replaces the ith spectrum in the spectra object with a the
  * supplied spectrum, new_spectrum. It takes its own reference
  * to the New_Spectrum dataline.
  *
  **/
 void
-gwy_spectra_set_spectrum (GwySpectra *spectra, guint i, GwyDataLine *new_spectrum)
+gwy_spectra_set_spectrum (GwySpectra *spectra,
+                          guint i,
+                          GwyDataLine *new_spectrum)
 {
-    GwyDataLine* data_line;    
+    GwyDataLine* data_line;
     g_return_if_fail(GWY_IS_SPECTRA(spectra));
     g_return_if_fail(GWY_IS_DATA_LINE(new_spectrum));
-    
-    if (i >= spectra->y_pos->len){
-        g_critical("Invalid spectrum index");        
+
+    if (i >= spectra->y_pos->len) {
+        g_critical("Invalid spectrum index");
         return;
     }
-    data_line=g_ptr_array_index(spectra->spectrum,i);
+    
+    g_object_ref(new_spectrum);    
+    data_line = g_ptr_array_index(spectra->spectrum, i);
     g_object_unref(data_line);
-    g_ptr_array_index(spectra->spectrum,i)=new_spectrum;
-    g_object_ref(new_spectrum);
+    g_ptr_array_index(spectra->spectrum, i) = new_spectrum;
 }
 
 /**
@@ -664,21 +693,21 @@ gwy_spectra_set_spectrum (GwySpectra *spectra, guint i, GwyDataLine *new_spectru
  * @new_spectrum: A GwyDataLine containing the spectrum to append.
  * @real_x: The x coordinate of the location of the spectrum.
  * @real_y: The y coordinate of the location of the spectrum.
- *  
- * Appends a new_spectrum to the spectra collection with a position of x,y.
+ *
+ * Appends a new_spectrum to the spectra collection with a position of x, y.
  * gwy_spectra_add takes a refference to the supplied spectrum.
  **/
 void
-gwy_spectra_add_spectrum (GwySpectra *spectra, GwyDataLine *new_spectrum, 
+gwy_spectra_add_spectrum (GwySpectra *spectra, GwyDataLine *new_spectrum,
                           gdouble x, gdouble y)
 {
     g_return_if_fail(GWY_IS_SPECTRA(spectra));
     g_return_if_fail(GWY_IS_DATA_LINE(new_spectrum));
-   
-    g_ptr_array_add(spectra->spectrum,new_spectrum);
-    g_array_append_val(spectra->x_pos,x);
-    g_array_append_val(spectra->y_pos,y);
-    
+
+    g_ptr_array_add(spectra->spectrum, new_spectrum);
+    g_array_append_val(spectra->x_pos, x);
+    g_array_append_val(spectra->y_pos, y);
+
     g_object_ref(new_spectrum);
 
 }
@@ -687,48 +716,48 @@ gwy_spectra_add_spectrum (GwySpectra *spectra, GwyDataLine *new_spectrum,
  * gwy_spectra_remove:
  * @spectra: A Spectra Object
  * @i: Index of spectrum to remove.
- *  
+ *
  * Removes the ith spectrum from the Spectra collection.
  **/
 void gwy_spectra_remove_spectrum (GwySpectra *spectra, guint i)
 {
     GwyDataLine* data_line;
-    
+
     g_return_if_fail(GWY_IS_SPECTRA(spectra));
-    if (i >= spectra->y_pos->len){
-        g_critical("Invalid spectrum index");        
+    if (i >= spectra->y_pos->len) {
+        g_critical("Invalid spectrum index");
         return;
     }
-    
-    data_line=g_ptr_array_index(spectra->spectrum,i);
+
+    data_line = g_ptr_array_index(spectra->spectrum, i);
     g_object_unref(data_line);
-    g_ptr_array_remove_index(spectra->spectrum,i);
-    g_array_remove_index(spectra->x_pos,i);
-    g_array_remove_index(spectra->y_pos,i);
+    g_ptr_array_remove_index(spectra->spectrum, i);
+    g_array_remove_index(spectra->x_pos, i);
+    g_array_remove_index(spectra->y_pos, i);
 }
 
 
-/* function to calculate the angle A ^B^ C 
+/* function to calculate the angle A ^B^ C
  * points is an array in the format:
- * Ax,Ay,Bx,By,Cx,Cy
+ * Ax, Ay, Bx, By, Cx, Cy
  */
 gdouble calc_angle(const gdouble* points)
 {
-    gdouble Ax,Ay,Bx,By,Cx,Cy;    
-    gdouble aa,bb,cc,beta;
+    gdouble Ax, Ay, Bx, By, Cx, Cy;
+    gdouble aa, bb, cc, beta;
 
-    Ax=points[0];
-    Ay=points[1];
-    Bx=points[2];
-    By=points[3];
-    Cx=points[4];
-    Cy=points[5];
-    
-    aa=(Bx-Cx)*(Bx-Cx)+(By-Cy)*(By-Cy);
-    bb=(Ax-Cx)*(Ax-Cx)+(Ay-Cy)*(Ay-Cy);
-    cc=(Ax-Bx)*(Ax-Bx)+(Ay-By)*(Ay-By);
-    
-    beta=acos((aa+cc-bb)/(sqrt(4*aa*cc)));
+    Ax = points[0];
+    Ay = points[1];
+    Bx = points[2];
+    By = points[3];
+    Cx = points[4];
+    Cy = points[5];
+
+    aa = (Bx-Cx)*(Bx-Cx)+(By-Cy)*(By-Cy);
+    bb = (Ax-Cx)*(Ax-Cx)+(Ay-Cy)*(Ay-Cy);
+    cc = (Ax-Bx)*(Ax-Bx)+(Ay-By)*(Ay-By);
+
+    beta = acos((aa+cc-bb)/(sqrt(4*aa*cc)));
     return beta;
 }
 
@@ -736,36 +765,37 @@ gint is_in_triangle(gdouble x, gdouble y,
                     const gdouble* triangle)
 {
     guint i;
-    gdouble points[6],ang;
-    points[2]=x;
-    points[3]=y;
-    ang=0;
-    for (i=0;i<3;i++) {
-        points[0]=triangle[(guint)fmod(i*2,6)];
-        points[1]=triangle[(guint)fmod(i*2+1,6)];
-        points[4]=triangle[(guint)fmod(i*2+2,6)];
-        points[5]=triangle[(guint)fmod(i*2+3,6)];
-        ang+=calc_angle(points);
+    gdouble points[6], ang;
+    points[2] = x;
+    points[3] = y;
+    ang = 0;
+    for (i = 0; i < 3; i++) {
+        points[0] = triangle[(guint)fmod(i*2, 6)];
+        points[1] = triangle[(guint)fmod(i*2+1, 6)];
+        points[4] = triangle[(guint)fmod(i*2+2, 6)];
+        points[5] = triangle[(guint)fmod(i*2+3, 6)];
+        ang += calc_angle(points);
     }
-    if (ang==2*M_PI) return 1;
-    else return 0;
+    if (ang == 2*M_PI)
+        return 1;
+    else
+        return 0;
 }
 
 gdouble* tri_interp_weight(gdouble x, gdouble y,
                            const gdouble* triangle)
 {
-    /* TODO: Function to get the interpolation weightings 
+    /* TODO: Function to get the interpolation weightings
              between three points*/
     return NULL;
 }
 
-/**        triangle[0]=points[fmod(i*2,6)];
-
+/**
  * gwy_spectra_get_spectra_interp:
  * @spectra: A Spectra Object
  * @x: x coordinate for spectrum
  * @y: y coordinate fro spectrum
- *  
+ *
  * In future will:
  * Interpolates a spectrum at some arbitary point specified by x,y.
  * If the point is within the triangle made by three measured spectra
@@ -780,36 +810,36 @@ gwy_spectra_get_spectra_interp (GwySpectra *spectra, gdouble x, gdouble y)
     guint i;
     /* TODO: Function to do a proper interpolation. */
     g_return_val_if_fail(GWY_IS_SPECTRA(spectra), NULL);
-    if(spectra->x_pos->len <= 0) {
+    if (spectra->x_pos->len <= 0) {
         g_critical("Contains no spectra");
         return NULL;
     }
-    i=gwy_spectra_xytoi(spectra,x,y);
-    return gwy_data_line_duplicate(gwy_spectra_get_spectrum(spectra,i));
+    i = gwy_spectra_xytoi(spectra, x, y);
+    return gwy_data_line_duplicate(gwy_spectra_get_spectrum(spectra, i));
 }
 
 /**
  * gwy_spectra_empty:
  * @spectra: A Spectra Object
- *  
+ *
  * Removes all spectra from the collection.
  * Returns: A newly created dataline.
  **/
 void
 gwy_spectra_empty (GwySpectra *spectra)
 {
-    int i=0;
+    int i = 0;
     GwyDataLine* spec;
 
-    for (i=0; i<spectra->spectrum->len;i++){ 
-		spec=g_ptr_array_index(spectra->spectrum,i);
-		gwy_object_unref(spec);
-	}
+    for (i = 0; i < spectra->spectrum->len; i++) {
+        spec = g_ptr_array_index(spectra->spectrum, i);
+        gwy_object_unref(spec);
+    }
     g_free(spectra->spectrum);
-    g_array_free(spectra->x_pos,TRUE);
-    g_array_free(spectra->y_pos,TRUE);
-    spectra->x_pos=g_array_new(FALSE,TRUE,sizeof(gdouble));
-    spectra->y_pos=g_array_new(FALSE,TRUE,sizeof(gdouble));
+    g_array_free(spectra->x_pos, TRUE);
+    g_array_free(spectra->y_pos, TRUE);
+    spectra->x_pos = g_array_new(FALSE, TRUE, sizeof(gdouble));
+    spectra->y_pos = g_array_new(FALSE, TRUE, sizeof(gdouble));
 }
 
 /************************** Documentation ****************************/
