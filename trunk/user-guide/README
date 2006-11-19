@@ -1,5 +1,9 @@
 Some random remarks:
 
+* If you downloaded and unpacked this and wonder what to do with it, you
+  downloaded the wrong package.  This is the Docbook source code.  Get the
+  ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
+
 * xml/      contains the XML DocBook sources,
   formulas/ contains TeX sources of formula images
   images/   contains bitmap images
