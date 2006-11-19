@@ -770,7 +770,10 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
           <literal>HKEY_LOCAL_MACHINE→Software→Microsoft→Windows→Current Version→App Paths→Gwyddion.exe</literal>
         </informalexample>
         a string key <literal>Path</literal> and put
-        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> there.  If you
+        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> there (here again
+        <envar>$(GTK_TOP)</envar> is to be replaced with the corresponding
+        directory set in <filename>make.msc</filename>, do not put
+        <quote><literal>$(GTK_TOP)</literal></quote> there literally).  If you
         have separate GtkGLExt and/or LibXML2, add also their
         <filename>lib</filename> and <filename>bin</filename> directories,
         separated by semicolons.  If you cannot edit global registry under
