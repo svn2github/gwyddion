@@ -372,7 +372,7 @@ make install</userinput></literallayout>
         <option>--with-tiff</option>/<option>--without-tiff</option>
         (for LibTIFF).
         By default all optional features are enabled if their prerequisites
-        are found.  A brief summary enabled and distable optional features is
+        are found.  A brief summary enabled and disabled optional features is
         printed near the end of <command>configure</command> output.
       </para>
     </section>
