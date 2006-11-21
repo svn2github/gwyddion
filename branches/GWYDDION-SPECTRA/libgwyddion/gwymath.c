@@ -97,6 +97,9 @@ gwy_math_humanize_numbers(gdouble unit,
  * <warning> Result can be either TRUE or FALSE if the test point
  * is *exactly* on an edge. </warning>
  **/
+
+/* This neat little check algorithm  was found at
+   http://alienryderflex.com/polygon and has been adapted*/
 gboolean
 gwy_math_is_in_poly(gdouble x,
            gdouble y,
