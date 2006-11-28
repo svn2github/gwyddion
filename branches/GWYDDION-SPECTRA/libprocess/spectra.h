@@ -49,10 +49,11 @@ struct _GwySpectra {
     GObject parent_instance;
 
     gdouble     *coords;
-    GwyDataLine **data; /* Array of GwySpectrum */
+    GwyDataLine **data;  /* Array of GwySpectrum */
     guint       ncurves; /* Number of spectra */
     guint       nalloc;  /* Allocated space */
-
+    
+    gchar       *title;
     GwySIUnit   *si_unit_xy;
 
     gdouble     double1;
@@ -99,6 +100,7 @@ GwyDataLine*    gwy_spectra_get_spectrum           (GwySpectra *spectra,
 void            gwy_spectra_set_spectrum           (GwySpectra *spectra,
                                                     guint i,
                                                     GwyDataLine *new_spectrum);
+guint           gwy_spectra_n_spectra              (GwySpectra *spectra); 
 gint            gwy_spectra_nearest                (GwySpectra *spectra,
                                                     guint** plist,
                                                     gdouble real_x,
@@ -112,6 +114,8 @@ void            gwy_spectra_remove_spectrum        (GwySpectra *spectra,
 GwyDataLine*    gwy_spectra_get_spectra_interp     (GwySpectra *spectra,
                                                     gdouble x,
                                                     gdouble y);
+const gchar*    gwy_spectra_get_title              (GwySpectra *spectra);
+void            gwy_spectra_set_title              (GwySpectra *spectra, gchar *new_title);
 void            gwy_spectra_clear                  (GwySpectra *spectra);
 
 G_END_DECLS

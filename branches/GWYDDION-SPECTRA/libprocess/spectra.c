@@ -120,6 +120,7 @@ gwy_spectra_finalize(GObject *object)
     }
     g_free(spectra->data);
     g_free(spectra->coords);
+    g_free(spectra->title);
     G_OBJECT_CLASS(gwy_spectra_parent_class)->finalize(object);
 }
 
@@ -142,6 +143,7 @@ gwy_spectra_new() {
     spectra->coords =  g_new0(gdouble, 2*DEFAULT_ALLOC_SIZE);
     spectra->nalloc = DEFAULT_ALLOC_SIZE;
     spectra->ncurves = 0;
+    spectra->title = NULL;
 
     return spectra;
 }
@@ -193,6 +195,7 @@ gwy_spectra_serialize(GObject *obj,
     {
         guint ncoords = spectra->ncurves*2;
         GwySerializeSpec spec[] = {
+            { 's', "title", &spectra->title, NULL, },
             { 'D', "coords", &spectra->coords, &ncoords, },
             { 'O', "data", &spectra->data, &spectra->ncurves, },
             { 'i', "ncurves", &spectra->ncurves, NULL, },
@@ -218,7 +221,9 @@ gwy_spectra_get_size(GObject *obj)
         spectra->si_unit_xy = gwy_si_unit_new("");
     {
         guint ncoords = spectra->ncurves*2;
+
         GwySerializeSpec spec[] = {
+            { 's', "title", &spectra->title, NULL, },
             { 'D', "coords", &spectra->coords, &ncoords, },
             { 'O', "data", &spectra->data, &spectra->ncurves, },
             { 'i', "ncurves", &spectra->ncurves, NULL, },
@@ -240,8 +245,10 @@ gwy_spectra_deserialize(const guchar *buffer,
     GwySIUnit *si_unit_xy = NULL;
     GwyDataLine **data = NULL;
     GwySpectra *spectra;
+    gchar* title = NULL;
 
     GwySerializeSpec spec[] = {
+      { 's', "title", &title, NULL, },
       { 'D', "coords", &coords, &ncoords, },
       { 'O', "data", &data, &n_spectrum, },
       { 'i', "ncurves", &ncurves, NULL, },
@@ -270,6 +277,7 @@ gwy_spectra_deserialize(const guchar *buffer,
 
     spectra = gwy_spectra_new();
 
+    spectra->title = title;
     g_free(spectra->data);
     spectra->data = data;
     g_free(spectra->coords);
@@ -635,6 +643,20 @@ gwy_spectra_set_spectrum (GwySpectra *spectra,
 }
 
 /**
+ * gwy_spectra_n_spectra:
+ * @spectra: A Spectra Object
+ *
+ * Returns: The number of spectra in a spectra object.
+ *
+ **/
+guint
+gwy_spectra_n_spectra (GwySpectra *spectra)
+{
+    g_return_val_if_fail(GWY_IS_SPECTRA(spectra), 0);
+    return spectra->ncurves;
+}
+
+/**
  * gwy_spectra_add_spectrum:
  * @spectra: A Spectra Object
  * @new_spectrum: A GwyDataLine containing the spectrum to append.
@@ -757,6 +779,36 @@ gwy_spectra_get_spectra_interp (GwySpectra *spectra, gdouble x, gdouble y)
     i = gwy_spectra_xytoi(spectra, x, y);
 
     return gwy_data_line_duplicate(gwy_spectra_get_spectrum(spectra, i));
+}
+
+/**
+ * gwy_spectra_get_title:
+ * @spectra: A Spectra Object
+ *
+ * Returns: A pointer to the title string.
+ **/
+const gchar*
+gwy_spectra_get_title (GwySpectra *spectra)
+{
+    g_return_val_if_fail(GWY_IS_SPECTRA(spectra), NULL);
+    return spectra->title;
+}
+/**
+ * gwy_spectra_set_title:
+ * @spectra: A Spectra Object
+ * @new_title: The title string
+ *
+ * Sets the title of the spectra collection. The object takes ownership
+ * of the new string and it is freed when the object is finalised. Title
+ * strings should be dynamically allocated.
+ **/
+void
+gwy_spectra_set_title (GwySpectra *spectra, gchar *new_title)
+{
+    g_return_if_fail(GWY_IS_SPECTRA(spectra));
+
+    g_free(spectra->title);
+    spectra->title = new_title;
 }
 
 /**
