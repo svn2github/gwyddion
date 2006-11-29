@@ -504,6 +504,48 @@
       </para>
     </section>
   </section>
+  <section id="line-stats">
+    <title>
+      Row/Column Statistics Tool
+      <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
+    </title>
+    <para>
+      This tool calculates numeric characteristics of each row or column
+      and plots them as a function of its position.  This makes it kind of
+      complementary to
+      <link linkend="stat_functions">Statistical Functions</link> tool.
+      Available quantities include:
+    </para>
+    <orderedlist>
+      <listitem>
+        Mean value, minimum, maximum and median.
+      </listitem>
+      <listitem>
+        RMS value of the height irregularities computed from data variance.
+      </listitem>
+      <listitem>
+        Surface line length.  It is estimated as the total length of the
+        straight segments joining data values in the row (column).
+      </listitem>
+      <listitem>
+        Overall slope, i.e. the tangent of the mean line fitted through the
+        row (column).
+      </listitem>
+      <listitem>
+        Tangent of β<subscript>0</subscript>.  This is a characteristics of
+        the steepnes of local slopes, closely related to the behaviour of
+        autocorrelation and height-height correlation functions at zero.  For
+        discrete values it is calculated as follows:
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-tan-beta0.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+    </orderedlist>
+  </section>
   <section>
     <title>Two-Dimensional Slope Statistics</title>
     <para>

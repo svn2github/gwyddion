@@ -188,6 +188,19 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry>
+      <term>
+        Row/Column Statistics
+        <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-line-stats">
+        <para>
+          Somewhat complementary to 1D statistical functions, this tool
+          plots characteristics such as mean, median or surface length for
+          each row (column).
+        </para>
+      </listitem>
+    </varlistentry>
   </variablelist>
   <para>
     Tool dialogs can be closed (or more precisely hidden, as the current tool
