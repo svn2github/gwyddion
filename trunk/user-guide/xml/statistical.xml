@@ -20,15 +20,15 @@
     represents the number of rows and/or columns within the data field. The real
     size of the field is denoted as
     <phrase role="math">L<subscript>x</subscript></phrase> × <phrase role="math">L<subscript>y</subscript></phrase>
-    where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase>
+    where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase>
     are the sizes of the respective axes.
     The sampling interval (distance between two adjacent points within the scan) is
-    denoted &Delta;. We assume that the sampling interval is the same in
-    both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase>
+    denoted Δ. We assume that the sampling interval is the same in
+    both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase>
     direction. We assume that the surface height at a given point
-    <phrase role="math">x</phrase>,<phrase role="math">y</phrase>
+    <phrase role="math">x</phrase>, <phrase role="math">y</phrase>
     can be described by a random function
-    <phrase role="math">&xi;</phrase>(<phrase role="math">x</phrase>,<phrase role="math">y</phrase>)
+    ξ(<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
     that has given statistical properties.
   </para>
   <para>
@@ -220,20 +220,22 @@
         are concrete values of heights at points
         [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>],
-        <phrase role="math">&tau;<subscript>x</subscript></phrase> = 
+        τ<subscript><phrase role="math">x</phrase></subscript> = 
         <phrase role="math">x</phrase><subscript>1</subscript> - 
         <phrase role="math">x</phrase><subscript>2</subscript> and
-        <phrase role="math">&tau;<subscript>y</subscript></phrase> = 
+        τ<subscript><phrase role="math">y</phrase></subscript> = 
         <phrase role="math">y</phrase><subscript>1</subscript> - 
         <phrase role="math">y</phrase><subscript>2</subscript>.
         The function
         <phrase role="math">w</phrase>(<phrase role="math">z</phrase><subscript>1</subscript>, <phrase role="math">z</phrase><subscript>2</subscript>,
-        <phrase role="math">&tau;<subscript>x</subscript></phrase>, <phrase role="math">&tau;<subscript>y</subscript></phrase>)
-        denotes the two-dimensional probability density of the random function <phrase role="math">&xi;</phrase> &gt; (<phrase role="math">x</phrase>,<phrase role="math">y</phrase>)
-        corresponding to points [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
-        [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>]
-        and the distance between
-        these points <phrase role="math">&tau;</phrase>.
+        τ<subscript><phrase role="math">x</phrase></subscript>,
+        τ<subscript><phrase role="math">y</phrase></subscript>)
+        denotes the two-dimensional probability density of the random function
+        ξ &gt; (<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
+        corresponding to points
+        [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
+        [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>]
+        and the distance between these points τ.
       </para>
       <para>
         For AFM measurements, we usually evaluate the one-dimensional
@@ -253,8 +255,8 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. The function can thus be evaluated in a discrete set
-        of values of <phrase role="math">&tau;</phrase> separated by the sampling interval <phrase role="math">&Delta;</phrase>.
+        where <phrase role="math">m</phrase> = τ<subscript><phrase role="math">x</phrase></subscript>/Δ. The function can thus be evaluated in a discrete set
+        of values of τ separated by the sampling interval Δ.
       </para>
       <para>
         The one-dimensional autocorrelation function is often assumed to have the
@@ -269,11 +271,13 @@
       </informalequation>
       <para>
         <!--TODO: Tried to fix this sentence, but my not be correct -->
-        where <phrase role="math">&sigma;</phrase> denotes the root mean square deviation of
-        the heights and <phrase role="math">T</phrase> represents the autocorrelation length.
+        where σ denotes the root mean square deviation of
+        the heights and
+        <phrase role="math">T</phrase> represents the autocorrelation length.
       </para>
       <para>
-        For the exponential autocorrelation function we have the following relation
+        For the exponential autocorrelation function we have the following
+        relation
       </para>
       <informalequation>
         <mediaobject>
@@ -315,8 +319,9 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = <phrase role="math">&tau;<subscript>x</subscript></phrase>/<phrase role="math">&Delta;</phrase>. The function thus can be evaluated in a discrete set
-        of values of <phrase role="math">&tau;</phrase> separated by the sampling interval <phrase role="math">&Delta;</phrase>.
+        where <phrase role="math">m</phrase> = τ<subscript><phrase role="math">x</phrase></subscript>/Δ.
+        The function thus can be evaluated in a discrete set of values of τ
+        separated by the sampling interval Δ.
       </para>
       <para>
         The one-dimensional height-height correlation function is often assumed to be
@@ -331,11 +336,8 @@
       </informalequation>
       <para>
         <!--TODO: Tried to fix this sentence, but my not be correct -->
-        where <phrase role="math">&sigma;</phrase> denotes the root mean square deviation of
-        the heights and <phrase role="math">T</phrase> denotes the autocorrelation length.
-        <!--TODO: Does T donote the autocorrelation length, or the height-height
-                  corelation length? Looks like a mistake as a result of copying from the
-                  previous section -->
+        where σ denotes the root mean square deviation of the heights and
+        <phrase role="math">T</phrase> denotes the autocorrelation length.
       </para>
       <para>
         For the exponential height-height correlation function we have the following relation
@@ -352,7 +354,7 @@
         In Fig. 1 the height-height correlation function and autocorrelation function obtained for
         simulated surface having Gaussian autocorrelation function are plotted. These functions
         are fitted by means of least-squares method using the formulae shown above. The resulting
-        values of <phrase role="math">&sigma;</phrase> and <phrase role="math">T</phrase> were practically same for both the approaches.
+        values of σ and <phrase role="math">T</phrase> were practically same for both the approaches.
       </para>
       <figure>
         <title>
@@ -435,8 +437,8 @@
       <para>
         <!--TODO: Fix this paragraph, and figure -->
         In Figure 2 the resulting PSDF and its fit for the same surface as used in Fig. 1 are plotted.
-        We can see that the function can be again fitted by Gaussian PSDF. The resulting values of
-        <phrase role="math">&sigma;</phrase> and <phrase role="math">T</phrase> were practically same as those from the HHCF and ACF fit.
+        We can see that the function can be again fitted by Gaussian PSDF. The resulting values of σ
+        and <phrase role="math">T</phrase> were practically same as those from the HHCF and ACF fit.
       </para>
       <figure>
         <title>
