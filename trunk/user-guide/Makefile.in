@@ -95,8 +95,8 @@ distclean: clean
 help:
 	@echo "xhtml        Compile User guide to XHTML"
 	@echo "all          The same"
-	@echo "dist         Create tarball with source code"
-	@echo "dist-xhtml   Create tarball with ready-to-read XHTML User guide"
+	@echo "dist         Create tarball with DocBook sources"
+	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
 	@echo "version      Update version number to current date"
 
 .PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
