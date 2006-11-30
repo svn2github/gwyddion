@@ -15,6 +15,7 @@ tools_LTLIBRARIES = \
 	readvalue.la \
 	sfunctions.la \
 	spotremove.la \
+	spectro.la \
 	stats.la
 
 
@@ -82,14 +83,17 @@ profile_la_LIBADD = $(module_libadd)
 readvalue_la_SOURCES = readvalue.c
 readvalue_la_LIBADD = $(module_libadd)
 
-stats_la_SOURCES = stats.c
-stats_la_LIBADD = $(module_libadd)
-
 sfunctions_la_SOURCES = sfunctions.c
 sfunctions_la_LIBADD = $(module_libadd)
 
+spectro_la_SOURCES = spectro.c
+spectro_la_LIBADD = $(module_libadd)
+
 spotremove_la_SOURCES = spotremove.c
 spotremove_la_LIBADD = $(module_libadd)
+
+stats_la_SOURCES = stats.c
+stats_la_LIBADD = $(module_libadd)
 
 
 clean-local:

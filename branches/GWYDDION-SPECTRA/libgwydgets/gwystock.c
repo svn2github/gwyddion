@@ -806,6 +806,13 @@ free_the_icon_factory(void)
  **/
 
 /**
+ * GWY_STOCK_SPECTRUM
+ *
+ * The "Spectrum" stock icon.
+ * <inlinegraphic fileref="../gwy_spectrum-24.png" format="PNG"/>
+ **/
+
+/**
  * GWY_STOCK_SPOT_REMOVE
  *
  * The "Spot-Remove" stock icon.

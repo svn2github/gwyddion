@@ -275,7 +275,7 @@ omicron_load(const gchar *filename,
 
                 /* single point spectrum copied to each data field */
                 for(idx=0;idx < ofile.topo_channels->len; idx++){
-                    g_snprintf(key, sizeof(key), "/%u/spc/%u", idx,i);                    
+                    g_snprintf(key, sizeof(key), "/%u/spec/%u", idx,i);                    
                     gwy_container_set_object_by_name(container, key, spectra);
                 }
 			}
