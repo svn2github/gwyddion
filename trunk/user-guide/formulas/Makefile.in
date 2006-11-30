@@ -24,7 +24,7 @@ png-images: $(PNGS)
 	cat defs.tex header.tex $< footer.tex >$(T)$<
 	$(TEX) --interaction=batchmode $(T)$<
 	$(DVIPS) -q -E -o $(T)$*.ps $(T)$*.dvi
-	. $(T)$*.bbox; sed -i -e "s/^\(%%BoundingBox:\).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
+	. ./$(T)$*.bbox; sed -i -e "s/^\(%%BoundingBox:\).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
 	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
 	@{ \
 	    eval $$(./pngsize <$(T)$*.png); \
