@@ -87,6 +87,7 @@ struct _GwyToolSpectro {
     GtkWidget *separate;
     GtkWidget *apply;
     GType layer_type;
+    gulong layer_object_chosen_id;
 
     /* potential class data */
     GwySIValueFormat *coord_format;
@@ -111,7 +112,10 @@ static void   gwy_tool_spectro_selection_changed    (GwyPlainTool *plain_tool,
                                                      gint hint);
 static void   gwy_tool_spectro_tree_sel_changed     (GtkTreeSelection *selection,
                                                      gpointer data);
-static void   gwy_tool_spectro_show_curve         (GwyToolSpectro *tool,
+static void   gwy_tool_spectro_object_chosen        (GwyVectorLayer *gwyvectorlayer,
+                                                     gint i,
+                                                     gpointer *data);
+static void   gwy_tool_spectro_show_curve           (GwyToolSpectro *tool,
                                                      gint i);
 static void   gwy_tool_spectro_update_all_curves    (GwyToolSpectro *tool);
 static void   gwy_tool_spectro_render_cell          (GtkCellLayout *layout,
@@ -200,8 +204,10 @@ static void
 gwy_tool_spectro_finalize(GObject *object)
 {
     GwyToolSpectro *tool;
+    GwyPlainTool *plain_tool;
     GwyContainer *settings;
-
+    
+    plain_tool = GWY_PLAIN_TOOL(object);
     tool = GWY_TOOL_SPECTRO(object);
 
     settings = gwy_app_settings_get();
@@ -228,6 +234,13 @@ gwy_tool_spectro_finalize(GObject *object)
         gwy_si_unit_value_format_free(tool->coord_format);
     if (tool->spectra)
         g_object_unref(tool->spectra);
+    gwy_debug("");
+    gwy_debug("id: %d", tool->layer_object_chosen_id);
+    if (tool->layer_object_chosen_id>0){
+        g_signal_handler_disconnect(plain_tool->layer,
+                                    tool->layer_object_chosen_id);
+        tool->layer_object_chosen_id=0;
+    }
     G_OBJECT_CLASS(gwy_tool_spectro_parent_class)->finalize(object);
 }
 
@@ -266,7 +279,6 @@ gwy_tool_spectro_init(GwyToolSpectro *tool)
 
     gwy_plain_tool_connect_selection(plain_tool, tool->layer_type,
                                      "spec");
-
     gwy_tool_spectro_init_dialog(tool);
 }
 
@@ -413,7 +425,7 @@ gwy_tool_spectro_init_dialog(GwyToolSpectro *tool)
 
     tool->graph = gwy_graph_new(tool->gmodel);
     gwy_graph_enable_user_input(GWY_GRAPH(tool->graph), FALSE);
-    g_object_set(tool->gmodel, "label-visible", FALSE, NULL);
+    g_object_set(tool->gmodel, "    label-visible", FALSE, NULL);
     gtk_box_pack_start(GTK_BOX(hbox), tool->graph, TRUE, TRUE, 2);
 
     //gwy_plain_tool_add_clear_button(GWY_PLAIN_TOOL(tool));
@@ -454,15 +466,28 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         return;
     }
 
+    gwy_debug("disconect obj-chosen handler: %d",
+              tool->layer_object_chosen_id);
+    if (tool->layer_object_chosen_id > 0) {
+        g_signal_handler_disconnect(plain_tool->layer,
+                                    tool->layer_object_chosen_id);
+        tool->layer_object_chosen_id = 0;
+    }
+
     GWY_TOOL_CLASS(gwy_tool_spectro_parent_class)->data_switched(gwytool,
                                                                  data_view);
-
-
     if (data_view) {
+        
+        
+        tool->layer_object_chosen_id =
+                g_signal_connect(G_OBJECT (plain_tool->layer),
+                                 "object-chosen",
+                                 G_CALLBACK (gwy_tool_spectro_object_chosen),
+                                 tool);
+        
         blayer = gwy_data_view_get_base_layer(data_view);
         data_key = gwy_pixmap_layer_get_data_key(blayer);
         len=strlen(data_key);
-
         /* FIXME: This is going to need to be able to deal with more than just
                   "spec/0" */
         len+=2; /* space to add "/0" */
@@ -520,10 +545,10 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         }
         gtk_tree_view_set_model(tool->treeview, tool->model);
     } else { /* --- if(data_view) --- */
+        
         if (tool->spectra) {
             g_object_unref(tool->spectra);
             tool->spectra = NULL;
-            
         }
     }
 
@@ -615,6 +640,28 @@ gwy_tool_spectro_tree_sel_changed (GtkTreeSelection *selection,
         gtk_tree_model_get (model, &iter, COLUMN_I, &i, -1);
         gwy_tool_spectro_show_curve(tool, i);
     }
+}
+
+static void
+gwy_tool_spectro_object_chosen (GwyVectorLayer *gwyvectorlayer,
+                                gint i,
+                                gpointer *data)
+{
+    GwyToolSpectro *tool;
+    GtkTreePath *treepath = NULL;
+    GtkTreeSelection *selection;
+
+    g_return_if_fail(GWY_IS_TOOL_SPECTRO(data));
+    tool = GWY_TOOL_SPECTRO(data);
+    
+    if (i < 0) 
+        return;
+    gwy_debug("obj-chosen: %d", i);
+    
+    treepath = gtk_tree_path_new_from_indices(i,-1);
+    selection = gtk_tree_view_get_selection(tool->treeview);
+    gtk_tree_selection_select_path (selection, treepath);
+    g_free(treepath);
 }
 
 static void
