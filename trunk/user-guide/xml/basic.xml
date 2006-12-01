@@ -20,23 +20,26 @@
       typically only a few hundred pixels in width and height), the
       interpolation method used can become critical for proper quantitative
       analysis of data properties. There are several interpolation methods
-      in 1D and 2D implemented in Gwyddion and the user can choose which
+      [1] in 1D and 2D implemented in Gwyddion and the user can choose which
       method to use for most of the modules using interpolation.
     </para>
     <para>
-      Here, we describe 1D interpolation method principles. Nearly all
-      interpolation methods in 2D are simply composed of these methods
-      currently. The interpolation methods that can be applied on data are as
+      Here, we describe 1D interpolation method principles. All implemented
+      2D interpolation methods are separable and simply composed these 1D
+      methods. The interpolation methods that can be applied on data are as
       follows
     </para>
     <itemizedlist>
       <listitem>
-        Round interpolation is the simplest method - it just takes round
+        Round interpolation is the simplest method - it just takes round
         value of the expected position and finds therefore the closest
         data value at integer position.
+        Its polynomial degree is 0, regularity
+        <phrase role="math">C</phrase><superscript>-1</superscript>
+        and order 1.
       </listitem>
       <listitem>
-        (Bi)linear interpolation is a linear interpolation
+        Linear interpolation is a linear interpolation
         between the two closest data values. The value
         <phrase role="math">z</phrase> at point of relative
         position <phrase role="math">x</phrase> is obtained as
@@ -50,6 +53,9 @@
         where <phrase role="math">z</phrase><subscript>0</subscript>
         and <phrase role="math">z</phrase><subscript>1</subscript> and
         values at the preceding and following points, respectively.
+        Its polynomial degree is 1, regularity
+        <phrase role="math">C</phrase><superscript>0</superscript>
+        and order 2.  It is identical to the second-order B-spline.
       </listitem>
       <listitem>
         Key interpolation (more precisely Key's interpolation with
@@ -58,7 +64,8 @@
         and after-following points
         <phrase role="math">z</phrase><subscript>-1</subscript>
         and <phrase role="math">z</phrase><subscript>2</subscript>,
-        respectively.  The value is then obtained as
+        respectively.  In other words it has support of length 4,
+        The value is then obtained as
         <informalequation>
           <mediaobject>
             <imageobject>
@@ -74,11 +81,29 @@
             </imageobject>
           </mediaobject>
         </informalequation>
-        are the interpolation coefficients.
+        are the interpolation weights.
+        Key's interpolation degree is 3, regularity
+        <phrase role="math">C</phrase><superscript>1</superscript>
+        and order 3.
+      </listitem>
+      <listitem>
+        Schaum interpolation (more precisely fourth-order Schaum) has also
+        support of length 4.  The interpolation are
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-schaum.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        Its polynomial degree is 3, regularity
+        <phrase role="math">C</phrase><superscript>0</superscript>
+        and order 4.
       </listitem>
       <listitem>
         Nearest neighbour approximation is again calculated from the closest
-        four data values.  The interpolation coefficients are
+        four data values but unlike all others it is not piecewise-polynomial.
+        The interpolation weights are
         <informalequation>
           <mediaobject>
             <imageobject>
@@ -91,10 +116,41 @@
         <phrase role="math">r</phrase><subscript>0</subscript> = <phrase role="math">x</phrase>,
         <phrase role="math">r</phrase><subscript>1</subscript> = 1 − <phrase role="math">x</phrase>,
         <phrase role="math">r</phrase><subscript>2</subscript> = 2 − <phrase role="math">x</phrase>.
+        Its order is 1.
       </listitem>
       <listitem>
-        Bspline and Omoms interpolations are misimplemented and should not
-        be used.
+        B-spline was misimplemented up to version 2.1 (inclusive) and it
+        blurred data.  It should be avoided these old versions.
+        The weights are
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-bspline.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        However, they are not used with directly function values as above,
+        but with interpolation coefficients calculated from function
+        values [1].  Its polynomial degree is 3, regularity
+        <phrase role="math">C</phrase><superscript>2</superscript>
+        and order 4.
+      </listitem>
+      <listitem>
+        O-MOMS was misimplemented up to version 2.1 (inclusive) and it
+        blurred data.  It should be avoided these old versions.
+        The weights are
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-interpolation-omoms.png" format="PNG"/>
+            </imageobject>
+          </mediaobject>
+        </informalequation>
+        However, they are not used directly with function values as above,
+        but with interpolation coefficients calculated from function
+        values [1].  Its polynomial degree is 3, regularity
+        <phrase role="math">C</phrase><superscript>0</superscript>
+        and order 4.
       </listitem>
     </itemizedlist>
     <figure float="0">
@@ -221,6 +277,14 @@
       After profiles are chosen, they can be extracted to graphs (separate
       of merged in one Graph window) that can be further analysed using
       Graph modules.
+    </para>
+  </section>
+  <section>
+    <title>References</title>
+    <para>
+      [1] P. Thévenaz, T. Blu, M. Unser: Interpolation revisited.
+      IEEE Transactions on medical imaging, Volume 10, Number 7, July 2000,
+      739
     </para>
   </section>
 </section>
