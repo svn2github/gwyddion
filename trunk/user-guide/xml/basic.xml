@@ -299,7 +299,7 @@
         of the normal to the <phrase role="math">xy</phrase> plane, as
         displayed on the following figure.
       </para>
-      <figure>
+      <figure float='0'>
         <title>
           Facet orientation measured as counterclockwise angle from
           <phrase role="math">x</phrase>-axis to the projection of facet
@@ -328,6 +328,16 @@
         and the endpoint value difference (Δ<phrase role="math">z</phrase>)
         for a set of lines selected on the data.
       </para>
+      <figure float='0'>
+        <title>
+          Distance tool with three selected lines.
+        </title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="distances.png" format="PNG"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
     </section>
   </section>
   <!-- FIXME: Does it belong here? -->
@@ -351,6 +361,16 @@
       of merged in one Graph window) that can be further analysed using
       Graph modules.
     </para>
+    <figure float='0'>
+      <title>
+        Profile tool with three extracted profiles.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="profiles.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
   <section>
     <title>References</title>
