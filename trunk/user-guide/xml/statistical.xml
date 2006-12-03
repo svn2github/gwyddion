@@ -41,7 +41,7 @@
     along the <phrase role="math">x</phrase> profiles as these are less affected
     by low frequency noise and thermal drift of the sample.
   </para>
-  <section id="stat_quantities">
+  <section id="stat-quantities">
     <title>
       Statistical Quantities Tool
       <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
@@ -50,7 +50,7 @@
       Statistical quantities include basic properties of the height values
       distribution, including its variance, skewness and kurtosis. The
       quantities accessible within Gwyddion by means of the
-      <link linkend="stat_quantities">Statistical Quantities</link>
+      <guilabel>Statistical Quantities</guilabel>
       tool are as follows:
     </para>
     <orderedlist>
@@ -151,14 +151,14 @@
       </mediaobject>
     </figure>
   </section>
-  <section id="stat_functions">
+  <section id="sfunctions">
     <title>
       Statistical Functions Tool
       <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
     </title>
     <para>
       One-dimensional statistical functions can be accessed by using the
-      <link linkend="stat_functions">Statistical Functions</link> tool.
+      <guilabel>Statistical Functions</guilabel> tool.
       Within the tool window, you can select which function to evaluate using
       the selection box on the left labeled <guilabel>Output Type</guilabel>.
       The graph preview will update automatically. You can select in which
@@ -172,7 +172,7 @@
     </para>
     <tip>
       Similar to the
-      <link linkend="stat_quantities">Statistical Quantities</link>
+      <link linkend="stat-quantities">Statistical Quantities</link>
       tool, this tool evaluates for the entire image by default, but you can
       select a sub-region to analyze if you wish.
     </tip>
@@ -455,7 +455,7 @@
         Within Gwyddion you can fit all statistical functions presented here
         by their Gaussian and exponential forms. To do this, fist click
         <guibutton>Apply</guibutton> within the
-        <link linkend="stat_functions">Statistical Functions</link> tool window.
+        <link linkend="sfunctions">Statistical Functions</link> tool window.
         This will create a new graph window. With this new window selected, click
         on
         <menuchoice>
@@ -513,7 +513,7 @@
       This tool calculates numeric characteristics of each row or column
       and plots them as a function of its position.  This makes it kind of
       complementary to
-      <link linkend="stat_functions">Statistical Functions</link> tool.
+      <link linkend="sfunctions">Statistical Functions</link> tool.
       Available quantities include:
     </para>
     <orderedlist>

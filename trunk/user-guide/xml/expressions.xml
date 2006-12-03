@@ -27,8 +27,8 @@
   <para>
     The precedence of operations is summarized in following table.
   </para>
-  <table frame='none'>
-    <title id="expr-op-precedence">Precedence of operations</title>
+  <table frame='none' id="expr-op-precedence">
+    <title>Precedence of operations</title>
     <tgroup cols='2'>
       <thead>
         <row>
@@ -73,8 +73,8 @@
   <para>
     Available operators and functions are listed in following table.
   </para>
-  <table frame='none'>
-    <title id="expr-operators">Operators and functions</title>
+  <table frame='none' id="expr-operators">
+    <title>Operators and functions</title>
     <tgroup cols='2'>
       <thead>
         <row>

@@ -51,8 +51,8 @@
         to zero (Fix Zero) or mean value to zero (Zero Mean Value).
       </para>
     </section>
-    <section>
-      <title id="process-level-plane">
+    <section id="process-level-plane">
+      <title>
         Plane Level
         <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
       </title>
@@ -74,21 +74,21 @@
         the image window and selecting <guimenuitem>Level</guimenuitem>.
       </tip>
     </section>
-    <section>
-      <title id="process-level-three">
+    <section id="level3">
+      <title>
         Three Point Leveling Tool
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </title>
       <para>
-        The <link linkend="process-level-three">Three Point Leveling</link>
+        The <guilabel>Three Point Leveling</guilabel>
         tool can be used for leveling very complicated surface structures.
         The user can simply mark three points in the image that should be at
         the same level, and then click <guibutton>Apply</guibutton>. The plane
         is computed from these three points and is subtracted from the data.
       </para>
     </section>
-    <section>
-      <title id="module-facet-level">
+    <section id="module-facet-level">
+      <title>
         Facet Level
         <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
       </title>

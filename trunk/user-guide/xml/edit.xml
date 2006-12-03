@@ -2,10 +2,6 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<!-- TODO: Add these sections:
-              -Median Line Correction
-              -Modus Line Correction
-              -Unrotate -->
 <section id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Data Edit</title>
   <para>

@@ -325,13 +325,13 @@
         vertical (Δ<phrase role="math">y</phrase>)
         and total planar (<phrase role="math">R</phrase>) distances;
         the azimuth φ (measured identically to inclination φ)
-        and the value difference (Δ<phrase role="math">z</phrase>)
+        and the endpoint value difference (Δ<phrase role="math">z</phrase>)
         for a set of lines selected on the data.
       </para>
     </section>
   </section>
   <!-- FIXME: Does it belong here? -->
-  <section>
+  <section id="profile">
     <title>
       Profile Extraction
       <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>

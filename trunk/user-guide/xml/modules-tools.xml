@@ -19,23 +19,18 @@
   <variablelist>
     <varlistentry>
       <term>
-        Read Value
+        <link linkend="read-value">Read Value</link>
         <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
       </term>
       <listitem id="tool-read-value">
         <para>
-          Reads
-          <phrase role="math">x</phrase>,
-          <phrase role="math">y</phrase>,
-          <phrase role="math">z</phrase> values at the position of mouse
-          click. You can average more points around the point where you
-          clicked.
+          Reads values at the position of mouse click.
         </para>
       </listitem>
     </varlistentry>
     <varlistentry>
       <term>
-        Distance
+        <link linkend="distance">Distance</link>
         <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
       </term>
       <listitem id="tool-distance">
@@ -75,7 +70,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Filter
+        <link linkend="basic-filters">Filter</link>
         <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
       </term>
       <listitem id="tool-filters">
@@ -87,7 +82,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Three Point Level
+        <link linkend="level3">Three Point Level</link>
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </term>
       <listitem id="tool-level3">
@@ -100,7 +95,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Statistical Quantities
+        <link linkend="stat-quantities">Statistical Quantities</link>
         <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
       </term>
       <listitem id="tool-stats">
@@ -114,7 +109,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Statistical Functions
+        <link linkend="sfunctions">Statistical Functions</link>
         <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
       </term>
       <listitem id="tool-sfunctions">
@@ -127,7 +122,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Profile
+        <link linkend="profile">Profile</link>
         <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>
       </term>
       <listitem id="tool-profile">
@@ -152,7 +147,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Spot Remover
+        <link linkend="remove-spots">Spot Remover</link>
         <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
       </term>
       <listitem id="tool-remove-spots">
@@ -190,7 +185,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        Row/Column Statistics
+        <link linkend="line-stats">Row/Column Statistics</link>
         <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
       </term>
       <listitem id="tool-line-stats">
