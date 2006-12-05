@@ -340,7 +340,7 @@ gwy_tool_spectro_init_dialog(GwyToolSpectro *tool)
     }
 
     select = gtk_tree_view_get_selection (GTK_TREE_VIEW (tool->treeview));
-    gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
+    gtk_tree_selection_set_mode (select, GTK_SELECTION_MULTIPLE);
     g_signal_connect (G_OBJECT (select), "changed",
                       G_CALLBACK (gwy_tool_spectro_tree_sel_changed),
                       tool);
@@ -350,6 +350,8 @@ gwy_tool_spectro_init_dialog(GwyToolSpectro *tool)
                                    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_container_add(GTK_CONTAINER(scwin), GTK_WIDGET(tool->treeview));
     gtk_box_pack_start(GTK_BOX(vbox), scwin, TRUE, TRUE, 0);
+
+    /*  */
 
     /* Options */
     tool->options = gtk_expander_new(_("<b>Options</b>"));
@@ -628,6 +630,7 @@ gwy_tool_spectro_tree_sel_changed (GtkTreeSelection *selection,
     GwyToolSpectro *tool;
     GtkTreeIter iter;
     GtkTreeModel *model;
+    GList *selected, *item;
     guint i;
 
     g_return_if_fail(GWY_IS_TOOL_SPECTRO(data));
@@ -635,11 +638,17 @@ gwy_tool_spectro_tree_sel_changed (GtkTreeSelection *selection,
 
     gwy_debug("");
     gwy_graph_model_remove_all_curves(tool->gmodel);
-    if (gtk_tree_selection_get_selected (selection, &model, &iter))
-    {
+    selected = gtk_tree_selection_get_selected_rows(selection, &model);
+    item = selected;
+    while (item) {
+        gtk_tree_model_get_iter(model, &iter, (GtkTreePath*)item->data);
         gtk_tree_model_get (model, &iter, COLUMN_I, &i, -1);
         gwy_tool_spectro_show_curve(tool, i);
+        item = g_list_next(item);
     }
+    g_list_foreach (selected, gtk_tree_path_free, NULL);
+    g_list_free (selected);
+
 }
 
 static void
@@ -661,7 +670,7 @@ gwy_tool_spectro_object_chosen (GwyVectorLayer *gwyvectorlayer,
     treepath = gtk_tree_path_new_from_indices(i,-1);
     selection = gtk_tree_view_get_selection(tool->treeview);
     gtk_tree_selection_select_path (selection, treepath);
-    g_free(treepath);
+    gtk_tree_path_free(treepath);
 }
 
 static void
@@ -691,9 +700,7 @@ gwy_tool_spectro_show_curve(GwyToolSpectro *tool,
     for(i = 0; i < n; i++){
         guint idx;
         gcmodel = gwy_graph_model_get_curve(tool->gmodel, i);
-        g_object_get(G_OBJECT(gcmodel),
-                     "sid", &idx,
-                      NULL);
+        idx = GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(gcmodel), "sid"));
         if (idx==id)
             break;
         else
