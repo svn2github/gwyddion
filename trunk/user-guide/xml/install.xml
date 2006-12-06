@@ -856,8 +856,8 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     <section>
       <title>Linux/Unix</title>
       <para>
-        Run <userinput>./autogen.sh</userinput> with any arguments you
-        would give to <command>configure</command> after a fresh checkout.
+        After a fresh checkout, run <userinput>./autogen.sh</userinput> with
+        any arguments you would give to <command>configure</command>.
         Note it automatically adds <option>--enable-maintainer-mode</option>.
         This option enables <command>make</command> rules for creation and
         updates of files that are distributed in the source code tarball (and
