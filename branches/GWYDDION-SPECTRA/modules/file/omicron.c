@@ -267,17 +267,12 @@ omicron_load(const gchar *filename,
 				    goto fail;
 				}
                 
-                /* XXX: This seems wastefull, as a copy is made to be associated 
-                   with every datafield, but I think the mess created by making
-                    one instance and referenceing it would be worse. 
-                    This may change as spectroscopy is developed.
-                   Owain */
-
                 /* single point spectrum copied to each data field */
                 for(idx=0;idx < ofile.topo_channels->len; idx++){
                     g_snprintf(key, sizeof(key), "/%u/spec/%u", idx,i);                    
                     gwy_container_set_object_by_name(container, key, spectra);
                 }
+                g_object_unref(spectra);
 			}
 	        
 		    if ( strstr(channel->filename, ".sf") || strstr(channel->filename, ".sb") )
@@ -291,11 +286,6 @@ omicron_load(const gchar *filename,
 fail:
     omicron_file_free(&ofile);
     
-    if (spectra) {
-        g_object_unref(spectra);        
-        spectra = NULL;
-    }
-
     g_free(text);
 
     return container;
@@ -730,6 +720,7 @@ omicron_read_cs_data(OmicronFile *ofile,
         if (strstr(line, "BEGIN COORD")) {
             // Read in cordinates Spectroscopy Curves
             i=0;
+            coord_unit = gwy_si_unit_new_parse("nm", &power10);
             while ((line=gwy_str_next_line(&buffer))){
                 gchar *val2;
                 if (strstr(line,"END")){
@@ -748,7 +739,6 @@ omicron_read_cs_data(OmicronFile *ofile,
                 }
 
                 val2=line+16;
-                coord_unit = gwy_si_unit_new_parse("nm", &power10);             
                 x=g_ascii_strtod(line,&val2) * pow10(power10);
                 y=g_ascii_strtod(val2,NULL) * pow10(power10);
                 
@@ -851,12 +841,15 @@ omicron_read_cs_data(OmicronFile *ofile,
     }
 
     gwy_spectra_set_si_unit_xy(spectra, coord_unit);
+    g_object_unref(coord_unit);
+
     for (i=0; i<ncurves; i++) {
         dline=g_ptr_array_index(spectrum,i);
         gwy_spectra_add_spectrum(spectra,dline,coords[i*2],coords[i*2+1]);
         g_object_unref(dline);
     }
 
+    g_ptr_array_free(spectrum, TRUE);
     g_free(coords);
     g_free(buffer);
     return spectra;

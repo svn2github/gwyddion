@@ -225,7 +225,9 @@ gwy_tool_spectro_finalize(GObject *object)
     gwy_container_set_boolean_by_name(settings, separate_key,
                                       tool->args.separate);
 
-    gwy_object_unref(tool->line);
+    if (tool->line)
+        gwy_object_unref(tool->line);
+    
     if (tool->model) {
         gtk_tree_view_set_model(tool->treeview, NULL);
         gwy_object_unref(tool->model);
@@ -426,8 +428,10 @@ gwy_tool_spectro_init_dialog(GwyToolSpectro *tool)
     g_object_set(tool->gmodel, "title", _("Spectroscopy"), NULL);
 
     tool->graph = gwy_graph_new(tool->gmodel);
+    g_object_unref(tool->gmodel); /* The GwyGraph takes a ref */
+
     gwy_graph_enable_user_input(GWY_GRAPH(tool->graph), FALSE);
-    g_object_set(tool->gmodel, "    label-visible", FALSE, NULL);
+    g_object_set(tool->gmodel, "label-visible", FALSE, NULL);
     gtk_box_pack_start(GTK_BOX(hbox), tool->graph, TRUE, TRUE, 2);
 
     //gwy_plain_tool_add_clear_button(GWY_PLAIN_TOOL(tool));
@@ -508,7 +512,6 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         gwy_debug("key: %s",key);
         strcpy(key+len-6, ext);
         gwy_debug("key: %s",key);
-
         spec_found = gwy_container_gis_object_by_name(plain_tool->container,
                                                       key,
                                                       &spectra);
