@@ -690,7 +690,7 @@ omicron_read_cs_data(OmicronFile *ofile,
 {
     GError *err = NULL;
     GwyDataLine *dline;
-    GwySIUnit *siunit = NULL;
+    GwySIUnit *siunit = NULL, *coord_unit = NULL;
     GwySpectra *spectra = NULL;
     GPtrArray *spectrum = NULL;
         
@@ -748,7 +748,7 @@ omicron_read_cs_data(OmicronFile *ofile,
                 }
 
                 val2=line+16;
-                siunit = gwy_si_unit_new_parse("nm", &power10);             
+                coord_unit = gwy_si_unit_new_parse("nm", &power10);             
                 x=g_ascii_strtod(line,&val2) * pow10(power10);
                 y=g_ascii_strtod(val2,NULL) * pow10(power10);
                 
@@ -831,14 +831,14 @@ omicron_read_cs_data(OmicronFile *ofile,
     if (spectrum->len < ncurves) {
         gwy_debug("Less actual spectra than ncurves");
         ncurves=spectrum->len;
-    }   
+    } 
     if (spectrum->len > ncurves) {
         gwy_debug("More actual spectra than ncurves, remaining pos will be set at (0.0,0.0)");
         coords=g_renew(gdouble, coords, spectrum->len*2);
         if (!coords) {
             g_critical("Could not reallocate mem for coords.");
             return NULL;
-        }        
+        }
         while (spectrum->len > ncurves) {
             coords[ncurves*2]=0.0;
             coords[ncurves*2+1]=0.0;
@@ -849,6 +849,8 @@ omicron_read_cs_data(OmicronFile *ofile,
         g_critical("Could not allocates new spectra object");
         return NULL;
     }
+
+    gwy_spectra_set_si_unit_xy(spectra, coord_unit);
     for (i=0; i<ncurves; i++) {
         dline=g_ptr_array_index(spectrum,i);
         gwy_spectra_add_spectrum(spectra,dline,coords[i*2],coords[i*2+1]);
