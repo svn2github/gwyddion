@@ -144,6 +144,13 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>JEOL SPM</entry>
+          <entry>.tif</entry>
+          <entry>jeol module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>JPK Instruments</entry>
           <entry>.jpk</entry>
           <entry>jpkscan module</entry>
@@ -189,6 +196,13 @@
           <entry>Nanotop</entry>
           <entry>.spm</entry>
           <entry>nanotop module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>GXSM netCDF</entry>
+          <entry>.nc</entry>
+          <entry>netcdf module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
