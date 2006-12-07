@@ -448,13 +448,16 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
     GwyPixmapLayer *blayer;
     GwySpectra *spectra;
     GtkListStore *store;
+    GtkTreeViewColumn *column;
+    GtkLabel *label;
     GwySIUnit *siunit;
     GwySIValueFormat *vf;
     guint len, i;
     const gchar *data_key;
-    gchar *key;
+    gchar *key, *column_title;
     gchar ext[]="spec/0";
     const gdouble *coords=NULL;
+    gboolean spec_found = FALSE;
 
     plain_tool = GWY_PLAIN_TOOL(gwytool);
     tool = GWY_TOOL_SPECTRO(gwytool);
@@ -478,6 +481,13 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
 
     GWY_TOOL_CLASS(gwy_tool_spectro_parent_class)->data_switched(gwytool,
                                                                  data_view);
+    if (plain_tool->layer) {
+        gwy_object_set_or_reset(plain_tool->layer,
+                                tool->layer_type,
+                                "editable", FALSE,
+                                "focus", -1,
+                                NULL);
+    }
     if (data_view) {
         
         
@@ -499,31 +509,26 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         strcpy(key+len-6, ext);
         gwy_debug("key: %s",key);
 
-        if (gwy_container_gis_object_by_name(plain_tool->container,
-                                         key,
-                                         &spectra)) {
-            gwy_debug("Found spectra @ %s", key);
-        } else {
-            gwy_debug("Spectra not found @ %s", key);
-        }
-        
+        spec_found = gwy_container_gis_object_by_name(plain_tool->container,
+                                                      key,
+                                                      &spectra);
+        gwy_debug("Spectra %sfound @ %s", spec_found?"":" not", key);
+    }
+    if (spec_found) {
         g_return_if_fail(GWY_IS_SPECTRA(spectra));
         g_object_ref(spectra);
         if (tool->spectra)
             g_object_unref(tool->spectra);
-        
         tool->spectra=spectra;
-        gwy_object_set_or_reset(plain_tool->layer,
-                                tool->layer_type,
-                                "editable", FALSE,
-                                "focus", -1,
-                                NULL);
+
         gwy_selection_set_max_objects(plain_tool->selection, spectra->ncurves);
         coords=gwy_spectra_itoxy(spectra, 0);
         gwy_selection_set_data(plain_tool->selection,
                                gwy_spectra_n_spectra(spectra),
                                spectra->coords);
         siunit = gwy_spectra_get_si_unit_xy(spectra);
+
+        /* XXX: Tidy this up. */
         vf = gwy_si_unit_get_format_with_resolution(siunit,
                                                     GWY_SI_UNIT_FORMAT_PLAIN,
                                                     gwy_data_field_get_xreal(plain_tool->data_field),
@@ -546,12 +551,34 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
            gwy_debug("Added: %d,%g,%g", i, coords[2*i], coords[2*i+1]);
         }
         gtk_tree_view_set_model(tool->treeview, tool->model);
-    } else { /* --- if(data_view) --- */
-        
+
+        column_title = g_strconcat("<b>x</b> [",vf->units,"]",NULL);
+        gwy_debug("%s", column_title);    
+        column = gtk_tree_view_get_column(tool->treeview, COLUMN_X);
+        label = GTK_LABEL(gtk_tree_view_column_get_widget(column));
+        gtk_label_set_markup(label, column_title);
+        g_free(column_title);
+
+        column_title = g_strconcat("<b>y</b> [",vf->units,"]",NULL);
+        column = gtk_tree_view_get_column(tool->treeview, COLUMN_Y);
+        label = GTK_LABEL(gtk_tree_view_column_get_widget(column));
+        gtk_label_set_markup(label, column_title);
+        g_free(column_title);
+
+    } 
+
+    if (!spec_found) {
         if (tool->spectra) {
             g_object_unref(tool->spectra);
             tool->spectra = NULL;
         }
+        if (tool->coord_format)
+            gwy_si_unit_value_format_free(tool->coord_format);
+        tool->coord_format = NULL;
+        store = GTK_LIST_STORE(tool->model);
+        gtk_tree_view_set_model(tool->treeview, NULL);
+        gtk_list_store_clear(store);
+        gtk_tree_view_set_model(tool->treeview, tool->model);
     }
 
     gwy_graph_model_remove_all_curves(tool->gmodel);
