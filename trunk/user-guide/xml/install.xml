@@ -214,11 +214,11 @@
       compiled software from source code, you very likely met autotools and
       already know how to proceed.  This section shall describe the
       compilation procedure in enough detail even for the uninitiated though.
-      File <ulink url="http://svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL"><filename>INSTALL</filename></ulink>
+      File <ulink url="http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL"><filename>INSTALL</filename></ulink>
       in the top-level directory of the
       source tarball contains generic GNU autotools installation instructions.
       <application>Gwyddion</application> specific information can be found in
-      file <ulink url="http://svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL.gwyddion"><filename>INSTALL.gwyddion</filename></ulink>.
+      file <ulink url="http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL.gwyddion"><filename>INSTALL.gwyddion</filename></ulink>.
       Since this file comes with a particular version of
       <application>Gwyddion</application> it may contain more concrete or
       up-to-date information and you should follow it instead of this general
@@ -813,7 +813,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         web pages</ulink>.  For example the current head revision of
       the program itself can be checked out with
       <informalexample>
-        <userinput>svn checkout https://svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput>
+        <userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput>
       </informalexample>
     </para>
     <para>
