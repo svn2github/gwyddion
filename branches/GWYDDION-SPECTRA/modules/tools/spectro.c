@@ -136,8 +136,6 @@ static void   gwy_tool_spectro_separate_changed     (GtkToggleButton *check,
                                                      GwyToolSpectro *tool);
 static void   gwy_tool_spectro_interpolation_changed(GtkComboBox *combo,
                                                      GwyToolSpectro *tool);
-static gboolean gwy_tool_spectro_list_key_press     (GwyToolSpectro *tool,
-                                                     GdkEventKey *event);
 static void   gwy_tool_spectro_apply                (GwyToolSpectro *tool);
 
 static GwyModuleInfo module_info = {
@@ -318,9 +316,7 @@ gwy_tool_spectro_init_dialog(GwyToolSpectro *tool)
                                G_TYPE_DOUBLE);
     tool->model = GTK_TREE_MODEL(store);
     tool->treeview = GTK_TREE_VIEW(gtk_tree_view_new_with_model(tool->model));
-    g_signal_connect_swapped(tool->treeview, "key-press-event",
-                             G_CALLBACK(gwy_tool_spectro_list_key_press), tool);
-
+    
     for (i = 0; i < NCOLUMNS; i++) {
         column = gtk_tree_view_column_new();
         gtk_tree_view_column_set_expand(column, TRUE);
@@ -868,38 +864,9 @@ gwy_tool_spectro_interpolation_changed(GtkComboBox *combo,
     gwy_tool_spectro_update_all_curves(tool);
 }
 
-static gboolean
-gwy_tool_spectro_list_key_press(GwyToolSpectro *tool,
-                                GdkEventKey *event)
-{
-/*
-    GtkTreeSelection *selection;
-    GtkTreePath *path;
-    GtkTreeIter iter;
-    const gint *indices;
-
-    if (event->keyval == GDK_Delete) {
-        selection = gtk_tree_view_get_selection(tool->treeview);
-        if (gtk_tree_selection_get_selected(selection, NULL, &iter)) {
-            path = gtk_tree_model_get_path(tool->model, &iter);
-            indices = gtk_tree_path_get_indices(path);
-            gwy_selection_delete_object(GWY_PLAIN_TOOL(tool)->selection,
-                                        indices[0]);
-            gtk_tree_path_free(path);
-        }
-
-        return TRUE;
-    }
-
-    return FALSE;
-*/
-    return TRUE;
-}
-
 static void
 gwy_tool_spectro_apply(GwyToolSpectro *tool)
 {
-/*
     GwyPlainTool *plain_tool;
     GwyGraphCurveModel *gcmodel;
     GwyGraphModel *gmodel;
@@ -908,7 +875,7 @@ gwy_tool_spectro_apply(GwyToolSpectro *tool)
 
     plain_tool = GWY_PLAIN_TOOL(tool);
     g_return_if_fail(plain_tool->selection);
-    n = gwy_selection_get_data(plain_tool->selection, NULL);
+    n = gwy_graph_model_get_n_curves(tool->gmodel);
     g_return_if_fail(n);
 
     if (!tool->args.separate) {
@@ -917,7 +884,6 @@ gwy_tool_spectro_apply(GwyToolSpectro *tool)
         gwy_app_data_browser_add_graph_model(gmodel, plain_tool->container,
                                              TRUE);
         g_object_unref(gmodel);
-
         return;
     }
 
@@ -935,7 +901,6 @@ gwy_tool_spectro_apply(GwyToolSpectro *tool)
                                              TRUE);
         g_object_unref(gmodel);
     }
-*/
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
