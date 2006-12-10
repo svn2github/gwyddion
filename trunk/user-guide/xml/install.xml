@@ -257,7 +257,8 @@ make install</userinput></literallayout>
         <ulink url="http://www.bzip.org/">bzip2</ulink>
         (<filename>.bz2</filename>) are considerably smaller than
         <ulink url="http://www.gzip.org/">gzip</ulink>
-        compressed tarballs (<filename>.gz</filename>) but they need bzip2,
+        compressed tarballs (<filename>.gz</filename>) but they need bzip2 to
+        decompress,
         which used to be less widespread than gzip, to decompress.
         However, modern Unix and Unix-like systems should contain both.
       </para>
