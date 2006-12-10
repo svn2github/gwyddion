@@ -30,34 +30,21 @@
 #include <libgwydgets/gwydgetutils.h>
 #include <app/gwyapp.h>
 
-#define GWY_TYPE_TOOL_SFUNCTIONS            (gwy_tool_sfunctions_get_type())
-#define GWY_TOOL_SFUNCTIONS(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_TOOL_SFUNCTIONS, GwyToolSFunctions))
-#define GWY_IS_TOOL_SFUNCTIONS(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_TOOL_SFUNCTIONS))
-#define GWY_TOOL_SFUNCTIONS_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_TOOL_SFUNCTIONS, GwyToolSFunctionsClass))
-
-typedef enum {
-    GWY_SF_DH                     = 0,
-    GWY_SF_CDH                    = 1,
-    GWY_SF_DA                     = 2,
-    GWY_SF_CDA                    = 3,
-    GWY_SF_ACF                    = 4,
-    GWY_SF_HHCF                   = 5,
-    GWY_SF_PSDF                   = 6,
-    GWY_SF_MINKOWSKI_VOLUME       = 7,
-    GWY_SF_MINKOWSKI_BOUNDARY     = 8,
-    GWY_SF_MINKOWSKI_CONNECTIVITY = 9,
-} GwySFOutputType;
+#define GWY_TYPE_TOOL_LINE_STATS            (gwy_tool_line_stats_get_type())
+#define GWY_TOOL_LINE_STATS(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_TOOL_LINE_STATS, GwyToolLineStats))
+#define GWY_IS_TOOL_LINE_STATS(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_TOOL_LINE_STATS))
+#define GWY_TOOL_LINE_STATS_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_TOOL_LINE_STATS, GwyToolLineStatsClass))
 
 enum {
     MIN_RESOLUTION = 4,
     MAX_RESOLUTION = 1024
 };
 
-typedef struct _GwyToolSFunctions      GwyToolSFunctions;
-typedef struct _GwyToolSFunctionsClass GwyToolSFunctionsClass;
+typedef struct _GwyToolLineStats      GwyToolLineStats;
+typedef struct _GwyToolLineStatsClass GwyToolLineStatsClass;
 
 typedef struct {
-    GwySFOutputType output_type;
+    GwyLineStatQuantity output_type;
     gboolean options_visible;
     gboolean instant_update;
     gint resolution;
@@ -66,7 +53,7 @@ typedef struct {
     GwyInterpolationType interpolation;
 } ToolArgs;
 
-struct _GwyToolSFunctions {
+struct _GwyToolLineStats {
     GwyPlainTool parent_instance;
 
     ToolArgs args;
@@ -93,63 +80,62 @@ struct _GwyToolSFunctions {
     GType layer_type_rect;
 };
 
-struct _GwyToolSFunctionsClass {
+struct _GwyToolLineStatsClass {
     GwyPlainToolClass parent_class;
 };
 
 static gboolean module_register(void);
 
-static GType gwy_tool_sfunctions_get_type            (void) G_GNUC_CONST;
-static void gwy_tool_sfunctions_finalize             (GObject *object);
-static void gwy_tool_sfunctions_init_dialog          (GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_data_switched        (GwyTool *gwytool,
+static GType gwy_tool_line_stats_get_type            (void) G_GNUC_CONST;
+static void gwy_tool_line_stats_finalize             (GObject *object);
+static void gwy_tool_line_stats_init_dialog          (GwyToolLineStats *tool);
+static void gwy_tool_line_stats_data_switched        (GwyTool *gwytool,
                                                       GwyDataView *data_view);
-static void gwy_tool_sfunctions_response             (GwyTool *tool,
+static void gwy_tool_line_stats_response             (GwyTool *tool,
                                                       gint response_id);
-static void gwy_tool_sfunctions_data_changed         (GwyPlainTool *plain_tool);
-static void gwy_tool_sfunctions_selection_changed    (GwyPlainTool *plain_tool,
+static void gwy_tool_line_stats_data_changed         (GwyPlainTool *plain_tool);
+static void gwy_tool_line_stats_selection_changed    (GwyPlainTool *plain_tool,
                                                       gint hint);
-static void gwy_tool_sfunctions_update_sensitivity   (GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_update_curve         (GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_instant_update_changed(GtkToggleButton *check,
-                                                       GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_resolution_changed   (GwyToolSFunctions *tool,
+static void gwy_tool_line_stats_update_sensitivity   (GwyToolLineStats *tool);
+static void gwy_tool_line_stats_update_curve         (GwyToolLineStats *tool);
+static void gwy_tool_line_stats_instant_update_changed(GtkToggleButton *check,
+                                                       GwyToolLineStats *tool);
+static void gwy_tool_line_stats_resolution_changed   (GwyToolLineStats *tool,
                                                       GtkAdjustment *adj);
-static void gwy_tool_sfunctions_fixres_changed       (GtkToggleButton *check,
-                                                      GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_output_type_changed  (GtkComboBox *combo,
-                                                      GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_direction_changed    (GObject *button,
-                                                      GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_interpolation_changed(GtkComboBox *combo,
-                                                      GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_options_expanded     (GtkExpander *expander,
+static void gwy_tool_line_stats_fixres_changed       (GtkToggleButton *check,
+                                                      GwyToolLineStats *tool);
+static void gwy_tool_line_stats_output_type_changed  (GtkComboBox *combo,
+                                                      GwyToolLineStats *tool);
+static void gwy_tool_line_stats_direction_changed    (GObject *button,
+                                                      GwyToolLineStats *tool);
+static void gwy_tool_line_stats_interpolation_changed(GtkComboBox *combo,
+                                                      GwyToolLineStats *tool);
+static void gwy_tool_line_stats_options_expanded     (GtkExpander *expander,
                                                       GParamSpec *pspec,
-                                                      GwyToolSFunctions *tool);
-static void gwy_tool_sfunctions_apply                (GwyToolSFunctions *tool);
+                                                      GwyToolLineStats *tool);
+static void gwy_tool_line_stats_apply                (GwyToolLineStats *tool);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
-    N_("Statistical function tool, calculates one-dimensional statistical "
-       "functions (height distribution, correlations, PSDF, Minkowski "
-       "functionals) of selected part of data."),
-    "Petr Klapetek <klapetek@gwyddion.net>",
-    "2.3",
+    N_("Row/column statistical function tool, mean values, medians, maxima, "
+       "minima, RMS, ..., of rows or columns."),
+    "Yeti <yeti@gwyddion.net>",
+    "1.1",
     "David Nečas (Yeti) & Petr Klapetek",
-    "2004",
+    "2006",
 };
 
-static const gchar direction_key[]       = "/module/sfunctions/direction";
-static const gchar fixres_key[]          = "/module/sfunctions/fixres";
-static const gchar instant_update_key[]  = "/module/sfunctions/instant_update";
-static const gchar interpolation_key[]   = "/module/sfunctions/interpolation";
-static const gchar options_visible_key[] = "/module/sfunctions/options_visible";
-static const gchar output_type_key[]     = "/module/sfunctions/output_type";
-static const gchar resolution_key[]      = "/module/sfunctions/resolution";
+static const gchar direction_key[]       = "/module/linestats/direction";
+static const gchar fixres_key[]          = "/module/linestats/fixres";
+static const gchar instant_update_key[]  = "/module/linestats/instant_update";
+static const gchar interpolation_key[]   = "/module/linestats/interpolation";
+static const gchar options_visible_key[] = "/module/linestats/options_visible";
+static const gchar output_type_key[]     = "/module/linestats/output_type";
+static const gchar resolution_key[]      = "/module/linestats/resolution";
 
 static const ToolArgs default_args = {
-    GWY_SF_DH,
+    GWY_LINE_STAT_MEAN,
     FALSE,
     TRUE,
     120,
@@ -159,59 +145,57 @@ static const ToolArgs default_args = {
 };
 
 static const GwyEnum sf_types[] =  {
-    { N_("Height distribution"),         GWY_SF_DH,                     },
-    { N_("Cum. height distribution"),    GWY_SF_CDH,                    },
-    { N_("Distribution of angles"),      GWY_SF_DA,                     },
-    { N_("Cum. distribution of angles"), GWY_SF_CDA,                    },
-    { N_("ACF"),                         GWY_SF_ACF,                    },
-    { N_("HHCF"),                        GWY_SF_HHCF,                   },
-    { N_("PSDF"),                        GWY_SF_PSDF,                   },
-    { N_("Minkowski volume"),            GWY_SF_MINKOWSKI_VOLUME,       },
-    { N_("Minkowski boundary"),          GWY_SF_MINKOWSKI_BOUNDARY,     },
-    { N_("Minkowski connectivity"),      GWY_SF_MINKOWSKI_CONNECTIVITY, },
+    { N_("Mean"),               GWY_LINE_STAT_MEAN,      },
+    { N_("Median"),             GWY_LINE_STAT_MEDIAN,    },
+    { N_("Minimum"),            GWY_LINE_STAT_MINIMUM,   },
+    { N_("Maximum"),            GWY_LINE_STAT_MAXIMUM,   },
+    { N_("RMS"),                GWY_LINE_STAT_RMS,       },
+    { N_("Length"),             GWY_LINE_STAT_LENGTH,    },
+    { N_("Slope"),              GWY_LINE_STAT_SLOPE,     },
+    { N_("tan β<sub>0</sub>"),  GWY_LINE_STAT_TAN_BETA0, },
 };
 
 GWY_MODULE_QUERY(module_info)
 
-G_DEFINE_TYPE(GwyToolSFunctions, gwy_tool_sfunctions, GWY_TYPE_PLAIN_TOOL)
+G_DEFINE_TYPE(GwyToolLineStats, gwy_tool_line_stats, GWY_TYPE_PLAIN_TOOL)
 
 static gboolean
 module_register(void)
 {
-    gwy_tool_func_register(GWY_TYPE_TOOL_SFUNCTIONS);
+    gwy_tool_func_register(GWY_TYPE_TOOL_LINE_STATS);
 
     return TRUE;
 }
 
 static void
-gwy_tool_sfunctions_class_init(GwyToolSFunctionsClass *klass)
+gwy_tool_line_stats_class_init(GwyToolLineStatsClass *klass)
 {
     GwyPlainToolClass *ptool_class = GWY_PLAIN_TOOL_CLASS(klass);
     GwyToolClass *tool_class = GWY_TOOL_CLASS(klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
-    gobject_class->finalize = gwy_tool_sfunctions_finalize;
+    gobject_class->finalize = gwy_tool_line_stats_finalize;
 
-    tool_class->stock_id = GWY_STOCK_GRAPH_HALFGAUSS;
-    tool_class->title = _("Statistical Functions");
-    tool_class->tooltip = _("Calculate 1D statistical functions");
-    tool_class->prefix = "/module/sfunctions";
+    tool_class->stock_id = GWY_STOCK_GRAPH_VERTICAL;
+    tool_class->title = _("Row/Column Statistics");
+    tool_class->tooltip = _("Calculate row/column statistical functions");
+    tool_class->prefix = "/module/line_stats";
     tool_class->default_width = 640;
     tool_class->default_height = 400;
-    tool_class->data_switched = gwy_tool_sfunctions_data_switched;
-    tool_class->response = gwy_tool_sfunctions_response;
+    tool_class->data_switched = gwy_tool_line_stats_data_switched;
+    tool_class->response = gwy_tool_line_stats_response;
 
-    ptool_class->data_changed = gwy_tool_sfunctions_data_changed;
-    ptool_class->selection_changed = gwy_tool_sfunctions_selection_changed;
+    ptool_class->data_changed = gwy_tool_line_stats_data_changed;
+    ptool_class->selection_changed = gwy_tool_line_stats_selection_changed;
 }
 
 static void
-gwy_tool_sfunctions_finalize(GObject *object)
+gwy_tool_line_stats_finalize(GObject *object)
 {
-    GwyToolSFunctions *tool;
+    GwyToolLineStats *tool;
     GwyContainer *settings;
 
-    tool = GWY_TOOL_SFUNCTIONS(object);
+    tool = GWY_TOOL_LINE_STATS(object);
 
     settings = gwy_app_settings_get();
     gwy_container_set_enum_by_name(settings, output_type_key,
@@ -232,11 +216,11 @@ gwy_tool_sfunctions_finalize(GObject *object)
     gwy_object_unref(tool->line);
     gwy_object_unref(tool->gmodel);
 
-    G_OBJECT_CLASS(gwy_tool_sfunctions_parent_class)->finalize(object);
+    G_OBJECT_CLASS(gwy_tool_line_stats_parent_class)->finalize(object);
 }
 
 static void
-gwy_tool_sfunctions_init(GwyToolSFunctions *tool)
+gwy_tool_line_stats_init(GwyToolLineStats *tool)
 {
     GwyPlainTool *plain_tool;
     GwyContainer *settings;
@@ -277,11 +261,11 @@ gwy_tool_sfunctions_init(GwyToolSFunctions *tool)
     gwy_plain_tool_connect_selection(plain_tool, tool->layer_type_rect,
                                      "rectangle");
 
-    gwy_tool_sfunctions_init_dialog(tool);
+    gwy_tool_line_stats_init_dialog(tool);
 }
 
 static void
-gwy_tool_sfunctions_rect_updated(GwyToolSFunctions *tool)
+gwy_tool_line_stats_rect_updated(GwyToolLineStats *tool)
 {
     GwyPlainTool *plain_tool;
 
@@ -292,11 +276,11 @@ gwy_tool_sfunctions_rect_updated(GwyToolSFunctions *tool)
 }
 
 static void
-gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
+gwy_tool_line_stats_init_dialog(GwyToolLineStats *tool)
 {
     static const GwyEnum directions[] = {
-        { N_("_Horizontal direction"), GWY_ORIENTATION_HORIZONTAL, },
-        { N_("_Vertical direction"),   GWY_ORIENTATION_VERTICAL,   },
+        { N_("Ro_ws"),    GWY_ORIENTATION_HORIZONTAL, },
+        { N_("Co_lumns"), GWY_ORIENTATION_VERTICAL,   },
     };
     GtkDialog *dialog;
     GtkWidget *label, *hbox, *vbox, *hbox2, *image;
@@ -314,7 +298,7 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
 
     /* Selection info */
     tool->rlabels = gwy_rect_selection_labels_new
-                         (TRUE, G_CALLBACK(gwy_tool_sfunctions_rect_updated),
+                         (TRUE, G_CALLBACK(gwy_tool_line_stats_rect_updated),
                           tool);
     gtk_box_pack_start(GTK_BOX(vbox),
                        gwy_rect_selection_labels_get_table(tool->rlabels),
@@ -327,7 +311,7 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
 
     tool->output_type = gwy_enum_combo_box_new
                            (sf_types, G_N_ELEMENTS(sf_types),
-                            G_CALLBACK(gwy_tool_sfunctions_output_type_changed),
+                            G_CALLBACK(gwy_tool_line_stats_output_type_changed),
                             tool,
                             tool->args.output_type, TRUE);
     gtk_box_pack_start(GTK_BOX(hbox2), tool->output_type, FALSE, FALSE, 0);
@@ -338,7 +322,7 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
     gtk_expander_set_expanded(GTK_EXPANDER(tool->options),
                               tool->args.options_visible);
     g_signal_connect(tool->options, "notify::expanded",
-                     G_CALLBACK(gwy_tool_sfunctions_options_expanded), tool);
+                     G_CALLBACK(gwy_tool_line_stats_options_expanded), tool);
     gtk_box_pack_start(GTK_BOX(vbox), tool->options, FALSE, FALSE, 0);
 
     table = GTK_TABLE(gtk_table_new(6, 4, FALSE));
@@ -355,7 +339,7 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tool->instant_update),
                                  tool->args.instant_update);
     g_signal_connect(tool->instant_update, "toggled",
-                     G_CALLBACK(gwy_tool_sfunctions_instant_update_changed),
+                     G_CALLBACK(gwy_tool_line_stats_instant_update_changed),
                      tool);
     row++;
 
@@ -366,19 +350,19 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
                             tool->resolution,
                             GWY_HSCALE_CHECK | GWY_HSCALE_SQRT);
     g_signal_connect_swapped(tool->resolution, "value-changed",
-                             G_CALLBACK(gwy_tool_sfunctions_resolution_changed),
+                             G_CALLBACK(gwy_tool_line_stats_resolution_changed),
                              tool);
     tool->fixres = gwy_table_hscale_get_check(tool->resolution);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tool->fixres),
                                  tool->args.fixres);
     g_signal_connect(tool->fixres, "toggled",
-                     G_CALLBACK(gwy_tool_sfunctions_fixres_changed), tool);
+                     G_CALLBACK(gwy_tool_line_stats_fixres_changed), tool);
     gtk_table_set_row_spacing(table, row, 8);
     row++;
 
     tool->direction = gwy_radio_buttons_create
                         (directions, G_N_ELEMENTS(directions),
-                        G_CALLBACK(gwy_tool_sfunctions_direction_changed), tool,
+                        G_CALLBACK(gwy_tool_line_stats_direction_changed), tool,
                         tool->args.direction);
     row = gwy_radio_buttons_attach_to_table(tool->direction, table, 3, row);
     gtk_table_set_row_spacing(table, row-1, 8);
@@ -394,7 +378,7 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
 
     tool->interpolation = gwy_enum_combo_box_new
                          (gwy_interpolation_type_get_enum(), -1,
-                          G_CALLBACK(gwy_tool_sfunctions_interpolation_changed),
+                          G_CALLBACK(gwy_tool_line_stats_interpolation_changed),
                           tool,
                           tool->args.interpolation, TRUE);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), tool->interpolation);
@@ -417,26 +401,26 @@ gwy_tool_sfunctions_init_dialog(GwyToolSFunctions *tool)
                                         GTK_RESPONSE_APPLY);
     gtk_dialog_set_default_response(dialog, GTK_RESPONSE_APPLY);
 
-    gwy_tool_sfunctions_update_sensitivity(tool);
+    gwy_tool_line_stats_update_sensitivity(tool);
 
     gtk_widget_show_all(dialog->vbox);
 }
 
 static void
-gwy_tool_sfunctions_data_switched(GwyTool *gwytool,
+gwy_tool_line_stats_data_switched(GwyTool *gwytool,
                                   GwyDataView *data_view)
 {
     GwyPlainTool *plain_tool;
-    GwyToolSFunctions *tool;
+    GwyToolLineStats *tool;
 
-    GWY_TOOL_CLASS(gwy_tool_sfunctions_parent_class)->data_switched(gwytool,
+    GWY_TOOL_CLASS(gwy_tool_line_stats_parent_class)->data_switched(gwytool,
                                                                  data_view);
 
     plain_tool = GWY_PLAIN_TOOL(gwytool);
     if (plain_tool->init_failed)
         return;
 
-    tool = GWY_TOOL_SFUNCTIONS(gwytool);
+    tool = GWY_TOOL_LINE_STATS(gwytool);
     if (data_view) {
         gwy_object_set_or_reset(plain_tool->layer,
                                 tool->layer_type_rect,
@@ -446,36 +430,36 @@ gwy_tool_sfunctions_data_switched(GwyTool *gwytool,
         gwy_selection_set_max_objects(plain_tool->selection, 1);
     }
 
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_response(GwyTool *tool,
+gwy_tool_line_stats_response(GwyTool *tool,
                              gint response_id)
 {
-    GWY_TOOL_CLASS(gwy_tool_sfunctions_parent_class)->response(tool,
+    GWY_TOOL_CLASS(gwy_tool_line_stats_parent_class)->response(tool,
                                                                response_id);
 
     if (response_id == GTK_RESPONSE_APPLY)
-        gwy_tool_sfunctions_apply(GWY_TOOL_SFUNCTIONS(tool));
+        gwy_tool_line_stats_apply(GWY_TOOL_LINE_STATS(tool));
     else if (response_id == GWY_TOOL_RESPONSE_UPDATE)
-        gwy_tool_sfunctions_update_curve(GWY_TOOL_SFUNCTIONS(tool));
+        gwy_tool_line_stats_update_curve(GWY_TOOL_LINE_STATS(tool));
 }
 
 static void
-gwy_tool_sfunctions_data_changed(GwyPlainTool *plain_tool)
+gwy_tool_line_stats_data_changed(GwyPlainTool *plain_tool)
 {
-    gwy_tool_sfunctions_update_curve(GWY_TOOL_SFUNCTIONS(plain_tool));
+    gwy_tool_line_stats_update_curve(GWY_TOOL_LINE_STATS(plain_tool));
 }
 
 static void
-gwy_tool_sfunctions_selection_changed(GwyPlainTool *plain_tool,
+gwy_tool_line_stats_selection_changed(GwyPlainTool *plain_tool,
                                       gint hint)
 {
-    GwyToolSFunctions *tool;
+    GwyToolLineStats *tool;
     gint n = 0;
 
-    tool = GWY_TOOL_SFUNCTIONS(plain_tool);
+    tool = GWY_TOOL_LINE_STATS(plain_tool);
     g_return_if_fail(hint <= 0);
 
     if (plain_tool->selection) {
@@ -490,44 +474,43 @@ gwy_tool_sfunctions_selection_changed(GwyPlainTool *plain_tool,
         gwy_rect_selection_labels_fill(tool->rlabels, NULL, NULL, NULL, NULL);
 
     if (tool->args.instant_update)
-        gwy_tool_sfunctions_update_curve(tool);
+        gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_update_sensitivity(GwyToolSFunctions *tool)
+gwy_tool_line_stats_update_sensitivity(GwyToolLineStats *tool)
 {
-    gboolean sensitive;
-    GSList *l;
-
     gtk_widget_set_sensitive(tool->update, !tool->args.instant_update);
+
     gwy_table_hscale_set_sensitive(tool->resolution, tool->args.fixres);
-
-    sensitive = (tool->args.output_type == GWY_SF_ACF
-                 || tool->args.output_type == GWY_SF_HHCF
-                 || tool->args.output_type == GWY_SF_PSDF);
-    gtk_widget_set_sensitive(tool->interpolation, sensitive);
-    gtk_widget_set_sensitive(tool->interpolation_label, sensitive);
-
-    sensitive = (tool->args.output_type == GWY_SF_DA
-                 || tool->args.output_type == GWY_SF_CDA
-                 || tool->args.output_type == GWY_SF_ACF
-                 || tool->args.output_type == GWY_SF_HHCF
-                 || tool->args.output_type == GWY_SF_PSDF);
-    for (l = tool->direction; l; l = g_slist_next(l))
-        gtk_widget_set_sensitive(GTK_WIDGET(l->data), sensitive);
+    gtk_widget_set_sensitive(tool->interpolation, tool->args.fixres);
+    gtk_widget_set_sensitive(tool->interpolation_label, tool->args.fixres);
 }
 
 static void
-gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
+gwy_tool_line_stats_update_curve(GwyToolLineStats *tool)
 {
     GwyPlainTool *plain_tool;
     GwyGraphCurveModel *gcmodel;
     gdouble sel[4];
     gint isel[4] = { sizeof("Die, die, GCC!"), 0, 0, 0 };
-    gint n, nsel, lineres, w = sizeof("Die, die, GCC!"), h = 0;
+    gint n, nsel, w = sizeof("Die, die, GCC!"), h = 0;
     const gchar *title;
 
     plain_tool = GWY_PLAIN_TOOL(tool);
+
+    if (plain_tool->data_field
+        && tool->args.output_type == GWY_LINE_STAT_LENGTH) {
+        GwySIUnit *xyunit, *zunit;
+
+        xyunit = gwy_data_field_get_si_unit_xy(plain_tool->data_field);
+        zunit = gwy_data_field_get_si_unit_z(plain_tool->data_field);
+        if (!gwy_si_unit_equal(xyunit, zunit)) {
+            gwy_graph_model_remove_all_curves(tool->gmodel);
+            gtk_widget_set_sensitive(tool->apply, FALSE);
+            return;
+        }
+    }
 
     n = gwy_graph_model_get_n_curves(tool->gmodel);
     nsel = 0;
@@ -564,91 +547,15 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
         return;
     }
 
-    lineres = tool->args.fixres ? tool->args.resolution : -1;
-    switch (tool->args.output_type) {
-        case GWY_SF_DH:
-        gwy_data_field_area_dh(plain_tool->data_field, NULL,
-                               tool->line,
-                               isel[0], isel[1], w, h,
-                               lineres);
-        break;
-
-        case GWY_SF_CDH:
-        gwy_data_field_area_cdh(plain_tool->data_field, NULL,
-                                tool->line,
-                                isel[0], isel[1], w, h,
-                                lineres);
-        break;
-
-        case GWY_SF_DA:
-        gwy_data_field_area_da(plain_tool->data_field,
-                               tool->line,
-                               isel[0], isel[1], w, h,
-                               tool->args.direction,
-                               lineres);
-        break;
-
-        case GWY_SF_CDA:
-        gwy_data_field_area_cda(plain_tool->data_field,
-                                tool->line,
-                                isel[0], isel[1], w, h,
-                                tool->args.direction,
-                                lineres);
-        break;
-
-        case GWY_SF_ACF:
-        gwy_data_field_area_acf(plain_tool->data_field,
-                                tool->line,
-                                isel[0], isel[1], w, h,
-                                tool->args.direction,
-                                tool->args.interpolation,
-                                lineres);
-        break;
-
-        case GWY_SF_HHCF:
-        gwy_data_field_area_hhcf(plain_tool->data_field,
-                                 tool->line,
-                                 isel[0], isel[1], w, h,
-                                 tool->args.direction,
-                                 tool->args.interpolation,
-                                 lineres);
-        break;
-
-        case GWY_SF_PSDF:
-        gwy_data_field_area_psdf(plain_tool->data_field,
-                                 tool->line,
-                                 isel[0], isel[1], w, h,
-                                 tool->args.direction,
-                                 tool->args.interpolation,
-                                 GWY_WINDOWING_HANN,
-                                 lineres);
-        break;
-
-        case GWY_SF_MINKOWSKI_VOLUME:
-        gwy_data_field_area_minkowski_volume(plain_tool->data_field,
-                                             tool->line,
-                                             isel[0], isel[1], w, h,
-                                             lineres);
-        break;
-
-        case GWY_SF_MINKOWSKI_BOUNDARY:
-        gwy_data_field_area_minkowski_boundary(plain_tool->data_field,
-                                               tool->line,
-                                               isel[0], isel[1], w, h,
-                                               lineres);
-        break;
-
-        case GWY_SF_MINKOWSKI_CONNECTIVITY:
-        gwy_data_field_area_minkowski_euler(plain_tool->data_field,
-                                            tool->line,
-                                            isel[0], isel[1], w, h,
-                                            lineres);
-        break;
-
-        default:
-        g_return_if_reached();
-        break;
-    }
+    gwy_data_field_area_get_line_stats(plain_tool->data_field, NULL,
+                                       tool->line,
+                                       isel[0], isel[1], w, h,
+                                       tool->args.output_type,
+                                       tool->args.direction);
+    if (tool->args.fixres)
+        gwy_data_line_resample(tool->line,
+                               tool->args.resolution,
+                               tool->args.interpolation);
 
     if (nsel > 0 && n == 0) {
         gcmodel = gwy_graph_curve_model_new();
@@ -668,67 +575,68 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
 }
 
 static void
-gwy_tool_sfunctions_instant_update_changed(GtkToggleButton *check,
-                                           GwyToolSFunctions *tool)
+gwy_tool_line_stats_instant_update_changed(GtkToggleButton *check,
+                                           GwyToolLineStats *tool)
 {
     tool->args.instant_update = gtk_toggle_button_get_active(check);
-    gwy_tool_sfunctions_update_sensitivity(tool);
+    gwy_tool_line_stats_update_sensitivity(tool);
     if (tool->args.instant_update)
-        gwy_tool_sfunctions_update_curve(tool);
+        gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_resolution_changed(GwyToolSFunctions *tool,
+gwy_tool_line_stats_resolution_changed(GwyToolLineStats *tool,
                                        GtkAdjustment *adj)
 {
     tool->args.resolution = gwy_adjustment_get_int(adj);
     /* Resolution can be changed only when fixres == TRUE */
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_fixres_changed(GtkToggleButton *check,
-                                   GwyToolSFunctions *tool)
+gwy_tool_line_stats_fixres_changed(GtkToggleButton *check,
+                                   GwyToolLineStats *tool)
 {
     tool->args.fixres = gtk_toggle_button_get_active(check);
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_sensitivity(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_output_type_changed(GtkComboBox *combo,
-                                        GwyToolSFunctions *tool)
+gwy_tool_line_stats_output_type_changed(GtkComboBox *combo,
+                                        GwyToolLineStats *tool)
 {
     tool->args.output_type = gwy_enum_combo_box_get_active(combo);
-    gwy_tool_sfunctions_update_sensitivity(tool);
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_sensitivity(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_direction_changed(G_GNUC_UNUSED GObject *button,
-                                      GwyToolSFunctions *tool)
+gwy_tool_line_stats_direction_changed(G_GNUC_UNUSED GObject *button,
+                                      GwyToolLineStats *tool)
 {
     tool->args.direction = gwy_radio_buttons_get_current(tool->direction);
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_interpolation_changed(GtkComboBox *combo,
-                                          GwyToolSFunctions *tool)
+gwy_tool_line_stats_interpolation_changed(GtkComboBox *combo,
+                                          GwyToolLineStats *tool)
 {
     tool->args.interpolation = gwy_enum_combo_box_get_active(combo);
-    gwy_tool_sfunctions_update_curve(tool);
+    gwy_tool_line_stats_update_curve(tool);
 }
 
 static void
-gwy_tool_sfunctions_options_expanded(GtkExpander *expander,
+gwy_tool_line_stats_options_expanded(GtkExpander *expander,
                                      G_GNUC_UNUSED GParamSpec *pspec,
-                                     GwyToolSFunctions *tool)
+                                     GwyToolLineStats *tool)
 {
     tool->args.options_visible = gtk_expander_get_expanded(expander);
 }
 
 static void
-gwy_tool_sfunctions_apply(GwyToolSFunctions *tool)
+gwy_tool_line_stats_apply(GwyToolLineStats *tool)
 {
     GwyPlainTool *plain_tool;
     GwyGraphModel *gmodel;

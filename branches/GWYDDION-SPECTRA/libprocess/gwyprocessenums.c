@@ -173,15 +173,23 @@ gwy_dwt_denoise_type_get_enum(void)
 /**
  * GwyInterpolationType:
  * @GWY_INTERPOLATION_NONE: No interpolation at all, resulting values are not
- *                          meaningful and should not be used (use for
- *                          resize operations discarding original data).
- * @GWY_INTERPOLATION_ROUND: Round interpolation (nearest neighbour
- *                           interpolation).
- * @GWY_INTERPOLATION_BILINEAR: Bilinear interpolation.
- * @GWY_INTERPOLATION_KEY: Key interpolation.
- * @GWY_INTERPOLATION_BSPLINE: B-spline interpolation.
- * @GWY_INTERPOLATION_OMOMS: Omoms interpolation
+ *                          defined, it must not be used for interpolation.
+ *                          It can be used in resize operations discarding
+ *                          original data.
+ * @GWY_INTERPOLATION_ROUND: Round interpolation (more precisely symmetric
+ *                           nearest neighbour interpolation).
+ * @GWY_INTERPOLATION_LINEAR: Linear interpolation.
+ * @GWY_INTERPOLATION_BILINEAR: Old name for %GWY_INTERPOLATION_LINEAR.  This
+ *                              is a misnomer because it in fact denotes linear
+ *                              interpolation of arbitrary dimension.  Use
+ *                              %GWY_INTERPOLATION_LINEAR instead.
+ * @GWY_INTERPOLATION_KEY: Cubic Key's interpolation (with a=-1/2).
+ * @GWY_INTERPOLATION_BSPLINE: B-spline interpolation. This interpolation type
+ *                             is misimplemented and should not be used.
+ * @GWY_INTERPOLATION_OMOMS: Omoms interpolation. This interpolation type
+ *                           is misimplemented and should not be used.
  * @GWY_INTERPOLATION_NNA: Nearest neighbour approximation.
+ * @GWY_INTERPOLATION_SCHAUM: Cubic Schaum interpolation.
  *
  * Interpolation types.
  **/
@@ -196,13 +204,14 @@ const GwyEnum*
 gwy_interpolation_type_get_enum(void)
 {
     static const GwyEnum entries[] = {
-        { N_("Round"),    GWY_INTERPOLATION_ROUND,    },
-        { N_("Bilinear"), GWY_INTERPOLATION_BILINEAR, },
-        { N_("Key"),      GWY_INTERPOLATION_KEY,      },
-        { N_("BSpline"),  GWY_INTERPOLATION_BSPLINE,  },
-        { N_("OMOMS"),    GWY_INTERPOLATION_OMOMS,    },
-        { N_("NNA"),      GWY_INTERPOLATION_NNA,      },
-        { NULL,           0,                          },
+        { N_("Round"),   GWY_INTERPOLATION_ROUND,   },
+        { N_("Linear"),  GWY_INTERPOLATION_LINEAR,  },
+        { N_("Key"),     GWY_INTERPOLATION_KEY,     },
+        { N_("BSpline"), GWY_INTERPOLATION_BSPLINE, },
+        { N_("OMOMS"),   GWY_INTERPOLATION_OMOMS,   },
+        { N_("NNA"),     GWY_INTERPOLATION_NNA,     },
+        { N_("Schaum"),  GWY_INTERPOLATION_SCHAUM,  },
+        { NULL,          0,                         },
     };
     return entries;
 }
@@ -351,6 +360,23 @@ gwy_correlation_type_get_enum(void)
  *
  * There should be little need to this enum directly except in libgwyprocess
  * methods.
+ **/
+
+/**
+ * GwyLineStatQuantity:
+ * @GWY_LINE_STAT_MEAN: Mean value.
+ * @GWY_LINE_STAT_MEDIAN: Median.
+ * @GWY_LINE_STAT_MINIMUM: Minimum value.
+ * @GWY_LINE_STAT_MAXIMUM: Maximum value.
+ * @GWY_LINE_STAT_RMS: Root mean square of deviations from the mean value.
+ * @GWY_LINE_STAT_LENGTH: Line length.
+ * @GWY_LINE_STAT_SLOPE: Overall line slope.
+ * @GWY_LINE_STAT_TAN_BETA0: Root mean square slope.
+ *
+ * Line statistical quantities to be requested with
+ * gwy_data_field_area_get_line_stats().
+ *
+ * Since: 2.2
  **/
 
 /**

@@ -24,6 +24,7 @@
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwymodule/gwymodule-tool.h>
+#include <libprocess/gwyprocesstypes.h>
 #include <libprocess/datafield.h>
 #include <libprocess/linestats.h>
 #include <libgwydgets/gwystock.h>
@@ -131,7 +132,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Profile tool, creates profile graphs from selected lines."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "2.3",
+    "2.4",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -214,6 +215,7 @@ gwy_tool_profile_finalize(GObject *object)
         gtk_tree_view_set_model(tool->treeview, NULL);
         gwy_object_unref(tool->model);
     }
+    gwy_object_unref(tool->gmodel);
     if (tool->pixel_format)
         gwy_si_unit_value_format_free(tool->pixel_format);
 
@@ -247,6 +249,9 @@ gwy_tool_profile_init(GwyToolProfile *tool)
                                       &tool->args.fixres);
     gwy_container_gis_enum_by_name(settings, interpolation_key,
                                    &tool->args.interpolation);
+    tool->args.interpolation
+        = gwy_enum_sanitize_value(tool->args.interpolation,
+                                  GWY_TYPE_INTERPOLATION_TYPE);
     gwy_container_gis_boolean_by_name(settings, separate_key,
                                       &tool->args.separate);
 

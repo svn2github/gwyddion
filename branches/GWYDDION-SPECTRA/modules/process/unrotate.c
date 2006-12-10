@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
+#include <libprocess/gwyprocesstypes.h>
 #include <libprocess/correct.h>
 #include <libprocess/stats.h>
 #include <libgwydgets/gwystock.h>
@@ -78,7 +79,7 @@ static void             save_args                (GwyContainer *container,
 static void             sanitize_args            (UnrotateArgs *args);
 
 static const UnrotateArgs unrotate_defaults = {
-    GWY_INTERPOLATION_BILINEAR,
+    GWY_INTERPOLATION_LINEAR,
     GWY_SYMMETRY_AUTO,
 };
 
@@ -376,9 +377,10 @@ static const gchar symmetry_key[] = "/module/unrotate/symmetry";
 static void
 sanitize_args(UnrotateArgs *args)
 {
-    args->interp = CLAMP(args->interp,
-                         GWY_INTERPOLATION_ROUND, GWY_INTERPOLATION_NNA);
-    args->symmetry = MIN(args->symmetry, GWY_SYMMETRY_LAST-1);
+    args->interp = gwy_enum_sanitize_value(args->interp,
+                                           GWY_TYPE_INTERPOLATION_TYPE);
+    args->symmetry = gwy_enum_sanitize_value(args->symmetry,
+                                             GWY_TYPE_PLANE_SYMMETRY);
 }
 
 static void

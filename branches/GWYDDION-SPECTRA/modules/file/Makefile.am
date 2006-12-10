@@ -31,17 +31,20 @@ file_LTLIBRARIES = \
 	bcrfile.la \
 	burleigh.la \
 	createc.la \
+	dmefile.la \
 	ezdfile.la \
 	ecsfile.la \
 	gwyfile.la \
 	hdf4file.la \
 	hitachi-afm.la \
+	jeol.la \
 	$(jpkscan_module) \
 	metropro.la \
 	mifile.la \
 	nanoscope.la \
 	nanonis.la \
 	nanotop.la \
+	netcdf.la \
 	nt-mdt.la \
 	omicron.la \
 	pixmap.la \
@@ -118,6 +121,9 @@ burleigh_la_LIBADD = $(module_libadd)
 createc_la_SOURCES = createc.c
 createc_la_LIBADD = $(module_libadd)
 
+dmefile_la_SOURCES = dmefile.c
+dmefile_la_LIBADD = $(module_libadd)
+
 ecsfile_la_SOURCES = ecsfile.c
 ecsfile_la_LIBADD = $(module_libadd)
 
@@ -132,6 +138,9 @@ hdf4file_la_LIBADD = $(module_libadd)
 
 hitachi_afm_la_SOURCES = hitachi-afm.c
 hitachi_afm_la_LIBADD = $(module_libadd)
+
+jeol_la_SOURCES = jeol.c
+jeol_la_LIBADD = $(module_libadd)
 
 if HAVE_TIFF
 jpkscan_la_SOURCES = jpk.h jpkscan.c
@@ -152,6 +161,9 @@ nanonis_la_LIBADD = $(module_libadd)
 
 nanotop_la_SOURCES = nanotop.c
 nanotop_la_LIBADD = $(module_libadd)
+
+netcdf_la_SOURCES = netcdf.c
+netcdf_la_LIBADD = $(module_libadd)
 
 nt_mdt_la_SOURCES = nt-mdt.c
 nt_mdt_la_LIBADD = $(module_libadd)
@@ -214,6 +226,9 @@ witfile_la_LIBADD = $(module_libadd)
 
 wsxmfile_la_SOURCES = wsxmfile.c
 wsxmfile_la_LIBADD = $(module_libadd)
+
+
+MAINTAINERCLEANFILES = makefile.msc
 
 clean-local:
 	rm -f core.* *~

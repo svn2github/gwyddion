@@ -23,7 +23,7 @@
 static inline gulong
 get_WORD_LE(const guchar **p)
 {
-    gulong z = (gulong)(*p)[0] + ((gulong)(*p)[1] << 8);
+    gulong z = (gulong)(*p)[0] | ((gulong)(*p)[1] << 8);
     *p += 2;
     return z;
 }
@@ -31,7 +31,7 @@ get_WORD_LE(const guchar **p)
 static inline gulong
 get_WORD_BE(const guchar **p)
 {
-    gulong z = (gulong)((*p)[0] << 8) + (gulong)(*p)[1];
+    gulong z = (gulong)((*p)[0] << 8) | (gulong)(*p)[1];
     *p += 2;
     return z;
 }
@@ -39,8 +39,8 @@ get_WORD_BE(const guchar **p)
 static inline gulong
 get_DWORD_LE(const guchar **p)
 {
-    gulong z = (gulong)(*p)[0] + ((gulong)(*p)[1] << 8)
-              + ((gulong)(*p)[2] << 16) + ((gulong)(*p)[3] << 24);
+    gulong z = (gulong)(*p)[0] | ((gulong)(*p)[1] << 8)
+               | ((gulong)(*p)[2] << 16) | ((gulong)(*p)[3] << 24);
     *p += 4;
     return z;
 }
@@ -48,9 +48,31 @@ get_DWORD_LE(const guchar **p)
 static inline gulong
 get_DWORD_BE(const guchar **p)
 {
-    gulong z = ((gulong)(*p)[0] << 24) + ((gulong)(*p)[1] << 16)
-              + ((gulong)(*p)[2] << 8) + (gulong)(*p)[3];
+    gulong z = ((gulong)(*p)[0] << 24) | ((gulong)(*p)[1] << 16)
+               | ((gulong)(*p)[2] << 8) | (gulong)(*p)[3];
     *p += 4;
+    return z;
+}
+
+static inline guint64
+get_QWORD_LE(const guchar **p)
+{
+    guint64 z = (guint64)(*p)[0] | ((guint64)(*p)[1] << 8)
+                | ((guint64)(*p)[2] << 16) | ((guint64)(*p)[3] << 24)
+                | ((guint64)(*p)[4] << 32) | ((guint64)(*p)[5] << 40)
+                | ((guint64)(*p)[4] << 48) | ((guint64)(*p)[5] << 56);
+    *p += 8;
+    return z;
+}
+
+static inline guint64
+get_QWORD_BE(const guchar **p)
+{
+    guint64 z = ((guint64)(*p)[0] << 56) | ((guint64)(*p)[1] << 48)
+                | ((guint64)(*p)[2] << 40) | ((guint64)(*p)[3] << 32)
+                | ((guint64)(*p)[2] << 24) | ((guint64)(*p)[3] << 16)
+                | ((guint64)(*p)[2] << 8) | (guint64)(*p)[3];
+    *p += 8;
     return z;
 }
 
@@ -182,6 +204,57 @@ get_PASCAL_STRING(const guchar **p,
     *p += len;
 
     return s;
+}
+
+/* Get a non-terminated string preceded by one byte containing the length.
+ * Size is the maximum size of the string and the number of bytes the pointer
+ * will move forward.
+ * Dest must be one byte larger to hold the terminating NUL. */
+static inline void
+get_PASCAL_CHARS0(gchar *dest,
+                  const guchar **p,
+                  gsize size)
+{
+    guint len;
+
+    len = MIN(**p, size);
+    (*p)++;
+    memcpy(dest, *p, len);
+    dest[len] = '\0';
+    *p += size;
+}
+
+#define get_PASCAL_CHARARRAY0(dest, p) \
+    get_PASCAL_CHARS0(dest, p, sizeof(dest)-1)
+
+static inline gdouble
+get_PASCAL_REAL_LE(const guchar **p)
+{
+    gint power;
+    gdouble x;
+
+    if (!(*p)[0]) {
+        *p += 6;
+        return 0.0;
+    }
+    x = 1.0 + (((((*p)[1]/256.0 + (*p)[2])/256.0 + (*p)[3])/256.0
+                + (*p)[4])/256.0 + ((*p)[5] & 0x7f))/128.0;
+    if ((*p)[5] & 0x80)
+        x = -x;
+
+    power = (gint)(*p)[0] - 129;
+    while (power > 0) {
+        x *= 2.0;
+        power--;
+    }
+    while (power < 0) {
+        x /= 2.0;
+        power++;
+    }
+
+    *p += 6;
+
+    return x;
 }
 
 #endif

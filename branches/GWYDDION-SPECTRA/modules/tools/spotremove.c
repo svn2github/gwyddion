@@ -242,8 +242,7 @@ gwy_tool_spot_remover_init(GwyToolSpotRemover *tool)
 
     settings = gwy_app_settings_get();
     tool->args = default_args;
-    gwy_container_gis_enum_by_name(settings, method_key,
-                                   &tool->args.method);
+    gwy_container_gis_enum_by_name(settings, method_key, &tool->args.method);
 
     gwy_plain_tool_connect_selection(plain_tool, tool->layer_type_point,
                                      "pointer");
@@ -668,7 +667,7 @@ fractal_average(GwyDataField *dfield,
     gwy_data_field_clear(mask);
     gwy_data_field_area_fill(mask, ximin, yimin, ximax - ximin, yimax - yimin,
                              1.0);
-    gwy_data_field_fractal_correction(dfield, mask, GWY_INTERPOLATION_BILINEAR);
+    gwy_data_field_fractal_correction(dfield, mask, GWY_INTERPOLATION_LINEAR);
     g_object_unref(mask);
 }
 

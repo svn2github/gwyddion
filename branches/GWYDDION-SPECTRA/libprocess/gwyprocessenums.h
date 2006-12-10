@@ -101,11 +101,13 @@ typedef enum {
 typedef enum {
     GWY_INTERPOLATION_NONE      = 0,
     GWY_INTERPOLATION_ROUND     = 1,
-    GWY_INTERPOLATION_BILINEAR  = 2,
+    GWY_INTERPOLATION_LINEAR    = 2,
+    GWY_INTERPOLATION_BILINEAR  = GWY_INTERPOLATION_LINEAR,
     GWY_INTERPOLATION_KEY       = 3,
     GWY_INTERPOLATION_BSPLINE   = 4,
     GWY_INTERPOLATION_OMOMS     = 5,
-    GWY_INTERPOLATION_NNA       = 6
+    GWY_INTERPOLATION_NNA       = 6,
+    GWY_INTERPOLATION_SCHAUM    = 7
 } GwyInterpolationType;
 
 typedef enum {
@@ -166,6 +168,17 @@ typedef enum {
     GWY_DATA_COMPATIBILITY_VALUE   = 1 << 4,
     GWY_DATA_COMPATIBILITY_ALL     = 0x001f
 } GwyDataCompatibilityFlags;
+
+typedef enum {
+    GWY_LINE_STAT_MEAN,
+    GWY_LINE_STAT_MEDIAN,
+    GWY_LINE_STAT_MINIMUM,
+    GWY_LINE_STAT_MAXIMUM,
+    GWY_LINE_STAT_RMS,
+    GWY_LINE_STAT_LENGTH,
+    GWY_LINE_STAT_SLOPE,
+    GWY_LINE_STAT_TAN_BETA0
+} GwyLineStatQuantity;
 
 const GwyEnum* gwy_merge_type_get_enum(void) G_GNUC_CONST;
 const GwyEnum* gwy_plane_symmetry_get_enum(void) G_GNUC_CONST;

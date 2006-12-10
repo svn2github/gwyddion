@@ -38,6 +38,56 @@ gwy_interpolation_get_dval_of_equidists(gdouble x,
                                         gdouble *data,
                                         GwyInterpolationType interpolation);
 
+gdouble
+gwy_interpolation_interpolate_1d(gdouble x,
+                                 const gdouble *coeff,
+                                 GwyInterpolationType interpolation);
+
+gdouble
+gwy_interpolation_interpolate_2d(gdouble x,
+                                 gdouble y,
+                                 gint rowstride,
+                                 const gdouble *coeff,
+                                 GwyInterpolationType interpolation);
+
+gboolean
+gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation);
+
+gint
+gwy_interpolation_get_support_size(GwyInterpolationType interpolation);
+
+void
+gwy_interpolation_resolve_coeffs_1d(gint n,
+                                    gdouble *data,
+                                    GwyInterpolationType interpolation);
+
+void
+gwy_interpolation_resolve_coeffs_2d(gint width,
+                                    gint height,
+                                    gint rowstride,
+                                    gdouble *data,
+                                    GwyInterpolationType interpolation);
+
+void
+gwy_interpolation_resample_block_1d(gint length,
+                                    gdouble *data,
+                                    gint newlength,
+                                    gdouble *newdata,
+                                    GwyInterpolationType interpolation,
+                                    gboolean preserve);
+
+void
+gwy_interpolation_resample_block_2d(gint width,
+                                    gint height,
+                                    gint rowstride,
+                                    gdouble *data,
+                                    gint newwidth,
+                                    gint newheight,
+                                    gint newrowstride,
+                                    gdouble *newdata,
+                                    GwyInterpolationType interpolation,
+                                    gboolean preserve);
+
 G_END_DECLS
 
 #endif /* __GWY_PROCESS_INTERPOLATION_H__ */

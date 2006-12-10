@@ -97,7 +97,7 @@ static GwyModuleInfo module_info = {
     N_("Grain removal tool, removes continuous parts of mask and/or "
        "underlying data."),
     "Petr Klapetek <klapetek@gwyddion.net>, Yeti <yeti@gwyddion.net>",
-    "3.1",
+    "3.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -180,10 +180,8 @@ gwy_tool_grain_remover_init(GwyToolGrainRemover *tool)
 
     settings = gwy_app_settings_get();
     tool->args = default_args;
-    gwy_container_gis_enum_by_name(settings,
-                                   mode_key, &tool->args.mode);
-    gwy_container_gis_enum_by_name(settings,
-                                   method_key, &tool->args.method);
+    gwy_container_gis_enum_by_name(settings, mode_key, &tool->args.mode);
+    gwy_container_gis_enum_by_name(settings, method_key, &tool->args.method);
 
     gwy_plain_tool_connect_selection(plain_tool, tool->layer_type_point,
                                      "pointer");
@@ -310,8 +308,8 @@ gwy_tool_grain_remover_selection_finised(GwyPlainTool *plain_tool)
         || !gwy_selection_get_object(plain_tool->selection, 0, point))
         return;
 
-    row = ROUND(gwy_data_field_rtoi(plain_tool->mask_field, point[1]));
-    col = ROUND(gwy_data_field_rtoj(plain_tool->mask_field, point[0]));
+    row = gwy_data_field_rtoi(plain_tool->mask_field, point[1]);
+    col = gwy_data_field_rtoj(plain_tool->mask_field, point[0]);
     if (!gwy_data_field_get_val(plain_tool->mask_field, col, row))
         return;
 
@@ -333,7 +331,7 @@ gwy_tool_grain_remover_selection_finised(GwyPlainTool *plain_tool)
 
             case GRAIN_REMOVE_FRACTAL:
             gwy_data_field_fractal_correction(plain_tool->data_field, tmp,
-                                              GWY_INTERPOLATION_BILINEAR);
+                                              GWY_INTERPOLATION_LINEAR);
             break;
         }
         g_object_unref(tmp);

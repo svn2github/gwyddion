@@ -7,8 +7,10 @@ process_LTLIBRARIES = \
 	arithmetic.la \
 	basicops.la \
 	calibrate.la \
+	convolution_filter.la \
 	crosscor.la \
 	cwt.la \
+	drift.la \
 	dwt.la \
 	dwtanisotropy.la \
 	edge.la \
@@ -44,7 +46,8 @@ process_LTLIBRARIES = \
 	shade.la \
 	slope_dist.la \
 	sphere-revolve.la \
-	tip_blind.la \
+	superresolution.la \
+        tip_blind.la \
 	tip_model.la \
 	tipops.la \
 	unrotate.la
@@ -94,14 +97,17 @@ basicops_la_LIBADD = $(module_libadd)
 calibrate_la_SOURCES = calibrate.c
 calibrate_la_LIBADD = $(module_libadd)
 
+convolution_filter_la_SOURCES = convolution_filter.c convolutionfilterpreset.h
+convolution_filter_la_LIBADD = $(module_libadd)
+
 crosscor_la_SOURCES = crosscor.c
 crosscor_la_LIBADD = $(module_libadd)
 
 cwt_la_SOURCES = cwt.c
 cwt_la_LIBADD = $(module_libadd)
 
-#drift_la_SOURCES = drift.c
-#drift_la_LIBADD = $(module_libadd)
+drift_la_SOURCES = drift.c
+drift_la_LIBADD = $(module_libadd)
 
 dwt_la_SOURCES = dwt.c
 dwt_la_LIBADD = $(module_libadd)
@@ -220,6 +226,9 @@ slope_dist_la_LIBADD = $(module_libadd)
 sphere_revolve_la_SOURCES = sphere-revolve.c
 sphere_revolve_la_LIBADD = $(module_libadd)
 
+superresolution_la_SOURCES = superresolution.c
+superresolution_la_LIBADD = $(module_libadd)
+
 tip_blind_la_SOURCES = tip_blind.c
 tip_blind_la_LIBADD = $(module_libadd)
 
@@ -232,6 +241,8 @@ tipops_la_LIBADD = $(module_libadd)
 unrotate_la_SOURCES = unrotate.c
 unrotate_la_LIBADD = $(module_libadd)
 
+
+MAINTAINERCLEANFILES = makefile.msc
 
 clean-local:
 	rm -f core.* *~

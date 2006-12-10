@@ -218,9 +218,6 @@ gwy_data_field_new_resampled(GwyDataField *data_field,
                              GwyInterpolationType interpolation)
 {
     GwyDataField *result;
-    gdouble *p;
-    gdouble xratio, yratio;
-    gint i, j;
 
     g_return_val_if_fail(GWY_IS_DATA_FIELD(data_field), NULL);
     if (data_field->xres == xres && data_field->yres == yres)
@@ -238,20 +235,11 @@ gwy_data_field_new_resampled(GwyDataField *data_field,
     if (data_field->si_unit_z)
         result->si_unit_z = gwy_si_unit_duplicate(data_field->si_unit_z);
 
-    if (interpolation == GWY_INTERPOLATION_NONE)
-        return result;
-
-    xratio = data_field->xres/(gdouble)xres;
-    yratio = data_field->yres/(gdouble)yres;
-
-    p = result->data;
-    for (i = 0; i < yres; i++) {
-        for (j = 0; j < xres; j++, p++) {
-            *p = gwy_data_field_get_dval(data_field,
-                                         (j + 0.5)*xratio, (i + 0.5)*yratio,
-                                         interpolation);
-        }
-    }
+    gwy_interpolation_resample_block_2d(data_field->xres, data_field->yres,
+                                        data_field->xres, data_field->data,
+                                        result->xres, result->yres,
+                                        result->xres, result->data,
+                                        interpolation, TRUE);
 
     return result;
 }
@@ -606,9 +594,7 @@ gwy_data_field_resample(GwyDataField *data_field,
                         gint xres, gint yres,
                         GwyInterpolationType interpolation)
 {
-    gdouble *bdata, *p;
-    gdouble xratio, yratio;
-    gint i, j;
+    gdouble *bdata;
 
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
     if (data_field->xres == xres && data_field->yres == yres)
@@ -626,18 +612,10 @@ gwy_data_field_resample(GwyDataField *data_field,
     }
 
     bdata = g_new(gdouble, xres*yres);
-
-    xratio = data_field->xres/(gdouble)xres;
-    yratio = data_field->yres/(gdouble)yres;
-
-    p = bdata;
-    for (i = 0; i < yres; i++) {
-        for (j = 0; j < xres; j++, p++) {
-            *p = gwy_data_field_get_dval(data_field,
-                                         (j + 0.5)*xratio, (i + 0.5)*yratio,
-                                         interpolation);
-        }
-    }
+    gwy_interpolation_resample_block_2d(data_field->xres, data_field->yres,
+                                        data_field->xres, data_field->data,
+                                        xres, yres, xres, bdata,
+                                        interpolation, FALSE);
     g_free(data_field->data);
     data_field->data = bdata;
     data_field->xres = xres;
@@ -797,7 +775,7 @@ gwy_data_field_get_dval(GwyDataField *a,
         iy = CLAMP(floory, 0, a->yres - 1);
         return a->data[ix + a->xres*iy];
 
-        case GWY_INTERPOLATION_BILINEAR:
+        case GWY_INTERPOLATION_LINEAR:
         /* To centered pixel value */
         x -= 0.5;
         y -= 0.5;
@@ -871,7 +849,7 @@ gwy_data_field_get_dval(GwyDataField *a,
  *
  * Gets the raw data buffer of a data field.
  *
- * The returned buffer is not quaranteed to be valid through whole data
+ * The returned buffer is not guaranteed to be valid through whole data
  * field life time.  Some function may change it, most notably
  * gwy_data_field_resize() and gwy_data_field_resample().
  *
@@ -899,7 +877,7 @@ gwy_data_field_get_data(GwyDataField *data_field)
  *
  * Gets the raw data buffer of a data field, read-only.
  *
- * The returned buffer is not quaranteed to be valid through whole data
+ * The returned buffer is not guaranteed to be valid through whole data
  * field life time.  Some function may change it, most notably
  * gwy_data_field_resize() and gwy_data_field_resample().
  *
@@ -1391,66 +1369,86 @@ gwy_data_field_rotate(GwyDataField *a,
                       GwyInterpolationType interpolation)
 {
     GwyDataField *b;
-    gdouble inew, jnew, ir, jr, ang, icor, jcor, sn, cs, val;
-    gint i, j;
+    gdouble icor, jcor, sn, cs, val, x, y, v;
+    gdouble *coeff;
+    gint xres, yres, newi, newj, oldi, oldj, i, j, ii, jj, suplen, sf, st;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(a));
+
+    suplen = gwy_interpolation_get_support_size(interpolation);
+    if (suplen <= 0)
+        return;
 
     angle = fmod(angle, 2*G_PI);
     if (angle < 0.0)
         angle += 2*G_PI;
 
-    if (angle == 0.0)
+    if (fabs(angle) < 1e-15)
         return;
+    if (fabs(angle - G_PI) < 2e-15) {
+        gwy_data_field_invert(a, TRUE, TRUE, FALSE);
+        return;
+    }
 
-    b = gwy_data_field_duplicate(a);
-
-    val = gwy_data_field_get_min(a);
-    ang = 3*G_PI/4 + angle;
     if (fabs(angle - G_PI/2) < 1e-15) {
         sn = 1.0;
         cs = 0.0;
-        icor = 1.0;
-        jcor = 0.0;
     }
-    if (fabs(angle - G_PI) < 2e-15) {
-        sn = 0.0;
-        cs = -1.0;
-        icor = 1.0;
-        jcor = a->xres;
-    }
-    if (fabs(angle - 3*G_PI/4) < 3e-15) {
+    else if (fabs(angle - 3*G_PI/4) < 3e-15) {
         sn = -1.0;
         cs = 0.0;
-        icor = a->yres;
-        jcor = a->xres;
     }
     else {
         sn = sin(angle);
         cs = cos(angle);
-        icor = a->yres*(1.0 + cs)/2.0 - sn*a->xres/2.0;
-        jcor = a->xres*(1.0 - cs)/2.0 - sn*a->yres/2.0;
     }
 
-    for (i = 0; i < a->yres; i++) { /*row*/
-        for (j = 0; j < a->xres; j++) { /*column*/
-            ir = a->yres - (i + 0.5) - icor;
-            jr = (j + 0.5) - jcor;
-            inew = -ir*cs + jr*sn;
-            jnew = ir*sn + jr*cs;
-            if (inew > a->yres+1 || jnew > a->xres+1 || inew < -1 || jnew < -1)
-                a->data[j + a->xres*i] = val;
+    xres = a->xres;
+    yres = a->yres;
+    icor = ((yres - 1.0)*(1.0 - cs) - (xres - 1.0)*sn)/2.0;
+    jcor = ((xres - 1.0)*(1.0 - cs) + (yres - 1.0)*sn)/2.0;
+
+    coeff = g_newa(gdouble, suplen*suplen);
+    sf = -((suplen - 1)/2);
+    st = suplen/2;
+
+    val = gwy_data_field_get_min(a);
+    b = gwy_data_field_duplicate(a);
+    gwy_interpolation_resolve_coeffs_2d(xres, yres, xres, b->data,
+                                        interpolation);
+
+    for (newi = 0; newi < yres; newi++) {
+        for (newj = 0; newj < xres; newj++) {
+            y = newi*cs + newj*sn + icor;
+            x = -newi*sn + newj*cs + jcor;
+            if (y > yres || x > xres || y < 0.0 || x < 0.0)
+                v = val;
             else {
-                inew = CLAMP(inew, 0, a->yres);
-                jnew = CLAMP(jnew, 0, a->xres);
-                a->data[j + a->xres*i] = gwy_data_field_get_dval(b, jnew, inew,
-                                                                 interpolation);
+                oldi = (gint)floor(y);
+                y -= oldi;
+                oldj = (gint)floor(x);
+                x -= oldj;
+                for (i = sf; i <= st; i++) {
+                    ii = (oldi + i + 2*st*yres) % (2*yres);
+                    if (G_UNLIKELY(ii >= yres))
+                        ii = 2*yres-1 - ii;
+                    for (j = sf; j <= st; j++) {
+                        jj = (oldj + j + 2*st*xres) % (2*xres);
+                        if (G_UNLIKELY(jj >= xres))
+                            jj = 2*xres-1 - jj;
+                        coeff[(i - sf)*suplen + j - sf] = b->data[ii*xres + jj];
+                    }
+                }
+                v = gwy_interpolation_interpolate_2d(x, y, suplen, coeff,
+                                                     interpolation);
             }
+            a->data[newj + xres*newi] = v;
         }
     }
 
     g_object_unref(b);
     gwy_data_field_invalidate(a);
 }
-
 
 /**
  * gwy_data_field_invert:
@@ -1933,7 +1931,7 @@ gwy_data_field_set_row_part(GwyDataField *data_field,
         GWY_SWAP(gint, from, to);
 
     if (data_line->res != (to - from))
-        gwy_data_line_resample(data_line, to-from, GWY_INTERPOLATION_BILINEAR);
+        gwy_data_line_resample(data_line, to-from, GWY_INTERPOLATION_LINEAR);
 
     memcpy(data_field->data + row*data_field->xres + from,
            data_line->data,
@@ -1970,7 +1968,7 @@ gwy_data_field_set_column_part(GwyDataField *data_field,
         GWY_SWAP(gint, from, to);
 
     if (data_line->res != (to-from))
-        gwy_data_line_resample(data_line, to-from, GWY_INTERPOLATION_BILINEAR);
+        gwy_data_line_resample(data_line, to-from, GWY_INTERPOLATION_LINEAR);
 
     for (k = 0; k < to-from; k++)
         data_field->data[(k+from)*data_field->xres + col] = data_line->data[k];

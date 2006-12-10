@@ -194,9 +194,6 @@ gwy_data_line_new_resampled(GwyDataLine *data_line,
                             GwyInterpolationType interpolation)
 {
     GwyDataLine *result;
-    gdouble *p;
-    gdouble ratio;
-    gint j;
 
     g_return_val_if_fail(GWY_IS_DATA_LINE(data_line), NULL);
     if (data_line->res == res)
@@ -211,14 +208,9 @@ gwy_data_line_new_resampled(GwyDataLine *data_line,
     if (data_line->si_unit_y)
         result->si_unit_y = gwy_si_unit_duplicate(data_line->si_unit_y);
 
-    if (interpolation == GWY_INTERPOLATION_NONE)
-        return result;
-
-    ratio = data_line->res/(gdouble)res;
-
-    p = result->data;
-    for (j = 0; j < res; j++, p++)
-        *p = gwy_data_line_get_dval(data_line, (j + 0.5)*ratio, interpolation);
+    gwy_interpolation_resample_block_1d(data_line->res, data_line->data,
+                                        result->res, result->data,
+                                        interpolation, TRUE);
 
     return result;
 }
@@ -421,8 +413,6 @@ gwy_data_line_resample(GwyDataLine *data_line,
                        GwyInterpolationType interpolation)
 {
     gdouble *bdata;
-    gdouble ratio;
-    gint i;
 
     g_return_if_fail(GWY_IS_DATA_LINE(data_line));
     if (res == data_line->res)
@@ -436,10 +426,9 @@ gwy_data_line_resample(GwyDataLine *data_line,
     }
 
     bdata = g_new(gdouble, res);
-    ratio = data_line->res/(gdouble)res;
-    for (i = 0; i < res; i++)
-        bdata[i] = gwy_data_line_get_dval(data_line, (i + 0.5)*ratio,
-                                          interpolation);
+    gwy_interpolation_resample_block_1d(data_line->res, data_line->data,
+                                        res, bdata,
+                                        interpolation, FALSE);
     g_free(data_line->data);
     data_line->data = bdata;
     data_line->res = res;
@@ -570,7 +559,7 @@ gwy_data_line_get_dval(GwyDataLine *a, gdouble x, gint interpolation)
         case GWY_INTERPOLATION_ROUND:
         return a->data[l];
 
-        case GWY_INTERPOLATION_BILINEAR:
+        case GWY_INTERPOLATION_LINEAR:
         return (1.0 - rest)*a->data[l] + rest*a->data[l+1];
 
         default:
@@ -595,7 +584,7 @@ gwy_data_line_get_dval(GwyDataLine *a, gdouble x, gint interpolation)
  *
  * Gets the raw data buffer of a data line.
  *
- * The returned buffer is not quaranteed to be valid through whole data
+ * The returned buffer is not guaranteed to be valid through whole data
  * line life time.  Some function may change it, most notably
  * gwy_data_line_resize() and gwy_data_line_resample().
  *
@@ -617,7 +606,7 @@ gwy_data_line_get_data(GwyDataLine *data_line)
  *
  * Gets the raw data buffer of a data line, read-only.
  *
- * The returned buffer is not quaranteed to be valid through whole data
+ * The returned buffer is not guaranteed to be valid through whole data
  * line life time.  Some function may change it, most notably
  * gwy_data_line_resize() and gwy_data_line_resample().
  *
@@ -1349,7 +1338,7 @@ gwy_data_line_line_rotate(GwyDataLine *a,
         yl2 = dy[k];
 
         if (interpolation == GWY_INTERPOLATION_ROUND
-            || interpolation == GWY_INTERPOLATION_BILINEAR)
+            || interpolation == GWY_INTERPOLATION_LINEAR)
             a->data[i] = gwy_interpolation_get_dval(x, xl1, yl1, xl2, yl2,
                                                     interpolation);
         else
@@ -1448,8 +1437,10 @@ gwy_data_line_part_fit_polynom(GwyDataLine *data_line,
         for (j = 0; j <= i; j++)
             row[j] = sumx[i+j];
     }
-    if (!gwy_math_choleski_decompose(n+1, m))
+    if (!gwy_math_choleski_decompose(n+1, m)) {
+        g_warning("Line polynomial fit failed");
         memset(coeffs, 0, (n+1)*sizeof(gdouble));
+    }
     else
         gwy_math_choleski_solve(n+1, m, coeffs);
 

@@ -49,6 +49,11 @@ struct _GwyAppFileChooser {
     GtkWidget *filter_enable;
     GtkWidget *type_list;
     GtkWidget *expander;
+    GtkWidget *preview;
+    GObject *renderer_fileinfo;
+
+    guint full_preview_id;
+    gboolean make_thumbnail;
 };
 
 struct _GwyAppFileChooserClass {

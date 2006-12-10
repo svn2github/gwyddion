@@ -22,6 +22,7 @@
 #include <gtk/gtk.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
+#include <libprocess/gwyprocesstypes.h>
 #include <libprocess/stats.h>
 #include <libgwydgets/gwystock.h>
 #include <libgwydgets/gwydataview.h>
@@ -75,7 +76,7 @@ static void     rotate_save_args    (GwyContainer *container,
 
 static const RotateArgs rotate_defaults = {
     0.0,
-    GWY_INTERPOLATION_BILINEAR,
+    GWY_INTERPOLATION_LINEAR,
     FALSE,
 };
 
@@ -84,7 +85,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Rotates data by arbitrary angle."),
     "Yeti <yeti@gwyddion.net>",
-    "1.7",
+    "1.8",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -134,7 +135,7 @@ rotate_datafield(GwyDataField *dfield,
     gwy_data_field_rotate(df, args->angle, args->interp);
     gwy_data_field_resample(dfield, xres + 2*xborder, yres + 2*yborder,
                             GWY_INTERPOLATION_NONE);
-    gwy_data_field_copy(df, dfield, TRUE);
+    gwy_data_field_copy(df, dfield, FALSE);
     gwy_data_field_set_xreal(dfield, xreal*(xres + 2.0*xborder)/xres);
     gwy_data_field_set_yreal(dfield, yreal*(yres + 2.0*yborder)/yres);
     g_object_unref(df);
@@ -220,7 +221,7 @@ create_preview_data(GwyContainer *data)
     yres = gwy_data_field_get_yres(dfield);
     zoomval = (gdouble)PREVIEW_SIZE/MAX(xres, yres);
     gwy_data_field_resample(dfield, xres*zoomval, yres*zoomval,
-                            GWY_INTERPOLATION_BILINEAR);
+                            GWY_INTERPOLATION_LINEAR);
     dfield_show = gwy_data_field_duplicate(dfield);
 
     gwy_container_set_object_by_name(preview, "/0/data", dfield);
@@ -265,7 +266,7 @@ rotate_dialog(RotateArgs *args,
     gtk_table_set_row_spacings(GTK_TABLE(table), 2);
     gtk_table_set_col_spacings(GTK_TABLE(table), 6);
     gtk_container_set_border_width(GTK_CONTAINER(table), 4);
-    gtk_box_pack_start(GTK_BOX(hbox), table, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
 
     controls.angle = gtk_adjustment_new(args->angle*180.0/G_PI,
                                         -360, 360, 1, 30, 0);
@@ -279,7 +280,8 @@ rotate_dialog(RotateArgs *args,
                                  G_CALLBACK(interp_changed_cb), &controls,
                                  args->interp, TRUE);
     gwy_table_attach_hscale(table, 1, _("_Interpolation type:"), NULL,
-                            GTK_OBJECT(controls.interp), GWY_HSCALE_WIDGET);
+                            GTK_OBJECT(controls.interp),
+                            GWY_HSCALE_WIDGET_NO_EXPAND);
 
     controls.expand
         = gtk_check_button_new_with_mnemonic(_("E_xpand result to fit "
@@ -370,8 +372,8 @@ static void
 rotate_sanitize_args(RotateArgs *args)
 {
     args->angle = fmod(args->angle, 2*G_PI);
-    args->interp = CLAMP(args->interp,
-                         GWY_INTERPOLATION_ROUND, GWY_INTERPOLATION_NNA);
+    args->interp = gwy_enum_sanitize_value(args->interp,
+                                           GWY_TYPE_INTERPOLATION_TYPE);
     args->expand = !!args->expand;
 }
 

@@ -22,6 +22,7 @@
 #include <gtk/gtk.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
+#include <libprocess/gwyprocesstypes.h>
 #include <libprocess/inttrans.h>
 #include <libprocess/stats.h>
 #include <libgwydgets/gwydgetutils.h>
@@ -63,6 +64,7 @@ static void     fft                (GwyContainer *data,
 static void     fft_create_output  (GwyContainer *data,
                                     GwyDataField *dfield,
                                     const gchar *window_name);
+static void     humanize_offsets   (GwyDataField *dfield);
 static gboolean fft_dialog         (FFTArgs *args,
                                     gint oldsize,
                                     gint newsize);
@@ -87,7 +89,7 @@ static void     fft_sanitize_args  (FFTArgs *args);
 static const FFTArgs fft_defaults = {
     FALSE,
     TRUE,
-    GWY_INTERPOLATION_BILINEAR,
+    GWY_INTERPOLATION_LINEAR,
     GWY_WINDOWING_HANN,
     GWY_FFT_OUTPUT_MOD,
 };
@@ -97,7 +99,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Two-dimensional FFT (Fast Fourier Transform)."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "1.6",
+    "1.7",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -160,7 +162,7 @@ fft(GwyContainer *data, GwyRunType run)
     }
 
     dfield = gwy_data_field_new_resampled(dfield, newsize, newsize,
-                                          GWY_INTERPOLATION_BILINEAR);
+                                          args.interp);
     xyunit = gwy_data_field_get_si_unit_xy(dfield);
     gwy_si_unit_power(xyunit, -1, xyunit);
 
@@ -185,14 +187,15 @@ fft(GwyContainer *data, GwyRunType run)
     newreals = ((gdouble)gwy_data_field_get_xres(dfield))
                /gwy_data_field_get_xreal(dfield);
 
+    gwy_data_field_set_xreal(dfield, newreals);
+    gwy_data_field_set_yreal(dfield, newreals);
+    humanize_offsets(dfield);
+
     if (args.preserve) {
         gwy_data_field_resample(dfield, xsize, ysize, args.interp);
         gwy_data_field_resample(raout, xsize, ysize, args.interp);
         gwy_data_field_resample(ipout, xsize, ysize, args.interp);
     }
-
-    gwy_data_field_set_xreal(dfield, newreals);
-    gwy_data_field_set_yreal(dfield, newreals);
 
     if (args.out == GWY_FFT_OUTPUT_REAL_IMG
         || args.out == GWY_FFT_OUTPUT_REAL) {
@@ -222,6 +225,21 @@ fft(GwyContainer *data, GwyRunType run)
     g_object_unref(dfield);
     g_object_unref(raout);
     g_object_unref(ipout);
+}
+
+static void
+humanize_offsets(GwyDataField *dfield)
+{
+    gint res;
+    gdouble r;
+
+    res = gwy_data_field_get_xres(dfield);
+    r = (res + 1 + res % 2)/2.0;
+    gwy_data_field_set_xoffset(dfield, -gwy_data_field_jtor(dfield, r));
+
+    res = gwy_data_field_get_yres(dfield);
+    r = (res + 1 + res % 2)/2.0;
+    gwy_data_field_set_yoffset(dfield, -gwy_data_field_itor(dfield, r));
 }
 
 static void
@@ -433,9 +451,10 @@ fft_sanitize_args(FFTArgs *args)
 {
     args->preserve = !!args->preserve;
     args->zeromean = !!args->zeromean;
-    args->interp = CLAMP(args->interp,
-                         GWY_INTERPOLATION_ROUND, GWY_INTERPOLATION_NNA);
-    args->window = MIN(args->window, GWY_WINDOWING_RECT);
+    args->interp = gwy_enum_sanitize_value(args->interp,
+                                           GWY_TYPE_INTERPOLATION_TYPE);
+    args->window = gwy_enum_sanitize_value(args->window,
+                                           GWY_TYPE_WINDOWING_TYPE);
     args->out = MIN(args->out, GWY_FFT_OUTPUT_PHASE);
 }
 

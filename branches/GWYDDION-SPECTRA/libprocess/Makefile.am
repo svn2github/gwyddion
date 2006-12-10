@@ -43,7 +43,9 @@ EXTRA_DIST = \
 
 # Must init
 CLEANFILES =
-MAINTAINERCLEANFILES =
+MAINTAINERCLEANFILES = \
+	makefile.msc \
+	libgwyprocess2.def
 BUILT_SOURCES =
 
 MKENUM_NAME = gwyprocesstypes
