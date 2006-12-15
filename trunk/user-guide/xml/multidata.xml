@@ -56,7 +56,81 @@
     </para>
   </section>
   <section>
-    <title>Merging and Immersion</title>
+    <title>Detail Immersion</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Immerse</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Immerse insets a detail, high-resolution image into a larger image.
+    </para>
+    <para>
+      The detail can positioned manually on the large image with mouse.
+      Button <guibutton>Improve</guibutton> can then be used to find the
+      exact coordinates in the neighbourhood of the current position that give
+      the maximum correlation between the detail and the large image.
+      Or the best-match position can be searched through the whole image
+      with <guibutton>Locate</guibutton>.
+    </para>
+    <para>
+      It should be noted the correlation search is insensitive to value scales
+      and offsets, therefore the automated matching is based solely on
+      data features, absolute heights play no role.
+    </para>
+    <para>
+      <guilabel>Result Sampling</guilabel> controls the size and resolution
+      of the result image:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Upsample large image</guilabel>
+        </term>
+        <listitem>
+          The resolution of the result is determined by the resolution of
+          the inset detail.  Therefore the large image is scaled up.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Downsample detail</guilabel>
+        </term>
+        <listitem>
+          The resolution of the result is determined by the resolution of
+          the large image.  The detail is downsampled.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      <guilabel>Detail Leveling</guilabel> selects the transform of the
+      <phrase role="math">z</phrase> values of the detail:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>None</guilabel>
+        </term>
+        <listitem>
+          No <phrase role="math">z</phrase> value adjustment is performed.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Mean value</guilabel>
+        </term>
+        <listitem>
+          All values of the detail image are shifted by a constant to make
+          its mean value match the mean value of the corresponding area of
+          the large image.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+  <section>
+    <title>Merging</title>
   </section>
   <section>
     <title>Cross-Correlation</title>
