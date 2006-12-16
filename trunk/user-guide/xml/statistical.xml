@@ -570,6 +570,18 @@
       <phrase role="math">r</phrase><superscript>2</superscript> over φ
       where we introduced polar coordinates
       (<phrase role="math">r</phrase>, φ) in the plane of derivatives.
+      The relation between the derivative Cartesian coordinates of the
+      two-dimensional slope distribution and the
+      <link linkend="inclinations-coordinates">facet inclination
+        angles</link>
+      are given by the following formula:
+      <informalequation>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-facet-theta-phi.png" format="PNG"/>
+          </imageobject>
+        </mediaobject>
+      </informalequation>
     </para>
     <para>
       <guimenuitem>Angle Distribution</guimenuitem> function is

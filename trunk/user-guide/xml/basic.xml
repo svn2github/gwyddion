@@ -294,10 +294,14 @@
       <para>
         Angle ϑ is the angle between the
         upward direction and the normal, this means ϑ = 0 for horizontal
-        facets and increases with the slope. Angle φ is the counter-clockwise
+        facets and increases with the slope. It is always positive.
+      </para>
+      <para>
+        Angle φ is the counter-clockwise measured
         angle between axis <phrase role="math">x</phrase> and the projection
         of the normal to the <phrase role="math">xy</phrase> plane, as
-        displayed on the following figure.
+        displayed on the following figure.  For facets it means φ corresponds
+        to the downward direction of the facet.
       </para>
       <figure float='0'>
         <title>
