@@ -7,6 +7,11 @@
     Unrotate
     <guiicon><inlinegraphic fileref="gwy_unrotate-24.png"/></guiicon>
   </title>
+  <menuchoice>
+    <guimenu>Data Process</guimenu>
+    <guisubmenu>Correct Data</guisubmenu>
+    <guimenuitem>Unrotate</guimenuitem>
+  </menuchoice>
   <para>
     Unrotate can automatically make principal directions in an image
     parallel with horizontal and/or vertical image edges.  For that to work,
@@ -29,7 +34,7 @@
     It is recommended to level (or facet-level<!-- TODO: link -->) the data
     first as overall slope can skew the calculated rotations.
   </para>
-  <figure>
+  <figure float='0'>
     <title>
       Unrotate dialog with automatically estimated type of structure and
       rotation.

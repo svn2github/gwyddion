@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <section id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <title>Data Edit</title>
+  <title>Data Edit and Correction</title>
   <para>
     There are several modules that enable direct or indirect editing of the
     SPM data. In principal, most of the data processing modules change the data
@@ -208,10 +208,20 @@
       Line correction functions in <guisubmenu>Correct Data</guisubmenu>
       perform only line corrections, therefore one has to rotate the image
       to perform column-wise correction.  They include:
-      <guimenuitem>Match Line Correction</guimenuitem>,
-      <guimenuitem>Median Line Correction</guimenuitem>,
-      <guimenuitem>Modus Line Correction</guimenuitem>, and
-      <guimenuitem>Step Line Correction</guimenuitem>.
+      <itemizedlist>
+        <listitem>
+          <guimenuitem>Match Line Correction</guimenuitem>,
+        </listitem>
+        <listitem>
+          <guimenuitem>Median Line Correction</guimenuitem>,
+        </listitem>
+        <listitem>
+          <guimenuitem>Modus Line Correction</guimenuitem>, and
+        </listitem>
+        <listitem>
+          <guimenuitem>Step Line Correction</guimenuitem>.
+        </listitem>
+      </itemizedlist>
       The first three are very similar, they all align rows of the data field
       to minimize some quantity.  As the names indicate,
       <guimenuitem>Median Line Correction</guimenuitem> matches line medians
@@ -231,6 +241,60 @@
       a row.  This function is rather experimental and the exact way it
       works can be subject of futher changes.
     </para>
+  </section>
+  <section>
+    <title>Drift Compensation</title>
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Correct Data</guisubmenu>
+      <guimenuitem>Compensate Drift</guimenuitem>
+    </menuchoice>
+    <para>
+      Compensate Drift calculates and/or corrects drift in the fast scanning
+      axis (horizontal).  The drift graph, which is one of possible outputs,
+      represents the horizontal shift of individual rows compared to
+      a reference row (which could be in principle chosen arbitrarily, in
+      practice the zero shift is chosen to minimize the amount of data
+      sticking out of the image after compensation), with the row
+      <phrase role="math">y</phrase>-coordinate on the abscissa.
+    </para>
+    <para>
+      The drift is determined in two steps:
+      <orderedlist>
+        <listitem>
+          A mutual horizontal offset is estimated for each couple of rows not
+          more distant than <guilabel>Search range</guilabel>.  It is
+          estimated as the offset value giving the maximum mutual correlation
+          of the two rows.  Thus a set of local row drift estimations is
+          obtained (together with the maximum correlation scores providing
+          an estimate of their actual similarity).
+        </listitem>
+        <listitem>
+          Global offsets are calculated from the local ones.  At present the
+          method is very simple as it seems sufficient in most cases: local
+          drift derivatives are fitted for each row onto the local drift
+          estimations and the global drift is then obtained by intergration
+          (i.e. summing the local drifts).
+        </listitem>
+      </orderedlist>
+    </para>
+    <para>
+      Option <guilabel>Exclude linear skew</guilabel> subtracts the linear
+      term from the calculated drift, it can be useful when the image is
+      anisotropic and its features are supposed to be oriented in a direction
+      not paralled to the image sides.
+    </para>
+    <figure float='0'>
+      <title>
+        Drift correction example: (a) original data exhibiting strong drift in
+        the fast scan axis, (b) corrected data, (c) calculated drift graph.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="drift-corrected-graph.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
   </section>
   <xi:include href="unrotate.xml"/>
 </section>
