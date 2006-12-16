@@ -884,7 +884,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
             AUTOCONF=autoconf259 AUTOHEADER=autoheader259 ./autogen.sh
           </userinput>
         </informalexample>
-        You may need to set the following variables
+        You may need to set the following variables:
         <envar>ACLOCAL</envar>,
         <envar>AUTOCONF</envar>,
         <envar>AUTOHEADER</envar>,
@@ -910,8 +910,8 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         This has to be done explicitly, documentation is never (re)built
         automatically, option <option>--enable-gtk-doc</option> of
         <command>configure</command> only makes the <literal>docs</literal>
-        target available (the option is on by default, therefore
-        <literal>docs</literal> if made available when
+        target available (this option is on by default, therefore
+        <literal>docs</literal> is made available when
         <application>gtk-doc</application> is detected).
       </para>
       <para>
