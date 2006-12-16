@@ -390,9 +390,9 @@ make install</userinput></literallayout>
       </para>
       <para>
         If you need to do unusual things to compile the package, please try to
-        figure out how <command>configure</command> could check whether to do
-        them, and e-mail patches or instructions to the bug-report address
-        so they can be considered for the next release.
+        figure out how <command>configure</command> could detect whether and
+        what to do, and e-mail patches or instructions to the bug-report
+        address so they can be considered for the next release.
       </para>
     </section>
     <section>
@@ -733,9 +733,11 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
       <para>
         Run a shell (command line, MS-DOS prompt), switch to the source
         directory and run <command>vcvars32.bat</command> there.
-        This batch file is provided by MSVC and ensures its program directories
-        are present in <envar>PATH</envar>.  (It may not be in
-        <envar>PATH</envar> itself but it should be easy to locate.)
+        This batch file is provided by MSVC and sets certain environment
+        variables the command-line compiler and linker require, it also
+        makes them directly executable by setting <envar>PATH</envar>.  Note
+        <command>vcvars32.bat</command> may not be in <envar>PATH</envar>
+        itself but it should be easy to locate.
       </para>
     </section>
     <section>
