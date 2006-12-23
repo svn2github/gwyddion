@@ -13,7 +13,10 @@ T = TEMP-
 
 all: formulas
 
-formulas: pngsize png-images
+formulas: Makefile pngsize png-images
+
+Makefile: Makefile.in ../config.status
+	../config.status Makefile
 
 pngsize: pngsize.c
 	$(CC) -o pngsize pngsize.c
@@ -52,3 +55,4 @@ distclean: clean
 	-rm -f Makefile
 
 .PHONY: clean dist formulas all distclean
+.PRECIOUS: Makefile

@@ -25,6 +25,9 @@ CSS_STYLES = user-guide.css
 
 all: xhtml
 
+Makefile: Makefile.in ./config.status
+	./config.status Makefile
+
 pdf: $(PACKAGE).pdf
 
 user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
@@ -36,7 +39,7 @@ user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
 
 xhtml: formulas xhtml.stamp
 
-xhtml.stamp: $(XML_SOURCES) xhtml.xsl
+xhtml.stamp: Makefile $(XML_SOURCES) xhtml.xsl
 	test -d xhtml || mkdir xhtml
 	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 	cp images/*.png xhtml
@@ -100,3 +103,4 @@ help:
 	@echo "version      Update version number to current date"
 
 .PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
+.PRECIOUS: Makefile
