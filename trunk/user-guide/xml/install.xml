@@ -45,7 +45,7 @@
   <section id="installation-unix">
     <title>Linux/Unix Packages</title>
     <para>
-      Some Linux and Unix systems may provide binary packages of Gwyddion.
+      Some GNU/Linux and Unix systems may provide binary packages of Gwyddion.
       The <ulink url="http://gwyddion.net/download.php">download</ulink> page
       of the project also tracks known packages and packaging efforts.
       If your operating system provides such a package and it is recent enough,
