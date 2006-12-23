@@ -31,17 +31,18 @@
     rotation is rarely meaningful.
   </para>
   <para>
-    It is recommended to level (or facet-level<!-- TODO: link -->) the data
+    It is recommended to level (or
+    <link linkend="module-facet-level">facet-level</link>) the data
     first as overall slope can skew the calculated rotations.
   </para>
   <figure float='0'>
     <title>
-      Unrotate dialog with automatically estimated type of structure and
-      rotation.
+      Orientations of prevalent directions corresponding to Unrotate symmetry
+      types.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="unrotate.png" format="PNG"/>
+        <imagedata fileref="unrotate-symmetries.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>
