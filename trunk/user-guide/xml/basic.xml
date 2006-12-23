@@ -155,9 +155,10 @@
     </itemizedlist>
     <figure float="0">
       <title>
-        Demonstration of the available interpolation types on an equidistant
-        one-dimensional data.  Values outside the displayed abscissa range
-        (used in higher order interpolation types) are zero.
+        Illlustration of the available interpolation types (the original
+        pixels the interpolation is performed between are obvious on the
+        result of Round interpolation).  All images have identical false color
+        map ranges.
       </title>
       <mediaobject>
         <imageobject>
