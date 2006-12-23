@@ -66,6 +66,7 @@
     </para>
     <para>
       Immerse insets a detail, high-resolution image into a larger image.
+      The image the function was run on forms the large, base image.
     </para>
     <para>
       The detail can positioned manually on the large image with mouse.
@@ -131,6 +132,69 @@
   </section>
   <section>
     <title>Merging</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Merge</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Images that form parts of a larger image can be merged together with
+      Merge.  The image the function was run on forms corresponds to the base
+      image, the image selected with <guilabel>Merge with</guilabel>
+      represents the second operand. The side of the base image the second one
+      will be attached to is controlled with
+      <guilabel>Put second operand</guilabel> selector.
+    </para>
+    <para>
+      If the images match perfectly, they can be simply placed side by side
+      with no adjustments.  This behaviour is selected by option
+      <guilabel>None</guilabel> of alignment control
+      <guilabel>Align second operand</guilabel>.
+    </para>
+    <para>
+      However, usually adjustments are necessary.  Option
+      <guilabel>Correlation</guilabel> selects automated alignment by
+      correlation-based search of the best match.  The search is performed
+      both in the direction parallel to the attaching side and in the
+      perpendicular direction.  If a parallel shift is present, the result is
+      expanded to contain both images fully (with undefined data filled with
+      a background value).
+    </para>
+    <para>
+      Option <guilabel>Boundary treatment</guilabel> is useful only for the
+      latter case of imperfectly aligned images.  It controls the treatment
+      of overlapping areas in the source images:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>First operand</guilabel>
+        </term>
+        <listitem>
+          Values in overlapping areas are taken from the first, base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Second operand</guilabel>
+        </term>
+        <listitem>
+          Values in overlapping areas are taken from the second image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Smooth</guilabel>
+        </term>
+        <listitem>
+          A smooth transition between the first and the second image is made
+          through the overlapping area by using a weighted average with
+          a suitable weighting function.
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </section>
   <section>
     <title>Cross-Correlation</title>
