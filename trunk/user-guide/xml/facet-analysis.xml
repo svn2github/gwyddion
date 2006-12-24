@@ -21,19 +21,34 @@
   <para>
     The center of facet view always correspond to zero inclination (horizontal
     facets),
+    <!-- FIXME: not true any more? -->
     derivation in <phrase role="math">x</phrase>-direction increases towards
     left and right border and derivation in
     <phrase role="math">y</phrase>-direction increases towards top and bottom
     borders.  The exact coordinate system is a bit complex and it adapts to
     the range of slopes in the particular data displayed.
   </para>
+  <para>
+    <guilabel>Facet plane size</guilabel> controls the size (radius) of plane
+    locally fitted in each point to determine the local inclination.  The
+    special value 0 stands for no plane fitting, the local inclination is
+    determined from symmetric <phrase role="math">x</phrase> and
+    <phrase role="math">y</phrase> derivatives in each point.  The choice of
+    neighbourhood size is crucial for meaningful results: it must be smaller
+    than the features one is interested in to avoid their smoothing, on the
+    other hand it has to be large enough to suppress noise present in the
+    image.
+  </para>
   <figure>
     <title>
-      Facet Analysis dialog with a marked area of similar slopes.
+      Illustration of fitted plane size on the distribution of a scan of
+      a delaminated DLC surface with considerable fine noise.  One can see
+      the distribution is completely obscured by the noise on small plane
+      sizes.  Neighbourhood sizes: (a) 0, (b) 2, (c) 4, (d) 7.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="facet-analysis.png" format="PNG"/>
+        <imagedata fileref="facet-analysis-sizes.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -44,11 +59,11 @@
     facet view selection is updated to show inclination in this point.
   </para>
   <para>
-    The <guibutton>Find Maximum</guibutton> button sets facet view selection
+    Button <guibutton>Find Maximum</guibutton> sets facet view selection
     to slope distribution maximum (the initial selection position).
   </para>
   <para>
-    The <guibutton>Mark</guibutton> button updates the mask of areas with slope
+    Button <guibutton>Mark</guibutton> updates the mask of areas with slope
     similar to the selected slope.  More precisely, of areas with slope
     within <guilabel>Tolerance</guilabel> from the selected slope.  The facet
     view then displays the set of slopes corresponding to marked points
