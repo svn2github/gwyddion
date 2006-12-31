@@ -27,7 +27,7 @@
       and therefore alter the statistical functions and quantities evaluated
       from the surface.
     </para>
-    <section id="fix_zero">
+    <section id="fix-zero">
       <title>Fix Zero and Zero Mean Value</title>
       <para>
         <menuchoice>
@@ -45,8 +45,8 @@
       </para>
       <para>
         The simplest modules that are connected with data leveling are
-        <link linkend="fix_zero">Fix Zero</link> and
-        <link linkend="fix_zero">Zero Mean Value</link>
+        <link linkend="fix-zero">Fix Zero</link> and
+        <link linkend="fix-zero">Zero Mean Value</link>
         that simply set the average height of the data to put the minimum
         to zero (Fix Zero) or mean value to zero (Zero Mean Value).
       </para>

@@ -221,7 +221,7 @@
               </listitem>
               <listitem>
                 <guilabel>Minimum bounding direction</guilabel>,
-                The direction of the gap from the previous item.  If the grain
+                the direction of the gap from the previous item.  If the grain
                 exhibits a symmetry that makes several directions to qualify,
                 an arbitrary direction is chosen.
               </listitem>
@@ -233,9 +233,47 @@
               </listitem>
               <listitem>
                 <guilabel>Maximum bounding direction</guilabel>,
-                The direction of the gap from the previous item.  If the grain
+                the direction of the gap from the previous item.  If the grain
                 exhibits a symmetry that makes several directions to qualify,
                 an arbitrary direction is chosen.
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Volume-related properties</term>
+          <listitem>
+            <itemizedlist>
+              <listitem>
+                <guilabel>Zero basis</guilabel>,
+                the volume between grain surface and the plane
+                <phrase role="math">z</phrase> = 0.  Values below
+                zero form negative volumes.  The zero level must be set to
+                a reasonable value (often
+                <link linkend="fix-zero">Fix Zero</link> is sufficient) for
+                the results to make sense, which is also the advantage of
+                this method: one can use basis plane of his choice.
+              </listitem>
+              <listitem>
+                <guilabel>Grain minimum basis</guilabel>,
+                the volume between grain surface and the plane
+                <phrase role="math">z</phrase> = <phrase role="math">z</phrase><subscript>min</subscript>,
+                where <phrase role="math">z</phrase><subscript>min</subscript>
+                is the minimum value (height) occuring in the grain.  This
+                method accounts for grain surrounding but it typically
+                underestimates the volume, especially for small grains.
+              </listitem>
+              <listitem>
+                <guilabel>Laplacian backround basis</guilabel>,
+                the volume between grain surface and the basis surface formed
+                by laplacian interpolation of surrounding values.  In other
+                words, this is the volume that would disappear after using
+                <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+                or
+                <link linkend="tool-remove-grains">Grain Remover</link> tool
+                with Laplacian interpolation on the grain.  This is the most
+                sophisticated method, on the other hand it is the hardest to
+                develop intuition for.
               </listitem>
             </itemizedlist>
           </listitem>
@@ -266,6 +304,27 @@
       <mediaobject>
         <imageobject>
           <imagedata fileref="boundary_length.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      The grain volume is, after subtracting the basis, estimated as the
+      volume of exactly the same body whose upper surface is used for
+      <link linkend="surface-area-vertices">surface area calculation</link>.
+      Note for the volume between vertices this is equivalent to the classic
+      two-dimensional trapezoid integration method.  However, we calculate the
+      volume under a mask centered on vertices, therefore their contribution
+      to the integral is distributed differently as shown in the following
+      figure.
+    </para>
+    <figure>
+      <title>
+        Contributions of individual pixels to the volume of single pixel
+        (grey).
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="volume-pixel-weights.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
