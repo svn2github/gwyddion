@@ -120,7 +120,7 @@
       </listitem>
       <listitem>
         B-spline was misimplemented up to version 2.1 (inclusive) and it
-        blurred data.  It should be avoided these old versions.
+        blurred data.  It should be avoided in these old versions.
         The weights are
         <informalequation>
           <mediaobject>
@@ -137,7 +137,7 @@
       </listitem>
       <listitem>
         O-MOMS was misimplemented up to version 2.1 (inclusive) and it
-        blurred data.  It should be avoided these old versions.
+        blurred data.  It should be avoided in these old versions.
         The weights are
         <informalequation>
           <mediaobject>
