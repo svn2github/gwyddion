@@ -116,6 +116,13 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>FRT MicroProf</entry>
+          <entry>.txt</entry>
+          <entry>microprof module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Gwyddion native</entry>
           <entry>.gwy</entry>
           <entry>gwyfile module</entry>
