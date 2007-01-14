@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="facet-analysis">
+<sect2 id="facet-analysis">
   <title>Facet Analysis</title>
   <para>
     <menuchoice>
@@ -74,4 +74,4 @@
     of all points in selected range of slopes is displayed under
     <guilabel>Mean Normal</guilabel>.
   </para>
-</section>
+</sect2>

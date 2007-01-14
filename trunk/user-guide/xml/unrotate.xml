@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="unrotate">
+<sect2 id="unrotate">
   <title>
     Unrotate
     <guiicon><inlinegraphic fileref="gwy_unrotate-24.png"/></guiicon>
@@ -119,5 +119,4 @@
       </varlistentry>
     </variablelist>
   </para>
-</section>
-
+</sect2>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="graph-windows">
+<sect1 id="graph-windows">
   <title>Graph Window</title>
   <para>
     Graph window is used for 1D data processing. You can get it only by using
@@ -31,4 +31,4 @@
       </imageobject>
     </mediaobject>
   </figure>
-</section>
+</sect1>

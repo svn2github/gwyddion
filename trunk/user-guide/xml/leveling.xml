@@ -2,10 +2,10 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-leveling">
+<sect1 id="features-leveling">
   <title>Data Leveling and Background Subtraction</title>
   <!--TODO: Clean up section id's and links -->
-  <section>
+  <sect2>
     <title>Leveling</title>
     <para>
       The data obtained from SPM microscopes are <!--TODO: should it be "are" or "is"?-->
@@ -27,7 +27,7 @@
       and therefore alter the statistical functions and quantities evaluated
       from the surface.
     </para>
-    <section id="fix-zero">
+    <sect3 id="fix-zero">
       <title>Fix Zero and Zero Mean Value</title>
       <para>
         <menuchoice>
@@ -50,8 +50,8 @@
         that simply set the average height of the data to put the minimum
         to zero (Fix Zero) or mean value to zero (Zero Mean Value).
       </para>
-    </section>
-    <section id="process-level-plane">
+    </sect3>
+    <sect3 id="process-level-plane">
       <title>
         Plane Level
         <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
@@ -73,8 +73,8 @@
         You can quickly apply plane leveling by simply right-clicking on
         the image window and selecting <guimenuitem>Level</guimenuitem>.
       </tip>
-    </section>
-    <section id="level3">
+    </sect3>
+    <sect3 id="level3">
       <title>
         Three Point Leveling Tool
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
@@ -86,8 +86,8 @@
         the same level, and then click <guibutton>Apply</guibutton>. The plane
         is computed from these three points and is subtracted from the data.
       </para>
-    </section>
-    <section id="module-facet-level">
+    </sect3>
+    <sect3 id="module-facet-level">
       <title>
         Facet Level
         <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
@@ -122,8 +122,8 @@
           </imageobject>
         </mediaobject>
       </figure>
-    </section>
-    <section id="level_rotate">
+    </sect3>
+    <sect3 id="level_rotate">
       <title>Level Rotate</title>
       <para>
         <menuchoice>
@@ -141,9 +141,9 @@
         <link linkend="process-level-plane">Plane Level</link>, this
         module should therefore preserve angle data in the image.
       </para>
-    </section>
-  </section>
-  <section>
+    </sect3>
+  </sect2>
+  <sect2>
     <title>Background Subtraction</title>
     <para>
       Gwyddion has several special modules for background subtraction. All
@@ -155,7 +155,7 @@
       and then use the <link linkend="">Data Arithmetic</link><!--TODO: fix link-->
       module to subtract the results from your original image.
     </tip>
-    <section>
+    <sect3>
       <title>
         Polynomial Background
         <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
@@ -193,8 +193,8 @@
         where <phrase role="math">n</phrase> is the selected total polynomial
         degree.
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Revolve Arc</title>
       <para>
         <menuchoice>
@@ -209,8 +209,8 @@
         background, resulting in removal of features larger than the arc radius
         (approximately).
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Median Level</title>
       <para>
         <menuchoice>
@@ -225,8 +225,8 @@
         kernel size will be kept.
       </para>
       <note>This method can be very slow.</note>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Fit Sphere</title>
       <para>
         <menuchoice>
@@ -240,7 +240,6 @@
         center position) and initial fit values can be preset before fitting.
         Marquardt-Levenberg fitting routine is used to calculate the result.
       </para>
-    </section>
-   </section>
-</section>
-
+    </sect3>
+  </sect2>
+</sect1>

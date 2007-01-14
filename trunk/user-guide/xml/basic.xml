@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-basic">
+<sect1 id="features-basic">
   <title>Basic Operations</title>
   <para>
     Basic geometrical operations are the core of any data processing program.
@@ -11,7 +11,7 @@
     algorithms behind these functions will be described and the list of
     available modules will be presented.
   </para>
-  <section>
+  <sect2>
     <title>Interpolation</title>
     <para>
       A large number of the morphological operations in Gwyddion are
@@ -166,8 +166,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Basic 2D Data Operation Modules</title>
     <para>
       Within basic modules it is possible to perform the following
@@ -260,8 +260,8 @@
         <guimenuitem>Calibrate</guimenuitem>
       </menuchoice>.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Reading Values</title>
     <para>
       The simpliest method of reading values is to place the mouse cursor
@@ -269,7 +269,7 @@
       value is then displayed in the statusbar.  This method works both with
       data windows and graph windows.
     </para>
-    <section id="read-value">
+    <sect3 id="read-value">
       <title>
         Read Value Tool
         <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
@@ -285,8 +285,8 @@
         the local facet. <guilabel>Averaging radius</guilabel> again
         determines the radius of the area to use for the plane fit.
       </para>
-    </section>
-    <section id="inclinations-coordinates">
+    </sect3>
+    <sect3 id="inclinations-coordinates">
       <title>Inclinations</title>
       <para>
         In all Gwyddion tools facet and plane inclinations are displayed as
@@ -317,8 +317,8 @@
           </imageobject>
         </mediaobject>
       </figure>
-    </section>
-    <section id="distance">
+    </sect3>
+    <sect3 id="distance">
       <title>
         Distance Tool
         <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
@@ -343,10 +343,10 @@
           </imageobject>
         </mediaobject>
       </figure>
-    </section>
-  </section>
+    </sect3>
+  </sect2>
   <!-- FIXME: Does it belong here? -->
-  <section id="profile">
+  <sect2 id="profile">
     <title>
       Profile Extraction
       <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>
@@ -376,13 +376,13 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>References</title>
     <para>
       [1] P. Thévenaz, T. Blu, M. Unser: Interpolation revisited.
       IEEE Transactions on medical imaging, Volume 10, Number 7, July 2000,
       739
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>

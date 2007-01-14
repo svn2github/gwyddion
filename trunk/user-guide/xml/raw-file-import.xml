@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="raw-file-import">
+<sect1 id="raw-file-import">
   <title>Raw Data File Import</title>
   <para>
     Both raw ASCII and binary data files and files in unsupported formats
@@ -14,7 +14,7 @@
     option <guilabel>Automatically offer raw data import of unknown
       files</guilabel>.
   </para>
-  <section>
+  <sect2>
     <title>Information</title>
     <para>
       Its first tab, <guilabel>Information</guilabel>, allows to set basic
@@ -66,8 +66,8 @@
         </varlistentry>
       </variablelist>
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Data Format</title>
     <para>
       On the second tab, <guilabel>Data Format</guilabel>, particular data
@@ -240,8 +240,8 @@
         </varlistentry>
       </variablelist>
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Presets</title>
     <para>
       Import settings can be saved as presets that allow to easily import
@@ -256,8 +256,8 @@
       and <guibutton>Load</guibutton> replaced current import setting with
       selected preset.
     </para>
-  </section>
-  <section id="pixmap-file-import">
+  </sect2>
+  <sect2 id="pixmap-file-import">
     <title>Import from Graphics Formats</title>
     <para>
       Importing data from image formats such as PNG, TIFF, JPEG or BMP is
@@ -269,5 +269,5 @@
       Note the physical dimensions suggested there are not obtained from
       the file, they are simply the last values used.
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>

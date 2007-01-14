@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-fractal">
+<sect1 id="features-fractal">
   <title>Fractal Analysis</title>
   <para>
     In practice objects exhibiting random properties are encountered. It is
@@ -123,7 +123,7 @@
     are also used in Fractal Correction module and Fractal Correction option
     of Remove Spots tool.
   </para>
-  <section>
+  <sect2>
   <title>References</title>
   <para>
     [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal character of
@@ -151,6 +151,6 @@
     [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
     fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
   </para>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

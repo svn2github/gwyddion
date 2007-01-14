@@ -4,7 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <chapter id="introduction">
   <title>Introduction</title>
-  <section id="motivation">
+  <sect2 id="motivation">
     <title>Motivation</title>
     <para>
       <ulink url="http://gwyddion.net/"><application>Gwyddion</application></ulink>
@@ -40,8 +40,8 @@
       institutions will participate on developement. Project is open for
       anyone. Welcome…
     </para>
-  </section>
-  <section id="licensing">
+  </sect2>
+  <sect2 id="licensing">
     <title>Licensing</title>
     <para>
       Gwyddion is covered by
@@ -73,5 +73,5 @@
       developers that their code, here given to public, cannot be copied and
       used for commercial purposes.
     </para>
-  </section>
+  </sect2>
 </chapter>

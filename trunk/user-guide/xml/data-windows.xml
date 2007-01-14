@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="data-windows">
+<sect1 id="data-windows">
   <title>Data Window</title>
   <para>
     Data window is used for 2D data presentation. It is the main
@@ -55,4 +55,4 @@
       </imageobject>
     </mediaobject>
   </figure>
-</section>
+</sect1>

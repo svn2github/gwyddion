@@ -2,9 +2,9 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-filters">
+<sect1 id="features-filters">
   <title>Filters and Presentations</title>
-  <section id="basic-filters">
+  <sect2 id="basic-filters">
     <title>
       Basic Filters Tool
       <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
@@ -83,8 +83,8 @@
       <link linkend="remove-data-under-mask">Remove Data Under Mask</link> module.
       For details see the <link linkend="features-edit">Data Edit</link> section.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Presentations</title>
     <para>
       <menuchoice>
@@ -104,7 +104,7 @@
     <para>
       Currently, the following presentation filters are implemented in Gwyddion:
     </para>
-    <section>
+    <sect3>
       <title>Shading</title>
       <para>
         <menuchoice>
@@ -119,8 +119,8 @@
         mix the shaded and original images for presentational purposes (the
         resulting image is meaningless from the physical point of view).
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Gradient Detection Presentations</title>
       <para>
         <menuchoice>
@@ -145,8 +145,8 @@
           </mediaobject>
         </informalequation>
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
      <title>Edge Detection Presentations</title>
       <para>
         <menuchoice>
@@ -217,8 +217,8 @@
           </listitem>
         </varlistentry>
       </variablelist>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
     <title>Local Contrast</title>
       <para>
         <menuchoice>
@@ -233,8 +233,8 @@
         range, or variation, around each data sample and stretching it to equalize
         this variation over all data.
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
     <title>Logscale</title>
       <para>
         <menuchoice>
@@ -246,11 +246,11 @@
       <para>
 	Logarithmic scale is used for false colors data presentation.
       </para>
-    </section>
+    </sect3>
     <para>
       Moreover, there are the following presentation manipulation commands in presentations menu:
     </para>
-    <section>
+    <sect3>
       <title>Attach Presentation</title>
       <para>
         <menuchoice>
@@ -265,8 +265,8 @@
 	while evaluating anything from the data as all the computed values are evaluated
         from the data (not from the presentation, even if it looks like data).
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Remove Presentation</title>
       <para>
         <menuchoice>
@@ -278,8 +278,8 @@
       <para>
 	Removes presentation from the actual data window.
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Extract Presentation</title>
       <para>
         <menuchoice>
@@ -293,7 +293,7 @@
 	being one channel in the Gwyddion native file format (container). In this way we
         can get presentation data for further processing.
       </para>
-    </section>
+    </sect3>
     <figure>
       <title>
         Presentation examples: (a) Original data, (b) Shading, (c) vertical Prewitt
@@ -306,6 +306,6 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

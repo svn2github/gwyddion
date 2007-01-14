@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-grains">
+<sect1 id="features-grains">
   <title>Grain Analysis</title>
   <para>
     There are several grain-related algorithms implemented in Gwyddion. First
@@ -30,7 +30,7 @@
     false grains occurred by noise or some dust particles, for example. You can
     use also interactive grain removal tool for doing this manually.
   </para>
-  <section>
+  <sect2>
     <title>Watershed</title>
     <para>
       For more complicated data structures the effectiveness of thresholding
@@ -117,8 +117,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Statistics</title>
     <para>
       Grain properties can be studied using several tools. The simplest of them
@@ -344,8 +344,8 @@
       of the quantities in the dialog; all values are written in base SI units,
       as is usual in <application>Gwyddion</application>.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>References</title>
     <para>
       [1] <ulink url="http://klapetek.cz/download.html">
@@ -353,7 +353,7 @@
         Acta Physica Slovaca, 3 (223-230), 2003
       </ulink>
     </para>
-  </section>
+  </sect2>
   <!--  Doesn't work well, needs serious formatting improvements.
   <bibliography>
     <biblioentry>
@@ -378,5 +378,5 @@
     </biblioentry>
   </bibliography>
   -->
-</section>
+</sect1>
 

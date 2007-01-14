@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="managing-files">
+<sect1 id="managing-files">
   <title>Managing Files</title>
   <para>
     Gwyddion uses its internal data format (.gwy) to store data. The main
@@ -351,7 +351,7 @@
       </tbody>
     </tgroup>
   </table>
-  <section id="file-loading">
+  <sect2 id="file-loading">
     <title>File Loading</title>
     <para>
       By default, Gwyddion detects the file format automatically based on
@@ -394,8 +394,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section id="file-saving">
+  </sect2>
+  <sect2 id="file-saving">
     <title>File Saving</title>
     <para>
       Much of the previous section applies to file saving too.  One of the
@@ -416,8 +416,8 @@
       and presentations).  Therefore it does <emphasis>not</emphasis>
       change the file name of the current file to the just saved file name.
     </para>
-  </section>
-  <section id="document-history">
+  </sect2>
+  <sect2 id="document-history">
     <title>Document History</title>
     <para>
       The history of recently opened files can be accessed with
@@ -491,6 +491,6 @@
       distinguish the case themselves it is recommended to keep the setting
       on case insensitive.
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

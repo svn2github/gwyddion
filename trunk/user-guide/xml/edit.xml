@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
+<sect1 id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title id="features-edit.title">Data Edit and Correction</title>
   <para>
     There are several modules that enable direct or indirect editing of the
@@ -12,7 +12,7 @@
     defects in an image. The functions below remove <quote>bad</quote> data
     from an image, and then fill it in using an interpolation algorithm.
   </para>
-  <section id="remove-spots">
+  <sect2 id="remove-spots">
     <title>
       Remove Spots Tool
       <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
@@ -62,8 +62,8 @@
       </menuchoice>.
       </note>
     </para>
-  </section>
-  <section id="remove-scars">
+  </sect2>
+  <sect2 id="remove-scars">
     <title>
       Remove Scars
       <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>
@@ -84,8 +84,8 @@
       is run with the last settings used in <link linkend="mark-scars">Mark
         Scars</link>.
     </para>
-  </section>
-  <section id="mark-scars">
+  </sect2>
+  <sect2 id="mark-scars">
     <title>Mark Scars</title>
     <para>
       <menuchoice>
@@ -132,8 +132,8 @@
       After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
       to the image. Other modules or tools can then be run to edit this data.
     </para>
-  </section>
-  <section id="remove-data-under-mask">
+  </sect2>
+  <sect2 id="remove-data-under-mask">
     <title>Remove Data Under Mask</title>
     <para>
       <menuchoice>
@@ -147,8 +147,8 @@
       equation. Unmasked data are used as the virtual source and information in
       the masked regions is iteratively computed.
     </para>
-  </section>
-  <section id="fractal-correction">
+  </sect2>
+  <sect2 id="fractal-correction">
     <title>Fractal Correction</title>
     <para>
       <menuchoice>
@@ -172,8 +172,8 @@
       Running this module on data that do not have fractal properties can cause
       really unrealistic results and is strictly not recommended.
     </warning>
-  </section>
-  <section id="mask-of-outliers">
+  </sect2>
+  <sect2 id="mask-of-outliers">
     <title>Mask of Outliers</title>
     <para>
       <menuchoice>
@@ -187,8 +187,8 @@
       criterion. All the values above and below this confidence interval
       are marked in mask and can be edited or processed by other modules afterwards.
     </para>
-  </section>
-  <section id="features-line-correction">
+  </sect2>
+  <sect2 id="features-line-correction">
     <title>
       Line Correction
       <guiicon><inlinegraphic fileref="gwy_line_level-24.png"/></guiicon>
@@ -241,6 +241,6 @@
       a row.  This function is rather experimental and the exact way it
       works can be subject of futher changes.
     </para>
-  </section>
+  </sect2>
   <xi:include href="unrotate.xml"/>
-</section>
+</sect1>

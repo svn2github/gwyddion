@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="main-window">
+<sect1 id="main-window">
   <title>Main Window</title>
   <para>
     The main window is one of the two Gwyddion windows that appear after
@@ -95,4 +95,4 @@
       </imageobject>
     </mediaobject>
   </figure>
-</section>
+</sect1>

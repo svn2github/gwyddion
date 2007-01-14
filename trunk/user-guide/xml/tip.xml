@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-tip">
+<sect1 id="features-tip">
   <title>Tip Convolution Artefacts</title>
   <para>
     Tip convolution artefact is one of the most important error sources in
@@ -26,7 +26,7 @@
     algorithms of dilation and/or erosion, respectively. These algorithms
     were published by Villarubia (see Ref. [1]).
   </para>
-  <section id="features-tip-get">
+  <sect2 id="features-tip-get">
     <title>Obtaining the Tip Geometry</title>
     <para>
       For studying the tip influence on the data we need to know tip geometry
@@ -92,8 +92,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section id="features-tip-use">
+  </sect2>
+  <sect2 id="features-tip-use">
     <title>Tip Convolution and Surface Reconstruction</title>
     <para>
       When we know tip geometry, we can use tip convolution (dilation)
@@ -170,8 +170,8 @@
         <guimenuitem>Certainty Map</guimenuitem>
       </menuchoice>).
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>References</title>
     <para>
       [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
@@ -179,6 +179,6 @@
     <para>
       [2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

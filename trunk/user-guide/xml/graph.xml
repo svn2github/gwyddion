@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-graph">
+<sect1 id="features-graph">
   <title>Graph Processing</title>
   <para>
     Many of the Gwyddion data processing modules produce graph as a output.
@@ -16,7 +16,7 @@
   <para>
     In this section the graph modules present in Gwyddion are shortly presented
   </para>
-  <section>
+  <sect2>
     <title>Basic Operations</title>
     <para>
       First of all there are zooming and data reading modules in Graph menu.
@@ -34,8 +34,8 @@
         graph and prints out their distances and angles between them.
       </listitem>
     </itemizedlist>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Fit Graph</title>
     <para>
       This module is designed namely for fitting the statistical function by
@@ -61,8 +61,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Critical Dimension</title>
     <para>
       Critical dimension module can be used to fit some
@@ -82,6 +82,6 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

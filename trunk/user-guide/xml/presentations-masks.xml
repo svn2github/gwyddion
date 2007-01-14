@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="presentations-masks">
+<sect1 id="presentations-masks">
   <title>Presentations and Masks</title>
   <para>
     Presentations can be used to show the height field in other way than as
@@ -67,4 +67,4 @@
       </imageobject>
     </mediaobject>
   </figure>
-</section>
+</sect1>

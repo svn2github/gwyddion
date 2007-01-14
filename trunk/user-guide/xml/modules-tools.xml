@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="modules-tools">
+<sect1 id="modules-tools">
   <title>Modules and Tools</title>
   <para>
     Modules are responsible for most of the Gwyddion features. They mostly
@@ -203,4 +203,4 @@
     <guibutton>Hide</guibutton> button, by pressing <keycap>Esc</keycap>
     or clicking the tool's button in the toolbox again.
   </para>
-</section>
+</sect1>

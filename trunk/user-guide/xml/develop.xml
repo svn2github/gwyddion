@@ -16,7 +16,7 @@
     don't have to limit yourself to modules or plug-ins of course, but they
     should be easier to start with.
   </para>
-  <section>
+  <sect2>
     <title>API References</title>
     <para>
       There are many functions that can help you while developing your module.
@@ -24,8 +24,8 @@
       <ulink url="http://gwyddion.net/documentation/">Documentation
         section</ulink> of the project web.
     </para>
-  </section>
-  <section id="bug-reports">
+  </sect2>
+  <sect2 id="bug-reports">
     <title>Bug reports</title>
     <para>
       We will be very happy if you send as bug reports if you find errors in
@@ -39,5 +39,5 @@
       The preferred bug reporting method is to send an e-mail to
       <email>klapetek@gwyddion.net</email>.
     </para>
-  </section>
+  </sect2>
 </chapter>

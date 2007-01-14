@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
 'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="gwyfile-format">
+<sect1 id="gwyfile-format">
   <title>Format of Gwyddion Files</title>
   <para>
     <application>Gwyddion</application> native data files consists of
@@ -17,14 +17,14 @@
     First of all, we will describe physical file structure without regard to
     possible interpretation of contained data.
   </para>
-  <section>
+  <sect2>
     <title>Byte Order</title>
     <para>
       All data is stored in little-endian (also known as LSB or Intel) byte
       order.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>File Header</title>
     <para>
       The file header consists of four bytes (magic number) with the
@@ -35,16 +35,16 @@
       header <literal>GWYO</literal> also exists.  It will not be discussed
       here.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>File Data</title>
     <para>
       The rest of the file consists of a serialized <type>GwyContainer</type>
       object that contains all the data.  It is stored exactly the same way
       as any other object, that is as described in the next section.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Object Layout</title>
     <para>
       An object consists of three parts (in the following order):
@@ -64,8 +64,8 @@
         </listitem>
       </itemizedlist>
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Components</title>
     <para>
       Each component consits of three parts (in the following order):
@@ -82,8 +82,8 @@
         </listitem>
       </itemizedlist>
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Data Types</title>
     <para>
       Available atomic data types are listed in following table:
@@ -196,12 +196,12 @@
         </tbody>
       </tgroup>
     </informaltable>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Particular Objects</title>
     <para>
       To be written.
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

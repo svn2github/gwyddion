@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="keyboard-shortcuts">
+<sect1 id="keyboard-shortcuts">
   <title>Keyboard Shortcuts</title>
   <table frame='topbot' id="table-keyboard-shortcuts">
     <title>Keyboard shortcuts</title>
@@ -180,4 +180,4 @@
         </tbody>
       </tgroup>
     </table>
-</section>
+</sect1>

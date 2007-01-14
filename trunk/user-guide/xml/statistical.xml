@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
+<sect1 id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
   <!--TODO: Clean up line breaks. The equation sections are esp. messy -->
 
   <title>Statistical Analysis</title>
@@ -41,7 +41,7 @@
     along the <phrase role="math">x</phrase> profiles as these are less affected
     by low frequency noise and thermal drift of the sample.
   </para>
-  <section id="stat-quantities">
+  <sect2 id="stat-quantities">
     <title>
       Statistical Quantities Tool
       <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
@@ -150,8 +150,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section id="sfunctions">
+  </sect2>
+  <sect2 id="sfunctions">
     <title>
       Statistical Functions Tool
       <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
@@ -176,7 +176,7 @@
       tool, this tool evaluates for the entire image by default, but you can
       select a sub-region to analyze if you wish.
     </tip>
-    <section>
+    <sect3>
       <title>Height and Angle Distribution Functions</title>
       <para>
         The simplest statistical functions are the height and slope
@@ -187,8 +187,8 @@
         abscissa in <quote>angle distribution</quote> is the tangent of the
         angle, not the angle itself.
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>First-order vs. Second-order Quantities</title>
       <para>
         The height and slope distribution quantities belong to the first-order
@@ -201,8 +201,8 @@
         function, and the power spectral density function.
         A description of each of these follows:
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Autocorrelation Function</title>
       <para>
         The autocorrelation function is given by
@@ -294,8 +294,8 @@
         <!--TODO: These artical citations are not correct. -->
         usually assume that the exponential form is closer to the reality.
       </note>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Height-Height Correlation Function</title>
       <para>
         The difference between the height-height correlation function and the
@@ -367,8 +367,8 @@
           </imageobject>
         </mediaobject>
       </figure>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Power Spectral Density Function</title>
       <para>
         The two-dimensional power spectral density function can be written in
@@ -463,8 +463,8 @@
           <guimenuitem><link linkend=""><!--TODO: Fix Link-->Fit Graph</link></guimenuitem>
         </menuchoice>.
       </tip>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Minkowski Functionals</title>
       <para>
         The Minkowski functionals are used to describe global geometric characteristics
@@ -502,9 +502,9 @@
         <phrase role="math">χ</phrase>(<phrase role="math">ϑ</phrase>)
         are what is actually plotted.
       </para>
-    </section>
-  </section>
-  <section id="line-stats">
+    </sect3>
+  </sect2>
+  <sect2 id="line-stats">
     <title>
       Row/Column Statistics Tool
       <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
@@ -545,8 +545,8 @@
         </informalequation>
       </listitem>
     </orderedlist>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Two-Dimensional Slope Statistics</title>
     <para>
       Several functions in
@@ -598,6 +598,6 @@
       is drawn.  The number of points on the circle is given by
       <guilabel>Number of steps</guilabel>.
     </para>
-  </section>
+  </sect2>
   <xi:include href="facet-analysis.xml"/>
-</section>
+</sect1>

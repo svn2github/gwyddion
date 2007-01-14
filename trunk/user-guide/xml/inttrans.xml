@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-inttrans">
+<sect1 id="features-inttrans">
   <title>Integral Transforms</title>
   <para>
     Currently, two different integral transforms can be used within Gwyddion
@@ -15,7 +15,7 @@
       <guisubmenu>Integral Transforms</guisubmenu>
     </menuchoice>.
   </para>
-  <section>
+  <sect2>
     <title>Fourier Transform</title>
     <para>
       Fourier transform can be accessed within FFT module which implements Fast Fourier transform.
@@ -93,8 +93,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Wavelet Transform</title>
     <para>
       The wavelet transform is a transform similar to the Fourier transform (or much more to the windowed Fourier transform)
@@ -147,7 +147,7 @@
       </menuchoice>
       menu.
     </para>
-    <section>
+    <sect3>
       <title>Discrete Wavelet Transform</title>
       <para>
         The discrete wavelet transform (DWT) is an implementation of the wavelet transform using a discrete set of the wavelet scales
@@ -294,8 +294,8 @@
       <para>
         DWT denoising can be accessed within the DWT denoise module.
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>Continuous Wavelet Transform</title>
       <para>
         Continuous wavelet transform (CWT) is an implementaion of the wavelet transform using an arbitrary scales and almost arbitrary
@@ -323,9 +323,9 @@
       <para>
         Within Gwyddion, several 2D wavelets are implemented within CWT module.
       </para>
-    </section>
-  </section>
-  <section>
+    </sect3>
+  </sect2>
+  <sect2>
     <title>References</title>
     <para>
       [1] A. Bultheel: Bull. Belg. Math. Soc.: (1995)  2
@@ -336,6 +336,6 @@
     <para>
       [3] S. G. Chang, B. Yu, M. Vetterli: IEEE Trans. Image Processing, (2000) 9 p. 1522
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>
 

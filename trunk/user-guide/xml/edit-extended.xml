@@ -2,9 +2,9 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="edit-extended" xmlns:xi="http://www.w3.org/2001/XInclude">
+<sect1 id="edit-extended" xmlns:xi="http://www.w3.org/2001/XInclude">
   <!-- TODO: This needs to go somewhere.
-  <section>
+  <sect2>
     <title>FFT Filters</title>
     <para>
       Sometimes it is useful to be able to filter an image in the frequency
@@ -23,19 +23,19 @@
       <classname>1D FFT Filter</classname> and the
       <classname>2D FFT Filter</classname>.
     </para>
-    <section>
+    <sect3>
       <title>1D FFT Filter</title>
       <para>
         <emphasis>TODO: Info about 1D FFT Filter goes here</emphasis>
       </para>
-    </section>
-    <section>
+    </sect3>
+    <sect3>
       <title>2D FFT Filter</title>
       <para>
         <emphasis>TODO: Info about 2D FFT Filter goes here (chris will do)</emphasis>
       </para>
-    </section>
-  </section> -->
+    </sect3>
+  </sect2> -->
 
   <title>Extended Data Edit</title>
   <para>
@@ -47,7 +47,7 @@
      methods that lead to global errors, like low frequencies modulated on
      the data or data drift in the slow scanning axis.
   </para>
-  <section>
+  <sect2>
     <title id="drift-compensation">Drift Compensation</title>
     <para>
       <menuchoice>
@@ -106,8 +106,8 @@
         </imageobject>
       </mediaobject>
     </figure>
-  </section>
-  <section id="fft-filter-1d">
+  </sect2>
+  <sect2 id="fft-filter-1d">
     <title>1D FFT Filter</title>
     <para>
       <menuchoice>
@@ -132,8 +132,8 @@
       inverted easily using the Filter type choice. 1D FFT filter can be used
       both for horizontal and vertical direction.
     </para>
-  </section>
-  <section id="fft-filter-2d">
+  </sect2>
+  <sect2 id="fft-filter-2d">
     <title>2D FFT Filter</title>
     <para>
       <menuchoice>
@@ -144,5 +144,5 @@
     </para>
     <para>
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>

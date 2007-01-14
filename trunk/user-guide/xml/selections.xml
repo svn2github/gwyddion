@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="selections">
+<sect1 id="selections">
   <title>Working with Selections</title>
   <para>
     All interactive <link linkend="modules-tools">tools</link> and some other processing methods allow to select
@@ -42,4 +42,4 @@
     form a specific subset.  E.g., pressing Shift restricts rectanglular selections to perfect squares, or it
     restricts line directions to multiples of 15 ° in line selections.
   </para>
-</section>
+</sect1>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="metadata">
+<sect1 id="metadata">
   <title>Metadata</title>
   <para>
     Auxiliary information and values describing certain data and the
@@ -38,4 +38,4 @@
       </imageobject>
     </mediaobject>
   </figure>
-</section>
+</sect1>

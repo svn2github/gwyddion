@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="expression-syntax">
+<sect1 id="expression-syntax">
   <title>Expressions</title>
   <para>
     Expressions used in Data Arithmetic module and in graph function
@@ -262,4 +262,4 @@
     </itemizedlist>
     If in doubt, write out expressions in full form.
   </para>
-</section>
+</sect1>

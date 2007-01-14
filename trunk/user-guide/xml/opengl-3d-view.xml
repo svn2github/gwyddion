@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="opengl-3d-view">
+<sect1 id="opengl-3d-view">
   <title>OpenGL 3D Data Display</title>
   <para>
     Three-dimensional OpenGL display of current data window can be invoked
@@ -26,7 +26,7 @@
       </imageobject>
     </mediaobject>
   </figure>
-  <section>
+  <sect2>
     <title>Basic Controls</title>
     <para>
       Basic 3D window contains interaction mode controls at the right side of
@@ -55,8 +55,8 @@
       </itemizedlist>
       The basic controls also include an image export button.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Full Controls</title>
     <para>
       In expanded controls the mode buttons are located in top row, however
@@ -83,5 +83,5 @@
         </listitem>
       </itemizedlist>
     </para>
-  </section>
-</section>
+  </sect2>
+</sect1>

@@ -2,12 +2,12 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<section id="features-multidata">
+<sect1 id="features-multidata">
   <title>Multiple Data</title>
   <para>
     To be written.
   </para>
-  <section id="data-arithmetic">
+  <sect2 id="data-arithmetic">
     <title>Arithmetic</title>
     <para>
       <menuchoice>
@@ -54,8 +54,8 @@
       immediately evaluated, expressions referring to data fields are used to
       calculate a new data field.
     </para>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Detail Immersion</title>
     <para>
       <menuchoice>
@@ -129,8 +129,8 @@
         </listitem>
       </varlistentry>
     </variablelist>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Merging</title>
     <para>
       <menuchoice>
@@ -195,12 +195,12 @@
         </listitem>
       </varlistentry>
     </variablelist>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Cross-Correlation</title>
-  </section>
-  <section>
+  </sect2>
+  <sect2>
     <title>Mask by Correlation</title>
-  </section>
-</section>
+  </sect2>
+</sect1>
 
