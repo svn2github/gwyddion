@@ -4,27 +4,32 @@
 shopt -s nullglob
 set -e
 
+# Check wheter we are called from the right dir
+test -f gtk-doc.xsl
+test -f fixme.pl
+test -f fixme.xsl
+
 version="$1"
-basedir=$HOME/Projects/Gwyddion
-srcdir=$basedir/devel-docs
+srcdir=$(pwd)
+docbase=${docbase:-$HOME/Projects/Gwyddion/gwyddion/devel-docs}
 libs="libgwyddion libgwyprocess libgwydraw libgwydgets libgwymodule libgwyapp"
 
-cd $srcdir
 rm -f .releaseme
 
 xrefdirs=$(echo $libs | sed 's#[^ ]\+#--extra-dir=../\0/xhtml#g')
 
-pushd() {
+function pushd() {
   builtin pushd "$@" >/dev/null
 }
 
-popd() {
+function popd() {
   builtin popd "$@" >/dev/null
 }
 
-setup() {
+# Make symlinks to project's documentation xml dirs (i.e. DocBook sources)
+function setup() {
   local name=$1
-  local xmldir=$basedir/gwyddion/devel-docs/$name
+  local xmldir=$docbase/$name
   local driverfile=$name-docs.sgml
   local x
 
@@ -40,7 +45,8 @@ setup() {
   popd
 }
 
-build() {
+# Compile DocBook to XHTML
+function build() {
   local name=$1
   local driverfile=$name-docs.sgml
 
@@ -55,7 +61,11 @@ build() {
   popd
 }
 
-fix() {
+# Fix cross-references with gtkdoc-fixxref,
+# fix cross-references again to absolute WWW URLs,
+# and do things that is easier to do with another processing stage than
+# directly in gtk-doc.xsl
+function fix() {
   local name=$1
   local x y
 
@@ -73,9 +83,10 @@ fix() {
   popd
 }
 
-finalize() {
+# Shuffle things to gwyddion.net layout
+function finalize() {
   local name=$1
-  local xmldir=$basedir/gwyddion/devel-docs/$name
+  local xmldir=$docbase/$name
   local x
 
   mv $name $name.tmp
