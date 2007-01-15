@@ -340,7 +340,7 @@ make install</userinput></literallayout>
                 for libTIFF in <filename>/usr/local</filename> one can do
                 <userinput>CFLAGS=-I/usr/local/include; export CFLAGS</userinput>
                 and
-                <userinput>LDFLAGS=-I/usr/local/lib; export LDFLAGS</userinput>.
+                <userinput>LDFLAGS=-L/usr/local/lib; export LDFLAGS</userinput>.
               </para>
             </listitem>
           </varlistentry>
