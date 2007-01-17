@@ -35,7 +35,7 @@
   <!-- Remove unwanted spans -->
   <xsl:template match="span">
     <xsl:choose>
-      <xsl:when test="@id or @class='gtkdoc-since'">
+      <xsl:when test="@id or @class='gtkdoc-since' or @class='math'">
         <xsl:copy>
           <xsl:apply-templates select="node()|@class|@id"/>
         </xsl:copy>

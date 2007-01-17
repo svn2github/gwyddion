@@ -30,8 +30,7 @@
        then rename -->
   <xsl:param name="html.ext" select="'.html'"/>
 
-  <!-- use index filtering (if available) -->
-  <xsl:param name="index.on.role" select="1"/>
+  <xsl:param name="phrase.propagates.style" select="1"/>
 
   <xsl:param name="shade.verbatim" select="0"/>
 
