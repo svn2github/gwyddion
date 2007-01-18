@@ -233,7 +233,7 @@ Get a newer version at http://docbook.sourceforge.net/projects/xsl/
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    <xsl:element name="h{$hlevel}" namespace="http://www.w3.org/1999/xhtml">
+    <xsl:element name="h{$hlevel}">
       <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
       <xsl:if test="$allow-anchors != 0">
         <xsl:call-template name="anchor">
@@ -257,7 +257,6 @@ Get a newer version at http://docbook.sourceforge.net/projects/xsl/
     <xsl:param name="next" select="/foo"/>
     <xsl:variable name="home" select="/*[1]"/>
     <xsl:variable name="up" select="parent::*"/>
-    <xsl:variable name="sections" select="./refsect1[@id]"/>
 
     <xsl:if test="$home != .">
       <div class="navigation"><table summary="Navigation"><tr>
