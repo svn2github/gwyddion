@@ -2,7 +2,7 @@
 # $1: if equal to HEAD, generates one-level deeper PHP inclusions and adds
 #     (HEAD) to titles
 shopt -s nullglob
-set -e -x
+set -e
 
 # Check wheter we are called from the right dir
 test -f user-guide.xsl
