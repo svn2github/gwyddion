@@ -11,20 +11,22 @@
     some SPM tips imaged on the surface scan while sharp features are present
     on the surface.
   </para>
-  <para>
-    <figure>
-    <title>Images of ZnSe surface measured with four different SPM tips (more or less broken ones).</title>
-      <mediaobject>
-        <imageobject>
-          <imagedata width="600" fileref="alltips.png" format="PNG"/>
-        </imageobject>
-      </mediaobject>
-    </figure>
-  </para>
+  <figure id="fig-alltips">
+    <title>
+      Images of ZnSe surface measured with four different SPM tips
+      (more or less broken ones).
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata width="600" fileref="alltips.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
   <para>
     We can fortunately simulate and/or correct the tip efects using
     algorithms of dilation and/or erosion, respectively. These algorithms
-    were published by Villarubia (see Ref. [1]).
+    were published by Villarubia
+    (see [<link linkend="features-tip-ref-1">1</link>]).
   </para>
   <sect2 id="features-tip-get">
     <title>Obtaining the Tip Geometry</title>
@@ -85,7 +87,11 @@
       full tip estimation algorithm speed.
     </para>
     <figure>
-      <title>SPM tips obtained from data of Figure 1 using blind estimation algorithm.</title>
+      <title>
+        SPM tips obtained from data of
+        <link linkend="fig-alltips">previous figure</linkend>
+        using blind estimation algorithm.
+      </title>
       <mediaobject>
         <imageobject>
           <imagedata fileref="alltips2.png" format="PNG"/>
@@ -105,7 +111,8 @@
         <guimenuitem>Dilation</guimenuitem>
       </menuchoice>).
       This can be in particular useful when working with data being result of
-      some numerical modelling (see e. g. Ref. 2).
+      some numerical modelling
+      (see e.g. [<link linkend="features-tip-ref-2">2</link>]).
     </para>
     <figure>
       <title>
@@ -173,10 +180,10 @@
   </sect2>
   <sect2>
     <title>References</title>
-    <para>
+    <para id="features-tip-ref-1">
       [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
     </para>
-    <para>
+    <para id="features-tip-ref-2">
       [2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
     </para>
   </sect2>

@@ -16,7 +16,8 @@
     can be studied using atomic force microscopy (AFM). The results of the
     fractal analysis of the self-affine random surfaces using AFM are often
     used to classify these surfaces prepared by various technological
-    procedures [1-4].
+    procedures
+    [<link linkend="features-fractal-ref-1">1</link>,<link linkend="features-fractal-ref-2">2</link>,<link linkend="features-fractal-ref-3">3</link>,<link linkend="features-fractal-ref-4">4</link>].
   </para>
   <para>
     Within Gwyddion, there are different methods of fractal analysis
@@ -29,7 +30,9 @@
   </para>
   <orderedlist>
     <listitem>
-      Cube counting method [1,2] is derived directly from a definition of
+      Cube counting method
+      [<link linkend="features-fractal-ref-1">1</link>,<link linkend="features-fractal-ref-2">2</link>]
+      is derived directly from a definition of
       box-counting fractal dimension. The algorithm is based on the following
       steps: a cubic lattice with lattice constant l is superimposed
       on the <phrase role="math">z</phrase>-expanded surface.
@@ -49,7 +52,8 @@
       <phrase role="math">D<subscript>f</subscript></phrase> directly.
     </listitem>
     <listitem>
-      Triangulation method [1] is very similar to cube counting method and is
+      Triangulation method [<link linkend="features-fractal-ref-1">1</link>]
+      is very similar to cube counting method and is
       also based directly on the box-counting fractal dimension definition. The
       method works as follows: A grid of unit dimension
       <phrase role="math">l</phrase> is placed on the surface. This defines
@@ -71,7 +75,9 @@
       <phrase role="math">D<subscript>f</subscript></phrase> − 2.
     </listitem>
     <listitem>
-      The variance method [3,4] is based on the scale dependence of the
+      The variance method
+      [<link linkend="features-fractal-ref-3">3</link>,<link linkend="features-fractal-ref-4">4</link>]
+      is based on the scale dependence of the
       variance of fractional Brownian motion. In practice, in the variance
       method one divides the full surface into equal-sized squared boxes, and
       the variance (power of RMS value of heights), is calculated for
@@ -125,29 +131,29 @@
   </para>
   <sect2>
   <title>References</title>
-  <para>
+  <para id="features-fractal-ref-1">
     [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal character of
     cold-deposited silver films determined by low-temperature scanning
     tunneling microscopy. Physical Review B, Volume 51, Number 16, 15 april
     1995, 51
   </para>
-  <para>
+  <para id="features-fractal-ref-2">
     [2] W. Zahn, A. Zösch: The dependance of fractal dimension on
     measuring conditions of scanning probe microscopy. Fresenius J Analen Chem
     (1999) 365: 168-172
   </para>
-  <para>
+  <para id="features-fractal-ref-3">
     [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken:
     Quantitative characerization of individual particle sutfaces by fractal
     analysis of scanning electron microscope images. Fresenius J Analen Chem
     (1994) 350: 440-447
   </para>
-  <para>
+  <para id="features-fractal-ref-3">
     [4] A. Mannelquist, N. Almquist, S. Fredriksson: Influence of tip geometry
     on fractal analysis of atomic force microscopy images. Appl. Phys.
     A 66,1998, 891-895
   </para>
-  <para>
+  <para id="features-fractal-ref-5">
     [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
     fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
   </para>

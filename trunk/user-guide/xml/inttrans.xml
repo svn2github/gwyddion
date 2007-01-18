@@ -160,7 +160,8 @@
     </orderedlist>
     <para>
       For more details on wavelet transorm see any of the thousands of
-      wavelet resources on the Web, or for example Ref. 1.
+      wavelet resources on the Web, or for example
+      [<link linkend="features-inttrans-ref-1">1</link>].
     </para>
     <para>
       Within Gwyddion data processing library, both these transforms are
@@ -300,8 +301,11 @@
         perform an inverse transform (with the same wavelet basis) we can
         obtain more or less denoised signal. There are several ways how to
         choose the coefficients that will be keeped. Within Gwyddion, the
-        universal thresholding, scale adaptive thresholding [2] and scale and
-        space adaptive thresholding [3] is implemented. For threshold
+        universal thresholding, scale adaptive thresholding
+        [<link linkend="features-inttrans-ref-2">2</link>] and scale and
+        space adaptive thresholding
+        [<link linkend="features-inttrans-ref-3">3</link>] is implemented.
+        For threshold
         determination within these methods we first determine the noise
         variance guess given by
       </para>
@@ -403,13 +407,13 @@
   </sect2>
   <sect2>
     <title>References</title>
-    <para>
-      [1] A. Bultheel: Bull. Belg. Math. Soc.: (1995)  2
+    <para id="features-inttrans-ref-1">
+      [1] A. Bultheel: Bull. Belg. Math. Soc.: (1995) 2
     </para>
-    <para>
+    <para id="features-inttrans-ref-2">
       [2] S. G. Chang, B. Yu, M. Vetterli: IEEE Trans. Image Processing, (2000) 9 p. 1532
     </para>
-    <para>
+    <para id="features-inttrans-ref-3">
       [3] S. G. Chang, B. Yu, M. Vetterli: IEEE Trans. Image Processing, (2000) 9 p. 1522
     </para>
   </sect2>

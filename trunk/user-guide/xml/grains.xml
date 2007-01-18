@@ -44,10 +44,12 @@
       of determining the grain positions can be understood as the problem of
       finding local extremes on the surface this algorithm can be used also for
       purposes of grain segmentation or marking. For convenience in the
-      following we will treat the data inverted in the <phrase
-        role="math">z</phrase> direction while describing the algorithm (i.e.
+      following we will treat the data inverted in the
+      <phrase role="math">z</phrase>
+      direction while describing the algorithm (i.e.
       the grain tops are forming local minima in the following text). We
-      applied two stages of the grain analysis (see Ref. [1]):
+      applied two stages of the grain analysis
+      (see [<link linkend="features-grains-ref-1">1</link>]):
     </para>
     <orderedlist>
       <listitem>
@@ -347,7 +349,7 @@
   </sect2>
   <sect2>
     <title>References</title>
-    <para>
+    <para id="features-grains-ref-1">
       [1] <ulink url="http://klapetek.cz/download.html">
         Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
         Acta Physica Slovaca, 3 (223-230), 2003

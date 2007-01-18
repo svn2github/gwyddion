@@ -20,7 +20,8 @@
       typically only a few hundred pixels in width and height), the
       interpolation method used can become critical for proper quantitative
       analysis of data properties. There are several interpolation methods
-      [1] in 1D and 2D implemented in Gwyddion and the user can choose which
+      [<link linkend="features-basic-ref-1">1</link>]
+      in 1D and 2D implemented in Gwyddion and the user can choose which
       method to use for most of the modules using interpolation.
     </para>
     <para>
@@ -131,7 +132,8 @@
         </informalequation>
         However, they are not used with directly function values as above,
         but with interpolation coefficients calculated from function
-        values [1].  Its polynomial degree is 3, regularity
+        values [<link linkend="features-basic-ref-1">1</link>].
+        Its polynomial degree is 3, regularity
         <phrase role="math">C</phrase><superscript>2</superscript>
         and order 4.
       </listitem>
@@ -148,7 +150,8 @@
         </informalequation>
         However, they are not used directly with function values as above,
         but with interpolation coefficients calculated from function
-        values [1].  Its polynomial degree is 3, regularity
+        values [<link linkend="features-basic-ref-1">1</link>].
+        Its polynomial degree is 3, regularity
         <phrase role="math">C</phrase><superscript>0</superscript>
         and order 4.
       </listitem>
@@ -379,7 +382,7 @@
   </sect2>
   <sect2>
     <title>References</title>
-    <para>
+    <para id="features-basic-ref-1">
       [1] P. Thévenaz, T. Blu, M. Unser: Interpolation revisited.
       IEEE Transactions on medical imaging, Volume 10, Number 7, July 2000,
       739
