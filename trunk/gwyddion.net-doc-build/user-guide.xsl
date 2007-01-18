@@ -39,12 +39,6 @@
 
   <xsl:template name="book.titlepage.separator"/>
 
-  <xsl:template name="book.titlepage.before.recto">
-    <a href="http://gwyddion.net/" title="Gwyddion web site">
-      <img style="float:right;border:none;" src="stacked3.png"/>
-    </a>
-  </xsl:template>
-
   <xsl:template match="book|article">
     <xsl:variable name="tooldver">
       <xsl:call-template name="version-greater-or-equal">
@@ -149,6 +143,9 @@ Get a newer version at http://docbook.sourceforge.net/projects/xsl/
     <h1>
       <xsl:value-of select="."/>
     </h1>
+    <a href="http://gwyddion.net/" title="Gwyddion web site">
+      <img style="float:right;border:none;" src="stacked3.png"/>
+    </a>
   </xsl:template>
 
   <xsl:template match="title" mode="chapter.titlepage.recto.mode">
@@ -171,6 +168,15 @@ Get a newer version at http://docbook.sourceforge.net/projects/xsl/
     <xsl:if test="(normalize-space($recto.content) != '') or ($recto.elements.count &gt; 0)">
       <xsl:copy-of select="$recto.content"/>
     </xsl:if>
+  </xsl:template>
+
+  <xsl:template match="author" mode="titlepage.mode">
+    <div class="{name(.)}">
+      <p class="{name(.)}"><xsl:call-template name="person.name"/></p>
+      <xsl:apply-templates mode="titlepage.mode" select="./contrib"/>
+      <xsl:apply-templates mode="titlepage.mode" select="./affiliation"/>
+      <xsl:apply-templates mode="titlepage.mode" select="./email"/>
+    </div>
   </xsl:template>
 
   <!-- ========================================================= -->
