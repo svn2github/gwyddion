@@ -75,7 +75,7 @@ function fix() {
   pushd xhtml
   for x in *.html; do
     y=$(echo "$x" | sed 's/html$/php/')
-    xsltproc $srcdir/fixme.xsl $x | $srcdir/fixme.pl $y $version >$y
+    xsltproc --nonet $srcdir/fixme.xsl $x | $srcdir/fixme.pl $y $version >$y
     rm -f $x
   done
   popd
