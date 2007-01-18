@@ -21,7 +21,7 @@
   <!-- Remove unwanted divs -->
   <xsl:template match="div">
     <xsl:choose>
-      <xsl:when test="@id or @class='variablelist' or @class='navigation' or @class='shortcuts'">
+      <xsl:when test="@id or @class='variablelist' or @class='navigation' or @class='informalequation'">
         <xsl:copy>
           <xsl:apply-templates select="node()|@class|@id"/>
         </xsl:copy>
