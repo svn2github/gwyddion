@@ -216,6 +216,16 @@
             </para>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>
+            <guilabel>Inclination</guilabel>
+          </term>
+          <listitem>
+            <para>
+              Visualizes the angle ϑ of local plane inclination.
+            </para>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </sect3>
     <sect3>
