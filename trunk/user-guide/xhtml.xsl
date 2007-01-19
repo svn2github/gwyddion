@@ -41,7 +41,7 @@
 
   <xsl:template name="book.titlepage.before.recto">
     <a href="http://gwyddion.net/" title="Gwyddion web site">
-      <img style="float:right;border:none;" src="stacked3.png"/>
+      <img style="margin-top:12px;float:right;border:none;" src="stacked3.png"/>
     </a>
   </xsl:template>
 
