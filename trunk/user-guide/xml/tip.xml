@@ -28,7 +28,7 @@
     were published by Villarubia
     (see [<link linkend="features-tip-ref-1">1</link>]).
   </para>
-  <sect2 id="features-tip-get">
+  <sect2>
     <title>Obtaining the Tip Geometry</title>
     <para>
       For studying the tip influence on the data we need to know tip geometry
@@ -52,8 +52,8 @@
         or other suitable samples
       </listitem>
     </orderedlist>
-    <para>
-      Within Gwyddion, we can use the firts and the last approach of the
+    <para id="tip-model">
+      Within Gwyddion, we can use the first and the last approach of the
       mentioned ones. Using tip modelling
       (<menuchoice>
         <guimenu>Data Process</guimenu>
@@ -62,8 +62,10 @@
       </menuchoice>)
       most of the tips with simple geometries can be simulated. This way of
       tip geometry specification can be very efficient namely when we need to
-      check only certainty map of perform tip convolution simulation. To
-      obtain more detailed (and more realistic) tip structure blind tip
+      check only certainty map of perform tip convolution simulation.
+    </para>
+    <para id="tip-blind-estimate">
+      To obtain more detailed (and more realistic) tip structure blind tip
       estimation algorithm can be used
       (<menuchoice>
         <guimenu>Data Process</guimenu><guisubmenu>Tip</guisubmenu>
@@ -99,9 +101,9 @@
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="features-tip-use">
+  <sect2>
     <title>Tip Convolution and Surface Reconstruction</title>
-    <para>
+    <para id="tip-convolution">
       When we know tip geometry, we can use tip convolution (dilation)
       algorithm to simulate data acquisition process. For doing this use
       Dilation module
@@ -125,7 +127,7 @@
         </imageobject>
       </mediaobject>
     </figure>
-    <para>
+    <para id="tip-surface-reconstruction">
       The opposite of the tip convolution is surface reconstruction (erosion)
       that can be used to correct partially the tip influence on image data.
       For doing this, use Surface Reconstruction module
@@ -148,7 +150,7 @@
         </imageobject>
       </mediaobject>
     </figure>
-    <para>
+    <para id="tip-certainty-map">
       As it can be seen, the most problematic parts of SPM image are data
       points, where tip did not touch the surface in a single point, mut in
       multiple points. There is a loss of information in these points.

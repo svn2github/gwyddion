@@ -35,7 +35,7 @@
       </listitem>
     </itemizedlist>
   </sect2>
-  <sect2>
+  <sect2 id="graph-fit">
     <title>Fit Graph</title>
     <para>
       This module is designed namely for fitting the statistical function by
@@ -62,7 +62,7 @@
       </mediaobject>
     </figure>
   </sect2>
-  <sect2>
+  <sect2 id="graph-critical-dimension">
     <title>Critical Dimension</title>
     <para>
       Critical dimension module can be used to fit some

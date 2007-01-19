@@ -50,6 +50,9 @@
             <imageobject>
               <imagedata fileref="eq-filters-dechecker.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Dechecker filter 5×5 coefficient matrix</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
       </listitem>
@@ -72,16 +75,17 @@
     <para>
       Moreover, there are more denoising functions in Gwyddion, for example
       DWT denoising and FFT filtering.
-      <!--TODO: Think about moving 1D,2D FFT Filters into the Integral Transforms menu-->
-      For details see the <link linkend="features-inttrans">Integral Transforms</link> section.
+      For details see section
+      <link linkend="edit-extended">Extended Data Edit</link>.
     </para>
     <para>
-      If you need to only suppress some values in the SPM data that are obviously wrong,
-      you can also try the
+      If you need to only suppress some values in the SPM data that are
+      obviously wrong, you can also try the
       <link linkend="mask-of-outliers">Mask of Outliers</link>
       module and the
-      <link linkend="remove-data-under-mask">Remove Data Under Mask</link> module.
-      For details see the <link linkend="features-edit">Data Edit</link> section.
+      <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+      module.
+      For details see section <link linkend="features-edit">Data Edit</link>.
     </para>
   </sect2>
   <sect2>
@@ -102,9 +106,10 @@
       window, and select <guimenuitem>Remove Presentation</guimenuitem>.
     </para>
     <para>
-      Currently, the following presentation filters are implemented in Gwyddion:
+      Currently, the following presentation filters are implemented in
+      Gwyddion:
     </para>
-    <sect3>
+    <sect3 id="shade">
       <title>Shading</title>
       <para>
         <menuchoice>
@@ -120,7 +125,7 @@
         resulting image is meaningless from the physical point of view).
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="gradient">
       <title>Gradient Detection Presentations</title>
       <para>
         <menuchoice>
@@ -146,7 +151,7 @@
         </informalequation>
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="edge">
      <title>Edge Detection Presentations</title>
       <para>
         <menuchoice>
@@ -228,7 +233,7 @@
         </varlistentry>
       </variablelist>
     </sect3>
-    <sect3>
+    <sect3 id="local-contrast">
     <title>Local Contrast</title>
       <para>
         <menuchoice>
@@ -239,12 +244,12 @@
       </para>
       <para>
         A method to visualize features in areas with low and high value
-        variation at the same time.  This is achieved by calculation of local value
-        range, or variation, around each data sample and stretching it to equalize
-        this variation over all data.
+        variation at the same time.  This is achieved by calculation of local
+        value range, or variation, around each data sample and stretching it to
+        equalize this variation over all data.
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="logscale">
     <title>Logscale</title>
       <para>
         <menuchoice>
@@ -254,11 +259,12 @@
         </menuchoice>
       </para>
       <para>
-	Logarithmic scale is used for false colors data presentation.
+        Logarithmic scale is used for false colors data presentation.
       </para>
     </sect3>
-    <para>
-      Moreover, there are the following presentation manipulation commands in presentations menu:
+    <para id="presentationops">
+      Moreover, there are the following presentation manipulation commands in
+      presentations menu:
     </para>
     <sect3>
       <title>Attach Presentation</title>
@@ -270,10 +276,11 @@
         </menuchoice>
       </para>
       <para>
-        Attaches other data (height or other physical quantity field) as a presentation
-	to the actual data. Note that this useful option can be particularly confusing
-	while evaluating anything from the data as all the computed values are evaluated
-        from the data (not from the presentation, even if it looks like data).
+        Attaches other data (height or other physical quantity field) as
+        a presentation to the actual data. Note that this useful option can be
+        particularly confusing while evaluating anything from the data as all
+        the computed values are evaluated from the data (not from the
+        presentation, even if it looks like data).
       </para>
     </sect3>
     <sect3>
@@ -286,7 +293,7 @@
         </menuchoice>
       </para>
       <para>
-	Removes presentation from the actual data window.
+        Removes presentation from the actual data window.
       </para>
     </sect3>
     <sect3>
@@ -299,21 +306,32 @@
         </menuchoice>
       </para>
       <para>
-	Extracts presentation from the actual data window making copy of the presentation
-	being one channel in the Gwyddion native file format (container). In this way we
-        can get presentation data for further processing.
+        Extracts presentation from the actual data window making copy of the
+        presentation as a new channel in the same file.  In this way one can
+        get presentation data for further processing.  Note however, the
+        extracted data have no absolute scale information (the range is
+        always [0, 1]) as presentation often help to visualize certain
+        features, but the produced values are hard or impossible to assign
+        any physical meaning to.
       </para>
     </sect3>
     <figure>
       <title>
-        Presentation examples: (a) Original data, (b) Shading, (c) vertical Prewitt
-        gradient, (d) Canny edge detection, (d) Local non-linearity edge detection,
+        Presentation examples:
+        (a) Original data,
+        (b) Shading,
+        (c) Vertical Prewitt gradient,
+        (d) Canny edge detection,
+        (e) Local non-linearity edge detection,
         (f) Local contrast improvement.
       </title>
       <mediaobject>
         <imageobject>
           <imagedata fileref="presentations.png" format="PNG"/>
         </imageobject>
+        <textobject>
+          <phrase>Illustration of selected presentation filters</phrase>
+        </textobject>
       </mediaobject>
     </figure>
   </sect2>

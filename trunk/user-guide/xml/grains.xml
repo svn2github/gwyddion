@@ -10,27 +10,29 @@
     curvature thresholding). These procedures can be very efficient namely
     within particle analysis (to mark particles located on flat surface).
   </para>
-  <para>
+  <para id="grain-threshold">
     Thresholding methods can be accessed within Gwyddion as
     <menuchoice>
-      <guimenu>Data Process</guimenu><guisubmenu>Grains</guisubmenu>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
       <guimenuitem>Mark by Threshold</guimenuitem>
     </menuchoice>.
     Height, slope and curvature thresholding is implemented within this module.
     The results of each individual thresholding methods can be merged together
     using several operators.
   </para>
-  <para>
+  <para id="grain-remove-thresholding">
     Similarly, the grains can be removed from the mask using
     <menuchoice>
-      <guimenu>Data Process</guimenu><guisubmenu>Grains</guisubmenu>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
       <guimenuitem>Remove Grains</guimenuitem>
     </menuchoice> menu choice.
     Maximum height and/or size thresholding methods can be used to eliminate
     false grains occurred by noise or some dust particles, for example. You can
     use also interactive grain removal tool for doing this manually.
   </para>
-  <sect2>
+  <sect2 id="grain-watershed">
     <title>Watershed</title>
     <para>
       For more complicated data structures the effectiveness of thresholding
@@ -122,7 +124,7 @@
   </sect2>
   <sect2>
     <title>Statistics</title>
-    <para>
+    <para id="grain-statistics">
       Grain properties can be studied using several tools. The simplest of them
       is
       <menuchoice>
@@ -141,7 +143,7 @@
       option is switched on.  By inverting the mask the same information can
       be obtained also for the non-grain area.
     </para>
-    <para>
+    <para id="grain-distributions">
       The most powerful and complex tool, capable of characterization of
       individual grains is
       <menuchoice>
@@ -282,7 +284,7 @@
         </varlistentry>
       </variablelist>
     </para>
-    <para>
+    <para id="boundary-length-calculation">
       The grain boundary length is estimated by summing estimated contributions
       of each pixel corner participating in the boundary.  The contributions
       are displayed on the following figure for each type of corner
@@ -309,7 +311,7 @@
         </imageobject>
       </mediaobject>
     </figure>
-    <para>
+    <para id="grain-volume-calculation">
       The grain volume is, after subtracting the basis, estimated as the
       volume of exactly the same body whose upper surface is used for
       <link linkend="surface-area-vertices">surface area calculation</link>.

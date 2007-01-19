@@ -55,7 +55,7 @@
       calculate a new data field.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="immerse">
     <title>Detail Immersion</title>
     <para>
       <menuchoice>
@@ -130,7 +130,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2>
+  <sect2 id="merge">
     <title>Merging</title>
     <para>
       <menuchoice>
@@ -196,10 +196,10 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2>
+  <sect2 id="cross-correlation">
     <title>Cross-Correlation</title>
   </sect2>
-  <sect2>
+  <sect2 id="mask-by-correlation">
     <title>Mask by Correlation</title>
   </sect2>
 </sect1>

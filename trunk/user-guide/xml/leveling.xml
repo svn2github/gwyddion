@@ -4,7 +4,6 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-leveling">
   <title>Data Leveling and Background Subtraction</title>
-  <!--TODO: Clean up section id's and links -->
   <sect2>
     <title>Leveling</title>
     <para>
@@ -51,7 +50,7 @@
         to zero (Fix Zero) or mean value to zero (Zero Mean Value).
       </para>
     </sect3>
-    <sect3 id="process-level-plane">
+    <sect3 id="plane-level">
       <title>
         Plane Level
         <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
@@ -60,8 +59,7 @@
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Level</guisubmenu>
-          <!--TODO: Consider changing "Level" menu item to "Plane Level"-->
-          <guimenuitem>Level</guimenuitem>
+          <guimenuitem>Plane Level</guimenuitem>
         </menuchoice>
       </para>
       <para>
@@ -74,7 +72,7 @@
         the image window and selecting <guimenuitem>Level</guimenuitem>.
       </tip>
     </sect3>
-    <sect3 id="level3">
+    <sect3 id="three-point-level">
       <title>
         Three Point Leveling Tool
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
@@ -87,7 +85,7 @@
         is computed from these three points and is subtracted from the data.
       </para>
     </sect3>
-    <sect3 id="module-facet-level">
+    <sect3 id="facet-level">
       <title>
         Facet Level
         <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
@@ -100,13 +98,13 @@
         </menuchoice>
       </para>
       <para>
-        <link linkend="module-facet-level">Facet Level</link> levels data by
+        <link linkend="facet-level">Facet Level</link> levels data by
         subtracting a plane like the standard
-        <link linkend="process-level-plane">Plane Level</link> function does.
+        <link linkend="plane-level">Plane Level</link> function does.
         However, the plane is determined differently: it makes facets of the
         surface as horizontal as possible. Thus for surfaces with flat horizontal
         areas it leads to much better results than the standard
-        <link linkend="process-level-plane">Plane Level</link>.
+        <link linkend="plane-level">Plane Level</link>.
         On the other hand, for random surfaces, it can behave much worse.
       </para>
       <figure float="0">
@@ -123,7 +121,7 @@
         </mediaobject>
       </figure>
     </sect3>
-    <sect3 id="level_rotate">
+    <sect3 id="level-rotate">
       <title>Level Rotate</title>
       <para>
         <menuchoice>
@@ -133,12 +131,12 @@
         </menuchoice>
       </para>
       <para>
-        <link linkend="level_rotate">Level Rotate</link> behaves similarly to
-        <link linkend="process-level-plane">Plane Level</link>, however it does
+        <link linkend="level-rotate">Level Rotate</link> behaves similarly to
+        <link linkend="plane-level">Plane Level</link>, however it does
         not simply subtract the fitted plane from the data. Instead, this module
         takes the fitted plane parameters and rotates the image data by a
         calculated amount to make it lie in a plane. So unlike
-        <link linkend="process-level-plane">Plane Level</link>, this
+        <link linkend="plane-level">Plane Level</link>, this
         module should therefore preserve angle data in the image.
       </para>
     </sect3>
@@ -152,10 +150,10 @@
     <tip>
       For finer control, you can use any of Gwyddion's
       <link linkend="basic-filters">filtering tools</link> on an image,
-      and then use the <link linkend="">Data Arithmetic</link><!--TODO: fix link-->
+      and then use the <link linkend="data-arithmetic">Data Arithmetic</link>
       module to subtract the results from your original image.
     </tip>
-    <sect3>
+    <sect3 id="polynomial-level">
       <title>
         Polynomial Background
         <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
@@ -177,6 +175,12 @@
             <imageobject>
               <imagedata fileref="eq-polynomial-independent-degree.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with independent maximum x and y
+                degrees
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where <phrase role="math">m</phrase> and <phrase role="math">n</phrase>
@@ -188,13 +192,18 @@
             <imageobject>
               <imagedata fileref="eq-polynomial-total-degree.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with limited total degree
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where <phrase role="math">n</phrase> is the selected total polynomial
         degree.
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="revolve-arc">
       <title>Revolve Arc</title>
       <para>
         <menuchoice>
@@ -210,7 +219,7 @@
         (approximately).
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="median-level">
       <title>Median Level</title>
       <para>
         <menuchoice>
@@ -226,7 +235,7 @@
       </para>
       <note>This method can be very slow.</note>
     </sect3>
-    <sect3>
+    <sect3 id="fit-sphere">
       <title>Fit Sphere</title>
       <para>
         <menuchoice>

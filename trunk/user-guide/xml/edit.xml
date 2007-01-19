@@ -163,7 +163,8 @@
       module, replaces data under the mask. However, it uses
       a different algorithm to come up with the new data: The fractal dimension
       of the whole image is first computed, and then the areas under the mask
-      are substituted by a randomly rough surface having the same fractal dimension.
+      are substituted by a randomly rough surface having the same fractal
+      dimension.
       The root mean square value of the height irregularities (roughness)
       is not changed by using this module.
     </para>
@@ -183,9 +184,10 @@
       </menuchoice>
     </para>
     <para>
-      This module creates mask of areas in the data that not pass the 3*sigma
+      This module creates mask of areas in the data that not pass the 3σ
       criterion. All the values above and below this confidence interval
-      are marked in mask and can be edited or processed by other modules afterwards.
+      are marked in mask and can be edited or processed by other modules
+      afterwards.
     </para>
   </sect2>
   <sect2 id="features-line-correction">

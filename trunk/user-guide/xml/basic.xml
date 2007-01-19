@@ -11,7 +11,7 @@
     algorithms behind these functions will be described and the list of
     available modules will be presented.
   </para>
-  <sect2>
+  <sect2 id="interpolation">
     <title>Interpolation</title>
     <para>
       A large number of the morphological operations in Gwyddion are
@@ -49,6 +49,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-linear.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Linear interpolation formula</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where <phrase role="math">z</phrase><subscript>0</subscript>
@@ -72,6 +75,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-w1234.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Four-point interpolation weighted sum</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where
@@ -80,6 +86,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-key.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Interpolation weights for Key</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         are the interpolation weights.
@@ -95,6 +104,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-schaum.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Interpolation weights for Schaum</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         Its polynomial degree is 3, regularity
@@ -110,6 +122,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-nna.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Interpolation weights for NNA</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         for <phrase role="math">k</phrase> = -1, 0, 1, 2, where
@@ -128,6 +143,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-bspline.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Interpolation weights for B-Spline</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         However, they are not used with directly function values as above,
@@ -146,6 +164,9 @@
             <imageobject>
               <imagedata fileref="eq-interpolation-omoms.png" format="PNG"/>
             </imageobject>
+            <textobject>
+              <phrase>Interpolation weights for O-MOMS</phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         However, they are not used directly with function values as above,
@@ -167,17 +188,20 @@
         <imageobject>
           <imagedata fileref="interpolation.png" format="PNG"/>
         </imageobject>
+        <textobject>
+          <phrase>2D interpolation examples</phrase>
+        </textobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2>
+  <sect2 id="modules-basic">
     <title>Basic 2D Data Operation Modules</title>
     <para>
       Within basic modules it is possible to perform the following
       operations with 2D data field:
     </para>
     <itemizedlist>
-      <listitem>
+      <listitem id="scale">
         Scale data using chosen result dimension and chosen interpolation
         method by
         <menuchoice>
@@ -186,10 +210,10 @@
           <guimenuitem>Scale</guimenuitem>
         </menuchoice>.
       </listitem>
-      <listitem>
+      <listitem id="crop">
         Crop data using the Crop tool (at the Tools menu bar).
       </listitem>
-      <listitem>
+      <listitem id="rotate">
         Rotate data by 90 degrees or by user-specified amount using some
         of the rotate modules:
         <menuchoice>
@@ -210,7 +234,7 @@
           <guimenuitem>Rotate</guimenuitem>
         </menuchoice>.
       </listitem>
-      <listitem>
+      <listitem id="flip">
         Flip data horizontally (i.e. about the vertical axis) and vertically
         (i.e. about the horizontal axis) with
         <menuchoice>
@@ -226,7 +250,7 @@
         </menuchoice>,
         respectively.
       </listitem>
-      <listitem>
+      <listitem id="flip-both">
         Flip data about the center with
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -234,7 +258,7 @@
           <guimenuitem>Flip Both</guimenuitem>
         </menuchoice>.
       </listitem>
-      <listitem>
+      <listitem id="invert-value">
         Invert data about the mean value the <guimenuitem>Invert
           Value</guimenuitem> function:
         <menuchoice>
@@ -243,7 +267,7 @@
           <guimenuitem>Invert</guimenuitem>
         </menuchoice>.
       </listitem>
-      <listitem>
+      <listitem id="square-samples">
         Upsample data to make pixels square with
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -253,7 +277,7 @@
         (This is no-op on most data as they have square pixels.)
       </listitem>
     </itemizedlist>
-    <para>
+    <para id="calibrate">
       Moreover, calibration module can be used for changing the information
       about image physical dimensions and changing the data values
       calibration:
@@ -318,6 +342,9 @@
           <imageobject>
             <imagedata fileref="inclination-phi.png" format="PNG"/>
           </imageobject>
+          <textobject>
+            <phrase>Measuring facet orientation</phrase>
+          </textobject>
         </mediaobject>
       </figure>
     </sect3>
@@ -344,11 +371,13 @@
           <imageobject>
             <imagedata fileref="distances.png" format="PNG"/>
           </imageobject>
+          <textobject>
+            <phrase>Distance tool dialog screenshot</phrase>
+          </textobject>
         </mediaobject>
       </figure>
     </sect3>
   </sect2>
-  <!-- FIXME: Does it belong here? -->
   <sect2 id="profile">
     <title>
       Profile Extraction
@@ -377,6 +406,9 @@
         <imageobject>
           <imagedata fileref="profiles.png" format="PNG"/>
         </imageobject>
+        <textobject>
+          <phrase>Profile tool dialog screenshot</phrase>
+        </textobject>
       </mediaobject>
     </figure>
   </sect2>

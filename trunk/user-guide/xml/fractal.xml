@@ -19,7 +19,7 @@
     procedures
     [<link linkend="features-fractal-ref-1">1</link>,<link linkend="features-fractal-ref-2">2</link>,<link linkend="features-fractal-ref-3">3</link>,<link linkend="features-fractal-ref-4">4</link>].
   </para>
-  <para>
+  <para id="fractal-dimension">
     Within Gwyddion, there are different methods of fractal analysis
     implemented within
   <menuchoice>

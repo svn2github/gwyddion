@@ -82,7 +82,7 @@
     </varlistentry>
     <varlistentry>
       <term>
-        <link linkend="level3">Three Point Level</link>
+        <link linkend="three-point-level">Three Point Level</link>
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </term>
       <listitem id="tool-level3">

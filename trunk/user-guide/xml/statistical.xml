@@ -22,8 +22,8 @@
     <phrase role="math">L<subscript>x</subscript></phrase> × <phrase role="math">L<subscript>y</subscript></phrase>
     where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase>
     are the sizes of the respective axes.
-    The sampling interval (distance between two adjacent points within the scan) is
-    denoted Δ. We assume that the sampling interval is the same in
+    The sampling interval (distance between two adjacent points within the
+    scan) is denoted Δ. We assume that the sampling interval is the same in
     both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase>
     direction. We assume that the surface height at a given point
     <phrase role="math">x</phrase>, <phrase role="math">y</phrase>
@@ -96,8 +96,11 @@
       window and the tool will reset.
     </tip>
     <para>
-      More precisely, RMS (σ), skewness (γ<subscript>1</subscript>), and kurtosis (γ<subscript>2</subscript>) are computed
-      from central moments of <phrase role="math">i</phrase>-th order <phrase role="math">μ<subscript>i</subscript></phrase>
+      More precisely, RMS (σ), skewness (γ<subscript>1</subscript>),
+      and kurtosis (γ<subscript>2</subscript>) are computed
+      from central moments of
+      <phrase role="math">i</phrase>-th order
+      <phrase role="math">μ<subscript>i</subscript></phrase>
       according to the following formulas:
     </para>
     <informalequation>
@@ -270,10 +273,8 @@
         </mediaobject>
       </informalequation>
       <para>
-        <!--TODO: Tried to fix this sentence, but my not be correct -->
-        where σ denotes the root mean square deviation of
-        the heights and
-        <phrase role="math">T</phrase> represents the autocorrelation length.
+        where σ denotes the root mean square deviation of the heights and
+        <phrase role="math">T</phrase> denotes the autocorrelation length.
       </para>
       <para>
         For the exponential autocorrelation function we have the following
@@ -287,10 +288,11 @@
         </mediaobject>
       </informalequation>
       <note>
-        For optical measurements (e. g. spectroscopic reflectometry, ellipsometry)
-        the Gaussian autocorrelation function is usually expected to be in good
-        agreement with the surface properties. However, some articles related with
-        surface growth \cite{jordan} and oxidation \cite{yoshinobu}
+        For optical measurements (e. g. spectroscopic reflectometry,
+        ellipsometry) the Gaussian autocorrelation function is usually expected
+        to be in good agreement with the surface properties. However, some
+        articles related with surface growth \cite{jordan} and oxidation
+        \cite{yoshinobu}
         <!--TODO: These artical citations are not correct. -->
         usually assume that the exponential form is closer to the reality.
       </note>
@@ -324,8 +326,8 @@
         separated by the sampling interval Δ.
       </para>
       <para>
-        The one-dimensional height-height correlation function is often assumed to be
-        Gaussian, i.e. given by the following relation
+        The one-dimensional height-height correlation function is often
+        assumed to be Gaussian, i.e. given by the following relation
       </para>
       <informalequation>
         <mediaobject>
@@ -335,12 +337,12 @@
         </mediaobject>
       </informalequation>
       <para>
-        <!--TODO: Tried to fix this sentence, but my not be correct -->
         where σ denotes the root mean square deviation of the heights and
         <phrase role="math">T</phrase> denotes the autocorrelation length.
       </para>
       <para>
-        For the exponential height-height correlation function we have the following relation
+        For the exponential height-height correlation function we have the
+        following relation
       </para>
       <informalequation>
         <mediaobject>
@@ -456,22 +458,23 @@
         by their Gaussian and exponential forms. To do this, fist click
         <guibutton>Apply</guibutton> within the
         <link linkend="sfunctions">Statistical Functions</link> tool window.
-        This will create a new graph window. With this new window selected, click
-        on
+        This will create a new graph window. With this new window selected,
+        click on
         <menuchoice>
           <guimenu>Graph</guimenu>
-          <guimenuitem><link linkend=""><!--TODO: Fix Link-->Fit Graph</link></guimenuitem>
+          <guimenuitem><link linkend="graph-fit">Fit Graph</link></guimenuitem>
         </menuchoice>.
       </tip>
     </sect3>
     <sect3>
       <title>Minkowski Functionals</title>
       <para>
-        The Minkowski functionals are used to describe global geometric characteristics
-        of structures.  Two-dimensional discrete variants of
+        The Minkowski functionals are used to describe global geometric
+        characteristics of structures.  Two-dimensional discrete variants of
         volume <phrase role="math">V</phrase>,
         surface <phrase role="math">S</phrase>,
-        and connectivity (Euler-Poincaré Characteristic) <phrase role="math">χ</phrase>
+        and connectivity (Euler-Poincaré Characteristic)
+        <phrase role="math">χ</phrase>
         are calculated according to following formulas:
       </para>
       <informalequation>
@@ -484,17 +487,19 @@
       <para>
         Here <phrase role="math">N</phrase> denotes the total number of pixels,
         <phrase role="math">N<subscript>white</subscript></phrase> denotes
-        the number of “white” pixels, that is pixels above threshold (pixels below
-        threshold are referred to as “black”).
-        The symbol <phrase role="math">N<subscript>bound</subscript></phrase> denotes
-        the number of white-black pixel boundaries.
-        Finally <phrase role="math">C<subscript>white</subscript></phrase> and
-        <phrase role="math">C<subscript>black</subscript></phrase> denote the number of
-        continuous sets of white and black pixels respectively.
+        the number of “white” pixels, that is pixels above threshold (pixels
+        below threshold are referred to as “black”).
+        The symbol <phrase role="math">N<subscript>bound</subscript></phrase>
+        denotes the number of white-black pixel boundaries.
+        Finally, <phrase role="math">C<subscript>white</subscript></phrase> and
+        <phrase role="math">C<subscript>black</subscript></phrase>
+        denote the number of continuous sets of white and black pixels
+        respectively.
       </para>
       <para>
-        For an image with continuous set of values the functionals are parametrized by
-        the height threshold value <phrase role="math">ϑ</phrase> that divides white pixels
+        For an image with continuous set of values the functionals are
+        parametrized by the height threshold value
+         <phrase role="math">ϑ</phrase> that divides white pixels
         from black, that is they can be viewed as functions of this parameter.
         And these functions
         <phrase role="math">V</phrase>(<phrase role="math">ϑ</phrase>),
@@ -546,7 +551,7 @@
       </listitem>
     </orderedlist>
   </sect2>
-  <sect2>
+  <sect2 id="slope-distribution">
     <title>Two-Dimensional Slope Statistics</title>
     <para>
       Several functions in
@@ -583,7 +588,7 @@
         </mediaobject>
       </informalequation>
     </para>
-    <para>
+    <para id="angle-distribution">
       <guimenuitem>Angle Distribution</guimenuitem> function is
       a visualization tool that does not calculate a distribution in the
       strict sense.  For each derivative <phrase role="math">v</phrase>

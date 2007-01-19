@@ -15,7 +15,7 @@
       <guisubmenu>Integral Transforms</guisubmenu>
     </menuchoice>.
   </para>
-  <sect2>
+  <sect2 id="fft">
     <title>Fourier Transform</title>
     <para>
       Fourier transform can be accessed within FFT module which implements
@@ -32,7 +32,7 @@
       has really bad  Fourier image thus leading to corruption of the Fourier
       spectrum.
     </para>
-    <para>
+    <para id="windowing">
       Winhin Gwyddion several windowing functions are implemented. Most of
       them are formed by some sine and cosine functions that damp data
       correctly at the edges. Windowing function can be set within the
@@ -168,11 +168,12 @@
       implemented and the modules using wavelet transforms can be accessed
       within
       <menuchoice>
-        <guimenu>Data Process</guimenu><guisubmenu>Integral Transforms</guisubmenu>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Integral Transforms</guisubmenu>
       </menuchoice>
       menu.
     </para>
-    <sect3>
+    <sect3 id="dwt">
       <title>Discrete Wavelet Transform</title>
       <para>
         The discrete wavelet transform (DWT) is an implementation of the
@@ -294,7 +295,7 @@
         discrete wavelet transform. Discrete wavelet transform in 2D can be
         accessed using DWT module.
       </para>
-      <para>
+      <para id="dwt-denoise">
         Discrete wavelet transform can be used for easy and fast denoising of
         a noisy signal. If we take only a limited number of highest
         coefficients of the discrete wavelet transform spectrum, and we
@@ -359,10 +360,15 @@
         (soft thresholding).
       </para>
       <para>
-        DWT denoising can be accessed within the DWT denoise module.
+        DWT denoising can be accessed with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Integral Transforms</guisubmenu>
+          <guimenuitem>DWT Denoise</guimenuitem>
+        </menuchoice>.
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="cwt">
       <title>Continuous Wavelet Transform</title>
       <para>
         Continuous wavelet transform (CWT) is an implementaion of the wavelet
@@ -383,7 +389,8 @@
         represents the time-frequency plane directly. The algoritm used for
         this computaion can be based on a direct convolution or on
         a convolution by means of
-        multiplication in Fourier space (this is sometimes called Fast wavelet transform).
+        multiplication in Fourier space (this is sometimes called Fast wavelet
+        transform).
       </para>
       <para>
         The choice of the wavelet that is used for time-frequency
@@ -401,7 +408,12 @@
         poor one in frequencies.
       </para>
       <para>
-        Within Gwyddion, several 2D wavelets are implemented within CWT module.
+        CWT is implemented in the CWT module that can be accessed with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Integral Transforms</guisubmenu>
+          <guimenuitem>CWT</guimenuitem>
+        </menuchoice>.
       </para>
     </sect3>
   </sect2>
