@@ -190,7 +190,7 @@
       afterwards.
     </para>
   </sect2>
-  <sect2 id="features-line-correction">
+  <sect2 id="line-correction">
     <title>
       Line Correction
       <guiicon><inlinegraphic fileref="gwy_line_level-24.png"/></guiicon>
