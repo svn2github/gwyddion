@@ -47,8 +47,8 @@
      methods that lead to global errors, like low frequencies modulated on
      the data or data drift in the slow scanning axis.
   </para>
-  <sect2>
-    <title id="drift-compensation">Drift Compensation</title>
+  <sect2 id="drift-compensation">
+    <title>Drift Compensation</title>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
