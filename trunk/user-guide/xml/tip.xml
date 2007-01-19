@@ -101,7 +101,7 @@
       </mediaobject>
     </figure>
   </sect2>
-  <sect2>
+  <sect2 id="tip-operations">
     <title>Tip Convolution and Surface Reconstruction</title>
     <para id="tip-convolution">
       When we know tip geometry, we can use tip convolution (dilation)
