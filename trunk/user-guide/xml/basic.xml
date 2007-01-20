@@ -312,6 +312,10 @@
         <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
       </title>
       <indexterm><primary>Read Value tool</primary></indexterm>
+      <indexterm>
+        <primary>inclination</primary>
+        <secondary>reading on data</secondary>
+      </indexterm>
       <para>
         Tool <guilabel>Read Value</guilabel> offers more value reading
         posibilities: It displays coordinates and values of the last point of
@@ -326,7 +330,10 @@
     </sect3>
     <sect3 id="inclinations-coordinates">
       <title>Inclinations</title>
-      <indexterm><primary>inclination calculation</primary></indexterm>
+      <indexterm>
+        <primary>inclination</primary>
+        <secondary>calculation</secondary>
+      </indexterm>
       <para>
         In all Gwyddion tools facet and plane inclinations are displayed as
         the spherical angles (ϑ, φ) of the plane normal vector.

@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-grains">
   <title>Grain Analysis</title>
+  <indexterm><primary>grain marking</primary></indexterm>
   <para>
     There are several grain-related algorithms implemented in Gwyddion. First
     of all, simple thresholding algorithms can be used (height, slope or
@@ -11,6 +12,7 @@
     within particle analysis (to mark particles located on flat surface).
   </para>
   <para id="grain-threshold">
+    <indexterm><primary>threshold grain marking</primary></indexterm>
     Thresholding methods can be accessed within Gwyddion as
     <menuchoice>
       <guimenu>Data Process</guimenu>
@@ -34,6 +36,7 @@
   </para>
   <sect2 id="grain-watershed">
     <title>Watershed</title>
+    <indexterm><primary>watershed grain marking</primary></indexterm>
     <para>
       For more complicated data structures the effectiveness of thresholding
       algorithms can be very poor. For these data a <emphasis>watershed
@@ -77,28 +80,28 @@
         soon as the drop reached a local minimum.
         <orderedlist>
           <listitem>
-            the drop reached the place previously marked as a concrete grain.
+            The drop reached the place previously marked as a concrete grain.
             In this case the drop was merged with the grain, i. e. it was
             marked as a part of the same grain.
           </listitem>
           <listitem>
-            the drop reached the place where no grain was found but a concrete
+            The drop reached the place where no grain was found but a concrete
             grain was found in the closest neighbourhood of the drop. In this
             case the drop was merged with the grain again.
           </listitem>
           <listitem>
-            the drop reached the place where no grain was found and no grain
+            The drop reached the place where no grain was found and no grain
             was found even in the closest neighbourhood of the drop. In that
             case the drop was not marked at all.
           </listitem>
           <listitem>
-            the drop reached the place where no grain was found but more than
+            The drop reached the place where no grain was found but more than
             one concrete grain was found in the closest neighbourhood (e. g.
             two different grains were found in the neighbourhood). In this case
             the drop was marked as the grain boundary.
           </listitem>
           <listitem>
-            the drop reached the place marked as grain boundary. In this case
+            The drop reached the place marked as grain boundary. In this case
             the drop was marked as the grain boundary too.
           </listitem>
         </orderedlist>
@@ -124,6 +127,7 @@
   </sect2>
   <sect2>
     <title>Statistics</title>
+    <indexterm><primary>number of grains</primary></indexterm>
     <para id="grain-statistics">
       Grain properties can be studied using several tools. The simplest of them
       is
@@ -158,19 +162,35 @@
           <listitem>
             <itemizedlist>
               <listitem>
+                <indexterm>
+                  <primary>minimum</primary>
+                  <secondary>of a grain</secondary>
+                </indexterm>
                 <guilabel>Maximum</guilabel>,
                 the maximum value (height) occuring inside the grain.
               </listitem>
               <listitem>
+                <indexterm>
+                  <primary>maximum</primary>
+                  <secondary>of a grain</secondary>
+                </indexterm>
                 <guilabel>Minimum</guilabel>,
                 the minimum value (height) occuring inside the grain.
               </listitem>
               <listitem>
+                <indexterm>
+                  <primary>mean</primary>
+                  <secondary>of a grain</secondary>
+                </indexterm>
                 <guilabel>Mean</guilabel>,
                 the mean of all values occuring inside the grain, that is the
                 mean grain height.
               </listitem>
               <listitem>
+                <indexterm>
+                  <primary>median</primary>
+                  <secondary>of a grain</secondary>
+                </indexterm>
                 <guilabel>Median</guilabel>
                 the median of all values occuring inside the grain, that is the
                 median grain height.
@@ -285,6 +305,7 @@
       </variablelist>
     </para>
     <para id="boundary-length-calculation">
+      <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
       of each pixel corner participating in the boundary.  The contributions
       are displayed on the following figure for each type of corner
@@ -312,6 +333,7 @@
       </mediaobject>
     </figure>
     <para id="grain-volume-calculation">
+      <indexterm><primary>volume calculation</primary></indexterm>
       The grain volume is, after subtracting the basis, estimated as the
       volume of exactly the same body whose upper surface is used for
       <link linkend="surface-area-vertices">surface area calculation</link>.

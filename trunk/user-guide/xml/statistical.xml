@@ -55,9 +55,29 @@
     </para>
     <orderedlist>
       <listitem>
+        <indexterm>
+          <primary>mean</primary>
+          <secondary>of a data area</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>median</primary>
+          <secondary>of a data area</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>of a data area</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>of a data area</secondary>
+        </indexterm>
         Mean value, minimum, maximum and median.
       </listitem>
       <listitem>
+        <indexterm>
+          <primary>rms</primary>
+          <secondary>of a data area</secondary>
+        </indexterm>
         RMS value of the height irregularities: this quantity is computed from
         data variance.
       </listitem>
@@ -184,15 +204,18 @@
     <sect3 id="height-angle-distribution">
       <title>Height and Angle Distribution Functions</title>
       <indexterm><primary>height distribution</primary></indexterm>
-      <indexterm><primary>angle distribution (1D)</primary></indexterm>
+      <indexterm>
+        <primary>angle distribution</primary>
+        <secondary>1D</secondary>
+      </indexterm>
       <para>
         The simplest statistical functions are the height and slope
         distribution functions. These can be computed as non-cumulative or
         cumulative. These functions are computed as normalized histograms of
-        the height or slope (obtained as dreivatives in the selected direction
-         – horizontal or vertical) values.  In other words, the quantity on the
-        abscissa in <quote>angle distribution</quote> is the tangent of the
-        angle, not the angle itself.
+        the height or slope (obtained as dreivatives in the selected
+        direction – horizontal or vertical) values.  In other words, the
+        quantity on the abscissa in <quote>angle distribution</quote> is the
+        tangent of the angle, not the angle itself.
       </para>
     </sect3>
     <sect3>
@@ -541,9 +564,29 @@
     </para>
     <orderedlist>
       <listitem>
+        <indexterm>
+          <primary>mean</primary>
+          <secondary>of a row/column</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>median</primary>
+          <secondary>of a row/column</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>of a row/column</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>of a row/column</secondary>
+        </indexterm>
         Mean value, minimum, maximum and median.
       </listitem>
       <listitem>
+        <indexterm>
+          <primary>rms</primary>
+          <secondary>of a row/column</secondary>
+        </indexterm>
         RMS value of the height irregularities computed from data variance.
       </listitem>
       <listitem>
@@ -572,7 +615,10 @@
   <sect2 id="slope-distribution">
     <title>Two-Dimensional Slope Statistics</title>
     <indexterm><primary>slope distribution (2D)</primary></indexterm>
-    <indexterm><primary>angle distribution (2D)</primary></indexterm>
+    <indexterm>
+      <primary>angle distribution</primary>
+      <secondary>2D</secondary>
+    </indexterm>
     <para>
       Several functions in
       <menuchoice>

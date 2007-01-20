@@ -228,6 +228,10 @@
     </sect3>
     <sect3 id="median-level">
       <title>Median Level</title>
+      <indexterm>
+        <primary>median</primary>
+        <secondary>background removal</secondary>
+      </indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
