@@ -6,10 +6,11 @@
 
 <xsl:import href="http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl"/>
 
-  <xsl:param name="chunker.output.method" select="'xml'"/>
+  <xsl:param name="chunker.output.method">xml</xsl:param>
   <!-- MSIE, dillo do not like xml decl -->
-  <xsl:param name="chunker.output.omit-xml-declaration" select="'yes'"/>
-  <xsl:param name="chunker.output.encoding" select="'utf-8'"/>
+  <xsl:param name="chunker.output.omit-xml-declaration">yes</xsl:param>
+  <xsl:param name="chunk.first.sections" select="1"/>
+  <xsl:param name="chunker.output.encoding">utf-8</xsl:param>
   <xsl:param name="toc.section.depth" select="1"/>
   <xsl:param name="use.id.as.filename" select="1"/>
   <xsl:param name="phrase.propagates.style" select="1"/>
@@ -41,7 +42,7 @@
 
   <xsl:template name="book.titlepage.before.recto">
     <a href="http://gwyddion.net/" title="Gwyddion web site">
-      <img style="margin-top:12px;float:right;border:none;" src="stacked3.png"/>
+      <img id="TitleImage" alt="Small Gwyddion screenshot" src="stacked3.png"/>
     </a>
   </xsl:template>
 
