@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect2 id="facet-analysis">
   <title>Facet Analysis</title>
+  <indexterm><primary>facet analysis</primary></indexterm>
   <para>
     <menuchoice>
       <guimenu>Data Process</guimenu>

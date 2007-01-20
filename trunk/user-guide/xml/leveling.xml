@@ -7,7 +7,8 @@
   <sect2>
     <title>Leveling</title>
     <para>
-      The data obtained from SPM microscopes are <!--TODO: should it be "are" or "is"?-->
+      The data obtained from SPM microscopes are
+      <!--TODO: should it be "are" or "is"?-->
       very often not leveled at all; the microscope directly outputs raw data
       values computed from piezoscanner voltage, strain gauge, interferometer or
       other detection system values. This way of exporting data enables the user
@@ -55,6 +56,7 @@
         Plane Level
         <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
       </title>
+      <indexterm><primary>plane leveling</primary></indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -77,6 +79,7 @@
         Three Point Leveling Tool
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </title>
+      <indexterm><primary>three-point leveling</primary></indexterm>
       <para>
         The <guilabel>Three Point Leveling</guilabel>
         tool can be used for leveling very complicated surface structures.
@@ -90,6 +93,7 @@
         Facet Level
         <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
       </title>
+      <indexterm><primary>facet leveling</primary></indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -123,6 +127,7 @@
     </sect3>
     <sect3 id="level-rotate">
       <title>Level Rotate</title>
+      <indexterm><primary>rotation leveling</primary></indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -141,8 +146,9 @@
       </para>
     </sect3>
   </sect2>
-  <sect2>
+  <sect2 id="background-subtraction">
     <title>Background Subtraction</title>
+    <indexterm><primary>background subtraction</primary></indexterm>
     <para>
       Gwyddion has several special modules for background subtraction. All
       allow you to extract the subtracted background to a separate data window.
@@ -158,6 +164,7 @@
         Polynomial Background
         <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
       </title>
+      <indexterm><primary>polynomial background</primary></indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -237,6 +244,7 @@
     </sect3>
     <sect3 id="fit-sphere">
       <title>Fit Sphere</title>
+      <indexterm><primary>sphere fitting</primary></indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>

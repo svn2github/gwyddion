@@ -4,7 +4,6 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
   <!--TODO: Clean up line breaks. The equation sections are esp. messy -->
-
   <title>Statistical Analysis</title>
   <para>
     While analyzing randomly rough surfaces we often need a statistical approach
@@ -46,6 +45,7 @@
       Statistical Quantities Tool
       <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
     </title>
+    <indexterm><primary>Statistical Quantities tool</primary></indexterm>
     <para>
       Statistical quantities include basic properties of the height values
       distribution, including its variance, skewness and kurtosis. The
@@ -111,6 +111,7 @@
       </mediaobject>
     </informalequation>
     <para id="surface-area-calculation">
+      <indexterm><primary>surface area calculation</primary></indexterm>
       The surface area is estimated by the following method.
       Let <phrase role="math">z<subscript>i</subscript></phrase> for
       <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in
@@ -159,6 +160,7 @@
       Statistical Functions Tool
       <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
     </title>
+    <indexterm><primary>Statistical Functions tool</primary></indexterm>
     <para>
       One-dimensional statistical functions can be accessed by using the
       <guilabel>Statistical Functions</guilabel> tool.
@@ -179,8 +181,10 @@
       tool, this tool evaluates for the entire image by default, but you can
       select a sub-region to analyze if you wish.
     </tip>
-    <sect3>
+    <sect3 id="height-angle-distribution">
       <title>Height and Angle Distribution Functions</title>
+      <indexterm><primary>height distribution</primary></indexterm>
+      <indexterm><primary>angle distribution (1D)</primary></indexterm>
       <para>
         The simplest statistical functions are the height and slope
         distribution functions. These can be computed as non-cumulative or
@@ -205,8 +209,9 @@
         A description of each of these follows:
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="autocorrelation-1d">
       <title>Autocorrelation Function</title>
+      <indexterm><primary>autocorrelation function (1D)</primary></indexterm>
       <para>
         The autocorrelation function is given by
       </para>
@@ -299,6 +304,7 @@
     </sect3>
     <sect3>
       <title>Height-Height Correlation Function</title>
+      <indexterm><primary>height-height correlation function</primary></indexterm>
       <para>
         The difference between the height-height correlation function and the
         autocorrelation function is very small. As with the autocorrelation
@@ -352,16 +358,19 @@
         </mediaobject>
       </informalequation>
       <para>
-        <!--TODO: Fix this paragraph, as well as the accompanying figure -->
-        In Fig. 1 the height-height correlation function and autocorrelation function obtained for
-        simulated surface having Gaussian autocorrelation function are plotted. These functions
-        are fitted by means of least-squares method using the formulae shown above. The resulting
-        values of σ and <phrase role="math">T</phrase> were practically same for both the approaches.
+        In the following <link linkend="fig-hhcf-acf-gauss">figure</link>
+        the height-height correlation function and autocorrelation function
+        obtained for a simulated surface having Gaussian autocorrelation
+        function are plotted.  These functions are fitted by means of
+        least-squares method using the formulae shown above. The resulting
+        values of σ and <phrase role="math">T</phrase> were practically same
+        for both the approaches.
       </para>
-      <figure>
+      <figure id="fig-hhcf-acf-gauss">
         <title>
-          Height-height correlation function and autocorrelation function obtained for
-          simulated surface having Gaussian autocorrelation function.
+          Height-height correlation function and autocorrelation function
+          obtained for simulated surface having Gaussian autocorrelation
+          function.
         </title>
         <mediaobject>
           <imageobject>
@@ -370,8 +379,9 @@
         </mediaobject>
       </figure>
     </sect3>
-    <sect3>
+    <sect3 id="psdf">
       <title>Power Spectral Density Function</title>
+      <indexterm><primary>power spectral density function</primary></indexterm>
       <para>
         The two-dimensional power spectral density function can be written in
         terms of the Fourier transform of the autocorrelation function
@@ -396,7 +406,8 @@
         </mediaobject>
       </informalequation>
       <para>
-        This function can be evaluated by means of the Fast Fourier Transform as follows:
+        This function can be evaluated by means of the Fast Fourier Transform
+        as follows:
       </para>
       <informalequation>
         <mediaobject>
@@ -406,8 +417,10 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">P<subscript>j</subscript></phrase>(<phrase role="math">K<subscript>x</subscript></phrase>) is the Fourier coefficient
-        of the <phrase role="math">j</phrase>-th row, i.e.
+        where
+        <phrase role="math">P<subscript>j</subscript></phrase>(<phrase role="math">K<subscript>x</subscript></phrase>)
+        is the Fourier coefficient of the <phrase role="math">j</phrase>-th
+        row, i.e.
       </para>
       <informalequation>
         <mediaobject>
@@ -417,7 +430,8 @@
         </mediaobject>
       </informalequation>
       <para>
-        If we have chosen the Gaussian ACF, the corresponding Gaussian relation for the PSDF is
+        If we have chosen the Gaussian ACF, the corresponding Gaussian
+        relation for the PSDF is
       </para>
       <informalequation>
         <mediaobject>
@@ -437,15 +451,17 @@
         </mediaobject>
       </informalequation>
       <para>
-        <!--TODO: Fix this paragraph, and figure -->
-        In Figure 2 the resulting PSDF and its fit for the same surface as used in Fig. 1 are plotted.
-        We can see that the function can be again fitted by Gaussian PSDF. The resulting values of σ
-        and <phrase role="math">T</phrase> were practically same as those from the HHCF and ACF fit.
+        In the following <link linkend="fig-psdf-gauss">figure</link>
+        the resulting PSDF and its fit for the same surface as used in the
+        <link linkend="fig-hhcf-acf-gauss">previous figure</link> are
+        plotted. We can see that the function can be again fitted by Gaussian
+        PSDF. The resulting values of σ and <phrase role="math">T</phrase>
+        were practically same as those from the HHCF and ACF fit.
       </para>
-      <figure>
+      <figure id="fig-psdf-gauss">
         <title>
-          PSDF obtained for data simulated with Gaussian autocorrelation function. Points represent
-          computed data, line represents its fit.
+          PSDF obtained for data simulated with Gaussian autocorrelation
+          function. Points represent computed data, line represents its fit.
         </title>
         <mediaobject>
           <imageobject>
@@ -466,8 +482,9 @@
         </menuchoice>.
       </tip>
     </sect3>
-    <sect3>
+    <sect3 id="minkowski-functionals">
       <title>Minkowski Functionals</title>
+      <indexterm><primary>Minkowski functionals</primary></indexterm>
       <para>
         The Minkowski functionals are used to describe global geometric
         characteristics of structures.  Two-dimensional discrete variants of
@@ -514,6 +531,7 @@
       Row/Column Statistics Tool
       <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
     </title>
+    <indexterm><primary>Row/Column Statistics tool</primary></indexterm>
     <para>
       This tool calculates numeric characteristics of each row or column
       and plots them as a function of its position.  This makes it kind of
@@ -553,6 +571,8 @@
   </sect2>
   <sect2 id="slope-distribution">
     <title>Two-Dimensional Slope Statistics</title>
+    <indexterm><primary>slope distribution (2D)</primary></indexterm>
+    <indexterm><primary>angle distribution (2D)</primary></indexterm>
     <para>
       Several functions in
       <menuchoice>

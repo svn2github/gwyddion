@@ -13,6 +13,7 @@
   </para>
   <sect2 id="interpolation">
     <title>Interpolation</title>
+    <indexterm><primary>interpolation</primary></indexterm>
     <para>
       A large number of the morphological operations in Gwyddion are
       dependent on data interpolation.  As the SPM data are relatively
@@ -31,15 +32,19 @@
       follows
     </para>
     <itemizedlist>
-      <listitem>
-        Round interpolation is the simplest method - it just takes round
+      <listitem id="interpolation-round">
+        <indexterm><primary>round interpolation</primary></indexterm>
+        <indexterm><primary>nearest neighbourhood interpolation</primary></indexterm>
+        Round interpolation (also called nearest neighbourhood interpolation)
+        is the simplest method - it just takes round
         value of the expected position and finds therefore the closest
         data value at integer position.
         Its polynomial degree is 0, regularity
         <phrase role="math">C</phrase><superscript>-1</superscript>
         and order 1.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-linear">
+        <indexterm><primary>linear interpolation</primary></indexterm>
         Linear interpolation is a linear interpolation
         between the two closest data values. The value
         <phrase role="math">z</phrase> at point of relative
@@ -61,7 +66,8 @@
         <phrase role="math">C</phrase><superscript>0</superscript>
         and order 2.  It is identical to the second-order B-spline.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-key">
+        <indexterm><primary>Key interpolation</primary></indexterm>
         Key interpolation (more precisely Key's interpolation with
         <phrase role="math">a</phrase> = -1/2 which has the highest
         interpolation order) makes use also of values in the before-preceding
@@ -96,7 +102,8 @@
         <phrase role="math">C</phrase><superscript>1</superscript>
         and order 3.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-schaum">
+        <indexterm><primary>Schaum interpolation</primary></indexterm>
         Schaum interpolation (more precisely fourth-order Schaum) has also
         support of length 4.  The interpolation are
         <informalequation>
@@ -113,7 +120,8 @@
         <phrase role="math">C</phrase><superscript>0</superscript>
         and order 4.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-nna">
+        <indexterm><primary>NNA interpolation</primary></indexterm>
         Nearest neighbour approximation is again calculated from the closest
         four data values but unlike all others it is not piecewise-polynomial.
         The interpolation weights are
@@ -134,7 +142,8 @@
         <phrase role="math">r</phrase><subscript>2</subscript> = 2 − <phrase role="math">x</phrase>.
         Its order is 1.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-bspline">
+        <indexterm><primary>B-spline interpolation</primary></indexterm>
         B-spline was misimplemented up to version 2.1 (inclusive) and it
         blurred data.  It should be avoided in these old versions.
         The weights are
@@ -155,7 +164,8 @@
         <phrase role="math">C</phrase><superscript>2</superscript>
         and order 4.
       </listitem>
-      <listitem>
+      <listitem id="interpolation-omoms">
+        <indexterm><primary>O-MOMS interpolation</primary></indexterm>
         O-MOMS was misimplemented up to version 2.1 (inclusive) and it
         blurred data.  It should be avoided in these old versions.
         The weights are
@@ -301,6 +311,7 @@
         Read Value Tool
         <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
       </title>
+      <indexterm><primary>Read Value tool</primary></indexterm>
       <para>
         Tool <guilabel>Read Value</guilabel> offers more value reading
         posibilities: It displays coordinates and values of the last point of
@@ -315,6 +326,7 @@
     </sect3>
     <sect3 id="inclinations-coordinates">
       <title>Inclinations</title>
+      <indexterm><primary>inclination calculation</primary></indexterm>
       <para>
         In all Gwyddion tools facet and plane inclinations are displayed as
         the spherical angles (ϑ, φ) of the plane normal vector.
@@ -353,6 +365,7 @@
         Distance Tool
         <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
       </title>
+      <indexterm><primary>Distance tool</primary></indexterm>
       <para>
         Distances and differences can be read with
         <guilabel>Distance</guilabel> tool.  It displays the
@@ -383,6 +396,7 @@
       Profile Extraction
       <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>
     </title>
+    <indexterm><primary>Profile extraction</primary></indexterm>
     <para>
       Profile extraction tool can be accessed from the tools menu bar. You
       can use mouse to drag several profiles in the image that can be
