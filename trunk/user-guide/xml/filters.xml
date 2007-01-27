@@ -44,13 +44,19 @@
         Kuwahara filter – is an edge-preserving smoothing filter.
       </listitem>
       <listitem id="filter-minimum">
-        <indexterm><primary>minimum filter</primary></indexterm>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
         <indexterm><primary>erosion filter</primary></indexterm>
         Minimum filter – also known as erode filter, replaces values by
         minimum found in neighborhood.
       </listitem>
       <listitem id="filter-maximum">
-        <indexterm><primary>maximum filter</primary></indexterm>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
         <indexterm><primary>dilation filter</primary></indexterm>
         Maximum filter – also known as dilate filter, replaces values by
         maximum found in neighborhood.

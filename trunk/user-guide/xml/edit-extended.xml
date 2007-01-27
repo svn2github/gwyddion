@@ -49,6 +49,7 @@
   </para>
   <sect2 id="drift-compensation">
     <title>Drift Compensation</title>
+    <indexterm><primary>drift compensation</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -109,6 +110,10 @@
   </sect2>
   <sect2 id="fft-filter-1d">
     <title>1D FFT Filter</title>
+    <indexterm>
+      <primary>FFT</primary>
+      <secondary>1D filtering</secondary>
+    </indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -135,6 +140,10 @@
   </sect2>
   <sect2 id="fft-filter-2d">
     <title>2D FFT Filter</title>
+    <indexterm>
+      <primary>FFT</primary>
+      <secondary>2D filtering</secondary>
+    </indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
