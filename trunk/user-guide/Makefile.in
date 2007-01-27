@@ -42,6 +42,7 @@ xhtml: formulas xhtml.stamp
 xhtml.stamp: Makefile $(XML_SOURCES) xhtml.xsl
 	test -d xhtml || mkdir xhtml
 	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
+	sed -i 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 	cp images/*.png xhtml
 	cp user-guide.css xhtml
 	touch $@
