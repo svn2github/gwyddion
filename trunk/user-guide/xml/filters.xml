@@ -126,6 +126,44 @@
       For details see section <link linkend="features-edit">Data Edit</link>.
     </para>
   </sect2>
+  <sect2 id="convolution-filter">
+    <title>Convolution</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Integral Transforms</guisubmenu>
+        <guisubmenu>Convolution Filter</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Convolutions with arbitrary kernels up to 9 × 9 can be performed with
+      the <link linkend="convolution-filter">Convolution Filter</link>
+      module.
+    </para>
+    <para>
+      The <guilabel>Divisor</guilabel> entry represents a common factor all
+      the coefficients are divided before applying the filter.  This allows
+      to use denormalized coefficients that are often nicer numbers.  The
+      normalization can be also calculated automatically when
+      <guilabel>automatic</guilabel> is checked.  When the sum of the
+      coefficients is nonzero, it makes the filter sum-preserving, i.e. it
+      the factor normalizes the sum of coefficients to unity.  When the sum
+      of the coefficients is zero, the automatic factor is simply let equal
+      to 1.
+    </para>
+    <para>
+      Since many filters used in practice exhibit various types of symmetry,
+      the coefficients can be automatically completed according to the
+      selected symmetry type (odd, even).  Note the completion is performed
+      on pressing <keycap>Enter</keycap> in the coefficient entry.
+    </para>
+    <para>
+      In a fresh installation only a sample Identity filter is present (which
+      is not particularly useful as it does nothing).  This filter cannot be
+      modified, to create a new filter use the <guilabel>New</guilabel> button
+      on the <guilabel>Presets</guilabel> page.
+    </para>
+  </sect2>
   <sect2>
     <title>Presentations</title>
     <para>
