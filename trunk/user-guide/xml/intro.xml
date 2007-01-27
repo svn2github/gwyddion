@@ -4,7 +4,12 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <chapter id="introduction">
   <title>Introduction</title>
-  <sect2 id="motivation">
+  <para>
+    This guide was last updated to a post-2.3 version of Gwyddion.
+    The latest version this guide can be found at
+    <ulink url="http://gwyddion.net/documentation/">http://gwyddion.net/documentation/</ulink>.
+  </para>
+  <sect1 id="motivation">
     <title>Motivation</title>
     <para>
       <ulink url="http://gwyddion.net/"><application>Gwyddion</application></ulink>
@@ -13,8 +18,9 @@
       scanning probe microscopy techniques (AFM, MFM, STM, NSOM), but
       generally it can be used for any other height field analysis or image
       analysis.
-      Gwyddion is a free software, covered by
-      <ulink url="http://www.gnu.org/licenses/gpl.html">GNU General Public License</ulink> (GNU GPL).
+      Gwyddion is Free Software (and Open Source Software), covered by
+      <ulink url="http://www.gnu.org/licenses/gpl.html">GNU General Public License</ulink>
+      (GNU GPL).
     </para>
     <para>
       The main idea behind Gwyddion developement is to provide modular
@@ -27,27 +33,26 @@
       Gwyddion can be currently used with Linux/Unix (including Mac OS X) and
       Microsoft Windows operating systems. Both families of systems can be
       used also for developement. For graphical interface,
-      <ulink url="http://www.gtk.org/">Gtk+</ulink> and
-      <ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink> and
-      libraries are used, therefore it can be basically ported on any system
-      that is supported by Gtk+ and GtkGLExt.
+      <ulink url="http://www.gtk.org/">Gtk+</ulink> widget toolkit is used,
+      therefore it can be basically ported on any system
+      that is supported by Gtk+.
     </para>
     <para>
       Gwyddion core developement is currently funded by
-      <ulink url="http://www.cmi.cz/">Czech Metrology Institute</ulink>.
+      <ulink url="http://www.cmi.cz/?lang=2">Czech Metrology Institute</ulink>.
       The project started as a part of the Nanomet initiative (covered by
       Euromet) in August, 2004. It is supposed that more persons and
       institutions will participate on developement. Project is open for
       anyone. Welcome…
     </para>
-  </sect2>
-  <sect2 id="licensing">
+  </sect1>
+  <sect1 id="licensing">
     <title>Licensing</title>
     <para>
       Gwyddion is covered by
-      <ulink url="http://www.gnu.org/licenses/gpl.html">GNU General Public License</ulink> (GNU GPL). See file
-      <filename>COPYING</filename> in distribution for full License
-      text. In particular, this means that:
+      <ulink url="http://www.gnu.org/licenses/gpl.html">GNU General Public License</ulink>
+      (GNU GPL). See file <filename>COPYING</filename> in distribution for
+      full License text. In particular, this means that:
       <itemizedlist>
         <listitem>
           <para>
@@ -73,5 +78,5 @@
       developers that their code, here given to public, cannot be copied and
       used for commercial purposes.
     </para>
-  </sect2>
+  </sect1>
 </chapter>

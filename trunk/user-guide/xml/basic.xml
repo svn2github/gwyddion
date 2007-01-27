@@ -261,7 +261,7 @@
         respectively.
       </listitem>
       <listitem id="flip-both">
-        Flip data about the center with
+        Flip data about the centre with
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>

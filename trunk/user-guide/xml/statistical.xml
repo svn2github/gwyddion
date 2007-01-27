@@ -135,11 +135,11 @@
       The surface area is estimated by the following method.
       Let <phrase role="math">z<subscript>i</subscript></phrase> for
       <phrase role="math">i</phrase> = 1, 2, 3, 4 be values in
-      four neighbour points (pixel centers), and
+      four neighbour points (pixel centres), and
       <phrase role="math">h<subscript>x</subscript></phrase> and
       <phrase role="math">h<subscript>y</subscript></phrase>
       pixel dimensions along corresponding axes.  If an additional point is
-      placed in the center of the rectangle which corresponds to the common
+      placed in the centre of the rectangle which corresponds to the common
       corner of the four pixels (using the mean value of the pixels),
       four triangles are formed and the surface area can be
       approximated by summing their areas. This leads to the following formulas

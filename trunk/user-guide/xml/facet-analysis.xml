@@ -20,7 +20,7 @@
     slope distribution.
   </para>
   <para>
-    The center of facet view always correspond to zero inclination (horizontal
+    The centre of facet view always correspond to zero inclination (horizontal
     facets),
     <!-- FIXME: not true any more? -->
     derivation in <phrase role="math">x</phrase>-direction increases towards

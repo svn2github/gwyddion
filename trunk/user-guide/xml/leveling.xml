@@ -257,8 +257,8 @@
         </menuchoice>
       </para>
       <para>
-        Fits part of sphere surface on the data. Sphere orientation (i. e.
-        center position) and initial fit values can be preset before fitting.
+        Fits part of sphere surface on the data. Sphere orientation (i.e.
+        centre position) and initial fit values can be preset before fitting.
         Marquardt-Levenberg fitting routine is used to calculate the result.
       </para>
     </sect3>
