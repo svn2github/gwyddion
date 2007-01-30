@@ -198,9 +198,124 @@
   </sect2>
   <sect2 id="cross-correlation">
     <title>Cross-Correlation</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Cross-correlation</guimenuitem>
+      </menuchoice>
+    </para>
+     <para>Module finds local correlations between details on two different images.
+      As an ideal output, the shift of every pixel on the first image as seen on the
+      second image is returned. This can be used for determining local changes on
+      the surface while imaged twice (shifts can be for example due to some sample deformation 
+      or microscope malfunction). 
+    </para>
+    <para>
+      For every pixel on the first operand (actual window), the module takes its neighbourhood and searches for the best correlation
+      in the second operand within defined area. The postion of the correlation maximum is used to set up the value of shift for
+      the mentioned pixel on the first operand.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Second operand</guilabel>
+        </term>
+        <listitem>
+          Image to be used for comparison with the first operand - base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Search size</guilabel>
+        </term>
+        <listitem>
+          Used to set the area whera algoritgm will search for the local neighbourhood (on the second operand).
+	  Should be larger than window size. Increase this size if there are big differences between the
+          compared images.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Window size</guilabel>
+        </term>
+        <listitem>
+          Used to set the local neighbourhood size (on the first operand).
+	  Should be smaller than search size. Increasing this value can improve the module
+          functionality, but it will surely slow down the computation.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Output type</guilabel>
+        </term>
+        <listitem>
+          Determines the output (pixel shift) format.  
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Add low score threshold mask</guilabel>
+        </term>
+        <listitem>
+          For some pixels (with not very pronounced neighbourhood) the correlation scores can
+          be small everywhere, but the algorithm anyway picks some maximum value from the scores.
+          To see these pixels and possibly remove them from any further considerations you can
+          let the module to set mask of low-score pixel shifts that have larger probability to be 
+          not accurately determined.
+        </listitem>
+      </varlistentry>
+       </variablelist>
   </sect2>
   <sect2 id="mask-by-correlation">
     <title>Mask by Correlation</title>
-  </sect2>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Mask by Correlation</guimenuitem>
+      </menuchoice>
+    </para>
+     <para>
+     Module searches for a given correlation pattern within the actual image. The resulting pattern position
+     is marked as a mask in the data window.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Correlation kernek</guilabel>
+        </term>
+        <listitem>
+          Image to be found on the base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Output type</guilabel>
+        </term>
+        <listitem>
+          There are several possibilities what to output: local correlation maxima (single points), 
+          masks of kernel size for each correlation maximum (good for presentation purposes), or
+          simply the correlation score.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Correlation method</guilabel>
+        </term>
+        <listitem>
+          Algorithm for computing correlation can be selected here.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Threshold</guilabel>
+        </term>
+        <listitem>
+          Threshold for determining whether the local maximum will be treated as "correlation kernel found here".
+        </listitem>
+      </varlistentry>
+    </variablelist>
+   </sect2>
 </sect1>
 
