@@ -230,8 +230,8 @@
         If you know the drill:
       </para>
       <informalexample>
-        <literallayout><userinput>tar -jxvf gwyddion-2.1.tar.bz2
-cd gwyddion-2.1
+        <literallayout><userinput>tar -jxvf gwyddion-2.4.tar.bz2
+cd gwyddion-2.4
 ./configure
 make install</userinput></literallayout>
       </informalexample>
@@ -241,15 +241,15 @@ make install</userinput></literallayout>
       <para>
         Unpack the source code tarball with
         <informalexample>
-          <userinput>tar -jxvf gwyddion-2.1.tar.bz2</userinput>
+          <userinput>tar -jxvf gwyddion-2.4.tar.bz2</userinput>
         </informalexample>
         or
         <informalexample>
-          <userinput>tar -zxvf gwyddion-2.1.tar.gz</userinput>
+          <userinput>tar -zxvf gwyddion-2.4.tar.gz</userinput>
         </informalexample>
-        replacing 2.1 with the actual version number. It will create directory
-        <filename>gwyddion-2.1</filename> (again, with the actual version
-        number in place of 2.1), <command>cd</command> to this directory.
+        replacing 2.4 with the actual version number. It will create directory
+        <filename>gwyddion-2.4</filename> (again, with the actual version
+        number in place of 2.4), <command>cd</command> to this directory.
         All other compilation actions will take place there.
       </para>
       <para>
@@ -445,9 +445,9 @@ make install</userinput></literallayout>
         It is possible to build RPM packages on RPM-based GNU/Linux
         distributions directly from source code tarballs with
         <informalexample>
-          <userinput>rpmbuild -tb gwyddion-2.1.tar.bz2</userinput>
+          <userinput>rpmbuild -tb gwyddion-2.4.tar.bz2</userinput>
         </informalexample>
-        where 2.1 is to be replaced with the actual version as above.
+        where 2.4 is to be replaced with the actual version as above.
       </para>
     </sect2>
   </sect1>
@@ -466,12 +466,12 @@ make install</userinput></literallayout>
       are two ways to install <application>Gwyddion</application>:
       <itemizedlist>
         <listitem>
-          using <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
-          compiling <application>Gwyddion</application> the common Unix way,
-        </listitem>
-        <listitem>
           using <ulink url="http://www.macports.org/">MacPorts</ulink>
           (formerly Darwinports) and building from a Portfile.
+        </listitem>
+        <listitem>
+          using <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
+          compiling <application>Gwyddion</application> the common Unix way,
         </listitem>
       </itemizedlist>
     </para>
@@ -534,6 +534,33 @@ make install</userinput></literallayout>
       </para>
     </sect2>
     <sect2>
+      <title>MacPorts</title>
+      <para>
+        MacPorts is an <application>Port</application> based System for
+        porting and installing Open Source/GNU software to OS X. It's based
+        on using installation files called <quote>Portfiles</quote> which
+        where describing the steps to compile and install an application. So
+        it's far easy to port software to OS X using MacPorts but every
+        computer has to compile the application.
+        Get and install
+        <ulink url="http://www.macports.org/">MacPorts</ulink>.
+        After you installed MacPorts, run
+        <informalexample>
+          <userinput>sudo port selfupdate</userinput>
+        </informalexample>
+        to update MacPorts to the latest version.
+      </para>
+      <para>
+        <application>Gwyddion</application> can be then built and installed
+        simply by
+        <informalexample>
+          <userinput>sudo port install gwyddion</userinput>
+        </informalexample>
+        The result will appear in <filename>/opt/local</filename> as any
+        other MacPorts software.
+      </para>
+    </sect2>
+    <sect2>
       <title>Fink</title>
       <para>
         <!-- XXX: a few more words about fink -->
@@ -555,43 +582,6 @@ make install</userinput></literallayout>
         <application>Gwyddion</application> source code, and follow the
         <link linkend="installation-unix-source">Unix installation
           section</link> instructions.
-      </para>
-    </sect2>
-    <sect2>
-      <title>MacPorts</title>
-      <para>
-        MacPorts is an <application>Port</application> based System for
-        porting and installing open source/gnu software to OS X. It's based
-        on using installation files called <quote>Portfiles</quote> which
-        where describing the steps to compile and install an application. So
-        it's far easy to port software to OS X using MacPorts but every
-        computer has to compile the application.
-        Get and install
-        <ulink url="http://www.macports.org/">MacPorts</ulink>.
-        After you installed MacPorts, run
-        <informalexample>
-          <userinput>sudo port selfupdate</userinput>
-        </informalexample>
-        to update MacPorts to the latest version.
-      </para>
-      <para>
-        <application>Gwyddion</application> has been submitted to MacPorts
-        therefore it should be eventually installable simply
-        <informalexample>
-          <userinput>sudo port install gwyddion</userinput>
-        </informalexample>
-        However, at the time of writing this it is not a part of Portbase yet
-        and it is not known when it will be.  Therefore you need to obtain a
-        <ulink url="http://gwyddion.net/download/test/Portfile"><filename>Portfile</filename></ulink>
-        from the project's web.
-        Store the <filename>Portfile</filename> to a folder,
-        <command>cd</command> to this folder, run
-        <informalexample>
-          <userinput>sudo port install</userinput>
-        </informalexample>
-        and wait until everything builds (it will take some time).
-        The result will appear in <filename>/opt/local</filename> as any
-        other MacPorts software.
       </para>
     </sect2>
     <sect2>
@@ -661,7 +651,7 @@ make install</userinput></literallayout>
       </para>
       <para>
         The unpacking will create directory
-        <filename>gwyddion-2.1</filename> (with 2.1 replaced with the actual
+        <filename>gwyddion-2.4</filename> (with 2.4 replaced with the actual
         version number) where all other compilation actions will take place.
       </para>
     </sect2>
@@ -796,10 +786,10 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
         version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
         build the installer, it will create
-        <filename>Gwyddion-2.1.exe</filename> (with 2.1 replaced with the
+        <filename>Gwyddion-2.4.exe</filename> (with 2.4 replaced with the
         actual version number), again in <filename>inst</filename>.  You can
         repeat this procedure with <filename>inst/gwyddion-devel.iss</filename>
-        to obtain <filename>Gwyddion-Development-2.1.exe</filename>, should
+        to obtain <filename>Gwyddion-Development-2.4.exe</filename>, should
         you ever need it.
       </para>
     </sect2>
