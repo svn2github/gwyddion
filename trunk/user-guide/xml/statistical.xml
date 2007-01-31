@@ -190,8 +190,8 @@
       direction to evaluate
       (<phrase role="math">x</phrase> or <phrase role="math">y</phrase>),
       but as stated above, we recommend using the fast scanning axis direction.
-      You can also select which interpolation method to use
-      (see <link>Interpolation<!--TODO: Fix link--></link>).
+      You can also select which
+      <link linkend="interpolation">interpolation</link> method to use.
       When you are finished, click <guibutton>Apply</guibutton> to close the
       tool window and output a new graph window containing the statistical data.
     </para>
@@ -210,12 +210,30 @@
       </indexterm>
       <para>
         The simplest statistical functions are the height and slope
-        distribution functions. These can be computed as non-cumulative or
-        cumulative. These functions are computed as normalized histograms of
-        the height or slope (obtained as dreivatives in the selected
-        direction – horizontal or vertical) values.  In other words, the
-        quantity on the abscissa in <quote>angle distribution</quote> is the
-        tangent of the angle, not the angle itself.
+        distribution functions. These can be computed as non-cumulative (i.e.
+        densities) or cumulative. These functions are computed as normalized
+        histograms of the height or slope (obtained as dreivatives in the
+        selected direction – horizontal or vertical) values. In other words,
+        the quantity on the abscissa in <quote>angle distribution</quote> is
+        the tangent of the angle, not the angle itself.
+      </para>
+      <para>
+        The normalization of the densities ρ(<phrase role="math">x</phrase>)
+        (where <phrase role="math">x</phrase> is the corresponding quantity,
+        height or slope) is such that
+      </para>
+      <informalequation>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-distribution-density-normalization.png" format="PNG"/>
+          </imageobject>
+        </mediaobject>
+      </informalequation>
+      <para>
+        Evidently, the scale of the values is then independent on the number
+        of data points and the number of histogram buckets.  The cumulative
+        distributions are integrals of the densities and they have values
+        from interval [0, 1].
       </para>
     </sect3>
     <sect3>
