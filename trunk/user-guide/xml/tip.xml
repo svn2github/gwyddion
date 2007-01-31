@@ -154,12 +154,14 @@
       As it can be seen, the most problematic parts of SPM image are data
       points, where tip did not touch the surface in a single point, mut in
       multiple points. There is a loss of information in these points.
-      Certainty map algorithm can identify these data points and mark them.
+      Certainty map algorithm can mark point where surface was probably
+      touched in a single point.
     </para>
     <figure>
       <title>
-        Certainty map obtained from columnar surface (having large pores).
-        (A) - sample, (B) sample with marked certainty map.
+        Certainty map obtained from standard grating. Note that the modelled
+        tip parameters were taken from datasheet here for illustration purposes.
+        (left) - sample, (right) sample with marked certainty map.
       </title>
       <mediaobject>
         <imageobject>
