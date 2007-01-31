@@ -337,9 +337,7 @@
         For optical measurements (e. g. spectroscopic reflectometry,
         ellipsometry) the Gaussian autocorrelation function is usually expected
         to be in good agreement with the surface properties. However, some
-        articles related with surface growth \cite{jordan} and oxidation
-        \cite{yoshinobu}
-        <!--TODO: These artical citations are not correct. -->
+        articles related with surface growth and oxidation
         usually assume that the exponential form is closer to the reality.
       </note>
     </sect3>
