@@ -237,7 +237,7 @@
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Presentation</guisubmenu>
-          <guimenuitem>Edge detection...</guimenuitem>
+          <guisubmenu>Edge Detection</guisubmenu>
         </menuchoice>
       </para>
       <indexterm><primary>edge detection</primary></indexterm>
@@ -246,7 +246,8 @@
       <para>
         Edge detection – Canny edge detector can be used to extract image of
         sharp edges on the data.  Laplacian presents a simple convolution with
-        the following kernel:
+        the following kernel (that is the limit of discrete Laplacian of
+        Gaussians filter for σ → 0):
         <informalequation>
           <mediaobject>
             <imageobject>
@@ -254,6 +255,16 @@
             </imageobject>
           </mediaobject>
         </informalequation>
+      </para>
+      <para id="edge-zero-crossing">
+        <indexterm><primary>zero crossing edge detection</primary></indexterm>
+        Zero crossing edge detection marks lines where the result of
+        Laplacian of Gaussians filter changes sign, i.e. crosses zero.
+        The FWHM (full width half maximum) of the Gaussians determines the
+        level of details covered.  Threshold enables to exclude sign changes
+        with too small absolute value of the neighbour pixels, filtering out
+        fine noise.  Note however that for non-zero threshold the edge lines
+        may become discontinuous.
       </para>
       <para>
         Some rather experimental edge detection algorithms are available too:
