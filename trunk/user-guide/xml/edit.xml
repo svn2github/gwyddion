@@ -132,6 +132,22 @@
       After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
       to the image. Other modules or tools can then be run to edit this data.
     </para>
+    <figure float='0'>
+      <title>
+        Scars marking and removal example:
+        (a) original data with defects,
+        (b) data with marked deffects,
+        (c) corrected data.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="remove-scars.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>Unrotate symmetries scheme</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
   </sect2>
   <sect2 id="remove-data-under-mask">
     <title>Remove Data Under Mask</title>

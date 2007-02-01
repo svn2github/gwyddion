@@ -113,10 +113,10 @@
     </para>
     <figure>
       <title>
-        Image of grain-like surface structure (a) and corresponding results
-        of height thresholding (b), curvature thresholding (c), and watershed
-        (d) algorithm. Within watershed algorithm it is possible to segment
-        image even further.
+        Image of grain-like surface structure (a) and corresponding results
+        of height thresholding (b), curvature thresholding (c), and
+        watershed (d) algorithm.   Within watershed algorithm it is possible
+        to segment image even further.
       </title>
       <mediaobject>
         <imageobject>

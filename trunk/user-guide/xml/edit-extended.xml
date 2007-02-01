@@ -64,8 +64,10 @@
     </para>
     <figure float='0'>
       <title>
-        Drift correction example: (a) original data exhibiting strong drift in
-        the fast scan axis, (b) corrected data, (c) calculated drift graph.
+        Drift correction example:
+        (a) original data exhibiting strong drift in the fast scan axis,
+        (b) corrected data,
+        (c) calculated drift graph.
       </title>
       <mediaobject>
         <imageobject>

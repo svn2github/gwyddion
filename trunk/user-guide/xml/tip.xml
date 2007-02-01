@@ -18,7 +18,7 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata width="600" fileref="alltips.png" format="PNG"/>
+        <imagedata fileref="alltips.png" format="PNG"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -165,7 +165,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata width="600" fileref="cmap.png" format="PNG"/>
+          <imagedata fileref="cmap.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>

@@ -424,12 +424,12 @@
     <figure>
       <title>
         Presentation examples:
-        (a) Original data,
-        (b) Shading,
-        (c) Vertical Prewitt gradient,
-        (d) Canny edge detection,
-        (e) Local non-linearity edge detection,
-        (f) Local contrast improvement.
+        (a) original data,
+        (b) shading,
+        (c) vertical Prewitt gradient,
+        (d) Canny edge detection,
+        (e) local non-linearity edge detection,
+        (f) local contrast improvement.
       </title>
       <mediaobject>
         <imageobject>
