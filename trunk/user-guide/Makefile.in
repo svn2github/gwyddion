@@ -64,7 +64,7 @@ dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
 	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
-	cp $(XSL_STYLES) $(CSS_STYLES) $(DISTNAME)
+	cp $(XSL_STYLES) $(CSS_STYLES) user-guide.iss.in $(DISTNAME)
 	cp images/*.png $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
 	cd ./formulas && $(GMAKE) dist
@@ -82,6 +82,7 @@ dist-xhtml: xhtml
 	test -z "$$fail"
 	-rm -rf $(DISTNAMEXHTML)
 	cp -R xhtml $(DISTNAMEXHTML)
+	cp user-guide.iss $(DISTNAMEXHTML)
 	chmod a+rx $(DISTNAMEXHTML)
 	chmod a+r $(DISTNAMEXHTML)/*
 	tar -zcf $(DISTNAMEXHTML).tar.gz $(DISTNAMEXHTML)
@@ -94,7 +95,7 @@ version:
 
 distclean: clean
 	cd ./formulas && $(GMAKE) distclean
-	-rm -fr Makefile config.status config.log autom4te.cache
+	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
 
 help:
 	@echo "xhtml        Compile User guide to XHTML"
