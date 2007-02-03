@@ -18,6 +18,8 @@ DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES = $(wildcard xml/*.xml)
 FORMULA_SOURCES = $(wildcard formulas/*.tex)
+IMAGES = $(shell sed -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]*\)".*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
+PNG_IMAGES = $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
 XSL_STYLES = fo.xsl xhtml.xsl
@@ -37,26 +39,26 @@ user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
 %.txt: %.html
 	$(HTML2TXT) $< >$@
 
-xhtml: formulas xhtml.stamp
+xhtml: xhtml.stamp
 
-xhtml.stamp: Makefile $(XML_SOURCES) xhtml.xsl
+xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
 	test -d xhtml || mkdir xhtml
 	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 	sed -i 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-	cp images/*.png xhtml
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 	cp user-guide.css xhtml
 	touch $@
 
 formulas: formulas.stamp
 
 formulas.stamp: $(FORMULA_SOURCES)
-	cd ./formulas && $(GMAKE)
+	+cd ./formulas && $(GMAKE)
 	test -d xhtml || mkdir xhtml
 	cp formulas/eq-*.png xhtml
 	touch $@
 
 clean:
-	cd ./formulas && $(GMAKE) clean
+	+cd ./formulas && $(GMAKE) clean
 	-rm -rf xhtml *.stamp xml/*~ *~
 	-rm -f *.aux *.log *.out $(PACKAGE).fo $(PACKAGE).xml
 
@@ -65,15 +67,15 @@ dist:
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
 	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) user-guide.iss.in $(DISTNAME)
-	cp images/*.png $(DISTNAME)/images
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
-	cd ./formulas && $(GMAKE) dist
+	+cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
 
 dist-xhtml: xhtml
 	@fail=; \
-	for x in $$(sed -e 's/.*<imagedata [^>]*fileref="\([^/"]*\)".*/\1/' -e t -e d xml/*.xml); do \
+	for x in $(IMAGES); do \
 		if test \! -f xhtml/$$x; then \
 			echo Missing image: $$x 1>&2; \
 			fail=fail; \
@@ -94,7 +96,7 @@ version:
 	autoconf && ./configure
 
 distclean: clean
-	cd ./formulas && $(GMAKE) distclean
+	+cd ./formulas && $(GMAKE) distclean
 	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
 
 help:
