@@ -11,7 +11,7 @@
     If you want to become developer, we recommend you to start with some
     simple modules (see module tutorial), to see how the application works.
     If you write a module or plug-in, you are encouraged to share it here
-    with other Gwyddion users. Please, let us know, so that we can link your
+    with other Gwyddion users.  Let us know, so that we can link your
     modules or plug-ins to these pages or even include in it Gwyddion. You
     don't have to limit yourself to modules or plug-ins of course, but they
     should be easier to start with.
@@ -20,7 +20,7 @@
     <title>API References</title>
     <para>
       There are many functions that can help you while developing your module.
-      Please, see API reference at
+      See API reference at
       <ulink url="http://gwyddion.net/documentation/">Documentation
         section</ulink> of the project web.
     </para>

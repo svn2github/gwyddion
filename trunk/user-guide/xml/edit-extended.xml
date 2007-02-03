@@ -79,7 +79,7 @@
   <sect2 id="fft-filter-1d">
     <title>1D FFT Filter</title>
     <indexterm>
-      <primary>FFT</primary>
+      <primary>Fourier transform</primary>
       <secondary>1D filtering</secondary>
     </indexterm>
     <para>
@@ -109,7 +109,7 @@
   <sect2 id="fft-filter-2d">
     <title>2D FFT Filter</title>
     <indexterm>
-      <primary>FFT</primary>
+      <primary>Fourier transform</primary>
       <secondary>2D filtering</secondary>
     </indexterm>
     <para>

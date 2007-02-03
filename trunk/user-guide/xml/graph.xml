@@ -37,6 +37,7 @@
   </sect2>
   <sect2 id="graph-fit">
     <title>Fit Graph</title>
+    <indexterm><primary>function fitting</primary></indexterm>
     <para>
       This module is designed namely for fitting the statistical function by
       means of functions mostly used in roughness parameters evaluation. This
@@ -64,6 +65,7 @@
   </sect2>
   <sect2 id="graph-critical-dimension">
     <title>Critical Dimension</title>
+    <indexterm><primary>critical dimension</primary></indexterm>
     <para>
       Critical dimension module can be used to fit some
       <quote>typical</quote> objects that can be often found while analyzing

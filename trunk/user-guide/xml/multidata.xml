@@ -4,11 +4,9 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-multidata">
   <title>Multiple Data</title>
-  <para>
-    To be written.
-  </para>
   <sect2 id="data-arithmetic">
     <title>Arithmetic</title>
+    <indexterm><primary>arithmetic on data</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -57,6 +55,7 @@
   </sect2>
   <sect2 id="immerse">
     <title>Detail Immersion</title>
+    <indexterm><primary>detail image immersion</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -132,6 +131,8 @@
   </sect2>
   <sect2 id="merge">
     <title>Merging</title>
+    <indexterm><primary>merging images</primary></indexterm>
+    <indexterm><primary>joining images</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -198,6 +199,7 @@
   </sect2>
   <sect2 id="cross-correlation">
     <title>Cross-Correlation</title>
+    <indexterm><primary>cross-correlation</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -205,16 +207,20 @@
         <guimenuitem>Cross-correlation</guimenuitem>
       </menuchoice>
     </para>
-     <para>Module finds local correlations between details on two different images.
-      As an ideal output, the shift of every pixel on the first image as seen on the
-      second image is returned. This can be used for determining local changes on
-      the surface while imaged twice (shifts can be for example due to some sample deformation 
-      or microscope malfunction). 
+    <para>
+      Module finds local correlations between details on two different
+      images. As an ideal output, the shift of every pixel on the first image
+      as seen on the second image is returned. This can be used for
+      determining local changes on the surface while imaged twice (shifts can
+      be for example due to some sample deformation or microscope
+      malfunction).
     </para>
     <para>
-      For every pixel on the first operand (actual window), the module takes its neighbourhood and searches for the best correlation
-      in the second operand within defined area. The postion of the correlation maximum is used to set up the value of shift for
-      the mentioned pixel on the first operand.
+      For every pixel on the first operand (actual window), the module takes
+      its neighbourhood and searches for the best correlation in the second
+      operand within defined area. The postion of the correlation maximum is
+      used to set up the value of shift for the mentioned pixel on the first
+      operand.
     </para>
     <variablelist>
       <varlistentry>
@@ -230,8 +236,9 @@
           <guilabel>Search size</guilabel>
         </term>
         <listitem>
-          Used to set the area whera algoritgm will search for the local neighbourhood (on the second operand).
-	  Should be larger than window size. Increase this size if there are big differences between the
+          Used to set the area whera algoritgm will search for the local
+          neighbourhood (on the second operand). Should be larger than window
+          size. Increase this size if there are big differences between the
           compared images.
         </listitem>
       </varlistentry>
@@ -241,8 +248,9 @@
         </term>
         <listitem>
           Used to set the local neighbourhood size (on the first operand).
-	  Should be smaller than search size. Increasing this value can improve the module
-          functionality, but it will surely slow down the computation.
+          Should be smaller than search size. Increasing this value can
+          improve the module functionality, but it will surely slow down the
+          computation.
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -250,7 +258,7 @@
           <guilabel>Output type</guilabel>
         </term>
         <listitem>
-          Determines the output (pixel shift) format.  
+          Determines the output (pixel shift) format.
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -258,17 +266,19 @@
           <guilabel>Add low score threshold mask</guilabel>
         </term>
         <listitem>
-          For some pixels (with not very pronounced neighbourhood) the correlation scores can
-          be small everywhere, but the algorithm anyway picks some maximum value from the scores.
-          To see these pixels and possibly remove them from any further considerations you can
-          let the module to set mask of low-score pixel shifts that have larger probability to be 
-          not accurately determined.
+          For some pixels (with not very pronounced neighbourhood) the
+          correlation scores can be small everywhere, but the algorithm
+          anyway picks some maximum value from the scores. To see these
+          pixels and possibly remove them from any further considerations you
+          can let the module to set mask of low-score pixel shifts that have
+          larger probability to be not accurately determined.
         </listitem>
       </varlistentry>
-       </variablelist>
+    </variablelist>
   </sect2>
   <sect2 id="mask-by-correlation">
     <title>Mask by Correlation</title>
+    <indexterm><primary>correlation search</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -276,14 +286,15 @@
         <guimenuitem>Mask by Correlation</guimenuitem>
       </menuchoice>
     </para>
-     <para>
-     Module searches for a given correlation pattern within the actual image. The resulting pattern position
-     is marked as a mask in the data window.
+    <para>
+      Module searches for a given correlation pattern within the actual
+      image. The resulting pattern position is marked as a mask in the data
+      window.
     </para>
     <variablelist>
       <varlistentry>
         <term>
-          <guilabel>Correlation kernek</guilabel>
+          <guilabel>Correlation kernel</guilabel>
         </term>
         <listitem>
           Image to be found on the base image.
@@ -294,9 +305,10 @@
           <guilabel>Output type</guilabel>
         </term>
         <listitem>
-          There are several possibilities what to output: local correlation maxima (single points), 
-          masks of kernel size for each correlation maximum (good for presentation purposes), or
-          simply the correlation score.
+          There are several possibilities what to output: local correlation
+          maxima (single points), masks of kernel size for each correlation
+          maximum (good for presentation purposes), or simply the correlation
+          score.
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -312,10 +324,11 @@
           <guilabel>Threshold</guilabel>
         </term>
         <listitem>
-          Threshold for determining whether the local maximum will be treated as "correlation kernel found here".
+          Threshold for determining whether the local maximum will be treated
+          as <quote>correlation kernel found here</quote>.
         </listitem>
       </varlistentry>
     </variablelist>
-   </sect2>
+  </sect2>
 </sect1>
 

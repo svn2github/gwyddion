@@ -4,6 +4,7 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title id="features-edit.title">Data Edit and Correction</title>
+  <indexterm><primary>defect correction</primary></indexterm>
   <para>
     There are several modules that enable direct or indirect editing of the
     SPM data. In principal, most of the data processing modules change the data
@@ -68,6 +69,8 @@
       Remove Scars
       <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>
     </title>
+    <indexterm><primary>scars correction</primary></indexterm>
+    <indexterm><primary>strokes correction</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -166,6 +169,7 @@
   </sect2>
   <sect2 id="fractal-correction">
     <title>Fractal Correction</title>
+    <indexterm><primary>fractal interpolation</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -192,6 +196,7 @@
   </sect2>
   <sect2 id="mask-of-outliers">
     <title>Mask of Outliers</title>
+    <indexterm><primary>outliers correction</primary></indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -211,6 +216,7 @@
       Line Correction
       <guiicon><inlinegraphic fileref="gwy_line_level-24.png"/></guiicon>
     </title>
+    <indexterm><primary>line correction</primary></indexterm>
     <para>
       Several functions can be used for line correction: The Polynomial tool
       and then several procedures under

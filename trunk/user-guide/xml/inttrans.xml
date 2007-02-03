@@ -17,6 +17,7 @@
   </para>
   <sect2 id="fft">
     <title>Fourier Transform</title>
+    <indexterm><primary>Fourier transform</primary></indexterm>
     <para>
       Fourier transform can be accessed within FFT module which implements
       Fast Fourier transform. Fourier transform decomposes signal into its
@@ -102,6 +103,7 @@
   </sect2>
   <sect2>
     <title>Wavelet Transform</title>
+    <indexterm><primary>wavelet transform</primary></indexterm>
     <para>
       The wavelet transform is a transform similar to the Fourier transform
       (or much more to the windowed Fourier transform) with a completely
@@ -175,6 +177,10 @@
     </para>
     <sect3 id="dwt">
       <title>Discrete Wavelet Transform</title>
+      <indexterm>
+        <primary>wavelet transform</primary>
+        <secondary>discrete</secondary>
+      </indexterm>
       <para>
         The discrete wavelet transform (DWT) is an implementation of the
         wavelet transform using a discrete set of the wavelet scales and
@@ -370,6 +376,10 @@
     </sect3>
     <sect3 id="cwt">
       <title>Continuous Wavelet Transform</title>
+      <indexterm>
+        <primary>wavelet transform</primary>
+        <secondary>continuous</secondary>
+      </indexterm>
       <para>
         Continuous wavelet transform (CWT) is an implementaion of the wavelet
         transform using an arbitrary scales and almost arbitrary wavelets.

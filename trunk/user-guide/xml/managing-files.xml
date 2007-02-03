@@ -357,7 +357,7 @@
       By default, Gwyddion detects the file format automatically based on
       file contents (i.e. file names and extensions are irrelevant).  This
       usually works well and you will hopefully never need to change it.
-      Please see <link linkend="raw-file-import">Raw Data File Import</link>
+      See <link linkend="raw-file-import">Raw Data File Import</link>
       for details of import of data from unsupported formats and from
       <link linkend="pixmap-file-import">pixmap images</link>.
     </para>
@@ -381,7 +381,7 @@
     <para>
       Once a file type is selected it remains selected even in subsequent
       file open dialog invocations.  If you seem to be suddenly unable to
-      load a file, please check the file type is set to the corresponding
+      load a file, check the file type is set to the corresponding
       type, or to <guilabel>Automatically detected</guilabel>.
     </para>
     <figure>

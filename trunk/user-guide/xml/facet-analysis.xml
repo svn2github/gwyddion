@@ -21,10 +21,8 @@
   </para>
   <para>
     The centre of facet view always correspond to zero inclination (horizontal
-    facets),
-    <!-- FIXME: not true any more? -->
-    derivation in <phrase role="math">x</phrase>-direction increases towards
-    left and right border and derivation in
+    facets), slope in <phrase role="math">x</phrase>-direction increases
+    towards left and right border and slope in
     <phrase role="math">y</phrase>-direction increases towards top and bottom
     borders.  The exact coordinate system is a bit complex and it adapts to
     the range of slopes in the particular data displayed.

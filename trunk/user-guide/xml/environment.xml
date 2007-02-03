@@ -7,7 +7,7 @@
   <para>
     On Linux/Unix, following environment variables can be used to override compiled-in
     installation paths (MS Windows version always looks to directories relative to path where it
-    was installed). Please not they are intended to override system installation paths therefore
+    was installed). Note they are intended to override system installation paths therefore
     they are not path lists, they can contain only a single path.
   </para>
   <variablelist>
