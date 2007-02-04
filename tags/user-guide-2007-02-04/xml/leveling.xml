@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="features-leveling">
+  <title>Data Leveling and Background Subtraction</title>
+  <sect2>
+    <title>Leveling</title>
+    <para>
+      The data obtained from SPM microscopes are
+      <!--TODO: should it be "are" or "is"?-->
+      very often not leveled at all; the microscope directly outputs raw data
+      values computed from piezoscanner voltage, strain gauge, interferometer or
+      other detection system values. This way of exporting data enables the user
+      to choose his/her own method of leveling data.
+    </para>
+    <para>
+      The choice of leveling method should be based on your SPM system
+      configuration. Basically, for systems with independent scanner(s) for
+      each axis, plane leveling should be sufficient. For systems with
+      scanner(s) moving in all three axes (tube scanners) 2nd order polynomial
+      leveling should be used.
+    </para>
+    <para>
+      Of course, you can use higher order leveling for any data, however, this
+      can supress real features on the surface (namely waviness of the surface)
+      and therefore alter the statistical functions and quantities evaluated
+      from the surface.
+    </para>
+    <sect3 id="fix-zero">
+      <title>Fix Zero and Zero Mean Value</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Fix Zero</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Zero Mean Value</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        The simplest modules that are connected with data leveling are
+        <link linkend="fix-zero">Fix Zero</link> and
+        <link linkend="fix-zero">Zero Mean Value</link>
+        that simply set the average height of the data to put the minimum
+        to zero (Fix Zero) or mean value to zero (Zero Mean Value).
+      </para>
+    </sect3>
+    <sect3 id="plane-level">
+      <title>
+        Plane Level
+        <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
+      </title>
+      <indexterm><primary>plane leveling</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Plane Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Plane leveling is usually one of the first functions applied to raw SPM
+        data. The plane is computed from all the image points and is subtracted
+        from the data.
+      </para>
+      <tip>
+        You can quickly apply plane leveling by simply right-clicking on
+        the image window and selecting <guimenuitem>Level</guimenuitem>.
+      </tip>
+    </sect3>
+    <sect3 id="three-point-level">
+      <title>
+        Three Point Leveling Tool
+        <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
+      </title>
+      <indexterm><primary>three-point leveling</primary></indexterm>
+      <para>
+        The <guilabel>Three Point Leveling</guilabel>
+        tool can be used for leveling very complicated surface structures.
+        The user can simply mark three points in the image that should be at
+        the same level, and then click <guibutton>Apply</guibutton>. The plane
+        is computed from these three points and is subtracted from the data.
+      </para>
+    </sect3>
+    <sect3 id="facet-level">
+      <title>
+        Facet Level
+        <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
+      </title>
+      <indexterm><primary>facet leveling</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Facet Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <link linkend="facet-level">Facet Level</link> levels data by
+        subtracting a plane like the standard
+        <link linkend="plane-level">Plane Level</link> function does.
+        However, the plane is determined differently: it makes facets of the
+        surface as horizontal as possible. Thus for surfaces with flat horizontal
+        areas it leads to much better results than the standard
+        <link linkend="plane-level">Plane Level</link>.
+        On the other hand, for random surfaces, it can behave much worse.
+      </para>
+      <figure float="0">
+        <title>
+          Facet Level example:
+          (a) uncorrected, sloping data;
+          (b) data leveled by standard plane fitting (Plane Level);
+          (c) data leveled by Facet Level.
+        </title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="level-plane-facet.png" format="PNG"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </sect3>
+    <sect3 id="level-rotate">
+      <title>Level Rotate</title>
+      <indexterm><primary>rotation leveling</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Level Rotate</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <link linkend="level-rotate">Level Rotate</link> behaves similarly to
+        <link linkend="plane-level">Plane Level</link>, however it does
+        not simply subtract the fitted plane from the data. Instead, this module
+        takes the fitted plane parameters and rotates the image data by a
+        calculated amount to make it lie in a plane. So unlike
+        <link linkend="plane-level">Plane Level</link>, this
+        module should therefore preserve angle data in the image.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id="background-subtraction">
+    <title>Background Subtraction</title>
+    <indexterm><primary>background subtraction</primary></indexterm>
+    <para>
+      Gwyddion has several special modules for background subtraction. All
+      allow you to extract the subtracted background to a separate data window.
+    </para>
+    <tip>
+      For finer control, you can use any of Gwyddion's
+      <link linkend="basic-filters">filtering tools</link> on an image,
+      and then use the <link linkend="data-arithmetic">Data Arithmetic</link>
+      module to subtract the results from your original image.
+    </tip>
+    <sect3 id="polynomial-level">
+      <title>
+        Polynomial Background
+        <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
+      </title>
+      <indexterm><primary>polynomial background</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Polynomial Background</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fits data by a polynomial of the given order and subtracts this
+        polynomial.  In the <guilabel>Independent degree</guilabel> mode
+        the horizontal and vertical polynomial orders can be generally set
+        separately, i.e. the fitted polynomial is
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-polynomial-independent-degree.png" format="PNG"/>
+            </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with independent maximum x and y
+                degrees
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where <phrase role="math">m</phrase> and <phrase role="math">n</phrase>
+        are the selected horizontal and vertical polynomial degrees,
+        respectively.  In the <guilabel>Limited total degree</guilabel> mode
+        the fitted polynomial is
+        <informalequation>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-polynomial-total-degree.png" format="PNG"/>
+            </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with limited total degree
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where <phrase role="math">n</phrase> is the selected total polynomial
+        degree.
+      </para>
+    </sect3>
+    <sect3 id="revolve-arc">
+      <title>Revolve Arc</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Revolve Arc</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Revolves virtual 'arc' of given radius horizontally or vertically over
+        (or under) the data. The envelope of this arc is treated as a
+        background, resulting in removal of features larger than the arc radius
+        (approximately).
+      </para>
+    </sect3>
+    <sect3 id="median-level">
+      <title>Median Level</title>
+      <indexterm>
+        <primary>median</primary>
+        <secondary>background removal</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Median Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Filters data with a median filter using a large kernel and treats the
+        result as background. Only features smaller than approximately the
+        kernel size will be kept.
+      </para>
+      <note>This method can be very slow.</note>
+    </sect3>
+    <sect3 id="fit-sphere">
+      <title>Fit Sphere</title>
+      <indexterm><primary>sphere fitting</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Fit sphere</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fits part of sphere surface on the data. Sphere orientation (i.e.
+        centre position) and initial fit values can be preset before fitting.
+        Marquardt-Levenberg fitting routine is used to calculate the result.
+      </para>
+    </sect3>
+  </sect2>
+</sect1>

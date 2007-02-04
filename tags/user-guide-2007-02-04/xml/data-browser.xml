@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="data-browser">
+  <title>Data Browser</title>
+  <para>
+    Data browser is a window that displays the actually focused Gwyddion
+    native file (<filename>*.gwy</filename>) structure. As the Gwyddion
+    native file format supports more channels for height (or other physical
+    parameters) data and more graphs to be present in one file, data browser
+    is a tool for browsing and managing all the available channels and
+    graphs.
+  </para>
+  <para>
+    As data browser displays all the time the structure of actually focused
+    file, its content is switching if the user switches between different
+    windows (belonging to different files).  If user loads new file (any
+    type), it is automatically treated as a new Gwyddion file too.
+  </para>
+  <para>
+    The check left of the channel or graph name controls whether it is
+    displayed in a window.  When all windows belonging to a file (i.e.,
+    showing items of this file) are closed the file is closed too.  The
+    browser displays some auxiliary information right to the name, it is
+    specific to each item type.  For channels it indicates the presence of
+    masks (M) and presentations (P), the graph list shows the number of
+    curves in the graph.
+  </para>
+  <para>
+    Individual channels of graphs can be deleted, duplicated or extracted to
+    new Gwyddion native file using data browser buttons. It is also possible
+    to copy a graph or channel to another file by dragging a data browser row
+    to any window belonging to the target file.
+  </para>
+  <para>
+    Data browser can be closed by user and afterwards recalled back using the
+    <menuchoice>
+      <guimenu>Meta</guimenu>
+      <guimenuitem>Show Data Browser</guimenuitem>
+    </menuchoice>
+    command.
+  </para>
+  <para>
+  </para>
+  <figure float="0">
+    <title>
+      Data browser displaying several open channels.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="data_browser.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</sect1>

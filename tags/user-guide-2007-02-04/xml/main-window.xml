@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="main-window">
+  <title>Main Window</title>
+  <para>
+    The main window is one of the two Gwyddion windows that appear after
+    program start (with no parameters).  The main window consist of set of
+    Gwyddion menus:
+    <menuchoice>
+      <guimenu>File</guimenu>
+    </menuchoice>,
+    <menuchoice>
+      <guimenu>Edit</guimenu>
+    </menuchoice>,
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+    </menuchoice>,
+    <menuchoice>
+      <guimenu>Graph</guimenu>
+    </menuchoice>
+    and
+    <menuchoice>
+      <guimenu>Meta</guimenu>
+    </menuchoice>,
+    and from several rows of buttons connected with tools
+    and modules (modules are accessible also by menus).
+  </para>
+  <para>
+    <menuchoice>
+      <guimenu>File</guimenu>
+    </menuchoice>
+    menu associates commands that are used for file input and output. Global
+    commands (e. g. <guimenuitem>Exit</guimenuitem>) are located here too.
+    Submenu command names are self-explanatory
+    (<guimenuitem>Open</guimenuitem>, <guimenuitem>Save</guimenuitem>, etc.).
+    The history of recently opened files can be browsed with
+    <menuchoice>
+      <guimenu>File</guimenu>
+      <guisubmenu>Open Recent</guisubmenu>
+      <guimenuitem>Document History</guimenuitem>
+    </menuchoice>.
+  </para>
+  <para>
+    <menuchoice>
+      <guimenu>Edit</guimenu>
+    </menuchoice>
+    menu constist of history manipulation commands (Undo, Redo) and commands
+    that can be used to change some of the global program parameters, like
+    setting mask color or editing gradients and materials for false color and
+    3D data representation.
+  </para>
+  <para>
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+    </menuchoice>
+    menu is built automatically from all the modules available at the
+    Gwyddion modules directory (depending on operating system). Modules are
+    responsible for all the data processing, so this menu item associates
+    most of the commands you will need at analyzing your SPM data. Note that
+    all the tools (special class of modules connected with mouse selections)
+    are accessible only though Tools panel of buttons in the main window, not
+    though this menu.
+  </para>
+  <para>
+    <menuchoice>
+      <guimenu>Graph</guimenu>
+    </menuchoice>
+    menu consist of commands that are applicable on graphs. Graph processing
+    includes reading values of graphs, measuring profile distances, exporting
+    graphs etc.
+  </para>
+  <para>
+    <menuchoice>
+      <guimenu>Meta</guimenu>
+    </menuchoice>
+    contains commands that provide information about height field metadata
+    (e. g. scanning speed, tip voltage, etc.) and information about
+    Gwyddion itself.
+  </para>
+  <para>
+    Finally, you can find some rows of buttons in the main window. These
+    buttons represent tools and some of the modules (selection of the mostly
+    used ones).
+  </para>
+  <figure float="0">
+    <title>
+      Main window with data view showing microchip surface (Gwyddion sample
+      file).
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="main_window.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</sect1>

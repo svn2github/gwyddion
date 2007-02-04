@@ -1,0 +1,110 @@
+# XXX: needs working catalog setup, otherwise everything is fetched from
+# network!
+export
+
+VERSION = @PACKAGE_VERSION@
+BASENAME = @PACKAGE_TARNAME@
+PACKAGE = @PACKAGE_SHORTNAME@
+
+GMAKE = @GMAKE@
+XSLTPROC = @XSLTPROC@ --xinclude
+PDFXMLTEX = @PDFXMLTEX@
+HTML2TXT = @LYNX@ -force_html -dump -nolist
+
+DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
+
+DISTNAME = $(BASENAME)-$(VERSION)
+DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
+MAIN_XML_SOURCE = xml/$(PACKAGE).xml
+XML_SOURCES = $(wildcard xml/*.xml)
+FORMULA_SOURCES = $(wildcard formulas/*.tex)
+IMAGES = $(shell sed -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]*\)".*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
+PNG_IMAGES = $(filter-out eq-%.png,$(IMAGES))
+SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
+
+XSL_STYLES = fo.xsl xhtml.xsl
+CSS_STYLES = user-guide.css
+
+all: xhtml
+
+Makefile: Makefile.in ./config.status
+	./config.status Makefile
+
+pdf: $(PACKAGE).pdf
+
+user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
+	$(XSLTPROC) -o $(PACKAGE).fo fo.xsl $(MAIN_XML_SOURCE)
+	$(PDFXMLTEX) $(PACKAGE).fo
+
+%.txt: %.html
+	$(HTML2TXT) $< >$@
+
+xhtml: xhtml.stamp
+
+xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
+	test -d xhtml || mkdir xhtml
+	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
+	sed -i 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
+	cp user-guide.css xhtml
+	touch $@
+
+formulas: formulas.stamp
+
+formulas.stamp: $(FORMULA_SOURCES)
+	+cd ./formulas && $(GMAKE)
+	test -d xhtml || mkdir xhtml
+	cp formulas/eq-*.png xhtml
+	touch $@
+
+clean:
+	+cd ./formulas && $(GMAKE) clean
+	-rm -rf xhtml *.stamp xml/*~ *~
+	-rm -f *.aux *.log *.out $(PACKAGE).fo $(PACKAGE).xml
+
+dist:
+	-rm -rf $(DISTNAME)
+	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
+	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
+	cp $(XSL_STYLES) $(CSS_STYLES) user-guide.iss.in $(DISTNAME)
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
+	cp xml/*.xml $(DISTNAME)/xml
+	+cd ./formulas && $(GMAKE) dist
+	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
+	rm -rf $(DISTNAME)
+
+dist-xhtml: xhtml
+	@fail=; \
+	for x in $(IMAGES); do \
+		if test \! -f xhtml/$$x; then \
+			echo Missing image: $$x 1>&2; \
+			fail=fail; \
+		fi; \
+	done; \
+	test -z "$$fail"
+	-rm -rf $(DISTNAMEXHTML)
+	cp -R xhtml $(DISTNAMEXHTML)
+	cp user-guide.iss $(DISTNAMEXHTML)
+	chmod a+rx $(DISTNAMEXHTML)
+	chmod a+r $(DISTNAMEXHTML)/*
+	tar -zcf $(DISTNAMEXHTML).tar.gz $(DISTNAMEXHTML)
+	-rm -rf $(DISTNAMEXHTML)
+
+version:
+	d=`date --iso`; \
+	sed -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
+	autoconf && ./configure
+
+distclean: clean
+	+cd ./formulas && $(GMAKE) distclean
+	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
+
+help:
+	@echo "xhtml        Compile User guide to XHTML"
+	@echo "all          The same"
+	@echo "dist         Create tarball with DocBook sources"
+	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
+	@echo "version      Update version number to current date"
+
+.PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
+.PRECIOUS: Makefile

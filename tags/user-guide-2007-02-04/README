@@ -1,0 +1,23 @@
+Some random remarks:
+
+* If you downloaded and unpacked this and wonder what to do with it, you
+  downloaded the wrong package.  This is the DocBook source code.  Get the
+  ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
+
+* xml/      contains the XML DocBook sources,
+  formulas/ contains TeX sources of formula images
+  images/   contains bitmap images
+  xhtml/    will contain the compiled XHTML
+
+* GNU make is required; configure detects whether you have it, but you
+  still have to type (for example)
+
+    gmake
+
+  to build the guide.
+
+* You may need to specify location of the XML catalog to configure:
+
+    ./configure --with-xml-catalog=/usr/local/share/xml/catalog
+
+* After svn checkout, run autoconf to generate configure.
