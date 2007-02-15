@@ -31,6 +31,7 @@
 #include <libgwydgets/gwylayer-basic.h>
 #include <libgwydgets/gwyradiobuttons.h>
 #include <libgwydgets/gwydgetutils.h>
+#include <libgwydgets/gwystock.h>
 #include <libgwymodule/gwymodule-process.h>
 #include <app/gwyapp.h>
 
@@ -49,7 +50,7 @@
 #define downsample_limit 20
 
 enum {
-    PREVIEW_SIZE = 320
+    PREVIEW_SIZE = 400
 };
 
 typedef enum {
@@ -182,7 +183,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Immerse high resolution detail into overall image."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "2.0",
+    "2.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -195,7 +196,7 @@ module_register(void)
     gwy_process_func_register("immerse",
                               (GwyProcessFunc)&immerse,
                               N_("/M_ultidata/_Immerse Detail..."),
-                              NULL,
+                              GWY_STOCK_IMMERSE,
                               IMMERSE_RUN_MODES,
                               GWY_MENU_FLAG_DATA,
                               N_("Immerse a detail into image"));
@@ -283,8 +284,12 @@ immerse_dialog(ImmerseArgs *args)
                                       TRUE);
     controls.view = gwy_data_view_new(controls.mydata);
     layer = gwy_layer_basic_new();
-    gwy_pixmap_layer_set_data_key(layer, "/0/data");
-    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    g_object_set(layer,
+                 "data-key", "/0/data",
+                 "gradient-key", "/0/base/palette",
+                 "range-type-key", "/0/base/range-type",
+                 "min-max-key", "/0/base",
+                 NULL);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view), layer);
     /* XXX: This is wrong with realsquare=TRUE */
     zoomval = PREVIEW_SIZE/(gdouble)MAX(gwy_data_field_get_xres(dfield),
@@ -321,7 +326,7 @@ immerse_dialog(ImmerseArgs *args)
     g_signal_connect(chooser, "changed",
                      G_CALLBACK(immerse_detail_cb), &controls);
     gwy_table_attach_hscale(table, row, _("_Detail image:"), NULL,
-                            GTK_OBJECT(chooser), GWY_HSCALE_WIDGET);
+                            GTK_OBJECT(chooser), GWY_HSCALE_WIDGET_NO_EXPAND);
     row++;
 
     /* Detail position */

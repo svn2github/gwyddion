@@ -327,6 +327,15 @@ gwy_correlation_type_get_enum(void)
  * @GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE: Direction of the maximum lateral
  *                                       bounding size (arbitrary one if the
  *                                       maximum is not unique).
+ * @GWY_GRAIN_VALUE_VOLUME_0: Grain volume calculated with grain basis at
+ *                            z=0 (therefore it is just an integral it can be
+ *                            negative).  (Since: 2.3)
+ * @GWY_GRAIN_VALUE_VOLUME_MIN: Grain volume calculated with grain basis at
+ *                              grain minimum value.  This value is a lower
+ *                              bound.  (Since: 2.3)
+ * @GWY_GRAIN_VALUE_VOLUME_LAPLACE: Grain volume calculated with grain basis
+ *                                  calculated by laplacian interpolation of
+ *                                  surrounding values.  (Since: 2.3)
  *
  * Grain quantity to request from gwy_data_field_grains_get_distribution()
  * and similar functions.
@@ -375,6 +384,35 @@ gwy_correlation_type_get_enum(void)
  *
  * Line statistical quantities to be requested with
  * gwy_data_field_area_get_line_stats().
+ *
+ * Since: 2.2
+ **/
+
+/**
+ * GwyExteriorType;
+ * @GWY_EXTERIOR_UNDEFINED: The values corresponding to or calculated from
+ *                          exterior data values are undefined, they may be
+ *                          left unset or set to bogus values.  The caller
+ *                          must handle them itself afterwards, for instance
+ *                          by resizing the result to consist of valid data
+ *                          only.
+ * @GWY_EXTERIOR_BORDER_EXTEND: Values of exterior pixels are considered to be
+ *                              equal to the values of the nearest interior
+ *                              pixels.
+ * @GWY_EXTERIOR_MIRROR_EXTEND: The data is considered to be periodically
+ *                              repeated, with odd instances reflected
+ *                              (the total period is thus twice the size of
+ *                              the data).
+ * @GWY_EXTERIOR_PERIODIC: The data is considered to be periodically repeated.
+ * @GWY_EXTERIOR_FIXED_VALUE: Values of exterior pixels are considered to
+ *                            be all equal to a user-specified value.
+ *
+ * Methods to handle pixels outside data.
+ *
+ * Many methods currently use a fixed metod of handling of exterior pixels,
+ * for example area calculation uses extension (border and mirror coincide),
+ * convolution uses mirror extension, rotation fills exterior with
+ * a fixed value.
  *
  * Since: 2.2
  **/

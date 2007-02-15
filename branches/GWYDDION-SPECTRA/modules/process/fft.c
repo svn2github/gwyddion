@@ -111,7 +111,7 @@ module_register(void)
 {
     gwy_process_func_register("fft",
                               (GwyProcessFunc)&fft,
-                              N_("/_Integral Transforms/_2D FFT..."),
+                              N_("/_Integral Transforms/2D _FFT..."),
                               GWY_STOCK_FFT,
                               FFT_RUN_MODES,
                               GWY_MENU_FLAG_DATA,
@@ -168,10 +168,6 @@ fft(GwyContainer *data, GwyRunType run)
 
     raout = gwy_data_field_new_alike(dfield, FALSE);
     ipout = gwy_data_field_new_alike(dfield, FALSE);
-
-    gwy_data_field_multiply(dfield, 1.0
-                            /(gwy_data_field_get_max(dfield)
-                              - gwy_data_field_get_min(dfield)));
 
     gwy_data_field_2dfft(dfield, NULL,
                          raout, ipout,

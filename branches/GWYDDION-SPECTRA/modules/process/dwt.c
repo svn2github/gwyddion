@@ -29,6 +29,7 @@
 #include <libprocess/gwyprocesstypes.h>
 #include <libgwydgets/gwydgetutils.h>
 #include <libgwydgets/gwycombobox.h>
+#include <libgwydgets/gwystock.h>
 #include <libgwymodule/gwymodule-process.h>
 #include <app/gwyapp.h>
 
@@ -84,8 +85,8 @@ module_register(void)
 {
     gwy_process_func_register("dwt",
                               (GwyProcessFunc)&dwt,
-                              N_("/_Integral Transforms/_2D DWT..."),
-                              NULL,
+                              N_("/_Integral Transforms/2D _DWT..."),
+                              GWY_STOCK_DWT,
                               DWT_RUN_MODES,
                               GWY_MENU_FLAG_DATA,
                               N_("Compute Discrete Wavelet Transform"));

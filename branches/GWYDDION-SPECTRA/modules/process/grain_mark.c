@@ -35,13 +35,18 @@
 #define MARK_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
 enum {
-    PREVIEW_SIZE = 320
+    PREVIEW_SIZE = 400
 };
 
 enum {
     MARK_HEIGHT = 0,
     MARK_SLOPE  = 1,
     MARK_LAP    = 2
+};
+
+enum {
+    RESPONSE_RESET   = 1,
+    RESPONSE_PREVIEW = 2
 };
 
 typedef struct {
@@ -54,8 +59,9 @@ typedef struct {
     gboolean is_lap;
     gboolean update;
     GwyMergeType merge_type;
+
+    /* interface only */
     gboolean computed;
-    gboolean init;
 } MarkArgs;
 
 typedef struct {
@@ -73,6 +79,7 @@ typedef struct {
     GtkWidget *update;
     GwyContainer *mydata;
     MarkArgs *args;
+    gboolean in_init;
 } MarkControls;
 
 static gboolean    module_register            (void);
@@ -122,7 +129,6 @@ static const MarkArgs mark_defaults = {
     TRUE,
     GWY_MERGE_UNION,
     FALSE,
-    FALSE,
 };
 
 static GwyModuleInfo module_info = {
@@ -130,7 +136,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Marks grains by thresholding (height, slope, curvature)."),
     "Petr Klapetek <petr@klapetek.cz>",
-    "1.10",
+    "1.13",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -201,7 +207,7 @@ create_mask_field(GwyDataField *dfield)
     GwySIUnit *siunit;
 
     mfield = gwy_data_field_new_alike(dfield, FALSE);
-    siunit = gwy_si_unit_new("");
+    siunit = gwy_si_unit_new(NULL);
     gwy_data_field_set_si_unit_z(mfield, siunit);
     g_object_unref(siunit);
 
@@ -230,10 +236,6 @@ mark_dialog(MarkArgs *args,
             gint id,
             GQuark mquark)
 {
-    enum {
-        RESPONSE_RESET = 1,
-        RESPONSE_PREVIEW = 2
-    };
     GtkWidget *dialog, *table, *hbox;
     MarkControls controls;
     gint response;
@@ -244,13 +246,19 @@ mark_dialog(MarkArgs *args,
     gboolean temp;
 
     controls.args = args;
+    controls.in_init = TRUE;
 
     dialog = gtk_dialog_new_with_buttons(_("Mark Grains by Threshold"), NULL, 0,
-                                         _("_Update Preview"), RESPONSE_PREVIEW,
-                                         _("_Reset"), RESPONSE_RESET,
-                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
                                          NULL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 gwy_stock_like_button_new(_("_Update"),
+                                                           GTK_STOCK_EXECUTE),
+                                 RESPONSE_PREVIEW);
+    gtk_dialog_add_button(GTK_DIALOG(dialog), _("_Reset"), RESPONSE_RESET);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_OK, GTK_RESPONSE_OK);
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     controls.dialog = dialog;
@@ -269,8 +277,12 @@ mark_dialog(MarkArgs *args,
                             0);
     controls.view = gwy_data_view_new(controls.mydata);
     layer = gwy_layer_basic_new();
-    gwy_pixmap_layer_set_data_key(layer, "/0/data");
-    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    g_object_set(layer,
+                 "data-key", "/0/data",
+                 "gradient-key", "/0/base/palette",
+                 "range-type-key", "/0/base/range-type",
+                 "min-max-key", "/0/base",
+                 NULL);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view), layer);
     zoomval = PREVIEW_SIZE/(gdouble)MAX(gwy_data_field_get_xres(dfield),
                                         gwy_data_field_get_yres(dfield));
@@ -360,11 +372,14 @@ mark_dialog(MarkArgs *args,
                                  args->is_lap);
 
     /* finished initializing, allow instant updates */
-    args->init = TRUE;
+    controls.in_init = FALSE;
 
     /* show initial preview if instant updates are on */
-    if (args->update)
+    if (args->update) {
+        gtk_dialog_set_response_sensitive(GTK_DIALOG(controls.dialog),
+                                          RESPONSE_PREVIEW, FALSE);
         preview(&controls, args);
+    }
 
     gtk_widget_show_all(dialog);
     do {
@@ -387,8 +402,9 @@ mark_dialog(MarkArgs *args,
             *args = mark_defaults;
             args->update = temp;
             mark_dialog_update_controls(&controls, args);
+            controls.in_init = TRUE;
             preview(&controls, args);
-            args->init = TRUE;
+            controls.in_init = FALSE;
             break;
 
             case RESPONSE_PREVIEW:
@@ -469,25 +485,29 @@ mark_dialog_update_values(MarkControls *controls,
 }
 
 static void
-update_change_cb(MarkControls *controls)
-{
-    controls->args->update
-            = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controls->update));
-
-    if (controls->args->update)
-        mark_invalidate(controls);
-}
-
-static void
 mark_invalidate(MarkControls *controls)
 {
     controls->args->computed = FALSE;
 
     /* create preview if instant updates are on */
-    if (controls->args->update && controls->args->init) {
+    if (controls->args->update && !controls->in_init) {
         mark_dialog_update_values(controls, controls->args);
         preview(controls, controls->args);
     }
+}
+
+static void
+update_change_cb(MarkControls *controls)
+{
+    controls->args->update
+            = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controls->update));
+
+    gtk_dialog_set_response_sensitive(GTK_DIALOG(controls->dialog),
+                                      RESPONSE_PREVIEW,
+                                      !controls->args->update);
+
+    if (controls->args->update)
+        mark_invalidate(controls);
 }
 
 static void

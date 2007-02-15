@@ -26,6 +26,7 @@
 #include <libprocess/filters.h>
 #include <libprocess/arithmetic.h>
 #include <libprocess/stats.h>
+#include <libprocess/correct.h>
 #include <libprocess/grains.h>
 
 typedef struct {
@@ -752,6 +753,13 @@ gwy_data_field_grains_get_distribution(GwyDataField *data_field,
         gwy_si_unit_set_from_string(lineunit, NULL);
         break;
 
+        case GWY_GRAIN_VALUE_VOLUME_0:
+        case GWY_GRAIN_VALUE_VOLUME_MIN:
+        case GWY_GRAIN_VALUE_VOLUME_LAPLACE:
+        gwy_si_unit_power(xyunit, 2, lineunit);
+        gwy_si_unit_multiply(lineunit, zunit, lineunit);
+        break;
+
         default:
         g_warning("Wrong grain quantity %d", (gint)quantity);
         break;
@@ -982,6 +990,139 @@ grain_minimum_bound(GArray *vertices,
     }
 }
 
+static gdouble
+grain_volume_laplace(GwyDataField *data_field,
+                     const gint *grains,
+                     gint gno,
+                     const gint *bound)
+{
+    GwyDataField *grain, *mask, *buffer;
+    gint xres, yres, col, row, w, h, i, j, k, ns;
+    gdouble v, s, maxerr, error, vol;
+    const gdouble *d;
+    gdouble *m, *g;
+
+    xres = data_field->xres;
+    yres = data_field->yres;
+
+    /* Caulcate extended boundaries */
+    w = bound[2];
+    col = bound[0];
+    if (col > 0) {
+        col--;
+        w++;
+    }
+    if (col + w < xres)
+        w++;
+
+    h = bound[3];
+    row = bound[1];
+    if (row > 0) {
+        row--;
+        h++;
+    }
+    if (row + h < yres)
+        h++;
+
+    /* Create the mask for laplace iteration and calculate a suitable starting
+     * value to fill the grain with */
+    grain = gwy_data_field_area_extract(data_field, col, row, w, h);
+    mask = gwy_data_field_new_alike(grain, TRUE);
+
+    g = grain->data;
+    m = mask->data;
+    d = data_field->data + row*xres + col;
+
+    s = maxerr = 0.0;
+    ns = 0;
+    for (i = 0; i < h; i++) {
+        for (j = 0; j < w; j++) {
+            k = (i + row)*xres + j + col;
+            if (grains[k] == gno) {
+                m[i*w + j] = 1.0;
+                if (i > 0 && !grains[k - xres]) {
+                    v = g[i*w + j - w];
+                    s += v;
+                    maxerr += v*v;
+                    ns++;
+                }
+                if (j > 0 && !grains[k - 1]) {
+                    v = g[i*w + j - 1];
+                    s += v;
+                    maxerr += v*v;
+                    ns++;
+                }
+                if (j + 1 < w && !grains[k + 1]) {
+                    v = g[i*w + j + 1];
+                    s += v;
+                    maxerr += v*v;
+                    ns++;
+                }
+                if (i + 1 < h && !grains[k + xres]) {
+                    v = g[i*w + j + w];
+                    s += v;
+                    maxerr += v*v;
+                    ns++;
+                }
+            }
+        }
+    }
+    g_assert(ns > 0);
+    s /= ns;
+    maxerr = sqrt(fabs(maxerr/ns - s*s))/1e-2;
+
+    /* Fill with the starting value */
+    for (i = 0; i < h; i++) {
+        for (j = 0; j < w; j++) {
+            k = (i + row)*xres + j + col;
+            if (grains[k] == gno)
+                g[i*w + j] = s;
+        }
+    }
+
+    /* Iterate to get basis (background) */
+    if (maxerr) {
+        buffer = gwy_data_field_new_alike(grain, FALSE);
+        for (i = 0; i < 500; i++) {
+            gwy_data_field_correct_laplace_iteration(grain, mask, buffer,
+                                                     0.2, &error);
+            if (error <= maxerr)
+                break;
+        }
+        g_object_unref(buffer);
+    }
+    g_object_unref(mask);
+
+    /* Calculate the volume between data and basis */
+    vol = 0.0;
+    for (i = 0; i < h; i++) {
+        for (j = 0; j < w; j++) {
+            k = (i + row)*xres + j + col;
+            if (grains[k] == gno) {
+                gint im, ip, jm, jp;
+
+                im = (i > 0) ? i-1 : i;
+                ip = (i < h-1) ? i+1 : i;
+                jm = (j > 0) ? j-1 : j;
+                jp = (j < w-1) ? j+1 : j;
+
+                vol += 52.0*(d[i*xres + j] - g[i*w + j])
+                       + 10.0*(d[im*xres + j] - g[im*w + j]
+                               + d[i*xres + jm] - g[i*w + jm]
+                               + d[i*xres + jp] - g[i*w + jp]
+                               + d[ip*xres + j] - g[ip*w + j])
+                       + (d[im*xres + jm] - g[im*w + jm]
+                          + d[im*xres + jp] - g[im*w + jp]
+                          + d[ip*xres + jm] - g[ip*w + jm]
+                          + d[ip*xres + jp] - g[ip*w + jp]);
+            }
+        }
+    }
+    g_object_unref(grain);
+
+    return vol;
+}
+
 /**
  * gwy_data_field_grains_get_values:
  * @data_field: Data field used for marking.  For some quantities its values
@@ -1001,7 +1142,7 @@ grain_minimum_bound(GArray *vertices,
  *
  * The array @values will be filled with the requested grain value for each
  * individual grain (0th item of @values which do not correspond to any grain
- * is overwritten with an arbitrary value and should be ignored).
+ * will be overwritten with an arbitrary value and should be ignored).
  *
  * The grain numbers serve as indices in @values.  Therefore as long as the
  * same @grains is used, the same position in @values corresponds to the same
@@ -1018,7 +1159,7 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
                                  const gint *grains,
                                  GwyGrainQuantity quantity)
 {
-    const gdouble *data;
+    const gdouble *d;
     gdouble *tmp;
     gint *sizes, *pos;
     gdouble q, qh, qv;
@@ -1038,7 +1179,7 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
     qh = gwy_data_field_get_xmeasure(data_field);
     qv = gwy_data_field_get_ymeasure(data_field);
 
-    data = data_field->data;
+    d = data_field->data;
     switch (quantity) {
         case GWY_GRAIN_VALUE_PROJECTED_AREA:
         case GWY_GRAIN_VALUE_EQUIV_SQUARE_SIDE:
@@ -1073,8 +1214,8 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
         for (i = 0; i <= ngrains; i++)
             values[i] = G_MAXDOUBLE;
         for (i = 0; i < nn; i++) {
-            if (data[i] < values[grains[i]])
-                values[grains[i]] = data[i];
+            if (d[i] < values[grains[i]])
+                values[grains[i]] = d[i];
         }
         break;
 
@@ -1082,8 +1223,8 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
         for (i = 0; i <= ngrains; i++)
             values[i] = -G_MAXDOUBLE;
         for (i = 0; i < nn; i++) {
-            if (data[i] > values[grains[i]])
-                values[grains[i]] = data[i];
+            if (d[i] > values[grains[i]])
+                values[grains[i]] = d[i];
         }
         break;
 
@@ -1091,7 +1232,7 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
         sizes = g_new0(gint, ngrains + 1);
         memset(values, 0, (ngrains + 1)*sizeof(gdouble));
         for (i = 0; i < nn; i++) {
-            values[grains[i]] += data[i];
+            values[grains[i]] += d[i];
             sizes[grains[i]]++;
         }
         for (i = 0; i <= ngrains; i++)
@@ -1117,7 +1258,7 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
         /* Sort values by grain # to tmp */
         for (i = 0; i < nn; i++) {
             if ((j = grains[i])) {
-                tmp[pos[j]] = data[i];
+                tmp[pos[j]] = d[i];
                 pos[j]++;
             }
         }
@@ -1193,17 +1334,21 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
                 jm = (j > 0) ? j-1 : j;
                 jp = (j < yres-1) ? j+1 : j;
 
-                c = (data[ix + j] + data[ix + jm]
-                     + data[imx + jm] + data[imx + j])/2.0;
+                c = (d[ix + j] + d[ix + jm] + d[imx + jm] + d[imx + j])/2.0;
+                values[gno] += square_area2w_1c(d[ix + j], d[ix + jm],
+                                                d[imx + j], c, qh, qv);
 
-                values[gno] += square_area2w_1c(data[ix + j], data[ix + jm],
-                                                data[imx + j], c, qh, qv);
-                values[gno] += square_area2w_1c(data[ix + j], data[ix + jp],
-                                                data[imx + j], c, qh, qv);
-                values[gno] += square_area2w_1c(data[ix + j], data[ix + jm],
-                                                data[ipx + j], c, qh, qv);
-                values[gno] += square_area2w_1c(data[ix + j], data[ix + jp],
-                                                data[ipx + j], c, qh, qv);
+                c = (d[ix + j] + d[ix + jp] + d[imx + jp] + d[imx + j])/2.0;
+                values[gno] += square_area2w_1c(d[ix + j], d[ix + jp],
+                                                d[imx + j], c, qh, qv);
+
+                c = (d[ix + j] + d[ix + jm] + d[ipx + jm] + d[ipx + j])/2.0;
+                values[gno] += square_area2w_1c(d[ix + j], d[ix + jm],
+                                                d[ipx + j], c, qh, qv);
+
+                c = (d[ix + j] + d[ix + jp] + d[ipx + jp] + d[ipx + j])/2.0;
+                values[gno] += square_area2w_1c(d[ix + j], d[ix + jp],
+                                                d[ipx + j], c, qh, qv);
             }
         }
         for (i = 1; i <= ngrains; i++)
@@ -1265,6 +1410,70 @@ gwy_data_field_grains_get_values(GwyDataField *data_field,
         }
         /* Finalize */
         g_array_free(vertices, TRUE);
+        g_free(pos);
+        break;
+
+        case GWY_GRAIN_VALUE_VOLUME_0:
+        case GWY_GRAIN_VALUE_VOLUME_MIN:
+        /* Yay! We can recurse to calculate the minima! */
+        if (quantity == GWY_GRAIN_VALUE_VOLUME_MIN) {
+            tmp = g_new(gdouble, ngrains + 1);
+            gwy_data_field_grains_get_values(data_field, tmp, ngrains, grains,
+                                             GWY_GRAIN_VALUE_MINIMUM);
+        }
+        else
+            tmp = NULL;
+
+        memset(values, 0, (ngrains + 1)*sizeof(gdouble));
+        for (i = 0; i < yres; i++) {
+            for (j = 0; j < xres; j++) {
+                gint ix, ipx, imx, jp, jm, gno;
+
+                ix = i*xres;
+                if (!(gno = grains[ix + j]))
+                    continue;
+
+                imx = (i > 0) ? ix-xres : ix;
+                ipx = (i < yres-1) ? ix+xres : ix;
+                jm = (j > 0) ? j-1 : j;
+                jp = (j < yres-1) ? j+1 : j;
+
+                values[gno] += 52.0*d[ix + j]
+                               + 10.0*(d[imx + j] + d[ix + jm]
+                                       + d[ix + jp] + d[ipx + j])
+                               + (d[imx + jm] + d[imx + jp]
+                                  + d[ipx + jm] + d[ipx + jp]);
+
+                /* We know the basis would appear with total weight -96 so
+                 * don't bother subtracting it from individual heights */
+                if (tmp)
+                    values[gno] -= 96.0*tmp[gno];
+            }
+        }
+        q = qh*qv/96.0;
+        for (i = 1; i <= ngrains; i++)
+            values[i] *= q;
+        /* Finalize */
+        g_free(tmp);
+        break;
+
+        case GWY_GRAIN_VALUE_VOLUME_LAPLACE:
+        memset(values, 0, (ngrains + 1)*sizeof(gdouble));
+        /* Fail gracefully when there is one big `grain' over all data */
+        pos = gwy_data_field_get_grain_bounding_boxes(data_field,
+                                                      ngrains, grains, NULL);
+        if (ngrains == 1
+            && (pos[4] == 0 && pos[5] == 0
+                && pos[6] == xres && pos[7] == yres)) {
+            g_warning("Cannot interpolate from exterior of the grain when it "
+                      "has no exterior.");
+        }
+        else {
+            q = qh*qv/96.0;
+            for (i = 1; i <= ngrains; i++)
+                values[i] = q*grain_volume_laplace(data_field, grains,
+                                                   i, pos + 4*i);
+        }
         g_free(pos);
         break;
 
@@ -1608,7 +1817,7 @@ resolve_grain_map(gint *m, gint i, gint j)
  *          grain will be set to grain number.  Grains are numbered
  *          sequentially 1, 2, 3, ...
  *
- * Numbers grains in a mask data field:.
+ * Numbers grains in a mask data field.
  *
  * Returns: The number of last grain (note they are numbered from 1).
  **/
@@ -1620,9 +1829,9 @@ gwy_data_field_number_grains(GwyDataField *mask_field,
     gint xres, yres, i, j, grain_id, max_id, id;
     gint *m, *mm;
 
-    xres = gwy_data_field_get_xres(mask_field);
-    yres = gwy_data_field_get_yres(mask_field);
-    data = gwy_data_field_get_data_const(mask_field);
+    xres = mask_field->xres;
+    yres = mask_field->yres;
+    data = mask_field->data;
 
     /* The max number of grains, reached with checkerboard pattern */
     m = g_new0(gint, (xres*yres + 1)/2 + 1);
@@ -1694,6 +1903,75 @@ gwy_data_field_number_grains(GwyDataField *mask_field,
     g_free(m);
 
     return id;
+}
+
+/**
+ * gwy_data_field_get_grain_bounding_boxes:
+ * @mask_field: Data field containing positive values in grains, nonpositive
+ *              in free space.  However its contents is ignored as all
+ *              grain information is taken from @grains (its dimensions
+ *              determine the dimensions of @grains).
+ * @ngrains: The number of grains as returned by
+ *           gwy_data_field_number_grains().
+ * @grains: Grain numbers filled with gwy_data_field_number_grains().
+ * @bboxes: Array of size at least 4*(@ngrains+1) to fill with grain bounding
+ *          boxes (as usual zero does not correspond to any grain, grains
+ *          start from 1). The bounding boxes are stored as quadruples of
+ *          indices: (xmin, ymin, width, height).  It can be %NULL to allocate
+ *          a new array.
+ *
+ * Find bounding boxes of all grains.
+ *
+ * Returns: Either %bboxes (if it was not %NULL), or a newly allocated array
+ *          of size 4@ngrains.
+ *
+ * Since: 2.3
+ **/
+gint*
+gwy_data_field_get_grain_bounding_boxes(GwyDataField *mask_field,
+                                        gint ngrains,
+                                        const gint *grains,
+                                        gint *bboxes)
+{
+    gint xres, yres, i, j, id;
+    const gdouble *data;
+
+    g_return_val_if_fail(GWY_IS_DATA_FIELD(mask_field), NULL);
+    g_return_val_if_fail(grains, NULL);
+
+    xres = mask_field->xres;
+    yres = mask_field->yres;
+    data = mask_field->data;
+    if (!bboxes)
+        bboxes = g_new(gint, 4*(ngrains + 1));
+
+    for (i = 1; i <= ngrains; i++) {
+        bboxes[4*i] = bboxes[4*i + 1] = G_MAXINT;
+        bboxes[4*i + 2] = bboxes[4*i + 3] = -1;
+    }
+
+    for (i = 0; i < yres; i++) {
+        for (j = 0; j < xres; j++) {
+            if ((id = grains[i*xres + j])) {
+                id *= 4;
+                if (j < bboxes[id])
+                    bboxes[id] = j;
+                if (i < bboxes[id + 1])
+                    bboxes[id + 1] = i;
+                if (j > bboxes[id + 2])
+                    bboxes[id + 2] = j;
+                if (i > bboxes[id + 3])
+                    bboxes[id + 3] = i;
+            }
+        }
+    }
+
+    for (i = 1; i <= ngrains; i++) {
+        bboxes[4*i + 2] = bboxes[4*i + 2] - bboxes[4*i]     + 1;
+        bboxes[4*i + 3] = bboxes[4*i + 3] - bboxes[4*i + 1] + 1;
+    }
+
+    return bboxes;
 }
 
 /**

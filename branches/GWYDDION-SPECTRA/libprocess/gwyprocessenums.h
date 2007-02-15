@@ -157,7 +157,10 @@ typedef enum {
     GWY_GRAIN_VALUE_MINIMUM_BOUND_SIZE   = 12,
     GWY_GRAIN_VALUE_MINIMUM_BOUND_ANGLE  = 13,
     GWY_GRAIN_VALUE_MAXIMUM_BOUND_SIZE   = 14,
-    GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE  = 15
+    GWY_GRAIN_VALUE_MAXIMUM_BOUND_ANGLE  = 15,
+    GWY_GRAIN_VALUE_VOLUME_0             = 18,
+    GWY_GRAIN_VALUE_VOLUME_MIN           = 19,
+    GWY_GRAIN_VALUE_VOLUME_LAPLACE       = 20
 } GwyGrainQuantity;
 
 typedef enum {
@@ -179,6 +182,14 @@ typedef enum {
     GWY_LINE_STAT_SLOPE,
     GWY_LINE_STAT_TAN_BETA0
 } GwyLineStatQuantity;
+
+typedef enum {
+    GWY_EXTERIOR_UNDEFINED,
+    GWY_EXTERIOR_BORDER_EXTEND,
+    GWY_EXTERIOR_MIRROR_EXTEND,
+    GWY_EXTERIOR_PERIODIC,
+    GWY_EXTERIOR_FIXED_VALUE
+} GwyExteriorType;
 
 const GwyEnum* gwy_merge_type_get_enum(void) G_GNUC_CONST;
 const GwyEnum* gwy_plane_symmetry_get_enum(void) G_GNUC_CONST;

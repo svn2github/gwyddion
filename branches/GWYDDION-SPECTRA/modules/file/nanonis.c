@@ -23,15 +23,14 @@
 #include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwyutils.h>
-#include <libgwymodule/gwymodule-file.h>
 #include <libprocess/datafield.h>
-
-#include <string.h>
+#include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "err.h"
-#include "get.h"
 
 #define MAGIC ":NANONIS_VERSION:"
 #define MAGIC_SIZE (sizeof(MAGIC) - 1)
@@ -79,7 +78,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports Nanonis SXM data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.2",
+    "0.3",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -349,7 +348,7 @@ read_data_field(GwyContainer *container,
     data = gwy_data_field_get_data(dfield);
 
     for (j = 0; j < sxmfile->xres*sxmfile->yres; j++)
-        *(data++) = get_FLOAT_BE(p);
+        *(data++) = gwy_get_gfloat_be(p);
 
     siunit = gwy_si_unit_new("m");
     gwy_data_field_set_si_unit_xy(dfield, siunit);
@@ -375,6 +374,8 @@ read_data_field(GwyContainer *container,
         gwy_container_set_string_by_name(container, key, title);
         /* Don't free title, container eats it */
     }
+
+    gwy_app_channel_check_nonsquare(container, *id);
 
     if (dir == DIR_BACKWARD)
         flip_horizontally = TRUE;
@@ -492,9 +493,7 @@ sxm_load(const gchar *filename,
     /* Pixel sizes */
     if (sxmfile.ok) {
         if ((s = g_hash_table_lookup(sxmfile.meta, "SCAN_PIXELS"))) {
-            if (sscanf(s, "%d %d", &sxmfile.xres, &sxmfile.yres) == 2) {
-                if (rotated)
-                    GWY_SWAP(gint, sxmfile.xres, sxmfile.yres);
+            if (sscanf(s, "%d %d", &sxmfile.yres, &sxmfile.xres) == 2) {
                 size1 *= sxmfile.xres * sxmfile.yres;
                 gwy_debug("xres: %d, yres: %d", sxmfile.xres, sxmfile.yres);
                 gwy_debug("size1: %u", (guint)size1);

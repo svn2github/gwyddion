@@ -34,6 +34,7 @@
 #include <libgwyddion/gwymath.h>
 #include <libprocess/datafield.h>
 #include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "err.h"
 
@@ -129,7 +130,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports Veeco (Digital Instruments) Nanoscope data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.14",
+    "0.16",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -256,7 +257,7 @@ nanoscope_load(const gchar *filename,
     }
 
     if (ok) {
-        gchar key[32];
+        gchar key[40];
 
         i = 0;
         container = gwy_container_new();
@@ -278,6 +279,7 @@ nanoscope_load(const gchar *filename,
                 gwy_container_set_object_by_name(container, key, meta);
                 g_object_unref(meta);
 
+                gwy_app_channel_check_nonsquare(container, i);
                 i++;
             }
         }

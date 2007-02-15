@@ -35,7 +35,12 @@
 #define REMOVE_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
 enum {
-    PREVIEW_SIZE = 320
+    PREVIEW_SIZE = 400
+};
+
+enum {
+    RESPONSE_RESET   = 1,
+    RESPONSE_PREVIEW = 2
 };
 
 typedef struct {
@@ -45,7 +50,6 @@ typedef struct {
     gboolean is_height;
     gboolean is_area;
     gboolean update;
-    gboolean init;
     gboolean computed;
     GwyMergeType merge_type;
 } RemoveArgs;
@@ -64,6 +68,7 @@ typedef struct {
     GwyContainer *mydata;
     RemoveArgs *args;
     GwyDataField *mask;
+    gboolean in_init;
 } RemoveControls;
 
 static gboolean    module_register               (void);
@@ -115,7 +120,6 @@ static const RemoveArgs remove_defaults = {
     FALSE,
     TRUE,
     FALSE,
-    FALSE,
     GWY_MERGE_UNION,
 };
 
@@ -124,7 +128,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Removes grains by thresholding (height, size)."),
     "Petr Klapetek <petr@klapetek.cz>",
-    "1.9",
+    "1.12",
     "David Nečas (Yeti) & Petr Klapetek",
     "2003",
 };
@@ -192,10 +196,6 @@ remove_dialog(RemoveArgs *args,
 {
     GtkWidget *dialog, *table, *spin, *hbox;
     RemoveControls controls;
-    enum {
-        RESPONSE_RESET = 1,
-        RESPONSE_PREVIEW = 2
-    };
     gint response;
     gdouble zoomval;
     GwyPixmapLayer *layer;
@@ -205,14 +205,19 @@ remove_dialog(RemoveArgs *args,
 
     controls.args = args;
     controls.mask = mfield;
+    controls.in_init = TRUE;
 
     dialog = gtk_dialog_new_with_buttons(_("Remove Grains by Threshold"),
-                                         NULL, 0,
-                                         _("_Update Preview"), RESPONSE_PREVIEW,
-                                         _("_Reset"), RESPONSE_RESET,
-                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                         NULL);
+                                         NULL, 0, NULL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 gwy_stock_like_button_new(_("_Update"),
+                                                           GTK_STOCK_EXECUTE),
+                                 RESPONSE_PREVIEW);
+    gtk_dialog_add_button(GTK_DIALOG(dialog), _("_Reset"), RESPONSE_RESET);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_OK, GTK_RESPONSE_OK);
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     controls.dialog = dialog;
@@ -234,8 +239,12 @@ remove_dialog(RemoveArgs *args,
                             0);
     controls.view = gwy_data_view_new(controls.mydata);
     layer = gwy_layer_basic_new();
-    gwy_pixmap_layer_set_data_key(layer, "/0/data");
-    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    g_object_set(layer,
+                 "data-key", "/0/data",
+                 "gradient-key", "/0/base/palette",
+                 "range-type-key", "/0/base/range-type",
+                 "min-max-key", "/0/base",
+                 NULL);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view), layer);
     layer = gwy_layer_mask_new();
     gwy_pixmap_layer_set_data_key(layer, "/0/mask");
@@ -336,11 +345,14 @@ remove_dialog(RemoveArgs *args,
                                  args->is_area);
 
     /* finished initializing, allow instant updates */
-    args->init = TRUE;
+    controls.in_init = FALSE;
 
     /* show initial preview if instant updates are on */
-    if (args->update)
+    if (args->update) {
+        gtk_dialog_set_response_sensitive(GTK_DIALOG(controls.dialog),
+                                          RESPONSE_PREVIEW, FALSE);
         preview(&controls, args, mfield);
+    }
 
     gtk_widget_show_all(dialog);
     do {
@@ -362,9 +374,10 @@ remove_dialog(RemoveArgs *args,
             temp = args->update;
             *args = remove_defaults;
             args->update = temp;
+            controls.in_init = TRUE;
             remove_dialog_update_controls(&controls, args);
+            controls.in_init = FALSE;
             preview(&controls, args, mfield);
-            args->init = TRUE;
             break;
 
             case RESPONSE_PREVIEW:
@@ -442,6 +455,10 @@ update_change_cb(RemoveControls *controls)
     controls->args->update
             = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controls->update));
 
+    gtk_dialog_set_response_sensitive(GTK_DIALOG(controls->dialog),
+                                      RESPONSE_PREVIEW,
+                                      !controls->args->update);
+
     if (controls->args->update)
         remove_invalidate(controls);
 }
@@ -452,7 +469,7 @@ remove_invalidate(RemoveControls *controls)
     controls->args->computed = FALSE;
 
     /* create preview if instant updates are on */
-    if (controls->args->update && controls->args->init) {
+    if (controls->args->update && !controls->in_init) {
         remove_dialog_update_values(controls, controls->args);
         preview(controls, controls->args, controls->mask);
     }

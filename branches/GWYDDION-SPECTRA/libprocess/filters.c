@@ -23,9 +23,9 @@
 
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
-#include <libprocess/datafield.h>
 #include <libprocess/filters.h>
 #include <libprocess/stats.h>
+#include <libprocess/linestats.h>
 
 /* Cache operations */
 #define CVAL(datafield, b)  ((datafield)->cache[GWY_DATA_FIELD_CACHE_##b])
@@ -580,10 +580,90 @@ gwy_data_field_area_gather(GwyDataField *data_field,
     }
 }
 
+static void
+gwy_data_field_area_convolve_3x3(GwyDataField *data_field,
+                                 const gdouble *kernel,
+                                 gint col, gint row,
+                                 gint width, gint height)
+{
+    gdouble *rm, *rc, *rp;
+    gdouble t, v;
+    gint xres, i, j;
+
+    xres = data_field->xres;
+    rp = data_field->data + row*xres + col;
+
+    /* Special-case width == 1 to avoid complications below.  It's silly but
+     * the API guarantees it. */
+    if (width == 1) {
+        t = rp[0];
+        for (i = 0; i < height; i++) {
+            rc = rp = data_field->data + (row + i)*xres + col;
+            if (i < height-1)
+                rp += xres;
+
+            v = (kernel[0] + kernel[1] + kernel[2])*t
+                + (kernel[3] + kernel[4] + kernel[5])*rc[0]
+                + (kernel[6] + kernel[7] + kernel[8])*rp[0];
+            t = rc[0];
+            rc[0] = v;
+        }
+        gwy_data_field_invalidate(data_field);
+
+        return;
+    }
+
+    rm = g_new(gdouble, width);
+    memcpy(rm, rp, width*sizeof(gdouble));
+
+    for (i = 0; i < height; i++) {
+        rc = rp;
+        if (i < height-1)
+            rp += xres;
+        v = (kernel[0] + kernel[1])*rm[0] + kernel[2]*rm[1]
+            + (kernel[3] + kernel[4])*rc[0] + kernel[5]*rc[1]
+            + (kernel[6] + kernel[7])*rp[0] + kernel[8]*rp[1];
+        t = rc[0];
+        rc[0] = v;
+        if (i < height-1) {
+            for (j = 1; j < width-1; j++) {
+                v = kernel[0]*rm[j-1] + kernel[1]*rm[j] + kernel[2]*rm[j+1]
+                    + kernel[3]*t + kernel[4]*rc[j] + kernel[5]*rc[j+1]
+                    + kernel[6]*rp[j-1] + kernel[7]*rp[j] + kernel[8]*rp[j+1];
+                rm[j-1] = t;
+                t = rc[j];
+                rc[j] = v;
+            }
+            v = kernel[0]*rm[j-1] + (kernel[1] + kernel[2])*rm[j]
+                + kernel[3]*t + (kernel[4] + kernel[5])*rc[j]
+                + kernel[6]*rp[j-1] + (kernel[7] + kernel[8])*rp[j];
+        }
+        else {
+            for (j = 1; j < width-1; j++) {
+                v = kernel[0]*rm[j-1] + kernel[1]*rm[j] + kernel[2]*rm[j+1]
+                    + kernel[3]*t + kernel[4]*rc[j] + kernel[5]*rc[j+1]
+                    + kernel[6]*t + kernel[7]*rc[j] + kernel[8]*rc[j+1];
+                rm[j-1] = t;
+                t = rc[j];
+                rc[j] = v;
+            }
+            v = kernel[0]*rm[j-1] + (kernel[1] + kernel[2])*rm[j]
+                + kernel[3]*t + (kernel[4] + kernel[5])*rc[j]
+                + kernel[6]*t + (kernel[7] + kernel[8])*rc[j];
+        }
+        rm[j-1] = t;
+        rm[j] = rc[j];
+        rc[j] = v;
+    }
+
+    g_free(rm);
+    gwy_data_field_invalidate(data_field);
+}
+
 /**
  * gwy_data_field_area_convolve:
- * @data_field: A data field to convolve.  It must be larger than @kernel_field
- *              (or at least of the same size).
+ * @data_field: A data field to convolve.  It must be at least as large as
+ *              1/3 of @kernel_field in each dimension.
  * @kernel_field: Kenrel field to convolve @data_field with.
  * @col: Upper-left column coordinate.
  * @row: Upper-left row coordinate.
@@ -601,8 +681,8 @@ gwy_data_field_area_convolve(GwyDataField *data_field,
     gint xres, yres, kxres, kyres, i, j, m, n, ii, jj;
     GwyDataField *hlp_df;
 
-    gwy_debug("");
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_FIELD(kernel_field));
 
     xres = data_field->xres;
     yres = data_field->yres;
@@ -620,25 +700,30 @@ gwy_data_field_area_convolve(GwyDataField *data_field,
         return;
     }
 
-    hlp_df = gwy_data_field_new_alike(data_field, TRUE);
+    if (kxres == 3 && kyres == 3) {
+        gwy_data_field_area_convolve_3x3(data_field, kernel_field->data,
+                                         col, row, width, height);
+        return;
+    }
 
+    hlp_df = gwy_data_field_new(width, height, 1.0, 1.0, TRUE);
     for (i = row; i < row + height; i++) {
         for (j = col; j < col + width; j++) {
             for (m = -kyres/2; m < kyres - kyres/2; m++) {
                 ii = i + m;
                 if (G_UNLIKELY(ii < 0))
-                    ii = -ii;
+                    ii = -ii-1;
                 else if (G_UNLIKELY(ii >= yres))
                     ii = 2*yres-1 - ii;
 
                 for (n = -kxres/2; n < kxres - kxres/2; n++) {
                     jj = j + n;
                     if (G_UNLIKELY(jj < 0))
-                        jj = -jj;
+                        jj = -jj-1;
                     else if (G_UNLIKELY(jj >= xres))
                         jj = 2*xres-1 - jj;
 
-                    hlp_df->data[i*xres + j]
+                    hlp_df->data[(i - row)*width + (j - col)]
                         += data_field->data[ii*xres + jj]
                            * kernel_field->data[kxres*(m + kyres/2)
                                                 + n + kxres/2];
@@ -646,12 +731,7 @@ gwy_data_field_area_convolve(GwyDataField *data_field,
             }
         }
     }
-
-    for (i = row; i < row + height; i++) {
-        for (j = col; j < col + width; j++) {
-            data_field->data[j + xres * i] = hlp_df->data[j + xres * i];
-        }
-    }
+    gwy_data_field_area_copy(hlp_df, data_field, 0, 0, width, height, col, row);
     g_object_unref(hlp_df);
 
     gwy_data_field_invalidate(data_field);
@@ -659,8 +739,8 @@ gwy_data_field_area_convolve(GwyDataField *data_field,
 
 /**
  * gwy_data_field_convolve:
- * @data_field: A data field to convolve.  It must be larger than @kernel_field
- *              (or at least of the same size).
+ * @data_field: A data field to convolve.  It must be at least as large as
+ *              1/3 of @kernel_field in each dimension.
  * @kernel_field: Kenrel field to convolve @data_field with.
  *
  * Convolves a data field with given kernel.
@@ -670,8 +750,195 @@ gwy_data_field_convolve(GwyDataField *data_field,
                         GwyDataField *kernel_field)
 {
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    gwy_data_field_area_convolve(data_field, kernel_field, 0, 0,
-                                 data_field->xres, data_field->yres);
+    gwy_data_field_area_convolve(data_field, kernel_field,
+                                 0, 0, data_field->xres, data_field->yres);
+}
+
+static void
+gwy_data_field_area_hconvolve(GwyDataField *data_field,
+                              GwyDataLine *kernel_line,
+                              gint col, gint row,
+                              gint width, gint height)
+{
+    gint kres, i, j, k, pos;
+    const gdouble *kernel;
+    gdouble *buf, *drow;
+    gdouble d;
+
+    kres = kernel_line->res;
+    kernel = kernel_line->data;
+    buf = g_new(gdouble, kres);
+
+    for (i = 0; i < height; i++) {
+        drow = data_field->data + (row + i)*data_field->xres + col;
+        /* Initialize with a triangluar sums, mirror-extend */
+        memset(buf, 0, kres*sizeof(gdouble));
+        for (j = 0; j < kres; j++) {
+            k = j - kres/2;
+            d = drow[k >= 0 ? k : -k-1];
+            for (k = 0; k <= j; k++)
+                buf[k] += kernel[j - k]*d;
+        }
+        pos = 0;
+        /* Middle part and tail with mirror extension again, we do some
+         * O(1/2*k^2) of useless work here by not separating the tail */
+        for (j = 0; j < width; j++) {
+            drow[j] = buf[pos];
+            buf[pos] = 0.0;
+            pos = (pos + 1) % kres;
+            k = j + kres - kres/2;
+            d = drow[k < width ? k : 2*width-1 - k];
+            for (k = pos; k < kres; k++)
+                buf[k] += kernel[kres-1 - (k - pos)]*d;
+            for (k = 0; k < pos; k++)
+                buf[k] += kernel[pos-1 - k]*d;
+        }
+    }
+
+    g_free(buf);
+}
+
+static void
+gwy_data_field_area_vconvolve(GwyDataField *data_field,
+                              GwyDataLine *kernel_line,
+                              gint col, gint row,
+                              gint width, gint height)
+{
+    gint kres, xres, i, j, k, pos;
+    const gdouble *kernel;
+    gdouble *buf, *dcol;
+    gdouble d;
+
+    kres = kernel_line->res;
+    kernel = kernel_line->data;
+    xres = data_field->xres;
+    buf = g_new(gdouble, kres);
+
+    /* This looks like a bad memory access pattern.  And for small kernels it
+     * indeed is (we should iterate row-wise and directly calculate the sums).
+     * For large kernels this is mitigated by the maximum possible amount of
+     * work done per a data field access. */
+    for (j = 0; j < width; j++) {
+        dcol = data_field->data + row*xres + (col + j);
+        /* Initialize with a triangluar sums, mirror-extend */
+        memset(buf, 0, kres*sizeof(gdouble));
+        for (i = 0; i < kres; i++) {
+            k = i - kres/2;
+            d = dcol[k >= 0 ? k*xres : (-k-1)*xres];
+            for (k = 0; k <= i; k++)
+                buf[k] += kernel[i - k]*d;
+        }
+        pos = 0;
+        /* Middle part and tail with mirror extension again, we do some
+         * O(1/2*k^2) of useless work here by not separating the tail */
+        for (i = 0; i < height; i++) {
+            dcol[i*xres] = buf[pos];
+            buf[pos] = 0.0;
+            pos = (pos + 1) % kres;
+            k = i + kres - kres/2;
+            d = dcol[k < height ? k*xres : (2*height-1 - k)*xres];
+            for (k = pos; k < kres; k++)
+                buf[k] += kernel[kres-1 - (k - pos)]*d;
+            for (k = 0; k < pos; k++)
+                buf[k] += kernel[pos-1 - k]*d;
+        }
+    }
+
+    g_free(buf);
+}
+
+/**
+ * gwy_data_field_area_convolve_1d:
+ * @data_field: A data field to convolve.  It must be at least as large as
+ *              1/3 of @kernel_field in the corresponding dimension.
+ * @kernel_line: Kernel line to convolve @data_field with.
+ * @orientation: Filter orientation (%GWY_ORIENTATION_HORIZONTAL for
+ *               row-wise convolution, %GWY_ORIENTATION_VERTICAL for
+ *               column-wise convolution).
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ *
+ * Convolves a rectangular part of a data field with given linear kernel.
+ *
+ * For large separable kernels it can be more efficient to use a sequence of
+ * horizontal and vertical convolutions instead one 2D convolution.
+ *
+ * Since: 2.4
+ **/
+void
+gwy_data_field_area_convolve_1d(GwyDataField *data_field,
+                                GwyDataLine *kernel_line,
+                                GwyOrientation orientation,
+                                gint col, gint row,
+                                gint width, gint height)
+{
+    gint kres;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_LINE(kernel_line));
+
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width >= 0 && height >= 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    kres = kernel_line->res;
+    if (kres == 1) {
+        gwy_data_field_area_multiply(data_field, col, row, width, height,
+                                     kernel_line->data[0]);
+        return;
+    }
+
+    switch (orientation) {
+        case GWY_ORIENTATION_HORIZONTAL:
+        if (kres > 3*width) {
+            g_warning("Kernel width %d more than 3 times larger "
+                      "than field area width %d.", kres, width);
+            return;
+        }
+        gwy_data_field_area_hconvolve(data_field, kernel_line,
+                                      col, row, width, height);
+        break;
+
+        case GWY_ORIENTATION_VERTICAL:
+        if (kres > 3*height) {
+            g_warning("Kernel height %d more than 3 times larger "
+                      "than field area height %d.", kres, height);
+            return;
+        }
+        gwy_data_field_area_vconvolve(data_field, kernel_line,
+                                      col, row, width, height);
+        break;
+
+        default:
+        g_return_if_reached();
+        break;
+    }
+
+    gwy_data_field_invalidate(data_field);
+}
+
+/**
+ * gwy_data_field_convolve_1d:
+ * @data_field: A data field to convolve.  It must be at least as large as
+ *              1/3 of @kernel_field in the corresponding dimension.
+ * @kernel_line: Kenrel line to convolve @data_field with.
+ * @orientation: Filter orientation (see gwy_data_field_area_convolve_1d()).
+ *
+ * Convolves a data field with given linear kernel.
+ *
+ * Since: 2.4
+ **/
+void
+gwy_data_field_convolve_1d(GwyDataField *data_field,
+                           GwyDataLine *kernel_line,
+                           GwyOrientation orientation)
+{
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    gwy_data_field_area_convolve_1d(data_field, kernel_line, orientation,
+                                    0, 0, data_field->xres, data_field->yres);
 }
 
 /**
@@ -891,13 +1158,10 @@ gwy_data_field_area_filter_laplacian(GwyDataField *data_field,
         1, -4, 1,
         0,  1, 0,
     };
-    GwyDataField *kernel;
 
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    kernel = gwy_data_field_new(3, 3, 3, 3, FALSE);
-    memcpy(kernel->data, laplace, sizeof(laplace));
-    gwy_data_field_area_convolve(data_field, kernel, col, row, width, height);
-    g_object_unref(kernel);
+    gwy_data_field_area_convolve_3x3(data_field, laplace,
+                                     col, row, width, height);
 }
 
 /**
@@ -941,16 +1205,14 @@ gwy_data_field_area_filter_sobel(GwyDataField *data_field,
          0,     0,    0,
         -0.25, -0.5, -0.25,
     };
-    GwyDataField *kernel;
 
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    kernel = gwy_data_field_new(3, 3, 3, 3, FALSE);
     if (orientation == GWY_ORIENTATION_HORIZONTAL)
-        memcpy(kernel->data, hsobel, sizeof(hsobel));
+        gwy_data_field_area_convolve_3x3(data_field, hsobel,
+                                         col, row, width, height);
     else
-        memcpy(kernel->data, vsobel, sizeof(vsobel));
-    gwy_data_field_area_convolve(data_field, kernel, col, row, width, height);
-    g_object_unref(kernel);
+        gwy_data_field_area_convolve_3x3(data_field, vsobel,
+                                         col, row, width, height);
 }
 
 /**
@@ -997,16 +1259,14 @@ gwy_data_field_area_filter_prewitt(GwyDataField *data_field,
          0,        0,        0,
         -1.0/3.0, -1.0/3.0, -1.0/3.0,
     };
-    GwyDataField *kernel;
 
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    kernel = gwy_data_field_new(3, 3, 3, 3, FALSE);
     if (orientation == GWY_ORIENTATION_HORIZONTAL)
-        memcpy(kernel->data, hprewitt, sizeof(hprewitt));
+        gwy_data_field_area_convolve_3x3(data_field, hprewitt,
+                                         col, row, width, height);
     else
-        memcpy(kernel->data, vprewitt, sizeof(vprewitt));
-    gwy_data_field_area_convolve(data_field, kernel, col, row, width, height);
-    g_object_unref(kernel);
+        gwy_data_field_area_convolve_3x3(data_field, vprewitt,
+                                         col, row, width, height);
 }
 
 /**
@@ -1077,6 +1337,80 @@ gwy_data_field_filter_dechecker(GwyDataField *data_field)
 }
 
 /**
+ * gwy_data_field_area_filter_gaussian:
+ * @data_field: A data field to apply the filter to.
+ * @sigma: The sigma parameter of the Gaussian.
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ *
+ * Filters a rectangular part of a data field with a Gaussian filter.
+ *
+ * The Gausian is normalized, i.e. it is sum-preserving.
+ *
+ * Since: 2.4
+ **/
+void
+gwy_data_field_area_filter_gaussian(GwyDataField *data_field,
+                                    gdouble sigma,
+                                    gint col, gint row,
+                                    gint width, gint height)
+{
+    GwyDataLine *kernel;
+    gdouble x;
+    gint res, i;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(sigma >= 0.0);
+    if (sigma == 0.0)
+        return;
+
+    res = (gint)ceil(5.0*sigma);
+    res = 2*res + 1;
+    /* FIXME */
+    i = 3*MIN(data_field->xres, data_field->yres);
+    if (res > i) {
+        res = i;
+        if (res % 2 == 0)
+            res--;
+    }
+
+    kernel = gwy_data_line_new(res, 1.0, FALSE);
+    for (i = 0; i < res; i++) {
+        x = i - (res - 1)/2.0;
+        x /= sigma;
+        kernel->data[i] = exp(-x*x/2.0);
+    }
+    gwy_data_line_multiply(kernel, 1.0/gwy_data_line_get_sum(kernel));
+    gwy_data_field_area_convolve_1d(data_field, kernel,
+                                    GWY_ORIENTATION_HORIZONTAL,
+                                    col, row, width, height);
+    gwy_data_field_area_convolve_1d(data_field, kernel,
+                                    GWY_ORIENTATION_VERTICAL,
+                                    col, row, width, height);
+    g_object_unref(kernel);
+}
+
+/**
+ * gwy_data_field_filter_gaussian:
+ * @data_field: A data field to apply the filter to.
+ * @sigma: The sigma parameter of the Gaussian.
+ *
+ * Filters a data field with a Gaussian filter.
+ *
+ * Since: 2.4
+ **/
+void
+gwy_data_field_filter_gaussian(GwyDataField *data_field,
+                               gdouble sigma)
+{
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    gwy_data_field_area_filter_gaussian(data_field, sigma, 0, 0,
+                                         data_field->xres, data_field->yres);
+}
+
+/**
  * gwy_data_field_area_filter_median:
  * @data_field: A data field to apply the filter to.
  * @size: Size of area to take median of.
@@ -1099,7 +1433,6 @@ gwy_data_field_area_filter_median(GwyDataField *data_field,
     gint xfrom, xto, yfrom, yto;
     gdouble *buffer, *data, *kernel;
 
-    gwy_debug("");
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
     g_return_if_fail(size > 0);
     g_return_if_fail(col >= 0 && row >= 0
@@ -1246,8 +1579,6 @@ gwy_data_field_filter_conservative(GwyDataField *data_field,
                                             data_field->xres, data_field->yres);
 }
 
-
-
 static inline gint
 pixel_status(GwyDataField *data_field, gint i, gint j)
 {
@@ -1256,7 +1587,6 @@ pixel_status(GwyDataField *data_field, gint i, gint j)
     else
         return 1;
 }
-
 
 static gint
 znzt_val(GwyDataField *data_field, gint i, gint j)

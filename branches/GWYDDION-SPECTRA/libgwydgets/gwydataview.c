@@ -776,6 +776,7 @@ gwy_data_view_update(GwyDataView *data_view)
     data_view->yres = gwy_data_field_get_yres(data_field);
     data_view->xreal = gwy_data_field_get_xreal(data_field);
     data_view->yreal = gwy_data_field_get_yreal(data_field);
+
     widget = GTK_WIDGET(data_view);
     if (!widget->window)
         return;
@@ -794,8 +795,15 @@ gwy_data_view_update(GwyDataView *data_view)
         gtk_widget_queue_resize(widget);
         g_signal_emit(widget, data_view_signals[RESIZED], 0);
     }
-    else
+    else {
+        if (data_view->pixbuf) {
+            pxres = gdk_pixbuf_get_width(data_view->pixbuf);
+            pyres = gdk_pixbuf_get_height(data_view->pixbuf);
+            data_view->xmeasure = data_view->xreal/pxres;
+            data_view->ymeasure = data_view->yreal/pyres;
+        }
         gdk_window_invalidate_rect(widget->window, NULL, TRUE);
+    }
 }
 
 /**
@@ -1364,7 +1372,7 @@ gwy_data_view_export_pixbuf(GwyDataView *data_view,
 
     g_return_val_if_fail(GWY_IS_DATA_VIEW(data_view), NULL);
     g_return_val_if_fail(GTK_WIDGET_REALIZED(data_view), NULL);
-    g_return_val_if_fail(zoom >= 0.0626 && zoom <= 16.0, NULL);
+    g_return_val_if_fail(zoom > 0.0, NULL);
     g_return_val_if_fail(data_view->base_layer, NULL);
 
     width = MAX(data_view->xres * zoom, 2);

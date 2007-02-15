@@ -35,7 +35,7 @@
 #define WSHED_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
 enum {
-    PREVIEW_SIZE = 320
+    PREVIEW_SIZE = 400
 };
 
 typedef struct {
@@ -109,7 +109,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Marks grains by watershed algorithm."),
     "Petr Klapetek <petr@klapetek.cz>",
-    "1.12",
+    "1.15",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -174,12 +174,16 @@ wshed_dialog(WshedArgs *args,
     gint row;
 
     dialog = gtk_dialog_new_with_buttons(_("Mark Grains by Watershed"),
-                                         NULL, 0,
-                                         _("_Update Preview"), RESPONSE_PREVIEW,
-                                         _("_Reset"), RESPONSE_RESET,
-                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                         NULL);
+                                         NULL, 0, NULL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 gwy_stock_like_button_new(_("_Update"),
+                                                           GTK_STOCK_EXECUTE),
+                                 RESPONSE_PREVIEW);
+    gtk_dialog_add_button(GTK_DIALOG(dialog), _("_Reset"), RESPONSE_RESET);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_OK, GTK_RESPONSE_OK);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     controls.dialog = dialog;
@@ -198,8 +202,12 @@ wshed_dialog(WshedArgs *args,
                             0);
     controls.view = gwy_data_view_new(controls.mydata);
     layer = gwy_layer_basic_new();
-    gwy_pixmap_layer_set_data_key(layer, "/0/data");
-    gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+    g_object_set(layer,
+                 "data-key", "/0/data",
+                 "gradient-key", "/0/base/palette",
+                 "range-type-key", "/0/base/range-type",
+                 "min-max-key", "/0/base",
+                 NULL);
     gwy_data_view_set_base_layer(GWY_DATA_VIEW(controls.view), layer);
     zoomval = PREVIEW_SIZE/(gdouble)MAX(gwy_data_field_get_xres(dfield),
                                         gwy_data_field_get_yres(dfield));
@@ -414,7 +422,7 @@ create_mask_field(GwyDataField *dfield)
     GwyDataField *mfield;
     GwySIUnit *siunit;
 
-    mfield = gwy_data_field_new_alike(dfield, FALSE);
+    mfield = gwy_data_field_new_alike(dfield, TRUE);
     siunit = gwy_si_unit_new("");
     gwy_data_field_set_si_unit_z(mfield, siunit);
     g_object_unref(siunit);

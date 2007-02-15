@@ -1456,6 +1456,7 @@ gwy_app_data_browser_create_channel(GwyAppDataBrowser *browser,
     quark = g_quark_from_string(key);
     gwy_app_data_browser_sync_mask(proxy->container, quark,
                                    GWY_DATA_VIEW(data_view));
+    gwy_app_update_data_range_type(GWY_DATA_VIEW(data_view), id);
 
     /* FIXME: A silly place for this? */
     if (browser->sensgroup)
@@ -1838,6 +1839,12 @@ gwy_app_data_browser_create_3d(G_GNUC_UNUSED GwyAppDataBrowser *browser,
     len = strlen(key);
 
     g_strlcat(key, "3d", sizeof(key));
+    /* Since gwy_3d_view_set_setup_prefix() instantiates a new 3d setup if none
+     * is present, we have to check whether any is present and create a new
+     * one with user's defaults before calling this method.  After that we
+     * cannot tell whether the 3d setup was in the container from previous
+     * 3d views or it has been just created. */
+    _gwy_app_3d_view_init_setup(proxy->container, key);
     gwy_3d_view_set_setup_prefix(GWY_3D_VIEW(view3d), key);
 
     key[len] = '\0';
@@ -2181,7 +2188,7 @@ gwy_app_data_proxy_graph_set_visible(GwyAppDataProxy *proxy,
         if (succ)
             gwy_app_data_browser_select_graph(GWY_GRAPH(succ));
         else
-            _gwy_app_data_view_set_current(NULL);
+            _gwy_app_graph_set_current(NULL);
     }
     g_object_unref(object);
 
@@ -3003,7 +3010,6 @@ gwy_app_data_browser_reset_visibility(GwyContainer *data,
     GwyAppDataBrowser *browser;
     GwyAppDataProxy *proxy = NULL;
     GwyAppDataList *list;
-    GtkTreeIter iter;
     gboolean visible;
     gint i;
 
@@ -3031,12 +3037,15 @@ gwy_app_data_browser_reset_visibility(GwyContainer *data,
 
         /* Attempt to show something. FIXME: Crude. */
         for (i = 0; i < NPAGES; i++) {
+            GtkTreeModel *model;
+            GtkTreeIter iter;
+
             list = &proxy->lists[i];
-            if (gwy_app_data_proxy_find_object(proxy->lists[i].store,
-                                               0, &iter)) {
-                set_visible[i](proxy, &iter, TRUE);
-                return TRUE;
-            }
+            model = GTK_TREE_MODEL(list->store);
+            if (!gtk_tree_model_get_iter_first(model, &iter))
+                continue;
+
+            set_visible[i](proxy, &iter, TRUE);
         }
 
         return FALSE;

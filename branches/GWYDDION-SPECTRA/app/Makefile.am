@@ -19,6 +19,8 @@ libgwyapp2include_HEADERS = \
 	gradient-editor.h \
 	gwyapp.h \
 	gwyapptypes.h \
+	gwymoduleutils.h \
+	gwymoduleutils-file.h \
 	gwyplaintool.h \
 	gwytool.h \
 	menu.h \
@@ -56,14 +58,18 @@ MKENUM_NAME = gwyapptypes
 MKENUM_HFILES = data-browser.h menu.h
 include $(top_srcdir)/utils/mkenum.mk
 
+AM_CFLAGS = @COMMON_CFLAGS@
+AM_CPPFLAGS = -I$(top_builddir)
+
 # In following order do:
 # Any code change     C:   R++: A
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 0:0:0
+libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 1:1:1
 #libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
-libgwyapp2_la_CFLAGS = -DG_LOG_DOMAIN=\"GwyApp\" $(AM_CPPFLAGS)
+libgwyapp2_la_CPPFLAGS = -DG_LOG_DOMAIN=\"GwyApp\" $(AM_CPPFLAGS)
+
 libgwyapp2_la_SOURCES = \
 	app.c \
 	data-browser.c \
@@ -75,6 +81,8 @@ libgwyapp2_la_SOURCES = \
 	gradient-editor.c \
 	gwyappfilechooser.c \
 	gwyapptypes.c \
+	gwymoduleutils.c \
+	gwymoduleutils-file.c \
 	gwyplaintool.c \
 	gwytool.c \
 	menu.c \
@@ -102,6 +110,7 @@ gwyddion_LDADD = @GTKGLEXT_LIBS@ @BASIC_LIBS@ $(LIBTIFF) \
 authors.h: ${top_srcdir}/AUTHORS
 	{ \
 		echo '/* This is a GENERATED file */'; \
+		echo '/*< private_header >*/'; \
 		echo 'static const gchar *core_developers[] = {'; \
 		sed -n -e '/=== Core developers ===/,/^$$/{' \
 			-e 's/^[ =].*//' -e t -e 's/^$$//' -e t \
@@ -121,8 +130,6 @@ authors.h: ${top_srcdir}/AUTHORS
 			${top_srcdir}/AUTHORS; \
 		echo '};'; \
 	} >authors.h
-
-INCLUDES = -I$(top_srcdir)
 
 clean-local:
 	rm -f core.* *~

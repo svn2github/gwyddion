@@ -4,7 +4,6 @@ pixmapdatadir = $(pkgdatadir)/pixmaps
 icondatadir = $(datadir)/pixmaps
 
 # Removed/missing:
-#   data_arithmetic
 #   graph_export_ascii
 #   graph_export_bitmap
 #   graph_export_vector
@@ -14,7 +13,8 @@ icondatadir = $(datadir)/pixmaps
 #   pointer
 #   polynom_remove (but see polynom)
 #   slope_mask
-#   window_measure
+
+# Since 2.3: arithmetic data_measure drift immerse merge
 
 # If you add new stock icons here, run ./utils/stockgen.py from the top-level
 # directory to update source code declarations.
@@ -24,12 +24,15 @@ pixmapdata_DATA = \
 	cd_rstep.png \
 	cd_step.png \
 	gwy_3d_base-24.png \
+	gwy_arithmetic-24.png \
 	gwy_bold-20.png \
 	gwy_cantilever-24.png \
 	gwy_color_range-24.png \
 	gwy_crop-24.png \
 	gwy_cwt-24.png \
+	gwy_data_measure-24.png \
 	gwy_distance-24.png \
+	gwy_drift-24.png \
 	gwy_dwt-24.png \
 	gwy_edge-24.png \
 	gwy_facet_level-24.png \
@@ -59,6 +62,7 @@ pixmapdata_DATA = \
 	gwy_graph_zoom_out-24.png \
 	gwy_gwyddion-32.png \
 	gwy_gwyddion-60.png \
+	gwy_immerse-24.png \
 	gwy_italic-20.png \
 	gwy_less-24.png \
 	gwy_level-24.png \
@@ -83,6 +87,7 @@ pixmapdata_DATA = \
 	gwy_mask_remove-24.png \
 	gwy_mask_shrink-24.png \
 	gwy_mask_subtract-24.png \
+	gwy_merge-24.png \
 	gwy_more-24.png \
 	gwy_palettes-24.png \
 	gwy_pointer_measure-24.png \
@@ -116,13 +121,14 @@ icondata_DATA = \
 	gwyddion.png
 
 # Note: splash screen source is too big to distribute in every tarball,
-# check it out from CVS
+# check it out from Subversion
 xcf_sources = \
 	cd_line.xcf \
 	cd_rline.xcf \
 	cd_rstep.xcf \
 	cd_step.xcf \
 	gwy_3d_base-24.xcf \
+	gwy_arithmetic-24.xcf \
 	gwy_cantilever-24.xcf \
 	gwy_crop-24.xcf \
 	gwy_direction-24.xcf \

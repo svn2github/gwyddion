@@ -40,6 +40,7 @@ file_LTLIBRARIES = \
 	jeol.la \
 	$(jpkscan_module) \
 	metropro.la \
+	microprof.la \
 	mifile.la \
 	nanoscope.la \
 	nanonis.la \
@@ -76,16 +77,12 @@ EXTRA_DIST = \
 	makefile.msc \
 	makefile.msc.gwt
 
-
-INCLUDES = -I$(top_srcdir)
-
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\"
-
-
 if OS_WIN32
 no_undefined = -no-undefined
 endif
 
+AM_CPPFLAGS = -I$(top_buildir) -DG_LOG_DOMAIN=\"Module\"
+AM_CFLAGS = @COMMON_CFLAGS@
 AM_LDFLAGS = -avoid-version -module $(no_undefined)
 
 if MODULE_DEPENDENCIES
@@ -101,7 +98,6 @@ module_libadd = \
 else
 MODULE_LIBTIFF =
 endif
-
 
 asciiexport_la_SOURCES = asciiexport.c
 asciiexport_la_LIBADD = $(module_libadd)
@@ -149,6 +145,9 @@ endif
 
 metropro_la_SOURCES = metropro.c
 metropro_la_LIBADD = $(module_libadd)
+
+microprof_la_SOURCES = microprof.c
+microprof_la_LIBADD = $(module_libadd)
 
 mifile_la_SOURCES = mifile.c
 mifile_la_LIBADD = $(module_libadd)
@@ -202,7 +201,7 @@ sis_la_LIBADD = $(module_libadd)
 
 if HAVE_XML2
 spml_la_SOURCES = spml.c spml-utils.h
-spml_la_CFLAGS = @XML2_CFLAGS@
+spml_la_CFLAGS = $(AM_CFLAGS) @XML2_CFLAGS@
 spml_la_LIBADD = $(module_libadd) @XML2_LIBS@
 endif
 
@@ -226,7 +225,6 @@ witfile_la_LIBADD = $(module_libadd)
 
 wsxmfile_la_SOURCES = wsxmfile.c
 wsxmfile_la_LIBADD = $(module_libadd)
-
 
 MAINTAINERCLEANFILES = makefile.msc
 

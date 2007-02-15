@@ -90,8 +90,11 @@ function extract_build_documentation() {
   if test -s $tmplog; then
       h=1
   fi
-  grep -P "^(WARNING|ERROR)\\b.*(\\n\\s+.*)*" \
-    $logfile | grep -v -f build_documentation.ignore >$tmplog
+  python -c \
+"import re, sys
+x = re.findall(r'(?m)^(?:WARNING|ERROR)\\b.*(?:\\n\s+.*)*', sys.stdin.read())
+if x: print '\\n'.join(x)" \
+    <$logfile | grep -v -f build_documentation.ignore >$tmplog
   if test -s $tmplog -a -z "$h"; then
     echo "=====[ build_documentation ]====="
   fi
@@ -132,9 +135,11 @@ extract_translation_stats
 printerr build_documentation
 extract_build_documentation
 extract_documentation_stats
-printerr check_coding_style
 coding_style_report
 printerr install_to_tmp grep -vFf build_project.err
+printerr check_headers
+printerr check_symbols
+printerr check_coding_style
 printerr make_dists grep -vFf build_project.err
 printerr gnains_index
 

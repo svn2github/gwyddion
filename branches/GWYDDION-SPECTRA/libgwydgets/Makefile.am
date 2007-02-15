@@ -1,9 +1,5 @@
 # @(#) $Id$
 
-libgwyddion = $(top_builddir)/libgwyddion/libgwyddion2.la
-libgwyprocess = $(top_builddir)/libprocess/libgwyprocess2.la
-libgwydraw = $(top_builddir)/libdraw/libgwydraw2.la
-
 libgwydgets2includedir = $(pkgincludedir)/libgwydgets
 
 libgwydgets2include_HEADERS = \
@@ -86,12 +82,15 @@ GENMARSHAL_NAME = gwydgetmarshals
 GENMARSHAL_PREFIX = _gwydget_marshal
 include $(top_srcdir)/utils/genmarshal.mk
 
+AM_CFLAGS = @COMMON_CFLAGS@
+AM_CPPFLAGS = -I$(top_builddir) -DG_LOG_DOMAIN=\"Gwydgets\"
+
 # In following order do:
 # Any code change     C:   R++: A
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 0:0:0
+libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 2:1:2
 #libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
 libgwydgets2_la_SOURCES = \
 	gwy3dlabel.c \
@@ -148,9 +147,6 @@ libgwydgets2_la_SOURCES = \
 	gwyvectorlayer.c \
 	gwyvruler.c \
 	gwycurve.c
-
-INCLUDES = -I$(top_srcdir)
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Gwydgets\"
 
 clean-local:
 	rm -f core.* *~

@@ -19,21 +19,16 @@ tools_LTLIBRARIES = \
 	spectro.la \
 	stats.la
 
-
 EXTRA_DIST = \
 	makefile.msc \
 	makefile.msc.gwt
-
-
-INCLUDES = -I$(top_srcdir)
-
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\"
-
 
 if OS_WIN32
 no_undefined = -no-undefined
 endif
 
+AM_CPPFLAGS = -I$(top_buildir) -DG_LOG_DOMAIN=\"Module\"
+AM_CFLAGS = @COMMON_CFLAGS@
 AM_LDFLAGS = -avoid-version -module $(no_undefined)
 
 if MODULE_DEPENDENCIES
@@ -46,13 +41,6 @@ module_libadd = \
 	$(top_builddir)/libprocess/libgwyprocess2.la \
 	@GTK_LIBS@
 endif
-
-
-#############################################################################
-# If you know what an alphabet is, please keep the alphabetic order.
-# If you have no idea, please return to basic school.
-#############################################################################
-
 
 crop_la_SOURCES = crop.c
 crop_la_LIBADD = $(module_libadd)
@@ -87,6 +75,9 @@ profile_la_LIBADD = $(module_libadd)
 readvalue_la_SOURCES = readvalue.c
 readvalue_la_LIBADD = $(module_libadd)
 
+stats_la_SOURCES = stats.c
+stats_la_LIBADD = $(module_libadd)
+
 sfunctions_la_SOURCES = sfunctions.c
 sfunctions_la_LIBADD = $(module_libadd)
 
@@ -95,9 +86,6 @@ spectro_la_LIBADD = $(module_libadd)
 
 spotremove_la_SOURCES = spotremove.c
 spotremove_la_LIBADD = $(module_libadd)
-
-stats_la_SOURCES = stats.c
-stats_la_LIBADD = $(module_libadd)
 
 MAINTAINERCLEANFILES = makefile.msc
 

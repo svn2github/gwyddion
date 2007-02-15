@@ -98,6 +98,8 @@ static gboolean gwy_axis_normalscale         (GwyAxis *a);
 static gboolean gwy_axis_logscale           (GwyAxis *a);
 static gint    gwy_axis_scale               (GwyAxis *a);
 static gint    gwy_axis_formatticks         (GwyAxis *a);
+static GwySIValueFormat* gwy_axis_calculate_format(GwyAxis *axis,
+                                                   GwySIValueFormat *format);
 static gint    gwy_axis_precompute          (GwyAxis *a,
                                              gint scrmin,
                                              gint scrmax);
@@ -278,8 +280,6 @@ gwy_axis_init(GwyAxis *axis)
     PangoContext *context;
     PangoFontDescription *description;
     gint size;
-
-    gwy_debug("");
 
     axis->orientation = GTK_POS_BOTTOM;
 
@@ -514,9 +514,6 @@ gwy_axis_realize(GtkWidget *widget)
     gint i, attributes_mask;
     GtkStyle *style;
 
-    gwy_debug("realizing a GwyAxis (%ux%u)",
-              widget->allocation.x, widget->allocation.height);
-
     g_return_if_fail(widget != NULL);
     g_return_if_fail(GWY_IS_AXIS(widget));
 
@@ -617,7 +614,7 @@ gwy_axis_size_request(GtkWidget *widget,
         pango_layout_set_font_description(layout, axis->par.major_font);
         for (i = 0; i < axis->mjticks->len; i++) {
             pmjt = &g_array_index(axis->mjticks, GwyAxisLabeledTick, i);
-            pango_layout_set_text(layout, pmjt->ttext->str, pmjt->ttext->len);
+            pango_layout_set_markup(layout, pmjt->ttext->str, pmjt->ttext->len);
             pango_layout_get_pixel_extents(layout, NULL, &rect);
             rect_label.width = MAX(rect_label.width, rect.width);
         }
@@ -1003,7 +1000,7 @@ gwy_axis_draw_tlabels(GdkDrawable *drawable,
 
     for (i = 0; i < axis->mjticks->len; i++) {
         pmjt = &g_array_index(axis->mjticks, GwyAxisLabeledTick, i);
-        pango_layout_set_text(layout,  pmjt->ttext->str, pmjt->ttext->len);
+        pango_layout_set_markup(layout, pmjt->ttext->str, pmjt->ttext->len);
         pango_layout_get_pixel_extents(layout, NULL, &rect);
 
         switch (axis->orientation) {
@@ -1263,7 +1260,8 @@ gwy_axis_normalscale(GwyAxis *a)
         return TRUE;
     }
 
-    tickstep = gwy_axis_quantize_normal_tics(range, a->par.major_maxticks); /*step*/
+    /*step*/
+    tickstep = gwy_axis_quantize_normal_tics(range, a->par.major_maxticks);
     majorbase = ceil(reqmin/tickstep)*tickstep; /*starting value*/
     minortickstep = tickstep/(gdouble)a->par.minor_division;
     minorbase = ceil(reqmin/minortickstep)*minortickstep;
@@ -1281,7 +1279,7 @@ gwy_axis_normalscale(GwyAxis *a)
     i = 0;
     do {
         mjt.t.value = majorbase;
-        mjt.ttext = g_string_new(" ");
+        mjt.ttext = g_string_new(NULL);
         a->mjticks = g_array_append_val(a->mjticks, mjt);
         majorbase += tickstep;
         i++;
@@ -1324,16 +1322,16 @@ gwy_axis_logscale(GwyAxis *a)
     else
         logmin = logmax - 1.0;
 
-    /*ticks will be linearly distributed again*/
-    /*major ticks - will be equally ditributed in the log domain 1,10,100*/
-    tickstep = 1; /*step*/
-    base = ceil(logmin/tickstep)*tickstep - 1; /*starting value*/
+    /* Ticks will be linearly distributed again */
+    /* Major ticks - will be equally ditributed in the log domain 1,10,100 */
+    tickstep = (ceil(logmax) - floor(logmin))/MAX(a->par.major_maxticks - 1, 1);
+    tickstep = ceil(tickstep);
+    base = ceil(logmin/tickstep)*tickstep - 1; /* starting value */
     logmin = base;
-    /*printf("MJ base %g, tickstep %g\n", base, tickstep);*/
     i = 0;
     do {
         mjt.t.value = base;
-        mjt.ttext = g_string_new(" ");
+        mjt.ttext = g_string_new(NULL);
         g_array_append_val(a->mjticks, mjt);
         base += tickstep;
         i++;
@@ -1343,18 +1341,33 @@ gwy_axis_logscale(GwyAxis *a)
     min = gwy_axis_dbl_raise(10.0, logmin);
     max = gwy_axis_dbl_raise(10.0, logmax);
 
-    /*minor ticks - will be equally distributed in the normal domain 1,2,3...*/
-    tickstep = min;
-    base = tickstep;
-    i = 0;
-    do {
-         /*here, tickstep must be adapted do scale*/
-         tickstep = gwy_axis_dbl_raise(10.0, (gint)floor(log10(base*1.01)));
-             mit.value = log10(base);
-         g_array_append_val(a->miticks, mit);
-         base += tickstep;
-         i++;
-    } while (base <= max && i < a->par.major_maxticks*20);
+    /* Minor ticks - will be equally distributed in the normal domain 1,2,3...
+     * if the major tick step is only one order, otherwise distribute them in
+     * the log domain too */
+    if (tickstep == 1) {
+        tickstep = min;
+        base = tickstep;
+        i = 0;
+        do {
+            /* Here, tickstep must be adapted do scale */
+            tickstep = gwy_axis_dbl_raise(10.0, (gint)floor(log10(base*1.001)));
+            mit.value = log10(base);
+            g_array_append_val(a->miticks, mit);
+            base += tickstep;
+            i++;
+        } while (base <= max && i < a->par.major_maxticks*20);
+    }
+    else {
+        i = 0;
+        tickstep = 1;
+        base = logmin;
+        do {
+            mit.value = base;
+            g_array_append_val(a->miticks, mit);
+            base += tickstep;
+            i++;
+        } while ((base - tickstep) < logmax && i < a->par.major_maxticks*20);
+    }
 
     a->max = max;
     a->min = min;
@@ -1363,7 +1376,10 @@ gwy_axis_logscale(GwyAxis *a)
 }
 
 
-/* returns 0 if everything went OK, <0 if there are not enough major ticks, >0 if there area too many ticks */
+/* returns
+ * 0 if everything went OK,
+ * < 0 if there are not enough major ticks,
+ * > 0 if there area too many ticks */
 static gint
 gwy_axis_scale(GwyAxis *a)
 {
@@ -1390,11 +1406,12 @@ gwy_axis_scale(GwyAxis *a)
         gwy_axis_normalscale(a);
     /*label ticks*/
     ret = gwy_axis_formatticks(a);
-    /*precompute screen coordinates of ticks (must be done after each geometry change)*/
 
     return ret;
 }
 
+/* precompute screen coordinates of ticks
+ * (must be done after each geometry change) */
 static gint
 gwy_axis_precompute(GwyAxis *a, gint scrmin, gint scrmax)
 {
@@ -1408,7 +1425,7 @@ gwy_axis_precompute(GwyAxis *a, gint scrmin, gint scrmax)
     if (a->is_logarithmic) range = log10(a->max)-log10(a->min);
 
     for (i = 0; i < a->mjticks->len; i++) {
-        pmjt = &g_array_index (a->mjticks, GwyAxisLabeledTick, i);
+        pmjt = &g_array_index(a->mjticks, GwyAxisLabeledTick, i);
         if (a->is_logarithmic)
             pmjt->t.scrpos = ROUND(scrmin + (pmjt->t.value
                                              - log10(a->min))/range*dist);
@@ -1418,7 +1435,7 @@ gwy_axis_precompute(GwyAxis *a, gint scrmin, gint scrmax)
     }
 
     for (i = 0; i < a->miticks->len; i++) {
-        pmit = &g_array_index (a->miticks, GwyAxisTick, i);
+        pmit = &g_array_index(a->miticks, GwyAxisTick, i);
         if (a->is_logarithmic)
             pmit->scrpos = ROUND(scrmin + (pmit->value
                                            - log10(a->min))/range*dist);
@@ -1431,14 +1448,14 @@ gwy_axis_precompute(GwyAxis *a, gint scrmin, gint scrmax)
 static gint
 gwy_axis_formatticks(GwyAxis *a)
 {
-    gdouble value, average;
+    gdouble value;
     PangoLayout *layout;
     PangoContext *context;
     PangoRectangle rect;
-    gint totalwidth=0, totalheight=0;
-    gdouble range;
+    gint totalwidth = 0, totalheight = 0;
     GwySIValueFormat *format = NULL;
-    GwyAxisLabeledTick mji, mjx, *pmjt;
+    GwyAxisLabeledTick *pmjt;
+    gboolean human_fmt = TRUE;
     guint i;
 
     /* Determine range */
@@ -1446,24 +1463,10 @@ gwy_axis_formatticks(GwyAxis *a)
         g_warning("No ticks found");
         return 1;
     }
-    mji = g_array_index(a->mjticks, GwyAxisLabeledTick, 0);
-    mjx = g_array_index(a->mjticks, GwyAxisLabeledTick, a->mjticks->len - 1);
-    if (a->is_logarithmic) {
-        average = 0;
-        /*range = fabs(pow(10, mjx.t.value) - pow(10, mji.t.value));*/
-        range = 1;
-    }
-    else {
-        average = fabs(mjx.t.value + mji.t.value)/2;
-        range = fabs(mjx.t.value - mji.t.value);
-    }
 
-    /*move exponents to axis label*/
+    /* move exponents to axis label */
     if (a->par.major_printmode == GWY_AXIS_SCALE_FORMAT_AUTO) {
-        format = gwy_si_unit_get_format_with_resolution
-                          (a->unit, GWY_SI_UNIT_FORMAT_MARKUP,
-                           MAX(average, range), range/(double)a->mjticks->len,
-                           format);
+        format = gwy_axis_calculate_format(a, format);
         if (a->magnification_string)
             g_string_assign(a->magnification_string, format->units);
         else
@@ -1481,52 +1484,53 @@ gwy_axis_formatticks(GwyAxis *a)
     layout = pango_layout_new(context);
     pango_layout_set_font_description(layout, a->par.major_font);
 
-    for (i = 0; i < a->mjticks->len; i++)
-    {
+    if (a->is_logarithmic) {
+        pmjt = &g_array_index(a->mjticks, GwyAxisLabeledTick, 0);
+        if (pmjt->t.value < -4 || pmjt->t.value > 3)
+            human_fmt = FALSE;
+        pmjt = &g_array_index(a->mjticks, GwyAxisLabeledTick,
+                              a->mjticks->len-1);
+        if (pmjt->t.value < -4 || pmjt->t.value > 3)
+            human_fmt = FALSE;
+    }
+
+    for (i = 0; i < a->mjticks->len; i++) {
         /* Find the value we want to put in string */
         pmjt = &g_array_index(a->mjticks, GwyAxisLabeledTick, i);
-        if (a->is_logarithmic)
-            value = pow(10, pmjt->t.value);
-        else
-            value = pmjt->t.value;
-
+        value = pmjt->t.value;
         if (format)
             value /= format->magnitude;
 
         /* Fill tick labels dependent to mode */
         if (a->is_logarithmic) {
-            if (value >= 1 && value <= 1000)
-                g_string_printf(pmjt->ttext,"%d", (int)value);
-            else if (value < 1 && value > 1e-4)
-                g_string_printf(pmjt->ttext,"%.*f", (int)fabs(log10(value)), value);
+            if (human_fmt)
+                g_string_printf(pmjt->ttext, "%g", pow10(value));
             else
-                g_string_printf(pmjt->ttext,"%.1e", value);
+                g_string_printf(pmjt->ttext, "10<sup>%d</sup>", ROUND(value));
         }
         else {
             if (a->par.major_printmode == GWY_AXIS_SCALE_FORMAT_AUTO) {
                 g_string_printf(pmjt->ttext, "%.*f", format->precision, value);
             }
             else if (a->par.major_printmode == GWY_AXIS_SCALE_FORMAT_EXP) {
-                g_string_printf(pmjt->ttext,"%.1e", value);
                 if (value == 0)
-                g_string_printf(pmjt->ttext,"0");
+                    g_string_printf(pmjt->ttext, "0");
+                else
+                    g_string_printf(pmjt->ttext, "%.1e", value);
             }
             else if (a->par.major_printmode == GWY_AXIS_SCALE_FORMAT_INT) {
-                g_string_printf(pmjt->ttext,"%d", (int)(value+0.5));
+                g_string_printf(pmjt->ttext, "%d", (int)(value+0.5));
             }
         }
 
-        pango_layout_set_text(layout,  pmjt->ttext->str, pmjt->ttext->len);
+        pango_layout_set_markup(layout, pmjt->ttext->str, pmjt->ttext->len);
         pango_layout_get_pixel_extents(layout, NULL, &rect);
         totalwidth += rect.width;
         totalheight += rect.height;
     }
 
-    if (format) {
-        g_free(format->units);
-        g_free(format);
-    }
-
+    if (format)
+        gwy_si_unit_value_format_free(format);
     g_object_unref(layout);
     g_object_unref(context);
 
@@ -1546,6 +1550,63 @@ gwy_axis_formatticks(GwyAxis *a)
     }
 
     return 0;
+}
+
+static GwySIValueFormat*
+gwy_axis_calculate_format(GwyAxis *axis,
+                          GwySIValueFormat *format)
+{
+    GwyAxisLabeledTick *pmjt, *mji, *mjx;
+    gdouble average, step;
+    GString *u1, *u2;
+    gboolean ok;
+    guint i;
+
+    /* FIXME: Does anyone really care? */
+    if (axis->is_logarithmic)
+        return gwy_si_unit_get_format(axis->unit, GWY_SI_UNIT_FORMAT_MARKUP,
+                                      0, format);
+
+    mji = &g_array_index(axis->mjticks, GwyAxisLabeledTick, 0);
+    mjx = &g_array_index(axis->mjticks, GwyAxisLabeledTick,
+                         axis->mjticks->len - 1);
+    average = fabs(mjx->t.value + mji->t.value)/2;
+    step = fabs(mjx->t.value - mji->t.value);
+    average = MAX(average, step);
+    step /= axis->mjticks->len - 1;
+
+    format = gwy_si_unit_get_format_with_resolution
+                                        (axis->unit, GWY_SI_UNIT_FORMAT_MARKUP,
+                                         average, step, format);
+
+    /* Ensure the format is not too precise */
+    format->precision++;
+    u1 = g_string_new(NULL);
+    u2 = g_string_new(NULL);
+    ok = TRUE;
+    while (ok && format->precision > 0 && axis->mjticks->len > 1) {
+        format->precision--;
+        ok = TRUE;
+        pmjt = &g_array_index(axis->mjticks, GwyAxisLabeledTick, 0);
+        g_string_printf(u1, "%.*f",
+                        format->precision, pmjt->t.value/format->magnitude);
+        for (i = 1; i < MIN(axis->mjticks->len, 6); i++) {
+            pmjt = &g_array_index(axis->mjticks, GwyAxisLabeledTick, i);
+            g_string_printf(u2, "%.*f",
+                            format->precision, pmjt->t.value/format->magnitude);
+            if (gwy_strequal(u2->str, u1->str)) {
+                format->precision++;
+                ok = FALSE;
+                break;
+            }
+            GWY_SWAP(GString*, u2, u1);
+        }
+    }
+
+    g_string_free(u1, TRUE);
+    g_string_free(u2, TRUE);
+
+    return format;
 }
 
 /**
@@ -1818,7 +1879,7 @@ gwy_axis_export_vector(GwyAxis *axis, gint xmin, gint ymin,
     g_string_append_printf(out, "%%MajorTicks\n");
     g_string_append_printf(out, "%d setlinewidth\n", ticklinewidth);
     for (i = 0; i < axis->mjticks->len; i++) {
-        pmjt = &g_array_index (axis->mjticks, GwyAxisLabeledTick, i);
+        pmjt = &g_array_index(axis->mjticks, GwyAxisLabeledTick, i);
 
         switch (axis->orientation) {
             case GTK_POS_TOP:

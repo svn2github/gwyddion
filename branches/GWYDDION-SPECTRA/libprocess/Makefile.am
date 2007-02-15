@@ -1,7 +1,5 @@
 # @(#) $Id$
 
-libgwyddion = $(top_builddir)/libgwyddion/libgwyddion2.la
-
 libgwyprocess2includedir = $(pkgincludedir)/libprocess
 
 libgwyprocess2include_HEADERS = \
@@ -52,12 +50,15 @@ MKENUM_NAME = gwyprocesstypes
 MKENUM_HFILES = gwyprocessenums.h
 include $(top_srcdir)/utils/mkenum.mk
 
+AM_CFLAGS = @COMMON_CFLAGS@
+AM_CPPFLAGS = -I$(top_builddir) -DG_LOG_DOMAIN=\"GwyProcess\"
+
 # In following order do:
 # Any code change     C:   R++: A
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -version-info 0:0:0
+libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -version-info 3:0:3
 #libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -release @LIBRARY_RELEASE@
 libgwyprocess2_la_SOURCES = \
 	arithmetic.c \
@@ -85,9 +86,6 @@ libgwyprocess2_la_SOURCES = \
 	spectra.c \
 	stats.c \
 	tip.c
-
-INCLUDES = -I$(top_srcdir)
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"GwyProcess\"
 
 clean-local:
 	rm -f core.* *~

@@ -40,7 +40,7 @@
 #define CONVOLUTION_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
 enum {
-    PREVIEW_SIZE = 320
+    PREVIEW_SIZE = 400
 };
 
 typedef struct {
@@ -137,7 +137,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Generic convolution filter with a user-defined matrix."),
     "Yeti <yeti@gwyddion.net>",
-    "1.0",
+    "1.1.2",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -160,7 +160,7 @@ module_register(void)
 
     gwy_process_func_register("convolution_filter",
                               (GwyProcessFunc)&convolution_filter,
-                              N_("/_Integral Transforms/Convolution _Filter..."),
+                              N_("/_Integral Transforms/Con_volution Filter..."),
                               NULL,
                               CONVOLUTION_RUN_MODES,
                               GWY_MENU_FLAG_DATA,
@@ -240,10 +240,15 @@ convolution_filter_dialog(ConvolutionArgs *args,
     controls.position_quark = g_quark_from_static_string("position");
 
     dialog = gtk_dialog_new_with_buttons(_("Convolution Filter"), NULL, 0,
-                                         _("_Update"), RESPONSE_PREVIEW,
-                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
                                          NULL);
+    gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
+                                 gwy_stock_like_button_new(_("_Update"),
+                                                           GTK_STOCK_EXECUTE),
+                                 RESPONSE_PREVIEW);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL);
+    gtk_dialog_add_button(GTK_DIALOG(dialog),
+                          GTK_STOCK_OK, GTK_RESPONSE_OK);
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
     gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
     controls.dialog = dialog;
@@ -645,6 +650,7 @@ convolution_filter_switch_preset(GtkTreeSelection *selection,
     gwy_radio_buttons_set_current(controls->vsym, preset->vsym);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(controls->divisor_auto),
                                  preset->data.auto_divisor);
+    gtk_widget_set_sensitive(controls->divisor, !preset->data.auto_divisor);
     controls->in_update = FALSE;
     convolution_filter_update_divisor(controls);
     controls->computed = FALSE;
@@ -720,6 +726,7 @@ convolution_filter_preset_copy(ConvolutionControls *controls,
     gwy_inventory_store_get_iter(controls->presets,
                                  gwy_resource_get_name(resource), &iter);
     gtk_tree_selection_select_iter(controls->selection, &iter);
+    convolution_filter_preset_save(GWY_CONVOLUTION_FILTER_PRESET(resource));
 }
 
 static gboolean

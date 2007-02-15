@@ -3,8 +3,6 @@
  *  Copyright (C) 2005 David Necas (Yeti), Petr Klapetek.
  *  E-mail: yeti@gwyddion.net, klapetek@gwyddion.net.
  *
- *  Date conversion code copied from Wine, see below.
- *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -26,9 +24,9 @@
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
-#include <libgwymodule/gwymodule-file.h>
 #include <libprocess/stats.h>
-#include <app/gwyapp.h>
+#include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "get.h"
 #include "err.h"
@@ -90,7 +88,6 @@ typedef enum {
     SURF_LEVELING_MZ   = 2,
 } SurfLevelingType;
 
-
 typedef struct {
     SurfFormatType format;
     gint nobjects;
@@ -108,7 +105,7 @@ typedef struct {
     gint zmax;
     gint xres; /* number of points per line */
     gint yres; /* number of lines */
-    gint nofpoints;
+    guint nofpoints;
     gdouble dx;
     gdouble dy;
     gdouble dz;
@@ -143,12 +140,6 @@ typedef struct {
     GwyDataField *dfield;
 } SurfFile;
 
-typedef struct {
-    SurfFile *file;
-    GwyContainer *data;
-    GtkWidget *data_view;
-} SurfControls;
-
 static gboolean      module_register      (void);
 static gint          surffile_detect      (const GwyFileDetectInfo *fileinfo,
                                            gboolean only_name);
@@ -159,8 +150,6 @@ static gboolean      fill_data_fields     (SurfFile *surffile,
                                            const guchar *buffer,
                                            GError **error);
 static GwyContainer* surffile_get_metadata(SurfFile *surffile);
-static gboolean    data_field_has_highly_nosquare_samples(GwyDataField *dfield);
-
 
 static const GwyEnum acq_modes[] = {
    { "Unknown",                     SURF_ACQ_UNKNOWN,        },
@@ -181,7 +170,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports Surf data files."),
     "Petr Klapetek <klapetek@gwyddion.net>",
-    "0.5",
+    "0.7",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -231,6 +220,7 @@ surffile_load(const gchar *filename,
     GError *err = NULL;
     gchar signature[12];
     gdouble max, min;
+    gint add = 0;
 
     if (!gwy_file_get_contents(filename, &buffer, &size, &err)) {
         err_GET_FILE_CONTENTS(error, &err);
@@ -253,29 +243,29 @@ surffile_load(const gchar *filename,
         return NULL;
     }
 
-    surffile.format = get_WORD_LE(&p);
-    surffile.nobjects = get_WORD_LE(&p);
-    surffile.version = get_WORD_LE(&p);
-    surffile.type = get_WORD_LE(&p);
+    surffile.format = gwy_get_guint16_le(&p);
+    surffile.nobjects = gwy_get_guint16_le(&p);
+    surffile.version = gwy_get_guint16_le(&p);
+    surffile.type = gwy_get_guint16_le(&p);
     get_CHARS0(surffile.object_name, &p, 30);
     get_CHARS0(surffile.operator_name, &p, 30);
-    surffile.material_code = get_WORD_LE(&p);
-    surffile.acquisition = get_WORD_LE(&p);
-    surffile.range = get_WORD_LE(&p);
-    surffile.special_points = get_WORD_LE(&p);
-    surffile.absolute = get_WORD_LE(&p);
+    surffile.material_code = gwy_get_guint16_le(&p);
+    surffile.acquisition = gwy_get_guint16_le(&p);
+    surffile.range = gwy_get_guint16_le(&p);
+    surffile.special_points = gwy_get_guint16_le(&p);
+    surffile.absolute = gwy_get_guint16_le(&p);
     /*reserved*/
     p += 8;
-    surffile.pointsize = get_WORD_LE(&p);
-    surffile.zmin = get_DWORD_LE(&p);
-    surffile.zmax = get_DWORD_LE(&p);
-    surffile.xres = get_DWORD_LE(&p);
-    surffile.yres = get_DWORD_LE(&p);
-    surffile.nofpoints = get_DWORD_LE(&p);
+    surffile.pointsize = gwy_get_guint16_le(&p);
+    surffile.zmin = gwy_get_gint32_le(&p);
+    surffile.zmax = gwy_get_gint32_le(&p);
+    surffile.xres = gwy_get_gint32_le(&p);
+    surffile.yres = gwy_get_gint32_le(&p);
+    surffile.nofpoints = gwy_get_guint32_le(&p);
 
-    surffile.dx = get_FLOAT_LE(&p);
-    surffile.dy = get_FLOAT_LE(&p);
-    surffile.dz = get_FLOAT_LE(&p);
+    surffile.dx = gwy_get_gfloat_le(&p);
+    surffile.dy = gwy_get_gfloat_le(&p);
+    surffile.dz = gwy_get_gfloat_le(&p);
     get_CHARS0(surffile.xaxis, &p, 16);
     get_CHARS0(surffile.yaxis, &p, 16);
     get_CHARS0(surffile.zaxis, &p, 16);
@@ -286,30 +276,31 @@ surffile_load(const gchar *filename,
     get_CHARS0(surffile.ylength_unit, &p, 16);
     get_CHARS0(surffile.zlength_unit, &p, 16);
 
-    surffile.xunit_ratio = get_FLOAT_LE(&p);
-    surffile.yunit_ratio = get_FLOAT_LE(&p);
-    surffile.zunit_ratio = get_FLOAT_LE(&p);
-    surffile.imprint = get_WORD_LE(&p);
-    surffile.inversion = get_WORD_LE(&p);
-    surffile.leveling = get_WORD_LE(&p);
+    surffile.xunit_ratio = gwy_get_gfloat_le(&p);
+    surffile.yunit_ratio = gwy_get_gfloat_le(&p);
+    surffile.zunit_ratio = gwy_get_gfloat_le(&p);
+    surffile.imprint = gwy_get_guint16_le(&p);
+    surffile.inversion = gwy_get_guint16_le(&p);
+    surffile.leveling = gwy_get_guint16_le(&p);
 
     p += 12;
 
-    surffile.seconds = get_WORD_LE(&p);
-    surffile.minutes = get_WORD_LE(&p);
-    surffile.hours = get_WORD_LE(&p);
-    surffile.day = get_WORD_LE(&p);
-    surffile.month = get_WORD_LE(&p);
-    surffile.year = get_WORD_LE(&p);
-    surffile.measurement_duration = get_WORD_LE(&p);
-    surffile.comment_size = get_WORD_LE(&p);
-    surffile.private_size = get_WORD_LE(&p);
+    surffile.seconds = gwy_get_guint16_le(&p);
+    surffile.minutes = gwy_get_guint16_le(&p);
+    surffile.hours = gwy_get_guint16_le(&p);
+    surffile.day = gwy_get_guint16_le(&p);
+    surffile.month = gwy_get_guint16_le(&p);
+    surffile.year = gwy_get_guint16_le(&p);
+    surffile.measurement_duration = gwy_get_guint16_le(&p);
+    surffile.comment_size = gwy_get_guint16_le(&p);
+    surffile.private_size = gwy_get_guint16_le(&p);
 
     get_CHARARRAY(surffile.client_zone, &p);
 
-    surffile.XOffset = get_FLOAT_LE(&p);
-    surffile.YOffset = get_FLOAT_LE(&p);
-    surffile.ZOffset = get_FLOAT_LE(&p);
+    surffile.XOffset = gwy_get_gfloat_le(&p);
+    surffile.YOffset = gwy_get_gfloat_le(&p);
+    surffile.ZOffset = gwy_get_gfloat_le(&p);
+
 
     gwy_debug("fileformat: %d,  n_of_objects: %d, "
               "version: %d, object_type: %d",
@@ -346,16 +337,22 @@ surffile_load(const gchar *filename,
     gwy_debug("Time: %d:%d:%d, Date: %d.%d.%d",
               surffile.hours, surffile.minutes, surffile.seconds,
               surffile.day, surffile.month, surffile.year);
+    gwy_debug("private zone size: %d, comment size %d",
+              surffile.private_size, surffile.comment_size);
 
     expected_size = (SURF_HEADER_SIZE
                      + surffile.pointsize/8*surffile.xres*surffile.yres);
     if (expected_size != size) {
-        err_SIZE_MISMATCH(error, expected_size, size);
-        gwy_file_abandon_contents(buffer, size, NULL);
-        return NULL;
+        gwy_debug("Size mismatch!");
+        if (size > expected_size) add = size - expected_size; /*TODO  correct this !*/
+        else {
+          err_SIZE_MISMATCH(error, expected_size, size);
+          gwy_file_abandon_contents(buffer, size, NULL);
+          return NULL;
+        }
     }
 
-    p = buffer + SURF_HEADER_SIZE;
+    p = buffer + SURF_HEADER_SIZE + add;
     if (!fill_data_fields(&surffile, p, error)) {
         gwy_file_abandon_contents(buffer, size, NULL);
         return NULL;
@@ -395,10 +392,7 @@ surffile_load(const gchar *filename,
     gwy_container_set_object_by_name(container, "/0/meta", meta);
     g_object_unref(meta);
 
-    /* FIXME: this can be generally useful, move it to gwyddion */
-    if (data_field_has_highly_nosquare_samples(surffile.dfield))
-        gwy_container_set_boolean_by_name(container, "/0/data/realsquare",
-                                          TRUE);
+    gwy_app_channel_check_nonsquare(container, 0);
 
     return container;
 }
@@ -488,24 +482,4 @@ surffile_get_metadata(SurfFile *surffile)
     return meta;
 }
 
-static gboolean
-data_field_has_highly_nosquare_samples(GwyDataField *dfield)
-{
-    gint xres, yres;
-    gdouble xreal, yreal, q;
-
-    xres = gwy_data_field_get_xres(dfield);
-    yres = gwy_data_field_get_yres(dfield);
-    xreal = gwy_data_field_get_xreal(dfield);
-    yreal = gwy_data_field_get_yreal(dfield);
-
-    q = (xreal/xres)/(yreal/yres);
-
-    /* The threshold is somewhat arbitrary.  Fortunately, most files encoutered
-     * in practice have either q very close to 1, or 2 or more */
-    return q > G_SQRT2 || q < 1.0/G_SQRT2;
-}
-
-
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
-

@@ -1,8 +1,8 @@
 # @(#) $Id$
 dnl Process this file with autoconf to produce a configure script.
 m4_define([gwy_version_major],[2])
-m4_define([gwy_version_minor],[1])
-m4_define([gwy_version_string],[gwy_version_major.gwy_version_minor.20061208])
+m4_define([gwy_version_minor],[4])
+m4_define([gwy_version_string],[gwy_version_major.gwy_version_minor])
 AC_INIT([Gwyddion], [gwy_version_string], [klapetek@gwyddion.net])
 # Use -release for unstable version libs instead of -version-info, because
 # we *do* break compatibility each version
@@ -84,19 +84,17 @@ AC_CHECK_PROGS([XSLTPROC],[xsltproc],[:])
 GTK_DOC_CHECK(1.4)
 
 #############################################################################
-# Host sytstem.
-AC_MSG_CHECKING([for 32bit])
-case "$host_cpu" in
-  # Highly incomplete
-  i@<:@3456@:>@86)
-    arch_32bit=yes
-    ;;
-  *)
-    # We cannot reliably detect things like CFLAGS=-m32
-    arch_32bit="maybe-not"
-    ;;
-esac
-AC_MSG_RESULT([$arch_32bit])
+# 64bit (for FFTW 3.0 warning)
+# Unfortunately, AC_CHECK_SIZEOF() is capable only of preprocessor symbol
+# production while we need to know the size now.  We don't care much about
+# the exact model: if pointers are larger than 32bit it can possibly break,
+# and so we will warn.
+AC_CHECK_SIZEOF([void*])
+if test $ac_cv_sizeof_voidp = 4; then
+  arch_32bit=yes
+else
+  arch_32bit=no
+fi
 
 #############################################################################
 # Win32.
@@ -307,7 +305,7 @@ if test x$enable_tiff != xno && test -z "$LIBTIFF"; then
     [])
   if test x$enable_tiff != xno; then
     AC_MSG_CHECKING([whether libtiff version is at least 3.6])
-    ORIG_LIBS="$LIBS"
+    TIFF_ORIG_LIBS="$LIBS"
     LIBS="$LIBS $LIBTIFF"
     AC_RUN_IFELSE(AC_LANG_PROGRAM([[#include <tiffio.h>
                                     #include <stdio.h>
@@ -324,7 +322,7 @@ if test x$enable_tiff != xno && test -z "$LIBTIFF"; then
        [enable_tiff=yes],
        [enable_tiff=no],
        [enable_tiff=no])
-    LIBS="$ORIG_LIBS"
+    LIBS="$TIFF_ORIG_LIBS"
     AC_MSG_RESULT([$enable_tiff])
   fi
 fi
@@ -385,13 +383,14 @@ AC_SUBST(GETTEXT_PACKAGE)
 
 #############################################################################
 # Libs
-BASIC_LIBS="$GOBJECT_LIBS $INTLLIBS $LIBS $LDFLAGS"
+BASIC_LIBS="$GOBJECT_LIBS $INTLLIBS"
 LIBS="$ORIG_LIBS"
 AC_SUBST(BASIC_LIBS)
-BASIC_CFLAGS="$GOBJECT_CFLAGS $GMODULE_CFLAGS $GTKGLEXT_CFLAGS $CFLAGS"
+COMMON_LDFLAGS="$HOST_LDFLAGS"
+AC_SUBST(COMMON_LDFLAGS)
 
-CFLAGS="$HOST_CFLAGS $WARNING_CFLAGS $MATH_CFLAGS $BASIC_CFLAGS"
-LDFLAGS="$HOST_LDFLAGS"
+COMMON_CFLAGS="$HOST_CFLAGS $WARNING_CFLAGS $GOBJECT_CFLAGS $GMODULE_CFLAGS $GTKGLEXT_CFLAGS $MATH_CFLAGS"
+AC_SUBST(COMMON_CFLAGS)
 
 #############################################################################
 # Plugin-proxy

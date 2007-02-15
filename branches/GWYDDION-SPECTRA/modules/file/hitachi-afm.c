@@ -24,25 +24,24 @@
  * Hitachi. */
 
 #include "config.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwymodule/gwymodule-file.h>
 #include <libprocess/datafield.h>
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "err.h"
-#include "get.h"
 
 #define MAGIC "AFM/Ver. "
 #define MAGIC_SIZE (sizeof(MAGIC)-1)
 
 #define EXTENSION ".afm"
 
-#define Nanometer 1e-9
+#define Nanometer (1e-9)
 
 enum {
     HEADER_SIZE   = 0x280,
@@ -82,7 +81,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports Hitachi AFM files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.5",
+    "0.6",
     "David Nečas (Yeti) & Petr Klapetek & Markus Pristovsek",
     "2005",
 };
@@ -144,31 +143,13 @@ hitachi_old_detect(const GwyFileDetectInfo *fileinfo,
         return 0;
 
     p = fileinfo->head + RES_OFFSET_OLD;
-    xres = get_WORD_LE(&p);
-    yres = get_WORD_LE(&p);
+    xres = gwy_get_guint16_le(&p);
+    yres = gwy_get_guint16_le(&p);
 
     if (fileinfo->file_size == 2*xres*yres + HEADER_SIZE_OLD)
         return 100;
 
     return 0;
-}
-
-static gboolean
-data_field_has_highly_nosquare_samples(GwyDataField *dfield)
-{
-    gint xres, yres;
-    gdouble xreal, yreal, q;
-
-    xres = gwy_data_field_get_xres(dfield);
-    yres = gwy_data_field_get_yres(dfield);
-    xreal = gwy_data_field_get_xreal(dfield);
-    yreal = gwy_data_field_get_yreal(dfield);
-
-    q = (xreal/xres)/(yreal/yres);
-
-    /* The threshold is somewhat arbitrary.  Fortunately, most files encoutered
-     * in practice have either q very close to 1, or 2 or more */
-    return q > G_SQRT2 || q < 1.0/G_SQRT2;
 }
 
 static GwyContainer*
@@ -222,10 +203,7 @@ hitachi_load(const gchar *filename,
     gwy_container_set_string_by_name(container, "/0/data/title",
                                      g_strdup("Topography"));
 
-    /* FIXME: this can be generally useful, move it to gwyddion */
-    if (data_field_has_highly_nosquare_samples(dfield))
-        gwy_container_set_boolean_by_name(container, "/0/data/realsquare",
-                                          TRUE);
+    gwy_app_channel_check_nonsquare(container, 0);
 
     return container;
 }
@@ -244,8 +222,8 @@ read_data_field(const guchar *buffer,
     const guchar *p;
 
     p = buffer + RES_OFFSET;
-    xres = get_DWORD_LE(&p);
-    yres = get_DWORD_LE(&p);
+    xres = gwy_get_guint32_le(&p);
+    yres = gwy_get_guint32_le(&p);
     gwy_debug("xres: %d, yres: %d", xres, yres);
 
     n = xres*yres;
@@ -255,11 +233,11 @@ read_data_field(const guchar *buffer,
     }
 
     p = buffer + XREAL_OFFSET;
-    xreal = get_DOUBLE_LE(&p) * Nanometer;
+    xreal = gwy_get_gdouble_le(&p) * Nanometer;
     p = buffer + YREAL_OFFSET;
-    yreal = get_DOUBLE_LE(&p) * Nanometer;
+    yreal = gwy_get_gdouble_le(&p) * Nanometer;
     p = buffer + ZSCALE_OFFSET;
-    q = get_DOUBLE_LE(&p) * Nanometer;
+    q = gwy_get_gdouble_le(&p) * Nanometer;
     gwy_debug("xreal: %g, yreal: %g, zreal: %g",
               xreal/Nanometer, yreal/Nanometer, q/Nanometer);
     /* XXX: I don't know where the factor of 0.5 comes from.  But it makes
@@ -301,8 +279,8 @@ read_data_field_old(const guchar *buffer,
     const guchar *p;
 
     p = buffer + RES_OFFSET_OLD;
-    xres = get_WORD_LE(&p);
-    yres = get_WORD_LE(&p);
+    xres = gwy_get_guint16_le(&p);
+    yres = gwy_get_guint16_le(&p);
     gwy_debug("xres: %d, yres: %d", xres, yres);
 
     n = xres*yres;
@@ -312,17 +290,17 @@ read_data_field_old(const guchar *buffer,
     }
 
     p = buffer + SCALE_OFFSET_OLD;
-    xscale = get_DOUBLE_LE(&p);
-    yscale = get_DOUBLE_LE(&p);
-    zscale = get_DOUBLE_LE(&p);
+    xscale = gwy_get_gdouble_le(&p);
+    yscale = gwy_get_gdouble_le(&p);
+    zscale = gwy_get_gdouble_le(&p);
     p = buffer + UNIT_OFFSET_OLD;
-    xunit = get_DOUBLE_LE(&p);
-    yunit = get_DOUBLE_LE(&p);
-    zunit = get_DOUBLE_LE(&p);
+    xunit = gwy_get_gdouble_le(&p);
+    yunit = gwy_get_gdouble_le(&p);
+    zunit = gwy_get_gdouble_le(&p);
     p = buffer + SPEED_OFFSET_OLD;
-    vx = get_DWORD_LE(&p);
-    vy = get_DWORD_LE(&p);
-    vz = get_DWORD_LE(&p);
+    vx = gwy_get_guint32_le(&p);
+    vy = gwy_get_guint32_le(&p);
+    vz = gwy_get_guint32_le(&p);
 
     xreal = xscale * vx;
     yreal = yscale * vy;
@@ -350,4 +328,3 @@ read_data_field_old(const guchar *buffer,
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
-

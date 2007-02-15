@@ -1131,7 +1131,7 @@ gwy_data_field_area_dh(GwyDataField *data_field,
                        gint width, gint height,
                        gint nstats)
 {
-    GwySIUnit *fieldunit, *lineunit;
+    GwySIUnit *fieldunit, *lineunit, *rhounit;
     gdouble min, max;
     const gdouble *drow, *mrow;
     gint i, j, k, nn;
@@ -1174,8 +1174,8 @@ gwy_data_field_area_dh(GwyDataField *data_field,
     fieldunit = gwy_data_field_get_si_unit_z(data_field);
     lineunit = gwy_data_line_get_si_unit_x(target_line);
     gwy_serializable_clone(G_OBJECT(fieldunit), G_OBJECT(lineunit));
-    lineunit = gwy_data_line_get_si_unit_y(target_line);
-    gwy_si_unit_set_from_string(lineunit, NULL);
+    rhounit = gwy_data_line_get_si_unit_y(target_line);
+    gwy_si_unit_power(lineunit, -1, rhounit);
 
     /* Handle border cases */
     if (min == max) {
@@ -1198,6 +1198,8 @@ gwy_data_field_area_dh(GwyDataField *data_field,
                     /* Fix rounding errors */
                     if (G_UNLIKELY(k >= nstats))
                         k = nstats-1;
+                    else if (G_UNLIKELY(k < 0))
+                        k = 0;
 
                     target_line->data[k] += 1;
                 }
@@ -1213,6 +1215,8 @@ gwy_data_field_area_dh(GwyDataField *data_field,
                 /* Fix rounding errors */
                 if (G_UNLIKELY(k >= nstats))
                     k = nstats-1;
+                else if (G_UNLIKELY(k < 0))
+                    k = 0;
 
                 target_line->data[k] += 1;
             }
@@ -1273,11 +1277,18 @@ gwy_data_field_area_cdh(GwyDataField *data_field,
                         gint width, gint height,
                         gint nstats)
 {
+    GwySIUnit *rhounit, *lineunit;
+
     gwy_data_field_area_dh(data_field, mask, target_line,
                            col, row, width, height,
                            nstats);
     gwy_data_line_cumulate(target_line);
     gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
+
+    /* Update units after integration */
+    lineunit = gwy_data_line_get_si_unit_x(target_line);
+    rhounit = gwy_data_line_get_si_unit_y(target_line);
+    gwy_si_unit_multiply(rhounit, lineunit, rhounit);
 }
 
 /**
@@ -1296,11 +1307,9 @@ gwy_data_field_cdh(GwyDataField *data_field,
                    gint nstats)
 {
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    gwy_data_field_area_dh(data_field, NULL, target_line,
-                           0, 0, data_field->xres, data_field->yres,
-                           nstats);
-    gwy_data_line_cumulate(target_line);
-    gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
+    gwy_data_field_area_cdh(data_field, NULL, target_line,
+                            0, 0, data_field->xres, data_field->yres,
+                            nstats);
 }
 
 /**
@@ -1326,7 +1335,7 @@ gwy_data_field_area_da(GwyDataField *data_field,
                        GwyOrientation orientation,
                        gint nstats)
 {
-    GwySIUnit *lineunit;
+    GwySIUnit *lineunit, *rhounit;
     GwyDataField *der;
     const gdouble *drow;
     gdouble *derrow;
@@ -1412,8 +1421,8 @@ gwy_data_field_area_da(GwyDataField *data_field,
     gwy_si_unit_divide(gwy_data_field_get_si_unit_z(data_field),
                        gwy_data_field_get_si_unit_xy(data_field),
                        lineunit);
-    lineunit = gwy_data_line_get_si_unit_y(target_line);
-    gwy_si_unit_set_from_string(lineunit, NULL);
+    rhounit = gwy_data_line_get_si_unit_y(target_line);
+    gwy_si_unit_power(lineunit, -1, rhounit);
 }
 
 /**
@@ -1463,11 +1472,18 @@ gwy_data_field_area_cda(GwyDataField *data_field,
                         GwyOrientation orientation,
                         gint nstats)
 {
+    GwySIUnit *lineunit, *rhounit;
+
     gwy_data_field_area_da(data_field, target_line,
                            col, row, width, height,
                            orientation, nstats);
     gwy_data_line_cumulate(target_line);
     gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
+
+    /* Update units after integration */
+    lineunit = gwy_data_line_get_si_unit_x(target_line);
+    rhounit = gwy_data_line_get_si_unit_y(target_line);
+    gwy_si_unit_multiply(rhounit, lineunit, rhounit);
 }
 
 /**
@@ -1488,11 +1504,9 @@ gwy_data_field_cda(GwyDataField *data_field,
                    gint nstats)
 {
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    gwy_data_field_area_da(data_field, target_line,
-                           0, 0, data_field->xres, data_field->yres,
-                           orientation, nstats);
-    gwy_data_line_cumulate(target_line);
-    gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
+    gwy_data_field_area_cda(data_field, target_line,
+                            0, 0, data_field->xres, data_field->yres,
+                            orientation, nstats);
 }
 
 #ifdef HAVE_FFTW3
@@ -2682,6 +2696,7 @@ calculate_surface_area(GwyDataField *dfield,
 
     return sum*q/4;
 }
+
 /**
  * gwy_data_field_get_surface_area:
  * @data_field: A data field.
@@ -2728,6 +2743,9 @@ gwy_data_field_get_surface_area(GwyDataField *data_field)
  *
  * Computes surface area of a rectangular part of a data field.
  *
+ * This quantity makes sense only if the lateral dimensions and values of
+ * @data_field are the same physical quantities.
+ *
  * Returns: The surface area.
  **/
 gdouble
@@ -2755,6 +2773,419 @@ gwy_data_field_area_get_surface_area(GwyDataField *data_field,
         return gwy_data_field_get_surface_area(data_field);
 
     return calculate_surface_area(data_field, mask, col, row, width, height);
+}
+
+/**
+ * square_volume:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ *
+ * Calculates approximate volume of a one square pixel.
+ *
+ * Returns: The volume.
+ **/
+static inline gdouble
+square_volume(gdouble z1, gdouble z2, gdouble z3, gdouble z4)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/4.0;
+
+    return c;
+}
+
+/**
+ * square_volumew:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @w1: Weight of first corner (0 or 1).
+ * @w2: Weight of second corner (0 or 1).
+ * @w3: Weight of third corner (0 or 1).
+ * @w4: Weight of fourth corner (0 or 1).
+ *
+ * Calculates approximate volume of a one square pixel with some corners
+ * possibly missing.
+ *
+ * Returns: The volume.
+ **/
+static inline gdouble
+square_volumew(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+               gint w1, gint w2, gint w3, gint w4)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/4.0;
+
+    return (w1*(3.0*z1 + z2 + z4 + c)
+            + w2*(3.0*z2 + z1 + z3 + c)
+            + w3*(3.0*z3 + z2 + z4 + c)
+            + w4*(3.0*z4 + z3 + z1 + c))/24.0;
+}
+
+/**
+ * stripe_volume:
+ * @n: The number of values in @r, @rr, @m.
+ * @stride: Stride in @r, @rr, @m.
+ * @r: Array of @n z-values of vertices, this row of vertices is considered
+ *     inside.
+ * @rr: Array of @n z-values of vertices, this row of vertices is considered
+ *      outside.
+ * @m: Mask for @r (@rr does not need mask since it has zero weight by
+ *     definition), or %NULL to sum over all @r vertices.
+ *
+ * Calculates approximate volume of a half-pixel stripe.
+ *
+ * Returns: The volume.
+ **/
+static gdouble
+stripe_volume(gint n,
+              gint stride,
+              const gdouble *r,
+              const gdouble *rr,
+              const gdouble *m)
+{
+    gdouble sum = 0.0;
+    gint j;
+
+    if (m) {
+        for (j = 0; j < n-1; j++)
+            sum += square_volumew(r[j*stride], r[(j + 1)*stride],
+                                  rr[(j + 1)*stride], rr[j*stride],
+                                  m[j*stride] > 0.0, m[(j + 1)*stride] > 0.0,
+                                  0, 0);
+    }
+    else {
+        for (j = 0; j < n-1; j++)
+            sum += square_volumew(r[j*stride], r[(j + 1)*stride],
+                                  rr[(j + 1)*stride], rr[j*stride],
+                                  1, 1, 0, 0);
+    }
+
+    return sum;
+}
+
+/**
+ * stripe_volumeb:
+ * @n: The number of values in @r, @rr, @m.
+ * @stride: Stride in @r, @rr, @m.
+ * @r: Array of @n z-values of vertices, this row of vertices is considered
+ *     inside.
+ * @rr: Array of @n z-values of vertices, this row of vertices is considered
+ *      outside.
+ * @b: Array of @n z-values of basis, this row of vertices is considered
+ *     inside.
+ * @br: Array of @n z-values of basis, this row of vertices is considered
+ *      outside.
+ * @m: Mask for @r (@rr does not need mask since it has zero weight by
+ *     definition), or %NULL to sum over all @r vertices.
+ *
+ * Calculates approximate volume of a half-pixel stripe, taken from basis.
+ *
+ * Returns: The volume.
+ **/
+static gdouble
+stripe_volumeb(gint n,
+               gint stride,
+               const gdouble *r,
+               const gdouble *rr,
+               const gdouble *b,
+               const gdouble *br,
+               const gdouble *m)
+{
+    gdouble sum = 0.0;
+    gint j;
+
+    if (m) {
+        for (j = 0; j < n-1; j++)
+            sum += square_volumew(r[j*stride] - b[j*stride],
+                                  r[(j + 1)*stride] - b[(j + 1)*stride],
+                                  rr[(j + 1)*stride] - br[(j + 1)*stride],
+                                  rr[j*stride] - br[j*stride],
+                                  m[j*stride] > 0.0,
+                                  m[(j + 1)*stride] > 0.0,
+                                  0, 0);
+    }
+    else {
+        for (j = 0; j < n-1; j++)
+            sum += square_volumew(r[j*stride] - b[j*stride],
+                                  r[(j + 1)*stride] - b[(j + 1)*stride],
+                                  rr[(j + 1)*stride] - br[(j + 1)*stride],
+                                  rr[j*stride] - br[j*stride],
+                                  1, 1, 0, 0);
+    }
+
+    return sum;
+}
+
+static gdouble
+calculate_volume(GwyDataField *dfield,
+                 GwyDataField *basis,
+                 GwyDataField *mask,
+                 gint col, gint row,
+                 gint width, gint height)
+{
+    const gdouble *r, *m, *b, *dataul, *maskul, *basisul;
+    gint i, j, xres, yres, s;
+    gdouble sum = 0.0;
+
+    /* special cases */
+    if (!width || !height)
+        return sum;
+
+    xres = dfield->xres;
+    yres = dfield->yres;
+    dataul = dfield->data + xres*row + col;
+
+    if (mask) {
+        maskul = mask->data + xres*row + col;
+        if (!basis) {
+            /* Inside */
+            for (i = 0; i < height-1; i++) {
+                r = dataul + xres*i;
+                m = maskul + xres*i;
+                for (j = 0; j < width-1; j++)
+                    sum += square_volumew(r[j], r[j+1],
+                                          r[j+xres+1], r[j+xres],
+                                          m[j] > 0.0, m[j+1] > 0.0,
+                                          m[j+xres+1] > 0.0, m[j+xres] > 0.0);
+            }
+
+            /* Top row */
+            s = !(row == 0);
+            sum += stripe_volume(width, 1, dataul, dataul - s*xres, maskul);
+
+            /* Bottom row */
+            s = !(row + height == yres);
+            sum += stripe_volume(width, 1,
+                                 dataul + xres*(height-1),
+                                 dataul + xres*(height-1 + s),
+                                 maskul + xres*(height-1));
+
+            /* Left column */
+            s = !(col == 0);
+            sum += stripe_volume(height, xres, dataul, dataul - s, maskul);
+
+            /* Right column */
+            s = !(col + width == xres);
+            sum += stripe_volume(height, xres,
+                                 dataul + width-1, dataul + width-1 + s,
+                                 maskul + width-1);
+
+            /* Just take the four corner quater-pixels as flat.  */
+            if (maskul[0])
+                sum += dataul[0]/4.0;
+            if (maskul[width-1])
+                sum += dataul[width-1]/4.0;
+            if (maskul[xres*(height-1)])
+                sum += dataul[xres*(height-1)]/4.0;
+            if (maskul[xres*(height-1) + width-1])
+                sum += dataul[xres*(height-1) + width-1]/4.0;
+        }
+        else {
+            basisul = basis->data + xres*row + col;
+
+            /* Inside */
+            for (i = 0; i < height-1; i++) {
+                r = dataul + xres*i;
+                m = maskul + xres*i;
+                b = basisul + xres*i;
+                for (j = 0; j < width-1; j++)
+                    sum += square_volumew(r[j] - b[j],
+                                          r[j+1] - b[j+1],
+                                          r[j+xres+1] - b[j+xres+1],
+                                          r[j+xres] - b[j+xres],
+                                          m[j] > 0.0, m[j+1] > 0.0,
+                                          m[j+xres+1] > 0.0, m[j+xres] > 0.0);
+            }
+
+            /* Top row */
+            s = !(row == 0);
+            sum += stripe_volumeb(width, 1,
+                                  dataul, dataul - s*xres,
+                                  basisul, basisul - s*xres,
+                                  maskul);
+
+            /* Bottom row */
+            s = !(row + height == yres);
+            sum += stripe_volumeb(width, 1,
+                                  dataul + xres*(height-1),
+                                  dataul + xres*(height-1 + s),
+                                  basisul + xres*(height-1),
+                                  basisul + xres*(height-1 + s),
+                                  maskul + xres*(height-1));
+
+            /* Left column */
+            s = !(col == 0);
+            sum += stripe_volumeb(height, xres,
+                                  dataul, dataul - s,
+                                  basisul, basisul - s,
+                                  maskul);
+
+            /* Right column */
+            s = !(col + width == xres);
+            sum += stripe_volumeb(height, xres,
+                                  dataul + width-1, dataul + width-1 + s,
+                                  basisul + width-1, basisul + width-1 + s,
+                                  maskul + width-1);
+
+            /* Just take the four corner quater-pixels as flat.  */
+            if (maskul[0])
+                sum += (dataul[0] - basisul[0])/4.0;
+            if (maskul[width-1])
+                sum += (dataul[width-1] - basisul[width-1])/4.0;
+            if (maskul[xres*(height-1)])
+                sum += (dataul[xres*(height-1)] - basisul[xres*(height-1)])/4.0;
+            if (maskul[xres*(height-1) + width-1])
+                sum += (dataul[xres*(height-1) + width-1]
+                        - basisul[xres*(height-1) + width-1])/4.0;
+        }
+    }
+    else {
+        if (!basis) {
+            /* Inside */
+            for (i = 0; i < height-1; i++) {
+                r = dataul + xres*i;
+                for (j = 0; j < width-1; j++)
+                    sum += square_volume(r[j], r[j+1], r[j+xres+1], r[j+xres]);
+            }
+
+            /* Top row */
+            s = !(row == 0);
+            sum += stripe_volume(width, 1, dataul, dataul - s*xres, NULL);
+
+            /* Bottom row */
+            s = !(row + height == yres);
+            sum += stripe_volume(width, 1,
+                                 dataul + xres*(height-1),
+                                 dataul + xres*(height-1 + s),
+                                 NULL);
+
+            /* Left column */
+            s = !(col == 0);
+            sum += stripe_volume(height, xres, dataul, dataul - s, NULL);
+
+            /* Right column */
+            s = !(col + width == xres);
+            sum += stripe_volume(height, xres,
+                                 dataul + width-1, dataul + width-1 + s,
+                                 NULL);
+
+            /* Just take the four corner quater-pixels as flat.  */
+            sum += dataul[0]/4.0;
+            sum += dataul[width-1]/4.0;
+            sum += dataul[xres*(height-1)]/4.0;
+            sum += dataul[xres*(height-1) + width-1]/4.0;
+        }
+        else {
+            basisul = basis->data + xres*row + col;
+
+            /* Inside */
+            for (i = 0; i < height-1; i++) {
+                r = dataul + xres*i;
+                b = basisul + xres*i;
+                for (j = 0; j < width-1; j++)
+                    sum += square_volume(r[j] - b[j],
+                                         r[j+1] - b[j+1],
+                                         r[j+xres+1] - b[j+xres+1],
+                                         r[j+xres] - b[j+xres]);
+            }
+
+            /* Top row */
+            s = !(row == 0);
+            sum += stripe_volumeb(width, 1,
+                                  dataul, dataul - s*xres,
+                                  basisul, basisul - s*xres,
+                                  NULL);
+
+            /* Bottom row */
+            s = !(row + height == yres);
+            sum += stripe_volumeb(width, 1,
+                                  dataul + xres*(height-1),
+                                  dataul + xres*(height-1 + s),
+                                  basisul + xres*(height-1),
+                                  basisul + xres*(height-1 + s),
+                                  NULL);
+
+            /* Left column */
+            s = !(col == 0);
+            sum += stripe_volumeb(height, xres,
+                                  dataul, dataul - s,
+                                  basisul, basisul - s,
+                                  NULL);
+
+            /* Right column */
+            s = !(col + width == xres);
+            sum += stripe_volumeb(height, xres,
+                                  dataul + width-1, dataul + width-1 + s,
+                                  basisul + width-1, basisul + width-1 + s,
+                                  NULL);
+
+            /* Just take the four corner quater-pixels as flat.  */
+            sum += (dataul[0] - basisul[0])/4.0;
+            sum += (dataul[width-1] - basisul[width-1])/4.0;
+            sum += (dataul[xres*(height-1)] - basisul[xres*(height-1)])/4.0;
+            sum += (dataul[xres*(height-1) + width-1]
+                    - basisul[xres*(height-1) + width-1])/4.0;
+        }
+    }
+
+    return sum* dfield->xreal/dfield->xres * dfield->yreal/dfield->yres;
+}
+
+/* Don't define gwy_data_field_get_volume() without mask and basis, it would
+ * just be a complicate way to calculate gwy_data_field_get_sum() */
+
+/**
+ * gwy_data_field_area_get_volume:
+ * @data_field: A data field.
+ * @basis: The basis or background for volume calculation if not %NULL.
+ *         The height of each vertex is then the difference between
+ *         @data_field value and @basis value.  Value %NULL is the same
+ *         as passing all zeroes for the basis.
+ * @mask: Mask of values to take values into account, or %NULL for full
+ *        @data_field.  Values equal to 0.0 and below cause corresponding
+ *        @data_field samples to be ignored, values equal to 1.0 and above
+ *        cause inclusion of corresponding @data_field samples.  The behaviour
+ *        for values inside (0.0, 1.0) is undefined (it may be specified
+ *        in the future).
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ *
+ * Computes volume of a rectangular part of a data field.
+ *
+ * Returns: The volume.
+ *
+ * Since: 2.3
+ **/
+gdouble
+gwy_data_field_area_get_volume(GwyDataField *data_field,
+                               GwyDataField *basis,
+                               GwyDataField *mask,
+                               gint col, gint row,
+                               gint width, gint height)
+{
+    gdouble vol = 0.0;
+
+    g_return_val_if_fail(GWY_IS_DATA_FIELD(data_field), vol);
+    g_return_val_if_fail(!basis || (GWY_IS_DATA_FIELD(basis)
+                                    && basis->xres == data_field->xres
+                                    && basis->yres == data_field->yres), vol);
+    g_return_val_if_fail(!mask || (GWY_IS_DATA_FIELD(mask)
+                                   && mask->xres == data_field->xres
+                                   && mask->yres == data_field->yres), vol);
+    g_return_val_if_fail(col >= 0 && row >= 0
+                         && width >= 0 && height >= 0
+                         && col + width <= data_field->xres
+                         && row + height <= data_field->yres,
+                         vol);
+
+    return calculate_volume(data_field, basis, mask, col, row, width, height);
 }
 
 /**

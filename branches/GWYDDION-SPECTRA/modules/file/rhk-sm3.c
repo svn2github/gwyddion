@@ -19,15 +19,15 @@
  */
 
 #include "config.h"
-#include <libgwyddion/gwymacros.h>
-#include <libgwyddion/gwymath.h>
-#include <libgwyddion/gwyutils.h>
-#include <libgwymodule/gwymodule-file.h>
-#include <libprocess/datafield.h>
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
+#include <libgwyddion/gwyutils.h>
+#include <libprocess/datafield.h>
+#include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "err.h"
 #include "get.h"
@@ -200,14 +200,13 @@ static GwyContainer* rhk_sm3_load          (const gchar *filename,
                                             GwyRunType mode,
                                             GError **error);
 static GwyContainer* rhk_sm3_get_metadata  (RHKPage *rhkpage);
-static gboolean    data_field_has_highly_nosquare_samples(GwyDataField *dfield);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     N_("Imports RHK Technology SM3 data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.7",
+    "0.9",
     "David Nečas (Yeti) & Petr Klapetek",
     "2005",
 };
@@ -298,7 +297,7 @@ rhk_sm3_read_string(const guchar **buffer,
     if (len < 2)
         return NULL;
 
-    n = get_WORD_LE(buffer);
+    n = gwy_get_guint16_le(buffer);
     len -= 2;
     if (len < 2*n)
         return NULL;
@@ -308,7 +307,7 @@ rhk_sm3_read_string(const guchar **buffer,
 
     p = s = g_new(gchar, 6*n + 1);
     for (i = 0; i < n; i++) {
-        chr = get_WORD_LE(buffer);
+        chr = gwy_get_guint16_le(buffer);
         p += g_unichar_to_utf8(chr, p);
     }
     *p = '\0';
@@ -351,7 +350,7 @@ rhk_sm3_read_page(const guchar **buffer,
     }
 
     page = g_new0(RHKPage, 1);
-    page->param_size = get_WORD_LE(&p);
+    page->param_size = gwy_get_guint16_le(&p);
     gwy_debug("param_size = %u", page->param_size);
     if (*len < page->param_size + 4) {
         g_set_error(error, GWY_MODULE_FILE_ERROR, GWY_MODULE_FILE_ERROR_DATA,
@@ -361,46 +360,46 @@ rhk_sm3_read_page(const guchar **buffer,
     /* TODO: Convert to UTF-8, store to meta */
     memcpy(page->version, p, MAGIC_TOTAL_SIZE);
     p += MAGIC_TOTAL_SIZE;
-    page->string_count = get_WORD_LE(&p);
+    page->string_count = gwy_get_guint16_le(&p);
     gwy_debug("string_count = %u", page->string_count);
-    page->type = get_DWORD_LE(&p);
+    page->type = gwy_get_guint32_le(&p);
     gwy_debug("type = %u", page->type);
-    page->page_type = get_DWORD_LE(&p);
+    page->page_type = gwy_get_guint32_le(&p);
     gwy_debug("page_type = %u", page->page_type);
-    page->data_sub_source = get_DWORD_LE(&p);
-    page->line_type = get_DWORD_LE(&p);
-    page->x_coord = get_DWORD_LE(&p);
-    page->y_coord = get_DWORD_LE(&p);
-    page->x_size = get_DWORD_LE(&p);
-    page->y_size = get_DWORD_LE(&p);
+    page->data_sub_source = gwy_get_guint32_le(&p);
+    page->line_type = gwy_get_guint32_le(&p);
+    page->x_coord = gwy_get_gint32_le(&p);
+    page->y_coord = gwy_get_gint32_le(&p);
+    page->x_size = gwy_get_guint32_le(&p);
+    page->y_size = gwy_get_guint32_le(&p);
     gwy_debug("x_size = %u, y_size = %u", page->x_size, page->y_size);
-    page->source_type = get_DWORD_LE(&p);
-    page->image_type = get_DWORD_LE(&p);
+    page->source_type = gwy_get_guint32_le(&p);
+    page->image_type = gwy_get_guint32_le(&p);
     gwy_debug("image_type = %u", page->image_type);
-    page->scan_dir = get_DWORD_LE(&p);
+    page->scan_dir = gwy_get_guint32_le(&p);
     gwy_debug("scan_dir = %u", page->scan_dir);
-    page->group_id = get_DWORD_LE(&p);
+    page->group_id = gwy_get_guint32_le(&p);
     gwy_debug("group_id = %u", page->group_id);
-    page->data_size = get_DWORD_LE(&p);
+    page->data_size = gwy_get_guint32_le(&p);
     gwy_debug("data_size = %u", page->data_size);
-    page->min_z_value = (gint)get_DWORD_LE(&p);
-    page->max_z_value = (gint)get_DWORD_LE(&p);
+    page->min_z_value = gwy_get_gint32_le(&p);
+    page->max_z_value = gwy_get_gint32_le(&p);
     gwy_debug("min,max_z_value = %d %d", page->min_z_value, page->max_z_value);
-    page->x_scale = get_FLOAT_LE(&p);
-    page->y_scale = get_FLOAT_LE(&p);
-    page->z_scale = get_FLOAT_LE(&p);
+    page->x_scale = gwy_get_gfloat_le(&p);
+    page->y_scale = gwy_get_gfloat_le(&p);
+    page->z_scale = gwy_get_gfloat_le(&p);
     gwy_debug("x,y,z_scale = %g %g %g",
               page->x_scale, page->y_scale, page->z_scale);
-    page->xy_scale = get_FLOAT_LE(&p);
-    page->x_offset = get_FLOAT_LE(&p);
-    page->y_offset = get_FLOAT_LE(&p);
-    page->z_offset = get_FLOAT_LE(&p);
+    page->xy_scale = gwy_get_gfloat_le(&p);
+    page->x_offset = gwy_get_gfloat_le(&p);
+    page->y_offset = gwy_get_gfloat_le(&p);
+    page->z_offset = gwy_get_gfloat_le(&p);
     gwy_debug("x,y,z_offset = %g %g %g",
               page->x_offset, page->y_offset, page->z_offset);
-    page->period = get_FLOAT_LE(&p);
-    page->bias = get_FLOAT_LE(&p);
-    page->current = get_FLOAT_LE(&p);
-    page->angle = get_FLOAT_LE(&p);
+    page->period = gwy_get_gfloat_le(&p);
+    page->bias = gwy_get_gfloat_le(&p);
+    page->current = gwy_get_gfloat_le(&p);
+    page->angle = gwy_get_gfloat_le(&p);
     gwy_debug("period = %g, bias = %g, current = %g, angle = %g",
               page->period, page->bias, page->current, page->angle);
     get_CHARARRAY(page->page_id, &p);
@@ -444,7 +443,7 @@ rhk_sm3_read_page(const guchar **buffer,
             goto FAIL;
         }
         /* Info size includes itself */
-        page->color_info.size = get_DWORD_LE(&p) - 2;
+        page->color_info.size = gwy_get_guint32_le(&p) - 2;
         if (*len < (p - *buffer) + page->color_info.size) {
             g_set_error(error, GWY_MODULE_FILE_ERROR,
                         GWY_MODULE_FILE_ERROR_DATA,
@@ -601,10 +600,7 @@ rhk_sm3_load(const gchar *filename,
         gwy_container_set_object_by_name(container, key->str, meta);
         g_object_unref(meta);
 
-        if (data_field_has_highly_nosquare_samples(dfield)) {
-            g_string_printf(key, "/%d/data/realsquare", i);
-            gwy_container_set_boolean_by_name(container, key->str, TRUE);
-        }
+        gwy_app_channel_check_nonsquare(container, i);
     }
     g_string_free(key, TRUE);
 
@@ -686,24 +682,6 @@ rhk_sm3_get_metadata(RHKPage *rhkpage)
     gwy_container_set_string_by_name(meta, "Page ID", str);
 
     return meta;
-}
-
-static gboolean
-data_field_has_highly_nosquare_samples(GwyDataField *dfield)
-{
-    gint xres, yres;
-    gdouble xreal, yreal, q;
-
-    xres = gwy_data_field_get_xres(dfield);
-    yres = gwy_data_field_get_yres(dfield);
-    xreal = gwy_data_field_get_xreal(dfield);
-    yreal = gwy_data_field_get_yreal(dfield);
-
-    q = (xreal/xres)/(yreal/yres);
-
-    /* The threshold is somewhat arbitrary.  Fortunately, most files encoutered
-     * in practice have either q very close to 1, or 2 or more */
-    return q > G_SQRT2 || q < 1.0/G_SQRT2;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

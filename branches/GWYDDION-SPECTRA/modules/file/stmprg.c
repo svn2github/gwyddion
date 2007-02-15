@@ -36,15 +36,15 @@
  */
 
 #include "config.h"
-#include <libgwyddion/gwymacros.h>
-#include <libgwyddion/gwyutils.h>
-#include <libgwyddion/gwymath.h>
-#include <libgwymodule/gwymodule-file.h>
-#include <libprocess/datafield.h>
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwyutils.h>
+#include <libgwyddion/gwymath.h>
+#include <libprocess/datafield.h>
+#include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "get.h"
 #include "err.h"
@@ -63,8 +63,6 @@ static gboolean      read_binary_ubedata (gint n,
                                           gdouble *data,
                                           guchar *buffer,
                                           gint bpp);
-static void          guess_channel_type  (GwyContainer *data,
-                                          const gchar *key);
 
 /* Parameters are stored in global variables */
 /* FIXME: Eliminate this */
@@ -77,7 +75,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports Omicron STMPRG data files (tp ta)."),
     "Rok Zitko <rok.zitko@ijs.si>",
-    "0.7",
+    "0.8",
     "Rok Zitko",
     "2004",
 };
@@ -118,7 +116,7 @@ read_parameters(gchar *buffer, guint size)
 {
     gchar *ptr = buffer + 4;    /* 4 for MPAR */
 
-    gwy_debug("tp file size = %i, should be %i\n", size, L_SIZE);
+    gwy_debug("tp file size = %i, should be %i\n", size, (guint)L_SIZE);
     if (size < L_SIZE)
         return FALSE;
 
@@ -212,7 +210,7 @@ FLOAT_FROM_BE(float f)
 {
     const guchar *p = (const guchar*)&f;
 
-    return get_FLOAT_BE(&p);
+    return gwy_get_gfloat_be(&p);
 }
 
 static void
@@ -296,7 +294,7 @@ byteswap_and_dump_parameters()
     gwy_debug("spec_lend=%f\n", control.spec_lend);
     control.spec_linc = FLOAT_FROM_BE(control.spec_linc);
     gwy_debug("spec_linc=%f\n", control.spec_linc);
-    control.spec_lsteps = GLONG_FROM_BE(control.spec_lsteps);
+    control.spec_lsteps = GUINT32_FROM_BE(control.spec_lsteps);
     gwy_debug("spec_lsteps=%li\n", control.spec_lsteps);
     control.spec_rstart = FLOAT_FROM_BE(control.spec_rstart);
     gwy_debug("spec_rstart=%f\n", control.spec_rstart);
@@ -304,7 +302,7 @@ byteswap_and_dump_parameters()
     gwy_debug("spec_rend=%f\n", control.spec_rend);
     control.spec_rinc = FLOAT_FROM_BE(control.spec_rinc);
     gwy_debug("spec_rinc=%f\n", control.spec_rinc);
-    control.spec_rsteps = GLONG_FROM_BE(control.spec_rsteps);
+    control.spec_rsteps = GUINT32_FROM_BE(control.spec_rsteps);
     gwy_debug("spec_rsteps=%li\n", control.spec_rsteps);
     control.version = FLOAT_FROM_BE(control.version);
     gwy_debug("version=%f\n", control.version);
@@ -312,7 +310,7 @@ byteswap_and_dump_parameters()
     gwy_debug("free_lend=%f\n", control.free_lend);
     control.free_linc = FLOAT_FROM_BE(control.free_linc);
     gwy_debug("free_linc=%f\n", control.free_linc);
-    control.free_lsteps = GLONG_FROM_BE(control.free_lsteps);
+    control.free_lsteps = GUINT32_FROM_BE(control.free_lsteps);
     gwy_debug("free_lsteps=%li\n", control.free_lsteps);
     control.free_rstart = FLOAT_FROM_BE(control.free_rstart);
     gwy_debug("free_rstart=%f\n", control.free_rstart);
@@ -320,17 +318,17 @@ byteswap_and_dump_parameters()
     gwy_debug("free_rend=%f\n", control.free_rend);
     control.free_rinc = FLOAT_FROM_BE(control.free_rinc);
     gwy_debug("free_rinc=%f\n", control.free_rinc);
-    control.free_rsteps = GLONG_FROM_BE(control.free_rsteps);
+    control.free_rsteps = GUINT32_FROM_BE(control.free_rsteps);
     gwy_debug("free_rsteps=%li\n", control.free_rsteps);
-    control.timer1 = GLONG_FROM_BE(control.timer1);
+    control.timer1 = GUINT32_FROM_BE(control.timer1);
     gwy_debug("timer1=%li\n", control.timer1);
-    control.timer2 = GLONG_FROM_BE(control.timer2);
+    control.timer2 = GUINT32_FROM_BE(control.timer2);
     gwy_debug("timer2=%li\n", control.timer2);
-    control.timer3 = GLONG_FROM_BE(control.timer3);
+    control.timer3 = GUINT32_FROM_BE(control.timer3);
     gwy_debug("timer3=%li\n", control.timer3);
-    control.timer4 = GLONG_FROM_BE(control.timer4);
+    control.timer4 = GUINT32_FROM_BE(control.timer4);
     gwy_debug("timer4=%li\n", control.timer4);
-    control.m_time = GLONG_FROM_BE(control.m_time);
+    control.m_time = GUINT32_FROM_BE(control.m_time);
     gwy_debug("m_time=%li\n", control.m_time);
     control.u_divider = FLOAT_FROM_BE(control.u_divider);
     gwy_debug("u_divider=%f\n", control.u_divider);
@@ -477,7 +475,7 @@ stmprg_load(const gchar *filename,
     gwy_container_set_object_by_name(container, "/0/data", dfield);
     g_object_unref(dfield);
     /* FIXME: with documentation, we could perhaps do better */
-    guess_channel_type(container, "/0/data");
+    gwy_app_channel_title_fall_back(container, 0);
 
     meta = stmprg_get_metadata();
     gwy_container_set_object_by_name(container, "/0/meta", meta);
@@ -529,60 +527,6 @@ read_binary_ubedata(gint n, gdouble *data, guchar *buffer, gint bpp)
     }
 
     return TRUE;
-}
-
-/**
- * guess_channel_type:
- * @data: A data container.
- * @key: Data channel key.
- *
- * Adds a channel title based on data field units.
- *
- * The guess is very simple, but probably better than `Unknown channel' in
- * most cases.  If there already is a title it is left intact, making use of
- * this function as a fallback easier.
- **/
-static void
-guess_channel_type(GwyContainer *data,
-                   const gchar *key)
-{
-    GwySIUnit *siunit, *test;
-    GwyDataField *dfield;
-    const gchar *title;
-    GQuark quark;
-    gchar *s;
-
-    s = g_strconcat(key, "/title", NULL);
-    quark = g_quark_from_string(s);
-    g_free(s);
-    if (gwy_container_contains(data, quark))
-        return;
-
-    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, key));
-    g_return_if_fail(GWY_IS_DATA_FIELD(dfield));
-    siunit = gwy_data_field_get_si_unit_z(dfield);
-    test = gwy_si_unit_new(NULL);
-    title = NULL;
-
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "m");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Topography";
-    }
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "A");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Current";
-    }
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "deg");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Phase";
-    }
-
-    g_object_unref(test);
-    if (title)
-        gwy_container_set_string(data, quark, g_strdup(title));
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

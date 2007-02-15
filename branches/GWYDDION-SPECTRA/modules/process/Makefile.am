@@ -46,26 +46,21 @@ process_LTLIBRARIES = \
 	shade.la \
 	slope_dist.la \
 	sphere-revolve.la \
-	superresolution.la \
-        tip_blind.la \
+	tip_blind.la \
 	tip_model.la \
 	tipops.la \
 	unrotate.la
-
 
 EXTRA_DIST = \
 	makefile.msc \
 	makefile.msc.gwt
 
-INCLUDES = -I$(top_srcdir)
-
-AM_CPPFLAGS = -DG_LOG_DOMAIN=\"Module\"
-
-
 if OS_WIN32
 no_undefined = -no-undefined
 endif
 
+AM_CPPFLAGS = -I$(top_buildir) -DG_LOG_DOMAIN=\"Module\"
+AM_CFLAGS = @COMMON_CFLAGS@
 AM_LDFLAGS = -avoid-version -module $(no_undefined)
 
 if MODULE_DEPENDENCIES
@@ -78,12 +73,6 @@ module_libadd = \
 	$(top_builddir)/libprocess/libgwyprocess2.la \
 	@GTK_LIBS@
 endif
-
-
-#############################################################################
-# If you know what an alphabet is, please keep the alphabetic order.
-# If you have no idea, please return to basic school.
-#############################################################################
 
 angle_dist_la_SOURCES = angle_dist.c
 angle_dist_la_LIBADD = $(module_libadd)
@@ -226,8 +215,8 @@ slope_dist_la_LIBADD = $(module_libadd)
 sphere_revolve_la_SOURCES = sphere-revolve.c
 sphere_revolve_la_LIBADD = $(module_libadd)
 
-superresolution_la_SOURCES = superresolution.c
-superresolution_la_LIBADD = $(module_libadd)
+#superresolution_la_SOURCES = superresolution.c
+#superresolution_la_LIBADD = $(module_libadd)
 
 tip_blind_la_SOURCES = tip_blind.c
 tip_blind_la_LIBADD = $(module_libadd)
@@ -240,7 +229,6 @@ tipops_la_LIBADD = $(module_libadd)
 
 unrotate_la_SOURCES = unrotate.c
 unrotate_la_LIBADD = $(module_libadd)
-
 
 MAINTAINERCLEANFILES = makefile.msc
 

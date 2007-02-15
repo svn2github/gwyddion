@@ -19,18 +19,18 @@
  */
 
 #include "config.h"
-#include <libgwyddion/gwymacros.h>
-#include <libgwyddion/gwymath.h>
-#include <libgwyddion/gwyutils.h>
-#include <libgwymodule/gwymodule-file.h>
-#include <libprocess/stats.h>
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <libgwyddion/gwymacros.h>
+#include <libgwyddion/gwymath.h>
+#include <libgwyddion/gwyutils.h>
+#include <libprocess/stats.h>
+#include <libgwymodule/gwymodule-file.h>
+#include <app/gwymoduleutils-file.h>
 
 #include "err.h"
-#include "get.h"
 
 /* in characters, not bytes */
 #define HEADER_SIZE 2048
@@ -90,8 +90,6 @@ static GwyDataField* read_data_field_with_voids(const guchar *buffer,
 static void          load_metadata             (gchar *buffer,
                                                 GHashTable *meta);
 static GwyContainer* bcrfile_get_metadata      (GHashTable *bcrmeta);
-static void          guess_channel_type        (GwyContainer *data,
-                                                const gchar *key);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
@@ -208,7 +206,7 @@ bcrfile_load(const gchar *filename,
         container = gwy_container_new();
         gwy_container_set_object_by_name(container, "/0/data", dfield);
         g_object_unref(dfield);
-        guess_channel_type(container, "/0/data");
+        gwy_app_channel_title_fall_back(container, 0);
         if (voidmask) {
             gwy_container_set_object_by_name(container, "/0/mask", voidmask);
             g_object_unref(voidmask);
@@ -391,60 +389,6 @@ bcrfile_get_metadata(GHashTable *bcrmeta)
     return meta;
 }
 
-/**
- * guess_channel_type:
- * @data: A data container.
- * @key: Data channel key.
- *
- * Adds a channel title based on data field units.
- *
- * The guess is very simple, but probably better than `Unknown channel' in
- * most cases.  If there already is a title it is left intact, making use of
- * this function as a fallback easier.
- **/
-static void
-guess_channel_type(GwyContainer *data,
-                   const gchar *key)
-{
-    GwySIUnit *siunit, *test;
-    GwyDataField *dfield;
-    const gchar *title;
-    GQuark quark;
-    gchar *s;
-
-    s = g_strconcat(key, "/title", NULL);
-    quark = g_quark_from_string(s);
-    g_free(s);
-    if (gwy_container_contains(data, quark))
-        return;
-
-    dfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(data, key));
-    g_return_if_fail(GWY_IS_DATA_FIELD(dfield));
-    siunit = gwy_data_field_get_si_unit_z(dfield);
-    test = gwy_si_unit_new(NULL);
-    title = NULL;
-
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "m");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Topography";
-    }
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "A");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Current";
-    }
-    if (!title) {
-        gwy_si_unit_set_from_string(test, "deg");
-        if (gwy_si_unit_equal(siunit, test))
-            title = "Phase";
-    }
-
-    g_object_unref(test);
-    if (title)
-        gwy_container_set_string(data, quark, g_strdup(title));
-}
-
 static GwyDataField*
 read_data_field(const guchar *buffer,
                 gint xres,
@@ -474,11 +418,11 @@ read_data_field(const guchar *buffer,
         case BCR_FILE_FLOAT:
         if (little_endian) {
             for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT_LE(&buffer);
+                data[i] = gwy_get_gfloat_le(&buffer);
         }
         else {
             for (i = 0; i < xres*yres; i++)
-                data[i] = get_FLOAT_BE(&buffer);
+                data[i] = gwy_get_gfloat_be(&buffer);
         }
         gwy_data_field_multiply(dfield, 1e-9);
         break;
@@ -540,7 +484,7 @@ read_data_field_with_voids(const guchar *buffer,
         case BCR_FILE_FLOAT:
         if (little_endian) {
             for (i = 0; i < xres*yres; i++) {
-                data[i] = get_FLOAT_LE(&buffer);
+                data[i] = gwy_get_gfloat_le(&buffer);
                 if (data[i] > 1.7e38)
                     voids[i] = 1.0;
                 else {
@@ -551,7 +495,7 @@ read_data_field_with_voids(const guchar *buffer,
         }
         else {
             for (i = 0; i < xres*yres; i++) {
-                data[i] = get_FLOAT_BE(&buffer);
+                data[i] = gwy_get_gfloat_be(&buffer);
                 if (data[i] > 1.7e38)
                     voids[i] = 1.0;
                 else {
