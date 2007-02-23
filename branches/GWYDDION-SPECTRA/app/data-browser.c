@@ -20,6 +20,7 @@
 
 /* XXX: The purpose of this file is to contain all ugliness from the rest of
  * source files.  And indeed it has managed to gather lots of it. */
+#define DEBUG
 
 #include "config.h"
 #include <stdlib.h>
@@ -29,6 +30,7 @@
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwyddion/gwycontainer.h>
+#include <libprocess/spectra.h>
 #include <libgwyddion/gwydebugobjects.h>
 #include <libprocess/stats.h>
 #include <libdraw/gwypixfield.h>
@@ -62,13 +64,15 @@ typedef enum {
     KEY_IS_TITLE,
     KEY_IS_SELECT,
     KEY_IS_RANGE_TYPE,
-    KEY_IS_FILENAME
+    KEY_IS_FILENAME,
+    KEY_IS_SPEC,
+    KEY_IS_SPEC_ACTIVE
 } GwyAppKeyType;
 
 /* Notebook pages */
 enum {
     PAGE_CHANNELS,
-    PAGE_GRAPHS,
+     PAGE_GRAPHS,
     NPAGES
 };
 
@@ -85,6 +89,13 @@ enum {
     MODEL_OBJECT,
     MODEL_WIDGET,
     MODEL_N_COLUMNS
+};
+
+enum {
+    MODEL_SPEC_CHAN_ID,
+    MODEL_SPEC_SPEC_ID,
+    MODEL_SPEC_SPECTRA,
+    MODEL_SPEC_N_COLUMNS
 };
 
 typedef struct _GwyAppDataBrowser GwyAppDataBrowser;
@@ -120,6 +131,8 @@ struct _GwyAppDataBrowser {
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *lists[NPAGES];
+    GtkTreeModel *spec_list_fltr;
+    GtkWidget *spec_list;
 };
 
 /* The proxy associated with each Container (this is non-GUI object) */
@@ -130,6 +143,8 @@ struct _GwyAppDataProxy {
     struct _GwyAppDataBrowser *parent;
     GwyContainer *container;
     GwyAppDataList lists[NPAGES];
+    GtkListStore *spec_list;
+    
     GList *associated3d;
 };
 
@@ -301,6 +316,7 @@ gwy_app_widget_queue_manage(GtkWidget *widget, gboolean remv)
  *       Usually this is up to the last digit of data number,
  *       however selections have also "/select" skipped,
  *       titles have "/data" skipped.
+ *       spectra have "/spec" skipped.
  *
  * Infers expected data type from container key.
  *
@@ -316,7 +332,7 @@ gwy_app_data_proxy_analyse_key(const gchar *strkey,
                                guint *len)
 {
     const gchar *s;
-    guint i, n;
+    gint i, n;
 
     *type = KEY_IS_NONE;
 
@@ -376,11 +392,21 @@ gwy_app_data_proxy_analyse_key(const gchar *strkey,
         *type = KEY_IS_SELECT;
         n += strlen("select/");
     }
-    else
+    else if (gwy_strequal(s, "spec/active")) {
+        *type = KEY_IS_SPEC_ACTIVE;
+    }
+    else if (g_str_has_prefix(s, "spec/")
+             && !strchr(s + sizeof("spec/")-1, '/')) {
+        *type = KEY_IS_SPEC;
+        n += strlen("spec/");
+    }
+    else {
         i = -1;
+    }
 
-    if (len && i > -1)
+    if (len && i>-1) {
         *len = n;
+    }
 
     return i;
 }
@@ -465,6 +491,81 @@ gwy_app_data_proxy_reconnect_channel(GwyAppDataProxy *proxy,
                        -1);
     g_signal_connect(object, "data-changed",
                      G_CALLBACK(gwy_app_data_proxy_channel_changed), proxy);
+    g_object_unref(old);
+}
+
+static void
+gwy_app_data_proxy_spec_changed(G_GNUC_UNUSED GwyGraphModel *graph,
+                                G_GNUC_UNUSED GwyAppDataProxy *proxy)
+{
+    gwy_debug("proxy=%p, spec=%p", proxy, graph);
+}
+
+
+static void
+gwy_app_data_proxy_connect_spec(GwyAppDataProxy *proxy, 
+                                gint chn_id, gint spc_id,
+                                GObject *object)
+{
+    gchar key[32];
+    GQuark quark;
+    
+    GtkTreeIter iter;
+
+    gtk_list_store_insert_with_values(proxy->spec_list,
+                                      &iter, G_MAXINT,
+                                      MODEL_SPEC_CHAN_ID, chn_id,
+                                      MODEL_SPEC_SPEC_ID, spc_id,
+                                      MODEL_SPEC_SPECTRA, object,
+                                      -1);
+    g_snprintf(key, sizeof(key), "/%d/spec/%d", chn_id, spc_id);
+    gwy_debug("Setting keys on Spectra %p (%s)", object, key);
+    quark = g_quark_from_string(key);
+    g_object_set_qdata(object, container_quark, proxy->container);
+    g_object_set_qdata(object, own_key_quark, GUINT_TO_POINTER(quark));
+
+    g_signal_connect(object, "data-changed",
+                     G_CALLBACK(gwy_app_data_proxy_spec_changed), proxy);
+}
+
+static void
+gwy_app_data_proxy_disconnect_spec(GwyAppDataProxy *proxy,
+                                   GtkTreeIter *iter)
+{
+    GObject *object;
+
+    gtk_tree_model_get(GTK_TREE_MODEL(proxy->spec_list), iter,
+                       MODEL_SPEC_SPECTRA, &object,
+                       -1);
+    g_signal_handlers_disconnect_by_func(object,
+                                         gwy_app_data_proxy_spec_changed,
+                                         proxy);
+    g_object_unref(object);
+    gtk_list_store_remove(proxy->lists[PAGE_CHANNELS].store, iter);
+}
+
+static void
+gwy_app_data_proxy_reconnect_spec(GwyAppDataProxy *proxy,
+                                  GtkTreeIter *iter,
+                                  GObject *object)
+{
+    GObject *old;
+
+    gtk_tree_model_get(GTK_TREE_MODEL(proxy->spec_list), iter,
+                       MODEL_SPEC_SPECTRA, &old,
+                       -1);
+    g_signal_handlers_disconnect_by_func(old,
+                                         gwy_app_data_proxy_spec_changed,
+                                         proxy);
+    g_object_set_qdata(object, container_quark,
+                       g_object_get_qdata(old, container_quark));
+    g_object_set_qdata(object, own_key_quark,
+                       g_object_get_qdata(old, own_key_quark));
+    gtk_list_store_set(proxy->spec_list, iter,
+                       MODEL_SPEC_SPECTRA, object,
+                       -1);
+    g_signal_connect(object, "data-changed",
+                     G_CALLBACK(gwy_app_data_proxy_spec_changed), proxy);
     g_object_unref(old);
 }
 
@@ -557,10 +658,11 @@ gwy_app_data_proxy_scan_data(gpointer key,
     const gchar *strkey;
     GwyAppKeyType type;
     GObject *object;
-    gint i;
-
+    gint i, j;
+    guint len=0;
+    
     strkey = g_quark_to_string(quark);
-    i = gwy_app_data_proxy_analyse_key(strkey, &type, NULL);
+    i = gwy_app_data_proxy_analyse_key(strkey, &type, &len);
     if (i < 0)
         return;
 
@@ -601,6 +703,15 @@ gwy_app_data_proxy_scan_data(gpointer key,
         g_return_if_fail(G_VALUE_HOLDS_OBJECT(gvalue));
         object = g_value_get_object(gvalue);
         g_return_if_fail(GWY_IS_SELECTION(object));
+        break;
+        
+        case KEY_IS_SPEC:
+        j=atoi(strkey+len+1);
+        gwy_debug("Found Spectra %d:%d (%s)",i,j, strkey);
+        g_return_if_fail(G_VALUE_HOLDS_OBJECT(gvalue));
+        object = g_value_get_object(gvalue);
+        g_return_if_fail(GWY_IS_SPECTRA(object));
+        gwy_app_data_proxy_connect_spec(proxy, i, j, object);
         break;
 
         default:
@@ -690,6 +801,48 @@ gwy_app_data_proxy_find_object(GtkListStore *store,
 }
 
 /**
+ * gwy_app_data_proxy_find_spec:
+ * @store: Spectra list store
+ * @i: channel id
+ * @j: spectra id
+ * @iter: Tree iterator to set to row containinf object @i:j.
+ *
+ * Find a spectra in the spectra list store.
+ *
+ * Returns: %TRUE if spectra was found and @iter set, %FALSE otherwise (@iter
+ *          is invalid then).
+ **/
+ static gboolean
+gwy_app_data_proxy_find_spec(GtkListStore *store,
+                             gint i,
+                             gint j,
+                             GtkTreeIter *iter)
+{
+    GtkTreeModel *model;
+    gint chan_id, spec_id;
+
+    gwy_debug("looking for spectra %d:%d", i, j);
+    if (i < 0 || j < 0)
+        return FALSE;
+
+    model = GTK_TREE_MODEL(store);
+    if (!gtk_tree_model_get_iter_first(model, iter))
+        return FALSE;
+
+    do {
+        gtk_tree_model_get(model, iter,
+                           MODEL_SPEC_CHAN_ID, &chan_id,
+                           MODEL_SPEC_SPEC_ID, &spec_id,
+                           -1);
+        gwy_debug("found spectra %d:%d", chan_id, spec_id);
+        if (chan_id == i && spec_id == j)
+            return TRUE;
+    } while (gtk_tree_model_iter_next(model, iter));
+
+    return FALSE;
+}
+ 
+/**
  * gwy_app_data_proxy_item_changed:
  * @data: A data container.
  * @quark: Quark key of item that has changed.
@@ -704,16 +857,18 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
 {
     GObject *object = NULL;
     GwyAppDataList *list;
+    GtkListStore *spec_list;
     const gchar *strkey;
     GwyAppKeyType type;
     GtkTreeIter iter;
     GwyDataView *data_view = NULL;
     gboolean found;
     GList *item;
-    gint i;
+    gint i,j;
+    guint len;
 
     strkey = g_quark_to_string(quark);
-    i = gwy_app_data_proxy_analyse_key(strkey, &type, NULL);
+    i = gwy_app_data_proxy_analyse_key(strkey, &type, &len);
     if (i < 0) {
         if (type == KEY_IS_FILENAME) {
             gwy_app_data_browser_update_filename(proxy);
@@ -759,6 +914,27 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
             gwy_app_data_proxy_reconnect_graph(proxy, &iter, object);
             emit_row_changed(list->store, &iter);
         }
+        break;
+
+        case KEY_IS_SPEC:
+        gwy_container_gis_object(data, quark, &object);
+        spec_list = proxy->spec_list;
+        j=atoi(strkey+len+1);
+        found = gwy_app_data_proxy_find_spec(spec_list, i, j, &iter);
+        gwy_debug("Spectra <%s>: %s in container, %s in list store",
+                  strkey,
+                  object ? "present" : "missing",
+                  found ? "present" : "missing");
+        g_return_if_fail(object || found);
+        if (object && !found)
+            gwy_app_data_proxy_connect_spec(proxy, i, j, object);
+        else if (!object && found)
+            gwy_app_data_proxy_disconnect_spec(proxy, &iter);
+        else {
+            gwy_app_data_proxy_reconnect_spec(proxy, &iter, object);
+            emit_row_changed(spec_list, &iter);
+        }
+        
         break;
 
         case KEY_IS_MASK:
@@ -880,6 +1056,10 @@ gwy_app_data_proxy_finalize(gpointer user_data)
     gwy_app_data_proxy_finalize_list
         (GTK_TREE_MODEL(proxy->lists[PAGE_GRAPHS].store),
          MODEL_OBJECT, &gwy_app_data_proxy_graph_changed, proxy);
+    gwy_app_data_proxy_finalize_list
+        (GTK_TREE_MODEL(proxy->spec_list),
+         MODEL_SPEC_SPECTRA, &gwy_app_data_proxy_spec_changed, proxy);
+
     g_object_unref(proxy->container);
     g_free(proxy);
 
@@ -1046,6 +1226,15 @@ gwy_app_data_proxy_new(GwyAppDataBrowser *browser,
         gwy_app_data_proxy_list_setup(&proxy->lists[i]);
     /* For historical reasons, graphs are numbered from 1 */
     proxy->lists[PAGE_GRAPHS].last = 0;
+    
+    /* setup spectroscopy list */
+    proxy->spec_list = gtk_list_store_new(MODEL_SPEC_N_COLUMNS,
+                                          G_TYPE_INT,
+                                          G_TYPE_INT,
+                                          G_TYPE_OBJECT);
+    gwy_debug_objects_creation(G_OBJECT(proxy->spec_list));
+    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(proxy->spec_list),
+                                         MODEL_SPEC_SPEC_ID, GTK_SORT_ASCENDING);
 
     gwy_container_foreach(data, NULL, gwy_app_data_proxy_scan_data, proxy);
 
@@ -1133,15 +1322,31 @@ gwy_app_data_browser_selection_changed(GtkTreeSelection *selection,
 {
     gint pageno;
     gboolean any;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
 
     pageno = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(selection),
                                                 page_id_quark));
     if (pageno != browser->active_page)
         return;
 
-    any = gtk_tree_selection_get_selected(selection, NULL, NULL);
+    any = gtk_tree_selection_get_selected(selection, &model, &iter);
     gwy_debug("Any: %d (page %d)", any, pageno);
-
+    
+    if (pageno==PAGE_CHANNELS && browser->spec_list_fltr) {
+        gint chan_id;
+        if (any)
+            gtk_tree_model_get( model, &iter,
+                                MODEL_ID, &chan_id,
+                                -1);
+        else
+            chan_id=-1;
+        g_object_set_data(G_OBJECT(browser->spec_list_fltr),
+                          "chan-id", GINT_TO_POINTER(chan_id));
+        gtk_tree_model_filter_refilter(
+            GTK_TREE_MODEL_FILTER(browser->spec_list_fltr));
+    }
+    
     gwy_sensitivity_group_set_state(browser->sensgroup,
                                     SENS_OBJECT, any ? SENS_OBJECT : 0);
 }
@@ -2001,6 +2206,158 @@ gwy_app_data_browser_construct_channels(GwyAppDataBrowser *browser)
 }
 
 static void
+gwy_app_spec_list_row_activated(GtkTreeView *treeview,
+                                GtkTreePath *path,
+                                GtkTreeViewColumn *column,
+                                G_GNUC_UNUSED gpointer user_data)
+{
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    gchar key[32];
+    GwyContainer *container;
+    GwyAppDataBrowser *browser;
+    GwyAppDataProxy *proxy;
+    gint active=-1, chan_id=-1, spec_id=-1;
+    gboolean found;
+    
+    browser=gwy_app_get_data_browser();
+    proxy=browser->current;
+    container=proxy->container;
+    
+    model = gtk_tree_view_get_model(treeview);
+    if (gtk_tree_model_get_iter(model, &iter, path)){
+        gtk_tree_model_get(model, &iter,
+                           MODEL_SPEC_CHAN_ID, &chan_id,
+                           MODEL_SPEC_SPEC_ID, &spec_id,
+                           -1);
+        g_snprintf(key, sizeof(key), "/%d/spec/active", chan_id);
+        gwy_debug("looking for %s", key);
+        found = gwy_container_gis_int32_by_name(container, key, &active);
+        if (active!=spec_id || !found) {
+            gwy_container_set_int32_by_name(container, key, spec_id);
+            gwy_debug("Setting %s: %d",key,spec_id);
+        }
+    } else {
+        gwy_debug("iter not found");
+    }
+}
+
+
+/* given a unit replaces it with the quatity it represesents
+ * works for a few base units. If it does not recognise it it leaves it */
+static void
+gwy_app_data_browser_unit_to_quantity(char* s){
+    switch (s[0]) {
+        case 'm':
+            s[0]='Z';
+            break;
+        case 'A':
+            s[0]='I';
+            break;
+        case 'V':
+            break;
+        case 's':
+            s[0]='t';
+        default:
+            break;
+    }
+}
+
+static void
+gwy_app_data_browser_spec_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
+                                          GtkCellRenderer *renderer,
+                                          GtkTreeModel *model,
+                                          GtkTreeIter *iter,
+                                          gpointer userdata)
+{
+    GwyAppDataBrowser *browser = (GwyAppDataBrowser*)userdata;
+    static gchar buf[128];
+    const guchar *title;
+    GwyContainer *data;
+    GwySpectra* spectra=NULL;
+    gint cid, sid;
+    
+    
+    /* XXX: browser->current must match what is visible in the browser */
+    data = browser->current->container;
+    gtk_tree_model_get(model, iter,
+                       MODEL_SPEC_SPECTRA, &spectra,
+                       MODEL_SPEC_CHAN_ID, &cid,
+                       MODEL_SPEC_SPEC_ID, &sid,
+                       -1);
+    title = gwy_spectra_get_title(spectra);
+    if (!title) {
+        GwyDataLine *dline;
+        GwySIUnit *si_unit;
+        gchar *X, *Y;
+        if (gwy_spectra_n_spectra(spectra)>0) {
+            dline = gwy_spectra_get_spectrum(spectra,0);
+            si_unit = gwy_data_line_get_si_unit_x(dline);
+            X=gwy_si_unit_get_string(si_unit, GWY_SI_UNIT_FORMAT_PLAIN);
+            si_unit = gwy_data_line_get_si_unit_y(dline);
+            Y=gwy_si_unit_get_string(si_unit, GWY_SI_UNIT_FORMAT_PLAIN);
+            gwy_app_data_browser_unit_to_quantity(X);
+            gwy_app_data_browser_unit_to_quantity(Y);
+            g_snprintf(buf, sizeof(buf),_("%s-%s Spectroscopy (%d)"),Y,X,sid);
+            g_free(X);
+            g_free(Y);
+            g_object_unref(dline);
+            title=buf;
+        }
+    }
+    g_object_set(renderer, "text", title, NULL);
+}
+
+static GtkWidget*
+gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
+{
+    GtkWidget *retval;
+    GtkTreeView *treeview;
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    /*GtkTreeSelection *selection;*/
+
+    /* Construct the GtkTreeView that will display spectroscopy channels */
+    retval = gtk_tree_view_new();
+    treeview = GTK_TREE_VIEW(retval);
+    g_signal_connect(treeview, "row-activated",
+                     G_CALLBACK(gwy_app_spec_list_row_activated), NULL);
+
+    /* Add the title column */
+    renderer = gtk_cell_renderer_text_new();
+    g_object_set(renderer,
+                 "ellipsize", PANGO_ELLIPSIZE_END,
+                 "ellipsize-set", TRUE,
+                 NULL);
+
+    column = gtk_tree_view_column_new_with_attributes("Title", renderer,
+                                                      NULL);
+    /* TODO: conect edited and edit-disable signals here */
+    gtk_tree_view_column_set_expand(column, TRUE);
+    gtk_tree_view_column_set_cell_data_func
+        (column, renderer,
+         gwy_app_data_browser_spec_render_title, browser, NULL);
+    g_object_set_qdata(G_OBJECT(column), column_id_quark, "title");
+    gtk_tree_view_append_column(treeview, column);
+    
+    /* chan_id */
+    renderer= gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("CID", renderer,
+                                                      "text", MODEL_SPEC_CHAN_ID,  
+                                                      NULL);
+    gtk_tree_view_append_column(treeview, column);
+    /* spec_id */
+    renderer= gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("PID", renderer,
+                                                      "text", MODEL_SPEC_SPEC_ID,  
+                                                      NULL);
+    gtk_tree_view_append_column(treeview, column);
+    
+    
+    return retval;
+}
+
+static void
 gwy_app_data_browser_graph_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
                                         GtkCellRenderer *renderer,
                                         GtkTreeModel *model,
@@ -2646,7 +3003,11 @@ gwy_app_data_browser_construct_window(GwyAppDataBrowser *browser)
     browser->lists[PAGE_CHANNELS]
         = gwy_app_data_browser_construct_channels(browser);
     gtk_container_add(GTK_CONTAINER(scwin), browser->lists[PAGE_CHANNELS]);
-
+    
+    /* Spectroscopy List */
+    browser->spec_list = gwy_app_data_browser_construct_spec_list(browser);
+    gtk_box_pack_start(GTK_BOX(box_page), browser->spec_list,FALSE, TRUE, 0);
+    
     /* Graphs tab */
     box_page = gtk_vbox_new(FALSE, 0);
     label = gtk_label_new(_("Graphs"));
@@ -2731,6 +3092,53 @@ gwy_app_data_browser_restore_active(GtkTreeView *treeview,
         gwy_app_data_browser_select_iter(treeview, &iter);
 }
 
+static gboolean
+gwy_app_data_browser_spec_list_visible_func(GtkTreeModel *model,
+                                            GtkTreeIter *iter,
+                                            gpointer data)
+{
+    gint chan_id;
+    gint id;
+    GtkTreeModelFilter *filter;
+    
+    filter = GTK_TREE_MODEL_FILTER(data);
+    gtk_tree_model_get(model, iter,
+                       MODEL_SPEC_CHAN_ID, &chan_id,
+                       -1);
+    id=GPOINTER_TO_INT(g_object_get_data(G_OBJECT(filter), "chan-id"));
+    return (id==chan_id);
+}
+
+static void
+gwy_app_data_browser_restore_active_spec(GwyAppDataBrowser *browser,
+                                         GwyAppDataProxy *proxy)
+{
+        GtkTreeModelFilter *filter;
+        GtkTreeModel *list;
+        gint chan_id;
+        
+        list = GTK_TREE_MODEL(proxy->spec_list);
+        filter = GTK_TREE_MODEL_FILTER(browser->spec_list_fltr);
+        
+        chan_id = proxy->lists[PAGE_CHANNELS].active;
+        if (filter)
+            g_object_unref(filter);
+        filter = GTK_TREE_MODEL_FILTER(gtk_tree_model_filter_new(list, NULL));
+        gtk_tree_model_filter_set_visible_func(
+           filter, gwy_app_data_browser_spec_list_visible_func,
+            (gpointer)(filter), NULL);
+        browser->spec_list_fltr = GTK_TREE_MODEL(filter);
+        gtk_tree_view_set_model(GTK_TREE_VIEW(browser->spec_list),
+                                    GTK_TREE_MODEL(filter));
+
+        if (filter) {
+            g_object_set_data(G_OBJECT(filter),
+                              "chan-id", GINT_TO_POINTER(chan_id));
+            gtk_tree_model_filter_refilter(filter);
+        }
+
+        /* TODO: select active spectra */
+}
 static void
 gwy_app_data_browser_switch_data(GwyContainer *data)
 {
@@ -2743,6 +3151,7 @@ gwy_app_data_browser_switch_data(GwyContainer *data)
         if (browser->window) {
             for (i = 0; i < NPAGES; i++)
                 gtk_tree_view_set_model(GTK_TREE_VIEW(browser->lists[i]), NULL);
+            gtk_tree_view_set_model(GTK_TREE_VIEW(browser->spec_list), NULL);
             gtk_label_set_text(GTK_LABEL(browser->filename), NULL);
             gwy_sensitivity_group_set_state(browser->sensgroup,
                                             SENS_FILE | SENS_OBJECT, 0);
@@ -2766,7 +3175,7 @@ gwy_app_data_browser_switch_data(GwyContainer *data)
         for (i = 0; i < NPAGES; i++)
             gwy_app_data_browser_restore_active
                           (GTK_TREE_VIEW(browser->lists[i]), &proxy->lists[i]);
-
+        gwy_app_data_browser_restore_active_spec(browser, proxy);
         gwy_sensitivity_group_set_state(browser->sensgroup,
                                         SENS_FILE, SENS_FILE);
     }
@@ -3331,6 +3740,63 @@ gwy_app_get_show_key_for_id(gint id)
 }
 
 /**
+ * gwy_app_get_spec_key_for_id:
+ * @cid: Channel number in container.
+ * @sid: Spec Number for channel.
+ *
+ * Calculates spectra quark identifier from its the channel id @cid and
+ * the spectrum id @sid.
+ *
+ * Returns: The quark key identifying spectra @cid:@sid.
+ **/
+GQuark
+gwy_app_get_spec_key_for_id(gint cid, gint sid)
+{
+    static GQuark quarks[12][4] = { {0,} };
+    gchar key[24];
+
+    g_return_val_if_fail(cid >= 0 && sid >=0, 0);
+    if (cid < 12 && sid < 4 && quarks[cid][sid])
+        return quarks[cid][sid];
+
+    g_snprintf(key, sizeof(key), "/%d/spec/%d", cid, sid);
+
+    if (cid < 12 && sid < 4) {
+        quarks[cid][sid] = g_quark_from_string(key);
+        return quarks[cid][sid];
+    }
+    return g_quark_from_string(key);
+}
+
+/**
+ * gwy_app_get_active_spec_for_cid:
+ * @data: A data container
+ * @cid: The data channel id
+ *
+ * Returns: The active spectra id for a given channel id (@cid) in @data.
+ *
+ * Gets the spectra id for a given data channel specified by @cid and the
+ * container @data. If the no active spectra is specified or the specified one
+ * does not exist then -1 is returned.
+ **/
+gint
+gwy_app_get_active_spec_for_cid(GwyContainer *data, gint cid)
+{
+    gchar key[32];
+    gboolean found;
+    gint sid=-1;
+    
+    g_snprintf(key, sizeof(key), "/%d/spec/active", cid);
+    found = gwy_container_gis_int32_by_name(data, key, &sid);
+    
+    if (found && sid>-1) {
+        g_snprintf(key, sizeof(key), "/%d/spec/%d", cid, sid);
+        if (gwy_container_contains_by_name(data, key)) return sid;
+    }
+    
+    return -1;
+}
+/**
  * gwy_app_set_data_field_title:
  * @data: A data container.
  * @id: The data channel id.
@@ -3446,12 +3912,14 @@ gwy_app_data_browser_get_current(GwyAppWhat what,
     GwyAppDataBrowser *browser;
     GwyAppDataProxy *current = NULL;
     GwyAppDataList *channels = NULL, *graphs = NULL;
+    GtkTreeModel *spec_list = NULL;
     GtkTreeIter iter;
     GObject *object, **otarget;
     GObject *dfield = NULL, *gmodel = NULL;  /* Cache current */
     GQuark quark, *qtarget;
     gint *itarget;
     va_list ap;
+    gint sid;
 
     if (!what)
         return;
@@ -3463,6 +3931,7 @@ gwy_app_data_browser_get_current(GwyAppWhat what,
         if (current) {
             channels = &current->lists[PAGE_CHANNELS];
             graphs = &current->lists[PAGE_GRAPHS];
+            spec_list = GTK_TREE_MODEL(current->spec_list);
         }
     }
 
@@ -3508,6 +3977,10 @@ gwy_app_data_browser_get_current(GwyAppWhat what,
             case GWY_APP_MASK_FIELD_KEY:
             case GWY_APP_SHOW_FIELD:
             case GWY_APP_SHOW_FIELD_KEY:
+            case GWY_APP_SPEC:
+            case GWY_APP_SPEC_KEY:
+            case GWY_APP_SPEC_ID:
+            
             if (!dfield
                 && current
                 && gwy_app_data_proxy_find_object(channels->store,
@@ -3570,6 +4043,47 @@ gwy_app_data_browser_get_current(GwyAppWhat what,
                 *qtarget = 0;
                 if (dfield)
                     *qtarget = gwy_app_get_show_key_for_id(channels->active);
+                break;
+                
+                case GWY_APP_SPEC:
+                otarget = va_arg(ap, GObject**);
+                *otarget = NULL;
+                if (dfield) {
+                    sid = gwy_app_get_active_spec_for_cid(current->container,
+                                                          channels->active);
+                    if (sid<0)
+                        break;
+                    quark = gwy_app_get_spec_key_for_id(channels->active,
+                                                        sid);
+                    gwy_container_gis_object(current->container, quark,
+                                             otarget);
+                }
+                break;
+                
+                case GWY_APP_SPEC_KEY:
+                qtarget = va_arg(ap, GQuark*);
+                *qtarget = 0;
+                if (dfield) {
+                    sid = gwy_app_get_active_spec_for_cid(current->container,
+                                                          channels->active);
+                    if (sid<0)
+                        break;
+                    *qtarget = gwy_app_get_spec_key_for_id(channels->active,
+                                                           sid);
+                }
+                break;
+                
+                case GWY_APP_SPEC_ID:
+                itarget = va_arg(ap, gint*);
+                *itarget = -1;
+                if (dfield) {
+                    sid = gwy_app_get_active_spec_for_cid(current->container,
+                                                          channels->active);
+                    if (sid<0)
+                        break;
+                    
+                    *itarget = (channels->active << 15) | sid;
+                }
                 break;
 
                 default:
@@ -4137,6 +4651,9 @@ gwy_app_data_browser_shut_down(void)
     if (browser->window) {
         for (i = 0; i < NPAGES; i++)
             gtk_tree_view_set_model(GTK_TREE_VIEW(browser->lists[i]), NULL);
+        gtk_tree_view_set_model(GTK_TREE_VIEW(browser->spec_list), NULL);
+        if (browser->spec_list_fltr)
+            g_object_unref(browser->spec_list_fltr);
     }
 }
 
@@ -4372,7 +4889,11 @@ gwy_app_get_channel_thumbnail(GwyContainer *data,
  * @GWY_APP_GRAPH_MODEL: Graph model.
  * @GWY_APP_GRAPH_MODEL_KEY: Quark corresponding to the graph model.
  * @GWY_APP_GRAPH_MODEL_ID: Number (id) of the graph model in its container.
- *
+ * @GWY_APP_SPEC: A Spectra object (collection of single point 
+ *                                  spectroscopy curves)
+ * @GWY_APP_SPEC_KEY: Quark correspoinding to the Spectra object.
+ * @GWY_APP_SPEC_ID: Number pair (chn_id:spc_id) of the spectra object.
+ * 
  * Types of current objects that can be requested with
  * gwy_app_data_browser_get_current().
  **/

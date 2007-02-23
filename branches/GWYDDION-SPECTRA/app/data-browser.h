@@ -41,7 +41,10 @@ typedef enum {
     GWY_APP_SHOW_FIELD_KEY,
     GWY_APP_GRAPH_MODEL,
     GWY_APP_GRAPH_MODEL_KEY,
-    GWY_APP_GRAPH_MODEL_ID
+    GWY_APP_GRAPH_MODEL_ID,
+    GWY_APP_SPEC,
+    GWY_APP_SPEC_KEY,
+    GWY_APP_SPEC_ID
 } GwyAppWhat;
 /* XXX: silly name */
 
@@ -99,9 +102,14 @@ void   gwy_app_sync_data_items              (GwyContainer *source,
 gint   gwy_app_data_browser_copy_channel    (GwyContainer *source,
                                              gint id,
                                              GwyContainer *dest);
+gint   gwy_app_get_active_spec_for_cid      (GwyContainer *data,
+                                             gint cid);
 GQuark gwy_app_get_data_key_for_id          (gint id);
 GQuark gwy_app_get_mask_key_for_id          (gint id);
 GQuark gwy_app_get_show_key_for_id          (gint id);
+GQuark gwy_app_get_spec_key_for_id          (gint cid,
+                                             gint sid);
+
 void   gwy_app_set_data_field_title         (GwyContainer *data,
                                              gint id,
                                              const gchar *name);

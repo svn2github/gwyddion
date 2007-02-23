@@ -454,10 +454,12 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
     GwySIValueFormat *vf;
     guint len, i;
     const gchar *data_key;
-    gchar *key, *column_title;
+    const gchar *key;
+    gchar *column_title;
     gchar ext[]="spec/0";
     const gdouble *coords=NULL;
     gboolean spec_found = FALSE;
+    GQuark q_spec;
 
     plain_tool = GWY_PLAIN_TOOL(gwytool);
     tool = GWY_TOOL_SPECTRO(gwytool);
@@ -497,12 +499,10 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
                                  G_CALLBACK (gwy_tool_spectro_object_chosen),
                                  tool);
         
-        blayer = gwy_data_view_get_base_layer(data_view);
+        /*blayer = gwy_data_view_get_base_layer(data_view);
         data_key = gwy_pixmap_layer_get_data_key(blayer);
         len=strlen(data_key);
-        /* FIXME: This is going to need to be able to deal with more than just
-                  "spec/0" */
-        len+=2; /* space to add "/0" */
+        len+=2;
         key = g_new0(gchar, len+1);
         strcpy(key, data_key);
         gwy_debug("key: %s",key);
@@ -510,8 +510,15 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         gwy_debug("key: %s",key);
         spec_found = gwy_container_gis_object_by_name(plain_tool->container,
                                                       key,
-                                                      &spectra);
-        gwy_debug("Spectra %sfound @ %s", spec_found?"":" not", key);
+                                                      &spectra);*/
+        gwy_app_data_browser_get_current(GWY_APP_SPEC, &spectra,
+                                         GWY_APP_SPEC_KEY, &q_spec,
+                                         0);
+        if (spectra) spec_found=TRUE;
+        
+        key=g_quark_to_string(q_spec);
+        
+        gwy_debug("Spectra%sfound @ %s", spec_found?" ":" not", key);
     }
     if (spec_found) {
         g_return_if_fail(GWY_IS_SPECTRA(spectra));
