@@ -466,8 +466,10 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
         
     if (plain_tool->init_failed)
         return;
-
-    if(data_view==plain_tool->data_view) {
+    
+    gwy_app_data_browser_get_current(GWY_APP_SPEC, &spectra, 0);
+    
+    if(data_view==plain_tool->data_view && spectra==tool->spectra) {
         GWY_TOOL_CLASS(gwy_tool_spectro_parent_class)->data_switched(gwytool,
                                                                      data_view);
         return;
@@ -491,28 +493,13 @@ gwy_tool_spectro_data_switched(GwyTool *gwytool,
                                 NULL);
     }
     if (data_view) {
-        
-        
         tool->layer_object_chosen_id =
                 g_signal_connect(G_OBJECT (plain_tool->layer),
                                  "object-chosen",
                                  G_CALLBACK (gwy_tool_spectro_object_chosen),
                                  tool);
-        
-        /*blayer = gwy_data_view_get_base_layer(data_view);
-        data_key = gwy_pixmap_layer_get_data_key(blayer);
-        len=strlen(data_key);
-        len+=2;
-        key = g_new0(gchar, len+1);
-        strcpy(key, data_key);
-        gwy_debug("key: %s",key);
-        strcpy(key+len-6, ext);
-        gwy_debug("key: %s",key);
-        spec_found = gwy_container_gis_object_by_name(plain_tool->container,
-                                                      key,
-                                                      &spectra);*/
-        gwy_app_data_browser_get_current(GWY_APP_SPEC, &spectra,
-                                         GWY_APP_SPEC_KEY, &q_spec,
+    
+        gwy_app_data_browser_get_current(GWY_APP_SPEC_KEY, &q_spec,
                                          0);
         if (spectra) spec_found=TRUE;
         

@@ -2219,6 +2219,7 @@ gwy_app_spec_list_row_activated(GtkTreeView *treeview,
     GwyAppDataProxy *proxy;
     gint active=-1, chan_id=-1, spec_id=-1;
     gboolean found;
+    GwyDataView *dataview=NULL;
     
     browser=gwy_app_get_data_browser();
     proxy=browser->current;
@@ -2236,6 +2237,16 @@ gwy_app_spec_list_row_activated(GtkTreeView *treeview,
         if (active!=spec_id || !found) {
             gwy_container_set_int32_by_name(container, key, spec_id);
             gwy_debug("Setting %s: %d",key,spec_id);
+            /* force rerender of old active row to unbold it */
+            if (found) {
+                found = gwy_app_data_proxy_find_spec(browser->spec_list_fltr, 
+                                                     chan_id, spec_id, &iter);
+                emit_row_changed(browser->spec_list_fltr, &iter);
+            }
+            /* XXX: is this too crude? */
+            gwy_app_data_browser_get_current(GWY_APP_DATA_VIEW, &dataview, 0);
+            if (dataview)
+                _gwy_app_data_view_set_current(dataview);
         }
     } else {
         gwy_debug("iter not found");
@@ -2306,6 +2317,14 @@ gwy_app_data_browser_spec_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
         }
     }
     g_object_set(renderer, "text", title, NULL);
+    
+    if (gwy_app_get_active_spec_for_cid(data, cid)==sid) {
+        g_object_set(renderer, "weight", PANGO_WEIGHT_SEMIBOLD
+                             , NULL);
+    } else {
+        g_object_set(renderer, "weight", PANGO_WEIGHT_NORMAL
+                             , NULL);
+    }
 }
 
 static GtkWidget*
@@ -2328,6 +2347,7 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
     g_object_set(renderer,
                  "ellipsize", PANGO_ELLIPSIZE_END,
                  "ellipsize-set", TRUE,
+                 "weight-set", TRUE,
                  NULL);
 
     column = gtk_tree_view_column_new_with_attributes("Title", renderer,
