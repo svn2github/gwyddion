@@ -183,6 +183,12 @@ static void     gwy_app_data_browser_copy_object(GwyAppDataProxy *srcproxy,
                                                  GtkTreeModel *model,
                                                  GtkTreeIter *iter,
                                                  GwyAppDataProxy *destproxy);
+static void     gwy_app_data_proxy_copy_spec(GwyAppDataProxy *srcproxy,
+                                             GtkTreeModel *model,
+                                             GtkTreeIter *iter,
+                                             GwyAppDataProxy *destproxy,
+                                             gint cid);
+
 static const gchar*
 gwy_app_data_browser_figure_out_channel_title(GwyContainer *data,
                                               gint channel);
@@ -541,7 +547,7 @@ gwy_app_data_proxy_disconnect_spec(GwyAppDataProxy *proxy,
                                          gwy_app_data_proxy_spec_changed,
                                          proxy);
     g_object_unref(object);
-    gtk_list_store_remove(proxy->lists[PAGE_CHANNELS].store, iter);
+    gtk_list_store_remove(proxy->spec_list, iter);
 }
 
 static void
@@ -1465,10 +1471,13 @@ gwy_app_window_dnd_data_received(GtkWidget *window,
     GwyAppDataBrowser *browser = (GwyAppDataBrowser*)user_data;
     GwyAppDataProxy *srcproxy, *destproxy;
     GwyContainer *container = NULL;
+    GwyDataView *dataview = NULL;
+    GwyAppKeyType type;
     GtkTreeModel *model;
     GtkTreePath *path;
     GtkTreeIter iter;
-    guint pageno;
+    const gchar *key;
+    guint pageno, dest_cid;
 
     if (!gtk_tree_get_row_drag_data(data, &model, &path)) {
         g_warning("Cannot get row drag data");
@@ -1497,8 +1506,20 @@ gwy_app_window_dnd_data_received(GtkWidget *window,
 
     if (container) {
         destproxy = gwy_app_data_browser_get_proxy(browser, container, FALSE);
-        gwy_app_data_browser_copy_object(srcproxy, pageno, model, &iter,
-                                         destproxy);
+        
+        if (model==GTK_TREE_MODEL(browser->current->spec_list) &&
+            GWY_IS_DATA_WINDOW(window)) {
+            gwy_debug("DnDed Spectra spec_list");
+            dataview = gwy_data_window_get_data_view(GWY_DATA_WINDOW(window));
+            key = gwy_data_view_get_data_prefix(dataview);
+            dest_cid = gwy_app_data_proxy_analyse_key(key, &type, NULL);
+            gwy_app_data_proxy_copy_spec(srcproxy,model, &iter,
+                                         destproxy, dest_cid);
+        }
+        else {
+            gwy_app_data_browser_copy_object(srcproxy, pageno, model, &iter,
+                                             destproxy);
+        }
     }
     else
         g_warning("Cannot determine drop target GwyContainer");
@@ -2208,7 +2229,7 @@ gwy_app_data_browser_construct_channels(GwyAppDataBrowser *browser)
 static void
 gwy_app_spec_list_row_activated(GtkTreeView *treeview,
                                 GtkTreePath *path,
-                                GtkTreeViewColumn *column,
+                                G_GNUC_UNUSED GtkTreeViewColumn *column,
                                 G_GNUC_UNUSED gpointer user_data)
 {
     GtkTreeModel *model;
@@ -2239,9 +2260,11 @@ gwy_app_spec_list_row_activated(GtkTreeView *treeview,
             gwy_debug("Setting %s: %d",key,spec_id);
             /* force rerender of old active row to unbold it */
             if (found) {
-                found = gwy_app_data_proxy_find_spec(browser->spec_list_fltr, 
-                                                     chan_id, spec_id, &iter);
-                emit_row_changed(browser->spec_list_fltr, &iter);
+                found = gwy_app_data_proxy_find_spec(
+                            GTK_LIST_STORE(browser->spec_list_fltr), 
+                            chan_id, spec_id, &iter);
+                emit_row_changed(GTK_LIST_STORE(browser->spec_list_fltr),
+                                 &iter);
             }
             /* XXX: is this too crude? */
             gwy_app_data_browser_get_current(GWY_APP_DATA_VIEW, &dataview, 0);
@@ -2297,7 +2320,7 @@ gwy_app_data_browser_spec_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
                        MODEL_SPEC_SPEC_ID, &sid,
                        -1);
     title = gwy_spectra_get_title(spectra);
-    if (!title) {
+    if (!title || *title==0) {
         GwyDataLine *dline;
         GwySIUnit *si_unit;
         gchar *X, *Y;
@@ -2330,6 +2353,7 @@ gwy_app_data_browser_spec_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
 static GtkWidget*
 gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
 {
+    static const GtkTargetEntry dnd_target_table[] = { GTK_TREE_MODEL_ROW };
     GtkWidget *retval;
     GtkTreeView *treeview;
     GtkCellRenderer *renderer;
@@ -2360,6 +2384,8 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
     g_object_set_qdata(G_OBJECT(column), column_id_quark, "title");
     gtk_tree_view_append_column(treeview, column);
     
+    
+    /* XXX: Remove chan_id and spec_id cols in release version */
     /* chan_id */
     renderer= gtk_cell_renderer_text_new();
     column = gtk_tree_view_column_new_with_attributes("CID", renderer,
@@ -2373,6 +2399,12 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
                                                       NULL);
     gtk_tree_view_append_column(treeview, column);
     
+    /* DnD */
+    gtk_tree_view_enable_model_drag_source(treeview,
+                                           GDK_BUTTON1_MASK,
+                                           dnd_target_table,
+                                           G_N_ELEMENTS(dnd_target_table),
+                                           GDK_ACTION_COPY);
     
     return retval;
 }
@@ -2781,6 +2813,8 @@ gwy_app_data_browser_delete_object(GwyAppDataProxy *proxy,
             gwy_container_remove_by_prefix(data, key);
             g_snprintf(key, sizeof(key), "/%d/3d", i);
             gwy_container_remove_by_prefix(data, key);
+            g_snprintf(key, sizeof(key), "/%d/spec", i);
+            gwy_container_remove_by_prefix(data, key);
         }
         break;
 
@@ -2802,6 +2836,33 @@ gwy_app_data_browser_delete_object(GwyAppDataProxy *proxy,
     }
 }
 
+static void
+gwy_app_data_proxy_copy_spec(GwyAppDataProxy *srcproxy,
+                             GtkTreeModel *model,
+                             GtkTreeIter *iter,
+                             GwyAppDataProxy *destproxy,
+                             gint cid)
+{   
+    GwyAppDataBrowser *browser;
+    gint src_cid=-1, src_sid=-1;
+    
+    browser = srcproxy->parent;
+    gtk_tree_model_get(model, iter,
+                       MODEL_SPEC_CHAN_ID, &src_cid,
+                       MODEL_SPEC_SPEC_ID, &src_sid,
+                       -1);
+    if (!destproxy) {
+        gwy_debug("Container NULL");
+        return;
+    }
+
+    gwy_debug("Create a new object in container %p", destproxy->container);
+    gwy_app_data_browser_copy_spec(srcproxy->container,
+                                   src_cid, src_sid,
+                                   destproxy->container,
+                                   cid);
+    
+}
 static void
 gwy_app_data_browser_copy_object(GwyAppDataProxy *srcproxy,
                                  guint pageno,
@@ -4361,7 +4422,7 @@ gwy_app_data_browser_foreach(GwyAppDataForeachFunc function,
     g_list_free(proxies);
 }
 
-/**
+/** 
  * gwy_app_sync_data_items:
  * @source: Source container.
  * @dest: Target container (may be identical to source).
@@ -4387,6 +4448,7 @@ gwy_app_sync_data_items(GwyContainer *source,
     };
 
     GwyDataItem what;
+    GwyContainer *dup;
     gchar key_from[40];
     gchar key_to[40];
     const guchar *name;
@@ -4397,7 +4459,7 @@ gwy_app_sync_data_items(GwyContainer *source,
     gdouble dbl;
     va_list ap;
     guint i;
-
+    
     g_return_if_fail(GWY_IS_CONTAINER(source));
     g_return_if_fail(GWY_IS_CONTAINER(dest));
     g_return_if_fail(from_id >= 0 && to_id >= 0);
@@ -4496,6 +4558,18 @@ gwy_app_sync_data_items(GwyContainer *source,
                     gwy_container_remove_by_name(dest, key_to);
             }
             break;
+            
+            case GWY_DATA_ITEM_SPECS:
+            g_snprintf(key_to, sizeof(key_to), "/%d/spec", to_id);
+            g_snprintf(key_from, sizeof(key_to), "/%d/spec", from_id);
+                
+            if (delete_too) {
+                gwy_container_remove_by_prefix(dest, key_to);
+            }
+            dup = gwy_container_duplicate_by_prefix(source, key_from, NULL);
+            gwy_container_transfer(dup, dest, key_from, key_to, TRUE);
+            g_object_unref(dup);
+            break;
 
             default:
             g_assert_not_reached();
@@ -4559,9 +4633,108 @@ gwy_app_data_browser_copy_channel(GwyContainer *source,
                             GWY_DATA_ITEM_META,
                             GWY_DATA_ITEM_TITLE,
                             GWY_DATA_ITEM_SELECTIONS,
+                            GWY_DATA_ITEM_SPECS,
                             0);
 
     return newid;
+}
+
+/**
+ * gwy_app_data_browser_add_spec:
+ * @spectra: Spectra to add.
+ * @data: Container to add the spectra to.
+ * @cid: Data Channel to add the spectra under.
+ *
+ * Adds a spectroscopy channel to a container @data, under channel id @cid.
+ *
+ * Returns: The id of the newly added spectra;
+ **/
+gint
+gwy_app_data_browser_add_spec(GwySpectra *spectra,
+                              GwyContainer *data,
+                              gint cid)
+{
+    GwyAppDataBrowser *browser;
+    GwyAppDataProxy *proxy;
+    GtkTreeModel *spec_list=NULL;
+    GtkTreeIter iter;
+    gint id, sid, max = 0;
+    gchar key[32];
+    
+    g_return_val_if_fail(GWY_IS_SPECTRA(spectra),-1);
+    g_return_val_if_fail(GWY_IS_CONTAINER(data),-1);
+    if (cid < 0) {
+        return -1;
+    }
+    
+    browser = gwy_app_get_data_browser();
+    if (data)
+        proxy = gwy_app_data_browser_get_proxy(browser, data, FALSE);
+    else
+        proxy = browser->current;
+    if (!proxy) {
+        g_critical("Data container is unknown to data browser.");
+        return -1;
+    }
+
+    spec_list = GTK_TREE_MODEL(proxy->spec_list);
+    if (gtk_tree_model_get_iter_first(spec_list, &iter)) {
+        do {
+            gtk_tree_model_get(spec_list, &iter,
+                               MODEL_SPEC_CHAN_ID, &id,
+                               MODEL_SPEC_SPEC_ID, &sid,
+                               -1);
+            if (sid > max && id==cid)
+                max = id;
+        } while (gtk_tree_model_iter_next(spec_list, &iter));
+    }
+    
+    g_snprintf(key, sizeof(key), "/%d/spec/%d", cid, ++sid);
+    /* This invokes "item-changed" callback that will finish the work. */
+    gwy_container_set_object_by_name(proxy->container, key, spectra);
+
+    return sid;
+}
+
+/**
+ * gwy_app_data_browser_copy_spec:
+ * @source: Source container.
+ * @src_cid: Source Data channel id.
+ * @src_sid: Source Spec channel id.
+ * @dest: Target container (may be identical to source).
+ * @dest_cid: Target Data channel id (may be identical to source).
+ *
+ * Copies a spectroscopy channel including all auxiliary data.
+ *
+ * Returns: The id of the copy.
+ **/
+gint
+gwy_app_data_browser_copy_spec(GwyContainer *source,
+                               gint src_cid,
+                               gint src_sid,
+                               GwyContainer *dest,
+                               gint dest_cid)
+{
+    gint new_sid;
+    GQuark key;
+    GwySpectra *spectra;
+    
+    g_return_val_if_fail(GWY_IS_CONTAINER(source),-1);
+    g_return_val_if_fail(GWY_IS_CONTAINER(dest),-1);
+    if (src_cid < 0 || src_sid < 0 || dest_cid < 0) {
+        return -1;
+    }
+    
+    key = gwy_app_get_spec_key_for_id(src_cid, src_sid);
+    spectra = gwy_container_get_object(source, key);
+    g_return_val_if_fail(GWY_IS_SPECTRA(spectra), -1);
+
+    spectra = gwy_spectra_duplicate(spectra);
+    new_sid = gwy_app_data_browser_add_spec(spectra, dest, dest_cid);
+    g_object_unref(spectra);
+
+    
+    return new_sid;
 }
 
 /**

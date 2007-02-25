@@ -57,7 +57,8 @@ typedef enum {
     GWY_DATA_ITEM_RANGE_TYPE,
     GWY_DATA_ITEM_REAL_SQUARE,
     GWY_DATA_ITEM_SELECTIONS,
-    GWY_DATA_ITEM_META
+    GWY_DATA_ITEM_META,
+    GWY_DATA_ITEM_SPECS
 } GwyDataItem;
 
 typedef enum {
@@ -102,6 +103,11 @@ void   gwy_app_sync_data_items              (GwyContainer *source,
 gint   gwy_app_data_browser_copy_channel    (GwyContainer *source,
                                              gint id,
                                              GwyContainer *dest);
+gint   gwy_app_data_browser_copy_spec       (GwyContainer *source,
+                                             gint src_cid,
+                                             gint src_sid,
+                                             GwyContainer *dest,
+                                             gint dest_cid);
 gint   gwy_app_get_active_spec_for_cid      (GwyContainer *data,
                                              gint cid);
 GQuark gwy_app_get_data_key_for_id          (gint id);
