@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyutils.h>
@@ -178,6 +179,13 @@ static GList*   gwy_app_data_proxy_find_3d  (GwyAppDataProxy *proxy,
                                              Gwy3DWindow *window3d);
 static GList*   gwy_app_data_proxy_get_3d   (GwyAppDataProxy *proxy,
                                              gint id);
+static void gwy_app_data_browser_delete_object (GwyAppDataProxy *proxy,
+                                                guint pageno,
+                                                GtkTreeModel *model,
+                                                GtkTreeIter *iter);
+static void gwy_app_data_browser_delete_spec (GwyAppDataProxy *proxy,
+                                              GtkTreeModel *model,
+                                              GtkTreeIter *iter);
 static void     gwy_app_data_browser_copy_object(GwyAppDataProxy *srcproxy,
                                                  guint pageno,
                                                  GtkTreeModel *model,
@@ -188,6 +196,8 @@ static void     gwy_app_data_proxy_copy_spec(GwyAppDataProxy *srcproxy,
                                              GtkTreeIter *iter,
                                              GwyAppDataProxy *destproxy,
                                              gint cid);
+static gboolean gwy_app_data_browser_list_key_press(GtkTreeView *treeview,
+                                                    GdkEventKey *event);
 
 static const gchar*
 gwy_app_data_browser_figure_out_channel_title(GwyContainer *data,
@@ -2157,12 +2167,15 @@ gwy_app_data_browser_construct_channels(GwyAppDataBrowser *browser)
     treeview = GTK_TREE_VIEW(retval);
     g_signal_connect(treeview, "row-activated",
                      G_CALLBACK(gwy_app_data_list_row_activated), NULL);
+    g_signal_connect(treeview, "key-press-event",
+                     G_CALLBACK(gwy_app_data_browser_list_key_press),
+                     NULL);
 
     /* Add the thumbnail column */
-    renderer = gtk_cell_renderer_pixbuf_new();
+/*    renderer = gtk_cell_renderer_pixbuf_new();
     column = gtk_tree_view_column_new_with_attributes("Thumbnail", renderer,
                                                       NULL);
-    gtk_tree_view_append_column(treeview, column);
+    gtk_tree_view_append_column(treeview, column);*/
 
     /* Add the visibility column */
     renderer = gtk_cell_renderer_toggle_new();
@@ -2227,27 +2240,60 @@ gwy_app_data_browser_construct_channels(GwyAppDataBrowser *browser)
 }
 
 static void
-gwy_app_spec_list_row_activated(GtkTreeView *treeview,
-                                GtkTreePath *path,
-                                G_GNUC_UNUSED GtkTreeViewColumn *column,
-                                G_GNUC_UNUSED gpointer user_data)
+gwy_app_data_browser_spec_name_edited(GtkCellRenderer *renderer,
+                                      const gchar *strpath,
+                                      const gchar *text,
+                                      GwyAppDataBrowser *browser)
+{
+    GtkTreeModel *model;
+    GtkTreePath *path;
+    GtkTreeIter iter;
+    GwySpectra *spectra;
+    gchar *title;
+
+    g_return_if_fail(browser->current);
+    model = GTK_TREE_MODEL(browser->spec_list_fltr);
+
+    path = gtk_tree_path_new_from_string(strpath);
+    gtk_tree_model_get_iter(model, &iter, path);
+    gtk_tree_path_free(path);
+
+    gtk_tree_model_get(model, &iter, MODEL_SPEC_SPECTRA, &spectra, -1);
+    title = g_strstrip(g_strdup(text));
+    if (!*title) {
+        g_free(title);
+        gwy_spectra_set_title(spectra, NULL);
+    }
+    else {
+        gwy_spectra_set_title(spectra, title);
+    }
+
+    gwy_app_data_list_disable_edit(renderer);
+}
+
+static void
+gwy_app_data_browser_spec_toggled(GtkCellRendererToggle *renderer,
+                                  gchar *path_str,
+                                  GwyAppDataBrowser *browser)
 {
     GtkTreeModel *model;
     GtkTreeIter iter;
+    
     gchar key[32];
     GwyContainer *container;
-    GwyAppDataBrowser *browser;
     GwyAppDataProxy *proxy;
     gint active=-1, chan_id=-1, spec_id=-1;
     gboolean found;
     GwyDataView *dataview=NULL;
+    GtkTreeView *treeview;
     
-    browser=gwy_app_get_data_browser();
-    proxy=browser->current;
-    container=proxy->container;
+    browser = gwy_app_get_data_browser();
+    proxy = browser->current;
+    container = proxy->container;
+    treeview = GTK_TREE_VIEW(browser->spec_list);
     
     model = gtk_tree_view_get_model(treeview);
-    if (gtk_tree_model_get_iter(model, &iter, path)){
+    if (gtk_tree_model_get_iter_from_string(model, &iter, path_str)){
         gtk_tree_model_get(model, &iter,
                            MODEL_SPEC_CHAN_ID, &chan_id,
                            MODEL_SPEC_SPEC_ID, &spec_id,
@@ -2270,12 +2316,13 @@ gwy_app_spec_list_row_activated(GtkTreeView *treeview,
             gwy_app_data_browser_get_current(GWY_APP_DATA_VIEW, &dataview, 0);
             if (dataview)
                 _gwy_app_data_view_set_current(dataview);
+        } else {
+            gwy_container_remove_by_name(container, key);
         }
     } else {
         gwy_debug("iter not found");
     }
 }
-
 
 /* given a unit replaces it with the quatity it represesents
  * works for a few base units. If it does not recognise it it leaves it */
@@ -2340,14 +2387,75 @@ gwy_app_data_browser_spec_render_title(G_GNUC_UNUSED GtkTreeViewColumn *column,
         }
     }
     g_object_set(renderer, "text", title, NULL);
+}
+
+static void
+gwy_app_data_browser_render_spec_visible(G_GNUC_UNUSED GtkTreeViewColumn *column,
+                                         GtkCellRenderer *renderer,
+                                         GtkTreeModel *model,
+                                         GtkTreeIter *iter,
+                                         G_GNUC_UNUSED gpointer userdata)
+{
+    GwyContainer *data;
+    GwyAppDataBrowser *browser;
+    gint cid, sid;
     
-    if (gwy_app_get_active_spec_for_cid(data, cid)==sid) {
-        g_object_set(renderer, "weight", PANGO_WEIGHT_SEMIBOLD
-                             , NULL);
-    } else {
-        g_object_set(renderer, "weight", PANGO_WEIGHT_NORMAL
-                             , NULL);
+    browser = gwy_app_get_data_browser();
+    
+    data = browser->current->container;
+    gtk_tree_model_get(model, iter,
+                       MODEL_SPEC_CHAN_ID, &cid,
+                       MODEL_SPEC_SPEC_ID, &sid,
+                       -1);
+    g_object_set(renderer,
+                 "active", gwy_app_get_active_spec_for_cid(data, cid)==sid,
+                 NULL);
+}
+
+static gboolean
+gwy_app_data_browser_list_key_press(GtkTreeView *treeview,
+                                GdkEventKey *event)
+{
+    GtkTreeSelection *selection;
+    GtkTreePath *path;
+    GtkTreeIter iter;
+    GtkTreeModel *model;
+    GwyAppDataProxy *proxy;
+    GwyAppDataBrowser *browser;
+    
+    browser = gwy_app_get_data_browser();
+    g_return_val_if_fail(GTK_IS_TREE_VIEW(treeview), FALSE);
+    
+    if (event->keyval == GDK_Delete) {
+        selection = gtk_tree_view_get_selection(treeview);
+        model = gtk_tree_view_get_model(treeview);
+        
+        if (gtk_tree_selection_get_selected(selection, NULL, &iter)) {
+            path = gtk_tree_model_get_path(model, &iter);
+            if (treeview==GTK_TREE_VIEW(browser->spec_list)) {
+                /* delete spec */
+                proxy = browser->current;
+                gwy_app_data_browser_delete_spec(proxy,model,&iter);
+            }
+            else if(treeview==GTK_TREE_VIEW(browser->lists[PAGE_CHANNELS])) {
+                proxy = browser->current;
+                gwy_app_data_browser_delete_object(proxy, PAGE_CHANNELS,
+                                                   model, &iter);
+            }
+            else if(treeview==GTK_TREE_VIEW(browser->lists[PAGE_GRAPHS])) {
+                proxy = browser->current;
+                gwy_app_data_browser_delete_object(proxy, PAGE_GRAPHS,
+                                                   model, &iter);
+            }
+            
+            else {
+                g_assert_not_reached();
+            }
+            gtk_tree_path_free(path);
+        }
+        return TRUE;
     }
+    return FALSE;
 }
 
 static GtkWidget*
@@ -2364,7 +2472,23 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
     retval = gtk_tree_view_new();
     treeview = GTK_TREE_VIEW(retval);
     g_signal_connect(treeview, "row-activated",
-                     G_CALLBACK(gwy_app_spec_list_row_activated), NULL);
+                     G_CALLBACK(gwy_app_data_list_row_activated), NULL);
+    g_signal_connect(treeview, "key-press-event",
+                     G_CALLBACK(gwy_app_data_browser_list_key_press),
+                     NULL);
+    gtk_tree_view_set_headers_visible( treeview, FALSE);
+
+    /* Add the visibility column */
+    renderer = gtk_cell_renderer_toggle_new();
+    g_object_set(renderer, "activatable", TRUE, NULL);
+    g_signal_connect(renderer, "toggled",
+                     G_CALLBACK(gwy_app_data_browser_spec_toggled), browser);
+    column = gtk_tree_view_column_new_with_attributes("Active", renderer,
+                                                      NULL);
+    gtk_tree_view_column_set_cell_data_func
+        (column, renderer,
+         gwy_app_data_browser_render_spec_visible, browser, NULL);
+    gtk_tree_view_append_column(treeview, column);
 
     /* Add the title column */
     renderer = gtk_cell_renderer_text_new();
@@ -2376,7 +2500,13 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
 
     column = gtk_tree_view_column_new_with_attributes("Title", renderer,
                                                       NULL);
-    /* TODO: conect edited and edit-disable signals here */
+    g_signal_connect(renderer, "edited",
+                     G_CALLBACK(gwy_app_data_browser_spec_name_edited),
+                     browser);
+    g_signal_connect(renderer, "editing-canceled",
+                     G_CALLBACK(gwy_app_data_list_disable_edit), NULL);
+    g_object_set(renderer, "editable", TRUE, "editable-set", TRUE, NULL);
+    
     gtk_tree_view_column_set_expand(column, TRUE);
     gtk_tree_view_column_set_cell_data_func
         (column, renderer,
@@ -2384,22 +2514,7 @@ gwy_app_data_browser_construct_spec_list(GwyAppDataBrowser *browser)
     g_object_set_qdata(G_OBJECT(column), column_id_quark, "title");
     gtk_tree_view_append_column(treeview, column);
     
-    
-    /* XXX: Remove chan_id and spec_id cols in release version */
-    /* chan_id */
-    renderer= gtk_cell_renderer_text_new();
-    column = gtk_tree_view_column_new_with_attributes("CID", renderer,
-                                                      "text", MODEL_SPEC_CHAN_ID,  
-                                                      NULL);
-    gtk_tree_view_append_column(treeview, column);
-    /* spec_id */
-    renderer= gtk_cell_renderer_text_new();
-    column = gtk_tree_view_column_new_with_attributes("PID", renderer,
-                                                      "text", MODEL_SPEC_SPEC_ID,  
-                                                      NULL);
-    gtk_tree_view_append_column(treeview, column);
-    
-    /* DnD */
+   /* DnD */
     gtk_tree_view_enable_model_drag_source(treeview,
                                            GDK_BUTTON1_MASK,
                                            dnd_target_table,
@@ -2682,6 +2797,9 @@ gwy_app_data_browser_construct_graphs(GwyAppDataBrowser *browser)
     treeview = GTK_TREE_VIEW(retval);
     g_signal_connect(treeview, "row-activated",
                      G_CALLBACK(gwy_app_data_list_row_activated), NULL);
+    g_signal_connect(treeview, "key-press-event",
+                     G_CALLBACK(gwy_app_data_browser_list_key_press),
+                     NULL);
 
     /* Add the thumbnail column */
     renderer = gtk_cell_renderer_pixbuf_new();
@@ -2742,6 +2860,26 @@ gwy_app_data_browser_construct_graphs(GwyAppDataBrowser *browser)
                      browser);
 
     return retval;
+}
+
+static void
+gwy_app_data_browser_delete_spec(GwyAppDataProxy *proxy,
+                                 GtkTreeModel *model,
+                                 GtkTreeIter *iter)
+{
+    GwyContainer *data;
+    gint cid, sid;
+    gchar key[32];
+    
+    data = proxy->container;
+    gtk_tree_model_get(model, iter,
+                       MODEL_SPEC_CHAN_ID, &cid,
+                       MODEL_SPEC_SPEC_ID, &sid,
+                       -1);
+    if (cid>-1 || sid >-1) {
+        g_snprintf(key, sizeof(key), "/%d/spec/%d", cid, sid);
+        gwy_container_remove_by_prefix(data, key);
+    }
 }
 
 /* GUI only */
@@ -2835,6 +2973,8 @@ gwy_app_data_browser_delete_object(GwyAppDataProxy *proxy,
         break;
     }
 }
+
+
 
 static void
 gwy_app_data_proxy_copy_spec(GwyAppDataProxy *srcproxy,
@@ -3086,8 +3226,15 @@ gwy_app_data_browser_construct_window(GwyAppDataBrowser *browser)
     gtk_container_add(GTK_CONTAINER(scwin), browser->lists[PAGE_CHANNELS]);
     
     /* Spectroscopy List */
+    label = gtk_label_new(_("Spectroscopy"));
+    gtk_box_pack_start(GTK_BOX(box_page), label,FALSE, TRUE, 0);
+    scwin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scwin),
+                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_box_pack_start(GTK_BOX(box_page), scwin, TRUE, TRUE, 0);
+    
     browser->spec_list = gwy_app_data_browser_construct_spec_list(browser);
-    gtk_box_pack_start(GTK_BOX(box_page), browser->spec_list,FALSE, TRUE, 0);
+    gtk_container_add(GTK_CONTAINER(scwin), browser->spec_list);
     
     /* Graphs tab */
     box_page = gtk_vbox_new(FALSE, 0);
