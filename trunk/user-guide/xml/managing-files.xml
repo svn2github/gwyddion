@@ -144,9 +144,9 @@
           <entry>No</entry>
         </row>
         <row>
-          <entry>Zygo binary MetroPro</entry>
-          <entry>.dat</entry>
-          <entry>metropro module</entry>
+          <entry>Intematix SDF</entry>
+          <entry>.sdf</entry>
+          <entry>intematix module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -161,6 +161,13 @@
           <entry>JPK Instruments</entry>
           <entry>.jpk</entry>
           <entry>jpkscan module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Zygo binary MetroPro</entry>
+          <entry>.dat</entry>
+          <entry>metropro module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -188,7 +195,16 @@
         <row>
           <entry>Nanoscope</entry>
           <entry></entry>
-          <entry>nanoscope module</entry>
+          <entry>
+            nanoscope, nanoscope-ii modules
+            <footnote>
+              <para>
+                Nanoscope II and Nanoscope III (and newer) are two disticnt
+                file formats, nanoscope loads the newer files, while
+                nanoscope-ii loads the old version II files.
+              </para>
+            </footnote>
+          </entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
