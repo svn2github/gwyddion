@@ -329,7 +329,7 @@ make install</userinput></literallayout>
           </varlistentry>
           <varlistentry>
             <term>
-              <envar>CFLAGS</envar>,
+              <envar>CPPFLAGS</envar>,
               <envar>LDFLAGS</envar>
             </term>
             <listitem>
@@ -338,7 +338,7 @@ make install</userinput></literallayout>
                 non-standard directories with header files and libraries of
                 packages that do not come with pkg-config files, for example
                 for libTIFF in <filename>/usr/local</filename> one can do
-                <userinput>CFLAGS=-I/usr/local/include; export CFLAGS</userinput>
+                <userinput>CPPFLAGS=-I/usr/local/include; export CPPFLAGS</userinput>
                 and
                 <userinput>LDFLAGS=-L/usr/local/lib; export LDFLAGS</userinput>.
               </para>
