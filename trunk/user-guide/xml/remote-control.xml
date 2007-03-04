@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="remote-control">
+  <title>Remote Control</title>
+  <para>
+    <application>Gwyddion</application> provides means to open files in an
+    already running instance of the application and to test whether any
+    instance is running on a given display.  These operations are performed
+    by so called remote control command line options.  When they are given
+    to the program, it does not start the user interface as usual, instead
+    it attempts to communicate with an already running Gwyddion.  All the
+    remote control options take the form <option>--remote-*</option>:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term><option>--remote-new</option></term>
+      <listitem>
+        <para>
+          Proably the most useful option.  It opens the files given on the
+          command line in an already running instance of Gwyddion.  If none
+          is running, it starts new Gwyddion as if
+          <option>--remote-new</option> was not given – in this case, and
+          only in this case, start-up options such as
+          <option>--no-splash</option> have the intended effect (and make
+          sense).
+        </para>
+        <para>
+          File type associations are created to run Gwyddion with this option
+          by default.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>--remote-existing</option></term>
+      <listitem>
+        <para>
+          This options opens the files given on the command line in an
+          already running instance of Gwyddion, in this case the command
+          succeeds. However, if none is running it silently fails instead of
+          starting a new one.  This can be useful when you want to handle
+          failure differently than by starting a new Gwyddion.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>--remote-query</option></term>
+      <listitem>
+        <para>
+          If an instance is already running, this option prints its toolbox
+          window id (<type>Window</type> on X11, <type>HWND</type> on Win32)
+          and succeeds.  If none is running, it silently fails.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    If more than one instance of Gwyddion is running on the display, the
+    remote control will choose an arbitrary one
+  </para>
+</sect1>
