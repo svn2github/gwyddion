@@ -199,8 +199,8 @@
             nanoscope, nanoscope-ii modules
             <footnote>
               <para>
-                Nanoscope II and Nanoscope III (and newer) are two disticnt
-                file formats, nanoscope loads the newer files, while
+                Nanoscope II and Nanoscope III (and newer) are two distinct
+                file formats, nanoscope loads the newer files while
                 nanoscope-ii loads the old version II files.
               </para>
             </footnote>
