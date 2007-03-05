@@ -190,12 +190,29 @@
           <para>
             Speeds up various integral transforms, power spectrum and
             correlation operations.  It also allows to apply these operations
-            on data fields of much more sizes without rescaling.
+            on data fields of many more sizes without rescaling.
           </para>
           <para>
             Building with FFTW3 enabled is currently unsupported on MS Windows,
             although it is probably possible with some effort and manual
             adjustments.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <ulink url="http://www.x.org/">LibXmu</ulink>, X11 only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables <link linkend="remote-control">remote control</link> on
+            X11.  This is a standard X Window System library and everyone
+            having X probably has its runtime files.  However, since the
+            modularization of X in Xorg 7.0 it is distributed separately and
+            therefore you might not have its development files installed.
           </para>
         </listitem>
       </varlistentry>
