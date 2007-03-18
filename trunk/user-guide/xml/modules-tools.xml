@@ -196,6 +196,18 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry>
+      <term>
+        <link linkend="path-level">Path Level</link>
+        <guiicon><inlinegraphic fileref="gwy_path_level-24.png"/></guiicon>
+      </term>
+      <listitem id="tool-path-level">
+        <para>
+          Row leveling tool equalizing the height along a set of arbitrary
+          straight lines.
+        </para>
+      </listitem>
+    </varlistentry>
   </variablelist>
   <para>
     Tool dialogs can be closed (or more precisely hidden, as the current tool

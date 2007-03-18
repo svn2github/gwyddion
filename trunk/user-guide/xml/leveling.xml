@@ -88,6 +88,26 @@
         is computed from these three points and is subtracted from the data.
       </para>
     </sect3>
+    <sect3 id="path-level">
+      <title>
+        Path Leveling Tool
+        <guiicon><inlinegraphic fileref="gwy_path_level-24.png"/></guiicon>
+      </title>
+      <indexterm><primary>path leveling</primary></indexterm>
+      <para>
+        The <guilabel>Path Leveling</guilabel>
+        tool can be used to correct the heights in an arbitrary subset of rows
+        in complicated images.
+      </para>
+      <para>
+        First, one selects a number of straight lines on the data.  The
+        intersections of these lines with the rows then form a set of points
+        in each row that is used for leveling.  The rows are moved up or down
+        to minimize the difference between the heights of the points of
+        adjacent rows.  Rows that are not intersected by any line are not
+        moved (relatively to neighbouring rows).
+      </para>
+    </sect3>
     <sect3 id="facet-level">
       <title>
         Facet Level
