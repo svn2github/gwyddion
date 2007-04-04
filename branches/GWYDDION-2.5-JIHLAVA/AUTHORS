@@ -30,11 +30,15 @@ Jan Hořák <xhorak@gmail.com>
 Александр Ковалев <av_kov@tut.by>
     Nanotop import module.
 Owain Davies <owain.davies@blueyonder.co.uk>
-    Win32 maintenance.
+    Single point spectra, Win32 maintenance.
 Rolf Würdemann <rowue@digitalis.org>
     OS X porting, Shader mixer.
 Dirk Kähler <dirk.kaehler@isit.fraunhofer.de>
     Scale improvements.
+Miroslav Valtr <miraval@seznam.cz>
+    Win32 nightly builds, miscellaneous.
+Martin Hasoň <hasonm@physics.muni.cz>
+    ISO roughness tool.
 
 
 === Translators ===
