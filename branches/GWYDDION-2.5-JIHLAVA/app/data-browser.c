@@ -3453,7 +3453,7 @@ gwy_app_data_browser_add_graph_model(GwyGraphModel *gmodel,
     gchar key[32];
 
     g_return_val_if_fail(GWY_IS_GRAPH_MODEL(gmodel), -1);
-    g_return_val_if_fail(GWY_IS_CONTAINER(data), -1);
+    g_return_val_if_fail(!data || GWY_IS_CONTAINER(data), -1);
 
     browser = gwy_app_get_data_browser();
     if (data)
@@ -3502,7 +3502,7 @@ gwy_app_data_browser_add_data_field(GwyDataField *dfield,
     gchar key[24];
 
     g_return_val_if_fail(GWY_IS_DATA_FIELD(dfield), -1);
-    g_return_val_if_fail(GWY_IS_CONTAINER(data), -1);
+    g_return_val_if_fail(!data || GWY_IS_CONTAINER(data), -1);
 
     browser = gwy_app_get_data_browser();
     if (data)
