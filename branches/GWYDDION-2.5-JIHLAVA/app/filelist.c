@@ -176,13 +176,13 @@ static void  gwy_app_recent_file_create_dirs          (void);
 static GwyRecentFile* gwy_app_recent_file_new         (gchar *filename_utf8,
                                                        gchar *filename_sys);
 static gboolean gwy_app_recent_file_try_load_thumbnail(GwyRecentFile *rf);
-static void     gwy_recent_file_update_thumbnail      (GwyRecentFile *rf,
-                                                       GwyContainer *data,
-                                                       gint hint,
-                                                       GdkPixbuf *use_this_pixbuf);
-static void     gwy_app_recent_file_free              (GwyRecentFile *rf);
-static gchar* gwy_recent_file_thumbnail_name          (const gchar *uri);
-static const gchar* gwy_recent_file_thumbnail_dir     (void);
+static void     gwy_recent_file_update_thumbnail   (GwyRecentFile *rf,
+                                                    GwyContainer *data,
+                                                    gint hint,
+                                                    GdkPixbuf *use_this_pixbuf);
+static void     gwy_app_recent_file_free           (GwyRecentFile *rf);
+static gchar* gwy_recent_file_thumbnail_name       (const gchar *uri);
+static const gchar* gwy_recent_file_thumbnail_dir  (void);
 
 static guint remember_recent_files = 512;
 
@@ -837,11 +837,11 @@ gwy_app_recent_file_list_free(void)
  * @filename_utf8: A recent file to insert or move to the first position in
  *                 document history, in UTF-8.
  * @filename_sys: A recent file to insert or move to the first position in
- *                 document history, in system encoding.
+ *                 document history, in GLib encoding.
  * @hint: Preferred channel id to use for thumbnail, pass 0 if no channel
  *        is specificaly preferred.
  *
- * Moves @filename_utf8 to the first position in document history, eventually
+ * Moves @filename_utf8 to the first position in document history, possibly
  * adding it if not present yet.
  *
  * At least one of @filename_utf8, @filename_sys should be set.
@@ -981,7 +981,8 @@ gwy_app_recent_file_list_update_menu(Controls *controls)
  *
  * Returns: The thumbnail as a new pixbuf or a pixbuf with a new reference.
  *          The caller must unreference it but not modify it.  If not
- *          thumbnail can be obtained, a fully transparent pixbuf is returned.
+ *          thumbnail can not be obtained, a fully transparent pixbuf is
+ *          returned.
  **/
 GdkPixbuf*
 gwy_app_recent_file_get_thumbnail(const gchar *filename_utf8)
@@ -989,10 +990,18 @@ gwy_app_recent_file_get_thumbnail(const gchar *filename_utf8)
     GdkPixbuf *pixbuf;
     GwyRecentFile *rf;
 
-    rf = gwy_app_recent_file_new(gwy_canonicalize_path(filename_utf8), NULL);
-    gwy_app_recent_file_try_load_thumbnail(rf);
-    pixbuf = (GdkPixbuf*)g_object_ref(rf->pixbuf);
-    gwy_app_recent_file_free(rf);
+    if (gcontrols.store && gwy_app_recent_file_find(filename_utf8, NULL, &rf)) {
+        if (!rf->pixbuf)
+            gwy_app_recent_file_try_load_thumbnail(rf);
+        pixbuf = (GdkPixbuf*)g_object_ref(rf->pixbuf);
+    }
+    else {
+        rf = gwy_app_recent_file_new(gwy_canonicalize_path(filename_utf8),
+                                     NULL);
+        gwy_app_recent_file_try_load_thumbnail(rf);
+        pixbuf = (GdkPixbuf*)g_object_ref(rf->pixbuf);
+        gwy_app_recent_file_free(rf);
+    }
 
     return pixbuf;
 }
@@ -1225,7 +1234,8 @@ gwy_recent_file_update_thumbnail(GwyRecentFile *rf,
     g_return_if_fail(GWY_CONTAINER(data));
 
     if (use_this_pixbuf) {
-        /* If we are given a pixbuf, hint must be the ultimate channel id */
+        /* If we are given a pixbuf, hint must be the ultimate channel id.
+         * We also ignore the thnumbnail state then. */
         g_return_if_fail(GDK_IS_PIXBUF(use_this_pixbuf));
         id = hint;
         pixbuf = g_object_ref(use_this_pixbuf);
@@ -1233,6 +1243,9 @@ gwy_recent_file_update_thumbnail(GwyRecentFile *rf,
     else {
         pixbuf = NULL;
         id = gwy_recent_file_find_some_channel(data, hint);
+
+        if (rf->file_state == FILE_STATE_UNKNOWN)
+            gwy_app_recent_file_try_load_thumbnail(rf);
     }
 
     /* Find channel with the lowest id not smaller than hint */
@@ -1248,7 +1261,7 @@ gwy_recent_file_update_thumbnail(GwyRecentFile *rf,
         return;
     }
 
-    if (rf->file_mtime == (gulong)st.st_mtime)
+    if ((gulong)rf->file_mtime == (gulong)st.st_mtime)
         return;
 
     quark = gwy_app_get_data_key_for_id(id);
