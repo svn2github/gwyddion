@@ -5,13 +5,9 @@
 if HAVE_TIFF
 jpkscan_module = jpkscan.la
 jpkscan_sources =
-psia_module = psia.la
-psia_sources =
 else
 jpkscan_module =
 jpkscan_sources = jpk.h jpkscan.c
-psia_module =
-psia_sources = psia.c
 endif
 
 # When libXML2 is disabled, put the sources to EXTRA_DIST to include them in
@@ -54,7 +50,7 @@ file_LTLIBRARIES = \
 	omicron.la \
 	pixmap.la \
 	pnifile.la \
-	$(psia_module) \
+	psia.la \
 	rawfile.la \
 	rhk-sm3.la \
 	rhk-spm32.la \
@@ -76,7 +72,6 @@ noinst_HEADERS = \
 
 EXTRA_DIST = \
 	$(jpkscan_sources) \
-	$(psia_sources) \
 	$(spml_sources) \
 	makefile.msc \
 	makefile.msc.gwt
@@ -115,7 +110,7 @@ ezdfile_la_SOURCES      = ezdfile.c
 gwyfile_la_SOURCES      = gwyfile.c
 hdf4file_la_SOURCES     = hdf4file.c
 hitachi_afm_la_SOURCES  = hitachi-afm.c
-intematix_la_SOURCES    = intematix.c
+intematix_la_SOURCES    = intematix.c gwytiff.h
 jeol_la_SOURCES         = jeol.c
 metropro_la_SOURCES     = metropro.c
 microprof_la_SOURCES    = microprof.c
@@ -128,6 +123,7 @@ netcdf_la_SOURCES       = netcdf.c
 nt_mdt_la_SOURCES       = nt-mdt.c
 omicron_la_SOURCES      = omicron.c
 pnifile_la_SOURCES      = pnifile.c
+psia_la_SOURCES         = psia.c gwytiff.h
 rawfile_la_SOURCES      = rawfile.c rawfilepreset.h
 rhk_sm3_la_SOURCES      = rhk-sm3.c
 rhk_spm32_la_SOURCES    = rhk-spm32.c
@@ -149,9 +145,6 @@ pixmap_la_LIBADD        = $(MODULE_LIBTIFF)
 if HAVE_TIFF
 jpkscan_la_SOURCES      = jpkscan.c jpk.h
 jpkscan_la_LIBADD       = $(MODULE_LIBTIFF)
-
-psia_la_SOURCES         = psia.c
-psia_la_LIBADD          = $(MODULE_LIBTIFF)
 endif
 
 if HAVE_XML2
