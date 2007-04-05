@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion\n"
 "Report-Msgid-Bugs-To: yeti@gwyddion.net\n"
-"POT-Creation-Date: 2007-04-05 11:50+0200\n"
+"POT-Creation-Date: 2007-04-05 13:36+0200\n"
 "PO-Revision-Date: 2007-04-05 13:31+0200\n"
 "Last-Translator: Yeti <yeti@gwyddion.net>\n"
 "Language-Team: Czech\n"
@@ -1205,11 +1205,11 @@ msgstr "Nelze vytvořit adresář pro uživatelské nastavení %s: %s"
 msgid "Cannot create user module directory %s: %s"
 msgstr "Nelze vytvořit adresář pro uživatelské moduly %s: %s"
 
-#: app/splash.c:694
+#: app/splash.c:681
 msgid "Starting "
 msgstr "Spouštím "
 
-#: app/splash.c:738
+#: app/splash.c:725
 msgid " is free software released under GNU GPL."
 msgstr " je svobodný software uvolněný pod GNU GPL."
 
@@ -1987,6 +1987,7 @@ msgid "Pixmap image export must be run as interactive."
 msgstr "Export rastrových obrázků musí být spustěn interaktivně."
 
 #: modules/file/pixmap.c:1947
+#, c-format
 msgid "Export %s"
 msgstr "Export %s"
 
