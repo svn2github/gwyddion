@@ -1,6 +1,43 @@
 
-2.5J (2007-04-07)
-TODO
+2.5J (2007-04-10)
+Application:
+- Infinite startup notification after remote file opening was fixed.
+- Translations updated: Czech, German, Italian.
+
+Libraries:
+- libgwydgets: 3D view shows value units in z labels (instead of lateral).
+- libgwyapp: Up to date thumbnails are no longer overwritten.
+- libgwyprocess: Bogus complex 2D FFT transform in the case of
+  gwy_fft_simple() backend was fixed.
+- libgwydgets: Impossibility to edit graph selection boundaries when it was
+  drawn the `wrong' direction was fixed.
+- libgwydgets: Invisible graph label (key) getting in the way was fixed.
+- libgwyprocess: Fractal interpolation works with Microsoft floating point
+  implementation.
+
+Modules:
+- Rawfile: Critical messages on Reset were fixed.
+- PSIA: It does not require libTIFF any more, crashes due to PSIA files not
+  being proper TIFF files were fixed.
+- 2D FFT filter: Resampled vertical resolution is displayed properly (instead
+  of displaying horizontal resolution again).
+- Polynomial distortion: GtkEntry errors when instant update took too long
+  were fixed.
+- Calibrate: The precision of scale spin buttons was increased.
+- Pixmap import: It is possible to set arbitrary units, the preview is bigger.
+- Pixmap export: Text size can be set independently, zoom can be specified by
+  desired width and height, cases of wrong preview scaling were fixed.
+- Graph fit: Initial estimated curve label saying "noun|Estimate" was fixed.
+- Point layer: Radius indicator scales properly when the layer is scaled.
+- Convolution filter: Divisor value is actually used for normalization
+  instead of being ignored.
+
+Other:
+- Freedesktop MIME types conflicting with existing types were removed or
+  otherwise corrected.
+- RPM spec file removes .la files manually again as certain distros
+  aggressively re-generate all autotools files.
+
 
 2.5 (2007-03-10)
 Application:
