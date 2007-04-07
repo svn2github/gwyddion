@@ -31,6 +31,8 @@ Modules:
 - Point layer: Radius indicator scales properly when the layer is scaled.
 - Convolution filter: Divisor value is actually used for normalization
   instead of being ignored.
+- Symbol of theta which often rendered wrong on Win32 was replaced with
+  another glyph.
 
 Other:
 - Freedesktop MIME types conflicting with existing types were removed or
