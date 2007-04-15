@@ -302,6 +302,26 @@
             </itemizedlist>
           </listitem>
         </varlistentry>
+        <varlistentry>
+          <term>Position-related properties</term>
+          <listitem>
+            <itemizedlist>
+              <listitem>
+                <guilabel>Center x position</guilabel>,
+                the horizontal coordinate of the grain centre.  Since the
+                grain area is defined as the area covered by the
+                corresponding mask pixels, the centre of a single-pixel grain
+                has half-integer coordinates, not integer ones.  Data field
+                origin offset (if any) is taken into account.
+              </listitem>
+              <listitem>
+                <guilabel>Center y position</guilabel>,
+                the verical coordinate of the grain centre.  See above for
+                the interpretation.
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
       </variablelist>
     </para>
     <para id="boundary-length-calculation">
