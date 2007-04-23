@@ -40,12 +40,12 @@
   </para>
   <figure>
     <title>
-      Illustration of fitted plane size on the distribution of a scan of
-      a delaminated DLC surface with considerable fine noise.  One can see
-      the distribution is completely obscured by the noise at small plane
-      sizes.  The neighbourhood sizes are: (a) 0, (b) 2, (c) 4, (d) 7.
+      Illustration of the influence of fitted plane size on the distribution
+      of a scan of a delaminated DLC surface with considerable fine noise.
+      One can see the distribution is completely obscured by the noise at small
+      plane sizes.  The neighbourhood sizes are: (a) 0, (b) 2, (c) 4, (d) 7.
       The angle and false color mappings are full-scale for each particular
-      image, i.e. they vary between them.
+      image, i.e. they vary among them.
     </title>
     <mediaobject>
       <imageobject>
