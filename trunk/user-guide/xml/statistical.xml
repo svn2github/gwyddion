@@ -292,7 +292,7 @@
         scanning axis. It can therefore be evaluated from the discrete AFM data
         values as
       </para>
-      <informalequation>
+      <informalequation id="eq-autocorrelation-discrete">
         <mediaobject>
           <imageobject role="html">
             <imagedata fileref="eq-autocorrelation-discrete.png" format="PNG"/>

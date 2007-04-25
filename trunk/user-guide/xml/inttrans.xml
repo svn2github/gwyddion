@@ -62,31 +62,61 @@
           <row>
             <entry>Hann</entry>
             <entry>
-              <inlinegraphic fileref="eq-windowing-hann.png" format="PNG"/>
+              <inlineequation id="eq-windowing-hann">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-hann.png" format="PNG"/>
+                  </imageobject>
+                </inlinemediaobject>
+              </inlineequation>
             </entry>
           </row>
           <row>
             <entry>Hamming</entry>
             <entry>
-              <inlinegraphic fileref="eq-windowing-hamming.png" format="PNG"/>
+              <inlineequation id="eq-windowing-hamming">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-hamming.png" format="PNG"/>
+                  </imageobject>
+                </inlinemediaobject>
+              </inlineequation>
             </entry>
           </row>
           <row>
             <entry>Blackman</entry>
             <entry>
-              <inlinegraphic fileref="eq-windowing-blackman.png" format="PNG"/>
+              <inlineequation id="eq-windowing-blackman">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-blackman.png" format="PNG"/>
+                  </imageobject>
+                </inlinemediaobject>
+              </inlineequation>
             </entry>
           </row>
           <row>
             <entry>Lanczos</entry>
             <entry>
-              <inlinegraphic fileref="eq-windowing-lanczos.png" format="PNG"/>
+              <inlineequation id="eq-windowing-lanczos">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-lanczos.png" format="PNG"/>
+                  </imageobject>
+                </inlinemediaobject>
+              </inlineequation>
             </entry>
           </row>
           <row>
             <entry>Welch</entry>
             <entry>
-              <inlinegraphic fileref="eq-windowing-welch.png" format="PNG"/>
+              <inlineequation id="eq-windowing-welch">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-welch.png" format="PNG"/>
+                  </imageobject>
+                </inlinemediaobject>
+              </inlineequation>
             </entry>
           </row>
         </tbody>
