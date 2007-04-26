@@ -3,7 +3,6 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <!--TODO: Clean up line breaks. The equation sections are esp. messy -->
   <title>Statistical Analysis</title>
   <para>
     While analyzing randomly rough surfaces we often need a statistical approach
@@ -123,11 +122,20 @@
       <phrase role="math">μ<subscript>i</subscript></phrase>
       according to the following formulas:
     </para>
-    <informalequation>
+    <informalequation id="eq-statistical-quantities">
       <mediaobject>
         <imageobject>
           <imagedata fileref="eq-statistical-quantities.png" format="PNG"/>
         </imageobject>
+        <textobject role="TeX">
+          <phrase>
+<![CDATA[
+\sigma = \mu_2^{1/2}\;,\quad
+\gamma_1 = {\mu_3\over\mu_2^{3/2}}\;,\quad
+\gamma_2 = {\mu_4\over\mu_2^{2\vphantom{/}}} - 3
+]]>
+          </phrase>
+        </textobject>
       </mediaobject>
     </informalequation>
     <para id="surface-area-calculation">
@@ -146,11 +154,24 @@
       for the area of one triangle (top) and the surface area of one
       pixel (bottom):
     </para>
-    <informalequation>
+    <informalequation id="eq-area-calculation">
       <mediaobject>
         <imageobject>
           <imagedata fileref="eq-area-calculation.png" format="PNG"/>
         </imageobject>
+        <textobject role="TeX">
+          <phrase>
+<![CDATA[
+\eqnarray{
+    A_{12}&=
+    &{h_xh_y\over4} \sqrt{1 + \left({z_1-z_2\over h_x}\right)^{\!\!2}
+                          + \left({z_1+z_2-2\bar z\over h_y}\right)^{\!\!2}}\cr
+    \noalign{\medskip}
+    A&=&A_{12} + A_{23} + A_{34} + A_{41}\cr
+}
+]]>
+          </phrase>
+        </textobject>
       </mediaobject>
     </informalequation>
     <para>
@@ -222,11 +243,18 @@
         (where <phrase role="math">x</phrase> is the corresponding quantity,
         height or slope) is such that
       </para>
-      <informalequation>
+      <informalequation id="eq-distribution-density-normalization">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-distribution-density-normalization.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\int_{-\infty}^\infty \varrho(x)\,\d x = 1
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -256,11 +284,26 @@
       <para>
         The autocorrelation function is given by
       </para>
-      <informalequation>
+      <informalequation id="eq-autocorrelation-definition">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-autocorrelation-definition.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\eqnarray{
+  G(\tau_x,\tau_y)
+  &=
+  &\dint_{-\infty}^\infty z_1z_2w(z_1,z_2,\tau_x,\tau_y)
+                          \,\d z_1\,\d z_2\hfil\cr
+  &=
+  &\lim_{S\to\infty} {1\over S}
+        \dint_S \xi(x_1,y_1)\,\xi(x_1+\tau_x,y_1+\tau_y) \,\d x_1\,\d y_1\cr
+}
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -294,12 +337,16 @@
       </para>
       <informalequation id="eq-autocorrelation-discrete">
         <mediaobject>
-          <imageobject role="html">
+          <imageobject>
             <imagedata fileref="eq-autocorrelation-discrete.png" format="PNG"/>
           </imageobject>
-          <textobject role="tex">
-            <phrase>$\displaystyle G_x(\tau_x) = {1\over N(M-m)}
-              \sum_{l=1}^N \sum_{n=1}^{M-m} z_{n+m,l} z_{n,l}$</phrase>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+G_x(\tau_x) = {1\over N(M-m)}
+              \sum_{l=1}^N \sum_{n=1}^{M-m} z_{n+m,l} z_{n,l}
+]]>
+            </phrase>
           </textobject>
         </mediaobject>
       </informalequation>
@@ -311,11 +358,18 @@
         The one-dimensional autocorrelation function is often assumed to have the
         form of a Gaussian, i.e. it can be given by the following relation
       </para>
-      <informalequation>
+      <informalequation id="eq-autocorrelation-gaussian">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-autocorrelation-gaussian.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -326,11 +380,18 @@
         For the exponential autocorrelation function we have the following
         relation
       </para>
-      <informalequation>
+      <informalequation id="eq-autocorrelation-exponential">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-autocorrelation-exponential.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <note>
@@ -358,11 +419,19 @@
         scanning axis. It can therefore be evaluated from the discrete AFM data
         values as
       </para>
-      <informalequation>
+      <informalequation id="eq-height-height-correlation-discrete">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-discrete.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+H_x(\tau_x) = {1\over N(M-m)}
+              \sum_{l=1}^N \sum_{n=1}^{M-m} (z_{n+m,l} - z_{n,l})^2
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -374,11 +443,18 @@
         The one-dimensional height-height correlation function is often
         assumed to be Gaussian, i.e. given by the following relation
       </para>
-      <informalequation>
+      <informalequation id="eq-height-height-correlation-gaussian">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-gaussian.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -389,11 +465,18 @@
         For the exponential height-height correlation function we have the
         following relation
       </para>
-      <informalequation>
+      <informalequation id="eq-height-height-correlation-exponential">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-exponential.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -425,11 +508,22 @@
         The two-dimensional power spectral density function can be written in
         terms of the Fourier transform of the autocorrelation function
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-fft">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-fft.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+W(K_x,K_y) = {1\over4\pi}
+             \dint_{-\infty}^\infty
+                 G(\tau_x,\tau_y)
+                 \,\e^{-\im(K_x\tau_x + K_y\tau_y)}
+                 \,\d\tau_x\,\d\tau_y
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -437,22 +531,36 @@
         the one-dimensional power spectral density function which is given by
         the equation
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-1d">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+W_1(K_x) = \int_{-\infty}^\infty W(K_x,K_y)\,\d K_y
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
         This function can be evaluated by means of the Fast Fourier Transform
         as follows:
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-1d-fft">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-fft.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -461,32 +569,53 @@
         is the Fourier coefficient of the <phrase role="math">j</phrase>-th
         row, i.e.
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-Pj">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-Pj.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\hat P_j(K_x) = {h\over2\pi} \sum_{k=0}^N z_{kj} \exp(-\im K_xkh)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
         If we have chosen the Gaussian ACF, the corresponding Gaussian
         relation for the PSDF is
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-1d-gaussian">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-gaussian.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+W_1(K_x) = {\sigma^2T\over2\sqrt\pi} \exp(-K_x^2T^2/4)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
         For the surface with exponential ACF we have
       </para>
-      <informalequation>
+      <informalequation id="eq-power-spectral-density-1d-exponential">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-exponential.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+W_1(K_x) = {\sigma^2T\over2\sqrt\pi} {1\over1+K_x^2T^2}
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -533,11 +662,20 @@
         <phrase role="math">χ</phrase>
         are calculated according to following formulas:
       </para>
-      <informalequation>
+      <informalequation id="eq-minkowski-functionals">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-minkowski-functionals.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+V = {N_{\rm white}\over N}\;,\quad
+S = {N_{\rm bound}\over N}\;,\quad
+\chi = {C_{\rm white} - C_{\rm black}\over N}
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -618,11 +756,18 @@
         the steepnes of local slopes, closely related to the behaviour of
         autocorrelation and height-height correlation functions at zero.  For
         discrete values it is calculated as follows:
-        <informalequation>
+        <informalequation id="eq-tan-beta">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-tan-beta0.png" format="PNG"/>
             </imageobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\tan^2\beta_0 = {1\over N-1} \sum_{i=1}^{N-1} (z_i - z_{i-1})^2
+]]>
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
       </listitem>
@@ -662,11 +807,19 @@
       <link linkend="inclinations-coordinates">facet inclination
         angles</link>
       are given by the following formula:
-      <informalequation>
+      <informalequation id="eq-facet-theta-phi">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-facet-theta-phi.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\vartheta = \atan\hypot\left({\d z\over\d x}, {\d z\over\d y}\right)\;,\quad
+\varphi = \atan_2\left({\d z\over\d y}, -{\d z\over\d x}\right)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
     </para>
@@ -675,11 +828,18 @@
       a visualization tool that does not calculate a distribution in the
       strict sense.  For each derivative <phrase role="math">v</phrase>
       the circle of points satisfying
-      <informalequation>
+      <informalequation id="eq-angle-distribution">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-angle-distribution.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+2{\bf r}\mathop.{\bf v} = r^2
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       is drawn.  The number of points on the circle is given by

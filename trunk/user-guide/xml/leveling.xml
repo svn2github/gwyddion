@@ -197,7 +197,7 @@
         polynomial.  In the <guilabel>Independent degree</guilabel> mode
         the horizontal and vertical polynomial orders can be generally set
         separately, i.e. the fitted polynomial is
-        <informalequation>
+        <informalequation id="eq-polynomial-independent-degree">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-polynomial-independent-degree.png" format="PNG"/>
@@ -208,13 +208,20 @@
                 degrees
               </phrase>
             </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\sum_{j=0}^m \sum_{k=0}^n a_{j,k} x^j y^k
+]]>
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where <phrase role="math">m</phrase> and <phrase role="math">n</phrase>
         are the selected horizontal and vertical polynomial degrees,
         respectively.  In the <guilabel>Limited total degree</guilabel> mode
         the fitted polynomial is
-        <informalequation>
+        <informalequation id="eq-polynomial-total-degree">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-polynomial-total-degree.png" format="PNG"/>
@@ -222,6 +229,13 @@
             <textobject>
               <phrase>
                 2D polynomial expression with limited total degree
+              </phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\sum_{j+k \le n} a_{j,k} x^j y^k
+]]>
               </phrase>
             </textobject>
           </mediaobject>

@@ -27,7 +27,7 @@
     </para>
     <para>
       Here, we describe 1D interpolation method principles. All implemented
-      2D interpolation methods are separable and simply composed these 1D
+      2D interpolation methods are separable and simply composed of these 1D
       methods. The interpolation methods that can be applied on data are as
       follows
     </para>
@@ -49,13 +49,20 @@
         between the two closest data values. The value
         <phrase role="math">z</phrase> at point of relative
         position <phrase role="math">x</phrase> is obtained as
-        <informalequation>
+        <informalequation id="eq-interpolation-linear">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-linear.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Linear interpolation formula</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+z = (1-x)z_0 + xz_1
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>
@@ -76,7 +83,7 @@
         and <phrase role="math">z</phrase><subscript>2</subscript>,
         respectively.  In other words it has support of length 4,
         The value is then obtained as
-        <informalequation>
+        <informalequation id="eq-interpolation-w1234">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-w1234.png" format="PNG"/>
@@ -84,16 +91,36 @@
             <textobject>
               <phrase>Four-point interpolation weighted sum</phrase>
             </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
+]]>
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         where
-        <informalequation>
+        <informalequation id="eq-interpolation-key">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-key.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Interpolation weights for Key</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+  w_{-1}&\bigl(-{1\over2} + (1 - {x\over2})x\bigr)x\cr
+  w_0&1 + (-{5\over2} + {2\over2}x)x^2\cr
+  w_1&\bigl({1\over2} + (2 - {3\over2}x)x\bigr)x\cr
+  w_2&(-{1\over2} + {x\over2})x^2\cr
+}}
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>
@@ -106,13 +133,26 @@
         <indexterm><primary>Schaum interpolation</primary></indexterm>
         Schaum interpolation (more precisely fourth-order Schaum) has also
         support of length 4.  The interpolation are
-        <informalequation>
+        <informalequation id="eq-interpolation-schaum">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-schaum.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Interpolation weights for Schaum</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+  w_{-1}&-{1\over6}x(x-1)(x-2)\cr
+  w_0&{1\over2}(x^2-1)(x-2)\cr
+  w_1&-{1\over2}x(x+1)(x-2)\cr
+  w_2&{1\over6}x(x^2-1)\cr
+}}
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>
@@ -125,13 +165,21 @@
         Nearest neighbour approximation is again calculated from the closest
         four data values but unlike all others it is not piecewise-polynomial.
         The interpolation weights are
-        <informalequation>
+        <informalequation id="eq-interpolation-nna">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-nna.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Interpolation weights for NNA</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+w_k = {{\displaystyle{1\over r_k^4}}
+       \over\sum\limits_{j=-1}^2 {\displaystyle{1\over r_j^4}}}\;,\quad
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>
@@ -147,13 +195,26 @@
         B-spline was misimplemented up to version 2.1 (inclusive) and it
         blurred data.  It should be avoided in these old versions.
         The weights are
-        <informalequation>
+        <informalequation id="eq-interpolation-bspline">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-bspline.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Interpolation weights for B-Spline</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+  w_{-1}&{1\over6}(1-x)^3\cr
+  w_0&{2\over3}-x^2(1-{x\over2})\cr
+  w_1&{1\over6}+{1\over2}x\bigl(1+x(1-x)\bigr)\cr
+  w_2&{1\over6}x^3\cr
+}}
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>
@@ -169,13 +230,26 @@
         O-MOMS was misimplemented up to version 2.1 (inclusive) and it
         blurred data.  It should be avoided in these old versions.
         The weights are
-        <informalequation>
+        <informalequation id="eq-interpolation-omoms">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-interpolation-omoms.png" format="PNG"/>
             </imageobject>
             <textobject>
               <phrase>Interpolation weights for O-MOMS</phrase>
+            </textobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+  w_{-1}&{4\over21}+\bigl(-{11\over21}+({1\over2}-{x\over6})x\bigr)x\cr
+  w_0&{13\over21}+\bigl({1\over14}+(-1+{x\over2})x\bigr)x\cr
+  w_1&{4\over21}+\bigl({3\over7}+({1\over2}-{x\over2})x\bigr)x\cr
+  w_2&({1\over42}+{1\over6}x^2)x\cr
+}}
+]]>
+              </phrase>
             </textobject>
           </mediaobject>
         </informalequation>

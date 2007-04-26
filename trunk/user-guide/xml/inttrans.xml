@@ -67,6 +67,13 @@
                   <imageobject>
                     <imagedata fileref="eq-windowing-hann.png" format="PNG"/>
                   </imageobject>
+                  <textobject role="TeX">
+                    <phrase>
+<![CDATA[
+w_{\rm hann}(x) = {1\over2}-{1\over2}\cos 2\pi x
+]]>
+                    </phrase>
+                  </textobject>
                 </inlinemediaobject>
               </inlineequation>
             </entry>
@@ -79,6 +86,13 @@
                   <imageobject>
                     <imagedata fileref="eq-windowing-hamming.png" format="PNG"/>
                   </imageobject>
+                  <textobject role="TeX">
+                    <phrase>
+<![CDATA[
+w_{\rm hamming}(x) = 0.54-0.46\cos 2\pi x
+]]>
+                    </phrase>
+                  </textobject>
                 </inlinemediaobject>
               </inlineequation>
             </entry>
@@ -91,6 +105,13 @@
                   <imageobject>
                     <imagedata fileref="eq-windowing-blackman.png" format="PNG"/>
                   </imageobject>
+                  <textobject role="TeX">
+                    <phrase>
+<![CDATA[
+w_{\rm blackman}(x) = 0.42 + 0.5\cos \pi(2x-1) + 0.08\cos 2\pi(2x-1)
+]]>
+                    </phrase>
+                  </textobject>
                 </inlinemediaobject>
               </inlineequation>
             </entry>
@@ -103,6 +124,13 @@
                   <imageobject>
                     <imagedata fileref="eq-windowing-lanczos.png" format="PNG"/>
                   </imageobject>
+                  <textobject role="TeX">
+                    <phrase>
+<![CDATA[
+w_{\rm lanczos}(x) = \sinc \pi(2x-1)
+]]>
+                    </phrase>
+                  </textobject>
                 </inlinemediaobject>
               </inlineequation>
             </entry>
@@ -115,6 +143,13 @@
                   <imageobject>
                     <imagedata fileref="eq-windowing-welch.png" format="PNG"/>
                   </imageobject>
+                  <textobject role="TeX">
+                    <phrase>
+<![CDATA[
+w_{\rm welch}(x) = 4x(1-x)
+]]>
+                    </phrase>
+                  </textobject>
                 </inlinemediaobject>
               </inlineequation>
             </entry>
@@ -144,11 +179,18 @@
       Generally, the wavelet transform can be expressed by the following
       equation:
     </para>
-    <informalequation>
+    <informalequation id="eq-wavelet-transform-continuous">
       <mediaobject>
         <imageobject>
           <imagedata fileref="eq-wavelet-transform-continuous.png" format="PNG"/>
         </imageobject>
+        <textobject role="TeX">
+          <phrase>
+<![CDATA[
+F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
+]]>
+          </phrase>
+        </textobject>
       </mediaobject>
     </informalequation>
     <para>
@@ -227,11 +269,18 @@
         some mathematical conditions on them which are mentioned everywhere
         e.g. the dilation equation
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-dilation-equation">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-dilation-equation.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\phi(x) = \sum_{k=-\infty}^\infty a_k\phi(Sx-k)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -240,11 +289,18 @@
         normalized and scaling function must be ortogonal to its integer
         translates, e.g.
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-orthogonality">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-orthogonality.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\int_{-\infty}^\infty \phi(x)\,\phi(x+l)\,\d x = \delta_{0,l}
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -255,11 +311,18 @@
         which define the scaling function and also the wavelet. The wavelet
         is obtained from the scaling function as
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-expression-scaling-func">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-expression-scaling-func.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\psi(x) = \sum_{k=-\infty}^\infty (-1)^k a_{N-1-k} \psi(2x-k)
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -346,11 +409,18 @@
         determination within these methods we first determine the noise
         variance guess given by
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-variance-guess">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-variance-guess.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\hat\sigma = {\mathop{\rm Median}|Y_{ij}|\over0.6745}
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
@@ -364,30 +434,51 @@
         pixel neighbourhood within subband (for scale and space adaptive
         thresholding) the variance is the computed as
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-variance-sum">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-variance-sum.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+\hat\sigma_Y^2 = {1\over n^2} \sum_{i,j=1}^n Y_{ij}^2
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
         Treshold value is finally computed as
       </para>
-      <informalequation>
+      <informalequation id="eq-wavelet-threshold-value">
         <mediaobject>
           <imageobject>
             <imagedata fileref="eq-wavelet-threshold-value.png" format="PNG"/>
           </imageobject>
+          <textobject role="TeX">
+            <phrase>
+<![CDATA[
+T(\hat\sigma_X) = \hat\sigma^2/\hat\sigma_X
+]]>
+            </phrase>
+          </textobject>
         </mediaobject>
       </informalequation>
       <para>
         where
-        <informalequation>
+        <informalequation id="eq-wavelet-sigma-X">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-wavelet-sigma-X.png" format="PNG"/>
             </imageobject>
+            <textobject role="TeX">
+              <phrase>
+<![CDATA[
+\hat\sigma_X = \sqrt{\max(\hat\sigma_Y^2-\hat\sigma^2, 0)}
+]]>
+              </phrase>
+            </textobject>
           </mediaobject>
         </informalequation>
         When threshold for given scale is known, we can remove all the
