@@ -756,7 +756,7 @@ S = {N_{\rm bound}\over N}\;,\quad
         the steepnes of local slopes, closely related to the behaviour of
         autocorrelation and height-height correlation functions at zero.  For
         discrete values it is calculated as follows:
-        <informalequation id="eq-tan-beta">
+        <informalequation id="eq-tan-beta0">
           <mediaobject>
             <imageobject>
               <imagedata fileref="eq-tan-beta0.png" format="PNG"/>

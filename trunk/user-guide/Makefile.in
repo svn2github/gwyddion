@@ -22,7 +22,7 @@ IMAGES = $(shell sed -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]
 PNG_IMAGES = $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
-XSL_STYLES = fo.xsl xhtml.xsl
+XSL_STYLES = fo.xsl xhtml.xsl eq-extract.xsl
 CSS_STYLES = user-guide.css
 
 all: xhtml
