@@ -51,7 +51,8 @@ xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
 
 formulas: formulas.stamp
 
-formulas.stamp: $(FORMULA_SOURCES)
+formulas.stamp: eq-extract.xsl $(XML_SOURCES)
+	$(XSLTPROC) eq-extract.xsl $(MAIN_XML_SOURCE)
 	+cd ./formulas && $(GMAKE)
 	test -d xhtml || mkdir xhtml
 	cp formulas/eq-*.png xhtml

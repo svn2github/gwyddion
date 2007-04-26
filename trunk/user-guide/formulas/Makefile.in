@@ -4,26 +4,37 @@ DVIPS = @DVIPS@
 GS = @GS@
 CC = @CC@
 
-FORMULAS = $(wildcard eq-*.tex)
-PNGS = $(subst .tex,.png,$(FORMULAS))
+FORMULAS := $(wildcard eq-*.tex.in)
+TEXS := $(subst .tex.in,.tex,$(FORMULAS))
+PNGS := $(subst .tex.in,.png,$(FORMULAS))
 TEMPLATES = header.tex footer.tex defs.tex
-DISTFILES = Makefile pngsize.c $(FORMULAS) $(TEMPLATES)
 
 T = TEMP-
 
 all: formulas
 
-formulas: Makefile pngsize png-images
+formulas: Makefile tex-sources pngsize png-images
 
 Makefile: Makefile.in ../config.status
-	../config.status Makefile
+	cd .. && ./config.status formulas/Makefile
 
 pngsize: pngsize.c
 	$(CC) -o pngsize pngsize.c
 
+tex-sources: $(TEXS)
+
 png-images: $(PNGS)
 
-%.png: %.tex $(TEMPLATES)
+%.tex: %.tex.in Makefile
+	sed -e 's/&gt;/>/g' -e 's/&lt;/</g' -e 's/&amp;/\&/g' \
+	    -e 's/ *$$//' -e '/^$$/d' $< >$(T)$@
+	if test -s $@ && cmp $(T)$@ $@; then \
+	    rm -f $(T)$@; \
+	else \
+	    mv -f $(T)$@ $@; \
+	fi
+
+%.png: %.tex $(TEMPLATES) Makefile
 	cat defs.tex header.tex $< footer.tex >$(T)$<
 	$(TEX) --interaction=batchmode $(T)$<
 	$(DVIPS) -q -E -o $(T)$*.ps $(T)$*.dvi
@@ -45,11 +56,11 @@ png-images: $(PNGS)
 	rm $(T)$*.*
 
 clean:
-	-rm -f eq-*.png pngsize $(T)* *~
+	-rm -f eq-*.png eq-*.tex eq-*.tex.in pngsize $(T)* *~
 
 dist:
 	mkdir ../$(DISTNAME)/formulas
-	cp Makefile.in pngsize.c $(FORMULAS) $(TEMPLATES) ../$(DISTNAME)/formulas
+	cp Makefile.in pngsize.c $(TEMPLATES) ../$(DISTNAME)/formulas
 
 distclean: clean
 	-rm -f Makefile

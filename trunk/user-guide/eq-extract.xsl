@@ -57,9 +57,9 @@
       <xsl:otherwise>
         <xsl:call-template name="write-eq">
           <xsl:with-param name="filename">
-            <xsl:text>formulae/</xsl:text>
+            <xsl:text>formulas/</xsl:text>
             <xsl:value-of select="@id"/>
-            <xsl:text>.tex</xsl:text>
+            <xsl:text>.tex.in</xsl:text>
           </xsl:with-param>
           <xsl:with-param name="formula">
             <xsl:value-of select="mediaobject/textobject[@role='TeX']"/>
@@ -90,9 +90,9 @@
       <xsl:otherwise>
         <xsl:call-template name="write-eq">
           <xsl:with-param name="filename">
-            <xsl:text>formulae/</xsl:text>
+            <xsl:text>formulas/</xsl:text>
             <xsl:value-of select="@id"/>
-            <xsl:text>.tex</xsl:text>
+            <xsl:text>.tex.in</xsl:text>
           </xsl:with-param>
           <xsl:with-param name="formula">
             <xsl:value-of select="inlinemediaobject/textobject[@role='TeX']"/>
