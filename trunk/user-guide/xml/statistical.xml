@@ -764,7 +764,7 @@ S = {N_{\rm bound}\over N}\;,\quad
             <textobject role="TeX">
               <phrase>
 <![CDATA[
-\tan^2\beta_0 = {1\over N-1} \sum_{i=1}^{N-1} (z_i - z_{i-1})^2
+\tan^2\beta_0 = {1\over (N-1)h^2} \sum_{i=1}^{N-1} (z_i - z_{i-1})^2
 ]]>
               </phrase>
             </textobject>
