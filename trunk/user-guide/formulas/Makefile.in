@@ -26,9 +26,9 @@ tex-sources: $(TEXS)
 png-images: $(PNGS)
 
 %.tex: %.tex.in Makefile
-	sed -e 's/&gt;/>/g' -e 's/&lt;/</g' -e 's/&amp;/\&/g' \
+	@sed -e 's/&gt;/>/g' -e 's/&lt;/</g' -e 's/&amp;/\&/g' \
 	    -e 's/ *$$//' -e '/^$$/d' $< >$(T)$@
-	if test -s $@ && cmp $(T)$@ $@; then \
+	@if test -s $@ && cmp $(T)$@ $@; then \
 	    rm -f $(T)$@; \
 	else \
 	    mv -f $(T)$@ $@; \
