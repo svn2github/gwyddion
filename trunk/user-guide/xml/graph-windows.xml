@@ -41,4 +41,8 @@
     to other graphs by dragging their curve list rows onto them (provided the
     graphs are unit-wise compatible).
   </para>
+  <para>
+    Clicking on a graph axis brings a dialog with axis properties and graph
+    key properties can be edited after double-clicing on it.
+  </para>
 </sect1>
