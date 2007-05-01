@@ -57,6 +57,6 @@
   </variablelist>
   <para>
     If more than one instance of Gwyddion is running on the display, the
-    remote control will choose an arbitrary one
+    remote control will choose an arbitrary one.
   </para>
 </sect1>
