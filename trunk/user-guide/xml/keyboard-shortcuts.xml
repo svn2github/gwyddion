@@ -47,7 +47,10 @@
               </menuchoice>
             </entry>
             <entry>toolbox, data window, 3D window, graph window, tool window</entry>
-            <entry>Save current data (you will be prompted for a file name if none is associated yet).</entry>
+            <entry>
+              Save current data (you will be prompted for a file name if none
+              is associated yet).
+            </entry>
           </row>
           <row>
             <entry><keycap>Ctrl-Shift-S</keycap></entry>
@@ -59,8 +62,21 @@
             </entry>
             <entry>toolbox, data window, 3D window, graph window, tool window</entry>
             <entry>
-              Save current data under a different name. The file name associated with the data
-              changes to the new name.
+              Save current data under a different name. The file name
+              associated with the data changes to the new name.
+            </entry>
+          </row>
+          <row>
+            <entry><keycap>Ctrl-Shift-M</keycap></entry>
+            <entry>
+              <menuchoice>
+                <guimenu>File</guimenu>
+                <guimenuitem>Merge</guimenuitem>
+              </menuchoice>
+            </entry>
+            <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+            <entry>
+              Merge data from a file to the current file.
             </entry>
           </row>
           <row>

@@ -411,6 +411,14 @@
       </mediaobject>
     </figure>
   </sect2>
+  <sect2 id="file-merging">
+    <title>File Merging</title>
+    <para>
+      File merging is similar to normal file loading, except that the
+      selected file (or files) is merged into the current file.  In other
+      words, channels, graphs and spectra, together with all their settings
+      and properties are added to those already present in the current file.
+    </para>
   <sect2 id="file-saving">
     <title>File Saving</title>
     <para>
