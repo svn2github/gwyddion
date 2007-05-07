@@ -5,9 +5,18 @@
 <sect1 id="tools">
   <title>Tools</title>
   <para>
-    Modules are responsible for most of the Gwyddion features. They mostly
-    include data processing functions as leveling, rotations, integral
-    transforms, etc. See Data process menu for list of available modules.
+    Functions from <guimenu>Data Process</guimenu> menu and button panel
+    either execute immediately or after asking for parameters and settings
+    in a dialog box.  Tools, accessible from <guilabel>Tools</guilabel>
+    button panel, work differently.  Once selected, they remain active
+    and always follow the current data window until one switches to another
+    tool.  In other words one can switch data windows freely while using
+    a tool and it always shows information from or operates on the current
+    data. Tools also differ by working with <link
+      linkend="selections">selections</link>, e.g. points, lines or
+    rectangles, on data windows.  Nevertheless functionally they perform
+    similar tasks as <guimenu>Data Process</guimenu> functions – value
+    reading, leveling, statistics, correction, etc.
   </para>
   <informaltable frame='none'>
     <tgroup cols='4'>
@@ -224,11 +233,8 @@
     </tgroup>
   </informaltable>
   <para>
-    Tools are a special kind of modules that work directly on data windows.
-    They are used for interactive selection of areas, lines or other types of
-    objects on the data and processing them. Tools can be launched only from
-    tools button rows located in the main window. Gwyddion includes these
-    tools:
+    Tools can be launched only from <guilabel>Tools</guilabel> button panel
+    located in the main window. Gwyddion includes these tools:
   </para>
   <variablelist>
     <varlistentry id="tool-read-value">
