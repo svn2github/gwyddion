@@ -52,7 +52,7 @@
       </para>
     </legalnotice>
   </bookinfo>
-  <xi:include href="intro.xml"/>
+  <xi:include href="introduction.xml"/>
   <xi:include href="install.xml"/>
   <chapter id="getting-started">
     <title>Getting Started</title>
@@ -61,7 +61,7 @@
     <xi:include href="managing-files.xml"/>
     <xi:include href="data-windows.xml"/>
     <xi:include href="graph-windows.xml"/>
-    <xi:include href="modules-tools.xml"/>
+    <xi:include href="tools.xml"/>
     <xi:include href="color-map.xml"/>
     <xi:include href="presentations-masks.xml"/>
     <xi:include href="selections.xml"/>
@@ -81,7 +81,7 @@
     <xi:include href="edit-extended.xml"/>
     <xi:include href="statistical.xml"/>
     <xi:include href="grains.xml"/>
-    <xi:include href="inttrans.xml"/>
+    <xi:include href="integral-transforms.xml"/>
     <xi:include href="fractal.xml"/>
     <xi:include href="tip.xml"/>
     <xi:include href="multidata.xml"/>
