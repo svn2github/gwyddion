@@ -419,6 +419,7 @@
       words, channels, graphs and spectra, together with all their settings
       and properties are added to those already present in the current file.
     </para>
+  </sect2>
   <sect2 id="file-saving">
     <title>File Saving</title>
     <para>
