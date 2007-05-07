@@ -14,7 +14,7 @@
     option <guilabel>Automatically offer raw data import of unknown
       files</guilabel>.
   </para>
-  <sect2>
+  <sect2 id="raw-file-import-information">
     <title>Information</title>
     <para>
       Its first tab, <guilabel>Information</guilabel>, allows to set basic
@@ -67,7 +67,7 @@
       </variablelist>
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="raw-file-import-data-format">
     <title>Data Format</title>
     <para>
       On the second tab, <guilabel>Data Format</guilabel>, particular data
@@ -241,7 +241,7 @@
       </variablelist>
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="raw-file-import-presets">
     <title>Presets</title>
     <para>
       Import settings can be saved as presets that allow to easily import

@@ -17,14 +17,14 @@
     First of all, we will describe physical file structure without regard to
     possible interpretation of contained data.
   </para>
-  <sect2>
+  <sect2 id="gwyfile-byte-order">
     <title>Byte Order</title>
     <para>
       All data is stored in little-endian (also known as LSB or Intel) byte
       order.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-file-header">
     <title>File Header</title>
     <para>
       The file header consists of four bytes (magic number) with the
@@ -36,7 +36,7 @@
       here.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-file-data">
     <title>File Data</title>
     <para>
       The rest of the file consists of a serialized <type>GwyContainer</type>
@@ -44,7 +44,7 @@
       as any other object, that is as described in the next section.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-object-layout">
     <title>Object Layout</title>
     <para>
       An object consists of three parts (in the following order):
@@ -65,7 +65,7 @@
       </itemizedlist>
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-components">
     <title>Components</title>
     <para>
       Each component consits of three parts (in the following order):
@@ -83,7 +83,7 @@
       </itemizedlist>
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-data-types">
     <title>Data Types</title>
     <para>
       Available atomic data types are listed in following table:

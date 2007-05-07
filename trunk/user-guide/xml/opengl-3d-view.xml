@@ -26,7 +26,7 @@
       </imageobject>
     </mediaobject>
   </figure>
-  <sect2>
+  <sect2 id="opengl-3d-view-basic-controls">
     <title>Basic Controls</title>
     <para>
       Basic 3D window contains interaction mode controls at the right side of
@@ -56,7 +56,7 @@
       The basic controls also include an image export button.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="opengl-3d-view-full-controls">
     <title>Full Controls</title>
     <para>
       In expanded controls the mode buttons are located in top row, however

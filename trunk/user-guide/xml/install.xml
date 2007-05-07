@@ -241,7 +241,7 @@
       up-to-date information and you should follow it instead of this general
       guide if they contradict each other.
     </para>
-    <sect2>
+    <sect2 id="installation-unix-source-quick">
       <title>Quick Instructions</title>
       <para>
         If you know the drill:
@@ -253,7 +253,7 @@ cd gwyddion-2.4
 make install</userinput></literallayout>
       </informalexample>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-unpacking">
       <title>Source Unpacking</title>
       <para>
         Unpack the source code tarball with
@@ -280,7 +280,7 @@ make install</userinput></literallayout>
         However, modern Unix and Unix-like systems should contain both.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-configuration">
       <title>Configuration</title>
       <para>
         Run
@@ -394,7 +394,7 @@ make install</userinput></literallayout>
         printed near the end of <command>configure</command> output.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-compilation">
       <title>Compilation</title>
       <para>
         Run
@@ -412,7 +412,7 @@ make install</userinput></literallayout>
         address so they can be considered for the next release.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-installation">
       <title>Installation</title>
       <para>
         Run
@@ -441,7 +441,7 @@ make install</userinput></literallayout>
         <varname>bindir</varname>, <varname>libdir</varname>.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-deinstallation">
       <title>Deinstallation</title>
       <para>
         Run
@@ -456,7 +456,7 @@ make install</userinput></literallayout>
         ability to reproduce the build process.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-unix-source-rpm">
       <title>RPM Packages</title>
       <para>
         It is possible to build RPM packages on RPM-based GNU/Linux
@@ -492,7 +492,7 @@ make install</userinput></literallayout>
         </listitem>
       </itemizedlist>
     </para>
-    <sect2>
+    <sect2 id="installation-osx-preparation">
       <title>Preparation</title>
       <para>
         To install and run <application>Gwyddion</application> you need the
@@ -550,7 +550,7 @@ make install</userinput></literallayout>
         </informaltable>
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-osx-macports">
       <title>MacPorts</title>
       <para>
         MacPorts is an <application>Port</application> based System for
@@ -577,9 +577,10 @@ make install</userinput></literallayout>
         other MacPorts software.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-osx-fink">
       <title>Fink</title>
       <para>
+        <!-- TODO: we have a Fink info file now -->
         <!-- XXX: a few more words about fink -->
         Get and install
         <ulink url="http://fink.sourceforge.net/">Fink</ulink>.
@@ -601,7 +602,7 @@ make install</userinput></literallayout>
           section</link> instructions.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-osx-running">
       <title>Running</title>
       <para>
         Start <application>X11.app</application> and type
@@ -651,7 +652,7 @@ make install</userinput></literallayout>
       you do not need to install the run-time package if you install the
       development one.
     </para>
-    <sect2>
+    <sect2 id="installation-ms-windows-source-unpacking">
       <title>Unpacking</title>
       <para>
         Unpack the source code tarball with your favorite (de)compression
@@ -672,7 +673,7 @@ make install</userinput></literallayout>
         version number) where all other compilation actions will take place.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-ms-windows-source-configuration">
       <title>Configuration</title>
       <para>
         Open file <filename>make.msc</filename> in a text editor.  It starts
@@ -747,7 +748,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         itself but it should be easy to locate.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-ms-windows-source-compilation">
       <title>Compilation</title>
       <para>
         Run
@@ -765,7 +766,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <filename>inst.stamp</filename> first for a clean start.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-ms-windows-source-installation">
       <title>Installation</title>
       <para>
         The layout of the staging area in <filename>inst</filename> exactly
@@ -796,7 +797,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         renaming it.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-ms-windows-source-installers">
       <title>Executable Installers</title>
       <para>
         To create an executable installer you need
@@ -863,7 +864,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         probably GNU versions of most tools: the compiler, binutils, …
       </listitem>
     </itemizedlist>
-    <sect2>
+    <sect2 id="installation-devel-unix">
       <title>Linux/Unix</title>
       <para>
         After a fresh checkout, run <userinput>./autogen.sh</userinput> with
@@ -968,7 +969,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         from <filename>Makefile.am</filename>.
       </para>
     </sect2>
-    <sect2>
+    <sect2 id="installation-devel-ms-windows">
       <title>MS Windows</title>
       <para>
         As one can see from the previous section, a direct build from a
