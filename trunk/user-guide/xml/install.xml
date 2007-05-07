@@ -580,7 +580,6 @@ make install</userinput></literallayout>
     <sect2 id="installation-osx-fink">
       <title>Fink</title>
       <para>
-        <!-- TODO: we have a Fink info file now -->
         <!-- XXX: a few more words about fink -->
         Get and install
         <ulink url="http://fink.sourceforge.net/">Fink</ulink>.
@@ -599,7 +598,9 @@ make install</userinput></literallayout>
         When everything is installed, download
         <application>Gwyddion</application> source code, and follow the
         <link linkend="installation-unix-source">Unix installation
-          section</link> instructions.
+          section</link> instructions.  Or you can use Fink
+        <ulink url="http://gwyddion.net/download.php#stable-osx"><filename>.info</filename>
+          file</ulink> available from the project web site.
       </para>
     </sect2>
     <sect2 id="installation-osx-running">
