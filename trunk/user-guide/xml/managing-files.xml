@@ -415,22 +415,23 @@
     <title>File Merging</title>
     <para>
       File merging is similar to normal file loading, except that the
-      selected file (or files) is merged into the current file.  In other
-      words, channels, graphs and spectra, together with all their settings
-      and properties are added to those already present in the current file.
+      selected file (or files) is merged into the current open file.  In
+      other words, channels, graphs and spectra, together with all their
+      settings and properties are added to those already present in the
+      current file.
     </para>
   </sect2>
   <sect2 id="file-saving">
     <title>File Saving</title>
     <para>
-      Much of the previous section applies to file saving too.  One of the
+      Much of the previous paragraphs applies to file saving too.  One of the
       differences is the reliability of automatic file type determination.
       While loading can and does examine the file contents, saving depends
       on file name and extension.  Combined with the large number of
-      different file types using the same extension as
+      different file types using the same extension such as
       <filename>.img</filename>, <filename>.afm</filename> or
-      <filename>.dat</filename> it gives raise to ambiguities.  Select the
-      file type explicitly upon save if you are unsure.
+      <filename>.dat</filename> it leads to ambiguities.  Select the file
+      type explicitly before saving if you are unsure.
     </para>
     <para>
       Since the only file type able to fully represent Gwyddion data
