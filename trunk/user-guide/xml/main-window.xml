@@ -5,12 +5,12 @@
 <sect1 id="main-window">
   <title>Main Window</title>
   <para>
-    The main window is one of the two Gwyddion windows that appear after
-    program start (with no files given to open), the other one is the
-    <link linkend="data-browser">data browser</link>.  The main window
-    consists of the set of Gwyddion menus and from several rows of buttons
-    connected with common functions and tools.  The menus group Gwyddion
-    functions as follows:
+    The main window, also called toolbox, is one of the two Gwyddion windows
+    that appear after program start (with no files given to open), the other
+    one is the <link linkend="data-browser">data browser</link>.  The main
+    window consists of the set of Gwyddion menus and from several rows of
+    buttons connected with common functions and tools.  The menus group
+    Gwyddion functions as follows:
   </para>
   <variablelist>
     <varlistentry>
@@ -115,8 +115,8 @@
   </para>
   <figure float="0">
     <title>
-      Main window with data view showing microchip surface (Gwyddion sample
-      file).
+      Main window and a data window showing microchip surface (Gwyddion
+      sample file).
     </title>
     <mediaobject>
       <imageobject>
