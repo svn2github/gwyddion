@@ -438,7 +438,7 @@
     </varlistentry>
     <varlistentry id="tool-color-range">
       <term>
-        Color Range
+        <link linkend="color-map">Color Range</link>
         <guiicon><inlinegraphic fileref="gwy_color_range-24.png"/></guiicon>
       </term>
       <listitem>
