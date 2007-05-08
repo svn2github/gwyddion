@@ -402,7 +402,7 @@
     </varlistentry>
     <varlistentry id="tool-measure-grains">
       <term>
-        Grain Measurement
+        <link linkend="grain-measure">Grain Measurement</link>
         <guiicon><inlinegraphic fileref="gwy_grains_measure-24.png"/></guiicon>
       </term>
       <listitem>

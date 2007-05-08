@@ -125,205 +125,259 @@
       </mediaobject>
     </figure>
   </sect2>
-  <sect2>
+  <sect2 id="grain-analysis-statistics">
     <title>Statistics</title>
     <indexterm><primary>number of grains</primary></indexterm>
-    <para id="grain-statistics">
-      Grain properties can be studied using several tools. The simplest of them
-      is
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Grains</guisubmenu>
-        <guimenuitem>Statistics</guimenuitem>
-      </menuchoice>
-      which calculates the total number of marked grains, their total
-      (projected) area both as an absolute value and as a fraction of total
-      data field area, and the mean area and equivalent square size of one
-      grain.
-    </para>
     <para>
-      More overall characteristics of the marked area can be obtained
-      with Statistical Quantities tool when its <guilabel>Use mask</guilabel>
-      option is switched on.  By inverting the mask the same information can
-      be obtained also for the non-grain area.
+      Grain properties can be studied using several functions. The simplest of
+      them is Grain Statistics
     </para>
-    <para id="grain-distributions">
-      The most powerful and complex tool, capable of characterization of
-      individual grains is
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Grains</guisubmenu>
-        <guimenuitem>Distributions</guimenuitem>
-      </menuchoice>.
-      It can calculate the following properties of individual grains:
-      <variablelist>
-        <varlistentry>
-          <term>Value-related properties</term>
-          <listitem>
-            <itemizedlist>
-              <listitem>
-                <indexterm>
-                  <primary>minimum</primary>
-                  <secondary>of a grain</secondary>
-                </indexterm>
-                <guilabel>Maximum</guilabel>,
-                the maximum value (height) occuring inside the grain.
-              </listitem>
-              <listitem>
-                <indexterm>
-                  <primary>maximum</primary>
-                  <secondary>of a grain</secondary>
-                </indexterm>
-                <guilabel>Minimum</guilabel>,
-                the minimum value (height) occuring inside the grain.
-              </listitem>
-              <listitem>
-                <indexterm>
-                  <primary>mean</primary>
-                  <secondary>of a grain</secondary>
-                </indexterm>
-                <guilabel>Mean</guilabel>,
-                the mean of all values occuring inside the grain, that is the
-                mean grain height.
-              </listitem>
-              <listitem>
-                <indexterm>
-                  <primary>median</primary>
-                  <secondary>of a grain</secondary>
-                </indexterm>
-                <guilabel>Median</guilabel>
-                the median of all values occuring inside the grain, that is the
-                median grain height.
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>Area-related properties</term>
-          <listitem>
-            <itemizedlist>
-              <listitem>
-                <guilabel>Projected area</guilabel>,
-                the projected (flat) area of the grain.
-              </listitem>
-              <listitem>
-                <guilabel>Equivalent square side</guilabel>,
-                the side of the square with the same projected area as the
-                grain.
-              </listitem>
-              <listitem>
-                <guilabel>Equivalent disc radius</guilabel>,
-                the radius of the disc with the same projected area as the
-                grain.
-              </listitem>
-              <listitem>
-                <guilabel>Surface area</guilabel>,
-                the surface area of the grain, see
-                <link linkend="surface-area-calculation">statistical
-                  quantities</link> section for description of the surface area
-                estimation method.
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>Boundary-related properties</term>
-          <listitem>
-            <itemizedlist>
-              <listitem>
-                <guilabel>Projected boundary length</guilabel>,
-                the length of the grain boundary projected to the horizontal
-                plane (that is not taken on the real three-dimensional
-                surface).  The method of boundary length estimation is
-                described below.
-              </listitem>
-              <listitem>
-                <guilabel>Minimum bounding size</guilabel>,
-                the minimum dimension of the grain in the horizontal plane.  It
-                can be visualized as the minimum width of a gap in the
-                horizontal plane the grain could pass through.
-              </listitem>
-              <listitem>
-                <guilabel>Minimum bounding direction</guilabel>,
-                the direction of the gap from the previous item.  If the grain
-                exhibits a symmetry that makes several directions to qualify,
-                an arbitrary direction is chosen.
-              </listitem>
-              <listitem>
-                <guilabel>Maximum bounding size</guilabel>,
-                the maximum dimension of the grain in the horizontal plane.  It
-                can be visualized as the maximum width of a gap in the
-                horizontal plane the grain could fill up.
-              </listitem>
-              <listitem>
-                <guilabel>Maximum bounding direction</guilabel>,
-                the direction of the gap from the previous item.  If the grain
-                exhibits a symmetry that makes several directions to qualify,
-                an arbitrary direction is chosen.
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>Volume-related properties</term>
-          <listitem>
-            <itemizedlist>
-              <listitem>
-                <guilabel>Zero basis</guilabel>,
-                the volume between grain surface and the plane
-                <phrase role="math">z</phrase> = 0.  Values below
-                zero form negative volumes.  The zero level must be set to
-                a reasonable value (often
-                <link linkend="fix-zero">Fix Zero</link> is sufficient) for
-                the results to make sense, which is also the advantage of
-                this method: one can use basis plane of his choice.
-              </listitem>
-              <listitem>
-                <guilabel>Grain minimum basis</guilabel>,
-                the volume between grain surface and the plane
-                <phrase role="math">z</phrase> = <phrase role="math">z</phrase><subscript>min</subscript>,
-                where <phrase role="math">z</phrase><subscript>min</subscript>
-                is the minimum value (height) occuring in the grain.  This
-                method accounts for grain surrounding but it typically
-                underestimates the volume, especially for small grains.
-              </listitem>
-              <listitem>
-                <guilabel>Laplacian backround basis</guilabel>,
-                the volume between grain surface and the basis surface formed
-                by laplacian interpolation of surrounding values.  In other
-                words, this is the volume that would disappear after using
-                <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
-                or
-                <link linkend="tool-remove-grains">Grain Remover</link> tool
-                with Laplacian interpolation on the grain.  This is the most
-                sophisticated method, on the other hand it is the hardest to
-                develop intuition for.
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>Position-related properties</term>
-          <listitem>
-            <itemizedlist>
-              <listitem>
-                <guilabel>Center x position</guilabel>,
-                the horizontal coordinate of the grain centre.  Since the
-                grain area is defined as the area covered by the
-                corresponding mask pixels, the centre of a single-pixel grain
-                has half-integer coordinates, not integer ones.  Data field
-                origin offset (if any) is taken into account.
-              </listitem>
-              <listitem>
-                <guilabel>Center y position</guilabel>,
-                the verical coordinate of the grain centre.  See above for
-                the interpretation.
-              </listitem>
-            </itemizedlist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+    <sect3 id="grain-statistics">
+      <title>Grain Statistics</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Statistics</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        This function calculates the total number of marked grains, their total
+        (projected) area both as an absolute value and as a fraction of total
+        data field area, and the mean area and equivalent square size of one
+        grain.
+      </para>
+      <para>
+        Overall characteristics of the marked area can be also obtained with
+        Statistical Quantities tool when its <guilabel>Use mask</guilabel>
+        option is switched on.  By inverting the mask the same information
+        can be obtained also for the non-grain area.
+      </para>
+    </sect3>
+    <sect3 id="grain-distributions">
+      <title>
+        Grain Distributions
+        <guiicon><inlinegraphic fileref="gwy_grains_graph-24.png"/></guiicon>
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Distributions</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Grain Distributions is the most powerful and complex tool. It has two
+        basic modes of operation: graph plotting and raw data export. In
+        graph plotting mode selected characteristics of individual grains are
+        calculated, gathered and summary graphs showing their distributions
+        are plotted.
+      </para>
+      <para>
+        Raw data export is useful for experts who need for example to
+        correlate properties of individual grains.  In this mode selected
+        grain characteristics are calculated and dumped to a text file table
+        where each row corresponds to one grain and columns correspond to
+        requested quantities.  The order of the colums is the same as the
+        relative order of the quantities in the dialog; all values are
+        written in base SI units, as is usual in
+        <application>Gwyddion</application>.
+      </para>
+    </sect3>
+    <sect3 id="grain-measure">
+      <title>
+        Grain Measurement Tool
+        <guiicon><inlinegraphic fileref="gwy_grains_measure-24.png"/></guiicon>
+      </title>
+      <para>
+        The grain measurement tool is the interactive method to obtain the
+        same information about individual grains as
+        <link linkend="grain-distributions">Grain Distributions</link> in raw
+        mode.  After selecting a grain on the data window with mouse, all
+        the available quantities are displayed in the tool window.
+      </para>
+      <para>
+        Beside physical characteristics this tool also displays the grain
+        number.  Grain numbers corresponds to row numbers (counting from 1)
+        in files exported by
+        <link linkend="grain-distributions">Grain Distributions</link>.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id="grain-properties">
+    <title>Grain Properties</title>
+    <para>
+      <link linkend="grain-distributions">Grain Distributions</link>
+      and <link linkend="grain-measure">Grain measurement tool</link>
+      can calculate the following grain properties:
     </para>
+    <variablelist>
+      <varlistentry>
+        <term>Value-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Maximum</guilabel>,
+              the maximum value (height) occuring inside the grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Minimum</guilabel>,
+              the minimum value (height) occuring inside the grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>mean</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Mean</guilabel>,
+              the mean of all values occuring inside the grain, that is the
+              mean grain height.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>median</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Median</guilabel>
+              the median of all values occuring inside the grain, that is the
+              median grain height.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Area-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Projected area</guilabel>,
+              the projected (flat) area of the grain.
+            </listitem>
+            <listitem>
+              <guilabel>Equivalent square side</guilabel>,
+              the side of the square with the same projected area as the
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Equivalent disc radius</guilabel>,
+              the radius of the disc with the same projected area as the
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Surface area</guilabel>,
+              the surface area of the grain, see
+              <link linkend="surface-area-calculation">statistical
+                quantities</link> section for description of the surface area
+              estimation method.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Boundary-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Projected boundary length</guilabel>,
+              the length of the grain boundary projected to the horizontal
+              plane (that is not taken on the real three-dimensional
+              surface).  The method of boundary length estimation is
+              described below.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum bounding size</guilabel>,
+              the minimum dimension of the grain in the horizontal plane.  It
+              can be visualized as the minimum width of a gap in the
+              horizontal plane the grain could pass through.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum bounding direction</guilabel>,
+              the direction of the gap from the previous item.  If the grain
+              exhibits a symmetry that makes several directions to qualify,
+              an arbitrary direction is chosen.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum bounding size</guilabel>,
+              the maximum dimension of the grain in the horizontal plane.  It
+              can be visualized as the maximum width of a gap in the
+              horizontal plane the grain could fill up.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum bounding direction</guilabel>,
+              the direction of the gap from the previous item.  If the grain
+              exhibits a symmetry that makes several directions to qualify,
+              an arbitrary direction is chosen.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Volume-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Zero basis</guilabel>,
+              the volume between grain surface and the plane
+              <phrase role="math">z</phrase> = 0.  Values below
+              zero form negative volumes.  The zero level must be set to
+              a reasonable value (often
+              <link linkend="fix-zero">Fix Zero</link> is sufficient) for
+              the results to make sense, which is also the advantage of
+              this method: one can use basis plane of his choice.
+            </listitem>
+            <listitem>
+              <guilabel>Grain minimum basis</guilabel>,
+              the volume between grain surface and the plane
+              <phrase role="math">z</phrase> = <phrase role="math">z</phrase><subscript>min</subscript>,
+              where <phrase role="math">z</phrase><subscript>min</subscript>
+              is the minimum value (height) occuring in the grain.  This
+              method accounts for grain surrounding but it typically
+              underestimates the volume, especially for small grains.
+            </listitem>
+            <listitem>
+              <guilabel>Laplacian backround basis</guilabel>,
+              the volume between grain surface and the basis surface formed
+              by laplacian interpolation of surrounding values.  In other
+              words, this is the volume that would disappear after using
+              <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+              or
+              <link linkend="tool-remove-grains">Grain Remover</link> tool
+              with Laplacian interpolation on the grain.  This is the most
+              sophisticated method, on the other hand it is the hardest to
+              develop intuition for.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Position-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Center x position</guilabel>,
+              the horizontal coordinate of the grain centre.  Since the
+              grain area is defined as the area covered by the
+              corresponding mask pixels, the centre of a single-pixel grain
+              has half-integer coordinates, not integer ones.  Data field
+              origin offset (if any) is taken into account.
+            </listitem>
+            <listitem>
+              <guilabel>Center y position</guilabel>,
+              the verical coordinate of the grain centre.  See above for
+              the interpretation.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
     <para id="boundary-length-calculation">
       <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
@@ -374,22 +428,6 @@
         </imageobject>
       </mediaobject>
     </figure>
-    <para>
-      The <guimenuitem>Distributions</guimenuitem> module has two basic
-      modes of operation: graph plotting and raw data export. In graph
-      plotting mode selected characteristics of individual grains are
-      calculated, gathered and summary graphs showing their distributions
-      are plotted.
-    </para>
-    <para>
-      Raw data export is useful for experts who need for example to correlate
-      properties of individual grains.  In this mode selected grain
-      characteristics are calculated and dumped to a text file table where each
-      row corresponds to one grain and columns correspond to requested
-      quantities.  The order of the colums is the same as the relative order
-      of the quantities in the dialog; all values are written in base SI units,
-      as is usual in <application>Gwyddion</application>.
-    </para>
   </sect2>
   <sect2>
     <title>References</title>
