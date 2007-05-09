@@ -5,16 +5,27 @@
 <sect1 id="opengl-3d-view">
   <title>OpenGL 3D Data Display</title>
   <para>
-    Three-dimensional OpenGL display of current data window can be invoked
+    Three-dimensional OpenGL display of the current data window can be invoked
     with the button with symbol of cube in <guilabel>View</guilabel> button
     row of main window.
+  </para>
+  <para>
+    This feature is optional, i.e. it can be disabled at compile time. It can
+    also happen that while Gwyddion is capable of 3D data display your system
+    does not support it.  In both cases an attempt to invoke 3D view gives an
+    error message explaining which of the two cases occured.  In the former
+    case you have to ask the producers of Gwyddion executables to build them
+    with 3D support or build Gwyddion yourself from source code. If it is the
+    latter case, refer to your operating system guide on how to enable OpenGL
+    3D capabilities.
   </para>
   <para>
     The 3D window has two possible forms: with basic and expanded controls.
     It starts with basic controls only, this form is displayed on
     <link linkend="opengl-3d-view-screenshot">following figure</link>.
     It can be switched to the expanded form (and back) with an expander button
-    it the upper right corner.
+    it the upper right corner.  Clicking on the view with right mouse button
+    brings a quick color gradient/GL material selector.
   </para>
   <figure id="opengl-3d-view-screenshot" float="0">
     <title>
@@ -82,6 +93,84 @@
           and other properties of axis labels.
         </listitem>
       </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id="opengl-material-editor">
+    <title>OpenGL Material Editor</title>
+    <para>OpenGL material editor can be invoked with
+      <menuchoice>
+        <guimenu>Edit</guimenu>
+        <guimenuitem>GL Materials</guimenuitem>
+      </menuchoice>.
+      The controls in the material list are the same as in the
+      <link linkend="color-gradient-editor">color gradient editor</link> list
+      and the material management works identically.  The actual editor is of
+      course different.  It allows to edit four quantities defining the
+      material:
+      <itemizedlist>
+        <listitem>
+          ambient color
+          <phrase role="math">k</phrase><subscript>a,α</subscript>
+          (where α = red, green, blue), controlling the reflection of ambient
+          light that is assumed come uniformly from all directions,
+        </listitem>
+        <listitem>
+          diffuse color
+          <phrase role="math">k</phrase><subscript>d,α</subscript>,
+          describing the diffuse reflection which is independent on the
+          direction of incident light and whose apparent brightness is
+          independent of the viewing angle,
+        </listitem>
+        <listitem>
+          specular color
+          <phrase role="math">k</phrase><subscript>s,α</subscript>,
+          controlling the specular reflection with reflected light intensity
+          dependent on the angle between the observing direction and the
+          direction of light that would be reflected by an ideal mirror with
+          the same normal, and
+        </listitem>
+        <listitem>
+          shininess <phrase role="math">s</phrase>, a numeric exponent
+          determining how much the specular reflection resembles an ideal
+          mirror, smaller values mean rougher surfaces, higher values mean
+          smoother surfaces.
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      If we denote
+      <phrase role="math"><emphasis role="bold">L</emphasis></phrase>
+      the normal vector pointing from the observed surface point to the light
+      source,
+      <phrase role="math"><emphasis role="bold">V</emphasis></phrase>
+      the normal vector to the observer,
+      <phrase role="math"><emphasis role="bold">N</emphasis></phrase>
+      the normal vector to the surface
+      <phrase role="math"><emphasis role="bold">R</emphasis></phrase>
+      the normal vector in the direction of ideal mirror reflection, the
+      observed light intensity in OpenGL lighting model can be expressed as
+    </para>
+    <informalequation id="eq-opengl-light-model">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="eq-opengl-light-model.png" format="PNG"/>
+        </imageobject>
+        <textobject role="TeX">
+          <phrase>
+<![CDATA[
+I_\alpha = k_{a,\alpha}I_{a,\alpha}
+           + k_{d,\alpha}I_{d,\alpha} ({\bf N}\mathop.{\bf L})
+           + k_{s,\alpha}I_{s,\alpha} ({\bf R}\mathop.{\bf V})^s
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      where <phrase role="math">I</phrase><subscript>a,α</subscript>,
+      <phrase role="math">I</phrase><subscript>d,α</subscript> and
+      <phrase role="math">I</phrase><subscript>s,α</subscript> are the
+      ambient, diffuse and specular light source intensities.
     </para>
   </sect2>
 </sect1>
