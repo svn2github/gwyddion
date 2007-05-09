@@ -7,7 +7,7 @@
   <para>
      This section presents extended modules designed for editing (correcting)
      SPM data. Using simple data editing tools presented in chapter
-     <link linkend="features-edit" endterm="features-edit.title"/>
+     <link linkend="editing-correction" endterm="editing-correction.title"/>
      it is possible to correct many local scanning defects that
      can be found on SPM images. There are also many error sources within SPM
      methods that lead to global errors, like low frequencies modulated on

@@ -2,8 +2,8 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-edit" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <title id="features-edit.title">Data Edit and Correction</title>
+<sect1 id="editing-correction" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <title id="editing-correction.title">Data Edit and Correction</title>
   <indexterm><primary>defect correction</primary></indexterm>
   <para>
     There are several modules that enable direct or indirect editing of the
@@ -75,7 +75,7 @@
       mask to remove is selected by clicking on it with left mouse button.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="remove-scars">
     <title>
       Remove Scars
       <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>

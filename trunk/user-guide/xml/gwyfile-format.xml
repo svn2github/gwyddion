@@ -197,7 +197,7 @@
       </tgroup>
     </informaltable>
   </sect2>
-  <sect2>
+  <sect2 id="gwyfile-data-objects">
     <title>Particular Objects</title>
     <para>
       To be written.

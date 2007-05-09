@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-stats" xmlns:xi="http://www.w3.org/2001/XInclude">
+<sect1 id="statistical-analysis" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Statistical Analysis</title>
   <para>
     While analyzing randomly rough surfaces we often need a statistical approach

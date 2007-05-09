@@ -76,7 +76,7 @@
       <listitem>
         <para>
           is similar to <guimenu>Data Process</guimenu>, except it
-          consists of graph functions. <link linkend="features-graph">Graph
+          consists of graph functions. <link linkend="graph-processing">Graph
             processing</link> includes function fitting, exporting graph data
           etc.  Button panel <guilabel>Graph</guilabel> again contains
           a subset of commonly used functions from <guimenu>Graph</guimenu>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-filters">
+<sect1 id="filters-presentations">
   <title>Filters and Presentations</title>
   <sect2 id="basic-filters">
     <title>
@@ -142,7 +142,8 @@ w_{\rm dechecker}
       module and the
       <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
       module.
-      For details see section <link linkend="features-edit">Data Edit</link>.
+      For details see section
+      <link linkend="editing-correction">Data Edit</link>.
     </para>
   </sect2>
   <sect2 id="convolution-filter">
@@ -183,7 +184,7 @@ w_{\rm dechecker}
       on the <guilabel>Presets</guilabel> page.
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="presentation-filters">
     <title>Presentations</title>
     <para>
       <menuchoice>

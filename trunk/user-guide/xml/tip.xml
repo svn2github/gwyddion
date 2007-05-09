@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-tip">
+<sect1 id="tip-convolution-artefacts">
   <title>Tip Convolution Artefacts</title>
   <para>
     Tip convolution artefact is one of the most important error sources in
@@ -26,9 +26,9 @@
     We can fortunately simulate and/or correct the tip efects using
     algorithms of dilation and/or erosion, respectively. These algorithms
     were published by Villarubia
-    (see [<link linkend="features-tip-ref-1">1</link>]).
+    (see [<link linkend="tip-convolution-artefacts-ref-1">1</link>]).
   </para>
-  <sect2>
+  <sect2 id="tip-obtaining-geometry">
     <title>Obtaining the Tip Geometry</title>
     <para>
       For studying the tip influence on the data we need to know tip geometry
@@ -114,7 +114,7 @@
       </menuchoice>).
       This can be in particular useful when working with data being result of
       some numerical modelling
-      (see e.g. [<link linkend="features-tip-ref-2">2</link>]).
+      (see e.g. [<link linkend="tip-convolution-artefacts-ref-2">2</link>]).
     </para>
     <figure>
       <title>
@@ -182,12 +182,12 @@
       </menuchoice>).
     </para>
   </sect2>
-  <sect2>
+  <sect2 id="tip-convolution-artefacts-ref">
     <title>References</title>
-    <para id="features-tip-ref-1">
+    <para id="tip-convolution-artefacts-ref-1">
       [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
     </para>
-    <para id="features-tip-ref-2">
+    <para id="tip-convolution-artefacts-ref-2">
       [2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
     </para>
   </sect2>

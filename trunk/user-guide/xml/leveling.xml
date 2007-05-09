@@ -2,9 +2,9 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-leveling">
+<sect1 id="leveling-and-background">
   <title>Data Leveling and Background Subtraction</title>
-  <sect2>
+  <sect2 id="leveling">
     <title>Leveling</title>
     <para>
       The data obtained from SPM microscopes are

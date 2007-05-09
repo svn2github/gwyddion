@@ -166,7 +166,7 @@ w_{\rm welch}(x) = 4x(1-x)
       </mediaobject>
     </figure>
   </sect2>
-  <sect2>
+  <sect2 id="wavelet-transform">
     <title>Wavelet Transform</title>
     <indexterm><primary>wavelet transform</primary></indexterm>
     <para>
@@ -548,7 +548,7 @@ T(\hat\sigma_X) = \hat\sigma^2/\hat\sigma_X
       </para>
     </sect3>
   </sect2>
-  <sect2>
+  <sect2 id="integral-transforms-ref">
     <title>References</title>
     <para id="integral-transforms-ref-1">
       [1] A. Bultheel: Bull. Belg. Math. Soc.: (1995) 2

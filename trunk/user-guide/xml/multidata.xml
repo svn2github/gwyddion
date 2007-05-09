@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="features-multidata">
+<sect1 id="multidata">
   <title>Multiple Data</title>
   <sect2 id="data-arithmetic">
     <title>Arithmetic</title>
