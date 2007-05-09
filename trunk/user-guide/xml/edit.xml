@@ -64,7 +64,18 @@
       </note>
     </para>
   </sect2>
-  <sect2 id="remove-scars">
+  <sect2 id="remove-grains">
+    <title>
+      Remove Grains Tool
+      <guiicon><inlinegraphic fileref="gwy_grains_remove-24.png"/></guiicon>
+    </title>
+    <para>
+      This simple tool removes manually selected connected parts of mask
+      or interpolates the data under them, or possibly both.  The part of
+      mask to remove is selected by clicking on it with left mouse button.
+    </para>
+  </sect2>
+  <sect2>
     <title>
       Remove Scars
       <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>
@@ -153,7 +164,10 @@
     </figure>
   </sect2>
   <sect2 id="remove-data-under-mask">
-    <title>Remove Data Under Mask</title>
+    <title>
+      Remove Data Under Mask
+      <guiicon><inlinegraphic fileref="gwy_remove_under_mask-24.png"/></guiicon>
+    </title>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>
