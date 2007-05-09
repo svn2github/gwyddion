@@ -315,7 +315,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </menuchoice>.
       </listitem>
       <listitem id="crop">
-        Crop data using the Crop tool (at the Tools menu bar).
+        Crop data using the Crop tool.
       </listitem>
       <listitem id="rotate">
         Rotate data by 90 degrees or by user-specified amount using some
