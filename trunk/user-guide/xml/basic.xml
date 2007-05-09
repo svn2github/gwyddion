@@ -27,90 +27,97 @@
     </para>
     <para>
       Here, we describe 1D interpolation method principles. All implemented
-      2D interpolation methods are separable and simply composed of these 1D
-      methods. The interpolation methods that can be applied on data are as
-      follows
+      2D interpolation methods are separable and thus simply composed of these
+      1D methods. The following interpolation method are currently available:
     </para>
-    <itemizedlist>
-      <listitem id="interpolation-round">
+    <variablelist>
+      <varlistentry id="interpolation-round">
         <indexterm><primary>round interpolation</primary></indexterm>
         <indexterm><primary>nearest neighbourhood interpolation</primary></indexterm>
-        Round interpolation (also called nearest neighbourhood interpolation)
-        is the simplest method - it just takes round
-        value of the expected position and finds therefore the closest
-        data value at integer position.
-        Its polynomial degree is 0, regularity
-        <phrase role="math">C</phrase><superscript>-1</superscript>
-        and order 1.
-      </listitem>
-      <listitem id="interpolation-linear">
+        <term>Round</term>
+        <listitem>
+          Round interpolation (also called nearest neighbourhood
+          interpolation) is the simplest method – it just takes round value
+          of the expected position and finds therefore the closest data value
+          at integer position.
+          Its polynomial degree is 0, regularity
+          <phrase role="math">C</phrase><superscript>-1</superscript>
+          and order 1.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-linear">
         <indexterm><primary>linear interpolation</primary></indexterm>
-        Linear interpolation is a linear interpolation
-        between the two closest data values. The value
-        <phrase role="math">z</phrase> at point of relative
-        position <phrase role="math">x</phrase> is obtained as
-        <informalequation id="eq-interpolation-linear">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-linear.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Linear interpolation formula</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>Linear</term>
+        <listitem>
+          Linear interpolation is a linear interpolation
+          between the two closest data values. The value
+          <phrase role="math">z</phrase> at point of relative
+          position <phrase role="math">x</phrase> is obtained as
+          <informalequation id="eq-interpolation-linear">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-linear.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Linear interpolation formula</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 z = (1-x)z_0 + xz_1
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where <phrase role="math">z</phrase><subscript>0</subscript>
-        and <phrase role="math">z</phrase><subscript>1</subscript> and
-        values at the preceding and following points, respectively.
-        Its polynomial degree is 1, regularity
-        <phrase role="math">C</phrase><superscript>0</superscript>
-        and order 2.  It is identical to the second-order B-spline.
-      </listitem>
-      <listitem id="interpolation-key">
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          where <phrase role="math">z</phrase><subscript>0</subscript>
+          and <phrase role="math">z</phrase><subscript>1</subscript> and
+          values at the preceding and following points, respectively.
+          Its polynomial degree is 1, regularity
+          <phrase role="math">C</phrase><superscript>0</superscript>
+          and order 2.  It is identical to the second-order B-spline.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-key">
         <indexterm><primary>Key interpolation</primary></indexterm>
-        Key interpolation (more precisely Key's interpolation with
-        <phrase role="math">a</phrase> = -1/2 which has the highest
-        interpolation order) makes use also of values in the before-preceding
-        and after-following points
-        <phrase role="math">z</phrase><subscript>-1</subscript>
-        and <phrase role="math">z</phrase><subscript>2</subscript>,
-        respectively.  In other words it has support of length 4,
-        The value is then obtained as
-        <informalequation id="eq-interpolation-w1234">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-w1234.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Four-point interpolation weighted sum</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>Key</term>
+        <listitem>
+          Key interpolation (more precisely Key's interpolation with
+          <phrase role="math">a</phrase> = -1/2 which has the highest
+          interpolation order) makes use also of values in the
+          before-preceding and after-following points
+          <phrase role="math">z</phrase><subscript>-1</subscript>
+          and <phrase role="math">z</phrase><subscript>2</subscript>,
+          respectively.  In other words it has support of length 4,
+          The value is then obtained as
+          <informalequation id="eq-interpolation-w1234">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-w1234.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Four-point interpolation weighted sum</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where
-        <informalequation id="eq-interpolation-key">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-key.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Interpolation weights for Key</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          where
+          <informalequation id="eq-interpolation-key">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-key.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Interpolation weights for Key</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
 \vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
@@ -120,29 +127,32 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
   w_2&(-{1\over2} + {x\over2})x^2\cr
 }}
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        are the interpolation weights.
-        Key's interpolation degree is 3, regularity
-        <phrase role="math">C</phrase><superscript>1</superscript>
-        and order 3.
-      </listitem>
-      <listitem id="interpolation-schaum">
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          are the interpolation weights.
+          Key's interpolation degree is 3, regularity
+          <phrase role="math">C</phrase><superscript>1</superscript>
+          and order 3.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-schaum">
         <indexterm><primary>Schaum interpolation</primary></indexterm>
-        Schaum interpolation (more precisely fourth-order Schaum) has also
-        support of length 4.  The interpolation are
-        <informalequation id="eq-interpolation-schaum">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-schaum.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Interpolation weights for Schaum</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>Schaum</term>
+        <listitem>
+          Schaum interpolation (more precisely fourth-order Schaum) has also
+          support of length 4.  The interpolation are
+          <informalequation id="eq-interpolation-schaum">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-schaum.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Interpolation weights for Schaum</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
 \vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
@@ -152,59 +162,65 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
   w_2&{1\over6}x(x^2-1)\cr
 }}
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        Its polynomial degree is 3, regularity
-        <phrase role="math">C</phrase><superscript>0</superscript>
-        and order 4.
-      </listitem>
-      <listitem id="interpolation-nna">
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          Its polynomial degree is 3, regularity
+          <phrase role="math">C</phrase><superscript>0</superscript>
+          and order 4.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-nna">
         <indexterm><primary>NNA interpolation</primary></indexterm>
-        Nearest neighbour approximation is again calculated from the closest
-        four data values but unlike all others it is not piecewise-polynomial.
-        The interpolation weights are
-        <informalequation id="eq-interpolation-nna">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-nna.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Interpolation weights for NNA</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>NNA</term>
+        <listitem>
+          Nearest neighbour approximation is again calculated from the
+          closest four data values but unlike all others it is not
+          piecewise-polynomial. The interpolation weights are
+          <informalequation id="eq-interpolation-nna">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-nna.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Interpolation weights for NNA</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 w_k = {{\displaystyle{1\over r_k^4}}
-       \over\sum\limits_{j=-1}^2 {\displaystyle{1\over r_j^4}}}\;,\quad
+      \over\sum\limits_{j=-1}^2 {\displaystyle{1\over r_j^4}}}\;,\quad
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        for <phrase role="math">k</phrase> = -1, 0, 1, 2, where
-        <phrase role="math">r</phrase><subscript>-1</subscript> = 1 + <phrase role="math">x</phrase>,
-        <phrase role="math">r</phrase><subscript>0</subscript> = <phrase role="math">x</phrase>,
-        <phrase role="math">r</phrase><subscript>1</subscript> = 1 − <phrase role="math">x</phrase>,
-        <phrase role="math">r</phrase><subscript>2</subscript> = 2 − <phrase role="math">x</phrase>.
-        Its order is 1.
-      </listitem>
-      <listitem id="interpolation-bspline">
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          for <phrase role="math">k</phrase> = -1, 0, 1, 2, where
+          <phrase role="math">r</phrase><subscript>-1</subscript> = 1 + <phrase role="math">x</phrase>,
+          <phrase role="math">r</phrase><subscript>0</subscript> = <phrase role="math">x</phrase>,
+          <phrase role="math">r</phrase><subscript>1</subscript> = 1 − <phrase role="math">x</phrase>,
+          <phrase role="math">r</phrase><subscript>2</subscript> = 2 − <phrase role="math">x</phrase>.
+          Its order is 1.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-bspline">
         <indexterm><primary>B-spline interpolation</primary></indexterm>
-        B-spline was misimplemented up to version 2.1 (inclusive) and it
-        blurred data.  It should be avoided in these old versions.
-        The weights are
-        <informalequation id="eq-interpolation-bspline">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-bspline.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Interpolation weights for B-Spline</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>B-spline</term>
+        <listitem>
+          B-spline was misimplemented up to version 2.1 (inclusive) and it
+          blurred data.  It should be avoided in these old versions.
+          The weights are
+          <informalequation id="eq-interpolation-bspline">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-bspline.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Interpolation weights for B-Spline</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
 \vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
@@ -214,32 +230,35 @@ w_k = {{\displaystyle{1\over r_k^4}}
   w_2&{1\over6}x^3\cr
 }}
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        However, they are not used with directly function values as above,
-        but with interpolation coefficients calculated from function
-        values [<link linkend="features-basic-ref-1">1</link>].
-        Its polynomial degree is 3, regularity
-        <phrase role="math">C</phrase><superscript>2</superscript>
-        and order 4.
-      </listitem>
-      <listitem id="interpolation-omoms">
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          However, they are not used with directly function values as above,
+          but with interpolation coefficients calculated from function
+          values [<link linkend="features-basic-ref-1">1</link>].
+          Its polynomial degree is 3, regularity
+          <phrase role="math">C</phrase><superscript>2</superscript>
+          and order 4.
+        </listitem>
+      </varlistentry>
+      <varlistentry id="interpolation-omoms">
         <indexterm><primary>O-MOMS interpolation</primary></indexterm>
-        O-MOMS was misimplemented up to version 2.1 (inclusive) and it
-        blurred data.  It should be avoided in these old versions.
-        The weights are
-        <informalequation id="eq-interpolation-omoms">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-interpolation-omoms.png" format="PNG"/>
-            </imageobject>
-            <textobject>
-              <phrase>Interpolation weights for O-MOMS</phrase>
-            </textobject>
-            <textobject role="TeX">
-              <phrase>
+        <term>O-MOMS</term>
+        <listitem>
+          O-MOMS was misimplemented up to version 2.1 (inclusive) and it
+          blurred data.  It should be avoided in these old versions.
+          The weights are
+          <informalequation id="eq-interpolation-omoms">
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="eq-interpolation-omoms.png" format="PNG"/>
+              </imageobject>
+              <textobject>
+                <phrase>Interpolation weights for O-MOMS</phrase>
+              </textobject>
+              <textobject role="TeX">
+                <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
 \vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
@@ -249,18 +268,19 @@ w_k = {{\displaystyle{1\over r_k^4}}
   w_2&({1\over42}+{1\over6}x^2)x\cr
 }}
 ]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        However, they are not used directly with function values as above,
-        but with interpolation coefficients calculated from function
-        values [<link linkend="features-basic-ref-1">1</link>].
-        Its polynomial degree is 3, regularity
-        <phrase role="math">C</phrase><superscript>0</superscript>
-        and order 4.
-      </listitem>
-    </itemizedlist>
+                </phrase>
+              </textobject>
+            </mediaobject>
+          </informalequation>
+          However, they are not used directly with function values as above,
+          but with interpolation coefficients calculated from function
+          values [<link linkend="features-basic-ref-1">1</link>].
+          Its polynomial degree is 3, regularity
+          <phrase role="math">C</phrase><superscript>0</superscript>
+          and order 4.
+        </listitem>
+      </varlistentry>
+    </variablelist>
     <figure float="0">
       <title>
         Illustration of the available interpolation types (the original
