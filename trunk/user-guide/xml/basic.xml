@@ -281,7 +281,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </listitem>
       </varlistentry>
     </variablelist>
-    <figure float="0">
+    <figure id="fig-interpolations">
       <title>
         Illustration of the available interpolation types (the original
         pixels the interpolation is performed between are obvious on the
@@ -444,7 +444,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         displayed on the following figure.  For facets it means φ corresponds
         to the downward direction of the facet.
       </para>
-      <figure float='0'>
+      <figure id="fig-inclination-coordinates">
         <title>
           Facet orientation measured as counterclockwise angle from
           <phrase role="math">x</phrase>-axis to the projection of facet
@@ -477,7 +477,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         and the endpoint value difference (Δ<phrase role="math">z</phrase>)
         for a set of lines selected on the data.
       </para>
-      <figure float='0'>
+      <figure id="fig-distance-screenshot">
         <title>
           Distance tool with three selected lines.
         </title>
@@ -513,7 +513,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
       of merged in one Graph window) that can be further analysed using
       Graph modules.
     </para>
-    <figure float='0'>
+    <figure id="fit-profile-screenshot">
       <title>
         Profile tool with three extracted profiles.
       </title>

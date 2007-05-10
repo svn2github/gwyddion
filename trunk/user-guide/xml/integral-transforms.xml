@@ -157,7 +157,7 @@ w_{\rm welch}(x) = 4x(1-x)
         </tbody>
       </tgroup>
     </table>
-    <figure>
+    <figure id="fig-windowing-types">
       <title>Window functions: Hann, Hamming, Blackman, Lanczos, Welch.</title>
       <mediaobject>
         <imageobject>
@@ -345,7 +345,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
         Another mentioned wavelet is the simplest one, the Haar wavelet,
         which uses a box function as the scaling function.
       </para>
-      <figure>
+      <figure id="fig-wavelet-haar">
         <title>Haar scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>
@@ -353,7 +353,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
           </imageobject>
         </mediaobject>
       </figure>
-      <figure>
+      <figure id="fig-wavelet-daubechies4">
         <title>Daubechies 4 scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>
@@ -361,7 +361,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
           </imageobject>
         </mediaobject>
       </figure>
-      <figure>
+      <figure id="fig-wavelet-daubechies20">
         <title>Daubechies 20 scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>

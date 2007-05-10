@@ -29,7 +29,7 @@
     it.  To calculate height distribution of the same rectangle you have
     selected for statistical quantities, it is sufficient to switch the tool.
   </para>
-  <figure float="0">
+  <figure id="fig-selections">
     <title>
       Data window with three selected lines, two horizontal and one vertical.
     </title>

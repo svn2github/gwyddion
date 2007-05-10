@@ -400,7 +400,7 @@
       load a file, check the file type is set to the corresponding
       type, or to <guilabel>Automatically detected</guilabel>.
     </para>
-    <figure>
+    <figure id="fix-file-open-screenshot">
       <title>
         File open dialog with expanded file type options and channel preview.
       </title>

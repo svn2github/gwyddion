@@ -11,7 +11,7 @@
     some SPM tips imaged on the surface scan while sharp features are present
     on the surface.
   </para>
-  <figure id="fig-alltips">
+  <figure id="fig-tip-alltips-scans">
     <title>
       Images of ZnSe surface measured with four different SPM tips
       (more or less broken ones).
@@ -88,10 +88,10 @@
       results as starting point for full estimation. This shlould improve the
       full tip estimation algorithm speed.
     </para>
-    <figure>
+    <figure id="fig-tip-alltips">
       <title>
         SPM tips obtained from data of
-        <link linkend="fig-alltips">previous figure</link>
+        <link linkend="fig-tip-alltips-scans">previous figure</link>
         using blind estimation algorithm.
       </title>
       <mediaobject>
@@ -116,7 +116,7 @@
       some numerical modelling
       (see e.g. [<link linkend="tip-convolution-artefacts-ref-2">2</link>]).
     </para>
-    <figure>
+    <figure id="fig-tip-simulated-convolution">
       <title>
         Simulated fractal surface before (left) and after (right) tip
         convolution.
@@ -140,7 +140,7 @@
       (e. g. pores) cannot be reconstructed as there is no information about
       these points.
     </para>
-    <figure>
+    <figure id="fig-tip-reconstruction">
       <title>
         Original and reconstructed image of ZnSe imaged by broken SPM tip.
       </title>
@@ -157,7 +157,7 @@
       Certainty map algorithm can mark point where surface was probably
       touched in a single point.
     </para>
-    <figure>
+    <figure id="fig-tip-certainty-map">
       <title>
         Certainty map obtained from standard grating. Note that the modelled
         tip parameters were taken from datasheet here for illustration purposes.

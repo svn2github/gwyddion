@@ -38,7 +38,7 @@
     <link linkend="facet-level">facet-level</link>) the data
     first as overall slope can skew the calculated rotations.
   </para>
-  <figure float='0'>
+  <figure id="fig-unrotate-directions">
     <title>
       Orientations of prevalent directions corresponding to Unrotate symmetry
       types.

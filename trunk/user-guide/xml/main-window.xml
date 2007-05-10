@@ -113,7 +113,7 @@
     with selections on data windows.  These functions are accessible only
     from this button panel.
   </para>
-  <figure float="0">
+  <figure id="fig-main-window">
     <title>
       Main window and a data window showing microchip surface (Gwyddion
       sample file).

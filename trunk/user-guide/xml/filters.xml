@@ -121,7 +121,7 @@ w_{\rm dechecker}
       badly measured areas within a good image. To apply a filter to the entire
       image again, just click once anywhere within the image window.
     </tip>
-    <figure>
+    <figure id="fig-filters-screenshot">
       <title>Filtering screenshot</title>
       <mediaobject>
         <imageobject>
@@ -456,7 +456,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         any physical meaning to.
       </para>
     </sect3>
-    <figure>
+    <figure id="fig-presentation-examples">
       <title>
         Presentation examples:
         (a) original data,

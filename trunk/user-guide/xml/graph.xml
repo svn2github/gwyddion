@@ -73,7 +73,7 @@
       this is not desirable, quit the dialog with
       <guibutton>Cancel</guibutton>.
     </para>
-    <figure>
+    <figure id="fig-graph-fit-screenshot">
       <title>Fit graph module screenshot</title>
       <mediaobject>
         <imageobject>
@@ -95,7 +95,7 @@
       The user interface of this module is practically the same as of the
       graph fit module.
     </para>
-    <figure>
+    <figure id="fig-graph-cd-screenshot">
       <title>Critical dimension module screenshot</title>
       <mediaobject>
         <imageobject>

@@ -62,7 +62,7 @@
       anisotropic and its features are supposed to be oriented in a direction
       not paralled to the image sides.
     </para>
-    <figure float='0'>
+    <figure id="fit-drift-correction">
       <title>
         Drift correction example:
         (a) original data exhibiting strong drift in the fast scan axis,

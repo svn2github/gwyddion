@@ -111,7 +111,7 @@
       In this way we can identify the grain positions and then determine the
       volume occupied by each grain separately.
     </para>
-    <figure>
+    <figure id="fig-grain-marking">
       <title>
         Image of grain-like surface structure (a) and corresponding results
         of height thresholding (b), curvature thresholding (c), and
@@ -378,6 +378,16 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <figure id="fig-grain-bounding-dims">
+      <title>
+        Maximum and minimum bounding dimensions and angles of a grain.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="grain-bounding-dims.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
     <para id="boundary-length-calculation">
       <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
@@ -389,7 +399,7 @@
       are pixel dimension along corresponding axes and
       <phrase role="math">q</phrase> is the length of the pixel diagonal.
     </para>
-    <figure>
+    <figure id="fig-boundary-length">
       <title>
         Grey squares represent pixels inside the grain, white squares represent
         outside pixels.  The estimated contribution of each configuration to
@@ -410,14 +420,14 @@
       <indexterm><primary>volume calculation</primary></indexterm>
       The grain volume is, after subtracting the basis, estimated as the
       volume of exactly the same body whose upper surface is used for
-      <link linkend="surface-area-vertices">surface area calculation</link>.
+      <link linkend="fig-surface-area-vertices">surface area calculation</link>.
       Note for the volume between vertices this is equivalent to the classic
       two-dimensional trapezoid integration method.  However, we calculate the
       volume under a mask centered on vertices, therefore their contribution
       to the integral is distributed differently as shown in the following
       figure.
     </para>
-    <figure>
+    <figure id="fig-volume-pixel-weights">
       <title>
         Contributions of individual pixels to the volume of single pixel
         (grey).

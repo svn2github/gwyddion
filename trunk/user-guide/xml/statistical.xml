@@ -185,7 +185,7 @@
       row of pixels on each side for the purpose of surface area calculation,
       thus making all pixels of interest inner.
     </para>
-    <figure id="surface-area-vertices">
+    <figure id="fig-surface-area-vertices">
       <title>
         Surface area calculation triangulation scheme.
       </title>

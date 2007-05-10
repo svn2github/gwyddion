@@ -43,7 +43,7 @@
   </para>
   <para>
   </para>
-  <figure float="0">
+  <figure id="fig-data-browser">
     <title>
       Data browser displaying several open channels.
     </title>

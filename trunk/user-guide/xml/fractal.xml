@@ -110,7 +110,7 @@
     Note, that results of different methods differ. This fact is caused by
     systematic error of different fractal analysis approaches.
   </para>
-  <figure>
+  <figure id="fig-fractal-dimension-screenshot">
     <title>Fractal Dimension dialog.</title>
     <mediaobject>
       <imageobject>

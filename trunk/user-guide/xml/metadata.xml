@@ -28,7 +28,7 @@
     no metadata is imported from your files, for example when they contain
     no auxiliary data or it is not known how to read it.
   </para>
-  <figure float="0">
+  <figure id="fig-metadata-browser">
     <title>
       Metadata browser showing the metadata of a Nanoscope file.
     </title>

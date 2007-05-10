@@ -146,7 +146,7 @@
       After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
       to the image. Other modules or tools can then be run to edit this data.
     </para>
-    <figure float='0'>
+    <figure id="fig-scars">
       <title>
         Scars marking and removal example:
         (a) original data with defects,

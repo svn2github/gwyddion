@@ -18,7 +18,7 @@
     computationaly intensive to calculate, therefore they are not
     automatically updated when the underlying data change.
   </para>
-  <figure float="0">
+  <figure id="fig-mask-presentation-scheme">
     <title>
       Visualization of masks and presentations.  If the user looks from above
       they can be imagined as stacked as in the picture.
@@ -56,7 +56,7 @@
     window by right-click on the displayed data and selecting appropriate
     command from the context menu.
   </para>
-  <figure float="0">
+  <figure id="fig-mask-presentation">
     <title>
       Data in default false color representation (left), with superimposed
       mask (centre) and with shading presentation (right).

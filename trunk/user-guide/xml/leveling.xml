@@ -131,7 +131,7 @@
         <link linkend="plane-level">Plane Level</link>.
         On the other hand, for random surfaces, it can behave much worse.
       </para>
-      <figure float="0">
+      <figure id="fig-facet-level">
         <title>
           Facet Level example:
           (a) uncorrected, sloping data;
