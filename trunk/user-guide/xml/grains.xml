@@ -401,9 +401,9 @@
     </para>
     <figure id="fig-boundary-length">
       <title>
+        Contributions of pixel configurations to the estimated boundary length.
         Grey squares represent pixels inside the grain, white squares represent
-        outside pixels.  The estimated contribution of each configuration to
-        the boundary length is:
+        outside pixels.  The estimated contribution of each configuration is:
         (a) <phrase role="math">q</phrase>/2,
         (b) <phrase role="math">q</phrase>,
         (c) <phrase role="math">h<subscript>y</subscript></phrase>,

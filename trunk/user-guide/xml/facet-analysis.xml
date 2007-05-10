@@ -38,7 +38,7 @@
     other hand it has to be large enough to suppress noise present in the
     image.
   </para>
-  <figure>
+  <figure id="fig-facet-analysis-sizes">
     <title>
       Illustration of the influence of fitted plane size on the distribution
       of a scan of a delaminated DLC surface with considerable fine noise.
