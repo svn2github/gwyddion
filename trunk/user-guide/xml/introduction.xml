@@ -25,7 +25,7 @@
     <para>
       The main idea behind Gwyddion developement is to provide modular
       program for 2D data analysis that could be easily extended by modules
-      and plugins with no need of core recompilation. Moreover, the status of
+      and plug-ins with no need of core recompilation. Moreover, the status of
       free software enables to provide source codes to developers and users,
       which makes the further program improvement easier.
     </para>
@@ -50,24 +50,31 @@
     <title>Licensing</title>
     <para>
       Gwyddion is covered by
-      <ulink url="http://www.gnu.org/licenses/gpl.html">GNU General Public License</ulink>
-      (GNU GPL). See file <filename>COPYING</filename> in distribution for
-      full License text. In particular, this means that:
+      <link linkend="gpl">GNU General Public License</link>
+      (GNU GPL).  The full license text is also included as file
+      <filename>COPYING</filename> in the source distribution (MS Windows
+      installers contain it as file <filename>COPYING.wri</filename>).
+      In brief, this license means that:
       <itemizedlist>
         <listitem>
           <para>
-            you can freely make copies and modify them. You can download the
-            program and its source code from the Gwyddion pages and modify it
-            as you want – however, the modified code will be still covered by
-            the same license.
+            You can freely use the program.  You can freely make copies,
+            modify and distribute them.  You can download the program and its
+            source code from Gwyddion web pages and modify it as you want.
           </para>
         </listitem>
         <listitem>
           <para>
-            if you add any part to the program (e.g. if you write a module),
-            your code must be also covered by GNU GPL. The only exception are
-            plugins that are run as a separate programs communicating with
-            Gwyddion. Plugins therefore can have any license.
+            If you decide to distribute it, the modified code is still covered
+            by the same license.  In particular, you have to offer the source
+            code too.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The same hold for extensions (e.g. if you write a module).
+            The only exception are plug-ins that are run as a separate
+            programs.  Plug-ins therefore can have any license.
           </para>
         </listitem>
       </itemizedlist>
@@ -76,7 +83,7 @@
       modular program that can be easily developed my many persons from
       different institutions. Second, this license protects the rights of
       developers that their code, here given to public, cannot be copied and
-      used for commercial purposes.
+      used for closed proprietary products.
     </para>
   </sect1>
 </chapter>
