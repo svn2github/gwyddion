@@ -407,7 +407,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
       Moreover, there are the following presentation manipulation commands in
       presentations menu:
     </para>
-    <sect3>
+    <sect3 id="presentation-attach">
       <title>Attach Presentation</title>
       <para>
         <menuchoice>
@@ -424,7 +424,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         presentation, even if it looks like data).
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="presentation-remove">
       <title>Remove Presentation</title>
       <para>
         <menuchoice>
@@ -437,7 +437,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         Removes presentation from the actual data window.
       </para>
     </sect3>
-    <sect3>
+    <sect3 id="presentation-extract">
       <title>Extract Presentation</title>
       <para>
         <menuchoice>

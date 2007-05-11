@@ -27,7 +27,7 @@
     encourage you to write IO module or plugin for your instrument-specific
     data file format, or, at least, to send us your format specifications.
   </para>
-  <table frame='none'>
+  <table frame='none' id="table-file-formats">
     <title>Supported file formats</title>
     <tgroup cols='2'>
       <colspec align='left'/>

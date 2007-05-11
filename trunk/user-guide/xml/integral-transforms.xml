@@ -39,7 +39,7 @@
       correctly at the edges. Windowing function can be set within the
       Fourier Transform module.
     </para>
-    <table frame='none'>
+    <table frame='none' id="table-windowing-types">
       <title>Windowing types</title>
       <tgroup cols='2'>
         <colspec align='left'/>

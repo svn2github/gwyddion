@@ -264,8 +264,8 @@
         from interval [0, 1].
       </para>
     </sect3>
-    <sect3>
-      <title>First-order vs. Second-order Quantities</title>
+    <sect3 id="first-order-vs-second-order-quantities">
+      <title>First-Order vs. Second-Order Quantities</title>
       <para>
         The height and slope distribution quantities belong to the first-order
         statistical quantities, describing only the statistical properties of
@@ -402,7 +402,7 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
         usually assume that the exponential form is closer to the reality.
       </note>
     </sect3>
-    <sect3>
+    <sect3 id="height-height-correlation-1d">
       <title>Height-Height Correlation Function</title>
       <indexterm><primary>height-height correlation function</primary></indexterm>
       <para>
@@ -501,17 +501,17 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         </mediaobject>
       </figure>
     </sect3>
-    <sect3 id="psdf">
-      <title>Power Spectral Density Function</title>
-      <indexterm><primary>power spectral density function</primary></indexterm>
+    <sect3 id="power-spectrum-density-1d">
+      <title>Power Spectrum Density Function</title>
+      <indexterm><primary>power spectrum density function</primary></indexterm>
       <para>
-        The two-dimensional power spectral density function can be written in
+        The two-dimensional power spectrum density function can be written in
         terms of the Fourier transform of the autocorrelation function
       </para>
-      <informalequation id="eq-power-spectral-density-fft">
+      <informalequation id="eq-power-spectrum-density-fft">
         <mediaobject>
           <imageobject>
-            <imagedata fileref="eq-power-spectral-density-fft.png" format="PNG"/>
+            <imagedata fileref="eq-power-spectrum-density-fft.png" format="PNG"/>
           </imageobject>
           <textobject role="tex">
             <phrase>
@@ -528,7 +528,7 @@ W(K_x,K_y) = {1\over4\pi}
       </informalequation>
       <para>
         Similarly to the autocorrelation function, we also usually evaluate
-        the one-dimensional power spectral density function which is given by
+        the one-dimensional power spectrum density function which is given by
         the equation
       </para>
       <informalequation id="eq-power-spectral-density-1d">
