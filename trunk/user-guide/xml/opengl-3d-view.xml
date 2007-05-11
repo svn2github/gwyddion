@@ -155,7 +155,7 @@
         <imageobject>
           <imagedata fileref="eq-opengl-light-model.png" format="PNG"/>
         </imageobject>
-        <textobject role="TeX">
+        <textobject role="tex">
           <phrase>
 <![CDATA[
 I_\alpha = k_{a,\alpha}I_{a,\alpha}

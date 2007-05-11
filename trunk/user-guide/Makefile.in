@@ -18,7 +18,7 @@ DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES := $(wildcard xml/*.xml)
 FORMULA_SOURCES := $(wildcard formulas/*.tex)
-EQ_SOURCES := $(shell grep -l '<textobject role="TeX">' $(XML_SOURCES))
+EQ_SOURCES := $(shell grep -l '<textobject role="tex">' $(XML_SOURCES))
 IMAGES := $(shell sed -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]*\)".*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)

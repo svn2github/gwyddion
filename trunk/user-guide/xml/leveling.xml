@@ -208,7 +208,7 @@
                 degrees
               </phrase>
             </textobject>
-            <textobject role="TeX">
+            <textobject role="tex">
               <phrase>
 <![CDATA[
 \sum_{j=0}^m \sum_{k=0}^n a_{j,k} x^j y^k
@@ -231,7 +231,7 @@
                 2D polynomial expression with limited total degree
               </phrase>
             </textobject>
-            <textobject role="TeX">
+            <textobject role="tex">
               <phrase>
 <![CDATA[
 \sum_{j+k \le n} a_{j,k} x^j y^k

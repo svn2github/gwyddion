@@ -61,7 +61,7 @@
               <textobject>
                 <phrase>Linear interpolation formula</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 z = (1-x)z_0 + xz_1
@@ -98,7 +98,7 @@ z = (1-x)z_0 + xz_1
               <textobject>
                 <phrase>Four-point interpolation weighted sum</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
@@ -116,7 +116,7 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
               <textobject>
                 <phrase>Interpolation weights for Key</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
@@ -151,7 +151,7 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
               <textobject>
                 <phrase>Interpolation weights for Schaum</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
@@ -186,7 +186,7 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
               <textobject>
                 <phrase>Interpolation weights for NNA</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 w_k = {{\displaystyle{1\over r_k^4}}
@@ -219,7 +219,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
               <textobject>
                 <phrase>Interpolation weights for B-Spline</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
@@ -257,7 +257,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
               <textobject>
                 <phrase>Interpolation weights for O-MOMS</phrase>
               </textobject>
-              <textobject role="TeX">
+              <textobject role="tex">
                 <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}

@@ -127,7 +127,7 @@
         <imageobject>
           <imagedata fileref="eq-statistical-quantities.png" format="PNG"/>
         </imageobject>
-        <textobject role="TeX">
+        <textobject role="tex">
           <phrase>
 <![CDATA[
 \sigma = \mu_2^{1/2}\;,\quad
@@ -159,7 +159,7 @@
         <imageobject>
           <imagedata fileref="eq-area-calculation.png" format="PNG"/>
         </imageobject>
-        <textobject role="TeX">
+        <textobject role="tex">
           <phrase>
 <![CDATA[
 \eqnarray{
@@ -248,7 +248,7 @@
           <imageobject>
             <imagedata fileref="eq-distribution-density-normalization.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 \int_{-\infty}^\infty \varrho(x)\,\d x = 1
@@ -289,7 +289,7 @@
           <imageobject>
             <imagedata fileref="eq-autocorrelation-definition.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 \eqnarray{
@@ -340,7 +340,7 @@
           <imageobject>
             <imagedata fileref="eq-autocorrelation-discrete.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 G_x(\tau_x) = {1\over N(M-m)}
@@ -363,7 +363,7 @@ G_x(\tau_x) = {1\over N(M-m)}
           <imageobject>
             <imagedata fileref="eq-autocorrelation-gaussian.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
@@ -385,7 +385,7 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
           <imageobject>
             <imagedata fileref="eq-autocorrelation-exponential.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
@@ -424,7 +424,7 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-discrete.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 H_x(\tau_x) = {1\over N(M-m)}
@@ -448,7 +448,7 @@ H_x(\tau_x) = {1\over N(M-m)}
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-gaussian.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
@@ -470,7 +470,7 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
           <imageobject>
             <imagedata fileref="eq-height-height-correlation-exponential.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
@@ -513,7 +513,7 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-fft.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 W(K_x,K_y) = {1\over4\pi}
@@ -536,7 +536,7 @@ W(K_x,K_y) = {1\over4\pi}
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 W_1(K_x) = \int_{-\infty}^\infty W(K_x,K_y)\,\d K_y
@@ -554,7 +554,7 @@ W_1(K_x) = \int_{-\infty}^\infty W(K_x,K_y)\,\d K_y
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-fft.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
@@ -574,7 +574,7 @@ W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-Pj.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 \hat P_j(K_x) = {h\over2\pi} \sum_{k=0}^N z_{kj} \exp(-\im K_xkh)
@@ -592,7 +592,7 @@ W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-gaussian.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 W_1(K_x) = {\sigma^2T\over2\sqrt\pi} \exp(-K_x^2T^2/4)
@@ -609,7 +609,7 @@ W_1(K_x) = {\sigma^2T\over2\sqrt\pi} \exp(-K_x^2T^2/4)
           <imageobject>
             <imagedata fileref="eq-power-spectral-density-1d-exponential.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
@@ -667,7 +667,7 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
           <imageobject>
             <imagedata fileref="eq-minkowski-functionals.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 V = {N_{\rm white}\over N}\;,\quad
@@ -761,7 +761,7 @@ S = {N_{\rm bound}\over N}\;,\quad
             <imageobject>
               <imagedata fileref="eq-tan-beta0.png" format="PNG"/>
             </imageobject>
-            <textobject role="TeX">
+            <textobject role="tex">
               <phrase>
 <![CDATA[
 \tan^2\beta_0 = {1\over (N-1)h^2} \sum_{i=1}^{N-1} (z_i - z_{i-1})^2
@@ -812,7 +812,7 @@ S = {N_{\rm bound}\over N}\;,\quad
           <imageobject>
             <imagedata fileref="eq-facet-theta-phi.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 \vartheta = \atan\hypot\left({\d z\over\d x}, {\d z\over\d y}\right)\;,\quad
@@ -833,7 +833,7 @@ S = {N_{\rm bound}\over N}\;,\quad
           <imageobject>
             <imagedata fileref="eq-angle-distribution.png" format="PNG"/>
           </imageobject>
-          <textobject role="TeX">
+          <textobject role="tex">
             <phrase>
 <![CDATA[
 2{\bf r}\mathop.{\bf v} = r^2

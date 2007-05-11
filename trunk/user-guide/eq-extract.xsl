@@ -46,7 +46,7 @@
           <xsl:value-of select="mediaobject/imageobject/imagedata/attribute::fileref"/>
         </xsl:message>
       </xsl:when>
-      <xsl:when test="not(mediaobject/textobject[@role='TeX'])">
+      <xsl:when test="not(mediaobject/textobject[@role='tex'])">
         <xsl:message>
           <xsl:text>Missing TeX textobject for </xsl:text>
           <xsl:value-of select="name(.)"/>
@@ -62,7 +62,7 @@
             <xsl:text>.tex.in</xsl:text>
           </xsl:with-param>
           <xsl:with-param name="formula">
-            <xsl:value-of select="mediaobject/textobject[@role='TeX']"/>
+            <xsl:value-of select="mediaobject/textobject[@role='tex']"/>
           </xsl:with-param>
         </xsl:call-template>
       </xsl:otherwise>
@@ -79,7 +79,7 @@
           <xsl:value-of select="inlinemediaobject/imageobject/imagedata/attribute::fileref"/>
         </xsl:message>
       </xsl:when>
-      <xsl:when test="not(inlinemediaobject/textobject[@role='TeX'])">
+      <xsl:when test="not(inlinemediaobject/textobject[@role='tex'])">
         <xsl:message>
           <xsl:text>Missing TeX textobject for </xsl:text>
           <xsl:value-of select="name(.)"/>
@@ -95,7 +95,7 @@
             <xsl:text>.tex.in</xsl:text>
           </xsl:with-param>
           <xsl:with-param name="formula">
-            <xsl:value-of select="inlinemediaobject/textobject[@role='TeX']"/>
+            <xsl:value-of select="inlinemediaobject/textobject[@role='tex']"/>
           </xsl:with-param>
         </xsl:call-template>
       </xsl:otherwise>
