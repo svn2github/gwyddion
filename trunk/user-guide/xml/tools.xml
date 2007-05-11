@@ -379,12 +379,12 @@
     </varlistentry>
     <varlistentry id="tool-crop">
       <term>
-        Crop
+        <link linkend="crop">Crop</link>
         <guiicon><inlinegraphic fileref="gwy_crop-24.png"/></guiicon>
       </term>
       <listitem>
         <para>
-          Cuts part of the data, possibly putting the result to new window.
+          Cuts part of the data.
         </para>
       </listitem>
     </varlistentry>

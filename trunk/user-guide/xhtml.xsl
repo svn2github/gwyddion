@@ -16,6 +16,8 @@
   <xsl:param name="phrase.propagates.style" select="1"/>
   <xsl:param name="header.rule" select="0"/>
   <xsl:param name="footer.rule" select="0"/>
+  <!-- This may or may be not the default.  Ensure no ASCII art is used. -->
+  <xsl:param name="menuchoice.menu.separator" select="' → '"/>
   <xsl:param name="html.stylesheet.type">text/css</xsl:param>
   <xsl:param name="html.stylesheet">user-guide.css</xsl:param>
   <xsl:param name="base.dir">xhtml/</xsl:param>

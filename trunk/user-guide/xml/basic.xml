@@ -6,10 +6,10 @@
   <title>Basic Operations</title>
   <para>
     Basic geometrical operations are the core of any data processing program.
-    Also Gwyddion has a wide set of modules and functions for data scaling,
-    rotation, resampling or profile extraction. In this section the main
-    algorithms behind these functions will be described and the list of
-    available modules will be presented.
+    Also Gwyddion has a wide set of functions for data scaling, rotation,
+    resampling or profile extraction. In this section the main algorithms
+    behind these functions will be described and the list of available modules
+    will be presented.
   </para>
   <sect2 id="interpolation">
     <title>Interpolation</title>
@@ -299,7 +299,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
     </figure>
   </sect2>
   <sect2 id="modules-basic">
-    <title>Basic 2D Data Operation Modules</title>
+    <title>Basic 2D Data Operations</title>
     <para>
       Within basic modules it is possible to perform the following
       operations with 2D data field:
@@ -315,11 +315,17 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </menuchoice>.
       </listitem>
       <listitem id="crop">
-        Crop data using the Crop tool.
+        Crop data using the <link linkend="tool-crop">Crop tool</link>,
+        either in place or putting the result to a new channel (with
+        <guilabel>Create new channel</guilabel>).
+        With <guilabel>Keep lateral offsets</guilabel> option enabled, the top
+        left corner coordinates of the resulting image correspond to the
+        top left corner of the selection, otherwise the top left corner
+        coordinates are set to (0, 0).
       </listitem>
       <listitem id="rotate">
         Rotate data by 90 degrees or by user-specified amount using some
-        of the rotate modules:
+        of the rotate functions:
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
@@ -378,7 +384,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <guisubmenu>Basic Operations</guisubmenu>
           <guimenuitem>Square Samples</guimenuitem>
         </menuchoice>.
-        (This is no-op on most data as they have square pixels.)
+        Most scans have pixels with 1:1 aspect ratio, therefore this function
+        has no effect on them.
       </listitem>
     </itemizedlist>
     <para id="calibrate">
@@ -420,6 +427,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
         simpliest method does). In addition it can display the inclination of
         the local facet. <guilabel>Averaging radius</guilabel> again
         determines the radius of the area to use for the plane fit.
+        Button <guibutton>Set zero</guibutton> shifts the values to make the
+        current <phrase role="math">z</phrase> the new zero.
       </para>
     </sect3>
     <sect3 id="inclinations-coordinates">
@@ -511,7 +520,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
     <para>
       After profiles are chosen, they can be extracted to graphs (separate
       of merged in one Graph window) that can be further analysed using
-      Graph modules.
+      Graph functions.
     </para>
     <figure id="fit-profile-screenshot">
       <title>
