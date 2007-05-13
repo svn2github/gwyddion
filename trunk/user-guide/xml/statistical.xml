@@ -651,7 +651,7 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
           <textobject role="tex">
             <phrase>
 <![CDATA[
-W_{\rm r}(K) = \int_0^{2\pi} W(K_x(K,\varphi),K_y(K,\varphi))\,K\,\d\varphi
+W_{\rm r}(K) = \int_0^{2\pi} W(K\cos\varphi,K\sin\varphi)\,K\,\d\varphi
 ]]>
             </phrase>
           </textobject>
