@@ -232,20 +232,31 @@
     </title>
     <indexterm><primary>line correction</primary></indexterm>
     <para>
-      Several functions can be used for line correction: The Polynomial tool
-      and then several procedures under
+      Profiles taken in the fast scanning axis
+      (usually <phrase role="math">x</phrase>-axis) can be mutually shifted
+      by some amount or have slightly different slopes. The basic line
+      correction functions deal with this type of discrepancy. Several
+      functions can be used: The Polynomial tool and then several procedures
+      under
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Correct Data</guisubmenu>
       </menuchoice>
-      menu.  The Polynomial tool can fit and subtract line polynomials
-      (both horizontal and vertical) up to the second order.  It also permits
-      to select an area for exclusion from the fit.
+      menu.
+    </para>
+    <para id="line-polynomial">
+      The Polynomial tool fits each horizontal or vertical line by
+      a polynomial up to the third order and then subtracts the fitted
+      polynomial – a very frequently used function in basic processing of raw
+      SPM data. It also permits to exclude or include selected area from the
+      fit. The inclusion or exclusion only applies to the lines interseting
+      the selected area.  Other lines are always fitted using all data
+      values.
     </para>
     <para>
       Line correction functions in <guisubmenu>Correct Data</guisubmenu>
-      perform only line corrections, therefore one has to rotate the image
-      to perform column-wise correction.  They include:
+      perform only horizontal line corrections, therefore one has to rotate
+      the image to perform column-wise correction.  They include:
       <itemizedlist>
         <listitem>
           <guimenuitem>Match Line Correction</guimenuitem>,

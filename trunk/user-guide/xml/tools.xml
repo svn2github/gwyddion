@@ -364,16 +364,12 @@
     </varlistentry>
     <varlistentry id="tool-polynom">
       <term>
-        Polynomial Profile Fit
+        <link linkend="line-polynomial">Polynomial Line Level</link>
         <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
       </term>
       <listitem>
         <para>
-          Fits horizontal or vertical profiles by polynomial – very frequently
-          used tool for basic processing of raw SPM data. Profiles taken in the
-          fast scanning axis (usually <phrase role="math">x</phrase>-axis)
-          can be mutually shifted by some amount or having slightly different
-          slope. Polynomial Profile Fit tool can fix this discrepancy.
+          Levels rows or columns by fitting and subtracting polynomials.
         </para>
       </listitem>
     </varlistentry>
