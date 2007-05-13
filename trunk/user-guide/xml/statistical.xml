@@ -501,17 +501,17 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         </mediaobject>
       </figure>
     </sect3>
-    <sect3 id="power-spectrum-density-1d">
-      <title>Power Spectrum Density Function</title>
-      <indexterm><primary>power spectrum density function</primary></indexterm>
+    <sect3 id="power-spectral-density-1d">
+      <title>Power Spectral Density Function</title>
+      <indexterm><primary>power spectral density function</primary></indexterm>
       <para>
-        The two-dimensional power spectrum density function can be written in
+        The two-dimensional power spectral density function can be written in
         terms of the Fourier transform of the autocorrelation function
       </para>
-      <informalequation id="eq-power-spectrum-density-fft">
+      <informalequation id="eq-power-spectral-density-fft">
         <mediaobject>
           <imageobject>
-            <imagedata fileref="eq-power-spectrum-density-fft.png" format="PNG"/>
+            <imagedata fileref="eq-power-spectral-density-fft.png" format="PNG"/>
           </imageobject>
           <textobject role="tex">
             <phrase>
@@ -528,7 +528,7 @@ W(K_x,K_y) = {1\over4\pi}
       </informalequation>
       <para>
         Similarly to the autocorrelation function, we also usually evaluate
-        the one-dimensional power spectrum density function which is given by
+        the one-dimensional power spectral density function which is given by
         the equation
       </para>
       <informalequation id="eq-power-spectral-density-1d">
@@ -637,6 +637,60 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
           </imageobject>
         </mediaobject>
       </figure>
+      <para>
+        We can also introduce radial PSDF
+        <phrase role="math">W</phrase><subscript>r</subscript>(<phrase role="math">K</phrase>),
+        which of course contains the same information as the one-dimensional
+        PSDF for isotropic rough surfaces:
+      </para>
+      <informalequation id="eq-power-spectral-density-radial">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-power-spectral-density-radial.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+W_{\rm r}(K) = \int_0^{2\pi} W(K_x(K,\varphi),K_y(K,\varphi))\,K\,\d\varphi
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+      <para>
+        For a surface with Gaussian ACF this function is expressed as
+      </para>
+      <informalequation id="eq-power-spectral-density-radial-gaussian">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-power-spectral-density-radial-gaussian.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+W_{\rm r}(K) = {\sigma^2T\over2}\,KT\exp(-K^2T^2/4)
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+      <para>
+        while for exponential ACF surface as
+      </para>
+      <informalequation id="eq-power-spectral-density-radial-exponential">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-power-spectral-density-radial-exponential.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+W_{\rm r}(K) = \sigma^2T{KT\over(1+K^2T^2)^{3/2}}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
       <tip>
         Within Gwyddion you can fit all statistical functions presented here
         by their Gaussian and exponential forms. To do this, fist click
