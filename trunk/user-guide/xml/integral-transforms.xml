@@ -349,7 +349,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
         <title>Haar scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="whaar.png" format="PNG"/>
+            <imagedata fileref="wavelet-haar.png" format="PNG"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -357,7 +357,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
         <title>Daubechies 4 scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="wdaub4.png" format="PNG"/>
+            <imagedata fileref="wavelet-daubechies-4.png" format="PNG"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -365,7 +365,7 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
         <title>Daubechies 20 scaling function and wavelet.</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="wdaub20.png" format="PNG"/>
+            <imagedata fileref="wavelet-daubechies-20.png" format="PNG"/>
           </imageobject>
         </mediaobject>
       </figure>

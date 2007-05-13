@@ -165,7 +165,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="cmap.png" format="PNG"/>
+          <imagedata fileref="certainty-map.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
