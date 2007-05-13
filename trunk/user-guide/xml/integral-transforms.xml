@@ -34,10 +34,12 @@
       spectrum.
     </para>
     <para id="windowing">
-      Winhin Gwyddion several windowing functions are implemented. Most of
-      them are formed by some sine and cosine functions that damp data
-      correctly at the edges. Windowing function can be set within the
-      Fourier Transform module.
+      Gwyddion offers several windowing functions. Most of them are formed by
+      some sine and cosine functions that damp data correctly at the edges.
+      In the following windowing formula table the independent variable
+      <phrase role="math">x</phrase> is from interval [0, 1], which
+      corresponds to the normalized abscissa; for simplicity variable
+      ξ = 2π<phrase role="math">x</phrase> is used in some formulas.
     </para>
     <table frame='none' id="table-windowing-types">
       <title>Windowing types</title>
@@ -53,7 +55,7 @@
         <tbody>
           <row>
             <entry>None</entry>
-            <entry>1 (no windowing)</entry>
+            <entry>1</entry>
           </row>
           <row>
             <entry>Rect</entry>
@@ -70,7 +72,7 @@
                   <textobject role="tex">
                     <phrase>
 <![CDATA[
-w_{\rm hann}(x) = {1\over2}-{1\over2}\cos 2\pi x
+w_{\rm Hann}(x) = 0.5-0.5\cos\xi
 ]]>
                     </phrase>
                   </textobject>
@@ -89,7 +91,7 @@ w_{\rm hann}(x) = {1\over2}-{1\over2}\cos 2\pi x
                   <textobject role="tex">
                     <phrase>
 <![CDATA[
-w_{\rm hamming}(x) = 0.54-0.46\cos 2\pi x
+w_{\rm Hamming}(x) = 0.54-0.46\cos\xi
 ]]>
                     </phrase>
                   </textobject>
@@ -108,7 +110,7 @@ w_{\rm hamming}(x) = 0.54-0.46\cos 2\pi x
                   <textobject role="tex">
                     <phrase>
 <![CDATA[
-w_{\rm blackman}(x) = 0.42 + 0.5\cos \pi(2x-1) + 0.08\cos 2\pi(2x-1)
+w_{\rm Blackman}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
 ]]>
                     </phrase>
                   </textobject>
@@ -127,7 +129,7 @@ w_{\rm blackman}(x) = 0.42 + 0.5\cos \pi(2x-1) + 0.08\cos 2\pi(2x-1)
                   <textobject role="tex">
                     <phrase>
 <![CDATA[
-w_{\rm lanczos}(x) = \sinc \pi(2x-1)
+w_{\rm Lanczos}(x) = \sinc \pi(2x-1)
 ]]>
                     </phrase>
                   </textobject>
@@ -146,7 +148,7 @@ w_{\rm lanczos}(x) = \sinc \pi(2x-1)
                   <textobject role="tex">
                     <phrase>
 <![CDATA[
-w_{\rm welch}(x) = 4x(1-x)
+w_{\rm Welch}(x) = 4x(1-x)
 ]]>
                     </phrase>
                   </textobject>
@@ -154,11 +156,76 @@ w_{\rm welch}(x) = 4x(1-x)
               </inlineequation>
             </entry>
           </row>
+          <row>
+            <entry>Nutall</entry>
+            <entry>
+              <inlineequation id="eq-windowing-nutall">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-nutall.png" format="PNG"/>
+                  </imageobject>
+                  <textobject role="tex">
+                    <phrase>
+<![CDATA[
+w_{\rm Nutall}(x) = 0.355768 - 0.487396\cos\xi
+                    + 0.144232\cos2\xi - 0.012604\cos3\xi
+]]>
+                    </phrase>
+                  </textobject>
+                </inlinemediaobject>
+              </inlineequation>
+            </entry>
+          </row>
+          <row>
+            <entry>Flat-top</entry>
+            <entry>
+              <inlineequation id="eq-windowing-flat-top">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-flat-top.png" format="PNG"/>
+                  </imageobject>
+                  <textobject role="tex">
+                    <phrase>
+<![CDATA[
+w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
+                      - 0.097\cos3\xi + 0.008\cos4\xi
+]]>
+                    </phrase>
+                  </textobject>
+                </inlinemediaobject>
+              </inlineequation>
+            </entry>
+          </row>
+          <row>
+            <entry>Kaiser α</entry>
+            <entry>
+              <inlineequation id="eq-windowing-kaiser">
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref="eq-windowing-kaiser.png" format="PNG"/>
+                  </imageobject>
+                  <textobject role="tex">
+                    <phrase>
+<![CDATA[
+\def\I#1{{\rm I}_{#1}}
+w_{\rm Kaiser,\alpha}(x) = {\I0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
+                            \over\I0(\pi\alpha)}
+]]>
+                    </phrase>
+                  </textobject>
+                </inlinemediaobject>
+              </inlineequation>
+              where I<subscript>0</subscript> is the modified Bessel function
+              of zeroth order and α is a parameter
+            </entry>
+          </row>
         </tbody>
       </tgroup>
     </table>
     <figure id="fig-windowing-types">
-      <title>Window functions: Hann, Hamming, Blackman, Lanczos, Welch.</title>
+      <title>
+        Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
+        Nutall, Flat-top, Kaiser 2.5.</title>
       <mediaobject>
         <imageobject>
           <imagedata fileref="windowing-types.png" format="PNG"/>
