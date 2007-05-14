@@ -21,12 +21,13 @@
     where <phrase role="math">L<subscript>x</subscript></phrase> and <phrase role="math">L<subscript>y</subscript></phrase>
     are the sizes of the respective axes.
     The sampling interval (distance between two adjacent points within the
-    scan) is denoted Δ. We assume that the sampling interval is the same in
+    scan) is denoted <phrase role="math">Δ</phrase>. We assume that the
+    sampling interval is the same in
     both the <phrase role="math">x</phrase> and <phrase role="math">y</phrase>
     direction. We assume that the surface height at a given point
     <phrase role="math">x</phrase>, <phrase role="math">y</phrase>
     can be described by a random function
-    ξ(<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
+    <phrase role="math">ξ</phrase>(<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
     that has given statistical properties.
   </para>
   <para>
@@ -115,7 +116,7 @@
       window and the tool will reset.
     </tip>
     <para>
-      More precisely, RMS (σ), skewness (γ<subscript>1</subscript>),
+      More precisely, RMS (<phrase role="math">σ</phrase>), skewness (γ<subscript>1</subscript>),
       and kurtosis (γ<subscript>2</subscript>) are computed
       from central moments of
       <phrase role="math">i</phrase>-th order
@@ -239,7 +240,7 @@
         the tangent of the angle, not the angle itself.
       </para>
       <para>
-        The normalization of the densities ρ(<phrase role="math">x</phrase>)
+        The normalization of the densities <phrase role="math">ρ</phrase>(<phrase role="math">x</phrase>)
         (where <phrase role="math">x</phrase> is the corresponding quantity,
         height or slope) is such that
       </para>
@@ -312,22 +313,22 @@
         are concrete values of heights at points
         [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>],
-        τ<subscript><phrase role="math">x</phrase></subscript> = 
-        <phrase role="math">x</phrase><subscript>1</subscript> - 
+        <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript> = 
+        <phrase role="math">x</phrase><subscript>1</subscript> − 
         <phrase role="math">x</phrase><subscript>2</subscript> and
-        τ<subscript><phrase role="math">y</phrase></subscript> = 
-        <phrase role="math">y</phrase><subscript>1</subscript> - 
+        <phrase role="math">τ</phrase><subscript><phrase role="math">y</phrase></subscript> = 
+        <phrase role="math">y</phrase><subscript>1</subscript> − 
         <phrase role="math">y</phrase><subscript>2</subscript>.
         The function
         <phrase role="math">w</phrase>(<phrase role="math">z</phrase><subscript>1</subscript>, <phrase role="math">z</phrase><subscript>2</subscript>,
-        τ<subscript><phrase role="math">x</phrase></subscript>,
-        τ<subscript><phrase role="math">y</phrase></subscript>)
+        <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>,
+        <phrase role="math">τ</phrase><subscript><phrase role="math">y</phrase></subscript>)
         denotes the two-dimensional probability density of the random function
-        ξ &gt; (<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
+        <phrase role="math">ξ</phrase> &gt; (<phrase role="math">x</phrase>, <phrase role="math">y</phrase>)
         corresponding to points
         [<phrase role="math">x</phrase><subscript>1</subscript>, <phrase role="math">y</phrase><subscript>1</subscript>],
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>]
-        and the distance between these points τ.
+        and the distance between these points <phrase role="math">τ</phrase>.
       </para>
       <para>
         For AFM measurements, we usually evaluate the one-dimensional
@@ -351,8 +352,9 @@ G_x(\tau_x) = {1\over N(M-m)}
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = τ<subscript><phrase role="math">x</phrase></subscript>/Δ. The function can thus be evaluated in a discrete set
-        of values of τ separated by the sampling interval Δ.
+        where <phrase role="math">m</phrase> = <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>/<phrase role="math">Δ</phrase>. The function can thus be evaluated in a discrete set
+        of values of <phrase role="math">τ</phrase> separated by the sampling
+        interval <phrase role="math">Δ</phrase>.
       </para>
       <para>
         The one-dimensional autocorrelation function is often assumed to have the
@@ -373,7 +375,8 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
         </mediaobject>
       </informalequation>
       <para>
-        where σ denotes the root mean square deviation of the heights and
+        where <phrase role="math">σ</phrase> denotes the root mean square
+        deviation of the heights and
         <phrase role="math">T</phrase> denotes the autocorrelation length.
       </para>
       <para>
@@ -435,9 +438,10 @@ H_x(\tau_x) = {1\over N(M-m)}
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = τ<subscript><phrase role="math">x</phrase></subscript>/Δ.
-        The function thus can be evaluated in a discrete set of values of τ
-        separated by the sampling interval Δ.
+        where <phrase role="math">m</phrase> = <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>/<phrase role="math">Δ</phrase>.
+        The function thus can be evaluated in a discrete set of values
+        of <phrase role="math">τ</phrase>
+        separated by the sampling interval <phrase role="math">Δ</phrase>.
       </para>
       <para>
         The one-dimensional height-height correlation function is often
@@ -458,7 +462,8 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
         </mediaobject>
       </informalequation>
       <para>
-        where σ denotes the root mean square deviation of the heights and
+        where <phrase role="math">σ</phrase> denotes the root mean square
+        deviation of the heights and
         <phrase role="math">T</phrase> denotes the autocorrelation length.
       </para>
       <para>
@@ -485,7 +490,8 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         obtained for a simulated surface having Gaussian autocorrelation
         function are plotted.  These functions are fitted by means of
         least-squares method using the formulae shown above. The resulting
-        values of σ and <phrase role="math">T</phrase> were practically same
+        values of <phrase role="math">σ</phrase> and
+        <phrase role="math">T</phrase> were practically same
         for both the approaches.
       </para>
       <figure id="fig-hhcf-acf-gauss">
@@ -623,7 +629,8 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
         the resulting PSDF and its fit for the same surface as used in the
         <link linkend="fig-hhcf-acf-gauss">previous figure</link> are
         plotted. We can see that the function can be again fitted by Gaussian
-        PSDF. The resulting values of σ and <phrase role="math">T</phrase>
+        PSDF. The resulting values of <phrase role="math">σ</phrase> and
+        <phrase role="math">T</phrase>
         were practically same as those from the HHCF and ACF fit.
       </para>
       <figure id="fig-psdf-gauss">
@@ -806,7 +813,8 @@ S = {N_{\rm bound}\over N}\;,\quad
         row (column).
       </listitem>
       <listitem>
-        Tangent of β<subscript>0</subscript>.  This is a characteristics of
+        Tangent of <phrase role="math">β</phrase><subscript>0</subscript>.
+        This is a characteristics of
         the steepnes of local slopes, closely related to the behaviour of
         autocorrelation and height-height correlation functions at zero.  For
         discrete values it is calculated as follows:
@@ -853,9 +861,11 @@ S = {N_{\rm bound}\over N}\;,\quad
       gradient.  <guimenuitem>Slope Distribution</guimenuitem> has also
       another mode operation called <guilabel>Per-angle graph</guilabel>.
       in which it plots the distribution of
-      <phrase role="math">r</phrase><superscript>2</superscript> over φ
+      <phrase role="math">r</phrase><superscript>2</superscript>
+      over <phrase role="math">φ</phrase>
       where we introduced polar coordinates
-      (<phrase role="math">r</phrase>, φ) in the plane of derivatives.
+      (<phrase role="math">r</phrase>, <phrase role="math">φ</phrase>) in the
+      plane of derivatives.
       The relation between the derivative Cartesian coordinates of the
       two-dimensional slope distribution and the
       <link linkend="inclinations-coordinates">facet inclination

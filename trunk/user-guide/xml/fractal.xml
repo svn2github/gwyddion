@@ -83,9 +83,10 @@
       method one divides the full surface into equal-sized squared boxes, and
       the variance (power of RMS value of heights), is calculated for
       particular box size. Fractal dimension is
-      evaluated from the slope β of a least-square regression line fit to the
-      data points in log-log plot of variance as
-      <phrase role="math">D<subscript>f</subscript></phrase> = 3 − β/2.
+      evaluated from the slope <phrase role="math">β</phrase> of a
+      least-square regression line fit to the data points in log-log plot
+      of variance as
+      <phrase role="math">D<subscript>f</subscript></phrase> = 3 − <phrase role="math">β</phrase>/2.
     </listitem>
     <listitem>
       Power spectrum method [3, 4, 5] is based on the power spectrum dependence
@@ -95,9 +96,10 @@
       dimension is evaluated from the slope In the power spectrum method, every
       line height profiles that forms the image is Fourier transformed and the
       power spectrum evaluated and then all these power spectra are averaged.
-      Fractal dimension is evaluated from the slope β of a least-square
+      Fractal dimension is evaluated from the slope
+      <phrase role="math">β</phrase> of a least-square
       regression line fit to the data points in log-log plot of power spectrum
-      as <phrase role="math">D<subscript>f</subscript></phrase> = 7/2 − β/2.
+      as <phrase role="math">D<subscript>f</subscript></phrase> = 7/2 − <phrase role="math">β</phrase>/2.
     </listitem>
   </orderedlist>
   <para>

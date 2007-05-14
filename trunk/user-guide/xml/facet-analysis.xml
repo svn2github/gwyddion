@@ -55,7 +55,8 @@
   </figure>
   <para>
     Both facet view and data view allow to select a point with mouse and read
-    corresponding facet normal inclination value ϑ and direction φ under
+    corresponding facet normal inclination value <phrase role="math">ϑ</phrase>
+    and direction <phrase role="math">φ</phrase> under
     <guilabel>Normal</guilabel>.  When you select a point on data view, the
     facet view selection is updated to show inclination in this point.
   </para>

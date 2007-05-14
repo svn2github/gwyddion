@@ -88,7 +88,7 @@ z = (1-x)z_0 + xz_1
         <listitem>
           <para>
             Key interpolation (more precisely Key's interpolation with
-            <phrase role="math">a</phrase> = -1/2 which has the highest
+            <phrase role="math">a</phrase> = −1/2 which has the highest
             interpolation order) makes use also of values in the
             before-preceding and after-following points
             <phrase role="math">z</phrase><subscript>-1</subscript>
@@ -453,18 +453,22 @@ w_k = {{\displaystyle{1\over r_k^4}}
       </indexterm>
       <para>
         In all Gwyddion tools facet and plane inclinations are displayed as
-        the spherical angles (ϑ, φ) of the plane normal vector.
+        the spherical angles
+        (<phrase role="math">ϑ</phrase>, <phrase role="math">φ</phrase>)
+        of the plane normal vector.
       </para>
       <para>
-        Angle ϑ is the angle between the
-        upward direction and the normal, this means ϑ = 0 for horizontal
+        Angle <phrase role="math">ϑ</phrase> is the angle between the
+        upward direction and the normal, this means
+        <phrase role="math">ϑ</phrase> = 0 for horizontal
         facets and increases with the slope. It is always positive.
       </para>
       <para>
-        Angle φ is the counter-clockwise measured
+        Angle <phrase role="math">φ</phrase> is the counter-clockwise measured
         angle between axis <phrase role="math">x</phrase> and the projection
         of the normal to the <phrase role="math">xy</phrase> plane, as
-        displayed on the following figure.  For facets it means φ corresponds
+        displayed on the following figure.  For facets it means
+        <phrase role="math">φ</phrase> corresponds
         to the downward direction of the facet.
       </para>
       <figure id="fig-inclination-coordinates">
@@ -496,7 +500,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
         horizontal (Δ<phrase role="math">x</phrase>),
         vertical (Δ<phrase role="math">y</phrase>)
         and total planar (<phrase role="math">R</phrase>) distances;
-        the azimuth φ (measured identically to inclination φ)
+        the azimuth <phrase role="math">φ</phrase> (measured identically to
+        inclination <phrase role="math">φ</phrase>)
         and the endpoint value difference (Δ<phrase role="math">z</phrase>)
         for a set of lines selected on the data.
       </para>

@@ -39,7 +39,8 @@
       In the following windowing formula table the independent variable
       <phrase role="math">x</phrase> is from interval [0, 1], which
       corresponds to the normalized abscissa; for simplicity variable
-      ξ = 2π<phrase role="math">x</phrase> is used in some formulas.
+      <phrase role="math">ξ</phrase> = 2π<phrase role="math">x</phrase>
+      is used in some formulas.
     </para>
     <table frame='none' id="table-windowing-types">
       <title>Windowing types</title>
@@ -261,7 +262,8 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
       </mediaobject>
     </informalequation>
     <para>
-      where the * is the complex conjugate symbol and function ψ is some
+      where the * is the complex conjugate symbol and
+      function <phrase role="math">ψ</phrase> is some
       function which can be different obeying some rules.
     </para>
     <para>
