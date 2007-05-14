@@ -226,10 +226,22 @@ w_{\rm Kaiser,\alpha}(x) = {\I0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
     <figure id="fig-windowing-types">
       <title>
         Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
-        Nutall, Flat-top, Kaiser 2.5.</title>
+        Nutall, Flat-top, Kaiser 2.5.
+      </title>
       <mediaobject>
         <imageobject>
           <imagedata fileref="windowing-types.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <figure id="fig-windowing-types-freq">
+      <title>
+        Envelopes of windowing functions frequency responses: Hann, Hamming,
+        Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="windowing-types-freq.png" format="PNG"/>
         </imageobject>
       </mediaobject>
     </figure>
