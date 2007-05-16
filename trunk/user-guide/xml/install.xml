@@ -856,7 +856,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <ulink url="http://www.perl.org/">Perl5</ulink>
       </listitem>
       <listitem>
-        <ulink url="http://www.gtk.org/gtk-doc/">gtk-doc</ulink> ≥ 1.4
+        <ulink url="http://www.gtk.org/gtk-doc/">gtk-doc</ulink> ≥ 1.8
       </listitem>
       <listitem>
         <ulink url="http://www.gnu.org/software/gettext/">GNU gettext</ulink> ≥ 0.12, including development stuff
