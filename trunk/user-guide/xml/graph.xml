@@ -68,7 +68,8 @@
     </para>
     <para>
       As the result you obtain the fitted curve and the set of its parameters.
-      The fit report can be saved into a file.  Pressing
+      The fit report can be saved into a file using
+      <guibutton>Save</guibutton> button.  Pressing
       <guibutton>OK</guibutton> button adds the fitted curve to the graph, if
       this is not desirable, quit the dialog with
       <guibutton>Cancel</guibutton>.
