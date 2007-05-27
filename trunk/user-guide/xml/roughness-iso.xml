@@ -2,29 +2,32 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect2 id="roughness-so">
+<sect2 id="roughness-iso">
   <title>One-Dimensional Roughness Parameters</title>
-  <sect3 id="roughness-iso-amplitude">
-    <title>Roughness Amplitude Parameters</title>
-    <para>
-      In the following formulas we assume the mean value of
-      <phrase role="math">r<subscript>j</subscript></phrase> is zero, i.e.
-      <informalequation id="eq-roughness-iso-rj">
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="eq-roughness-iso-rj.png" format="PNG"/>
-          </imageobject>
-          <textobject role="tex">
-            <phrase>
+  <para>
+    Standardized one-dimensional roughness parameters can be evaluated with
+    the roughness tool.
+  </para>
+  <para>
+    In the following formulas we assume the mean value of
+    <phrase role="math">r<subscript>j</subscript></phrase> is zero, i.e.
+    <informalequation id="eq-roughness-iso-rj">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="eq-roughness-iso-rj.png" format="PNG"/>
+        </imageobject>
+        <textobject role="tex">
+          <phrase>
 <![CDATA[
 r_j = z_j - \bar z
 ]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <phrase role="math">r<subscript>j</subscript></phrase> = <phrase role="math">z<subscript>j</subscript></phrase> -<phrase role="math">z̅</phrase>.
-    </para>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+  </para>
+  <sect3 id="roughness-iso-amplitude">
+    <title>Roughness Amplitude Parameters</title>
     <variablelist>
       <varlistentry>
         <term>
