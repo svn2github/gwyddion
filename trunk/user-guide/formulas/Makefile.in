@@ -13,7 +13,7 @@ T = TEMP-
 
 all: formulas
 
-formulas: Makefile tex-sources pngsize png-images
+formulas: Makefile tex-sources png-images
 
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status formulas/Makefile
@@ -34,7 +34,7 @@ png-images: $(PNGS)
 	    mv -f $(T)$@ $@; \
 	fi
 
-%.png: %.tex $(TEMPLATES) Makefile
+%.png: %.tex $(TEMPLATES) Makefile pngsize
 	cat defs.tex header.tex $< footer.tex >$(T)$<
 	$(TEX) --interaction=batchmode $(T)$<
 	$(DVIPS) -q -E -o $(T)$*.ps $(T)$*.dvi
