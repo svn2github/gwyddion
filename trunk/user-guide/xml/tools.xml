@@ -328,12 +328,12 @@
     </varlistentry>
     <varlistentry id="tool-roughness">
       <term>
-        <link linkend="iso-roughness">Roughness</link>
+        <link linkend="roughness-iso">Roughness</link>
         <guiicon><inlinegraphic fileref="gwy_iso_roughness-24.png"/></guiicon>
       </term>
       <listitem>
         <para>
-          Evaluates ISO XXX roughness parameters.
+          Evaluates standardized one-dimensional roughness parameters.
         </para>
       </listitem>
     </varlistentry>
