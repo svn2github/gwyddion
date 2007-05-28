@@ -263,8 +263,8 @@ R_{{\rm v}m} = {1\over m} \sum_{i=1}^m R_{{\rm v}i}
 <![CDATA[
 R_{{\rm v}i} = \left| \min r_j \right|
 \quad\hbox{for}\quad
-(i-1){N\over m} < x < i{N\over m}
-]]><!-- FIXME: What is x? -->
+(i-1){N\over m} < j < i{N\over m}
+]]>
                   </phrase>
                 </textobject>
               </mediaobject>
@@ -310,8 +310,8 @@ R_{{\rm p}m} = {1\over m} \sum_{i=1}^m R_{{\rm p}i}
 <![CDATA[
 R_{{\rm p}i} = \left| \max r_j \right|
 \quad\hbox{for}\quad
-(i-1){N\over m} < x < i{N\over m}
-]]><!-- FIXME: What is x? -->
+(i-1){N\over m} < j < i{N\over m}
+]]>
                   </phrase>
                 </textobject>
               </mediaobject>
