@@ -377,6 +377,25 @@
           </itemizedlist>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>Slope-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Inclination <phrase role="math">ϑ</phrase></guilabel>,
+              the deviation of the normal to the mean plane from the
+              <phrase role="math">z</phrase>-axis, see
+              <link linkend="inclinations-coordinates">inclinations</link>
+              for details.
+            </listitem>
+            <listitem>
+              <guilabel>Inclination <phrase role="math">φ</phrase></guilabel>,
+              the azimuth of the slope, as defined in
+              <link linkend="inclinations-coordinates">inclinations</link>.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <figure id="fig-grain-bounding-dims">
       <title>
