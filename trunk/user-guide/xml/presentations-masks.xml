@@ -5,18 +5,18 @@
 <sect1 id="presentations-masks">
   <title>Presentations and Masks</title>
   <para>
-    Presentations can be used to show the height field in other way than as
-    false colors map of heights. Several presentation methods are
+    Presentations can be used to show the height field in another way than as
+    a false color map of the heights. Several presentation methods are
     implemented, including shading, gradient filters and edge detectors.  It
-    is also possible to superimpose arbitrary data field over another one
-    as a presentation.
+    is also possible to superimpose an arbitrary data field over another one
+    as the presentation.
   </para>
   <para>
-    When you use data with superimposed presentation within data processing
-    modules or tools the results will be computed from original data –
-    presentation is thus only a visualization mode.  Presentations can be
-    computationaly intensive to calculate, therefore they are not
-    automatically updated when the underlying data change.
+    When you use data with a superimposed presentation in data processing
+    functions or tools the results are always computed from the original
+    data – presentations are only a visualization mode.  As presentations can
+    be computationaly intensive to calculate, they are not automatically
+    updated when the underlying data change.
   </para>
   <figure id="fig-mask-presentation-scheme">
     <title>
