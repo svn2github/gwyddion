@@ -257,7 +257,7 @@
             <footnote>
               <para>
                 And others, namely for import. The exact list depends on
-                formats supported by libraries on a particular platform.
+                formats supported by libraries on the particular platform.
               </para>
             </footnote>
           </entry>
@@ -313,7 +313,14 @@
           <entry>.sdf</entry>
           <entry>sdfile module</entry>
           <entry>Yes</entry>
-          <entry>No</entry>
+          <entry>
+            Yes
+            <footnote>
+              <para>
+                Only the text variant can be exported at present.
+              </para>
+            </footnote>
+          </entry>
         </row>
         <row>
           <entry>CSM Surf</entry>
