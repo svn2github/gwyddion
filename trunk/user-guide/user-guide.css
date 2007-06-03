@@ -30,4 +30,7 @@ h1, h2, h3, h4, div.navheader, div.navfooter { font-family: sans-serif; }
 h1 { margin-bottom: 6px; }
 h2, h3, h4 { margin-bottom: 0px; }
 h3.author { margin-top: 2px; }
+.guibutton, .guiicon, .guilabel, .guimenu, .guimenuitem, .guisubmenu {
+  font-style: italic;
+}
 #TitleImage { margin-top: 12px; float: right; border: none; }

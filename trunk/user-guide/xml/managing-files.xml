@@ -389,13 +389,13 @@
       to load the file as a particular format by expanding the <guilabel>File
         type</guilabel> selector and choosing a file type.  However, if the
       file format is not detected automatically it is very unlikely the file
-      can be loaded.
+      can be loaded at all.
     </para>
     <para>
       By enabling <guilabel>Show only loadable files of selected
         type</guilabel> the file list can be limited only to the selected
       type.  The file type label then indicates the filtering by appending
-      <guilabel>filtered</guilabel> to the end.  In the case of
+      <guilabel>(filtered)</guilabel> to the end.  In the case of
       <guilabel>Automatically detected</guilabel> file type this means
       the list to files is limited to those Gwyddion thinks it can load.
       This can be very convenient, on the other hand it can slow down listing
