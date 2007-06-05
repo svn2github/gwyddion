@@ -441,6 +441,24 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           </para>
         </listitem>
       </varlistentry>
+      <varlistentry id="edge-step">
+        <indexterm>
+          <primary>step detection</primary>
+        </indexterm>
+        <term>
+          <guilabel>Step</guilabel>
+        </term>
+        <listitem>
+          <para>
+            A step detection algorithm providing a good resolution, i.e. sharp
+            discontinuity lines, and a good dynamic range while being
+            relatively insensitive to noise.  The principle is quite simple:
+            it visualizes the square root of the difference between the 2/3
+            and 1/3 quantiles of the data values in a circular neighbourhood
+            of radius 2.5 pixels centered around the sample.
+          </para>
+        </listitem>
+      </varlistentry>
       <varlistentry id="edge-rms">
         <term>
           <guilabel>RMS</guilabel>
@@ -453,8 +471,8 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           <para>
             This step detector visualizes areas with high local value
             variation.  The root mean square of deviations from the mean
-            value in disc of radius 2.5 pixels centered around each sample
-            is calculated and displayed.
+            value of a circular neighbourhood of radius 2.5 pixels centered
+            around each sample is calculated and displayed.
           </para>
         </listitem>
       </varlistentry>
@@ -480,9 +498,10 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           <indexterm><primary>local nonlinearity edge detection</primary></indexterm>
           <para>
             An edge detector which visualizes areas that are locally very
-            non-planar. It fits a plane through disc of radius 2.5 pixels
-            centered around each sample and then calculates residual sum of
-            squares of this fit reduced to plane slope, i.e. divided by
+            non-planar. It fits a plane through a circular neighbourhood of
+            radius 2.5 pixels centered around each sample and then calculates
+            residual sum of squares of this fit reduced to plane slope, i.e.
+            divided by
             1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
             where
             <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
