@@ -23,7 +23,7 @@ fi
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
-  AC_MSG_ERROR([convert is required to build user guide (install ImageMagic)])
+  AC_MSG_ERROR([convert is required to build user guide (install ImageMagick)])
 fi
 
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[no])
