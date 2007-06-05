@@ -192,7 +192,7 @@ w_{\rm dechecker}
         <guisubmenu>Presentation</guisubmenu>
       </menuchoice>
     </para>
-    <para>
+    <para id="presentationops">
       Presentations are special filters that output their results into
       a separate layer that displays on top of the original data. Unlike the
       filters mentioned above, presentation filters preserve the measured data.
@@ -202,210 +202,8 @@ w_{\rm dechecker}
       window, and select <guimenuitem>Remove Presentation</guimenuitem>.
     </para>
     <para>
-      Currently, the following presentation filters are implemented in
-      Gwyddion:
-    </para>
-    <sect3 id="shade">
-      <title>Shading</title>
-      <para>
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Presentation</guisubmenu>
-          <guimenuitem>Shading</guimenuitem>
-        </menuchoice>
-      </para>
-      <indexterm><primary>shading</primary></indexterm>
-      <para>
-        Simple and very useful way of seeing data as illuminated from some
-        direction. The direction can be set by user.  It is also possible to
-        mix the shaded and original images for presentational purposes (the
-        resulting image is meaningless from the physical point of view).
-      </para>
-    </sect3>
-    <sect3 id="gradient">
-      <title>Gradient Detection Presentations</title>
-      <para>
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Presentation</guisubmenu>
-          <guimenuitem>Gradient...</guimenuitem>
-        </menuchoice>
-      </para>
-      <indexterm><primary>gradient filters</primary></indexterm>
-      <indexterm><primary>Sobel filter</primary></indexterm>
-      <indexterm><primary>Prewitt filter</primary></indexterm>
-      <para>
-        Sobel horizontal and vertical gradient filter and Prewitt horizontal
-        and vertical gradient filter create similar images as shading, however,
-        they output data as a result of convolution of data with relatively
-        standardized kernel. Thus, they can be used for further presentation
-        processing for example.  The kernels for horizontal filters are listed
-        below, vertical kernels differ only by reflection about
-        main diagonal.
-        <informalequation id="eq-filters-sobel-prewitt">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-filters-sobel-prewitt.png" format="PNG"/>
-            </imageobject>
-            <textobject role="tex">
-              <phrase>
-<![CDATA[
-w_{\rm prewitt} = \pmatrix{1/3&0&-1/3\cr1/3&0&-1/3\cr1/3&0&-1/3\cr}\;,\quad
-w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-      </para>
-    </sect3>
-    <sect3 id="edge">
-     <title>Edge Detection Presentations</title>
-      <para>
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Presentation</guisubmenu>
-          <guisubmenu>Edge Detection</guisubmenu>
-        </menuchoice>
-      </para>
-      <indexterm><primary>edge detection</primary></indexterm>
-      <indexterm><primary>Canny edge detection</primary></indexterm>
-      <indexterm><primary>Laplacian of Gaussians</primary></indexterm>
-      <para>
-        Edge detection – Canny edge detector can be used to extract image of
-        sharp edges on the data.  Laplacian presents a simple convolution with
-        the following kernel (that is the limit of discrete Laplacian of
-        Gaussians filter for σ → 0):
-        <informalequation id="eq-filters-laplacian">
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
-            </imageobject>
-            <textobject role="tex">
-              <phrase>
-<![CDATA[
-w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-      </para>
-      <para id="edge-zero-crossing">
-        <indexterm><primary>zero crossing edge detection</primary></indexterm>
-        Zero crossing edge detection marks lines where the result of
-        Laplacian of Gaussians filter changes sign, i.e. crosses zero.
-        The FWHM (full width half maximum) of the Gaussians determines the
-        level of details covered.  Threshold enables to exclude sign changes
-        with too small absolute value of the neighbour pixels, filtering out
-        fine noise.  Note however that for non-zero threshold the edge lines
-        may become discontinuous.
-      </para>
-      <para>
-        Some rather experimental edge detection algorithms are available too:
-      </para>
-      <variablelist>
-        <varlistentry>
-          <term>
-            <guilabel>RMS</guilabel>
-          </term>
-          <listitem>
-            <indexterm>
-              <primary>rms</primary>
-              <secondary>edge detection</secondary>
-            </indexterm>
-            <para>
-              Visualizes areas with high local value variation.  The root
-              mean square of deviations from the mean value in squares 5 × 5
-              pixels centered around each sample is calculated and displayed.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>
-            <guilabel>RMS Edge</guilabel>
-          </term>
-          <listitem>
-            <indexterm><primary>rms edge edge detection</primary></indexterm>
-            <para>
-              This function essentially postprocesses RMS output with a filter
-              similar to Laplacian to emphasize boundaries of areas with high
-              local value variation.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>
-            <guilabel>Local Non-Linearity</guilabel>
-          </term>
-          <listitem>
-            <indexterm><primary>local nonlinearity edge detection</primary></indexterm>
-            <para>
-              Visualizes areas that are locally very non-planar. It fits
-              a plane through squares 5 × 5 pixels centered around each sample
-              and then calculates residual sum of squares of this fit reduced
-              to plane slope, i.e. divided by
-              1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
-              where
-              <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
-              and
-              <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
-              are the plane coefficients in <phrase role="math">x</phrase>
-              and <phrase role="math">y</phrase> directions, respectively.
-              The square root is then displayed.
-            </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <indexterm>
-            <primary>inclination</primary>
-            <secondary>edge detection filter</secondary>
-          </indexterm>
-          <term>
-            <guilabel>Inclination</guilabel>
-          </term>
-          <listitem>
-            <para>
-              Visualizes the angle ϑ of local plane inclination.
-            </para>
-          </listitem>
-        </varlistentry>
-      </variablelist>
-    </sect3>
-    <sect3 id="local-contrast">
-      <title>Local Contrast</title>
-      <indexterm><primary>local contrast improvement</primary></indexterm>
-      <para>
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Presentation</guisubmenu>
-          <guimenuitem>Local contrast...</guimenuitem>
-        </menuchoice>
-      </para>
-      <para>
-        A method to visualize features in areas with low and high value
-        variation at the same time.  This is achieved by calculation of local
-        value range, or variation, around each data sample and stretching it to
-        equalize this variation over all data.
-      </para>
-    </sect3>
-    <sect3 id="logscale">
-    <title>Logscale</title>
-      <indexterm><primary>logarithmic scale</primary></indexterm>
-      <para>
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Presentation</guisubmenu>
-          <guimenuitem>Logscale</guimenuitem>
-        </menuchoice>
-      </para>
-      <para>
-        Logarithmic scale is used for false colors data presentation.
-      </para>
-    </sect3>
-    <para id="presentationops">
-      Moreover, there are the following presentation manipulation commands in
-      presentations menu:
+      The <guisubmenu>Presentation</guisubmenu> menu contains a few basic
+      presentation operations:
     </para>
     <sect3 id="presentation-attach">
       <title>Attach Presentation</title>
@@ -476,5 +274,203 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
       </mediaobject>
     </figure>
   </sect2>
+  <sect2 id="shade">
+    <title>Shading Presentation</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Shading</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>shading</primary></indexterm>
+    <para>
+      Simple and very useful way of seeing data as illuminated from some
+      direction. The direction can be set by user.  It is also possible to
+      mix the shaded and original images for presentational purposes (the
+      resulting image is meaningless from the physical point of view).
+    </para>
+  </sect2>
+  <sect2 id="gradient">
+    <title>Gradient Detection Presentations</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Gradient...</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>gradient filters</primary></indexterm>
+    <indexterm><primary>Sobel filter</primary></indexterm>
+    <indexterm><primary>Prewitt filter</primary></indexterm>
+    <para>
+      Sobel horizontal and vertical gradient filter and Prewitt horizontal
+      and vertical gradient filter create similar images as shading, however,
+      they output data as a result of convolution of data with relatively
+      standardized kernel. Thus, they can be used for further presentation
+      processing for example.  The kernels for horizontal filters are listed
+      below, vertical kernels differ only by reflection about
+      main diagonal.
+      <informalequation id="eq-filters-sobel-prewitt">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-filters-sobel-prewitt.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+w_{\rm prewitt} = \pmatrix{1/3&0&-1/3\cr1/3&0&-1/3\cr1/3&0&-1/3\cr}\;,\quad
+w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+    </para>
+  </sect2>
+  <sect2 id="edge">
+    <title>Edge Detection Presentations</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guisubmenu>Edge Detection</guisubmenu>
+      </menuchoice>
+    </para>
+    <indexterm><primary>edge detection</primary></indexterm>
+    <indexterm><primary>Canny edge detection</primary></indexterm>
+    <indexterm><primary>Laplacian of Gaussians</primary></indexterm>
+    <para>
+      Edge detection – Canny edge detector can be used to extract image of
+      sharp edges on the data.  Laplacian presents a simple convolution with
+      the following kernel (that is the limit of discrete Laplacian of
+      Gaussians filter for σ → 0):
+      <informalequation id="eq-filters-laplacian">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+    </para>
+    <para id="edge-zero-crossing">
+      <indexterm><primary>zero crossing edge detection</primary></indexterm>
+      Zero crossing edge detection marks lines where the result of
+      Laplacian of Gaussians filter changes sign, i.e. crosses zero.
+      The FWHM (full width half maximum) of the Gaussians determines the
+      level of details covered.  Threshold enables to exclude sign changes
+      with too small absolute value of the neighbour pixels, filtering out
+      fine noise.  Note however that for non-zero threshold the edge lines
+      may become discontinuous.
+    </para>
+    <para>
+      Some rather experimental edge detection algorithms are available too:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>rms</primary>
+            <secondary>edge detection</secondary>
+          </indexterm>
+          <para>
+            Visualizes areas with high local value variation.  The root
+            mean square of deviations from the mean value in squares 5 × 5
+            pixels centered around each sample is calculated and displayed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>RMS Edge</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>rms edge edge detection</primary></indexterm>
+          <para>
+            This function essentially postprocesses RMS output with a filter
+            similar to Laplacian to emphasize boundaries of areas with high
+            local value variation.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Local Non-Linearity</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>local nonlinearity edge detection</primary></indexterm>
+          <para>
+            Visualizes areas that are locally very non-planar. It fits
+            a plane through squares 5 × 5 pixels centered around each sample
+            and then calculates residual sum of squares of this fit reduced
+            to plane slope, i.e. divided by
+            1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+            where
+            <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
+            and
+            <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+            are the plane coefficients in <phrase role="math">x</phrase>
+            and <phrase role="math">y</phrase> directions, respectively.
+            The square root is then displayed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <indexterm>
+          <primary>inclination</primary>
+          <secondary>edge detection filter</secondary>
+        </indexterm>
+        <term>
+          <guilabel>Inclination</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Visualizes the angle <phrase role="math">ϑ</phrase> of local plane
+            inclination.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id="local-contrast">
+    <title>Local Contrast</title>
+    <indexterm><primary>local contrast improvement</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Local contrast...</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      A method to visualize features in areas with low and high value
+      variation at the same time.  This is achieved by calculation of local
+      value range, or variation, around each data sample and stretching it to
+      equalize this variation over all data.
+    </para>
+  </sect2>
+  <sect2 id="logscale">
+  <title>Logscale</title>
+    <indexterm><primary>logarithmic scale</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Logscale</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Logarithmic scale is used for false colors data presentation.
+    </para>
+  </sect2>
 </sect1>
-
