@@ -338,43 +338,110 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
       </menuchoice>
     </para>
     <indexterm><primary>edge detection</primary></indexterm>
-    <indexterm><primary>Canny edge detection</primary></indexterm>
-    <indexterm><primary>Laplacian of Gaussians</primary></indexterm>
+    <indexterm><primary>step detection</primary></indexterm>
     <para>
-      Edge detection – Canny edge detector can be used to extract image of
-      sharp edges on the data.  Laplacian presents a simple convolution with
-      the following kernel (that is the limit of discrete Laplacian of
-      Gaussians filter for σ → 0):
-      <informalequation id="eq-filters-laplacian">
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
-          </imageobject>
-          <textobject role="tex">
-            <phrase>
+      One is often interested in the visualization of the discontinuities
+      present in the image, particularly in discontinuities in the value and
+      discontinuities in the first derivative. Although the methods of
+      location of both are commonly referred to as <quote>edge
+        detection</quote> methods, these are actually quite different,
+      therefore we will refer to the former as to step detection and to the
+      latter as to edge detection.
+    </para>
+    <para>
+      The type of the discontinuity detection methods can be usually easily
+      told from its output as edge detection methods produce typical double
+      edges at value discontinuities as is illustrated in the following
+      figure.  While the positions of the upper and lower edge in an ideal step
+      coincide, real-world data tend to actually contain two distinct edges
+      as is illustrated in the picture.  In addition, finding two edges
+      on a value step, even an ideally sharp one, is often an inherent
+      property of edge detection methods.
+    </para>
+    <figure id="fig-step-vs-edge">
+      <title>
+        Step versus edge in one dimension.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="step-edge.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>One-dimensional step and edge schematic image</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+      The following step and edge detection functions are available in
+      Gwyddion (the later ones are somewhat experimental, on they other
+      hand they usually give better results than the well-known algorithms):
+    </para>
+    <variablelist>
+      <varlistentry id="edge-canny">
+        <term>
+          <guilabel>Canny</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Canny</primary>
+            <secondary>edge detection</secondary>
+          </indexterm>
+          <para>
+            Canny edge detector is a well-known step detector can be used to
+            extract the image of sharp value discontinuities in the data as
+            thin single-pixel lines.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-log">
+        <term>
+          <guilabel>Laplacian of Gaussians</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Laplacian of Gaussians</primary>
+          </indexterm>
+          <para>
+            Laplacian presents a simple convolution with
+            the following kernel (that is the limit of discrete Laplacian of
+            Gaussians filter for <phrase role="math">σ</phrase> → 0):
+            <informalequation id="eq-filters-laplacian">
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
 <![CDATA[
 w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
 ]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-    </para>
-    <para id="edge-zero-crossing">
-      <indexterm><primary>zero crossing edge detection</primary></indexterm>
-      Zero crossing edge detection marks lines where the result of
-      Laplacian of Gaussians filter changes sign, i.e. crosses zero.
-      The FWHM (full width half maximum) of the Gaussians determines the
-      level of details covered.  Threshold enables to exclude sign changes
-      with too small absolute value of the neighbour pixels, filtering out
-      fine noise.  Note however that for non-zero threshold the edge lines
-      may become discontinuous.
-    </para>
-    <para>
-      Some rather experimental edge detection algorithms are available too:
-    </para>
-    <variablelist>
-      <varlistentry>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-zero-crossing">
+        <term>
+          <guilabel>Zero Crossing</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>zero crossing edge detection</primary>
+          </indexterm>
+          <para>
+            Zero crossing step detection marks lines where the result of
+            Laplacian of Gaussians filter changes sign, i.e. crosses zero.
+            The FWHM (full width half maximum) of the Gaussians determines
+            the level of details covered.  Threshold enables to exclude sign
+            changes with too small absolute value of the neighbour pixels,
+            filtering out fine noise.  Note, however, that for non-zero
+            threshold the edge lines may become discontinuous.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-rms">
         <term>
           <guilabel>RMS</guilabel>
         </term>
@@ -384,13 +451,14 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
             <secondary>edge detection</secondary>
           </indexterm>
           <para>
-            Visualizes areas with high local value variation.  The root
-            mean square of deviations from the mean value in squares 5 × 5
-            pixels centered around each sample is calculated and displayed.
+            This step detector visualizes areas with high local value
+            variation.  The root mean square of deviations from the mean
+            value in disc of radius 2.5 pixels centered around each sample
+            is calculated and displayed.
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id="edge-rms-edge">
         <term>
           <guilabel>RMS Edge</guilabel>
         </term>
@@ -399,21 +467,22 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           <para>
             This function essentially postprocesses RMS output with a filter
             similar to Laplacian to emphasize boundaries of areas with high
-            local value variation.
+            local value variation.  Despite the name it is still a step
+            detector.
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id="edge-local-nonlinearity">
         <term>
           <guilabel>Local Non-Linearity</guilabel>
         </term>
         <listitem>
           <indexterm><primary>local nonlinearity edge detection</primary></indexterm>
           <para>
-            Visualizes areas that are locally very non-planar. It fits
-            a plane through squares 5 × 5 pixels centered around each sample
-            and then calculates residual sum of squares of this fit reduced
-            to plane slope, i.e. divided by
+            An edge detector which visualizes areas that are locally very
+            non-planar. It fits a plane through disc of radius 2.5 pixels
+            centered around each sample and then calculates residual sum of
+            squares of this fit reduced to plane slope, i.e. divided by
             1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
             where
             <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
@@ -425,7 +494,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id="edge-inclination">
         <indexterm>
           <primary>inclination</primary>
           <secondary>edge detection filter</secondary>
@@ -436,7 +505,10 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         <listitem>
           <para>
             Visualizes the angle <phrase role="math">ϑ</phrase> of local plane
-            inclination.
+            inclination.  Technically this function belongs to step detectors,
+            however, the emphasis of edges in its output is not very strong
+            and it is more intended for easy visual comparison of different
+            slopes present in the image.
           </para>
         </listitem>
       </varlistentry>
