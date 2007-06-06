@@ -532,6 +532,27 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         </listitem>
       </varlistentry>
     </variablelist>
+    <figure id="fig-edge-method-comparison">
+      <title>
+        Comparison of step and edge detection methods on several interesting,
+        or typical example data.  Canny and Zero crossing are step detectors
+        that produce one pixel wide edge lines, Step and Inclination are step
+        detectors with continous output, Local nonlinearity is an edge
+        detector – the edge detection can be easily observed on the second
+        and third row. Note zero crossing is tunable, it parameters were
+        chosen to produce reasonable output in each example.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="edge-method-comparison.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>
+            Comparison of step and edge detection methods on several images
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
   </sect2>
   <sect2 id="local-contrast">
     <title>Local Contrast</title>
