@@ -28,6 +28,22 @@
     More control over the way values are mapped to colors is possible with
     <link linkend="color-range">Color range</link> tool.
   </para>
+  <figure id="fig-gradient-selectors">
+    <title>
+      A data window with the right-click color gradient pop up menu and the
+      full color gradient list.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="gradient-selectors.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>
+          Comparison of step and edge detection methods on several images
+        </phrase>
+      </textobject>
+    </mediaobject>
+  </figure>
   <sect2 id="color-range">
     <title>
       Color Range Tool

@@ -18,7 +18,9 @@
       <guimenuitem>Metadata Browser</guimenuitem>
     </menuchoice>
     command.  The browser lists all available metadata as Name, Value pairs.
-    It also enables to modify and delete values or add new ones.
+    It also enables to modify and delete values or add new ones.  It is
+    possible to export all metadata of a channel to a text file with
+    <guibutton>Save</guibutton> button.
   </para>
   <para>
     The level of metadata support differs wildly between file formats.
