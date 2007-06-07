@@ -473,14 +473,15 @@ w_k = {{\displaystyle{1\over r_k^4}}
       </para>
       <figure id="fig-inclination-coordinates">
         <title>
-          Facet orientation measured as counterclockwise angle from
-          <phrase role="math">x</phrase>-axis to the projection of facet
-          normal vector <phrase role="math">n</phrase> to
-          <phrase role="math">xy</phrase> plane.
+          Surface facet (displayed blue) orientation measured as the
+          counterclockwise angle from <phrase role="math">x</phrase>-axis to
+          the projection of facet normal vector
+          <phrase role="math">n</phrase> to <phrase role="math">xy</phrase>
+          plane.
         </title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="inclination-phi.png" format="PNG"/>
+            <imagedata fileref="inclination.png" format="PNG"/>
           </imageobject>
           <textobject>
             <phrase>Measuring facet orientation</phrase>
@@ -504,6 +505,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
         inclination <phrase role="math">φ</phrase>)
         and the endpoint value difference (Δ<phrase role="math">z</phrase>)
         for a set of lines selected on the data.
+      </para>
+      <para>
+        The list of distances can be saved to a text file with
+        <guibutton>Save</guibutton> button.
       </para>
       <figure id="fig-distance-screenshot">
         <title>

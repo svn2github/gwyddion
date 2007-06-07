@@ -95,6 +95,24 @@
       </itemizedlist>
     </para>
   </sect2>
+  <sect2 id="opengl-3d-view-saving-images">
+    <title>Saving Images</title>
+    <para>
+      The 3D view can be saved into a bitmap image with the
+      <guibutton>Save</guibutton> button.  The output is currently always
+      a PNG (Portable Network Graphics) image with exactly the same size and
+      contents as displayed on the screen.  Entering a different file
+      extensions than <filename>.png</filename> still produces an image in
+      PNG format, albeit with a confusing extension.
+    </para>
+    <para>
+      Note due to the peculiarities of certain operating systems, graphics
+      drivers and windowing environments, artefacts may sometimes appear on
+      the exported image in parts corresponding to obscured parts of the 3D
+      view.  If you encounter this problem, make sure the 3D view is not
+      obscured by other windows on export.
+    </para>
+  </sect2>
   <sect2 id="opengl-material-editor">
     <title>OpenGL Material Editor</title>
     <para>OpenGL material editor can be invoked with

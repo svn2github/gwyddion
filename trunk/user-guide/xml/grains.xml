@@ -184,6 +184,23 @@
         <application>Gwyddion</application>.
       </para>
     </sect3>
+    <sect3 id="grain-correlation">
+      <title>
+        Grain Property Correlation
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Correlate</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Grain correlation plots a graph of one selected graph quantity as
+        the function of another grain quantity, visualizing correlations
+        between them.
+      </para>
+    </sect3>
     <sect3 id="grain-measure">
       <title>
         Grain Measurement Tool
