@@ -4,12 +4,13 @@ Some random remarks:
   downloaded the wrong package.  This is the DocBook source code.  Get the
   ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
 
-* xml/      contains the XML DocBook sources,
-  formulas/ contains TeX sources of formula images
+* xml/      contains the XML DocBook sources
+  formulas/ contains rules for TeX formula rendering and will contain the
+            extracted and rendered formulas
   images/   contains bitmap images
   xhtml/    will contain the compiled XHTML
 
-* GNU make is required; configure detects whether you have it, but you
+* GNU make is required; configure detects whether you have it, but you may
   still have to type (for example)
 
     gmake
