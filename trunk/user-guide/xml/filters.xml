@@ -92,7 +92,7 @@ w_{\rm dechecker}
       </listitem>
       <listitem id="filter-gaussian">
         <indexterm><primary>gaussian filter</primary></indexterm>
-        Gaussian filter – a smoothing filter, the size parameters determines
+        Gaussian filter – a smoothing filter, the size parameter determines
         the FWHM (full width at half maximum) of the Gaussian.  The relation
         between FWHM and σ is
         <informalequation id="eq-gaussian-fwhm">
@@ -106,7 +106,7 @@ w_{\rm dechecker}
             <textobject role="tex">
               <phrase>
 <![CDATA[
-{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma
+{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
 ]]>
               </phrase>
             </textobject>

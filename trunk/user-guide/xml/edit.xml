@@ -176,9 +176,10 @@
       </menuchoice>
     </para>
     <para>
-      This module tries to substitute data under the mask by solving the Laplacian
-      equation. Unmasked data are used as the virtual source and information in
-      the masked regions is iteratively computed.
+      This function substitutes the data under the mask by the solution of
+      solving the Laplacian equation. The data values around the masked areas
+      define the boundary conditions.  The solution is calculated iteratively
+      and it can take some time to converge.
     </para>
   </sect2>
   <sect2 id="fractal-correction">
@@ -236,8 +237,10 @@
       (usually <phrase role="math">x</phrase>-axis) can be mutually shifted
       by some amount or have slightly different slopes. The basic line
       correction functions deal with this type of discrepancy. Several
-      functions can be used: The Polynomial tool and then several procedures
-      under
+      functions can be used: The
+      <link linkend="line-polynomial">Polynomial</link> and
+      <link linkend="path-level">Path level</link> tools and then several
+      procedures under
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Correct Data</guisubmenu>
