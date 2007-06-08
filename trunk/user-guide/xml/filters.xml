@@ -524,10 +524,10 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         <listitem>
           <para>
             Visualizes the angle <phrase role="math">ϑ</phrase> of local plane
-            inclination.  Technically this function belongs to step detectors,
-            however, the emphasis of edges in its output is not very strong
-            and it is more intended for easy visual comparison of different
-            slopes present in the image.
+            inclination.  Technically this function belongs among step
+            detectors, however, the accentuation of steps in its output is not
+            very strong and it is more intended for easy visual comparison of
+            different slopes present in the image.
           </para>
         </listitem>
       </varlistentry>
