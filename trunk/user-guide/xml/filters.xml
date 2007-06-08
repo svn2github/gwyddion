@@ -504,9 +504,9 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
             divided by
             1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
             where
-            <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript>
+            <phrase role="math">b<subscript>x</subscript></phrase>
             and
-            <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+            <phrase role="math">b<subscript>y</subscript></phrase>
             are the plane coefficients in <phrase role="math">x</phrase>
             and <phrase role="math">y</phrase> directions, respectively.
             The square root is then displayed.
