@@ -116,6 +116,14 @@
       some numerical modelling
       (see e.g. [<link linkend="tip-convolution-artefacts-ref-2">2</link>]).
     </para>
+    <para>
+      Note this alrgorithms (as well as the following two) requires compatible
+      scan and tip data, i.e. the physical dimensions of a scan pixel and
+      of a tip image pixels have to be equal.  This relation is automatically
+      guaranteed for tips obtained by blind estimate when used on the same
+      data (or data with an identical measure).  If you obtained the tip
+      image other means, you may need to resample it.
+    </para>
     <figure id="fig-tip-simulated-convolution">
       <title>
         Simulated fractal surface before (left) and after (right) tip
@@ -130,7 +138,7 @@
     <para id="tip-surface-reconstruction">
       The opposite of the tip convolution is surface reconstruction (erosion)
       that can be used to correct partially the tip influence on image data.
-      For doing this, use Surface Reconstruction module
+      For doing this, use Surface Reconstruction function
       (<menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Tip</guisubmenu>
@@ -160,8 +168,9 @@
     <figure id="fig-tip-certainty-map">
       <title>
         Certainty map obtained from standard grating. Note that the modelled
-        tip parameters were taken from datasheet here for illustration purposes.
-        (left) - sample, (right) sample with marked certainty map.
+        tip parameters were taken from datasheet here for illustration
+        purposes. (left) – sample, (right) – sample with marked
+        certainty map.
       </title>
       <mediaobject>
         <imageobject>
@@ -174,7 +183,7 @@
       image that are corrupted by tip convolution in an irreversible way. For
       SPM data analysis on surfaces with large slopes it is important to
       check always presence of these points. Within Gwyddion you can use
-      Ceratinty map module for creating these maps
+      Ceratinty Map function for creating these maps
       (<menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Tip</guisubmenu>
