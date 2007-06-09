@@ -341,22 +341,24 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
     <indexterm><primary>step detection</primary></indexterm>
     <para>
       One is often interested in the visualization of the discontinuities
-      present in the image, particularly in discontinuities in the value and
-      discontinuities in the first derivative. Although the methods of
-      location of both are commonly referred to as <quote>edge
-        detection</quote> methods, these are actually quite different,
-      therefore we will refer to the former as to step detection and to the
-      latter as to edge detection.
+      present in the image, particularly in discontinuities in the value
+      (zeroth order) and discontinuities in the derivative (first order).
+      Although the methods of location of both are commonly referred to as
+      <quote>edge detection</quote> methods, these are actually quite
+      different, therefore we will refer to the former as to step detection
+      and to the latter as to edge detection.  Methods for the detection of
+      more specific features, e.g. corners, are commonly used too, these
+      methods usually are of order zero.
     </para>
     <para>
-      The type of the discontinuity detection methods can be usually easily
-      told from its output as edge detection methods produce typical double
-      edges at value discontinuities as is illustrated in the following
-      figure.  While the positions of the upper and lower edge in an ideal step
-      coincide, real-world data tend to actually contain two distinct edges
-      as is illustrated in the picture.  In addition, finding two edges
-      on a value step, even an ideally sharp one, is often an inherent
-      property of edge detection methods.
+      The order of a discontinuity detection method can be easily seen on its
+      output as edge detection methods produce typical double edge lines at
+      value discontinuities as is illustrated in the following figure. While
+      the positions of the upper and lower edge in an ideal step coincide,
+      real-world data tend to actually contain two distinct edges as is
+      illustrated in the picture.  In addition, finding two edges on a value
+      step, even an ideally sharp one, is often an inherent feature of edge
+      detection methods.
     </para>
     <figure id="fig-step-vs-edge">
       <title>
