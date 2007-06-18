@@ -105,5 +105,71 @@
       </mediaobject>
     </figure>
   </sect2>
-</sect1>
+  <sect2 id="graph-fdcurve">
+    <title>Force-Distance curve analysis</title>
+    <indexterm><primary>force distance curve analysis</primary></indexterm>
+    <para>
+      Force-Distance (FD) curve analysis is designed to be used for fitting
+      parts of complete FD curve with respect to different theoretical models
+      of forces acting between tip and sample. 
+    </para>
+    <para>
+      There are several models implemented in Gwyddion, all now related to
+     van der Waals force fitting only (June 2007). You can choose between
+     these curves and operate the module in the same way as for general
+     curve fitting module. 
+    </para>
+    <para>
+      The orientation of the FD curve as understood in Gwyddion is shown
+      on the following picture.
+    </para>
+    <figure id="fig-graph-fdcurve_orientation">
+      <title>Force-distance curve orientation in Gwyddion</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="graph_fd_orientation.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+     <para>
+     The following functions are implemented (all 
+     model tips above planar surface):
+    </para>
+    <itemizedlist>
+      <listitem>
+      vdW: sphere - simple spherical tip model
+      See: B. Cappella, G. Dietler, Surface Science Reports 34 (1999) 1-104
+      </listitem>
+      <listitem>
+      vdW: offset sphere: simple spherical tip model with offset to prevent singularity. 
+      See: N. A. Burnham et al., Nanotechnology 8 (1997) 67–75.
+      </listitem>
+        <listitem>
+      vdW: semisphere: semispherical tip (downwards oriented semisphere).
+      See: S.I. Zanette et al., Surface Science 453 (2000) 75–82
+      </listitem>
+       <listitem>
+      vdW:pyramide: pyramidal tip (downwards oriented 4-side pyramid), with
+      defined slope.
+      See: S.I. Zanette et al., Surface Science 453 (2000) 75–82
+      </listitem>
+     <itemizedlist>
+    <para>
+      As the result you obtain the fitted curve and the set of its parameters.
+      The fit report can be saved into a file using
+      <guibutton>Save</guibutton> button.  Pressing
+      <guibutton>OK</guibutton> button adds the fitted curve to the graph, if
+      this is not desirable, quit the dialog with
+      <guibutton>Cancel</guibutton>.
+    </para>
+    <figure id="fig-graph-fdcurve-screenshot">
+      <title>Fit force-distance curve screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="graph_fdcurve.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </sect2>
+ </sect1>
 
