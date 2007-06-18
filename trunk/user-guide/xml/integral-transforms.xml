@@ -245,6 +245,17 @@ w_{\rm Kaiser,\alpha}(x) = {\I0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
         </imageobject>
       </mediaobject>
     </figure>
+    <para>
+      Fourier transforms of data with sizes that are not factorable into
+      small prime factors can be very slow – or not implemented at all.
+      <application>Gwyddion</application> can use built-in FFT routines or
+      the famous <ulink url="http://www.fftw.org/">FFTW</ulink> library to
+      perform Fourier transforms.  In both cases data may need to be resampled
+      to a more FFT-friendly size.  This resampling is performed
+      automatically, however, as resampling generally distorts the data,
+      it can result in slightly different outputs of functions that employ
+      FFT, such as <link linkend="power-spectral-density-1d">PSDF</link>.
+    </para>
   </sect2>
   <sect2 id="wavelet-transform">
     <title>Wavelet Transform</title>
