@@ -1,0 +1,21 @@
+/*
+ * gwyconfig.h
+ *
+ * This is a static Win32 version.
+ */
+
+#ifndef __GWY_CONFIG_H__
+#define __GWY_CONFIG_H__
+
+#define GWYDDION_HAS_OPENGL 1
+
+/* Math functions become available when gwymath.h is included. */
+#define pow10(x) pow(10.0, (x))
+/* hypot() is defined */
+#define cbrt(x) pow((x), 1.0/3.0)
+#define acosh(x) _gwy_math_acosh(x)
+#define asinh(x) _gwy_math_asinh(x)
+#define atanh(x) _gwy_math_atanh(x)
+
+#endif /* __GWY_CONFIG_H__ */
+

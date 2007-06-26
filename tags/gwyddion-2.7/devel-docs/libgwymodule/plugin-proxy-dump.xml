@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="plugin-proxy-dump" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Dump Format</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Dump Format</refname>
+    <refpurpose>
+      Dumb dump file format used for data exchange between plug-in proxy and
+      plug-ins
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Overall Structure</title>
+    <para>
+      The dump format consists of text lines, except for the actual data
+      samples which are for efficiency reasons stored as arrays of (binary)
+      IEEE double precision numbers.
+    </para>
+    <para>
+      Since dump files contain binary data (along with text lines)
+      they have to be always opened in binary mode to avoid end-of-line
+      conversions (on systems distinguishing between text and binary files).
+      Unix end-of-lines are always used, i.e., lines are always terminated
+      by a single LF (line feed) character, ASCII 0x0a.  Plugin-proxy
+      always writes data with Unix end-of-lines and although it may read
+      dumps with CRLF end-of-lines without problems too, don't count on it.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>String Data</title>
+    <para>The text lines have the form
+      <literal><parameter>key</parameter>=<parameter>value</parameter></literal>.
+      The keys are keys in data <link linkend="GwyContainer">container</link>
+      created for the data, and the values are corresponding values.
+      Except for a few special keys specified below, all values are stored
+      as strings.
+    </para>
+    <para>
+      There are only a few types of data you may expect to find in or 
+      want to write to a dump file:
+      <itemizedlist>
+        <listitem>
+          Data fields.  They use some specific keys and you can read more
+          about them
+          <link linkend="plugin-proxy-dump-data-fields">below</link>.
+        </listitem>
+        <listitem>
+          Metadata about the data.  They start with <literal>/meta/</literal>
+          followed by an arbitrary key string.  Not used directly by
+          <application>Gwyddion</application>, but will appear in Metadata Browser.
+        </listitem>
+        <listitem>
+          Queer stuff (everything else).  It's best to ignore it.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </refsect1>
+  <refsect1>
+    <title id="plugin-proxy-dump-data-fields">Data Fields</title>
+    <para>
+      The data samples themselves are stored as a sequence of binary IEEE
+      double precision floating point numbers in little-endian byte order.
+      The array is
+      preceded by line <literal>/0/data=[</literal> and
+      a single left bracket <literal>[</literal> (with no newline after).
+      The data samples are closed by a sequence of two right brackets
+      <literal>]]</literal> and a single LF character.
+      The end of data field marker serves as a check the data was read
+      correctly, as its size must be know beforehand.
+    </para>
+    <para>
+      To be more precise, <literal>/0/data</literal> is the name of the
+      main data field. As data fields can generally have arbitrary names
+      and left bracket is a valid value, a <literal>[</literal> as a value
+      marks start of a data field if and only if the next line starts with a
+      <literal>[</literal> too.  Otherwise it is a regular metadata value.
+    </para>
+    <para>
+      The data samples are stored in `screen' order.  That means they are
+      ordered by lines (rows), starting from the uppermost one, and inside
+      lines they are ordered by column, from left to right.
+    </para>
+    <para>
+      The resolutions and physical dimensions are specified using special
+      keys <literal>/0/data/xres</literal>, <literal>/0/data/yres</literal>,
+      <literal>/0/data/xreal</literal>, and <literal>/0/data/yreal</literal>.
+      Since the resolutions must be obviously known before data samples can
+      be read, the lines
+      <literal>/0/data/xres=<parameter>x-resolution</parameter></literal>
+      and
+      <literal>/0/data/yres=<parameter>y-resolution</parameter></literal>
+      must appear somewhere before them in the file.  It is also strongly
+      recommended to specify physical dimensions too, though it is not
+      strictly necessary if you don't mind some bogus default value (like
+      1 meter) is substituted then.
+    </para>
+    <para>
+      All the values are in base SI units, i.e., dimensions are in meters
+      (not micrometers, nanometres, or kilometres), currents in ampers
+      (not picoampers), etc.  The base units can be specified using the
+      <literal>/0/data/unit-xy</literal> (lateral) and
+      <literal>/0/data/unit-z</literal> (value, height) keys.
+      If not specified, meters are assumed.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title id="plugin-proxy-dump-example">Example</title>
+    <para>
+      A dump file with a single data field <literal>"/0/data"</literal>
+      thus could look (replacing binary data with dots):
+    </para>
+    <informalexample><programlisting><![CDATA[
+/0/data/xres=240
+/0/data/yres=240
+/0/data/xreal=4.1e-08
+/0/data/yreal=4.1e-08
+/0/data/unit-xy=m
+/0/data/unit-z=m
+/0/data=[
+[...
+...
+...]]
+]]></programlisting></informalexample>
+    <para>
+      This file would describe square data of size 240 × 240 samples
+      and physical dimension 41nm × 41nm, with height as value.
+    </para>
+    <para>
+      If you want to pass mask (or presentation) instead of the main data,
+      just replace the <literal>/0/data</literal> with
+      <literal>/0/mask</literal> (or <literal>/0/show</literal>) in the
+      previous description.  If they are present in the data, they are
+      always written to the dump, so you don't need anything special to
+      read them.
+    </para>
+  </refsect1>
+  <refsect1>
+    <title>Reference Implementations</title>
+    <para>
+      A few sample dump format implementations are included in <application>Gwyddion</application>
+      source distribution (see the directory
+      <filename>plugins/file</filename> and the <filename>README</filename>
+      there).
+    </para>
+    <para>
+      For several languages they were implemented as [language] modules that
+      can be simply imported and used in your plug-in.  The others have to
+      carry the implementation with them if they want to use it.
+    </para>
+    <sect2>
+      <title>Using library implementations directly</title>
+      <para>
+        Following languages can benefit from language modules: Perl, Python,
+        and Ruby.  As of <application>Gwyddion</application> 1.6 their
+        installation and import was finally standardized (in previous
+        versions they were be installed into a hardly predictable directory
+        that might or might not be in actual module search path for the
+        language).
+      </para>
+      <para>
+        Plugin-proxy
+        export an environment variable <varname>GWYPLUGINLIB</varname> that
+        points to top-level directory of plug-in library modules.  It
+        contains a subdirectory for each language (<filename>perl</filename>,
+        <filename>python</filename>, etc.).  A plug-in should add
+        corresponding subdirectory to its module search path –
+        that is to <varname>@INC</varname> in Perl, <varname>sys.path</varname>
+        in Python, and <varname>$:</varname> in Ruby.  Then the module can
+        be imported as usual.  Please see the sample modules for possible
+        implementations.
+      </para>
+    </sect2>
+    <sect2>
+      <title>C</title>
+      <para>
+        The plug-in proxy itself is always the most complete reference
+        C implementation.  See namely
+        <function>text_dump_export()</function> and
+        <function>text_dump_import()</function> functions
+        in <filename>modules/plugin-proxy.c</filename>.
+        Note this file has a special licensing exception, you can
+        freely study it for the purpose of creation of <application>Gwyddion</application> plug-ins
+        without becoming `tainted'.
+      </para>
+    </sect2>
+    <sect2>
+      <title>C++</title>
+      <para>
+        A sample C++ data-processing plug-in is included in <application>Gwyddion</application>
+        distribution since version 1.4.
+        It is divided to a simple class implementing dump file reading and
+        writing (<filename>dump.cc</filename>, <filename>dump.hh</filename>)
+        and the plug-in itself (<filename>invert_cpp.cc</filename>).
+        These files are in the public domain.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Perl</title>
+      <para>
+        A Perl module <systemitem class="library">Gwyddion::dump</systemitem>
+        handling reading and writing dump files
+        is distributed as a part of <application>Gwyddion</application>
+        since version 1.4.
+        This module is in the public domain.
+      </para>
+      <para>
+        A sample Perl data-processing plug-in using
+        <systemitem class="library">Gwyddion::dump</systemitem> is included
+        in the source distribution:
+        <filename>plugins/process/invert_perl.pl</filename>.
+        This script is in the public domain.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Python</title>
+      <para>
+        A Python module <systemitem class="library">Gwyddion.dump</systemitem>
+        handling reading and writing dump files
+        is distributed as a part of <application>Gwyddion</application>
+        since version 1.4.
+        This module is in the public domain.
+      </para>
+      <para>
+        A sample Python data-processing plug-in using
+        <systemitem class="library">Gwyddion.dump</systemitem> is included
+        in the source distribution:
+        <filename>plugins/process/invert_python.py</filename>.
+        This script is in the public domain.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Ruby</title>
+      <para>
+        A Ruby module <systemitem class="library">gwyddion/dump</systemitem>
+        handling reading and writing dump files
+        is distributed as a part of <application>Gwyddion</application>
+        since version 1.6.
+        This module is in the public domain.
+      </para>
+      <para>
+        Two sample Ruby data-processing plug-ins using
+        <systemitem class="library">gwyddion/dump</systemitem>, one for vanilla
+        Ruby and one making use of
+        <systemitem class="library">NArray</systemitem>, are included
+        in the source distribution:
+        <filename>plugins/process/invert_ruby.py</filename> and
+        <filename>plugins/process/invert_narray.py</filename>.
+        These scripts are in the public domain.
+      </para>
+    </sect2>
+    <sect2>
+      <title>Pascal/Delphi</title>
+      <para>
+        A sample Pascal/Delphi data-processing plug-in is included in <application>Gwyddion</application>
+        distribution since version 1.4.
+        The plug-in is implemented in the Delphi Pascal dialect, so it
+        should work with FreePascal and Delphi.
+      </para>
+      <para>
+        It is divied to GwyddionDump unit
+        (<filename>GwyddionDump.pas</filename>) implementing dump format
+        reading and writing and the plug-in itself
+        (<filename>invert_pascal.pas</filename>).
+        These files are in the public domain.
+      </para>
+    </sect2>
+    <sect2>
+      <title>FORTRAN</title>
+      <para>
+        Work on a sample FORTRAN plug-in is in progress.
+      </para>
+    </sect2>
+  </refsect1>
+</refentry>
+
