@@ -120,15 +120,67 @@
       </menuchoice>
     </para>
     <para>
-     2D FFT filter acts similarly as the 1D variant (see above) but using 2D FFT transform. Therefore,
-     the spatial frequencies that should be filtered must be selected in 2D using mask editor. As the
-     frequencies are related to center of the image (corresponding to zero frequency), the mask can
-     snapped to the center (coordinate system origin) while being edited. There are also different display and
-     output modes that are self-explanatory - image or FFT coefficients can be outputted by module (or both).
+     2D FFT filter acts similarly as the 1D variant (see above) but using 2D
+     FFT transform. Therefore, the spatial frequencies that should be
+     filtered must be selected in 2D using mask editor. As the frequencies
+     are related to center of the image (corresponding to zero frequency),
+     the mask can snapped to the center (coordinate system origin) while
+     being edited. There are also different display and output modes that are
+     self-explanatory – image or FFT coefficients can be outputted by module
+     (or both).
     </para>
     <para>
-     Note that the filter usually resamples the data to size that fits to your FFT algorithm (FFTW or Gwyddion FFT).
-     As this may affect results, the resampled image size information is stated in the module window.
+     Note that the filter usually resamples the data to size that fits to
+     the available FFT algorithm (FFTW or Gwyddion FFT). As this may affect
+     results, the resampled image size information is stated in the module
+     window.
+    </para>
+  </sect2>
+  <sect2 id="polynomial-distort">
+    <title>Polynomial Distortion</title>
+    <indexterm><primary>distortion in xy plane</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Polynomial Distortion</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      General distortion in the horizontal plane can be compensated, or
+      created, with Polynomial distortion.  It performs transforms that
+      can be expressed as
+    </para>
+    <informalequation id="eq-polynomial-distortion">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="eq-polynomial-distortion.png" format="PNG"/>
+        </imageobject>
+        <textobject role="tex">
+          <phrase>
+<![CDATA[
+\eqnarray{
+x_{\rm old}&=&P_x(x_{\rm new}, y_{\rm new}),\cr
+y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
+}
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      where <phrase role="math">P<subscript>x</subscript></phrase>
+      and <phrase role="math">P<subscript>y</subscript></phrase>
+      are polynomials up to the third total order with user-defined
+      coefficients.  Note the direction of the coordinate transform – the
+      reverse direction would not guarantee an unambiguous mapping.
+    </para>
+    <para>
+      The polynomial coefficients are entered as scale-free, i.e.
+      as if the coordinate ranges were always [0, 1].  If
+      <guilabel>Instant updates</guilabel> are enabled, pressing
+      <keysym>Enter</keysym> in a coefficient entry (or just leaving moving
+      keyboard focus elsewhere) updates the preview.
     </para>
   </sect2>
 </sect1>

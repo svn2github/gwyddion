@@ -282,6 +282,7 @@
     <sect3 id="autocorrelation-1d">
       <title>Autocorrelation Function</title>
       <indexterm><primary>autocorrelation function (1D)</primary></indexterm>
+      <indexterm><primary>autocorrelation function (2D)</primary></indexterm>
       <para>
         The autocorrelation function is given by
       </para>
