@@ -330,32 +330,66 @@
         [<phrase role="math">x</phrase><subscript>2</subscript>, <phrase role="math">y</phrase><subscript>2</subscript>]
         and the distance between these points <phrase role="math">τ</phrase>.
       </para>
-      <para>
-        For AFM measurements, we usually evaluate the one-dimensional
-        autocorrelation function based only on profiles along the fast
-        scanning axis. It can therefore be evaluated from the discrete AFM data
-        values as
+      <para id="autocorrelation-2d">
+        From the discrete AFM data one can evaluate this function as
       </para>
-      <informalequation id="eq-autocorrelation-discrete">
+      <informalequation id="eq-autocorrelation-discrete-2d">
         <mediaobject>
           <imageobject>
-            <imagedata fileref="eq-autocorrelation-discrete.png" format="PNG"/>
+            <imagedata fileref="eq-autocorrelation-discrete-2d.png" format="PNG"/>
           </imageobject>
           <textobject role="tex">
             <phrase>
 <![CDATA[
-G_x(\tau_x) = {1\over N(M-m)}
-              \sum_{l=1}^N \sum_{n=1}^{M-m} z_{n+m,l} z_{n,l}
+G(m,n) = {1\over (N-n)(M-m)}
+         \sum_{l=1}^{N-n} \sum_{k=1}^{M-m} z_{k+m,l+n} z_{k,l}
 ]]>
             </phrase>
           </textobject>
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role="math">m</phrase> = <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>/<phrase role="math">Δ</phrase>. The function can thus be evaluated in a discrete set
-        of values of <phrase role="math">τ</phrase> separated by the sampling
-        interval <phrase role="math">Δ</phrase>.
+        where
+        <phrase role="math">m</phrase> = <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>/<phrase role="math">Δ</phrase><subscript><phrase role="math">x</phrase></subscript>,
+        <phrase role="math">n</phrase> = <phrase role="math">τ</phrase><subscript><phrase role="math">y</phrase></subscript>/<phrase role="math">Δ</phrase><subscript><phrase role="math">y</phrase></subscript>.
+        The function can thus be evaluated in a discrete set
+        of values of
+        <phrase role="math">τ</phrase><subscript><phrase role="math">x</phrase></subscript>
+        and
+        <phrase role="math">τ</phrase><subscript><phrase role="math">y</phrase></subscript>
+        separated by the sampling intervals
+        <phrase role="math">Δ</phrase><subscript><phrase role="math">x</phrase></subscript>
+        and
+        <phrase role="math">Δ</phrase><subscript><phrase role="math">y</phrase></subscript>,
+        respectively.
+        The two-dimensional autocorrelation function can be calculated with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Statistics</guisubmenu>
+          <guimenuitem>2D Autocorrelation</guimenuitem>
+        </menuchoice>.
       </para>
+      <para>
+        For AFM measurements, we usually evaluate the one-dimensional
+        autocorrelation function based only on profiles along the fast
+        scanning axis. It can therefore be evaluated from the discrete AFM data
+        values as
+      </para>
+      <informalequation id="eq-autocorrelation-discrete-1d">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-autocorrelation-discrete-1d.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+G_x(m) = G(m, 0) = {1\over N(M-m)}
+                    \sum_{l=1}^N \sum_{k=1}^{M-m} z_{k+m,l} z_{k,l}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
       <para>
         The one-dimensional autocorrelation function is often assumed to have the
         form of a Gaussian, i.e. it can be given by the following relation
