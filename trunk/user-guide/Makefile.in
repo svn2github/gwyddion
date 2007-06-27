@@ -7,6 +7,7 @@ BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
 
 GMAKE = @GMAKE@
+GSED = @GSED@
 XSLTPROC = @XSLTPROC@ --xinclude
 PDFXMLTEX = @PDFXMLTEX@
 HTML2TXT = @LYNX@ -force_html -dump -nolist
@@ -19,7 +20,7 @@ MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES := $(wildcard xml/*.xml)
 FORMULA_SOURCES := $(wildcard formulas/*.tex)
 EQ_SOURCES := $(shell grep -l '<textobject role="tex">' $(XML_SOURCES))
-IMAGES := $(shell sed -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]*\)".*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
+IMAGES := $(shell $(GSED) -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\([^/"]*\)".*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
@@ -45,7 +46,7 @@ xhtml: xhtml.stamp
 xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
 	test -d xhtml || mkdir xhtml
 	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
-	sed -i 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
+	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 	cp user-guide.css xhtml
 	touch $@
@@ -94,7 +95,7 @@ dist-xhtml: xhtml
 
 version:
 	d=`date --iso`; \
-	sed -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
+	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
 	autoconf && ./configure
 
 distclean: clean

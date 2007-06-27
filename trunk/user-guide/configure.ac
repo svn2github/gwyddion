@@ -10,6 +10,7 @@ PACKAGE_SHORTNAME=user-guide
 AC_SUBST(PACKAGE_SHORTNAME)
 
 AC_PROG_CC
+
 AC_CHECK_PROGS([GMAKE],[gmake make],[no])
 if test "$GMAKE" != no; then
   AC_MSG_CHECKING([whether $GMAKE is GNU make])
@@ -17,18 +18,33 @@ if test "$GMAKE" != no; then
     AC_MSG_RESULT([seems so])
   else
     AC_MSG_RESULT([no])
-    AC_MSG_ERROR([GNU make is required to build user guide])
+    AC_MSG_ERROR([GNU make is required to build user guide
+                  Get it at http://www.gnu.org/software/make/])
+  fi
+fi
+
+AC_CHECK_PROGS([GSED],[gsed sed],[no])
+if test "$GSED" != no; then
+  AC_MSG_CHECKING([whether $GSED is GNU sed])
+  if $GSED --version 2>/dev/null | grep '^GNU sed' >/dev/null; then
+    AC_MSG_RESULT([seems so])
+  else
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([GNU sed is required to build the user guide.
+                  Get it at http://ftp.gnu.org/pub/gnu/sed/])
   fi
 fi
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
-  AC_MSG_ERROR([convert is required to build user guide (install ImageMagick)])
+  AC_MSG_ERROR([convert is required to build user guide
+                Get ImageMagick at http://www.imagemagick.org/])
 fi
 
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[no])
 if test "$XSLTPROC" = no; then
-  AC_MSG_ERROR([xsltproc is required to build user guide (install libxml2)])
+  AC_MSG_ERROR([xsltproc is required to build user guide
+                Get libxml2 at http://xmlsoft.org/])
 fi
 
 AC_CHECK_PROGS([TEX],[tex],[no])
