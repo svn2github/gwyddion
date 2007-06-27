@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="presentations-masks">
+  <title>Presentations and Masks</title>
+  <para>
+    Presentations can be used to show the height field in another way than as
+    a false color map of the heights. Several presentation methods are
+    implemented, including shading, gradient filters and edge detectors.  It
+    is also possible to superimpose an arbitrary data field over another one
+    as the presentation.
+  </para>
+  <para>
+    When you use data with a superimposed presentation in data processing
+    functions or tools the results are always computed from the original
+    data – presentations are only a visualization mode.  As presentations can
+    be computationaly intensive to calculate, they are not automatically
+    updated when the underlying data change.
+  </para>
+  <figure id="fig-mask-presentation-scheme">
+    <title>
+      Visualization of masks and presentations.  If the user looks from above
+      they can be imagined as stacked as in the picture.
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="data-show-mask.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    Masks are used for special areal selections (e.g. grains, defects or
+    factes with certain orientation). Masks can have any shape and within the
+    data window they can be visualized by a color overlayed over the data.
+    The mask color and opacity can be changed in the right-click context
+    menu of the data window.  Mask are created by various modules and it is
+    also possible to manually modify them with
+    <link linkend="tool-mask-editor">Mask Editor tool</link>
+    which can invert, grow, and shrink masks and draw or undraw various shapes
+    on the mask.  A few basic mask operations are also available in
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Mask</guisubmenu>
+    </menuchoice>
+    menu.
+  </para>
+  <para>
+    Several functions require a mask and they then operate on the mask and/or
+    the data it marks, e.g. interpolation of data under mask or grain
+    statistics.  Some statistical functions for masked areas can be found
+    under <quote>grain</quote> functions as these functions are typically
+    used for grains, however, you can use them for masks of any origin.
+    Other functions allow to limit the area they operate on with masks, e.g.
+    the statistical quantities tool or plane leveling.
+  </para>
+  <para>
+    Both masks and presentations can be removed from the data by functions
+    in the right-click menu of the data window, or with
+    <link linkend="keyboard-shortcuts">keyboard shortcuts</link>.
+  </para>
+  <figure id="fig-mask-presentation">
+    <title>
+      Data in default false color representation (left), with superimposed
+      mask (centre) and with shading presentation (right).
+    </title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="mask.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</sect1>

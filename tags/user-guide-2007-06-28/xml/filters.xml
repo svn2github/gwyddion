@@ -1,0 +1,594 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="filters-presentations">
+  <title>Filters and Presentations</title>
+  <sect2 id="basic-filters">
+    <title>
+      Basic Filters Tool
+      <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
+    </title>
+    <para>
+      The <link linkend="basic-filters">Basic Filters</link> tool
+      lets you apply several simple filters to your image. This can be very
+      useful for data denoising; however, the real measured data will get
+      altered in the process, so great care should be taken not to destroy
+      important features of the image.
+    </para>
+    <itemizedlist>
+      <listitem id="filter-mean">
+        <indexterm>
+          <primary>mean</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        Mean filter – takes the mean value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem id="filter-median">
+        <indexterm>
+          <primary>median</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        Median filter – takes the median value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem id="filter-conservative-denoise">
+        <indexterm><primary>conservative denoise filter</primary></indexterm>
+        Conservative denoise filter – checks whether the value is not extreme
+        within the neighborhood. If yes, filter substitutes the value by
+        of the next highest (lowest) value.
+      </listitem>
+      <listitem id="filter-kuwahara">
+        <indexterm><primary>Kuwahara filter</primary></indexterm>
+        Kuwahara filter – is an edge-preserving smoothing filter.
+      </listitem>
+      <listitem id="filter-minimum">
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        <indexterm><primary>erosion filter</primary></indexterm>
+        Minimum filter – also known as erode filter, replaces values by
+        minimum found in neighborhood.
+      </listitem>
+      <listitem id="filter-maximum">
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        <indexterm><primary>dilation filter</primary></indexterm>
+        Maximum filter – also known as dilate filter, replaces values by
+        maximum found in neighborhood.
+      </listitem>
+      <listitem id="filter-dechecker">
+        <indexterm><primary>dechecker filter</primary></indexterm>
+        <indexterm><primary>checker pattern removal filter</primary></indexterm>
+        Dechecker filter – a smoothing filter specially designed to remove
+        checker pattern from the image while preserving other details.  It is
+        a convolution filter with kernel
+        <informalequation id="eq-filters-dechecker">
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-filters-dechecker.png" format="PNG"/>
+            </imageobject>
+            <textobject>
+              <phrase>Dechecker filter 5 × 5 coefficient matrix</phrase>
+            </textobject>
+            <textobject role="tex">
+              <phrase>
+<![CDATA[
+w_{\rm dechecker}
+  = \pmatrix{0&1/144&-1/72&1/144&0\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             -1/72&1/9&7/9&1/9&-1/72\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             0&1/144&-1/72&1/144&0\cr}
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+      <listitem id="filter-gaussian">
+        <indexterm><primary>gaussian filter</primary></indexterm>
+        Gaussian filter – a smoothing filter, the size parameter determines
+        the FWHM (full width at half maximum) of the Gaussian.  The relation
+        between FWHM and σ is
+        <informalequation id="eq-gaussian-fwhm">
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="eq-gaussian-fwhm.png" format="PNG"/>
+            </imageobject>
+            <textobject>
+              <phrase>FWHM-sigma relation for Gaussian</phrase>
+            </textobject>
+            <textobject role="tex">
+              <phrase>
+<![CDATA[
+{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+    </itemizedlist>
+    <tip>
+      By default, these filters will be applied to the entire
+      image. However, you can apply a filter to a specific region within your
+      image by selecting it with the mouse. This can be useful for correcting
+      badly measured areas within a good image. To apply a filter to the entire
+      image again, just click once anywhere within the image window.
+    </tip>
+    <figure id="fig-filters-screenshot">
+      <title>Filtering screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="filter.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Moreover, there are more denoising functions in Gwyddion, for example
+      DWT denoising and FFT filtering.
+      For details see section
+      <link linkend="edit-extended">Extended Data Edit</link>.
+    </para>
+    <para>
+      If you need to only suppress some values in the SPM data that are
+      obviously wrong, you can also try the
+      <link linkend="mask-of-outliers">Mask of Outliers</link>
+      module and the
+      <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+      module.
+      For details see section
+      <link linkend="editing-correction">Data Edit</link>.
+    </para>
+  </sect2>
+  <sect2 id="convolution-filter">
+    <title>Convolution</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Integral Transforms</guisubmenu>
+        <guisubmenu>Convolution Filter</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Convolutions with arbitrary kernels up to 9 × 9 can be performed with
+      the <link linkend="convolution-filter">Convolution Filter</link>
+      module.
+    </para>
+    <para>
+      The <guilabel>Divisor</guilabel> entry represents a common factor all
+      the coefficients are divided before applying the filter.  This allows
+      to use denormalized coefficients that are often nicer numbers.  The
+      normalization can be also calculated automatically when
+      <guilabel>automatic</guilabel> is checked.  When the sum of the
+      coefficients is nonzero, it makes the filter sum-preserving, i.e. it
+      the factor normalizes the sum of coefficients to unity.  When the sum
+      of the coefficients is zero, the automatic factor is simply let equal
+      to 1.
+    </para>
+    <para>
+      Since many filters used in practice exhibit various types of symmetry,
+      the coefficients can be automatically completed according to the
+      selected symmetry type (odd, even).  Note the completion is performed
+      on pressing <keycap>Enter</keycap> in the coefficient entry.
+    </para>
+    <para>
+      In a fresh installation only a sample Identity filter is present (which
+      is not particularly useful as it does nothing).  This filter cannot be
+      modified, to create a new filter use the <guilabel>New</guilabel> button
+      on the <guilabel>Presets</guilabel> page.
+    </para>
+  </sect2>
+  <sect2 id="presentation-filters">
+    <title>Presentations</title>
+    <indexterm>
+      <primary>presentation</primary>
+      <primary>basic operations</primary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+      </menuchoice>
+    </para>
+    <para id="presentationops">
+      Presentations are special filters that output their results into
+      a separate layer that displays on top of the original data. Unlike the
+      filters mentioned above, presentation filters preserve the measured data.
+      This allows the user to safely apply various data visualizations. The
+      other data processing modules and tools will still operate on the
+      original data. To remove a presentation, just right click on the data
+      window, and select <guimenuitem>Remove Presentation</guimenuitem>.
+    </para>
+    <para>
+      The <guisubmenu>Presentation</guisubmenu> menu contains a few basic
+      presentation operations:
+    </para>
+    <sect3 id="presentation-attach">
+      <title>Attach Presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Attach presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Attaches other data (height or other physical quantity field) as
+        a presentation to the actual data. Note that this useful option can be
+        particularly confusing while evaluating anything from the data as all
+        the computed values are evaluated from the data (not from the
+        presentation, even if it looks like data).
+      </para>
+    </sect3>
+    <sect3 id="presentation-remove">
+      <title>Remove Presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Remove presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Removes presentation from the actual data window.
+      </para>
+    </sect3>
+    <sect3 id="presentation-extract">
+      <title>Extract Presentation</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Presentation</guisubmenu>
+          <guimenuitem>Extract presentation</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Extracts presentation from the actual data window making copy of the
+        presentation as a new channel in the same file.  In this way one can
+        get presentation data for further processing.  Note however, the
+        extracted data have no absolute scale information (the range is
+        always [0, 1]) as presentation often help to visualize certain
+        features, but the produced values are hard or impossible to assign
+        any physical meaning to.
+      </para>
+    </sect3>
+    <figure id="fig-presentation-examples">
+      <title>
+        Presentation examples:
+        (a) original data,
+        (b) shading,
+        (c) vertical Prewitt gradient,
+        (d) Canny edge detection,
+        (e) local non-linearity edge detection,
+        (f) local contrast improvement.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="presentations.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>Illustration of selected presentation filters</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+  </sect2>
+  <sect2 id="shade">
+    <title>Shading Presentation</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Shading</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>shading</primary></indexterm>
+    <para>
+      Simple and very useful way of seeing data as illuminated from some
+      direction. The direction can be set by user.  It is also possible to
+      mix the shaded and original images for presentational purposes (the
+      resulting image is meaningless from the physical point of view).
+    </para>
+  </sect2>
+  <sect2 id="gradient">
+    <title>Gradient Detection Presentations</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Gradient...</guimenuitem>
+      </menuchoice>
+    </para>
+    <indexterm><primary>gradient filters</primary></indexterm>
+    <indexterm><primary>Sobel filter</primary></indexterm>
+    <indexterm><primary>Prewitt filter</primary></indexterm>
+    <para>
+      Sobel horizontal and vertical gradient filter and Prewitt horizontal
+      and vertical gradient filter create similar images as shading, however,
+      they output data as a result of convolution of data with relatively
+      standardized kernel. Thus, they can be used for further presentation
+      processing for example.  The kernels for horizontal filters are listed
+      below, vertical kernels differ only by reflection about
+      main diagonal.
+      <informalequation id="eq-filters-sobel-prewitt">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="eq-filters-sobel-prewitt.png" format="PNG"/>
+          </imageobject>
+          <textobject role="tex">
+            <phrase>
+<![CDATA[
+w_{\rm prewitt} = \pmatrix{1/3&0&-1/3\cr1/3&0&-1/3\cr1/3&0&-1/3\cr}\;,\quad
+w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+    </para>
+  </sect2>
+  <sect2 id="edge">
+    <title>Edge Detection Presentations</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guisubmenu>Edge Detection</guisubmenu>
+      </menuchoice>
+    </para>
+    <indexterm><primary>edge detection</primary></indexterm>
+    <indexterm><primary>step detection</primary></indexterm>
+    <para>
+      One is often interested in the visualization of the discontinuities
+      present in the image, particularly in discontinuities in the value
+      (zeroth order) and discontinuities in the derivative (first order).
+      Although the methods of location of both are commonly referred to as
+      <quote>edge detection</quote> methods, these are actually quite
+      different, therefore we will refer to the former as to step detection
+      and to the latter as to edge detection.  Methods for the detection of
+      more specific features, e.g. corners, are commonly used too, these
+      methods usually are of order zero.
+    </para>
+    <para>
+      The order of a discontinuity detection method can be easily seen on its
+      output as edge detection methods produce typical double edge lines at
+      value discontinuities as is illustrated in the following figure. While
+      the positions of the upper and lower edge in an ideal step coincide,
+      real-world data tend to actually contain two distinct edges as is
+      illustrated in the picture.  In addition, finding two edges on a value
+      step, even an ideally sharp one, is often an inherent feature of edge
+      detection methods.
+    </para>
+    <figure id="fig-step-vs-edge">
+      <title>
+        Step versus edge in one dimension.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="step-edge.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>One-dimensional step and edge schematic image</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+      The following step and edge detection functions are available in
+      Gwyddion (the later ones are somewhat experimental, on they other
+      hand they usually give better results than the well-known algorithms):
+    </para>
+    <variablelist>
+      <varlistentry id="edge-canny">
+        <term>
+          <guilabel>Canny</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Canny</primary>
+            <secondary>edge detection</secondary>
+          </indexterm>
+          <para>
+            Canny edge detector is a well-known step detector can be used to
+            extract the image of sharp value discontinuities in the data as
+            thin single-pixel lines.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-log">
+        <term>
+          <guilabel>Laplacian of Gaussians</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>Laplacian of Gaussians</primary>
+          </indexterm>
+          <para>
+            Laplacian presents a simple convolution with
+            the following kernel (that is the limit of discrete Laplacian of
+            Gaussians filter for <phrase role="math">σ</phrase> → 0):
+            <informalequation id="eq-filters-laplacian">
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-filters-laplacian.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-zero-crossing">
+        <term>
+          <guilabel>Zero Crossing</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>zero crossing edge detection</primary>
+          </indexterm>
+          <para>
+            Zero crossing step detection marks lines where the result of
+            Laplacian of Gaussians filter changes sign, i.e. crosses zero.
+            The FWHM (full width half maximum) of the Gaussians determines
+            the level of details covered.  Threshold enables to exclude sign
+            changes with too small absolute value of the neighbour pixels,
+            filtering out fine noise.  Note, however, that for non-zero
+            threshold the edge lines may become discontinuous.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-step">
+        <indexterm>
+          <primary>step detection</primary>
+        </indexterm>
+        <term>
+          <guilabel>Step</guilabel>
+        </term>
+        <listitem>
+          <para>
+            A step detection algorithm providing a good resolution, i.e. sharp
+            discontinuity lines, and a good dynamic range while being
+            relatively insensitive to noise.  The principle is quite simple:
+            it visualizes the square root of the difference between the 2/3
+            and 1/3 quantiles of the data values in a circular neighbourhood
+            of radius 2.5 pixels centered around the sample.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-rms">
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <indexterm>
+            <primary>rms</primary>
+            <secondary>edge detection</secondary>
+          </indexterm>
+          <para>
+            This step detector visualizes areas with high local value
+            variation.  The root mean square of deviations from the mean
+            value of a circular neighbourhood of radius 2.5 pixels centered
+            around each sample is calculated and displayed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-rms-edge">
+        <term>
+          <guilabel>RMS Edge</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>rms edge edge detection</primary></indexterm>
+          <para>
+            This function essentially postprocesses RMS output with a filter
+            similar to Laplacian to emphasize boundaries of areas with high
+            local value variation.  Despite the name it is still a step
+            detector.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-local-nonlinearity">
+        <term>
+          <guilabel>Local Non-Linearity</guilabel>
+        </term>
+        <listitem>
+          <indexterm><primary>local nonlinearity edge detection</primary></indexterm>
+          <para>
+            An edge detector which visualizes areas that are locally very
+            non-planar. It fits a plane through a circular neighbourhood of
+            radius 2.5 pixels centered around each sample and then calculates
+            residual sum of squares of this fit reduced to plane slope, i.e.
+            divided by
+            1 + <phrase role="math">b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role="math">b<subscript>y</subscript></phrase><superscript>2</superscript>
+            where
+            <phrase role="math">b<subscript>x</subscript></phrase>
+            and
+            <phrase role="math">b<subscript>y</subscript></phrase>
+            are the plane coefficients in <phrase role="math">x</phrase>
+            and <phrase role="math">y</phrase> directions, respectively.
+            The square root is then displayed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="edge-inclination">
+        <indexterm>
+          <primary>inclination</primary>
+          <secondary>edge detection filter</secondary>
+        </indexterm>
+        <term>
+          <guilabel>Inclination</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Visualizes the angle <phrase role="math">ϑ</phrase> of local plane
+            inclination.  Technically this function belongs among step
+            detectors, however, the accentuation of steps in its output is not
+            very strong and it is more intended for easy visual comparison of
+            different slopes present in the image.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <figure id="fig-edge-method-comparison">
+      <title>
+        Comparison of step and edge detection methods on several interesting,
+        or typical example data.  Canny and Zero crossing are step detectors
+        that produce one pixel wide edge lines, Step and Inclination are step
+        detectors with continous output, Local nonlinearity is an edge
+        detector – the edge detection can be easily observed on the second
+        and third row. Note zero crossing is tunable, it parameters were
+        chosen to produce reasonable output in each example.
+      </title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="edge-method-comparison.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>
+            Comparison of step and edge detection methods on several images
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+  </sect2>
+  <sect2 id="local-contrast">
+    <title>Local Contrast</title>
+    <indexterm><primary>local contrast improvement</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Local contrast...</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      A method to visualize features in areas with low and high value
+      variation at the same time.  This is achieved by calculation of local
+      value range, or variation, around each data sample and stretching it to
+      equalize this variation over all data.
+    </para>
+  </sect2>
+  <sect2 id="logscale">
+  <title>Logscale</title>
+    <indexterm><primary>logarithmic scale</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Presentation</guisubmenu>
+        <guimenuitem>Logscale</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Logarithmic scale is used for false colors data presentation.
+    </para>
+  </sect2>
+</sect1>

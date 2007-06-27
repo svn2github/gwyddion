@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
+               'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
+<sect1 id="graph-processing">
+  <title>Graph Processing</title>
+  <para>
+    Many of the Gwyddion data processing modules produce graph as a output.
+    Graphs can be exported into text files or further analyzed within
+    Gwyddion by several graph processing modules. These modules can be found
+    in the Graph menu in the Gwyddion main window. Note that the number of
+    graph modules is quite limited now and consists of basic modules for
+    doing things that are very frequent within SPM data analysis. For more
+    analytical tools you can use your favorite graph processing program.
+  </para>
+  <para>
+    In this section the graph modules present in Gwyddion are briefly
+    presented.
+  </para>
+  <sect2 id="basic-graph-operations">
+    <title>Basic Operations</title>
+    <para>
+      First of all zooming and data reading functions are available directly
+      in the graph window:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Logarithmic axes – horizontal and vertical axes can be switched
+        between linear and logarithmic using the logscale buttons.  Switching
+        to logarithmic scale is possible only for positive values (either on
+        abscissa or ordinate).
+      </listitem>
+      <listitem>
+        Zoom in and zoom out – after selecting zoom in simply draw the area
+        that should be zoomed by mouse. Zoom out restores the state when all
+        data can be seen.
+      </listitem>
+      <listitem>
+        Measure distances – enables user to select several points within
+        the graph and displays their distances and angles between them.
+      </listitem>
+    </itemizedlist>
+  </sect2>
+  <sect2 id="graph-level">
+    <title>Graph Level</title>
+    <para>
+      <link linkend="graph-level">Graph level</link> is a very simple module
+      that currently performs linear fit of each graph curve and subtracts
+      the fitted linear functions from them.
+    </para>
+  </sect2>
+  <sect2 id="graph-fit">
+    <title>Function Fitting</title>
+    <indexterm><primary>function fitting</primary></indexterm>
+    <para>
+      The curve fitting is designed namely for fitting of statistical
+      functions used in roughness parameters evaluation.  Therefore most of
+      the available functions are currently various statistical functions of
+      surfaces with Gaussian or exponential autocorrelation functions.
+      Nevertheless it also offers a handful of common general-purpose
+      functions.
+    </para>
+    <para>
+      Within the fitting module you can select the area that should be fitted
+      (with mouse or numerically), try some initial parameters, or let the
+      module to guess them, and then fit the data using Marquardt-Levenberg
+      algorithm.
+    </para>
+    <para>
+      As the result you obtain the fitted curve and the set of its parameters.
+      The fit report can be saved into a file using
+      <guibutton>Save</guibutton> button.  Pressing
+      <guibutton>OK</guibutton> button adds the fitted curve to the graph, if
+      this is not desirable, quit the dialog with
+      <guibutton>Cancel</guibutton>.
+    </para>
+    <figure id="fig-graph-fit-screenshot">
+      <title>Fit graph module screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="graph_fit.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </sect2>
+  <sect2 id="graph-critical-dimension">
+    <title>Critical Dimension</title>
+    <indexterm><primary>critical dimension</primary></indexterm>
+    <para>
+      Critical dimension module can be used to fit some
+      <quote>typical</quote> objects that are often found while analyzing
+      profiles extracted from microchips and related surfaces. These objects
+      are located in the graph and their properties are evaluated.
+    </para>
+    <para>
+      The user interface of this module is practically the same as of the
+      graph fit module.
+    </para>
+    <figure id="fig-graph-cd-screenshot">
+      <title>Critical dimension module screenshot</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="graph_cd.png" format="PNG"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </sect2>
+</sect1>
+
