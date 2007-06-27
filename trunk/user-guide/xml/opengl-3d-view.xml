@@ -114,7 +114,7 @@
       drivers and windowing environments, artefacts may sometimes appear on
       the exported image in parts corresponding to obscured parts of the 3D
       view.  If you encounter this problem, make sure the 3D view is not
-      obscured by other windows on export.
+      obscured by other windows during the image export.
     </para>
   </sect2>
   <sect2 id="opengl-material-editor">
@@ -200,7 +200,7 @@ I_\alpha = k_{a,\alpha}I_{a,\alpha}
       where <phrase role="math">I</phrase><subscript>a,α</subscript>,
       <phrase role="math">I</phrase><subscript>d,α</subscript> and
       <phrase role="math">I</phrase><subscript>s,α</subscript> are the
-      ambient, diffuse and specular light source intensities.
+      ambient, diffuse and specular light source intensities, respectively.
     </para>
   </sect2>
 </sect1>

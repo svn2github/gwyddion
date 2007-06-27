@@ -277,7 +277,7 @@
     </varlistentry>
     <varlistentry id="tool-spectro">
       <term>
-        <link linkend="single-point-spectra">Spectro</link>
+        <link linkend="point-spectroscopy">Spectro</link>
         <guiicon><inlinegraphic fileref="gwy_spectrum-24.png"/></guiicon>
       </term>
       <listitem>
