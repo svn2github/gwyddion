@@ -36,6 +36,7 @@
     or use some of the tools available at the <guilabel>Tools</guilabel> set
     of buttons at the Gwyddion main window.
   </para>
+  <indexterm><primary>aspect ratio</primary></indexterm>
   <para>
     The arrow in the upper left corner brings the aspect ratio switch menu.
     The data can be displayed either with pixels mapped with 1:1 aspect ratio

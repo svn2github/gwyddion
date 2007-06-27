@@ -320,6 +320,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
     </para>
     <itemizedlist>
       <listitem id="scale">
+        <indexterm><primary>scaling</primary></indexterm>
         Scale data using chosen result dimension and chosen interpolation
         method by
         <menuchoice>
@@ -329,6 +330,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </menuchoice>.
       </listitem>
       <listitem id="crop">
+        <indexterm><primary>cropping</primary></indexterm>
         Crop data using the <link linkend="tool-crop">Crop tool</link>,
         either in place or putting the result to a new channel (with
         <guilabel>Create new channel</guilabel>).
@@ -338,6 +340,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         coordinates are set to (0, 0).
       </listitem>
       <listitem id="rotate">
+        <indexterm><primary>rotation</primary></indexterm>
         Rotate data by 90 degrees or by user-specified amount using some
         of the rotate functions:
         <menuchoice>
@@ -391,6 +394,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <guimenuitem>Invert</guimenuitem>
         </menuchoice>.
       </listitem>
+      <indexterm>
+        <primary>aspect ratio</primary>
+        <secondary>resampling to square pixels</secondary>
+      </indexterm>
       <listitem id="square-samples">
         Upsample data to make pixels square with
         <menuchoice>
@@ -427,6 +434,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
       </title>
       <indexterm><primary>Read Value tool</primary></indexterm>
+      <indexterm><primary>slope measurement</primary></indexterm>
       <indexterm>
         <primary>inclination</primary>
         <secondary>reading on data</secondary>
@@ -495,6 +503,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
         <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
       </title>
       <indexterm><primary>Distance tool</primary></indexterm>
+      <indexterm><primary>distance measurement</primary></indexterm>
+      <indexterm><primary>angle measurement</primary></indexterm>
       <para>
         Distances and differences can be read with
         <guilabel>Distance</guilabel> tool.  It displays the

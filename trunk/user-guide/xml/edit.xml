@@ -158,12 +158,16 @@
           <imagedata fileref="remove-scars.png" format="PNG"/>
         </imageobject>
         <textobject>
-          <phrase>Unrotate symmetries scheme</phrase>
+          <phrase>Scrars removal example</phrase>
         </textobject>
       </mediaobject>
     </figure>
   </sect2>
   <sect2 id="remove-data-under-mask">
+    <indexterm>
+      <primary>interpolation</primary>
+      <secondary>of data under mask</secondary>
+    </indexterm>
     <title>
       Remove Data Under Mask
       <guiicon><inlinegraphic fileref="gwy_remove_under_mask-24.png"/></guiicon>

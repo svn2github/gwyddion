@@ -30,6 +30,10 @@
   </para>
   <sect2 id="tip-obtaining-geometry">
     <title>Obtaining the Tip Geometry</title>
+    <indexterm>
+      <primary>tip</primary>
+      <secondary>modelling</secondary>
+    </indexterm>
     <para>
       For studying the tip influence on the data we need to know tip geometry
       firts. In general, the geometry of the SPM tip can be determined in
@@ -103,6 +107,10 @@
   </sect2>
   <sect2 id="tip-operations">
     <title>Tip Convolution and Surface Reconstruction</title>
+    <indexterm>
+      <primary>tip</primary>
+      <secondary>convolution</secondary>
+    </indexterm>
     <para id="tip-convolution">
       When we know tip geometry, we can use tip convolution (dilation)
       algorithm to simulate data acquisition process. For doing this use
@@ -136,6 +144,10 @@
       </mediaobject>
     </figure>
     <para id="tip-surface-reconstruction">
+      <indexterm>
+        <primary>tip</primary>
+        <secondary>deconvolution</secondary>
+      </indexterm>
       The opposite of the tip convolution is surface reconstruction (erosion)
       that can be used to correct partially the tip influence on image data.
       For doing this, use Surface Reconstruction function
@@ -159,6 +171,10 @@
       </mediaobject>
     </figure>
     <para id="tip-certainty-map">
+      <indexterm>
+        <primary>tip</primary>
+        <secondary>certainty map</secondary>
+      </indexterm>
       As it can be seen, the most problematic parts of SPM image are data
       points, where tip did not touch the surface in a single point, mut in
       multiple points. There is a loss of information in these points.

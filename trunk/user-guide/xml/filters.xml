@@ -186,6 +186,10 @@ w_{\rm dechecker}
   </sect2>
   <sect2 id="presentation-filters">
     <title>Presentations</title>
+    <indexterm>
+      <primary>presentation</primary>
+      <primary>basic operations</primary>
+    </indexterm>
     <para>
       <menuchoice>
         <guimenu>Data Process</guimenu>

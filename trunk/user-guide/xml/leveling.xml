@@ -57,6 +57,10 @@
         <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
       </title>
       <indexterm><primary>plane leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>mean plane subtraction</secondary>
+      </indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -80,6 +84,10 @@
         <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
       </title>
       <indexterm><primary>three-point leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>three-point</secondary>
+      </indexterm>
       <para>
         The <guilabel>Three Point Leveling</guilabel>
         tool can be used for leveling very complicated surface structures.
@@ -94,6 +102,10 @@
         <guiicon><inlinegraphic fileref="gwy_path_level-24.png"/></guiicon>
       </title>
       <indexterm><primary>path leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>along paths</secondary>
+      </indexterm>
       <para>
         The <guilabel>Path Leveling</guilabel>
         tool can be used to correct the heights in an arbitrary subset of rows
@@ -127,6 +139,10 @@
         <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
       </title>
       <indexterm><primary>facet leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>to align facets horizontally</secondary>
+      </indexterm>
       <para>
         <menuchoice>
           <guimenu>Data Process</guimenu>

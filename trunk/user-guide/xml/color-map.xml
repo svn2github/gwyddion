@@ -4,6 +4,10 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="color-map">
   <title>False Color Mapping</title>
+  <indexterm>
+    <primary>color</primary>
+    <secondary>mapping</secondary>
+  </indexterm>
   <para>
     False color mapping is the basic two-dimensional data visualization
     method.  The color gradient (also called palette) to use can be selected
@@ -153,6 +157,14 @@
   </sect2>
   <sect2 id="color-gradient-editor">
     <title>Color Gradient Editor</title>
+    <indexterm>
+      <primary>color map</primary>
+      <secondary>editting</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>color map</primary>
+      <secondary>choosing default</secondary>
+    </indexterm>
     <para>Color gradient editor can be invoked with
       <menuchoice>
         <guimenu>Edit</guimenu>

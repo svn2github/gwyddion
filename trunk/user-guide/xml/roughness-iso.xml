@@ -4,6 +4,10 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect2 id="roughness-iso">
   <title>One-Dimensional Roughness Parameters</title>
+  <indexterm>
+    <primary>roughness</primary>
+    <secondary>ISO parameters</secondary>
+  </indexterm>
   <para>
     Standardized one-dimensional roughness parameters can be evaluated with
     the roughness tool.

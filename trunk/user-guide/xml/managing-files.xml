@@ -29,6 +29,10 @@
   </para>
   <table frame='none' id="table-file-formats">
     <title>Supported file formats</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>supported formats</primary>
+    </indexterm>
     <tgroup cols='2'>
       <colspec align='left'/>
       <colspec align='left'/>
@@ -376,6 +380,10 @@
   </table>
   <sect2 id="file-loading">
     <title>File Loading</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>loading</primary>
+    </indexterm>
     <para>
       By default, Gwyddion detects the file format automatically based on
       file contents (i.e. file names and extensions are irrelevant).  This
@@ -420,6 +428,10 @@
   </sect2>
   <sect2 id="file-merging">
     <title>File Merging</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>merging</primary>
+    </indexterm>
     <para>
       File merging is similar to normal file loading, except that the
       selected file (or files) is merged into the current open file.  In
@@ -430,6 +442,10 @@
   </sect2>
   <sect2 id="file-saving">
     <title>File Saving</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>saving</primary>
+    </indexterm>
     <para>
       Much of the previous paragraphs applies to file saving too.  One of the
       differences is the reliability of automatic file type determination.
@@ -452,6 +468,10 @@
   </sect2>
   <sect2 id="document-history">
     <title>Document History</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>recently open</primary>
+    </indexterm>
     <para>
       The history of recently opened files can be accessed with
       <menuchoice>

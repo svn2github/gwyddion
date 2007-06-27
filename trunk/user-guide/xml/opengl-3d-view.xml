@@ -4,6 +4,10 @@
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
 <sect1 id="opengl-3d-view">
   <title>OpenGL 3D Data Display</title>
+  <indexterm>
+    <primary>3D</primary>
+    <secondary>data display</secondary>
+  </indexterm>
   <para>
     Three-dimensional OpenGL display of the current data window can be invoked
     with the button with symbol of cube in <guilabel>View</guilabel> button
@@ -115,6 +119,14 @@
   </sect2>
   <sect2 id="opengl-material-editor">
     <title>OpenGL Material Editor</title>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>material editting</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>choosing default material</secondary>
+    </indexterm>
     <para>OpenGL material editor can be invoked with
       <menuchoice>
         <guimenu>Edit</guimenu>
