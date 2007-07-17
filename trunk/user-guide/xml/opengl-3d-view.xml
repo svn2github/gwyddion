@@ -70,6 +70,14 @@
       </itemizedlist>
       The basic controls also include an image export button.
     </para>
+    <para>
+      When basic controls are shown it is possible to switch between the modes
+      using keys
+      <keycap>R</keycap> (rotation),
+      <keycap>S</keycap> (scale),
+      <keycap>V</keycap> (value scale)
+      and <keycap>L</keycap> (light rotation).
+    </para>
   </sect2>
   <sect2 id="opengl-3d-view-full-controls">
     <title>Full Controls</title>
