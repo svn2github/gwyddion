@@ -16,8 +16,7 @@ GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) --cflags)
 GWY_LDFLAGS = $(shell $(PKGCONFIG) $(GWY) --libs)
 rp = -Wl,-rpath=
 RPATHS = $(subst -L,$(rp),$(shell $(PKGCONFIG) $(GWY) --libs-only-L))
-MODULE_DIR = $(shell $(PKGCONFIG) $(GWY) --variable=gwymoduledir)
-EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\" -DGWY_MODULE_DIR=\"$(MODULE_DIR)\"
+EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 OBJECTS = $(SOURCES:.c=.o)
 LDFLAGS = $(GWY_LDFLAGS) $(RPATHS)
 
