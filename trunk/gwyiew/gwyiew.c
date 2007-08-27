@@ -25,7 +25,7 @@
 #include <libgwymodule/gwymodule.h>
 #include <libgwyddion/gwyddion.h>
 #include <libgwydgets/gwydgets.h>
-#include <app/settings.h>
+#include <app/gwyapp.h>
 
 static void print_help(void);
 static void process_preinit_options(int *argc,
@@ -34,12 +34,10 @@ static void process_preinit_options(int *argc,
 int
 main(int argc, char *argv[])
 {
-    GwyResourceClass *klass;
     GtkWidget *window, *view;
     GwyContainer *data, *settings;
     GwyPixmapLayer *layer;
-    gchar *modulepath, *filename;
-    const gchar *paths[3];
+    gchar *filename;
     GError *err = NULL;
 
     /* Check for --help and --version before rash file loading and GUI
@@ -50,33 +48,13 @@ main(int argc, char *argv[])
         return 0;
     }
 
-    /* Initialize Gwyddion stuff */
-    gwy_widgets_type_init();
+    /* Initialize Gtk+ */
+    gtk_init(&argc, &argv);
     g_set_application_name(PACKAGE);
 
-    /* Load color gradients from disk */
-    klass = g_type_class_ref(GWY_TYPE_GRADIENT);
-    gwy_resource_class_load(klass);
-    g_type_class_unref(klass);
-
-    /* Load gwyddion settings.  Maybe not very useful here, except for
-     * files mysteriously missing mask color. */
-    filename = gwy_app_settings_get_settings_filename();
-    if (g_file_test(filename, G_FILE_TEST_IS_REGULAR))
-        gwy_app_settings_load(filename);
-    g_free(filename);
+    /* Initialize Gwyddion stuff */
+    gwy_app_init_common(NULL, "layer", "file", NULL);
     settings = gwy_app_settings_get();
-
-    /* Load layer and file modules.
-     * Layer modules are not strictly required but the file is likely to
-     * contain selections and they would not cause unrecognized object warning
-     * when the corresponding layers are not loaded. */
-    modulepath = gwy_find_self_dir("modules");
-    paths[0] = g_build_filename(modulepath, "layer", NULL);
-    paths[1] = g_build_filename(modulepath, "file", NULL);
-    paths[2] = NULL;
-    gwy_module_register_modules(paths);
-    /* Paths should be freed here, let the operating system do it at exit. */
 
     /* Load the file */
     data = gwy_file_load(argv[1], GWY_RUN_NONINTERACTIVE, &err);
@@ -86,7 +64,6 @@ main(int argc, char *argv[])
     }
 
     /* Construct the GUI */
-    gtk_init(&argc, &argv);
 
     /* Main window */
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
