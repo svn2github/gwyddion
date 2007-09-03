@@ -1,4 +1,5 @@
-Gwyiew is a very simple .gwy file viewer.
+Gwyiew is a very simple SPM file viewer.  It can display any file Gwyddion
+can.
 
 It was written as an example of standalone application using Gwyddion
 libraies.  Because of that, simplicity is valued more than cool features
