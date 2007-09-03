@@ -128,7 +128,7 @@ print_help(void)
 {
     g_print(
 "Usage: gwyiew FILENAME\n"
-"A very simple Gwyddion .gwy file viewer.\n\n"
+"A very simple SPM file viewer.\n\n"
         );
     g_print(
 "Options:\n"
