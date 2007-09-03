@@ -7,10 +7,10 @@ that would make the code harder to understand.
 
 == Installation (Unix) ======
 
-If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
-do one of following:
-(a) run make with PREFIX=/home/me/usr
-(b) export PKG_CONFIG_PATH=/home/me/usr/lib/pkgconfig
+If you have Gwyddion installed in a non-standard location (e.g.
+/home/me/opt/gwyddion) do one of following:
+(a) run make with PREFIX=/home/me/opt/gwyddion
+(b) export PKG_CONFIG_PATH=/home/me/opt/gwyddion/lib/pkgconfig
 
 Otherwise just run make, make install.
 

@@ -3,7 +3,7 @@
 PACKAGE = gwyiew
 # Module version, it is also defined as a preprocessor macro you are
 # encouraged to use for module registering.
-VERSION = 1.3
+VERSION = 2.0
 # Module source files
 SOURCES = gwyiew.c
 # Module header files, if any
