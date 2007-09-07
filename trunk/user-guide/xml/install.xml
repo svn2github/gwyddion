@@ -107,17 +107,11 @@
       <varlistentry>
         <term>
           <ulink url="http://www.gtk.org/">Gtk+</ulink>
-          ≥ 2.6.0 (Unix),
-          ≥ 2.8.0 (MS Windows)
+          ≥ 2.8.0
         </term>
         <listitem>
           <para>
             <emphasis>Required.</emphasis>
-          </para>
-          <para>
-            It is possible to build Gwyddion with Gtk+ 2.6 on MS Windows too,
-            but it requires manual build system adjustments and it is not
-            supported.
           </para>
         </listitem>
       </varlistentry>
@@ -247,8 +241,8 @@
         If you know the drill:
       </para>
       <informalexample>
-        <literallayout><userinput>tar -jxvf gwyddion-2.4.tar.bz2
-cd gwyddion-2.4
+        <literallayout><userinput>tar -jxvf gwyddion-2.9.tar.bz2
+cd gwyddion-2.9
 ./configure
 make install</userinput></literallayout>
       </informalexample>
@@ -258,15 +252,15 @@ make install</userinput></literallayout>
       <para>
         Unpack the source code tarball with
         <informalexample>
-          <userinput>tar -jxvf gwyddion-2.4.tar.bz2</userinput>
+          <userinput>tar -jxvf gwyddion-2.9.tar.bz2</userinput>
         </informalexample>
         or
         <informalexample>
-          <userinput>tar -zxvf gwyddion-2.4.tar.gz</userinput>
+          <userinput>tar -zxvf gwyddion-2.9.tar.gz</userinput>
         </informalexample>
-        replacing 2.4 with the actual version number. It will create directory
-        <filename>gwyddion-2.4</filename> (again, with the actual version
-        number in place of 2.4), <command>cd</command> to this directory.
+        replacing 2.9 with the actual version number. It will create directory
+        <filename>gwyddion-2.9</filename> (again, with the actual version
+        number in place of 2.9), <command>cd</command> to this directory.
         All other compilation actions will take place there.
       </para>
       <para>
@@ -462,9 +456,9 @@ make install</userinput></literallayout>
         It is possible to build RPM packages on RPM-based GNU/Linux
         distributions directly from source code tarballs with
         <informalexample>
-          <userinput>rpmbuild -tb gwyddion-2.4.tar.bz2</userinput>
+          <userinput>rpmbuild -tb gwyddion-2.9.tar.bz2</userinput>
         </informalexample>
-        where 2.4 is to be replaced with the actual version as above.
+        where 2.9 is to be replaced with the actual version as above.
       </para>
     </sect2>
   </sect1>
@@ -670,7 +664,7 @@ make install</userinput></literallayout>
       </para>
       <para>
         The unpacking will create directory
-        <filename>gwyddion-2.4</filename> (with 2.4 replaced with the actual
+        <filename>gwyddion-2.9</filename> (with 2.9 replaced with the actual
         version number) where all other compilation actions will take place.
       </para>
     </sect2>
@@ -805,10 +799,10 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
         version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
         build the installer, it will create
-        <filename>Gwyddion-2.4.exe</filename> (with 2.4 replaced with the
+        <filename>Gwyddion-2.9.exe</filename> (with 2.9 replaced with the
         actual version number), again in <filename>inst</filename>.  You can
         repeat this procedure with <filename>inst/gwyddion-devel.iss</filename>
-        to obtain <filename>Gwyddion-Development-2.4.exe</filename>, should
+        to obtain <filename>Gwyddion-Development-2.9.exe</filename>, should
         you ever need it.
       </para>
     </sect2>
