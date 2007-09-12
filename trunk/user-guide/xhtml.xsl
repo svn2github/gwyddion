@@ -43,9 +43,11 @@
   </xsl:param>
 
   <xsl:template name="book.titlepage.before.recto">
-    <a href="http://gwyddion.net/" title="Gwyddion web site">
-      <img id="TitleImage" alt="Small Gwyddion screenshot" src="stacked3.png"/>
-    </a>
+    <div id="TitleImage">
+      <a href="http://gwyddion.net/" title="Gwyddion web site">
+        <img alt="Small Gwyddion screenshot" src="stacked3.png"/>
+      </a>
+    </div>
   </xsl:template>
 
 </xsl:stylesheet>
