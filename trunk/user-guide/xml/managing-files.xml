@@ -313,6 +313,13 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Shimadzu</entry>
+          <entry></entry>
+          <entry>shimadzu module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Surfstand Surface Data File</entry>
           <entry>.sdf</entry>
           <entry>sdfile module</entry>
