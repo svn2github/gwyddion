@@ -1,0 +1,29 @@
+Gwyfract is a simple Mandelbrot and Julia set renderer that uses Gwyddion
+libraries for user interface.
+
+It is more an example than a real-world renderer.  Despite its low line count
+it has a few cool features:
+- smooth true-color set outside visualization based on inifinity iteration
+  limit
+- deep zoom, using GNU MP library for arbitrary precision math
+- multithreaded, with the number of calculation threads automatically adjusted
+  to the number of available processor cores
+- false colours based on your favourite Gwyddion palettes
+- image ehnancement via `unfair antialiasing'
+- several iteration count to false colour mapping modes, including Gwyddion's
+  adaptive mapping
+
+Requirements:
+- Gwyddion 2.5 or newer
+- GThread 2.x (i.e. GLib with thread support enabled)
+- GNU MP arbitrary precision library
+- GNU/Linux or FreeBSD (possibly other Unix system although automatic number
+  of CPUs might not work)
+
+Usage:
+- Resize the window to change the resolution.
+- Select a rectangle to zoom in,
+- Click to return to previous zoom.
+
+Web:    http://gwyddion.net/applications/gwyfract.php
+E-mail: yeti@gwyddion.net
