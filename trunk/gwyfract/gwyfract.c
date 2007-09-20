@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+#include "config.h"
 #include <math.h>
 #include <errno.h>
 #include <string.h>
