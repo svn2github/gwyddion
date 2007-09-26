@@ -141,7 +141,7 @@ get_n_cpus(void)
     dcc_ncpus(&ncpus);
 
     if (ncpus > 64) {
-        g_printerr("More than 64 processors (%d), we are not that "
+        g_printerr("More than 64 processors (%d), we don't think we are that "
                    "scalable.\n", ncpus);
         ncpus = 64;
     }
@@ -600,6 +600,9 @@ calculate(Application *app)
     precision = region_get_precision((MPRegion*)app->zoom_stack->data, w, h);
     if (precision <= app->bits || app->julia)
         precision = 0;
+
+    if (precision && app->enhance)
+        g_printerr("FIXME: Enhance not implemented for Deep Zoom yet!\n");
 
     for (i = 0; i < app->ncpus; i++) {
         Task *task = app->tasks + i;
@@ -1170,49 +1173,49 @@ read_region(MPRegion *region, gchar *p)
 }
 
 static void
-restore(Application *app)
+restore_region(Application *app,
+               const gchar *filename)
 {
     MPRegion *region = NULL;
+    gchar *buf;
+    GError *err = NULL;
 
+    if (!g_file_get_contents(filename, &buf, NULL, &err)) {
+        g_printerr("Cannot read %s: %s\n", filename, err->message);
+        g_clear_error(&err);
+    }
+    else {
+        region = g_new(MPRegion, 1);
+        if (!read_region(region, buf)) {
+            g_free(region);
+            region = NULL;
+        }
+        else
+            waste_of_time(TRUE, TRUE);
+        g_free(buf);
+    }
+
+    if (region) {
+        stop_calculation(app);
+        app->zoom_stack = g_slist_prepend(app->zoom_stack, region);
+        calculate(app);
+    }
+}
+
+static void
+restore(Application *app)
+{
     ensure_filechooser(app, GTK_FILE_CHOOSER_ACTION_SAVE);
     if (gtk_dialog_run(GTK_DIALOG(app->filechooser)) == GTK_RESPONSE_OK) {
         gchar *fnm;
 
         fnm = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(app->filechooser));
         if (fnm) {
-            gchar *buf;
-            GError *err = NULL;
-
-            if (!g_file_get_contents(fnm, &buf, NULL, &err)) {
-                g_printerr("Cannot read %s: %s\n", fnm, err->message);
-                g_clear_error(&err);
-            }
-            else {
-                region = g_new(MPRegion, 1);
-                if (!read_region(region, buf)) {
-                    g_free(region);
-                    region = NULL;
-                }
-                else
-                    waste_of_time(TRUE, TRUE);
-                g_free(buf);
-            }
+            restore_region(app, fnm);
             g_free(fnm);
         }
     }
     gtk_widget_hide(app->filechooser);
-
-    if (region) {
-        stop_calculation(app);
-        while (app->zoom_stack) {
-            region_clear((MPRegion*)app->zoom_stack->data);
-            g_free(app->zoom_stack->data);
-            app->zoom_stack = g_slist_delete_link(app->zoom_stack,
-                                                  app->zoom_stack);
-        }
-        app->zoom_stack = g_slist_prepend(app->zoom_stack, region);
-        calculate(app);
-    }
 }
 
 static GtkWidget*
@@ -1330,6 +1333,23 @@ setup_workers(Application *app)
                                      NULL, app->ncpus, FALSE, NULL);
 }
 
+static void
+print_help(void)
+{
+        g_print(
+"Usage: gwyfract [SAVEFILE]\n"
+"A toy Mandelrbot set rendered using Gwyddion libraries.\n\n"
+        );
+    g_print(
+"Options:\n"
+" -h, --help                 Print this help and terminate.\n"
+" -v, --version              Print version info and terminate.\n\n"
+        );
+    g_print("Report bugs to <yeti@gwyddion.net>\n");
+
+    exit(EXIT_SUCCESS);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -1340,10 +1360,20 @@ main(int argc, char *argv[])
     g_thread_init(NULL);
     if (!g_thread_supported()) {
         g_printerr("Threads not supported.\n");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
-    g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL);
+    if (argc == 2) {
+        if (gwy_strequal(argv[1], "--help") || gwy_strequal(argv[1], "-h"))
+            print_help();
+        if (gwy_strequal(argv[1], "--version") || gwy_strequal(argv[1], "-v")) {
+            g_print("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+            exit(EXIT_SUCCESS);
+        }
+    }
+    else if (argc > 2)
+        print_help();
+
     memset(&app, 0, sizeof(Application));
     app.ncpus = get_n_cpus();
     app.bits = get_long_double_bits();
@@ -1359,6 +1389,7 @@ main(int argc, char *argv[])
     app.smooth = TRUE;
 
     app.container = gwy_container_new();
+    /* Always put the default to the zoom stack */
     region = g_new(MPRegion, 1);
     region_init_set_from_double(region, &defmxy);
     app.zoom_stack = g_slist_prepend(app.zoom_stack, region);
@@ -1376,7 +1407,10 @@ main(int argc, char *argv[])
     app.progress_id = g_timeout_add(PROGRESSBAR_TIMEOUT,
                                     (GSourceFunc)check_progress, &app);
 
+    if (argv[1])
+        restore_region(&app, argv[1]);
+
     gtk_main();
 
-    return 0;
+    return EXIT_SUCCESS;
 }
