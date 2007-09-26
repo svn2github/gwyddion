@@ -45,6 +45,10 @@
 #define HW_NCPU 3
 #endif
 
+#ifndef HAVE_LOG_2
+#define log2(x) (log(x)/G_LN2)
+#endif
+
 enum {
     TASK_BLOCK_SIZE     = 256,
     PROGRESSBAR_TIMEOUT = 250

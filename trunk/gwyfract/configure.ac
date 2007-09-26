@@ -19,6 +19,7 @@ if test "x$GCC" = xyes; then
 fi
 AC_CHECK_LIBM
 LIBS="$LIBS $LIBM"
+AC_CHECK_FUNCS([log2])
 PKG_CHECK_MODULES(GTHREAD, [gthread-2.0])
 PKG_CHECK_MODULES(GWYDDION, [gwyddion])
 AC_CHECK_LIB(gmp, __gmpf_init,
