@@ -19,16 +19,11 @@
  */
 #include "config.h"
 #include <math.h>
-#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <locale.h>
-#include <unistd.h>
-#include <sys/utsname.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
 #include <gmp.h>
 #include <gtk/gtk.h>
 #include <libgwyddion/gwyddion.h>
@@ -134,56 +129,22 @@ static const DoubleRegion defjxy = {  0.0, 0.0, 3.6, 3.0 };
 static const gdouble r2 = 1e12;
 static const gdouble fuzz = 3.0;
 
+/* from ncpus.c */
+int dcc_ncpus(int *ncpus);
+
 static gint
 get_n_cpus(void)
 {
-    struct utsname buf;
-    gint ncpus = 1;
+    gint ncpus;
 
-    if (uname(&buf)) {
-        g_printerr("uname() failed: %s\n", g_strerror(errno));
-        return ncpus;
+    /* ignore errors, 1 is good enough for us */
+    dcc_ncpus(&ncpus);
+
+    if (ncpus > 64) {
+        g_printerr("More than 64 processors (%d), we are not that "
+                   "scalable.\n", ncpus);
+        ncpus = 64;
     }
-
-    if (gwy_strequal(buf.sysname, "Linux")) {
-        gchar *p, *line, *buf = NULL;
-        GError *err = NULL;
-
-        if (!g_file_get_contents(CPUINFO_FILE, &buf, NULL, &err)) {
-            g_printerr("g_file_get_contents() failed on %s: %s\n",
-                       CPUINFO_FILE, err->message);
-            g_clear_error(&err);
-            return ncpus;
-        }
-        p = buf;
-        ncpus = 0;
-        while ((line = gwy_str_next_line(&p))) {
-            if (g_str_has_prefix(line, "processor\t"))
-                ncpus++;
-        }
-        g_free(buf);
-        if (ncpus < 1) {
-            g_printerr("Cannot not find any processor in %s\n", CPUINFO_FILE);
-            ncpus = 1;
-        }
-    }
-    else if (gwy_strequal(buf.sysname, "FreeBSD")) {
-        int args[] = { HW_NCPU };
-        size_t len;
-
-        if (sysctl(args, 1, &ncpus, &len, NULL, 0) || len != sizeof(int)) {
-            g_printerr("sysctl(HW_NCPU...) failed: %s\n", g_strerror(errno));
-            return 1;
-        }
-        if (ncpus > 64) {
-            g_printerr("More than 64 processors (%d), we are not that "
-                       "scalable.\n", ncpus);
-            ncpus = 64;
-        }
-    }
-    else
-        g_printerr("Don't know any method to determine "
-                   "the number of processors on %s.\n", buf.sysname);
 
     return ncpus;
 }

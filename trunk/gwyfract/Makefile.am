@@ -1,6 +1,6 @@
 # @(#) $Id$
 bin_PROGRAMS = gwyfract
-gwyfract_SOURCES = gwyfract.c
+gwyfract_SOURCES = gwyfract.c ncpus.c
 AM_CFLAGS = @GWYDDION_CFLAGS@ @GTHREAD_CFLAGS@ @EXTRA_CFLAGS@
 AM_LDFLAGS = @GWYDDION_LIBS@ @GTHREAD_LIBS@ @EXTRA_LIBS@
-EXTRA_DIST = README COPYING m4/pkg.m4
+EXTRA_DIST = m4/pkg.m4
