@@ -962,9 +962,9 @@ shut_down(Application *app)
     if (app->progress_id) {
         g_source_remove(app->progress_id);
         app->progress_id = 0;
-        stop_calculation(app);
-        gtk_main_quit();
     }
+    stop_calculation(app);
+    gtk_main_quit();
 }
 
 static gboolean
