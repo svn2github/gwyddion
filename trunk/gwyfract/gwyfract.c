@@ -442,6 +442,9 @@ worker_calculate_double(Task *task)
             if (waste_of_time(FALSE, FALSE))
                 break;
         }
+        /* Completely inside the set??? */
+        if (task->iter_min > task->iter_max)
+            task->iter_min = task->iter_max = 1.0;
     }
 
     task->done = TRUE;
@@ -1075,6 +1078,8 @@ format_mpf(mpf_t x, const gchar *name, size_t digits, gchar *s, GString *str)
     const gchar *sg = "";
 
     memset(s, 0, digits + 2);
+    /* FIXME: free()ing the return value of mpf_get_str() segfaults for some
+     * reason -- a wrong set of memory functions?  Supply own buffers. */
     mpf_get_str(s, &e, 10, digits, x);
     if (s[0] == '-') {
         sg = "-";
@@ -1128,59 +1133,74 @@ save(Application *app)
 static gboolean
 read_region(MPRegion *region, gchar *p)
 {
-#if 0
+    enum { XO, YO, XS, YS };
     static const gchar *names[] = { "xo", "yo", "xs", "ys" };
-    static const guint offsets[] = {
-        G_STRUCT_OFFSET(MPRegion, xo), G_STRUCT_OFFSET(MPRegion, yo),
-        G_STRUCT_OFFSET(MPRegion, xs), G_STRUCT_OFFSET(MPRegion, ys),
-    };
-    gboolean seen[4];
+    gboolean seen[G_N_ELEMENTS(names)];
     struct lconv *lcnv;
     gchar *q, *line;
-    gint i;
+    guint i;
 
     lcnv = localeconv();
-    memset(seen, 0, 4*sizeof(gboolean));
+    memset(seen, 0, G_N_ELEMENTS(names)*sizeof(gboolean));
     while ((line = gwy_str_next_line(&p))) {
         g_strstrip(line);
         if (!line[0] || line[0] == '#')
             continue;
-        for (i = 0; i < 4; i++) {
+        for (i = 0; i < G_N_ELEMENTS(names); i++) {
             if (g_str_has_prefix(line, names[i])
                 && g_ascii_isspace(line[strlen(names[i])]))
-            break;
+                break;
         }
-        if (i == 4) {
+        if (i == G_N_ELEMENTS(names)) {
             g_printerr("Cannot understand line: %s\n", line);
             continue;
         }
         if (seen[i])
             g_printerr("Duplicit value: %.*s\n", (gint)strlen(names[i]), line);
-        else
-            mpf_init(G_STRUCT_MEMBER(mpf_t, region, offsets[i]));
+        else {
+            if (i == XO)
+                mpf_init(region->xo);
+            else if (i == YO)
+                mpf_init(region->yo);
+        }
 
         line += strlen(names[i]) + 1;
-        /* Fix locale-dependent gmp functions */
-        if ((q = strchr(line, '.')))
-            *q = lcnv->decimal_point[0];
-        mpf_set_str(G_STRUCT_MEMBER(mpf_t, region, offsets[i]), line, 10);
+        if (i == XO || i == YO) {
+            /* Fix locale-dependent gmp functions */
+            if ((q = strchr(line, '.')))
+                *q = lcnv->decimal_point[0];
+
+            if (i == XO)
+                mpf_set_str(region->xo, line, 10);
+            else if (i == YO)
+                mpf_set_str(region->yo, line, 10);
+            else {
+                g_assert_not_reached();
+            }
+        }
+        else if (i == XS)
+            region->xs = g_ascii_strtod(line, NULL);
+        else if (i == YS)
+            region->ys = g_ascii_strtod(line, NULL);
+        else
+            g_assert_not_reached();
         seen[i] = TRUE;
     }
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < G_N_ELEMENTS(names); i++) {
         if (!seen[i]) {
             g_printerr("Missing %s\n", names[i]);
             break;
         }
     }
-    if (i == 4)
+    if (i == G_N_ELEMENTS(names))
         return TRUE;
 
-    for (i = 0; i < 4; i++) {
-        if (seen[i])
-            mpf_clear(G_STRUCT_MEMBER(mpf_t, region, offsets[i]));
-    }
-#endif
+    if (seen[XO])
+        mpf_clear(region->xo);
+    if (seen[YO])
+        mpf_clear(region->yo);
+
     return FALSE;
 }
 
@@ -1358,6 +1378,7 @@ main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL);
     memset(&app, 0, sizeof(Application));
     app.ncpus = get_n_cpus();
     app.bits = get_long_double_bits();
