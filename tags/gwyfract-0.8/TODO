@@ -1,0 +1,3 @@
+- implement Enhance for deep zoom
+- save and restore more than just the region
+- easier manipulation with the history stack
