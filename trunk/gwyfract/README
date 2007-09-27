@@ -3,7 +3,7 @@ libraries for user interface.
 
 It is more an example than a real-world renderer.  Despite its low line count
 it has a few cool features:
-- smooth true-color set outside visualization based on inifinity iteration
+- smooth true-color set outside visualization based on renormalized inifinity
   limit
 - deep zoom, using GNU MP library for arbitrary precision math
 - multithreaded, with the number of calculation threads automatically adjusted
