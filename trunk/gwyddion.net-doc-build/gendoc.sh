@@ -1,6 +1,7 @@
 #!/bin/bash
 # $1: if equal to HEAD, generates one-level deeper PHP inclusions and adds
 #     (HEAD) to titles
+export PATH="$HOME/bin:$PATH"
 shopt -s nullglob
 set -e
 
