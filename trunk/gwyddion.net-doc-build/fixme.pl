@@ -19,22 +19,19 @@ local $_ = <STDIN>;
 # Close <col> tags.  XXX: Why the output isn't well-formed?
 s#(<col\b[^/>]*)>#$1/>#sg;
 
-# Fix relative paths to .php
-s#(<a\s+(?:accesskey="."\s+)?href="(?:\.\./[^/"]+/)?[^/"]+)\.html((?:\#[-A-Za-z0-9_:.]*)?")#$1.php$2#sg;
-
 # Fix absolute paths to WWW links
-my $gtkwww = 'http://developer.gnome.org/doc/API/2.0';
+my $gtkwww = 'http://library.gnome.org/devel';
 my $gtkglextwww = 'http://gtkglext.sourceforge.net/reference';
 my $cairowww = 'http://www.cairographics.org/manual';
 my $gimpwww = 'http://developer.gimp.org/api/2.0';
 my %docmap = (
-    'atk'            => $gtkwww      . '/atk',
+    'atk'            => $gtkwww      . '/atk'             . '/stable',
     'cairo'          => $cairowww,
-    'gdk'            => $gtkwww      . '/gdk',
-    'gdk-pixbuf'     => $gtkwww      . '/gdk-pixbuf',
-    'glib'           => $gtkwww      . '/glib',
-    'gobject'        => $gtkwww      . '/gobject',
-    'gtk'            => $gtkwww      . '/gtk',
+    'gdk'            => $gtkwww      . '/gdk'             . '/stable',
+    'gdk-pixbuf'     => $gtkwww      . '/gdk-pixbuf'      . '/stable',
+    'glib'           => $gtkwww      . '/glib'            . '/stable',
+    'gobject'        => $gtkwww      . '/gobject'         . '/stable',
+    'gtk'            => $gtkwww      . '/gtk'             . '/stable',
     'gtkglext'       => $gtkglextwww . '/gtkglext',
     'libgimp'        => $gimpwww     . '/libgimp',
     'libgimpbase'    => $gimpwww     . '/libgimpbase',
@@ -43,17 +40,32 @@ my %docmap = (
     'libgimpmodule'  => $gimpwww     . '/libgimpmodule',
     'libgimpthumb'   => $gimpwww     . '/libgimpthumb',
     'libgimpwidgets' => $gimpwww     . '/libgimpwidgets',
-    'pango'          => $gtkwww      . '/pango',
+    'pango'          => $gtkwww      . '/pango'           . '/stable',
+);
+# Safe relative references
+my %localdocmap = (
+    'libgwyddion'   => 1,
+    'libgwyprocess' => 1,
+    'libgwydraw'    => 1,
+    'libgwydgets'   => 1,
+    'libgwymodule'  => 1,
+    'libgwyapp'     => 1,
 );
 my %unknowndoc;
-s#(<a\s+href=")/.*?/([^"/]+)(/[^"/]+")#
-    if (defined $docmap{$2}) { $1.$docmap{$2}.$3 }
-    else { $unknowndoc{$2} = 1; $1.$gtkwww.$2.'/'.$3 }
+
+s#(<a\s+href=")(/.*?/|\.\./)([^"/]+)(/[^"/]+")#
+    if (defined $docmap{$3}) { $1.$docmap{$3}.$4 }
+    elsif ($2 eq '../' and defined $localdocmap{$3}) { $1.$2.$3.$4 }
+    else { $unknowndoc{$3} = 1; $1.$gtkwww.$3.'/stable/'.$4 }
 #sge;
+
 if (%unknowndoc) {
     my $x;
     for $x (keys %unknowndoc) { warn "$x documentation location is unknown." }
 }
+
+# Fix relative paths to .php
+s#(<a\s+(?:accesskey="."\s+)?href="(?:\.\./[^/"]+/)?[^/"]+)\.html((?:\#[-A-Za-z0-9_:.]*)?")#$1.php$2#sg;
 
 # Remove document name from links to self
 s#(<a\s+href=")$self(\#[-A-Za-z0-9_:.]*")#$1$2#sg;
