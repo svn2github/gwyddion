@@ -68,8 +68,8 @@ if (%unknowndoc) {
 s#(<a\s+(?:class="\w+"\s+)?(?:accesskey="."\s+)?href="(?:\.\./[^/"]+/)?[^/"]+)\.html((?:\#[-A-Za-z0-9_:.]*)?")#$1.php$2#sg;
 
 # Remove document name from links to self
-s#(<a\s+href=")$self(\#[-A-Za-z0-9_:.]*")#$1$2#sg;
-s#(<a\s+href=")$self(")#$1\#$2#sg;
+s#(<a\s+(?:class="\w+"\s+)?href=")$self(\#[-A-Za-z0-9_:.]*")#$1$2#sg;
+s#(<a\s+(?:class="\w+"\s+)?href=")$self(")#$1\#$2#sg;
 
 # Remove leading whitespace from <pre class="synopsis">
 s#(<pre class="synopsis">)( *\n)+#$1\n#sg;
