@@ -12,7 +12,7 @@ test -f fixme.xsl
 
 version="$1"
 srcdir=$(pwd)
-docbase=${docbase:-$HOME/Projects/Gwyddion/gwyddion/devel-docs}
+docbase=${docbase:-$HOME/Projects/Gwyddion/gwyddion-trunk/devel-docs}
 libs="libgwyddion libgwyprocess libgwydraw libgwydgets libgwymodule libgwyapp"
 
 rm -f .releaseme
