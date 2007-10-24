@@ -35,8 +35,12 @@ Makefile: Makefile.in ./config.status
 pdf: $(PACKAGE).pdf
 
 user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
-	$(XSLTPROC) -o $(PACKAGE).fo fo.xsl $(MAIN_XML_SOURCE)
-	$(PDFXMLTEX) $(PACKAGE).fo
+	rm -rf pdf
+	mkdir pdf
+	$(XSLTPROC) -o pdf/$(PACKAGE).fo fo.xsl $(MAIN_XML_SOURCE)
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) pdf
+	cd pdf && $(PDFXMLTEX) $(PACKAGE).fo
+	cp pdf/$@ .
 
 %.txt: %.html
 	$(HTML2TXT) $< >$@
@@ -63,7 +67,7 @@ formulas.stamp: eq-extract.xsl $(EQ_SOURCES) $(MAIN_XML_SOURCE)
 clean:
 	+cd ./formulas && $(GMAKE) clean
 	-rm -rf xhtml *.stamp xml/*~ *~
-	-rm -f *.aux *.log *.out $(PACKAGE).fo $(PACKAGE).xml
+	-rm -f *.aux *.log *.out $(PACKAGE).pdf $(PACKAGE).xml pdf
 
 dist:
 	-rm -rf $(DISTNAME)
