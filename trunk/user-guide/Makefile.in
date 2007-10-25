@@ -34,11 +34,13 @@ Makefile: Makefile.in ./config.status
 
 pdf: $(PACKAGE).pdf
 
-user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl
+# XXX: We should use the embedded TeX sources, not formula images
+user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl formulas
 	rm -rf pdf
 	mkdir pdf
 	$(XSLTPROC) -o pdf/$(PACKAGE).fo fo.xsl $(MAIN_XML_SOURCE)
 	cp $(patsubst %,images/%,$(PNG_IMAGES)) pdf
+	cp formulas/eq-*.png pdf
 	cd pdf && $(PDFXMLTEX) $(PACKAGE).fo
 	cp pdf/$@ .
 
