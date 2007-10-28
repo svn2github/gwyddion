@@ -24,8 +24,9 @@ IMAGES := $(shell $(GSED) -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref="\(
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
-XSL_STYLES = fo.xsl xhtml.xsl eq-extract.xsl
+XSL_STYLES = fo.xsl xhtml.xsl eq-extract.xsl latex.xsl
 CSS_STYLES = user-guide.css
+TEX_STYLES = latex-support.tex
 
 all: xhtml
 
@@ -33,6 +34,24 @@ Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
 pdf: $(PACKAGE).pdf
+
+latex: latex.stamp
+
+latex.stamp: $(XML_SOURCES) latex.xsl
+	rm -rf latex
+	mkdir latex
+	$(XSLTPROC) -o latex/$(PACKAGE).tex latex.xsl $(MAIN_XML_SOURCE)
+	sed -i -e 's/<?xml.*/\\documentclass[oneside]{book}\\usepackage[utf8]{inputenc}\\include{defs}\\include{latex-support}\\begin{document}/' \
+	       -e '$$i\\\end{document}' \
+	       -e 's/&lt;/</g' \
+	       -e 's/&gt;/>/g' \
+	       -e 's/&amp;/\&/g' \
+	       -e '/^ *$$/d' \
+	       latex/$(PACKAGE).tex
+	cp formulas/defs.tex latex
+	cp latex-support.tex latex
+	cp $(patsubst %,images/%,$(PNG_IMAGES)) latex
+	cd latex && pdflatex -interaction scrollmode $(PACKAGE).tex
 
 # XXX: We should use the embedded TeX sources, not formula images
 user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl formulas
@@ -75,7 +94,7 @@ dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
 	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
-	cp $(XSL_STYLES) $(CSS_STYLES) user-guide.iss.in $(DISTNAME)
+	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) user-guide.iss.in $(DISTNAME)
 	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
 	cp xml/*.xml $(DISTNAME)/xml
 	+cd ./formulas && $(GMAKE) dist
