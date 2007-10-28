@@ -125,7 +125,7 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
                   <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
   w_{-1}&\bigl(-{1\over2} + (1 - {x\over2})x\bigr)x\cr
   w_0&1 + (-{5\over2} + {2\over2}x)x^2\cr
   w_1&\bigl({1\over2} + (2 - {3\over2}x)x\bigr)x\cr
@@ -162,7 +162,7 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
                   <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
   w_{-1}&-{1\over6}x(x-1)(x-2)\cr
   w_0&{1\over2}(x^2-1)(x-2)\cr
   w_1&-{1\over2}x(x+1)(x-2)\cr
@@ -234,7 +234,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
                   <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
   w_{-1}&{1\over6}(1-x)^3\cr
   w_0&{2\over3}-x^2(1-{x\over2})\cr
   w_1&{1\over6}+{1\over2}x\bigl(1+x(1-x)\bigr)\cr
@@ -274,7 +274,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
                   <phrase>
 <![CDATA[
 \def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil$#=\Q$&$#\Q$\hfil\cr
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
   w_{-1}&{4\over21}+\bigl(-{11\over21}+({1\over2}-{x\over6})x\bigr)x\cr
   w_0&{13\over21}+\bigl({1\over14}+(-1+{x\over2})x\bigr)x\cr
   w_1&{4\over21}+\bigl({3\over7}+({1\over2}-{x\over2})x\bigr)x\cr
