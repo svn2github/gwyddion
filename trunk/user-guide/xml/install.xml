@@ -71,7 +71,7 @@
       Note that there are several Gtk+ packages for MS Windows operating
       systems available on the internet. Some of them include all required
       components (like GtkGLExt and LibXML2), some do not. We recommend
-      <ulink url="http://gladewin32.sourceforge.net/">GladeWin32</ulink>
+      <ulink url="http://sourceforge.net/projects/gladewin32">GladeWin32</ulink>
       packages that are known to contain all required components and we
       build Gwyddion MS Windows executables with them.
     </para>
@@ -82,7 +82,7 @@
     <itemizedlist>
       <listitem>
         Download the Gtk+ run-time environment installer from
-        <ulink url="http://gladewin32.sourceforge.net/">Gladewin32</ulink>,
+        <ulink url="http://sourceforge.net/projects/gladewin32">Gladewin32</ulink>,
         version 2.8 or higher, and install it.
       </listitem>
       <listitem>
@@ -642,7 +642,7 @@ make install</userinput></literallayout>
     <para>
       In addition to MSVC you need to install Gtk+ development environment.
       Again, we recommend to use the
-      <ulink url="http://gladewin32.sourceforge.net/">GladeWin32</ulink>
+      <ulink url="http://sourceforge.net/projects/gladewin32">GladeWin32</ulink>
       package.  Note it also contains the run-time environment, therefore
       you do not need to install the run-time package if you install the
       development one.
