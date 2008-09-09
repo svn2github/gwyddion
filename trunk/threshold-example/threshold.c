@@ -1,5 +1,4 @@
 /*
- *  threshold.c
  *  @(#) $Id$
  *  Copyright (C) 2003,2004,2008 David Necas (Yeti)
  *  E-mail: yeti@gwyddion.net
