@@ -23,12 +23,12 @@ MOD_LINK = \
 	$(INTL_LIBS) \
 	$(GWY_LIBS)
 
-all: threshold.dll
+all: $(PACKAGE).dll
 
 .c.obj:
 	$(CC) $(CFLAGS) -GD -c $(MOD_CFLAGS) $<
 
-threshold.dll: threshold.obj
-	$(LINK32) threshold.obj $(MOD_LINK) $(WIN32LIBS) $(LDFLAGS) /out:threshold.dll /dll /implib:threshold.lib
+$(PACKAGE).dll: threshold-example.obj
+	$(LINK32) threshold.obj $(MOD_LINK) $(WIN32LIBS) $(LDFLAGS) /out:$(PACKAGE).dll /dll /implib:$(PACKAGE).lib
 
 # vim: ft=make

@@ -7,7 +7,7 @@ VERSION = 2.0
 # Module type (one of process, file)
 MODULE_TYPE = process
 # Module source files
-SOURCES = threshold.c
+SOURCES = $(PACKAGE).c
 # Module header files, if any
 HEADERS =
 # Extra files to distribute (README, ...)
