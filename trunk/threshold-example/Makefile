@@ -16,7 +16,7 @@ GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) --cflags)
 MODULE_DIR = $(shell $(PKGCONFIG) $(GWY) --variable=gwymoduledir)/$(MODULE_TYPE)
 HOME_MODULE_DIR = $(HOME)/.gwyddion/modules/$(MODULE_TYPE)
 EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(SOURCES:.c=.lo)
 
 DNAME = $(PACKAGE)-$(VERSION)
 STD_DIST = Makefile COPYING makefile.msc make.msc pkg.mak $(PACKAGE).spec $(PACKAGE).iss
@@ -24,20 +24,20 @@ COMPILE = libtool --mode=compile gcc
 LINK = libtool --mode=link gcc
 INSTALL = libtool --mode=install install
 
-all: $(PACKAGE).so
+all: $(PACKAGE).la
 
 clean:
 	-rm -f *~ *.o *.lo *.la *.so .libs/* core core.* $(PACKAGE)
 
-%.o: %.c $(HEADERS)
+%.lo: %.c $(HEADERS)
 	$(COMPILE) -shared $(GWY_CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS) -c $< -o $@
 
-$(PACKAGE).so: $(OBJECTS)
-	$(LINK) -shared -export-dynamic $(LDFLAGS) -Wl,-soname,$*.so -o $@ $^
+$(PACKAGE).la: $(OBJECTS)
+	$(LINK) -avoid-version -module -rpath $(DESTDIR)$(MODULE_DIR) $(LDFLAGS) -o $@ $^
 
 install: all
 	mkdir -p $(DESTDIR)$(MODULE_DIR)
-	$(INSTALL) -s -c $(PACKAGE).so $(DESTDIR)$(MODULE_DIR)
+	$(INSTALL) -c $(PACKAGE).la $(DESTDIR)$(MODULE_DIR)
 
 install-user:
 	mkdir -p $(HOME_MODULE_DIR)
