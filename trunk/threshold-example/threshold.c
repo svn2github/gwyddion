@@ -65,6 +65,9 @@ static gboolean    threshold                      (GwyContainer *data,
                                                    GwyRunType run);
 static gboolean    threshold_dialog               (ThresholdArgs *args,
                                                    GwyDataField *dfield);
+static GwyDataField* create_auxiliary_data_field  (GwyContainer *data,
+                                                   GwyDataField *dfield,
+                                                   GQuark quark);
 static void        threshold_do                   (GwyContainer *data,
                                                    GwyDataField *dfield,
                                                    GQuark dquark,
@@ -77,7 +80,7 @@ static void        fractile_changed               (GtkAdjustment *adj,
                                                    ThresholdControls *controls);
 static void        absolute_changed               (GtkAdjustment *adj,
                                                    ThresholdControls *controls);
-static void        mode_changed                   (GtkWidget *widget,
+static void        mode_changed                   (GtkToggleButton *button,
                                                    ThresholdControls *controls);
 static void        threshold_load_args            (GwyContainer *container,
                                                    ThresholdArgs *args);
@@ -146,8 +149,8 @@ threshold(GwyContainer *data, GwyRunType run)
                                      GWY_APP_DATA_FIELD, &dfield,
                                      GWY_APP_MASK_FIELD_KEY, &mquark,
                                      GWY_APP_MASK_FIELD, &mfield,
-                                     GWY_APP_MASK_FIELD_KEY, &squark,
-                                     GWY_APP_MASK_FIELD, &sfield,
+                                     GWY_APP_SHOW_FIELD_KEY, &squark,
+                                     GWY_APP_SHOW_FIELD, &sfield,
                                      NULL);
     /* Set up parameters */
     args = threshold_defaults;
@@ -177,14 +180,10 @@ threshold_do(GwyContainer *data,
              GQuark squark,
              ThresholdArgs *args)
 {
-    GwySIUnit *siunit;
-    gdouble *p, *q;
-    gsize n;
-
     switch (args->mode) {
         case THRESHOLD_CHANGE_DATA:
         /* Save current data field for undo */
-        gwy_app_undo_qcheckpoint(data, dquark, NULL);
+        gwy_app_undo_qcheckpointv(data, 1, &dquark);
         /* Do threshold */
         gwy_data_field_threshold(dfield, args->absolute, args->min, args->max);
         /* Signal views showing this data field it has changed -- do this
@@ -194,50 +193,54 @@ threshold_do(GwyContainer *data,
 
         case THRESHOLD_CHANGE_MASK:
         /* Save current mask field for undo */
-        gwy_app_undo_checkpoint(data, mquark, NULL);
+        gwy_app_undo_qcheckpointv(data, 1, &mquark);
         /* If there is no mask yet, create one */
-        if (!mfield) {
-            mfield = gwy_data_field_new_alike(dfield, FALSE);
-            siunit = gwy_si_unit_new(NULL);
-            gwy_data_field_set_si_unit_z(mfield, siunit);
-            g_object_unref(siunit);
-            gwy_container_set_object(data, mquark, mfield);
-            g_object_unref(mfield);
-        }
+        if (!mfield)
+            mfield = create_auxiliary_data_field(data, dfield, mquark);
+        gwy_data_field_copy(dfield, sfield, FALSE);
         /* Create mask by threshold */
-        n = gwy_data_field_get_xres(dfield)*gwy_data_field_get_yres(dfield);
-        p = gwy_data_field_get_data(dfield);
-        q = gwy_data_field_get_data(mfield);
-        for ( ; n; n--, p++, q++)
-            *q = (*p > args->absolute) ? 1.0 : 0.0;
+        gwy_data_field_threshold(mfield, args->absolute, 0.0, 1.0);
         /* Signal views showing this mask field it has changed -- do this
          * after all changes are done. */
-        gwy_data_field_data_changed(dfield);
+        gwy_data_field_data_changed(mfield);
         break;
 
         case THRESHOLD_CHANGE_PRESENTATION:
         /* Save current presentation field for undo */
-        gwy_app_undo_checkpoint(data, "/0/show", NULL);
+        gwy_app_undo_qcheckpointv(data, 1, &squark);
         /* If there is no presentation yet, create one */
-        if (!sfield) {
-            sfield = gwy_data_field_new_alike(dfield, FALSE);
-            siunit = gwy_si_unit_new(NULL);
-            gwy_data_field_set_si_unit_z(sfield, siunit);
-            g_object_unref(siunit);
-            gwy_container_set_object(data, squark, sfield);
-            g_object_unref(sfield);
-        }
+        if (!sfield)
+            sfield = create_auxiliary_data_field(data, dfield, squark);
+        gwy_data_field_copy(dfield, sfield, FALSE);
         /* Do threshold */
         gwy_data_field_threshold(sfield, args->absolute, args->min, args->max);
         /* Signal views showing this presentation it has changed -- do this
          * after all changes are done. */
-        gwy_data_field_data_changed(dfield);
+        gwy_data_field_data_changed(sfield);
         break;
 
         default:
         g_assert_not_reached();
         break;
     }
+}
+
+static GwyDataField*
+create_auxiliary_data_field(GwyContainer *data,
+                            GwyDataField *dfield,
+                            GQuark quark)
+{
+    GwySIUnit *siunit;
+    GwyDataField *afield;
+
+    afield = gwy_data_field_new_alike(dfield, FALSE);
+    siunit = gwy_si_unit_new(NULL);
+    gwy_data_field_set_si_unit_z(afield, siunit);
+    g_object_unref(siunit);
+    gwy_container_set_object(data, quark, afield);
+    g_object_unref(afield);
+
+    return afield;
 }
 
 static gboolean
@@ -277,10 +280,9 @@ threshold_dialog(ThresholdArgs *args,
     g_signal_connect(controls.fractile, "value_changed",
                      G_CALLBACK(fractile_changed), &controls);
 
-    controls.format
-        = fmt
-        = gwy_data_field_get_value_format_z(dfield,
+    fmt = gwy_data_field_get_value_format_z(dfield,
                                             GWY_SI_UNIT_FORMAT_VFMARKUP, NULL);
+    controls.format = fmt;
     controls.absolute = gtk_adjustment_new(args->absolute/fmt->magnitude,
                                            args->min/fmt->magnitude,
                                            args->max/fmt->magnitude,
@@ -310,6 +312,7 @@ threshold_dialog(ThresholdArgs *args,
                                       THRESHOLD_CHANGE_PRESENTATION,
                                       NULL);
     gwy_radio_buttons_attach_to_table(group, GTK_TABLE(table), 3, 3);
+    controls.mode = group;
     controls.in_update = FALSE;
 
     gtk_widget_show_all(dialog);
@@ -376,10 +379,10 @@ absolute_changed(GtkAdjustment *adj,
 }
 
 static void
-mode_changed(GtkWidget *widget,
+mode_changed(GtkToggleButton *button,
              ThresholdControls *controls)
 {
-    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+    if (!gtk_toggle_button_get_active(button))
         return;
 
     controls->args->mode = gwy_radio_buttons_get_current(controls->mode);

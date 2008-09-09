@@ -15,7 +15,7 @@ GWY = gwyddion
 GWY_CFLAGS = $(shell $(PKGCONFIG) $(GWY) --cflags)
 MODULE_DIR = $(shell $(PKGCONFIG) $(GWY) --variable=gwymoduledir)/$(MODULE_TYPE)
 HOME_MODULE_DIR = $(HOME)/.gwyddion/modules/$(MODULE_TYPE)
-EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
+EXTRA_CFLAGS = -Wall -g -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
 OBJECTS = $(SOURCES:.c=.lo)
 
 DNAME = $(PACKAGE)-$(VERSION)
