@@ -39,9 +39,9 @@ install: all
 	mkdir -p $(DESTDIR)$(MODULE_DIR)
 	$(INSTALL) -c $(PACKAGE).la $(DESTDIR)$(MODULE_DIR)
 
-install-user:
+install-user: all
 	mkdir -p $(HOME_MODULE_DIR)
-	$(INSTALL) -s -c $(PACKAGE).so $(HOME_MODULE_DIR)
+	$(INSTALL) -c $(PACKAGE).la $(HOME_MODULE_DIR)
 
 uninstall:
 	-rm -f $(MODULE_DIR)/$(PACKAGE).so
