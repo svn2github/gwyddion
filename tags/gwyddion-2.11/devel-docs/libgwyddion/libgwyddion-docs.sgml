@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <para>
+    This library contains basic classes and interfaces not directly related
+    to GUI or data processing, and various utility functions.
+  </para>
+  <xi:include href="xml/gwyddionenums.xml"/>
+  <xi:include href="xml/gwyserializable.xml"/>
+  <xi:include href="xml/gwycontainer.xml"/>
+  <xi:include href="xml/gwymacros.xml"/>
+  <xi:include href="xml/gwyddion.xml"/>
+  <xi:include href="xml/gwyentities.xml"/>
+  <xi:include href="xml/gwymath.xml"/>
+  <xi:include href="xml/gwymathfallback.xml"/>
+  <xi:include href="xml/gwynlfit.xml"/>
+  <xi:include href="xml/gwynlfitpreset.xml"/>
+  <xi:include href="xml/gwyfdcurvepreset.xml"/>
+  <xi:include href="xml/gwyexpr.xml"/>
+  <xi:include href="xml/gwysiunit.xml"/>
+  <xi:include href="xml/gwyutils.xml"/>
+  <xi:include href="xml/gwyversion.xml"/>
+  <xi:include href="xml/gwyenum.xml"/>
+  <xi:include href="xml/gwyinventory.xml"/>
+  <xi:include href="xml/gwyresource.xml"/>
+  <xi:include href="xml/gwystringlist.xml"/>
+  <xi:include href="xml/gwymd5.xml"/>
+  <xi:include href="xml/gwydebugobjects.xml"/>
+</book>
