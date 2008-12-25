@@ -29,6 +29,6 @@ all: $(PACKAGE).dll
 	$(CC) $(CFLAGS) -GD -c $(MOD_CFLAGS) $<
 
 $(PACKAGE).dll: threshold-example.obj
-	$(LINK32) threshold.obj $(MOD_LINK) $(WIN32LIBS) $(LDFLAGS) /out:$(PACKAGE).dll /dll /implib:$(PACKAGE).lib
+	$(LINK32) threshold-example.obj $(MOD_LINK) $(WIN32LIBS) $(LDFLAGS) /out:$(PACKAGE).dll /dll /implib:$(PACKAGE).lib
 
 # vim: ft=make
