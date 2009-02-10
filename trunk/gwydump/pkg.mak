@@ -3,7 +3,7 @@
 PACKAGE = gwydump
 # Module version, it is also defined as a preprocessor macro you are
 # encouraged to use for module registering.
-VERSION = 2.0
+VERSION = 2.1
 # Module source files
 SOURCES = gwydump.c
 # Module header files, if any

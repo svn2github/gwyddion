@@ -37,8 +37,10 @@
 #define G_TYPE_STRING G_TYPE_MAKE_FUNDAMENTAL (16)
 #define G_TYPE_OBJECT G_TYPE_MAKE_FUNDAMENTAL (20)
 
+#define U64F "%" G_GUINT64_FORMAT
+
 typedef struct {
-    gboolean v1file;
+    guint version;
     gboolean extract_succeeded;
     gchar *buffer0;
     gchar *buffer;
@@ -63,6 +65,7 @@ static gboolean opt_type = FALSE;
 static gboolean opt_value = FALSE;
 static gboolean opt_raw = FALSE;
 static gboolean opt_path = FALSE;
+static gboolean opt_quad = FALSE;
 static gchar *opt_extract = NULL;
 
 int
@@ -84,7 +87,7 @@ main(int argc, char *argv[])
     }
 
     state.buffer = state.buffer0;
-    state.v1file = FALSE;
+    state.version = opt_quad ? 3 : 2;
     state.extract_succeeded = FALSE;
     state.path = g_string_new(NULL);
     state.stack = g_array_new(FALSE, FALSE, sizeof(gint));
@@ -92,15 +95,20 @@ main(int argc, char *argv[])
     if (!opt_raw) {
         if (size < 10
             || (strncmp(state.buffer0, "GWYP", 4)
-                && strncmp(state.buffer0, "GWYO", 4))) {
+                && strncmp(state.buffer0, "GWYO", 4)
+                && strncmp(state.buffer0, "GWYQ", 4))) {
             fprintf(stderr, "File `%s' is not a Gwyddion file\n", argv[1]);
             return EXIT_FAILURE;
         }
         if (strncmp(state.buffer0, "GWYO", 4) == 0)
-            state.v1file = TRUE;
+            state.version = 1;
+        else if (strncmp(state.buffer0, "GWYP", 4) == 0)
+            state.version = 2;
+        else if (strncmp(state.buffer0, "GWYQ", 4) == 0)
+            state.version = 3;
 
         if (opt_offset)
-            print(&state, "%08x: ", (guint)(state.buffer - state.buffer0));
+            print(&state, "%08lx: ", (gulong)(state.buffer - state.buffer0));
         print(&state, "Header %.4s\n", state.buffer0);
         state.buffer += 4;
         size -= 4;
@@ -109,7 +117,7 @@ main(int argc, char *argv[])
     /* Special case this, object that has no component name breaks all the
      * normal printing assumptions. */
     if (opt_offset)
-        print(&state, "%08x: ", (guint)(state.buffer - state.buffer0));
+        print(&state, "%08lx: ", (gulong)(state.buffer - state.buffer0));
     print(&state, "\"\"");
     dump_object(&state, &size);
 
@@ -123,8 +131,8 @@ fail(DumpState *state,
 {
     va_list ap;
 
-    fprintf(stderr, "\nError at position %08x: ",
-            (guint)(state->buffer - state->buffer0));
+    fprintf(stderr, "\nError at position %08lx: ",
+            (gulong)(state->buffer - state->buffer0));
     va_start(ap, format);
     vfprintf(stderr, format, ap);
     va_end(ap);
@@ -218,7 +226,7 @@ print_offset(DumpState *state)
         return;
 
     if (opt_offset)
-        printf("%08x: ", (guint)(state->buffer - state->buffer0));
+        printf("%08lx: ", (gulong)(state->buffer - state->buffer0));
     print_indent(state);
 }
 
@@ -293,12 +301,18 @@ get_value_real(DumpState *state,
         print_value(state, name, format, toprint); \
     } while (0)
 
-static guint32
+static guint64
 get_size(DumpState *state,
          gsize *size)
 {
-    guint32 value;
-    get_value(state, size, guint32, "int32", value);
+    guint64 value;
+    if (state->version == 3)
+        get_value(state, size, guint64, "int64", value);
+    else {
+        guint32 value32;
+        get_value(state, size, guint32, "int32", value32);
+        value = value32;
+    }
     return value;
 };
 
@@ -315,6 +329,13 @@ dump_char(DumpState *state,
 {
     dump_value(state, size, gchar, "char",
                g_ascii_isprint(value) ? "%c" : "\\%03o", value);
+}
+
+static void
+dump_int16(DumpState *state,
+           gsize *size)
+{
+    dump_value(state, size, gint16, "int16", "%d", value);
 }
 
 static void
@@ -372,13 +393,14 @@ dump_array(DumpState *state,
         { 'B', "boolean", sizeof(gchar),   dump_boolean, },
         { 'C', "char",    sizeof(gchar),   dump_char,    },
         { 'D', "double",  sizeof(gdouble), dump_double,  },
+        { 'H', "int16",   sizeof(gint16),  dump_int16,   },
         { 'I', "int32",   sizeof(gint32),  dump_int32,   },
         { 'O', "object",  0,               dump_object,  },
         { 'Q', "int64",   sizeof(gint64),  dump_int64,   },
         { 'S', "string",  0,               dump_string,  },
     };
 
-    guint32 mysize, i, limit, type;
+    guint64 mysize, i, limit, type;
     gchar *p, *start;
 
     /* Find the type */
@@ -396,7 +418,7 @@ dump_array(DumpState *state,
             print(state, " %s", array[type].name);
         print(state, " array");
         if (opt_value)
-            print(state, " of length %u", mysize);
+            print(state, " of length " U64F, mysize);
     }
     print(state, "\n");
 
@@ -411,7 +433,7 @@ dump_array(DumpState *state,
      * dump function take care about the actual extraction */
     if (opt_extract && g_str_has_prefix(opt_extract, state->path->str)) {
         p = opt_extract + state->path->len;
-        if (sscanf(p, "/[%u]", &i) == 1
+        if (sscanf(p, "/[" U64F "]", &i) == 1
             && (p = strchr(p, ']'))
             && p[1] == '\0'
             && i < mysize)
@@ -421,14 +443,14 @@ dump_array(DumpState *state,
     /* Print at most limit array items */
     for (i = 0; i < limit; i++) {
         print_offset(state);
-        push(state, "[%u]", i);
+        push(state, "[" U64F "]", i);
         array[type].func(state, size);
         pop(state);
     }
     /* Print ellipsis for remaining items */
     if (opt_array_length && i < mysize) {
         print_offset(state);
-        push(state, "[%u..%u]", i, mysize-1);
+        push(state, "[" U64F ".." U64F "]", i, mysize-1);
         print_value(state, array[type].name, "...");
         pop(state);
     }
@@ -492,6 +514,7 @@ dump_hash(DumpState *state,
         { 'b', dump_boolean, },
         { 'c', dump_char,    },
         { 'd', dump_double,  },
+        { 'h', dump_int16,   },
         { 'i', dump_int32,   },
         { 'o', dump_object,  },
         { 'q', dump_int64,   },
@@ -553,7 +576,7 @@ dump_object(DumpState *state,
             gsize *size)
 {
     gboolean container;
-    guint32 mysize;
+    guint64 mysize;
     gchar *p, *start;
 
     /* Name */
@@ -585,12 +608,12 @@ dump_object(DumpState *state,
     /* Hash */
     *size -= mysize;
     p = state->buffer + mysize;
-    dump_hash(state, mysize, state->v1file && container);
+    dump_hash(state, mysize, state->version == 1 && container);
     if (state->buffer > p)
         fail(state, "Internal error, object managed to escape jail");
     if (state->buffer < p) {
-        fprintf(stderr, "Warning: padding of length %u found",
-                (guint)(p - state->buffer));
+        fprintf(stderr, "Warning: padding of length " U64F " found",
+                (guint64)(p - state->buffer));
         state->buffer = p;
     }
 }
@@ -614,6 +637,7 @@ process_options(int *argc,
         { "paths", 'p', 0, G_OPTION_ARG_NONE, &opt_path, NULL, NULL },
         { "extract", 'x', 0, G_OPTION_ARG_STRING, &opt_extract, NULL, NULL },
         { "raw", 'r', 0, G_OPTION_ARG_NONE, &opt_raw, NULL, NULL },
+        { "quad", 'q', 0, G_OPTION_ARG_NONE, &opt_quad, NULL, NULL },
         { "version", 'V', 0, G_OPTION_ARG_NONE, &opt_version, NULL, NULL },
         { "help", 'h', 0, G_OPTION_ARG_NONE, &opt_help, NULL, NULL },
         { NULL }
@@ -673,6 +697,7 @@ print_help(void)
 " -i, --indent=N       Indent each nesting level by N spaces.\n"
 " -p, --paths          Print full paths as component names.\n\n"
 " -r, --raw            File is raw serialized data, no header.\n"
+" -q, --quad           File uses 64bit sizes (automatic for non-raw files).\n"
 " -x, --extract=PATH   Extract component PATH to standard output (as raw binary\n"
 "                      data) in stead of printing.\n\n"
 " -h, --help           Print this help and terminate.\n"
