@@ -59,13 +59,19 @@
         <row>
           <entry>ASCII data (raw)</entry>
           <entry></entry>
-          <entry>rawfile, asciiexport modules</entry>
+          <entry>rawfile, rawgraph,
+            <footnote id='file-format-fn-rawgraph'>
+              <para>
+                Only simple two-column files are imported.
+              </para>
+            </footnote>
+            asciiexport modules</entry>
           <entry>Yes</entry>
           <entry>
             Yes
-            <footnote id='file-format-fn1'>
+            <footnote id='file-format-fn-rawfile'>
               <para>
-                Only a simple data-matrix format si currently supported.
+                Currently, only a simple data-matrix format can be exported.
               </para>
             </footnote>
           </entry>
@@ -99,6 +105,20 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Burleigh BII</entry>
+          <entry>.bii</entry>
+          <entry>burleigh_bii module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Burleigh export</entry>
+          <entry>.txt, .bin</entry>
+          <entry>burleigh_exp module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Createc</entry>
           <entry>.dat</entry>
           <entry>createc module</entry>
@@ -116,13 +136,6 @@
           <entry>ECS</entry>
           <entry>.img</entry>
           <entry>ecsfile module</entry>
-          <entry>Yes</entry>
-          <entry>No</entry>
-        </row>
-        <row>
-          <entry>FRT MicroProf</entry>
-          <entry>.txt</entry>
-          <entry>microprof module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -169,9 +182,30 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>ADE Phase Shift MapVue</entry>
+          <entry>.map</entry>
+          <entry>mapvue module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Zygo binary MetroPro</entry>
           <entry>.dat</entry>
           <entry>metropro module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>MicroProf FRT</entry>
+          <entry>.txt</entry>
+          <entry>microprof module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Micromap</entry>
+          <entry>.sdfa</entry>
+          <entry>sdfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -201,7 +235,7 @@
           <entry></entry>
           <entry>
             nanoscope, nanoscope-ii modules
-            <footnote>
+            <footnote id='file-format-fn-nanoscope'>
               <para>
                 Nanoscope II and Nanoscope III (and newer) are two distinct
                 file formats, nanoscope loads the newer files while
@@ -241,9 +275,30 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Olympus LEXT OLS3000</entry>
+          <entry>.old</entry>
+          <entry>ols module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Omicron Scala</entry>
           <entry>.par + data</entry>
           <entry>omicron module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Omicron MATRIX</entry>
+          <entry>.mtrx + data</entry>
+          <entry>omicronmatrix module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Wyko OPD and ASC</entry>
+          <entry>.opd, .asc</entry>
+          <entry>opdfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -258,7 +313,7 @@
           <entry>Pixmap images</entry>
           <entry>
             .png, .jpeg, .ppm, .tga, .bmp
-            <footnote>
+            <footnote id='file-format-fn-pixmap-import'>
               <para>
                 And others, namely for import. The exact list depends on
                 formats supported by libraries on the particular platform.
@@ -269,7 +324,7 @@
           <entry>Yes</entry>
           <entry>
             Yes
-            <footnote>
+            <footnote id='file-format-fn-pixmap-export'>
               <para>
                 Alhough this is usually lossy. Export to pixmap graphics is
                 intended for presentational purpose mainly.
@@ -281,6 +336,13 @@
           <entry>PSIA</entry>
           <entry>.tiff</entry>
           <entry>psia module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Quesant</entry>
+          <entry>.afm</entry>
+          <entry>quesant module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
@@ -306,6 +368,20 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>Sensofar</entry>
+          <entry>.plu</entry>
+          <entry>sensofar module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Sensolytics</entry>
+          <entry>.dat</entry>
+          <entry>sensolytics module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Scanning Probe Microscopy Markup Langugae</entry>
           <entry>.xml</entry>
           <entry>spml module</entry>
@@ -320,18 +396,39 @@
           <entry>No</entry>
         </row>
         <row>
+          <entry>IonScope SICM</entry>
+          <entry>.img</entry>
+          <entry>sicmfile module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>SPIP ASCII export</entry>
+          <entry>.asc</entry>
+          <entry>spipasc module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+        </row>
+        <row>
           <entry>Surfstand Surface Data File</entry>
           <entry>.sdf</entry>
           <entry>sdfile module</entry>
           <entry>Yes</entry>
           <entry>
             Yes
-            <footnote>
+            <footnote id='file-format-fn-surfstand'>
               <para>
                 Only the text variant can be exported at present.
               </para>
             </footnote>
           </entry>
+        </row>
+        <row>
+          <entry>STMPRG</entry>
+          <entry></entry>
+          <entry>stmprg module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>CSM Surf</entry>
@@ -355,9 +452,9 @@
           <entry>No</entry>
         </row>
         <row>
-          <entry>STMPRG</entry>
-          <entry></entry>
-          <entry>stmprg module</entry>
+          <entry>Veeco Instruments FLT</entry>
+          <entry>.flt</entry>
+          <entry>spmlabf module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
         </row>
