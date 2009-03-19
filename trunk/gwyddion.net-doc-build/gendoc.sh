@@ -71,7 +71,7 @@ function fix() {
   local x y
 
   pushd $name
-  gtkdoc-fixxref --module-dir=xhtml $xrefdirs
+  gtkdoc-fixxref --module=$name --module-dir=xhtml $xrefdirs
 
   pushd xhtml
   for x in *.html; do
