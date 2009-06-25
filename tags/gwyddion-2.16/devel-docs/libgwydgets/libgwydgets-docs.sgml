@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
+  <bookinfo>
+    <title>Gwyddion Widgets Library Reference Manual</title>
+    <xi:include href="releaseinfo.xml"/>
+  </bookinfo>
+
+  <para>
+    This library contains Gwyddion extension Gtk+ widgets and widget
+    utilities.
+  </para>
+  <chapter id="DataWindowWidgets">
+    <para>
+      <link linkend="GwyDataView">GwyDataView</link> is the basic
+      twodimensional data display widget used in Gwyddion. It contains
+      <link linkend="GwyPixmapLayer">pixmap layers</link> displaying some
+      <link linkend="GwyDataFields">data fields</link>, and may contain a
+      <link linkend="GwyVectorLayer">vector layer</link> allowing user to
+      `draw' on the view.  It is often packed together with
+      <link linkend="GwyColorAxis">GwyColorAxis</link> and other widgets
+      to a <link linkend="GwyDataWindow">GwyDataWindow</link>.
+    </para>
+    <title>Data Windows and Views</title>
+    <xi:include href="xml/gwydatawindow.xml"/>
+    <xi:include href="xml/gwydataview.xml"/>
+    <xi:include href="xml/gwydataviewlayer.xml"/>
+    <xi:include href="xml/gwypixmaplayer.xml"/>
+    <xi:include href="xml/gwyvectorlayer.xml"/>
+    <xi:include href="xml/gwylayer-basic.xml"/>
+    <xi:include href="xml/gwylayer-mask.xml"/>
+    <xi:include href="xml/gwycoloraxis.xml"/>
+    <xi:include href="standard-vector-layers.xml"/>
+  </chapter>
+
+  <chapter id="GraphWidgets">
+    <title>Graphs</title>
+    <xi:include href="xml/gwygraph.xml"/>
+    <xi:include href="xml/gwygraphwindow.xml"/>
+    <xi:include href="xml/gwygraphmodel.xml"/>
+    <xi:include href="xml/gwygraphcurvemodel.xml"/>
+    <xi:include href="xml/gwygrapharea.xml"/>
+    <xi:include href="xml/gwyaxis.xml"/>
+    <xi:include href="xml/gwygraphbasics.xml"/>
+    <xi:include href="xml/gwygraphlabel.xml"/>
+    <xi:include href="xml/gwygraphdata.xml"/>
+    <xi:include href="xml/gwygraphcurves.xml"/>
+    <xi:include href="xml/gwygraphcorner.xml"/>
+    <xi:include href="xml/gwyselectiongraph1darea.xml"/>
+    <xi:include href="xml/gwyselectiongrapharea.xml"/>
+    <xi:include href="xml/gwyselectiongraphline.xml"/>
+    <xi:include href="xml/gwyselectiongraphpoint.xml"/>
+    <xi:include href="xml/gwyselectiongraphzoom.xml"/>
+  </chapter>
+
+  <chapter id="Widgets3D">
+    <title>3D Widgets</title>
+    <xi:include href="xml/gwy3dview.xml"/>
+    <xi:include href="xml/gwy3dwindow.xml"/>
+    <xi:include href="xml/gwy3dsetup.xml"/>
+    <xi:include href="xml/gwy3dlabel.xml"/>
+  </chapter>
+
+  <chapter id="GeneralWidgets">
+    <title>General Widgets</title>
+    <xi:include href="xml/gwycolorbutton.xml"/>
+    <xi:include href="xml/gwycurve.xml"/>
+    <xi:include href="xml/gwyruler.xml"/>
+    <xi:include href="xml/gwyhruler.xml"/>
+    <xi:include href="xml/gwyvruler.xml"/>
+    <xi:include href="xml/gwymarkerbox.xml"/>
+    <xi:include href="xml/gwyhmarkerbox.xml"/>
+    <xi:include href="xml/gwyscitext.xml"/>
+    <xi:include href="xml/gwystatusbar.xml"/>
+    <xi:include href="xml/gwyshader.xml"/>
+    <xi:include href="xml/gwyinventorystore.xml"/>
+    <xi:include href="xml/gwynullstore.xml"/>
+  </chapter>
+
+  <chapter id="WidgetUtilities">
+    <title>Widget Utilities</title>
+    <xi:include href="xml/gwydgets.xml"/>
+    <xi:include href="xml/gwydgetenums.xml"/>
+    <xi:include href="xml/gwydgetutils.xml"/>
+    <xi:include href="xml/gwystock.xml"/>
+    <xi:include href="xml/gwyoptionmenus.xml"/>
+    <xi:include href="xml/gwygrainvaluemenu.xml"/>
+    <xi:include href="xml/gwycombobox.xml"/>
+    <xi:include href="xml/gwyradiobuttons.xml"/>
+    <xi:include href="xml/gwysensitivitygroup.xml"/>
+  </chapter>
+</book>

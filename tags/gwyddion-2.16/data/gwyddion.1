@@ -1,0 +1,147 @@
+.TH "gwyddion" "1" "Sep 2007" " " " "
+.\" @(#) $Id$
+.SH NAME
+.PP
+gwyddion \-\- SPM data visualization and analysis program
+.
+.
+.SH "SYNOPSIS"
+.PP
+\fBgwyddion\fR [\fIOPTION\fR]... [\fIFILE\fR]...
+.
+.
+.SH DESCRIPTION
+.PP
+Gwyddion is a graphical SPM (Scanning Probe Microscope) data visualization
+and analysis program, using Gtk+.
+.
+.
+.SH OPTIONS
+.PP
+The program accepts all standard Gtk+, Gdk, and GtkGLExt options like
+\fB\-\-display\fR or \fB\-\-sync\fR.  Please see documentation of these
+packages for description of toolkit options.
+.PP
+The behaviour of the \fB\-\-remote\-*\fR commands is undefined when more than
+one instance of Gwyddion is running on the display.  They can choose
+arbitrary of them to interact with.
+.PP
+Gwyddion options:
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Prints a brief help and terminates.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Prints version information and terminates.
+.TP
+\fB\-\-no\-splash\fR
+Disables splash screen on program startup.
+.TP
+\fB\-\-remote\-new\fR
+Opens files given on the command line in an already running instance of
+Gwyddion on the display.  Runs a new instance if none is running.
+.TP
+\fB\-\-remote\-existing\fR
+Opens files given on the command line in an already running instance of
+Gwyddion on the display.  Fails if none is running.
+.TP
+\fB\-\-remote\-query\fR
+Succeeds if an instance of Gwyddion is already running on the display and
+prints its window id.  Fails if none is running.
+.TP
+\fB\-\-check\fR
+Instead of running the user interface and opening \fIFILE\fRs, loads the
+files, performs a sanity check on them (printing errors to standard error
+output) and terminates.
+.TP
+\fB\-\-log\-to\-file\fR
+Redirect messages from GLib, Gtk+, Gwyddion, etc. to ~/.gwyddion/gwyddion.log
+or file given in \fBGWYDDION_LOGFILE\fR environment variable.  Note messages
+are always redirected to a file on Win32.
+.TP
+\fB\-\-debug\-objects\fR
+Prints list of objects created during run time, with creation and
+desctruction times or reference counts on program exit.  Useful only for
+developers.
+.TP
+\fB\-\-startup\-time\fR
+Prints wall-clock time taken by various startup (and shutdown) tasks.
+Useful only for developers and people going to complain about too slow
+startup.
+.
+.SH ENVIRONMENT
+.TP
+.B GWYDDION_DATADIR
+Data directory where resources were installed.
+If not set, it defaults to compiled-in value of ${datadir}.
+.
+.TP
+.B GWYDDION_LIBDIR
+Library directory where modules were installed.
+If not set, it defaults to compiled-in value of
+${libdir}.
+.
+.TP
+.B GWYDDION_LIBEXECDIR
+Libexec directory where plug-ins were installed.
+If not set, it defaults to compiled-in value of ${libexecdir}.
+.
+.TP
+.B GWYDDION_LOCALEDIR
+Locale distrectory where translations were installed.
+If not set, it defaults to compiled-in value of ${datadir}/locale.
+.
+.TP
+.B GWYDDION_LOGFILE
+Name of file to redirect messages to if \fB\-\-log\-to\-file\fR is given.
+.
+.
+.SH FILES
+.TP
+.B ~/.gwyddion/settings
+Saved user settings and tool states.  Don't edit when Gwyddion is running,
+it will overwrite it at exit.
+.
+.TP
+\fB~/.gwyddion/glmaterials\fR, \fB~/.gwyddion/gradients\fR, ...
+User directories with various resources (OpenGL materials, color gradients, ...).
+.
+.TP
+\fB$GWYDDION_DATADIR/gwyddion/glmaterials\fR, ...
+The same for system-wide resources.
+.
+.TP
+.B ~/.gwyddion/pixmaps
+Directory to place user icons to.  This is mainly useful for installation of
+modules to home.
+.
+.TP
+.B $GWYDDION_DATADIR/gwyddion/pixmaps
+The same for system-wide pixmaps.
+.
+.TP
+.B ~/.gwyddion/modules
+Directory to place user modules to.  They should be placed into
+\fBfile\fR, \fBgraph\fR, \fBprocess\fR, \fBlayer\fR, and \fBtools\fR
+subdirectories according to their kind, though this is more a convention
+than anything else.
+.
+.TP
+.B $GWYDDION_LIBDIR/gwyddion/modules
+The same for system-wide modules.
+.
+.TP
+.B ~/.gwyddion/plugins
+Directory to place user plug-ins to.  They should be placed into
+\fBfile\fR and \fBprocess\fR subdirectories according to their kind.
+.
+.TP
+.B $GWYDDION_LIBEXECDIR/gwyddion/plugins
+The same for system-wide plug-ins.
+.
+.
+.SH SEE ALSO
+.PP
+\fIgwyddion-thumbnailer\fR(1),
+\fIgxsm\fR(1).
+.
