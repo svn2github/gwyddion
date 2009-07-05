@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="data-browser">
+<sect1 id='data-browser'>
   <title>Data Browser</title>
   <indexterm><primary>data browser</primary></indexterm>
   <para>
@@ -22,17 +22,17 @@
     spectra can present in the same file.  The data browser is a tool for
     browsing and managing all the available data in the file.
   </para>
-  <figure id="fig-data-browser">
+  <figure id='fig-data-browser'>
     <title>
       Data browser displaying several channels.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="data_browser.png" format="PNG"/>
+        <imagedata fileref='data_browser.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
-  <sect2 id="data-browser-operating">
+  <sect2 id='data-browser-operating'>
     <title>Controlling the Browser</title>
     <para>
       Since the data browser always displays the structure of currently
@@ -74,13 +74,13 @@
       command.
     </para>
   </sect2>
-  <sect2 id="data-browser-channels">
+  <sect2 id='data-browser-channels'>
     <title>Channels</title>
     <para>
       The channel list shows channel thumbnails, check-boxes controlling
       whether the channel is visible (i.e. displayed in a window) and channel
       names.  Right to the name the presence of
-      <link linkend="presentations-masks">presentation and/or mask</link> is
+      <link linkend='presentations-masks'>presentation and/or mask</link> is
       indicated by the following letters:
       <itemizedlist>
         <listitem><guilabel>M</guilabel> – mask</listitem>
@@ -88,7 +88,7 @@
       </itemizedlist>
     </para>
   </sect2>
-  <sect2 id="data-browser-graphs">
+  <sect2 id='data-browser-graphs'>
     <title>Graphs</title>
     <para>
       The graph list shows check-boxes controlling whether the graph is visible
@@ -96,13 +96,13 @@
       is displayed.
     </para>
   </sect2>
-  <sect2 id="data-browser-spectra">
+  <sect2 id='data-browser-spectra'>
     <title>Spectra</title>
     <para>
       The spectrum list shows the spectra name and the number of points in the
       set.  Since single-point spectra are displayed and operated on only in
       connection with a two-dimensional data using the
-      <link linkend="single-point-spectra">spectroscopy tool</link> there is
+      <link linkend='single-point-spectra'>spectroscopy tool</link> there is
       no check-box controlling the visibility.
     </para>
   </sect2>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect2 id="facet-analysis">
+<sect2 id='facet-analysis'>
   <title>Facet Analysis</title>
   <indexterm><primary>facet analysis</primary></indexterm>
   <para>
@@ -21,9 +21,9 @@
   </para>
   <para>
     The centre of facet view always correspond to zero inclination (horizontal
-    facets), slope in <phrase role="math">x</phrase>-direction increases
+    facets), slope in <phrase role='math'>x</phrase>-direction increases
     towards left and right border and slope in
-    <phrase role="math">y</phrase>-direction increases towards top and bottom
+    <phrase role='math'>y</phrase>-direction increases towards top and bottom
     borders.  The exact coordinate system is a bit complex and it adapts to
     the range of slopes in the particular data displayed.
   </para>
@@ -31,14 +31,14 @@
     <guilabel>Facet plane size</guilabel> controls the size (radius) of plane
     locally fitted in each point to determine the local inclination.  The
     special value 0 stands for no plane fitting, the local inclination is
-    determined from symmetric <phrase role="math">x</phrase> and
-    <phrase role="math">y</phrase> derivatives in each point.  The choice of
+    determined from symmetric <phrase role='math'>x</phrase> and
+    <phrase role='math'>y</phrase> derivatives in each point.  The choice of
     neighbourhood size is crucial for meaningful results: it must be smaller
     than the features one is interested in to avoid their smoothing, on the
     other hand it has to be large enough to suppress noise present in the
     image.
   </para>
-  <figure id="fig-facet-analysis-sizes">
+  <figure id='fig-facet-analysis-sizes'>
     <title>
       Illustration of the influence of fitted plane size on the distribution
       of a scan of a delaminated DLC surface with considerable fine noise.
@@ -49,14 +49,14 @@
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="facet-analysis-sizes.png" format="PNG"/>
+        <imagedata fileref='facet-analysis-sizes.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
   <para>
     Both facet view and data view allow to select a point with mouse and read
-    corresponding facet normal inclination value <phrase role="math">ϑ</phrase>
-    and direction <phrase role="math">φ</phrase> under
+    corresponding facet normal inclination value <phrase role='math'>ϑ</phrase>
+    and direction <phrase role='math'>φ</phrase> under
     <guilabel>Normal</guilabel>.  When you select a point on data view, the
     facet view selection is updated to show inclination in this point.
   </para>

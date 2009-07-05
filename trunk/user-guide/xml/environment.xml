@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="environment-variables">
+<sect1 id='environment-variables'>
   <title>Environment Variables</title>
   <para>
     On Linux/Unix, following environment variables can be used to override compiled-in

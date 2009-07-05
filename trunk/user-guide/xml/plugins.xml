@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="plugins">
+<sect1 id='plugins'>
   <title>Plugins</title>
   <para>
     Plug-ins are external programs that can be executed by Gwyddion to either

@@ -2,13 +2,13 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<appendix id="gfdl">
+<appendix id='gfdl'>
   <appendixinfo>
     <title>GNU Free Documentation License</title>
     <pubdate>Version 1.2, November 2002</pubdate>
     <copyright><year>2000,2001,2002</year>
       <holder>Free Software Foundation, Inc.</holder></copyright>
-    <legalnotice id="gfdl-legalnotice">
+    <legalnotice id='gfdl-legalnotice'>
       <para>
         <address>Free Software Foundation, Inc.
           <street>59 Temple Place, Suite 330</street>,
@@ -26,7 +26,7 @@
     <releaseinfo>Version 1.2, November 2002</releaseinfo>
   </appendixinfo>
   <title>GNU Free Documentation License</title>
-  <simplesect id="gfdl-0">
+  <simplesect id='gfdl-0'>
     <title>PREAMBLE</title>
     <para>
       The purpose of this License is to make a manual, textbook, or other
@@ -53,9 +53,9 @@
       principally for works whose purpose is instruction or reference.
     </para>
   </simplesect>
-  <simplesect id="gfdl-1">
+  <simplesect id='gfdl-1'>
     <title>APPLICABILITY AND DEFINITIONS</title>
-    <para id="gfdl-doc">
+    <para id='gfdl-doc'>
       This License applies to any manual or other work, in any medium, that
       contains a notice placed by the copyright holder saying it can be
       distributed under the terms of this License.  Such a notice grants
@@ -66,12 +66,12 @@
       license if you copy, modify or distribute the work in a way requiring
       permission under copyright law.
     </para>
-    <para id="gfdl-mod-ver">
+    <para id='gfdl-mod-ver'>
       A <quote>Modified Version</quote> of the Document means any work
       containing the Document or a portion of it, either copied verbatim, or
       with modifications and/or translated into another language.
     </para>
-    <para id="gfdl-secnd-sect">
+    <para id='gfdl-secnd-sect'>
       A <quote>Secondary Section</quote> is a named appendix or
       a front-matter section of the Document that deals exclusively with the
       relationship of the publishers or authors of the Document to the
@@ -83,7 +83,7 @@
       legal, commercial, philosophical, ethical or political position
       regarding them.
     </para>
-    <para id="gfdl-inv-sect">
+    <para id='gfdl-inv-sect'>
       The <quote>Invariant Sections</quote> are certain Secondary
       Sections whose titles are designated, as being those of Invariant
       Sections, in the notice that says that the Document is released under
@@ -92,14 +92,14 @@
       Document may contain zero Invariant Sections.  If the Document does not
       identify any Invariant Sections then there are none.
     </para>
-    <para id="gfdl-cov-text">
+    <para id='gfdl-cov-text'>
       The <quote>Cover Texts</quote> are certain short passages of
       text that are listed, as Front-Cover Texts or Back-Cover Texts, in the
       notice that says that the Document is released under this License.  A
       Front-Cover Text may be at most 5 words, and a Back-Cover Text may be at
       most 25 words.
     </para>
-    <para id="gfdl-transparent">
+    <para id='gfdl-transparent'>
       A <quote>Transparent</quote> copy of the Document means a
       machine-readable copy, represented in a format whose specification is
       available to the general public, that is suitable for revising the
@@ -126,7 +126,7 @@
       HTML, PostScript or PDF produced by some word processors for output
       purposes only.
     </para>
-    <para id="gfdl-title-page">
+    <para id='gfdl-title-page'>
       The <quote>Title Page</quote> means, for a printed book,
       the title page itself, plus such following pages as are needed to hold,
       legibly, the material this License requires to appear in the title page.
@@ -135,7 +135,7 @@
       appearance of the work's title, preceding the beginning of the body of
       the text.
     </para>
-    <para id="gfdl-entitled">
+    <para id='gfdl-entitled'>
       A section <quote>Entitled XYZ</quote> means a named subunit of the
       Document whose title either is precisely XYZ or contains XYZ in
       parentheses following text that translates XYZ in another language.
@@ -155,7 +155,7 @@
       meaning of this License.
     </para>
   </simplesect>
-  <simplesect id="gfdl-2">
+  <simplesect id='gfdl-2'>
     <title>VERBATIM COPYING</title>
     <para>
       You may copy and distribute the Document in any medium, either
@@ -173,7 +173,7 @@
       and you may publicly display copies.
     </para>
   </simplesect>
-  <simplesect id="gfdl-3">
+  <simplesect id='gfdl-3'>
     <title>COPYING IN QUANTITY</title>
     <para>
       If you publish printed copies (or copies in media that commonly
@@ -216,7 +216,7 @@
       Document.
     </para>
   </simplesect>
-  <simplesect id="gfdl-4">
+  <simplesect id='gfdl-4'>
     <title>MODIFICATIONS</title>
     <para>
       You may copy and distribute a Modified Version of the Document
@@ -227,7 +227,7 @@
       possesses a copy of it.  In addition, you must do these things in the
       Modified Version:
     </para>
-    <orderedlist id="gfdl-modif-cond" numeration="upperalpha">
+    <orderedlist id='gfdl-modif-cond' numeration='upperalpha'>
       <title>GNU FDL Modification Conditions</title>
       <listitem>
         <simpara>
@@ -268,7 +268,7 @@
           Include, immediately after the copyright notices, a
           license notice giving the public permission to use the Modified
           Version under the terms of this License, in the form shown in the
-          <link linkend="gfdl-addendum">Addendum</link> below.
+          <link linkend='gfdl-addendum'>Addendum</link> below.
         </simpara>
       </listitem>
       <listitem>
@@ -372,11 +372,11 @@
       assert or imply endorsement of any Modified Version.
     </para>
   </simplesect>
-  <simplesect id="gfdl-5">
+  <simplesect id='gfdl-5'>
     <title>COMBINING DOCUMENTS</title>
     <para>
       You may combine the Document with other documents released under
-      this License, under the terms defined in <link linkend="gfdl-4">section
+      this License, under the terms defined in <link linkend='gfdl-4'>section
         4</link> above for modified versions, provided that you include in the
       combination all of the Invariant Sections of all of the original
       documents, unmodified, and list them all as Invariant Sections of your
@@ -402,7 +402,7 @@
       <quote>Endorsements</quote>.
     </para>
   </simplesect>
-  <simplesect id="gfdl-6">
+  <simplesect id='gfdl-6'>
     <title>COLLECTIONS OF DOCUMENTS</title>
     <para>
       You may make a collection consisting of the Document and other
@@ -420,7 +420,7 @@
       document.
     </para>
   </simplesect>
-  <simplesect id="gfdl-7">
+  <simplesect id='gfdl-7'>
     <title>AGGREGATION WITH INDEPENDENT WORKS</title>
     <para>
       A compilation of the Document or its derivatives with other separate
@@ -442,7 +442,7 @@
       aggregate.
     </para>
   </simplesect>
-  <simplesect id="gfdl-8">
+  <simplesect id='gfdl-8'>
     <title>TRANSLATION</title>
     <para>
       Translation is considered a kind of modification, so you may
@@ -465,7 +465,7 @@
       Title (section 1) will typically require changing the actual title.
     </para>
   </simplesect>
-  <simplesect id="gfdl-9">
+  <simplesect id='gfdl-9'>
     <title>TERMINATION</title>
     <para>
       You may not copy, modify, sublicense, or distribute the Document
@@ -477,7 +477,7 @@
       in full compliance.
     </para>
   </simplesect>
-  <simplesect id="gfdl-10">
+  <simplesect id='gfdl-10'>
     <title>FUTURE REVISIONS OF THIS LICENSE</title>
     <para>
       The Free Software Foundation may publish new, revised versions of
@@ -497,14 +497,14 @@
       ever published (not as a draft) by the Free Software Foundation.
     </para>
   </simplesect>
-  <simplesect id="gfdl-addendum">
+  <simplesect id='gfdl-addendum'>
     <title>ADDENDUM: How to use this License for your documents</title>
     <para>
       To use this License in a document you have written, include a copy
       of the License in the document and put the following copyright and
       license notices just after the title page:
     </para>
-    <blockquote id="copyright-sample">
+    <blockquote id='copyright-sample'>
       <title>Sample Invariant Sections list</title>
       <para>
         Copyright (c)  YEAR  YOUR NAME. Permission is granted to copy,
@@ -520,7 +520,7 @@
       If you have Invariant Sections, Front-Cover Texts and Back-Cover
       Texts, replace the <quote>with...Texts.</quote> line with this:
     </para>
-    <blockquote id="inv-cover-sample">
+    <blockquote id='inv-cover-sample'>
       <title>Sample Invariant Sections list</title>
       <para>
         with the Invariant Sections being LIST THEIR TITLES, with the

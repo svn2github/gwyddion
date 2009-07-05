@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="graph-processing">
+<sect1 id='graph-processing'>
   <title>Graph Processing</title>
   <para>
     Many of the Gwyddion data processing modules produce graph as a output.
@@ -17,7 +17,7 @@
     In this section the graph modules present in Gwyddion are briefly
     presented.
   </para>
-  <sect2 id="basic-graph-operations">
+  <sect2 id='basic-graph-operations'>
     <title>Basic Operations</title>
     <para>
       First of all zooming and data reading functions are available directly
@@ -41,15 +41,15 @@
       </listitem>
     </itemizedlist>
   </sect2>
-  <sect2 id="graph-level">
+  <sect2 id='graph-level'>
     <title>Graph Level</title>
     <para>
-      <link linkend="graph-level">Graph level</link> is a very simple module
+      <link linkend='graph-level'>Graph level</link> is a very simple module
       that currently performs linear fit of each graph curve and subtracts
       the fitted linear functions from them.
     </para>
   </sect2>
-  <sect2 id="graph-fit">
+  <sect2 id='graph-fit'>
     <title>Function Fitting</title>
     <indexterm><primary>function fitting</primary></indexterm>
     <para>
@@ -74,16 +74,16 @@
       this is not desirable, quit the dialog with
       <guibutton>Cancel</guibutton>.
     </para>
-    <figure id="fig-graph-fit-screenshot">
+    <figure id='fig-graph-fit-screenshot'>
       <title>Fit graph module screenshot</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="graph_fit.png" format="PNG"/>
+          <imagedata fileref='graph_fit.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="graph-critical-dimension">
+  <sect2 id='graph-critical-dimension'>
     <title>Critical Dimension</title>
     <indexterm><primary>critical dimension</primary></indexterm>
     <para>
@@ -96,11 +96,11 @@
       The user interface of this module is practically the same as of the
       graph fit module.
     </para>
-    <figure id="fig-graph-cd-screenshot">
+    <figure id='fig-graph-cd-screenshot'>
       <title>Critical dimension module screenshot</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="graph_cd.png" format="PNG"/>
+          <imagedata fileref='graph_cd.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="expression-syntax">
+<sect1 id='expression-syntax'>
   <title>Expressions</title>
   <para>
     Expressions used in Data Arithmetic module and in graph function
@@ -27,7 +27,7 @@
   <para>
     The precedence of operations is summarized in following table.
   </para>
-  <table frame='none' id="expr-op-precedence">
+  <table frame='none' id='expr-op-precedence'>
     <title>Precedence of operations</title>
     <tgroup cols='2'>
       <thead>
@@ -73,7 +73,7 @@
   <para>
     Available operators and functions are listed in following table.
   </para>
-  <table frame='none' id="expr-operators">
+  <table frame='none' id='expr-operators'>
     <title>Operators and functions</title>
     <tgroup cols='2'>
       <thead>

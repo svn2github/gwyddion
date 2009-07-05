@@ -2,20 +2,20 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<chapter id="installation">
+<chapter id='installation'>
   <title>Installation</title>
   <para>
     <application>Gwyddion</application> source code and binaries can be
     downloaded from the
-    <ulink url="http://gwyddion.net/download.php">download</ulink>
+    <ulink url='http://gwyddion.net/download.php'>download</ulink>
     web page of the project, or alternatively from raw
-    <ulink url="http://sourceforge.net/project/showfiles.php?group_id=121723">SourceForge.net download page</ulink>.
+    <ulink url='http://sourceforge.net/project/showfiles.php?group_id=121723'>SourceForge.net download page</ulink>.
     The installation slightly varies depending on the operating system used.
     However, basically it consist of two steps:
     <itemizedlist>
       <listitem>
         <para>
-          Installing the <ulink url="http://www.gtk.org/">Gtk+</ulink> widget
+          Installing the <ulink url='http://www.gtk.org/'>Gtk+</ulink> widget
           toolkit (if not already done).
         </para>
       </listitem>
@@ -36,17 +36,17 @@
   </para>
   <para>
     We recommend to download
-    <ulink url="http://gwyddion.net/download.php#sample-files">sample
+    <ulink url='http://gwyddion.net/download.php#sample-files'>sample
       <application>Gwyddion</application> files</ulink>
     too. They are in native <application>Gwyddion</application> format
     and represent typical AFM data.
   </para>
 
-  <sect1 id="installation-unix">
+  <sect1 id='installation-unix'>
     <title>Linux/Unix Packages</title>
     <para>
       Some GNU/Linux and Unix systems may provide binary packages of Gwyddion.
-      The <ulink url="http://gwyddion.net/download.php">download</ulink> page
+      The <ulink url='http://gwyddion.net/download.php'>download</ulink> page
       of the project also tracks known packages and packaging efforts.
       If your operating system provides such a package and it is recent enough,
       install it using the standard means of the operating system.  Otherwise
@@ -54,12 +54,12 @@
     </para>
   </sect1>
 
-  <sect1 id="installation-ms-windows">
+  <sect1 id='installation-ms-windows'>
     <title>MS Windows Packages</title>
     <para>
       If you never had any Gtk+ based application on your system (for example
       bitmap editor
-      <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>)
+      <ulink url='http://www.gimp.org/'><application>GIMP</application></ulink>)
       you will need to install Gtk+ run-time environment on your computer prior
       to <application>Gwyddion</application> installation.
       Gtk+ is a library designed for portable creating of graphical user
@@ -71,7 +71,7 @@
       Note that there are several Gtk+ packages for MS Windows operating
       systems available on the internet. Some of them include all required
       components (like GtkGLExt and LibXML2), some do not. We recommend
-      <ulink url="http://sourceforge.net/projects/gladewin32">GladeWin32</ulink>
+      <ulink url='http://sourceforge.net/projects/gladewin32'>GladeWin32</ulink>
       packages that are known to contain all required components and we
       build Gwyddion MS Windows executables with them.
     </para>
@@ -82,17 +82,17 @@
     <itemizedlist>
       <listitem>
         Download the Gtk+ run-time environment installer from
-        <ulink url="http://sourceforge.net/projects/gladewin32">Gladewin32</ulink>,
+        <ulink url='http://sourceforge.net/projects/gladewin32'>Gladewin32</ulink>,
         version 2.8 or higher, and install it.
       </listitem>
       <listitem>
-        Download <ulink url="http://gwyddion.net/download.php#stable-windows"><application>Gwyddion</application> installer</ulink> and install
+        Download <ulink url='http://gwyddion.net/download.php#stable-windows'><application>Gwyddion</application> installer</ulink> and install
         <application>Gwyddion</application>.
       </listitem>
     </itemizedlist>
   </sect1>
 
-  <sect1 id="installation-dependencies">
+  <sect1 id='installation-dependencies'>
     <title>Build Dependencies</title>
     <para>
       The following table lists packages required to build
@@ -106,7 +106,7 @@
       <title>Build Dependencies</title>
       <varlistentry>
         <term>
-          <ulink url="http://www.gtk.org/">Gtk+</ulink>
+          <ulink url='http://www.gtk.org/'>Gtk+</ulink>
           ≥ 2.8.0
         </term>
         <listitem>
@@ -117,7 +117,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://pkgconfig.freedesktop.org/">pkg-config</ulink>
+          <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
           ≥ 0.16
         </term>
         <listitem>
@@ -128,7 +128,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink>
+          <ulink url='http://gtkglext.sourceforge.net/'>GtkGLExt</ulink>
           ≥ 1.0
         </term>
         <listitem>
@@ -146,7 +146,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://xmlsoft.org/">LibXML2</ulink>
+          <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
           ≥ 2.<varname>x</varname>
         </term>
         <listitem>
@@ -164,7 +164,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://www.fftw.org/">FFTW3</ulink>
+          <ulink url='http://www.fftw.org/'>FFTW3</ulink>
           ≥ 3.0 (32bit),
           ≥ 3.1 (64bit),
           Unix only
@@ -186,14 +186,14 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://www.x.org/">LibXmu</ulink>, X11 only
+          <ulink url='http://www.x.org/'>LibXmu</ulink>, X11 only
         </term>
         <listitem>
           <para>
             <emphasis>Optional.</emphasis>
           </para>
           <para>
-            Enables <link linkend="remote-control">remote control</link> on
+            Enables <link linkend='remote-control'>remote control</link> on
             X11.  This is a standard X Window System library and everyone
             having X probably has its runtime files.  However, since the
             modularization of X in Xorg 7.0 it is distributed separately and
@@ -203,7 +203,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://www.pygtk.org/">PyGTK2</ulink>, including codegen
+          <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
         </term>
         <listitem>
           <para>
@@ -220,7 +220,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://gtksourceview.sourceforge.net/">GtkSourceView</ulink>
+          <ulink url='http://gtksourceview.sourceforge.net/'>GtkSourceView</ulink>
         </term>
         <listitem>
           <para>
@@ -233,7 +233,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://www.freedesktop.org/software/desktop-file-utils">desktop-file-utils</ulink>,
+          <ulink url='http://www.freedesktop.org/software/desktop-file-utils'>desktop-file-utils</ulink>,
           Unix only
         </term>
         <listitem>
@@ -249,7 +249,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <ulink url="http://projects.gnome.org/gconf/">GConf2</ulink>,
+          <ulink url='http://projects.gnome.org/gconf/'>GConf2</ulink>,
           Unix only
         </term>
         <listitem>
@@ -265,29 +265,29 @@
     </variablelist>
   </sect1>
 
-  <sect1 id="installation-unix-source">
+  <sect1 id='installation-unix-source'>
     <title>Linux/Unix from Source Code Tarball</title>
     <para>
       <application>Gwyddion</application> Unix build system is based on
       GNU autotools
-      (<ulink url="http://www.gnu.org/software/autoconf/">autoconf</ulink>,
-      <ulink url="http://www.gnu.org/software/automake/">automake</ulink>,
-      <ulink url="http://www.gnu.org/software/libtool/">libtool</ulink>), like
+      (<ulink url='http://www.gnu.org/software/autoconf/'>autoconf</ulink>,
+      <ulink url='http://www.gnu.org/software/automake/'>automake</ulink>,
+      <ulink url='http://www.gnu.org/software/libtool/'>libtool</ulink>), like
       most of current Unix Free and Open Source Software.  If you have ever
       compiled software from source code, you very likely met autotools and
       already know how to proceed.  This section shall describe the
       compilation procedure in enough detail even for the uninitiated though.
-      File <ulink url="http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL"><filename>INSTALL</filename></ulink>
+      File <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL'><filename>INSTALL</filename></ulink>
       in the top-level directory of the
       source tarball contains generic GNU autotools installation instructions.
       <application>Gwyddion</application> specific information can be found in
-      file <ulink url="http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL.gwyddion"><filename>INSTALL.gwyddion</filename></ulink>.
+      file <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL.gwyddion'><filename>INSTALL.gwyddion</filename></ulink>.
       Since this file comes with a particular version of
       <application>Gwyddion</application> it may contain more concrete or
       up-to-date information and you should follow it instead of this general
       guide should they disagree.
     </para>
-    <sect2 id="installation-unix-source-quick">
+    <sect2 id='installation-unix-source-quick'>
       <title>Quick Instructions</title>
       <para>
         If you know the drill:
@@ -299,7 +299,7 @@ cd gwyddion-2.16
 make install</userinput></literallayout>
       </informalexample>
     </sect2>
-    <sect2 id="installation-unix-source-unpacking">
+    <sect2 id='installation-unix-source-unpacking'>
       <title>Source Unpacking</title>
       <para>
         Unpack the source code tarball with
@@ -324,7 +324,7 @@ make install</userinput></literallayout>
         choice.
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-configuration">
+    <sect2 id='installation-unix-source-configuration'>
       <title>Configuration</title>
       <para>
         Run
@@ -362,7 +362,7 @@ make install</userinput></literallayout>
             <listitem>
               <para>
                 Most packages come with so called
-                <ulink url="http://pkgconfig.freedesktop.org/wiki/">pkg-config</ulink>
+                <ulink url='http://pkgconfig.freedesktop.org/wiki/'>pkg-config</ulink>
                 files (<filename>.pc</filename>) that describe how programs
                 should compile and link with them.  <command>configure</command>
                 uses information from these files, therefore
@@ -430,7 +430,7 @@ make install</userinput></literallayout>
         </informalexample>
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-configuration2">
+    <sect2 id='installation-unix-source-configuration2'>
       <title>Configuration tweaks</title>
       <para>
         Optional features can be enabled/disabled with options such as
@@ -453,11 +453,11 @@ make install</userinput></literallayout>
         a staging area instead of the final directory (commonly done when
         building Linux packages).  In this case the auxiliary actions are
         disabled automatically by non-empty <varname>DESTDIR</varname> (see
-        <link linkend="installation-unix-source-installation">installation</link>)
+        <link linkend='installation-unix-source-installation'>installation</link>)
         and hence they need not be disabled in <command>configure</command>.
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-compilation">
+    <sect2 id='installation-unix-source-compilation'>
       <title>Compilation</title>
       <para>
         Run
@@ -475,7 +475,7 @@ make install</userinput></literallayout>
         address so they can be considered for the next release.
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-installation">
+    <sect2 id='installation-unix-source-installation'>
       <title>Installation</title>
       <para>
         Run
@@ -520,7 +520,7 @@ make install</userinput></literallayout>
         adjusted after installation to get full desktop integration.
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-deinstallation">
+    <sect2 id='installation-unix-source-deinstallation'>
       <title>Deinstallation</title>
       <para>
         Run
@@ -535,7 +535,7 @@ make install</userinput></literallayout>
         ability to reproduce the build process.
       </para>
     </sect2>
-    <sect2 id="installation-unix-source-rpm">
+    <sect2 id='installation-unix-source-rpm'>
       <title>RPM Packages</title>
       <para>
         It is possible to build RPM packages on RPM-based GNU/Linux
@@ -548,11 +548,11 @@ make install</userinput></literallayout>
     </sect2>
   </sect1>
 
-  <sect1 id="installation-osx">
+  <sect1 id='installation-osx'>
     <title>Mac OS X</title>
     <para>
       Much of the previous generic
-      <link linkend="installation-unix-source">Unix/Linux installation
+      <link linkend='installation-unix-source'>Unix/Linux installation
         section</link> applies also to OS X.  Therefore this section deals
       mainly with the specifics of OS X installation, some of the steps
       listed here are explained in more detail in the generic Unix section.
@@ -562,16 +562,16 @@ make install</userinput></literallayout>
       are two ways to install <application>Gwyddion</application>:
       <itemizedlist>
         <listitem>
-          using <ulink url="http://www.macports.org/">MacPorts</ulink>
+          using <ulink url='http://www.macports.org/'>MacPorts</ulink>
           (formerly Darwinports) and building from a Portfile.
         </listitem>
         <listitem>
-          using <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
+          using <ulink url='http://fink.sourceforge.net/'>Fink</ulink> and
           compiling <application>Gwyddion</application> the common Unix way,
         </listitem>
       </itemizedlist>
     </para>
-    <sect2 id="installation-osx-preparation">
+    <sect2 id='installation-osx-preparation'>
       <title>Preparation</title>
       <para>
         To install and run <application>Gwyddion</application> you need the
@@ -589,7 +589,7 @@ make install</userinput></literallayout>
         <application>Terminal.app</application>.
       </para>
       <para>
-        See <link linkend="installation-dependencies">installation
+        See <link linkend='installation-dependencies'>installation
           dependencies</link> section for an overview of required and
         optional packages to install prior to
         <application>Gwyddion</application> installation. The following table
@@ -629,7 +629,7 @@ make install</userinput></literallayout>
         </informaltable>
       </para>
     </sect2>
-    <sect2 id="installation-osx-macports">
+    <sect2 id='installation-osx-macports'>
       <title>MacPorts</title>
       <para>
         MacPorts is an <application>Port</application> based System for
@@ -639,7 +639,7 @@ make install</userinput></literallayout>
         it's far easy to port software to OS X using MacPorts but every
         computer has to compile the application.
         Get and install
-        <ulink url="http://www.macports.org/">MacPorts</ulink>.
+        <ulink url='http://www.macports.org/'>MacPorts</ulink>.
         After you installed MacPorts, run
         <informalexample>
           <userinput>sudo port selfupdate</userinput>
@@ -656,12 +656,12 @@ make install</userinput></literallayout>
         other MacPorts software.
       </para>
     </sect2>
-    <sect2 id="installation-osx-fink">
+    <sect2 id='installation-osx-fink'>
       <title>Fink</title>
       <para>
         <!-- XXX: a few more words about fink -->
         Get and install
-        <ulink url="http://fink.sourceforge.net/">Fink</ulink>.
+        <ulink url='http://fink.sourceforge.net/'>Fink</ulink>.
         After you installed Fink run
         <informalexample>
           <userinput>apt-get update</userinput>
@@ -676,13 +676,13 @@ make install</userinput></literallayout>
       <para>
         When everything is installed, download
         <application>Gwyddion</application> source code, and follow the
-        <link linkend="installation-unix-source">Unix installation
+        <link linkend='installation-unix-source'>Unix installation
           section</link> instructions.  Or you can use Fink
-        <ulink url="http://gwyddion.net/download.php#stable-osx"><filename>.info</filename>
+        <ulink url='http://gwyddion.net/download.php#stable-osx'><filename>.info</filename>
           file</ulink> available from the project web site.
       </para>
     </sect2>
-    <sect2 id="installation-osx-running">
+    <sect2 id='installation-osx-running'>
       <title>Running</title>
       <para>
         Start <application>X11.app</application> and type
@@ -710,7 +710,7 @@ make install</userinput></literallayout>
     </sect2>
   </sect1>
 
-  <sect1 id="installation-ms-windows-source">
+  <sect1 id='installation-ms-windows-source'>
     <title>MS Windows from Source Code Tarball</title>
     <para>
       <application>Gwyddion</application> MS Windows build system uses the
@@ -727,24 +727,24 @@ make install</userinput></literallayout>
     <para>
       In addition to MSVC you need to install Gtk+ development environment.
       Again, we recommend to use the
-      <ulink url="http://sourceforge.net/projects/gladewin32">GladeWin32</ulink>
+      <ulink url='http://sourceforge.net/projects/gladewin32'>GladeWin32</ulink>
       package.  Note it also contains the complete run-time environment,
       therefore you do not need to install the run-time package if you install
       the development one.
     </para>
-    <sect2 id="installation-ms-windows-source-unpacking">
+    <sect2 id='installation-ms-windows-source-unpacking'>
       <title>Unpacking</title>
       <para>
         Unpack the source code tarball with your favorite (de)compression
         program or file manager. Tarballs compressed with
-        <ulink url="http://www.bzip.org/">bzip2</ulink>
+        <ulink url='http://www.bzip.org/'>bzip2</ulink>
         (<filename>.bz2</filename>)
         are considerably smaller than
-        <ulink url="http://www.gzip.org/">gzip</ulink> compressed tarballs
+        <ulink url='http://www.gzip.org/'>gzip</ulink> compressed tarballs
         (<filename>.gz</filename>), however support for bzip2 compression used
         to be less widespread than gzip compression support in MS Windows
         programs. Most recent programs support both, for example
-        <ulink url="http://www.7-zip.org/"><application>7zip</application></ulink>
+        <ulink url='http://www.7-zip.org/'><application>7zip</application></ulink>
         which is also Free Software.
       </para>
       <para>
@@ -753,7 +753,7 @@ make install</userinput></literallayout>
         version number) where all other compilation actions will take place.
       </para>
     </sect2>
-    <sect2 id="installation-ms-windows-source-configuration">
+    <sect2 id='installation-ms-windows-source-configuration'>
       <title>Configuration</title>
       <para>
         Open file <filename>make.msc</filename> in a text editor.  It starts
@@ -828,7 +828,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         itself but it should be easy to locate.
       </para>
     </sect2>
-    <sect2 id="installation-ms-windows-source-compilation">
+    <sect2 id='installation-ms-windows-source-compilation'>
       <title>Compilation</title>
       <para>
         Run
@@ -846,7 +846,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <filename>inst.stamp</filename> first for a clean start.
       </para>
     </sect2>
-    <sect2 id="installation-ms-windows-source-installation">
+    <sect2 id='installation-ms-windows-source-installation'>
       <title>Installation</title>
       <para>
         The layout of the staging area in <filename>inst</filename> exactly
@@ -877,11 +877,11 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         renaming it.
       </para>
     </sect2>
-    <sect2 id="installation-ms-windows-source-installers">
+    <sect2 id='installation-ms-windows-source-installers'>
       <title>Executable Installers</title>
       <para>
         To create an executable installer you need
-        <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
+        <ulink url='http://www.jrsoftware.org/isinfo.php'>Inno Setup</ulink>,
         version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
         build the installer, it will create
         <filename>Gwyddion-2.16.exe</filename> (with 2.16 replaced with the
@@ -893,14 +893,14 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     </sect2>
   </sect1>
 
-  <sect1 id="installation-devel">
+  <sect1 id='installation-devel'>
     <title>Subversion Checkout, Development</title>
     <para>
       <application>Gwyddion</application> uses
-      <ulink url="http://subversion.tigris.org/">Subversion</ulink>
+      <ulink url='http://subversion.tigris.org/'>Subversion</ulink>
       version control system for source code revision management.  The
       organization of the repository is described
-      <ulink url="http://gwyddion.net/resources.php#subversion">on project
+      <ulink url='http://gwyddion.net/resources.php#subversion'>on project
         web pages</ulink>.  For example the current head revision of
       the program itself can be checked out with
       <informalexample>
@@ -920,31 +920,31 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
     <itemizedlist>
       <title>Additional development build dependencies</title>
       <listitem>
-        <ulink url="http://www.gnu.org/software/autoconf/">GNU autoconf</ulink> ≥ 2.60
+        <ulink url='http://www.gnu.org/software/autoconf/'>GNU autoconf</ulink> ≥ 2.60
       </listitem>
       <listitem>
-        <ulink url="http://www.gnu.org/software/automake/">GNU automake</ulink> ≥ 1.7
+        <ulink url='http://www.gnu.org/software/automake/'>GNU automake</ulink> ≥ 1.7
       </listitem>
       <listitem>
-        <ulink url="http://www.gnu.org/software/libtool/">GNU libtool</ulink> ≥ 1.4
+        <ulink url='http://www.gnu.org/software/libtool/'>GNU libtool</ulink> ≥ 1.4
       </listitem>
       <listitem>
-        <ulink url="http://www.python.org/">Python</ulink> ≥ 2.2
+        <ulink url='http://www.python.org/'>Python</ulink> ≥ 2.2
       </listitem>
       <listitem>
-        <ulink url="http://www.perl.org/">Perl5</ulink>
+        <ulink url='http://www.perl.org/'>Perl5</ulink>
       </listitem>
       <listitem>
-        <ulink url="http://www.gtk.org/gtk-doc/">gtk-doc</ulink> ≥ 1.8
+        <ulink url='http://www.gtk.org/gtk-doc/'>gtk-doc</ulink> ≥ 1.8
       </listitem>
       <listitem>
-        <ulink url="http://www.gnu.org/software/gettext/">GNU gettext</ulink> ≥ 0.12, including development stuff
+        <ulink url='http://www.gnu.org/software/gettext/'>GNU gettext</ulink> ≥ 0.12, including development stuff
       </listitem>
       <listitem>
         probably GNU versions of most tools: the compiler, binutils, …
       </listitem>
     </itemizedlist>
-    <sect2 id="installation-devel-unix">
+    <sect2 id='installation-devel-unix'>
       <title>Linux/Unix</title>
       <para>
         After a fresh checkout, run <userinput>./autogen.sh</userinput> with
@@ -1066,7 +1066,7 @@ LDFLAGS=-L/usr/local/lib \
         from <filename>Makefile.am</filename>.
       </para>
     </sect2>
-    <sect2 id="installation-devel-ms-windows">
+    <sect2 id='installation-devel-ms-windows'>
       <title>MS Windows</title>
       <para>
         As one can see from the previous section, a direct build from a

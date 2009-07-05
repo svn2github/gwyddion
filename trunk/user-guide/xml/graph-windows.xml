@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="graph-windows">
+<sect1 id='graph-windows'>
   <title>Graph Window</title>
   <para>
     Graph window is used for 1D data processing. They are created by
@@ -22,13 +22,13 @@
     </menuchoice>
     menu at the Gwyddion main window.
   </para>
-  <figure id="fig-graph-window">
+  <figure id='fig-graph-window'>
     <title>
       A Graph window with three profiles.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="graph_window.png" format="PNG"/>
+        <imagedata fileref='graph_window.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>

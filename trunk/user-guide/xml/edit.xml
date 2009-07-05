@@ -2,8 +2,8 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="editing-correction" xmlns:xi="http://www.w3.org/2001/XInclude">
-  <title id="editing-correction.title">Data Edit and Correction</title>
+<sect1 id='editing-correction' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title id='editing-correction.title'>Data Edit and Correction</title>
   <indexterm><primary>defect correction</primary></indexterm>
   <para>
     There are several modules that enable direct or indirect editing of the
@@ -13,13 +13,13 @@
     defects in an image. The functions below remove <quote>bad</quote> data
     from an image, and then fill it in using an interpolation algorithm.
   </para>
-  <sect2 id="remove-spots">
+  <sect2 id='remove-spots'>
     <title>
       Remove Spots Tool
-      <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_spot_remove-24.png'/></guiicon>
     </title>
     <para>
-      The <link linkend="remove-spots">Remove Spots</link> tool can be used
+      The <link linkend='remove-spots'>Remove Spots</link> tool can be used
       for removing very small parts of the image that are considered
       a scanning error, dust particle or anything else that should not be
       present in the data. Note that doing so can dramatically alter the
@@ -55,19 +55,19 @@
       <note>
       Spot removal will only work for regions of size 64 × 64 pixels or
       smaller. To remove larger regions, create a mask using the
-      <link linkend="tool-mask-editor">Mask Editor</link> tool, then use
+      <link linkend='tool-mask-editor'>Mask Editor</link> tool, then use
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Correct Data</guisubmenu>
-        <guimenuitem><link linkend="remove-data-under-mask">Remove Data Under Mask</link></guimenuitem>
+        <guimenuitem><link linkend='remove-data-under-mask'>Remove Data Under Mask</link></guimenuitem>
       </menuchoice>.
       </note>
     </para>
   </sect2>
-  <sect2 id="remove-grains">
+  <sect2 id='remove-grains'>
     <title>
       Remove Grains Tool
-      <guiicon><inlinegraphic fileref="gwy_grains_remove-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_grains_remove-24.png'/></guiicon>
     </title>
     <para>
       This simple tool removes manually selected connected parts of mask
@@ -75,10 +75,10 @@
       mask to remove is selected by clicking on it with left mouse button.
     </para>
   </sect2>
-  <sect2 id="remove-scars">
+  <sect2 id='remove-scars'>
     <title>
       Remove Scars
-      <guiicon><inlinegraphic fileref="gwy_scars-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_scars-24.png'/></guiicon>
     </title>
     <indexterm><primary>scars correction</primary></indexterm>
     <indexterm><primary>strokes correction</primary></indexterm>
@@ -95,11 +95,11 @@
       defects are usually parallel to the fast scanning axis in the image.
       This function will automatically find and remove these scars, using
       neighbourhood lines to <quote>fill-in</quote> the gaps.  The method
-      is run with the last settings used in <link linkend="mark-scars">Mark
+      is run with the last settings used in <link linkend='mark-scars'>Mark
         Scars</link>.
     </para>
   </sect2>
-  <sect2 id="mark-scars">
+  <sect2 id='mark-scars'>
     <title>Mark Scars</title>
     <para>
       <menuchoice>
@@ -111,7 +111,7 @@
     <para>
       Similarly, the <classname>Mark Scars</classname> module can create a mask
       of the points treated as scars. Unlike
-      <link linkend="remove-scars">Remove Scars</link>
+      <link linkend='remove-scars'>Remove Scars</link>
       which directly interpolates the located defects, this module lets you
       interactively set several parameters which can fine-tune the scar
       selection process:
@@ -146,7 +146,7 @@
       After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
       to the image. Other modules or tools can then be run to edit this data.
     </para>
-    <figure id="fig-scars">
+    <figure id='fig-scars'>
       <title>
         Scars marking and removal example:
         (a) original data with defects,
@@ -155,7 +155,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="remove-scars.png" format="PNG"/>
+          <imagedata fileref='remove-scars.png' format='PNG'/>
         </imageobject>
         <textobject>
           <phrase>Scrars removal example</phrase>
@@ -163,14 +163,14 @@
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="remove-data-under-mask">
+  <sect2 id='remove-data-under-mask'>
     <indexterm>
       <primary>interpolation</primary>
       <secondary>of data under mask</secondary>
     </indexterm>
     <title>
       Remove Data Under Mask
-      <guiicon><inlinegraphic fileref="gwy_remove_under_mask-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_remove_under_mask-24.png'/></guiicon>
     </title>
     <para>
       <menuchoice>
@@ -186,7 +186,7 @@
       and it can take some time to converge.
     </para>
   </sect2>
-  <sect2 id="fractal-correction">
+  <sect2 id='fractal-correction'>
     <title>Fractal Correction</title>
     <indexterm><primary>fractal interpolation</primary></indexterm>
     <para>
@@ -198,7 +198,7 @@
     </para>
     <para>
       The Fractal Correction module, like the
-      <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+      <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
       module, replaces data under the mask. However, it uses
       a different algorithm to come up with the new data: The fractal dimension
       of the whole image is first computed, and then the areas under the mask
@@ -213,7 +213,7 @@
       really unrealistic results and is strictly not recommended.
     </warning>
   </sect2>
-  <sect2 id="mask-of-outliers">
+  <sect2 id='mask-of-outliers'>
     <title>Mask of Outliers</title>
     <indexterm><primary>outliers correction</primary></indexterm>
     <para>
@@ -230,20 +230,20 @@
       afterwards.
     </para>
   </sect2>
-  <sect2 id="line-correction">
+  <sect2 id='line-correction'>
     <title>
       Line Correction
-      <guiicon><inlinegraphic fileref="gwy_line_level-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_line_level-24.png'/></guiicon>
     </title>
     <indexterm><primary>line correction</primary></indexterm>
     <para>
       Profiles taken in the fast scanning axis
-      (usually <phrase role="math">x</phrase>-axis) can be mutually shifted
+      (usually <phrase role='math'>x</phrase>-axis) can be mutually shifted
       by some amount or have slightly different slopes. The basic line
       correction functions deal with this type of discrepancy. Several
       functions can be used: The
-      <link linkend="line-polynomial">Polynomial</link> and
-      <link linkend="path-level">Path level</link> tools and then several
+      <link linkend='line-polynomial'>Polynomial</link> and
+      <link linkend='path-level'>Path level</link> tools and then several
       procedures under
       <menuchoice>
         <guimenu>Data Process</guimenu>
@@ -251,7 +251,7 @@
       </menuchoice>
       menu.
     </para>
-    <para id="line-polynomial">
+    <para id='line-polynomial'>
       The Polynomial tool fits each horizontal or vertical line by
       a polynomial up to the third order and then subtracts the fitted
       polynomial – a very frequently used function in basic processing of raw
@@ -298,5 +298,5 @@
       works can be subject of futher changes.
     </para>
   </sect2>
-  <xi:include href="unrotate.xml"/>
+  <xi:include href='unrotate.xml'/>
 </sect1>

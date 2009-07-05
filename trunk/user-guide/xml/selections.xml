@@ -2,10 +2,10 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="selections">
+<sect1 id='selections'>
   <title>Working with Selections</title>
   <para>
-    All interactive <link linkend="tools">tools</link> and some other
+    All interactive <link linkend='tools'>tools</link> and some other
     processing methods allow to select geometrical shapes on data with mouse:
     points, lines, rectangles, circles/ellipses.  Existing selections can be
     similarly modified by dragging corners, endpoints, or complete
@@ -29,13 +29,13 @@
     it.  To calculate height distribution of the same rectangle you have
     selected for statistical quantities, it is sufficient to switch the tool.
   </para>
-  <figure id="fig-selections">
+  <figure id='fig-selections'>
     <title>
       Data window with three selected lines, two horizontal and one vertical.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="selections-vlsi.png" format="PNG"/>
+        <imagedata fileref='selections-vlsi.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>

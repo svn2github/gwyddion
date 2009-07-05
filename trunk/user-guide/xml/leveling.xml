@@ -2,9 +2,9 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="leveling-and-background">
+<sect1 id='leveling-and-background'>
   <title>Data Leveling and Background Subtraction</title>
-  <sect2 id="leveling">
+  <sect2 id='leveling'>
     <title>Leveling</title>
     <para>
       The data obtained from SPM microscopes are
@@ -27,7 +27,7 @@
       and therefore alter the statistical functions and quantities evaluated
       from the surface.
     </para>
-    <sect3 id="fix-zero">
+    <sect3 id='fix-zero'>
       <title>Fix Zero and Zero Mean Value</title>
       <para>
         <menuchoice>
@@ -45,16 +45,16 @@
       </para>
       <para>
         The simplest modules that are connected with data leveling are
-        <link linkend="fix-zero">Fix Zero</link> and
-        <link linkend="fix-zero">Zero Mean Value</link>
+        <link linkend='fix-zero'>Fix Zero</link> and
+        <link linkend='fix-zero'>Zero Mean Value</link>
         that simply set the average height of the data to put the minimum
         to zero (Fix Zero) or mean value to zero (Zero Mean Value).
       </para>
     </sect3>
-    <sect3 id="plane-level">
+    <sect3 id='plane-level'>
       <title>
         Plane Level
-        <guiicon><inlinegraphic fileref="gwy_level-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_level-24.png'/></guiicon>
       </title>
       <indexterm><primary>plane leveling</primary></indexterm>
       <indexterm>
@@ -78,10 +78,10 @@
         the image window and selecting <guimenuitem>Level</guimenuitem>.
       </tip>
     </sect3>
-    <sect3 id="three-point-level">
+    <sect3 id='three-point-level'>
       <title>
         Three Point Leveling Tool
-        <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_level_triangle-24.png'/></guiicon>
       </title>
       <indexterm><primary>three-point leveling</primary></indexterm>
       <indexterm>
@@ -96,10 +96,10 @@
         is computed from these three points and is subtracted from the data.
       </para>
     </sect3>
-    <sect3 id="path-level">
+    <sect3 id='path-level'>
       <title>
         Path Leveling Tool
-        <guiicon><inlinegraphic fileref="gwy_path_level-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_path_level-24.png'/></guiicon>
       </title>
       <indexterm><primary>path leveling</primary></indexterm>
       <indexterm>
@@ -119,7 +119,7 @@
         adjacent rows.  Rows that are not intersected by any line are not
         moved (relatively to neighbouring rows).
       </para>
-      <figure id="fig-path-level">
+      <figure id='fig-path-level'>
         <title>
           Path Level example:
           (a) uncorrected data with steps that the automated method may
@@ -128,15 +128,15 @@
         </title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="path-level.png" format="PNG"/>
+            <imagedata fileref='path-level.png' format='PNG'/>
           </imageobject>
         </mediaobject>
       </figure>
     </sect3>
-    <sect3 id="facet-level">
+    <sect3 id='facet-level'>
       <title>
         Facet Level
-        <guiicon><inlinegraphic fileref="gwy_facet_level-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_facet_level-24.png'/></guiicon>
       </title>
       <indexterm><primary>facet leveling</primary></indexterm>
       <indexterm>
@@ -151,16 +151,16 @@
         </menuchoice>
       </para>
       <para>
-        <link linkend="facet-level">Facet Level</link> levels data by
+        <link linkend='facet-level'>Facet Level</link> levels data by
         subtracting a plane like the standard
-        <link linkend="plane-level">Plane Level</link> function does.
+        <link linkend='plane-level'>Plane Level</link> function does.
         However, the plane is determined differently: it makes facets of the
         surface as horizontal as possible. Thus for surfaces with flat horizontal
         areas it leads to much better results than the standard
-        <link linkend="plane-level">Plane Level</link>.
+        <link linkend='plane-level'>Plane Level</link>.
         On the other hand, for random surfaces, it can behave much worse.
       </para>
-      <figure id="fig-facet-level">
+      <figure id='fig-facet-level'>
         <title>
           Facet Level example:
           (a) uncorrected, sloping data;
@@ -169,12 +169,12 @@
         </title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="level-plane-facet.png" format="PNG"/>
+            <imagedata fileref='level-plane-facet.png' format='PNG'/>
           </imageobject>
         </mediaobject>
       </figure>
     </sect3>
-    <sect3 id="level-rotate">
+    <sect3 id='level-rotate'>
       <title>Level Rotate</title>
       <indexterm><primary>rotation leveling</primary></indexterm>
       <para>
@@ -185,17 +185,17 @@
         </menuchoice>
       </para>
       <para>
-        <link linkend="level-rotate">Level Rotate</link> behaves similarly to
-        <link linkend="plane-level">Plane Level</link>, however it does
+        <link linkend='level-rotate'>Level Rotate</link> behaves similarly to
+        <link linkend='plane-level'>Plane Level</link>, however it does
         not simply subtract the fitted plane from the data. Instead, this module
         takes the fitted plane parameters and rotates the image data by a
         calculated amount to make it lie in a plane. So unlike
-        <link linkend="plane-level">Plane Level</link>, this
+        <link linkend='plane-level'>Plane Level</link>, this
         module should therefore preserve angle data in the image.
       </para>
     </sect3>
   </sect2>
-  <sect2 id="background-subtraction">
+  <sect2 id='background-subtraction'>
     <title>Background Subtraction</title>
     <indexterm><primary>background subtraction</primary></indexterm>
     <para>
@@ -204,14 +204,14 @@
     </para>
     <tip>
       For finer control, you can use any of Gwyddion's
-      <link linkend="basic-filters">filtering tools</link> on an image,
-      and then use the <link linkend="data-arithmetic">Data Arithmetic</link>
+      <link linkend='basic-filters'>filtering tools</link> on an image,
+      and then use the <link linkend='data-arithmetic'>Data Arithmetic</link>
       module to subtract the results from your original image.
     </tip>
-    <sect3 id="polynomial-level">
+    <sect3 id='polynomial-level'>
       <title>
         Polynomial Background
-        <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_polynom-24.png'/></guiicon>
       </title>
       <indexterm><primary>polynomial background</primary></indexterm>
       <para>
@@ -226,10 +226,10 @@
         polynomial.  In the <guilabel>Independent degree</guilabel> mode
         the horizontal and vertical polynomial orders can be generally set
         separately, i.e. the fitted polynomial is
-        <informalequation id="eq-polynomial-independent-degree">
+        <informalequation id='eq-polynomial-independent-degree'>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="eq-polynomial-independent-degree.png" format="PNG"/>
+              <imagedata fileref='eq-polynomial-independent-degree.png' format='PNG'/>
             </imageobject>
             <textobject>
               <phrase>
@@ -237,7 +237,7 @@
                 degrees
               </phrase>
             </textobject>
-            <textobject role="tex">
+            <textobject role='tex'>
               <phrase>
 <![CDATA[
 \sum_{j=0}^m \sum_{k=0}^n a_{j,k} x^j y^k
@@ -246,21 +246,21 @@
             </textobject>
           </mediaobject>
         </informalequation>
-        where <phrase role="math">m</phrase> and <phrase role="math">n</phrase>
+        where <phrase role='math'>m</phrase> and <phrase role='math'>n</phrase>
         are the selected horizontal and vertical polynomial degrees,
         respectively.  In the <guilabel>Limited total degree</guilabel> mode
         the fitted polynomial is
-        <informalequation id="eq-polynomial-total-degree">
+        <informalequation id='eq-polynomial-total-degree'>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="eq-polynomial-total-degree.png" format="PNG"/>
+              <imagedata fileref='eq-polynomial-total-degree.png' format='PNG'/>
             </imageobject>
             <textobject>
               <phrase>
                 2D polynomial expression with limited total degree
               </phrase>
             </textobject>
-            <textobject role="tex">
+            <textobject role='tex'>
               <phrase>
 <![CDATA[
 \sum_{j+k \le n} a_{j,k} x^j y^k
@@ -269,11 +269,11 @@
             </textobject>
           </mediaobject>
         </informalequation>
-        where <phrase role="math">n</phrase> is the selected total polynomial
+        where <phrase role='math'>n</phrase> is the selected total polynomial
         degree.
       </para>
     </sect3>
-    <sect3 id="revolve-arc">
+    <sect3 id='revolve-arc'>
       <title>Revolve Arc</title>
       <para>
         <menuchoice>
@@ -289,7 +289,7 @@
         (approximately).
       </para>
     </sect3>
-    <sect3 id="median-level">
+    <sect3 id='median-level'>
       <title>Median Level</title>
       <indexterm>
         <primary>median</primary>
@@ -309,7 +309,7 @@
       </para>
       <note>This method can be very slow.</note>
     </sect3>
-    <sect3 id="fit-sphere">
+    <sect3 id='fit-sphere'>
       <title>Fit Sphere</title>
       <indexterm><primary>sphere fitting</primary></indexterm>
       <para>

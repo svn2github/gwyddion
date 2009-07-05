@@ -2,10 +2,10 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="managing-files">
+<sect1 id='managing-files'>
   <title>Managing Files</title>
   <para>
-    Gwyddion uses its <link linkend="gwyfile-format">custom data format</link>
+    Gwyddion uses its <link linkend='gwyfile-format'>custom data format</link>
     (<filename>.gwy</filename>) to store data.  This format has the following
     important advantages:
     <itemizedlist>
@@ -36,7 +36,7 @@
     to write an import module (if you can program) or contact the maintainers
     to help them improve the support.
   </para>
-  <table frame='none' id="table-file-formats">
+  <table frame='none' id='table-file-formats'>
     <title>Supported file formats</title>
     <indexterm>
       <primary>file</primary>
@@ -567,7 +567,7 @@
       </tbody>
     </tgroup>
   </table>
-  <sect2 id="file-loading">
+  <sect2 id='file-loading'>
     <title>File Loading</title>
     <indexterm>
       <primary>file</primary>
@@ -581,9 +581,9 @@
       based solely on file contents.  Thanks to the efficiency of the automated
       detection you should rarely need to intervene and select file types
       manually.
-      See <link linkend="raw-file-import">Raw Data File Import</link>
+      See <link linkend='raw-file-import'>Raw Data File Import</link>
       for details of import of data from unsupported formats and from
-      <link linkend="pixmap-file-import">pixmap images</link>.
+      <link linkend='pixmap-file-import'>pixmap images</link>.
     </para>
     <para>
       If necessary, it is possible to enforce an attempt to load the file
@@ -608,18 +608,18 @@
       load a file, check the file type is set to the corresponding
       type, or to <guilabel>Automatically detected</guilabel>.
     </para>
-    <figure id="fix-file-open-screenshot">
+    <figure id='fix-file-open-screenshot'>
       <title>
         File open dialog with expanded file type options and channel preview.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="file-open.png" format="PNG"/>
+          <imagedata fileref='file-open.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="file-merging">
+  <sect2 id='file-merging'>
     <title>File Merging</title>
     <indexterm>
       <primary>file</primary>
@@ -633,7 +633,7 @@
       current file.
     </para>
   </sect2>
-  <sect2 id="file-saving">
+  <sect2 id='file-saving'>
     <title>File Saving</title>
     <indexterm>
       <primary>file</primary>
@@ -659,7 +659,7 @@
       change the file name of the current file to the just saved file name.
     </para>
   </sect2>
-  <sect2 id="document-history">
+  <sect2 id='document-history'>
     <title>Document History</title>
     <indexterm>
       <primary>file</primary>
@@ -721,7 +721,7 @@
           pattern <literal>*.sis</literal> the initial <literal>*</literal>
           matches all leading directory components.  The pattern syntax is
           described in
-          <ulink url="http://developer.gnome.org/doc/API/2.0/glib/glib-Glob-style-pattern-matching.html">GPatternSpec</ulink>
+          <ulink url='http://developer.gnome.org/doc/API/2.0/glib/glib-Glob-style-pattern-matching.html'>GPatternSpec</ulink>
           documentation.
         </listitem>
         <listitem>

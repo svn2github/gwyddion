@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<chapter id="development">
+<chapter id='development'>
   <title>Developing Gwyddion</title>
   <para>
     You are encouraged to become a developer of Gwyddion.
@@ -16,16 +16,16 @@
     don't have to limit yourself to modules or plug-ins of course, but they
     should be easier to start with.
   </para>
-  <sect2 id="api-references">
+  <sect2 id='api-references'>
     <title>API References</title>
     <para>
       There are many functions that can help you while developing your module.
       See API reference at
-      <ulink url="http://gwyddion.net/documentation/">Documentation
+      <ulink url='http://gwyddion.net/documentation/'>Documentation
         section</ulink> of the project web.
     </para>
   </sect2>
-  <sect2 id="bug-reports">
+  <sect2 id='bug-reports'>
     <title>Bug reports</title>
     <para>
       We will be very happy if you send as bug reports if you find errors in

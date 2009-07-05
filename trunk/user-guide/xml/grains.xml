@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="grain-analysis">
+<sect1 id='grain-analysis'>
   <title>Grain Analysis</title>
   <indexterm><primary>grain marking</primary></indexterm>
   <para>
@@ -11,7 +11,7 @@
     curvature thresholding). These procedures can be very efficient namely
     within particle analysis (to mark particles located on flat surface).
   </para>
-  <para id="grain-threshold">
+  <para id='grain-threshold'>
     <indexterm><primary>threshold grain marking</primary></indexterm>
     Thresholding methods can be accessed within Gwyddion as
     <menuchoice>
@@ -23,7 +23,7 @@
     The results of each individual thresholding methods can be merged together
     using several operators.
   </para>
-  <para id="grain-remove-thresholding">
+  <para id='grain-remove-thresholding'>
     Similarly, the grains can be removed from the mask using
     <menuchoice>
       <guimenu>Data Process</guimenu>
@@ -34,7 +34,7 @@
     false grains occurred by noise or some dust particles, for example. You can
     use also interactive grain removal tool for doing this manually.
   </para>
-  <sect2 id="grain-watershed">
+  <sect2 id='grain-watershed'>
     <title>Watershed</title>
     <indexterm><primary>watershed grain marking</primary></indexterm>
     <para>
@@ -50,11 +50,11 @@
       finding local extremes on the surface this algorithm can be used also for
       purposes of grain segmentation or marking. For convenience in the
       following we will treat the data inverted in the
-      <phrase role="math">z</phrase>
+      <phrase role='math'>z</phrase>
       direction while describing the algorithm (i.e.
       the grain tops are forming local minima in the following text). We
       applied two stages of the grain analysis
-      (see [<link linkend="grain-analysis-ref-1">1</link>]):
+      (see [<link linkend='grain-analysis-ref-1'>1</link>]):
     </para>
     <orderedlist>
       <listitem>
@@ -111,7 +111,7 @@
       In this way we can identify the grain positions and then determine the
       volume occupied by each grain separately.
     </para>
-    <figure id="fig-grain-marking">
+    <figure id='fig-grain-marking'>
       <title>
         Image of grain-like surface structure (a) and corresponding results
         of height thresholding (b), curvature thresholding (c), and
@@ -120,19 +120,19 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="allgrains.png" format="PNG"/>
+          <imagedata fileref='allgrains.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="grain-analysis-statistics">
+  <sect2 id='grain-analysis-statistics'>
     <title>Statistics</title>
     <indexterm><primary>number of grains</primary></indexterm>
     <para>
       Grain properties can be studied using several functions. The simplest of
       them is Grain Statistics
     </para>
-    <sect3 id="grain-statistics">
+    <sect3 id='grain-statistics'>
       <title>Grain Statistics</title>
       <para>
         <menuchoice>
@@ -154,10 +154,10 @@
         can be obtained also for the non-grain area.
       </para>
     </sect3>
-    <sect3 id="grain-distributions">
+    <sect3 id='grain-distributions'>
       <title>
         Grain Distributions
-        <guiicon><inlinegraphic fileref="gwy_grains_graph-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_grains_graph-24.png'/></guiicon>
       </title>
       <para>
         <menuchoice>
@@ -184,7 +184,7 @@
         <application>Gwyddion</application>.
       </para>
     </sect3>
-    <sect3 id="grain-correlation">
+    <sect3 id='grain-correlation'>
       <title>
         Grain Property Correlation
       </title>
@@ -201,15 +201,15 @@
         between them.
       </para>
     </sect3>
-    <sect3 id="grain-measure">
+    <sect3 id='grain-measure'>
       <title>
         Grain Measurement Tool
-        <guiicon><inlinegraphic fileref="gwy_grains_measure-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_grains_measure-24.png'/></guiicon>
       </title>
       <para>
         The grain measurement tool is the interactive method to obtain the
         same information about individual grains as
-        <link linkend="grain-distributions">Grain Distributions</link> in raw
+        <link linkend='grain-distributions'>Grain Distributions</link> in raw
         mode.  After selecting a grain on the data window with mouse, all
         the available quantities are displayed in the tool window.
       </para>
@@ -217,15 +217,15 @@
         Beside physical characteristics this tool also displays the grain
         number.  Grain numbers corresponds to row numbers (counting from 1)
         in files exported by
-        <link linkend="grain-distributions">Grain Distributions</link>.
+        <link linkend='grain-distributions'>Grain Distributions</link>.
       </para>
     </sect3>
   </sect2>
-  <sect2 id="grain-properties">
+  <sect2 id='grain-properties'>
     <title>Grain Properties</title>
     <para>
-      <link linkend="grain-distributions">Grain Distributions</link>
-      and <link linkend="grain-measure">Grain measurement tool</link>
+      <link linkend='grain-distributions'>Grain Distributions</link>
+      and <link linkend='grain-measure'>Grain measurement tool</link>
       can calculate the following grain properties:
     </para>
     <variablelist>
@@ -291,7 +291,7 @@
             <listitem>
               <guilabel>Surface area</guilabel>,
               the surface area of the grain, see
-              <link linkend="surface-area-calculation">statistical
+              <link linkend='surface-area-calculation'>statistical
                 quantities</link> section for description of the surface area
               estimation method.
             </listitem>
@@ -343,18 +343,18 @@
             <listitem>
               <guilabel>Zero basis</guilabel>,
               the volume between grain surface and the plane
-              <phrase role="math">z</phrase> = 0.  Values below
+              <phrase role='math'>z</phrase> = 0.  Values below
               zero form negative volumes.  The zero level must be set to
               a reasonable value (often
-              <link linkend="fix-zero">Fix Zero</link> is sufficient) for
+              <link linkend='fix-zero'>Fix Zero</link> is sufficient) for
               the results to make sense, which is also the advantage of
               this method: one can use basis plane of his choice.
             </listitem>
             <listitem>
               <guilabel>Grain minimum basis</guilabel>,
               the volume between grain surface and the plane
-              <phrase role="math">z</phrase> = <phrase role="math">z</phrase><subscript>min</subscript>,
-              where <phrase role="math">z</phrase><subscript>min</subscript>
+              <phrase role='math'>z</phrase> = <phrase role='math'>z</phrase><subscript>min</subscript>,
+              where <phrase role='math'>z</phrase><subscript>min</subscript>
               is the minimum value (height) occuring in the grain.  This
               method accounts for grain surrounding but it typically
               underestimates the volume, especially for small grains.
@@ -364,9 +364,9 @@
               the volume between grain surface and the basis surface formed
               by laplacian interpolation of surrounding values.  In other
               words, this is the volume that would disappear after using
-              <link linkend="remove-data-under-mask">Remove Data Under Mask</link>
+              <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
               or
-              <link linkend="tool-remove-grains">Grain Remover</link> tool
+              <link linkend='tool-remove-grains'>Grain Remover</link> tool
               with Laplacian interpolation on the grain.  This is the most
               sophisticated method, on the other hand it is the hardest to
               develop intuition for.
@@ -399,86 +399,86 @@
         <listitem>
           <itemizedlist>
             <listitem>
-              <guilabel>Inclination <phrase role="math">ϑ</phrase></guilabel>,
+              <guilabel>Inclination <phrase role='math'>ϑ</phrase></guilabel>,
               the deviation of the normal to the mean plane from the
-              <phrase role="math">z</phrase>-axis, see
-              <link linkend="inclinations-coordinates">inclinations</link>
+              <phrase role='math'>z</phrase>-axis, see
+              <link linkend='inclinations-coordinates'>inclinations</link>
               for details.
             </listitem>
             <listitem>
-              <guilabel>Inclination <phrase role="math">φ</phrase></guilabel>,
+              <guilabel>Inclination <phrase role='math'>φ</phrase></guilabel>,
               the azimuth of the slope, as defined in
-              <link linkend="inclinations-coordinates">inclinations</link>.
+              <link linkend='inclinations-coordinates'>inclinations</link>.
             </listitem>
           </itemizedlist>
         </listitem>
       </varlistentry>
     </variablelist>
-    <figure id="fig-grain-bounding-dims">
+    <figure id='fig-grain-bounding-dims'>
       <title>
         Maximum and minimum bounding dimensions and angles of a grain.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="grain-bounding-dims.png" format="PNG"/>
+          <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
-    <para id="boundary-length-calculation">
+    <para id='boundary-length-calculation'>
       <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
       of each pixel corner participating in the boundary.  The contributions
       are displayed on the following figure for each type of corner
       configuration, where
-      <phrase role="math">h<subscript>x</subscript></phrase> and 
-      <phrase role="math">h<subscript>y</subscript></phrase>
+      <phrase role='math'>h<subscript>x</subscript></phrase> and 
+      <phrase role='math'>h<subscript>y</subscript></phrase>
       are pixel dimension along corresponding axes and
-      <phrase role="math">q</phrase> is the length of the pixel diagonal.
+      <phrase role='math'>q</phrase> is the length of the pixel diagonal.
     </para>
-    <figure id="fig-boundary-length">
+    <figure id='fig-boundary-length'>
       <title>
         Contributions of pixel configurations to the estimated boundary length.
         Grey squares represent pixels inside the grain, white squares represent
         outside pixels.  The estimated contribution of each configuration is:
-        (a) <phrase role="math">q</phrase>/2,
-        (b) <phrase role="math">q</phrase>,
-        (c) <phrase role="math">h<subscript>y</subscript></phrase>,
-        (c) <phrase role="math">h<subscript>x</subscript></phrase>,
-        (e) <phrase role="math">q</phrase>/2.
+        (a) <phrase role='math'>q</phrase>/2,
+        (b) <phrase role='math'>q</phrase>,
+        (c) <phrase role='math'>h<subscript>y</subscript></phrase>,
+        (c) <phrase role='math'>h<subscript>x</subscript></phrase>,
+        (e) <phrase role='math'>q</phrase>/2.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="boundary_length.png" format="PNG"/>
+          <imagedata fileref='boundary_length.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
-    <para id="grain-volume-calculation">
+    <para id='grain-volume-calculation'>
       <indexterm><primary>volume calculation</primary></indexterm>
       The grain volume is, after subtracting the basis, estimated as the
       volume of exactly the same body whose upper surface is used for
-      <link linkend="fig-surface-area-vertices">surface area calculation</link>.
+      <link linkend='fig-surface-area-vertices'>surface area calculation</link>.
       Note for the volume between vertices this is equivalent to the classic
       two-dimensional trapezoid integration method.  However, we calculate the
       volume under a mask centered on vertices, therefore their contribution
       to the integral is distributed differently as shown in the following
       figure.
     </para>
-    <figure id="fig-volume-pixel-weights">
+    <figure id='fig-volume-pixel-weights'>
       <title>
         Contributions of individual pixels to the volume of single pixel
         (grey).
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="volume-pixel-weights.png" format="PNG"/>
+          <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="grain-analysis-ref">
+  <sect2 id='grain-analysis-ref'>
     <title>References</title>
-    <para id="grain-analysis-ref-1">
-      [1] <ulink url="http://klapetek.cz/download.html">
+    <para id='grain-analysis-ref-1'>
+      [1] <ulink url='http://klapetek.cz/download.html'>
         Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
         Acta Physica Slovaca, 3 (223-230), 2003
       </ulink>

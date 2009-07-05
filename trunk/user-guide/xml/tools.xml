@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="tools">
+<sect1 id='tools'>
   <title>Tools</title>
   <para>
     Functions from <guimenu>Data Process</guimenu> menu and button panel
@@ -13,7 +13,7 @@
     tool.  In other words one can switch data windows freely while using
     a tool and it always shows information from or operates on the current
     data. Tools also differ by working with <link
-      linkend="selections">selections</link>, e.g. points, lines or
+      linkend='selections'>selections</link>, e.g. points, lines or
     rectangles, on data windows.  Nevertheless functionally they perform
     similar tasks as <guimenu>Data Process</guimenu> functions – value
     reading, leveling, statistics, correction, etc.
@@ -23,90 +23,44 @@
       <tbody>
         <row>
           <entry>
-            <link linkend="tool-read-value">
+            <link linkend='tool-read-value'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-distance">
+            <link linkend='tool-distance'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_distance-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_distance-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-profile">
+            <link linkend='tool-profile'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_profile-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_profile-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-spectro">
+            <link linkend='tool-spectro'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_spectrum-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-        </row>
-        <row>
-          <entry>
-            <link linkend="tool-stats">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_stat_quantities-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-sfunctions">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_graph_halfgauss-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-line-stats">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_graph_vertical-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-roughness">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_iso_roughness-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
@@ -115,90 +69,44 @@
         </row>
         <row>
           <entry>
-            <link linkend="tool-level3">
+            <link linkend='tool-stats'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_level_triangle-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-path-level">
+            <link linkend='tool-sfunctions'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_path_level-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-polynom">
+            <link linkend='tool-line-stats'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_polynom-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-crop">
+            <link linkend='tool-roughness'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_crop-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-        </row>
-        <row>
-          <entry>
-            <link linkend="tool-mask-editor">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_mask_editor-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-measure-grains">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_grains_measure-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-remove-grains">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_grains_remove-24.png" format="PNG"/>
-                  </imageobject>
-                </inlinemediaobject>
-              </guiicon>
-            </link>
-          </entry>
-          <entry>
-            <link linkend="tool-remove-spots">
-              <guiicon>
-                <inlinemediaobject>
-                  <imageobject>
-                    <imagedata fileref="gwy_spot_remove-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_iso_roughness-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
@@ -207,22 +115,114 @@
         </row>
         <row>
           <entry>
-            <link linkend="tool-color-range">
+            <link linkend='tool-level3'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_color_range-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
             </link>
           </entry>
           <entry>
-            <link linkend="tool-filters">
+            <link linkend='tool-path-level'>
               <guiicon>
                 <inlinemediaobject>
                   <imageobject>
-                    <imagedata fileref="gwy_filter-24.png" format="PNG"/>
+                    <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-polynom'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-crop'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_crop-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-mask-editor'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_mask_editor-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-measure-grains'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-remove-grains'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-remove-spots'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-color-range'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-filters'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_filter-24.png' format='PNG'/>
                   </imageobject>
                 </inlinemediaobject>
               </guiicon>
@@ -237,10 +237,10 @@
     located in the main window. Gwyddion includes these tools:
   </para>
   <variablelist>
-    <varlistentry id="tool-read-value">
+    <varlistentry id='tool-read-value'>
       <term>
-        <link linkend="read-value">Read Value</link>
-        <guiicon><inlinegraphic fileref="gwy_pointer_measure-24.png"/></guiicon>
+        <link linkend='read-value'>Read Value</link>
+        <guiicon><inlinegraphic fileref='gwy_pointer_measure-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -248,10 +248,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-distance">
+    <varlistentry id='tool-distance'>
       <term>
-        <link linkend="distance">Distance</link>
-        <guiicon><inlinegraphic fileref="gwy_distance-24.png"/></guiicon>
+        <link linkend='distance'>Distance</link>
+        <guiicon><inlinegraphic fileref='gwy_distance-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -262,10 +262,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-profile">
+    <varlistentry id='tool-profile'>
       <term>
-        <link linkend="profile">Profile</link>
-        <guiicon><inlinegraphic fileref="gwy_profile-24.png"/></guiicon>
+        <link linkend='profile'>Profile</link>
+        <guiicon><inlinegraphic fileref='gwy_profile-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -275,10 +275,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-spectro">
+    <varlistentry id='tool-spectro'>
       <term>
-        <link linkend="point-spectroscopy">Spectro</link>
-        <guiicon><inlinegraphic fileref="gwy_spectrum-24.png"/></guiicon>
+        <link linkend='point-spectroscopy'>Spectro</link>
+        <guiicon><inlinegraphic fileref='gwy_spectrum-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -286,10 +286,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-stats">
+    <varlistentry id='tool-stats'>
       <term>
-        <link linkend="stat-quantities">Statistical Quantities</link>
-        <guiicon><inlinegraphic fileref="gwy_stat_quantities-24.png"/></guiicon>
+        <link linkend='stat-quantities'>Statistical Quantities</link>
+        <guiicon><inlinegraphic fileref='gwy_stat_quantities-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -300,10 +300,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-sfunctions">
+    <varlistentry id='tool-sfunctions'>
       <term>
-        <link linkend="sfunctions">Statistical Functions</link>
-        <guiicon><inlinegraphic fileref="gwy_graph_halfgauss-24.png"/></guiicon>
+        <link linkend='sfunctions'>Statistical Functions</link>
+        <guiicon><inlinegraphic fileref='gwy_graph_halfgauss-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -313,10 +313,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-line-stats">
+    <varlistentry id='tool-line-stats'>
       <term>
-        <link linkend="line-stats">Row/Column Statistics</link>
-        <guiicon><inlinegraphic fileref="gwy_graph_vertical-24.png"/></guiicon>
+        <link linkend='line-stats'>Row/Column Statistics</link>
+        <guiicon><inlinegraphic fileref='gwy_graph_vertical-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -326,10 +326,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-roughness">
+    <varlistentry id='tool-roughness'>
       <term>
-        <link linkend="roughness-iso">Roughness</link>
-        <guiicon><inlinegraphic fileref="gwy_iso_roughness-24.png"/></guiicon>
+        <link linkend='roughness-iso'>Roughness</link>
+        <guiicon><inlinegraphic fileref='gwy_iso_roughness-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -337,10 +337,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-level3">
+    <varlistentry id='tool-level3'>
       <term>
-        <link linkend="three-point-level">Three Point Level</link>
-        <guiicon><inlinegraphic fileref="gwy_level_triangle-24.png"/></guiicon>
+        <link linkend='three-point-level'>Three Point Level</link>
+        <guiicon><inlinegraphic fileref='gwy_level_triangle-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -350,10 +350,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-path-level">
+    <varlistentry id='tool-path-level'>
       <term>
-        <link linkend="path-level">Path Level</link>
-        <guiicon><inlinegraphic fileref="gwy_path_level-24.png"/></guiicon>
+        <link linkend='path-level'>Path Level</link>
+        <guiicon><inlinegraphic fileref='gwy_path_level-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -362,10 +362,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-polynom">
+    <varlistentry id='tool-polynom'>
       <term>
-        <link linkend="line-polynomial">Polynomial Line Level</link>
-        <guiicon><inlinegraphic fileref="gwy_polynom-24.png"/></guiicon>
+        <link linkend='line-polynomial'>Polynomial Line Level</link>
+        <guiicon><inlinegraphic fileref='gwy_polynom-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -373,10 +373,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-crop">
+    <varlistentry id='tool-crop'>
       <term>
-        <link linkend="crop">Crop</link>
-        <guiicon><inlinegraphic fileref="gwy_crop-24.png"/></guiicon>
+        <link linkend='crop'>Crop</link>
+        <guiicon><inlinegraphic fileref='gwy_crop-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -384,10 +384,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-mask-editor">
+    <varlistentry id='tool-mask-editor'>
       <term>
         Mask Editor
-        <guiicon><inlinegraphic fileref="gwy_mask_editor-24.png"/></guiicon>
+        <guiicon><inlinegraphic fileref='gwy_mask_editor-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -396,10 +396,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-measure-grains">
+    <varlistentry id='tool-measure-grains'>
       <term>
-        <link linkend="grain-measure">Grain Measurement</link>
-        <guiicon><inlinegraphic fileref="gwy_grains_measure-24.png"/></guiicon>
+        <link linkend='grain-measure'>Grain Measurement</link>
+        <guiicon><inlinegraphic fileref='gwy_grains_measure-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -407,10 +407,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-remove-grains">
+    <varlistentry id='tool-remove-grains'>
       <term>
-        <link linkend="remove-grains">Grain Remover</link>
-        <guiicon><inlinegraphic fileref="gwy_grains_remove-24.png"/></guiicon>
+        <link linkend='remove-grains'>Grain Remover</link>
+        <guiicon><inlinegraphic fileref='gwy_grains_remove-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -419,10 +419,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-remove-spots">
+    <varlistentry id='tool-remove-spots'>
       <term>
-        <link linkend="remove-spots">Spot Remover</link>
-        <guiicon><inlinegraphic fileref="gwy_spot_remove-24.png"/></guiicon>
+        <link linkend='remove-spots'>Spot Remover</link>
+        <guiicon><inlinegraphic fileref='gwy_spot_remove-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -432,10 +432,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-color-range">
+    <varlistentry id='tool-color-range'>
       <term>
-        <link linkend="color-range">Color Range</link>
-        <guiicon><inlinegraphic fileref="gwy_color_range-24.png"/></guiicon>
+        <link linkend='color-range'>Color Range</link>
+        <guiicon><inlinegraphic fileref='gwy_color_range-24.png'/></guiicon>
       </term>
       <listitem>
         <para>
@@ -445,10 +445,10 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry id="tool-filters">
+    <varlistentry id='tool-filters'>
       <term>
-        <link linkend="basic-filters">Filter</link>
-        <guiicon><inlinegraphic fileref="gwy_filter-24.png"/></guiicon>
+        <link linkend='basic-filters'>Filter</link>
+        <guiicon><inlinegraphic fileref='gwy_filter-24.png'/></guiicon>
       </term>
       <listitem>
         <para>

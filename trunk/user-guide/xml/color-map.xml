@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="color-map">
+<sect1 id='color-map'>
   <title>False Color Mapping</title>
   <indexterm>
     <primary>color</primary>
@@ -20,26 +20,26 @@
     by selecting <menuchoice><guimenuitem>More</guimenuitem></menuchoice>.
     Preferred gradients can be chosen by checking the corresponding check
     buttons in the full list or in the
-    <link linkend="color-gradient-editor">gradient editor</link> list.
+    <link linkend='color-gradient-editor'>gradient editor</link> list.
     Selecting a row in the full list changes the gradient to the selected
     one, double-clicking (or pressing <keycap>Enter</keycap>) also finishes
     selection and closes the list window.  Gradients of known names can be
     quickly accessed by starting to type their name. The default color
     gradient to use (when none is specified in the file) can be also set in
-    the <link linkend="color-gradient-editor">gradient editor</link>.
+    the <link linkend='color-gradient-editor'>gradient editor</link>.
   </para>
   <para>
     More control over the way values are mapped to colors is possible with
-    <link linkend="color-range">Color range</link> tool.
+    <link linkend='color-range'>Color range</link> tool.
   </para>
-  <figure id="fig-gradient-selectors">
+  <figure id='fig-gradient-selectors'>
     <title>
       A data window with the right-click color gradient pop up menu and the
       full color gradient list.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="gradient-selectors.png" format="PNG"/>
+        <imagedata fileref='gradient-selectors.png' format='PNG'/>
       </imageobject>
       <textobject>
         <phrase>
@@ -48,13 +48,13 @@
       </textobject>
     </mediaobject>
   </figure>
-  <sect2 id="color-range">
+  <sect2 id='color-range'>
     <title>
       Color Range Tool
-      <guiicon><inlinegraphic fileref="gwy_color_range-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_color_range-24.png'/></guiicon>
     </title>
     <para>
-      Color range tool is a special <link linkend="tools">tool</link> whose
+      Color range tool is a special <link linkend='tools'>tool</link> whose
       purpose is not to analyse or modify data, but to control the way values
       are mapped to colors.  It offers four basic color mapping types:
     </para>
@@ -62,7 +62,7 @@
       <varlistentry>
         <term>
           Full
-          <guiicon><inlinegraphic fileref="gwy_color_range_full-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_color_range_full-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -75,7 +75,7 @@
       <varlistentry>
         <term>
           Fixed
-          <guiicon><inlinegraphic fileref="gwy_color_range_fixed-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_color_range_fixed-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -114,7 +114,7 @@
       <varlistentry>
         <term>
           Automatic
-          <guiicon><inlinegraphic fileref="gwy_color_range_auto-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_color_range_auto-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -128,7 +128,7 @@
       <varlistentry>
         <term>
           Adaptive
-          <guiicon><inlinegraphic fileref="gwy_color_range_adaptive-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_color_range_adaptive-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -155,7 +155,7 @@
       other words, color gradients of the same name are shared among files.
     </para>
   </sect2>
-  <sect2 id="color-gradient-editor">
+  <sect2 id='color-gradient-editor'>
     <title>Color Gradient Editor</title>
     <indexterm>
       <primary>color map</primary>

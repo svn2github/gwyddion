@@ -2,9 +2,9 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="multidata">
+<sect1 id='multidata'>
   <title>Multiple Data</title>
-  <sect2 id="data-arithmetic">
+  <sect2 id='data-arithmetic'>
     <title>Arithmetic</title>
     <indexterm><primary>arithmetic on data</primary></indexterm>
     <para>
@@ -20,7 +20,7 @@
       data fields (currently up to five).  And although it is not its primary
       function it can be also used as a calculator with immediate expression
       evaluation.  The expression syntax is described in section
-      <link linkend="expression-syntax">Expressions</link>.
+      <link linkend='expression-syntax'>Expressions</link>.
     </para>
     <para>
       The data fields to operate on are called <guilabel>Operands</guilabel>
@@ -53,7 +53,7 @@
       calculate a new data field.
     </para>
   </sect2>
-  <sect2 id="immerse">
+  <sect2 id='immerse'>
     <title>Detail Immersion</title>
     <indexterm><primary>detail image immersion</primary></indexterm>
     <para>
@@ -106,7 +106,7 @@
     </variablelist>
     <para>
       <guilabel>Detail Leveling</guilabel> selects the transform of the
-      <phrase role="math">z</phrase> values of the detail:
+      <phrase role='math'>z</phrase> values of the detail:
     </para>
     <variablelist>
       <varlistentry>
@@ -114,7 +114,7 @@
           <guilabel>None</guilabel>
         </term>
         <listitem>
-          No <phrase role="math">z</phrase> value adjustment is performed.
+          No <phrase role='math'>z</phrase> value adjustment is performed.
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -129,7 +129,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2 id="merge">
+  <sect2 id='merge'>
     <title>Merging</title>
     <indexterm><primary>merging images</primary></indexterm>
     <indexterm><primary>joining images</primary></indexterm>
@@ -197,7 +197,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2 id="cross-correlation">
+  <sect2 id='cross-correlation'>
     <title>Cross-Correlation</title>
     <indexterm><primary>cross-correlation</primary></indexterm>
     <para>
@@ -276,7 +276,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2 id="mask-by-correlation">
+  <sect2 id='mask-by-correlation'>
     <title>Mask by Correlation</title>
     <indexterm><primary>correlation search</primary></indexterm>
     <para>

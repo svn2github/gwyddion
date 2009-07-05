@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="raw-file-import">
+<sect1 id='raw-file-import'>
   <title>Raw Data File Import</title>
   <para>
     Both raw ASCII and binary data files and files in unsupported formats
@@ -14,7 +14,7 @@
     option <guilabel>Automatically offer raw data import of unknown
       files</guilabel>.
   </para>
-  <sect2 id="raw-file-import-information">
+  <sect2 id='raw-file-import-information'>
     <title>Information</title>
     <para>
       Its first tab, <guilabel>Information</guilabel>, allows to set basic
@@ -67,7 +67,7 @@
       </variablelist>
     </para>
   </sect2>
-  <sect2 id="raw-file-import-data-format">
+  <sect2 id='raw-file-import-data-format'>
     <title>Data Format</title>
     <para>
       On the second tab, <guilabel>Data Format</guilabel>, particular data
@@ -143,8 +143,8 @@
               How bytes in samples are swapped.  This option is only
               available for predefined formats larger than one byte.
               Its bits correspond to groups of bytes to swap: if
-              <phrase role="math">j</phrase>-th bit is set, adjacent groups
-              of 2<phrase role="math"><superscript>j</superscript></phrase>
+              <phrase role='math'>j</phrase>-th bit is set, adjacent groups
+              of 2<phrase role='math'><superscript>j</superscript></phrase>
               bits are swapped.
             </para>
             <para>
@@ -154,9 +154,9 @@
               swapped.  The net effect is reversal of byte order in groups
               of four bytes.  More generally, if you want to reverse byte
               order in groups of size
-              2<phrase role="math"><superscript>j</superscript></phrase>,
+              2<phrase role='math'><superscript>j</superscript></phrase>,
               which is the common case, use byte swap pattern
-              <phrase role="math">j</phrase>-1.
+              <phrase role='math'>j</phrase>-1.
             </para>
           </listitem>
         </varlistentry>
@@ -241,7 +241,7 @@
       </variablelist>
     </para>
   </sect2>
-  <sect2 id="raw-file-import-presets">
+  <sect2 id='raw-file-import-presets'>
     <title>Presets</title>
     <para>
       Import settings can be saved as presets that allow to easily import
@@ -257,7 +257,7 @@
       selected preset.
     </para>
   </sect2>
-  <sect2 id="pixmap-file-import">
+  <sect2 id='pixmap-file-import'>
     <title>Import from Graphics Formats</title>
     <para>
       Importing data from image formats such as PNG, TIFF, JPEG or BMP is

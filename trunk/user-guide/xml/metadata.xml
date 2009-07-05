@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="metadata">
+<sect1 id='metadata'>
   <title>Metadata</title>
   <para>
     Auxiliary information and values describing certain data and the
@@ -30,13 +30,13 @@
     no metadata is imported from your files, for example when they contain
     no auxiliary data or it is not known how to read it.
   </para>
-  <figure id="fig-metadata-browser">
+  <figure id='fig-metadata-browser'>
     <title>
       Metadata browser showing the metadata of a Nanoscope file.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="metadata_browser.png" format="PNG"/>
+        <imagedata fileref='metadata_browser.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>

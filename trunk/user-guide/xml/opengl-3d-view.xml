@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="opengl-3d-view">
+<sect1 id='opengl-3d-view'>
   <title>OpenGL 3D Data Display</title>
   <indexterm>
     <primary>3D</primary>
@@ -26,22 +26,22 @@
   <para>
     The 3D window has two possible forms: with basic and expanded controls.
     It starts with basic controls only, this form is displayed on
-    <link linkend="fig-opengl-3d-view-screenshot">following figure</link>.
+    <link linkend='fig-opengl-3d-view-screenshot'>following figure</link>.
     It can be switched to the expanded form (and back) with an expander button
     it the upper right corner.  Clicking on the view with right mouse button
     brings a quick color gradient/GL material selector.
   </para>
-  <figure id="fig-opengl-3d-view-screenshot" float="0">
+  <figure id='fig-opengl-3d-view-screenshot' float='0'>
     <title>
       Three-dimensional OpenGL data display window with basic controls.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="opengl-3d-view.png" format="PNG"/>
+        <imagedata fileref='opengl-3d-view.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
-  <sect2 id="opengl-3d-view-basic-controls">
+  <sect2 id='opengl-3d-view-basic-controls'>
     <title>Basic Controls</title>
     <para>
       Basic 3D window contains interaction mode controls at the right side of
@@ -50,7 +50,7 @@
       <itemizedlist>
         <listitem>
           Rotation – this is the default.  Dragging the view horizontally
-          rotates it around <phrase role="math">z</phrase>-axis, vertical drag
+          rotates it around <phrase role='math'>z</phrase>-axis, vertical drag
           rotates it around horizontal axis parallel with the plane of view.
         </listitem>
         <listitem>
@@ -59,7 +59,7 @@
         </listitem>
         <listitem>
           Z-scale – dragging the view up (down) increases (decreases) the
-          <phrase role="math">z</phrase>-scale, making the hills and valleys
+          <phrase role='math'>z</phrase>-scale, making the hills and valleys
           more or less pronounced.
         </listitem>
         <listitem>
@@ -79,7 +79,7 @@
       and <keycap>L</keycap> (light rotation).
     </para>
   </sect2>
-  <sect2 id="opengl-3d-view-full-controls">
+  <sect2 id='opengl-3d-view-full-controls'>
     <title>Full Controls</title>
     <para>
       In expanded controls the mode buttons are located in top row, however
@@ -107,7 +107,7 @@
       </itemizedlist>
     </para>
   </sect2>
-  <sect2 id="opengl-3d-view-saving-images">
+  <sect2 id='opengl-3d-view-saving-images'>
     <title>Saving Images</title>
     <para>
       The 3D view can be saved into a bitmap image with the
@@ -125,7 +125,7 @@
       obscured by other windows during the image export.
     </para>
   </sect2>
-  <sect2 id="opengl-material-editor">
+  <sect2 id='opengl-material-editor'>
     <title>OpenGL Material Editor</title>
     <indexterm>
       <primary>3D</primary>
@@ -141,34 +141,34 @@
         <guimenuitem>GL Materials</guimenuitem>
       </menuchoice>.
       The controls in the material list are the same as in the
-      <link linkend="color-gradient-editor">color gradient editor</link> list
+      <link linkend='color-gradient-editor'>color gradient editor</link> list
       and the material management works identically.  The actual editor is of
       course different.  It allows to edit four quantities defining the
       material:
       <itemizedlist>
         <listitem>
           ambient color
-          <phrase role="math">k</phrase><subscript>a,α</subscript>
+          <phrase role='math'>k</phrase><subscript>a,α</subscript>
           (where α = red, green, blue), controlling the reflection of ambient
           light that is assumed come uniformly from all directions,
         </listitem>
         <listitem>
           diffuse color
-          <phrase role="math">k</phrase><subscript>d,α</subscript>,
+          <phrase role='math'>k</phrase><subscript>d,α</subscript>,
           describing the diffuse reflection which is independent on the
           direction of incident light and whose apparent brightness is
           independent of the viewing angle,
         </listitem>
         <listitem>
           specular color
-          <phrase role="math">k</phrase><subscript>s,α</subscript>,
+          <phrase role='math'>k</phrase><subscript>s,α</subscript>,
           controlling the specular reflection with reflected light intensity
           dependent on the angle between the observing direction and the
           direction of light that would be reflected by an ideal mirror with
           the same normal, and
         </listitem>
         <listitem>
-          shininess <phrase role="math">s</phrase>, a numeric exponent
+          shininess <phrase role='math'>s</phrase>, a numeric exponent
           determining how much the specular reflection resembles an ideal
           mirror, smaller values mean rougher surfaces, higher values mean
           smoother surfaces.
@@ -177,23 +177,23 @@
     </para>
     <para>
       If we denote
-      <phrase role="math"><emphasis role="bold">L</emphasis></phrase>
+      <phrase role='math'><emphasis role='bold'>L</emphasis></phrase>
       the normal vector pointing from the observed surface point to the light
       source,
-      <phrase role="math"><emphasis role="bold">V</emphasis></phrase>
+      <phrase role='math'><emphasis role='bold'>V</emphasis></phrase>
       the normal vector to the observer,
-      <phrase role="math"><emphasis role="bold">N</emphasis></phrase>
+      <phrase role='math'><emphasis role='bold'>N</emphasis></phrase>
       the normal vector to the surface
-      <phrase role="math"><emphasis role="bold">R</emphasis></phrase>
+      <phrase role='math'><emphasis role='bold'>R</emphasis></phrase>
       the normal vector in the direction of ideal mirror reflection, the
       observed light intensity in OpenGL lighting model can be expressed as
     </para>
-    <informalequation id="eq-opengl-light-model">
+    <informalequation id='eq-opengl-light-model'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="eq-opengl-light-model.png" format="PNG"/>
+          <imagedata fileref='eq-opengl-light-model.png' format='PNG'/>
         </imageobject>
-        <textobject role="tex">
+        <textobject role='tex'>
           <phrase>
 <![CDATA[
 I_\alpha = k_{a,\alpha}I_{a,\alpha}
@@ -205,9 +205,9 @@ I_\alpha = k_{a,\alpha}I_{a,\alpha}
       </mediaobject>
     </informalequation>
     <para>
-      where <phrase role="math">I</phrase><subscript>a,α</subscript>,
-      <phrase role="math">I</phrase><subscript>d,α</subscript> and
-      <phrase role="math">I</phrase><subscript>s,α</subscript> are the
+      where <phrase role='math'>I</phrase><subscript>a,α</subscript>,
+      <phrase role='math'>I</phrase><subscript>d,α</subscript> and
+      <phrase role='math'>I</phrase><subscript>s,α</subscript> are the
       ambient, diffuse and specular light source intensities, respectively.
     </para>
   </sect2>

@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="fractal-analysis">
+<sect1 id='fractal-analysis'>
   <title>Fractal Analysis</title>
   <para>
     In practice objects exhibiting random properties are encountered. It is
@@ -17,9 +17,9 @@
     fractal analysis of the self-affine random surfaces using AFM are often
     used to classify these surfaces prepared by various technological
     procedures
-    [<link linkend="fractal-analysis-ref-1">1</link>,<link linkend="fractal-analysis-ref-2">2</link>,<link linkend="fractal-analysis-ref-3">3</link>,<link linkend="fractal-analysis-ref-4">4</link>].
+    [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>,<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>].
   </para>
-  <para id="fractal-dimension">
+  <para id='fractal-dimension'>
     <indexterm><primary>fractal dimension</primary></indexterm>
     Within Gwyddion, there are different methods of fractal analysis
     implemented within
@@ -32,61 +32,61 @@
   <orderedlist>
     <listitem>
       Cube counting method
-      [<link linkend="fractal-analysis-ref-1">1</link>,<link linkend="fractal-analysis-ref-2">2</link>]
+      [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>]
       is derived directly from a definition of
       box-counting fractal dimension. The algorithm is based on the following
       steps: a cubic lattice with lattice constant l is superimposed
-      on the <phrase role="math">z</phrase>-expanded surface.
-      Initially <phrase role="math">l</phrase> is set
-      at <phrase role="math">X/2</phrase>
-      (where <phrase role="math">X</phrase> is length of edge of the surface),
+      on the <phrase role='math'>z</phrase>-expanded surface.
+      Initially <phrase role='math'>l</phrase> is set
+      at <phrase role='math'>X/2</phrase>
+      (where <phrase role='math'>X</phrase> is length of edge of the surface),
       resulting in a lattice of 2×2×2 = 8 cubes.
-      <phrase role="math">N</phrase>(<phrase role="math">l</phrase>)
+      <phrase role='math'>N</phrase>(<phrase role='math'>l</phrase>)
       is then number of all cubes that contain at least one pixel of the image.
-      Lattice constant <phrase role="math">l</phrase> is then reduced stepwise
+      Lattice constant <phrase role='math'>l</phrase> is then reduced stepwise
       by factor of 2 and the process repeated until
-      <phrase role="math">l</phrase> is equal to distance between two adjacent
+      <phrase role='math'>l</phrase> is equal to distance between two adjacent
       pixels. The slope of a plot of
-      log(<phrase role="math">N</phrase>(<phrase role="math">l</phrase>))
-      versus log(1/<phrase role="math">l</phrase>)
+      log(<phrase role='math'>N</phrase>(<phrase role='math'>l</phrase>))
+      versus log(1/<phrase role='math'>l</phrase>)
       gives the fractal dimension
-      <phrase role="math">D<subscript>f</subscript></phrase> directly.
+      <phrase role='math'>D<subscript>f</subscript></phrase> directly.
     </listitem>
     <listitem>
-      Triangulation method [<link linkend="fractal-analysis-ref-1">1</link>]
+      Triangulation method [<link linkend='fractal-analysis-ref-1'>1</link>]
       is very similar to cube counting method and is
       also based directly on the box-counting fractal dimension definition. The
       method works as follows: A grid of unit dimension
-      <phrase role="math">l</phrase> is placed on the surface. This defines
+      <phrase role='math'>l</phrase> is placed on the surface. This defines
       the location of the vertices of a number of triangles.
-      When <phrase role="math">l</phrase> = <phrase role="math">X</phrase>/4,
+      When <phrase role='math'>l</phrase> = <phrase role='math'>X</phrase>/4,
       for example, the surface is covered by 32 triangles of different areas
       inclined at various angles with respect to the
-      <phrase role="math">xy</phrase> plane.
+      <phrase role='math'>xy</phrase> plane.
       The areas of all triangles are calculated and summed to obtain an
       approximation of the surface area
-      <phrase role="math">S</phrase>(<phrase role="math">l</phrase>)
-      corresponding to <phrase role="math">l</phrase>.
+      <phrase role='math'>S</phrase>(<phrase role='math'>l</phrase>)
+      corresponding to <phrase role='math'>l</phrase>.
       The grid size is then decreased by successive factor of 2, as before,
-      and the process continued until <phrase role="math">l</phrase>
+      and the process continued until <phrase role='math'>l</phrase>
       corresponds to distance between two adjacent pixel points.
       The slope of a plot of
-      log(<phrase role="math">S</phrase>(<phrase role="math">l</phrase>))
-      versus log(1/<phrase role="math">l</phrase>) then corresponds to
-      <phrase role="math">D<subscript>f</subscript></phrase> − 2.
+      log(<phrase role='math'>S</phrase>(<phrase role='math'>l</phrase>))
+      versus log(1/<phrase role='math'>l</phrase>) then corresponds to
+      <phrase role='math'>D<subscript>f</subscript></phrase> − 2.
     </listitem>
     <listitem>
       The variance method
-      [<link linkend="fractal-analysis-ref-3">3</link>,<link linkend="fractal-analysis-ref-4">4</link>]
+      [<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>]
       is based on the scale dependence of the
       variance of fractional Brownian motion. In practice, in the variance
       method one divides the full surface into equal-sized squared boxes, and
       the variance (power of RMS value of heights), is calculated for
       particular box size. Fractal dimension is
-      evaluated from the slope <phrase role="math">β</phrase> of a
+      evaluated from the slope <phrase role='math'>β</phrase> of a
       least-square regression line fit to the data points in log-log plot
       of variance as
-      <phrase role="math">D<subscript>f</subscript></phrase> = 3 − <phrase role="math">β</phrase>/2.
+      <phrase role='math'>D<subscript>f</subscript></phrase> = 3 − <phrase role='math'>β</phrase>/2.
     </listitem>
     <listitem>
       Power spectrum method [3, 4, 5] is based on the power spectrum dependence
@@ -97,9 +97,9 @@
       line height profiles that forms the image is Fourier transformed and the
       power spectrum evaluated and then all these power spectra are averaged.
       Fractal dimension is evaluated from the slope
-      <phrase role="math">β</phrase> of a least-square
+      <phrase role='math'>β</phrase> of a least-square
       regression line fit to the data points in log-log plot of power spectrum
-      as <phrase role="math">D<subscript>f</subscript></phrase> = 7/2 − <phrase role="math">β</phrase>/2.
+      as <phrase role='math'>D<subscript>f</subscript></phrase> = 7/2 − <phrase role='math'>β</phrase>/2.
     </listitem>
   </orderedlist>
   <para>
@@ -112,11 +112,11 @@
     Note, that results of different methods differ. This fact is caused by
     systematic error of different fractal analysis approaches.
   </para>
-  <figure id="fig-fractal-dimension-screenshot">
+  <figure id='fig-fractal-dimension-screenshot'>
     <title>Fractal Dimension dialog.</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="fractal.png" format="PNG"/>
+        <imagedata fileref='fractal.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -132,31 +132,31 @@
     are also used in Fractal Correction module and Fractal Correction option
     of Remove Spots tool.
   </para>
-  <sect2 id="fractal-analysis-ref">
+  <sect2 id='fractal-analysis-ref'>
     <title>References</title>
-    <para id="fractal-analysis-ref-1">
+    <para id='fractal-analysis-ref-1'>
       [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal
       character of cold-deposited silver films determined by low-temperature
       scanning tunneling microscopy. Physical Review B, Volume 51, Number 16,
       15 April 1995, 51
     </para>
-    <para id="fractal-analysis-ref-2">
+    <para id='fractal-analysis-ref-2'>
       [2] W. Zahn, A. Zösch: The dependance of fractal dimension on measuring
       conditions of scanning probe microscopy. Fresenius J Analen Chem (1999)
       365: 168-172
     </para>
-    <para id="fractal-analysis-ref-3">
+    <para id='fractal-analysis-ref-3'>
       [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken:
       Quantitative characerization of individual particle sutfaces by fractal
       analysis of scanning electron microscope images. Fresenius J Analen
       Chem (1994) 350: 440-447
     </para>
-    <para id="fractal-analysis-ref-4">
+    <para id='fractal-analysis-ref-4'>
       [4] A. Mannelquist, N. Almquist, S. Fredriksson: Influence of tip
       geometry on fractal analysis of atomic force microscopy images. Appl.
       Phys. A 66,1998, 891-895
     </para>
-    <para id="fractal-analysis-ref-5">
+    <para id='fractal-analysis-ref-5'>
       [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
       fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
     </para>

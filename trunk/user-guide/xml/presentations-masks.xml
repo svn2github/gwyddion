@@ -34,14 +34,14 @@
     how it was created all mask functions can be used with masks of any
     origin.
   </para>
-  <figure id="fig-mask-presentation-scheme">
+  <figure id='fig-mask-presentation-scheme'>
     <title>
       Visualization of masks and presentations.  If you look from above they
       can be imagined to be stacked as in the picture.
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="data-show-mask.png" format="PNG"/>
+        <imagedata fileref='data-show-mask.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -49,16 +49,16 @@
     Both masks and presentations can be removed from the data by functions
     in the right-click menu of the
     <link linkend='data-windows'>data window</link>, or with
-    <link linkend="keyboard-shortcuts">keyboard shortcuts</link>.
+    <link linkend='keyboard-shortcuts'>keyboard shortcuts</link>.
   </para>
-  <figure id="fig-mask-presentation">
+  <figure id='fig-mask-presentation'>
     <title>
       Data in default false color representation (left), with superimposed
       mask (centre) and with shading presentation (right).
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="mask.png" format="PNG"/>
+        <imagedata fileref='mask.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -149,7 +149,7 @@
   <sect2 id='mask-editor'>
     <title>
       Mask Editor Tool
-      <guiicon><inlinegraphic fileref="gwy_mask_editor-24.png"/></guiicon>
+      <guiicon><inlinegraphic fileref='gwy_mask_editor-24.png'/></guiicon>
     </title>
     <para>
       The Mask Editor is the basic mask modification tool.  It provides two
@@ -166,7 +166,7 @@
       <varlistentry>
         <term>
           Set
-          <guiicon><inlinegraphic fileref="gwy_mask-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -178,7 +178,7 @@
       <varlistentry>
         <term>
           Add
-          <guiicon><inlinegraphic fileref="gwy_mask_add-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask_add-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -190,7 +190,7 @@
       <varlistentry>
         <term>
           Subtract
-          <guiicon><inlinegraphic fileref="gwy_mask_subtract-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask_subtract-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -202,7 +202,7 @@
       <varlistentry>
         <term>
           Intersect
-          <guiicon><inlinegraphic fileref="gwy_mask_intersect-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask_intersect-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -227,7 +227,7 @@
       <varlistentry>
         <term>
           <guilabel>Grow</guilabel>
-          <guiicon><inlinegraphic fileref="gwy_mask_grow-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask_grow-24.png'/></guiicon>
         </term>
         <listitem>
           <para>
@@ -247,7 +247,7 @@
       <varlistentry>
         <term>
           <guilabel>Shrink</guilabel>
-          <guiicon><inlinegraphic fileref="gwy_mask_shrink-24.png"/></guiicon>
+          <guiicon><inlinegraphic fileref='gwy_mask_shrink-24.png'/></guiicon>
         </term>
         <listitem>
           <para>

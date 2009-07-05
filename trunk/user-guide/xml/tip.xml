@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.2//EN'
                'http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd'>
-<sect1 id="tip-convolution-artefacts">
+<sect1 id='tip-convolution-artefacts'>
   <title>Tip Convolution Artefacts</title>
   <para>
     Tip convolution artefact is one of the most important error sources in
@@ -11,14 +11,14 @@
     some SPM tips imaged on the surface scan while sharp features are present
     on the surface.
   </para>
-  <figure id="fig-tip-alltips-scans">
+  <figure id='fig-tip-alltips-scans'>
     <title>
       Images of ZnSe surface measured with four different SPM tips
       (more or less broken ones).
     </title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="alltips.png" format="PNG"/>
+        <imagedata fileref='alltips.png' format='PNG'/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -26,9 +26,9 @@
     We can fortunately simulate and/or correct the tip efects using
     algorithms of dilation and/or erosion, respectively. These algorithms
     were published by Villarubia
-    (see [<link linkend="tip-convolution-artefacts-ref-1">1</link>]).
+    (see [<link linkend='tip-convolution-artefacts-ref-1'>1</link>]).
   </para>
-  <sect2 id="tip-obtaining-geometry">
+  <sect2 id='tip-obtaining-geometry'>
     <title>Obtaining the Tip Geometry</title>
     <indexterm>
       <primary>tip</primary>
@@ -56,7 +56,7 @@
         or other suitable samples
       </listitem>
     </orderedlist>
-    <para id="tip-model">
+    <para id='tip-model'>
       Within Gwyddion, we can use the first and the last approach of the
       mentioned ones. Using tip modelling
       (<menuchoice>
@@ -68,7 +68,7 @@
       tip geometry specification can be very efficient namely when we need to
       check only certainty map of perform tip convolution simulation.
     </para>
-    <para id="tip-blind-estimate">
+    <para id='tip-blind-estimate'>
       To obtain more detailed (and more realistic) tip structure blind tip
       estimation algorithm can be used
       (<menuchoice>
@@ -92,26 +92,26 @@
       results as starting point for full estimation. This shlould improve the
       full tip estimation algorithm speed.
     </para>
-    <figure id="fig-tip-alltips">
+    <figure id='fig-tip-alltips'>
       <title>
         SPM tips obtained from data of
-        <link linkend="fig-tip-alltips-scans">previous figure</link>
+        <link linkend='fig-tip-alltips-scans'>previous figure</link>
         using blind estimation algorithm.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="alltips2.png" format="PNG"/>
+          <imagedata fileref='alltips2.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
   </sect2>
-  <sect2 id="tip-operations">
+  <sect2 id='tip-operations'>
     <title>Tip Convolution and Surface Reconstruction</title>
     <indexterm>
       <primary>tip</primary>
       <secondary>convolution</secondary>
     </indexterm>
-    <para id="tip-convolution">
+    <para id='tip-convolution'>
       When we know tip geometry, we can use tip convolution (dilation)
       algorithm to simulate data acquisition process. For doing this use
       Dilation module
@@ -122,7 +122,7 @@
       </menuchoice>).
       This can be in particular useful when working with data being result of
       some numerical modelling
-      (see e.g. [<link linkend="tip-convolution-artefacts-ref-2">2</link>]).
+      (see e.g. [<link linkend='tip-convolution-artefacts-ref-2'>2</link>]).
     </para>
     <para>
       Note this alrgorithms (as well as the following two) requires compatible
@@ -132,18 +132,18 @@
       data (or data with an identical measure).  If you obtained the tip
       image other means, you may need to resample it.
     </para>
-    <figure id="fig-tip-simulated-convolution">
+    <figure id='fig-tip-simulated-convolution'>
       <title>
         Simulated fractal surface before (left) and after (right) tip
         convolution.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="fractaltips.png" format="PNG"/>
+          <imagedata fileref='fractaltips.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
-    <para id="tip-surface-reconstruction">
+    <para id='tip-surface-reconstruction'>
       <indexterm>
         <primary>tip</primary>
         <secondary>deconvolution</secondary>
@@ -160,17 +160,17 @@
       (e. g. pores) cannot be reconstructed as there is no information about
       these points.
     </para>
-    <figure id="fig-tip-reconstruction">
+    <figure id='fig-tip-reconstruction'>
       <title>
         Original and reconstructed image of ZnSe imaged by broken SPM tip.
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="reconstruction.png" format="PNG"/>
+          <imagedata fileref='reconstruction.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
-    <para id="tip-certainty-map">
+    <para id='tip-certainty-map'>
       <indexterm>
         <primary>tip</primary>
         <secondary>certainty map</secondary>
@@ -181,7 +181,7 @@
       Certainty map algorithm can mark point where surface was probably
       touched in a single point.
     </para>
-    <figure id="fig-tip-certainty-map">
+    <figure id='fig-tip-certainty-map'>
       <title>
         Certainty map obtained from standard grating. Note that the modelled
         tip parameters were taken from datasheet here for illustration
@@ -190,7 +190,7 @@
       </title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="certainty-map.png" format="PNG"/>
+          <imagedata fileref='certainty-map.png' format='PNG'/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -207,13 +207,13 @@
       </menuchoice>).
     </para>
   </sect2>
-  <sect2 id="tip-convolution-artefacts-ref">
+  <sect2 id='tip-convolution-artefacts-ref'>
     <title>References</title>
-    <para id="tip-convolution-artefacts-ref-1">
+    <para id='tip-convolution-artefacts-ref-1'>
       [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
     </para>
-    <para id="tip-convolution-artefacts-ref-2">
-      [2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
+    <para id='tip-convolution-artefacts-ref-2'>
+      [2] <ulink url='http://klapetek.cz/download.html'>P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
     </para>
   </sect2>
 </sect1>
