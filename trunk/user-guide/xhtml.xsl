@@ -50,4 +50,10 @@
     </div>
   </xsl:template>
 
+  <xsl:template match="caption">
+    <p class='caption'>
+      <xsl:apply-templates/>
+    </p>
+  </xsl:template>
+
 </xsl:stylesheet>

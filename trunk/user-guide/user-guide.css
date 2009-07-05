@@ -21,6 +21,7 @@ body {
   a:visited { color: #808080; }
 }
 .math { font-style: italic; }
+.caption { font-style: italic; font-size: 90%; }
 a { text-decoration: underline; }
 a:link { color: black; }
 a:hover { color: #ab2f11; }
