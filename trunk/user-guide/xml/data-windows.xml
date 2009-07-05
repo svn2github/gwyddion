@@ -5,25 +5,23 @@
 <sect1 id="data-windows">
   <title>Data Window</title>
   <para>
-    Data window is used for 2D data presentation. It is the main
-    widget used for working with Gwyddion. The data are presented to user as
-    a field of false colors corresponding to heights. Color axis that
-    represents mapping the colors to real height values is also part of the
-    data window. 
+    Two-dimensional data are presented in so called data windows. It is the
+    main widget used for working with Gwyddion. The data are presented as a
+    field of false colors corresponding to heights. Color axis that represents
+    mapping the colors to real height values is on the right side of the data
+    window.
   </para>
   <para>
     Color palette used to represent height data can be changed by clicking on
-    the color axis with right mouse button (i. e. invoking context menu) and
+    the color axis with right mouse button (i.e. invoking context menu) and
     selecting appropriate palette from the list of palettes. Mostly used
     palettes are available directly in the context menu; however you can
     reach much more of the possible palettes using the
-    <menuchoice><guimenu>More...</guimenu></menuchoice> menu entry. Moreover,
-    you can use color gradients editor to create your own palettes available
-    at
-    <menuchoice>
-      <guimenu>Edit</guimenu>
-      <guisubmenu>Color Gradients...</guisubmenu>
-    </menuchoice>.
+    <menuchoice><guimenu>More...</guimenu></menuchoice> menu entry.
+    Moreover, you can use the
+    <link linkend='color-gradient-editor'>color gradient editor</link> to
+    create your own palettes and select which palettes should be displayed
+    in the short list.
   </para>
   <para>
     There is a context menu available also for the data area. This menu
