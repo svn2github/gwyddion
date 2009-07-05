@@ -5,7 +5,7 @@
 <chapter id="introduction">
   <title>Introduction</title>
   <para>
-    This guide was last updated to version 2.7 of Gwyddion.
+    This guide was last updated to version 2.16 of Gwyddion.
     The latest version this guide can be found at
     <ulink url="http://gwyddion.net/documentation/">http://gwyddion.net/documentation/</ulink>.
   </para>
@@ -72,9 +72,15 @@
         </listitem>
         <listitem>
           <para>
-            The same hold for extensions (e.g. if you write a module).
-            The only exception are plug-ins that are run as a separate
-            programs.  Plug-ins therefore can have any license.
+            The same holds for extensions, e.g. if you write an import module
+            for a new file type or a new data analysis function it has to be
+            licensed under GNU GPL (if you distribute it).
+          </para>
+          <para>
+            However, it is also possible to execute third-party programs from
+            Gwyddion and these do not necessarily have to be distributed under
+            the same license – if they are not derived works of Gwyddion
+            (which, admittely, is not always easy to determine).
           </para>
         </listitem>
       </itemizedlist>
