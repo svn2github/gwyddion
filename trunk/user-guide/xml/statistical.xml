@@ -186,16 +186,16 @@
       row of pixels on each side for the purpose of surface area calculation,
       thus making all pixels of interest inner.
     </para>
-    <figure id='fig-surface-area-vertices'>
-      <title>
-        Surface area calculation triangulation scheme.
-      </title>
+    <informalfigure id='fig-surface-area-vertices'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='surface_area_vertices.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Surface area calculation triangulation scheme.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='sfunctions'>
     <title>
@@ -529,18 +529,18 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         <phrase role='math'>T</phrase> were practically same
         for both the approaches.
       </para>
-      <figure id='fig-hhcf-acf-gauss'>
-        <title>
-          Height-height correlation function and autocorrelation function
-          obtained for simulated surface having Gaussian autocorrelation
-          function.
-        </title>
+      <informalfigure id='fig-hhcf-acf-gauss'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='fig_cf.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Height-height correlation function and autocorrelation function
+          obtained for simulated surface having Gaussian autocorrelation
+          function.
+        </caption>
+      </informalfigure>
     </sect3>
     <sect3 id='power-spectral-density-1d'>
       <title>Power Spectral Density Function</title>
@@ -668,17 +668,17 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
         <phrase role='math'>T</phrase>
         were practically same as those from the HHCF and ACF fit.
       </para>
-      <figure id='fig-psdf-gauss'>
-        <title>
-          PSDF obtained for data simulated with Gaussian autocorrelation
-          function. Points represent computed data, line represents its fit.
-        </title>
+      <informalfigure id='fig-psdf-gauss'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='fig_psdf.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
+        <caption>
+          PSDF obtained for data simulated with Gaussian autocorrelation
+          function. Points represent computed data, line represents its fit.
+        </caption>
+      </informalfigure>
       <para>
         We can also introduce radial PSDF
         <phrase role='math'>W</phrase><subscript>r</subscript>(<phrase role='math'>K</phrase>),

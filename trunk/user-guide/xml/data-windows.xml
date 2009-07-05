@@ -45,13 +45,13 @@
     be displayed either in 512×128 or 512×512 window.
   </para>
   <figure id='fig-data-window'>
-    <title>
-      Data window with all three available context menus shown.
-    </title>
     <mediaobject>
       <imageobject>
         <imagedata fileref='data_window.png' format='PNG'/>
       </imageobject>
     </mediaobject>
+    <caption>
+      Data window with all three available context menus shown.
+    </caption>
   </figure>
 </sect1>

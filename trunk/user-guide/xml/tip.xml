@@ -11,17 +11,17 @@
     some SPM tips imaged on the surface scan while sharp features are present
     on the surface.
   </para>
-  <figure id='fig-tip-alltips-scans'>
-    <title>
-      Images of ZnSe surface measured with four different SPM tips
-      (more or less broken ones).
-    </title>
+  <informalfigure id='fig-tip-alltips-scans'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='alltips.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Images of ZnSe surface measured with four different SPM tips
+      (more or less broken ones).
+    </caption>
+  </informalfigure>
   <para>
     We can fortunately simulate and/or correct the tip efects using
     algorithms of dilation and/or erosion, respectively. These algorithms
@@ -92,18 +92,18 @@
       results as starting point for full estimation. This shlould improve the
       full tip estimation algorithm speed.
     </para>
-    <figure id='fig-tip-alltips'>
-      <title>
-        SPM tips obtained from data of
-        <link linkend='fig-tip-alltips-scans'>previous figure</link>
-        using blind estimation algorithm.
-      </title>
+    <informalfigure id='fig-tip-alltips'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='alltips2.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        SPM tips obtained from data of
+        <link linkend='fig-tip-alltips-scans'>previous figure</link>
+        using blind estimation algorithm.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='tip-operations'>
     <title>Tip Convolution and Surface Reconstruction</title>
@@ -132,17 +132,17 @@
       data (or data with an identical measure).  If you obtained the tip
       image other means, you may need to resample it.
     </para>
-    <figure id='fig-tip-simulated-convolution'>
-      <title>
-        Simulated fractal surface before (left) and after (right) tip
-        convolution.
-      </title>
+    <informalfigure id='fig-tip-simulated-convolution'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='fractaltips.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Simulated fractal surface before (left) and after (right) tip
+        convolution.
+      </caption>
+    </informalfigure>
     <para id='tip-surface-reconstruction'>
       <indexterm>
         <primary>tip</primary>
@@ -160,16 +160,16 @@
       (e. g. pores) cannot be reconstructed as there is no information about
       these points.
     </para>
-    <figure id='fig-tip-reconstruction'>
-      <title>
-        Original and reconstructed image of ZnSe imaged by broken SPM tip.
-      </title>
+    <informalfigure id='fig-tip-reconstruction'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='reconstruction.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Original and reconstructed image of ZnSe imaged by broken SPM tip.
+      </caption>
+    </informalfigure>
     <para id='tip-certainty-map'>
       <indexterm>
         <primary>tip</primary>
@@ -181,19 +181,19 @@
       Certainty map algorithm can mark point where surface was probably
       touched in a single point.
     </para>
-    <figure id='fig-tip-certainty-map'>
-      <title>
-        Certainty map obtained from standard grating. Note that the modelled
-        tip parameters were taken from datasheet here for illustration
-        purposes. (left) – sample, (right) – sample with marked
-        certainty map.
-      </title>
+    <informalfigure id='fig-tip-certainty-map'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='certainty-map.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Certainty map obtained from standard grating. Note that the modelled
+        tip parameters were taken from datasheet here for illustration
+        purposes. (left) – sample, (right) – sample with marked
+        certainty map.
+      </caption>
+    </informalfigure>
     <para>
       Certainty map algortihm can be therefore used to mark data in the SPM
       image that are corrupted by tip convolution in an irreversible way. For

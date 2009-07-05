@@ -223,28 +223,28 @@ w_{\rm Kaiser,\alpha}(x) = {\I0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
         </tbody>
       </tgroup>
     </table>
-    <figure id='fig-windowing-types'>
-      <title>
-        Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
-        Nutall, Flat-top, Kaiser 2.5.
-      </title>
+    <informalfigure id='fig-windowing-types'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='windowing-types.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
-    <figure id='fig-windowing-types-freq'>
-      <title>
-        Envelopes of windowing functions frequency responses: Hann, Hamming,
-        Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
-      </title>
+      <caption>
+        Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
+        Nutall, Flat-top, Kaiser 2.5.
+      </caption>
+    </informalfigure>
+    <informalfigure id='fig-windowing-types-freq'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='windowing-types-freq.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Envelopes of windowing functions frequency responses: Hann, Hamming,
+        Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
+      </caption>
+    </informalfigure>
     <para>
       Fourier transforms of data with sizes that are not factorable into
       small prime factors can be very slow – or not implemented at all.
@@ -437,30 +437,36 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
         Another mentioned wavelet is the simplest one, the Haar wavelet,
         which uses a box function as the scaling function.
       </para>
-      <figure id='fig-wavelet-haar'>
-        <title>Haar scaling function and wavelet.</title>
+      <informalfigure id='fig-wavelet-haar'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='wavelet-haar.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
-      <figure id='fig-wavelet-daubechies4'>
-        <title>Daubechies 4 scaling function and wavelet.</title>
+        <caption>
+          Haar scaling function and wavelet.
+        </caption>
+      </informalfigure>
+      <informalfigure id='fig-wavelet-daubechies4'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='wavelet-daubechies-4.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
-      <figure id='fig-wavelet-daubechies20'>
-        <title>Daubechies 20 scaling function and wavelet.</title>
+        <caption>
+          Daubechies 4 scaling function and wavelet.
+        </caption>
+      </informalfigure>
+      <informalfigure id='fig-wavelet-daubechies20'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='wavelet-daubechies-20.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Daubechies 20 scaling function and wavelet.
+        </caption>
+      </informalfigure>
       <para>
         There are several types of implementation of the DWT algorithm. The
         oldest and most known one is the Malaat (pyramidal) algoritm. In this

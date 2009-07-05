@@ -608,16 +608,19 @@
       load a file, check the file type is set to the corresponding
       type, or to <guilabel>Automatically detected</guilabel>.
     </para>
-    <figure id='fix-file-open-screenshot'>
-      <title>
-        File open dialog with expanded file type options and channel preview.
-      </title>
+    <informalfigure id='fix-file-open-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='file-open.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        File open dialog with expanded file type options and channel preview.
+        The small text above the preview shows the module used to load the file
+        (sis) and the number of channels (ch), graphs (gr) and single-point
+        spectra (sps) in the file.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='file-merging'>
     <title>File Merging</title>

@@ -295,13 +295,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </listitem>
       </varlistentry>
     </variablelist>
-    <figure id='fig-interpolations'>
-      <title>
-        Illustration of the available interpolation types (the original
-        pixels the interpolation is performed between are obvious on the
-        result of Round interpolation).  All images have identical false color
-        map ranges.
-      </title>
+    <informalfigure id='fig-interpolations'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='interpolation.png' format='PNG'/>
@@ -310,7 +304,12 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <phrase>2D interpolation examples</phrase>
         </textobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Illustration of the available interpolation types (the original
+        pixels are obvious on the result of Round interpolation).  All images
+        have identical false color map ranges.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='modules-basic'>
     <title>Basic 2D Data Operations</title>
@@ -479,14 +478,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
         <phrase role='math'>φ</phrase> corresponds
         to the downward direction of the facet.
       </para>
-      <figure id='fig-inclination-coordinates'>
-        <title>
-          Surface facet (displayed blue) orientation measured as the
-          counterclockwise angle from <phrase role='math'>x</phrase>-axis to
-          the projection of facet normal vector
-          <phrase role='math'>n</phrase> to <phrase role='math'>xy</phrase>
-          plane.
-        </title>
+      <informalfigure id='fig-inclination-coordinates'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='inclination.png' format='PNG'/>
@@ -495,7 +487,14 @@ w_k = {{\displaystyle{1\over r_k^4}}
             <phrase>Measuring facet orientation</phrase>
           </textobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Surface facet (displayed blue) orientation measured as the
+          counterclockwise angle from <phrase role='math'>x</phrase>-axis to
+          the projection of facet normal vector
+          <phrase role='math'>n</phrase> to <phrase role='math'>xy</phrase>
+          plane.
+        </caption>
+      </informalfigure>
     </sect3>
     <sect3 id='distance'>
       <title>
@@ -517,13 +516,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
         for a set of lines selected on the data.
       </para>
       <para>
-        The list of distances can be saved to a text file with
-        <guibutton>Save</guibutton> button.
+        The distances can be copied to the clipboard or saved to a text file
+        using the buttons below the list.
       </para>
-      <figure id='fig-distance-screenshot'>
-        <title>
-          Distance tool with three selected lines.
-        </title>
+      <informalfigure id='fig-distance-screenshot'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='distances.png' format='PNG'/>
@@ -532,7 +528,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
             <phrase>Distance tool dialog screenshot</phrase>
           </textobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Distance tool with three selected lines.
+        </caption>
+      </informalfigure>
     </sect3>
   </sect2>
   <sect2 id='profile'>
@@ -556,10 +555,7 @@ w_k = {{\displaystyle{1\over r_k^4}}
       of merged in one Graph window) that can be further analysed using
       Graph functions.
     </para>
-    <figure id='fit-profile-screenshot'>
-      <title>
-        Profile tool with three extracted profiles.
-      </title>
+    <informalfigure id='fit-profile-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='profiles.png' format='PNG'/>
@@ -568,7 +564,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <phrase>Profile tool dialog screenshot</phrase>
         </textobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Profile tool with three extracted profiles and expanded options.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='basic-operations-ref'>
     <title>References</title>

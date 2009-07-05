@@ -31,16 +31,16 @@
     it the upper right corner.  Clicking on the view with right mouse button
     brings a quick color gradient/GL material selector.
   </para>
-  <figure id='fig-opengl-3d-view-screenshot' float='0'>
-    <title>
-      Three-dimensional OpenGL data display window with basic controls.
-    </title>
+  <informalfigure id='fig-opengl-3d-view-screenshot' float='0'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='opengl-3d-view.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Three-dimensional OpenGL data display window with basic controls.
+    </caption>
+  </informalfigure>
   <sect2 id='opengl-3d-view-basic-controls'>
     <title>Basic Controls</title>
     <para>

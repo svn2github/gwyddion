@@ -34,34 +34,42 @@
     how it was created all mask functions can be used with masks of any
     origin.
   </para>
-  <figure id='fig-mask-presentation-scheme'>
-    <title>
-      Visualization of masks and presentations.  If you look from above they
-      can be imagined to be stacked as in the picture.
-    </title>
+  <informalfigure id='fig-mask-presentation-scheme'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='data-show-mask.png' format='PNG'/>
       </imageobject>
+      <textobject>
+        <phrase>
+          Mask (top), presentation (middle), original data (bottom)
+        </phrase>
+      </textobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Visualization of masks and presentations.  If you look from above they
+      can be imagined to be stacked as in the picture.
+    </caption>
+  </informalfigure>
   <para>
     Both masks and presentations can be removed from the data by functions
     in the right-click menu of the
     <link linkend='data-windows'>data window</link>, or with
     <link linkend='keyboard-shortcuts'>keyboard shortcuts</link>.
   </para>
-  <figure id='fig-mask-presentation'>
-    <title>
-      Data in default false color representation (left), with superimposed
-      mask (centre) and with shading presentation (right).
-    </title>
+  <informalfigure id='fig-mask-presentation'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='mask.png' format='PNG'/>
       </imageobject>
+      <textobject>
+        <phrase>A data field shown with a mask and a presentation</phrase>
+      </textobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Data in default false color representation (left), with superimposed
+      mask (centre) and with shading presentation (right).
+    </caption>
+  </informalfigure>
   <sect2 id='masks'>
     <title>Working with Masks</title>
     <para>

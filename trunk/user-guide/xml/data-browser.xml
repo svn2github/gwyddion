@@ -22,16 +22,16 @@
     spectra can present in the same file.  The data browser is a tool for
     browsing and managing all the available data in the file.
   </para>
-  <figure id='fig-data-browser'>
-    <title>
-      Data browser displaying several channels.
-    </title>
+  <informalfigure id='fig-data-browser'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='data_browser.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Data browser displaying several channels.
+    </caption>
+  </informalfigure>
   <sect2 id='data-browser-operating'>
     <title>Controlling the Browser</title>
     <para>

@@ -112,14 +112,16 @@
     Note, that results of different methods differ. This fact is caused by
     systematic error of different fractal analysis approaches.
   </para>
-  <figure id='fig-fractal-dimension-screenshot'>
-    <title>Fractal Dimension dialog.</title>
+  <informalfigure id='fig-fractal-dimension-screenshot'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='fractal.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Fractal Dimension dialog.
+    </caption>
+  </informalfigure>
   <para>
     Moreover, the results of the fractal analysis can be influenced strongly by
     the tip convolution. We recommned therefore to check the certainty map

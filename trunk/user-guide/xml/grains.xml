@@ -111,19 +111,19 @@
       In this way we can identify the grain positions and then determine the
       volume occupied by each grain separately.
     </para>
-    <figure id='fig-grain-marking'>
-      <title>
-        Image of grain-like surface structure (a) and corresponding results
-        of height thresholding (b), curvature thresholding (c), and
-        watershed (d) algorithm.   Within watershed algorithm it is possible
-        to segment image even further.
-      </title>
+    <informalfigure id='fig-grain-marking'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='allgrains.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Image of grain-like surface structure (a) and corresponding results
+        of height thresholding (b), curvature thresholding (c), and
+        watershed (d) algorithm.   Within watershed algorithm it is possible
+        to segment image even further.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='grain-analysis-statistics'>
     <title>Statistics</title>
@@ -414,16 +414,16 @@
         </listitem>
       </varlistentry>
     </variablelist>
-    <figure id='fig-grain-bounding-dims'>
-      <title>
-        Maximum and minimum bounding dimensions and angles of a grain.
-      </title>
+    <informalfigure id='fig-grain-bounding-dims'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Maximum and minimum bounding dimensions and angles of a grain.
+      </caption>
+    </informalfigure>
     <para id='boundary-length-calculation'>
       <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
@@ -435,8 +435,13 @@
       are pixel dimension along corresponding axes and
       <phrase role='math'>q</phrase> is the length of the pixel diagonal.
     </para>
-    <figure id='fig-boundary-length'>
-      <title>
+    <informalfigure id='fig-boundary-length'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='boundary_length.png' format='PNG'/>
+        </imageobject>
+      </mediaobject>
+      <caption>
         Contributions of pixel configurations to the estimated boundary length.
         Grey squares represent pixels inside the grain, white squares represent
         outside pixels.  The estimated contribution of each configuration is:
@@ -445,13 +450,8 @@
         (c) <phrase role='math'>h<subscript>y</subscript></phrase>,
         (c) <phrase role='math'>h<subscript>x</subscript></phrase>,
         (e) <phrase role='math'>q</phrase>/2.
-      </title>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='boundary_length.png' format='PNG'/>
-        </imageobject>
-      </mediaobject>
-    </figure>
+      </caption>
+    </informalfigure>
     <para id='grain-volume-calculation'>
       <indexterm><primary>volume calculation</primary></indexterm>
       The grain volume is, after subtracting the basis, estimated as the
@@ -463,17 +463,17 @@
       to the integral is distributed differently as shown in the following
       figure.
     </para>
-    <figure id='fig-volume-pixel-weights'>
-      <title>
-        Contributions of individual pixels to the volume of single pixel
-        (grey).
-      </title>
+    <informalfigure id='fig-volume-pixel-weights'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Contributions of individual pixels to the volume of single pixel
+        (grey).
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='grain-analysis-ref'>
     <title>References</title>

@@ -146,13 +146,7 @@
       After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
       to the image. Other modules or tools can then be run to edit this data.
     </para>
-    <figure id='fig-scars'>
-      <title>
-        Scars marking and removal example:
-        (a) original data with defects,
-        (b) data with marked deffects,
-        (c) corrected data.
-      </title>
+    <informalfigure id='fig-scars'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='remove-scars.png' format='PNG'/>
@@ -161,7 +155,13 @@
           <phrase>Scrars removal example</phrase>
         </textobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Scars marking and removal example:
+        (a) original data with defects,
+        (b) data with marked deffects,
+        (c) corrected data.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='remove-data-under-mask'>
     <indexterm>

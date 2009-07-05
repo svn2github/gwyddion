@@ -29,16 +29,16 @@
     it.  To calculate height distribution of the same rectangle you have
     selected for statistical quantities, it is sufficient to switch the tool.
   </para>
-  <figure id='fig-selections'>
-    <title>
-      Data window with three selected lines, two horizontal and one vertical.
-    </title>
+  <informalfigure id='fig-selections'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='selections-vlsi.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Data window with three selected lines, two horizontal and one vertical.
+    </caption>
+  </informalfigure>
   <para>
     If you save data in Gwyddion native file format
     (<filename>.gwy</filename>), all selections are saved together with data

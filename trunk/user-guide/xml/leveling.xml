@@ -119,19 +119,19 @@
         adjacent rows.  Rows that are not intersected by any line are not
         moved (relatively to neighbouring rows).
       </para>
-      <figure id='fig-path-level'>
-        <title>
-          Path Level example:
-          (a) uncorrected data with steps that the automated method may
-          fail to correct, two suitable leveling lines are selected;
-          (b) the result of Path Level application with line width 5.
-        </title>
+      <informalfigure id='fig-path-level'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='path-level.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Path Level example:
+          (a) uncorrected data with steps that the automated method may
+          fail to correct, two suitable leveling lines are selected;
+          (b) the result of Path Level application with line width 5.
+        </caption>
+      </informalfigure>
     </sect3>
     <sect3 id='facet-level'>
       <title>
@@ -160,19 +160,19 @@
         <link linkend='plane-level'>Plane Level</link>.
         On the other hand, for random surfaces, it can behave much worse.
       </para>
-      <figure id='fig-facet-level'>
-        <title>
-          Facet Level example:
-          (a) uncorrected, sloping data;
-          (b) data leveled by standard plane fitting (Plane Level);
-          (c) data leveled by Facet Level.
-        </title>
+      <informalfigure id='fig-facet-level'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='level-plane-facet.png' format='PNG'/>
           </imageobject>
         </mediaobject>
-      </figure>
+        <caption>
+          Facet Level example:
+          (a) uncorrected, sloping data;
+          (b) data leveled by standard plane fitting (Plane Level);
+          (c) data leveled by Facet Level.
+        </caption>
+      </informalfigure>
     </sect3>
     <sect3 id='level-rotate'>
       <title>Level Rotate</title>

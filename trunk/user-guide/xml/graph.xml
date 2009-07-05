@@ -74,14 +74,16 @@
       this is not desirable, quit the dialog with
       <guibutton>Cancel</guibutton>.
     </para>
-    <figure id='fig-graph-fit-screenshot'>
-      <title>Fit graph module screenshot</title>
+    <informalfigure id='fig-graph-fit-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='graph_fit.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Curve fitting module dialog
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='graph-critical-dimension'>
     <title>Critical Dimension</title>
@@ -96,14 +98,16 @@
       The user interface of this module is practically the same as of the
       graph fit module.
     </para>
-    <figure id='fig-graph-cd-screenshot'>
-      <title>Critical dimension module screenshot</title>
+    <informalfigure id='fig-graph-cd-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='graph_cd.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Critical dimension module dialog.
+      </caption>
+    </informalfigure>
   </sect2>
 </sect1>
 

@@ -35,16 +35,16 @@
       set of curves into a graph that can be further analysed by the standard
       graph functions.
     </para>
-    <figure id='fig-spectro-tool'>
-      <title>
-        A data window with measurement points displayed and the point
-        spectroscopy tool showing curves from three selected points.
-      </title>
+    <informalfigure id='fig-spectro-tool'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='spectro-tool.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        A data window with measurement points displayed and the point
+        spectroscopy tool showing curves from three selected points.
+      </caption>
+    </informalfigure>
   </sect2>
 </sect1>

@@ -62,19 +62,19 @@
       anisotropic and its features are supposed to be oriented in a direction
       not paralled to the image sides.
     </para>
-    <figure id='fit-drift-correction'>
-      <title>
-        Drift correction example:
-        (a) original data exhibiting strong drift in the fast scan axis,
-        (b) corrected data,
-        (c) calculated drift graph.
-      </title>
+    <informalfigure id='fit-drift-correction'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='drift-corrected-graph.png' format='PNG'/>
         </imageobject>
       </mediaobject>
-    </figure>
+      <caption>
+        Drift correction example:
+        (a) original data exhibiting strong drift in the fast scan axis,
+        (b) corrected data,
+        (c) calculated drift graph.
+      </caption>
+    </informalfigure>
   </sect2>
   <sect2 id='fft-filter-1d'>
     <title>1D FFT Filter</title>

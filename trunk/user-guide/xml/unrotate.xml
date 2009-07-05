@@ -38,11 +38,7 @@
     <link linkend='facet-level'>facet-level</link>) the data
     first as overall slope can skew the calculated rotations.
   </para>
-  <figure id='fig-unrotate-directions'>
-    <title>
-      Orientations of prevalent directions corresponding to Unrotate symmetry
-      types.
-    </title>
+  <informalfigure id='fig-unrotate-directions'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='unrotate-symmetries.png' format='PNG'/>
@@ -51,7 +47,11 @@
         <phrase>Unrotate symmetries scheme</phrase>
       </textobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Orientations of prevalent directions corresponding to Unrotate symmetry
+      types.
+    </caption>
+  </informalfigure>
   <para>
     The assumed structure type can be set with <guilabel>Assume</guilabel>
     selector.  Following choices are possible:

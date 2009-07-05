@@ -32,11 +32,7 @@
     More control over the way values are mapped to colors is possible with
     <link linkend='color-range'>Color range</link> tool.
   </para>
-  <figure id='fig-gradient-selectors'>
-    <title>
-      A data window with the right-click color gradient pop up menu and the
-      full color gradient list.
-    </title>
+  <informalfigure id='fig-gradient-selectors'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='gradient-selectors.png' format='PNG'/>
@@ -47,7 +43,11 @@
         </phrase>
       </textobject>
     </mediaobject>
-  </figure>
+    <caption>
+      A data window with the right-click color gradient pop up menu and the
+      full color gradient list.
+    </caption>
+  </informalfigure>
   <sect2 id='color-range'>
     <title>
       Color Range Tool

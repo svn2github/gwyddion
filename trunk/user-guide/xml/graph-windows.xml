@@ -18,20 +18,20 @@
     directly in the graph window toolbar, namely zoom buttons and logarithmic
     axis buttons.  To reach all the possible operations use
     <menuchoice>
-      <guimenu>Graph...</guimenu>
+      <guimenu>Graph</guimenu>
     </menuchoice>
-    menu at the Gwyddion main window.
+    menu in the Gwyddion main window.
   </para>
-  <figure id='fig-graph-window'>
-    <title>
-      A Graph window with three profiles.
-    </title>
+  <informalfigure id='fig-graph-window'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='graph_window.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      A Graph window with three profiles.
+    </caption>
+  </informalfigure>
   <para>
     To edit curve presentation one can either click on the curve in the
     graph or activate (double-click) the corresponding row in

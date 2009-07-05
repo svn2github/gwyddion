@@ -114,15 +114,15 @@
     with selections on data windows.  These functions are accessible only
     from this button panel.
   </para>
-  <figure id='fig-main-window'>
-    <title>
-      Main window and a data window showing microchip surface (Gwyddion
-      sample file).
-    </title>
+  <informalfigure id='fig-main-window'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='main_window.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Main window and a data window showing microchip surface (Gwyddion
+      sample file <filename>chip.gwy</filename>).
+    </caption>
+  </informalfigure>
 </sect1>

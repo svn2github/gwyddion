@@ -30,14 +30,14 @@
     no metadata is imported from your files, for example when they contain
     no auxiliary data or it is not known how to read it.
   </para>
-  <figure id='fig-metadata-browser'>
-    <title>
-      Metadata browser showing the metadata of a Nanoscope file.
-    </title>
+  <informalfigure id='fig-metadata-browser'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='metadata_browser.png' format='PNG'/>
       </imageobject>
     </mediaobject>
-  </figure>
+    <caption>
+      Metadata browser showing the metadata of a Nanoscope file.
+    </caption>
+  </informalfigure>
 </sect1>
