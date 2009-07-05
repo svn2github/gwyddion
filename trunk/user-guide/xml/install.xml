@@ -117,6 +117,17 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <ulink url="http://pkgconfig.freedesktop.org/">pkg-config</ulink>
+          ≥ 0.16
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Required.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink>
           ≥ 1.0
         </term>
@@ -129,25 +140,6 @@
           </para>
           <para>
             The MS Windows build system is set up to require GtkGLExt and
-            manual adjustments are necessary to disable it there.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term>
-          <ulink url="http://www.libtiff.org/">LibTIFF</ulink>
-          ≥ 3.6.0
-        </term>
-        <listitem>
-          <para>
-            <emphasis>Optional.</emphasis>
-          </para>
-          <para>
-            Enables import of TIFF-based data files, namely JPK and PSIA,
-            also enables export to TIFF images.
-          </para>
-          <para>
-            The MS Windows build system is set up to require LibTIFF and
             manual adjustments are necessary to disable it there.
           </para>
         </listitem>
@@ -183,8 +175,7 @@
           </para>
           <para>
             Speeds up various integral transforms, power spectrum and
-            correlation operations.  It also allows to apply these operations
-            on data fields of many more sizes without rescaling.
+            correlation operations.
           </para>
           <para>
             Building with FFTW3 enabled is currently unsupported on MS Windows,
@@ -207,6 +198,67 @@
             having X probably has its runtime files.  However, since the
             modularization of X in Xorg 7.0 it is distributed separately and
             therefore you might not have its development files installed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <ulink url="http://www.pygtk.org/">PyGTK2</ulink>, including codegen
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables pygwy, the Gwyddion Python scripting interface.
+          </para>
+          <para>
+            Note that pygwy is not fully functional on MS Windows at this
+            moment.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <ulink url="http://gtksourceview.sourceforge.net/">GtkSourceView</ulink>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables syntax highlighting in the Python scripting console.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <ulink url="http://www.freedesktop.org/software/desktop-file-utils">desktop-file-utils</ulink>,
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables basic desktop integration to Freedesktop-conforming
+            environments, such as installation of Gwyddion to the menus and
+            file associations.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <ulink url="http://projects.gnome.org/gconf/">GConf2</ulink>,
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables better GNOME and XFce integration, in particular automatic
+            generation of SPM file thumbnails in Nautilus and Thunar.
           </para>
         </listitem>
       </varlistentry>
@@ -233,7 +285,7 @@
       Since this file comes with a particular version of
       <application>Gwyddion</application> it may contain more concrete or
       up-to-date information and you should follow it instead of this general
-      guide if they contradict each other.
+      guide should they disagree.
     </para>
     <sect2 id="installation-unix-source-quick">
       <title>Quick Instructions</title>
@@ -241,8 +293,8 @@
         If you know the drill:
       </para>
       <informalexample>
-        <literallayout><userinput>tar -jxvf gwyddion-2.9.tar.bz2
-cd gwyddion-2.9
+        <literallayout><userinput>tar -jxvf gwyddion-2.16.tar.bz2
+cd gwyddion-2.16
 ./configure
 make install</userinput></literallayout>
       </informalexample>
@@ -252,26 +304,24 @@ make install</userinput></literallayout>
       <para>
         Unpack the source code tarball with
         <informalexample>
-          <userinput>tar -jxvf gwyddion-2.9.tar.bz2</userinput>
+          <userinput>tar -jxvf gwyddion-2.16.tar.bz2</userinput>
         </informalexample>
-        or
-        <informalexample>
-          <userinput>tar -zxvf gwyddion-2.9.tar.gz</userinput>
-        </informalexample>
-        replacing 2.9 with the actual version number. It will create directory
-        <filename>gwyddion-2.9</filename> (again, with the actual version
-        number in place of 2.9), <command>cd</command> to this directory.
+        replacing 2.16 with the actual version number. It will create directory
+        <filename>gwyddion-2.16</filename> (again, with the actual version
+        number in place of 2.16), <command>cd</command> to this directory.
         All other compilation actions will take place there.
       </para>
       <para>
-        Tarballs compressed with
-        <ulink url="http://www.bzip.org/">bzip2</ulink>
-        (<filename>.bz2</filename>) are considerably smaller than
-        <ulink url="http://www.gzip.org/">gzip</ulink>
-        compressed tarballs (<filename>.gz</filename>) but they need bzip2 to
-        decompress,
-        which used to be less widespread than gzip, to decompress.
-        However, modern Unix and Unix-like systems should contain both.
+        If your operating system does not come with bzip2 you might want to
+        download <filename>gwyddion-2.16.tar.gz</filename> (compressed with
+        gzip) instead and unpack it with
+        <informalexample>
+          <userinput>tar -zxvf gwyddion-2.16.tar.gz</userinput>
+        </informalexample>
+        However, modern Unix and Unix-like systems come with both bzip2 and
+        gzip so, the considerably smaller
+        <filename>gwyddion-2.16.tar.gz</filename> should be normally the better
+        choice.
       </para>
     </sect2>
     <sect2 id="installation-unix-source-configuration">
@@ -375,17 +425,36 @@ make install</userinput></literallayout>
         <filename>/usr/local/bin</filename>, to install
         <application>Gwyddion</application> to your home directory you
         may want to use for instance
-        <userinput>--prefix=$HOME/opt/gwyddion</userinput>.
+        <informalexample>
+          <userinput>./configure --prefix=$HOME/opt/gwyddion</userinput>
+        </informalexample>
       </para>
+    </sect2>
+    <sect2 id="installation-unix-source-configuration2">
+      <title>Configuration tweaks</title>
       <para>
-        Optional features can be enabled/disabled with options as
+        Optional features can be enabled/disabled with options such as
         <option>--with-fftw3</option>/<option>--without-fftw3</option>
-        (for FFTW3) and
-        <option>--with-tiff</option>/<option>--without-tiff</option>
-        (for LibTIFF).
+        (for FFTW3):
+        <informalexample>
+          <userinput>./configure --with-fftw3</userinput>
+        </informalexample>
         By default all optional features are enabled if their prerequisites
         are found.  A brief summary enabled and disabled optional features is
         printed near the end of <command>configure</command> output.
+      </para>
+      <para>
+        Certain auxiliary installation actions can be disabled in
+        <command>configure</command>: Updating of Freedesktop files can be
+        disabled with <userinput>--disable-desktop-file-update</userinput>.
+        Installation of GConf2 schemas can be disabled with
+        <userinput>--disable-schemas-install</userinput>.  However, the usual
+        reason for disabling these actions is that Gwyddion is installed into
+        a staging area instead of the final directory (commonly done when
+        building Linux packages).  In this case the auxiliary actions are
+        disabled automatically by non-empty <varname>DESTDIR</varname> (see
+        <link linkend="installation-unix-source-installation">installation</link>)
+        and hence they need not be disabled in <command>configure</command>.
       </para>
     </sect2>
     <sect2 id="installation-unix-source-compilation">
@@ -434,6 +503,22 @@ make install</userinput></literallayout>
         Do <emphasis>not</emphasis> override individual directory variables as
         <varname>bindir</varname>, <varname>libdir</varname>.
       </para>
+      <para>
+        If you do not install to a system directory, e.g. install to a
+        subdirectory of your home directory, you may need to adjust the
+        following variables during installation:
+        <itemizedlist>
+          <listitem>
+            <varname>GCONF_SCHEMA_CONFIG_SOURCE</varname> – location of GConf2
+            schemas
+          </listitem>
+          <listitem>
+            <varname>KDE4_MODULE_DIR</varname> – location of KDE4 modules
+          </listitem>
+        </itemizedlist>
+        Also, variable <varname>XDG_DATA_DIRS</varname> might need to be
+        adjusted after installation to get full desktop integration.
+      </para>
     </sect2>
     <sect2 id="installation-unix-source-deinstallation">
       <title>Deinstallation</title>
@@ -456,9 +541,9 @@ make install</userinput></literallayout>
         It is possible to build RPM packages on RPM-based GNU/Linux
         distributions directly from source code tarballs with
         <informalexample>
-          <userinput>rpmbuild -tb gwyddion-2.9.tar.bz2</userinput>
+          <userinput>rpmbuild -tb gwyddion-2.16.tar.bz2</userinput>
         </informalexample>
-        where 2.9 is to be replaced with the actual version as above.
+        where 2.16 is to be replaced with the actual version as above.
       </para>
     </sect2>
   </sect1>
@@ -633,19 +718,19 @@ make install</userinput></literallayout>
       (version 6 is tested and recommended, albeit it is a bit older).  It
       primarily consists of a set of <command>nmake</command> makefiles,
       that is the compilation is done from the command line.  This approach
-      has several advantages for reproducibility and automation of the process
-      and it enables easy synchronization of Unix and MS Windows build systems.
-      The necessity to use command line may be considered a disadvantage,
-      though you should find the compilation process quite simple even you are
-      not used to use the command line much.
+      has several advantages with respect to reproducibility and automation of
+      the process. Furthermore, it enables easy synchronization of Unix and MS
+      Windows build systems.  The necessity to use command line may be
+      considered a disadvantage though you should find the compilation process
+      quite simple even you are not used to use the command line much.
     </para>
     <para>
       In addition to MSVC you need to install Gtk+ development environment.
       Again, we recommend to use the
       <ulink url="http://sourceforge.net/projects/gladewin32">GladeWin32</ulink>
-      package.  Note it also contains the run-time environment, therefore
-      you do not need to install the run-time package if you install the
-      development one.
+      package.  Note it also contains the complete run-time environment,
+      therefore you do not need to install the run-time package if you install
+      the development one.
     </para>
     <sect2 id="installation-ms-windows-source-unpacking">
       <title>Unpacking</title>
@@ -664,7 +749,7 @@ make install</userinput></literallayout>
       </para>
       <para>
         The unpacking will create directory
-        <filename>gwyddion-2.9</filename> (with 2.9 replaced with the actual
+        <filename>gwyddion-2.16</filename> (with 2.16 replaced with the actual
         version number) where all other compilation actions will take place.
       </para>
     </sect2>
@@ -799,10 +884,10 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>,
         version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
         build the installer, it will create
-        <filename>Gwyddion-2.9.exe</filename> (with 2.9 replaced with the
+        <filename>Gwyddion-2.16.exe</filename> (with 2.16 replaced with the
         actual version number), again in <filename>inst</filename>.  You can
         repeat this procedure with <filename>inst/gwyddion-devel.iss</filename>
-        to obtain <filename>Gwyddion-Development-2.9.exe</filename>, should
+        to obtain <filename>Gwyddion-Development-2.16.exe</filename>, should
         you ever need it.
       </para>
     </sect2>
