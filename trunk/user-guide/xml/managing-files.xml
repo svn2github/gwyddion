@@ -5,27 +5,36 @@
 <sect1 id="managing-files">
   <title>Managing Files</title>
   <para>
-    Gwyddion uses its internal data format (.gwy) to store data. The main
-    advantage of this format is fact, that it stores complete state of
-    processing of concrete data, including selections and other tool and
-    processing function settings. It can also store more channels and graphs
-    that have any relation in one single file. Therefore we recommned to use
-    this format for saving processed files. If you open our example files,
-    you can see that each one is plotted in different false color palette.
-    This is direct consequence of the fact that Gwyddion stores full state of
-    the data window including its palette.
+    Gwyddion uses its <link linkend="gwyfile-format">custom data format</link>
+    (<filename>.gwy</filename>) to store data.  This format has the following
+    important advantages:
+    <itemizedlist>
+      <listitem>
+        Capability to stores complete processing state of the individual data,
+        including masks, selections and other settings.
+      </listitem>
+      <listitem>
+        Arbitrary number of channels, graphs and spectrum sets, with arbitrary
+        dimensions and units of both dimensions and values.
+      </listitem>
+      <listitem>
+        Double-precision representation of all data, preventing information
+        loss due to rounding.
+      </listitem>
+    </itemizedlist>
+    Therefore, we recommned to use this format for saving of processed files.
+    If you open our sample files, you can see that each one is plotted in
+    different false color palette.  This is direct consequence of the fact that
+    Gwyddion stores the full state of the data window including its palette.
   </para>
   <para>
-    Other data file formats can be handled with appropriate loading and
-    saving modules or plugins. Beside several file formats used in
-    microscopy, graphical file types (JPEG, PNG, PPM, TIFF, BMP) and raw
-    binary and ASCII data can be imported too.
-  </para>
-  <para>
-    We expect that more file IO modules and plugins will be written,
-    depending on demands and file format specifications available. We
-    encourage you to write IO module or plugin for your instrument-specific
-    data file format, or, at least, to send us your format specifications.
+    Other data file formats are handled with appropriate file loading and
+    saving modules. Beside a large number of file formats used in scanning
+    probe microscopy, graphical file types (PNG, JPEG, TIFF, TARGA) and raw
+    binary and ASCII data can be imported too.  If your SPM data format is not
+    supported by Gwyddion yet or it is loaded incorrectly, you are encouraged
+    to write an import module (if you can program) or contact the maintainers
+    to help them improve the support.
   </para>
   <table frame='none' id="table-file-formats">
     <title>Supported file formats</title>
@@ -33,7 +42,8 @@
       <primary>file</primary>
       <primary>supported formats</primary>
     </indexterm>
-    <tgroup cols='2'>
+    <tgroup cols='6'>
+      <colspec align='left'/>
       <colspec align='left'/>
       <colspec align='left'/>
       <colspec align='left'/>
@@ -46,6 +56,7 @@
           <entry>Supported By</entry>
           <entry>Read</entry>
           <entry>Write</entry>
+          <entry>SPS</entry>
         </row>
       </thead>
       <tbody>
@@ -54,6 +65,7 @@
           <entry>.dat</entry>
           <entry>apefile module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -75,6 +87,7 @@
               </para>
             </footnote>
           </entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Assing AFM</entry>
@@ -82,12 +95,14 @@
           <entry>assing-afm module</entry>
           <entry>Yes</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Image Metrology BCR, BCRF</entry>
           <entry>.bcr, .bcrf</entry>
           <entry>bcrfile module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -96,12 +111,14 @@
           <entry>rawfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Burleigh v2.1</entry>
           <entry>.img</entry>
           <entry>burleigh module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -110,12 +127,14 @@
           <entry>burleigh_bii module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
-          <entry>Burleigh export</entry>
+          <entry>Burleigh exported</entry>
           <entry>.txt, .bin</entry>
           <entry>burleigh_exp module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -124,12 +143,14 @@
           <entry>createc module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>DME Rasterscope</entry>
           <entry>.img</entry>
           <entry>dmefile module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -138,11 +159,13 @@
           <entry>ecsfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Gwyddion native</entry>
           <entry>.gwy</entry>
           <entry>gwyfile module</entry>
+          <entry>Yes</entry>
           <entry>Yes</entry>
           <entry>Yes</entry>
         </row>
@@ -152,12 +175,14 @@
           <entry>hdf4file module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Hitachi AFM</entry>
           <entry>.afm</entry>
           <entry>hitachi-afm module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -166,12 +191,14 @@
           <entry>intematix module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>JEOL SPM</entry>
           <entry>.tif</entry>
           <entry>jeol module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -180,12 +207,14 @@
           <entry>jpkscan module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>ADE Phase Shift MapVue</entry>
           <entry>.map</entry>
           <entry>mapvue module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -194,12 +223,14 @@
           <entry>metropro module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>MicroProf FRT</entry>
           <entry>.txt</entry>
           <entry>microprof module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -208,6 +239,7 @@
           <entry>sdfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Molecular Imaging MI</entry>
@@ -215,6 +247,14 @@
           <entry>mifile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>Limited
+            <footnote id='file-format-fn-sps-limited'>
+              <para>
+                Spectra curves are imported as graphs, positional information
+                is lost.
+              </para>
+            </footnote>
+          </entry>
         </row>
         <row>
           <entry>Molecular Imaging STP</entry>
@@ -222,12 +262,22 @@
           <entry>stpfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
+        </row>
+        <row>
+          <entry>Nanoeducator</entry>
+          <entry>.spm, .mspm, .stm</entry>
+          <entry>nanoeducator module</entry>
+          <entry>Yes</entry>
+          <entry>No</entry>
+          <entry>Yes</entry>
         </row>
         <row>
           <entry>Nanonis</entry>
           <entry>.sxm</entry>
           <entry>nanonis module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -245,12 +295,14 @@
           </entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Nanosurf</entry>
           <entry>.ezd, .nid</entry>
           <entry>ezdfile module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -259,12 +311,14 @@
           <entry>nanotop module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>GXSM netCDF</entry>
           <entry>.nc</entry>
           <entry>netcdf module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -273,12 +327,14 @@
           <entry>nt-mdt module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Olympus LEXT OLS3000</entry>
           <entry>.old</entry>
           <entry>ols module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -287,12 +343,14 @@
           <entry>omicron module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>Yes</entry>
         </row>
         <row>
           <entry>Omicron MATRIX</entry>
           <entry>.mtrx + data</entry>
           <entry>omicronmatrix module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -301,6 +359,7 @@
           <entry>opdfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Pacific Nanotechnology PNI</entry>
@@ -308,11 +367,12 @@
           <entry>pnifile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Pixmap images</entry>
           <entry>
-            .png, .jpeg, .ppm, .tga, .bmp
+            .png, .jpeg, .tiff, .ppm, .tga, .bmp
             <footnote id='file-format-fn-pixmap-import'>
               <para>
                 And others, namely for import. The exact list depends on
@@ -331,12 +391,14 @@
               </para>
             </footnote>
           </entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>PSIA</entry>
           <entry>.tiff</entry>
           <entry>psia module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -345,6 +407,7 @@
           <entry>quesant module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>RHK Technology SPM32</entry>
@@ -352,6 +415,9 @@
           <entry>rhk-spm32 module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>Limited
+            <footnoteref linkend='file-format-fn-sps-limited'/>
+          </entry>
         </row>
         <row>
           <entry>RHK Technology SM3</entry>
@@ -359,12 +425,16 @@
           <entry>rhk-sm3 module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>Limited
+            <footnoteref linkend='file-format-fn-sps-limited'/>
+          </entry>
         </row>
         <row>
           <entry>Seiko</entry>
           <entry>.xqd</entry>
           <entry>seiko module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -373,12 +443,14 @@
           <entry>sensofar module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Sensolytics</entry>
           <entry>.dat</entry>
           <entry>sensolytics module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -387,12 +459,14 @@
           <entry>spml module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Shimadzu</entry>
           <entry></entry>
           <entry>shimadzu module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -401,12 +475,14 @@
           <entry>sicmfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>SPIP ASCII export</entry>
           <entry>.asc</entry>
           <entry>spipasc module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -422,12 +498,14 @@
               </para>
             </footnote>
           </entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>STMPRG</entry>
           <entry></entry>
           <entry>stmprg module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -436,12 +514,14 @@
           <entry>surffile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Surface Imaging Systems</entry>
           <entry>.sis</entry>
           <entry>sis module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -450,12 +530,14 @@
           <entry>spmlab module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>Veeco Instruments FLT</entry>
           <entry>.flt</entry>
           <entry>spmlabf module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
         <row>
@@ -464,6 +546,7 @@
           <entry>unisoku module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>WITec</entry>
@@ -471,12 +554,14 @@
           <entry>witfile module</entry>
           <entry>Yes</entry>
           <entry>No</entry>
+          <entry>No</entry>
         </row>
         <row>
           <entry>WSxM (Nanotec)</entry>
           <entry>.tom, .stp</entry>
           <entry>wsxmfile module</entry>
           <entry>Yes</entry>
+          <entry>No</entry>
           <entry>No</entry>
         </row>
       </tbody>
@@ -489,18 +574,22 @@
       <primary>loading</primary>
     </indexterm>
     <para>
-      By default, Gwyddion detects the file format automatically based on
-      file contents (i.e. file names and extensions are irrelevant).  This
-      usually works well and you will hopefully never need to change it.
+      Many SPM file formats use identical file extensions such as
+      <filename>.img</filename>, <filename>.afm</filename> or
+      <filename>.dat</filename>.  This, however,
+      cannot confuse Gwyddion because it detects the file format automatically
+      based solely on file contents.  Thanks to the efficiency of the automated
+      detection you should rarely need to intervene and select file types
+      manually.
       See <link linkend="raw-file-import">Raw Data File Import</link>
       for details of import of data from unsupported formats and from
       <link linkend="pixmap-file-import">pixmap images</link>.
     </para>
     <para>
-      If the automatic detection fails it is possible to enforce an attempt
-      to load the file as a particular format by expanding the <guilabel>File
+      If necessary, it is possible to enforce an attempt to load the file
+      assuming a particular format by expanding the <guilabel>File
         type</guilabel> selector and choosing a file type.  However, if the
-      file format is not detected automatically it is very unlikely the file
+      file format is not detected automatically it is quite unlikely the file
       can be loaded at all.
     </para>
     <para>
@@ -552,7 +641,7 @@
     </indexterm>
     <para>
       Much of the previous paragraphs applies to file saving too.  One of the
-      differences is the reliability of automatic file type determination.
+      main differences is the reliability of automatic file type determination.
       While loading can and does examine the file contents, saving depends
       on file name and extension.  Combined with the large number of
       different file types using the same extension such as
@@ -563,7 +652,7 @@
     <para>
       Since the only file type able to fully represent Gwyddion data
       structures is its native data format, saving to
-      a <filename>.gwy</filename> file is the only actual saving.  Saving to
+      a <filename>.gwy</filename> file is the only proper saving.  Saving to
       other file formats essentially consists of exporting of a limited
       subset of the data, typically only the active channel (without masks
       and presentations).  Therefore it does <emphasis>not</emphasis>
@@ -582,8 +671,8 @@
         <guimenu>File</guimenu>
         <guisubmenu>Open Recent</guisubmenu>
       </menuchoice>.
-      The submenu contains the last 10 recently used files for quick
-      recalling, extensive recent file history is accessed with the last item
+      The submenu contains the last 10 recently used files for quick recalling,
+      an extensive recent file history is accessed with the last item
       <guimenuitem>Document History</guimenuitem>.
     </para>
     <para>
