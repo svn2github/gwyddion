@@ -721,7 +721,7 @@
           pattern <literal>*.sis</literal> the initial <literal>*</literal>
           matches all leading directory components.  The pattern syntax is
           described in
-          <ulink url='http://developer.gnome.org/doc/API/2.0/glib/glib-Glob-style-pattern-matching.html'>GPatternSpec</ulink>
+          <ulink url='http://library.gnome.org/devel/glib/stable/glib-Glob-style-pattern-matching.html#glib-Glob-style-pattern-matching.description'>GPatternSpec</ulink>
           documentation.
         </listitem>
         <listitem>
