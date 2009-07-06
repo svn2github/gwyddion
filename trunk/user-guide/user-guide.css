@@ -20,7 +20,8 @@ body {
   div.navheader, div.navfooter { visibility: collapse; display: none; }
   a:visited { color: #808080; }
 }
-.math { font-style: italic; }
+.mathvar { font-style: italic; }
+.vector { font-style: bold; }
 .caption { font-style: italic; font-size: 90%; }
 a { text-decoration: underline; }
 a:link { color: black; }

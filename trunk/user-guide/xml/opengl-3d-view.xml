@@ -50,7 +50,7 @@
       <itemizedlist>
         <listitem>
           Rotation – this is the default.  Dragging the view horizontally
-          rotates it around <phrase role='math'>z</phrase>-axis, vertical drag
+          rotates it around <phrase role='mathvar'>z</phrase>-axis, vertical drag
           rotates it around horizontal axis parallel with the plane of view.
         </listitem>
         <listitem>
@@ -59,7 +59,7 @@
         </listitem>
         <listitem>
           Z-scale – dragging the view up (down) increases (decreases) the
-          <phrase role='math'>z</phrase>-scale, making the hills and valleys
+          <phrase role='mathvar'>z</phrase>-scale, making the hills and valleys
           more or less pronounced.
         </listitem>
         <listitem>
@@ -148,43 +148,73 @@
       <itemizedlist>
         <listitem>
           ambient color
-          <phrase role='math'>k</phrase><subscript>a,α</subscript>
-          (where α = red, green, blue), controlling the reflection of ambient
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>a,α</subscript></mathphrase>
+            <alt>k_{{\rm a},\alpha}</alt>
+          </inlineequation>
+          (where
+          <inlineequation>
+            <mathphrase>α = red, green, blue</mathphrase>
+            <alt>\alpha = \rm red, green, blue</alt>
+          </inlineequation>),
+          controlling the reflection of ambient
           light that is assumed come uniformly from all directions,
         </listitem>
         <listitem>
           diffuse color
-          <phrase role='math'>k</phrase><subscript>d,α</subscript>,
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>d,α</subscript></mathphrase>
+            <alt>k_{{\rm d},\alpha}</alt>
+</inlineequation>,
           describing the diffuse reflection which is independent on the
           direction of incident light and whose apparent brightness is
           independent of the viewing angle,
         </listitem>
         <listitem>
           specular color
-          <phrase role='math'>k</phrase><subscript>s,α</subscript>,
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>s,α</subscript></mathphrase>
+            <alt>k_{{\rm s},\alpha}</alt>
+</inlineequation>,
           controlling the specular reflection with reflected light intensity
           dependent on the angle between the observing direction and the
           direction of light that would be reflected by an ideal mirror with
           the same normal, and
         </listitem>
         <listitem>
-          shininess <phrase role='math'>s</phrase>, a numeric exponent
-          determining how much the specular reflection resembles an ideal
-          mirror, smaller values mean rougher surfaces, higher values mean
-          smoother surfaces.
+          shininess
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>s</phrase></mathphrase>
+            <alt>s</alt>
+          </inlineequation>,
+          a numeric exponent determining how much the specular reflection
+          resembles an ideal mirror, smaller values mean rougher surfaces,
+          higher values mean smoother surfaces.
         </listitem>
       </itemizedlist>
     </para>
     <para>
       If we denote
-      <phrase role='math'><emphasis role='bold'>L</emphasis></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>L</phrase></phrase></mathphrase>
+        <alt>\vec{L}</alt>
+      </inlineequation>
       the normal vector pointing from the observed surface point to the light
       source,
-      <phrase role='math'><emphasis role='bold'>V</emphasis></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>V</phrase></phrase></mathphrase>
+        <alt>\vec{V}</alt>
+      </inlineequation>
       the normal vector to the observer,
-      <phrase role='math'><emphasis role='bold'>N</emphasis></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>N</phrase></phrase></mathphrase>
+        <alt>\vec{N}</alt>
+</inlineequation>
       the normal vector to the surface
-      <phrase role='math'><emphasis role='bold'>R</emphasis></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>R</phrase></phrase></mathphrase>
+        <alt>\vec{R}</alt>
+</inlineequation>
       the normal vector in the direction of ideal mirror reflection, the
       observed light intensity in OpenGL lighting model can be expressed as
     </para>
@@ -205,10 +235,22 @@ I_\alpha = k_{a,\alpha}I_{a,\alpha}
       </mediaobject>
     </informalequation>
     <para>
-      where <phrase role='math'>I</phrase><subscript>a,α</subscript>,
-      <phrase role='math'>I</phrase><subscript>d,α</subscript> and
-      <phrase role='math'>I</phrase><subscript>s,α</subscript> are the
-      ambient, diffuse and specular light source intensities, respectively.
+      where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>a,α</subscript></mathphrase>
+        <alt>I_{{\rm a},\alpha}</alt>
+      </inlineequation>,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>d,α</subscript></mathphrase>
+        <alt>I_{{\rm d},\alpha}</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>s,α</subscript></mathphrase>
+        <alt>I_{{\rm s},\alpha}</alt>
+      </inlineequation>
+      are the ambient, diffuse and specular light source intensities,
+      respectively.
     </para>
   </sect2>
 </sect1>

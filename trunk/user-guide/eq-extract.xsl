@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<!-- $Id$
+     extract equations in mediaobject/textobject/phrase of equations to TeX
+     files for further processing -->
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:exsl="http://exslt.org/common"
@@ -72,12 +75,15 @@
   <xsl:for-each select="//inlineequation">
     <xsl:choose>
       <xsl:when test="not(@id)">
-        <xsl:message>
-          <xsl:text>Missing id for </xsl:text>
-          <xsl:value-of select="name(.)"/>
-          <xsl:text> </xsl:text>
-          <xsl:value-of select="inlinemediaobject/imageobject/imagedata/attribute::fileref"/>
-        </xsl:message>
+        <xsl:if test="not(mathphrase)">
+          <xsl:message>
+            <xsl:text>Missing id or mathphrase for </xsl:text>
+            <xsl:value-of select="name(.)"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="inlinemediaobject/imageobject/imagedata/attribute::fileref"/>
+          </xsl:message>
+        </xsl:if>
+        <!-- If there is a mathphrase, do not warn, it's rendered in HTML. -->
       </xsl:when>
       <xsl:when test="not(inlinemediaobject/textobject[@role='tex'])">
         <xsl:message>

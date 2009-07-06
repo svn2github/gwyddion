@@ -44,7 +44,7 @@
     reduced slow axis resolution and having therefore 512×128 pixels, can
     be displayed either in 512×128 or 512×512 window.
   </para>
-  <figure id='fig-data-window'>
+  <informalfigure id='fig-data-window'>
     <mediaobject>
       <imageobject>
         <imagedata fileref='data_window.png' format='PNG'/>
@@ -53,5 +53,5 @@
     <caption>
       Data window with all three available context menus shown.
     </caption>
-  </figure>
+  </informalfigure>
 </sect1>

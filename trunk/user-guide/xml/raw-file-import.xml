@@ -143,8 +143,15 @@
               How bytes in samples are swapped.  This option is only
               available for predefined formats larger than one byte.
               Its bits correspond to groups of bytes to swap: if
-              <phrase role='math'>j</phrase>-th bit is set, adjacent groups
-              of 2<phrase role='math'><superscript>j</superscript></phrase>
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>j</phrase></mathphrase>
+                <alt>j</alt>
+              </inlineequation>-th
+              bit is set, adjacent groups of
+              <inlineequation>
+                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
+                <alt>2^j</alt>
+              </inlineequation>
               bits are swapped.
             </para>
             <para>
@@ -154,9 +161,15 @@
               swapped.  The net effect is reversal of byte order in groups
               of four bytes.  More generally, if you want to reverse byte
               order in groups of size
-              2<phrase role='math'><superscript>j</superscript></phrase>,
+              <inlineequation>
+                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
+                <alt>2^j</alt>
+              </inlineequation>,
               which is the common case, use byte swap pattern
-              <phrase role='math'>j</phrase>-1.
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>j</phrase> − 1</mathphrase>
+                <alt>j-1</alt>
+              </inlineequation>.
             </para>
           </listitem>
         </varlistentry>

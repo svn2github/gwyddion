@@ -9,8 +9,8 @@ PACKAGE = @PACKAGE_SHORTNAME@
 GMAKE = @GMAKE@
 GSED = @GSED@
 XSLTPROC = @XSLTPROC@ --xinclude
-PDFXMLTEX = @PDFXMLTEX@
-HTML2TXT = @LYNX@ -force_html -dump -nolist
+DBLATEX = @DBLATEX@ --input-format=xml --fig-path=images --xslt="@XSLTPROC@" --debug
+#HTML2TXT = @LYNX@ -force_html -dump -nolist
 
 DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
 
@@ -24,79 +24,64 @@ IMAGES := $(shell $(GSED) -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref='"'
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
 SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
-XSL_STYLES = fo.xsl xhtml.xsl eq-extract.xsl latex.xsl
+XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl
 CSS_STYLES = user-guide.css
-TEX_STYLES = latex-support.tex
+TEX_STYLES =
 
-all: xhtml
+@HTML_TRUE@html_target = xhtml
+@HTML_FALSE@html_target =
+@PDF_TRUE@pdf_target = pdf
+@PDF_FALSE@pdf_target =
+
+ALL_TARGETS = $(html_target) $(pdf_target)
+
+all: $(ALL_TARGETS)
 
 Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
 pdf: $(PACKAGE).pdf
 
-latex: latex.stamp
-
-latex.stamp: $(XML_SOURCES) latex.xsl
-	rm -rf latex
-	mkdir latex
-	$(XSLTPROC) -o latex/$(PACKAGE).tex latex.xsl $(MAIN_XML_SOURCE)
-	sed -i -e 's/<?xml.*/\\documentclass[oneside]{book}\\usepackage[utf8]{inputenc}\\include{defs}\\include{latex-support}\\begin{document}/' \
-	       -e '$$i\\\end{document}' \
-	       -e 's/&lt;/</g' \
-	       -e 's/&gt;/>/g' \
-	       -e 's/&amp;/\&/g' \
-	       -e '/^ *$$/d' \
-	       latex/$(PACKAGE).tex
-	cp formulas/defs.tex latex
-	cp latex-support.tex latex
-	cp $(patsubst %,images/%,$(PNG_IMAGES)) latex
-	cd latex && pdflatex -interaction scrollmode $(PACKAGE).tex
-
-# XXX: We should use the embedded TeX sources, not formula images
-user-guide.pdf: $(MAIN_XML_SOURCE) $(XML_SOURCES) fo.xsl formulas
-	rm -rf pdf
-	mkdir pdf
-	$(XSLTPROC) -o pdf/$(PACKAGE).fo fo.xsl $(MAIN_XML_SOURCE)
-	cp $(patsubst %,images/%,$(PNG_IMAGES)) pdf
-	cp formulas/eq-*.png pdf
-	cd pdf && $(PDFXMLTEX) $(PACKAGE).fo
-	cp pdf/$@ .
+@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(TEX_STYLES) dblatex.xsl
+@PDF_TRUE@	rm -rf pdf
+@PDF_TRUE@	mkdir pdf
+@PDF_TRUE@	$(DBLATEX) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
 
 %.txt: %.html
 	$(HTML2TXT) $< >$@
 
 xhtml: xhtml.stamp
 
-xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
-	test -d xhtml || mkdir xhtml
-	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
-	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
-	cp user-guide.css xhtml
-	touch $@
+@HTML_TRUE@xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
+@HTML_TRUE@	test -d xhtml || mkdir xhtml
+@HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
+@HTML_TRUE@	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
+@HTML_TRUE@	cp user-guide.css xhtml
+@HTML_TRUE@	touch $@
 
 formulas: formulas.stamp
 
-formulas.stamp: eq-extract.xsl $(EQ_SOURCES) $(MAIN_XML_SOURCE)
-	$(XSLTPROC) eq-extract.xsl $(MAIN_XML_SOURCE)
-	+cd ./formulas && $(GMAKE)
-	test -d xhtml || mkdir xhtml
-	cp formulas/eq-*.png xhtml
-	touch $@
+@HTML_TRUE@formulas.stamp: eq-extract.xsl $(EQ_SOURCES) $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(XSLTPROC) eq-extract.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	+cd ./formulas && $(GMAKE)
+@HTML_TRUE@	test -d xhtml || mkdir xhtml
+@HTML_TRUE@	cp formulas/eq-*.png xhtml
+@HTML_TRUE@	touch $@
 
 clean:
 	+cd ./formulas && $(GMAKE) clean
 	-rm -rf xhtml *.stamp xml/*~ *~
-	-rm -f *.aux *.log *.out $(PACKAGE).pdf $(PACKAGE).xml pdf
+	-rm -rf $(PACKAGE).pdf pdf
 
 dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
-	cp Makefile.in aclocal.m4 configure configure.ac README $(DISTNAME)
-	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) user-guide.iss.in $(DISTNAME)
+	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.sh \
+	    user-guide.iss.in $(DISTNAME)
+	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
 	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
-	cp xml/*.xml $(DISTNAME)/xml
+	cp $(XML_SOURCES) $(DISTNAME)/xml
 	+cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
@@ -128,8 +113,11 @@ distclean: clean
 	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
 
 help:
-	@echo "xhtml        Compile User guide to XHTML"
-	@echo "all          The same"
+	@echo "all          Compile User guide to all available formats ($(ALL_TARGETS))"
+@HTML_TRUE@	@echo "xhtml        Compile User guide to XHTML"
+@HTML_FALSE@	@echo "xhtml        Compile User guide to XHTML (not available)"
+@PDF_TRUE@	@echo "pdf          Compile User guide to PDF"
+@PDF_FALSE@	@echo "pdf          Compile User guide to PDF (not available)"
 	@echo "dist         Create tarball with DocBook sources"
 	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
 	@echo "version      Update version number to current date"

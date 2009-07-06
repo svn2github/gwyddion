@@ -72,6 +72,7 @@
     <xi:include href='raw-file-import.xml'/>
     <xi:include href='plugins.xml'/>
   </chapter>
+  <!--
   <chapter id='data-analysis'>
     <title>Data Processing and Analysis</title>
     <xi:include href='basic.xml'/>
@@ -87,6 +88,7 @@
     <xi:include href='multidata.xml'/>
     <xi:include href='graph.xml'/>
   </chapter>
+  -->
   <chapter id='summaries'>
     <title>Summaries and Tables</title>
     <xi:include href='keyboard-shortcuts.xml'/>
