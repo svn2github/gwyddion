@@ -40,6 +40,7 @@ JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
 
 GWY_HTML_MISSING=
 GWY_PDF_MISSING=
+GWY_PNG_MISSING=
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
@@ -49,9 +50,9 @@ fi
 
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[no])
 if test "$XSLTPROC" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  xsltproc, get LibXML2 from http://xmlsoft.org/
+  GWY_HTML_MISSING="${GWY_HTML_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
 "
-  GWY_PDF_MISSING="${GWY_PDF_MISSING}  xsltproc, get LibXML2 from http://xmlsoft.org/
+  GWY_PDF_MISSING="${GWY_PDF_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
 "
 fi
 
@@ -89,6 +90,11 @@ if test "$DBLATEX" = no; then
 "
 fi
 
+PKG_CHECK_MODULES([PNG],[libpng],,[
+  GWY_PNG_MISSING="${GWY_PNG_MISSING}  libpng, get libpng from http://www.libpng.org/pub/png/
+"
+])
+
 if test x = "x$GWY_HTML_MISSING"; then
   HTML_TRUE=
   HTML_FALSE=#
@@ -109,6 +115,16 @@ fi
 AC_SUBST(PDF_TRUE)
 AC_SUBST(PDF_FALSE)
 
+if test x = "x$GWY_PNG_MISSING"; then
+  PNG_TRUE=
+  PNG_FALSE='#'
+else
+  PNG_TRUE='#'
+  PNG_FALSE=
+fi
+AC_SUBST(PNG_TRUE)
+AC_SUBST(PNG_FALSE)
+
 AC_OUTPUT
 
 if test x != "x$GWY_HTML_MISSING"; then
@@ -119,6 +135,11 @@ fi
 if test x != "x$GWY_PDF_MISSING"; then
 AC_MSG_WARN([Cannot build PDF, the following tools were not found:
 $GWY_PDF_MISSING])
+fi
+
+if test x != "x$GWY_PNG_MISSING"; then
+AC_MSG_WARN([Cannot build fixpngres, the following tools were not found:
+$GWY_PNG_MISSING])
 fi
 
 echo "Run '$GMAKE help' for some help."

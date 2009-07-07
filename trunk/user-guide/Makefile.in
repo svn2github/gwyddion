@@ -69,15 +69,18 @@ formulas: formulas.stamp
 @HTML_TRUE@	cp formulas/eq-*.png xhtml
 @HTML_TRUE@	touch $@
 
+@PNG_TRUE@fixpngres: fixpngres.c
+@PNG_TRUE@	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
+
 clean:
 	+cd ./formulas && $(GMAKE) clean
-	-rm -rf xhtml *.stamp xml/*~ *~
+	-rm -rf xhtml *.stamp xml/*~ *~ fixpngres
 	-rm -rf $(PACKAGE).pdf pdf
 
 dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
-	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.sh \
+	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.c \
 	    user-guide.iss.in $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
 	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
@@ -120,6 +123,8 @@ help:
 @PDF_FALSE@	@echo "pdf          Compile User guide to PDF (not available)"
 	@echo "dist         Create tarball with DocBook sources"
 	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
+@PNG_TRUE@	@echo "fixpngres          Build fixpngres tool"
+@PNG_FALSE@	@echo "fixpngres          Build fixpngres tool (not available)"
 	@echo "version      Update version number to current date"
 
 .PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
