@@ -123,8 +123,8 @@ help:
 @PDF_FALSE@	@echo "pdf          Compile User guide to PDF (not available)"
 	@echo "dist         Create tarball with DocBook sources"
 	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
-@PNG_TRUE@	@echo "fixpngres          Build fixpngres tool"
-@PNG_FALSE@	@echo "fixpngres          Build fixpngres tool (not available)"
+@PNG_TRUE@	@echo "fixpngres    Build fixpngres tool"
+@PNG_FALSE@	@echo "fixpngres    Build fixpngres tool (not available)"
 	@echo "version      Update version number to current date"
 
 .PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
