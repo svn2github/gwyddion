@@ -246,7 +246,16 @@
             </textobject>
           </mediaobject>
         </informalequation>
-        where <phrase role='math'>m</phrase> and <phrase role='math'>n</phrase>
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>m</phrase></mathphrase>
+          <alt>m</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
+          <alt>n</alt>
+        </inlineequation>
         are the selected horizontal and vertical polynomial degrees,
         respectively.  In the <guilabel>Limited total degree</guilabel> mode
         the fitted polynomial is
@@ -269,8 +278,12 @@
             </textobject>
           </mediaobject>
         </informalequation>
-        where <phrase role='math'>n</phrase> is the selected total polynomial
-        degree.
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
+          <alt>n</alt>
+        </inlineequation>
+        is the selected total polynomial degree.
       </para>
     </sect3>
     <sect3 id='revolve-arc'>
@@ -283,10 +296,10 @@
         </menuchoice>
       </para>
       <para>
-        Revolves virtual 'arc' of given radius horizontally or vertically over
-        (or under) the data. The envelope of this arc is treated as a
-        background, resulting in removal of features larger than the arc radius
-        (approximately).
+        Revolves virtual <quote>arc</quote> of given radius horizontally or
+        vertically over (or under) the data. The envelope of this arc is
+        treated as a background, resulting in removal of features larger than
+        the arc radius (approximately).
       </para>
     </sect3>
     <sect3 id='median-level'>
