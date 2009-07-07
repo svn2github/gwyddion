@@ -14,7 +14,11 @@
   </para>
   <para>
     In the following formulas we assume the mean value of
-    <phrase role='math'>r<subscript>j</subscript></phrase> is zero, i.e.
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>r<subscript>j</subscript></phrase></mathphrase>
+      <alt>r_j</alt>
+    </inlineequation>
+    is zero, i.e.
     <informalequation id='eq-roughness-iso-rj'>
       <mediaobject>
         <imageobject>
@@ -36,7 +40,10 @@ r_j = z_j - \bar z
       <varlistentry>
         <term>
           Roughness Average
-          <phrase role='math'>R</phrase><subscript>a</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+            <alt>R_{\rm a}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -63,16 +70,26 @@ R_{\rm a} = {1\over N} \sum_{j=1}^N |r_j|
           </para>
           <para>
             An older means of specifying a range for
-            <phrase role='math'>R</phrase><subscript>a</subscript> is RHR.
-            This is a symbol on a drawing specifying a minimum and maximum
-            value for <phrase role='math'>R</phrase><subscript>a</subscript>.
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+              <alt>R_{\rm a}</alt>
+            </inlineequation>
+            is RHR.  This is a symbol on a drawing specifying a minimum and
+            maximum value for
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+              <alt>R_{\rm a}</alt>
+            </inlineequation>.
           </para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term>
           Root Mean Square Roughness
-          <phrase role='math'>R</phrase><subscript>q</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>q</subscript></mathphrase>
+            <alt>R_{\rm q}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -101,7 +118,10 @@ R_{\rm q} = \sqrt{{1\over N} \sum_{j=1}^N r_j^2}
       <varlistentry>
         <term>
           Maximum Height of the Profile
-          <phrase role='math'>R</phrase><subscript>t</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>t</subscript></mathphrase>
+            <alt>R_{\rm t}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -131,8 +151,14 @@ R_{\rm t} = \left| \min\limits_{1\le j\le N} r_j  \right|
       <varlistentry>
         <term>
           Maximum Profile Valley Depth
-          <phrase role='math'>R</phrase><subscript>v</subscript>
-          <phrase role='math'>R</phrase><subscript>m</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>v</subscript></mathphrase>
+            <alt>R_{\rm v}</alt>
+          </inlineequation>,
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>m</subscript></mathphrase>
+            <alt>R_{\rm m}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -162,7 +188,10 @@ R_{\rm v} = \left| \min\limits_{1\le j\le N} r_j \right|
       <varlistentry>
         <term>
           Maximum Profile Peak Height
-          <phrase role='math'>R</phrase><subscript>p</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>p</subscript></mathphrase>
+            <alt>R_{\rm p}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -192,7 +221,10 @@ R_{\rm p} = \left| \max\limits_{1\le j\le N} r_j \right|
       <varlistentry>
         <term>
           Average Maximum Height of the Profile
-          <phrase role='math'>R</phrase><subscript>t<phrase role='math'>m</phrase></subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>t<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm t}m}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -217,14 +249,20 @@ R_{{\rm t}m} = R_{{\rm v}m} + R_{{\rm p}m}
               </mediaobject>
             </informalequation>
             where
-            <phrase role='math'>R</phrase><subscript>v<phrase role='math'>m</phrase></subscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>v<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm v}m}</alt>
+            </inlineequation>
             and
-            <phrase role='math'>R</phrase><subscript>p<phrase role='math'>m</phrase></subscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>p<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm p}m}</alt>
+            </inlineequation>
             are defined below.
           </para>
           <para>
             For profile data it is based on five sample lengths
-            (<phrase role='math'>m</phrase> = 5).
+            (<phrase role='mathvar'>m</phrase> = 5).
             The number of samples corresponded with the ISO standard.
           </para>
         </listitem>
@@ -232,7 +270,10 @@ R_{{\rm t}m} = R_{{\rm v}m} + R_{{\rm p}m}
       <varlistentry>
         <term>
           Average Maximum Profile Valley Depth
-          <phrase role='math'>R</phrase><subscript>v<phrase role='math'>m</phrase></subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>v<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm v}m}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -241,7 +282,11 @@ R_{{\rm t}m} = R_{{\rm v}m} + R_{{\rm p}m}
           <para>
             The mean valley depth based on one peak per sampling length.
             The single deepest valley is found in five sampling lengths
-            (<phrase role='math'>m</phrase> = 5) and then averaged
+            (<inlineequation>
+              <mathphrase><phrase role='mathvar'>m</phrase> = 5</mathphrase>
+              <alt>m=5</alt>
+            </inlineequation>)
+            and then averaged
             <informalequation id='eq-roughness-iso-Rvm'>
               <mediaobject>
                 <imageobject>
@@ -279,7 +324,10 @@ R_{{\rm v}i} = \left| \min r_j \right|
       <varlistentry>
         <term>
           Average Maximum Profile Peak Height
-          <phrase role='math'>R</phrase><subscript>p<phrase role='math'>m</phrase></subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>p<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm p}m}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -288,7 +336,11 @@ R_{{\rm v}i} = \left| \min r_j \right|
           <para>
             The mean peak height based on one peak per sampling length.
             The single highest peak is found in five sampling lengths
-            (<phrase role='math'>m</phrase> = 5) and then averaged
+            (<inlineequation>
+              <mathphrase><phrase role='mathvar'>m</phrase> = 5</mathphrase>
+              <alt>m=5</alt>
+            </inlineequation>)
+            and then averaged
             <informalequation id='eq-roughness-iso-Rpm'>
               <mediaobject>
                 <imageobject>
@@ -326,7 +378,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
       <varlistentry>
         <term>
           Base roughness depth
-          <phrase role='math'>R</phrase><subscript>3<phrase role='math'>z</phrase></subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>3<phrase role='mathvar'>z</phrase></subscript></mathphrase>
+            <alt>R_{3z}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -342,7 +397,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
       <varlistentry>
         <term>
           Base roughness profile depth
-          <phrase role='math'>R</phrase><subscript>3<phrase role='math'>z</phrase>ISO</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>3<phrase role='mathvar'>z</phrase>ISO</subscript></mathphrase>
+            <alt>R_{3z\rm ISO}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -358,7 +416,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
       <varlistentry>
         <term>
           Ten-point height
-          <phrase role='math'>R</phrase><subscript><phrase role='math'>z</phrase></subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript><phrase role='mathvar'>z</phrase></subscript></mathphrase>
+            <alt>R_z</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -373,7 +434,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
       <varlistentry>
         <term>
           Average peak-to-valley profile roughness
-          <phrase role='math'>R</phrase><subscript><phrase role='math'>z</phrase>ISO</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript><phrase role='mathvar'>z</phrase>ISO</subscript></mathphrase>
+            <alt>R_{z\rm ISO}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -383,7 +447,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
             The average peak-to-valley roughness based on one peak and one
             valley per sampling length. The single largest deviation is found
             in five sampling lengths and then averaged. It is identical to
-            <phrase role='math'>R</phrase><subscript>t<phrase role='math'>m</phrase></subscript>.
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>t<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm t}m}</alt>
+            </inlineequation>.
           </para>
         </listitem>
       </varlistentry>
@@ -398,8 +465,16 @@ R_{{\rm p}i} = \left| \max r_j \right|
           <para>
             The amplitude distribution function s a probability function that
             gives the probability that a profile of the surface has a certain
-            height <phrase role='math'>z</phrase> at any position
-            <phrase role='math'>x</phrase>.
+            height
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+              <alt>z</alt>
+            </inlineequation>
+            at any position
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>.
           </para>
         </listitem>
       </varlistentry>
@@ -422,7 +497,10 @@ R_{{\rm p}i} = \left| \max r_j \right|
       <varlistentry>
         <term>
           Skewness
-          <phrase role='math'>R</phrase><subscript>sk</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>sk</subscript></mathphrase>
+            <alt>R_{\rm sk}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
@@ -453,7 +531,10 @@ R_{\rm sk}= {1\over N R_q^3} \sum_{j=1}^N r_j^3
       <varlistentry>
         <term>
           Kurtosis
-          <phrase role='math'>R</phrase><subscript>ku</subscript>
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>ku</subscript></mathphrase>
+            <alt>R_{\rm ku}</alt>
+          </inlineequation>
         </term>
         <listitem>
           <para>
