@@ -40,11 +40,12 @@
         <imageobject>
           <imagedata fileref='spectro-tool.png' format='PNG'/>
         </imageobject>
+        <caption>
+          A data window with measurement points displayed and the point
+          spectroscopy tool showing curves from three selected points.
+        </caption>
       </mediaobject>
-      <caption>
-        A data window with measurement points displayed and the point
-        spectroscopy tool showing curves from three selected points.
-      </caption>
     </informalfigure>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

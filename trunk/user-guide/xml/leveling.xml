@@ -124,13 +124,13 @@
           <imageobject>
             <imagedata fileref='path-level.png' format='PNG'/>
           </imageobject>
+          <caption>
+            Path Level example:
+            (a) uncorrected data with steps that the automated method may
+            fail to correct, two suitable leveling lines are selected;
+            (b) the result of Path Level application with line width 5.
+          </caption>
         </mediaobject>
-        <caption>
-          Path Level example:
-          (a) uncorrected data with steps that the automated method may
-          fail to correct, two suitable leveling lines are selected;
-          (b) the result of Path Level application with line width 5.
-        </caption>
       </informalfigure>
     </sect3>
     <sect3 id='facet-level'>
@@ -165,13 +165,13 @@
           <imageobject>
             <imagedata fileref='level-plane-facet.png' format='PNG'/>
           </imageobject>
+          <caption>
+            Facet Level example:
+            (a) uncorrected, sloping data;
+            (b) data leveled by standard plane fitting (Plane Level);
+            (c) data leveled by Facet Level.
+          </caption>
         </mediaobject>
-        <caption>
-          Facet Level example:
-          (a) uncorrected, sloping data;
-          (b) data leveled by standard plane fitting (Plane Level);
-          (c) data leveled by Facet Level.
-        </caption>
       </informalfigure>
     </sect3>
     <sect3 id='level-rotate'>
@@ -340,3 +340,4 @@
     </sect3>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

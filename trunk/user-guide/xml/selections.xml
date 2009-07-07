@@ -34,10 +34,10 @@
       <imageobject>
         <imagedata fileref='selections-vlsi.png' format='PNG'/>
       </imageobject>
+      <caption>
+        Data window with three selected lines, two horizontal and one vertical.
+      </caption>
     </mediaobject>
-    <caption>
-      Data window with three selected lines, two horizontal and one vertical.
-    </caption>
   </informalfigure>
   <para>
     If you save data in Gwyddion native file format
@@ -52,3 +52,4 @@
     it restricts line directions to multiples of 15° in line selections.
   </para>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

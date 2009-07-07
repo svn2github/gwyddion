@@ -1109,3 +1109,4 @@ LDFLAGS=-L/usr/local/lib \
     </sect2>
   </sect1>
 </chapter>
+<!-- vim: set ts=2 sw=2 et : -->

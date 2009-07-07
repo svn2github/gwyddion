@@ -79,10 +79,10 @@
         <imageobject>
           <imagedata fileref='graph_fit.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Curve fitting module dialog
+        </caption>
       </mediaobject>
-      <caption>
-        Curve fitting module dialog
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='graph-critical-dimension'>
@@ -103,11 +103,11 @@
         <imageobject>
           <imagedata fileref='graph_cd.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Critical dimension module dialog.
+        </caption>
       </mediaobject>
-      <caption>
-        Critical dimension module dialog.
-      </caption>
     </informalfigure>
   </sect2>
 </sect1>
-
+<!-- vim: set ts=2 sw=2 et : -->

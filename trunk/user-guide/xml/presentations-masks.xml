@@ -44,11 +44,11 @@
           Mask (top), presentation (middle), original data (bottom)
         </phrase>
       </textobject>
+      <caption>
+        Visualization of masks and presentations.  If you look from above they
+        can be imagined to be stacked as in the picture.
+      </caption>
     </mediaobject>
-    <caption>
-      Visualization of masks and presentations.  If you look from above they
-      can be imagined to be stacked as in the picture.
-    </caption>
   </informalfigure>
   <para>
     Both masks and presentations can be removed from the data by functions
@@ -64,11 +64,11 @@
       <textobject>
         <phrase>A data field shown with a mask and a presentation</phrase>
       </textobject>
+      <caption>
+        Data in default false color representation (left), with superimposed
+        mask (centre) and with shading presentation (right).
+      </caption>
     </mediaobject>
-    <caption>
-      Data in default false color representation (left), with superimposed
-      mask (centre) and with shading presentation (right).
-    </caption>
   </informalfigure>
   <sect2 id='masks'>
     <title>Working with Masks</title>
@@ -329,3 +329,4 @@
     </variablelist>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

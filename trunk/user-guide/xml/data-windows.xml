@@ -49,9 +49,10 @@
       <imageobject>
         <imagedata fileref='data_window.png' format='PNG'/>
       </imageobject>
+      <caption>
+        Data window with all three available context menus shown.
+      </caption>
     </mediaobject>
-    <caption>
-      Data window with all three available context menus shown.
-    </caption>
   </informalfigure>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

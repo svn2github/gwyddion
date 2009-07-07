@@ -71,13 +71,13 @@
         <imageobject>
           <imagedata fileref='drift-corrected-graph.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Drift correction example:
+          (a) original data exhibiting strong drift in the fast scan axis,
+          (b) corrected data,
+          (c) calculated drift graph.
+        </caption>
       </mediaobject>
-      <caption>
-        Drift correction example:
-        (a) original data exhibiting strong drift in the fast scan axis,
-        (b) corrected data,
-        (c) calculated drift graph.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='fft-filter-1d'>
@@ -196,3 +196,4 @@ y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
     </para>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

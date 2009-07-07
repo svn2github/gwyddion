@@ -119,10 +119,11 @@
       <imageobject>
         <imagedata fileref='main_window.png' format='PNG'/>
       </imageobject>
+      <caption>
+        Main window and a data window showing microchip surface (Gwyddion
+        sample file <filename>chip.gwy</filename>).
+      </caption>
     </mediaobject>
-    <caption>
-      Main window and a data window showing microchip surface (Gwyddion
-      sample file <filename>chip.gwy</filename>).
-    </caption>
   </informalfigure>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

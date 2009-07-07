@@ -42,11 +42,11 @@
           Comparison of step and edge detection methods on several images
         </phrase>
       </textobject>
+      <caption>
+        A data window with the right-click color gradient pop up menu and the
+        full color gradient list.
+      </caption>
     </mediaobject>
-    <caption>
-      A data window with the right-click color gradient pop up menu and the
-      full color gradient list.
-    </caption>
   </informalfigure>
   <sect2 id='color-range'>
     <title>
@@ -213,3 +213,4 @@
     </para>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

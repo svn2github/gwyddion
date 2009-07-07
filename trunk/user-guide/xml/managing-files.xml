@@ -613,13 +613,13 @@
         <imageobject>
           <imagedata fileref='file-open.png' format='PNG'/>
         </imageobject>
+        <caption>
+          File open dialog with expanded file type options and channel preview.
+          The small text above the preview shows the module used to load the
+          file (sis) and the number of channels (ch), graphs (gr) and
+          single-point spectra (sps) in the file.
+        </caption>
       </mediaobject>
-      <caption>
-        File open dialog with expanded file type options and channel preview.
-        The small text above the preview shows the module used to load the file
-        (sis) and the number of channels (ch), graphs (gr) and single-point
-        spectra (sps) in the file.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='file-merging'>
@@ -742,4 +742,4 @@
     </para>
   </sect2>
 </sect1>
-
+<!-- vim: set ts=2 sw=2 et : -->

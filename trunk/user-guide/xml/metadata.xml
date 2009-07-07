@@ -35,9 +35,10 @@
       <imageobject>
         <imagedata fileref='metadata_browser.png' format='PNG'/>
       </imageobject>
+      <caption>
+        Metadata browser showing the metadata of a Nanoscope file.
+      </caption>
     </mediaobject>
-    <caption>
-      Metadata browser showing the metadata of a Nanoscope file.
-    </caption>
   </informalfigure>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

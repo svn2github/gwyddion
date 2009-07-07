@@ -131,11 +131,11 @@ w_{\rm dechecker}
         <imageobject>
           <imagedata fileref='filter.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Screenshot of filter tool with median filter applied to a rectangular
+          selection
+        </caption>
       </mediaobject>
-      <caption>
-        Screenshot of filter tool with median filter applied to a rectangular
-        selection
-      </caption>
     </informalfigure>
     <para>
       Moreover, there are more denoising functions in Gwyddion, for example
@@ -279,16 +279,16 @@ w_{\rm dechecker}
         <textobject>
           <phrase>Illustration of selected presentation filters</phrase>
         </textobject>
+        <caption>
+          Presentation examples:
+          (a) original data,
+          (b) shading,
+          (c) vertical Prewitt gradient,
+          (d) Canny edge detection,
+          (e) local non-linearity edge detection,
+          (f) local contrast improvement.
+        </caption>
       </mediaobject>
-      <caption>
-        Presentation examples:
-        (a) original data,
-        (b) shading,
-        (c) vertical Prewitt gradient,
-        (d) Canny edge detection,
-        (e) local non-linearity edge detection,
-        (f) local contrast improvement.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='shade'>
@@ -385,10 +385,10 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
         <textobject>
           <phrase>One-dimensional step and edge schematic image</phrase>
         </textobject>
+        <caption>
+          Step versus edge in one dimension.
+        </caption>
       </mediaobject>
-      <caption>
-        Step versus edge in one dimension.
-      </caption>
     </informalfigure>
     <para>
       The following step and edge detection functions are available in
@@ -587,16 +587,16 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
             Comparison of step and edge detection methods on several images
           </phrase>
         </textobject>
+        <caption>
+          Comparison of step and edge detection methods on several interesting,
+          or typical example data.  Canny and Zero crossing are step detectors
+          that produce one pixel wide edge lines, Step and Inclination are step
+          detectors with continous output, Local nonlinearity is an edge
+          detector – the edge detection can be easily observed on the second
+          and third row. Note zero crossing is tunable, it parameters were
+          chosen to produce reasonable output in each example.
+        </caption>
       </mediaobject>
-      <caption>
-        Comparison of step and edge detection methods on several interesting,
-        or typical example data.  Canny and Zero crossing are step detectors
-        that produce one pixel wide edge lines, Step and Inclination are step
-        detectors with continous output, Local nonlinearity is an edge
-        detector – the edge detection can be easily observed on the second
-        and third row. Note zero crossing is tunable, it parameters were
-        chosen to produce reasonable output in each example.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='local-contrast'>
@@ -631,3 +631,4 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
     </para>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

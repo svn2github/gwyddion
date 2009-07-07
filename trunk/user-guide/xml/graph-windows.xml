@@ -27,10 +27,10 @@
       <imageobject>
         <imagedata fileref='graph_window.png' format='PNG'/>
       </imageobject>
+      <caption>
+        A graph window with three profiles.
+      </caption>
     </mediaobject>
-    <caption>
-      A Graph window with three profiles.
-    </caption>
   </informalfigure>
   <para>
     To edit curve presentation one can either click on the curve in the
@@ -46,3 +46,4 @@
     key properties can be edited after double-clicing on it.
   </para>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

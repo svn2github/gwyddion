@@ -252,22 +252,22 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
         <imageobject>
           <imagedata fileref='windowing-types.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
+          Nutall, Flat-top, Kaiser 2.5.
+        </caption>
       </mediaobject>
-      <caption>
-        Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
-        Nutall, Flat-top, Kaiser 2.5.
-      </caption>
     </informalfigure>
     <informalfigure id='fig-windowing-types-freq'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='windowing-types-freq.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Envelopes of windowing functions frequency responses: Hann, Hamming,
+          Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
+        </caption>
       </mediaobject>
-      <caption>
-        Envelopes of windowing functions frequency responses: Hann, Hamming,
-        Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
-      </caption>
     </informalfigure>
     <para>
       Fourier transforms of data with sizes that are not factorable into
@@ -486,30 +486,30 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
           <imageobject>
             <imagedata fileref='wavelet-haar.png' format='PNG'/>
           </imageobject>
+          <caption>
+            Haar scaling function and wavelet.
+          </caption>
         </mediaobject>
-        <caption>
-          Haar scaling function and wavelet.
-        </caption>
       </informalfigure>
       <informalfigure id='fig-wavelet-daubechies4'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='wavelet-daubechies-4.png' format='PNG'/>
           </imageobject>
+          <caption>
+            Daubechies 4 scaling function and wavelet.
+          </caption>
         </mediaobject>
-        <caption>
-          Daubechies 4 scaling function and wavelet.
-        </caption>
       </informalfigure>
       <informalfigure id='fig-wavelet-daubechies20'>
         <mediaobject>
           <imageobject>
             <imagedata fileref='wavelet-daubechies-20.png' format='PNG'/>
           </imageobject>
+          <caption>
+            Daubechies 20 scaling function and wavelet.
+          </caption>
         </mediaobject>
-        <caption>
-          Daubechies 20 scaling function and wavelet.
-        </caption>
       </informalfigure>
       <para>
         There are several types of implementation of the DWT algorithm. The
@@ -744,4 +744,4 @@ T(\hat\sigma_X) = \hat\sigma^2/\hat\sigma_X
     </para>
   </sect2>
 </sect1>
-
+<!-- vim: set ts=2 sw=2 et : -->

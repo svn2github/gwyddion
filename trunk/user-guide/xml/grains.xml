@@ -119,13 +119,13 @@
         <imageobject>
           <imagedata fileref='allgrains.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Image of grain-like surface structure (a) and corresponding results
+          of height thresholding (b), curvature thresholding (c), and
+          watershed (d) algorithm.   Within watershed algorithm it is possible
+          to segment image even further.
+        </caption>
       </mediaobject>
-      <caption>
-        Image of grain-like surface structure (a) and corresponding results
-        of height thresholding (b), curvature thresholding (c), and
-        watershed (d) algorithm.   Within watershed algorithm it is possible
-        to segment image even further.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='grain-analysis-statistics'>
@@ -445,10 +445,10 @@
         <imageobject>
           <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Maximum and minimum bounding dimensions and angles of a grain.
+        </caption>
       </mediaobject>
-      <caption>
-        Maximum and minimum bounding dimensions and angles of a grain.
-      </caption>
     </informalfigure>
     <para id='boundary-length-calculation'>
       <indexterm><primary>boundary length calculation</primary></indexterm>
@@ -477,32 +477,33 @@
         <imageobject>
           <imagedata fileref='boundary_length.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Contributions of pixel configurations to the estimated boundary
+          length.  Grey squares represent pixels inside the grain, white
+          squares represent outside pixels.  The estimated contribution of each
+          configuration is:
+          (a) <inlineequation>
+            <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
+            <alt>q/2</alt>
+          </inlineequation>,
+          (b) <inlineequation>
+            <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
+            <alt>q</alt>
+          </inlineequation>,
+          (c) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+            <alt>h_y</alt>
+          </inlineequation>,
+          (c) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+            <alt>h_x</alt>
+          </inlineequation>,
+          (e) <inlineequation>
+            <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
+            <alt>q/2</alt>
+          </inlineequation>.
+        </caption>
       </mediaobject>
-      <caption>
-        Contributions of pixel configurations to the estimated boundary length.
-        Grey squares represent pixels inside the grain, white squares represent
-        outside pixels.  The estimated contribution of each configuration is:
-        (a) <inlineequation>
-          <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
-          <alt>q/2</alt>
-        </inlineequation>,
-        (b) <inlineequation>
-          <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
-          <alt>q</alt>
-        </inlineequation>,
-        (c) <inlineequation>
-          <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
-          <alt>h_y</alt>
-        </inlineequation>,
-        (c) <inlineequation>
-          <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
-          <alt>h_x</alt>
-        </inlineequation>,
-        (e) <inlineequation>
-          <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
-          <alt>q/2</alt>
-        </inlineequation>.
-      </caption>
     </informalfigure>
     <para id='grain-volume-calculation'>
       <indexterm><primary>volume calculation</primary></indexterm>
@@ -520,11 +521,11 @@
         <imageobject>
           <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Contributions of individual pixels to the volume of single pixel
+          (grey).
+        </caption>
       </mediaobject>
-      <caption>
-        Contributions of individual pixels to the volume of single pixel
-        (grey).
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='grain-analysis-ref'>
@@ -561,4 +562,4 @@
   </bibliography>
   -->
 </sect1>
-
+<!-- vim: set ts=2 sw=2 et : -->

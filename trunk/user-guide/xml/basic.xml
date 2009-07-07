@@ -364,12 +364,12 @@ w_k = {{\displaystyle{1\over r_k^4}}
         <textobject>
           <phrase>2D interpolation examples</phrase>
         </textobject>
+        <caption>
+          Illustration of the available interpolation types (the original
+          pixels are obvious on the result of Round interpolation).  All images
+          have identical false color map ranges.
+        </caption>
       </mediaobject>
-      <caption>
-        Illustration of the available interpolation types (the original
-        pixels are obvious on the result of Round interpolation).  All images
-        have identical false color map ranges.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='modules-basic'>
@@ -583,26 +583,26 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <textobject>
             <phrase>Measuring facet orientation</phrase>
           </textobject>
+          <caption>
+            Surface facet (displayed blue) orientation measured as the
+            counterclockwise angle from
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>-axis
+            to the projection of facet normal vector
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
+              <alt>\vec{n}</alt>
+            </inlineequation>
+            to
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+              <alt>xy</alt>
+            </inlineequation>
+            plane.
+          </caption>
         </mediaobject>
-        <caption>
-          Surface facet (displayed blue) orientation measured as the
-          counterclockwise angle from
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>x</alt>
-          </inlineequation>-axis
-          to the projection of facet normal vector
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
-            <alt>\vec{n}</alt>
-          </inlineequation>
-          to
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
-            <alt>xy</alt>
-          </inlineequation>
-          plane.
-        </caption>
       </informalfigure>
     </sect3>
     <sect3 id='distance'>
@@ -659,10 +659,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
           <textobject>
             <phrase>Distance tool dialog screenshot</phrase>
           </textobject>
+          <caption>
+            Distance tool with three selected lines.
+          </caption>
         </mediaobject>
-        <caption>
-          Distance tool with three selected lines.
-        </caption>
       </informalfigure>
     </sect3>
   </sect2>
@@ -695,10 +695,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
         <textobject>
           <phrase>Profile tool dialog screenshot</phrase>
         </textobject>
+        <caption>
+          Profile tool with three extracted profiles and expanded options.
+        </caption>
       </mediaobject>
-      <caption>
-        Profile tool with three extracted profiles and expanded options.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='basic-operations-ref'>
@@ -710,3 +710,4 @@ w_k = {{\displaystyle{1\over r_k^4}}
     </para>
   </sect2>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

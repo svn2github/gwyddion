@@ -154,13 +154,13 @@
         <textobject>
           <phrase>Scrars removal example</phrase>
         </textobject>
+        <caption>
+          Scars marking and removal example:
+          (a) original data with defects,
+          (b) data with marked deffects,
+          (c) corrected data.
+        </caption>
       </mediaobject>
-      <caption>
-        Scars marking and removal example:
-        (a) original data with defects,
-        (b) data with marked deffects,
-        (c) corrected data.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='remove-data-under-mask'>
@@ -308,3 +308,4 @@
   </sect2>
   <xi:include href='unrotate.xml'/>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

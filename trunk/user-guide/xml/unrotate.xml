@@ -46,11 +46,11 @@
       <textobject>
         <phrase>Unrotate symmetries scheme</phrase>
       </textobject>
+      <caption>
+        Orientations of prevalent directions corresponding to Unrotate symmetry
+        types.
+      </caption>
     </mediaobject>
-    <caption>
-      Orientations of prevalent directions corresponding to Unrotate symmetry
-      types.
-    </caption>
   </informalfigure>
   <para>
     The assumed structure type can be set with <guilabel>Assume</guilabel>
@@ -126,3 +126,4 @@
     </variablelist>
   </para>
 </sect2>
+<!-- vim: set ts=2 sw=2 et : -->

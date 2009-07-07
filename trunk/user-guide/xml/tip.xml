@@ -16,11 +16,11 @@
       <imageobject>
         <imagedata fileref='alltips.png' format='PNG'/>
       </imageobject>
+      <caption>
+        Images of ZnSe surface measured with four different SPM tips
+        (more or less broken ones).
+      </caption>
     </mediaobject>
-    <caption>
-      Images of ZnSe surface measured with four different SPM tips
-      (more or less broken ones).
-    </caption>
   </informalfigure>
   <para>
     We can fortunately simulate and/or correct the tip efects using
@@ -97,12 +97,12 @@
         <imageobject>
           <imagedata fileref='alltips2.png' format='PNG'/>
         </imageobject>
+        <caption>
+          SPM tips obtained from data of
+          <link linkend='fig-tip-alltips-scans'>previous figure</link>
+          using blind estimation algorithm.
+        </caption>
       </mediaobject>
-      <caption>
-        SPM tips obtained from data of
-        <link linkend='fig-tip-alltips-scans'>previous figure</link>
-        using blind estimation algorithm.
-      </caption>
     </informalfigure>
   </sect2>
   <sect2 id='tip-operations'>
@@ -137,11 +137,11 @@
         <imageobject>
           <imagedata fileref='fractaltips.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Simulated fractal surface before (left) and after (right) tip
+          convolution.
+        </caption>
       </mediaobject>
-      <caption>
-        Simulated fractal surface before (left) and after (right) tip
-        convolution.
-      </caption>
     </informalfigure>
     <para id='tip-surface-reconstruction'>
       <indexterm>
@@ -165,10 +165,10 @@
         <imageobject>
           <imagedata fileref='reconstruction.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Original and reconstructed image of ZnSe imaged by broken SPM tip.
+        </caption>
       </mediaobject>
-      <caption>
-        Original and reconstructed image of ZnSe imaged by broken SPM tip.
-      </caption>
     </informalfigure>
     <para id='tip-certainty-map'>
       <indexterm>
@@ -186,13 +186,13 @@
         <imageobject>
           <imagedata fileref='certainty-map.png' format='PNG'/>
         </imageobject>
+        <caption>
+          Certainty map obtained from standard grating. Note that the modelled
+          tip parameters were taken from datasheet here for illustration
+          purposes. (left) – sample, (right) – sample with marked
+          certainty map.
+        </caption>
       </mediaobject>
-      <caption>
-        Certainty map obtained from standard grating. Note that the modelled
-        tip parameters were taken from datasheet here for illustration
-        purposes. (left) – sample, (right) – sample with marked
-        certainty map.
-      </caption>
     </informalfigure>
     <para>
       Certainty map algortihm can be therefore used to mark data in the SPM
@@ -217,4 +217,4 @@
     </para>
   </sect2>
 </sect1>
-
+<!-- vim: set ts=2 sw=2 et : -->
