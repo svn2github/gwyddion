@@ -9,7 +9,7 @@ PACKAGE = @PACKAGE_SHORTNAME@
 GMAKE = @GMAKE@
 GSED = @GSED@
 XSLTPROC = @XSLTPROC@ --xinclude
-DBLATEX = @DBLATEX@ --input-format=xml --fig-path=images --xslt="@XSLTPROC@" --debug
+DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath formulas) --fig-path=images --xslt="@XSLTPROC@" --debug
 #HTML2TXT = @LYNX@ -force_html -dump -nolist
 
 DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
@@ -52,7 +52,7 @@ pdf: $(PACKAGE).pdf
 
 xhtml: xhtml.stamp
 
-@HTML_TRUE@xhtml.stamp: Makefile formulas $(XML_SOURCES) xhtml.xsl
+@HTML_TRUE@xhtml.stamp: formulas $(XML_SOURCES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
