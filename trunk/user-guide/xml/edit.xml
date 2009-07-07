@@ -224,7 +224,11 @@
       </menuchoice>
     </para>
     <para>
-      This module creates mask of areas in the data that not pass the 3σ
+      This module creates mask of areas in the data that not pass the
+      <inlineequation>
+        <mathphrase>3σ</mathphrase>
+        <alt>3\sigma</alt>
+      </inlineequation>
       criterion. All the values above and below this confidence interval
       are marked in mask and can be edited or processed by other modules
       afterwards.
@@ -238,10 +242,14 @@
     <indexterm><primary>line correction</primary></indexterm>
     <para>
       Profiles taken in the fast scanning axis
-      (usually <phrase role='math'>x</phrase>-axis) can be mutually shifted
-      by some amount or have slightly different slopes. The basic line
-      correction functions deal with this type of discrepancy. Several
-      functions can be used: The
+      (usually
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+        <alt>x</alt>
+      </inlineequation>-axis)
+      can be mutually shifted by some amount or have slightly different slopes.
+      The basic line correction functions deal with this type of discrepancy.
+      Several functions can be used: The
       <link linkend='line-polynomial'>Polynomial</link> and
       <link linkend='path-level'>Path level</link> tools and then several
       procedures under
