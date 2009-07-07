@@ -9,7 +9,7 @@ PACKAGE = @PACKAGE_SHORTNAME@
 GMAKE = @GMAKE@
 GSED = @GSED@
 XSLTPROC = @XSLTPROC@ --xinclude
-DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath formulas) --fig-path=images --xslt="@XSLTPROC@" --debug
+DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
 #HTML2TXT = @LYNX@ -force_html -dump -nolist
 
 DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
@@ -26,7 +26,7 @@ SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl
 CSS_STYLES = user-guide.css
-TEX_STYLES =
+TEX_STYLES = user-guide.sty
 
 @HTML_TRUE@html_target = xhtml
 @HTML_FALSE@html_target =

@@ -6,9 +6,10 @@
 \def\atan{\mathop{\rm atan}\nolimits}
 \def\dint{\int\!\!\!\!\int}
 \def\BesselI#1{{\rm I}_{#1}}
+\let\bmath=$
+\let\emath=$
+% Override LaTeX crap with a useful macro or define it for plainTeX
 \def\eqnarray#1{\vcenter{\ialign{%
   \hfil$\displaystyle{##}$%
   &${}##{}$%
   &&$\displaystyle{##}$\hfil\cr#1\crcr}}}
-\let\bmath=$
-\let\emath=$

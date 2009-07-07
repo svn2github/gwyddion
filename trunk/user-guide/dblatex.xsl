@@ -7,7 +7,7 @@
 <xsl:param name="latex.class.options">a4paper</xsl:param>
 
 <xsl:variable name="latex.begindocument">
-  <xsl:text>\input{defs.tex}&#10;</xsl:text>
+  <xsl:text>\input{user-guide.sty}&#10;</xsl:text>
   <xsl:text>\begin{document}&#10;</xsl:text>
 </xsl:variable>
 

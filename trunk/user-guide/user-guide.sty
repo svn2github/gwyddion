@@ -1,0 +1,11 @@
+\catcode`@=11
+\input{formulas/defs.tex}
+% Restore working plain macros that AMS-TeX wants us to replace with some crap
+\def\cases#1{\left\{\,\vcenter{\normalbaselines\m@th
+    \ialign{$##\hfil$&\quad##\hfil\crcr#1\crcr}}\right.}
+\def\matrix#1{\null\,\vcenter{\normalbaselines\m@th
+    \ialign{\hfil$##$\hfil&&\quad\hfil$##$\hfil\crcr
+      \mathstrut\crcr\noalign{\kern-\baselineskip}
+      #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
+\def\pmatrix#1{\left(\matrix{#1}\right)}
+\catcode`@=12
