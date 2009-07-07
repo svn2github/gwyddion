@@ -94,7 +94,12 @@ w_{\rm dechecker}
         <indexterm><primary>gaussian filter</primary></indexterm>
         Gaussian filter – a smoothing filter, the size parameter determines
         the FWHM (full width at half maximum) of the Gaussian.  The relation
-        between FWHM and σ is
+        between FWHM
+        and <inlineequation>
+          <mathphrase>σ</mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        is
         <informalequation id='eq-gaussian-fwhm'>
           <mediaobject>
             <imageobject>
@@ -159,7 +164,12 @@ w_{\rm dechecker}
       </menuchoice>
     </para>
     <para>
-      Convolutions with arbitrary kernels up to 9 × 9 can be performed with
+      Convolutions with arbitrary kernels up to
+      <inlineequation>
+        <mathphrase>9 × 9</mathphrase>
+        <alt>9\times9</alt>
+      </inlineequation>
+      can be performed with
       the <link linkend='convolution-filter'>Convolution Filter</link>
       module.
     </para>
@@ -413,7 +423,11 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
           <para>
             Laplacian presents a simple convolution with
             the following kernel (that is the limit of discrete Laplacian of
-            Gaussians filter for <phrase role='math'>σ</phrase> → 0):
+            Gaussians filter for
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>σ</phrase> → 0</mathphrase>
+              <alt>\sigma\to0</alt>
+            </inlineequation>):
             <informalequation id='eq-filters-laplacian'>
               <mediaobject>
                 <imageobject>
@@ -511,13 +525,31 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
             radius 2.5 pixels centered around each sample and then calculates
             residual sum of squares of this fit reduced to plane slope, i.e.
             divided by
-            1 + <phrase role='math'>b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role='math'>b<subscript>y</subscript></phrase><superscript>2</superscript>
+            <inlineequation>
+              <mathphrase>1 + <phrase role='mathvar'>b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role='mathvar'>b<subscript>y</subscript></phrase><superscript>2</superscript></mathphrase>
+              <alt>1+b_x^2+b_y^2</alt>
+            </inlineequation>
             where
-            <phrase role='math'>b<subscript>x</subscript></phrase>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>b<subscript>x</subscript></phrase></mathphrase>
+              <alt>b_x</alt>
+            </inlineequation>
             and
-            <phrase role='math'>b<subscript>y</subscript></phrase>
-            are the plane coefficients in <phrase role='math'>x</phrase>
-            and <phrase role='math'>y</phrase> directions, respectively.
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>b<subscript>y</subscript></phrase></mathphrase>
+              <alt>b_y</alt>
+            </inlineequation>
+            are the plane coefficients in
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+              <alt>y</alt>
+            </inlineequation>
+            directions, respectively.
             The square root is then displayed.
           </para>
         </listitem>
@@ -532,11 +564,15 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         </term>
         <listitem>
           <para>
-            Visualizes the angle <phrase role='math'>ϑ</phrase> of local plane
-            inclination.  Technically this function belongs among step
-            detectors, however, the accentuation of steps in its output is not
-            very strong and it is more intended for easy visual comparison of
-            different slopes present in the image.
+            Visualizes the angle
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
+              <alt>\vartheta</alt>
+            </inlineequation>
+            of local plane inclination.  Technically this function belongs
+            among step detectors, however, the accentuation of steps in its
+            output is not very strong and it is more intended for easy visual
+            comparison of different slopes present in the image.
           </para>
         </listitem>
       </varlistentry>
