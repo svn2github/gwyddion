@@ -36,44 +36,122 @@
       is derived directly from a definition of
       box-counting fractal dimension. The algorithm is based on the following
       steps: a cubic lattice with lattice constant l is superimposed
-      on the <phrase role='math'>z</phrase>-expanded surface.
-      Initially <phrase role='math'>l</phrase> is set
-      at <phrase role='math'>X/2</phrase>
-      (where <phrase role='math'>X</phrase> is length of edge of the surface),
-      resulting in a lattice of 2×2×2 = 8 cubes.
-      <phrase role='math'>N</phrase>(<phrase role='math'>l</phrase>)
-      is then number of all cubes that contain at least one pixel of the image.
-      Lattice constant <phrase role='math'>l</phrase> is then reduced stepwise
+      on the
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+        <alt>z</alt>
+      </inlineequation>-expanded surface.
+      Initially
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>is set
+      at
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>X</phrase>/2</mathphrase>
+        <alt>X/2</alt>
+      </inlineequation>
+      (where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>X</phrase></mathphrase>
+        <alt>X</alt>
+      </inlineequation>
+      is length of edge of the surface),
+      resulting in a lattice of
+      <inlineequation>
+        <mathphrase>2×2×2 = 8</mathphrase>
+        <alt>2\times2\times2=8</alt>
+      </inlineequation>
+      cubes.  Then
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
+        <alt>N(l)</alt>
+      </inlineequation>
+      is the number of all cubes that contain at least one pixel of the image.
+      The lattice constant
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>
+      is then reduced stepwise
       by factor of 2 and the process repeated until
-      <phrase role='math'>l</phrase> is equal to distance between two adjacent
-      pixels. The slope of a plot of
-      log(<phrase role='math'>N</phrase>(<phrase role='math'>l</phrase>))
-      versus log(1/<phrase role='math'>l</phrase>)
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>
+      is equal to the distance between two adjacent pixels. The slope of a plot of
+      <inlineequation>
+        <mathphrase>log(<phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
+        <alt>\log N(l)</alt>
+      </inlineequation>
+      versus
+      <inlineequation>
+        <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
+        <alt>\log 1/l</alt>
+      </inlineequation>
       gives the fractal dimension
-      <phrase role='math'>D<subscript>f</subscript></phrase> directly.
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript></mathphrase>
+        <alt>D_{\rm f}</alt>
+      </inlineequation>
+      directly.
     </listitem>
     <listitem>
       Triangulation method [<link linkend='fractal-analysis-ref-1'>1</link>]
       is very similar to cube counting method and is
       also based directly on the box-counting fractal dimension definition. The
       method works as follows: A grid of unit dimension
-      <phrase role='math'>l</phrase> is placed on the surface. This defines
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>
+      is placed on the surface. This defines
       the location of the vertices of a number of triangles.
-      When <phrase role='math'>l</phrase> = <phrase role='math'>X</phrase>/4,
-      for example, the surface is covered by 32 triangles of different areas
+      When, for example,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase> = <phrase role='mathvar'>X</phrase>/4</mathphrase>
+        <alt>l=X/4</alt>
+      </inlineequation>,
+      the surface is covered by 32 triangles of different areas
       inclined at various angles with respect to the
-      <phrase role='math'>xy</phrase> plane.
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+        <alt>xy</alt>
+      </inlineequation>
+      plane.
       The areas of all triangles are calculated and summed to obtain an
       approximation of the surface area
-      <phrase role='math'>S</phrase>(<phrase role='math'>l</phrase>)
-      corresponding to <phrase role='math'>l</phrase>.
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
+        <alt>S(l)</alt>
+      </inlineequation>
+      corresponding to
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>.
       The grid size is then decreased by successive factor of 2, as before,
-      and the process continued until <phrase role='math'>l</phrase>
+      and the process continues until
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+        <alt>l</alt>
+      </inlineequation>
       corresponds to distance between two adjacent pixel points.
       The slope of a plot of
-      log(<phrase role='math'>S</phrase>(<phrase role='math'>l</phrase>))
-      versus log(1/<phrase role='math'>l</phrase>) then corresponds to
-      <phrase role='math'>D<subscript>f</subscript></phrase> − 2.
+      <inlineequation>
+        <mathphrase>log(<phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
+        <alt>S(l)</alt>
+      </inlineequation>
+      versus
+      <inlineequation>
+        <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
+        <alt>\log 1/l</alt>
+      </inlineequation>
+      then corresponds to
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>D<subscript>f</subscript></phrase> − 2</mathphrase>
+        <alt>D_{\rm f}-2</alt>
+      </inlineequation>.
     </listitem>
     <listitem>
       The variance method
@@ -83,10 +161,17 @@
       method one divides the full surface into equal-sized squared boxes, and
       the variance (power of RMS value of heights), is calculated for
       particular box size. Fractal dimension is
-      evaluated from the slope <phrase role='math'>β</phrase> of a
-      least-square regression line fit to the data points in log-log plot
+      evaluated from the slope
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
+        <alt>\beta</alt>
+      </inlineequation>
+      of a least-square regression line fit to the data points in log-log plot
       of variance as
-      <phrase role='math'>D<subscript>f</subscript></phrase> = 3 − <phrase role='math'>β</phrase>/2.
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 3 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
+        <alt>D_{\rm f} = 3-\beta/2</alt>
+      </inlineequation>.
     </listitem>
     <listitem>
       Power spectrum method [3, 4, 5] is based on the power spectrum dependence
@@ -97,9 +182,17 @@
       line height profiles that forms the image is Fourier transformed and the
       power spectrum evaluated and then all these power spectra are averaged.
       Fractal dimension is evaluated from the slope
-      <phrase role='math'>β</phrase> of a least-square
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
+        <alt>\beta</alt>
+      </inlineequation>
+      of a least-square
       regression line fit to the data points in log-log plot of power spectrum
-      as <phrase role='math'>D<subscript>f</subscript></phrase> = 7/2 − <phrase role='math'>β</phrase>/2.
+      as
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 7/2 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
+        <alt>D_{\rm f}=7/2-\beta/2</alt>
+      </inlineequation>.
     </listitem>
   </orderedlist>
   <para>
