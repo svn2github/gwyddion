@@ -13,32 +13,92 @@
   </para>
   <para>
     Scanning probe microscopy data are usually represented as a two-dimensional
-    data field of size <phrase role='math'>N</phrase> × <phrase role='math'>M</phrase>,
-    where <phrase role='math'>N</phrase> and/or <phrase role='math'>M</phrase>
-    represents the number of rows and/or columns within the data field. The real
-    size of the field is denoted as
-    <phrase role='math'>L<subscript>x</subscript></phrase> × <phrase role='math'>L<subscript>y</subscript></phrase>
-    where <phrase role='math'>L<subscript>x</subscript></phrase> and <phrase role='math'>L<subscript>y</subscript></phrase>
-    are the sizes of the respective axes.
-    The sampling interval (distance between two adjacent points within the
-    scan) is denoted <phrase role='math'>Δ</phrase>. We assume that the
+    data field of size
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>N</phrase>×<phrase role='mathvar'>M</phrase></mathphrase>
+      <alt>N\times M</alt>
+    </inlineequation>,
+    where
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
+      <alt>N</alt>
+    </inlineequation>
+    and
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>M</phrase></mathphrase>
+      <alt>M</alt>
+    </inlineequation>
+    are the number of rows and columns of the data field, respectively.
+    The real area of the field is denoted as
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>L<subscript>x</subscript></phrase>×<phrase role='mathvar'>L<subscript>y</subscript></phrase></mathphrase>
+      <alt>L_x\times L_y</alt>
+    </inlineequation>
+    where
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>L<subscript>x</subscript></phrase></mathphrase>
+      <alt>L_x</alt>
+    </inlineequation>
+    and
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>L<subscript>y</subscript></phrase></mathphrase>
+      <alt>L_y</alt>
+    </inlineequation>
+    are the dimensions along the respective axes. The sampling interval (distance
+    between two adjacent points within the scan) is denoted
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>Δ</phrase></mathphrase>
+      <alt>\Delta</alt>
+    </inlineequation>.
+    We assume that the
     sampling interval is the same in
-    both the <phrase role='math'>x</phrase> and <phrase role='math'>y</phrase>
+    both the
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    and
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>
     direction. We assume that the surface height at a given point
-    <phrase role='math'>x</phrase>, <phrase role='math'>y</phrase>
+    <inlineequation>
+      <mathphrase>[<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>]</mathphrase>
+      <alt>[x,y]</alt>
+    </inlineequation>
     can be described by a random function
-    <phrase role='math'>ξ</phrase>(<phrase role='math'>x</phrase>, <phrase role='math'>y</phrase>)
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>ξ</phrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
+      <alt>\xi(x,y)</alt>
+    </inlineequation>
     that has given statistical properties.
   </para>
   <para>
     Note that the AFM data are usually collected as line scans along the
-    <phrase role='math'>x</phrase> axis that are concatenated together to form
-    the two-dimensional image. Therefore, the scanning speed in the
-    <phrase role='math'>x</phrase> direction is considerably higher than the
-    scanning speed in the <phrase role='math'>y</phrase> direction.
-    As a result, the statistical properties of AFM data are usually collected
-    along the <phrase role='math'>x</phrase> profiles as these are less affected
-    by low frequency noise and thermal drift of the sample.
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    axis that are concatenated together to form the two-dimensional image.
+    Therefore, the scanning speed in the
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    direction is considerably higher than the scanning speed in the
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>
+    direction. As a result, the statistical properties of AFM data are usually
+    collected along the
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    profiles as these are less affected by low frequency noise and thermal
+    drift of the sample.
   </para>
   <sect2 id='stat-quantities'>
     <title>
@@ -85,9 +145,15 @@
         Ra value of the height irregularities: this quantity is similar to
         RMS value with the only difference in exponent (power)
         within the data variance sum. As for the RMS this exponent is
-        <phrase role='math'>q</phrase> = 2,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>q</phrase> = 2</mathphrase>
+          <alt>q=2</alt>
+        </inlineequation>,
         the Ra value is computed with exponent
-        <phrase role='math'>q</phrase> = 1
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>q</phrase> = 1</mathphrase>
+          <alt>q=1</alt>
+        </inlineequation>
         and absolute values of the data (zero mean).
       </listitem>
       <listitem>
@@ -116,11 +182,30 @@
       window and the tool will reset.
     </tip>
     <para>
-      More precisely, RMS (<phrase role='math'>σ</phrase>), skewness (γ<subscript>1</subscript>),
-      and kurtosis (γ<subscript>2</subscript>) are computed
-      from central moments of
-      <phrase role='math'>i</phrase>-th order
-      <phrase role='math'>μ<subscript>i</subscript></phrase>
+      More precisely, RMS (<inlineequation>
+        <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
+        <alt>\sigma</alt>
+      </inlineequation>),
+      skewness
+      (<inlineequation>
+        <mathphrase>γ<subscript>1</subscript></mathphrase>
+        <alt>\gamma_1</alt>
+      </inlineequation>),
+      and kurtosis
+      (<inlineequation>
+        <mathphrase>γ<subscript>2</subscript></mathphrase>
+        <alt>\gamma_2</alt>
+      </inlineequation>)
+      are computed from central moments of
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>i</phrase></mathphrase>
+        <alt>i</alt>
+      </inlineequation>-th
+      order
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>μ<subscript>i</subscript></phrase></mathphrase>
+        <alt>\mu_i</alt>
+      </inlineequation>
       according to the following formulas:
     </para>
     <informalequation id='eq-statistical-quantities'>
@@ -142,11 +227,27 @@
     <para id='surface-area-calculation'>
       <indexterm><primary>surface area calculation</primary></indexterm>
       The surface area is estimated by the following method.
-      Let <phrase role='math'>z<subscript>i</subscript></phrase> for
-      <phrase role='math'>i</phrase> = 1, 2, 3, 4 be values in
+      Let
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z<subscript>i</subscript></phrase></mathphrase>
+        <alt>z_i</alt>
+      </inlineequation>
+      for
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>i</phrase> = 1, 2, 3, 4</mathphrase>
+        <alt>i=1,2,3,4</alt>
+      </inlineequation>
+      denote values in
       four neighbour points (pixel centres), and
-      <phrase role='math'>h<subscript>x</subscript></phrase> and
-      <phrase role='math'>h<subscript>y</subscript></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+        <alt>h_x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+        <alt>h_y</alt>
+      </inlineequation>
       pixel dimensions along corresponding axes.  If an additional point is
       placed in the centre of the rectangle which corresponds to the common
       corner of the four pixels (using the mean value of the pixels),
@@ -210,7 +311,15 @@
       the selection box on the left labeled <guilabel>Output Type</guilabel>.
       The graph preview will update automatically. You can select in which
       direction to evaluate
-      (<phrase role='math'>x</phrase> or <phrase role='math'>y</phrase>),
+      (<inlineequation>
+        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+        <alt>x</alt>
+      </inlineequation>
+      or
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+        <alt>y</alt>
+      </inlineequation>),
       but as stated above, we recommend using the fast scanning axis direction.
       You can also select which
       <link linkend='interpolation'>interpolation</link> method to use.
@@ -240,9 +349,17 @@
         the tangent of the angle, not the angle itself.
       </para>
       <para>
-        The normalization of the densities <phrase role='math'>ρ</phrase>(<phrase role='math'>x</phrase>)
-        (where <phrase role='math'>x</phrase> is the corresponding quantity,
-        height or slope) is such that
+        The normalization of the densities
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ρ</phrase>(<phrase role='mathvar'>p</phrase>)</mathphrase>
+          <alt>\varrho(p)</alt>
+        </inlineequation>
+        (where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+          <alt>p</alt>
+        </inlineequation>
+        is the corresponding quantity, height or slope) is such that
       </para>
       <informalequation id='eq-distribution-density-normalization'>
         <mediaobject>
@@ -262,7 +379,11 @@
         Evidently, the scale of the values is then independent on the number
         of data points and the number of histogram buckets.  The cumulative
         distributions are integrals of the densities and they have values
-        from interval [0, 1].
+        from interval
+        <inlineequation>
+          <mathphrase>[0, 1]</mathphrase>
+          <alt>[0,1]</alt>
+        </inlineequation>.
       </para>
     </sect3>
     <sect3 id='first-order-vs-second-order-quantities'>
@@ -309,27 +430,66 @@
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role='math'>z</phrase><subscript>1</subscript> and
-              <phrase role='math'>z</phrase><subscript>2</subscript>
-        are concrete values of heights at points
-        [<phrase role='math'>x</phrase><subscript>1</subscript>, <phrase role='math'>y</phrase><subscript>1</subscript>],
-        [<phrase role='math'>x</phrase><subscript>2</subscript>, <phrase role='math'>y</phrase><subscript>2</subscript>],
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>x</phrase></subscript> = 
-        <phrase role='math'>x</phrase><subscript>1</subscript> − 
-        <phrase role='math'>x</phrase><subscript>2</subscript> and
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>y</phrase></subscript> = 
-        <phrase role='math'>y</phrase><subscript>1</subscript> − 
-        <phrase role='math'>y</phrase><subscript>2</subscript>.
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>z</phrase><subscript>1</subscript></mathphrase>
+          <alt>z_1</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>z</phrase><subscript>2</subscript></mathphrase>
+          <alt>z_2</alt>
+        </inlineequation>
+        are the values of heights at points
+        <inlineequation>
+          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>]</mathphrase>
+          <alt>[x_1,y_1]</alt>
+        </inlineequation>,
+        <inlineequation>
+          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>]</mathphrase>
+          <alt>[x_2,y_2]</alt>
+        </inlineequation>;
+        furthermore,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript> = 
+            <phrase role='mathvar'>x</phrase><subscript>1</subscript> − 
+            <phrase role='mathvar'>x</phrase><subscript>2</subscript></mathphrase>
+          <alt>\tau_x=x_1-x_2</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript> = 
+            <phrase role='mathvar'>y</phrase><subscript>1</subscript> − 
+            <phrase role='mathvar'>y</phrase><subscript>2</subscript></mathphrase>
+          <alt>\tau_y=y_1-y_2</alt>
+        </inlineequation>.
         The function
-        <phrase role='math'>w</phrase>(<phrase role='math'>z</phrase><subscript>1</subscript>, <phrase role='math'>z</phrase><subscript>2</subscript>,
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>x</phrase></subscript>,
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>y</phrase></subscript>)
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>w</phrase>(<phrase role='mathvar'>z</phrase><subscript>1</subscript>,
+            <phrase role='mathvar'>z</phrase><subscript>2</subscript>,
+            <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript>,
+            <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript>)</mathphrase>
+          <alt>w(z_1,z_2,\tau_x,\tau_y)</alt>
+        </inlineequation>
         denotes the two-dimensional probability density of the random function
-        <phrase role='math'>ξ</phrase> &gt; (<phrase role='math'>x</phrase>, <phrase role='math'>y</phrase>)
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ξ</phrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
+          <alt>\xi(x,y)</alt>
+        </inlineequation>
         corresponding to points
-        [<phrase role='math'>x</phrase><subscript>1</subscript>, <phrase role='math'>y</phrase><subscript>1</subscript>],
-        [<phrase role='math'>x</phrase><subscript>2</subscript>, <phrase role='math'>y</phrase><subscript>2</subscript>]
-        and the distance between these points <phrase role='math'>τ</phrase>.
+        <inlineequation>
+          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>]</mathphrase>
+          <alt>[x_1,y_1]</alt>
+        </inlineequation>,
+        <inlineequation>
+          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>]</mathphrase>
+          <alt>[x_2,y_2]</alt>
+        </inlineequation>
+        and the distance between these points
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase></mathphrase>
+          <alt>\tau</alt>
+        </inlineequation>.
       </para>
       <para id='autocorrelation-2d'>
         From the discrete AFM data one can evaluate this function as
@@ -351,17 +511,35 @@ G(m,n) = {1\over (N-n)(M-m)}
       </informalequation>
       <para>
         where
-        <phrase role='math'>m</phrase> = <phrase role='math'>τ</phrase><subscript><phrase role='math'>x</phrase></subscript>/<phrase role='math'>Δ</phrase><subscript><phrase role='math'>x</phrase></subscript>,
-        <phrase role='math'>n</phrase> = <phrase role='math'>τ</phrase><subscript><phrase role='math'>y</phrase></subscript>/<phrase role='math'>Δ</phrase><subscript><phrase role='math'>y</phrase></subscript>.
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript>/<phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
+          <alt>m\tau_x/\Delta_x</alt>
+        </inlineequation>,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript>/<phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
+          <alt>m\tau_y/\Delta_y</alt>
+        </inlineequation>.
         The function can thus be evaluated in a discrete set
         of values of
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>x</phrase></subscript>
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
+          <alt>\tau_x</alt>
+        </inlineequation>
         and
-        <phrase role='math'>τ</phrase><subscript><phrase role='math'>y</phrase></subscript>
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
+          <alt>\tau_y</alt>
+        </inlineequation>
         separated by the sampling intervals
-        <phrase role='math'>Δ</phrase><subscript><phrase role='math'>x</phrase></subscript>
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
+          <alt>\Delta_x</alt>
+        </inlineequation>
         and
-        <phrase role='math'>Δ</phrase><subscript><phrase role='math'>y</phrase></subscript>,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
+          <alt>\Delta_y</alt>
+        </inlineequation>,
         respectively.
         The two-dimensional autocorrelation function can be calculated with
         <menuchoice>
@@ -410,9 +588,17 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role='math'>σ</phrase> denotes the root mean square
-        deviation of the heights and
-        <phrase role='math'>T</phrase> denotes the autocorrelation length.
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        denotes the root mean square deviation of the heights and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
+          <alt>T</alt>
+        </inlineequation>
+        denotes the autocorrelation length.
       </para>
       <para>
         For the exponential autocorrelation function we have the following
@@ -473,10 +659,21 @@ H_x(\tau_x) = {1\over N(M-m)}
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role='math'>m</phrase> = <phrase role='math'>τ</phrase><subscript><phrase role='math'>x</phrase></subscript>/<phrase role='math'>Δ</phrase>.
-        The function thus can be evaluated in a discrete set of values
-        of <phrase role='math'>τ</phrase>
-        separated by the sampling interval <phrase role='math'>Δ</phrase>.
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase>/<phrase role='mathvar'>Δ</phrase></mathphrase>
+          <alt>m=\tau/\Delta</alt>
+        </inlineequation>.
+        The function thus can be evaluated in a discrete set of values of
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>τ</phrase></mathphrase>
+          <alt>\tau</alt>
+        </inlineequation>
+        separated by the sampling interval
+         <inlineequation>
+          <mathphrase><phrase role='mathvar'>Δ</phrase></mathphrase>
+          <alt>\Delta</alt>
+        </inlineequation>.
       </para>
       <para>
         The one-dimensional height-height correlation function is often
@@ -497,9 +694,16 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
         </mediaobject>
       </informalequation>
       <para>
-        where <phrase role='math'>σ</phrase> denotes the root mean square
-        deviation of the heights and
-        <phrase role='math'>T</phrase> denotes the autocorrelation length.
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        denotes the root mean square deviation of the heights and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
+          <alt>T</alt>
+        </inlineequation>
       </para>
       <para>
         For the exponential height-height correlation function we have the
@@ -525,9 +729,17 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         obtained for a simulated surface having Gaussian autocorrelation
         function are plotted.  These functions are fitted by means of
         least-squares method using the formulae shown above. The resulting
-        values of <phrase role='math'>σ</phrase> and
-        <phrase role='math'>T</phrase> were practically same
-        for both the approaches.
+        values of
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
+          <alt>T</alt>
+        </inlineequation>
+        were practically same for both the approaches.
       </para>
       <informalfigure id='fig-hhcf-acf-gauss'>
         <mediaobject>
@@ -606,8 +818,15 @@ W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
       </informalequation>
       <para>
         where
-        <phrase role='math'>P<subscript>j</subscript></phrase>(<phrase role='math'>K<subscript>x</subscript></phrase>)
-        is the Fourier coefficient of the <phrase role='math'>j</phrase>-th
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>P<subscript>j</subscript></phrase>(<phrase role='mathvar'>K<subscript>x</subscript></phrase>)</mathphrase>
+          <alt>P_j(K_x)</alt>
+        </inlineequation>
+        is the Fourier coefficient of the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>j</phrase></mathphrase>
+          <alt>j</alt>
+        </inlineequation>-th
         row, i.e.
       </para>
       <informalequation id='eq-power-spectral-density-Pj'>
@@ -625,7 +844,7 @@ W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
         </mediaobject>
       </informalequation>
       <para>
-        If we have chosen the Gaussian ACF, the corresponding Gaussian
+        If we choose the Gaussian ACF, the corresponding Gaussian
         relation for the PSDF is
       </para>
       <informalequation id='eq-power-spectral-density-1d-gaussian'>
@@ -664,8 +883,16 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
         the resulting PSDF and its fit for the same surface as used in the
         <link linkend='fig-hhcf-acf-gauss'>previous figure</link> are
         plotted. We can see that the function can be again fitted by Gaussian
-        PSDF. The resulting values of <phrase role='math'>σ</phrase> and
-        <phrase role='math'>T</phrase>
+        PSDF. The resulting values of
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
+          <alt>T</alt>
+        </inlineequation>
         were practically same as those from the HHCF and ACF fit.
       </para>
       <informalfigure id='fig-psdf-gauss'>
@@ -681,7 +908,10 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
       </informalfigure>
       <para>
         We can also introduce radial PSDF
-        <phrase role='math'>W</phrase><subscript>r</subscript>(<phrase role='math'>K</phrase>),
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>W</phrase><subscript>r</subscript>(<phrase role='mathvar'>K</phrase>)</mathphrase>
+          <alt>W_{\rm r}(K)</alt>
+        </inlineequation>,
         which of course contains the same information as the one-dimensional
         PSDF for isotropic rough surfaces:
       </para>
@@ -752,10 +982,21 @@ W_{\rm r}(K) = \sigma^2T{KT\over(1+K^2T^2)^{3/2}}
       <para>
         The Minkowski functionals are used to describe global geometric
         characteristics of structures.  Two-dimensional discrete variants of
-        volume <phrase role='math'>V</phrase>,
-        surface <phrase role='math'>S</phrase>,
+        volume
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>V</phrase></mathphrase>
+          <alt>V</alt>
+        </inlineequation>,
+        surface
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>S</phrase></mathphrase>
+          <alt>S</alt>
+        </inlineequation>,
         and connectivity (Euler-Poincaré Characteristic)
-        <phrase role='math'>χ</phrase>
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>χ</phrase></mathphrase>
+          <alt>\chi</alt>
+        </inlineequation>
         are calculated according to following formulas:
       </para>
       <informalequation id='eq-minkowski-functionals'>
@@ -775,27 +1016,60 @@ S = {N_{\rm bound}\over N}\;,\quad
         </mediaobject>
       </informalequation>
       <para>
-        Here <phrase role='math'>N</phrase> denotes the total number of pixels,
-        <phrase role='math'>N<subscript>white</subscript></phrase> denotes
-        the number of “white” pixels, that is pixels above threshold (pixels
-        below threshold are referred to as “black”).
-        The symbol <phrase role='math'>N<subscript>bound</subscript></phrase>
+        Here
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
+          <alt>B</alt>
+        </inlineequation>
+        denotes the total number of pixels,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>N<subscript>white</subscript></phrase></mathphrase>
+          <alt>N_{\rm white}</alt>
+        </inlineequation>
+        denotes the number of “white” pixels, that is pixels above the
+        threshold. Pixels below the threshold are referred to as “black”.
+        Symbol
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>N<subscript>bound</subscript></phrase></mathphrase>
+          <alt>N_{\rm bound}</alt>
+        </inlineequation>
         denotes the number of white-black pixel boundaries.
-        Finally, <phrase role='math'>C<subscript>white</subscript></phrase> and
-        <phrase role='math'>C<subscript>black</subscript></phrase>
+        Finally,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>C<subscript>white</subscript></phrase></mathphrase>
+          <alt>C_{\rm white}</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>C<subscript>black</subscript></phrase></mathphrase>
+          <alt>C_{\rm black}</alt>
+        </inlineequation>
         denote the number of continuous sets of white and black pixels
         respectively.
       </para>
       <para>
         For an image with continuous set of values the functionals are
         parametrized by the height threshold value
-         <phrase role='math'>ϑ</phrase> that divides white pixels
-        from black, that is they can be viewed as functions of this parameter.
-        And these functions
-        <phrase role='math'>V</phrase>(<phrase role='math'>ϑ</phrase>),
-        <phrase role='math'>S</phrase>(<phrase role='math'>ϑ</phrase>), and
-        <phrase role='math'>χ</phrase>(<phrase role='math'>ϑ</phrase>)
-        are what is actually plotted.
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
+          <alt>\vartheta</alt>
+        </inlineequation>
+        that divides white pixels from black, that is they can be viewed as
+        functions of this parameter. And these functions
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>V</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
+          <alt>V(\vartheta)</alt>
+        </inlineequation>,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
+          <alt>S(\vartheta)</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>χ</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
+          <alt>\chi(\vartheta)</alt>
+        </inlineequation>
+        are plotted.
       </para>
     </sect3>
   </sect2>
@@ -848,7 +1122,11 @@ S = {N_{\rm bound}\over N}\;,\quad
         row (column).
       </listitem>
       <listitem>
-        Tangent of <phrase role='math'>β</phrase><subscript>0</subscript>.
+        Tangent of
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>β</phrase><subscript>0</subscript></mathphrase>
+          <alt>\beta_0</alt>
+        </inlineequation>.
         This is a characteristics of
         the steepnes of local slopes, closely related to the behaviour of
         autocorrelation and height-height correlation functions at zero.  For
@@ -896,15 +1174,23 @@ S = {N_{\rm bound}\over N}\;,\quad
       gradient.  <guimenuitem>Slope Distribution</guimenuitem> has also
       another mode operation called <guilabel>Per-angle graph</guilabel>.
       in which it plots the distribution of
-      <phrase role='math'>r</phrase><superscript>2</superscript>
-      over <phrase role='math'>φ</phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>r</phrase><superscript>2</superscript></mathphrase>
+        <alt>r^2</alt>
+      </inlineequation>
+      over
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+        <alt>\varphi</alt>
+      </inlineequation>
       where we introduced polar coordinates
-      (<phrase role='math'>r</phrase>, <phrase role='math'>φ</phrase>) in the
-      plane of derivatives.
-      The relation between the derivative Cartesian coordinates of the
-      two-dimensional slope distribution and the
-      <link linkend='inclinations-coordinates'>facet inclination
-        angles</link>
+      <inlineequation>
+        <mathphrase>[<phrase role='mathvar'>r</phrase>, <phrase role='mathvar'>φ</phrase>]</mathphrase>
+        <alt>[r,\varphi]</alt>
+      </inlineequation>
+      in the plane of derivatives. The relation between the derivative
+      Cartesian coordinates of the two-dimensional slope distribution and the
+      <link linkend='inclinations-coordinates'>facet inclination angles</link>
       are given by the following formula:
       <informalequation id='eq-facet-theta-phi'>
         <mediaobject>
@@ -925,7 +1211,11 @@ S = {N_{\rm bound}\over N}\;,\quad
     <para id='angle-distribution'>
       <guimenuitem>Angle Distribution</guimenuitem> function is
       a visualization tool that does not calculate a distribution in the
-      strict sense.  For each derivative <phrase role='math'>v</phrase>
+      strict sense.  For each derivative
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>v</phrase></mathphrase>
+        <alt>v</alt>
+      </inlineequation>
       the circle of points satisfying
       <informalequation id='eq-angle-distribution'>
         <mediaobject>
