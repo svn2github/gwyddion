@@ -9,7 +9,7 @@
     <application>Gwyddion</application> currently offers some basic
     visualization and extraction means for single point spectroscopy data (we
     will generally refer to any curves measured in or otherwise attached to
-    individual points of the sample as to “spectra” here).
+    individual points of the sample as to <quote>spectra</quote> here).
     If spectra import is supported for a file type, they will appear in the
     <guilabel>Spectra</guilabel> tab of the
     <link linkend='data-browser'>data browser</link>.  Standalone spectra

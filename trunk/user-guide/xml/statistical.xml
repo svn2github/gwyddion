@@ -1026,9 +1026,9 @@ S = {N_{\rm bound}\over N}\;,\quad
           <mathphrase><phrase role='mathvar'>N<subscript>white</subscript></phrase></mathphrase>
           <alt>N_{\rm white}</alt>
         </inlineequation>
-        denotes the number of “white” pixels, that is pixels above the
-        threshold. Pixels below the threshold are referred to as “black”.
-        Symbol
+        denotes the number of <quote>white</quote> pixels, that is pixels above
+        the threshold. Pixels below the threshold are referred to as
+        <quote>black</quote>.  Symbol
         <inlineequation>
           <mathphrase><phrase role='mathvar'>N<subscript>bound</subscript></phrase></mathphrase>
           <alt>N_{\rm bound}</alt>

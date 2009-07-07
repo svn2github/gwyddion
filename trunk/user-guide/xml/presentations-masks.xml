@@ -28,11 +28,11 @@
   </para>
   <para>
     Since grain marking is the most common use of masks, several functions
-    that operate on marked areas are called “grain” functions, e.g.
-    Grain Statistics.  Also, a contignuous part of mask is sometimes called
-    grain in this guide.  However, since a mask does not bear any information
-    how it was created all mask functions can be used with masks of any
-    origin.
+    that operate on marked areas are called <quote>grain</quote> functions,
+    e.g.  Grain Statistics.  Also, a contignuous part of mask is sometimes
+    called grain in this guide.  However, since a mask does not bear any
+    information how it was created all mask functions can be used with masks of
+    any origin.
   </para>
   <informalfigure id='fig-mask-presentation-scheme'>
     <mediaobject>
