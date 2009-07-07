@@ -50,7 +50,10 @@
       finding local extremes on the surface this algorithm can be used also for
       purposes of grain segmentation or marking. For convenience in the
       following we will treat the data inverted in the
-      <phrase role='math'>z</phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+        <alt>z</alt>
+      </inlineequation>
       direction while describing the algorithm (i.e.
       the grain tops are forming local minima in the following text). We
       applied two stages of the grain analysis
@@ -343,9 +346,12 @@
             <listitem>
               <guilabel>Zero basis</guilabel>,
               the volume between grain surface and the plane
-              <phrase role='math'>z</phrase> = 0.  Values below
-              zero form negative volumes.  The zero level must be set to
-              a reasonable value (often
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
+                <alt>z=0</alt>
+              </inlineequation>.
+              Values below zero form negative volumes.  The zero level must be
+              set to a reasonable value (often
               <link linkend='fix-zero'>Fix Zero</link> is sufficient) for
               the results to make sense, which is also the advantage of
               this method: one can use basis plane of his choice.
@@ -353,8 +359,15 @@
             <listitem>
               <guilabel>Grain minimum basis</guilabel>,
               the volume between grain surface and the plane
-              <phrase role='math'>z</phrase> = <phrase role='math'>z</phrase><subscript>min</subscript>,
-              where <phrase role='math'>z</phrase><subscript>min</subscript>
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase> = <phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
+                <alt>z=z_{\rm min}</alt>
+              </inlineequation>,
+              where
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
+                <alt>z_{\rm min}</alt>
+              </inlineequation>
               is the minimum value (height) occuring in the grain.  This
               method accounts for grain surrounding but it typically
               underestimates the volume, especially for small grains.
@@ -399,14 +412,27 @@
         <listitem>
           <itemizedlist>
             <listitem>
-              <guilabel>Inclination <phrase role='math'>ϑ</phrase></guilabel>,
+              <guilabel>Inclination
+                 <inlineequation>
+                  <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
+                  <alt>\vartheta</alt>
+                </inlineequation>
+              </guilabel>,
               the deviation of the normal to the mean plane from the
-              <phrase role='math'>z</phrase>-axis, see
-              <link linkend='inclinations-coordinates'>inclinations</link>
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+                <alt>z</alt>
+              </inlineequation>-axis,
+              see <link linkend='inclinations-coordinates'>inclinations</link>
               for details.
             </listitem>
             <listitem>
-              <guilabel>Inclination <phrase role='math'>φ</phrase></guilabel>,
+              <guilabel>Inclination
+                 <inlineequation>
+                  <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+                  <alt>\varphi</alt>
+                </inlineequation>
+              </guilabel>,
               the azimuth of the slope, as defined in
               <link linkend='inclinations-coordinates'>inclinations</link>.
             </listitem>
@@ -430,10 +456,21 @@
       of each pixel corner participating in the boundary.  The contributions
       are displayed on the following figure for each type of corner
       configuration, where
-      <phrase role='math'>h<subscript>x</subscript></phrase> and 
-      <phrase role='math'>h<subscript>y</subscript></phrase>
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+        <alt>h_x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+        <alt>h_y</alt>
+      </inlineequation>
       are pixel dimension along corresponding axes and
-      <phrase role='math'>q</phrase> is the length of the pixel diagonal.
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
+        <alt>q</alt>
+      </inlineequation>
+      is the length of the pixel diagonal.
     </para>
     <informalfigure id='fig-boundary-length'>
       <mediaobject>
@@ -445,11 +482,26 @@
         Contributions of pixel configurations to the estimated boundary length.
         Grey squares represent pixels inside the grain, white squares represent
         outside pixels.  The estimated contribution of each configuration is:
-        (a) <phrase role='math'>q</phrase>/2,
-        (b) <phrase role='math'>q</phrase>,
-        (c) <phrase role='math'>h<subscript>y</subscript></phrase>,
-        (c) <phrase role='math'>h<subscript>x</subscript></phrase>,
-        (e) <phrase role='math'>q</phrase>/2.
+        (a) <inlineequation>
+          <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
+          <alt>q/2</alt>
+        </inlineequation>,
+        (b) <inlineequation>
+          <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
+          <alt>q</alt>
+        </inlineequation>,
+        (c) <inlineequation>
+          <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+          <alt>h_y</alt>
+        </inlineequation>,
+        (c) <inlineequation>
+          <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+          <alt>h_x</alt>
+        </inlineequation>,
+        (e) <inlineequation>
+          <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
+          <alt>q/2</alt>
+        </inlineequation>.
       </caption>
     </informalfigure>
     <para id='grain-volume-calculation'>
