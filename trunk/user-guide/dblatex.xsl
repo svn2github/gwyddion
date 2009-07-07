@@ -4,6 +4,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version='1.0'>
 
 <xsl:param name="latex.encoding">utf8</xsl:param>
+<xsl:param name="latex.class.options">a4paper</xsl:param>
 
 <xsl:variable name="latex.begindocument">
   <xsl:text>\input{defs.tex}&#10;</xsl:text>
