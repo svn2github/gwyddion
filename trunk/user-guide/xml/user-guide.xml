@@ -74,9 +74,7 @@
   </chapter>
   <chapter id='data-analysis'>
     <title>Data Processing and Analysis</title>
-  <!--
     <xi:include href='basic.xml'/>
-  -->
     <xi:include href='leveling.xml'/>
     <xi:include href='filters.xml'/>
     <xi:include href='edit.xml'/>

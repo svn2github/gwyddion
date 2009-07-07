@@ -42,7 +42,10 @@
             of the expected position and finds therefore the closest data value
             at integer position.
             Its polynomial degree is 0, regularity
-            <phrase role='math'>C</phrase><superscript>-1</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>-1</superscript></mathphrase>
+              <alt>C^{-1}</alt>
+            </inlineequation>
             and order 1.
           </para>
         </listitem>
@@ -54,8 +57,17 @@
           <para>
             Linear interpolation is a linear interpolation
             between the two closest data values. The value
-            <phrase role='math'>z</phrase> at point of relative
-            position <phrase role='math'>x</phrase> is obtained as
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+              <alt>z</alt>
+            </inlineequation>
+            at point of relative
+            position
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>
+            is obtained as
             <informalequation id='eq-interpolation-linear'>
               <mediaobject>
                 <imageobject>
@@ -73,11 +85,22 @@ z = (1-x)z_0 + xz_1
                 </textobject>
               </mediaobject>
             </informalequation>
-            where <phrase role='math'>z</phrase><subscript>0</subscript>
-            and <phrase role='math'>z</phrase><subscript>1</subscript> and
-            values at the preceding and following points, respectively.
+            where
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase><subscript>0</subscript></mathphrase>
+              <alt>z_0</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase><subscript>1</subscript></mathphrase>
+              <alt>z_1</alt>
+            </inlineequation>
+            are values at the preceding and following points, respectively.
             Its polynomial degree is 1, regularity
-            <phrase role='math'>C</phrase><superscript>0</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
+              <alt>C^0</alt>
+            </inlineequation>
             and order 2.  It is identical to the second-order B-spline.
           </para>
         </listitem>
@@ -88,13 +111,23 @@ z = (1-x)z_0 + xz_1
         <listitem>
           <para>
             Key interpolation (more precisely Key's interpolation with
-            <phrase role='math'>a</phrase> = −1/2 which has the highest
-            interpolation order) makes use also of values in the
-            before-preceding and after-following points
-            <phrase role='math'>z</phrase><subscript>-1</subscript>
-            and <phrase role='math'>z</phrase><subscript>2</subscript>,
-            respectively.  In other words it has support of length 4,
-            The value is then obtained as
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>a</phrase> = −1/2</mathphrase>
+              <alt>a=-1/2</alt>
+            </inlineequation>
+            which has the highest interpolation order) makes use also of values
+            in the before-preceding and after-following points
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase><subscript>-1</subscript></mathphrase>
+              <alt>z_{-1}</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase><subscript>2</subscript></mathphrase>
+              <alt>z_2</alt>
+            </inlineequation>,
+            respectively.  In other words it has support of length 4, The value
+            is then obtained as
             <informalequation id='eq-interpolation-w1234'>
               <mediaobject>
                 <imageobject>
@@ -138,7 +171,10 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
             </informalequation>
             are the interpolation weights.
             Key's interpolation degree is 3, regularity
-            <phrase role='math'>C</phrase><superscript>1</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>1</superscript></mathphrase>
+              <alt>C^1</alt>
+            </inlineequation>
             and order 3.
           </para>
         </listitem>
@@ -174,7 +210,10 @@ z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
               </mediaobject>
             </informalequation>
             Its polynomial degree is 3, regularity
-            <phrase role='math'>C</phrase><superscript>0</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
+              <alt>C^0</alt>
+            </inlineequation>
             and order 4.
           </para>
         </listitem>
@@ -205,11 +244,27 @@ w_k = {{\displaystyle{1\over r_k^4}}
                 </textobject>
               </mediaobject>
             </informalequation>
-            for <phrase role='math'>k</phrase> = -1, 0, 1, 2, where
-            <phrase role='math'>r</phrase><subscript>-1</subscript> = 1 + <phrase role='math'>x</phrase>,
-            <phrase role='math'>r</phrase><subscript>0</subscript> = <phrase role='math'>x</phrase>,
-            <phrase role='math'>r</phrase><subscript>1</subscript> = 1 − <phrase role='math'>x</phrase>,
-            <phrase role='math'>r</phrase><subscript>2</subscript> = 2 − <phrase role='math'>x</phrase>.
+            for
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>k</phrase> = -1, 0, 1, 2</mathphrase>
+              <alt>k=-1,0,1,2</alt>
+            </inlineequation>, where
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>r</phrase><subscript>-1</subscript> = 1 + <phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>r_{-1}=1+x</alt>
+            </inlineequation>,
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>r</phrase><subscript>0</subscript> = <phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>r_0=x</alt>
+            </inlineequation>,
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>r</phrase><subscript>1</subscript> = 1 − <phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>r_1=1-x</alt>
+            </inlineequation>,
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>r</phrase><subscript>2</subscript> = 2 − <phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>r_2=2-x</alt>
+            </inlineequation>.
             Its order is 1.
           </para>
         </listitem>
@@ -249,7 +304,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
             but with interpolation coefficients calculated from function
             values [<link linkend='basic-operations-ref-1'>1</link>].
             Its polynomial degree is 3, regularity
-            <phrase role='math'>C</phrase><superscript>2</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>2</superscript></mathphrase>
+              <alt>C^2</alt>
+            </inlineequation>
             and order 4.
           </para>
         </listitem>
@@ -289,7 +347,10 @@ w_k = {{\displaystyle{1\over r_k^4}}
             but with interpolation coefficients calculated from function
             values [<link linkend='basic-operations-ref-1'>1</link>].
             Its polynomial degree is 3, regularity
-            <phrase role='math'>C</phrase><superscript>0</superscript>
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
+              <alt>C^0</alt>
+            </inlineequation>
             and order 4.
           </para>
         </listitem>
@@ -449,7 +510,12 @@ w_k = {{\displaystyle{1\over r_k^4}}
         the local facet. <guilabel>Averaging radius</guilabel> again
         determines the radius of the area to use for the plane fit.
         Button <guibutton>Set zero</guibutton> shifts the values to make the
-        current <phrase role='math'>z</phrase> the new zero.
+        current
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+          <alt>z</alt>
+        </inlineequation>
+        the new zero.
       </para>
     </sect3>
     <sect3 id='inclinations-coordinates'>
@@ -461,22 +527,49 @@ w_k = {{\displaystyle{1\over r_k^4}}
       <para>
         In all Gwyddion tools facet and plane inclinations are displayed as
         the spherical angles
-        (<phrase role='math'>ϑ</phrase>, <phrase role='math'>φ</phrase>)
+        <inlineequation>
+          <mathphrase>[<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>]</mathphrase>
+          <alt>[\vartheta,\varphi]</alt>
+        </inlineequation>
         of the plane normal vector.
       </para>
       <para>
-        Angle <phrase role='math'>ϑ</phrase> is the angle between the
-        upward direction and the normal, this means
-        <phrase role='math'>ϑ</phrase> = 0 for horizontal
-        facets and increases with the slope. It is always positive.
+        Angle
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
+          <alt>\vartheta</alt>
+        </inlineequation>
+        is the angle between the upward direction and the normal, this means
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ϑ</phrase> = 0</mathphrase>
+          <alt>\vartheta=0</alt>
+        </inlineequation>
+        for horizontal facets and increases with the slope. It is always
+        positive.
       </para>
       <para>
-        Angle <phrase role='math'>φ</phrase> is the counter-clockwise measured
-        angle between axis <phrase role='math'>x</phrase> and the projection
-        of the normal to the <phrase role='math'>xy</phrase> plane, as
+        Angle
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase> </mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        is the counter-clockwise measured angle between axis
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+          <alt>x</alt>
+        </inlineequation>
+        and the projection of the normal to the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+          <alt>xy</alt>
+        </inlineequation>
+        plane, as
         displayed on the following figure.  For facets it means
-        <phrase role='math'>φ</phrase> corresponds
-        to the downward direction of the facet.
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        corresponds to the downward direction of the facet.
       </para>
       <informalfigure id='fig-inclination-coordinates'>
         <mediaobject>
@@ -489,9 +582,21 @@ w_k = {{\displaystyle{1\over r_k^4}}
         </mediaobject>
         <caption>
           Surface facet (displayed blue) orientation measured as the
-          counterclockwise angle from <phrase role='math'>x</phrase>-axis to
-          the projection of facet normal vector
-          <phrase role='math'>n</phrase> to <phrase role='math'>xy</phrase>
+          counterclockwise angle from
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+            <alt>x</alt>
+          </inlineequation>-axis
+          to the projection of facet normal vector
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
+            <alt>\vec{n}</alt>
+          </inlineequation>
+          to
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+            <alt>xy</alt>
+          </inlineequation>
           plane.
         </caption>
       </informalfigure>
@@ -506,13 +611,36 @@ w_k = {{\displaystyle{1\over r_k^4}}
       <indexterm><primary>angle measurement</primary></indexterm>
       <para>
         Distances and differences can be read with
-        <guilabel>Distance</guilabel> tool.  It displays the
-        horizontal (Δ<phrase role='math'>x</phrase>),
-        vertical (Δ<phrase role='math'>y</phrase>)
-        and total planar (<phrase role='math'>R</phrase>) distances;
-        the azimuth <phrase role='math'>φ</phrase> (measured identically to
-        inclination <phrase role='math'>φ</phrase>)
-        and the endpoint value difference (Δ<phrase role='math'>z</phrase>)
+        <guilabel>Distance</guilabel> tool.  It displays the horizontal
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>x</phrase></mathphrase>
+          <alt>\Delta x</alt>
+        </inlineequation>),
+        vertical
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>y</phrase></mathphrase>
+          <alt>\Delta y</alt>
+        </inlineequation>)
+        and total planar
+        (<inlineequation>
+          <mathphrase><phrase role='mathvar'>R</phrase></mathphrase>
+          <alt>R</alt>
+        </inlineequation>)
+        distances; the azimuth
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        (measured identically to inclination
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>)
+        and the endpoint value difference
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>z</phrase></mathphrase>
+          <alt>\Delta z</alt>
+        </inlineequation>)
         for a set of lines selected on the data.
       </para>
       <para>
