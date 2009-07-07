@@ -43,8 +43,8 @@
       </inlineequation>
       is from interval
       <inlineequation>
-        <mathphrase>[0, 1]</mathphrase>
-        <alt>[0,1]</alt>
+        <mathphrase>(0, 1)</mathphrase>
+        <alt>(0,1)</alt>
       </inlineequation>,
       which corresponds to the normalized abscissa; for simplicity variable
       <inlineequation>

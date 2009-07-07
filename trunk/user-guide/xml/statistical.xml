@@ -64,8 +64,8 @@
     </inlineequation>
     direction. We assume that the surface height at a given point
     <inlineequation>
-      <mathphrase>[<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>]</mathphrase>
-      <alt>[x,y]</alt>
+      <mathphrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
+      <alt>(x,y)</alt>
     </inlineequation>
     can be described by a random function
     <inlineequation>
@@ -442,12 +442,12 @@
         </inlineequation>
         are the values of heights at points
         <inlineequation>
-          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>]</mathphrase>
-          <alt>[x_1,y_1]</alt>
+          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>)</mathphrase>
+          <alt>(x_1,y_1)</alt>
         </inlineequation>,
         <inlineequation>
-          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>]</mathphrase>
-          <alt>[x_2,y_2]</alt>
+          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>)</mathphrase>
+          <alt>(x_2,y_2)</alt>
         </inlineequation>;
         furthermore,
         <inlineequation>
@@ -478,12 +478,12 @@
         </inlineequation>
         corresponding to points
         <inlineequation>
-          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>]</mathphrase>
-          <alt>[x_1,y_1]</alt>
+          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>)</mathphrase>
+          <alt>(x_1,y_1)</alt>
         </inlineequation>,
         <inlineequation>
-          <mathphrase>[<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>]</mathphrase>
-          <alt>[x_2,y_2]</alt>
+          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>)</mathphrase>
+          <alt>(x_2,y_2)</alt>
         </inlineequation>
         and the distance between these points
         <inlineequation>
@@ -1185,8 +1185,8 @@ S = {N_{\rm bound}\over N}\;,\quad
       </inlineequation>
       where we introduced polar coordinates
       <inlineequation>
-        <mathphrase>[<phrase role='mathvar'>r</phrase>, <phrase role='mathvar'>φ</phrase>]</mathphrase>
-        <alt>[r,\varphi]</alt>
+        <mathphrase>(<phrase role='mathvar'>r</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
+        <alt>(r,\varphi)</alt>
       </inlineequation>
       in the plane of derivatives. The relation between the derivative
       Cartesian coordinates of the two-dimensional slope distribution and the

@@ -399,8 +399,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
         top left corner of the selection, otherwise the top left corner
         coordinates are set to
         <inlineequation>
-          <mathphrase>[0, 0]</mathphrase>
-          <alt>[0,0]</alt>
+          <mathphrase>(0, 0)</mathphrase>
+          <alt>(0,0)</alt>
         </inlineequation>.
       </listitem>
       <listitem id='rotate'>
@@ -532,8 +532,8 @@ w_k = {{\displaystyle{1\over r_k^4}}
         In all Gwyddion tools facet and plane inclinations are displayed as
         the spherical angles
         <inlineequation>
-          <mathphrase>[<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>]</mathphrase>
-          <alt>[\vartheta,\varphi]</alt>
+          <mathphrase>(<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
+          <alt>(\vartheta,\varphi)</alt>
         </inlineequation>
         of the plane normal vector.
       </para>
