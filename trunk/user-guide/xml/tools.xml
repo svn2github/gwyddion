@@ -397,7 +397,7 @@
     </varlistentry>
     <varlistentry id='tool-mask-editor'>
       <term>
-        Mask Editor
+        <link linkend='mask-editor'>Mask Editor</link>
         <guiicon><inlinegraphic fileref='gwy_mask_editor-24.png'/></guiicon>
       </term>
       <listitem>
