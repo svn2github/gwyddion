@@ -12,6 +12,15 @@
   <xsl:text>\begin{document}&#10;</xsl:text>
 </xsl:variable>
 
+<xsl:template match='informaltable[@role="toolbox"]'>
+</xsl:template>
+
+<!-- *********************************************************************
+
+         Formulas
+
+     ********************************************************************* -->
+
 <xsl:template match='informalequation'>
   <xsl:text>$$&#32;</xsl:text>
   <xsl:if test='mediaobject/textobject[@role="tex"]/phrase'>
@@ -33,6 +42,12 @@
   </xsl:if>
   <xsl:text>&#32;$</xsl:text>
 </xsl:template>
+
+<!-- *********************************************************************
+
+         Tables
+
+     ********************************************************************* -->
 
 <xsl:template match='thead/row/entry'>
   <xsl:text>\bf </xsl:text>
