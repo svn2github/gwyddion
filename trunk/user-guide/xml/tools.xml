@@ -228,6 +228,17 @@
               </guiicon>
             </link>
           </entry>
+          <entry>
+            <link linkend='tool-selection-manager'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_selections-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
         </row>
       </tbody>
     </tgroup>
@@ -454,6 +465,18 @@
         <para>
           Basic filters – mean, median, conservative denoise, minimum, maximum
           and similar simple filters to reduce noise in the data.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-selection-manager'>
+      <term>
+        <link linkend='selection-manager'>Selection Manager</link>
+        <guiicon><inlinegraphic fileref='gwy_selections-24.png'/></guiicon>
+      </term>
+      <listitem>
+        <para>
+          Displays selections for a channel and copies them to other channels
+          or files.
         </para>
       </listitem>
     </varlistentry>
