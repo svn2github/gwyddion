@@ -56,7 +56,7 @@ xhtml: xhtml.stamp
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-@HTML_TRUE@	cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
+@HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 @HTML_TRUE@	cp user-guide.css xhtml
 @HTML_TRUE@	touch $@
 
