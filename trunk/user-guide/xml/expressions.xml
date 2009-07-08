@@ -29,7 +29,7 @@
   </para>
   <table frame='none' id='expr-op-precedence'>
     <title>Precedence of operations</title>
-    <tgroup cols='2'>
+    <tgroup cols='3'>
       <thead>
         <row>
           <entry>Operation</entry>
