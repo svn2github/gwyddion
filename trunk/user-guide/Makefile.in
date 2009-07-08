@@ -10,6 +10,7 @@ GMAKE = @GMAKE@
 GSED = @GSED@
 XSLTPROC = @XSLTPROC@ --xinclude
 DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
+INKSCAPE = @INKSCAPE@ --without-gui --export-area-drawing
 #HTML2TXT = @LYNX@ -force_html -dump -nolist
 
 DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
@@ -71,6 +72,13 @@ formulas: formulas.stamp
 
 @PNG_TRUE@fixpngres: fixpngres.c
 @PNG_TRUE@	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
+
+@SVG_TRUE@%.png: %.svg
+@SVG_TRUE@	$(INKSCAPE) --export-dpi=120 --export-background=white \
+@SVG_TRUE@	    --export-png="$@" --file="$<"
+
+@SVG_TRUE@%.pdf: %.svg
+@SVG_TRUE@	$(INKSCAPE) --export-pdf="$@" --file="$<"
 
 clean:
 	+cd ./formulas && $(GMAKE) clean

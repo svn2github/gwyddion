@@ -41,6 +41,7 @@ JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
 GWY_HTML_MISSING=
 GWY_PDF_MISSING=
 GWY_PNG_MISSING=
+GWY_SVG_MISSING=
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
@@ -80,13 +81,37 @@ if test "$GS" = no; then
 "
 fi
 
-# FIXME: We need at least version 1.70, but how to compare the versions?
 JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl],
-                     [DocBook XSL Stylesheets])
+                     [DocBook XSL Stylesheets],
+                     [],[GWY_HTML_MISSING="${GWY_HTML_MISSING}  DocBook XSL Stylesheets, get them from http://docbook.sourceforge.net/projects/xsl/
+"])
+
+if test -z "$GWY_HTML_MISSING"; then
+  AC_MSG_CHECKING([whether DocBook XSL Stylesheets version is >= 1.70])
+  cat >conftest.xml <<_ACEOF
+<?xml version='1.0'?>
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN' 'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<book/>
+_ACEOF
+  if GWY_RUN_LOG($XSLTPROC --nowrite docbook-xsl-version.xsl conftest.xml); then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    GWY_HTML_MISSING="${GWY_HTML_MISSING}  DocBook XSL Stylesheets are too old, get them from http://docbook.sourceforge.net/projects/xsl/
+"
+  fi
+  rm -f conftest.xml
+fi
 
 AC_CHECK_PROGS([DBLATEX],[dblatex],[no])
 if test "$DBLATEX" = no; then
   GWY_PDF_MISSING="${GWY_PDF_MISSING}  dblatex, get DBLaTeX from http://dblatex.sourceforge.net/
+"
+fi
+
+AC_CHECK_PROGS([SVG],[inkscape],[no])
+if test "$SVG" = no; then
+  GWY_SVG_MISSING="${GWY_SVG_MISSING}  ikscape, get Inkscape from http://www.inkscape.org/
 "
 fi
 
@@ -95,35 +120,10 @@ PKG_CHECK_MODULES([PNG],[libpng],,[
 "
 ])
 
-if test x = "x$GWY_HTML_MISSING"; then
-  HTML_TRUE=
-  HTML_FALSE=#
-else
-  HTML_TRUE=#
-  HTML_FALSE=
-fi
-AC_SUBST(HTML_TRUE)
-AC_SUBST(HTML_FALSE)
-
-if test x = "x$GWY_PDF_MISSING"; then
-  PDF_TRUE=
-  PDF_FALSE='#'
-else
-  PDF_TRUE='#'
-  PDF_FALSE=
-fi
-AC_SUBST(PDF_TRUE)
-AC_SUBST(PDF_FALSE)
-
-if test x = "x$GWY_PNG_MISSING"; then
-  PNG_TRUE=
-  PNG_FALSE='#'
-else
-  PNG_TRUE='#'
-  PNG_FALSE=
-fi
-AC_SUBST(PNG_TRUE)
-AC_SUBST(PNG_FALSE)
+GWY_CONDITIONAL([HTML],[test x = "x$GWY_HTML_MISSING"])
+GWY_CONDITIONAL([PDF],[test x = "x$GWY_PDF_MISSING"])
+GWY_CONDITIONAL([PNG],[test x = "x$GWY_PNG_MISSING"])
+GWY_CONDITIONAL([SVG],[test x = "x$GWY_SVG_MISSING"])
 
 AC_OUTPUT
 
@@ -140,6 +140,11 @@ fi
 if test x != "x$GWY_PNG_MISSING"; then
 AC_MSG_WARN([Cannot build fixpngres, the following tools were not found:
 $GWY_PNG_MISSING])
+fi
+
+if test x != "x$GWY_SVG_MISSING"; then
+AC_MSG_WARN([Cannot build convert SVG images, the following tools were not found:
+$GWY_SVG_MISSING])
 fi
 
 echo "Run '$GMAKE help' for some help."

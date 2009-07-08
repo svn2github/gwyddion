@@ -22,3 +22,9 @@ Some random remarks:
     ./configure --with-xml-catalog=/usr/local/share/xml/catalog
 
 * After svn checkout, run autoconf to generate configure.
+
+* The user guide is licensed under either GNU GPL or GNU FDL, see the guide
+  text for the full license and author list.
+
+  Autoconf checks was borrowed from various sources.  The copright notices
+  can be found at the beginings of the code snippets.

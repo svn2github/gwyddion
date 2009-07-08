@@ -1,3 +1,16 @@
+# Simulate AM_CONDITIONAL
+AC_DEFUN([GWY_CONDITIONAL],
+[
+if $2; then
+  $1[]_TRUE=
+  $1[]_FALSE=#
+else
+  $1[]_TRUE=#
+  $1[]_FALSE=
+fi
+AC_SUBST($1[]_TRUE)
+AC_SUBST($1[]_FALSE)
+])
 
 # Checks the location of the XML Catalog
 # Usage:
@@ -55,7 +68,7 @@ AC_DEFUN([JH_CHECK_XML_CATALOG],
 ])
 
 
-# pkg.m4 - Macros to locate and utilise pkg-config.            -*- Autoconf -*-
+# pkg.m4 - Macros to locate and utilise pkg-config.
 # 
 # Copyright © 2004 Scott James Remnant <scott@netsplit.com>.
 #
@@ -210,3 +223,21 @@ else
 	ifelse([$3], , :, [$3])
 fi[]dnl
 ])# PKG_CHECK_MODULES
+
+##
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# GWY_RUN_LOG(COMMAND)
+# -------------------
+# Run COMMAND, save the exit status in ac_status, and log it.
+# (This has been adapted from Autoconf's _AC_RUN_LOG macro.)
+AC_DEFUN([GWY_RUN_LOG],
+[{ echo "$as_me:$LINENO: $1" >&AS_MESSAGE_LOG_FD
+   ($1) >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
+   (exit $ac_status); }])

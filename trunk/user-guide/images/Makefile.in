@@ -1,7 +1,0 @@
-INKSCAPE = @INKSCAPE@ --without-gui --export-area-drawing
-
-%.png: %.svg
-	$(INKSCAPE) --export-dpi=120 --export-background=white --export-png="$@" --file="$<"
-
-%.pdf: %.svg
-	$(INKSCAPE) --export-pdf="$@" --file="$<"
