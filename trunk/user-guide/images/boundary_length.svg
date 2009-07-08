@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2 Patchlevel 5 -->
+
+<!-- CreationDate: Wed Jul  8 21:18:54 2009 -->
+
+<!-- Magnification: 1.000 -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="3.0in"
+   height="0.8in"
+   viewBox="63 63 3624 906"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="boundary_length.fig"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <metadata
+     id="metadata60">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs58">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 36 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="270 : 36 : 1"
+       inkscape:persp3d-origin="135 : 24 : 1"
+       id="perspective62" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="753"
+     id="namedview56"
+     showgrid="false"
+     inkscape:zoom="1.9888889"
+     inkscape:cx="135"
+     inkscape:cy="34.994413"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     style="stroke-width:.025in; stroke:black; fill:none"
+     id="g4">
+    <!-- Line: box -->
+    <rect
+       x="375"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect6" />
+    <!-- Line: box -->
+    <rect
+       x="375"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect8" />
+    <!-- Line: box -->
+    <rect
+       x="75"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect10" />
+    <!-- Line: box -->
+    <rect
+       x="1125"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect12" />
+    <!-- Line: box -->
+    <rect
+       x="825"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect14" />
+    <!-- Line: box -->
+    <rect
+       x="1875"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect16" />
+    <!-- Line: box -->
+    <rect
+       x="1875"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect18" />
+    <!-- Line: box -->
+    <rect
+       x="2625"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect20" />
+    <!-- Line: box -->
+    <rect
+       x="2325"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect22" />
+    <!-- Line: box -->
+    <rect
+       x="3375"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       id="rect24" />
+    <!-- Line: box -->
+    <rect
+       x="75"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect26" />
+    <!-- Line: box -->
+    <rect
+       x="825"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect28" />
+    <!-- Line: box -->
+    <rect
+       x="1125"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect30" />
+    <!-- Line: box -->
+    <rect
+       x="1575"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect32" />
+    <!-- Line: box -->
+    <rect
+       x="1575"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect34" />
+    <!-- Line: box -->
+    <rect
+       x="2325"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect36" />
+    <!-- Line: box -->
+    <rect
+       x="2625"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect38" />
+    <!-- Line: box -->
+    <rect
+       x="3075"
+       y="375"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect40" />
+    <!-- Line: box -->
+    <rect
+       x="3075"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect42" />
+    <!-- Line: box -->
+    <rect
+       x="3375"
+       y="75"
+       width="300"
+       height="300"
+       rx="0"
+       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
+       id="rect44" />
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="1875"
+       y="900"
+       stroke="#000000"
+       fill="#000000"
+       font-family="AvantGarde"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       text-anchor="middle"
+       id="text46">(c)</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="2625"
+       y="900"
+       stroke="#000000"
+       fill="#000000"
+       font-family="AvantGarde"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       text-anchor="middle"
+       id="text48">(d)</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="3375"
+       y="900"
+       stroke="#000000"
+       fill="#000000"
+       font-family="AvantGarde"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       text-anchor="middle"
+       id="text50">(e)</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="1125"
+       y="900"
+       stroke="#000000"
+       fill="#000000"
+       font-family="AvantGarde"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       text-anchor="middle"
+       id="text52">(b)</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="375"
+       y="900"
+       stroke="#000000"
+       fill="#000000"
+       font-family="AvantGarde"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       text-anchor="middle"
+       id="text54">(a)</text>
+  </g>
+</svg>

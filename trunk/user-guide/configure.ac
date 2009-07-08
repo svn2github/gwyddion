@@ -109,8 +109,8 @@ if test "$DBLATEX" = no; then
 "
 fi
 
-AC_CHECK_PROGS([SVG],[inkscape],[no])
-if test "$SVG" = no; then
+AC_CHECK_PROGS([INKSCAPE],[inkscape],[no])
+if test "$INKSCAPE" = no; then
   GWY_SVG_MISSING="${GWY_SVG_MISSING}  ikscape, get Inkscape from http://www.inkscape.org/
 "
 fi

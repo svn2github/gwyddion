@@ -13,8 +13,6 @@ DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=image
 INKSCAPE = @INKSCAPE@ --without-gui --export-area-drawing
 #HTML2TXT = @LYNX@ -force_html -dump -nolist
 
-DOCBKBASE = http://docbook.sourceforge.net/release/xsl/current
-
 DISTNAME = $(BASENAME)-$(VERSION)
 DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
@@ -23,7 +21,16 @@ FORMULA_SOURCES := $(wildcard formulas/*.tex)
 EQ_SOURCES := $(shell grep -l '<textobject role="tex">' $(XML_SOURCES))
 IMAGES := $(shell $(GSED) -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref='"'"'\([^/'"'"']*\)'"'"'.*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
-SOURCES = $(XML_SOURCES) $(FORMULA_SOURCES)
+IMAGE_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
+SVG_IMAGES = \
+	boundary_length.svg \
+	grain-bounding-dims.svg \
+	inclination.svg \
+	unrotate-symmetries.svg
+BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES))
+# Distribute also BUILT_IMAGES, do not expect everyone to have Inkscape with
+# the right fonts.
+DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl
 CSS_STYLES = user-guide.css
@@ -43,7 +50,7 @@ Makefile: Makefile.in ./config.status
 
 pdf: $(PACKAGE).pdf
 
-@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(TEX_STYLES) dblatex.xsl
+@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_IMAGES) $(TEX_STYLES) dblatex.xsl
 @PDF_TRUE@	rm -rf pdf
 @PDF_TRUE@	mkdir pdf
 @PDF_TRUE@	$(DBLATEX) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
@@ -53,7 +60,8 @@ pdf: $(PACKAGE).pdf
 
 xhtml: xhtml.stamp
 
-@HTML_TRUE@xhtml.stamp: formulas $(XML_SOURCES) xhtml.xsl
+# FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
+@HTML_TRUE@xhtml.stamp: formulas $(XML_SOURCES) $(IMAGE_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
@@ -73,12 +81,16 @@ formulas: formulas.stamp
 @PNG_TRUE@fixpngres: fixpngres.c
 @PNG_TRUE@	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
 
-@SVG_TRUE@%.png: %.svg
-@SVG_TRUE@	$(INKSCAPE) --export-dpi=120 --export-background=white \
-@SVG_TRUE@	    --export-png="$@" --file="$<"
+# XXX: The `cd images' trick is necessary as inkscape fails to save images into
+# another directory
+@SVG_TRUE@images/%.png: images/%.svg
+@SVG_TRUE@	cd images && \
+@SVG_TRUE@	    $(INKSCAPE) --export-dpi=120 --export-background=white \
+@SVG_TRUE@	        --export-png="$*.png" --file="$*.svg"
 
 @SVG_TRUE@%.pdf: %.svg
-@SVG_TRUE@	$(INKSCAPE) --export-pdf="$@" --file="$<"
+@SVG_TRUE@	cd images && \
+@SVG_TRUE@	    $(INKSCAPE) --export-pdf="$*.png" --file="$*.svg"
 
 clean:
 	+cd ./formulas && $(GMAKE) clean
@@ -91,7 +103,7 @@ dist:
 	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.c \
 	    user-guide.iss.in $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
-	cp $(patsubst %,images/%,$(PNG_IMAGES)) $(DISTNAME)/images
+	cp $(SVG_IMAGES) $(DIST_IMAGES) $(DISTNAME)/images
 	cp $(XML_SOURCES) $(DISTNAME)/xml
 	+cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
