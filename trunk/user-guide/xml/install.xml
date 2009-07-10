@@ -35,6 +35,13 @@
     compilation from source code and development.
   </para>
   <para>
+    Beside Gtk+, Gwyddion can optionally utilize also other software libraries
+    and components that are described in section
+    <link linkend='installation-dependencies'>Build Dependencies</link>.
+    This is mainly important if you build Gwyddion from the source code and
+    hence can control what features it will include.
+  </para>
+  <para>
     We recommend to download
     <ulink url='http://gwyddion.net/download.php#sample-files'>sample
       <application>Gwyddion</application> files</ulink>
@@ -47,10 +54,26 @@
     <para>
       Some GNU/Linux and Unix systems may provide binary packages of Gwyddion.
       The <ulink url='http://gwyddion.net/download.php'>download</ulink> page
-      of the project also tracks known packages and packaging efforts.
-      If your operating system provides such a package and it is recent enough,
-      install it using the standard means of the operating system.  Otherwise
-      proceed with compilation from source code.
+      of the project also tracks known packages and packaging efforts.  For
+      instance,
+      <itemizedlist>
+        <listitem>Debian</listitem>
+        <listitem>Ubuntu</listitem>
+        <listitem>Gentoo</listitem>
+        <listitem>openSuSE</listitem>
+        <listitem>FreeBSD</listitem>
+      </itemizedlist>
+      offer Gwyddion packages.  If your operating system provides such a
+      package and it is recent enough, install it using the standard means of
+      the operating system.  Otherwise proceed with compilation from source
+      code.
+    </para>
+    <para>
+      On Linux distributions using the
+      <ulink url='http://www.rpm.org/'>RPM Package Manager</ulink>,
+      such as Fedora, openSuSE or Mandriva, you can also build a package
+      yourself from the source code, as
+      <link linkend='installation-unix-source-rpm'>described below</link>.
     </para>
   </sect1>
 
@@ -90,6 +113,56 @@
         <application>Gwyddion</application>.
       </listitem>
     </itemizedlist>
+    <para>
+      The installer offers a choice of languages to use for the user
+      interface.  After installation, the lagnauge can be changed by editting
+      registry keys in <command>regedit</command>.  For user-settings, edit
+      <informalexample>
+        <literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal>
+      </informalexample>
+      while
+      <informalexample>
+        <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal>
+      </informalexample>
+      can be set for system-wide default.  The list of available languages
+      include:
+      <informaltable frame='none'>
+        <tgroup cols='2'>
+          <thead>
+            <row>
+              <entry><literal>gwy_locale</literal></entry>
+              <entry>Language</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>cs_CZ.UTF-8</entry>
+              <entry>Czech (Czech Republic)</entry>
+            </row>
+            <row>
+              <entry>de_DE.UTF-8</entry>
+              <entry>German (Germany)</entry>
+            </row>
+            <row>
+              <entry>en_US.UTF-8</entry>
+              <entry>English (Unites States)</entry>
+            </row>
+            <row>
+              <entry>fr_FR.UTF-8</entry>
+              <entry>French (France)</entry>
+            </row>
+            <row>
+              <entry>it_IT.UTF-8</entry>
+              <entry>Italian (Italy)</entry>
+            </row>
+            <row>
+              <entry>ru_RU.UTF-8</entry>
+              <entry>Russian (Russia)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
   </sect1>
 
   <sect1 id='installation-dependencies'>
@@ -544,6 +617,9 @@ make install</userinput></literallayout>
           <userinput>rpmbuild -tb gwyddion-2.16.tar.bz2</userinput>
         </informalexample>
         where 2.16 is to be replaced with the actual version as above.
+        This method was tested mainly on Fedora, openSuSE and Mandriva and
+        the RPM spec file contains some specific provisions for these systems.
+        Specific support for other RPM-based systems can be added on request.
       </para>
     </sect2>
   </sect1>
@@ -858,7 +934,7 @@ MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
         run-time Gtk+ libraries (DLLs) it needs.  Run
         <command>regedit</command>, create in
         <informalexample>
-          <literal>HKEY_LOCAL_MACHINE→Software→Microsoft→Windows→Current Version→App Paths→Gwyddion.exe</literal>
+          <literal>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\Current Version\App Paths\Gwyddion.exe</literal>
         </informalexample>
         a string key <literal>Path</literal> and put
         <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> there (here again
