@@ -30,7 +30,7 @@ SVG_IMAGES = \
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES))
 # Distribute also BUILT_IMAGES, do not expect everyone to have Inkscape with
 # the right fonts.
-DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
+DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES))
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl
 CSS_STYLES = user-guide.css
@@ -103,7 +103,7 @@ dist:
 	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.c \
 	    user-guide.iss.in $(DISTNAME)
 	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
-	cp $(SVG_IMAGES) $(DIST_IMAGES) $(DISTNAME)/images
+	cp $(DIST_IMAGES) $(DISTNAME)/images
 	cp $(XML_SOURCES) $(DISTNAME)/xml
 	+cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
