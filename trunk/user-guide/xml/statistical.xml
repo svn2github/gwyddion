@@ -1023,25 +1023,25 @@ S = {N_{\rm bound}\over N}\;,\quad
         </inlineequation>
         denotes the total number of pixels,
         <inlineequation>
-          <mathphrase><phrase role='mathvar'>N<subscript>white</subscript></phrase></mathphrase>
+          <mathphrase><phrase role='mathvar'>N</phrase><subscript>white</subscript></mathphrase>
           <alt>N_{\rm white}</alt>
         </inlineequation>
         denotes the number of <quote>white</quote> pixels, that is pixels above
         the threshold. Pixels below the threshold are referred to as
         <quote>black</quote>.  Symbol
         <inlineequation>
-          <mathphrase><phrase role='mathvar'>N<subscript>bound</subscript></phrase></mathphrase>
+          <mathphrase><phrase role='mathvar'>N</phrase><subscript>bound</subscript></mathphrase>
           <alt>N_{\rm bound}</alt>
         </inlineequation>
         denotes the number of white-black pixel boundaries.
         Finally,
         <inlineequation>
-          <mathphrase><phrase role='mathvar'>C<subscript>white</subscript></phrase></mathphrase>
+          <mathphrase><phrase role='mathvar'>C</phrase><subscript>white</subscript></mathphrase>
           <alt>C_{\rm white}</alt>
         </inlineequation>
         and
         <inlineequation>
-          <mathphrase><phrase role='mathvar'>C<subscript>black</subscript></phrase></mathphrase>
+          <mathphrase><phrase role='mathvar'>C</phrase><subscript>black</subscript></mathphrase>
           <alt>C_{\rm black}</alt>
         </inlineequation>
         denote the number of continuous sets of white and black pixels
