@@ -66,7 +66,8 @@
       </textobject>
       <caption>
         Data in default false color representation (left), with superimposed
-        mask (centre) and with shading presentation (right).
+        mask visualized with a red color (centre) and with shading presentation
+        (right).
       </caption>
     </mediaobject>
   </informalfigure>
@@ -234,7 +235,7 @@
     <variablelist>
       <varlistentry>
         <term>
-          <guilabel>Grow</guilabel>
+          <guibutton>Grow</guibutton>
           <guiicon><inlinegraphic fileref='gwy_mask_grow-24.png'/></guiicon>
         </term>
         <listitem>
@@ -254,7 +255,7 @@
       </varlistentry>
       <varlistentry>
         <term>
-          <guilabel>Shrink</guilabel>
+          <guibutton>Shrink</guibutton>
           <guiicon><inlinegraphic fileref='gwy_mask_shrink-24.png'/></guiicon>
         </term>
         <listitem>
@@ -323,6 +324,13 @@
           <para>
             The Presentation mode differs from Data mode only in that a
             presentation is used instead of the data.
+          </para>
+          <para>
+            This is an exception to the rule stating that presentations are
+            never used for further processing.  Sometimes it can be useful to
+            mark, for instance, edges found on the data even though the
+            corresponding presentation visualizes a quantity weird from the
+            physical point of view.
           </para>
         </listitem>
       </varlistentry>
