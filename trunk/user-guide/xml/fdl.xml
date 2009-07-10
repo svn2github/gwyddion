@@ -27,7 +27,7 @@
   </appendixinfo>
   <title>GNU Free Documentation License</title>
   <simplesect id='gfdl-0'>
-    <title>PREAMBLE</title>
+    <title>Preamble</title>
     <para>
       The purpose of this License is to make a manual, textbook, or other
       functional and useful document <quote>free</quote> in the sense of
@@ -54,7 +54,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-1'>
-    <title>APPLICABILITY AND DEFINITIONS</title>
+    <title>Applicability And Definitions</title>
     <para id='gfdl-doc'>
       This License applies to any manual or other work, in any medium, that
       contains a notice placed by the copyright holder saying it can be
@@ -156,7 +156,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-2'>
-    <title>VERBATIM COPYING</title>
+    <title>Verbatim Copying</title>
     <para>
       You may copy and distribute the Document in any medium, either
       commercially or noncommercially, provided that this License, the
@@ -174,7 +174,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-3'>
-    <title>COPYING IN QUANTITY</title>
+    <title>Copying In Quantity</title>
     <para>
       If you publish printed copies (or copies in media that commonly
       have printed covers) of the Document, numbering more than 100, and the
@@ -217,7 +217,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-4'>
-    <title>MODIFICATIONS</title>
+    <title>Modifications</title>
     <para>
       You may copy and distribute a Modified Version of the Document
       under the conditions of sections 2 and 3 above, provided that you
@@ -373,7 +373,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-5'>
-    <title>COMBINING DOCUMENTS</title>
+    <title>Combining Documents</title>
     <para>
       You may combine the Document with other documents released under
       this License, under the terms defined in <link linkend='gfdl-4'>section
@@ -403,7 +403,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-6'>
-    <title>COLLECTIONS OF DOCUMENTS</title>
+    <title>Collections Of Documents</title>
     <para>
       You may make a collection consisting of the Document and other
       documents released under this License, and replace the individual copies
@@ -421,7 +421,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-7'>
-    <title>AGGREGATION WITH INDEPENDENT WORKS</title>
+    <title>Aggregation With Independent Works</title>
     <para>
       A compilation of the Document or its derivatives with other separate
       and independent documents or works, in or on a volume of a storage or
@@ -443,7 +443,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-8'>
-    <title>TRANSLATION</title>
+    <title>Translation</title>
     <para>
       Translation is considered a kind of modification, so you may
       distribute translations of the Document under the terms of section 4.
@@ -466,7 +466,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-9'>
-    <title>TERMINATION</title>
+    <title>Termination</title>
     <para>
       You may not copy, modify, sublicense, or distribute the Document
       except as expressly provided for under this License.  Any other attempt
@@ -478,7 +478,7 @@
     </para>
   </simplesect>
   <simplesect id='gfdl-10'>
-    <title>FUTURE REVISIONS OF THIS LICENSE</title>
+    <title>Future Revisions Of This License</title>
     <para>
       The Free Software Foundation may publish new, revised versions of
       the GNU Free Documentation License from time to time.  Such new versions
