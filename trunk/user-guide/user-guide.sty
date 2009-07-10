@@ -10,4 +10,50 @@
 \def\pmatrix#1{\left(\matrix{#1}\right)}
 % Poor man's vectors, but better than silly arrows
 \let\vec\mathbf
+% Get rid of rev history and other ugly tables
+\let\DBKdomitete=\relax
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+% Format the title page
+\def\DBKcover{
+\ifthenelse{\equal{\DBKedition}{}}{\def\edhead{}}{\def\edhead{Ed. \DBKedition}}
+{\thispagestyle{empty}\sffamily
+\hrule height0pt
+\vskip 0pt plus1filll
+\begin{center}
+\setlength{\baselineskip}{2\oldbaselineskip}
+\Huge{\textbf{\DBKtitle}}
+\end{center}
+\vskip2cm
+\begin{center}
+\Large{\DBKauthor{}}
+\end{center}
+\vskip 0pt plus3filll
+}
+\newpage
+\chead[]{\DBKcheadfront}
+\lfoot[]{}
+}
+% Fix chapter heads
+\def\@makechapterhead#1{%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \sffamily\huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+    \fi
+    \interlinepenalty\@M
+    \sffamily\Huge\bfseries #1\par\nobreak
+    \vskip 20\p@
+  }}
+\def\@makeschapterhead#1{%
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \sffamily\Huge\bfseries  #1\par\nobreak
+    \vskip 20\p@
+  }}
+% Fix vertical spacing in TOC
+\let\latex@dottedtocline=\@dottedtocline
+\def\@dottedtocline{\parskip=1pt plus0.05pt\latex@dottedtocline}
 \catcode`@=12

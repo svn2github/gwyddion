@@ -12,8 +12,7 @@
   <xsl:text>\begin{document}&#10;</xsl:text>
 </xsl:variable>
 
-<xsl:template match='informaltable[@role="toolbox"]'>
-</xsl:template>
+<xsl:template match='informaltable[@role="toolbox"]'/>
 
 <!-- *********************************************************************
 
@@ -118,8 +117,7 @@
   -->
 </xsl:template>
 
-<xsl:template match='colspec'>
-</xsl:template>
+<xsl:template match='colspec'/>
 
 <xsl:template match='thead'>
   <xsl:text>\noalign{\hrule}&#10;</xsl:text>
