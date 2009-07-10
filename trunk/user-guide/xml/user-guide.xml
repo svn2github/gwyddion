@@ -54,39 +54,8 @@
   </bookinfo>
   <xi:include href='introduction.xml'/>
   <xi:include href='install.xml'/>
-  <chapter id='getting-started'>
-    <title>Getting Started</title>
-    <xi:include href='main-window.xml'/>
-    <xi:include href='data-browser.xml'/>
-    <xi:include href='managing-files.xml'/>
-    <xi:include href='data-windows.xml'/>
-    <xi:include href='graph-windows.xml'/>
-    <xi:include href='tools.xml'/>
-    <xi:include href='color-map.xml'/>
-    <xi:include href='presentations-masks.xml'/>
-    <xi:include href='selections.xml'/>
-    <xi:include href='opengl-3d-view.xml'/>
-    <xi:include href='single-point-spectra.xml'/>
-    <xi:include href='metadata.xml'/>
-    <xi:include href='remote-control.xml'/>
-    <xi:include href='raw-file-import.xml'/>
-    <xi:include href='plugins.xml'/>
-  </chapter>
-  <chapter id='data-analysis'>
-    <title>Data Processing and Analysis</title>
-    <xi:include href='basic.xml'/>
-    <xi:include href='leveling.xml'/>
-    <xi:include href='filters.xml'/>
-    <xi:include href='edit.xml'/>
-    <xi:include href='edit-extended.xml'/>
-    <xi:include href='statistical.xml'/>
-    <xi:include href='grains.xml'/>
-    <xi:include href='integral-transforms.xml'/>
-    <xi:include href='fractal.xml'/>
-    <xi:include href='tip.xml'/>
-    <xi:include href='multidata.xml'/>
-    <xi:include href='graph.xml'/>
-  </chapter>
+  <xi:include href='getting-started.xml'/>
+  <xi:include href='data-analysis.xml'/>
   <chapter id='summaries'>
     <title>Summaries and Tables</title>
     <xi:include href='keyboard-shortcuts.xml'/>
