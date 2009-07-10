@@ -14,6 +14,12 @@
 
 <xsl:template match='informaltable[@role="toolbox"]'/>
 
+<xsl:template match="releaseinfo" mode="docinfo">
+  <xsl:text>\def\gwyreleaseinfo{</xsl:text>
+  <xsl:apply-templates select="."/>
+  <xsl:text>}&#10;</xsl:text>
+</xsl:template>
+
 <!-- *********************************************************************
 
          Formulas
