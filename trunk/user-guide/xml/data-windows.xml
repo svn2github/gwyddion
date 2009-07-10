@@ -17,7 +17,7 @@
     selecting appropriate palette from the list of palettes. Mostly used
     palettes are available directly in the context menu; however you can
     reach much more of the possible palettes using the
-    <menuchoice><guimenu>More...</guimenu></menuchoice> menu entry.
+    <menuchoice><guimenuitem>More</guimenuitem></menuchoice> menu entry.
     Moreover, you can use the
     <link linkend='color-gradient-editor'>color gradient editor</link> to
     create your own palettes and select which palettes should be displayed
