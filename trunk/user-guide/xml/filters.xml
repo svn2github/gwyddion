@@ -606,7 +606,7 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Presentation</guisubmenu>
-        <guimenuitem>Local contrast...</guimenuitem>
+        <guimenuitem>Local contrast</guimenuitem>
       </menuchoice>
     </para>
     <para>
