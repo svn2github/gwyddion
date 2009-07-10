@@ -32,9 +32,12 @@ BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES))
 # the right fonts.
 DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES))
 
-XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl
+XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl \
+	version-greater-or-equal.xsl docbook-xsl-version.xsl
 CSS_STYLES = user-guide.css
 TEX_STYLES = user-guide.sty
+BUILD_FILES = README Makefile.in user-guide.iss.in \
+	aclocal.m4 configure configure.ac
 
 @HTML_TRUE@html_target = xhtml
 @HTML_FALSE@html_target =
@@ -100,9 +103,7 @@ clean:
 dist:
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
-	cp Makefile.in aclocal.m4 configure configure.ac README fixpngres.c \
-	    user-guide.iss.in $(DISTNAME)
-	cp $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
+	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
 	cp $(DIST_IMAGES) $(DISTNAME)/images
 	cp $(XML_SOURCES) $(DISTNAME)/xml
 	+cd ./formulas && $(GMAKE) dist
