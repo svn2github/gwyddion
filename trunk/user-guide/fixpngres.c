@@ -16,7 +16,7 @@ static int
 process_file(FILE *fr, const char *rname,
              FILE *fw, const char *wname)
 {
-    enum { MAGIC_BYTES = 8, RESOLUTION = 4724 };
+    enum { MAGIC_BYTES = 8, RESOLUTION = 5906 };
 
     png_structp reader, writer;
     png_infop reader_info, writer_info;

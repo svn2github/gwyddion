@@ -88,7 +88,7 @@ formulas: formulas.stamp
 # another directory
 @SVG_TRUE@images/%.png: images/%.svg
 @SVG_TRUE@	cd images && \
-@SVG_TRUE@	    $(INKSCAPE) --export-dpi=120 --export-background=white \
+@SVG_TRUE@	    $(INKSCAPE) --export-dpi=150 --export-background=white \
 @SVG_TRUE@	        --export-png="$*.png" --file="$*.svg"
 
 @SVG_TRUE@%.pdf: %.svg
