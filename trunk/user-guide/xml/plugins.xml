@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='plugins'>
-  <title>Plugins</title>
+  <title>Plug-ins</title>
   <para>
     Plug-ins are external programs that can be executed by Gwyddion to either
     perform some operation on the data or to read or write data in
@@ -22,5 +22,13 @@
     result. Programming of modules is also no harder than programming of
     plug-ins, maybe it is even easier (assuming you know C).
   </para>
+  <warning>
+    The plug-in mechanism is deprecated.  It will remain supported in Gwyddion
+    2.x, however, it will not be exteneded or improved.  The recommended method
+    to extend Gwyddion by routines in another language is to use language
+    bindings, at this moment a Python interface is available.  The recommended
+    method to run third-party programs is to write a small specialized C module
+    that knows how to communicate with these programs.
+  </warning>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
