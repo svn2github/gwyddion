@@ -18,7 +18,7 @@ DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES := $(wildcard xml/*.xml)
 FORMULA_SOURCES := $(wildcard formulas/*.tex)
-EQ_SOURCES := $(shell grep -l '<textobject role="tex">' $(XML_SOURCES))
+EQ_SOURCES := $(shell grep -l '<textobject role='"'"'tex'"'"'>' $(XML_SOURCES))
 IMAGES := $(shell $(GSED) -e 's/.*<\(imagedata\|inlinegraphic\) [^>]*fileref='"'"'\([^/'"'"']*\)'"'"'.*/\2/' -e t -e d xml/*.xml | sort | uniq) stacked3.png
 PNG_IMAGES := $(filter-out eq-%.png,$(IMAGES))
 IMAGE_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
@@ -148,5 +148,5 @@ help:
 @PNG_FALSE@	@echo "fixpngres    Build fixpngres tool (not available)"
 	@echo "version      Update version number to current date"
 
-.PHONY: all clean dist pdf xhtml dist-xhtml help version distclean
+.PHONY: all clean dist pdf xhtml formulas dist-xhtml help version distclean
 .PRECIOUS: Makefile

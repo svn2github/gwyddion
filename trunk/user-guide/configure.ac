@@ -4,6 +4,7 @@ AC_CONFIG_FILES(\
   Makefile \
   user-guide.iss \
   formulas/Makefile \
+  formulas/render.sh \
 )
 
 PACKAGE_SHORTNAME=user-guide

@@ -1,9 +1,5 @@
 GSED = @GSED@
-TEX = @TEX@
-CONVERT = @CONVERT@
-DVIPS = @DVIPS@
-GS = @GS@
-CC = @CC@
+SHELL = @SHELL@
 
 FORMULAS := $(wildcard eq-*.tex.in)
 TEXS := $(subst .tex.in,.tex,$(FORMULAS))
@@ -34,36 +30,18 @@ png-images: $(PNGS)
 	    mv -f $(T)$@ $@; \
 	fi
 
-%.png: %.tex $(TEMPLATES) Makefile pngsize
-	cat defs.tex header.tex $< footer.tex >$(T)$<
-	$(TEX) --interaction=batchmode $(T)$<
-	$(DVIPS) -q -E -o $(T)$*.ps $(T)$*.dvi
-	. ./$(T)$*.bbox; $(GSED) -i -e "s/^\(%%BoundingBox:\).*/\\1 $$x0 $$y0 $$x1 $$y1/" $(T)$*.ps
-	$(GS) -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile=$(T)$*.png $(T)$*.ps
-	@{ \
-	    eval $$(./pngsize <$(T)$*.png); \
-	    if test $$h -gt 1600; then \
-	        echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2; \
-	        . $(T)$*.bbox; \
-	        eval $$($(GSED) -n '/^\\.size=/{s/^\\//;s/pt$$//;p}' header.tex); \
-	        w=$$((($$w*($$x1 - $$x0) + $$hsize/2)/$$hsize)); \
-	        h=$$((($$h*($$y1 - $$y0) + $$vsize/2)/$$vsize)); \
-	        $(CONVERT) -type Grayscale -crop $${w}x$$h -scale 38.2% -fx 'u^1.3' $(T)$*.png $@; \
-	    else \
-	        $(CONVERT) -type Grayscale -scale 38.2% -fx 'u^1.3' $(T)$*.png $@; \
-	    fi; \
-	}
-	rm $(T)$*.*
+%.png: %.tex $(TEMPLATES) pngsize render.sh
+	$(SHELL) render.sh "$*"
 
 clean:
 	-rm -f eq-*.png eq-*.tex eq-*.tex.in pngsize $(T)* *~
 
 dist:
 	mkdir ../$(DISTNAME)/formulas
-	cp Makefile.in pngsize.c $(TEMPLATES) ../$(DISTNAME)/formulas
+	cp Makefile.in pngsize.c render.sh.in $(TEMPLATES) ../$(DISTNAME)/formulas
 
 distclean: clean
-	-rm -f Makefile
+	-rm -f Makefile render.sh
 
 .PHONY: clean dist formulas all distclean
 .PRECIOUS: Makefile
