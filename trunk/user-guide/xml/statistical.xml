@@ -756,7 +756,10 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
     </sect3>
     <sect3 id='power-spectral-density-1d'>
       <title>Power Spectral Density Function</title>
-      <indexterm><primary>power spectral density function</primary></indexterm>
+      <indexterm>
+        <primary>power spectral density function</primary>
+        <secondary>one-dimensional</secondary>
+      </indexterm>
       <para>
         The two-dimensional power spectral density function can be written in
         terms of the Fourier transform of the autocorrelation function
@@ -906,7 +909,11 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
           </caption>
         </mediaobject>
       </informalfigure>
-      <para>
+      <para id='psdf-radial'>
+        <indexterm>
+          <primary>power spectral density function</primary>
+          <secondary>radial</secondary>
+        </indexterm>
         We can also introduce radial PSDF
         <inlineequation>
           <mathphrase><phrase role='mathvar'>W</phrase><subscript>r</subscript>(<phrase role='mathvar'>K</phrase>)</mathphrase>
