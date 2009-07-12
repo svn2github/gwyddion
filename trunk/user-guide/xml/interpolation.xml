@@ -9,8 +9,8 @@
     Most geometrical transformations, such as rotation, scaling or
     <link linkend='drift-compensation'>drift compensation</link> utilize or
     depend on data interpolation.  Also some other operations, e.g.
-    <link linkend='profile'>profile extraction</link>, work with values
-    between individual pixels and hence include interpolation.  As the SPM data
+    <link linkend='profile'>profile extraction</link>, can work with values
+    between individual pixels and hence involve interpolation.  Since SPM data
     are relatively coarsely sampled compared to measured details (full images
     are typically only a few hundred pixels in width and height), the
     interpolation method used can become critical for proper quantitative

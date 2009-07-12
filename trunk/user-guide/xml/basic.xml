@@ -5,11 +5,10 @@
 <sect1 id='basic-operations'>
   <title>Basic Operations</title>
   <para>
-    Basic geometrical operations are the core of any data processing program.
-    Also Gwyddion has a wide set of functions for data scaling, rotation,
-    resampling or profile extraction. In this section the main algorithms
-    behind these functions will be described and the list of available modules
-    will be presented.
+    Value-reading and basic geometrical operations represent the core of any
+    data processing program.  Gwyddion offers a wide set of functions for data
+    scaling, rotation, resampling or profile extraction.  This section
+    describes these simple but essential functions.
   </para>
   <sect2 id='modules-basic'>
     <title>Basic 2D Data Operations</title>
@@ -20,18 +19,19 @@
     <itemizedlist>
       <listitem id='scale'>
         <indexterm><primary>scaling</primary></indexterm>
-        Scale data using chosen result dimension and chosen interpolation
-        method by
+        <indexterm><primary>resampling</primary></indexterm>
+        Resample the data to chosen dimensions or scale using selected
+        interpolation method by
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
           <guimenuitem>Scale</guimenuitem>
-        </menuchoice>.
+        </menuchoice>
       </listitem>
       <listitem id='crop'>
         <indexterm><primary>cropping</primary></indexterm>
-        Crop data using the <link linkend='tool-crop'>Crop tool</link>,
-        either in place or putting the result to a new channel (with
+        Crop the data using the <link linkend='tool-crop'>Crop tool</link>
+        either in place or putting the result to a new channel (with option
         <guilabel>Create new channel</guilabel>).
         With <guilabel>Keep lateral offsets</guilabel> option enabled, the top
         left corner coordinates of the resulting image correspond to the
@@ -43,45 +43,47 @@
         </inlineequation>.
       </listitem>
       <listitem id='rotate'>
-        <indexterm><primary>rotation</primary></indexterm>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>by multiple of 90°</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>by arbitary angle</secondary>
+        </indexterm>
         Rotate data by 90 degrees or by user-specified amount using some
         of the rotate functions:
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Rotate clockwise</guimenuitem>
+          <guimenuitem>Rotate Clockwise</guimenuitem>
         </menuchoice>,
+        <guimenuitem>Rotate Anticlockwise</guimenuitem>
         or
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Rotate anticlockwise</guimenuitem>
-        </menuchoice>,
-        or
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Rotate</guimenuitem>
-        </menuchoice>.
+        <guimenuitem>Rotate</guimenuitem>.
       </listitem>
       <listitem id='flip'>
-        Flip data horizontally (i.e. about the vertical axis) and vertically
-        (i.e. about the horizontal axis) with
+        <indexterm>
+          <primary>flipping</primary>
+          <secondary>horizontally</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>flipping</primary>
+          <secondary>vertically</secondary>
+        </indexterm>
+        Flip the data horizontally (i.e. about the vertical axis) and
+        vertically (i.e. about the horizontal axis) with
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
           <guimenuitem>Flip Horizontally</guimenuitem>
         </menuchoice>
         and
-        <menuchoice>
-          <guimenu>Data Process</guimenu>
-          <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Flip Vertically</guimenuitem>
-        </menuchoice>,
+        <guimenuitem>Flip Vertically</guimenuitem>,
         respectively.
       </listitem>
       <listitem id='flip-both'>
-        Flip data about the centre with
+        Flip the data about the centre (i.e. about both axes) with
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
@@ -89,20 +91,23 @@
         </menuchoice>.
       </listitem>
       <listitem id='invert-value'>
-        Invert data about the mean value the <guimenuitem>Invert
+        <indexterm><primary>value inversion</primary></indexterm>
+        Invert the data values using the <guimenuitem>Invert
           Value</guimenuitem> function:
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Invert</guimenuitem>
+          <guimenuitem>Invert Value</guimenuitem>
         </menuchoice>.
+        The values are inverted about the mean value which keeps the mean
+        value unchanged.
       </listitem>
-      <indexterm>
-        <primary>aspect ratio</primary>
-        <secondary>resampling to square pixels</secondary>
-      </indexterm>
       <listitem id='square-samples'>
-        Upsample data to make pixels square with
+        <indexterm>
+          <primary>aspect ratio</primary>
+          <secondary>resampling to square pixels</secondary>
+        </indexterm>
+        Upsample the data to make pixels square with
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
@@ -113,9 +118,9 @@
       </listitem>
     </itemizedlist>
     <para id='calibrate'>
-      Moreover, calibration module can be used for changing the information
-      about image physical dimensions and changing the data values
-      calibration:
+      Moreover, the recalibration module can be used for changing the physical
+      dimensions, data value calibration and even to change the units of
+      values and lateral dimensions:
       <menuchoice>
         <guimenu>Data Process</guimenu>
         <guisubmenu>Basic operations</guisubmenu>
@@ -126,10 +131,12 @@
   <sect2 id='basic-value-reading'>
     <title>Reading Values</title>
     <para>
-      The simpliest method of reading values is to place the mouse cursor
-      over the point you want to read value of.  The coordinates and/or
-      value is then displayed in the statusbar.  This method works both with
-      data windows and graph windows.
+      The simpliest value reading method is to place the mouse cursor over the
+      point you want to read value of.  The coordinates and/or value is then
+      displayed in the
+      <link linkend='data-windows'>data window</link> or
+      <link linkend='graph-windows'>graph window</link>
+      status bar.
     </para>
     <sect3 id='read-value'>
       <title>
@@ -149,16 +156,18 @@
         value from a circular neighbourhood around the selected point, this
         is controlled by option <guilabel>Averaging radius</guilabel>.  When
         the radius is 1, the value of a single pixel is displayed (as the
-        simpliest method does). In addition it can display the inclination of
-        the local facet. <guilabel>Averaging radius</guilabel> again
-        determines the radius of the area to use for the plane fit.
-        Button <guibutton>Set zero</guibutton> shifts the values to make the
-        current
+        simplest method does).  Button <guibutton>Set Zero</guibutton> shifts
+        the surface to make the current
         <inlineequation>
           <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
           <alt>z</alt>
         </inlineequation>
-        the new zero.
+        the new zero level.
+      </para>
+      <para>
+        <guilabel>Read Value</guilabel> can also display the inclination of the
+        local facet. <guilabel>Averaging radius</guilabel> again determines the
+        radius of the area to use for the plane fit.
       </para>
     </sect3>
     <sect3 id='inclinations-coordinates'>
@@ -168,7 +177,7 @@
         <secondary>calculation</secondary>
       </indexterm>
       <para>
-        In all Gwyddion tools facet and plane inclinations are displayed as
+        In all Gwyddion tools, facet and plane inclinations are displayed as
         the spherical angles
         <inlineequation>
           <mathphrase>(<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
@@ -187,7 +196,7 @@
           <mathphrase><phrase role='mathvar'>ϑ</phrase> = 0</mathphrase>
           <alt>\vartheta=0</alt>
         </inlineequation>
-        for horizontal facets and increases with the slope. It is always
+        for horizontal facets and it increases with the slope. It is always
         positive.
       </para>
       <para>
@@ -253,7 +262,7 @@
       <indexterm><primary>distance measurement</primary></indexterm>
       <indexterm><primary>angle measurement</primary></indexterm>
       <para>
-        Distances and differences can be read with
+        Distances and differences can be measured with the
         <guilabel>Distance</guilabel> tool.  It displays the horizontal
         (<inlineequation>
           <mathphrase>Δ<phrase role='mathvar'>x</phrase></mathphrase>
@@ -310,20 +319,19 @@
       Profile Extraction
       <guiicon><inlinegraphic fileref='gwy_profile-24.png'/></guiicon>
     </title>
-    <indexterm><primary>Profile extraction</primary></indexterm>
+    <indexterm><primary>profile extraction</primary></indexterm>
     <para>
-      Profile extraction tool can be accessed from the tools menu bar. You
-      can use mouse to drag several profiles in the image that can be
-      further moved and adjusted. Profile graph preview can be seen in the
-      profile tool dialog. Profiles can be of different
-      <quote>thickness</quote> which means that more neighbour data
-      perpendicular to profile direction are used for evaluation of one
-      profile point for thicker profiles. This can be very useful for noise
-      suppression while measuring some regular objects.
+      The profile extraction tool can be accessed from the toolbox. You
+      can use mouse to draw several profiles in the image and they can be
+      further moved and adjusted. The dialog includes a live profile graph
+      preview.  Profiles can be of different <quote>thickness</quote> which
+      means that more neighbour data perpendicular to profile direction are
+      used for evaluation of one profile point for thicker profiles. This can
+      be very useful for noise suppression while measuring regular objects.
     </para>
     <para>
       After profiles are chosen, they can be extracted to graphs (separate
-      of merged in one Graph window) that can be further analysed using
+      or grouped in one Graph window) that can be further analysed using
       Graph functions.
     </para>
     <informalfigure id='fit-profile-screenshot'>
@@ -339,6 +347,16 @@
         </caption>
       </mediaobject>
     </informalfigure>
+    <para>
+      The profile curve is constructed from data sampled at regular intervals
+      along the selected line.  Values in points that do not lie exactly at
+      pixel centres (which normally occurs for oblique lines) are interpolated
+      using the chosen <link linkend='interpolation'>interpolation</link> mode.
+      Unless an explicit number of samples to take is set using the
+      <guilabel>Fix res.</guilabel> option, the number of samples corresponds
+      to the line length in pixels.  This means that for purely horizontal
+      or purely vertical lines no interpolation occurs.
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
