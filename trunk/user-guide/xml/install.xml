@@ -177,7 +177,7 @@
     </para>
     <variablelist>
       <title>Build Dependencies</title>
-      <varlistentry>
+      <varlistentry id='dependency-gtk'>
         <term>
           <ulink url='http://www.gtk.org/'>Gtk+</ulink>
           ≥ 2.8.0
@@ -188,7 +188,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-pkg-config'>
         <term>
           <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
           ≥ 0.16
@@ -199,7 +199,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-gtkglext'>
         <term>
           <ulink url='http://gtkglext.sourceforge.net/'>GtkGLExt</ulink>
           ≥ 1.0
@@ -217,7 +217,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-libxml2'>
         <term>
           <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
           ≥ 2.<varname>x</varname>
@@ -235,7 +235,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-fftw'>
         <term>
           <ulink url='http://www.fftw.org/'>FFTW3</ulink>
           ≥ 3.0 (32bit),
@@ -257,7 +257,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-libxmu'>
         <term>
           <ulink url='http://www.x.org/'>LibXmu</ulink>, X11 only
         </term>
@@ -274,7 +274,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-pygtk2'>
         <term>
           <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
         </term>
@@ -291,7 +291,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-gtksourceview'>
         <term>
           <ulink url='http://gtksourceview.sourceforge.net/'>GtkSourceView</ulink>
         </term>
@@ -304,7 +304,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-desktop-file-utils'>
         <term>
           <ulink url='http://www.freedesktop.org/software/desktop-file-utils'>desktop-file-utils</ulink>,
           Unix only
@@ -320,7 +320,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='dependency-gconf2'>
         <term>
           <ulink url='http://projects.gnome.org/gconf/'>GConf2</ulink>,
           Unix only
