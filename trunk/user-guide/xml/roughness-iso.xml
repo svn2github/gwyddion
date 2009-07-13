@@ -37,7 +37,7 @@ r_j = z_j - \bar z
   <sect2 id='roughness-iso-amplitude'>
     <title>Roughness Amplitude Parameters</title>
     <variablelist>
-      <varlistentry>
+      <varlistentry id='iso-Ra'>
         <term>
           Roughness Average
           <inlineequation>
@@ -83,7 +83,7 @@ R_{\rm a} = {1\over N} \sum_{j=1}^N |r_j|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rq'>
         <term>
           Root Mean Square Roughness
           <inlineequation>
@@ -115,7 +115,7 @@ R_{\rm q} = \sqrt{{1\over N} \sum_{j=1}^N r_j^2}
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rt'>
         <term>
           Maximum Height of the Profile
           <inlineequation>
@@ -148,7 +148,7 @@ R_{\rm t} = \left| \min\limits_{1\le j\le N} r_j  \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rm-Rv'>
         <term>
           Maximum Profile Valley Depth
           <inlineequation>
@@ -185,7 +185,7 @@ R_{\rm v} = \left| \min\limits_{1\le j\le N} r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rp'>
         <term>
           Maximum Profile Peak Height
           <inlineequation>
@@ -218,7 +218,7 @@ R_{\rm p} = \left| \max\limits_{1\le j\le N} r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rtm'>
         <term>
           Average Maximum Height of the Profile
           <inlineequation>
@@ -267,7 +267,7 @@ R_{{\rm t}m} = R_{{\rm v}m} + R_{{\rm p}m}
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rvm'>
         <term>
           Average Maximum Profile Valley Depth
           <inlineequation>
@@ -321,7 +321,7 @@ R_{{\rm v}i} = \left| \min r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rpm'>
         <term>
           Average Maximum Profile Peak Height
           <inlineequation>
@@ -375,7 +375,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-R3z'>
         <term>
           Base roughness depth
           <inlineequation>
@@ -394,7 +394,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-R3zISO'>
         <term>
           Base roughness profile depth
           <inlineequation>
@@ -413,7 +413,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rz'>
         <term>
           Ten-point height
           <inlineequation>
@@ -431,7 +431,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-RzISO'>
         <term>
           Average peak-to-valley profile roughness
           <inlineequation>
@@ -454,7 +454,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-ADF'>
         <term>
           The Amplitude Distribution Function ADF
         </term>
@@ -478,7 +478,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-BRC'>
         <term>
           The Bearing Ratio Curve BRC
         </term>
@@ -494,7 +494,7 @@ R_{{\rm p}i} = \left| \max r_j \right|
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rsk'>
         <term>
           Skewness
           <inlineequation>
@@ -528,7 +528,7 @@ R_{\rm sk}= {1\over N R_q^3} \sum_{j=1}^N r_j^3
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='iso-Rku'>
         <term>
           Kurtosis
           <inlineequation>
