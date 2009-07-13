@@ -241,16 +241,16 @@
                 <primary>minimum</primary>
                 <secondary>of a grain</secondary>
               </indexterm>
-              <guilabel>Maximum</guilabel>,
-              the maximum value (height) occuring inside the grain.
+              <guilabel>Minimum</guilabel>,
+              the minimum value (height) occuring inside the grain.
             </listitem>
             <listitem>
               <indexterm>
                 <primary>maximum</primary>
                 <secondary>of a grain</secondary>
               </indexterm>
-              <guilabel>Minimum</guilabel>,
-              the minimum value (height) occuring inside the grain.
+              <guilabel>Maximum</guilabel>,
+              the maximum value (height) occuring inside the grain.
             </listitem>
             <listitem>
               <indexterm>
@@ -269,6 +269,25 @@
               <guilabel>Median</guilabel>
               the median of all values occuring inside the grain, that is the
               median grain height.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>on a grain boundary</secondary>
+              </indexterm>
+              <guilabel>Minimum on boundary</guilabel>,
+              the maximum value (height) occuring on the inner grain boundary.
+              This means within the set of pixels that lie inside the grain
+              but at least one of their neighbours lies outside.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>on a grain boundary</secondary>
+              </indexterm>
+              <guilabel>Maximum on boundary</guilabel>,
+              the maximum value (height) occuring on the inner grain boundary,
+              defined simiarly to the minimum.
             </listitem>
           </itemizedlist>
         </listitem>
