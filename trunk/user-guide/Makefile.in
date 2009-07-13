@@ -69,7 +69,7 @@ pdf: $(PACKAGE).pdf
 xhtml: xhtml.stamp
 
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
-@HTML_TRUE@xhtml.stamp: formulas $(XML_SOURCES) $(IMAGE_IMAGES) xhtml.xsl
+@HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
