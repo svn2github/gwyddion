@@ -26,11 +26,16 @@ SVG_IMAGES = \
 	boundary_length.svg \
 	grain-bounding-dims.svg \
 	inclination.svg \
+	profile-interpolation.svg \
+	step-edge.svg \
 	unrotate-symmetries.svg
+PNG_SOURCE_IMAGES = \
+	profile-interpolation-graphs.png \
+	profile-interpolation-image.png
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES))
 # Distribute also BUILT_IMAGES, do not expect everyone to have Inkscape with
 # the right fonts.
-DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES))
+DIST_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES))
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl \
 	version-greater-or-equal.xsl docbook-xsl-version.xsl
