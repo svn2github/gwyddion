@@ -60,4 +60,15 @@
 % Fix vertical spacing in TOC
 \let\latex@dottedtocline=\@dottedtocline
 \def\@dottedtocline{\parskip=1pt plus0.05pt\latex@dottedtocline}
+% Format informal captions
+\long\def\gwycaption#1{%
+  \sbox\@tempboxa{#1}%
+  \ifdim \wd\@tempboxa >\hsize
+    \begingroup
+    \leftskip=\z@skip \rightskip=\z@skip \parfillskip=0pt plus1fil\relax
+    #1\par
+    \endgroup
+  \else
+    #1\par
+  \fi}
 \catcode`@=12

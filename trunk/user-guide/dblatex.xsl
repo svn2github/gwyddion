@@ -22,6 +22,21 @@
 
 <!-- *********************************************************************
 
+         Captions
+
+     ********************************************************************* -->
+<xsl:template match="mediaobject/caption">
+  <xsl:text>\gwycaption{</xsl:text>
+  <xsl:value-of select="$mediaobject.caption.style"/>
+  <xsl:text> </xsl:text>
+  <xsl:apply-templates/>
+  <!-- dblatex calls "normalize-scape" on "."  This unfortunately kills
+       formulas embedded in the caption. -->
+  <xsl:text>}</xsl:text>
+</xsl:template>
+
+<!-- *********************************************************************
+
          Formulas
 
      ********************************************************************* -->
