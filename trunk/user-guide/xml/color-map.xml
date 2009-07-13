@@ -139,6 +139,11 @@
             gradient and smaller value variations can be seen on them than
             normally.
           </para>
+          <para>
+            The false color map ruler on the right side of
+            <link linkend='data-windows'>data windows</link> does not display
+            any ticks in this mode, only the minimum and maximum value.
+          </para>
         </listitem>
       </varlistentry>
     </variablelist>
