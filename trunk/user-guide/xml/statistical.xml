@@ -1093,7 +1093,7 @@ S = {N_{\rm bound}\over N}\;,\quad
       <link linkend='sfunctions'>Statistical Functions</link> tool.
       Available quantities include:
     </para>
-    <orderedlist>
+    <itemizedlist>
       <listitem>
         <indexterm>
           <primary>mean</primary>
@@ -1167,7 +1167,7 @@ S = {N_{\rm bound}\over N}\;,\quad
         <link linkend='iso-Rz'>Rz</link>,
         <link linkend='iso-Rt'>Rt</link>.
       </listitem>
-    </orderedlist>
+    </itemizedlist>
     <para>
       In addition to the graph displaying the values for individual
       rows/columns, the mean value and standard deviation of the selected
