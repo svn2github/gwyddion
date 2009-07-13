@@ -334,7 +334,7 @@
       or grouped in one Graph window) that can be further analysed using
       Graph functions.
     </para>
-    <informalfigure id='fit-profile-screenshot'>
+    <informalfigure id='fig-profile-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='profiles.png' format='PNG'/>
@@ -357,6 +357,27 @@
       to the line length in pixels.  This means that for purely horizontal
       or purely vertical lines no interpolation occurs.
     </para>
+    <informalfigure id='fig-profile-interpolation'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Profile subpixel interpolation scheme</phrase>
+        </textobject>
+        <caption>
+          Illustration of data sampling in profile extraction for oblique
+          lines.  The figures on the left show the points along the line where
+          the values are read for natural and very high resolution.  The graphs
+          on the right show the extracted values.  Comparison of the natural
+          and high resolution profiles taken with Round interpolation reveals
+          that indeed natural-resolution curve points form a subset of the
+          high-resolution points.  The influence of the interpolation method
+          on values taken in non-grid positions is demonstrated by the lower
+          two graphs, comparing Round and Key interpolation at high resolution.
+        </caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
