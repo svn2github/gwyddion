@@ -6,9 +6,6 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:exsl="http://exslt.org/common"
                 extension-element-prefixes="exsl">
-<xsl:output method="text"
-            encoding="utf-8"
-            indent="no"/>
 
 <xsl:template name="write-eq">
   <xsl:param name="filename"/>
@@ -24,8 +21,12 @@
       -->
       <!-- Seems we need omit-xml-declaration explicitly here -->
       <exsl:document href="{$filename}"
+                     method="text"
+                     indent="no"
+                     encoding="utf-8"
                      omit-xml-declaration="yes">
-        <xsl:copy-of select="$formula"/>
+        <xsl:copy-of select="normalize-space($formula)"/>
+        <xsl:text>&#10;</xsl:text>
       </exsl:document>
     </xsl:when>
     <xsl:otherwise>
@@ -38,7 +39,7 @@
   </xsl:choose>
 </xsl:template>
 
-<xsl:template match="book">
+<xsl:template match="/">
   <xsl:for-each select="//informalequation">
     <xsl:choose>
       <xsl:when test="not(@id)">
