@@ -1118,7 +1118,14 @@ S = {N_{\rm bound}\over N}\;,\quad
           <primary>rms</primary>
           <secondary>of a row/column</secondary>
         </indexterm>
-        RMS value of the height irregularities computed from data variance.
+        RMS value of the height irregularities computed from data variance
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>R</phrase><subscript>q</subscript></mathphrase>
+          <alt>R_{\rm q}</alt>
+        </inlineequation>.
+      </listitem>
+      <listitem>
+        Skewness and kurtosis of the height distribution.
       </listitem>
       <listitem>
         Surface line length.  It is estimated as the total length of the
@@ -1153,7 +1160,19 @@ S = {N_{\rm bound}\over N}\;,\quad
           </mediaobject>
         </informalequation>
       </listitem>
+      <listitem>
+        Standard roughness parameters
+        <!-- FIXME: Formulas break inside links in dblatex. -->
+        <link linkend='iso-Ra'>Ra</link>,
+        <link linkend='iso-Rz'>Rz</link>,
+        <link linkend='iso-Rt'>Rt</link>.
+      </listitem>
     </orderedlist>
+    <para>
+      In addition to the graph displaying the values for individual
+      rows/columns, the mean value and standard deviation of the selected
+      quantity is calculated from the set of individual row/column values.
+    </para>
   </sect2>
   <sect2 id='slope-distribution'>
     <title>Two-Dimensional Slope Statistics</title>
