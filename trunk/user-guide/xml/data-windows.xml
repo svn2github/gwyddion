@@ -12,11 +12,11 @@
     window.
   </para>
   <para>
-    Color palette used to represent height data can be changed by clicking on
-    the color axis with right mouse button (i.e. invoking context menu) and
-    selecting appropriate palette from the list of palettes. Mostly used
-    palettes are available directly in the context menu; however you can
-    reach much more of the possible palettes using the
+    The False color palette used to represent height data can be changed by
+    clicking on the color axis with right mouse button (i.e. invoking context
+    menu) and selecting a palette from the list. Most frequently used palettes
+    are available directly in the context menu; however you can reach much more
+    of the possible palettes using the
     <menuchoice><guimenuitem>More</guimenuitem></menuchoice> menu entry.
     Moreover, you can use the
     <link linkend='color-gradient-editor'>color gradient editor</link> to
