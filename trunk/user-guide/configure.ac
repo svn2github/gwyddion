@@ -112,7 +112,10 @@ fi
 
 AC_CHECK_PROGS([INKSCAPE],[inkscape],[no])
 if test "$INKSCAPE" = no; then
-  GWY_SVG_MISSING="${GWY_SVG_MISSING}  ikscape, get Inkscape from http://www.inkscape.org/
+  GWY_SVG_MISSING="whatever"
+  GWY_HTML_MISSING="${GWY_HTML_MISSING}  inkscape, get Inkscape from http://www.inkscape.org/
+"
+  GWY_PDF_MISSING="${GWY_PDF_MISSING}  inkscape, get Inkscape from http://www.inkscape.org/
 "
 fi
 
@@ -141,11 +144,6 @@ fi
 if test x != "x$GWY_PNG_MISSING"; then
 AC_MSG_WARN([Cannot build fixpngres, the following tools were not found:
 $GWY_PNG_MISSING])
-fi
-
-if test x != "x$GWY_SVG_MISSING"; then
-AC_MSG_WARN([Cannot build convert SVG images, the following tools were not found:
-$GWY_SVG_MISSING])
 fi
 
 echo "Run '$GMAKE help' for some help."
