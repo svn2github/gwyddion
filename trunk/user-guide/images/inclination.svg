@@ -19,8 +19,9 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.46+devel"
-   sodipodi:docname="inclination.fig"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   sodipodi:docname="inclination.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
   <metadata
      id="metadata50">
     <rdf:RDF>
@@ -29,7 +30,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -53,157 +54,127 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1172"
-     inkscape:window-height="995"
+     inkscape:window-height="750"
      id="namedview46"
      showgrid="false"
-     inkscape:zoom="2.7803615"
-     inkscape:cx="193.50002"
-     inkscape:cy="135"
+     inkscape:zoom="5.560723"
+     inkscape:cx="196.85357"
+     inkscape:cy="170.96655"
      inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:current-layer="svg2" />
-  <g
-     style="stroke-width:.025in; stroke:black; fill:none"
-     id="g4">
-    <!-- Line -->
-    <polygon
-       points="5625,9300 5325,8100 4425,6900 4725,8100 5625,9300 "
-       style="stroke:#000000;stroke-width:15; stroke-linejoin:miter; stroke-linecap:butt; fill:#87cfff; "
-       id="polygon6" />
-    <!-- Line -->
-    <polygon
-       points="2250,8100 5250,8100 7350,6900 4350,6900 2250,8100 "
-       style="stroke:#000000;stroke-width:15; stroke-linejoin:miter; stroke-linecap:butt; fill:#ffffff; "
-       id="polygon8" />
-    <!-- Line -->
-    <polygon
-       points="4725,8100 4425,6900 3525,5700 3825,6900 4725,8100 "
-       style="stroke:#000000;stroke-width:15; stroke-linejoin:miter; stroke-linecap:butt; fill:#87cfff; "
-       id="polygon10" />
-    <!-- Arc -->
-    <path
-       style="stroke:#000000;stroke-width:7;stroke-linecap:butt;"
-       d="M 5780,7207 A 538 538  0  0  1  5871  7497 "
-       id="path12" />
-    <!-- Arc -->
-    <path
-       style="stroke:#000000;stroke-width:7;stroke-linecap:butt;"
-       d="M 4578,6577 A 653 653  0  0  1  5091  6815 "
-       id="path14" />
-    <!-- Line -->
-    <polyline
-       points="2250,8100 4350,6900 7350,6900 "
-       style="stroke:#000000;stroke-width:15; stroke-linejoin:miter; stroke-linecap:butt; stroke-dasharray:60 60;"
-       id="polyline16" />
-    <!-- Line -->
-    <polyline
-       points="4425,6900 5325,8100 "
-       style="stroke:#000000;stroke-width:15; stroke-linejoin:miter; stroke-linecap:butt; stroke-dasharray:60 60;"
-       id="polyline18" />
-    <!-- Line -->
-    <polyline
-       points="4575,7500 6958,7500 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="polyline20" />
-    <!-- Arrowhead on XXXpoint 4575 7500 - 6990 7500-->
-    <polyline
-       points="6853 7530 6973 7500 6853 7470 "
-       style="stroke:#000000;stroke-width:7; "
-       id="polyline22" />
-    <!-- Line -->
-    <polyline
-       points="4575,7500 6450,7050 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; stroke-dasharray:40 40;"
-       id="polyline24" />
-    <!-- Line -->
-    <polyline
-       points="4575,7500 5540,6237 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="polyline26" />
-    <!-- Arrowhead on XXXpoint 4575 7500 - 5559 6213-->
-    <polyline
-       points="5499 6339 5549 6226 5452 6303 "
-       style="stroke:#000000;stroke-width:7; "
-       id="polyline28" />
-    <!-- Line -->
-    <polyline
-       points="5550,6225 5550,7275 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; stroke-dasharray:40 40;"
-       id="polyline30" />
-    <!-- Line -->
-    <polyline
-       points="4575,7500 4575,6166 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="polyline32" />
-    <!-- Arrowhead on XXXpoint 4575 7500 - 4575 6135-->
-    <polyline
-       points="4605 6272 4575 6152 4545 6272 "
-       style="stroke:#000000;stroke-width:7; "
-       id="polyline34" />
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="7050"
-       y="7650"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Times"
-       font-style="italic"
-       font-weight="normal"
-       font-size="168"
-       text-anchor="start"
-       id="text36">x</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="4425"
-       y="6150"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Times"
-       font-style="italic"
-       font-weight="normal"
-       font-size="168"
-       text-anchor="start"
-       id="text38">z</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="5325"
-       y="6225"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Times"
-       font-style="italic"
-       font-weight="bold"
-       font-size="168"
-       text-anchor="start"
-       id="text40">n</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="4852"
-       y="6540"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Times,Symbol"
-       font-style="normal"
-       font-weight="normal"
-       font-size="168"
-       text-anchor="start"
-       id="text42">ϑ</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="5949"
-       y="7397"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Times,Symbol"
-       font-style="normal"
-       font-weight="normal"
-       font-size="168"
-       text-anchor="start"
-       id="text44">ϕ</text>
-  </g>
+     inkscape:window-y="24"
+     inkscape:current-layer="svg2"
+     inkscape:window-maximized="0" />
+  <polygon
+     id="polygon6"
+     style="fill:#87cfff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4425,6900 4725,8100 5625,9300 5625,9300 5325,8100 " />
+  <polygon
+     id="polygon8"
+     style="fill:#ffffff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="7350,6900 4350,6900 2250,8100 2250,8100 5250,8100 " />
+  <polygon
+     id="polygon10"
+     style="fill:#87cfff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="3525,5700 3825,6900 4725,8100 4725,8100 4425,6900 " />
+  <path
+     id="path12"
+     d="m 5780,7207 a 538,538 0 0 1 91,290"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <path
+     id="path14"
+     d="m 4578,6577 a 653,653 0 0 1 513,238"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <polyline
+     id="polyline16"
+     style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:60, 60"
+     points="2250,8100 4350,6900 7350,6900 " />
+  <polyline
+     id="polyline18"
+     style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:60, 60"
+     points="4425,6900 5325,8100 " />
+  <polyline
+     id="polyline20"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 6958,7500 " />
+  <polyline
+     id="polyline22"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="6853 7530 6973 7500 6853 7470 " />
+  <polyline
+     id="polyline24"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:40, 40"
+     points="4575,7500 6450,7050 " />
+  <polyline
+     id="polyline26"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 5540,6237 " />
+  <polyline
+     id="polyline28"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="5499 6339 5549 6226 5452 6303 " />
+  <polyline
+     id="polyline30"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:40, 40"
+     points="5550,6225 5550,7275 " />
+  <polyline
+     id="polyline32"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 4575,6166 " />
+  <polyline
+     id="polyline34"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="4605 6272 4575 6152 4545 6272 " />
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text36"
+     font-size="168"
+     font-weight="normal"
+     font-style="italic"
+     y="7650"
+     x="7050"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">x</text>
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text38"
+     font-size="168"
+     font-weight="normal"
+     font-style="italic"
+     y="6150"
+     x="4425"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">z</text>
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:bold;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Bold Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text40"
+     font-size="168"
+     font-weight="bold"
+     font-style="italic"
+     y="6225"
+     x="5325"
+     xml:space="preserve"
+     sodipodi:linespacing="125%"><tspan
+       style="font-weight:bold;-inkscape-font-specification:Linux Libertine Bold Italic;font-family:Linux Libertine;font-style:italic;font-stretch:normal;font-variant:normal"
+       id="tspan2852">n</tspan></text>
+  <text
+     style="font-size:168px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal"
+     id="text42"
+     font-size="168"
+     font-weight="normal"
+     font-style="normal"
+     y="6540"
+     x="4852"
+     xml:space="preserve">ϑ</text>
+  <text
+     style="font-size:168.00000358px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:100%"
+     id="text44"
+     font-size="168"
+     font-weight="normal"
+     font-style="normal"
+     y="7397"
+     x="5949"
+     xml:space="preserve"
+     sodipodi:linespacing="100%"><tspan
+       sodipodi:role="line"
+       id="tspan2856">φ</tspan></text>
 </svg>

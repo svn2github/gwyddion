@@ -19,8 +19,9 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.46+devel"
-   sodipodi:docname="unrotate-symmetries.fig"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   sodipodi:docname="unrotate-symmetries.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
   <metadata
      id="metadata104">
     <rdf:RDF>
@@ -29,7 +30,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -52,293 +53,246 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="640"
-     inkscape:window-height="480"
+     inkscape:window-width="1280"
+     inkscape:window-height="753"
      id="namedview100"
      showgrid="false"
-     inkscape:zoom="1.4056846"
+     inkscape:zoom="2.8113692"
      inkscape:cx="193.50002"
-     inkscape:cy="36"
-     inkscape:window-x="532"
-     inkscape:window-y="0"
-     inkscape:current-layer="svg2" />
+     inkscape:cy="34.577206"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:current-layer="svg2"
+     inkscape:window-maximized="1" />
   <g
-     style="stroke-width:.025in; stroke:black; fill:none"
-     id="g4">
-    <!-- Line -->
+     id="g2906"
+     transform="translate(-67.849502,0)">
     <polyline
        points="3045,3600 3405,3600 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline6" />
-    <!-- Arrowhead on XXXpoint 2925 3600 - 3540 3600-->
     <polygon
-       points="3404 3630 3524 3600 3404 3570 3404 3630  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="3404,3630 3404,3630 3524,3600 3404,3570 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon8" />
-    <!-- Arrowhead on XXXpoint 3525 3600 - 2910 3600-->
     <polygon
-       points="3046 3570 2926 3600 3046 3630 3046 3570  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="3046,3570 3046,3570 2926,3600 3046,3630 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon10" />
-    <!-- Line -->
     <polyline
        points="3225,3781 3225,3419 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline12" />
-    <!-- Arrowhead on XXXpoint 3225 3900 - 3225 3285-->
     <polygon
-       points="3255 3421 3225 3301 3195 3421 3255 3421  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="3255,3421 3255,3421 3225,3301 3195,3421 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon14" />
-    <!-- Arrowhead on XXXpoint 3225 3300 - 3225 3915-->
     <polygon
-       points="3195 3779 3225 3899 3255 3779 3195 3779  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="3195,3779 3195,3779 3225,3899 3255,3779 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon16" />
-    <!-- Line -->
+  </g>
+  <g
+     id="g2914">
     <polyline
        points="1875,3600 1875,3419 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline18" />
-    <!-- Arrowhead on XXXpoint 1875 3600 - 1875 3285-->
     <polygon
-       points="1905 3421 1875 3301 1845 3421 1905 3421  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="1845,3421 1905,3421 1905,3421 1875,3301 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon20" />
-    <!-- Line -->
     <polyline
        points="1875,3600 1694,3717 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline22" />
-    <!-- Arrowhead on XXXpoint 1875 3600 - 1582 3791-->
     <polygon
-       points="1680 3691 1596 3782 1712 3741 1680 3691  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="1712,3741 1680,3691 1680,3691 1596,3782 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon24" />
-    <!-- Line -->
     <polyline
        points="1875,3600 2055,3717 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline26" />
-    <!-- Arrowhead on XXXpoint 1875 3600 - 2167 3791-->
     <polygon
-       points="2036 3741 2153 3782 2068 3691 2036 3741  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="2068,3691 2036,3741 2036,3741 2153,3782 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon28" />
-    <!-- Line -->
     <polyline
        points="2250,3600 2250,3780 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline30" />
-    <!-- Arrowhead on XXXpoint 2250 3600 - 2250 3915-->
     <polygon
-       points="2220 3779 2250 3899 2280 3779 2220 3779  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="2280,3779 2220,3779 2220,3779 2250,3899 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon32" />
-    <!-- Line -->
     <polyline
        points="2250,3600 2069,3482 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline34" />
-    <!-- Arrowhead on XXXpoint 2250 3600 - 1957 3408-->
     <polygon
-       points="2087 3457 1971 3417 2054 3507 2087 3457  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="2054,3507 2087,3457 2087,3457 1971,3417 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon36" />
-    <!-- Line -->
     <polyline
        points="2250,3600 2430,3482 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline38" />
-    <!-- Arrowhead on XXXpoint 2250 3600 - 2542 3408-->
     <polygon
-       points="2444 3507 2528 3417 2411 3457 2444 3507  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="2411,3457 2444,3507 2444,3507 2528,3417 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon40" />
-    <!-- Line -->
+  </g>
+  <g
+     id="g2944"
+     transform="translate(67.633278,0)">
     <polyline
        points="5100,3600 5100,3419 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline42" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 5100 3285-->
     <polygon
-       points="5130 3421 5100 3301 5070 3421 5130 3421  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="5130,3421 5100,3301 5070,3421 5130,3421 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon44" />
-    <!-- Line -->
     <polyline
        points="5100,3600 4919,3717 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline46" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 4807 3791-->
     <polygon
-       points="4905 3691 4821 3782 4937 3741 4905 3691  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="4905,3691 4821,3782 4937,3741 4905,3691 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon48" />
-    <!-- Line -->
     <polyline
        points="5100,3600 5280,3717 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline50" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 5392 3791-->
     <polygon
-       points="5261 3741 5378 3782 5293 3691 5261 3741  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="5261,3741 5378,3782 5293,3691 5261,3741 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon52" />
-    <!-- Line -->
     <polyline
        points="5100,3600 5100,3780 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline54" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 5100 3915-->
     <polygon
-       points="5070 3779 5100 3899 5130 3779 5070 3779  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="5070,3779 5100,3899 5130,3779 5070,3779 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon56" />
-    <!-- Line -->
     <polyline
        points="5100,3600 4919,3482 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline58" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 4807 3408-->
     <polygon
-       points="4937 3457 4821 3417 4904 3507 4937 3457  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="4937,3457 4821,3417 4904,3507 4937,3457 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon60" />
-    <!-- Line -->
     <polyline
        points="5100,3600 5280,3482 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline62" />
-    <!-- Arrowhead on XXXpoint 5100 3600 - 5392 3408-->
     <polygon
-       points="5294 3507 5378 3417 5261 3457 5294 3507  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="5294,3507 5378,3417 5261,3457 5294,3507 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon64" />
-    <!-- Line -->
+  </g>
+  <g
+     id="g2928">
     <polyline
        points="795,3600 1155,3600 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline66" />
-    <!-- Arrowhead on XXXpoint 675 3600 - 1290 3600-->
     <polygon
-       points="1154 3630 1274 3600 1154 3570 1154 3630  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="1154,3570 1154,3630 1154,3630 1274,3600 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon68" />
-    <!-- Arrowhead on XXXpoint 1275 3600 - 660 3600-->
     <polygon
-       points="796 3570 676 3600 796 3630 796 3570  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="796,3630 796,3570 796,3570 676,3600 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon70" />
-    <!-- Line -->
     <polyline
        points="525,3781 525,3419 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline72" />
-    <!-- Arrowhead on XXXpoint 525 3900 - 525 3285-->
     <polygon
-       points="555 3421 525 3301 495 3421 555 3421  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="495,3421 555,3421 555,3421 525,3301 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon74" />
-    <!-- Arrowhead on XXXpoint 525 3300 - 525 3915-->
     <polygon
-       points="495 3779 525 3899 555 3779 495 3779  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="555,3779 495,3779 495,3779 525,3899 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon76" />
-    <!-- Line -->
+  </g>
+  <g
+     id="g2936"
+     transform="translate(18.171875,0)">
     <polyline
        points="3985,3460 4265,3740 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline78" />
-    <!-- Arrowhead on XXXpoint 3900 3375 - 4360 3835-->
     <polygon
-       points="4242 3760 4349 3824 4285 3717 4242 3760  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="4242,3760 4242,3760 4349,3824 4285,3717 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon80" />
-    <!-- Arrowhead on XXXpoint 4350 3825 - 3890 3365-->
     <polygon
-       points="4007 3439 3901 3376 3964 3482 4007 3439  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="4007,3439 4007,3439 3901,3376 3964,3482 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon82" />
-    <!-- Line -->
     <polyline
        points="4266,3460 3984,3740 "
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
+       style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
        id="polyline84" />
-    <!-- Arrowhead on XXXpoint 4350 3375 - 3889 3835-->
     <polygon
-       points="3963 3718 3900 3824 4006 3760 3963 3718  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="3963,3718 3963,3718 3900,3824 4006,3760 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon86" />
-    <!-- Arrowhead on XXXpoint 3900 3825 - 4360 3365-->
     <polygon
-       points="4285 3482 4349 3376 4242 3439 4285 3482  "
-       style="stroke:#000000;stroke-width:7; fill:#000000;"
+       points="4285,3482 4285,3482 4349,3376 4242,3439 "
+       style="fill:#000000;stroke:#000000;stroke-width:7"
        id="polygon88" />
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="525"
-       y="4200"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Helvetica"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="start"
-       id="text90">Parallel</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="1650"
-       y="4200"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Helvetica"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="start"
-       id="text92">Triangular</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="2925"
-       y="4200"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Helvetica"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="start"
-       id="text94">Square</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="3825"
-       y="4200"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Helvetica"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="start"
-       id="text96">Rhombic</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="4725"
-       y="4200"
-       stroke="#000000"
-       fill="#000000"
-       font-family="Helvetica"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="start"
-       id="text98">Hexagonal</text>
   </g>
+  <text
+     style="font-size:144px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
+     id="text90"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="4200"
+     x="592.84949"
+     xml:space="preserve">Parallel</text>
+  <text
+     style="font-size:144px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
+     id="text92"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="4200"
+     x="1703.6875"
+     xml:space="preserve">Triangular</text>
+  <text
+     style="font-size:144px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
+     id="text94"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="4200"
+     x="2902.2676"
+     xml:space="preserve">Square</text>
+  <text
+     style="font-size:144px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
+     id="text96"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="4200"
+     x="3825"
+     xml:space="preserve">Rhombic</text>
+  <text
+     style="font-size:144px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
+     id="text98"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="4200"
+     x="4783.1567"
+     xml:space="preserve">Hexagonal</text>
 </svg>

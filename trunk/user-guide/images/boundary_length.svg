@@ -19,7 +19,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.46+devel"
-   sodipodi:docname="boundary_length.fig"
+   sodipodi:docname="boundary_length.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
   <metadata
      id="metadata60">
@@ -29,7 +29,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -58,258 +58,219 @@
      showgrid="false"
      inkscape:zoom="1.9888889"
      inkscape:cx="135"
-     inkscape:cy="34.994413"
+     inkscape:cy="33.988826"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg2" />
-  <g
-     style="stroke-width:.025in; stroke:black; fill:none"
-     id="g4">
-    <!-- Line: box -->
-    <rect
-       x="375"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect6" />
-    <!-- Line: box -->
-    <rect
-       x="375"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect8" />
-    <!-- Line: box -->
-    <rect
-       x="75"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect10" />
-    <!-- Line: box -->
-    <rect
-       x="1125"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect12" />
-    <!-- Line: box -->
-    <rect
-       x="825"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect14" />
-    <!-- Line: box -->
-    <rect
-       x="1875"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect16" />
-    <!-- Line: box -->
-    <rect
-       x="1875"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect18" />
-    <!-- Line: box -->
-    <rect
-       x="2625"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect20" />
-    <!-- Line: box -->
-    <rect
-       x="2325"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect22" />
-    <!-- Line: box -->
-    <rect
-       x="3375"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; "
-       id="rect24" />
-    <!-- Line: box -->
-    <rect
-       x="75"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect26" />
-    <!-- Line: box -->
-    <rect
-       x="825"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect28" />
-    <!-- Line: box -->
-    <rect
-       x="1125"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect30" />
-    <!-- Line: box -->
-    <rect
-       x="1575"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect32" />
-    <!-- Line: box -->
-    <rect
-       x="1575"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect34" />
-    <!-- Line: box -->
-    <rect
-       x="2325"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect36" />
-    <!-- Line: box -->
-    <rect
-       x="2625"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect38" />
-    <!-- Line: box -->
-    <rect
-       x="3075"
-       y="375"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect40" />
-    <!-- Line: box -->
-    <rect
-       x="3075"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect42" />
-    <!-- Line: box -->
-    <rect
-       x="3375"
-       y="75"
-       width="300"
-       height="300"
-       rx="0"
-       style="stroke:#000000;stroke-width:7; stroke-linejoin:miter; stroke-linecap:butt; fill:#a0a0a0; "
-       id="rect44" />
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="1875"
-       y="900"
-       stroke="#000000"
-       fill="#000000"
-       font-family="AvantGarde"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="middle"
-       id="text46">(c)</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="2625"
-       y="900"
-       stroke="#000000"
-       fill="#000000"
-       font-family="AvantGarde"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="middle"
-       id="text48">(d)</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="3375"
-       y="900"
-       stroke="#000000"
-       fill="#000000"
-       font-family="AvantGarde"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="middle"
-       id="text50">(e)</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="1125"
-       y="900"
-       stroke="#000000"
-       fill="#000000"
-       font-family="AvantGarde"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="middle"
-       id="text52">(b)</text>
-    <!-- Text -->
-    <text
-       xml:space="preserve"
-       x="375"
-       y="900"
-       stroke="#000000"
-       fill="#000000"
-       font-family="AvantGarde"
-       font-style="normal"
-       font-weight="normal"
-       font-size="144"
-       text-anchor="middle"
-       id="text54">(a)</text>
-  </g>
+  <rect
+     id="rect6"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="375" />
+  <rect
+     id="rect8"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="375" />
+  <rect
+     id="rect10"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="75" />
+  <rect
+     id="rect12"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="1125" />
+  <rect
+     id="rect14"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="825" />
+  <rect
+     id="rect16"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="1875" />
+  <rect
+     id="rect18"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="1875" />
+  <rect
+     id="rect20"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="2625" />
+  <rect
+     id="rect22"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="2325" />
+  <rect
+     id="rect24"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="3375" />
+  <rect
+     id="rect26"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="75" />
+  <rect
+     id="rect28"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="825" />
+  <rect
+     id="rect30"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="1125" />
+  <rect
+     id="rect32"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="1575" />
+  <rect
+     id="rect34"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="1575" />
+  <rect
+     id="rect36"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="2325" />
+  <rect
+     id="rect38"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="2625" />
+  <rect
+     id="rect40"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="375"
+     x="3075" />
+  <rect
+     id="rect42"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="3075" />
+  <rect
+     id="rect44"
+     style="fill:#a0a0a0;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     rx="0"
+     height="300"
+     width="300"
+     y="75"
+     x="3375" />
+  <text
+     style="font-size:161.06666667px;font-style:normal;font-weight:normal;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans;font-stretch:normal;font-variant:normal;text-align:center;writing-mode:lr;line-height:125%"
+     id="text46"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="900"
+     x="1875"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">(c)</text>
+  <text
+     style="font-size:161.06666667px;font-style:normal;font-weight:normal;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans;font-stretch:normal;font-variant:normal;text-align:center;writing-mode:lr;line-height:125%"
+     id="text48"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="900"
+     x="2625"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">(d)</text>
+  <text
+     style="font-size:161.06666667px;font-style:normal;font-weight:normal;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans;font-stretch:normal;font-variant:normal;text-align:center;writing-mode:lr;line-height:125%"
+     id="text50"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="900"
+     x="3375"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">(e)</text>
+  <text
+     style="font-size:161.06666667px;font-style:normal;font-weight:normal;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans;font-stretch:normal;font-variant:normal;text-align:center;writing-mode:lr;line-height:125%"
+     id="text52"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="900"
+     x="1125"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">(b)</text>
+  <text
+     style="font-size:161.06666667px;font-style:normal;font-weight:normal;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans;font-stretch:normal;font-variant:normal;text-align:center;writing-mode:lr;line-height:125%"
+     id="text54"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="900"
+     x="375"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">(a)</text>
 </svg>

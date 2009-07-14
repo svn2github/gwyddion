@@ -9,8 +9,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="369.63382"
+   height="114.03252"
    id="svg2"
    version="1.1"
    inkscape:version="0.46+devel"
@@ -158,8 +158,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8498998"
-     inkscape:cx="309.06019"
-     inkscape:cy="734.68149"
+     inkscape:cx="168.3128"
+     inkscape:cy="54.061452"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -194,7 +194,8 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-140.74739,-258.41141)">
     <rect
        style="color:#000000;fill:none;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect2818"
@@ -204,7 +205,7 @@
        y="258.66141" />
     <text
        xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#bd0000;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#bd0000;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
        x="192.62354"
        y="316.07266"
        id="text2824"
@@ -272,7 +273,7 @@
        y="258.66141" />
     <text
        xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#bd0000;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#bd0000;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
        x="375.72296"
        y="292.81479"
        id="text2824-2"
@@ -336,7 +337,7 @@
        id="text3698"
        y="373.21246"
        x="411.14008"
-       style="font-size:12.00000025px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr;text-anchor:start;fill:#bd0000;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#bd0000;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
        xml:space="preserve"
        transform="scale(1.041049,0.96056954)"><tspan
          y="373.21246"

@@ -10,8 +10,8 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="405.88544"
+   height="326.42191"
    id="svg2"
    version="1.1"
    inkscape:version="0.46+devel"
@@ -110,8 +110,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.82"
-     inkscape:cx="450.94033"
-     inkscape:cy="811.72632"
+     inkscape:cx="227.76205"
+     inkscape:cy="231.31034"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -135,17 +135,19 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-223.17828,-146.6232)">
     <g
        id="g4031"
        transform="translate(0,-18.131868)">
       <image
+         sodipodi:absref="/home/yeti/Projects/Gwyddion/user-guide/images/profile-interpolation-image.png"
          xlink:href="profile-interpolation-image.png"
-         y="180.07217"
-         x="223.17828"
-         id="image3005"
+         width="159.90388"
          height="119.81439"
-         width="159.90388" />
+         id="image3005"
+         x="223.17828"
+         y="180.07217" />
       <path
          sodipodi:nodetypes="cc"
          inkscape:original-d="m 272.5115,270.09971 80.81867,-60.10492"
@@ -158,12 +160,13 @@
        id="g4035"
        transform="translate(1.0181274,-42.857143)">
       <image
+         sodipodi:absref="/home/yeti/Projects/Gwyddion/user-guide/images/profile-interpolation-image.png"
          xlink:href="profile-interpolation-image.png"
-         y="372.79803"
-         x="222.16016"
-         id="image3005-1"
+         width="159.90388"
          height="119.81439"
-         width="159.90388" />
+         id="image3005-1"
+         x="222.16016"
+         y="372.79803" />
       <path
          sodipodi:nodetypes="cc"
          inkscape:original-d="m 271.49338,462.82555 80.81868,-60.10492"
@@ -174,7 +177,7 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
        x="222.44"
        y="153.46109"
        id="text4039"><tspan
@@ -184,20 +187,21 @@
          y="153.46109">Natural resolution profile</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Liberation Sans;-inkscape-font-specification:Liberation Sans"
+       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
        x="222.44"
        y="318.57376"
        id="text4039-3"><tspan
          sodipodi:role="line"
          id="tspan4041-9"
          x="222.44"
-         y="318.57376">High resolution (supersampled) profile</tspan></text>
+         y="318.57376">High resolution profile</tspan></text>
     <image
-       y="146.93961"
-       x="389.17584"
-       id="image2913"
-       height="326.1055"
+       sodipodi:absref="/home/yeti/Projects/Gwyddion/user-guide/images/profile-interpolation-graphs.png"
+       xlink:href="profile-interpolation-graphs.png"
        width="239.88788"
-       xlink:href="profile-interpolation-graphs.png" />
+       height="326.1055"
+       id="image2913"
+       x="389.17584"
+       y="146.93961" />
   </g>
 </svg>
