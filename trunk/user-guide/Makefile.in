@@ -103,8 +103,13 @@ formulas: formulas.stamp
 
 clean:
 	+cd ./formulas && $(GMAKE) clean
+	-rm $(patsubst %,images/%,$(BUILT_IMAGES))
 	-rm -rf xhtml *.stamp xml/*~ *~ fixpngres
 	-rm -rf $(PACKAGE).pdf pdf
+
+distclean: clean
+	+cd ./formulas && $(GMAKE) distclean
+	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
 
 dist:
 	-rm -rf $(DISTNAME)
@@ -129,11 +134,6 @@ version:
 	d=`date --iso`; \
 	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
 	autoconf && ./configure
-
-distclean: clean
-	+cd ./formulas && $(GMAKE) distclean
-	-rm $(patsubst %,images/%,$(BUILT_IMAGES))
-	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
 
 help:
 	@echo "all          Compile User guide to all available formats ($(ALL_TARGETS))"
