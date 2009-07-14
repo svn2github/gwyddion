@@ -23,7 +23,8 @@ IMAGES := $(shell $(GSED) -n -f img-extract.sed $(XML_SOURCES) | sort -u) PNG:st
 XHTML_IMAGES := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
 PDF_IMAGES := $(patsubst PDF:%,%,$(filter PDF:%,$(IMAGES)))
 PNG_IMAGES := $(filter-out eq-%.png,$(XHTML_IMAGES))
-IMAGE_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
+IMAGE_PNG_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
+IMAGE_PDF_IMAGES := $(patsubst %,images/%,$(PDF_IMAGES))
 SVG_IMAGES = \
 	boundary_length.svg \
 	grain-bounding-dims.svg \
@@ -58,7 +59,7 @@ Makefile: Makefile.in ./config.status
 
 pdf: $(PACKAGE).pdf
 
-@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_IMAGES) $(TEX_STYLES) dblatex.xsl
+@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
 @PDF_TRUE@	rm -rf pdf
 @PDF_TRUE@	mkdir pdf
 @PDF_TRUE@	$(DBLATEX) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
@@ -69,7 +70,7 @@ pdf: $(PACKAGE).pdf
 xhtml: xhtml.stamp
 
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
-@HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_IMAGES) xhtml.xsl
+@HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_PNG_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
@@ -98,7 +99,7 @@ formulas: formulas.stamp
 
 @SVG_TRUE@images/%.pdf: images/%.svg
 @SVG_TRUE@	cd images && \
-@SVG_TRUE@	    $(INKSCAPE) --export-pdf="$*.png" --file="$*.svg"
+@SVG_TRUE@	    $(INKSCAPE) --export-pdf="$*.pdf" --file="$*.svg"
 
 clean:
 	+cd ./formulas && $(GMAKE) clean

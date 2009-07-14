@@ -232,6 +232,9 @@
       <informalfigure id='fig-inclination-coordinates'>
         <mediaobject>
           <imageobject>
+            <imagedata fileref='inclination.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
             <imagedata fileref='inclination.png' format='PNG'/>
           </imageobject>
           <textobject>
@@ -377,6 +380,9 @@
     </para>
     <informalfigure id='fig-profile-interpolation'>
       <mediaobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.pdf' format='PDF'/>
+        </imageobject>
         <imageobject>
           <imagedata fileref='profile-interpolation.png' format='PNG'/>
         </imageobject>

@@ -47,6 +47,9 @@
   <informalfigure id='fig-unrotate-directions'>
     <mediaobject>
       <imageobject>
+        <imagedata fileref='unrotate-symmetries.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
         <imagedata fileref='unrotate-symmetries.png' format='PNG'/>
       </imageobject>
       <textobject>

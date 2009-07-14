@@ -176,6 +176,9 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
     <informalfigure id='fig-step-vs-edge'>
       <mediaobject>
         <imageobject>
+          <imagedata fileref='step-edge.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
           <imagedata fileref='step-edge.png' format='PNG'/>
         </imageobject>
         <textobject>

@@ -474,6 +474,9 @@
     <informalfigure id='fig-grain-bounding-dims'>
       <mediaobject>
         <imageobject>
+          <imagedata fileref='grain-bounding-dims.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
           <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
         </imageobject>
         <caption>
@@ -505,6 +508,9 @@
     </para>
     <informalfigure id='fig-boundary-length'>
       <mediaobject>
+        <imageobject>
+          <imagedata fileref='boundary_length.pdf' format='PDF'/>
+        </imageobject>
         <imageobject>
           <imagedata fileref='boundary_length.png' format='PNG'/>
         </imageobject>
