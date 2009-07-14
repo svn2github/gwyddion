@@ -144,7 +144,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_pointer_measure-24.png'/>
+              <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -265,7 +265,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_distance-24.png'/>
+              <imagedata fileref='gwy_distance-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -332,7 +332,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_profile-24.png'/>
+            <imagedata fileref='gwy_profile-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>

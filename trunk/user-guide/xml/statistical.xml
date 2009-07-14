@@ -106,7 +106,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_stat_quantities-24.png'/>
+            <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>
@@ -310,7 +310,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_graph_halfgauss-24.png'/>
+            <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>
@@ -1098,7 +1098,7 @@ S = {N_{\rm bound}\over N}\;,\quad
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_graph_vertical-24.png'/>
+            <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>

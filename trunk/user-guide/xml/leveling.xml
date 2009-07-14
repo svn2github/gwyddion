@@ -57,7 +57,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_level-24.png'/>
+              <imagedata fileref='gwy_level-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -90,7 +90,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_level_triangle-24.png'/>
+              <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -114,7 +114,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_path_level-24.png'/>
+              <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -157,7 +157,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_facet_level-24.png'/>
+              <imagedata fileref='gwy_facet_level-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -238,7 +238,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_polynom-24.png'/>
+              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>

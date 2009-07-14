@@ -254,7 +254,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_pointer_measure-24.png'/>
+              <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -271,7 +271,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_distance-24.png'/>
+              <imagedata fileref='gwy_distance-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -291,7 +291,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_profile-24.png'/>
+              <imagedata fileref='gwy_profile-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -310,7 +310,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_spectrum-24.png'/>
+              <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -327,7 +327,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_stat_quantities-24.png'/>
+              <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -347,7 +347,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_graph_halfgauss-24.png'/>
+              <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -366,7 +366,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_graph_vertical-24.png'/>
+              <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -385,7 +385,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_iso_roughness-24.png'/>
+              <imagedata fileref='gwy_iso_roughness-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -402,7 +402,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_level_triangle-24.png'/>
+              <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -421,7 +421,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_path_level-24.png'/>
+              <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -439,7 +439,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_polynom-24.png'/>
+              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -456,7 +456,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_crop-24.png'/>
+              <imagedata fileref='gwy_crop-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -473,7 +473,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_mask_editor-24.png'/>
+              <imagedata fileref='gwy_mask_editor-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -491,7 +491,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_grains_measure-24.png'/>
+              <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -508,7 +508,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_grains_remove-24.png'/>
+              <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -526,7 +526,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_spot_remove-24.png'/>
+              <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -545,7 +545,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_color_range-24.png'/>
+              <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -564,7 +564,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_filter-24.png'/>
+              <imagedata fileref='gwy_filter-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -582,7 +582,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_selections-24.png'/>
+              <imagedata fileref='gwy_selections-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>

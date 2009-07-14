@@ -163,7 +163,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_grains_graph-24.png'/>
+              <imagedata fileref='gwy_grains_graph-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>
@@ -216,7 +216,7 @@
         <guiicon>
           <inlinemediaobject>
             <imageobject>
-              <imagedata fileref='gwy_grains_measure-24.png'/>
+              <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
             </imageobject>
           </inlinemediaobject>
         </guiicon>

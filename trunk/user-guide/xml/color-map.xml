@@ -54,7 +54,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_color_range-24.png'/>
+            <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>
@@ -71,7 +71,7 @@
           <guiicon>
             <inlinemediaobject>
               <imageobject>
-                <imagedata fileref='gwy_color_range_full-24.png'/>
+                <imagedata fileref='gwy_color_range_full-24.png' format='PNG'/>
               </imageobject>
             </inlinemediaobject>
           </guiicon>
@@ -90,7 +90,7 @@
           <guiicon>
             <inlinemediaobject>
               <imageobject>
-                <imagedata fileref='gwy_color_range_fixed-24.png'/>
+                <imagedata fileref='gwy_color_range_fixed-24.png' format='PNG'/>
               </imageobject>
             </inlinemediaobject>
           </guiicon>
@@ -135,7 +135,7 @@
           <guiicon>
             <inlinemediaobject>
               <imageobject>
-                <imagedata fileref='gwy_color_range_auto-24.png'/>
+                <imagedata fileref='gwy_color_range_auto-24.png' format='PNG'/>
               </imageobject>
             </inlinemediaobject>
           </guiicon>
@@ -155,7 +155,7 @@
           <guiicon>
             <inlinemediaobject>
               <imageobject>
-                <imagedata fileref='gwy_color_range_adaptive-24.png'/>
+                <imagedata fileref='gwy_color_range_adaptive-24.png' format='PNG'/>
               </imageobject>
             </inlinemediaobject>
           </guiicon>

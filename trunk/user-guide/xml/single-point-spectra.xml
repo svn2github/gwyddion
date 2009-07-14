@@ -22,7 +22,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_spectrum-24.png'/>
+            <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>
