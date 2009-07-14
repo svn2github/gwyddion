@@ -96,7 +96,7 @@ formulas: formulas.stamp
 @SVG_TRUE@	    $(INKSCAPE) --export-dpi=150 --export-background=white \
 @SVG_TRUE@	        --export-png="$*.png" --file="$*.svg"
 
-@SVG_TRUE@%.pdf: %.svg
+@SVG_TRUE@images/%.pdf: images/%.svg
 @SVG_TRUE@	cd images && \
 @SVG_TRUE@	    $(INKSCAPE) --export-pdf="$*.png" --file="$*.svg"
 
