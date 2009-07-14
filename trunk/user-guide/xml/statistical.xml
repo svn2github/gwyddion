@@ -103,7 +103,13 @@
   <sect2 id='stat-quantities'>
     <title>
       Statistical Quantities Tool
-      <guiicon><inlinegraphic fileref='gwy_stat_quantities-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_stat_quantities-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>Statistical Quantities tool</primary></indexterm>
     <para>
@@ -301,7 +307,13 @@
   <sect2 id='sfunctions'>
     <title>
       Statistical Functions Tool
-      <guiicon><inlinegraphic fileref='gwy_graph_halfgauss-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_graph_halfgauss-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>Statistical Functions tool</primary></indexterm>
     <para>
@@ -1083,7 +1095,13 @@ S = {N_{\rm bound}\over N}\;,\quad
   <sect2 id='line-stats'>
     <title>
       Row/Column Statistics Tool
-      <guiicon><inlinegraphic fileref='gwy_graph_vertical-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_graph_vertical-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>Row/Column Statistics tool</primary></indexterm>
     <para>

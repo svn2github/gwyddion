@@ -141,7 +141,13 @@
     <sect3 id='read-value'>
       <title>
         Read Value Tool
-        <guiicon><inlinegraphic fileref='gwy_pointer_measure-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_pointer_measure-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>Read Value tool</primary></indexterm>
       <indexterm><primary>slope measurement</primary></indexterm>
@@ -256,7 +262,13 @@
     <sect3 id='distance'>
       <title>
         Distance Tool
-        <guiicon><inlinegraphic fileref='gwy_distance-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_distance-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>Distance tool</primary></indexterm>
       <indexterm><primary>distance measurement</primary></indexterm>
@@ -317,7 +329,13 @@
   <sect2 id='profile'>
     <title>
       Profile Extraction
-      <guiicon><inlinegraphic fileref='gwy_profile-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_profile-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>profile extraction</primary></indexterm>
     <para>

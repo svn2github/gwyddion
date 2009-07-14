@@ -174,7 +174,13 @@
   <sect2 id='mask-editor'>
     <title>
       Mask Editor Tool
-      <guiicon><inlinegraphic fileref='gwy_mask_editor-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_mask_editor-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       The Mask Editor is the basic mask modification tool.  It provides two
@@ -191,7 +197,13 @@
       <varlistentry>
         <term>
           Set
-          <guiicon><inlinegraphic fileref='gwy_mask-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -203,7 +215,13 @@
       <varlistentry>
         <term>
           Add
-          <guiicon><inlinegraphic fileref='gwy_mask_add-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_add-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -215,7 +233,13 @@
       <varlistentry>
         <term>
           Subtract
-          <guiicon><inlinegraphic fileref='gwy_mask_subtract-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_subtract-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -227,7 +251,13 @@
       <varlistentry>
         <term>
           Intersect
-          <guiicon><inlinegraphic fileref='gwy_mask_intersect-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_intersect-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -252,7 +282,13 @@
       <varlistentry>
         <term>
           <guibutton>Grow</guibutton>
-          <guiicon><inlinegraphic fileref='gwy_mask_grow-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_grow-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -272,7 +308,13 @@
       <varlistentry>
         <term>
           <guibutton>Shrink</guibutton>
-          <guiicon><inlinegraphic fileref='gwy_mask_shrink-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_shrink-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>

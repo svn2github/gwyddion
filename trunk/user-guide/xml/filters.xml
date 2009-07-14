@@ -7,7 +7,13 @@
   <sect2 id='basic-filters'>
     <title>
       Basic Filters Tool
-      <guiicon><inlinegraphic fileref='gwy_filter-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_filter-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       The <link linkend='basic-filters'>Basic Filters</link> tool

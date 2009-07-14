@@ -16,7 +16,13 @@
   <sect2 id='remove-spots'>
     <title>
       Remove Spots Tool
-      <guiicon><inlinegraphic fileref='gwy_spot_remove-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_spot_remove-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       The <link linkend='remove-spots'>Remove Spots</link> tool can be used
@@ -67,7 +73,13 @@
   <sect2 id='remove-grains'>
     <title>
       Remove Grains Tool
-      <guiicon><inlinegraphic fileref='gwy_grains_remove-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_remove-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       This simple tool removes manually selected connected parts of mask
@@ -78,7 +90,13 @@
   <sect2 id='remove-scars'>
     <title>
       Remove Scars
-      <guiicon><inlinegraphic fileref='gwy_scars-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_scars-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>scars correction</primary></indexterm>
     <indexterm><primary>strokes correction</primary></indexterm>
@@ -170,7 +188,13 @@
     </indexterm>
     <title>
       Remove Data Under Mask
-      <guiicon><inlinegraphic fileref='gwy_remove_under_mask-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_remove_under_mask-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       <menuchoice>
@@ -237,7 +261,13 @@
   <sect2 id='line-correction'>
     <title>
       Line Correction
-      <guiicon><inlinegraphic fileref='gwy_line_level-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_line_level-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <indexterm><primary>line correction</primary></indexterm>
     <para>

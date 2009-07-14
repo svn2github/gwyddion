@@ -160,7 +160,13 @@
     <sect3 id='grain-distributions'>
       <title>
         Grain Distributions
-        <guiicon><inlinegraphic fileref='gwy_grains_graph-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_graph-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <para>
         <menuchoice>
@@ -207,7 +213,13 @@
     <sect3 id='grain-measure'>
       <title>
         Grain Measurement Tool
-        <guiicon><inlinegraphic fileref='gwy_grains_measure-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_measure-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <para>
         The grain measurement tool is the interactive method to obtain the

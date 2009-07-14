@@ -19,7 +19,13 @@
   <sect2 id='point-spectroscopy'>
     <title>
       Point Spectroscopy Tool
-      <guiicon><inlinegraphic fileref='gwy_spectrum-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_spectrum-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       The primary spectra visualization and extraction tool is the

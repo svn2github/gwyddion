@@ -54,7 +54,13 @@
     <sect3 id='plane-level'>
       <title>
         Plane Level
-        <guiicon><inlinegraphic fileref='gwy_level-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>plane leveling</primary></indexterm>
       <indexterm>
@@ -81,7 +87,13 @@
     <sect3 id='three-point-level'>
       <title>
         Three Point Leveling Tool
-        <guiicon><inlinegraphic fileref='gwy_level_triangle-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level_triangle-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>three-point leveling</primary></indexterm>
       <indexterm>
@@ -99,7 +111,13 @@
     <sect3 id='path-level'>
       <title>
         Path Leveling Tool
-        <guiicon><inlinegraphic fileref='gwy_path_level-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_path_level-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>path leveling</primary></indexterm>
       <indexterm>
@@ -136,7 +154,13 @@
     <sect3 id='facet-level'>
       <title>
         Facet Level
-        <guiicon><inlinegraphic fileref='gwy_facet_level-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_facet_level-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>facet leveling</primary></indexterm>
       <indexterm>
@@ -211,7 +235,13 @@
     <sect3 id='polynomial-level'>
       <title>
         Polynomial Background
-        <guiicon><inlinegraphic fileref='gwy_polynom-24.png'/></guiicon>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_polynom-24.png'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
       </title>
       <indexterm><primary>polynomial background</primary></indexterm>
       <para>

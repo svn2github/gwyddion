@@ -51,7 +51,13 @@
   <sect2 id='color-range'>
     <title>
       Color Range Tool
-      <guiicon><inlinegraphic fileref='gwy_color_range-24.png'/></guiicon>
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_color_range-24.png'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
     </title>
     <para>
       Color range tool is a special <link linkend='tools'>tool</link> whose
@@ -62,7 +68,13 @@
       <varlistentry>
         <term>
           Full
-          <guiicon><inlinegraphic fileref='gwy_color_range_full-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_full-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -75,7 +87,13 @@
       <varlistentry>
         <term>
           Fixed
-          <guiicon><inlinegraphic fileref='gwy_color_range_fixed-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_fixed-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -114,7 +132,13 @@
       <varlistentry>
         <term>
           Automatic
-          <guiicon><inlinegraphic fileref='gwy_color_range_auto-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_auto-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
@@ -128,7 +152,13 @@
       <varlistentry>
         <term>
           Adaptive
-          <guiicon><inlinegraphic fileref='gwy_color_range_adaptive-24.png'/></guiicon>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_adaptive-24.png'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
         </term>
         <listitem>
           <para>
