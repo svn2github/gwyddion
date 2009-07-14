@@ -53,7 +53,7 @@ main(int argc, char *argv[])
         do_fft = true;
         K = -K;
     }
-    if (K < 4 || (K & 1)) {
+    if (K < 2 || (K & 1)) {
         fprintf(stderr, "Invalid K %ld\n", K);
         return 1;
     }
@@ -69,9 +69,21 @@ main(int argc, char *argv[])
     phi = (double*)xmalloc(K*unity*sizeof(double));
     psi = (double*)xmalloc(K*unity*sizeof(double));
 
-    coefficients_daubechies(K, c);
-    scaling_function(scaling_steps, phi, psi, K, c);
+    /* Generate Haar wavelet for K=2, must special-case that */
     Km = K - 1;
+    if (K == 2) {
+        for (i = 0; i < Km*unity; i++)
+            phi[i] = 1.0;
+        for (i = 0; i < Km*unity/2; i++)
+            psi[i] = -1.0;
+        for (i = Km*unity/2; i < Km*unity; i++)
+            psi[i] = 1.0;
+    }
+    else {
+        coefficients_daubechies(K, c);
+        scaling_function(scaling_steps, phi, psi, K, c);
+    }
+
     if (do_fft) {
         calculate_psd(phi, Km*unity, zoom);
         calculate_psd(psi, Km*unity, zoom);
