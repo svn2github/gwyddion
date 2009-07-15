@@ -1269,7 +1269,7 @@ S = {N_{\rm bound}\over N}\;,\quad
           <textobject role='tex'>
             <phrase>
 <![CDATA[
-2{\bf r}\mathop.{\bf v} = r^2
+2\vec r\mathop.\vec v = r^2
 ]]>
             </phrase>
           </textobject>
