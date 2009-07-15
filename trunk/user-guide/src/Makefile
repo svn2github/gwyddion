@@ -3,7 +3,7 @@ GSL_LIBS := $(shell pkg-config --libs gsl)
 COMMON_CFLAGS = -Wall -W -O2 -g
 
 OBJECTS = daubechies.o scaling-func.o wavelet-plot.o
-DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20)
+DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
 WAVELET_DATA = $(patsubst %,%-wav.dat,$(DAUBECHIES)) $(patsubst %,%-fft.dat,$(DAUBECHIES))
 GRAPHS = $(WAVELET_GRAPHS)
@@ -12,14 +12,20 @@ PROGRAMS = wavelet-plot
 
 wavelet-graphs: $(WAVELET_GRAPHS)
 
-wavelet-daubechies%.svg: wavelet-daubechies%-wav.dat wavelet-daubechies%-fft.dat wavelet.gpi
-	echo 'name = "wavelet-daubechies$*"; load "wavelet.gpi"' | gnuplot -
+wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi
+	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
 
 wavelet-daubechies%-wav.dat: wavelet-plot
-	./$< $* 9 >$@
+	./$< $* 8 >$@
 
 wavelet-daubechies%-fft.dat: wavelet-plot
-	./$< -$* 9 >$@
+	./$< -$* 8 >$@
+
+wavelet-haar-wav.dat: wavelet-plot
+	./$< 2 8 >$@
+
+wavelet-haar-fft.dat: wavelet-plot
+	./$< -2 8 >$@
 
 wavelet-plot: wavelet-plot.o scaling-func.o daubechies.o
 	$(CC) $(GSL_LIBS) -o $@ $^

@@ -1,4 +1,4 @@
-set term svg size 400,150 enhanced font 'DejaVu Sans,6' lw 0.75
+set term svg size 440,165 enhanced font 'DejaVu Sans,6' lw 0.7
 load 'style.gpi'
 
 set output name.'.svg'

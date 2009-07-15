@@ -72,6 +72,23 @@ main(int argc, char *argv[])
     /* Generate Haar wavelet for K=2, must special-case that */
     Km = K - 1;
     if (K == 2) {
+        static const char haardump[] =
+            "-0.2 0 0\n"
+            "-0.0001 0 0\n"
+            "0.0001 1.0001 1.0001\n"
+            "0.4999 1.0001 1.0001\n"
+            "0.5001 1.0001 -1.0001\n"
+            "0.9999 1.0001 -1.0001\n"
+            "1.0001 0 0\n"
+            "1.2 0 0\n";
+
+        /* If we do not do FFT, don't bother spewing out tons of identical
+         * values. */
+        if (!do_fft) {
+            fputs(haardump, stdout);
+            return 0;
+        }
+
         for (i = 0; i < Km*unity; i++)
             phi[i] = 1.0;
         for (i = 0; i < Km*unity/2; i++)
