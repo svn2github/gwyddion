@@ -487,9 +487,9 @@
     <para id='boundary-length-calculation'>
       <indexterm><primary>boundary length calculation</primary></indexterm>
       The grain boundary length is estimated by summing estimated contributions
-      of each pixel corner participating in the boundary.  The contributions
-      are displayed on the following figure for each type of corner
-      configuration, where
+      of each four-pixel configuration on the boundary.  The contributions
+      are displayed on the following figure for each type of configuration,
+      where
       <inlineequation>
         <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
         <alt>h_x</alt>
@@ -501,44 +501,65 @@
       </inlineequation>
       are pixel dimension along corresponding axes and
       <inlineequation>
-        <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
-        <alt>q</alt>
+        <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
+        <alt>h</alt>
       </inlineequation>
-      is the length of the pixel diagonal.
+      is the length of the pixel diagonal:
+      <informalequation id='eq-grain-boundary-pixel-diagonal'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='eq-grain-boundary-pixel-diagonal.png' format='PNG'/>
+          </imageobject>
+          <textobject role='tex'>
+            <phrase>
+<![CDATA[
+h = \sqrt{h_x^2 + h_y^2}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+      The contributions correspond one-to-one to lenghts of segments of the
+      boundary of a polygon approximating the grain shape.  The construction of
+      the equivalent polygonal shape can also be seen in the figure.
     </para>
     <informalfigure id='fig-boundary-length'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='boundary_length.pdf' format='PDF'/>
+          <imagedata fileref='boundary-length.pdf' format='PDF'/>
         </imageobject>
         <imageobject>
-          <imagedata fileref='boundary_length.png' format='PNG'/>
+          <imagedata fileref='boundary-length.png' format='PNG'/>
         </imageobject>
         <caption>
           Contributions of pixel configurations to the estimated boundary
-          length.  Grey squares represent pixels inside the grain, white
+          length (top).  Grey squares represent pixels inside the grain, white
           squares represent outside pixels.  The estimated contribution of each
           configuration is:
-          (a) <inlineequation>
-            <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
-            <alt>q/2</alt>
+          (a) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
+            <alt>h/2</alt>
           </inlineequation>,
-          (b) <inlineequation>
-            <mathphrase><phrase role='mathvar'>q</phrase></mathphrase>
-            <alt>q</alt>
+          (b1), (b2) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
+            <alt>h</alt>
           </inlineequation>,
-          (c) <inlineequation>
+          (c) <inlineequation>
             <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
             <alt>h_y</alt>
           </inlineequation>,
-          (d) <inlineequation>
+          (d) <inlineequation>
             <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
             <alt>h_x</alt>
           </inlineequation>,
-          (e) <inlineequation>
-            <mathphrase><phrase role='mathvar'>q</phrase>/2</mathphrase>
-            <alt>q/2</alt>
+          (e) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
+            <alt>h/2</alt>
           </inlineequation>.
+          Cases (b1) and (b2) differ only in the visualization of the
+          polygonal shape segments, the estimated boundary lengths are
+          identical.  The bottom part of the figure illustrates how the
+          segments join to form the polygon.
         </caption>
       </mediaobject>
     </informalfigure>
