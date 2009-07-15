@@ -336,6 +336,49 @@
       works can be subject of futher changes.
     </para>
   </sect2>
+  <sect2 id='path-level'>
+    <title>
+      Path Leveling Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>path leveling</primary></indexterm>
+    <indexterm>
+      <primary>leveling</primary>
+      <secondary>along paths</secondary>
+    </indexterm>
+    <para>
+      The <guilabel>Path Leveling</guilabel>
+      tool can be used to correct the heights in an arbitrary subset of rows
+      in complicated images.
+    </para>
+    <para>
+      First, one selects a number of straight lines on the data.  The
+      intersections of these lines with the rows then form a set of points
+      in each row that is used for leveling.  The rows are moved up or down
+      to minimize the difference between the heights of the points of
+      adjacent rows.  Rows that are not intersected by any line are not
+      moved (relatively to neighbouring rows).
+    </para>
+    <informalfigure id='fig-path-level'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='path-level.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Path Level example:
+          (a) uncorrected data with steps that the automated method may
+          fail to correct, two suitable leveling lines are selected;
+          (b) the result of Path Level application with line width 5.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
   <xi:include href='unrotate.xml'/>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
