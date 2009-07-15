@@ -21,7 +21,7 @@ body {
   a:visited { color: #808080; }
 }
 .mathvar { font-style: italic; }
-.vector { font-style: bold; }
+.vector { font-weight: bold; }
 .caption { font-style: italic; font-size: 90%; }
 a { text-decoration: underline; }
 a:link { color: black; }
