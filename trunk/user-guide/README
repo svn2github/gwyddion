@@ -23,8 +23,17 @@ Some random remarks:
 
 * After svn checkout, run autoconf to generate configure.
 
+* The source is really source, i.e. generated files are not distributed.  To
+  build the various output formats (well, XHTML or PDF at this moment) a
+  number of auxiliary tools is necessary to render math formulas, convert
+  images to suitable output formats, etc.
+
+  configure is your friend, it does not abort when something is missing.
+  Instead, it checks for all the tools and at the end it prints what you will
+  be unable to build and why.
+
 * The user guide is licensed under either GNU GPL or GNU FDL, see the guide
   text for the full license and author list.
 
-  Autoconf checks was borrowed from various sources.  The copright notices
+  Autoconf checks were borrowed from various sources.  The copright notices
   can be found at the beginings of the code snippets.
