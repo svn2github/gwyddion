@@ -556,6 +556,9 @@
     <informalfigure id='fig-volume-pixel-weights'>
       <mediaobject>
         <imageobject>
+          <imagedata fileref='volume-pixel-weights.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
           <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
         </imageobject>
         <caption>

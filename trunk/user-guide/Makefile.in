@@ -32,6 +32,7 @@ SVG_IMAGES = \
 	profile-interpolation.svg \
 	step-edge.svg \
 	unrotate-symmetries.svg \
+	volume-pixel-weights.svg \
 	wavelet-daubechies20.svg \
 	wavelet-daubechies4.svg \
 	wavelet-haar.svg
