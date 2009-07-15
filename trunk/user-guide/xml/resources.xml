@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: environment.xml 9457 2009-07-15 22:02:37Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='resources'>
+  <title>Resources</title>
+  <para>
+    Format of Gwyddion resource files.
+  </para>
+  <sect2 id='resource-gradients'>
+    <title>Gradients</title>
+  </sect2>
+  <sect2 id='resource-gl-materials'>
+    <title>GL Materials</title>
+  </sect2>
+  <sect2 id='resource-grain-values'>
+    <title>Grain Values</title>
+  </sect2>
+  <sect2 id='resource-raw-file-presets'>
+    <title>Raw File Presets</title>
+  </sect2>
+  <sect2 id='settings'>
+    <title>Settings</title>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

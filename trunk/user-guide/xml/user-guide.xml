@@ -61,6 +61,7 @@
     <xi:include href='keyboard-shortcuts.xml'/>
     <xi:include href='expressions.xml'/>
     <xi:include href='environment.xml'/>
+    <xi:include href='resources.xml'/>
     <xi:include href='gwyfile-format.xml'/>
   </chapter>
   <xi:include href='develop.xml'/>
