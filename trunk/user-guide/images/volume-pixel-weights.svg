@@ -9,8 +9,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="106.92421"
+   height="106.92421"
    id="svg2"
    version="1.1"
    inkscape:version="0.46+devel"
@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.9818312"
-     inkscape:cx="359.30325"
-     inkscape:cy="592.0266"
+     inkscape:cx="111.58425"
+     inkscape:cy="42.624216"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -168,16 +168,17 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      id="layer1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1">
+     inkscape:label="Layer 1"
+     transform="translate(-247.719,-396.53787)">
     <rect
-       style="color:#000000;fill:#e7e7e7;stroke:none;stroke-width:0.62500000000000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1"
+       style="color:#000000;fill:#e7e7e7;fill-opacity:1;stroke:none;stroke-width:0.625;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        id="rect3745"
        width="35.433071"
        height="35.433071"
@@ -216,7 +217,7 @@
            d="m 1241.4,309.22 h 13.2 v -4.33 c 0,-1.8 0,-2.35 -3.7,-2.35 h -1.1 V 301 c 2.1,0.15 4.6,0.15 6.7,0.15 2.1,0 4.8,0 6.8,-0.15 v 1.54 h -1 c -3.7,0 -3.8,0.55 -3.8,2.35 v 4.33 h 5 v 1.54 h -5 v 22.67 c 0,1 0,1.29 -0.8,1.29 -0.5,0 -0.6,0 -1,-0.6 l -15.3,-23.36 h 1.4 l 12.1,18.58 v -18.58 h -12.1 -1.4 z"
            style="fill:#000000;stroke-width:0" /></g>    </g>
     <path
-       style="color:#000000;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.625;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.625;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 283.46457,396.85037 0,106.29921"
        id="path2965" />
     <path
