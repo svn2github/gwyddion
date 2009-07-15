@@ -197,23 +197,23 @@
       If we denote
       <inlineequation>
         <mathphrase><phrase role='mathvar'><phrase role='vector'>L</phrase></phrase></mathphrase>
-        <alt>\vec{L}</alt>
+        <alt>\vec L</alt>
       </inlineequation>
       the normal vector pointing from the observed surface point to the light
       source,
       <inlineequation>
         <mathphrase><phrase role='mathvar'><phrase role='vector'>V</phrase></phrase></mathphrase>
-        <alt>\vec{V}</alt>
+        <alt>\vec V</alt>
       </inlineequation>
       the normal vector to the observer,
       <inlineequation>
         <mathphrase><phrase role='mathvar'><phrase role='vector'>N</phrase></phrase></mathphrase>
-        <alt>\vec{N}</alt>
+        <alt>\vec N</alt>
 </inlineequation>
       the normal vector to the surface
       <inlineequation>
         <mathphrase><phrase role='mathvar'><phrase role='vector'>R</phrase></phrase></mathphrase>
-        <alt>\vec{R}</alt>
+        <alt>\vec R</alt>
 </inlineequation>
       the normal vector in the direction of ideal mirror reflection, the
       observed light intensity in OpenGL lighting model can be expressed as
@@ -227,8 +227,8 @@
           <phrase>
 <![CDATA[
 I_\alpha = k_{a,\alpha}I_{a,\alpha}
-           + k_{d,\alpha}I_{d,\alpha} ({\bf N}\mathop.{\bf L})
-           + k_{s,\alpha}I_{s,\alpha} ({\bf R}\mathop.{\bf V})^s
+           + k_{d,\alpha}I_{d,\alpha} (\vec N\cdot\vec L)
+           + k_{s,\alpha}I_{s,\alpha} (\vec R\cdot\vec V)^s
 ]]>
           </phrase>
         </textobject>
