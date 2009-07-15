@@ -205,30 +205,42 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
     <informalfigure id='fig-wavelet-haar'>
       <mediaobject>
         <imageobject>
+          <imagedata fileref='wavelet-haar.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
           <imagedata fileref='wavelet-haar.png' format='PNG'/>
         </imageobject>
         <caption>
-          Haar scaling function and wavelet.
+          Haar scaling function and wavelet (left) and their frequency content
+          (right).
         </caption>
       </mediaobject>
     </informalfigure>
     <informalfigure id='fig-wavelet-daubechies4'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='wavelet-daubechies-4.png' format='PNG'/>
+          <imagedata fileref='wavelet-daubechies4.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='wavelet-daubechies4.png' format='PNG'/>
         </imageobject>
         <caption>
-          Daubechies 4 scaling function and wavelet.
+          Daubechies 4 scaling function and wavelet (left) and their frequency
+          content (right).
         </caption>
       </mediaobject>
     </informalfigure>
     <informalfigure id='fig-wavelet-daubechies20'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='wavelet-daubechies-20.png' format='PNG'/>
+          <imagedata fileref='wavelet-daubechies20.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='wavelet-daubechies20.png' format='PNG'/>
         </imageobject>
         <caption>
-          Daubechies 20 scaling function and wavelet.
+          Daubechies 20 scaling function and wavelet (left) and their frequency
+          content (right).
         </caption>
       </mediaobject>
     </informalfigure>
