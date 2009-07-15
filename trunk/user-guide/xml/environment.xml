@@ -73,5 +73,31 @@
       </listitem>
     </varlistentry>
   </variablelist>
+  <para>
+    Other variables that influence <application>Gwyddion</application>
+    run-time behaviour include
+    <ulink href='http://library.gnome.org/devel/glib/stable/glib-running.html'>GLib+ variables</ulink>
+    and
+    <ulink href='http://library.gnome.org/devel/gtk/stable/gtk-running.html'>Gtk+ variables</ulink>
+    and some Gwyddion-specific variables:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <envar>GWYDDION_LOGFILE</envar>
+      </term>
+      <listitem>
+        <para>
+          Name of file to redirect log messages to.  On MS Windows, messages
+          are always sent to a file as working with the terminal is cumbersome
+          there.  The default log file location,
+          <filename>gwyddion.log</filename> in user's Documents and Settings,
+          can be overriden with <envar>GWYDDION_LOGFILE</envar>.
+          On Unix, messages go to the terminal by default and this environment
+          variable has effect only if <option>--log-to-file</option> is given.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
