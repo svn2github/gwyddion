@@ -79,6 +79,11 @@
         data. The plane is computed from all the image points and is subtracted
         from the data.
       </para>
+      <para>
+        If a mask is present plane leveling offers to use the data under mask
+        for the plane fitting, exclude the data under mask or ignore the maks
+        and use the entire data.
+      </para>
       <tip>
         You can quickly apply plane leveling by simply right-clicking on
         the image window and selecting <guimenuitem>Level</guimenuitem>.
@@ -181,8 +186,7 @@
         However, the plane is determined differently: it makes facets of the
         surface as horizontal as possible. Thus for surfaces with flat
         horizontal areas it leads to much better results than the standard
-        <link linkend='plane-level'>Plane Level</link> especially if large
-        objects are present.
+        Plane Level especially if large objects are present.
       </para>
       <para>
         On the other hand, it is not suitable for some types of surface.
@@ -190,6 +194,11 @@
         and non-topographic images as the method does not work well if the
         typical lateral dimensions and <quote>heights</quote> differ by
         many orders.
+      </para>
+      <para>
+        Similarly to <link linkend='plane-level'>Plane Level</link>, Facet
+        Level can include or exclude the data under mask.  This choice is
+        offered only if a mask is present.
       </para>
       <para>
         Finding the orientation of the facets is an iterative process that
@@ -214,7 +223,7 @@
           <alt>\vec n_i</alt>
         </inlineequation>
         is the vector of local facet normal (see
-        <link linkend='inclination-coordinates'>inclination coordinates</link>)
+        <link linkend='inclinations-coordinates'>inclination coordinates</link>)
         in the
         <inlineequation>
           <mathphrase><phrase role='mathvar'>i</phrase></mathphrase>
@@ -387,6 +396,11 @@
           <alt>n</alt>
         </inlineequation>
         is the selected total polynomial degree.
+      </para>
+      <para>
+        Similarly to <link linkend='plane-level'>Plane Level</link>, polynomial
+        background subtraction can include or exclude the data under mask.
+        This choice is offered only if a mask is present.
       </para>
     </sect3>
     <sect3 id='revolve-arc'>
