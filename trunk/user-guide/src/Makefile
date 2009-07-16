@@ -22,7 +22,7 @@ PROGRAMS = wavelet-plot windowing
 
 all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS)
 
-wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi
+wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi style.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
 
 wavelet-daubechies%-wav.dat: wavelet-plot
@@ -49,10 +49,10 @@ scaling-func.o: scaling-func.c wavelet.h
 daubechies.o: daubechies.c wavelet.h
 	$(CC) $(COMMON_CFLAGS) $(GSL_CFLAGS) -c -o $@ $<
 
-windowing-win.svg: windowing-win.gpi $(WINDOW_DATA_WIN)
+windowing-win.svg: windowing-win.gpi style.gpi $(WINDOW_DATA_WIN)
 	gnuplot $<
 
-windowing-fft.svg: windowing-fft.gpi $(WINDOW_DATA_WIN)
+windowing-fft.svg: windowing-fft.gpi style.gpi $(WINDOW_DATA_FFT)
 	gnuplot $<
 
 window-%-win.dat: windowing
