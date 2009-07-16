@@ -302,7 +302,16 @@
           <imagedata fileref='surface-area-vertices.png' format='PNG'/>
         </imageobject>
         <caption>
-          Surface area calculation triangulation scheme.
+          Surface area calculation triangulation scheme (left).  Application
+          of the triangulation scheme to a three-pixel masked area (right),
+          e.g. a grain.  The small circles represent pixel-center vertices
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>z<subscript>i</subscript></phrase></mathphrase>
+            <alt>z_i</alt>
+          </inlineequation>,
+          thin dashed lines stand for pixel boundaries while thick lines
+          symbolize the triangulation.  The surface area estimate equals to the
+          area covered by the mask (grey) in this scheme.
         </caption>
       </mediaobject>
     </informalfigure>
