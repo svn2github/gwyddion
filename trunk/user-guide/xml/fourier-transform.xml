@@ -82,13 +82,11 @@
       <mathphrase><phrase role='mathvar'>ξ</phrase> = 2π<phrase role='mathvar'>x</phrase></mathphrase>
       <alt>\xi=2\pi x</alt>
     </inlineequation>
-    is used in some formulas.
+    is used in some formulas.  The available windowing types include:
   </para>
-  <table frame='none' id='table-windowing-types'>
-    <title>Windowing types</title>
-    <tgroup cols='2'>
-      <colspec align='left'/>
-      <colspec align='left'/>
+  <informaltable frame='none' id='table-windowing-types'>
+    <tgroup cols='2' align='left'>
+      <?dblatex lX?>
       <thead>
         <row>
           <entry>Name</entry>
@@ -277,7 +275,7 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
         </row>
       </tbody>
     </tgroup>
-  </table>
+  </informaltable>
   <informalfigure id='fig-windowing-types'>
     <mediaobject>
       <imageobject>

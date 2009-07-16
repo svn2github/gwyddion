@@ -36,19 +36,13 @@
     to write an import module (if you can program) or contact the maintainers
     to help them improve the support.
   </para>
-  <table frame='none' id='table-file-formats'>
-    <title>Supported file formats</title>
+  <informaltable frame='none' id='table-file-formats'>
     <indexterm>
       <primary>file</primary>
       <primary>supported formats</primary>
     </indexterm>
-    <tgroup cols='6'>
-      <colspec align='left'/>
-      <colspec align='left'/>
-      <colspec align='left'/>
-      <colspec align='left'/>
-      <colspec align='left'/>
-      <colspec align='left'/>
+    <tgroup cols='6' align='left'>
+      <?dblatex XXXccc?>
       <thead>
         <row>
           <entry>File Format</entry>
@@ -566,7 +560,7 @@
         </row>
       </tbody>
     </tgroup>
-  </table>
+  </informaltable>
   <sect2 id='file-loading'>
     <title>File Loading</title>
     <indexterm>

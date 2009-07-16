@@ -126,43 +126,44 @@
       </informalexample>
       can be set for system-wide default.  The list of available languages
       include:
-      <informaltable frame='none'>
-        <tgroup cols='2'>
-          <thead>
-            <row>
-              <entry><literal>gwy_locale</literal></entry>
-              <entry>Language</entry>
-            </row>
-          </thead>
-          <tbody>
-            <row>
-              <entry>cs_CZ.UTF-8</entry>
-              <entry>Czech (Czech Republic)</entry>
-            </row>
-            <row>
-              <entry>de_DE.UTF-8</entry>
-              <entry>German (Germany)</entry>
-            </row>
-            <row>
-              <entry>en_US.UTF-8</entry>
-              <entry>English (Unites States)</entry>
-            </row>
-            <row>
-              <entry>fr_FR.UTF-8</entry>
-              <entry>French (France)</entry>
-            </row>
-            <row>
-              <entry>it_IT.UTF-8</entry>
-              <entry>Italian (Italy)</entry>
-            </row>
-            <row>
-              <entry>ru_RU.UTF-8</entry>
-              <entry>Russian (Russia)</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
     </para>
+    <informaltable frame='none'>
+      <tgroup cols='2'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry><literal>gwy_locale</literal></entry>
+            <entry>Language</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>cs_CZ.UTF-8</entry>
+            <entry>Czech (Czech Republic)</entry>
+          </row>
+          <row>
+            <entry>de_DE.UTF-8</entry>
+            <entry>German (Germany)</entry>
+          </row>
+          <row>
+            <entry>en_US.UTF-8</entry>
+            <entry>English (Unites States)</entry>
+          </row>
+          <row>
+            <entry>fr_FR.UTF-8</entry>
+            <entry>French (France)</entry>
+          </row>
+          <row>
+            <entry>it_IT.UTF-8</entry>
+            <entry>Italian (Italy)</entry>
+          </row>
+          <row>
+            <entry>ru_RU.UTF-8</entry>
+            <entry>Russian (Russia)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </sect1>
 
   <sect1 id='installation-dependencies'>
@@ -670,40 +671,41 @@ make install</userinput></literallayout>
         optional packages to install prior to
         <application>Gwyddion</application> installation. The following table
         summarizes how they are called in the two software collections:
-        <informaltable frame='none'>
-          <tgroup cols='3'>
-            <thead>
-              <row>
-                <entry>Package</entry>
-                <entry>Fink</entry>
-                <entry>MacPorts</entry>
-              </row>
-            </thead>
-            <tbody>
-              <row>
-                <entry>Gtk+</entry>
-                <entry>gtk+2</entry>
-                <entry>gtk2</entry>
-              </row>
-              <row>
-                <entry>GtkGLExt</entry>
-                <entry>gtkglext1</entry>
-                <entry>gtkglext</entry>
-              </row>
-              <row>
-                <entry>FFTW3</entry>
-                <entry>fftw3</entry>
-                <entry>fftw-3</entry>
-              </row>
-              <row>
-                <entry>LibXML2</entry>
-                <entry>libxml2</entry>
-                <entry>libxml2</entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </informaltable>
       </para>
+      <informaltable frame='none'>
+        <tgroup cols='3'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Package</entry>
+              <entry>Fink</entry>
+              <entry>MacPorts</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Gtk+</entry>
+              <entry>gtk+2</entry>
+              <entry>gtk2</entry>
+            </row>
+            <row>
+              <entry>GtkGLExt</entry>
+              <entry>gtkglext1</entry>
+              <entry>gtkglext</entry>
+            </row>
+            <row>
+              <entry>FFTW3</entry>
+              <entry>fftw3</entry>
+              <entry>fftw-3</entry>
+            </row>
+            <row>
+              <entry>LibXML2</entry>
+              <entry>libxml2</entry>
+              <entry>libxml2</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </sect2>
     <sect2 id='installation-osx-macports'>
       <title>MacPorts</title>

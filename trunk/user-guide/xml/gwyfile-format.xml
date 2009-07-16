@@ -89,7 +89,8 @@
       Available atomic data types are listed in following table:
     </para>
     <informaltable>
-      <tgroup cols='3'>
+      <tgroup cols='3' align='left'>
+        <?dblatex lll?>
         <thead>
           <row>
             <entry>Type</entry>
@@ -152,7 +153,8 @@
       types are listed in following table:
     </para>
     <informaltable>
-      <tgroup cols='3'>
+      <tgroup cols='3' align='left'>
+        <?dblatex lll?>
         <thead>
           <row>
             <entry>Type</entry>
