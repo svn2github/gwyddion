@@ -1,16 +1,26 @@
 GSL_CFLAGS := $(shell pkg-config --cflags gsl)
 GSL_LIBS := $(shell pkg-config --libs gsl)
+GWY_CFLAGS := $(shell pkg-config --cflags gwyddion)
+GWY_LIBS := $(shell pkg-config --libs gwyddion)
 COMMON_CFLAGS = -Wall -W -O2 -g
 
-OBJECTS = daubechies.o scaling-func.o wavelet-plot.o
+OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o
+
 DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
 WAVELET_DATA = $(patsubst %,%-wav.dat,$(DAUBECHIES)) $(patsubst %,%-fft.dat,$(DAUBECHIES))
-GRAPHS = $(WAVELET_GRAPHS)
-DATA = $(WAVELET_DATA)
-PROGRAMS = wavelet-plot
 
-wavelet-graphs: $(WAVELET_GRAPHS)
+WINDOW = $(patsubst %,window-%,None Hann Hamming Blackman Lanzcos Welch Rect Nuttall Flat-top Kaiser-2.5)
+WINDOW_GRAPHS = windowing-win.svg windowing-fft.svg
+WINDOW_DATA_WIN = $(patsubst %,%-win.dat,$(WINDOW))
+WINDOW_DATA_FFT = $(patsubst %,%-fft.dat,$(WINDOW))
+WINDOW_DATA = $(WINDOW_DATA_WIN) $(WINDOW_DATA_FFT)
+
+GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS)
+DATA = $(WAVELET_DATA) $(WINDOW_DATA) fftw-wisdom.dat
+PROGRAMS = wavelet-plot windowing
+
+all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS)
 
 wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
@@ -38,6 +48,24 @@ scaling-func.o: scaling-func.c wavelet.h
 
 daubechies.o: daubechies.c wavelet.h
 	$(CC) $(COMMON_CFLAGS) $(GSL_CFLAGS) -c -o $@ $<
+
+windowing-win.svg: windowing-win.gpi $(WINDOW_DATA_WIN)
+	gnuplot $<
+
+windowing-fft.svg: windowing-fft.gpi $(WINDOW_DATA_WIN)
+	gnuplot $<
+
+window-%-win.dat: windowing
+	./$< win $* >$@
+
+window-%-fft.dat: windowing
+	./$< fft $* >$@
+
+windowing: windowing.o
+	$(CC) $(GWY_LIBS) -o $@ $^
+
+windowing.o: windowing.c
+	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(PROGRAMS) $(OBJECTS) $(DATA) $(GRAPHS)

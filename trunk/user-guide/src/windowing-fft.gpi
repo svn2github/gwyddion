@@ -1,0 +1,16 @@
+set term svg size 250,165 enhanced font 'DejaVu Sans,6' lw 0.7
+load 'style.gpi'
+
+set output 'windowing-fft.svg'
+set format y '%.1f'
+
+set key
+plot \
+  'window-Hann-fft.dat' title 'Hann' ls 1, \
+  'window-Hamming-fft.dat' title 'Hamming' ls 2, \
+  'window-Blackman-fft.dat' title 'Blackman' ls 3, \
+  'window-Lanzcos-fft.dat' title 'Lanzcos' ls 4, \
+  'window-Welch-fft.dat' title 'Welch' ls 5, \
+  'window-Nuttall-fft.dat' title 'Nuttall' ls 6, \
+  'window-Flat-top-fft.dat' title 'Flat-top' ls 7, \
+  'window-Kaiser-2.5-fft.dat' title 'Kaiser-2.5' ls 8
