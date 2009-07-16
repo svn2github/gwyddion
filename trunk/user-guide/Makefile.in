@@ -136,8 +136,8 @@ dist-xhtml: xhtml.stamp $(patsubst %,xhtml/%,$(XHTML_IMAGES))
 
 version:
 	d=`date --iso`; \
-	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
-	$(GSED) -i 's/\(^ *Version *\)[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1'"$$d/" xml/user-guide.xml
+	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac; \
+	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml/user-guide.xml
 	autoconf && ./configure
 
 help:
