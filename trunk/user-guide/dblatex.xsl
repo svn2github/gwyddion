@@ -109,38 +109,54 @@
 </xsl:template>
 
 <xsl:template match='tgroup'>
-  <xsl:variable name='cols'>
-   <xsl:value-of select="@cols"/>
- </xsl:variable>
-  <xsl:text>\begin{tabularx}{\linewidth}{</xsl:text>
-  <xsl:call-template name='repeat'>
-    <xsl:with-param name='count' select='$cols'/>
-    <xsl:with-param name='text' select='"X"'/>
-  </xsl:call-template>
-  <xsl:text>}&#10;</xsl:text>
-  <xsl:apply-templates/>
-  <xsl:text>\end{tabularx}</xsl:text>
+  <!-- If there is <?dblatex COLSPEC?> use that as the column specification.
+       Processing instructions are ugly but the HTML and LaTeX table models
+       are too different. -->
+  <xsl:variable name='colspec'>
+    <xsl:choose>
+      <xsl:when test='processing-instruction("dblatex")'>
+        <xsl:value-of select='processing-instruction("dblatex")'/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name='cols'>
+          <xsl:value-of select="@cols"/>
+        </xsl:variable>
+        <xsl:call-template name='repeat'>
+          <xsl:with-param name='count' select='$cols'/>
+          <xsl:with-param name='text' select='"X"'/>
+        </xsl:call-template>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:variable>
+  <xsl:choose>
+    <xsl:when test='contains($colspec, "X")'>
+      <xsl:text>\begin{tabularx}{\linewidth}{</xsl:text>
+      <xsl:value-of select='$colspec'/>
+      <xsl:text>}&#10;</xsl:text>
+      <xsl:apply-templates mode='tabularx' select='thead'/>
+      <xsl:apply-templates select='tbody'/>
+      <xsl:text>\end{tabularx}</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:text>\begin{tabular}{</xsl:text>
+      <xsl:value-of select='$colspec'/>
+      <xsl:text>}&#10;</xsl:text>
+      <xsl:apply-templates mode='tabular' select='thead'/>
+      <xsl:apply-templates select='tbody'/>
+      <xsl:text>\end{tabular}</xsl:text>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
-<xsl:template match='thead/row'>
+<xsl:template match='thead/row|tbody/row'>
   <xsl:apply-templates/>
 </xsl:template>
 
-<xsl:template match='tbody/row'>
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match='table/title'>
-  <!--
-  <xsl:text>{\slshape </xsl:text>
-  <xsl:apply-templates/>
-  <xsl:text>}&#10;</xsl:text>
-  -->
-</xsl:template>
+<xsl:template match='table/title'/>
 
 <xsl:template match='colspec'/>
 
-<xsl:template match='thead'>
+<xsl:template match='thead' mode='tabularx'>
   <xsl:text>\noalign{\hrule}&#10;</xsl:text>
   <xsl:text>\noalign{\smallskip}&#10;</xsl:text>
   <xsl:apply-templates/>
@@ -151,7 +167,11 @@
   <xsl:text>\endfoot&#10;</xsl:text>
 </xsl:template>
 
-<xsl:template match='table|tbody'>
+<xsl:template match='thead' mode='tabular'>
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match='table|informaltable|tbody'>
   <xsl:apply-templates/>
 </xsl:template>
 
