@@ -119,7 +119,7 @@
       <guilabel>Statistical Quantities</guilabel>
       tool are as follows:
     </para>
-    <orderedlist>
+    <itemizedlist>
       <listitem>
         <indexterm>
           <primary>mean</primary>
@@ -178,7 +178,7 @@
         Mean inclination of facets in area: computed by averaging normalized
         facet direction vectors.
       </listitem>
-    </orderedlist>
+    </itemizedlist>
     <tip>
       By default, the Statistical Quantities tool will display figures based
       on the entire image. If you would like to analyze a certain region within
