@@ -296,7 +296,10 @@
     <informalfigure id='fig-surface-area-vertices'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='surface_area_vertices.png' format='PNG'/>
+          <imagedata fileref='surface-area-vertices.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='surface-area-vertices.png' format='PNG'/>
         </imageobject>
         <caption>
           Surface area calculation triangulation scheme.
