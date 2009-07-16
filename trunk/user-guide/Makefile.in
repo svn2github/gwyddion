@@ -26,7 +26,7 @@ PNG_IMAGES := $(filter-out eq-%.png,$(XHTML_IMAGES))
 IMAGE_PNG_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
 IMAGE_PDF_IMAGES := $(patsubst %,images/%,$(PDF_IMAGES))
 SVG_IMAGES = \
-	boundary_length.svg \
+	boundary-length.svg \
 	grain-bounding-dims.svg \
 	inclination.svg \
 	profile-interpolation.svg \
@@ -40,7 +40,7 @@ PNG_SOURCE_IMAGES = \
 	profile-interpolation-graphs.png \
 	profile-interpolation-image.png
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES)) $(patsubst %.svg,%.pdf,$(SVG_IMAGES))
-DIST_IMAGES := $(filter $(BUILT_IMAGES),$(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES)))
+DIST_IMAGES := $(filter-out $(BUILT_IMAGES),$(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES)))
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl \
 	version-greater-or-equal.xsl docbook-xsl-version.xsl
@@ -137,6 +137,7 @@ dist-xhtml: xhtml.stamp $(patsubst %,xhtml/%,$(XHTML_IMAGES))
 version:
 	d=`date --iso`; \
 	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
+	$(GSED) -i 's/\(^ *Version *\)[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1'"$$d/" xml/user-guide.xml
 	autoconf && ./configure
 
 help:
