@@ -8,9 +8,9 @@ PACKAGE = @PACKAGE_SHORTNAME@
 
 GMAKE = @GMAKE@
 GSED = @GSED@
-XSLTPROC = @XSLTPROC@ --xinclude
-DBLATEX = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
-INKSCAPE = @INKSCAPE@ --without-gui --export-area-drawing
+XSLTPROC_CMD = @XSLTPROC@ --xinclude
+DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
+INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
 #HTML2TXT = @LYNX@ -force_html -dump -nolist
 
 DISTNAME = $(BASENAME)-$(VERSION)
@@ -66,7 +66,7 @@ pdf: $(PACKAGE).pdf
 @PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
 @PDF_TRUE@	rm -rf pdf
 @PDF_TRUE@	mkdir pdf
-@PDF_TRUE@	$(DBLATEX) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
+@PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
 
 %.txt: %.html
 	$(HTML2TXT) $< >$@
@@ -76,7 +76,7 @@ xhtml: xhtml.stamp
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
 @HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_PNG_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
-@HTML_TRUE@	$(XSLTPROC) xhtml.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(XSLTPROC_CMD) xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 @HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 @HTML_TRUE@	cp user-guide.css xhtml
@@ -85,7 +85,7 @@ xhtml: xhtml.stamp
 formulas: formulas.stamp
 
 @HTML_TRUE@formulas.stamp: eq-extract.xsl $(EQ_SOURCES) $(MAIN_XML_SOURCE)
-@HTML_TRUE@	$(XSLTPROC) eq-extract.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(XSLTPROC_CMD) eq-extract.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	+cd ./formulas && $(GMAKE)
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	cp formulas/eq-*.png xhtml
@@ -98,12 +98,12 @@ formulas: formulas.stamp
 # another directory
 @SVG_TRUE@images/%.png: images/%.svg
 @SVG_TRUE@	cd images && \
-@SVG_TRUE@	    $(INKSCAPE) --export-dpi=150 --export-background=white \
+@SVG_TRUE@	    $(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
 @SVG_TRUE@	        --export-png="$*.png" --file="$*.svg"
 
 @SVG_TRUE@images/%.pdf: images/%.svg
 @SVG_TRUE@	cd images && \
-@SVG_TRUE@	    $(INKSCAPE) --export-pdf="$*.pdf" --file="$*.svg"
+@SVG_TRUE@	    $(INKSCAPE_CMD) --export-pdf="$*.pdf" --file="$*.svg"
 
 clean:
 	+cd ./formulas && $(GMAKE) clean
