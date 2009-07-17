@@ -1,10 +1,10 @@
-set term svg size 250,165 enhanced font 'DejaVu Sans,6' lw 0.7
+set term svg size 360,165 enhanced font 'DejaVu Sans,6' lw 0.7
 load 'style.gpi'
 
 set output 'windowing-win.svg'
 set format y '%.1f'
 
-set key
+set key outside
 plot \
   'window-Hann-win.dat' title 'Hann' ls 1, \
   'window-Hamming-win.dat' title 'Hamming' ls 2, \

@@ -6,7 +6,7 @@
 
 #define WISDOM_NAME "fftw-wisdom.dat"
 
-enum { EXTEND = 320 };
+enum { EXTEND = 400 };
 
 static void
 smooth2(GwyDataLine *xline, GwyDataLine *yline)
@@ -38,7 +38,7 @@ int
 main(int argc, char *argv[])
 {
     const GwyEnum *wtypes;
-    guint i, j, n, npt = 64000;
+    guint i, j, n, npt = 60000;
     GwyDataLine *line, *zero, *rout, *iout, *xdata;
     const gchar *name, *cmpname;
     gboolean do_fft;
@@ -79,6 +79,8 @@ main(int argc, char *argv[])
                    i);
 
     if (do_fft) {
+        double prevx = -1.0, prevy = -1.0;
+
         fh = fopen(WISDOM_NAME, "rb");
         if (fh) {
             fftw_import_wisdom_from_file(fh);
@@ -96,17 +98,23 @@ main(int argc, char *argv[])
         for (j = 0; j < npt; j++)
             gwy_data_line_set_val(xdata, j, (gdouble)j/npt);
 
-        for (j = 0; j < EXTEND; j++)
+        for (j = 0; j < EXTEND/2; j++)
             smooth2(xdata, line);
 
         n = gwy_data_line_get_res(xdata);
         for (j = 0; j < n; j++) {
             gdouble x = gwy_data_line_get_val(xdata, j);
+            gdouble y = gwy_data_line_get_val(line, j);
 
-            if (x < 0.5 || x > 0.999)
+            if (x < 0.001 || x > 0.998)
                 continue;
 
-            printf("%g %g\n", 2.0*x - 1.0, gwy_data_line_get_val(line, j));
+            if (fabs(x - prevx) < 0.005 && fabs(y - prevy) < 0.005)
+                continue;
+
+            printf("%g %g\n", 2.0*x - 1.0, y);
+            prevx = x;
+            prevy = y;
         }
 
         fh = fopen(WISDOM_NAME, "wb");
