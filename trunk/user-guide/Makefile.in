@@ -27,6 +27,9 @@ IMAGE_PNG_IMAGES := $(patsubst %,images/%,$(PNG_IMAGES))
 IMAGE_PDF_IMAGES := $(patsubst %,images/%,$(PDF_IMAGES))
 SVG_IMAGES = \
 	boundary-length.svg \
+	gaussian-acf.svg \
+	gaussian-hhcf.svg \
+	gaussian-psdf.svg \
 	grain-bounding-dims.svg \
 	inclination.svg \
 	profile-interpolation.svg \

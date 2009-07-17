@@ -642,6 +642,30 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
           </textobject>
         </mediaobject>
       </informalequation>
+      <informalfigure id='fig-gaussian-acf'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='gaussian-acf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-acf.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            Autocorrelation function obtained for simulated Gaussian randomly
+            rough surface (i.e. with a Gaussian autocorrelation function)
+            with
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>σ</phrase> ≈ 20 nm</mathphrase>
+              <alt>\sigma\approx20\rm\,nm</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>T</phrase> ≈ 300 nm</mathphrase>
+              <alt>T\approx300\rm\,nm</alt>
+            </inlineequation>.
+          </caption>
+        </mediaobject>
+      </informalfigure>
       <note>
         For optical measurements (e. g. spectroscopic reflectometry,
         ellipsometry) the Gaussian autocorrelation function is usually expected
@@ -748,12 +772,9 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
         </mediaobject>
       </informalequation>
       <para>
-        In the following <link linkend='fig-hhcf-acf-gauss'>figure</link>
-        the height-height correlation function and autocorrelation function
-        obtained for a simulated surface having Gaussian autocorrelation
-        function are plotted.  These functions are fitted by means of
-        least-squares method using the formulae shown above. The resulting
-        values of
+        In the following figure the height-height correlation function obtained
+        for a simulated Gaussian surface is plotted. It is fitted using the
+        formula shown above. The resulting values of
         <inlineequation>
           <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
           <alt>\sigma</alt>
@@ -763,17 +784,28 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
           <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
           <alt>T</alt>
         </inlineequation>
-        were practically same for both the approaches.
+        obtained by fitting the HHCF are practically the same as for the ACF.
       </para>
-      <informalfigure id='fig-hhcf-acf-gauss'>
+      <informalfigure id='fig-gaussian-hhcf'>
         <mediaobject>
           <imageobject>
-            <imagedata fileref='fig_cf.png' format='PNG'/>
+            <imagedata fileref='gaussian-hhcf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-hhcf.png' format='PNG'/>
           </imageobject>
           <caption>
-            Height-height correlation function and autocorrelation function
-            obtained for simulated surface having Gaussian autocorrelation
-            function.
+            Height-height correlation function obtained for simulated Gaussian
+            randomly rough surface with
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>σ</phrase> ≈ 20 nm</mathphrase>
+              <alt>\sigma\approx20\rm\,nm</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>T</phrase> ≈ 300 nm</mathphrase>
+              <alt>T\approx300\rm\,nm</alt>
+            </inlineequation>.
           </caption>
         </mediaobject>
       </informalfigure>
@@ -906,9 +938,10 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
         </mediaobject>
       </informalequation>
       <para>
-        In the following <link linkend='fig-psdf-gauss'>figure</link>
-        the resulting PSDF and its fit for the same surface as used in the
-        <link linkend='fig-hhcf-acf-gauss'>previous figure</link> are
+        In the following figure the resulting PSDF and its fit for the same
+        surface as used in the
+        <link linkend='fig-gaussian-acf'>ACF</link> and
+        <link linkend='fig-gaussian-hhcf'>HHCF</link> fitting are
         plotted. We can see that the function can be again fitted by Gaussian
         PSDF. The resulting values of
         <inlineequation>
@@ -922,14 +955,17 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
         </inlineequation>
         were practically same as those from the HHCF and ACF fit.
       </para>
-      <informalfigure id='fig-psdf-gauss'>
+      <informalfigure id='fig-gaussian-psdf'>
         <mediaobject>
           <imageobject>
-            <imagedata fileref='fig_psdf.png' format='PNG'/>
+            <imagedata fileref='gaussian-psdf.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='gaussian-psdf.png' format='PNG'/>
           </imageobject>
           <caption>
             PSDF obtained for data simulated with Gaussian autocorrelation
-            function. Points represent computed data, line represents its fit.
+            function.
           </caption>
         </mediaobject>
       </informalfigure>
