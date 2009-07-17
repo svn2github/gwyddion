@@ -35,7 +35,9 @@ SVG_IMAGES = \
 	volume-pixel-weights.svg \
 	wavelet-daubechies20.svg \
 	wavelet-daubechies4.svg \
-	wavelet-haar.svg
+	wavelet-haar.svg \
+	windowing-win.svg \
+	windowing-fft.svg
 PNG_SOURCE_IMAGES = \
 	profile-interpolation-graphs.png \
 	profile-interpolation-image.png

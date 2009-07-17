@@ -276,10 +276,13 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
       </tbody>
     </tgroup>
   </informaltable>
-  <informalfigure id='fig-windowing-types'>
+  <informalfigure id='fig-windowing-win'>
     <mediaobject>
       <imageobject>
-        <imagedata fileref='windowing-types.png' format='PNG'/>
+        <imagedata fileref='windowing-win.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-win.png' format='PNG'/>
       </imageobject>
       <caption>
         Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
@@ -287,10 +290,13 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
       </caption>
     </mediaobject>
   </informalfigure>
-  <informalfigure id='fig-windowing-types-freq'>
+  <informalfigure id='fig-windowing-fft'>
     <mediaobject>
       <imageobject>
-        <imagedata fileref='windowing-types-freq.png' format='PNG'/>
+        <imagedata fileref='windowing-fft.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-fft.png' format='PNG'/>
       </imageobject>
       <caption>
         Envelopes of windowing functions frequency responses: Hann, Hamming,
