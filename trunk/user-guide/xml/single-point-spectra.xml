@@ -38,8 +38,9 @@
     </para>
     <para>
       The <guibutton>Apply</guibutton> button then extracts the selected
-      set of curves into a graph that can be further analysed by the standard
-      graph functions.
+      set of curves into a graph that can be further analysed by graph
+      functions, such as
+      <link linkend='fd-curve-fitting'>force-distance curve fitting</link>.
     </para>
     <informalfigure id='fig-spectro-tool'>
       <mediaobject>
