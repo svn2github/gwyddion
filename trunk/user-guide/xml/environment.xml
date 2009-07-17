@@ -11,7 +11,7 @@
     they are not path lists, they can contain only a single path.
   </para>
   <variablelist>
-    <varlistentry>
+    <varlistentry id='GWYDDION_DATADIR'>
       <term>
         <envar>GWYDDION_DATADIR</envar>
       </term>
@@ -27,7 +27,7 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry>
+    <varlistentry id='GWYDDION_LIBDIR'>
       <term>
         <envar>GWYDDION_LIBDIR</envar>
       </term>
@@ -42,7 +42,7 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry>
+    <varlistentry id='GWYDDION_LIBEXECDIR'>
       <term>
         <envar>GWYDDION_LIBEXECDIR</envar>
       </term>
@@ -57,7 +57,7 @@
         </para>
       </listitem>
     </varlistentry>
-    <varlistentry>
+    <varlistentry id='GWYDDION_LOCALEDIR'>
       <term>
         <envar>GWYDDION_LOCALEDIR</envar>
       </term>
@@ -82,7 +82,7 @@
     and some Gwyddion-specific variables:
   </para>
   <variablelist>
-    <varlistentry>
+    <varlistentry id='GWYDDION_LOGFILE'>
       <term>
         <envar>GWYDDION_LOGFILE</envar>
       </term>
