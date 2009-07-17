@@ -5,13 +5,13 @@
 <chapter id='getting-started' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Getting Started</title>
   <para>
-    This chapter explains various basic concepts and terms, such as masks or
-    selections, the organization of data in Gwyddion and it describes the user
-    interface.
+    This chapter introduces various basic concepts and terms, such as masks or
+    selections, explains the organization of data in Gwyddion and describes the
+    user interface.
   </para>
   <para>
     The descriptions are relatively thorough and some of the topics near the
-    end of this chaper, such as raw file import or remote control, might be
+    end of the chaper, such as raw file import or remote control, might be
     considered advanced and not for everyday use.  So, despite the name, it is
     not necessary to read this entire chapter to be able to work with Gwyddion.
     The Gwyddion user interface is intuitive and much can be discovered by
