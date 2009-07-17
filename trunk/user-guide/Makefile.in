@@ -39,7 +39,6 @@ SVG_IMAGES = \
 	windowing-win.svg \
 	windowing-fft.svg
 PNG_SOURCE_IMAGES = \
-	profile-interpolation-graphs.png \
 	profile-interpolation-image.png
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES)) $(patsubst %.svg,%.pdf,$(SVG_IMAGES))
 DIST_IMAGES := $(filter-out $(BUILT_IMAGES),$(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES)))
