@@ -62,6 +62,8 @@ main(int argc, char *argv[])
         fprintf(stderr, "Invalid scaling steps %ld\n", scaling_steps);
         return 1;
     }
+    for (i = K/6; i; i /= 2)
+        scaling_steps--;
     unity = 1 << scaling_steps;
     zoom = GSL_MAX(4, unity/zoom);
 
