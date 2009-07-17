@@ -5,10 +5,90 @@
 <sect1 id='resources'>
   <title>Resources</title>
   <para>
-    Format of Gwyddion resource files.
+    Various bits of data, e.g. <link linkend='color-map'>false color maps</link>
+    or <link linkend='raw-file-import-presets'>raw file import presets</link>,
+    are stored in standalone files that are collectivelly called resource
+    files. Gwyddion looks for resources in two different locations: system
+    and user-specific.
+  </para>
+  <para>
+    System resources are installed along with the program and they are not
+    modifiable. Typically, they are located under a directory such as
+    <filename>/usr/share/gwyddion</filename> (Unix), <filename>Program
+      Files\Gwyddion</filename> (MS Windows) or other directory determined by
+    <link linkend='GWYDDION_DATADIR'><envar>GWYDDION_DATADIR</envar></link>.
+  </para>
+  <para>
+    User resources are located in a user's directory, this usually means under
+    <filename>~/.gwyddion</filename> (Unix) or <filename>Documents and
+      Settings\gwyddion</filename> (MS Windows).
+  </para>
+  <para>
+    All resource files are text files that can be easily examined and modified
+    by text editors or sent to other users (if they are copied or created
+    manually Gwyddion needs to be restarted to notice them).  They are
+    organized in subdirectories according to their kind, e.g. false color maps
+    reside in the subdirectory <filename>gradients</filename>.  The name of the
+    file determines the resource name – gradient Gray is found in file
+    <filename>gradients/Gray</filename>.
+  </para>
+  <para>
+    Every resource file has the same structure.  It starts with a line
+    identifying the resource type:
+    <informalexample>
+      <programlisting>Gwyddion resource GwyGradient</programlisting>
+    </informalexample>
+    where <type>GwyGradient</type> is the type name in the type system,
+    followed by named parameters in the form
+    <informalexample>
+      <programlisting><replaceable>name</replaceable> <replaceable>value</replaceable></programlisting>
+    </informalexample>
+    and resource data.  Some resource types may contain only named parameters,
+    other may contain only data.
   </para>
   <sect2 id='resource-gradients'>
     <title>Gradients</title>
+    <para>
+      Gradients, i.e. false color maps, are identified by
+      <type>GwyGradient</type> and contain only data.  The gradient data
+      consist of rows corresponding to individual points in the gradient:
+      <informalexample>
+        <programlisting><replaceable>position</replaceable> <replaceable>red</replaceable> <replaceable>green</replaceable> <replaceable>blue</replaceable> <replaceable>alpha</replaceable></programlisting>
+      </informalexample>
+      The position determines where the color defined by
+      <replaceable>red</replaceable>, <replaceable>green</replaceable>,
+      <replaceable>blue</replaceable> and <replaceable>alpha</replaceable>
+      components is placed in the interval
+      <inlineequation>
+        <mathphrase>[0, 1]</mathphrase>
+        <alt>[0,1]</alt>
+      </inlineequation>
+      where 0 corresponds to the gradient start, 1 corresponds to the end.
+      The color is interpolated linearly between the specified points.
+    </para>
+    <para>
+      The positions must form an increasing sequence from 0 to 1 (i.e.
+      the minimum number of color points is two). The range of the color
+      components is also
+      <inlineequation>
+        <mathphrase>[0, 1]</mathphrase>
+        <alt>[0,1]</alt>
+      </inlineequation>.
+      Note the alpha value, corresponding to opacity, is unused and must be
+      given as 1 (fully opaque).
+    </para>
+    <para>
+      For instance, the standard gradient Red going from black (0 0 0) to red
+      (1 0 0) to white (1 1 1) can be defined as follows:
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGradient
+0.0 0 0 0 1
+0.5 1 0 0 1
+1.0 1 1 1 1
+]]></programlisting>
+      </informalexample>
+    </para>
   </sect2>
   <sect2 id='resource-gl-materials'>
     <title>GL Materials</title>
