@@ -55,14 +55,7 @@
       Some GNU/Linux and Unix systems may provide binary packages of Gwyddion.
       The <ulink url='http://gwyddion.net/download.php'>download</ulink> page
       of the project also tracks known packages and packaging efforts.  For
-      instance,
-      <itemizedlist>
-        <listitem>Debian</listitem>
-        <listitem>Ubuntu</listitem>
-        <listitem>Gentoo</listitem>
-        <listitem>openSuSE</listitem>
-        <listitem>FreeBSD</listitem>
-      </itemizedlist>
+      instance, Debian, Ubuntu, Gentoo, openSuSE or FreeBSD
       offer Gwyddion packages.  If your operating system provides such a
       package and it is recent enough, install it using the standard means of
       the operating system.  Otherwise proceed with compilation from source
