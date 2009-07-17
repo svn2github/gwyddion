@@ -1,0 +1,15 @@
+set term svg size 260,180 enhanced font 'DejaVu Sans,6' lw 0.7
+load 'style.gpi'
+g = 'gaussian'
+
+set output g.'-'.name.'.svg'
+
+set style line 2 ps 0.7
+set style line 6 ps 0.7
+
+load g.'-'.name.'.gpi'
+plot \
+  g.'-'.name.'.dat' u ($1/xscale):($2/yscale) title 'evaluated '.NAME w p ls 6, \
+  '' u ($1/xscale):($3/yscale) title g.' '.NAME.' fit' ls 2
+
+unset multiplot

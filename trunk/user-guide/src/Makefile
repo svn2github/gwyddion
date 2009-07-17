@@ -4,7 +4,7 @@ GWY_CFLAGS := $(shell pkg-config --cflags gwyddion)
 GWY_LIBS := $(shell pkg-config --libs gwyddion)
 COMMON_CFLAGS = -Wall -W -O2 -g
 
-OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o
+OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o randomly-rough.o
 
 DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
@@ -16,14 +16,20 @@ WINDOW_DATA_WIN = $(patsubst %,%-win.dat,$(WINDOW))
 WINDOW_DATA_FFT = $(patsubst %,%-fft.dat,$(WINDOW))
 WINDOW_DATA = $(WINDOW_DATA_WIN) $(WINDOW_DATA_FFT)
 
+PROFILE = $(patsubst %,profile-interpolation-%,round-natural round-hires key-hires)
 PROFILE_GRAPHS = profile-interpolation.svg
-PROFILE_DATA = $(patsubst %,profile-interpolation-%.dat,round-natural round-hires key-hires)
+PROFILE_DATA = $(patsubst %,%.dat,$(PROFILE))
 
-GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS)
-DATA = $(WAVELET_DATA) $(WINDOW_DATA) fftw-wisdom.dat
-PROGRAMS = wavelet-plot windowing
+GAUSSIAN = $(patsubst %,gaussian-%,acf hhcf psdf)
+GAUSSIAN_GRAPHS = $(patsubst %,%.svg,$(GAUSSIAN))
+GAUSSIAN_DATA = $(patsubst %,%.dat,$(GAUSSIAN))
 
-all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS)
+# These things are cleaned!
+GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS)
+DATA = $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA) fftw-wisdom.dat
+PROGRAMS = wavelet-plot windowing randomly-rough
+
+all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS)
 
 wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi style.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
@@ -73,8 +79,20 @@ windowing.o: windowing.c
 profile-interpolation.svg: profile-interpolation.gpi style.gpi $(PROFILE_DATA)
 	gnuplot $<
 
+gaussian-%.svg: gaussian.gpi gaussian-%.gpi style.gpi gaussian-%.dat
+	echo 'name = "$*"; load "gaussian.gpi"' | gnuplot -
+
+gaussian-%.dat: randomly-rough
+	./$< $* 600 >$@
+
+randomly-rough: randomly-rough.o
+	$(CC) $(GWY_LIBS) -o $@ $^
+
+randomly-rough.o: randomly-rough.c
+	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
+
 clean:
 	rm -f $(PROGRAMS) $(OBJECTS) $(DATA) $(GRAPHS)
 
 .PHONY: clean
-.PRECIOUS: $(WAVELET_DATA)
+.PRECIOUS: $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA)

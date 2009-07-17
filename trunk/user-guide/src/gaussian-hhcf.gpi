@@ -1,0 +1,6 @@
+NAME = 'HHCF'
+xscale=1e-9
+yscale=1e-18
+set xlabel 'τ_x [nm]'
+set ylabel 'H [nm^2]'
+set key bottom right
