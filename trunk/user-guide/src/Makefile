@@ -10,7 +10,7 @@ DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
 WAVELET_DATA = $(patsubst %,%-wav.dat,$(DAUBECHIES)) $(patsubst %,%-fft.dat,$(DAUBECHIES))
 
-WINDOW = $(patsubst %,window-%,None Hann Hamming Blackman Lanzcos Welch Rect Nuttall Flat-top Kaiser-2.5)
+WINDOW = $(patsubst %,window-%,None Hann Hamming Blackmann Lanzcos Welch Rect Nuttall Flat-top Kaiser-2.5)
 WINDOW_GRAPHS = windowing-win.svg windowing-fft.svg
 WINDOW_DATA_WIN = $(patsubst %,%-win.dat,$(WINDOW))
 WINDOW_DATA_FFT = $(patsubst %,%-fft.dat,$(WINDOW))
