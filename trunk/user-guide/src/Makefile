@@ -16,11 +16,14 @@ WINDOW_DATA_WIN = $(patsubst %,%-win.dat,$(WINDOW))
 WINDOW_DATA_FFT = $(patsubst %,%-fft.dat,$(WINDOW))
 WINDOW_DATA = $(WINDOW_DATA_WIN) $(WINDOW_DATA_FFT)
 
-GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS)
+PROFILE_GRAPHS = profile-interpolation.svg
+PROFILE_DATA = $(patsubst %,profile-interpolation-%.dat,round-natural round-hires key-hires)
+
+GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS)
 DATA = $(WAVELET_DATA) $(WINDOW_DATA) fftw-wisdom.dat
 PROGRAMS = wavelet-plot windowing
 
-all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS)
+all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS)
 
 wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi style.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
@@ -66,6 +69,9 @@ windowing: windowing.o
 
 windowing.o: windowing.c
 	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
+
+profile-interpolation.svg: profile-interpolation.gpi style.gpi $(PROFILE_DATA)
+	gnuplot $<
 
 clean:
 	rm -f $(PROGRAMS) $(OBJECTS) $(DATA) $(GRAPHS)
