@@ -141,17 +141,17 @@ w_{\rm Hamming}(x) = 0.54-0.46\cos\xi
           </entry>
         </row>
         <row>
-          <entry>Blackman</entry>
+          <entry>Blackmann</entry>
           <entry>
-            <inlineequation id='eq-windowing-blackman'>
+            <inlineequation id='eq-windowing-blackmann'>
               <inlinemediaobject>
                 <imageobject>
-                  <imagedata fileref='eq-windowing-blackman.png' format='PNG'/>
+                  <imagedata fileref='eq-windowing-blackmann.png' format='PNG'/>
                 </imageobject>
                 <textobject role='tex'>
                   <phrase>
 <![CDATA[
-w_{\rm Blackman}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
+w_{\rm Blackmann}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
 ]]>
                   </phrase>
                 </textobject>
@@ -285,7 +285,7 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
         <imagedata fileref='windowing-win.png' format='PNG'/>
       </imageobject>
       <caption>
-        Windowing functions: Hann, Hamming, Blackman, Lanczos, Welch,
+        Windowing functions: Hann, Hamming, Blackmann, Lanczos, Welch,
         Nutall, Flat-top, Kaiser 2.5.
       </caption>
     </mediaobject>
@@ -300,7 +300,7 @@ w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
       </imageobject>
       <caption>
         Envelopes of windowing functions frequency responses: Hann, Hamming,
-        Blackman, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
+        Blackmann, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
       </caption>
     </mediaobject>
   </informalfigure>
