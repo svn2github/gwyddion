@@ -9,7 +9,7 @@ set logscale y
 plot [] [1e-9:] \
   'window-Hann-fft.dat' smooth sbezier title 'Hann' ls 1, \
   'window-Hamming-fft.dat' smooth sbezier title 'Hamming' ls 2, \
-  'window-Blackman-fft.dat' smooth sbezier title 'Blackman' ls 3, \
+  'window-Blackmann-fft.dat' smooth sbezier title 'Blackmann' ls 3, \
   'window-Lanzcos-fft.dat' smooth sbezier title 'Lanzcos' ls 4, \
   'window-Welch-fft.dat' smooth sbezier title 'Welch' ls 5, \
   'window-Nuttall-fft.dat' smooth sbezier title 'Nuttall' ls 6, \

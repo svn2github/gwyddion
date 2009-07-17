@@ -8,7 +8,7 @@ set key outside
 plot \
   'window-Hann-win.dat' title 'Hann' ls 1, \
   'window-Hamming-win.dat' title 'Hamming' ls 2, \
-  'window-Blackman-win.dat' title 'Blackman' ls 3, \
+  'window-Blackmann-win.dat' title 'Blackmann' ls 3, \
   'window-Lanzcos-win.dat' title 'Lanzcos' ls 4, \
   'window-Welch-win.dat' title 'Welch' ls 5, \
   'window-Nuttall-win.dat' title 'Nuttall' ls 6, \
