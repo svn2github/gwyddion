@@ -1,6 +1,7 @@
 % $Id$
-\catcode`@=11
 \input{formulas/defs.tex}
+\raggedbottom
+\makeatletter
 % Restore working plain macros that AMS-TeX wants us to replace with some crap
 \def\cases#1{\left\{\,\vcenter{\normalbaselines\m@th
     \ialign{$##\hfil$&\quad##\hfil\crcr#1\crcr}}\right.}
@@ -34,8 +35,6 @@
 \vskip 0pt plus3filll
 }
 \newpage
-\chead[]{\DBKcheadfront}
-\lfoot[]{}
 }
 % Fix chapter heads
 \def\@makechapterhead#1{%
@@ -70,4 +69,37 @@
   \else
     #1\par
   \fi}
-\catcode`@=12
+% Fix page heads
+\topmargin=1.2cm
+\textheight=24.7cm
+\headsep=20pt
+\def\mainmatter{
+  \cleardoublepage\pagenumbering{arabic}%
+  \fancyhead{}
+  \fancyhead[OR]{\thepage}
+  \fancyhead[OL]{\leftmark}
+  \fancyhead[EL]{\thepage}
+  \fancyhead[ER]{\DBKtitle}
+}
+\def\frontmatter{
+  \cleardoublepage\pagenumbering{roman}%
+  \fancyhead{}
+  \chead{}
+  \fancyhead[OR]{\thepage}
+  \fancyhead[OL]{\leftmark}
+  \fancyhead[EL]{\thepage}
+  \fancyhead[ER]{\DBKtitle}
+}
+\def\chaptermark#1{\markboth{\thechapter. #1}{}}
+\def\tableofcontents{%
+  \if@twocolumn
+    \@restonecoltrue\onecolumn
+  \else
+    \@restonecolfalse
+  \fi
+  \chapter*{\contentsname
+      \@mkboth{\contentsname}{\contentsname}}%
+  \@starttoc{toc}%
+  \if@restonecol\twocolumn\fi
+}
+\makeatother
