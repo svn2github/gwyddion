@@ -4,7 +4,7 @@ GWY_CFLAGS := $(shell pkg-config --cflags gwyddion)
 GWY_LIBS := $(shell pkg-config --libs gwyddion)
 COMMON_CFLAGS = -Wall -W -O2 -g
 
-OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o randomly-rough.o
+OBJECTS = daubechies.o scaling-func.o wavelet-plot.o windowing.o randomly-rough.o grain-quantity-dump.o
 
 DAUBECHIES = $(patsubst %,wavelet-daubechies%,4 6 12 20) wavelet-haar
 WAVELET_GRAPHS = $(patsubst %,%.svg,$(DAUBECHIES))
@@ -24,12 +24,14 @@ GAUSSIAN = $(patsubst %,gaussian-%,acf hhcf psdf)
 GAUSSIAN_GRAPHS = $(patsubst %,%.svg,$(GAUSSIAN))
 GAUSSIAN_DATA = $(patsubst %,%.dat,$(GAUSSIAN))
 
+GRAINQ_DATA = grain-quantities.xml
+
 # These things are cleaned!
 GRAPHS = $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS)
-DATA = $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA) fftw-wisdom.dat
-PROGRAMS = wavelet-plot windowing randomly-rough
+DATA = $(WAVELET_DATA) $(WINDOW_DATA) $(GAUSSIAN_DATA) $(GRAINQ_DATA) fftw-wisdom.dat
+PROGRAMS = wavelet-plot windowing randomly-rough grain-quantity-dump
 
-all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS)
+all: $(WAVELET_GRAPHS) $(WINDOW_GRAPHS) $(PROFILE_GRAPHS) $(GAUSSIAN_GRAPHS) $(GRAINQ_DATA)
 
 wavelet-%.svg: wavelet-%-wav.dat wavelet-%-fft.dat wavelet.gpi style.gpi
 	echo 'name = "wavelet-$*"; load "wavelet.gpi"' | gnuplot -
@@ -89,6 +91,15 @@ randomly-rough: randomly-rough.o
 	$(CC) $(GWY_LIBS) -o $@ $^
 
 randomly-rough.o: randomly-rough.c
+	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
+
+grain-quantities.xml: grain-quantity-dump
+	./$< >$@
+
+grain-quantity-dump: grain-quantity-dump.o
+	$(CC) $(GWY_LIBS) -o $@ $^
+
+grain-quantity-dump.o: grain-quantity-dump.c
 	$(CC) $(COMMON_CFLAGS) $(GWY_CFLAGS) -c -o $@ $<
 
 clean:
