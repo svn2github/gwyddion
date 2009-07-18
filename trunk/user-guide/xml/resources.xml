@@ -2,7 +2,7 @@
 <!-- @(#) $Id: environment.xml 9457 2009-07-15 22:02:37Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='resources'>
+<sect1 id='resources' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Resources</title>
   <para>
     Various bits of data, e.g. <link linkend='color-map'>false color maps</link>
@@ -24,13 +24,17 @@
       Settings\gwyddion</filename> (MS Windows).
   </para>
   <para>
-    All resource files are text files that can be easily examined and modified
-    by text editors or sent to other users (if they are copied or created
-    manually Gwyddion needs to be restarted to notice them).  They are
-    organized in subdirectories according to their kind, e.g. false color maps
-    reside in the subdirectory <filename>gradients</filename>.  The name of the
-    file determines the resource name – gradient Gray is found in file
-    <filename>gradients/Gray</filename>.
+    All resource files are simple text files that can be easily examined and
+    modified by text editors or sent to other users (if they are copied or
+    created manually Gwyddion needs to be restarted to notice them).  In most
+    cases only characters of the ASCII can appear in the files.  If
+    international text can appear there it must be in the UTF-8 encoding.
+  </para>
+  <para>
+    Resources are organized in subdirectories according to their kind, e.g.
+    color gradients reside in the subdirectory <filename>gradients</filename>.
+    The name of the file determines the resource name – gradient Gray is found
+    in file <filename>gradients/Gray</filename>.
   </para>
   <para>
     Every resource file has the same structure.  It starts with a line
@@ -49,9 +53,15 @@
   <sect2 id='resource-gradients'>
     <title>Gradients</title>
     <para>
-      Gradients, i.e. false color maps, are identified by
-      <type>GwyGradient</type> and contain only data.  The gradient data
-      consist of rows corresponding to individual points in the gradient:
+      Gradients, i.e. false color maps, reside in directory
+      <filename>gradients</filename>, they are identified by
+      <type>GwyGradient</type> and contain only data.  They can be edited in
+      the application using the
+      <link linkend='color-gradient-editor'>gradient editor</link>.
+    </para>
+    <para>
+      The gradient data consists of rows corresponding to individual points in
+      the gradient:
       <informalexample>
         <programlisting><replaceable>position</replaceable> <replaceable>red</replaceable> <replaceable>green</replaceable> <replaceable>blue</replaceable> <replaceable>alpha</replaceable></programlisting>
       </informalexample>
@@ -79,7 +89,7 @@
     </para>
     <para>
       For instance, the standard gradient Red going from black (0 0 0) to red
-      (1 0 0) to white (1 1 1) can be defined as follows:
+      (1 0 0) to white (1 1 1) is defined as follows:
       <informalexample>
         <programlisting><![CDATA[
 Gwyddion resource GwyGradient
@@ -90,11 +100,176 @@ Gwyddion resource GwyGradient
       </informalexample>
     </para>
   </sect2>
-  <sect2 id='resource-gl-materials'>
-    <title>GL Materials</title>
+  <sect2 id='resource-opengl-materials'>
+    <title>OpenGL Materials</title>
+    <para>
+      OpenGL materials reside in directory <filename>glmaterials</filename>,
+      they are identified by <type>GwyGLMaterial</type> and contain
+      only data.  They can be edited in the application using the
+      <link linkend='opengl-material-editor'>OpenGL material editor</link>.
+    </para>
+    <para>
+      The material data consists of four RGBA lines, similar to
+      <link linkend='resource-gradients'>gradients</link> that correspond in
+      to the four OpenGL material components in the following order:
+      <orderedlist>
+        <listitem>ambient,</listitem>
+        <listitem>diffuse,</listitem>
+        <listitem>specular,</listitem>
+        <listitem>emission.</listitem>
+      </orderedlist>
+      See section <link linkend='opengl-material-editor'>OpenGL Material
+        Editor</link> for explanation of the components.  They are followed by
+      a line containing the shininess, again as a number from the interval
+      <inlineequation>
+        <mathphrase>[0, 1]</mathphrase>
+        <alt>[0,1]</alt>
+      </inlineequation>.
+    </para>
+    <para>
+      Note the emission component, while read and written by Gwyddion, is
+      presently unused by the 3D view.  It is recommended to set it to
+      0 0 0 1, i.e. black.
+    </para>
+    <para>
+      For instance, the standard material Red-Rubber with very dark red
+      ambient color, grayish diffuse reflection, red specular reflection and
+      low shininess is defined as follows:
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGLMaterial
+0.05 0.0  0.0  1.0
+0.5  0.4  0.4  1.0
+0.7  0.04 0.04 1.0
+0.0  0.0  0.0  1.0
+.078125
+]]></programlisting>
+      </informalexample>
+    </para>
   </sect2>
   <sect2 id='resource-grain-values'>
     <title>Grain Values</title>
+    <para>
+      Grain values reside in directory <filename>grainvalues</filename>,
+      they are identified by <type>GwyGrainValue</type> and contain
+      only named parameters.  They can be used to define additional grain
+      quantities, derived from the built-in quantities, that appear under
+      <guilabel>User</guilabel> group in
+      <link linkend='grain-analysis-statistics'>grain analysis functions</link>.
+      At the time of writing this, there is no editor in the application, new
+      quantities must be created manually.
+    </para>
+    <para>
+      The named parameters are summarized in the following table:
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-grain-value'>
+        <tgroup cols='3'>
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Required</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>symbol</varname></entry>
+              <entry>required</entry>
+              <entry>
+                Identifier to use in other expressions (but see below).
+                It must be a valid identifier of ASCII letters, numbers and
+                underscores, starting with a letter.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>expression</varname></entry>
+              <entry>required</entry>
+              <entry>
+                Formula for calculation of this quantity from other
+                grain quantities.  The general expression syntax is described
+                in section <link linkend='expression-syntax'>Expressions</link>.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>symbol_markup</varname></entry>
+              <entry>optional</entry>
+              <entry>
+                Fancy symbol that can include Greek letters or subscripts
+                and superscripts expressed with the
+                <ulink url='http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html'>Pango markup language</ulink>.
+                It is used for presentation in the application so, while it
+                is optional, it is recommended to at least define it
+                identically to <varname>symbol</varname>.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>power_xy</varname></entry>
+              <entry>optional</entry>
+              <entry>
+                The power in which the lateral dimensions appear in the
+                quantity. For instance, this is 1 for grain dimensions, 2 for
+                areas and volumes.  The default value is 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>power_z</varname></entry>
+              <entry>optional</entry>
+              <entry>
+                The power in which the <quote>height</quote> dimension appears
+                in the quantity. For instance, this is 1 for values and
+                volumes, 0 for dimensions and areas.  The default value is 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>same_units</varname></entry>
+              <entry>optional</entry>
+              <entry>
+                Give as 1 if the quantity makes sense only for lateral and
+                <quote>height</quote> dimensions being the same physical
+                quantities.  For instance, this is required for the surface
+                area.  The default is 0.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>is_angle</varname></entry>
+              <entry>optional</entry>
+              <entry>
+                Give as 1 if the quantity is an angle.  The expression should
+                calculate angles in radians.  However, if
+                <varname>is_angle</varname> is set Gwyddion knowns the value
+                can be converted to degrees for presentation.
+                The default is 0.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      At present, user-defined grain quantities cannot depend on other
+      user-defined grain quantities to avoid circular dependences.  The
+      built-in grain quantities are listed below:
+    </para>
+    <para>
+      <xi:include href='table-grain-quantities.xml'/>
+    </para>
+    <para>
+      For instance, a new grain value Height, measuing the grain height as the
+      difference between the maximum and minimum value, can be defined as
+      follows:
+      <informalexample>
+        <programlisting><![CDATA[
+Gwyddion resource GwyGrainValue
+symbol dz
+symbol_markup Δz
+power_xy 0
+power_z 1
+expression z_max - z_min
+]]></programlisting>
+      </informalexample>
+    </para>
   </sect2>
   <sect2 id='resource-raw-file-presets'>
     <title>Raw File Presets</title>
