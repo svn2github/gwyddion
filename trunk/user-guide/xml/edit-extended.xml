@@ -66,7 +66,7 @@
       anisotropic and its features are supposed to be oriented in a direction
       not paralled to the image sides.
     </para>
-    <informalfigure id='fit-drift-correction'>
+    <informalfigure id='fig-drift-correction'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='drift-corrected-graph.png' format='PNG'/>

@@ -602,7 +602,7 @@
       load a file, check the file type is set to the corresponding
       type, or to <guilabel>Automatically detected</guilabel>.
     </para>
-    <informalfigure id='fix-file-open-screenshot'>
+    <informalfigure id='fig-file-open-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='file-open.png' format='PNG'/>
