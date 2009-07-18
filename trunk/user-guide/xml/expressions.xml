@@ -28,7 +28,7 @@
     The precedence of operations is summarized in following table.
   </para>
   <para>
-    <informaltable frame='none' id='expr-op-precedence'>
+    <informaltable frame='none' id='table-expressions-precedence'>
       <tgroup cols='3' align='left'>
         <?dblatex lll?>
         <thead>
@@ -76,7 +76,7 @@
     Available operators and functions are listed in following table.
   </para>
   <para>
-    <informaltable frame='none' id='expr-operators'>
+    <informaltable frame='none' id='table-expression-operators'>
       <tgroup cols='2' align='left'>
         <?dblatex ll?>
         <thead>

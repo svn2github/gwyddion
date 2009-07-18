@@ -18,7 +18,7 @@
     similar tasks as <guimenu>Data Process</guimenu> functions – value
     reading, leveling, statistics, correction, etc.
   </para>
-  <informaltable frame='none' role='toolbox'>
+  <informaltable frame='none' role='toolbox' id='table-toolbox'>
     <tgroup cols='4'>
       <tbody>
         <row>

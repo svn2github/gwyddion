@@ -120,7 +120,7 @@
       can be set for system-wide default.  The list of available languages
       include:
     </para>
-    <informaltable frame='none'>
+    <informaltable frame='none' id='table-locales'>
       <tgroup cols='2'>
         <?dblatex ll?>
         <thead>
@@ -665,7 +665,7 @@ make install</userinput></literallayout>
         <application>Gwyddion</application> installation. The following table
         summarizes how they are called in the two software collections:
       </para>
-      <informaltable frame='none'>
+      <informaltable frame='none' id='table-osx-package-names'>
         <tgroup cols='3'>
           <?dblatex lll?>
           <thead>

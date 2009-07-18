@@ -88,7 +88,7 @@
     <para>
       Available atomic data types are listed in following table:
     </para>
-    <informaltable>
+    <informaltable id='table-gwyfile-atomic-types'>
       <tgroup cols='3' align='left'>
         <?dblatex lll?>
         <thead>
@@ -152,7 +152,7 @@
       length (the number of items), followed by the item values. Array data
       types are listed in following table:
     </para>
-    <informaltable>
+    <informaltable id='table-gwyfile-array-types'>
       <tgroup cols='3' align='left'>
         <?dblatex lll?>
         <thead>
