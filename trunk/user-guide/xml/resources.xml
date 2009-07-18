@@ -34,7 +34,9 @@
     Resources are organized in subdirectories according to their kind, e.g.
     color gradients reside in the subdirectory <filename>gradients</filename>.
     The name of the file determines the resource name – gradient Gray is found
-    in file <filename>gradients/Gray</filename>.
+    in file <filename>gradients/Gray</filename>.  Modules can define their
+    own resource types; the types described here are the most important types
+    but the list may not be comprehensive.
   </para>
   <para>
     Every resource file has the same structure.  It starts with a line
@@ -42,7 +44,9 @@
     <informalexample>
       <programlisting>Gwyddion resource GwyGradient</programlisting>
     </informalexample>
-    where <type>GwyGradient</type> is the type name in the type system,
+    where <type>GwyGradient</type> is the type name in the
+    <ulink url='http://library.gnome.org/devel/gobject/stable/'>type system</ulink>
+    (which is quite a low-level detail but so it is),
     followed by named parameters in the form
     <informalexample>
       <programlisting><replaceable>name</replaceable> <replaceable>value</replaceable></programlisting>
@@ -164,12 +168,13 @@ Gwyddion resource GwyGLMaterial
     </para>
     <para>
       <informaltable frame='none' id='table-resource-grain-value'>
-        <tgroup cols='3'>
-          <?dblatex llX?>
+        <tgroup cols='4'>
+          <?dblatex lllX?>
           <thead>
             <row>
               <entry>Parameter</entry>
               <entry>Required</entry>
+              <entry>Type</entry>
               <entry>Description</entry>
             </row>
           </thead>
@@ -177,6 +182,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>symbol</varname></entry>
               <entry>required</entry>
+              <entry>identifier</entry>
               <entry>
                 Identifier to use in other expressions (but see below).
                 It must be a valid identifier of ASCII letters, numbers and
@@ -186,6 +192,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>expression</varname></entry>
               <entry>required</entry>
+              <entry>free-form</entry>
               <entry>
                 Formula for calculation of this quantity from other
                 grain quantities.  The general expression syntax is described
@@ -195,6 +202,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>symbol_markup</varname></entry>
               <entry>optional</entry>
+              <entry>free-form</entry>
               <entry>
                 Fancy symbol that can include Greek letters or subscripts
                 and superscripts expressed with the
@@ -207,6 +215,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>power_xy</varname></entry>
               <entry>optional</entry>
+              <entry>integer</entry>
               <entry>
                 The power in which the lateral dimensions appear in the
                 quantity. For instance, this is 1 for grain dimensions, 2 for
@@ -216,6 +225,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>power_z</varname></entry>
               <entry>optional</entry>
+              <entry>integer</entry>
               <entry>
                 The power in which the <quote>height</quote> dimension appears
                 in the quantity. For instance, this is 1 for values and
@@ -225,6 +235,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>same_units</varname></entry>
               <entry>optional</entry>
+              <entry>0 or 1</entry>
               <entry>
                 Give as 1 if the quantity makes sense only for lateral and
                 <quote>height</quote> dimensions being the same physical
@@ -235,6 +246,7 @@ Gwyddion resource GwyGLMaterial
             <row>
               <entry><varname>is_angle</varname></entry>
               <entry>optional</entry>
+              <entry>0 or 1</entry>
               <entry>
                 Give as 1 if the quantity is an angle.  The expression should
                 calculate angles in radians.  However, if
@@ -273,9 +285,252 @@ expression z_max - z_min
   </sect2>
   <sect2 id='resource-raw-file-presets'>
     <title>Raw File Presets</title>
-  </sect2>
-  <sect2 id='settings'>
-    <title>Settings</title>
+    <para>
+      Raw file presents reside in directory <filename>rawfile</filename>,
+      they are identified by <type>GwyRawFilePreset</type> and contain
+      only named parameters.  They are normally created and edited by the
+      preset editor in the
+      <link linkend='raw-file-import'>raw file import module</link>.
+    </para>
+    <para>
+      The named parameters in the resource files correspond closely to the
+      parameters in the user interface explained in detail in section
+      <link linkend='raw-file-import'>Raw Data File Import</link>.
+      Hence, they will be described only briefly here.
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-rawfile-preset'>
+        <tgroup cols='3'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>xres</varname>, <varname>yres</varname></entry>
+              <entry>integer</entry>
+              <entry>
+                horizontal and vertical size
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xreal</varname>, <varname>yreal</varname></entry>
+              <entry>number</entry>
+              <entry>
+                physical dimensions, in units given by
+                <varname>xyexponent</varname> and <varname>xyunit</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xyexponent</varname></entry>
+              <entry>multiple of 3</entry>
+              <entry>
+                power of 10 to multiply <varname>xreal</varname> and
+                <varname>yreal</varname> with
+              </entry>
+            </row>
+            <row>
+              <entry><varname>xyunit</varname></entry>
+              <entry>string</entry>
+              <entry>
+                base units of <varname>xreal</varname> and
+                <varname>yreal</varname>, e.g. <literal>"m"</literal>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zscale</varname></entry>
+              <entry>number</entry>
+              <entry>
+                unit step in values
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zexponent</varname></entry>
+              <entry>multiple of 3</entry>
+              <entry>
+                power of 10 to multiply <varname>zscale</varname> with
+              </entry>
+            </row>
+            <row>
+              <entry><varname>zunit</varname></entry>
+              <entry>string</entry>
+              <entry>
+                base units of <varname>zscale</varname>
+              </entry>
+            </row>
+            <row>
+              <entry><varname>format</varname></entry>
+              <entry>0 or 1</entry>
+              <entry>
+                0 means binary, 1 means text
+              </entry>
+            </row>
+            <row>
+              <entry><varname>builtin</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                built-in data format id, see below
+              </entry>
+            </row>
+            <row>
+              <entry><varname>offset</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                data offset in file, in bytes
+              </entry>
+            </row>
+            <row>
+              <entry><varname>size</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                data value size, in bits
+              </entry>
+            </row>
+            <row>
+              <entry><varname>skip</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                number of bits to skip after each value
+              </entry>
+            </row>
+            <row>
+              <entry><varname>rowskip</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                number of additional bits to skip after each row
+              </entry>
+            </row>
+            <row>
+              <entry><varname>sign</varname> (binary)</entry>
+              <entry>0 or 1</entry>
+              <entry>
+                0 means unsigned, 1 means signed
+              </entry>
+            </row>
+            <row>
+              <entry><varname>revsample</varname> (binary)</entry>
+              <entry>0 or 1</entry>
+              <entry>
+                1 means reverse bits in values
+              </entry>
+            </row>
+            <row>
+              <entry><varname>revbyte</varname> (binary)</entry>
+              <entry>0 or 1</entry>
+              <entry>
+                1 means reverse bits in bytes
+              </entry>
+            </row>
+            <row>
+              <entry><varname>byteswap</varname> (binary)</entry>
+              <entry>integer</entry>
+              <entry>
+                byte swap pattern
+              </entry>
+            </row>
+            <row>
+              <entry><varname>lineoffset</varname> (text)</entry>
+              <entry>integer</entry>
+              <entry>
+                lines to skip before starting to read the data
+              </entry>
+            </row>
+            <row>
+              <entry><varname>skipfields</varname> (text)</entry>
+              <entry>integer</entry>
+              <entry>
+                fields to skip at the start of each line
+              </entry>
+            </row>
+            <row>
+              <entry><varname>delimiter</varname> (text)</entry>
+              <entry>string</entry>
+              <entry>
+                field delimiter, empty string means arbitrary whitespace
+              </entry>
+            </row>
+            <row>
+              <entry><varname>decomma</varname> (text)</entry>
+              <entry>0 or 1</entry>
+              <entry>
+                1 if decimal separator is comma, 0 for dot
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Note the choice of a built-in binary format, i.e.  nonzero
+      <varname>builtin</varname>, implies the binary format to some extent.
+      This means the options <varname>size</varname>,
+      <varname>revbyte</varname> and <varname>sign</varname>
+      are ignored as they are used only for detailed specification of user
+      formats.  The available formats are listed in the following table:
+    </para>
+    <para>
+      <informaltable frame='none' id='table-resource-rawfile-builtin'>
+        <tgroup cols='2'>
+          <?dblatex ll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>0</entry>
+              <entry>user-specified</entry>
+            </row>
+            <row>
+              <entry>1</entry>
+              <entry>signed 8bit integer</entry>
+            </row>
+            <row>
+              <entry>2</entry>
+              <entry>unsigned 8bit integer</entry>
+            </row>
+            <row>
+              <entry>3</entry>
+              <entry>signed 16bit integer</entry>
+            </row>
+            <row>
+              <entry>4</entry>
+              <entry>unsigned 16bit integer</entry>
+            </row>
+            <row>
+              <entry>5</entry>
+              <entry>signed 32bit integer</entry>
+            </row>
+            <row>
+              <entry>6</entry>
+              <entry>unsigned 32bit integer</entry>
+            </row>
+            <row>
+              <entry>7</entry>
+              <entry>IEEE float</entry>
+            </row>
+            <row>
+              <entry>8</entry>
+              <entry>IEEE double</entry>
+            </row>
+            <row>
+              <entry>9</entry>
+              <entry>signed 64bit integer</entry>
+            </row>
+            <row>
+              <entry>10</entry>
+              <entry>unsigned 64bit integer</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
