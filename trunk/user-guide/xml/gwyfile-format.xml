@@ -88,63 +88,65 @@
     <para>
       Available atomic data types are listed in following table:
     </para>
-    <informaltable id='table-gwyfile-atomic-types'>
-      <tgroup cols='3' align='left'>
-        <?dblatex lll?>
-        <thead>
-          <row>
-            <entry>Type</entry>
-            <entry>Character</entry>
-            <entry>Note</entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>boolean</entry>
-            <entry><literal>b</literal></entry>
-            <entry>
-              Stored as a byte, zero is false, nonzero (normally 1) is true
-            </entry>
-          </row>
-          <row>
-            <entry>character</entry>
-            <entry><literal>c</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>32bit integer</entry>
-            <entry><literal>i</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>64bit integer</entry>
-            <entry><literal>q</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>double</entry>
-            <entry><literal>d</literal></entry>
-            <entry>
-              IEEE 754 double precession floating point number
-            </entry>
-          </row>
-          <row>
-            <entry>string</entry>
-            <entry><literal>s</literal></entry>
-            <entry>
-              <constant>NUL</constant>-terminated
-            </entry>
-          </row>
-          <row>
-            <entry>object</entry>
-            <entry><literal>o</literal></entry>
-            <entry>
-              Serialized object as described above
-            </entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+    <para>
+      <informaltable id='table-gwyfile-atomic-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Character</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>boolean</entry>
+              <entry><literal>b</literal></entry>
+              <entry>
+                Stored as a byte, zero is false, nonzero (normally 1) is true
+              </entry>
+            </row>
+            <row>
+              <entry>character</entry>
+              <entry><literal>c</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>32bit integer</entry>
+              <entry><literal>i</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>64bit integer</entry>
+              <entry><literal>q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>double</entry>
+              <entry><literal>d</literal></entry>
+              <entry>
+                IEEE 754 double precession floating point number
+              </entry>
+            </row>
+            <row>
+              <entry>string</entry>
+              <entry><literal>s</literal></entry>
+              <entry>
+                <constant>NUL</constant>-terminated
+              </entry>
+            </row>
+            <row>
+              <entry>object</entry>
+              <entry><literal>o</literal></entry>
+              <entry>
+                Serialized object as described above
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
     <para>
       Each atomic type except boolean has its array counterpart.  The type
       character of array types is the same as of the corresponding atomic
@@ -152,52 +154,54 @@
       length (the number of items), followed by the item values. Array data
       types are listed in following table:
     </para>
-    <informaltable id='table-gwyfile-array-types'>
-      <tgroup cols='3' align='left'>
-        <?dblatex lll?>
-        <thead>
-          <row>
-            <entry>Type</entry>
-            <entry>Character</entry>
-            <entry>Note</entry>
-          </row>
-        </thead>
-        <tbody>
-          <row>
-            <entry>array of characters</entry>
-            <entry><literal>C</literal></entry>
-            <entry>
-              Not <constant>NUL</constant>-terminated
-            </entry>
-          </row>
-          <row>
-            <entry>array of 32bit integers</entry>
-            <entry><literal>I</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>array of 64bit integers</entry>
-            <entry><literal>Q</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>array of doubles</entry>
-            <entry><literal>D</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>array of strings</entry>
-            <entry><literal>S</literal></entry>
-            <entry></entry>
-          </row>
-          <row>
-            <entry>array of objects</entry>
-            <entry><literal>O</literal></entry>
-            <entry>Uppercase Oh, not zero</entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
+    <para>
+      <informaltable id='table-gwyfile-array-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Character</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>array of characters</entry>
+              <entry><literal>C</literal></entry>
+              <entry>
+                Not <constant>NUL</constant>-terminated
+              </entry>
+            </row>
+            <row>
+              <entry>array of 32bit integers</entry>
+              <entry><literal>I</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of 64bit integers</entry>
+              <entry><literal>Q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of doubles</entry>
+              <entry><literal>D</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of strings</entry>
+              <entry><literal>S</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of objects</entry>
+              <entry><literal>O</literal></entry>
+              <entry>Uppercase Oh, not zero</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
   </sect2>
   <sect2 id='gwyfile-data-objects'>
     <title>Particular Objects</title>
