@@ -443,12 +443,7 @@
         <listitem>
           <itemizedlist>
             <listitem>
-              <guilabel>Inclination
-                 <inlineequation>
-                  <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
-                  <alt>\vartheta</alt>
-                </inlineequation>
-              </guilabel>,
+              <guilabel>Inclination θ</guilabel>,
               the deviation of the normal to the mean plane from the
               <inlineequation>
                 <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
@@ -458,12 +453,7 @@
               for details.
             </listitem>
             <listitem>
-              <guilabel>Inclination
-                 <inlineequation>
-                  <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
-                  <alt>\varphi</alt>
-                </inlineequation>
-              </guilabel>,
+              <guilabel>Inclination φ</guilabel>,
               the azimuth of the slope, as defined in
               <link linkend='inclinations-coordinates'>inclinations</link>.
             </listitem>
