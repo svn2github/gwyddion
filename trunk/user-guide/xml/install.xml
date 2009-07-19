@@ -387,8 +387,8 @@ make install</userinput></literallayout>
         </informalexample>
         However, modern Unix and Unix-like systems come with both bzip2 and
         gzip so, the considerably smaller
-        <filename>gwyddion-2.16.tar.gz</filename> should be normally the better
-        choice.
+        <filename>gwyddion-2.16.tar.bz2</filename> should be normally the
+        better choice.
       </para>
     </sect2>
     <sect2 id='installation-unix-source-configuration'>
