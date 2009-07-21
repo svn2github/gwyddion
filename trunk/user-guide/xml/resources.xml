@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!-- @(#) $Id: environment.xml 9457 2009-07-15 22:02:37Z yeti-dn $ -->
+<!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='resources' xmlns:xi='http://www.w3.org/2001/XInclude'>

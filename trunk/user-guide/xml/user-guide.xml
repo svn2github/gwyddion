@@ -58,9 +58,9 @@
   <xi:include href='data-analysis.xml'/>
   <chapter id='summaries'>
     <title>Summaries and Tables</title>
+    <xi:include href='gwyddion.xml'/>
     <xi:include href='keyboard-shortcuts.xml'/>
     <xi:include href='expressions.xml'/>
-    <xi:include href='environment.xml'/>
     <xi:include href='resources.xml'/>
     <xi:include href='gwyfile-format.xml'/>
   </chapter>

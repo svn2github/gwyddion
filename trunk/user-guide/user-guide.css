@@ -6,7 +6,7 @@ body {
   font-family: serif;
 }
 @media screen {
-  div.book, div.chapter, div.index, div.sect1, div.appendix,
+  div.book, div.chapter, div.index, div.sect1, div.appendix, div.refentry,
   div.navheader, div.navfooter {
     padding-left: 16px;
     padding-right: 16px;
