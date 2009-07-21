@@ -92,6 +92,11 @@
             instance of Gwyddion on the display.  Runs a new instance if none
             is running.
           </para>
+          <para>
+            This is probably the most useful remote control option.  File type
+            associations are usually installed to run Gwyddion with this
+            option.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -103,6 +108,10 @@
             Opens files given on the command line in an already running
             instance of Gwyddion on the display.  Fails if none is running.
           </para>
+          <para>
+            This is useful if you want to handle the case of Gwyddion not
+            running differently than by starting it.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -112,7 +121,8 @@
         <listitem>
           <para>
             Succeeds if an instance of Gwyddion is already running on the
-            display and prints its window id.  Fails if none is running.
+            display and prints its window id (<type>Window</type> on X11,
+            <type>HWND</type> on Win32).  Fails if none is running.
           </para>
         </listitem>
       </varlistentry>

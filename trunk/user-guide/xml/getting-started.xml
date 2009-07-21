@@ -11,7 +11,7 @@
   </para>
   <para>
     The descriptions are relatively thorough and some of the topics near the
-    end of the chaper, such as raw file import or remote control, might be
+    end of the chaper, such as raw file import or plug-ins, might be
     considered advanced and not for everyday use.  So, despite the name, it is
     not necessary to read this entire chapter to be able to work with Gwyddion.
     The Gwyddion user interface is intuitive and much can be discovered by
@@ -39,7 +39,6 @@
   <xi:include href='opengl-3d-view.xml'/>
   <xi:include href='single-point-spectra.xml'/>
   <xi:include href='metadata.xml'/>
-  <xi:include href='remote-control.xml'/>
   <xi:include href='raw-file-import.xml'/>
   <xi:include href='plugins.xml'/>
 </chapter>
