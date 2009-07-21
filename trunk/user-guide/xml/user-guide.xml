@@ -56,15 +56,7 @@
   <xi:include href='install.xml'/>
   <xi:include href='getting-started.xml'/>
   <xi:include href='data-analysis.xml'/>
-  <chapter id='summaries'>
-    <title>Summaries and Tables</title>
-    <xi:include href='gwyddion.xml'/>
-    <xi:include href='gwyddion-thumbnailer.xml'/>
-    <xi:include href='keyboard-shortcuts.xml'/>
-    <xi:include href='expressions.xml'/>
-    <xi:include href='resources.xml'/>
-    <xi:include href='gwyfile-format.xml'/>
-  </chapter>
+  <xi:include href='summaries.xml'/>
   <xi:include href='develop.xml'/>
   <xi:include href='gpl.xml'/>
   <xi:include href='fdl.xml'/>
