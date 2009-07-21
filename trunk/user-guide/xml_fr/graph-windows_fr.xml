@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='graph-windows'>
+  <title>Les Fenêtres de Graphe</title>
+  <para>
+    Les fenêtres de graphe sont utilisées pour analyser les données 1D. Elles sont 
+    crées par les outils ou modules pouvant extraire des graphes à partir des 
+    champs de données. Pour l'instant il n'est pas possible d'importer des 
+    graphes indépendants, car le but principal de Gwyddion est de fournir des 
+    outils pour analyser les champs de données et non les graphes..
+  </para>
+  <para>
+    Une fenêtre de graphe est constituée de trois onglets : le premier donne
+    le graphe, le second la table de données correspondante, et le troisième
+    la liste des courbes. Divers outils liés à la visualisation des données 1D 
+    sont disponibles directement dans la fenêtre de graphe : les boutons de
+    zoom et d'échelle logarithmique. Pour accéder à toutes les opérations
+    possibles utilisée le menu
+    <menuchoice>
+      <guimenu>Graphe</guimenu>
+    </menuchoice>
+    dans la fenêtre principale de Gwyddion.
+  </para>
+  <informalfigure id='fig-graph-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='graph_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Une fenêtre de graphe contenant trois profils.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Pour éditer les propriétés d'une courbe vous pouvez cliquer sur la courbe
+    dans l'onglet graphe ou activer par un double clic la ligne correspondante
+    dans l'onglet  <guilabel>Courbes</guilabel>. Pour supprimer une courbe
+    donnée il suffit de la sélectionner dans l'onglet 
+    <guilabel>Courbes</guilabel> d'appuyer sur la touche <keycap>Suppr</keycap>.
+    Il est aussi possible de copier une courbe vers une autre fenêtre graphe
+    en glissant la ligne correpondante vers l'autre fenêtre (si les unités
+    des graphes sont compatibles).
+  </para>
+  <para>
+    En cliquant sur un axe du graphe une boîte de dialogue apparaît et donne
+    accès aux propriétés de l'axe, qui peuvent être éditées.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

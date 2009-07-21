@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='data-windows'>
+  <title>La Fenêtre de Données</title>
+  <para>
+    Les données bi-dimensionnelles sont présentées dans les fenêtres de données.
+    Il s'agit de l'interface principale pour travailler avec Gwyddion. Les 
+    données sont affichées sous forme d'une image en fausses couleurs
+    représentant les hauteurs. L'axe des couleurs représentant la correspondance
+    entre les couleurs et les hauteurs réelles se trouve sur la droite de la 
+    fenêtre.
+  </para>
+  <para>
+    La palette de fausses couleurs utilisée pour représenter les hauteurs peut
+    être changée en cliquant sur l'axe avec le bouton droit de la souris (c'est-
+    à-dire en lançant le menu contextuel), puis en sélectionnant une palette 
+    dans la liste proposée. Les palettes les plus fréquemment utilisées sont
+    accessibles directement à partir du menu contextuel ; toutefois vous avez
+    accès à bien plus de palettes en choisissant 
+    <menuchoice><guimenuitem>Plus...</guimenuitem></menuchoice>.
+    De plus, vous pouvez utiliser
+    <link linkend='color-gradient-editor'>l'éditeur de gradient</link> pour
+    créer vos propres palettes et choisir quelles sont celles qui doivent
+    apparaître dans la liste de base.
+  </para>
+  <para>
+    Un menu contextuel existe aussi pour la zone des données. Ce menu donne
+    accès aux données et opérations basiques sur les données. Pour accéder à
+    toutes les opérations possibles, utilisez le menu
+    <menuchoice>
+      <guimenu>Traitement des Données</guimenu>
+    </menuchoice>
+    dans la fenêtre principale, ou utilisez les outils accessibles avec les
+    boutons du panneau <guilabel>Outils</guilabel>.
+  </para>
+  <indexterm><primary>Rapport d'aspect</primary></indexterm>
+  <para>
+    La flèche dans le coin gauche de la fenêtre donne accès au menu de 
+    changement du rapport d'aspect. Les données peuvent être affichées avec
+    un rapport d'aspect de 1:1 par rapport aux pixels de l'écran
+    (<guilabel>Pixels carrés</guilabel>), ou avec les dimensions physiques
+    avec une échelle de 1:1 sur l'écran 
+    (<guilabel>Pixels réels</guilabel>).  Une mesure de 1×1 μm scannée
+    avec une résolution réduite selon l'axe lent, ayant donc 512×128 pixels,
+    peut par exemple être affichée dans une fenêtre de 512×128 ou 512×512
+    pixels.
+  </para>
+  <informalfigure id='fig-data-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='data_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre de données et ses trois menus contextuels disponibles.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
