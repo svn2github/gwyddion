@@ -43,6 +43,7 @@ GWY_HTML_MISSING=
 GWY_PDF_MISSING=
 GWY_PNG_MISSING=
 GWY_SVG_MISSING=
+GWY_MAN_MISSING=
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
@@ -55,6 +56,8 @@ if test "$XSLTPROC" = no; then
   GWY_HTML_MISSING="${GWY_HTML_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
 "
   GWY_PDF_MISSING="${GWY_PDF_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
+"
+  GWY_MAN_MISSING="${GWY_MAN_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
 "
 fi
 
@@ -82,7 +85,8 @@ if test "$GS" = no; then
 "
 fi
 
-JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/html/chunk.xsl],
+# Here we assume if someone has xhtml he has manpages too.
+JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl],
                      [DocBook XSL Stylesheets],
                      [],[GWY_HTML_MISSING="${GWY_HTML_MISSING}  DocBook XSL Stylesheets, get them from http://docbook.sourceforge.net/projects/xsl/
 "])
@@ -128,6 +132,7 @@ GWY_CONDITIONAL([HTML],[test x = "x$GWY_HTML_MISSING"])
 GWY_CONDITIONAL([PDF],[test x = "x$GWY_PDF_MISSING"])
 GWY_CONDITIONAL([PNG],[test x = "x$GWY_PNG_MISSING"])
 GWY_CONDITIONAL([SVG],[test x = "x$GWY_SVG_MISSING"])
+GWY_CONDITIONAL([MAN],[test x = "x$GWY_MAN_MISSING"])
 
 AC_OUTPUT
 
@@ -139,6 +144,11 @@ fi
 if test x != "x$GWY_PDF_MISSING"; then
 AC_MSG_WARN([Cannot build PDF, the following tools were not found:
 $GWY_PDF_MISSING])
+fi
+
+if test x != "x$GWY_MAN_MISSING"; then
+AC_MSG_WARN([Cannot build man pages, the following tools were not found:
+$GWY_MAN_MISSING])
 fi
 
 if test x != "x$GWY_PNG_MISSING"; then

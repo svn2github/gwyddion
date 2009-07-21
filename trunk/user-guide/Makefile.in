@@ -45,8 +45,9 @@ PNG_SOURCE_IMAGES = \
 	profile-interpolation-image.png
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES)) $(patsubst %.svg,%.pdf,$(SVG_IMAGES))
 DIST_IMAGES := $(filter-out $(BUILT_IMAGES),$(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES)))
+MAN_PAGES = gwyddion.1
 
-XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl \
+XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl man.xsl \
 	version-greater-or-equal.xsl docbook-xsl-version.xsl
 CSS_STYLES = user-guide.css
 TEX_STYLES = user-guide.sty
@@ -57,8 +58,10 @@ BUILD_FILES = README Makefile.in user-guide.iss.in \
 @HTML_FALSE@html_target =
 @PDF_TRUE@pdf_target = pdf
 @PDF_FALSE@pdf_target =
+@MAN_TRUE@man_target = man
+@MAN_FALSE@man_target =
 
-ALL_TARGETS = $(html_target) $(pdf_target)
+ALL_TARGETS = $(html_target) $(pdf_target) $(man_target)
 
 all: $(ALL_TARGETS)
 
@@ -94,6 +97,11 @@ formulas: formulas.stamp
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	cp formulas/eq-*.png xhtml
 @HTML_TRUE@	touch $@
+
+man: $(MAN_PAGES)
+
+@MAN_TRUE@gwyddion.1: xml/gwyddion.xml
+@MAN_TRUE@	$(XSLTPROC_CMD) man.xsl $<
 
 @PNG_TRUE@fixpngres: fixpngres.c
 @PNG_TRUE@	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
@@ -150,6 +158,8 @@ help:
 @HTML_FALSE@	@echo "xhtml        Compile User guide to XHTML (not available)"
 @PDF_TRUE@	@echo "pdf          Compile User guide to PDF"
 @PDF_FALSE@	@echo "pdf          Compile User guide to PDF (not available)"
+@MAN_TRUE@	@echo "man          Compile Unix manual pages for commands"
+@MAN_FALSE@	@echo "man          Compile Unix manual pages for commands (not available)"
 	@echo "dist         Create tarball with DocBook sources"
 	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
 @PNG_TRUE@	@echo "fixpngres    Build fixpngres tool"
