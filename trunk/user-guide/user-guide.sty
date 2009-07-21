@@ -55,6 +55,19 @@
     \sffamily\Huge\bfseries  #1\par\nobreak
     \vskip 20\p@
   }}
+% Fix too pompous section heads
+\def\section{\@startsection{section}{1}{\z@}%
+                           {-2.5ex \@plus -1ex \@minus -.2ex}%
+                           {.5ex \@plus .1ex}%
+                           {\normalfont\sffamily\Large\bfseries}}
+\def\subsection{\@startsection{subsection}{2}{\z@}%
+                              {-2.25ex \@plus -1ex \@minus -.2ex}%
+                              {.3ex \@plus .05ex \@minus .02ex}%
+                              {\normalfont\sffamily\large\bfseries}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                 {-1.2ex\@plus -.5ex \@minus -.1ex}%
+                                 {.3ex \@plus .05ex \@minus .02ex}%
+                                 {\normalfont\sffamily\normalsize\bfseries}}
 % Fix vertical spacing in TOC
 \let\latex@dottedtocline=\@dottedtocline
 \def\@dottedtocline{\parskip=1pt plus0.05pt\latex@dottedtocline}
