@@ -82,7 +82,7 @@
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+      <varlistentry id='remote-control'>
         <term>
           <option>--remote-new</option>
         </term>
