@@ -135,7 +135,7 @@
       <xsl:text>}&#10;</xsl:text>
       <xsl:apply-templates mode='tabularx' select='thead'/>
       <xsl:apply-templates select='tbody'/>
-      <xsl:text>\end{tabularx}</xsl:text>
+      <xsl:text>\end{tabularx}&#10;</xsl:text>
     </xsl:when>
     <xsl:otherwise>
       <xsl:text>\begin{tabular}{</xsl:text>
@@ -143,7 +143,8 @@
       <xsl:text>}&#10;</xsl:text>
       <xsl:apply-templates mode='tabular' select='thead'/>
       <xsl:apply-templates select='tbody'/>
-      <xsl:text>\end{tabular}</xsl:text>
+      <xsl:text>\noalign{\hrule}&#10;</xsl:text>
+      <xsl:text>\end{tabular}&#10;</xsl:text>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
@@ -168,7 +169,11 @@
 </xsl:template>
 
 <xsl:template match='thead' mode='tabular'>
+  <xsl:text>\noalign{\hrule}&#10;</xsl:text>
+  <xsl:text>\noalign{\smallskip}&#10;</xsl:text>
   <xsl:apply-templates/>
+  <xsl:text>\noalign{\hrule}&#10;</xsl:text>
+  <xsl:text>\noalign{\smallskip}&#10;</xsl:text>
 </xsl:template>
 
 <xsl:template match='table|informaltable|tbody'>
