@@ -59,6 +59,7 @@
   <chapter id='summaries'>
     <title>Summaries and Tables</title>
     <xi:include href='gwyddion.xml'/>
+    <xi:include href='gwyddion-thumbnailer.xml'/>
     <xi:include href='keyboard-shortcuts.xml'/>
     <xi:include href='expressions.xml'/>
     <xi:include href='resources.xml'/>

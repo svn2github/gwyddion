@@ -45,7 +45,7 @@ PNG_SOURCE_IMAGES = \
 	profile-interpolation-image.png
 BUILT_IMAGES := $(patsubst %.svg,%.png,$(SVG_IMAGES)) $(patsubst %.svg,%.pdf,$(SVG_IMAGES))
 DIST_IMAGES := $(filter-out $(BUILT_IMAGES),$(patsubst %,images/%,$(PNG_IMAGES) $(SVG_IMAGES) $(PNG_SOURCE_IMAGES)))
-MAN_PAGES = gwyddion.1
+MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 
 XSL_STYLES = xhtml.xsl eq-extract.xsl dblatex.xsl man.xsl \
 	version-greater-or-equal.xsl docbook-xsl-version.xsl
@@ -100,7 +100,7 @@ formulas: formulas.stamp
 
 man: $(MAN_PAGES)
 
-@MAN_TRUE@gwyddion.1: xml/gwyddion.xml
+@MAN_TRUE@%.1: xml/%.xml
 @MAN_TRUE@	$(XSLTPROC_CMD) man.xsl $<
 
 @PNG_TRUE@fixpngres: fixpngres.c
@@ -122,6 +122,7 @@ clean:
 	-rm $(patsubst %,images/%,$(BUILT_IMAGES))
 	-rm -rf xhtml *.stamp xml/*~ *~ fixpngres
 	-rm -rf $(PACKAGE).pdf pdf
+	-rm -rf $(MAN_PAGES)
 
 distclean: clean
 	+cd ./formulas && $(GMAKE) distclean
