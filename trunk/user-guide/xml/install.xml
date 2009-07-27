@@ -759,20 +759,17 @@ make install</userinput></literallayout>
         <informalexample>
           <userinput>apt-get update</userinput>
         </informalexample>
-        to update the database of available packages and install the
-        dependencies (the following list is an example, you can choose
-        a different set of optional packages):
+        to update the database of available packages and install Gwyddion
+        with
         <informalexample>
-          <userinput>apt-get install gtk+2 gtkglext1 fftw3 libxml2</userinput>
+          <userinput>apt-get install gwyddion</userinput>
         </informalexample>
-      </para>
-      <para>
-        When everything is installed, download
-        <application>Gwyddion</application> source code, and follow the
+        To install Gwyddion from source code, for instance if you want to
+        install a development version, you need to install the required
+        packages listed in the <link linkend='table-osx-package-names'>above
+          table</link> and then follow the generic
         <link linkend='installation-unix-source'>Unix installation
-          section</link> instructions.  Or you can use Fink
-        <ulink url='http://gwyddion.net/download.php#stable-osx'><filename>.info</filename>
-          file</ulink> available from the project web site.
+          section</link> instructions.
       </para>
     </sect2>
     <sect2 id='installation-osx-running'>
