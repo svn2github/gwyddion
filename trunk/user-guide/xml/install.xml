@@ -652,7 +652,13 @@ make install</userinput></literallayout>
         localted as X11User.pkg below
         <filename>System/Installation/Packages</filename> even on the first
         DVD. If you have an CD Set the Discs may differ.
+
+		The people from MacPorts recommending using the newest version of
+		XCode. For further information look at the
+		<ulink url='http://www.macports.org/install.php'>MacPorts Install Page</ulink>.
+
         <!-- XXX rowue: look where you find it on ppc -->
+		<!-- rowue: 10.4 PPC is one DVD -->
         Also you should have some experience using
         <application>Terminal.app</application>.  All the commands in the
         the rest of this section are to be entered and run in
@@ -717,14 +723,30 @@ make install</userinput></literallayout>
         </informalexample>
         to update MacPorts to the latest version.
       </para>
-      <para>
-        <application>Gwyddion</application> can be then built and installed
+
+	  <para>
+	    Usually installing ports with MacPorts is easy. But since X11 is not
+		the native Desktop for OS X, things went a litte worse. So it is
+		recommended to install an alternative X11 before installing
+		<application>Gwyddion</application>. The recommended alternatives
+		are <ulink url='http://http://xquartz.macosforge.org/'>XQuartz</ulink>
+		on Leopard and the Port <application>xorg-server</application> on
+		Tiger.
+
+		After installing the suggested X11-System, 
+		<application>Gwyddion</application> can be then build and installed
         simply by
         <informalexample>
           <userinput>sudo port install gwyddion</userinput>
         </informalexample>
-        The result will appear in <filename>/opt/local</filename> as any
-        other MacPorts software.
+		To install <application>xorg-server</application> (Tiger) simply type
+        <informalexample>
+          <userinput>sudo port install xorg-server</userinput>
+        </informalexample>
+		this is <emphasis>needed</emphasis> for the 3D view on tiger.
+
+        After everything is done, you will find the StartUp-Icon
+		below <filename>/Applications/MacPorts</filename>.
       </para>
     </sect2>
     <sect2 id='installation-osx-fink'>
@@ -756,6 +778,11 @@ make install</userinput></literallayout>
     <sect2 id='installation-osx-running'>
       <title>Running</title>
       <para>
+	    On MacPorts you simply click on the StartUp-Icon and
+		wait until <application>Gwyddion</application> appears. Using
+		Fink or an self-compiled version you should follow 
+		the steps below:
+
         Start <application>X11.app</application> and type
         in <application>Terminal.app</application>
         <informalexample>
@@ -763,9 +790,8 @@ make install</userinput></literallayout>
         </informalexample>
         Then run <application>Gwyddion</application> from the folder it
         was installed to.  This is typically
-        <filename>/opt/local/bin</filename> for MacPorts and
         <filename>/usr/local/bin</filename> for Fink.  So for example for
-        MacPorts run:
+        Fink run:
         <informalexample>
           <userinput>/usr/local/bin/gwyddion</userinput>
         </informalexample>
