@@ -855,7 +855,7 @@ make install</userinput></literallayout>
       </para>
       <informalexample>
         <programlisting><![CDATA[
-# @(#) $Id$
+# @(#) $]]><![CDATA[Id: make.msc 8812 2008-12-02 08:49:22Z xhorak $
 #
 # XXX: Set following to your Gtk+-Development and MSVC paths
 #
