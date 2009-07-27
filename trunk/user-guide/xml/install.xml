@@ -125,33 +125,33 @@
         <?dblatex ll?>
         <thead>
           <row>
-            <entry><literal>gwy_locale</literal></entry>
+            <entry><envar>gwy_locale</envar></entry>
             <entry>Language</entry>
           </row>
         </thead>
         <tbody>
           <row>
-            <entry>cs_CZ.UTF-8</entry>
+            <entry><literal>cs_CZ.UTF-8</literal></entry>
             <entry>Czech (Czech Republic)</entry>
           </row>
           <row>
-            <entry>de_DE.UTF-8</entry>
+            <entry><literal>de_DE.UTF-8</literal></entry>
             <entry>German (Germany)</entry>
           </row>
           <row>
-            <entry>en_US.UTF-8</entry>
+            <entry><literal>en_US.UTF-8</literal></entry>
             <entry>English (Unites States)</entry>
           </row>
           <row>
-            <entry>fr_FR.UTF-8</entry>
+            <entry><literal>fr_FR.UTF-8</literal></entry>
             <entry>French (France)</entry>
           </row>
           <row>
-            <entry>it_IT.UTF-8</entry>
+            <entry><literal>it_IT.UTF-8</literal></entry>
             <entry>Italian (Italy)</entry>
           </row>
           <row>
-            <entry>ru_RU.UTF-8</entry>
+            <entry><literal>ru_RU.UTF-8</literal></entry>
             <entry>Russian (Russia)</entry>
           </row>
         </tbody>
