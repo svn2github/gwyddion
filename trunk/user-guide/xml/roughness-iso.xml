@@ -13,6 +13,13 @@
     the <link linkend='tool-roughness'>roughness tool</link>.
   </para>
   <para>
+    The one-dimensional texture is split to waviness (the low-frequency
+    components defining the overall shape) and roughness (the high-frequency
+    components) at the cut-off frequency.  This frequency is specified in the
+    units of the Nyquist frequency, that is value 1.0 corresponds to the
+    Nyquist frequency.
+  </para>
+  <para>
     In the following formulas we assume the mean value of
     <inlineequation>
       <mathphrase><phrase role='mathvar'>r<subscript>j</subscript></phrase></mathphrase>
