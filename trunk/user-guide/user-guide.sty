@@ -1,6 +1,7 @@
 % $Id$
 \input{formulas/defs.tex}
 \raggedbottom
+\lstset{tabsize=4}
 \makeatletter
 % Restore working plain macros that AMS-TeX wants us to replace with some crap
 \def\cases#1{\left\{\,\vcenter{\normalbaselines\m@th
@@ -154,4 +155,25 @@
 \def\textomega{\ensuremath{\omega}}
 \def\texttheta{\ensuremath{\vartheta}}
 \def\textrho{\ensuremath{\varrho}}
+% Fix vertical spacing in verbatim
+\def\@verbatim{\topsep=\z@ \partopsep=\z@
+  \vskip\parskip \vskip\z@skip % Prevent the first skip from being removed
+  \trivlist \item\relax
+  \parskip\z@skip \parsep\z@skip \global\@outerparskip\z@skip
+  \leftskip\@totalleftmargin\rightskip\z@skip
+  \parindent\z@\parfillskip\@flushglue
+  \@@par
+  \@tempswafalse
+  \def\par{%
+    \if@tempswa
+      \leavevmode \null \@@par\penalty\interlinepenalty
+    \else
+      \@tempswatrue
+      \ifhmode\@@par\penalty\interlinepenalty\fi
+    \fi}%
+  \let\do\@makeother \dospecials
+  \obeylines \verbatim@font \@noligs
+  \hyphenchar\font\m@ne
+  \everypar \expandafter{\the\everypar \unpenalty}%
+}
 \makeatother
