@@ -32,6 +32,12 @@ Some random remarks:
   Instead, it checks for all the tools and at the end it prints what you will
   be unable to build and why.
 
+* Some of the images and graphs were generated.  The programs, gnuplot scripts
+  and other tools are not distributed in the tarballs.  However, you can find
+  them in src/ subdirectory of the subversion repository
+
+  https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/user-guide/
+
 * The user guide is licensed under either GNU GPL or GNU FDL, see the guide
   text for the full license and author list.
 
