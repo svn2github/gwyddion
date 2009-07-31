@@ -1,0 +1,17 @@
+\def\d{{\rm d}}
+\def\e{{\rm e}}
+\def\im{{\rm i}}
+\def\sinc{\mathop{\rm sinc}\nolimits}
+\def\hypot{\mathop{\rm hypot}\nolimits}
+\def\atan{\mathop{\rm atan}\nolimits}
+\def\dint{\int\!\!\!\!\int}
+\def\BesselI#1{{\rm I}_{#1}}
+\let\bmath=$
+\let\emath=$
+% Poor man's vectors, but better than silly arrows
+\def\vec#1{{\bf #1}}
+% Override LaTeX crap with a useful macro or define it for plainTeX
+\def\eqnarray#1{\vcenter{\ialign{%
+  \hfil$\displaystyle{##}$%
+  &${}##{}$%
+  &&$\displaystyle{##}$\hfil\cr#1\crcr}}}

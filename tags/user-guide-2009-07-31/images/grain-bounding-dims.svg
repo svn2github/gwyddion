@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2 Patchlevel 5 -->
+
+<!-- CreationDate: Wed Jul  8 21:20:57 2009 -->
+
+<!-- Magnification: 1.000 -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="5.1in"
+   height="1.8in"
+   viewBox="775 697 6142 2204"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="grain-bounding-dims.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <metadata
+     id="metadata64">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs62">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 81 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="459 : 81 : 1"
+       inkscape:persp3d-origin="229.5 : 54 : 1"
+       id="perspective66" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="753"
+     id="namedview60"
+     showgrid="false"
+     inkscape:zoom="2.9779642"
+     inkscape:cx="199.70104"
+     inkscape:cy="89.30326"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <polygon
+     id="polygon6"
+     style="fill:#ff8080;stroke:#000000;stroke-width:16.88695335;stroke-linecap:butt;stroke-linejoin:bevel"
+     points="1198,2426 1207,2442 1218,2457 1231,2471 1246,2486 1262,2499 1279,2512 1298,2525 1319,2537 1341,2548 1364,2559 1388,2568 1413,2577 1439,2585 1466,2592 1493,2599 1521,2604 1549,2609 1578,2613 1607,2616 1636,2618 1665,2619 1695,2620 1726,2620 1753,2620 1780,2619 1808,2617 1837,2614 1866,2611 1896,2608 1927,2603 1959,2598 1991,2592 2024,2585 2058,2577 2092,2568 2126,2559 2161,2548 2196,2537 2231,2525 2266,2511 2301,2497 2336,2483 2370,2467 2404,2451 2437,2433 2470,2415 2502,2397 2533,2378 2564,2358 2593,2337 2622,2316 2651,2294 2678,2271 2705,2248 2732,2224 2757,2199 2783,2173 2808,2145 2833,2117 2858,2088 2882,2057 2906,2026 2930,1994 2953,1961 2976,1927 2999,1892 3020,1857 3042,1821 3062,1785 3081,1749 3100,1713 3118,1678 3134,1642 3150,1608 3164,1574 3177,1540 3189,1508 3199,1477 3208,1448 3216,1419 3223,1392 3228,1366 3233,1342 3235,1319 3237,1297 3237,1277 3237,1259 3234,1240 3231,1223 3226,1207 3220,1193 3212,1180 3203,1168 3192,1158 3181,1149 3168,1141 3154,1135 3138,1130 3122,1126 3105,1124 3086,1123 3067,1124 3048,1125 3027,1128 3006,1132 2985,1137 2964,1144 2942,1151 2921,1159 2899,1168 2878,1178 2857,1189 2836,1200 2816,1212 2796,1225 2776,1238 2756,1252 2734,1269 2712,1286 2689,1305 2667,1324 2645,1345 2622,1366 2599,1388 2576,1410 2553,1433 2530,1456 2506,1480 2483,1504 2459,1527 2436,1550 2413,1573 2390,1594 2368,1615 2345,1635 2324,1654 2302,1672 2281,1688 2261,1704 2240,1717 2220,1729 2200,1740 2180,1750 2159,1758 2137,1765 2114,1771 2091,1776 2068,1779 2044,1782 2019,1784 1994,1785 1968,1785 1942,1785 1915,1785 1888,1784 1862,1784 1835,1783 1808,1783 1781,1784 1755,1784 1729,1786 1704,1789 1679,1792 1655,1797 1631,1803 1607,1810 1583,1819 1561,1828 1539,1839 1517,1851 1495,1865 1472,1880 1450,1897 1427,1915 1405,1934 1383,1954 1361,1976 1340,1998 1320,2022 1300,2046 1281,2070 1264,2095 1248,2119 1233,2144 1220,2168 1208,2192 1198,2216 1190,2239 1183,2261 1178,2283 1175,2304 1174,2324 1174,2343 1174,2343 1175,2361 1179,2378 1183,2394 1190,2410 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polygon
+     id="polygon8"
+     style="fill:#ff8080;stroke:#000000;stroke-width:16.88695335;stroke-linecap:butt;stroke-linejoin:bevel"
+     points="4074,2377 4083,2393 4094,2408 4107,2422 4122,2437 4138,2450 4155,2463 4174,2476 4195,2488 4217,2499 4240,2510 4264,2519 4289,2528 4315,2536 4342,2543 4369,2550 4397,2555 4425,2560 4454,2564 4483,2567 4512,2569 4541,2570 4571,2571 4602,2571 4629,2571 4656,2570 4684,2568 4713,2565 4742,2562 4772,2559 4803,2554 4835,2549 4867,2543 4900,2536 4934,2528 4968,2519 5002,2510 5037,2499 5072,2488 5107,2476 5142,2462 5177,2448 5212,2434 5246,2418 5280,2402 5313,2384 5346,2366 5378,2348 5409,2329 5440,2309 5469,2288 5498,2267 5527,2245 5554,2222 5581,2199 5608,2175 5633,2150 5659,2124 5684,2096 5709,2068 5734,2039 5758,2008 5782,1977 5806,1945 5829,1912 5852,1878 5875,1843 5896,1808 5918,1772 5938,1736 5957,1700 5976,1664 5994,1629 6010,1593 6026,1559 6040,1525 6053,1491 6065,1459 6075,1428 6084,1399 6092,1370 6099,1343 6104,1317 6109,1293 6111,1270 6113,1248 6113,1228 6113,1210 6110,1191 6107,1174 6102,1158 6096,1144 6088,1131 6079,1119 6068,1109 6057,1100 6044,1092 6030,1086 6014,1081 5998,1077 5981,1075 5962,1074 5943,1075 5924,1076 5903,1079 5882,1083 5861,1088 5840,1095 5818,1102 5797,1110 5775,1119 5754,1129 5733,1140 5712,1151 5692,1163 5672,1176 5652,1189 5632,1203 5610,1220 5588,1237 5565,1256 5543,1275 5521,1296 5498,1317 5475,1339 5452,1361 5429,1384 5406,1407 5382,1431 5359,1455 5335,1478 5312,1501 5289,1524 5266,1545 5244,1566 5221,1586 5200,1605 5178,1623 5157,1639 5137,1655 5116,1668 5096,1680 5076,1691 5056,1701 5035,1709 5013,1716 4990,1722 4967,1727 4944,1730 4920,1733 4895,1735 4870,1736 4844,1736 4818,1736 4791,1736 4764,1735 4738,1735 4711,1734 4684,1734 4657,1735 4631,1735 4605,1737 4580,1740 4555,1743 4531,1748 4507,1754 4483,1761 4459,1770 4437,1779 4415,1790 4393,1802 4371,1816 4348,1831 4326,1848 4303,1866 4281,1885 4259,1905 4237,1927 4216,1949 4196,1973 4176,1997 4157,2021 4140,2046 4124,2070 4109,2095 4096,2119 4084,2143 4074,2167 4066,2190 4059,2212 4054,2234 4051,2255 4050,2275 4050,2294 4050,2294 4051,2312 4055,2329 4059,2345 4066,2361 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <text
+     style="font-size:163.25925695px;font-style:oblique;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315000000013;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Oblique;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text10"
+     font-size="144"
+     font-weight="normal"
+     font-style="italic"
+     y="1268.132"
+     x="1497.4208"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)"
+     sodipodi:linespacing="125%">D</text>
+  <text
+     style="font-size:122.44444275px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine"
+     id="text12"
+     font-size="108"
+     font-weight="normal"
+     font-style="normal"
+     y="1294.7798"
+     x="1629.4409"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995862)"
+     sodipodi:linespacing="125%">max</text>
+  <text
+     style="font-size:153.49128723px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315;font-family:Linux Libertine"
+     id="text14"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="1996.23"
+     x="1847.5145"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)">φ</text>
+  <text
+     style="font-size:122.44444271px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315000000013;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text16"
+     font-size="108"
+     font-weight="normal"
+     font-style="normal"
+     y="2068.7119"
+     x="1953.0397"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)"
+     sodipodi:linespacing="125%">max</text>
+  <text
+     style="font-size:163.25925695px;font-style:oblique;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315000000013;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Oblique;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text18"
+     font-size="144"
+     font-weight="normal"
+     font-style="italic"
+     y="1229.1925"
+     x="5832.0615"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)"
+     sodipodi:linespacing="125%">D</text>
+  <text
+     style="font-size:122.44444275px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine"
+     id="text20"
+     font-size="108"
+     font-weight="normal"
+     font-style="normal"
+     y="1255.8402"
+     x="5959.5132"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995862)"
+     sodipodi:linespacing="125%">min</text>
+  <text
+     style="font-size:153.49128723px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315;font-family:Linux Libertine"
+     id="text22"
+     font-size="144"
+     font-weight="normal"
+     font-style="normal"
+     y="1629.5225"
+     x="4869.3066"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)">φ</text>
+  <text
+     style="font-size:122.44444271px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:2.53304315000000013;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text24"
+     font-size="108"
+     font-weight="normal"
+     font-style="normal"
+     y="1702.0046"
+     x="4974.8325"
+     xml:space="preserve"
+     transform="scale(1.0000414,0.99995863)"
+     sodipodi:linespacing="125%">min</text>
+  <path
+     id="path26"
+     d="M 1842.0309,2201.8374 A 521.43002,521.38689 0 0 0 1693.6854,1884.7418"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <path
+     id="path28"
+     d="M 5251.3127,2194.7316 A 480.56838,480.52863 0 0 0 4562.8829,1755.9494"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <polyline
+     id="polyline30"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="3212,1182 1182,2401 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline32"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="2992,835 989,2038 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline34"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804"
+     points="1064 1956 977 2044 1095 2007 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline36"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804"
+     points="2915 916 3003 829 2884 865 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline38"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:45.03187441, 45.03187441"
+     points="787,2395 3562,2395 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline40"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="3354,1397 3220,1177 2936,709 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline42"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="1327,2657 1178,2406 886,1921 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline44"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="6629,1705 6230,911 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline46"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804"
+     points="6304 991 6224 898 6250 1018 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline48"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804"
+     points="6553 1623 6634 1717 6607 1596 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline50"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="3920,2025 6410,789 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline52"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:45.03187441, 45.03187441"
+     points="3866,2391 6641,2391 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline54"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="5284,2385 4873,1563 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline56"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="5428,2338 5358,2200 5228,2265 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+  <polyline
+     id="polyline58"
+     style="fill:none;stroke:#000000;stroke-width:7.88057804;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4307,2889 6797,1653 "
+     transform="matrix(0.88829645,0,0,0.88822298,87.645395,78.984436)" />
+</svg>

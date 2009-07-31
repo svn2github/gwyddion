@@ -1,0 +1,1073 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="360"
+   height="165"
+   viewBox="0 0 360 165"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="windowing-fft.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <metadata
+     id="metadata566">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="800"
+     id="namedview564"
+     showgrid="false"
+     inkscape:zoom="23.866667"
+     inkscape:cx="42.319184"
+     inkscape:cy="160.5938"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <desc
+     id="desc4">Produced by GNUPLOT 4.2 patchlevel 4  </desc>
+  <defs
+     id="defs6">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 82.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="360 : 82.5 : 1"
+       inkscape:persp3d-origin="180 : 55 : 1"
+       id="perspective568" />
+    <circle
+       id="gpDot"
+       r="1" />
+    <path
+       id="gpPt0"
+       style="stroke-width:0.444"
+       d="M-1,0 h2 M0,-1 v2" />
+    <path
+       id="gpPt1"
+       style="stroke-width:0.444"
+       d="M-1,-1 L1,1 M1,-1 L-1,1" />
+    <path
+       id="gpPt2"
+       style="stroke-width:0.444"
+       d="M-1,0 L1,0 M0,-1 L0,1 M-1,-1 L1,1 M-1,1 L1,-1" />
+    <rect
+       id="gpPt3"
+       style="stroke-width:0.444"
+       x="-1"
+       y="-1"
+       width="2"
+       height="2" />
+    <use
+       xlink:href="#gpPt3"
+       id="gpPt4"
+       style="fill:currentColor; stroke:none" />
+    <circle
+       id="gpPt5"
+       style="stroke-width:0.444"
+       cx="0"
+       cy="0"
+       r="1" />
+    <use
+       xlink:href="#gpPt5"
+       id="gpPt6"
+       style="fill:currentColor; stroke:none" />
+    <path
+       id="gpPt7"
+       style="stroke-width:0.444"
+       d="M0,-1.33 L-1.33,0.67 L1.33,0.67 z" />
+    <use
+       xlink:href="#gpPt7"
+       id="gpPt8"
+       style="fill:currentColor; stroke:none" />
+    <use
+       xlink:href="#gpPt7"
+       id="gpPt9"
+       transform="rotate(180)" />
+    <use
+       xlink:href="#gpPt9"
+       id="gpPt10"
+       style="fill:currentColor; stroke:none" />
+    <use
+       xlink:href="#gpPt3"
+       id="gpPt11"
+       transform="rotate(45)" />
+    <use
+       xlink:href="#gpPt11"
+       id="gpPt12"
+       style="fill:currentColor; stroke:none" />
+  </defs>
+  <g
+     style="fill:none; color:white; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g22" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g24" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g26" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g28">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,147.0 L291.6,147.0 "
+       id="path30" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g32" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g34">
+    <path
+       d="M33.2,147.0 L37.7,147.0 M291.6,147.0 L287.1,147.0 "
+       id="path36" />
+    <g
+       transform="translate(29.1,149.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g38">
+      <text
+         id="text40">
+        <tspan
+           id="tspan42">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan44">-9</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,142.4 L35.4,142.4 M291.6,142.4 L289.4,142.4 M33.2,136.2 L35.4,136.2 M291.6,136.2 L289.4,136.2    M33.2,133.1 L35.4,133.1 M291.6,133.1 L289.4,133.1 "
+       id="path46" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g48" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g50">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,131.6 L291.6,131.6 "
+       id="path52" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g54" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g56">
+    <path
+       d="M33.2,131.6 L37.7,131.6 M291.6,131.6 L287.1,131.6 "
+       id="path58" />
+    <g
+       transform="translate(29.1,133.8)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g60">
+      <text
+         id="text62">
+        <tspan
+           dy="3.00pt"
+           id="tspan64">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan66">-8</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,126.9 L35.4,126.9 M291.6,126.9 L289.4,126.9 M33.2,120.8 L35.4,120.8 M291.6,120.8 L289.4,120.8    M33.2,117.7 L35.4,117.7 M291.6,117.7 L289.4,117.7 "
+       id="path68" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g70" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g72">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,116.2 L291.6,116.2 "
+       id="path74" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g76" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g78">
+    <path
+       d="M33.2,116.2 L37.7,116.2 M291.6,116.2 L287.1,116.2 "
+       id="path80" />
+    <g
+       transform="translate(29.1,118.4)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g82">
+      <text
+         id="text84">
+        <tspan
+           dy="3.00pt"
+           id="tspan86">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan88">-7</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,111.5 L35.4,111.5 M291.6,111.5 L289.4,111.5 M33.2,105.4 L35.4,105.4 M291.6,105.4 L289.4,105.4    M33.2,102.2 L35.4,102.2 M291.6,102.2 L289.4,102.2 "
+       id="path90" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g92" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g94">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,100.7 L291.6,100.7 "
+       id="path96" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g98" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g100">
+    <path
+       d="M33.2,100.7 L37.7,100.7 M291.6,100.7 L287.1,100.7 "
+       id="path102" />
+    <g
+       transform="translate(29.1,102.9)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g104">
+      <text
+         id="text106">
+        <tspan
+           dy="3.00pt"
+           id="tspan108">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan110">-6</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,96.1 L35.4,96.1 M291.6,96.1 L289.4,96.1 M33.2,90.0 L35.4,90.0 M291.6,90.0 L289.4,90.0    M33.2,86.8 L35.4,86.8 M291.6,86.8 L289.4,86.8 "
+       id="path112" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g114" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g116">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,85.3 L291.6,85.3 "
+       id="path118" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g120" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g122">
+    <path
+       d="M33.2,85.3 L37.7,85.3 M291.6,85.3 L287.1,85.3 "
+       id="path124" />
+    <g
+       transform="translate(29.1,87.5)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g126">
+      <text
+         id="text128">
+        <tspan
+           dy="3.00pt"
+           id="tspan130">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan132">-5</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,80.7 L35.4,80.7 M291.6,80.7 L289.4,80.7 M33.2,74.5 L35.4,74.5 M291.6,74.5 L289.4,74.5    M33.2,71.4 L35.4,71.4 M291.6,71.4 L289.4,71.4 "
+       id="path134" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g136" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g138">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,69.9 L291.6,69.9 "
+       id="path140" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g142" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g144">
+    <path
+       d="M33.2,69.9 L37.7,69.9 M291.6,69.9 L287.1,69.9 "
+       id="path146" />
+    <g
+       transform="translate(29.1,72.1)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g148">
+      <text
+         id="text150">
+        <tspan
+           dy="3.00pt"
+           id="tspan152">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan154">-4</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,65.2 L35.4,65.2 M291.6,65.2 L289.4,65.2 M33.2,59.1 L35.4,59.1 M291.6,59.1 L289.4,59.1    M33.2,56.0 L35.4,56.0 M291.6,56.0 L289.4,56.0 "
+       id="path156" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g158" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g160">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,54.5 L291.6,54.5 "
+       id="path162" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g164" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g166">
+    <path
+       d="M33.2,54.5 L37.7,54.5 M291.6,54.5 L287.1,54.5 "
+       id="path168" />
+    <g
+       transform="translate(29.1,56.7)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g170">
+      <text
+         id="text172">
+        <tspan
+           dy="3.00pt"
+           id="tspan174">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan176">-3</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,49.8 L35.4,49.8 M291.6,49.8 L289.4,49.8 M33.2,43.7 L35.4,43.7 M291.6,43.7 L289.4,43.7    M33.2,40.5 L35.4,40.5 M291.6,40.5 L289.4,40.5 "
+       id="path178" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g180" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g182">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,39.0 L291.6,39.0 "
+       id="path184" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g186" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g188">
+    <path
+       d="M33.2,39.0 L37.7,39.0 M291.6,39.0 L287.1,39.0 "
+       id="path190" />
+    <g
+       transform="translate(29.1,41.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g192">
+      <text
+         id="text194">
+        <tspan
+           dy="3.00pt"
+           id="tspan196">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan198">-2</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,34.4 L35.4,34.4 M291.6,34.4 L289.4,34.4 M33.2,28.3 L35.4,28.3 M291.6,28.3 L289.4,28.3    M33.2,25.1 L35.4,25.1 M291.6,25.1 L289.4,25.1 "
+       id="path200" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g202" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g204">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,23.6 L291.6,23.6 "
+       id="path206" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g208" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g210">
+    <path
+       d="M33.2,23.6 L37.7,23.6 M291.6,23.6 L287.1,23.6 "
+       id="path212" />
+    <g
+       transform="translate(29.1,25.8)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g214">
+      <text
+         id="text216">
+        <tspan
+           dy="3.00pt"
+           id="tspan218">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan220">-1</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,19.0 L35.4,19.0 M291.6,19.0 L289.4,19.0 M33.2,12.8 L35.4,12.8 M291.6,12.8 L289.4,12.8    M33.2,9.7 L35.4,9.7 M291.6,9.7 L289.4,9.7 "
+       id="path222" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g224" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g226">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,8.2 L291.6,8.2 "
+       id="path228" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g230" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g232">
+    <path
+       d="M33.2,8.2 L37.7,8.2 M291.6,8.2 L287.1,8.2 "
+       id="path234" />
+    <g
+       transform="translate(29.1,10.4)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:end"
+       id="g236">
+      <text
+         id="text238">
+        <tspan
+           dy="3.00pt"
+           id="tspan240">10</tspan>
+        <tspan
+           font-size="4.8pt"
+           dy="-3.00pt"
+           id="tspan242">0</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g244" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g246">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M33.2,147.0 L33.2,8.2 "
+       id="path248" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g250" />
+  <g
+     id="g3378"
+     transform="translate(27.527933,0)">
+    <path
+       d="m 5.713966,147 0,-4.5 m 0,-134.3 0,4.5"
+       id="path254"
+       style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+    <g
+       transform="translate(5.713966,154.5562)"
+       style="font-size:7.5px;text-anchor:middle;color:#000000;fill:#000000;stroke:none;font-family:DejaVu Sans"
+       id="g256">
+      <text
+         id="text258">
+        <tspan
+           dy="3.75"
+           id="tspan260">-1</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g262" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g264">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M59.0,147.0 L59.0,8.2 "
+       id="path266" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g268" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g270">
+    <path
+       d="M59.0,147.0 L59.0,142.5 M59.0,8.2 L59.0,12.7 "
+       id="path272" />
+    <g
+       transform="translate(59.0,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g274">
+      <text
+         id="text276">
+        <tspan
+           id="tspan278">-0.8</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g280" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g282">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M84.9,147.0 L84.9,8.2 "
+       id="path284" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g286" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g288">
+    <path
+       d="M84.9,147.0 L84.9,142.5 M84.9,8.2 L84.9,12.7 "
+       id="path290" />
+    <g
+       transform="translate(84.9,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g292">
+      <text
+         id="text294">
+        <tspan
+           id="tspan296">-0.6</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g298" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g300">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M110.7,147.0 L110.7,8.2 "
+       id="path302" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g304" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g306">
+    <path
+       d="M110.7,147.0 L110.7,142.5 M110.7,8.2 L110.7,12.7 "
+       id="path308" />
+    <g
+       transform="translate(110.7,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g310">
+      <text
+         id="text312">
+        <tspan
+           id="tspan314">-0.4</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g316" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g318">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M136.6,147.0 L136.6,8.2 "
+       id="path320" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g322" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g324">
+    <path
+       d="M136.6,147.0 L136.6,142.5 M136.6,8.2 L136.6,12.7 "
+       id="path326" />
+    <g
+       transform="translate(136.6,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g328">
+      <text
+         id="text330">
+        <tspan
+           id="tspan332">-0.2</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g334" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g336">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M162.4,147.0 L162.4,8.2 "
+       id="path338" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g340" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g342">
+    <path
+       d="M162.4,147.0 L162.4,142.5 M162.4,8.2 L162.4,12.7 "
+       id="path344" />
+    <g
+       transform="translate(162.4,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g346">
+      <text
+         id="text348">
+        <tspan
+           id="tspan350"> 0</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g352" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g354">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M188.2,147.0 L188.2,8.2 "
+       id="path356" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g358" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g360">
+    <path
+       d="M188.2,147.0 L188.2,142.5 M188.2,8.2 L188.2,12.7 "
+       id="path362" />
+    <g
+       transform="translate(188.2,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g364">
+      <text
+         id="text366">
+        <tspan
+           id="tspan368"> 0.2</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g370" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g372">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M214.1,147.0 L214.1,8.2 "
+       id="path374" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g376" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g378">
+    <path
+       d="M214.1,147.0 L214.1,142.5 M214.1,8.2 L214.1,12.7 "
+       id="path380" />
+    <g
+       transform="translate(214.1,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g382">
+      <text
+         id="text384">
+        <tspan
+           id="tspan386"> 0.4</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g388" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g390">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M239.9,147.0 L239.9,8.2 "
+       id="path392" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g394" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g396">
+    <path
+       d="M239.9,147.0 L239.9,142.5 M239.9,8.2 L239.9,12.7 "
+       id="path398" />
+    <g
+       transform="translate(239.9,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g400">
+      <text
+         id="text402">
+        <tspan
+           id="tspan404"> 0.6</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g406" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g408">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M265.8,147.0 L265.8,8.2 "
+       id="path410" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g412" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g414">
+    <path
+       d="M265.8,147.0 L265.8,142.5 M265.8,8.2 L265.8,12.7 "
+       id="path416" />
+    <g
+       transform="translate(265.8,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g418">
+      <text
+         id="text420">
+        <tspan
+           id="tspan422"> 0.8</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g424" />
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:0.35; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g426">
+    <path
+       style="stroke:rgb(128, 128, 128)"
+       d="M291.6,147.0 L291.6,8.2 "
+       id="path428" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:rgb(128, 128, 128); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g430" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g432">
+    <path
+       d="M291.6,147.0 L291.6,142.5 M291.6,8.2 L291.6,12.7 "
+       id="path434" />
+    <g
+       transform="translate(291.6,158.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:middle"
+       id="g436">
+      <text
+         id="text438">
+        <tspan
+           id="tspan440"> 1</tspan>
+      </text>
+    </g>
+    <path
+       d="M33.2,8.2 L33.2,147.0 L291.6,147.0 L291.6,8.2 L33.2,8.2 Z "
+       id="path442" />
+  </g>
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g444" />
+  <g
+     style="fill:none; color:red; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g446" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g448">
+    <g
+       transform="translate(314.9,15.8)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g450">
+      <text
+         id="text452">
+        <tspan
+           id="tspan454">Hann</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:red; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g456">
+    <path
+       style="stroke:rgb(  0, 128,   0)"
+       d="M300.2,13.6 L310.8,13.6 M33.5,145.4 L38.1,125.6 L42.6,119.3 L47.2,116.1 L51.7,113.8 L56.2,111.9    L60.8,110.3 L65.3,108.9 L69.8,107.5 L74.3,106.2 L78.9,104.9 L83.4,103.6 L87.9,102.2 L92.4,100.8    L97.0,99.3 L101.5,97.8 L106.0,96.1 L110.5,94.3 L115.1,92.4 L119.6,90.2 L124.1,87.7 L128.6,84.7    L133.1,81.3 L137.5,77.1 L141.7,72.1 L145.7,66.3 L149.3,59.8 L152.4,53.1 L154.9,46.7 L156.8,40.8    L158.1,35.9 L158.9,32.1 L159.5,29.1 L159.9,26.9 L160.1,25.3 L160.3,24.0 L160.4,23.0 L160.5,22.1    L160.6,21.4 L160.7,20.7 L160.8,20.1 L160.9,19.6 L161.1,19.1 L161.2,18.6 L161.3,18.2 L161.5,17.8    L161.6,17.5 L161.8,17.3 L162.0,17.1 L162.3,17.0 L162.5,17.0 L162.7,17.1 L163.0,17.3 L163.2,17.5    L163.3,17.8 L163.5,18.2 L163.6,18.6 L163.7,19.1 L163.9,19.6 L164.0,20.1 L164.1,20.7 L164.2,21.4    L164.3,22.1 L164.4,22.9 L164.5,24.0 L164.7,25.2 L164.9,26.8 L165.3,28.9 L165.8,31.7 L166.6,35.4    L167.8,40.0 L169.6,45.5 L172.0,51.6 L174.9,58.1 L178.4,64.5 L182.3,70.4 L186.5,75.5 L190.9,79.9    L195.4,83.6 L199.9,86.6 L204.4,89.3 L208.9,91.6 L213.4,93.6 L217.9,95.5 L222.5,97.2 L227.0,98.8    L231.5,100.3 L236.0,101.7 L240.6,103.1 L245.1,104.4 L249.6,105.7 L254.1,107.0 L258.7,108.4 L263.2,109.8    L267.7,111.3 L272.2,113.0 L276.8,115.1 L281.3,117.8 L285.8,121.9 L290.5,131.0 "
+       id="path458" />
+  </g>
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g460" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g462">
+    <g
+       transform="translate(314.9,26.6)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g464">
+      <text
+         id="text466">
+        <tspan
+           id="tspan468">Hamming</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:green; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g470">
+    <path
+       style="stroke:rgb(224,   0,   0)"
+       d="M300.2,24.4 L310.8,24.4 M33.5,67.3 L38.3,64.5 L43.0,64.2 L47.6,64.2 L52.3,64.1 L56.9,64.0    L61.6,63.9 L66.3,63.7 L70.9,63.5 L75.6,63.3 L80.3,63.1 L84.9,62.8 L89.6,62.5 L94.3,62.2    L98.9,61.8 L103.6,61.4 L108.2,60.9 L112.9,60.3 L117.6,59.7 L122.2,59.0 L126.9,58.2 L131.5,57.2    L136.1,55.9 L140.6,54.3 L144.8,52.1 L148.7,49.3 L152.0,46.0 L154.7,42.2 L156.7,38.4 L158.1,34.8    L159.0,31.6 L159.6,29.0 L160.0,26.9 L160.2,25.3 L160.4,24.0 L160.5,23.0 L160.6,22.1 L160.7,21.3    L160.8,20.6 L160.9,20.0 L161.0,19.5 L161.1,19.0 L161.2,18.5 L161.3,18.0 L161.4,17.7 L161.6,17.3    L161.7,17.0 L161.9,16.7 L162.1,16.6 L162.3,16.5 L162.5,16.5 L162.7,16.6 L162.9,16.7 L163.1,17.0    L163.2,17.3 L163.4,17.7 L163.5,18.0 L163.6,18.5 L163.7,19.0 L163.8,19.5 L163.9,20.0 L164.0,20.6    L164.1,21.3 L164.2,22.1 L164.3,23.0 L164.4,24.0 L164.6,25.3 L164.8,26.9 L165.1,29.0 L165.7,31.6    L166.5,34.7 L167.9,38.3 L169.8,42.0 L172.3,45.7 L175.5,49.0 L179.3,51.7 L183.4,53.9 L187.9,55.5    L192.4,56.8 L197.1,57.9 L201.7,58.7 L206.4,59.5 L211.0,60.1 L215.7,60.7 L220.4,61.2 L225.0,61.7    L229.7,62.0 L234.4,62.4 L239.0,62.7 L243.7,63.0 L248.3,63.2 L253.0,63.4 L257.7,63.6 L262.3,63.8    L267.0,63.9 L271.7,64.0 L276.3,64.1 L281.0,64.2 L285.6,64.2 L290.3,64.2 "
+       id="path472" />
+  </g>
+  <g
+     style="fill:none; color:blue; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g474" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g476">
+    <g
+       transform="translate(314.9,37.4)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g478">
+      <text
+         id="text480">
+        <tspan
+           id="tspan482">Blackmann</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:blue; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g484">
+    <path
+       style="stroke:rgb(  0,  64, 192)"
+       d="M300.2,35.2 L310.8,35.2 M34.6,147.0 L37.8,133.1 L42.0,126.8 L46.2,123.5 L50.5,121.2 L54.7,119.4    L58.9,117.8 L63.1,116.4 L67.3,115.1 L71.5,113.9 L75.7,112.7 L79.9,111.4 L84.2,110.2 L88.4,108.9    L92.6,107.6 L96.8,106.3 L101.0,104.8 L105.2,103.3 L109.4,101.7 L113.6,99.9 L117.8,98.0 L122.0,95.8    L126.2,93.3 L130.4,90.5 L134.6,87.1 L138.6,83.0 L142.5,78.0 L146.2,72.2 L149.5,65.6 L152.3,58.6    L154.6,51.5 L156.3,45.0 L157.6,39.3 L158.5,34.7 L159.1,31.1 L159.5,28.4 L159.8,26.4 L160.0,25.0    L160.1,23.8 L160.3,22.9 L160.5,22.1 L160.6,21.4 L160.8,20.8 L160.9,20.2 L161.1,19.7 L161.3,19.3    L161.5,18.9 L161.7,18.7 L162.0,18.4 L162.2,18.3 L162.5,18.3 L162.8,18.4 L163.1,18.7 L163.3,18.9    L163.5,19.3 L163.7,19.7 L163.9,20.2 L164.0,20.8 L164.2,21.4 L164.3,22.1 L164.5,22.9 L164.7,23.8    L164.8,24.9 L165.0,26.4 L165.3,28.3 L165.7,30.9 L166.3,34.4 L167.1,38.8 L168.3,44.3 L169.9,50.5    L172.1,57.3 L174.8,64.2 L178.0,70.6 L181.5,76.4 L185.4,81.5 L189.4,85.7 L193.5,89.3 L197.7,92.3    L201.9,94.9 L206.1,97.1 L210.3,99.2 L214.5,101.0 L218.7,102.7 L222.9,104.2 L227.2,105.7 L231.4,107.1    L235.6,108.4 L239.8,109.7 L244.0,110.9 L248.2,112.2 L252.4,113.4 L256.6,114.6 L260.8,115.9 L265.1,117.3    L269.3,118.7 L273.5,120.4 L277.7,122.4 L281.9,125.1 L286.2,129.2 L290.5,137.9 "
+       id="path486" />
+  </g>
+  <g
+     style="fill:none; color:cyan; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g488" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g490">
+    <g
+       transform="translate(314.9,48.2)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g492">
+      <text
+         id="text494">
+        <tspan
+           id="tspan496">Lanzcos</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:cyan; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g498">
+    <path
+       style="stroke:rgb(160, 112,  16)"
+       d="M300.2,46.0 L310.8,46.0 M33.5,79.4 L37.7,80.5 L42.4,80.8 L47.2,80.7 L52.0,80.5 L56.9,80.3    L61.7,80.1 L66.5,79.7 L71.3,79.4 L76.1,78.9 L81.0,78.4 L85.8,77.9 L90.6,77.2 L95.4,76.5    L100.2,75.7 L105.1,74.8 L109.9,73.7 L114.7,72.5 L119.5,71.1 L124.3,69.5 L129.1,67.5 L133.9,65.1    L138.5,62.0 L143.0,58.3 L147.1,54.0 L150.8,49.1 L153.8,44.2 L156.1,39.4 L157.8,35.2 L158.9,31.7    L159.6,28.9 L160.0,26.7 L160.3,25.1 L160.4,23.7 L160.6,22.7 L160.7,21.8 L160.8,21.0 L160.8,20.3    L160.9,19.7 L161.0,19.2 L161.1,18.6 L161.2,18.2 L161.3,17.7 L161.4,17.3 L161.5,16.9 L161.6,16.6    L161.7,16.3 L161.9,16.1 L162.1,15.9 L162.3,15.8 L162.5,15.8 L162.7,15.8 L162.8,16.0 L163.0,16.2    L163.1,16.5 L163.3,16.8 L163.4,17.2 L163.5,17.6 L163.6,18.0 L163.7,18.5 L163.8,19.0 L163.8,19.5    L163.9,20.1 L164.0,20.8 L164.1,21.5 L164.2,22.3 L164.3,23.3 L164.4,24.5 L164.6,25.9 L165.0,27.8    L165.5,30.2 L166.4,33.2 L167.7,37.0 L169.7,41.3 L172.3,46.1 L175.7,50.9 L179.6,55.5 L183.9,59.6    L188.4,63.1 L193.1,65.9 L197.9,68.1 L202.7,70.0 L207.5,71.6 L212.3,72.9 L217.2,74.1 L222.0,75.1    L226.8,76.0 L231.6,76.7 L236.4,77.4 L241.3,78.1 L246.1,78.6 L250.9,79.1 L255.7,79.5 L260.5,79.8    L265.4,80.1 L270.2,80.4 L275.0,80.6 L279.8,80.7 L284.6,80.8 L289.5,80.9 "
+       id="path500" />
+  </g>
+  <g
+     style="fill:none; color:#157545; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g502" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g504">
+    <g
+       transform="translate(314.9,59.0)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g506">
+      <text
+         id="text508">
+        <tspan
+           id="tspan510">Welch</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:#157545; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g512">
+    <path
+       style="stroke:rgb(160,   0, 176)"
+       d="M300.2,56.8 L310.8,56.8 M33.5,74.7 L37.9,75.9 L42.8,76.1 L47.9,76.0 L52.9,75.9 L57.9,75.6    L62.9,75.3 L68.0,75.0 L73.0,74.6 L78.0,74.1 L83.1,73.6 L88.1,72.9 L93.1,72.2 L98.1,71.4    L103.2,70.5 L108.2,69.5 L113.2,68.3 L118.3,66.9 L123.3,65.2 L128.3,63.2 L133.3,60.8 L138.1,57.8    L142.8,54.3 L147.0,50.1 L150.8,45.7 L153.8,41.2 L156.2,37.0 L157.9,33.3 L159.0,30.2 L159.7,27.8    L160.2,25.8 L160.4,24.3 L160.6,23.1 L160.7,22.1 L160.8,21.2 L160.9,20.5 L160.9,19.8 L161.0,19.1    L161.1,18.6 L161.2,18.1 L161.2,17.6 L161.3,17.1 L161.4,16.7 L161.5,16.4 L161.6,16.0 L161.7,15.7    L161.8,15.4 L161.9,15.2 L162.1,15.0 L162.3,14.9 L162.5,14.9 L162.6,15.0 L162.8,15.1 L162.9,15.3    L163.1,15.6 L163.2,15.9 L163.3,16.2 L163.4,16.6 L163.5,17.0 L163.5,17.4 L163.6,17.9 L163.7,18.4    L163.8,19.0 L163.8,19.5 L163.9,20.2 L164.0,20.9 L164.1,21.8 L164.2,22.7 L164.3,23.8 L164.5,25.2    L164.9,26.9 L165.4,29.0 L166.3,31.7 L167.7,34.9 L169.7,38.7 L172.4,43.0 L175.8,47.4 L179.8,51.7    L184.3,55.6 L189.0,58.9 L194.0,61.7 L198.9,64.0 L204.0,65.8 L209.0,67.4 L214.0,68.7 L219.0,69.8    L224.1,70.8 L229.1,71.7 L234.1,72.5 L239.2,73.1 L244.2,73.7 L249.2,74.3 L254.2,74.7 L259.3,75.1    L264.3,75.4 L269.3,75.7 L274.4,75.9 L279.4,76.1 L284.4,76.2 L289.5,76.2 "
+       id="path514" />
+  </g>
+  <g
+     style="fill:none; color:#000094; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g516" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g518">
+    <g
+       transform="translate(314.9,69.8)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g520">
+      <text
+         id="text522">
+        <tspan
+           id="tspan524">Nuttall</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:#000094; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g526">
+    <path
+       style="stroke:rgb(255, 224,   0)"
+       d="M300.2,67.6 L310.8,67.6 M37.7,147.0 L41.5,140.9 L45.5,137.5 L49.5,135.3 L53.5,133.5 L57.4,131.9    L61.4,130.6 L65.4,129.3 L69.3,128.1 L73.3,127.0 L77.3,125.8 L81.2,124.7 L85.2,123.5 L89.2,122.3    L93.1,121.1 L97.1,119.8 L101.1,118.5 L105.0,117.1 L109.0,115.6 L113.0,114.0 L116.9,112.3 L120.9,110.4    L124.9,108.4 L128.8,106.0 L132.7,103.3 L136.6,99.9 L140.3,95.6 L143.9,90.1 L147.2,83.3 L150.1,75.2    L152.6,66.4 L154.6,57.5 L156.2,49.2 L157.3,42.1 L158.2,36.4 L158.8,32.1 L159.2,29.0 L159.5,26.8    L159.8,25.2 L160.0,24.0 L160.2,23.1 L160.4,22.3 L160.6,21.7 L160.8,21.1 L161.0,20.6 L161.3,20.2    L161.6,19.9 L161.9,19.6 L162.2,19.5 L162.6,19.5 L162.9,19.6 L163.2,19.9 L163.5,20.2 L163.8,20.6    L164.0,21.1 L164.2,21.7 L164.4,22.3 L164.6,23.1 L164.8,24.0 L165.0,25.2 L165.3,26.7 L165.6,28.9    L166.0,31.9 L166.6,36.1 L167.4,41.6 L168.5,48.5 L170.0,56.6 L171.9,65.4 L174.3,74.1 L177.1,82.1    L180.3,88.9 L183.7,94.4 L187.4,98.8 L191.3,102.2 L195.2,105.0 L199.1,107.4 L203.1,109.6 L207.0,111.5    L211.0,113.3 L214.9,115.0 L218.9,116.5 L222.9,117.9 L226.8,119.3 L230.8,120.6 L234.8,121.8 L238.7,123.0    L242.7,124.2 L246.7,125.3 L250.6,126.5 L254.6,127.6 L258.6,128.8 L262.5,130.0 L266.5,131.3 L270.5,132.8    L274.5,134.4 L278.4,136.4 L282.4,139.0 L286.4,143.1 L288.3,147.0 "
+       id="path528" />
+  </g>
+  <g
+     style="fill:none; color:#FF9900; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g530" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g532">
+    <g
+       transform="translate(314.9,80.6)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g534">
+      <text
+         id="text536">
+        <tspan
+           id="tspan538">Flat-top</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:#FF9900; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g540">
+    <path
+       style="stroke:rgb(  0, 192, 240)"
+       d="M300.2,78.4 L310.8,78.4 M33.5,96.6 L37.1,94.0 L40.7,93.6 L44.2,93.6 L47.7,93.5 L51.2,93.4    L54.7,93.4 L58.2,93.3 L61.8,93.2 L65.3,93.0 L68.8,92.9 L72.3,92.8 L75.8,92.6 L79.3,92.4    L82.8,92.2 L86.4,92.0 L89.9,91.7 L93.4,91.4 L96.9,91.1 L100.4,90.8 L103.9,90.4 L107.4,90.0    L111.0,89.5 L114.5,89.0 L118.0,88.4 L121.5,87.7 L125.0,86.9 L128.5,85.8 L132.0,84.4 L135.4,82.5    L138.8,80.0 L142.0,76.5 L145.0,72.2 L147.7,67.0 L150.1,61.1 L152.2,54.9 L153.9,48.8 L155.2,43.2    L156.2,38.3 L157.0,34.3 L157.5,31.2 L158.0,28.8 L158.4,27.0 L158.8,25.7 L159.1,24.6 L159.6,23.8    L160.1,23.2 L160.6,22.7 L161.3,22.4 L161.9,22.2 L162.6,22.1 L163.3,22.3 L164.0,22.5 L164.6,23.0    L165.1,23.5 L165.5,24.3 L165.9,25.2 L166.3,26.4 L166.7,28.0 L167.1,30.2 L167.6,33.0 L168.3,36.6    L169.3,41.1 L170.5,46.4 L172.1,52.3 L174.1,58.5 L176.4,64.6 L179.1,70.1 L182.1,74.8 L185.2,78.6    L188.6,81.5 L192.0,83.6 L195.4,85.2 L198.9,86.4 L202.4,87.3 L206.0,88.1 L209.5,88.7 L213.0,89.3    L216.5,89.8 L220.0,90.2 L223.5,90.6 L227.0,91.0 L230.6,91.3 L234.1,91.6 L237.6,91.8 L241.1,92.1    L244.6,92.3 L248.1,92.5 L251.6,92.7 L255.2,92.8 L258.7,93.0 L262.2,93.1 L265.7,93.2 L269.2,93.3    L272.7,93.4 L276.3,93.4 L279.8,93.5 L283.3,93.5 L286.8,93.6 L290.3,93.6 "
+       id="path542" />
+  </g>
+  <g
+     style="fill:none; color:#0099A1; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g544" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g546">
+    <g
+       transform="translate(314.9,91.4)"
+       style="stroke:none; fill:black; font-family:DejaVu Sans; font-size:6.00pt; text-anchor:start"
+       id="g548">
+      <text
+         id="text550">
+        <tspan
+           id="tspan552">Kaiser-2.5</tspan>
+      </text>
+    </g>
+  </g>
+  <g
+     style="fill:none; color:#0099A1; stroke:currentColor; stroke-width:1.05; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g554">
+    <path
+       style="stroke:rgb(240,  96,   0)"
+       d="M300.2,89.2 L310.8,89.2 M33.5,91.5 L37.9,88.8 L42.2,88.5 L46.6,88.4 L50.9,88.4 L55.2,88.3    L59.5,88.2 L63.8,88.0 L68.1,87.9 L72.4,87.7 L76.7,87.5 L81.0,87.3 L85.3,87.0 L89.6,86.8    L93.9,86.4 L98.2,86.1 L102.5,85.7 L106.8,85.2 L111.1,84.7 L115.4,84.2 L119.7,83.5 L124.0,82.7    L128.2,81.7 L132.4,80.4 L136.6,78.6 L140.6,76.0 L144.4,72.4 L147.8,67.7 L150.9,62.0 L153.5,55.5    L155.5,48.9 L157.0,42.8 L158.1,37.5 L158.8,33.2 L159.3,29.9 L159.7,27.5 L159.9,25.7 L160.1,24.4    L160.3,23.3 L160.4,22.4 L160.5,21.7 L160.7,21.0 L160.8,20.4 L161.0,19.9 L161.1,19.4 L161.3,19.0    L161.5,18.6 L161.7,18.4 L162.0,18.2 L162.2,18.1 L162.5,18.1 L162.8,18.2 L163.0,18.4 L163.3,18.6    L163.5,19.0 L163.7,19.4 L163.8,19.9 L164.0,20.4 L164.1,21.0 L164.3,21.7 L164.4,22.4 L164.5,23.3    L164.7,24.4 L164.9,25.7 L165.1,27.4 L165.4,29.8 L165.9,33.0 L166.6,37.1 L167.6,42.3 L169.0,48.3    L171.0,54.7 L173.4,61.1 L176.4,66.8 L179.8,71.6 L183.5,75.3 L187.5,78.0 L191.6,79.9 L195.8,81.3    L200.0,82.4 L204.3,83.2 L208.5,83.9 L212.8,84.5 L217.1,85.1 L221.4,85.5 L225.7,85.9 L230.0,86.3    L234.3,86.6 L238.6,86.9 L242.9,87.2 L247.2,87.4 L251.5,87.6 L255.8,87.8 L260.2,88.0 L264.5,88.1    L268.8,88.3 L273.1,88.3 L277.4,88.4 L281.7,88.5 L286.0,88.5 L290.3,88.5 "
+       id="path556" />
+  </g>
+  <g
+     style="fill:none; color:#0099A1; stroke:rgb(240,  96,   0); stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g558" />
+  <g
+     style="fill:none; color:black; stroke:currentColor; stroke-width:0.70; stroke-linecap:butt; stroke-linejoin:miter"
+     id="g560">
+    <path
+       d="M33.2,8.2 L33.2,147.0 L291.6,147.0 L291.6,8.2 L33.2,8.2 Z "
+       id="path562" />
+  </g>
+</svg>

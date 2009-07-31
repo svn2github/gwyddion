@@ -1,0 +1,251 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='color-map'>
+  <title>False Color Mapping</title>
+  <indexterm>
+    <primary>color</primary>
+    <secondary>mapping</secondary>
+  </indexterm>
+  <para>
+    False color mapping is the basic two-dimensional data visualization
+    method.  The color gradient (also called palette) to use can be selected
+    after clicking on the false color map part of a data window with right
+    mouse button.
+  </para>
+  <para>
+    This quick selection pop-up menu offers the list of preferred color
+    gradients.  In addition it allows to invoke the full color gradient list
+    by selecting <menuchoice><guimenuitem>More</guimenuitem></menuchoice>.
+    Preferred gradients can be chosen by checking the corresponding check
+    buttons in the full list or in the
+    <link linkend='color-gradient-editor'>gradient editor</link> list.
+    Selecting a row in the full list changes the gradient to the selected
+    one, double-clicking (or pressing <keycap>Enter</keycap>) also finishes
+    selection and closes the list window.  Gradients of known names can be
+    quickly accessed by starting to type their name. The default color
+    gradient to use (when none is specified in the file) can be also set in
+    the <link linkend='color-gradient-editor'>gradient editor</link>.
+  </para>
+  <para>
+    More control over the way values are mapped to colors is possible with
+    <link linkend='color-range'>Color range</link> tool.
+  </para>
+  <informalfigure id='fig-gradient-selectors'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='gradient-selectors.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>
+          Comparison of step and edge detection methods on several images
+        </phrase>
+      </textobject>
+      <caption>
+        A data window with the right-click color gradient pop up menu and the
+        full color gradient list.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='color-range'>
+    <title>
+      Color Range Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Color range tool is a special <link linkend='tools'>tool</link> whose
+      purpose is not to analyse or modify data, but to control the way values
+      are mapped to colors.  It offers four basic color mapping types:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Full
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_full-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Data values are mapped to colors linearly, the full data range
+            corresponds to the full color range.  This is the default type
+            (unless you have changed the default).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Fixed
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_fixed-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Data values are mapped to colors linearly, a user-specified data
+            range (which can be smaller or greater than the full range) maps
+            onto the full color range.  Values outside this range are
+            displayed with the edge colors.  The range can be set by several
+            means:
+          </para>
+          <itemizedlist>
+            <listitem>
+              by entering desired values numerically in the tool window,
+            </listitem>
+            <listitem>
+              by selecting a range on the height distribution graph in the
+              tool window or
+            </listitem>
+            <listitem>
+              by selecting an area on the data window, the range is then
+              set from the minimum to maximum of the data in this area only.
+            </listitem>
+          </itemizedlist>
+          <para>
+            If no range is manually set, fixed range type behaves identically
+            to full range.
+          </para>
+          <para>
+            Note data processing operations often modify the value range –
+            and as the fixed range remains fixed as you set it, it can result
+            for instance in completely black data display.  You may wish or
+            have to update the range manually then, or to switch to another
+            mapping type.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Automatic
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_auto-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Data values are mapped to colors linearly, a heuristically
+            determined subinterval of the full value range maps onto the full
+            color range.  Values outside this subrange are again displayed
+            with the edge colors.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Adaptive
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_adaptive-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            The full data range corresponds to the full color range, however
+            data values are mapped to colors non-linearly.  The mapping
+            function is based on inverse cumulative height distribution,
+            therefore flat areas generally get bigger slice of the color
+            gradient and smaller value variations can be seen on them than
+            normally.
+          </para>
+          <para>
+            The false color map ruler on the right side of
+            <link linkend='data-windows'>data windows</link> does not display
+            any ticks in this mode, only the minimum and maximum value.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      A mapping type can be set to be default by checking the
+      <guilabel>Default</guilabel> check button when it is active.  Newly
+      displayed data windows then use this type, unless a channel explicitly
+      specifies other type to use.
+    </para>
+    <para>
+      Saving data to <filename>.gwy</filename> file also saves all color
+      mapping settings: mapping type, range and gradient.  Gradient is
+      however not physically stored in the file, only referenced by name.  In
+      other words, color gradients of the same name are shared among files.
+    </para>
+  </sect2>
+  <sect2 id='color-gradient-editor'>
+    <title>Color Gradient Editor</title>
+    <indexterm>
+      <primary>color map</primary>
+      <secondary>editting</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>color map</primary>
+      <secondary>choosing default</secondary>
+    </indexterm>
+    <para>Color gradient editor can be invoked with
+      <menuchoice>
+        <guimenu>Edit</guimenu>
+        <guimenuitem>Color Gradients</guimenuitem>
+      </menuchoice>.
+      It consists of a gradient list similar to the full gradient selector,
+      with an additional button panel, and the actual editor that can be
+      invoked by double-clicking on a gradient you wish to edit or by
+      activating the <guilabel>Edit</guilabel> button.  Renaming is p
+      Only user-created
+      color gradients can be edited or deleted, system gradients installed
+      with Gwyddion are immutable.
+    </para>
+    <para>
+      The last button in the gradient list control panel makes the currently
+      selected gradient the default.  It will be used for all newly displayed
+      data that do not specify any particular color gradient.
+    </para>
+    <para>
+      Two editing modes are available:
+      <variablelist>
+        <varlistentry>
+          <term>Points</term>
+          <listitem>
+            <para>
+              The color gradient is defined by a set of points and their
+              associated colors.  The points are represented by triangular
+              markers on the gradient displayed in the lower part of the
+              editor window.  Moving these markers moves the points, new
+              points can be added by clicking into an empty space, existing
+              points can be removed by dragging them away from the gradient.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Curve</term>
+          <listitem>
+            <para>
+              The color gradient is defined by red, green and blue curves.
+              The curves are again segmented, but the segments of individual
+              curves do not need to coincide.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

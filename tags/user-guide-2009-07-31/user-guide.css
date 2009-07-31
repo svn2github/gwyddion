@@ -1,0 +1,38 @@
+body {
+  margin: 0px 0px;
+  padding: 0px;
+  background-color: white;
+  color: black;
+  font-family: serif;
+}
+@media screen {
+  div.book, div.chapter, div.index, div.sect1, div.appendix, div.refentry,
+  div.navheader, div.navfooter {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  div.navheader, div.navfooter { background-color: #f6cd7a; margin: 0px 0px; }
+  div.navheader { border-bottom: 1px solid #ab2f11; margin-bottom: 24px;  }
+  div.navfooter { border-top: 1px solid #ab2f11; margin-top: 30px; }
+  a:visited { color: #5b1508; }
+}
+@media print {
+  div.navheader, div.navfooter { visibility: collapse; display: none; }
+  a:visited { color: #808080; }
+}
+.mathvar { font-style: italic; }
+.vector { font-weight: bold; }
+.caption { font-style: italic; font-size: 90%; }
+a { text-decoration: underline; }
+a:link { color: black; }
+a:hover { color: #ab2f11; }
+img { border: 1px solid white; }
+a img:hover { border: 1px solid #ab2f11; }
+h1, h2, h3, h4, div.navheader, div.navfooter { font-family: sans-serif; }
+h1 { margin-bottom: 6px; }
+h2, h3, h4 { margin-bottom: 0px; }
+h3.author { margin-top: 2px; }
+.guibutton, .guiicon, .guilabel, .guimenu, .guimenuitem, .guisubmenu {
+  font-style: italic;
+}
+#TitleImage { margin-top: 12px; float: right; border: none; }

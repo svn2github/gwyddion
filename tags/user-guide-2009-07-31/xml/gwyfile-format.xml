@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gwyfile-format'>
+  <title>Format of Gwyddion Files</title>
+  <para>
+    <application>Gwyddion</application> native data files consists of
+    a tree-like structure of serialized objects.  Generally, these objects
+    can be of various kind and contain other embedded objects (hence the
+    tree-like structure).  It can be instructive to play with
+    <ulink url='http://gwyddion.net/gwydump.php'><command>gwydump</command></ulink>,
+    a simple file structure visualizer available in on the project's web,
+    for a while and examine the contents of various files.
+  </para>
+  <para>
+    First of all, we will describe physical file structure without regard to
+    possible interpretation of contained data.
+  </para>
+  <sect2 id='gwyfile-byte-order'>
+    <title>Byte Order</title>
+    <para>
+      All data is stored in little-endian (also known as LSB or Intel) byte
+      order.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-file-header'>
+    <title>File Header</title>
+    <para>
+      The file header consists of four bytes (magic number) with the
+      values of ASCII characters <literal>GWYP</literal>.
+    </para>
+    <para>
+      This is the new file format, an older version of file format with magic
+      header <literal>GWYO</literal> also exists.  It will not be discussed
+      here.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-file-data'>
+    <title>File Data</title>
+    <para>
+      The rest of the file consists of a serialized <type>GwyContainer</type>
+      object that contains all the data.  It is stored exactly the same way
+      as any other object, that is as described in the next section.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-object-layout'>
+    <title>Object Layout</title>
+    <para>
+      An object consists of three parts (in the following order):
+      <itemizedlist>
+        <listitem>
+          Type name, stored as a <constant>NUL</constant>-terminated string of
+          ASCII characters.  This is the type name in GObject type system.
+        </listitem>
+        <listitem>
+          Serialized data size, stored as an unsigned 32bit integer.  It does
+          not include the size of the type name and the size of self.
+        </listitem>
+        <listitem>
+          Component list.  Components are named parts of object data, each of
+          particular data type: an atomic type, an array of atomic types, or
+          again an object.  They are stored in no particular order.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-components'>
+    <title>Components</title>
+    <para>
+      Each component consits of three parts (in the following order):
+      <itemizedlist>
+        <listitem>
+          Name, stored as a <constant>NUL</constant>-terminated string.
+        </listitem>
+        <listitem>
+          Type, stored as a signle unsigned byte (character).  The table of
+          possible component types is presented below.
+        </listitem>
+        <listitem>
+          Data, stored as whatever is appropriate for a particular type.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-data-types'>
+    <title>Data Types</title>
+    <para>
+      Available atomic data types are listed in following table:
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-atomic-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Character</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>boolean</entry>
+              <entry><literal>b</literal></entry>
+              <entry>
+                Stored as a byte, zero is false, nonzero (normally 1) is true
+              </entry>
+            </row>
+            <row>
+              <entry>character</entry>
+              <entry><literal>c</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>32bit integer</entry>
+              <entry><literal>i</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>64bit integer</entry>
+              <entry><literal>q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>double</entry>
+              <entry><literal>d</literal></entry>
+              <entry>
+                IEEE 754 double precession floating point number
+              </entry>
+            </row>
+            <row>
+              <entry>string</entry>
+              <entry><literal>s</literal></entry>
+              <entry>
+                <constant>NUL</constant>-terminated
+              </entry>
+            </row>
+            <row>
+              <entry>object</entry>
+              <entry><literal>o</literal></entry>
+              <entry>
+                Serialized object as described above
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Each atomic type except boolean has its array counterpart.  The type
+      character of array types is the same as of the corresponding atomic
+      type, except it is uppercase. Arrays are stored as unsigned 32bit array
+      length (the number of items), followed by the item values. Array data
+      types are listed in following table:
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-array-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Character</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>array of characters</entry>
+              <entry><literal>C</literal></entry>
+              <entry>
+                Not <constant>NUL</constant>-terminated
+              </entry>
+            </row>
+            <row>
+              <entry>array of 32bit integers</entry>
+              <entry><literal>I</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of 64bit integers</entry>
+              <entry><literal>Q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of doubles</entry>
+              <entry><literal>D</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of strings</entry>
+              <entry><literal>S</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>array of objects</entry>
+              <entry><literal>O</literal></entry>
+              <entry>Uppercase Oh, not zero</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-data-objects'>
+    <title>Particular Objects</title>
+    <para>
+      To be written.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

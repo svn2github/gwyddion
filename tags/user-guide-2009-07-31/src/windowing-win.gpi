@@ -1,0 +1,16 @@
+set term svg size 360,165 enhanced font 'DejaVu Sans,6' lw 0.7
+load 'style.gpi'
+
+set output 'windowing-win.svg'
+set format y '%.1f'
+
+set key outside
+plot \
+  'window-Hann-win.dat' title 'Hann' ls 1, \
+  'window-Hamming-win.dat' title 'Hamming' ls 2, \
+  'window-Blackmann-win.dat' title 'Blackmann' ls 3, \
+  'window-Lanzcos-win.dat' title 'Lanzcos' ls 4, \
+  'window-Welch-win.dat' title 'Welch' ls 5, \
+  'window-Nuttall-win.dat' title 'Nuttall' ls 6, \
+  'window-Flat-top-win.dat' title 'Flat-top' ls 7, \
+  'window-Kaiser-2.5-win.dat' title 'Kaiser-2.5' ls 8

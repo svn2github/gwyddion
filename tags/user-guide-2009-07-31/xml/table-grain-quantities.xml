@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informaltable frame='none' id='table-grain-quantities'>
+  <tgroup cols='3'>
+    <?dblatex lll?>
+    <thead>
+      <row>
+        <entry>Symbol</entry>
+        <entry>Group</entry>
+        <entry>Name</entry>
+      </row>
+    </thead>
+    <tbody>
+      <row>
+        <entry><varname>x_c</varname></entry>
+        <entry>Position</entry>
+        <entry>Center x position</entry>
+      </row>
+      <row>
+        <entry><varname>y_c</varname></entry>
+        <entry>Position</entry>
+        <entry>Center y position</entry>
+      </row>
+      <row>
+        <entry><varname>z_min</varname></entry>
+        <entry>Value</entry>
+        <entry>Minimum value</entry>
+      </row>
+      <row>
+        <entry><varname>z_max</varname></entry>
+        <entry>Value</entry>
+        <entry>Maximum value</entry>
+      </row>
+      <row>
+        <entry><varname>z_m</varname></entry>
+        <entry>Value</entry>
+        <entry>Mean value</entry>
+      </row>
+      <row>
+        <entry><varname>z_med</varname></entry>
+        <entry>Value</entry>
+        <entry>Median value</entry>
+      </row>
+      <row>
+        <entry><varname>b_min</varname></entry>
+        <entry>Value</entry>
+        <entry>Minimum value on boundary</entry>
+      </row>
+      <row>
+        <entry><varname>b_max</varname></entry>
+        <entry>Value</entry>
+        <entry>Maximum value on boundary</entry>
+      </row>
+      <row>
+        <entry><varname>A_0</varname></entry>
+        <entry>Area</entry>
+        <entry>Projected area</entry>
+      </row>
+      <row>
+        <entry><varname>A_s</varname></entry>
+        <entry>Area</entry>
+        <entry>Surface area</entry>
+      </row>
+      <row>
+        <entry><varname>a_eq</varname></entry>
+        <entry>Area</entry>
+        <entry>Equivalent square side</entry>
+      </row>
+      <row>
+        <entry><varname>r_eq</varname></entry>
+        <entry>Area</entry>
+        <entry>Equivalent disc radius</entry>
+      </row>
+      <row>
+        <entry><varname>A_h</varname></entry>
+        <entry>Area</entry>
+        <entry>Area above half-height</entry>
+      </row>
+      <row>
+        <entry><varname>V_0</varname></entry>
+        <entry>Volume</entry>
+        <entry>Zero basis volume</entry>
+      </row>
+      <row>
+        <entry><varname>V_min</varname></entry>
+        <entry>Volume</entry>
+        <entry>Grain minimum basis volume</entry>
+      </row>
+      <row>
+        <entry><varname>V_L</varname></entry>
+        <entry>Volume</entry>
+        <entry>Laplacian background basis volume</entry>
+      </row>
+      <row>
+        <entry><varname>L_b0</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Projected boundary length</entry>
+      </row>
+      <row>
+        <entry><varname>D_min</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Minimum bounding size</entry>
+      </row>
+      <row>
+        <entry><varname>phi_min</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Minimum bounding direction</entry>
+      </row>
+      <row>
+        <entry><varname>D_max</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Maximum bounding size</entry>
+      </row>
+      <row>
+        <entry><varname>phi_max</varname></entry>
+        <entry>Boundary</entry>
+        <entry>Maximum bounding direction</entry>
+      </row>
+      <row>
+        <entry><varname>theta</varname></entry>
+        <entry>Slope</entry>
+        <entry>Inclination θ</entry>
+      </row>
+      <row>
+        <entry><varname>phi</varname></entry>
+        <entry>Slope</entry>
+        <entry>Inclination φ</entry>
+      </row>
+    </tbody>
+  </tgroup>
+</informaltable>

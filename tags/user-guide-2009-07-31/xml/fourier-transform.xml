@@ -1,0 +1,327 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='fourier-transform'>
+  <title>Fourier Transform</title>
+  <indexterm><primary>Fourier transform</primary></indexterm>
+  <para>
+    Two-dimensional Fourier transform can be accessed using
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Integral Transforms</guisubmenu>
+      <guimenuitem>2D FFT</guimenuitem>
+    </menuchoice>
+    which implements the Fast Fourier transform (FFT). Fourier transform
+    decomposes signal into its harmonic compoments, it is therefore useful
+    while studying spectral frequencies present in the SPM data.
+  </para>
+  <para>
+    The <guilabel>2D FFT</guilabel> module provides several types of output:
+    <itemizedlist>
+      <listitem>
+        Modulus – absolute value of the complex Fourier coefficient,
+        proportional to the square root of the power spectrum density function
+        (PSDF).
+      </listitem>
+      <listitem>
+        Phase – phase of the complex coefficient (rarely used).
+      </listitem>
+      <listitem>
+        Real – real part of the complex coefficient.
+      </listitem>
+      <listitem>
+        Imaginary – imaginary part of the complex coefficient.
+      </listitem>
+    </itemizedlist>
+    and some their combinations for convenience.
+  </para>
+  <para id='psdf-section'>
+    <indexterm>
+      <primary>power spectral density function</primary>
+      <secondary>section</secondary>
+    </indexterm>
+    Radial sections of the two-dimensional PSDF can be conveniently obtained
+    with
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Statistics</guisubmenu>
+      <guimenuitem>PSDF Section</guimenuitem>
+    </menuchoice>.
+    Several other functions producing spectral densities are described in
+    section
+    <link linkend='power-spectral-density-1d'>Statistical Analysis</link>.
+    It is also possible to filter images in the frequency domain using
+    <link linkend='fft-filter-1d'>one-dimensional</link> or
+    <link linkend='fft-filter-2d'>two-dimensional</link> FFT filters.
+  </para>
+  <para>
+    Note that the Fourier transform treats data as being infinite, thus
+    implying some cyclic boundary conditions. As the real data do not have
+    these properties, it is necessary to use some windowing function to
+    suppress the data at the edgest of the image. If you do not do this, FFT
+    treats data as being windowed by rectangular windowing function which
+    has really bad  Fourier image thus leading to corruption of the Fourier
+    spectrum.
+  </para>
+  <para id='windowing'>
+    Gwyddion offers several windowing functions. Most of them are formed by
+    some sine and cosine functions that damp data correctly at the edges.
+    In the following windowing formula table the independent variable
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    is from interval
+    <inlineequation>
+      <mathphrase>(0, 1)</mathphrase>
+      <alt>(0,1)</alt>
+    </inlineequation>,
+    which corresponds to the normalized abscissa; for simplicity variable
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>ξ</phrase> = 2π<phrase role='mathvar'>x</phrase></mathphrase>
+      <alt>\xi=2\pi x</alt>
+    </inlineequation>
+    is used in some formulas.  The available windowing types include:
+  </para>
+  <informaltable frame='none' id='table-windowing-types'>
+    <tgroup cols='2' align='left'>
+      <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Name</entry>
+          <entry>Formula</entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>None</entry>
+          <entry>1</entry>
+        </row>
+        <row>
+          <entry>Rect</entry>
+          <entry>0.5 at edge points, 1 everywhere else</entry>
+        </row>
+        <row>
+          <entry>Hann</entry>
+          <entry>
+            <inlineequation id='eq-windowing-hann'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-hann.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Hann}(x) = 0.5-0.5\cos\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Hamming</entry>
+          <entry>
+            <inlineequation id='eq-windowing-hamming'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-hamming.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Hamming}(x) = 0.54-0.46\cos\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Blackmann</entry>
+          <entry>
+            <inlineequation id='eq-windowing-blackmann'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-blackmann.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Blackmann}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Lanczos</entry>
+          <entry>
+            <inlineequation id='eq-windowing-lanczos'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-lanczos.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Lanczos}(x) = \sinc \pi(2x-1)
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Welch</entry>
+          <entry>
+            <inlineequation id='eq-windowing-welch'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-welch.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Welch}(x) = 4x(1-x)
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Nutall</entry>
+          <entry>
+            <inlineequation id='eq-windowing-nutall'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-nutall.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm Nutall}(x) = 0.355768 - 0.487396\cos\xi
+                  + 0.144232\cos2\xi - 0.012604\cos3\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Flat-top</entry>
+          <entry>
+            <inlineequation id='eq-windowing-flat-top'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-flat-top.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
+                    - 0.097\cos3\xi + 0.008\cos4\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Kaiser
+             <inlineequation>
+              <mathphrase>α</mathphrase>
+              <alt>\alpha</alt>
+            </inlineequation>
+          </entry>
+          <entry>
+            <inlineequation id='eq-windowing-kaiser'>
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-windowing-kaiser.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+\displaystyle
+w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
+                          \over\BesselI0(\pi\alpha)}
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+            where <inlineequation>
+              <mathphrase>I<subscript>0</subscript></mathphrase>
+              <alt>\BesselI0</alt>
+            </inlineequation>
+            is the modified Bessel function of zeroth order and
+            <inlineequation>
+              <mathphrase>α</mathphrase>
+              <alt>\alpha</alt>
+            </inlineequation>
+            is a parameter
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <informalfigure id='fig-windowing-win'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='windowing-win.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-win.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Windowing functions: Hann, Hamming, Blackmann, Lanczos, Welch,
+        Nutall, Flat-top, Kaiser 2.5.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <informalfigure id='fig-windowing-fft'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='windowing-fft.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-fft.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Envelopes of windowing functions frequency responses: Hann, Hamming,
+        Blackmann, Lanczos, Welch, Nutall, Flat-top, Kaiser 2.5.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Fourier transforms of data with sizes that are not factorable into
+    small prime factors can be very slow – and many programs only implement
+    FFT of arrays with dimensions that are powers of two.
+  </para>
+  <para>
+    In <application>Gwyddion</application>, however, the Fourier transform can
+    be applied to data fields and lines of arbitrary dimensions, with no data
+    resampling involved (at least since version 2.8).  Fourier transforms are
+    calculated either using the famous
+    <link linkend='dependency-fftw'>FFTW library</link> or, if it is not
+    available, using Gwyddion built-in routines that are slower but can also
+    handle transforms of arbitrary size.
+  </para>
+  <para>
+    Nevertheless, if the data size is not factorable into small prime factors
+    the transform is still considerably slower.  Hence it is preferable to
+    transform data fields of <quote>nice</quote> sizes.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

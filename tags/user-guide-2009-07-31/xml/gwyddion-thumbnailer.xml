@@ -1,0 +1,248 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<refentry id='gwyddion-thumbnailer'>
+  <refentryinfo>
+    <productname>gwyddion</productname>
+    <author><othername>Yeti</othername></author>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gwyddion-thumbnailer</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>gwyddion-thumbnailer</refname>
+    <refpurpose>Create thumbnails of SPM data files</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv id='gwyddion-thumbnailer-synopsis'>
+    <title>Synopsis</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <group choice='req'>
+        <arg choice='plain'>--version</arg>
+        <arg choice='plain'>--help</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='req'><replaceable>MODE</replaceable></arg>
+      <arg rep='repeat'><replaceable>ARGUMENT</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1 id='gwyddion-thumbnailer-description'>
+    <title>Description</title>
+    <para>
+      Gwyddion-thumbnailer creates thumbnails of SPM (Scanning Probe
+      Microscope) image files.  Depending on the mode of operation, described
+      below, the thumbnails are written to conform to various desktop
+      standards so that they can be displayed in
+      <citerefentry><refentrytitle>nautilus</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+      <citerefentry><refentrytitle>thunar</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+      and similar file managers.
+    </para>
+    <para>
+      Gwyddion-thumbnailer loads and renders files using
+      <citerefentry><refentrytitle>gwyddion</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+      libraries and modules, therefore, it can create thumbnails of all file
+      formats supported by your Gwyddion installation.  This also means it
+      inherits Gwyddion settings, e.g. the default false color gradient, and
+      that it is influenced by the same environment variables as Gwyddion.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-informative-options'>
+    <title>Informative Options</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>
+            Prints a brief help and terminates.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>
+            Prints version information and terminates.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-thumbnailing-options'>
+    <title>Thumbnailing Options</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--update</option>
+        </term>
+        <listitem>
+          <para>
+            Writes the thumbnail only if it does not exist yet or does not
+            seem to be up-to-date.  By default, gwyddion-thumbnailer
+            overwrites existing thumbnails with fresh ones even if they seem
+            up to date.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-mode'>
+    <title>Mode</title>
+    <para>
+      Three thumbnailing modes are available: <option>gnome2</option>,
+      <option>tms</option> and <option>kde4</option>; and one special
+      mode: <option>check</option>. They are described below.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-gnome2'>
+    <title>Gnome 2</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='plain'>gnome2</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+      <arg choice='plain'><replaceable>OUTPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      In <option>gnome2</option> mode, gwyddion-thumbnailer creates PNG
+      thumbnails according to the Gnome thumbnailer specification.  Usings
+      the convention from this specification, it should be run
+    </para>
+    <informalexample>
+      <programlisting>gwyddion-thumbnailer gnome2 %s %i %o</programlisting>
+    </informalexample>
+    <para>
+      Gwyddion installs the corresponding GConf schemas and enables
+      thumbnailers for all file types it supports by default, so usually this
+      should Just Work and should not need to be set up manually.
+    </para>
+    <para>
+      The thumbnails created in <option>gnome2</option> more are identical as
+      in <option>tms</option> mode, including all the PNG auxiliary chunks
+      (provided that the same <replaceable>MAX-SIZE</replaceable> as in
+      <option>tms</option> mode is specified, of course).
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-tms'>
+    <title>TMS</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='plain'>tms</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      In <option>tms</option> mode, gwyddion-thumbnailer creates PNG
+      thumbnails according to the Thumbnail Managing Standard.  Argument
+      <replaceable>MAX-SIZE</replaceable> must be <option>128</option> or
+      <option>normal</option> (both meaning 128 pixels) or
+      <option>256</option> or <option>large</option> (both meaning 256
+      pixels).
+    </para>
+    <para>
+      Output file name is not given as it is prescribed by the TMS.  The
+      thumbnail is placed to the directory for normal or large thumbnails
+      according to given <replaceable>MAX-SIZE</replaceable>.
+    </para>
+    <para>
+      This mode can also be useful for manual batch-creation of thumbnails.
+      For instance, to create them for all <filename>*.afm</filename> files
+      in directory <filename>scans</filename> and its subdirectories, you can
+      run
+    </para>
+    <informalexample>
+      <programlisting><![CDATA[
+find scans -type f -name '*.afm' -print0 \\
+    | xargs -0 -n 1 gwyddion-thumbnailer --update tms normal
+]]></programlisting>
+    </informalexample>
+    <para>
+      And then go make yourself a coffee because this will take some time.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-kde4'>
+    <title>KDE 4</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice='plain'>kde4</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      In <option>kde4</option> mode, gwyddion-thumbnailer creates PNG
+      thumbnails that are intended to be consumed by gwythumbcreator KDE
+      module.  The thumbnail, again identical as in the other modes, is
+      written to the standard output.
+    </para>
+    <para>
+      Do <emphasis>not</emphasis> use this mode from the command line.  It is
+      documented for completness, however, the protocol between
+      gwythumbcreator and gwyddion-thumbnailer must be considered private and
+      it can change any time.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-check'>
+    <title>Check</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice='plain'>check</arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      The <option>check</option> mode does not serve for thumbnail creation.
+      Instead, gwyddion-thumbnailer prints information about available
+      thumbnails of <replaceable>INPUT-FILE</replaceable> and cached failures
+      to produce a thumbnail by individual applications, as described by the
+      TMS.
+    </para>
+    <para>
+      If the normal-sized thumbnail exists and is up to date, the large
+      version does not exist and there is one cached failure from
+      gnome-thumbnail-factory, the output can be for instance:
+    </para>
+    <informalexample>
+      <literallayout><computeroutput>File:   <replaceable>INPUT-FILE</replaceable>
+URI:    file:///home/me/Pictures/naughty/broken-tip3/<replaceable>INPUT-FILE</replaceable>
+Normal: /home/me/.thumbnails/normal/<replaceable>MD5</replaceable>.png
+        status: OK
+Large:  /home/me/.thumbnails/large/<replaceable>MD5</replaceable>.png
+        status: Thumbnail does not exist or stat() fails on it.
+Failed: /home/me/.thumbnails/fail/gnome-thumbnail-factory/<replaceable>MD5</replaceable>.png</computeroutput></literallayout>
+    </informalexample>
+    <para>
+      URI is the canonical URI of the input file,
+      <replaceable>MD5</replaceable> stands for the hex representation of MD5
+      sum of the URI, as described by the TMS.  If there are no cached
+      failures, no Failed lines are printed.
+    </para>
+    <para>
+      This function can be used to check thumbnails of any kind, not
+      necessarily created by gwyddion or gwyddion-thumbnailer.  In future, it
+      might be reported as an error if the thumbnail does not contain
+      Gwyddion-specific information though.
+    </para>
+  </refsect1>
+  <refsect1 id="gwyddion-see-also">
+    <title>See also</title>
+    <para>
+      <citerefentry>
+        <refentrytitle>gwyddion</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>,
+    </para>
+  </refsect1>
+</refentry>

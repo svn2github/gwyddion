@@ -1,0 +1,17 @@
+set term svg size 360,165 enhanced font 'DejaVu Sans,6' lw 0.7
+load 'style.gpi'
+
+set output 'windowing-fft.svg'
+set format y '10^{%T}'
+
+set key outside
+set logscale y
+plot [] [1e-9:] \
+  'window-Hann-fft.dat' smooth sbezier title 'Hann' ls 1, \
+  'window-Hamming-fft.dat' smooth sbezier title 'Hamming' ls 2, \
+  'window-Blackmann-fft.dat' smooth sbezier title 'Blackmann' ls 3, \
+  'window-Lanzcos-fft.dat' smooth sbezier title 'Lanzcos' ls 4, \
+  'window-Welch-fft.dat' smooth sbezier title 'Welch' ls 5, \
+  'window-Nuttall-fft.dat' smooth sbezier title 'Nuttall' ls 6, \
+  'window-Flat-top-fft.dat' smooth sbezier title 'Flat-top' ls 7, \
+  'window-Kaiser-2.5-fft.dat' smooth sbezier title 'Kaiser-2.5' ls 8

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2 Patchlevel 5 -->
+
+<!-- CreationDate: Wed Jul  8 15:54:32 2009 -->
+
+<!-- Magnification: 1.000 -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="4.3in"
+   height="3.0in"
+   viewBox="2228 5678 5144 3644"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="inclination.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
+  <metadata
+     id="metadata50">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs48">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 135 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="387.00003 : 135 : 1"
+       inkscape:persp3d-origin="193.50002 : 90 : 1"
+       id="perspective52" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1172"
+     inkscape:window-height="750"
+     id="namedview46"
+     showgrid="false"
+     inkscape:zoom="5.560723"
+     inkscape:cx="196.85357"
+     inkscape:cy="170.96655"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:current-layer="svg2"
+     inkscape:window-maximized="0" />
+  <polygon
+     id="polygon6"
+     style="fill:#87cfff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4425,6900 4725,8100 5625,9300 5625,9300 5325,8100 " />
+  <polygon
+     id="polygon8"
+     style="fill:#ffffff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="7350,6900 4350,6900 2250,8100 2250,8100 5250,8100 " />
+  <polygon
+     id="polygon10"
+     style="fill:#87cfff;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter"
+     points="3525,5700 3825,6900 4725,8100 4725,8100 4425,6900 " />
+  <path
+     id="path12"
+     d="m 5780,7207 a 538,538 0 0 1 91,290"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <path
+     id="path14"
+     d="m 4578,6577 a 653,653 0 0 1 513,238"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt" />
+  <polyline
+     id="polyline16"
+     style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:60, 60"
+     points="2250,8100 4350,6900 7350,6900 " />
+  <polyline
+     id="polyline18"
+     style="fill:none;stroke:#000000;stroke-width:15;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:60, 60"
+     points="4425,6900 5325,8100 " />
+  <polyline
+     id="polyline20"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 6958,7500 " />
+  <polyline
+     id="polyline22"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="6853 7530 6973 7500 6853 7470 " />
+  <polyline
+     id="polyline24"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:40, 40"
+     points="4575,7500 6450,7050 " />
+  <polyline
+     id="polyline26"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 5540,6237 " />
+  <polyline
+     id="polyline28"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="5499 6339 5549 6226 5452 6303 " />
+  <polyline
+     id="polyline30"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:40, 40"
+     points="5550,6225 5550,7275 " />
+  <polyline
+     id="polyline32"
+     style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+     points="4575,7500 4575,6166 " />
+  <polyline
+     id="polyline34"
+     style="fill:none;stroke:#000000;stroke-width:7"
+     points="4605 6272 4575 6152 4545 6272 " />
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text36"
+     font-size="168"
+     font-weight="normal"
+     font-style="italic"
+     y="7650"
+     x="7050"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">x</text>
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text38"
+     font-size="168"
+     font-weight="normal"
+     font-style="italic"
+     y="6150"
+     x="4425"
+     xml:space="preserve"
+     sodipodi:linespacing="125%">z</text>
+  <text
+     style="font-size:161.95555555999999342px;font-style:italic;font-weight:bold;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine Bold Italic;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:125%"
+     id="text40"
+     font-size="168"
+     font-weight="bold"
+     font-style="italic"
+     y="6225"
+     x="5325"
+     xml:space="preserve"
+     sodipodi:linespacing="125%"><tspan
+       style="font-weight:bold;-inkscape-font-specification:Linux Libertine Bold Italic;font-family:Linux Libertine;font-style:italic;font-stretch:normal;font-variant:normal"
+       id="tspan2852">n</tspan></text>
+  <text
+     style="font-size:168px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal"
+     id="text42"
+     font-size="168"
+     font-weight="normal"
+     font-style="normal"
+     y="6540"
+     x="4852"
+     xml:space="preserve">ϑ</text>
+  <text
+     style="font-size:168.00000358px;font-style:normal;font-weight:normal;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.02500000000000000in;font-family:Linux Libertine;-inkscape-font-specification:Linux Libertine;font-stretch:normal;font-variant:normal;text-align:start;writing-mode:lr;line-height:100%"
+     id="text44"
+     font-size="168"
+     font-weight="normal"
+     font-style="normal"
+     y="7397"
+     x="5949"
+     xml:space="preserve"
+     sodipodi:linespacing="100%"><tspan
+       sodipodi:role="line"
+       id="tspan2856">φ</tspan></text>
+</svg>

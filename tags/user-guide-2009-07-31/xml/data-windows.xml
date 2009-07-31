@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='data-windows'>
+  <title>Data Window</title>
+  <para>
+    Two-dimensional data are presented in so called data windows. It is the
+    main widget used for working with Gwyddion. The data are presented as a
+    field of false colors corresponding to heights. Color axis that represents
+    mapping the colors to real height values is on the right side of the data
+    window.
+  </para>
+  <para>
+    The False color palette used to represent height data can be changed by
+    clicking on the color axis with right mouse button (i.e. invoking context
+    menu) and selecting a palette from the list. Most frequently used palettes
+    are available directly in the context menu; however you can reach much more
+    of the possible palettes using the
+    <menuchoice><guimenuitem>More</guimenuitem></menuchoice> menu entry.
+    Moreover, you can use the
+    <link linkend='color-gradient-editor'>color gradient editor</link> to
+    create your own palettes and select which palettes should be displayed
+    in the short list.
+  </para>
+  <para>
+    There is a context menu available also for the data area. This menu
+    consist of basic data and presentation operations. To reach all the
+    possible operations use
+    <menuchoice>
+      <guimenu>Data process...</guimenu>
+    </menuchoice>
+    menu at the Gwyddion main window,
+    or use some of the tools available at the <guilabel>Tools</guilabel> set
+    of buttons at the Gwyddion main window.
+  </para>
+  <indexterm><primary>aspect ratio</primary></indexterm>
+  <para>
+    The arrow in the upper left corner brings the aspect ratio switch menu.
+    The data can be displayed either with pixels mapped with 1:1 aspect ratio
+    to screen pixels (<guilabel>Pixelwise Square</guilabel>), or with
+    physical dimensions mapped 1:1 onto the screen (<guilabel>Physically
+      Square</guilabel>).  For instance a sample of size 1×1 μm scanned with
+    reduced slow axis resolution and having therefore 512×128 pixels, can
+    be displayed either in 512×128 or 512×512 window.
+  </para>
+  <informalfigure id='fig-data-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='data_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Data window with all three available context menus shown.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -1,0 +1,179 @@
+% $Id$
+\input{formulas/defs.tex}
+\raggedbottom
+\lstset{tabsize=4}
+\makeatletter
+% Restore working plain macros that AMS-TeX wants us to replace with some crap
+\def\cases#1{\left\{\,\vcenter{\normalbaselines\m@th
+    \ialign{$##\hfil$&\quad##\hfil\crcr#1\crcr}}\right.}
+\def\matrix#1{\null\,\vcenter{\normalbaselines\m@th
+    \ialign{\hfil$##$\hfil&&\quad\hfil$##$\hfil\crcr
+      \mathstrut\crcr\noalign{\kern-\baselineskip}
+      #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
+\def\pmatrix#1{\left(\matrix{#1}\right)}
+% Get rid of rev history and other ugly tables
+\let\DBKdomitete=\relax
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{1}
+% Format the title page
+\def\DBKcover{
+\ifthenelse{\equal{\DBKedition}{}}{\def\edhead{}}{\def\edhead{Ed. \DBKedition}}
+{\thispagestyle{empty}\sffamily
+\hrule height0pt
+\vskip 0pt plus1filll
+\begin{center}
+\setlength{\baselineskip}{2\oldbaselineskip}
+\Huge{\textbf{\DBKtitle}}
+\end{center}
+\vskip2cm
+\begin{center}
+\Large{\DBKauthor{}}
+\end{center}
+\vskip1cm
+\begin{center}
+\gwyreleaseinfo
+\end{center}
+\vskip 0pt plus3filll
+}
+\newpage
+}
+% Fix chapter heads
+\def\@makechapterhead#1{%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \sffamily\LARGE\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+    \fi
+    \interlinepenalty\@M
+    \sffamily\Huge\bfseries #1\par\nobreak
+    \vskip 20\p@
+  }}
+\def\@makeschapterhead#1{%
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \sffamily\Huge\bfseries  #1\par\nobreak
+    \vskip 20\p@
+  }}
+% Fix too pompous section heads
+\def\section{\@startsection{section}{1}{\z@}%
+                           {-2.5ex \@plus -1ex \@minus -.2ex}%
+                           {.5ex \@plus .1ex}%
+                           {\normalfont\sffamily\Large\bfseries}}
+\def\subsection{\@startsection{subsection}{2}{\z@}%
+                              {-2.25ex \@plus -1ex \@minus -.2ex}%
+                              {.3ex \@plus .05ex \@minus .02ex}%
+                              {\normalfont\sffamily\large\bfseries}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                 {-1.2ex\@plus -.5ex \@minus -.1ex}%
+                                 {.3ex \@plus .05ex \@minus .02ex}%
+                                 {\normalfont\sffamily\normalsize\bfseries}}
+% Fix vertical spacing in TOC
+\let\latex@dottedtocline=\@dottedtocline
+\def\@dottedtocline{\parskip=1pt plus0.05pt\latex@dottedtocline}
+% Format informal captions
+\long\def\gwycaption#1{%
+  \sbox\@tempboxa{#1}%
+  \ifdim \wd\@tempboxa >\hsize
+    \begingroup
+    \leftskip=\z@skip \rightskip=\z@skip \parfillskip=0pt plus1fil\relax
+    #1\par
+    \endgroup
+  \else
+    #1\par
+  \fi}
+% Fix page heads and dimensions
+\topmargin=1.2cm
+\textheight=24.7cm
+\headsep=20pt
+\textwidth=18cm
+\oddsidemargin=13mm
+\evensidemargin=18mm
+\def\mainmatter{
+  \cleardoublepage\pagenumbering{arabic}%
+  \fancyhead{}
+  \fancyhead[OR]{\thepage}
+  \fancyhead[OL]{\leftmark}
+  \fancyhead[EL]{\thepage}
+  \fancyhead[ER]{\DBKtitle}
+}
+\def\frontmatter{
+  \cleardoublepage\pagenumbering{roman}%
+  \fancyhead{}
+  \chead{}
+  \fancyhead[OR]{\thepage}
+  \fancyhead[OL]{\leftmark}
+  \fancyhead[EL]{\thepage}
+  \fancyhead[ER]{\DBKtitle}
+}
+\def\chaptermark#1{\markboth{\thechapter. #1}{}}
+\def\tableofcontents{%
+  \if@twocolumn
+    \@restonecoltrue\onecolumn
+  \else
+    \@restonecolfalse
+  \fi
+  \chapter*{\contentsname
+      \@mkboth{\contentsname}{\contentsname}}%
+  \@starttoc{toc}%
+  \if@restonecol\twocolumn\fi
+}
+% Define commands for single-symbol math
+\uc@dclc{977}{default}{\texttheta}%
+\uc@dclc{977}{mathletters}{\ensuremath{\vartheta}}%
+\def\textGamma{\ensuremath{\Gamma}}
+\def\textDelta{\ensuremath{\Delta}}
+\def\textTheta{\ensuremath{\Theta}}
+\def\textLambda{\ensuremath{\Lambda}}
+\def\textXi{\ensuremath{\Xhi}}
+\def\textPi{\ensuremath{\Pi}}
+\def\textSigma{\ensuremath{\Sigma}}
+\def\textPhi{\ensuremath{\Phi}}
+\def\textPsi{\ensuremath{\Psi}}
+\def\textOmega{\ensuremath{\Omega}}
+\def\textalpha{\ensuremath{\alpha}}
+\def\textbeta{\ensuremath{\beta}}
+\def\textgamma{\ensuremath{\gamma}}
+\def\textdelta{\ensuremath{\delta}}
+\def\textepsilon{\ensuremath{\varepsilon}}
+\def\texteta{\ensuremath{\eta}}
+\def\textiota{\ensuremath{\iota}}
+\def\textkappa{\ensuremath{\kappa}}
+\def\textlambda{\ensuremath{\lambda}}
+\def\textmu{\ensuremath{\mu}}
+\def\textnu{\ensuremath{\nu}}
+\def\textxi{\ensuremath{\xi}}
+\def\textomicron{\ensuremath{\omicron}}
+\def\textpi{\ensuremath{\pi}}
+\def\textsigma{\ensuremath{\sigma}}
+\def\texttau{\ensuremath{\tau}}
+\def\textupsilon{\ensuremath{\upsilon}}
+\def\textphi{\ensuremath{\varphi}}
+\def\textchi{\ensuremath{\chi}}
+\def\textpsi{\ensuremath{\psi}}
+\def\textomega{\ensuremath{\omega}}
+\def\texttheta{\ensuremath{\vartheta}}
+\def\textrho{\ensuremath{\varrho}}
+% Fix vertical spacing in verbatim
+\def\@verbatim{\topsep=\z@ \partopsep=\z@
+  \vskip\parskip \vskip\z@skip % Prevent the first skip from being removed
+  \trivlist \item\relax
+  \parskip\z@skip \parsep\z@skip \global\@outerparskip\z@skip
+  \leftskip\@totalleftmargin\rightskip\z@skip
+  \parindent\z@\parfillskip\@flushglue
+  \@@par
+  \@tempswafalse
+  \def\par{%
+    \if@tempswa
+      \leavevmode \null \@@par\penalty\interlinepenalty
+    \else
+      \@tempswatrue
+      \ifhmode\@@par\penalty\interlinepenalty\fi
+    \fi}%
+  \let\do\@makeother \dospecials
+  \obeylines \verbatim@font \@noligs
+  \hyphenchar\font\m@ne
+  \everypar \expandafter{\the\everypar \unpenalty}%
+}
+\makeatother

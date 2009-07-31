@@ -1,0 +1,407 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='basic-operations'>
+  <title>Basic Operations</title>
+  <para>
+    Value-reading and basic geometrical operations represent the core of any
+    data processing program.  Gwyddion offers a wide set of functions for data
+    scaling, rotation, resampling or profile extraction.  This section
+    describes these simple but essential functions.
+  </para>
+  <sect2 id='modules-basic'>
+    <title>Basic 2D Data Operations</title>
+    <para>
+      Within basic modules it is possible to perform the following
+      operations with 2D data field:
+    </para>
+    <itemizedlist>
+      <listitem id='scale'>
+        <indexterm><primary>scaling</primary></indexterm>
+        <indexterm><primary>resampling</primary></indexterm>
+        Resample the data to chosen dimensions or scale using selected
+        interpolation method by
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Scale</guimenuitem>
+        </menuchoice>
+      </listitem>
+      <listitem id='crop'>
+        <indexterm><primary>cropping</primary></indexterm>
+        Crop the data using the <link linkend='tool-crop'>Crop tool</link>
+        either in place or putting the result to a new channel (with option
+        <guilabel>Create new channel</guilabel>).
+        With <guilabel>Keep lateral offsets</guilabel> option enabled, the top
+        left corner coordinates of the resulting image correspond to the
+        top left corner of the selection, otherwise the top left corner
+        coordinates are set to
+        <inlineequation>
+          <mathphrase>(0, 0)</mathphrase>
+          <alt>(0,0)</alt>
+        </inlineequation>.
+      </listitem>
+      <listitem id='rotate'>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>by multiple of 90°</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>by arbitary angle</secondary>
+        </indexterm>
+        Rotate data by 90 degrees or by user-specified amount using some
+        of the rotate functions:
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Rotate Clockwise</guimenuitem>
+        </menuchoice>,
+        <guimenuitem>Rotate Anticlockwise</guimenuitem>
+        or
+        <guimenuitem>Rotate</guimenuitem>.
+      </listitem>
+      <listitem id='flip'>
+        <indexterm>
+          <primary>flipping</primary>
+          <secondary>horizontally</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>flipping</primary>
+          <secondary>vertically</secondary>
+        </indexterm>
+        Flip the data horizontally (i.e. about the vertical axis) and
+        vertically (i.e. about the horizontal axis) with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Flip Horizontally</guimenuitem>
+        </menuchoice>
+        and
+        <guimenuitem>Flip Vertically</guimenuitem>,
+        respectively.
+      </listitem>
+      <listitem id='flip-both'>
+        Flip the data about the centre (i.e. about both axes) with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Flip Both</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem id='invert-value'>
+        <indexterm><primary>value inversion</primary></indexterm>
+        Invert the data values using the <guimenuitem>Invert
+          Value</guimenuitem> function:
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Invert Value</guimenuitem>
+        </menuchoice>.
+        The values are inverted about the mean value which keeps the mean
+        value unchanged.
+      </listitem>
+      <listitem id='square-samples'>
+        <indexterm>
+          <primary>aspect ratio</primary>
+          <secondary>resampling to square pixels</secondary>
+        </indexterm>
+        Upsample the data to make pixels square with
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Square Samples</guimenuitem>
+        </menuchoice>.
+        Most scans have pixels with 1:1 aspect ratio, therefore this function
+        has no effect on them.
+      </listitem>
+    </itemizedlist>
+    <para id='calibrate'>
+      Moreover, the recalibration module can be used for changing the physical
+      dimensions, data value calibration and even to change the units of
+      values and lateral dimensions:
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Basic operations</guisubmenu>
+        <guimenuitem>Calibrate</guimenuitem>
+      </menuchoice>.
+    </para>
+  </sect2>
+  <sect2 id='basic-value-reading'>
+    <title>Reading Values</title>
+    <para>
+      The simpliest value reading method is to place the mouse cursor over the
+      point you want to read value of.  The coordinates and/or value is then
+      displayed in the
+      <link linkend='data-windows'>data window</link> or
+      <link linkend='graph-windows'>graph window</link>
+      status bar.
+    </para>
+    <sect3 id='read-value'>
+      <title>
+        Read Value Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>Read Value tool</primary></indexterm>
+      <indexterm><primary>slope measurement</primary></indexterm>
+      <indexterm>
+        <primary>inclination</primary>
+        <secondary>reading on data</secondary>
+      </indexterm>
+      <para>
+        Tool <guilabel>Read Value</guilabel> offers more value reading
+        posibilities: It displays coordinates and values of the last point of
+        the data window the mouse button was pressed.  It can avergae the
+        value from a circular neighbourhood around the selected point, this
+        is controlled by option <guilabel>Averaging radius</guilabel>.  When
+        the radius is 1, the value of a single pixel is displayed (as the
+        simplest method does).  Button <guibutton>Set Zero</guibutton> shifts
+        the surface to make the current
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+          <alt>z</alt>
+        </inlineequation>
+        the new zero level.
+      </para>
+      <para>
+        <guilabel>Read Value</guilabel> can also display the inclination of the
+        local facet. <guilabel>Averaging radius</guilabel> again determines the
+        radius of the area to use for the plane fit.
+      </para>
+    </sect3>
+    <sect3 id='inclinations-coordinates'>
+      <title>Inclinations</title>
+      <indexterm>
+        <primary>inclination</primary>
+        <secondary>calculation</secondary>
+      </indexterm>
+      <para>
+        In all Gwyddion tools, facet and plane inclinations are displayed as
+        the spherical angles
+        <inlineequation>
+          <mathphrase>(<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
+          <alt>(\vartheta,\varphi)</alt>
+        </inlineequation>
+        of the plane normal vector.
+      </para>
+      <para>
+        Angle
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
+          <alt>\vartheta</alt>
+        </inlineequation>
+        is the angle between the upward direction and the normal, this means
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>ϑ</phrase> = 0</mathphrase>
+          <alt>\vartheta=0</alt>
+        </inlineequation>
+        for horizontal facets and it increases with the slope. It is always
+        positive.
+      </para>
+      <para>
+        Angle
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase> </mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        is the counter-clockwise measured angle between axis
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+          <alt>x</alt>
+        </inlineequation>
+        and the projection of the normal to the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+          <alt>xy</alt>
+        </inlineequation>
+        plane, as
+        displayed on the following figure.  For facets it means
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        corresponds to the downward direction of the facet.
+      </para>
+      <informalfigure id='fig-inclination-coordinates'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='inclination.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='inclination.png' format='PNG'/>
+          </imageobject>
+          <textobject>
+            <phrase>Measuring facet orientation</phrase>
+          </textobject>
+          <caption>
+            Surface facet (displayed blue) orientation measured as the
+            counterclockwise angle from
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>-axis
+            to the projection of facet normal vector
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
+              <alt>\vec{n}</alt>
+            </inlineequation>
+            to
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+              <alt>xy</alt>
+            </inlineequation>
+            plane.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id='distance'>
+      <title>
+        Distance Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_distance-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>Distance tool</primary></indexterm>
+      <indexterm><primary>distance measurement</primary></indexterm>
+      <indexterm><primary>angle measurement</primary></indexterm>
+      <para>
+        Distances and differences can be measured with the
+        <guilabel>Distance</guilabel> tool.  It displays the horizontal
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>x</phrase></mathphrase>
+          <alt>\Delta x</alt>
+        </inlineequation>),
+        vertical
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>y</phrase></mathphrase>
+          <alt>\Delta y</alt>
+        </inlineequation>)
+        and total planar
+        (<inlineequation>
+          <mathphrase><phrase role='mathvar'>R</phrase></mathphrase>
+          <alt>R</alt>
+        </inlineequation>)
+        distances; the azimuth
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>
+        (measured identically to inclination
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
+          <alt>\varphi</alt>
+        </inlineequation>)
+        and the endpoint value difference
+        (<inlineequation>
+          <mathphrase>Δ<phrase role='mathvar'>z</phrase></mathphrase>
+          <alt>\Delta z</alt>
+        </inlineequation>)
+        for a set of lines selected on the data.
+      </para>
+      <para>
+        The distances can be copied to the clipboard or saved to a text file
+        using the buttons below the list.
+      </para>
+      <informalfigure id='fig-distance-screenshot'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='distances.png' format='PNG'/>
+          </imageobject>
+          <textobject>
+            <phrase>Distance tool dialog screenshot</phrase>
+          </textobject>
+          <caption>
+            Distance tool with three selected lines.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+  </sect2>
+  <sect2 id='profile'>
+    <title>
+      Profile Extraction
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_profile-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>profile extraction</primary></indexterm>
+    <para>
+      The profile extraction tool can be accessed from the toolbox. You
+      can use mouse to draw several profiles in the image and they can be
+      further moved and adjusted. The dialog includes a live profile graph
+      preview.  Profiles can be of different <quote>thickness</quote> which
+      means that more neighbour data perpendicular to profile direction are
+      used for evaluation of one profile point for thicker profiles. This can
+      be very useful for noise suppression while measuring regular objects.
+    </para>
+    <para>
+      After profiles are chosen, they can be extracted to graphs (separate
+      or grouped in one Graph window) that can be further analysed using
+      Graph functions.
+    </para>
+    <informalfigure id='fig-profile-screenshot'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='profiles.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Profile tool dialog screenshot</phrase>
+        </textobject>
+        <caption>
+          Profile tool with three extracted profiles and expanded options.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      The profile curve is constructed from data sampled at regular intervals
+      along the selected line.  Values in points that do not lie exactly at
+      pixel centres (which normally occurs for oblique lines) are interpolated
+      using the chosen <link linkend='interpolation'>interpolation</link> mode.
+      Unless an explicit number of samples to take is set using the
+      <guilabel>Fix res.</guilabel> option, the number of samples corresponds
+      to the line length in pixels.  This means that for purely horizontal
+      or purely vertical lines no interpolation occurs.
+    </para>
+    <informalfigure id='fig-profile-interpolation'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Profile subpixel interpolation scheme</phrase>
+        </textobject>
+        <caption>
+          Illustration of data sampling in profile extraction for oblique
+          lines.  The figures on the left show the points along the line where
+          the values are read for natural and very high resolution.  The graphs
+          on the right show the extracted values.  Comparison of the natural
+          and high resolution profiles taken with Round interpolation reveals
+          that indeed natural-resolution curve points form a subset of the
+          high-resolution points.  The influence of the interpolation method
+          on values taken in non-grid positions is demonstrated by the lower
+          two graphs, comparing Round and Key interpolation at high resolution.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

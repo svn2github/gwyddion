@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='single-point-spectra'>
+  <title>Single Point Spectra</title>
+  <indexterm><primary>spectra</primary></indexterm>
+  <para>
+    <application>Gwyddion</application> currently offers some basic
+    visualization and extraction means for single point spectroscopy data (we
+    will generally refer to any curves measured in or otherwise attached to
+    individual points of the sample as to <quote>spectra</quote> here).
+    If spectra import is supported for a file type, they will appear in the
+    <guilabel>Spectra</guilabel> tab of the
+    <link linkend='data-browser'>data browser</link>.  Standalone spectra
+    files can be added to the two-dimensional data using
+    <link linkend='file-merging'>file merging</link>.
+  </para>
+  <sect2 id='point-spectroscopy'>
+    <title>
+      Point Spectroscopy Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      The primary spectra visualization and extraction tool is the
+      Point spectroscopy tool.  It displays a list of measurement points and
+      shows their positions on the data window.  Individual curves can be
+      selected either in the list on by selecting the corresponding crosses
+      on the data window.  If the file contains more than one spectrum set,
+      one can choose among them by selecting the desired one in the
+      <guilabel>Spectra</guilabel> tab list of the data browser.
+    </para>
+    <para>
+      The <guibutton>Apply</guibutton> button then extracts the selected
+      set of curves into a graph that can be further analysed by graph
+      functions, such as
+      <link linkend='fd-curve-fitting'>force-distance curve fitting</link>.
+    </para>
+    <informalfigure id='fig-spectro-tool'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='spectro-tool.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          A data window with measurement points displayed and the point
+          spectroscopy tool showing curves from three selected points.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
