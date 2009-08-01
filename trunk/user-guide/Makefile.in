@@ -34,6 +34,7 @@ SVG_IMAGES = \
 	inclination.svg \
 	profile-interpolation.svg \
 	step-edge.svg \
+	surface-area-vertices.svg \
 	unrotate-symmetries.svg \
 	volume-pixel-weights.svg \
 	wavelet-daubechies20.svg \
@@ -146,6 +147,9 @@ dist-xhtml: xhtml.stamp $(patsubst %,xhtml/%,$(XHTML_IMAGES))
 	chmod a+r $(DISTNAMEXHTML)/*
 	tar -zcf $(DISTNAMEXHTML).tar.gz $(DISTNAMEXHTML)
 	-rm -rf $(DISTNAMEXHTML)
+
+dist-pdf: pdf
+	cp -f user-guide.pdf $(DISTNAME).pdf
 
 version:
 	d=`date --iso`; \
