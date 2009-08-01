@@ -70,7 +70,9 @@ if test -n "$1"; then
     done
   fi
 else
-  rm -f $logdir/*
+  for x in $(help); do
+    rm -f $logdir/$x.{log,err}
+  done
   # LIST-BEGIN
   call user_guide_autostuff
   call user_guide_xhtml
