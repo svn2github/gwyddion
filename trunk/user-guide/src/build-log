@@ -1,5 +1,5 @@
 #!/bin/bash
-# @(#) $Id: gwyddion-build-log 9542 2009-08-01 09:33:06Z yeti-dn $
+# @(#) $Id$
 pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/../buildlog
