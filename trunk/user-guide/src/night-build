@@ -1,0 +1,80 @@
+#!/bin/bash
+# @(#) $Id$
+disabled=
+pkgname=user-guide
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+
+source $HOME/.bashrc
+export LC_ALL=C
+export CFLAGS="-ggdb -O2"
+PATH="$HOME/bin:$PATH"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  exec >$logdir/$1.log
+  exec 2>$logdir/$1.err
+  cd $projectdir
+  for x in $disabled; do
+    if test "$1" = "$x"; then
+      echo disabled
+      return
+    fi
+  done
+  $@
+}
+
+# =====[ components ]========================================================
+function user_guide_autostuff() {
+  autoconf
+  CONFIG_SHELL=/bin/sh ./configure
+  # This runs configure again...
+  make -k version
+}
+
+
+function user_guide_xhtml() {
+  make -k xhtml
+  make -k dist-xhtml
+}
+
+
+function user_guide_pdf() {
+  make -k pdf
+  make -k dist-pdf
+}
+
+
+function user_guide_man() {
+  make -k man
+}
+
+
+function help() {
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call *//'
+}
+
+# =====[ main ]==============================================================
+cd $projectdir
+test -d $logdir || mkdir $logdir
+
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  rm -f $logdir/*
+  # LIST-BEGIN
+  call user_guide_autostuff
+  call user_guide_xhtml
+  call user_guide_pdf
+  call user_guide_man
+  # LIST-END
+fi
