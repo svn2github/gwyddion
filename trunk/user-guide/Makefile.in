@@ -1,5 +1,3 @@
-# XXX: needs working catalog setup, otherwise everything is fetched from
-# network!
 export
 
 VERSION = @PACKAGE_VERSION@
@@ -19,7 +17,7 @@ DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
 XML_SOURCES := $(wildcard xml/*.xml)
 FORMULA_SOURCES := $(wildcard formulas/*.tex)
-IMAGES := $(shell $(GSED) -n -f img-extract.sed $(XML_SOURCES) | sort -u) PNG:stacked3.png
+IMAGES := $(shell $(PYTHON) xml-extract.py imageinfo $(XML_SOURCES)) PNG:stacked3.png
 XHTML_IMAGES := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
 PDF_IMAGES := $(patsubst PDF:%,%,$(filter PDF:%,$(IMAGES)))
 PNG_IMAGES := $(filter-out eq-%.png,$(XHTML_IMAGES))
@@ -53,7 +51,7 @@ XSL_STYLES = xhtml.xsl dblatex.xsl man.xsl \
 CSS_STYLES = user-guide.css
 TEX_STYLES = user-guide.sty
 BUILD_FILES = README Makefile.in user-guide.iss.in \
-	aclocal.m4 configure configure.ac img-extract.sed xml-extract.py
+	aclocal.m4 configure configure.ac xml-extract.py
 
 @HTML_TRUE@html_target = xhtml
 @HTML_FALSE@html_target =

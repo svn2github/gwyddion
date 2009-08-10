@@ -44,8 +44,8 @@ fi
 
 AC_CHECK_PROGS([PYTHON],[python python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
 if test "$PYTHON" == no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  python, get python from http://www.python.org/
-"
+  AC_MSG_ERROR([Python is required to build the user guide.
+                Get it at http://www.python.org/])
 fi
 
 JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
