@@ -1,16 +1,13 @@
 GSED = @GSED@
 SHELL = @SHELL@
 
-FORMULAS := $(wildcard eq-*.tex.in)
-TEXS := $(subst .tex.in,.tex,$(FORMULAS))
-PNGS := $(subst .tex.in,.png,$(FORMULAS))
+TEXS := $(wildcard eq-*.tex)
+PNGS := $(subst .tex,.png,$(FORMULAS))
 TEMPLATES = header.tex footer.tex defs.tex
 
 T = TEMP-
 
-all: formulas
-
-formulas: tex-sources png-images
+all: png-images
 
 Makefile: Makefile.in ../config.status
 	cd .. && ./config.status formulas/Makefile
@@ -18,18 +15,13 @@ Makefile: Makefile.in ../config.status
 pngsize: pngsize.c
 	$(CC) -o pngsize pngsize.c
 
-tex-sources: $(TEXS)
-
 png-images: $(PNGS)
-
-%.tex: %.tex.in
-	@if test -s $@ && cmp $@ $<; then :; else cat $< >$@; fi
 
 %.png: %.tex $(TEMPLATES) pngsize render.sh
 	$(SHELL) render.sh "$*"
 
 clean:
-	-rm -f eq-*.png eq-*.tex eq-*.tex.in pngsize $(T)* *~
+	-rm -f eq-*.png eq-*.tex pngsize $(T)* *~
 
 dist:
 	mkdir ../$(DISTNAME)/formulas
@@ -38,4 +30,4 @@ dist:
 distclean: clean
 	-rm -f Makefile render.sh
 
-.PHONY: clean dist formulas tex-sources png-images all distclean
+.PHONY: clean dist png-images all distclean

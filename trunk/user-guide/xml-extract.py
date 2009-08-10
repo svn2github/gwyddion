@@ -1,0 +1,110 @@
+#!/usr/bin/python
+import xml.parsers.expat
+import sys
+
+class Parser(object):
+    def StartElementHandler(self, name, attributes):
+        self.path.append((name, attributes))
+
+    def EndElementHandler(self, name):
+        del self.path[-1]
+
+    def _setup_handlers(self):
+        for a in dir(type(self)):
+            if a.endswith('Handler'):
+                setattr(self.parser, a, getattr(self, a))
+
+    def parse_file(self, filename, *args):
+        self.filename = filename
+        self.parser = xml.parsers.expat.ParserCreate(*self.parserargs)
+        self._setup_handlers()
+        self.path = []
+        self.parser.ParseFile(file(filename))
+        del self.parser
+
+    def __init__(self, *args):
+        self.parserargs = args
+
+class FormulaParser(Parser):
+    def StartElementHandler(self, name, attributes):
+        Parser.StartElementHandler(self, name, attributes)
+        if name == 'informalequation':
+            self.lineno = self.parser.CurrentLineNumber
+            if 'id' not in attributes:
+                sys.stderr.write('%s:%d: missing id on <%s> '
+                                 % (self.filename, self.lineno, name))
+                self.fid = None
+                return
+            self.fid = attributes['id']
+            if self.fid in self.formulas:
+                self.stash = self.formulas[self.fid]
+            else:
+                self.stash = None
+            self.formulas[self.fid] = ''
+
+    def EndElementHandler(self, name):
+        if name == 'informalequation':
+            if self.stash != None and self.formulas[self.fid] != self.stash:
+                sys.stderr.write('%s:%d: conflicting definition of formula %s\n'
+                                 % (self.filename, self.lineno, self.fid))
+                # Keep the first definition, unless it's empty
+                if self.stash:
+                    self.formulas[self.fid] = self.stash
+            elif not self.formulas[self.fid]:
+                sys.stderr.write('%s:%d: empty formula %s\n'
+                                 % (self.filename, self.lineno, self.fid))
+            self.fid = self.stash = None
+        Parser.EndElementHandler(self, name)
+
+    def CharacterDataHandler(self, data):
+        p = self.path
+        if len(p) < 5 or not self.fid:
+            return
+
+        if (p[-1][0] != 'phrase'
+            or p[-2][0] != 'textobject' or p[-2][1].get('role') != 'tex'
+            or p[-3][0] != 'mediaobject'
+            or p[-4][0] != 'informalequation'):
+            return
+
+        data = data.rstrip()
+        if data:
+            self.formulas[self.fid] += data + '\n'
+
+    def __init__(self, *args):
+        Parser.__init__(self, *args)
+        self.formulas = {}
+
+    def parse_file(self, filename, *args):
+        self.stash = self.fid = None
+        Parser.parse_file(self, filename, *args)
+
+def update_file(filename, content):
+    content = content.encode('utf-8')
+    try:
+        orig = file(filename).read()
+    except IOError:
+        orig = None
+
+    if content != orig:
+        print 'Writing %s...' % filename
+        file(filename, 'w').write(content)
+
+def extract_formulas(filenames):
+    parser = FormulaParser('utf-8')
+    for filename in filenames:
+        parser.parse_file(filename)
+
+    for k, v in sorted(parser.formulas.items()):
+        update_file('formulas/%s.tex' % k, v)
+
+if len(sys.argv) < 2:
+    print 'Usage: %s {formulas} FILES...' % sys.argv[0]
+    sys.exit(0)
+
+mode = sys.argv[1]
+files = sys.argv[2:]
+if mode == 'formulas':
+    extract_formulas(files)
+else:
+    sys.stderr.write('Wrong mode %s\n' % mode)

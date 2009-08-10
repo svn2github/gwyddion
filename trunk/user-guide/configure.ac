@@ -10,6 +10,12 @@ AC_CONFIG_FILES(\
 PACKAGE_SHORTNAME=user-guide
 AC_SUBST(PACKAGE_SHORTNAME)
 
+GWY_HTML_MISSING=
+GWY_PDF_MISSING=
+GWY_PNG_MISSING=
+GWY_SVG_MISSING=
+GWY_MAN_MISSING=
+
 AC_PROG_CC
 
 AC_CHECK_PROGS([GMAKE],[gmake make],[no])
@@ -36,14 +42,14 @@ if test "$GSED" != no; then
   fi
 fi
 
+AC_CHECK_PROGS([PYTHON],[python python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
+if test "$PYTHON" == no; then
+  GWY_HTML_MISSING="${GWY_HTML_MISSING}  python, get python from http://www.python.org/
+"
+fi
+
 JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
                      [DocBook XML DTD V4.5])
-
-GWY_HTML_MISSING=
-GWY_PDF_MISSING=
-GWY_PNG_MISSING=
-GWY_SVG_MISSING=
-GWY_MAN_MISSING=
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
 if test "$CONVERT" = no; then
