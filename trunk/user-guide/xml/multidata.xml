@@ -24,7 +24,22 @@
     </para>
     <para>
       The data fields to operate on are called <guilabel>Operands</guilabel>
-      and they are denoted <guilabel>d1</guilabel>, …, <guilabel>d5</guilabel>.
+      and they are denoted <userinput>d1</userinput>, …,
+      <userinput>d5</userinput>.
+      In addition to values, local
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+        <alt>x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+        <alt>y</alt>
+      </inlineequation>-derivatives
+      are denoted <userinput>bx1</userinput>, <userinput>by1</userinput>,
+      <userinput>bx2</userinput>, …, <userinput>by5</userinput>.
+    </para>
+    <para>
       The data fields that actually appear in the expression have to be
       compatible, i.e. their dimensions (both pixel and physical) have to be
       identical.  Other data fields (i.e. those not actually entering the

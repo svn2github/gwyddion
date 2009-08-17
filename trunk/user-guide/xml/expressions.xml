@@ -5,8 +5,8 @@
 <sect1 id='expression-syntax'>
   <title>Expressions</title>
   <para>
-    Expressions used in Data Arithmetic module and in graph function
-    fitting have syntax similar to common programming languages.
+    Expressions used in Data Arithmetic module, grain quantity formulas and in
+    graph function fitting have syntax similar to common programming languages.
   </para>
   <para>
     All numbers are real (floating point), number literals use standard
