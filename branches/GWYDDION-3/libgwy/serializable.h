@@ -85,6 +85,15 @@ struct _GwySerializableItems {
     GwySerializableItem *items;
 };
 
+#define GWY_SERIALIZABLE_ERROR gwy_serializable_error_quark()
+
+typedef enum {
+    GWY_SERIALIZABLE_ERROR_TRUNCATED,
+    GWY_SERIALIZABLE_ERROR_SIZE,
+} GwySerializableError;
+
+GQuark gwy_serializable_error_quark(void);
+
 typedef struct _GwySerializableInterface GwySerializableInterface;
 typedef struct _GwySerializable          GwySerializable;        /* dummy */
 
@@ -130,7 +139,9 @@ GType gwy_serializable_get_type(void);
 gboolean gwy_serializable_serialize  (GwySerializable *serializable,
                                       GOutputStream *output,
                                       GError **error);
-GObject* gwy_serializable_deserialize(GInputStream *input,
+GObject* gwy_serializable_deserialize(const guchar *buffer,
+                                      gsize size,
+                                      gsize *bytes_consumed,
                                       GwyErrorList **error_list);
 GObject* gwy_serializable_duplicate  (GwySerializable *serializable);
 void     gwy_serializable_assign     (GwySerializable *destination,

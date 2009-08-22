@@ -63,6 +63,26 @@ gwy_serializable_get_type(void)
     return serializable_type;
 }
 
+/**
+ * gwy_serializable_error_quark:
+ *
+ * Gets the error domain for serialization and deserialization.
+ *
+ * See and use %GWY_SERIALIZABLE_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+GQuark
+gwy_serializable_error_quark(void)
+{
+    static GQuark error_domain = 0;
+
+    if (!error_domain)
+        error_domain = g_quark_from_static_string("gwy-serializable-error-quark");
+
+    return error_domain;
+}
+
 static void
 gwy_serializable_buffer_alloc(GwySerializableBuffer *buffer,
                               gsize size)
@@ -575,9 +595,47 @@ gwy_serializable_items_done(const GwySerializableItems *items)
     }
 }
 
+static inline gsize
+gwy_serializable_unpack_uint64(const guchar *buffer,
+                               gsize size,
+                               guint64 *value,
+                               GwyErrorList **error_list)
+{
+    if (size < sizeof(guint64)) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+                           "End of data was reached while reading int64.");
+        return FALSE;
+    }
+    memcpy(value, buffer, sizeof(guint64));
+    *value = GINT64_FROM_LE(*value);
+    return sizeof(gint64);
+}
+
+static inline gsize
+gwy_serializable_unpack_string(const guchar *buffer,
+                               gsize size,
+                               const guchar **value,
+                               GwyErrorList **error_list)
+{
+    const guchar *s = memchr(buffer, '\0', size);
+
+    if (!s) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+                           "End of data was reached while reading string.");
+        return FALSE;
+    }
+    *value = buffer;
+    return s-buffer + 1;
+}
+
 /**
  * gwy_serializable_deserialize:
- * @input: Input stream to read the serialized object from.
+ * @buffer: Memory containing the serialized representation of one object.
+ * @size: Size of @buffer in bytes.
+ * @bytes_consumed: Location to store the number of bytes actually consumed
+ *                  from @buffer, or %NULL.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
  * Deserializes an object.
@@ -589,10 +647,47 @@ gwy_serializable_items_done(const GwySerializableItems *items)
  * Returns: Newly created object on success, %NULL on failure.
  **/
 GObject*
-gwy_serializable_deserialize(GInputStream *input,
+gwy_serializable_deserialize(const guchar *buffer,
+                             gsize size,
+                             gsize *bytes_consumed,
                              GwyErrorList **error_list)
 {
-    guint64 size;
+    const guchar *typename;
+    gsize pos = 0, rbytes, objsize;
+    guint64 object_size;
+
+    /* Type name */
+    if (!(rbytes = gwy_serializable_unpack_string(buffer + pos, size - pos,
+                                                  &typename, error_list)))
+        goto fail;
+    pos += rbytes;
+
+    /* Object size */
+    if (!(rbytes = gwy_serializable_unpack_uint64(buffer + pos, size - pos,
+                                                  &object_size, error_list)))
+        goto fail;
+    pos += rbytes;
+
+    objsize = object_size;
+    if (objsize != object_size) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_SIZE,
+                           "Object size is not representable on this machine.");
+        goto fail;
+    }
+
+    /* XXX: Here we can still overflow! */
+    if (object_size + pos > size) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+                           "End of data was reached while reading object.");
+        goto fail;
+    }
+
+fail:
+    if (bytes_consumed)
+        *bytes_consumed = size;
+    return NULL;
 }
 
 /**
@@ -642,7 +737,7 @@ gwy_serializable_assign(GwySerializable *destination,
                                  G_TYPE_FROM_INSTANCE(destination)));
 
     iface = GWY_SERIALIZABLE_GET_INTERFACE(destination);
-    g_return_val_if_fail(iface && iface->assign, NULL);
+    g_return_if_fail(iface && iface->assign);
 
     return iface->assign(destination, source);
 }
@@ -665,6 +760,12 @@ gwy_serializable_assign(GwySerializable *destination,
  * user data and similar attributes are not subject of serialization and
  * deserialization).  This, on the other hand, permits to deserialize any saved
  * object individually and independently.
+ *
+ * Serialization and deserialization can fail for various reasons.  The errors
+ * returned can be either from %GWY_SERIALIZABLE_ERROR or %G_IO_ERROR domain
+ * (if GLib I/O streams are involved).  A number of errors that are not
+ * considered fatal can occur during deserialization, these are reported in
+ * the provided error list.
  *
  * Beside saving and restoration, all serializable classes implement a
  * copy-constructor that creates a duplicate of an existing object.  This
@@ -727,6 +828,15 @@ gwy_serializable_assign(GwySerializable *destination,
  * processed first.  This means that if done() of an object is invoked, all its
  * contained objects have been already process.  At the very end the item list
  * is freed too.
+ **/
+
+/**
+ * GWY_SERIALIZABLE_ERROR:
+ *
+ * Error domain for serialization and deserialization.
+ *
+ * Errors in this domain will be from the #GwySerializableError enumeration.
+ * See #GError for information on error domains.
  **/
 
 /**
