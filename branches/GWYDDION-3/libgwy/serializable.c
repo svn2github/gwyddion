@@ -651,7 +651,7 @@ static void
 items_done(const GwySerializableItems *items)
 {
     /* The zeroth item is always an object header. */
-    for (gsize i = items->len-1; i > 0; i--) {
+    for (gsize i = items->n_items-1; i > 0; i--) {
         const GwySerializableItem *item = items->items + i;
         if (item->ctype == GWY_SERIALIZABLE_OBJECT)
             gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
