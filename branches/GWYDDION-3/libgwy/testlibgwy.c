@@ -604,6 +604,50 @@ test_serialize_nested(void)
 }
 
 static void
+test_deserialize_nested(void)
+{
+    GwySerTest *sertest, *child;
+    GwyErrorList *error_list = NULL;
+    gsize bytes_consumed;
+
+    sertest = (GwySerTest*)gwy_serializable_deserialize(ser_test_nested,
+                                                        sizeof(ser_test_nested),
+                                                        &bytes_consumed,
+                                                        &error_list);
+    g_assert(sertest);
+    g_assert(GWY_IS_SER_TEST(sertest));
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert(sertest->flag == FALSE);
+    g_assert_cmpuint(sertest->len, ==, 0);
+    g_assert(sertest->data == NULL);
+    g_assert(sertest->s == NULL);
+
+    child = sertest->child;
+    g_assert(child);
+    g_assert(GWY_IS_SER_TEST(child));
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert(child->flag == FALSE);
+    g_assert_cmpuint(child->len, ==, 0);
+    g_assert(child->data == NULL);
+    g_assert(child->s == NULL);
+
+    child = child->child;
+    g_assert(child);
+    g_assert(GWY_IS_SER_TEST(child));
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert(child->flag == FALSE);
+    g_assert_cmpuint(child->len, ==, 0);
+    g_assert(child->data == NULL);
+    g_assert(child->s == NULL);
+    g_assert(child->child == NULL);
+
+    GWY_OBJECT_UNREF(sertest);
+}
+
+static void
 test_serialize_error(void)
 {
     static const gdouble data[] = { 1.0, G_PI, HUGE_VAL, -0.0 };
@@ -641,6 +685,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/serialize-error", test_serialize_error);
     g_test_add_func("/testlibgwy/deserialize-simple", test_deserialize_simple);
     g_test_add_func("/testlibgwy/deserialize-data", test_deserialize_data);
+    g_test_add_func("/testlibgwy/deserialize-nested", test_deserialize_nested);
     g_test_add_func("/testlibgwy/sort", test_sort);
 
     return g_test_run();
