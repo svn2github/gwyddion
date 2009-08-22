@@ -29,6 +29,23 @@ typedef union  _GwySerializableValue GwySerializableValue;
 typedef struct _GwySerializableItem  GwySerializableItem;
 typedef struct _GwySerializableItems GwySerializableItems;
 
+typedef enum {
+    GWY_SERIALIZABLE_HEADER       = 0,
+    GWY_SERIALIZABLE_CHAR         = 'c',
+    GWY_SERIALIZABLE_CHAR_ARRAY   = 'C',
+    GWY_SERIALIZABLE_BOOLEAN      = 'b',
+    GWY_SERIALIZABLE_INT32        = 'b',
+    GWY_SERIALIZABLE_INT32_ARRAY  = 'I',
+    GWY_SERIALIZABLE_INT64        = 'q',
+    GWY_SERIALIZABLE_INT64_ARRAY  = 'Q',
+    GWY_SERIALIZABLE_DOUBLE       = 'd',
+    GWY_SERIALIZABLE_DOUBLE_ARRAY = 'D',
+    GWY_SERIALIZABLE_STRING       = 's',
+    GWY_SERIALIZABLE_STRING_ARRAY = 'S',
+    GWY_SERIALIZABLE_OBJECT       = 'o',
+    GWY_SERIALIZABLE_OBJECT_ARRAY = 'O',
+} GwySerializableCType;
+
 union _GwySerializableValue {
     gboolean v_boolean;
     guchar v_char;
@@ -37,6 +54,7 @@ union _GwySerializableValue {
     gdouble v_double;
     guchar *v_string;
     GObject *v_object;
+    gsize *v_size;
     gboolean *v_boolean_array;
     guchar *v_char_array;
     guint32 *v_int32_array;
@@ -48,8 +66,8 @@ union _GwySerializableValue {
 
 struct _GwySerializableItem {
     const gchar *name;
-    GwySerializableValue value;
     gsize array_size;
+    GwySerializableValue value;
     guchar ctype;
 };
 
@@ -86,12 +104,12 @@ struct _GwySerializableInterface {
 
     /* virtual table */
     gsize    (*n_items)  (GwySerializable *serializable);
-    void     (*add_items)(GwySerializable *serializable,
+    gsize    (*itemize)  (GwySerializable *serializable,
                           GwySerializableItems *items);
     void     (*done)     (GwySerializable *serializable);
-             
+
     GObject* (*construct)(const GwySerializableItems *items);
-              
+
     GObject* (*duplicate)(GwySerializable *serializable);
     void     (*assign)   (GwySerializable *source,
                           GwySerializable *destination);
@@ -108,6 +126,10 @@ GObject* gwy_serializable_deserialize(GInputStream *input,
 GObject* gwy_serializable_duplicate  (GwySerializable *serializable);
 void     gwy_serializable_assign     (GwySerializable *source,
                                       GwySerializable *destination);
+
+gsize    gwy_serializable_n_items    (GwySerializable *serializable);
+void     gwy_serializable_itemize    (GwySerializable *serializable,
+                                      GwySerializableItems *items);
 
 G_END_DECLS
 

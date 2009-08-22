@@ -34,6 +34,36 @@ gwy_serializable_get_type(void)
     return serializable_type;
 }
 
+gsize
+gwy_serializable_n_items(GwySerializable *serializable)
+{
+    const GwySerializableInterface *iface;
+
+    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    g_return_val_if_fail(iface && iface->n_items, 1);
+
+    return iface->n_items(serializable) + 1;
+}
+
+void
+gwy_serializable_itemize(GwySerializable *serializable,
+                         GwySerializableItems *items)
+{
+    const GwySerializableInterface *iface;
+    GwySerializableItem *item;
+
+    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    g_return_if_fail(iface && iface->itemize);
+
+    g_return_if_fail(items->n_items >= items->len);
+    item = items->items + items->n_items;
+    items->n_items++;
+    item->name = G_OBJECT_TYPE_NAME(G_OBJECT(serializable));
+    item->value.v_size = 0;
+    item->ctype = GWY_SERIALIZABLE_HEADER;
+    item->array_size = iface->itemize(serializable, items);
+}
+
 /**
  * SECTION:serializable
  * @title: GwySerializable
