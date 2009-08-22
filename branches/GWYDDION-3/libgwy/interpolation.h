@@ -44,7 +44,7 @@ typedef enum {
     GWY_EXTERIOR_FIXED_VALUE
 } GwyExteriorType;
 
-gdouble  gwy_interpolate_equidists                (gdouble x,
+gdouble  gwy_interpolate_values                   (gdouble x,
                                                    const gdouble *data,
                                                    GwyInterpolationType interpolation);
 gdouble  gwy_interpolate_1d                       (gdouble x,

@@ -124,7 +124,7 @@ gwy_interpolation_get_weights(gdouble x,
 }
 
 /**
- * gwy_interpolate_equidists:
+ * gwy_interpolate_values:
  * @x: Possibly non-integer position in @data to get value at.
  * @data: Array of 4 values to interpolate between (see below).
  * @interpolation: Interpolation type to use.
@@ -148,9 +148,9 @@ gwy_interpolation_get_weights(gdouble x,
  * Returns: Interpolated value.
  **/
 gdouble
-gwy_interpolate_equidists(gdouble x,
-                          const gdouble *data,
-                          GwyInterpolationType interpolation)
+gwy_interpolate_values(gdouble x,
+                       const gdouble *data,
+                       GwyInterpolationType interpolation)
 {
     gint l;
     gdouble w[SUPPORT_LENGTH_MAX];
@@ -893,7 +893,7 @@ gwy_interpolation_shift_block_1d(gint length,
  * @short_description: Low-level interpolation functions
  *
  * Data interpolation is usually pixel-like in Gwyddion, not function-like.
- * That means that the contribution of individual data saples is preserved on
+ * That means that the contribution of individual data samples is preserved on
  * scaling.  The area that <quote>belongs</quote> to all values is the same,
  * it is not reduced to half for edge pixels.
  *
