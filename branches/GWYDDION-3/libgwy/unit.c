@@ -1190,10 +1190,87 @@ get_prefix(gint power)
     return NULL;
 }
 
+/**
+ * gwy_unit_clear_format:
+ * @format: Value format to clear.
+ *
+ * Clears a value format.
+ *
+ * The @units member is freed and set to %NULL.
+ **/
 void
 gwy_unit_clear_format(GwyUnitFormat *format)
 {
     GWY_FREE(format->units);
+}
+
+/**
+ * gwy_unit_format_snprint:
+ * @string: Output string buffer.
+ * @size: Size of @string (no more than @size bytes is ever written).
+ * @format: Value format to use.
+ * @value: Value to format using @format.
+ *
+ * Formats a value to a character buffer.
+ *
+ * This is a convenience wrapper around g_snprintf(), see its documentation
+ * for remarks.
+ *
+ * Returns: The number of bytes written provided the buffer would be long
+ *          enough.
+ **/
+gint
+gwy_unit_format_snprint(gchar *string,
+                        gsize size,
+                        const GwyUnitFormat *format,
+                        gdouble value)
+{
+    return g_snprintf(string, size, "%.*f%s%s",
+                      format->precision, value/format->magnitude,
+                      *format->units ? " " : "",
+                      format->units);
+}
+
+/**
+ * gwy_unit_format_strdup_print:
+ * @size: Size of @string (no more than @size bytes is ever written).
+ * @format: Value format to use.
+ * @value: Value to format using @format.
+ *
+ * Formats a value creating a new string.
+ *
+ * Returns: The formatted value as a newly allocated string.
+ **/
+gchar*
+gwy_unit_format_strdup_print(const GwyUnitFormat *format,
+                             gdouble value)
+{
+    return g_strdup_printf("%.*f%s%s",
+                           format->precision, value/format->magnitude,
+                           *format->units ? " " : "",
+                           format->units);
+}
+
+/**
+ * gwy_unit_format_gstring_print:
+ * @string: Output string.
+ * @format: Value format to use.
+ * @value: Value to format using @format.
+ *
+ * Formats a value to a #GString.
+ *
+ * The formatted value is appended to @string.  To overwrite the string,
+ * truncate it first.
+ **/
+void
+gwy_unit_format_gstring_print(GString *string,
+                              const GwyUnitFormat *format,
+                              gdouble value)
+{
+    g_string_append_printf(string, "%.*f%s%s",
+                           format->precision, value/format->magnitude,
+                           *format->units ? " " : "",
+                           format->units);
 }
 
 #define __LIBGWY_UNIT_C__

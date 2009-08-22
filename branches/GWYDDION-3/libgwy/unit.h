@@ -119,6 +119,15 @@ void     gwy_unit_format_with_digits    (GwyUnit *unit,
                                          gint sdigits,
                                          GwyUnitFormat *format);
 void     gwy_unit_clear_format          (GwyUnitFormat *format);
+gint     gwy_unit_format_snprint        (gchar *string,
+                                         gsize size,
+                                         const GwyUnitFormat *format,
+                                         gdouble value);
+gchar*   gwy_unit_format_strdup_print   (const GwyUnitFormat *format,
+                                         gdouble value);
+void     gwy_unit_format_gstring_print  (GString *string,
+                                         const GwyUnitFormat *format,
+                                         gdouble value);
 
 G_END_DECLS
 
