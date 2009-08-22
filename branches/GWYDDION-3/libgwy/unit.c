@@ -167,13 +167,12 @@ gwy_unit_class_init(GwyUnitClass *klass)
  * The ::changed signal is emitted whenever unit changes.
  */
     unit_signals[CHANGED]
-        = g_signal_new("changed",
-                       G_OBJECT_CLASS_TYPE(gobject_class),
-                       G_SIGNAL_RUN_FIRST,
-                       G_STRUCT_OFFSET(GwyUnitClass, changed),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__VOID,
-                       G_TYPE_NONE, 0);
+        g_signal_new_class_handler("changed",
+                                   G_OBJECT_CLASS_TYPE(klass),
+                                   G_SIGNAL_RUN_FIRST,
+                                   NULL, NULL, NULL,
+                                   g_cclosure_marshal_VOID__VOID,
+                                   G_TYPE_NONE, 0);
 }
 
 static void
@@ -1222,15 +1221,15 @@ gwy_unit_clear_format(GwyUnitFormat *format)
  * significant digits -- gwy_unit_get_format_with_digits().
  *
  * <refsect2 id='libgwy-unit-formatting'>
- * <title>Formats</title>
+ * <title>Formatting</title>
  * </refsect2>
  *
  * The functions for obtaining a value format fill or update a #GwyUnitFormat
- * structure.  A new format can be created with g_new0() or as automatic
- * variables (i.e. on stack), however, it has to be initialized with
- * GWY_UNIT_INIT_FORMAT in this case.  When it is no longer needed it is
- * necessary to free associated resourced with gwy_unit_clear_format().
- * Note this function does not free the structure itself.
+ * structure.  A new format can be created either with g_new0(), or as an
+ * automatic variable (i.e. on stack).  However, it has to be initialized with
+ * GWY_UNIT_INIT_FORMAT in the latter case.  When the format is no longer
+ * needed it is necessary to free the associated resourced with
+ * gwy_unit_clear_format().
  *
  * |[
  * GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
@@ -1247,10 +1246,17 @@ gwy_unit_clear_format(GwyUnitFormat *format)
 /**
  * GwyUnit:
  *
- * Representation of physical units.
+ * Object representing of physical units.
  *
  * The #GwyUnit struct contains private data only and should be accessed
  * using the functions below.
+ **/
+
+/**
+ * GwyUnitClass:
+ * @g_object_class: Parent class.
+ *
+ * Class of physical units objects.
  **/
 
 /**
@@ -1279,6 +1285,28 @@ gwy_unit_clear_format(GwyUnitFormat *format)
  *
  * See <link linkend="libgwy-unit-formatting">Formatting</link> for examples.
  */
+
+/**
+ * GWY_UNIT_INIT_FORMAT:
+ *
+ * Initializer for unit format.
+ *
+ * This initializer ensures @units field is %NULL but it does not provide an
+ * usable format.
+ *
+ * See <link linkend="libgwy-unit-formatting">Formatting</link> for examples.
+ **/
+
+/**
+ * gwy_unit_clear_format:
+ * @format: Pointer to #GwyUnitFormat.
+ *
+ * Frees resources associated with a physical quantity format.
+ *
+ * Note this function can be used with automatic variables and it does not free
+ * the structure itself.
+ * See <link linkend="libgwy-unit-formatting">Formatting</link> for examples.
+ **/
 
 /**
  * gwy_unit_duplicate:

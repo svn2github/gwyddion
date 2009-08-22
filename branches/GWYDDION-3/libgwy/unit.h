@@ -64,12 +64,7 @@ struct _GwyUnit {
 };
 
 struct _GwyUnitClass {
-    GObjectClass parent_class;
-
-    void (*changed)(GwyUnit *unit);
-
-    void (*reserved1)(void);
-    void (*reserved2)(void);
+    GObjectClass g_object_class;
 };
 
 #define gwy_unit_duplicate(unit) \
