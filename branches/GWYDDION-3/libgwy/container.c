@@ -1954,7 +1954,7 @@ gwy_container_transfer(GwyContainer *source,
     dpflen = strlen(dest_prefix);
     if (dpflen && dest_prefix[dpflen - 1] == GWY_CONTAINER_PATHSEP)
         dpflen--;
-    if (pfdata.closed_prefix)
+    if (pfdata.closed_prefix && pfdata.prefix_length)
         pfdata.prefix_length--;
 
     /* Transfer the items */
@@ -1967,11 +1967,16 @@ gwy_container_transfer(GwyContainer *source,
             break;
         }
 
-        GValue *copy = (GValue*)g_hash_table_lookup(dest->values, l->data);
+        g_string_truncate(key, dpflen);
+        g_string_append(key,
+                        g_quark_to_string(GPOINTER_TO_UINT(l->data))
+                        + pfdata.prefix_length);
+
+        GQuark quark = g_quark_from_string(key->str);
+        GValue *copy = (GValue*)g_hash_table_lookup(dest->values,
+                                                    GUINT_TO_POINTER(quark));
         gboolean exists = (copy != NULL);
-        if (!force && exists)
-            continue;
-        if (exists && values_are_equal(val, copy))
+        if (exists && (!force || values_are_equal(val, copy)))
             continue;
 
         if (exists)
@@ -1998,11 +2003,6 @@ gwy_container_transfer(GwyContainer *source,
         else
             g_value_copy(val, copy);
 
-        g_string_truncate(key, dpflen);
-        g_string_append(key,
-                        g_quark_to_string(GPOINTER_TO_UINT(l->data))
-                        + pfdata.prefix_length);
-        GQuark quark = g_quark_from_string(key->str);
         if (!exists)
             g_hash_table_insert(dest->values, GUINT_TO_POINTER(quark), copy);
         g_signal_emit(dest, container_signals[ITEM_CHANGED], quark, quark);
