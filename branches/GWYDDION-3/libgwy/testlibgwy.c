@@ -1197,6 +1197,136 @@ test_expr_garbage(void)
 
 /***************************************************************************
  *
+ * Container
+ *
+ ***************************************************************************/
+
+static void
+container_item_changed(G_GNUC_UNUSED GwyContainer *container,
+                       gpointer arg1,
+                       const gchar **item_key)
+{
+    *item_key = g_quark_to_string(GPOINTER_TO_UINT(arg1));
+}
+
+static void
+container_this_item_changed(G_GNUC_UNUSED GwyContainer *container,
+                            G_GNUC_UNUSED gpointer arg1,
+                            guint *called)
+{
+    (*called)++;
+}
+
+static void
+test_container_data(void)
+{
+    GwyContainer *container = gwy_container_new();
+    const gchar *item_key;
+    guint int_changed = 0;
+    GQuark quark;
+    gboolean ok;
+    guint n;
+
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 0);
+    g_signal_connect(container, "item-changed",
+                     G_CALLBACK(container_item_changed), &item_key);
+    g_signal_connect(container, "item-changed::/pfx/int",
+                     G_CALLBACK(container_this_item_changed), &int_changed);
+
+    item_key = "";
+    gwy_container_set_int32_by_name(container, "/pfx/int", 42);
+    quark = g_quark_try_string("/pfx/int");
+    g_assert(quark);
+
+    g_assert(gwy_container_contains(container, quark));
+    g_assert(gwy_container_get_int32(container, quark) == 42);
+    g_assert_cmpstr(item_key, ==, "/pfx/int");
+    g_assert_cmpuint(int_changed, ==, 1);
+
+    item_key = "";
+    gwy_container_set_int32(container, quark, -3);
+    g_assert(gwy_container_contains_by_name(container, "/pfx/int"));
+    g_assert_cmpint(gwy_container_get_int32_by_name(container, "/pfx/int"),
+                    ==, -3);
+    g_assert_cmpstr(item_key, ==, "/pfx/int");
+    g_assert_cmpuint(int_changed, ==, 2);
+
+    item_key = "";
+    gwy_container_set_char_by_name(container, "/pfx/char", '@');
+    g_assert(gwy_container_contains_by_name(container, "/pfx/char"));
+    g_assert_cmpint(gwy_container_get_char_by_name(container, "/pfx/char"),
+                    ==, '@');
+    g_assert_cmpstr(item_key, ==, "/pfx/char");
+
+    item_key = "";
+    gwy_container_set_int64_by_name(container, "/pfx/int64",
+                                    G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
+    g_assert(gwy_container_contains_by_name(container, "/pfx/int64"));
+    g_assert((guint64)gwy_container_get_int64_by_name(container, "/pfx/int64")
+             == G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
+    g_assert_cmpstr(item_key, ==, "/pfx/int64");
+
+    item_key = "";
+    gwy_container_set_double_by_name(container, "/pfx/double", G_LN2);
+    g_assert(gwy_container_contains_by_name(container, "/pfx/double"));
+    g_assert_cmpfloat(gwy_container_get_double_by_name(container, "/pfx/double"),
+                      ==, G_LN2);
+    g_assert_cmpstr(item_key, ==, "/pfx/double");
+
+    item_key = "";
+    gwy_container_set_string_by_name(container, "/pfx/string",
+                                     g_strdup("Test Test"));
+    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+                    ==, "Test Test");
+    g_assert_cmpstr(item_key, ==, "/pfx/string");
+
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 5);
+
+    gwy_container_transfer(container, container, "/pfx", "/elsewhere",
+                           TRUE, TRUE);
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 10);
+
+    ok = gwy_container_remove_by_name(container, "/pfx/string/ble");
+    g_assert(!ok);
+
+    n = gwy_container_remove_prefix(container, "/pfx/string/ble");
+    g_assert_cmpuint(n, ==, 0);
+
+    item_key = "";
+    ok = gwy_container_remove_by_name(container, "/pfx/string");
+    g_assert(ok);
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 9);
+    g_assert_cmpstr(item_key, ==, "/pfx/string");
+
+    item_key = "";
+    n = gwy_container_remove_prefix(container, "/pfx/int");
+    g_assert_cmpuint(n, ==, 1);
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 8);
+    g_assert_cmpstr(item_key, ==, "/pfx/int");
+
+    item_key = "";
+    ok = gwy_container_rename(container,
+                             g_quark_try_string("/pfx/int64"),
+                             g_quark_try_string("/pfx/int"),
+                             TRUE);
+    g_assert(ok);
+    g_assert_cmpuint(int_changed, ==, 4);
+    g_assert_cmpstr(item_key, ==, "/pfx/int");
+
+    n = gwy_container_remove_prefix(container, "/pfx");
+    g_assert_cmpuint(n, ==, 3);
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 5);
+    g_assert_cmpuint(int_changed, ==, 5);
+
+    gwy_container_remove_prefix(container, NULL);
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 0);
+
+    g_object_unref(container);
+}
+
+/***************************************************************************
+ *
  * Main
  *
  ***************************************************************************/
@@ -1227,6 +1357,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit-parse", test_unit_parse);
     g_test_add_func("/testlibgwy/unit-arithmetic", test_unit_arithmetic);
     g_test_add_func("/testlibgwy/unit-serialize", test_unit_serialize);
+    /* Requires serializable, unit */
+    g_test_add_func("/testlibgwy/container-data", test_container_data);
 
     return g_test_run();
 }
