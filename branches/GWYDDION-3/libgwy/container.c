@@ -2336,10 +2336,22 @@ next:
 
 /**
  * gwy_container_duplicate:
- * @container: A container to duplicate.
+ * @container: A data container.
  *
- * Convenience macro doing gwy_serializable_duplicate() with all the necessary
- * typecasting.
+ * This is a convenience wrapper of gwy_serializable_duplicate().
+ **/
+
+/**
+ * gwy_unit_assign:
+ * @dest: Destination data container.
+ * @src: Source physicsl unit.
+ *
+ * Copies the contents of a data container.
+ *
+ * This is a convenience wrapper of gwy_serializable_assign().
+ *
+ * See also gwy_container_transfer() for a more powerful method of copying data
+ * between containers.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
