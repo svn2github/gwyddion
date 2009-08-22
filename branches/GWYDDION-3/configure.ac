@@ -45,9 +45,14 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+#############################################################################
+# Compiler
+
 if test "x$ac_cv_prog_cc_c99" = xno; then
   AC_MSG_ERROR([C99 standard conforming C compiler is required])
 fi
+
+GWY_CHECK_GNUC_VISIBILITY
 
 #############################################################################
 # I18n
