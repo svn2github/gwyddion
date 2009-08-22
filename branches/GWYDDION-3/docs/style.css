@@ -21,19 +21,33 @@ a:link img { border: none; }
 .programlisting, .synopsis {
   font-size: 90%;
   background-color: #fdf3df;
+}
+.programlisting {
   margin: 0px;
   padding: 0px;
   border: 0px;
 }
+.synopsis {
+  padding: 8px;
+}
 .listing_lines {
   font-size: 90%;
-  background-color: #ab2e12;
+  background-color: #a0a0a0;
   color: #ffffff;
   font-weight: bold;
+  width: 2em;
 }
-.listing_lines, .listing_code, .listing_lines pre {
+.listing_code {
+  background-color: #fdf3df;
+}
+.listing_lines pre {
   margin: 0px;
   padding: 0px;
+  border: 0px;
+}
+.listing_lines, .listing_code {
+  margin: 0px;
+  padding: 8px;
   border: 0px;
 }
 .listing_frame {
