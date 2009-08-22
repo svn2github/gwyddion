@@ -17,6 +17,7 @@
   <xi:include href="xml/math.xml"/>
   <xi:include href="xml/interpolation.xml"/>
   <xi:include href="xml/expr.xml"/>
+  <xi:include href="xml/fitter.xml"/>
   <xi:include href="xml/pack.xml"/>
   <xi:include href="xml/serializable.xml"/>
   <xi:include href="xml/serialize.xml"/>
