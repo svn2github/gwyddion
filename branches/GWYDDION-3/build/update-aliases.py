@@ -36,7 +36,7 @@ header_c = """\
 #define COMPILING defined
 """
 
-footer_h = """\
+footer_c = """\
 #endif
 """
 
