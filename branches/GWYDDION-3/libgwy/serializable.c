@@ -1049,6 +1049,7 @@ unpack_items(const guchar *buffer,
     items->n_items = 0;
 
     while (size) {
+        GwySerializableCType ctype;
         gsize rbytes;
 
         /* Grow items if necessary */
@@ -1072,14 +1073,82 @@ unpack_items(const guchar *buffer,
             goto fail;
         buffer += rbytes;
         size -= rbytes;
+        ctype = item->ctype;
 
         /* The data */
-        switch (item->ctype) {
-            case GWY_SERIALIZABLE_BOOLEAN:
+        if (ctype == GWY_SERIALIZABLE_BOOLEAN) {
             if (!(rbytes = unpack_boolean(buffer, size, &item->value.v_boolean,
                                           error_list)))
                 goto fail;
-            break;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT8) {
+            if (!(rbytes = unpack_uint8(buffer, size, &item->value.v_uint8,
+                                        error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT32) {
+            if (!(rbytes = unpack_uint32(buffer, size, &item->value.v_uint32,
+                                         error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT64) {
+            if (!(rbytes = unpack_uint64(buffer, size, &item->value.v_uint64,
+                                         error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_DOUBLE) {
+            if (!(rbytes = unpack_double(buffer, size, &item->value.v_uint64,
+                                         error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING) {
+            if (!(rbytes = unpack_string(buffer, size, &item->value.v_string,
+                                         error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT8_ARRAY) {
+            if (!(rbytes = unpack_uint8_array(buffer, size,
+                                              &item->array_size,
+                                              &item->value.v_uint8_array,
+                                              error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT32_ARRAY) {
+            if (!(rbytes = unpack_uint32_array(buffer, size,
+                                               &item->array_size,
+                                               &item->value.v_uint32_array,
+                                               error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY) {
+            if (!(rbytes = unpack_uint64_array(buffer, size,
+                                               &item->array_size,
+                                               &item->value.v_uint64_array,
+                                               error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_DOUBLE_ARRAY) {
+            if (!(rbytes = unpack_double_array(buffer, size,
+                                               &item->array_size,
+                                               &item->value.v_uint64_array,
+                                               error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
+            if (!(rbytes = unpack_string_array(buffer, size,
+                                               &item->array_size,
+                                               &item->value.v_string_array,
+                                               error_list)))
+                goto fail;
+        }
+        else {
+            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                               GWY_SERIALIZABLE_ERROR_DATA,
+                               _("Data type 0x%02x is unknown. "
+                                 "It could not be just skipped, complete "
+                                 "object %s was ignored."),
+                               ctype, item->name);
+            goto fail;
         }
 
         buffer += rbytes;

@@ -92,6 +92,7 @@ typedef enum {
     GWY_SERIALIZABLE_ERROR_PADDING,
     GWY_SERIALIZABLE_ERROR_SIZE_T,
     GWY_SERIALIZABLE_ERROR_OBJECT,
+    GWY_SERIALIZABLE_ERROR_DATA,
 } GwySerializableError;
 
 GQuark gwy_serializable_error_quark(void);
