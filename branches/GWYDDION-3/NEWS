@@ -1,5 +1,19 @@
 Compared to Gwyddion 2.x:
 
+Global:
+- The code is written in C 99.  Legacy compilers will not compile it, recent
+  GCC or MSVC8 should suffice.
+
+Libraries in general:
+- The mess of libraries was reorganized to:
+  - libgwy: infrastructure, data processing, all data-like objects, basic
+            rendering -- does not need X11 or Gtk+
+  - libgwyui: user interface, i.e. new widgets and UI helper functions
+  - libgwyapp: modules, application-level functions
+- Libraries have a test suite (well, libgwy does), run `make check'.
+- Intralibrary symbol resolution does not go through PLT, the technique was
+  blatantly copied from GLib (though not the implementation).
+
 Serialization:
 - GWY format was changed to version 3, with 64bit object and array sizes and
   support for 16bit integers.
@@ -24,8 +38,8 @@ Serialization:
 Math:
 - Namespace is no longer polluted with unprefixed names, unless explicitly
   requested.
-- There are much fewer fallback math functions as all C99 functions are assumed
-  to be available.
+- There are much fewer fallback math functions as all C 99 functions are
+  assumed to be available.
 - gwy_math_sort() can sort an index array along with the actual data.
 
 Pack:
@@ -52,6 +66,9 @@ Container:
 - gwy_container_transfer() can perform both shallow and deep copies.
 
 Expr:
+- GwyExpr is an object now.
 - Expressions can be UTF-8 strings (as opposed to ASCII) which permits UTF-8
   identifier and constant names such as π or β₂.
 - It uses GSlice instead of the deprecated GMemChunk internally.
+- A few more math functions were added.
+
