@@ -26,7 +26,7 @@ GTKDOC_RUN = $(LIBTOOL) --mode=execute
 GPATH = $(srcdir)
 
 TARGET_DIR=$(HTML_DIR)/$(DOC_MODULE)
-ADD_OBJECTS = $(top_srcdir)/docs/add-objects.py
+ADD_OBJECTS = $(top_srcdir)/build/gtkdoc-add-objects.py
 
 EXTRA_DIST = \
 	$(content_files) \
