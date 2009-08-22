@@ -220,6 +220,11 @@ struct _GwySerTest {
     gdouble *data;
     gchar *s;
     guchar raw[4];
+    gdouble dbl;
+    gint16 i16;
+    gint32 i32;
+    gint64 i64;
+    gchar **strlist;
     GwySerTest *child;
 
     /* Testing stuff. */
@@ -231,9 +236,9 @@ gwy_ser_test_n_items(GwySerializable *serializable)
 {
     GwySerTest *sertest = GWY_SER_TEST(serializable);
 
-    return 5 + (sertest->child
-                ? gwy_serializable_n_items(GWY_SERIALIZABLE(sertest->child))
-                : 0);
+    return 10 + (sertest->child
+                 ? gwy_serializable_n_items(GWY_SERIALIZABLE(sertest->child))
+                 : 0);
 }
 
 // The remaining members get zero-initialized which saves us from doing it.
@@ -243,6 +248,11 @@ static const GwySerializableItem default_items[] = {
     { .name = "s",     .ctype = GWY_SERIALIZABLE_STRING,       },
     { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
     { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    { .name = "dbl",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    { .name = "i16",   .ctype = GWY_SERIALIZABLE_INT16,        },
+    { .name = "i32",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    { .name = "i64",   .ctype = GWY_SERIALIZABLE_INT64,        },
+    { .name = "ss",    .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
 };
 
 #define add_item(id) \
@@ -284,6 +294,32 @@ gwy_ser_test_itemize(GwySerializable *serializable,
         it[4].value.v_object = G_OBJECT(sertest->child);
         add_item(4);
         gwy_serializable_itemize(GWY_SERIALIZABLE(sertest->child), items);
+    }
+
+    if (sertest->dbl != G_LN2) {
+        it[5].value.v_double = sertest->dbl;
+        add_item(5);
+    }
+
+    if (sertest->i16) {
+        it[6].value.v_int16 = sertest->i16;
+        add_item(6);
+    }
+
+    if (sertest->i32) {
+        it[7].value.v_int32 = sertest->i32;
+        add_item(7);
+    }
+
+    if (sertest->i64) {
+        it[8].value.v_int64 = sertest->i64;
+        add_item(8);
+    }
+
+    if (sertest->strlist) {
+        it[9].value.v_string_array = sertest->strlist;
+        it[9].array_size = g_strv_length(sertest->strlist);
+        add_item(9);
     }
 
     sertest->done_called--;
@@ -393,8 +429,9 @@ gwy_ser_test_class_init(GwySerTestClass *klass)
 }
 
 static void
-gwy_ser_test_init(G_GNUC_UNUSED GwySerTest *sertest)
+gwy_ser_test_init(GwySerTest *sertest)
 {
+    sertest->dbl = G_LN2;
 }
 
 GwySerTest*
