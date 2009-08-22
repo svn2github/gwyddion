@@ -125,15 +125,15 @@ gwy_container_class_init(GwyContainerClass *klass)
     gobject_class->finalize = gwy_container_finalize;
 
     /**
-    * GwyContainer::item-changed:
-    * @gwycontainer: The #GwyContainer which received the signal.
-    * @arg1: #GQuark key identifying the changed item.
-    *
-    * The ::item-changed signal is emitted whenever a container item is
-    * changed.
-    *
-    * This signal is detailed and the detail is the string key identifier.
-    */
+     * GwyContainer::item-changed:
+     * @gwycontainer: The #GwyContainer which received the signal.
+     * @arg1: #GQuark key identifying the changed item.
+     *
+     * The ::item-changed signal is emitted whenever a container item is
+     * changed.
+     *
+     * This signal is detailed and the detail is the string key identifier.
+     **/
     container_signals[ITEM_CHANGED]
         = g_signal_new_class_handler("item-changed",
                                      G_OBJECT_CLASS_TYPE(klass),
@@ -2287,40 +2287,53 @@ next:
  * SECTION: container
  * @title: GwyContainer
  * @short_description: Data container with items identified by strings or quarks
- * @see_also: #GwyInventory
+ * @see_also: #GHashTable, #GwyInventory
  *
  * #GwyContainer is a general-purpose container, it can hold atomic types,
  * strings and objects. However, objects must implement the #GwySerializable
  * interface, because the container itself is serializable.
  *
  * A new container can be created with gwy_container_new(), items can be stored
- * with function like gwy_container_set_double(), read with
- * gwy_container_get_double(), and removed with gwy_container_remove() or
- * gwy_container_remove_prefix(). A presence of a value can be tested with
- * gwy_container_contains(), convenience functions for reading (updating) a
- * value only if it is present like gwy_container_gis_double(), are available
- * too.
+ * with functions gwy_container_set_int(), gwy_container_set_double(), etc.
+ * read with gwy_container_set_get_int(), gwy_container_get_double(), etc. and
+ * removed with gwy_container_remove() or gwy_container_remove_prefix(). A
+ * presence of a value can be tested with gwy_container_contains(), convenience
+ * functions for reading (updating) a value only if it is present such as
+ * gwy_container_gis_double(), are available too.
  *
  * #GwyContainer takes ownership of stored non-atomic items. For strings, this
  * means you cannot store static strings (use g_strdup() to duplicate them),
- * and must not free stored dynamic strings, as the container will free them
- * itself when they are removed or when the container is finalized. For
- * objects, this means it takes a reference on the object (released when the
+ * and you must not free stored dynamic strings, as the container will free
+ * them when they are removed or when the container is finalized. For objects,
+ * this means the container takes a reference on the object (released when the
  * object is removed or the container is finalized), so you usually want to
  * g_object_unref() objects after storing them to a container.
  *
  * Items in a #GwyContainer can be identified by a #GQuark or the corresponding
- * string.  While #GQuark's are atomic values and allow faster acces, they are
- * less convenient for casual usage -- each #GQuark-key function like
+ * string.  While #GQuark's are atomic values and allow faster access, they are
+ * less convenient for casual usage -- each #GQuark-key function such as
  * gwy_container_set_double() thus has a string-key counterpart
  * gwy_container_set_double_by_name().
+ *
+ * An important different between #GwyContainer and ordinary #GHashTable is
+ * that the container emits signal #GwyContainer::item-changed whenever an item
+ * changes.
  **/
 
 /**
  * GwyContainer:
  *
+ * Object representing hash table-like data container.
+ *
  * The #GwyContainer struct contains private data only and should be accessed
  * using the functions below.
+ **/
+
+/**
+ * GwyContainerClass:
+ * @g_object_class: Parent class.
+ *
+ * Class of data containers.
  **/
 
 /**
