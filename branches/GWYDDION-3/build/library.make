@@ -21,12 +21,12 @@ $(library).symbols: $(libgwyinclude_HEADERS)
 	     $(library).symbols $(libgwyinclude_HEADERS)
 
 $(library)-aliases.h: $(library).symbols
-	$(PYTHON) $(top_srcdir)/build/update-aliases.py h \
-	    <$(library).symbols >$(library)-aliases.h
+	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
+	    $(library)-aliases.h $(library).symbols
 
 $(library)-aliases.c: $(library).symbols
-	$(PYTHON) $(top_srcdir)/build/update-aliases.py c \
-	    <$(library).symbols >$(library)-aliases.c
+	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
+	    $(library)-aliases.c $(library).symbols
 
 .PHONY: check-symbols
 

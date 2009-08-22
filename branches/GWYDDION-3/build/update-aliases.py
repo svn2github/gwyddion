@@ -1,5 +1,6 @@
 #!/usr/bin/python
-import sys, re
+# vim: set ts=4 sw=4 et :
+import sys, re, difflib
 
 template_h = """
 extern __typeof (%(function)s) IA__%(function)s __attribute((visibility("hidden")))%(attributes)s;
@@ -40,27 +41,35 @@ footer_c = """\
 #endif
 """
 
-if len(sys.argv) != 2:
-    print 'Usage: update-aliases {alias|aliasdef} <LIBRARY.symbols >OUTPUT'
+if len(sys.argv) != 3:
+    print 'Usage: update-aliases OUTPUTFILE.{c|h} LIBRARY.symbols'
     sys.exit(0)
 
-if sys.argv[1] == 'h':
+outfilename = sys.argv[1]
+infilename = sys.argv[2]
+
+if outfilename.endswith('.h'):
     template = template_h
     header = header_h
     footer = footer_h
-elif sys.argv[1] == 'c':
+elif outfilename.endswith('.c'):
     template = template_c
     header = header_c
     footer = footer_c
 else:
-    sys.stderr.write('Bad argument %s\n' % sys.argv[1])
+    sys.stderr.write('Cannot determine output type for %s\n' % outfilename)
     sys.exit(1)
 
-print header % 'GENERATED'
-for line in sys.stdin:
+try:
+    orig = [x.strip() for x in file(outfilename).readlines()]
+except IOError:
+    orig = []
+
+output = [x.rstrip() for x in (header % 'GENERATED').split('\n')]
+for line in file(infilename):
     line = line.strip()
-    if line.startswith('#') or not line.strip():
-        print line
+    if line.startswith('#') or not line:
+        output.append(line)
         continue
     pos = line.find(' ')
     if pos == -1:
@@ -68,5 +77,13 @@ for line in sys.stdin:
     else:
         function, attributes = line[:pos], line[pos:]
 
-    print template % {'function': function, 'attributes': attributes}
-print footer
+    t = template % {'function': function, 'attributes': attributes}
+    output.extend(x.rstrip() for x in t.split('\n'))
+output.extend(x.rstrip() for x in footer.split('\n'))
+
+diff = difflib.unified_diff(orig, output, outfilename, outfilename + '.new')
+# There seems to be no easy way to tell whether the generator is empty
+diff = '\n'.join(x.rstrip() for x in diff)
+if diff:
+    file(outfilename, 'w').write('\n'.join(output))
+    print diff
