@@ -535,7 +535,7 @@ jump_over:
 
         if (tmp_ptr != array) {
             DSWAP(*tmp_ptr, *array);
-            DSWAP(*tmp_ptri, *index_array);
+            ISWAP(*tmp_ptri, *index_array);
         }
 
         /* Insertion sort, running from left-hand-side up to right-hand-side.
