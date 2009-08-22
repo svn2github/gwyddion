@@ -1339,10 +1339,9 @@ try_set_value(GwyContainer *container,
         }
     }
     else {
-        g_return_val_if_fail(G_TYPE_FUNDAMENTAL(type)
-                             && type != G_TYPE_BOXED
-                             && type != G_TYPE_POINTER
-                             && type != G_TYPE_PARAM,
+        g_return_val_if_fail(type == G_TYPE_CHAR || type == G_TYPE_BOOLEAN
+                             || type == G_TYPE_INT || type == G_TYPE_INT64
+                             || type == G_TYPE_DOUBLE || type == G_TYPE_STRING,
                              FALSE);
     }
 
