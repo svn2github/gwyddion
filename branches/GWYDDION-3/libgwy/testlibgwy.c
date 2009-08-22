@@ -351,7 +351,7 @@ gwy_ser_test_construct(GwySerializableItems *items,
 
     sertest->child = child;
 
-    return (GObject*)sertest;
+    return G_OBJECT(sertest);
 
 fail:
     GWY_FREE(it[1].value.v_double_array);

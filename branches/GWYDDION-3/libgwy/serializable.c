@@ -1105,17 +1105,17 @@ gwy_serializable_deserialize(const guchar *buffer,
 
     /* We should no only fit, but the object size should be exactly size.
      * If there is extra stuff, add an error, but do not fail. */
-    if (size - pos != object_size)
+    if (size - pos != object_size) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_PADDING,
                            _("Object ‘%s’ data is smaller than the space "
                              "alloted for it.  The padding was ignored."));
+        size = object_size + pos;
+    }
 
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
     items = unpack_items(buffer + pos, object_size, error_list);
-    // For bytes_consumed.
-    size = object_size;
     if (!items)
         goto fail;
 
