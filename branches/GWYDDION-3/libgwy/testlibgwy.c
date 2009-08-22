@@ -787,18 +787,25 @@ test_unit_arithmetic(void)
     u3 = gwy_unit_new_from_string("m/s", NULL);
 
     u4 = gwy_unit_multiply(NULL, u1, u2);
-    g_assert(gwy_unit_equal(u1, u4));
+    g_assert(gwy_unit_equal(u3, u4));
 
     u5 = gwy_unit_power(NULL, u1, -1);
     u6 = gwy_unit_power_multiply(NULL, u5, 2, u2, -2);
-    u7 = gwy_unit_power(NULL, u3, 2);
+    u7 = gwy_unit_power(NULL, u3, -2);
     g_assert(gwy_unit_equal(u6, u7));
 
     u8 = gwy_unit_nth_root(NULL, u6, 2);
+    gwy_unit_power(u8, u8, -1);
     g_assert(gwy_unit_equal(u8, u3));
 
-    u9 = gwy_unit_divide(NULL, u8, u3);
+    gwy_unit_divide(u8, u8, u3);
     u0 = gwy_unit_new();
+    g_assert(gwy_unit_equal(u8, u0));
+
+    u9 = gwy_unit_power(NULL, u3, 4);
+    gwy_unit_power_multiply(u9, u9, 1, u1, -3);
+    gwy_unit_power_multiply(u9, u2, 3, u9, -1);
+    gwy_unit_multiply(u9, u9, u3);
     g_assert(gwy_unit_equal(u9, u0));
 
     g_object_unref(u1);
