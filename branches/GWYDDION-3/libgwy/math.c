@@ -3,6 +3,10 @@
  *  Copyright (C) 2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
+ *  The quicksort algorithm was copied from GNU C library,
+ *  Copyright (C) 1991, 1992, 1996, 1997, 1999 Free Software Foundation, Inc.
+ *  See below.
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -28,6 +32,78 @@ static void gwy_math_sort_plain(gsize n,
 static void gwy_math_sort_index(gsize n,
                                 gdouble *array,
                                 guint *index_array);
+
+/* Quickly find median value in an array
+ * based on public domain code by Nicolas Devillard */
+/**
+ * gwy_math_median:
+ * @n: Number of items in @array.
+ * @array: Array of doubles.  It is modified by this function.  All values are
+ *         kept, but their positions in the array change.
+ *
+ * Finds median of an array of values using Quick select algorithm.
+ *
+ * Returns: The median value of @array.
+ **/
+gdouble
+gwy_math_median(gsize n, gdouble *array)
+{
+    gsize lo, hi;
+    gsize median;
+    gsize middle, ll, hh;
+
+    lo = 0;
+    hi = n - 1;
+    median = n/2;
+    while (TRUE) {
+        if (hi <= lo)        /* One element only */
+            return array[median];
+
+        if (hi == lo + 1) {  /* Two elements only */
+            if (array[lo] > array[hi])
+                DSWAP(array[lo], array[hi]);
+            return array[median];
+        }
+
+        /* Find median of lo, middle and hi items; swap into position lo */
+        middle = (lo + hi)/2;
+        if (array[middle] > array[hi])
+            DSWAP(array[middle], array[hi]);
+        if (array[lo] > array[hi])
+            DSWAP(array[lo], array[hi]);
+        if (array[middle] > array[lo])
+            DSWAP(array[middle], array[lo]);
+
+        /* Swap low item (now in position middle) into position (lo+1) */
+        DSWAP(array[middle], array[lo + 1]);
+
+        /* Nibble from each end towards middle, swapping items when stuck */
+        ll = lo + 1;
+        hh = hi;
+        while (TRUE) {
+            do {
+                ll++;
+            } while (array[lo] > array[ll]);
+            do {
+                hh--;
+            } while (array[hh] > array[lo]);
+
+            if (hh < ll)
+                break;
+
+            DSWAP(array[ll], array[hh]);
+        }
+
+        /* Swap middle item (in position lo) back into correct position */
+        DSWAP(array[lo], array[hh]);
+
+        /* Re-set active partition */
+        if (hh <= median)
+            lo = ll;
+        if (hh >= median)
+            hi = hh - 1;
+    }
+}
 
 /**
  * gwy_math_sort:
