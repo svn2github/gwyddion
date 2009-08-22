@@ -809,7 +809,7 @@ gwy_resource_classes_finalize(void)
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION:gwyresource
+ * SECTION: resource
  * @title: GwyResource
  * @short_description: Built-in and/or user supplied application resources
  * @see_also: #GwyInventory
