@@ -59,6 +59,10 @@ fi
 GWY_CHECK_GNUC_VISIBILITY
 
 #############################################################################
+# Headers
+AC_CHECK_HEADERS([unistd.h])
+
+#############################################################################
 # I18n
 GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])

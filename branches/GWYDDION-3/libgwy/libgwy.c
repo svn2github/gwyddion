@@ -17,10 +17,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include <string.h>
+#include <stdio.h>
+#include <glib/gstdio.h>
+
+#ifdef G_OS_WIN32
+#  define STRICT
+#  include <windows.h>
+#  undef STRICT
+#endif
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifndef R_OK
+#define R_OK 4
+#endif
+
+#ifndef W_OK
+#define W_OK 2
+#endif
+
+#ifndef X_OK
+#define X_OK 1
+#endif
+
 #include "libgwy/libgwy.h"
 #include "libgwy/libgwy-aliases.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
+
+static gchar *libdir = NULL;
+static gchar *datadir = NULL;
+static gchar *localedir = NULL;
+
+#ifdef G_OS_WIN32
+static HMODULE libgwy_dll = NULL;
+#endif
 
 /**
  * gwy_type_init:
@@ -123,6 +158,170 @@ init_types(G_GNUC_UNUSED gpointer arg)
  * All are concatenated into one list in given order.  If some directory
  * happens to occur multiple times the first occurrence counts.
  */
+
+#ifdef G_OS_WIN32
+BOOL WINAPI
+DllMain(HINSTANCE hinstDLL,
+        DWORD     fdwReason,
+        LPVOID    lpvReserved)
+{
+    if (fdwReason == DLL_PROCESS_ATTACH)
+        libgwy_dll = hinstDLL;
+
+    return TRUE;
+}
+
+static gchar*
+get_win32_module_directory(void)
+{
+    return g_win32_get_package_installation_directory_of_module(libgwy_dll);
+}
+#else
+static gchar*
+get_win32_module_directory(void)
+{
+    return NULL;
+}
+#endif
+
+#ifdef G_OS_UNIX
+static gchar*
+get_unix_module_directory(void)
+{
+    gchar *buffer = NULL;
+    gsize length = 0;
+
+    /* Do not bother with error reporting, if the file does not exist, we are
+     * on some other Unix than Linux. */
+    if (!g_file_get_contents("/proc/self/maps", &buffer, &length, NULL))
+        return NULL;
+
+    gchar *path = NULL;
+    gsize address = (gsize)&get_unix_module_directory;
+    gchar *p = buffer;
+    for (gchar *line = gwy_str_next_line(&p);
+         line;
+         line = gwy_str_next_line(&p)) {
+        gsize start, end;
+
+        if (sscanf(line, "%" G_GSIZE_MODIFIER "x-%" G_GSIZE_MODIFIER "x",
+                   &start, &end) != 2
+            || address < start
+            || address >= end)
+            continue;
+
+        /* Once we found our address, either succeed or fail, but do not scan
+         * anything more. */
+        if (!(p = strchr(line, '/')))
+            break;
+
+        /* If the slash is not preceeded by a space, it is something weird. */
+        if (!g_ascii_isspace(*(p-1)))
+            break;
+
+        g_strstrip(p);
+        path = g_path_get_dirname(p);
+    }
+
+    g_free(buffer);
+    return path;
+}
+#else
+static gchar*
+get_unix_module_directory(void)
+{
+    return NULL;
+}
+#endif
+
+static void
+fix_module_directory(gchar *path)
+{
+    if (!path)
+        return;
+
+    if (g_str_has_suffix(path, G_DIR_SEPARATOR_S "bin")) {
+        path[strlen(path) - strlen(G_DIR_SEPARATOR_S "bin")] = '\0';
+    }
+    else if (g_str_has_suffix(path, G_DIR_SEPARATOR_S "lib")) {
+        path[strlen(path) - strlen(G_DIR_SEPARATOR_S "lib")] = '\0';
+    }
+}
+
+/* FIXME: This is simplistic. */
+static gboolean
+directory_seems_good(const gchar *path, guint mode)
+{
+    return (g_file_test(path, G_FILE_TEST_IS_DIR)
+            && g_access(path, mode));
+}
+
+static void
+check_base_dir(const gchar *basedir,
+               gchar **plibdir,
+               gchar **pdatadir,
+               gchar **plocaledir)
+{
+    if (plibdir) {
+        gchar *path = g_build_filename(basedir, "lib", "gwyddion", NULL);
+        if (directory_seems_good(path, R_OK | X_OK))
+            *plibdir = path;
+        else
+            g_free(path);
+    }
+
+    if (pdatadir) {
+        gchar *path = g_build_filename(basedir, "share", "gwyddion", NULL);
+        if (directory_seems_good(path, R_OK | X_OK))
+            *pdatadir = path;
+        else
+            g_free(path);
+    }
+
+    if (plocaledir) {
+        gchar *path = g_build_filename(basedir, "share", "locale", NULL);
+        if (directory_seems_good(path, R_OK | X_OK))
+            *plocaledir = path;
+        else
+            g_free(path);
+    }
+}
+
+static gboolean
+find_self(void)
+{
+    gchar *basedir;
+
+    /* TODO: variables */
+    if (libdir && datadir && localedir)
+        return TRUE;
+
+    /* Unix installation */
+    if ((basedir = get_unix_module_directory())) {
+        fix_module_directory(basedir);
+        check_base_dir(basedir,
+                       libdir ? NULL : &libdir,
+                       datadir ? NULL : &datadir,
+                       localedir ? NULL : &localedir);
+        g_free(basedir);
+    }
+    if (libdir && datadir && localedir)
+        return TRUE;
+
+    /* Windows installation */
+    if ((basedir = get_win32_module_directory())) {
+        fix_module_directory(basedir);
+        check_base_dir(basedir,
+                       libdir ? NULL : &libdir,
+                       datadir ? NULL : &datadir,
+                       localedir ? NULL : &localedir);
+        g_free(basedir);
+    }
+    if (libdir && datadir && localedir)
+        return TRUE;
+
+    return FALSE;
+}
 
 #define __GWY_LIBGWY_C__
 #include "libgwy/libgwy-aliases.c"
