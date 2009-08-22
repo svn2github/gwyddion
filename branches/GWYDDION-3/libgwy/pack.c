@@ -32,8 +32,8 @@
 #error Byte order used on this system is not supported.
 #endif
 
-#define PASCAL_REAL_B 1099511627776.0
-#define PASCAL_REAL_2B 2199023255552.0
+#define PASCAL_REAL_B 549755813888.0
+#define PASCAL_REAL_2B 1099511627776.0
 
 enum { PASCAL_REAL_BIAS = 129 };
 
