@@ -2,7 +2,7 @@
 # $Id$
 
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
-WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
+WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=implicit-int -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 library = libgwy
 libsuffix = 3
