@@ -1,9 +1,6 @@
 # Generic gtk-doc rules.
 # $Id: gtk-doc.mk 8521 2007-09-11 21:15:47Z yeti-dn $
 
-# TODO: Use gtkdoc-rebase, as in recent gtk-doc template
-# TODO: Get rid of Makefile testing once gtk-doc tools support unique --src-dir
-
 # The directory containing the source code. Relative to $(top_srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
@@ -19,6 +16,7 @@ GWY_DOC_LIBS = \
 
 GTKDOC_CC = $(LIBTOOL) --mode=compile $(CC) $(GWY_DOC_CFLAGS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 GTKDOC_LD = $(LIBTOOL) --mode=link $(CC) $(GWY_DOC_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
+GTKDOC_RUN = $(LIBTOOL) --mode=execute
 
 # We set GPATH here; this gives us semantics for GNU make
 # which are more like other make's VPATH, when it comes to
@@ -85,7 +83,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	    --deprecated-guards="GWY_DISABLE_DEPRECATED" \
 	    --ignore-decorators="_GWY_STATIC_INLINE"
 	if grep -l '^..*$$' $(DOC_MODULE).types >/dev/null 2>&1 ; then \
-		CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" \
+		CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" RUN="$(GTKDOC_RUN)" \
 			gtkdoc-scangobj --module=$(DOC_MODULE) \
 			        --output-dir=$(builddir); \
 	else \
@@ -155,6 +153,8 @@ install-data-local:
 	if test -n "$$d"; then \
 		$(mkdir_p) $(DESTDIR)$(TARGET_DIR); \
 		$(INSTALL_DATA) $$d/* $(DESTDIR)$(TARGET_DIR); \
+		$(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) \
+		         --html-dir=$(DESTDIR)/$(TARGET_DIR); \
 	fi; \
 	test -n "$$d"
 
@@ -176,6 +176,7 @@ endif
 dist-hook: dist-check-gtkdoc
 	mkdir $(distdir)/html
 	if test -s html/index.sgml; then d=html; else d=$(srcdir)/html; fi; \
+	$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
 	cp -f $$d/* $(distdir)/html
 
 .PHONY: docs
