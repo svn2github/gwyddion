@@ -1,7 +1,8 @@
 # Generic gtester rules.
-# $Id: gtk-doc.mk 8521 2007-09-11 21:15:47Z yeti-dn $
+# $Id$
+# Variables: test_programs
 
-GTESTER = gtester 			# for non-GLIB packages
+GTESTER = gtester
 
 ### testing rules
 
