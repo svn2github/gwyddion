@@ -1,5 +1,5 @@
 /*
- *  @(#) $Id$
+ *  $Id$
  *  Copyright (C) 2007,2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
