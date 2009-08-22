@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/inventory.h"
 #include "libgwy/libgwy-aliases.h"

@@ -20,7 +20,7 @@
 #include "config.h"
 #include <string.h>
 #include <glib.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/expr.h"
 #define GWY_MATH_POLLUTE_NAMESPACE

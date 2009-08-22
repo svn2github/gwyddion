@@ -50,7 +50,7 @@ libgwy_la_SOURCES = \
 
 testlibgwy_SOURCES = testlibgwy.c
 
-AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS)
+AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS) -DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\"
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \

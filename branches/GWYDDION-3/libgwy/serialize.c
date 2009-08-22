@@ -18,7 +18,7 @@
  */
 
 #include <string.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/libgwy.h"
 #include "libgwy/libgwy-aliases.h"
 

@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <glib/gi18n.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/container.h"
 #include "libgwy/serialize.h"
