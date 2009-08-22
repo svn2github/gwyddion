@@ -253,9 +253,21 @@ test_error_list(void)
     gwy_error_list_clear(&errlist);
     g_assert_cmpuint(g_slist_length(errlist), ==, 0);
 
+    /* Propagation */
+    gwy_error_list_propagate(&errlist, NULL);
+    g_assert_cmpuint(g_slist_length(errlist), ==, 0);
+    err = g_error_new(GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
+                      "Just testing 3...");
+    gwy_error_list_propagate(&errlist, err);
+    g_assert_cmpuint(g_slist_length(errlist), ==, 1);
+    gwy_error_list_clear(&errlist);
+
     /* Ignoring errors. */
     gwy_error_list_add(NULL, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
                        "Ignored error");
+    err = g_error_new(GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
+                      "Ignored error");
+    gwy_error_list_propagate(NULL, err);
     gwy_error_list_clear(NULL);
 }
 

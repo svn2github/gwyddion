@@ -40,17 +40,42 @@ gwy_error_list_add(GwyErrorList **list,
                    const gchar *format,
                    ...)
 {
-    va_list ap;
-    gchar *message;
-
     if (!list)
         return;
 
+    va_list ap;
     va_start(ap, format);
-    message = g_strdup_vprintf(format, ap);
+    gchar *message = g_strdup_vprintf(format, ap);
     va_end(ap);
     *list = g_slist_prepend(*list, g_error_new_literal(domain, code, message));
     g_free(message);
+}
+
+/**
+ * gwy_error_list_propagate:
+ * @list: Pointer to error list or %NULL.
+ * @error: Error to move to @list.
+ *
+ * Moves an error to an error list.
+ *
+ * Does nothing if @error is %NULL, frees @error if @list is %NULL.  Otherwise,
+ * moves the error from @error to @list, freeing @error.  See also
+ * g_error_propagate().
+ **/
+void
+gwy_error_list_propagate(GwyErrorList **list,
+                         GError *error)
+{
+    if (!error)
+        return;
+
+    if (!list) {
+        g_clear_error(&error);
+        return;
+    }
+
+    *list = g_slist_prepend(*list, NULL);
+    g_propagate_error((GError**)&((*list)->data), error);
 }
 
 /**
@@ -65,12 +90,10 @@ gwy_error_list_add(GwyErrorList **list,
 void
 gwy_error_list_clear(GwyErrorList **list)
 {
-    GSList *l;
-
     if (!list || !*list)
         return;
 
-    for (l = *list; l; l = l->next)
+    for (GSList *l = *list; l; l = l->next)
         g_clear_error((GError**)&l->data);
 
     g_slist_free(*list);

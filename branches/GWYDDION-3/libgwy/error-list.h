@@ -26,12 +26,14 @@ G_BEGIN_DECLS
 
 typedef GSList GwyErrorList;
 
-void gwy_error_list_add(GwyErrorList **list,
-                        GQuark domain,
-                        gint code,
-                        const gchar *format,
-                        ...) G_GNUC_PRINTF(4, 5);
-void gwy_error_list_clear(GwyErrorList **list);
+void gwy_error_list_add      (GwyErrorList **list,
+                              GQuark domain,
+                              gint code,
+                              const gchar *format,
+                              ...) G_GNUC_PRINTF(4, 5);
+void gwy_error_list_propagate(GwyErrorList **list,
+                              GError *error);
+void gwy_error_list_clear    (GwyErrorList **list);
 
 G_END_DECLS
 
