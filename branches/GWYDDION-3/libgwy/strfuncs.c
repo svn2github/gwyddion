@@ -119,7 +119,8 @@ gwy_memmem(gconstpointer haystack,
  * (or "\r\n") is replaced with "\0", if present.
  *
  * Returns: The start of the line.  %NULL if the buffer is empty or %NULL.
- *          NOT a new string, the returned pointer points somewhere to @buffer.
+ *          The return value is <emphasis>not</emphasis> a new string; the
+ *          normal return value is the previous value of @buffer.
  **/
 gchar*
 gwy_str_next_line(gchar **buffer)
