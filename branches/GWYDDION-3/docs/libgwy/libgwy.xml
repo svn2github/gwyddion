@@ -18,5 +18,6 @@
   <xi:include href="xml/serialize.xml"/>
   <xi:include href="xml/unit.xml"/>
   <xi:include href="xml/container.xml"/>
+  <xi:include href="xml/inventory.xml"/>
   <xi:include href="xml/tree_index.sgml"/>
 </book>
