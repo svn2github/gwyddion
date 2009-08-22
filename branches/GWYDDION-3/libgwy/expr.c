@@ -86,16 +86,6 @@ typedef enum {
     GWY_EXPR_CODE_LGAMMA,
 } GwyExprOpCode;
 
-typedef enum {
-    GWY_EXPR_CONST_ADD,
-    GWY_EXPR_CONST_REMOVE,
-} GwyExprConstAction;
-
-typedef struct {
-    const gchar *name;
-    gdouble value;
-} GwyExprConstant;
-
 /* code stack item */
 typedef struct {
     GwyExprOpCode type;
