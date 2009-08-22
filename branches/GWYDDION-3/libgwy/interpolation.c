@@ -474,7 +474,7 @@ gwy_interpolation_resolve_coeffs_1d(guint n,
         || interpolation == GWY_INTERPOLATION_SCHAUM4)
         return;
 
-    gdouble *buffer = g_new(gdouble, n);
+    gdouble *buffer = g_slice_alloc(sizeof(gdouble)*n);
 
     if (interpolation == GWY_INTERPOLATION_BSPLINE4) {
         const double a = synth_func_values_bspline4[0];
@@ -496,7 +496,7 @@ gwy_interpolation_resolve_coeffs_1d(guint n,
         g_critical("Unknown interpolation type %u\n", interpolation);
     }
 
-    g_free(buffer);
+    g_slice_free1(sizeof(gdouble)*n, buffer);
 }
 
 /**
@@ -528,7 +528,8 @@ gwy_interpolation_resolve_coeffs_2d(guint width,
         || interpolation == GWY_INTERPOLATION_SCHAUM4)
         return;
 
-    gdouble *buffer = g_new(gdouble, MAX(width, height));
+    const guint n = MAX(width, height);
+    gdouble *buffer = g_slice_alloc(sizeof(gdouble)*n);
 
     if (interpolation == GWY_INTERPOLATION_BSPLINE4) {
         const double a = synth_func_values_bspline4[0];
@@ -554,7 +555,7 @@ gwy_interpolation_resolve_coeffs_2d(guint width,
         g_critical("Unknown interpolation type %u\n", interpolation);
     }
 
-    g_free(buffer);
+    g_slice_free1(sizeof(gdouble)*n, buffer);
 }
 
 /**
@@ -590,7 +591,7 @@ gwy_interpolation_resample_block_1d(guint length,
 
     if (!gwy_interpolation_has_interpolating_basis(interpolation)) {
         if (preserve)
-            data = coeffs = g_memdup(data, length*sizeof(gdouble));
+            data = coeffs = g_slice_copy(sizeof(gdouble)*length, data);
         gwy_interpolation_resolve_coeffs_1d(length, data, interpolation);
     }
 
@@ -611,7 +612,8 @@ gwy_interpolation_resample_block_1d(guint length,
         newdata[newi] = v;
     }
 
-    g_free(coeffs);
+    if (coeffs)
+        g_slice_free1(length*sizeof(gdouble), coeffs);
 }
 
 static void
@@ -676,7 +678,7 @@ gwy_interpolation_resample_block_2d(guint width,
             if (rowstride == width)
                 data = coeffs = g_memdup(data, width*height*sizeof(gdouble));
             else {
-                coeffs = g_new(gdouble, width*height);
+                coeffs = g_slice_alloc(sizeof(gdouble)*width*height);
                 for (guint i = 0; i < height; i++) {
                     memcpy(coeffs + i*width,
                            data + i*rowstride,
@@ -690,10 +692,10 @@ gwy_interpolation_resample_block_2d(guint width,
                                             data, interpolation);
     }
 
-    gdouble *xw = g_new(gdouble, suplen*newwidth);
-    gdouble *yw = g_new(gdouble, suplen*newheight);
-    guint *xp = g_new(guint, newwidth);
-    guint *yp = g_new(guint, newheight);
+    gdouble *xw = g_slice_alloc(sizeof(gdouble)*suplen*newwidth);
+    gdouble *yw = g_slice_alloc(sizeof(gdouble)*suplen*newheight);
+    guint *xp = g_slice_alloc(sizeof(guint)*newwidth);
+    guint *yp = g_slice_alloc(sizeof(guint)*newheight);
     calculate_weights_for_rescale(width, newwidth, xp, xw, interpolation);
     calculate_weights_for_rescale(height, newheight, yp, yw, interpolation);
     for (guint newi = 0; newi < newheight; newi++) {
@@ -717,12 +719,13 @@ gwy_interpolation_resample_block_2d(guint width,
             newdata[newi*newrowstride + newj] = v;
         }
     }
-    g_free(yp);
-    g_free(xp);
-    g_free(yw);
-    g_free(xw);
+    g_slice_free1(sizeof(gdouble)*suplen*newwidth, xw);
+    g_slice_free1(sizeof(gdouble)*suplen*newheight, yw);
+    g_slice_free1(sizeof(guint)*newwidth, xp);
+    g_slice_free1(sizeof(guint)*newheight, yp);
 
-    g_free(coeffs);
+    if (coeffs)
+        g_slice_free1(sizeof(gdouble)*width*height, coeffs);
 }
 
 /**
@@ -764,7 +767,7 @@ gwy_interpolation_shift_block_1d(guint length,
 
     if (!gwy_interpolation_has_interpolating_basis(interpolation)) {
         if (preserve)
-            data = coeffs = g_memdup(data, length*sizeof(gdouble));
+            data = coeffs = g_slice_copy(sizeof(gdouble)*length, data);
         gwy_interpolation_resolve_coeffs_1d(length, data, interpolation);
     }
 
@@ -818,7 +821,8 @@ gwy_interpolation_shift_block_1d(guint length,
         }
     }
 
-    g_free(coeffs);
+    if (coeffs)
+        g_slice_free1(sizeof(gdouble)*length, coeffs);
 }
 
 /**
