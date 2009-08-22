@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <math.h>
 #include "libgwy/libgwy.h"
 
 static void
@@ -26,7 +25,7 @@ test_pack(void)
 {
     enum { expected_size = 57 };
     struct {
-        gdouble d, dp; 
+        gdouble d, dp;
         gint32 i;
         gint16 a1, a2;
         gint64 q;
@@ -119,7 +118,7 @@ test_sort(void)
 
     if (g_test_quick())
         nmax = 8192;
-    
+
     array = g_new(gdouble, nmax);
     orig_array = g_new(gdouble, nmax);
     index_array = g_new(guint, nmax);
@@ -128,13 +127,13 @@ test_sort(void)
             orig_array[i] = sin(n/G_SQRT2 + 1.618*i);
 
         memcpy(array, orig_array, n*sizeof(gdouble));
-        gwy_math_sort(array, NULL, n); 
+        gwy_math_sort(array, NULL, n);
         g_assert(test_sort_is_strictly_ordered(array, n));
 
         memcpy(array, orig_array, n*sizeof(gdouble));
         for (i = 0; i < n; i++)
             index_array[i] = i;
-        gwy_math_sort(array, index_array, n); 
+        gwy_math_sort(array, index_array, n);
         g_assert(test_sort_is_strictly_ordered(array, n));
         g_assert(test_sort_is_ordered_with_index(array, index_array,
                                                  orig_array, n));
@@ -144,11 +143,38 @@ test_sort(void)
     g_free(array);
 }
 
+static void
+test_error_list(void)
+{
+    GwyErrorList *errlist = NULL;
+    GError *err;
+
+    gwy_error_list_add(&errlist, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
+                       "Just testing...");
+    g_assert_cmpuint(g_slist_length(errlist), ==, 1);
+
+    gwy_error_list_add(&errlist, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
+                       "Just testing %d...", 2);
+    g_assert_cmpuint(g_slist_length(errlist), ==, 2);
+    err = errlist->data;
+    g_assert_cmpuint(err->domain, ==, GWY_PACK_ERROR);
+    g_assert_cmpuint(err->code, ==, GWY_PACK_ERROR_FORMAT);
+    g_assert_cmpstr(err->message, ==, "Just testing 2...");
+
+    gwy_error_list_clear(&errlist);
+    g_assert_cmpuint(g_slist_length(errlist), ==, 0);
+
+    gwy_error_list_add(NULL, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
+                       "Ignored error");
+    gwy_error_list_clear(NULL);
+}
+
 int
 main(int argc, char *argv[])
 {
     g_test_init(&argc, &argv, NULL);
 
+    g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/sort", test_sort);
 
