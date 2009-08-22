@@ -73,7 +73,7 @@ static GValue*  gwy_container_get_value_of_type  (GwyContainer *container,
 static GValue*  gwy_container_gis_value_of_type  (GwyContainer *container,
                                                   GQuark key,
                                                   GType type);
-static gboolean gwy_container_try_set_one        (GwyContainer *container,
+static gboolean try_set_value                    (GwyContainer *container,
                                                   GQuark key,
                                                   const GValue *value,
                                                   gboolean do_replace,
@@ -89,6 +89,9 @@ static GObject* gwy_container_deserialize        (const guchar *buffer,
                                                   gsize size,
                                                   gsize *position);
 */
+static GObject* gwy_container_duplicate_impl     (GwySerializable *object);
+static void     gwy_container_assign_impl        (GwySerializable *destination,
+                                                  GwySerializable *source);
 static gboolean hash_remove_prefix_func          (gpointer hkey,
                                                   gpointer hvalue,
                                                   gpointer hdata);
@@ -101,9 +104,6 @@ static void     keys_foreach_func                (gpointer hkey,
 static void     keys_by_name_foreach_func        (gpointer hkey,
                                                   gpointer hvalue,
                                                   gpointer hdata);
-static GObject* gwy_container_duplicate_impl     (GwySerializable *object);
-static void     gwy_container_assign_impl        (GwySerializable *destination,
-                                                  GwySerializable *source);
 static void     hash_duplicate_func              (gpointer hkey,
                                                   gpointer hvalue,
                                                   gpointer hdata);
@@ -111,7 +111,7 @@ static void     hash_find_keys_func              (gpointer hkey,
                                                   gpointer hvalue,
                                                   gpointer hdata);
 
-static int      pstring_compare_callback         (const void *p,
+static int      pstring_compare                  (const void *p,
                                                   const void *q);
 static guint    token_length                     (const gchar *text);
 static gchar*   dequote_token                    (const gchar *tok,
@@ -1309,11 +1309,11 @@ gwy_container_values_equal(const GValue *value1,
 }
 
 static gboolean
-gwy_container_try_set_one(GwyContainer *container,
-                          GQuark key,
-                          const GValue *value,
-                          gboolean do_replace,
-                          gboolean do_create)
+try_set_value(GwyContainer *container,
+              GQuark key,
+              const GValue *value,
+              gboolean do_replace,
+              gboolean do_create)
 {
     GValue *old;
     gboolean changed;
@@ -1388,7 +1388,7 @@ gwy_container_set_value(GwyContainer *container,
                         GQuark key,
                         const GValue *value)
 {
-    gwy_container_try_set_one(container, key, value, TRUE, TRUE);
+    try_set_value(container, key, value, TRUE, TRUE);
 }
 
 /**
@@ -1418,7 +1418,7 @@ gwy_container_set_boolean(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_BOOLEAN);
     g_value_set_boolean(&gvalue, !!value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1448,7 +1448,7 @@ gwy_container_set_char(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_UCHAR);
     g_value_set_char(&gvalue, value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1478,7 +1478,7 @@ gwy_container_set_int32(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_INT);
     g_value_set_int(&gvalue, value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1539,7 +1539,7 @@ gwy_container_set_int64(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_INT64);
     g_value_set_int64(&gvalue, value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1569,7 +1569,7 @@ gwy_container_set_double(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_DOUBLE);
     g_value_set_double(&gvalue, value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1605,7 +1605,7 @@ gwy_container_set_string(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_STRING);
     g_value_take_string(&gvalue, (gchar*)value);
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
 /**
@@ -1644,7 +1644,7 @@ gwy_container_set_object(GwyContainer *container,
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_OBJECT);
     g_value_set_object(&gvalue, value);  /* this increases refcount too */
-    gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
     g_object_unref(value);
 }
 
@@ -1815,10 +1815,7 @@ gwy_container_deserialize(const guchar *buffer,
 static GObject*
 gwy_container_duplicate_impl(GwySerializable *object)
 {
-    GwyContainer *duplicate;
-
-    duplicate = gwy_container_new();
-    /* don't emit signals when no one can be connected */
+    GwyContainer *duplicate = gwy_container_new();
     duplicate->in_construction = TRUE;
     g_hash_table_foreach(GWY_CONTAINER(object)->values,
                          hash_duplicate_func, duplicate);
@@ -2047,7 +2044,7 @@ hash_find_keys_func(gpointer hkey,
 }
 
 static int
-pstring_compare_callback(const void *p, const void *q)
+pstring_compare(const void *p, const void *q)
 {
     return strcmp(*(gchar**)p, *(gchar**)q);
 }
@@ -2071,7 +2068,7 @@ gwy_container_dump_to_text(GwyContainer *container)
 
     GPtrArray *pa = g_ptr_array_new();
     g_hash_table_foreach(container->values, hash_text_serialize_func, pa);
-    g_ptr_array_sort(pa, pstring_compare_callback);
+    g_ptr_array_sort(pa, pstring_compare);
     g_ptr_array_add(pa, NULL);
 
     gchar **retval = (gchar**)pa->pdata;
