@@ -36,7 +36,10 @@
 
 G_BEGIN_DECLS
 
-void gwy_type_init(void);
+void   gwy_type_init        (void);
+gchar* gwy_library_directory(const gchar *subdir);
+gchar* gwy_data_directory   (const gchar *subdir);
+gchar* gwy_locale_directory (const gchar *subdir);
 
 G_END_DECLS
 

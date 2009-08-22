@@ -50,11 +50,15 @@ libgwy_la_SOURCES = \
 
 testlibgwy_SOURCES = testlibgwy.c
 
-AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS) -DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\"
+AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
-	-DG_LOG_DOMAIN=\"Gwy\"
+	-DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\" \
+	-DG_LOG_DOMAIN=\"Gwy\" \
+	-DGWY_LIBDIR=\"$(pkglibdir)\" \
+	-DGWY_DATADIR=\"$(pkgdatadir)\" \
+	-DGWY_LOCALE_DIR=\"$(localedir)\"
 
 # In following order do:
 # Any code change     C:   R++: A

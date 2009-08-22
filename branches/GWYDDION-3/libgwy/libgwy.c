@@ -125,8 +125,8 @@ init_types(G_GNUC_UNUSED gpointer arg)
  *   GWYDDION_LOCALE_DIR
  * - /proc/self/map (only on Linux)
  * - g_win32_get_package_installation_directory_of_module() (only on Win32)
- * - argv[0] and realpath, possibly together with PATH
  * - compile-time prefix
+ * - gwyddion program path
  *
  * These possibilities are tried in the following order and the first that
  * results in finding self is used.  The order is given by decreasing
@@ -248,12 +248,69 @@ fix_module_directory(gchar *path)
     }
 }
 
-/* FIXME: This is simplistic. */
 static gboolean
 directory_seems_good(const gchar *path, guint mode)
 {
     return (g_file_test(path, G_FILE_TEST_IS_DIR)
             && g_access(path, mode));
+}
+
+static gboolean
+libdir_seems_good(const gchar *path)
+{
+    if (!directory_seems_good(path, R_OK | X_OK))
+        return FALSE;
+
+    /* FIXME FIXME: If libgwy is installed separately from the application, the
+     * "modules" subdirectory might not exist! */
+    /*
+    gchar *subdir = g_build_filename(path, "modules", NULL);
+    gboolean ok = directory_seems_good(subdir, R_OK | X_OK);
+    g_free(subdir);
+
+    return ok;
+    */
+    return TRUE;
+}
+
+static gboolean
+datadir_seems_good(const gchar *path)
+{
+    if (!directory_seems_good(path, R_OK | X_OK))
+        return FALSE;
+
+    /* FIXME: We do not have any data yet. */
+    /*
+    gboolean ok = FALSE;
+    const gchar const* const components[] = {
+        "gradients", "glmaterials", "pixmaps", NULL
+    };
+    for (const gchar *const* comp = components; ok && *comp; comp++) {
+        gchar *subdir = g_build_filename(path, *comp, NULL);
+        ok = directory_seems_good(subdir, R_OK | X_OK);
+        g_free(subdir);
+    }
+
+    return ok;
+    */
+    return TRUE;
+}
+
+static gboolean
+localedir_seems_good(const gchar *path)
+{
+    if (!directory_seems_good(path, R_OK | X_OK))
+        return FALSE;
+
+    /* FIXME: We do not have any translations yet. */
+    /*
+    gchar *subdir = g_build_filename(path, "cs", NULL);
+    gboolean ok = directory_seems_good(subdir, R_OK | X_OK);
+    g_free(subdir);
+
+    return ok;
+    */
+    return TRUE;
 }
 
 static void
@@ -264,7 +321,7 @@ check_base_dir(const gchar *basedir,
 {
     if (plibdir) {
         gchar *path = g_build_filename(basedir, "lib", "gwyddion", NULL);
-        if (directory_seems_good(path, R_OK | X_OK))
+        if (libdir_seems_good(path))
             *plibdir = path;
         else
             g_free(path);
@@ -272,7 +329,7 @@ check_base_dir(const gchar *basedir,
 
     if (pdatadir) {
         gchar *path = g_build_filename(basedir, "share", "gwyddion", NULL);
-        if (directory_seems_good(path, R_OK | X_OK))
+        if (datadir_seems_good(path))
             *pdatadir = path;
         else
             g_free(path);
@@ -280,23 +337,30 @@ check_base_dir(const gchar *basedir,
 
     if (plocaledir) {
         gchar *path = g_build_filename(basedir, "share", "locale", NULL);
-        if (directory_seems_good(path, R_OK | X_OK))
+        if (localedir_seems_good(path))
             *plocaledir = path;
         else
             g_free(path);
     }
 }
 
-static gboolean
-find_self(void)
+static gpointer
+find_self_impl(G_GNUC_UNUSED gpointer arg)
 {
-    gchar *basedir;
+    gchar *basedir, *path;
+    const gchar *dir;
 
-    /* TODO: variables */
+    /* Explicite variables */
+    if ((dir = g_getenv("GWYDDION_LIBDIR")) && libdir_seems_good(dir))
+        libdir = g_strdup(dir);
+    if ((dir = g_getenv("GWYDDION_DATADIR")) && datadir_seems_good(dir))
+        datadir = g_strdup(dir);
+    if ((dir = g_getenv("GWYDDION_LOCALE_DIR")) && localedir_seems_good(dir))
+        localedir = g_strdup(dir);
     if (libdir && datadir && localedir)
-        return TRUE;
+        return GUINT_TO_POINTER(TRUE);
 
-    /* Unix installation */
+    /* Unix library installation */
     if ((basedir = get_unix_module_directory())) {
         fix_module_directory(basedir);
         check_base_dir(basedir,
@@ -306,9 +370,9 @@ find_self(void)
         g_free(basedir);
     }
     if (libdir && datadir && localedir)
-        return TRUE;
+        return GUINT_TO_POINTER(TRUE);
 
-    /* Windows installation */
+    /* Windows library installation */
     if ((basedir = get_win32_module_directory())) {
         fix_module_directory(basedir);
         check_base_dir(basedir,
@@ -318,9 +382,132 @@ find_self(void)
         g_free(basedir);
     }
     if (libdir && datadir && localedir)
-        return TRUE;
+        return GUINT_TO_POINTER(TRUE);
 
-    return FALSE;
+    /* Compile-time defaults */
+    if ((dir = GWY_LIBDIR) && libdir_seems_good(dir))
+        libdir = g_strdup(dir);
+    if ((dir = GWY_DATADIR) && datadir_seems_good(dir))
+        datadir = g_strdup(dir);
+    if ((dir = GWY_LOCALE_DIR) && localedir_seems_good(dir))
+        localedir = g_strdup(dir);
+    if (libdir && datadir && localedir)
+        return GUINT_TO_POINTER(TRUE);
+
+    /* Gwyddion program path */
+    if ((path = g_find_program_in_path("gwyddion"))) {
+        basedir = g_path_get_dirname(path);
+        fix_module_directory(basedir);
+        check_base_dir(basedir,
+                       libdir ? NULL : &libdir,
+                       datadir ? NULL : &datadir,
+                       localedir ? NULL : &localedir);
+        g_free(basedir);
+        g_free(path);
+    }
+    if (libdir && datadir && localedir)
+        return GUINT_TO_POINTER(TRUE);
+
+    return GUINT_TO_POINTER(FALSE);
+}
+
+static void
+find_self(void)
+{
+    static GOnce found_self = G_ONCE_INIT;
+    g_once(&found_self, find_self_impl, NULL);
+}
+
+/**
+ * gwy_library_directory:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains the Gwyddion system library directory.
+ *
+ * This is where modules and other architecture-dependent files reside.
+ * For instance, for a standard installation and %NULL @subdir the return value
+ * would be "/usr/local/lib64/gwyddion".
+ *
+ * The highest precedence for determinig this directory has the environment
+ * variable <envar>GWYDDION_LIBDIR</envar>, the libgwy and Gwyddion
+ * installation directory follows.  Note if the environment variable holds
+ * a value does not seem to be a Gwyddion library directory, its value is
+ * ignored.
+ *
+ * Returns: The requested subdirectory of Gwyddion system library directory.
+ *          %NULL is returned if such directory could not be determined.  The
+ *          returned directory is not guaranteed to exist even if it is a
+ *          standard subdirectory such as "modules".  Someone might delete it
+ *          just before this function returned, for instance.
+ **/
+gchar*
+gwy_library_directory(const gchar *subdir)
+{
+    find_self();
+    if (libdir)
+        return g_build_filename(libdir, subdir, NULL);
+    return NULL;
+}
+
+/**
+ * gwy_data_directory:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains the Gwyddion system data directory.
+ *
+ * This is where pixmaps, false color gradients and other
+ * architecture-independent files reside.  For instance, for a standard
+ * installation and %NULL @subdir the return value would be
+ * "/usr/local/share/gwyddion".
+ *
+ * The highest precedence for determinig this directory has the environment
+ * variable <envar>GWYDDION_DATADIR</envar>, the libgwy and Gwyddion
+ * installation directory follows.  Note if the environment variable holds
+ * a value does not seem to be a Gwyddion data directory, its value is
+ * ignored.
+ *
+ * Returns: The requested subdirectory of Gwyddion system data directory.
+ *          %NULL is returned if such directory could not be determined.  The
+ *          returned directory is not guaranteed to exist even if it is a
+ *          standard subdirectory such as "pixmaps".  Someone might delete it
+ *          just before this function returned, for instance.
+ **/
+gchar*
+gwy_data_directory(const gchar *subdir)
+{
+    find_self();
+    if (datadir)
+        return g_build_filename(datadir, subdir, NULL);
+    return NULL;
+}
+
+/**
+ * gwy_locale_directory:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains the Gwyddion system locale directory.
+ *
+ * This is where the translation files files reside.  For instance, for a
+ * standard installation and %NULL @subdir the return value would be
+ * "/usr/local/share/locale".
+ *
+ * The highest precedence for determinig this directory has the environment
+ * variable <envar>GWYDDION_LOCALE_DIR</envar>, the libgwy and Gwyddion
+ * installation directory follows.  Note if the environment variable holds
+ * a value does not seem to be a locale directory, its value is ignored.
+ *
+ * Returns: The requested subdirectory of Gwyddion system locale directory.
+ *          %NULL is returned if such directory could not be determined.  The
+ *          returned directory is not guaranteed to exist.  Someone might
+ *          delete it just before this function returned, for instance.
+ **/
+gchar*
+gwy_locale_directory(const gchar *subdir)
+{
+    find_self();
+    if (localedir)
+        return g_build_filename(localedir, subdir, NULL);
+    return NULL;
 }
 
 #define __GWY_LIBGWY_C__
