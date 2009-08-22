@@ -52,19 +52,19 @@ typedef struct {
     guchar *data;
 } GwySerializableBuffer;
 
-static gsize                 gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                                              gsize *pos);
-static void                  gwy_serializable_items_done     (const GwySerializableItems *items);
-static gboolean              gwy_serializable_dump_to_stream (const GwySerializableItems *items,
-                                                              GwySerializableBuffer *buffer);
-static GType                 gwy_serializable_get_interface  (const gchar *typename,
-                                                              gpointer *classref,
-                                                              const GwySerializableInterface **iface,
-                                                              GwyErrorList **error_list);
-static GwySerializableItems* gwy_serializable_unpack_items   (const guchar *buffer,
-                                                              gsize size,
-                                                              GwyErrorList **error_list);
-static void                  gwy_serializable_free_items     (GwySerializableItems *items);
+static gsize                 calculate_sizes (GwySerializableItems *items,
+                                              gsize *pos);
+static void                  items_done      (const GwySerializableItems *items);
+static gboolean              dump_to_stream  (const GwySerializableItems *items,
+                                              GwySerializableBuffer *buffer);
+static GType                 get_serializable(const gchar *typename,
+                                              gpointer *classref,
+                                              const GwySerializableInterface **iface,
+                                              GwyErrorList **error_list);
+static GwySerializableItems* unpack_items    (const guchar *buffer,
+                                              gsize size,
+                                              GwyErrorList **error_list);
+static void                  free_items      (GwySerializableItems *items);
 
 GType
 gwy_serializable_get_type(void)
@@ -102,8 +102,8 @@ gwy_serializable_error_quark(void)
 }
 
 static void
-gwy_serializable_buffer_alloc(GwySerializableBuffer *buffer,
-                              gsize size)
+buffer_alloc(GwySerializableBuffer *buffer,
+             gsize size)
 {
     if (!size)
         size = GWY_SERIALIZE_BUFFER_SIZE;
@@ -116,7 +116,7 @@ gwy_serializable_buffer_alloc(GwySerializableBuffer *buffer,
 }
 
 static gboolean
-gwy_serializable_buffer_finish(GwySerializableBuffer *buffer)
+buffer_finish(GwySerializableBuffer *buffer)
 {
     gsize size = buffer->len - buffer->bfree;
 
@@ -131,7 +131,7 @@ gwy_serializable_buffer_finish(GwySerializableBuffer *buffer)
 }
 
 static void
-gwy_serializable_buffer_dealloc(GwySerializableBuffer *buffer)
+buffer_dealloc(GwySerializableBuffer *buffer)
 {
     buffer->data -= buffer->len - buffer->bfree;
     buffer->bfree = buffer->len;
@@ -139,9 +139,9 @@ gwy_serializable_buffer_dealloc(GwySerializableBuffer *buffer)
 }
 
 static gboolean
-gwy_serializable_buffer_write(GwySerializableBuffer *buffer,
-                              gconstpointer data,
-                              gsize size)
+buffer_write(GwySerializableBuffer *buffer,
+             gconstpointer data,
+             gsize size)
 {
     while (size >= buffer->bfree) {
         memcpy(buffer->data, data, buffer->bfree);
@@ -163,21 +163,21 @@ gwy_serializable_buffer_write(GwySerializableBuffer *buffer,
 }
 
 static gboolean
-gwy_serializable_buffer_write32(GwySerializableBuffer *buffer,
-                                const guint32 *data32,
-                                gsize n)
+buffer_write32(GwySerializableBuffer *buffer,
+               const guint32 *data32,
+               gsize n)
 {
     guint32 *bdata32;
     gsize i;
 
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-        return gwy_serializable_buffer_write(buffer, data32, sizeof(guint32)*n);
+        return buffer_write(buffer, data32, sizeof(guint32)*n);
 
     /* Only swap aligned data.
      * First, we do not want to mess with the leftover bytes, second, the
      * mem-swapping instructions usually work much better on aligned data.*/
     if (buffer->bfree % sizeof(guint32) != 0) {
-        if (!gwy_serializable_buffer_finish(buffer))
+        if (!buffer_finish(buffer))
             return FALSE;
     }
 
@@ -210,21 +210,21 @@ gwy_serializable_buffer_write32(GwySerializableBuffer *buffer,
 }
 
 static gboolean
-gwy_serializable_buffer_write64(GwySerializableBuffer *buffer,
-                                const guint64 *data64,
-                                gsize n)
+buffer_write64(GwySerializableBuffer *buffer,
+               const guint64 *data64,
+               gsize n)
 {
     guint64 *bdata64;
     gsize i;
 
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-        return gwy_serializable_buffer_write(buffer, data64, sizeof(guint64)*n);
+        return buffer_write(buffer, data64, sizeof(guint64)*n);
 
     /* Only swap aligned data.
      * First, we do not want to mess with the leftover bytes, second, the
      * mem-swapping instructions usually work much better on aligned data.*/
     if (buffer->bfree % sizeof(guint64) != 0) {
-        if (!gwy_serializable_buffer_finish(buffer))
+        if (!buffer_finish(buffer))
             return FALSE;
     }
 
@@ -367,13 +367,13 @@ gwy_serializable_serialize(GwySerializable *serializable,
     items.n_items = 0;
 
     gwy_serializable_itemize(serializable, &items);
-    gwy_serializable_calculate_sizes(&items, &i);
-    gwy_serializable_buffer_alloc(&buffer, 0);
+    calculate_sizes(&items, &i);
+    buffer_alloc(&buffer, 0);
     buffer.output = output;
     buffer.error = error;
-    ok = gwy_serializable_dump_to_stream(&items, &buffer);
-    gwy_serializable_buffer_dealloc(&buffer);
-    gwy_serializable_items_done(&items);
+    ok = dump_to_stream(&items, &buffer);
+    buffer_dealloc(&buffer);
+    items_done(&items);
     gwy_serializable_done(serializable);
     g_free(items.items);
 
@@ -381,7 +381,7 @@ gwy_serializable_serialize(GwySerializable *serializable,
 }
 
 /**
- * gwy_serializable_ctype_size:
+ * ctype_size:
  * @ctype: Component type.
  *
  * Computes type size based on type letter.
@@ -389,7 +389,7 @@ gwy_serializable_serialize(GwySerializable *serializable,
  * Returns: Size in bytes, 0 for arrays and other nonatomic types.
  **/
 static inline gsize G_GNUC_CONST
-gwy_serializable_ctype_size(GwySerializableCType ctype)
+ctype_size(GwySerializableCType ctype)
 {
     switch (ctype) {
         case GWY_SERIALIZABLE_INT8:
@@ -418,9 +418,9 @@ gwy_serializable_ctype_size(GwySerializableCType ctype)
 /* The value is returned for convenience, it permits us to declare item as
  * const even when recusring, because we do not access the fields after the
  * size changes. */
-gsize
-gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                 gsize *pos)
+static gsize
+calculate_sizes(GwySerializableItems *items,
+                gsize *pos)
 {
     GwySerializableItem *header = items->items + (*pos)++;
     gsize i, n, size;
@@ -438,17 +438,16 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
 
         size += strlen(item->name)+1 + 1 /* ctype */;
 
-        if ((typesize = gwy_serializable_ctype_size(ctype)))
+        if ((typesize = ctype_size(ctype)))
             size += typesize;
-        else if ((typesize
-                  = gwy_serializable_ctype_size(g_ascii_tolower(ctype)))) {
+        else if ((typesize = ctype_size(g_ascii_tolower(ctype)))) {
             g_warn_if_fail(item->array_size != 0);
             size += typesize*item->array_size + sizeof(guint64);
         }
         else if (ctype == GWY_SERIALIZABLE_STRING)
             size += strlen((const gchar*)item->value.v_string)+1;
         else if (ctype == GWY_SERIALIZABLE_OBJECT)
-            size += gwy_serializable_calculate_sizes(items, pos);
+            size += calculate_sizes(items, pos);
         else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
             gsize j, alen;
 
@@ -461,7 +460,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
 
             alen = item->array_size;
             for (j = 0; j < alen; j++)
-                size += gwy_serializable_calculate_sizes(items, pos);
+                size += calculate_sizes(items, pos);
         }
         else {
             g_return_val_if_reached(0);
@@ -473,7 +472,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
 }
 
 /**
- * gwy_serializable_dump_to_stream:
+ * dump_to_stream:
  * @items: List of flattened object tree items.
  * @buffer: Serialization output buffer.
  *
@@ -484,8 +483,8 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
  **/
 static gboolean
-gwy_serializable_dump_to_stream(const GwySerializableItems *items,
-                                GwySerializableBuffer *buffer)
+dump_to_stream(const GwySerializableItems *items,
+               GwySerializableBuffer *buffer)
 {
     gsize i;
 
@@ -495,7 +494,7 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
         const guint8 ctype = item->ctype;
         gsize len = strlen(item->name) + 1;
 
-        if (!gwy_serializable_buffer_write(buffer, item->name, len))
+        if (!buffer_write(buffer, item->name, len))
             return FALSE;
 
         if (ctype == GWY_SERIALIZABLE_HEADER) {
@@ -503,86 +502,82 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
             guint64 v = item->value.v_size - len - sizeof(guint64);
 
             v = GUINT64_TO_LE(v);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
             continue;
         }
 
-        if (!gwy_serializable_buffer_write(buffer, &ctype, sizeof(guint8)))
+        if (!buffer_write(buffer, &ctype, sizeof(guint8)))
             return FALSE;
 
         /* Serializable object follows... */
         if (ctype == GWY_SERIALIZABLE_OBJECT)
             continue;
         else if (ctype == GWY_SERIALIZABLE_INT8) {
-            if (!gwy_serializable_buffer_write(buffer, &item->value.v_uint8,
-                                               sizeof(guint8)))
+            if (!buffer_write(buffer, &item->value.v_uint8, sizeof(guint8)))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_BOOLEAN) {
             guint8 v = !!item->value.v_boolean;
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint8)))
+            if (!buffer_write(buffer, &v, sizeof(guint8)))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT32) {
             guint32 v = GUINT32_TO_LE(item->value.v_uint32);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint32)))
+            if (!buffer_write(buffer, &v, sizeof(guint32)))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT64
                  || ctype == GWY_SERIALIZABLE_DOUBLE) {
             guint64 v = GUINT64_TO_LE(item->value.v_uint64);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_STRING) {
             const gchar *s = item->value.v_string;
-            if (!gwy_serializable_buffer_write(buffer, s, strlen(s)+1))
+            if (!buffer_write(buffer, s, strlen(s)+1))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT8_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
-            if (!gwy_serializable_buffer_write(buffer,
-                                               item->value.v_uint8_array,
-                                               item->array_size))
+            if (!buffer_write(buffer,
+                              item->value.v_uint8_array, item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT32_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
-            if (!gwy_serializable_buffer_write32(buffer,
-                                                 item->value.v_uint32_array,
-                                                 item->array_size))
+            if (!buffer_write32(buffer,
+                                item->value.v_uint32_array, item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY
                  || ctype == GWY_SERIALIZABLE_DOUBLE_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
-            if (!gwy_serializable_buffer_write64(buffer,
-                                                 item->value.v_uint64_array,
-                                                 item->array_size))
+            if (!buffer_write64(buffer,
+                                item->value.v_uint64_array, item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
             gsize j;
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
 
             for (j = 0; j < item->array_size; j++) {
                 const gchar *s = item->value.v_string_array[j];
-                if (!gwy_serializable_buffer_write(buffer, s, strlen(s)+1))
+                if (!buffer_write(buffer, s, strlen(s)+1))
                     return FALSE;
             }
         }
         else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
             /* Serialized objects follow... */
         }
@@ -591,17 +586,17 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
         }
     }
 
-    return gwy_serializable_buffer_finish(buffer);
+    return buffer_finish(buffer);
 }
 
 /**
- * gwy_serializable_items_done:
+ * items_done:
  * @items: List of flattened object tree items.
  *
  * Call method done on all objects that need it, in reverse order.
  **/
 static void
-gwy_serializable_items_done(const GwySerializableItems *items)
+items_done(const GwySerializableItems *items)
 {
     gsize i;
 
@@ -614,10 +609,10 @@ gwy_serializable_items_done(const GwySerializableItems *items)
 }
 
 static inline gboolean
-gwy_serializable_unpack_check_size(gsize size,
-                                   gsize required_size,
-                                   const gchar *what,
-                                   GwyErrorList **error_list)
+check_size(gsize size,
+           gsize required_size,
+           const gchar *what,
+           GwyErrorList **error_list)
 {
     if (G_LIKELY(size >= required_size))
         return TRUE;
@@ -634,17 +629,16 @@ gwy_serializable_unpack_check_size(gsize size,
 /* This is the only function that knows what integral is used to represent
  * sizes. */
 static inline gsize
-gwy_serializable_unpack_size(const guchar *buffer,
-                             gsize size,
-                             gsize item_size,
-                             gsize *array_size,
-                             const gchar *name,
-                             GwyErrorList **error_list)
+unpack_size(const guchar *buffer,
+            gsize size,
+            gsize item_size,
+            gsize *array_size,
+            const gchar *name,
+            GwyErrorList **error_list)
 {
     guint64 raw_size;
 
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64),
-                                            "data-size", error_list))
+    if (!check_size(size, sizeof(guint64), "data-size", error_list))
         return 0;
     memcpy(&raw_size, buffer, sizeof(guint64));
     raw_size = GINT64_FROM_LE(raw_size);
@@ -663,22 +657,21 @@ gwy_serializable_unpack_size(const guchar *buffer,
     }
 
     /* And if the airhtmetic works, whether the data fits. */
-    if (!gwy_serializable_unpack_check_size(size, *array_size * item_size,
-                                            name, error_list))
+    if (!check_size(size, *array_size * item_size, name, error_list))
         return 0;
 
     return sizeof(guint64);
 }
 
 static inline gsize
-gwy_serializable_unpack_boolean(const guchar *buffer,
-                                gsize size,
-                                gboolean *value,
-                                GwyErrorList **error_list)
+unpack_boolean(const guchar *buffer,
+               gsize size,
+               gboolean *value,
+               GwyErrorList **error_list)
 {
     guint8 byte;
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8),
-                                            "boolean", error_list))
+
+    if (!check_size(size, sizeof(guint8), "boolean", error_list))
         return 0;
     byte = *buffer;
     *value = !!byte;
@@ -686,30 +679,28 @@ gwy_serializable_unpack_boolean(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_uint8(const guchar *buffer,
-                              gsize size,
-                              guint8 *value,
-                              GwyErrorList **error_list)
+unpack_uint8(const guchar *buffer,
+             gsize size,
+             guint8 *value,
+             GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8),
-                                            "int8", error_list))
+    if (!check_size(size, sizeof(guint8), "int8", error_list))
         return 0;
     *value = *buffer;
     return sizeof(guint8);
 }
 
 static inline gsize
-gwy_serializable_unpack_uint8_array(const guchar *buffer,
-                                    gsize size,
-                                    gsize *array_size,
-                                    guint8 **value,
-                                    GwyErrorList **error_list)
+unpack_uint8_array(const guchar *buffer,
+                   gsize size,
+                   gsize *array_size,
+                   guint8 **value,
+                   GwyErrorList **error_list)
 {
     gsize rbytes;
 
-    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint8),
-                                                array_size, "int8-array",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer, size, sizeof(guint8),
+                               array_size, "int8-array", error_list)))
         return 0;
 
     buffer += rbytes;
@@ -721,13 +712,12 @@ gwy_serializable_unpack_uint8_array(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_uint32(const guchar *buffer,
-                               gsize size,
-                               guint32 *value,
-                               GwyErrorList **error_list)
+unpack_uint32(const guchar *buffer,
+              gsize size,
+              guint32 *value,
+              GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint32),
-                                            "int32", error_list))
+    if (!check_size(size, sizeof(guint32), "int32", error_list))
         return 0;
     memcpy(value, buffer, sizeof(guint32));
     *value = GINT32_FROM_LE(*value);
@@ -735,20 +725,19 @@ gwy_serializable_unpack_uint32(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_uint32_array(const guchar *buffer,
-                                     gsize size,
-                                     gsize *array_size,
-                                     guint32 **value,
-                                     GwyErrorList **error_list)
+unpack_uint32_array(const guchar *buffer,
+                    gsize size,
+                    gsize *array_size,
+                    guint32 **value,
+                    GwyErrorList **error_list)
 {
     gsize rbytes;
 
-    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint32),
-                                                array_size, "int32-array",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer, size, sizeof(guint32),
+                               array_size, "int32-array", error_list)))
         return 0;
-
     buffer += rbytes;
+
     if (*array_size) {
         *value = g_new(guint32, *array_size);
         memcpy(value, buffer, *array_size*sizeof(guint32));
@@ -766,13 +755,12 @@ gwy_serializable_unpack_uint32_array(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_uint64(const guchar *buffer,
-                               gsize size,
-                               guint64 *value,
-                               GwyErrorList **error_list)
+unpack_uint64(const guchar *buffer,
+              gsize size,
+              guint64 *value,
+              GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64),
-                                            "int64", error_list))
+    if (!check_size(size, sizeof(guint64), "int64", error_list))
         return 0;
     memcpy(value, buffer, sizeof(guint64));
     *value = GINT64_FROM_LE(*value);
@@ -780,20 +768,19 @@ gwy_serializable_unpack_uint64(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_uint64_array(const guchar *buffer,
-                                     gsize size,
-                                     gsize *array_size,
-                                     guint64 **value,
-                                     GwyErrorList **error_list)
+unpack_uint64_array(const guchar *buffer,
+                    gsize size,
+                    gsize *array_size,
+                    guint64 **value,
+                    GwyErrorList **error_list)
 {
     gsize rbytes;
 
-    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint64),
-                                                array_size, "int64-array",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer, size, sizeof(guint64),
+                               array_size, "int64-array", error_list)))
         return 0;
-
     buffer += rbytes;
+
     if (*array_size) {
         *value = g_new(guint64, *array_size);
         memcpy(value, buffer, *array_size*sizeof(guint64));
@@ -812,13 +799,12 @@ gwy_serializable_unpack_uint64_array(const guchar *buffer,
 
 /* The code says `int64', that is correct we only care about the size. */
 static inline gsize
-gwy_serializable_unpack_double(const guchar *buffer,
-                               gsize size,
-                               guint64 *value,
-                               GwyErrorList **error_list)
+unpack_double(const guchar *buffer,
+              gsize size,
+              guint64 *value,
+              GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(gdouble),
-                                            "double", error_list))
+    if (!check_size(size, sizeof(gdouble), "double", error_list))
         return 0;
     memcpy(value, buffer, sizeof(gdouble));
     *value = GINT64_FROM_LE(*value);
@@ -827,20 +813,19 @@ gwy_serializable_unpack_double(const guchar *buffer,
 
 /* The code says `int64', that is correct we only care about the size. */
 static inline gsize
-gwy_serializable_unpack_double_array(const guchar *buffer,
-                                     gsize size,
-                                     gsize *array_size,
-                                     guint64 **value,
-                                     GwyErrorList **error_list)
+unpack_double_array(const guchar *buffer,
+                    gsize size,
+                    gsize *array_size,
+                    guint64 **value,
+                    GwyErrorList **error_list)
 {
     gsize rbytes;
 
-    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(gdouble),
-                                                array_size, "double-array",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer, size, sizeof(gdouble),
+                               array_size, "double-array", error_list)))
         return 0;
-
     buffer += rbytes;
+
     if (*array_size) {
         *value = g_new(guint64, *array_size);
         memcpy(value, buffer, *array_size*sizeof(gdouble));
@@ -858,10 +843,10 @@ gwy_serializable_unpack_double_array(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_name(const guchar *buffer,
-                             gsize size,
-                             const gchar **value,
-                             GwyErrorList **error_list)
+unpack_name(const guchar *buffer,
+            gsize size,
+            const gchar **value,
+            GwyErrorList **error_list)
 {
     const guchar *s = memchr(buffer, '\0', size);
 
@@ -877,10 +862,10 @@ gwy_serializable_unpack_name(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_string(const guchar *buffer,
-                               gsize size,
-                               gchar **value,
-                               GwyErrorList **error_list)
+unpack_string(const guchar *buffer,
+              gsize size,
+              gchar **value,
+              GwyErrorList **error_list)
 {
     const guchar *s = memchr(buffer, '\0', size);
 
@@ -896,27 +881,24 @@ gwy_serializable_unpack_string(const guchar *buffer,
 }
 
 static inline gsize
-gwy_serializable_unpack_string_array(const guchar *buffer,
-                                     gsize size,
-                                     gsize *array_size,
-                                     gchar ***value,
-                                     GwyErrorList **error_list)
+unpack_string_array(const guchar *buffer,
+                    gsize size,
+                    gsize *array_size,
+                    gchar ***value,
+                    GwyErrorList **error_list)
 {
     gsize rbytes, i, position = 0;
 
-    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, 1,
-                                                array_size, "string-array",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer, size, 1,
+                               array_size, "string-array", error_list)))
         return 0;
     position += rbytes;
 
     if (*array_size) {
         *value = g_new0(gchar*, *array_size);
         for (i = 0; i < *array_size; i++) {
-            if (!(rbytes = gwy_serializable_unpack_string(buffer + position,
-                                                          size - position,
-                                                          *value + i,
-                                                          error_list))) {
+            if (!(rbytes = unpack_string(buffer + position, size - position,
+                                         *value + i, error_list))) {
                 while (i--)
                     g_free((*value)[i]);
                 GWY_FREE(*value);
@@ -961,21 +943,19 @@ gwy_serializable_deserialize(const guchar *buffer,
     GType type;
 
     /* Type name */
-    if (!(rbytes = gwy_serializable_unpack_name(buffer + pos, size - pos,
-                                                &typename, error_list)))
+    if (!(rbytes = unpack_name(buffer + pos, size - pos, &typename,
+                               error_list)))
         goto fail;
     pos += rbytes;
 
     /* Object size */
-    if (!(rbytes = gwy_serializable_unpack_size(buffer + pos, size - pos, 1,
-                                                &object_size, "object",
-                                                error_list)))
+    if (!(rbytes = unpack_size(buffer + pos, size - pos, 1,
+                               &object_size, "object", error_list)))
         goto fail;
     pos += rbytes;
 
     /* Check if we can deserialize such thing. */
-    if (!(type = gwy_serializable_get_interface(typename, &classref, &iface,
-                                                error_list)))
+    if (!(type = get_serializable(typename, &classref, &iface, error_list)))
         goto fail;
 
     /* We should no only fit, but the object size should be exactly size.
@@ -988,8 +968,7 @@ gwy_serializable_deserialize(const guchar *buffer,
 
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
-    items = gwy_serializable_unpack_items(buffer + pos, object_size,
-                                          error_list);
+    items = unpack_items(buffer + pos, object_size, error_list);
     if (!items)
         goto fail;
 
@@ -999,7 +978,7 @@ gwy_serializable_deserialize(const guchar *buffer,
 
 fail:
     if (items)
-        gwy_serializable_free_items(items);
+        free_items(items);
 
     if (bytes_consumed)
         *bytes_consumed = size;
@@ -1007,10 +986,10 @@ fail:
 }
 
 static GType
-gwy_serializable_get_interface(const gchar *typename,
-                               gpointer *classref,
-                               const GwySerializableInterface **iface,
-                               GwyErrorList **error_list)
+get_serializable(const gchar *typename,
+                 gpointer *classref,
+                 const GwySerializableInterface **iface,
+                 GwyErrorList **error_list)
 {
     GType type;
 
@@ -1057,11 +1036,12 @@ gwy_serializable_get_interface(const gchar *typename,
 }
 
 static GwySerializableItems*
-gwy_serializable_unpack_items(const guchar *buffer,
-                              gsize size,
-                              GwyErrorList **error_list)
+unpack_items(const guchar *buffer,
+             gsize size,
+             GwyErrorList **error_list)
 {
     GwySerializableItems *items;
+    GwySerializableItem *item;
 
     items = g_new(GwySerializableItems, 1);
     items->len = 8;
@@ -1070,8 +1050,6 @@ gwy_serializable_unpack_items(const guchar *buffer,
 
     while (size) {
         gsize rbytes;
-        const gchar *compname;
-        guint8 ctype;
 
         /* Grow items if necessary */
         if (items->n_items == items->len) {
@@ -1081,22 +1059,32 @@ gwy_serializable_unpack_items(const guchar *buffer,
             gwy_memclear(items->items + items->n_items,
                          items->len - items->n_items);
         }
+        item = items->items + items->n_items;
 
         /* Component name */
-        if (!(rbytes = gwy_serializable_unpack_name(buffer, size,
-                                                    &compname, error_list)))
+        if (!(rbytes = unpack_name(buffer, size, &item->name, error_list)))
             goto fail;
         buffer += rbytes;
         size -= rbytes;
 
         /* Component type */
-        if (!(rbytes = gwy_serializable_unpack_uint8(buffer, size,
-                                                     &ctype, error_list)))
+        if (!(rbytes = unpack_uint8(buffer, size, &item->ctype, error_list)))
             goto fail;
         buffer += rbytes;
         size -= rbytes;
 
         /* The data */
+        switch (item->ctype) {
+            case GWY_SERIALIZABLE_BOOLEAN:
+            if (!(rbytes = unpack_boolean(buffer, size, &item->value.v_boolean,
+                                          error_list)))
+                goto fail;
+            break;
+        }
+
+        buffer += rbytes;
+        size -= rbytes;
+        items->n_items++;
     }
 
 fail:
@@ -1105,7 +1093,7 @@ fail:
 }
 
 static void
-gwy_serializable_free_items(GwySerializableItems *items)
+free_items(GwySerializableItems *items)
 {
     gsize i;
 
@@ -1114,6 +1102,10 @@ gwy_serializable_free_items(GwySerializableItems *items)
         GwySerializableCType ctype = item->ctype;
 
         switch (ctype) {
+            case 0:
+            /* Type not assigned yet.  Can happen. */
+            break;
+
             case GWY_SERIALIZABLE_OBJECT:
             GWY_OBJECT_UNREF(item->value.v_object);
             break;
