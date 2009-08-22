@@ -323,10 +323,11 @@ gwy_expr_stack_interpret(GwyExpr *expr)
 /**
  * gwy_expr_stack_interpret_vectors:
  * @expr: An expression.
- * @n: The lenght of @result and of @data member arrays, that is vector length.
- * @data: An array of arrays of length @n.  The arrays correspond to expression
- *        variables in gwy_expr_execute().  Zeroth array can be %NULL.
- * @result: An array of length @n to store computation results to.  It may be
+ * @n: Lenght of @result and of @data member arrays, that is vector length.
+ * @data: Array of arrays, each of length @n.  The arrays correspond to
+ *        individual expression variables in gwy_expr_execute().  The zeroth
+ *        array is not accessed and it can be %NULL.
+ * @result: Array of length @n to store computation results to.  It may be
  *          one of those in @data.
  *
  * Performs actual vectorized stack interpretation.
@@ -542,7 +543,7 @@ token_list_length(GwyExprToken *tokens)
  **/
 static inline GwyExprToken*
 token_list_prepend(GwyExprToken *tokens,
-                            GwyExprToken *token)
+                   GwyExprToken *token)
 {
     token->next = tokens;
     if (tokens)
@@ -587,7 +588,7 @@ token_list_reverse(GwyExprToken *tokens)
  **/
 static inline GwyExprToken*
 token_list_concat(GwyExprToken *head,
-                           GwyExprToken *tail)
+                  GwyExprToken *tail)
 {
     GwyExprToken *end;
 
@@ -643,8 +644,8 @@ token_list_delete_token(GwyExprToken *tokens,
  **/
 static inline GwyExprToken*
 token_list_insert(GwyExprToken *tokens,
-                           GwyExprToken *before,
-                           GwyExprToken *token)
+                  GwyExprToken *before,
+                  GwyExprToken *token)
 {
     if (!before->prev)
         return token_list_prepend(tokens, token);
@@ -822,8 +823,7 @@ gwy_expr_rectify_token_list(GwyExpr *expr)
                          || prev->token == G_TOKEN_IDENTIFIER)) {
                 prev = gwy_expr_token_new0();
                 prev->token = '*';
-                expr->tokens = token_list_insert(expr->tokens,
-                                                          t, prev);
+                expr->tokens = token_list_insert(expr->tokens, t, prev);
             }
             t = t->next;
             break;
@@ -1344,6 +1344,18 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
     return TRUE;
 }
 
+static void
+gwy_expr_ensure_constants(GwyExpr *expr)
+{
+    if (expr->constants)
+        return;
+
+    /* We could also put constants into scanner's symbol table, but then
+     * we have to tell them apart when we get some symbol from scanner. */
+    expr->constants = g_hash_table_new_full(g_direct_hash, g_direct_equal,
+                                            NULL, g_free);
+}
+
 /****************************************************************************
  *
  *  High level, public API
@@ -1369,12 +1381,7 @@ gwy_expr_new(void)
         return NULL;
 
     expr = g_new0(GwyExpr, 1);
-
-    /* We could also put constants into scanner's symbol table, but then
-     * we have to tell them apart when we get some symbol from scanner. */
-    expr->constants = g_hash_table_new_full(g_direct_hash, g_direct_equal,
-                                            NULL, g_free);
-    expr->expr = g_string_new("");
+    expr->expr = g_string_new(NULL);
 
     return expr;
 }
@@ -1650,8 +1657,6 @@ gwy_expr_define_constant(GwyExpr *expr,
                          gdouble value,
                          GError **err)
 {
-    GQuark quark;
-
     g_return_val_if_fail(expr, FALSE);
     g_return_val_if_fail(name, FALSE);
 
@@ -1668,7 +1673,8 @@ gwy_expr_define_constant(GwyExpr *expr,
         return FALSE;
     }
 
-    quark = g_quark_from_string(name);
+    GQuark quark = g_quark_from_string(name);
+    gwy_expr_ensure_constants(expr);
     g_hash_table_insert(expr->constants, GUINT_TO_POINTER(quark),
                         g_memdup(&value, sizeof(gdouble)));
 
@@ -1692,12 +1698,13 @@ gboolean
 gwy_expr_undefine_constant(GwyExpr *expr,
                            const gchar *name)
 {
-    GQuark quark;
-
     g_return_val_if_fail(expr, FALSE);
     g_return_val_if_fail(name, FALSE);
 
-    quark = g_quark_from_string(name);
+    if (!expr->constants)
+        return FALSE;
+
+    GQuark quark = g_quark_from_string(name);
     if (!quark)
         return FALSE;
 
