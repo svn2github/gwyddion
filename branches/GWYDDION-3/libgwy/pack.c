@@ -164,7 +164,11 @@ gwy_pack(const gchar *format,
         if (g_ascii_isspace(f))
             continue;
        
-        g_warn_if_fail(count || !seen_count);
+        if (G_UNLIKELY(seen_count && !count)) {
+            g_warning("Zero item count");
+            seen_count = FALSE;
+            continue;
+        }
         itemsize = (f >= 64 && f < 128) ? sizes_from64[f - 64] : 0;
         if (G_UNLIKELY(!itemsize)) {
             g_set_error(error, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
@@ -182,6 +186,7 @@ gwy_pack(const gchar *format,
         if (f == 'x') {
             memset(buffer + pos, 0, count);
             pos += count;
+            count = 0;
         }
         else if (f == 'r') {
             while (count) {
@@ -197,6 +202,7 @@ gwy_pack(const gchar *format,
             const guchar *arg = va_arg(ap, const guchar*);
             memcpy(buffer + pos, arg, count);
             pos += count;
+            count = 0;
         }
         else if (f == 's') {
             while (count) {
@@ -209,6 +215,7 @@ gwy_pack(const gchar *format,
                 }
                 memcpy(buffer + pos, arg, itemsize);
                 pos += itemsize;
+                count--;
             }
         }
         else if (f == 'p') {
@@ -228,6 +235,7 @@ gwy_pack(const gchar *format,
                 buffer[pos++] = itemsize;
                 memcpy(buffer + pos, arg, itemsize);
                 pos += itemsize;
+                count--;
             }
         }
         /* We do not care what bloody type the user passed to us.  For
@@ -238,6 +246,7 @@ gwy_pack(const gchar *format,
             while (count) {
                 guchar arg = *va_arg(ap, const guchar*);
                 buffer[pos++] = arg;
+                count--;
             }
         }
         else if (itemsize == 2) {
@@ -247,6 +256,7 @@ gwy_pack(const gchar *format,
                     arg = GUINT16_SWAP_LE_BE(arg);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -254,6 +264,7 @@ gwy_pack(const gchar *format,
                     guint16 arg = *va_arg(ap, const guint16*);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
@@ -264,6 +275,7 @@ gwy_pack(const gchar *format,
                     arg = GUINT32_SWAP_LE_BE(arg);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -271,6 +283,7 @@ gwy_pack(const gchar *format,
                     guint32 arg = *va_arg(ap, const guint32*);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
@@ -281,6 +294,7 @@ gwy_pack(const gchar *format,
                     arg = GUINT64_SWAP_LE_BE(arg);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -288,6 +302,7 @@ gwy_pack(const gchar *format,
                     guint64 arg = *va_arg(ap, const guint64*);
                     memcpy(buffer + pos, &arg, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
@@ -375,7 +390,12 @@ gwy_unpack(const gchar *format,
         if (g_ascii_isspace(f))
             continue;
        
-        g_warn_if_fail(count || !seen_count);
+        if (G_UNLIKELY(seen_count && !count)) {
+            g_warning("Zero item count");
+            seen_count = FALSE;
+            continue;
+        }
+
         itemsize = (f >= 64 && f < 128) ? sizes_from64[f - 64] : 0;
         if (G_UNLIKELY(!itemsize)) {
             g_set_error(error, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
@@ -392,6 +412,7 @@ gwy_unpack(const gchar *format,
 
         if (f == 'x') {
             pos += count;
+            count = 0;
         }
         else if (f == 'r') {
             while (count) {
@@ -407,6 +428,7 @@ gwy_unpack(const gchar *format,
             guchar *arg = va_arg(ap, guchar*);
             memcpy(arg, buffer + pos, count);
             pos += count;
+            count = 0;
         }
         else if (f == 's') {
             while (count) {
@@ -423,6 +445,7 @@ gwy_unpack(const gchar *format,
                     to_free = g_ptr_array_new();
                 g_ptr_array_add(to_free, *arg);
                 pos += itemsize;
+                count--;
             }
         }
         else if (f == 'p') {
@@ -439,6 +462,7 @@ gwy_unpack(const gchar *format,
                     to_free = g_ptr_array_new();
                 g_ptr_array_add(to_free, *arg);
                 pos += itemsize;
+                count--;
             }
         }
         /* We do not care what bloody type the user passed to us.  For
@@ -449,6 +473,7 @@ gwy_unpack(const gchar *format,
             while (count) {
                 guchar *arg = va_arg(ap, guchar*);
                 *arg = buffer[pos++];
+                count--;
             }
         }
         else if (itemsize == 2) {
@@ -458,6 +483,7 @@ gwy_unpack(const gchar *format,
                     memcpy(arg, buffer + pos, itemsize);
                     *arg = GUINT16_SWAP_LE_BE(*arg);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -465,6 +491,7 @@ gwy_unpack(const gchar *format,
                     guint16 *arg = va_arg(ap, guint16*);
                     memcpy(arg, buffer + pos, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
@@ -475,6 +502,7 @@ gwy_unpack(const gchar *format,
                     memcpy(arg, buffer + pos, itemsize);
                     *arg = GUINT32_SWAP_LE_BE(*arg);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -482,6 +510,7 @@ gwy_unpack(const gchar *format,
                     guint32 *arg = va_arg(ap, guint32*);
                     memcpy(arg, buffer + pos, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
@@ -492,6 +521,7 @@ gwy_unpack(const gchar *format,
                     memcpy(arg, buffer + pos, itemsize);
                     *arg = GUINT64_SWAP_LE_BE(*arg);
                     pos += itemsize;
+                    count--;
                 }
             }
             else {
@@ -499,6 +529,7 @@ gwy_unpack(const gchar *format,
                     guint64 *arg = va_arg(ap, guint64*);
                     memcpy(arg, buffer + pos, itemsize);
                     pos += itemsize;
+                    count--;
                 }
             }
         }
