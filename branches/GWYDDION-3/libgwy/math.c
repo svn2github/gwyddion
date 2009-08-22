@@ -27,11 +27,11 @@
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
 
-static void gwy_math_sort_plain(gdouble *array,
-                                gsize n);
-static void gwy_math_sort_index(gdouble *array,
-                                guint *index_array,
-                                gsize n);
+static void sort_plain(gdouble *array,
+                       gsize n);
+static void sort_with_index(gdouble *array,
+                            guint *index_array,
+                            gsize n);
 
 /* Quickly find median value in an array
  * based on public domain code by Nicolas Devillard */
@@ -129,9 +129,9 @@ gwy_math_sort(gdouble *array,
               gsize n)
 {
     if (index_array)
-        gwy_math_sort_index(array, index_array, n);
+        sort_with_index(array, index_array, n);
     else
-        gwy_math_sort_plain(array, n);
+        sort_plain(array, n);
 }
 
 /****************************************************************************
@@ -214,8 +214,8 @@ typedef struct {
    stack size is needed (actually O(1) in this case)!  */
 
 static void
-gwy_math_sort_plain(gdouble *array,
-                    gsize n)
+sort_plain(gdouble *array,
+           gsize n)
 {
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
@@ -366,9 +366,9 @@ typedef struct {
  * instead of array indices when it effectively doubles the number of
  * variables.  This might force some variables from registers to memory... */
 static void
-gwy_math_sort_index(gdouble *array,
-                    guint *index_array,
-                    gsize n)
+sort_with_index(gdouble *array,
+                guint *index_array,
+                gsize n)
 {
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
