@@ -1202,7 +1202,8 @@ invent_item_name(GwyInventory *inventory,
  * GwyInventoryItemType:
  * @type: Object type, if item is object or other type with registered GType.
  *        May be zero to indicate an unregistered item type.
- *        If items are objects, inventory takes a reference on them.
+ *        If items are objects inventory takes a reference on them.  Therefore
+ *        it is usually unnecessary to set g_object_unref() as destroy().
  * @watchable_signal: Item signal name to watch, used only for objects.
  *                    When item emits this signal, inventory emits
  *                    "item-updated" signal for it.
