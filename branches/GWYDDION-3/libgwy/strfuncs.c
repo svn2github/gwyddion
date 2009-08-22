@@ -118,6 +118,16 @@ gwy_memmem(gconstpointer haystack,
  * @buffer is updated to point after the end of the line and the "\n"
  * (or "\r\n") is replaced with "\0", if present.
  *
+ * The typical usage of gwy_str_next_line() is:
+ * |[
+ * gchar *p = text;
+ * for (gchar *line = gwy_str_next_line(&p);
+ *      line;
+ *      line = gwy_str_next_line(&p)) {
+ *     // Do something with line
+ * }
+ * ]|
+ *
  * Returns: The start of the line.  %NULL if the buffer is empty or %NULL.
  *          The return value is <emphasis>not</emphasis> a new string; the
  *          normal return value is the previous value of @buffer.
