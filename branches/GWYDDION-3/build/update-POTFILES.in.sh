@@ -1,5 +1,7 @@
 #!/bin/sh
-outfile=po/POTFILES.in
+
+outfile=$1
+shift
 
 # Keep the `GENERATED' string separated to prevent match here
 G=GENERATED
@@ -8,7 +10,7 @@ cat >$outfile.new <<EOF
 # This is a $G file, by build/update-POTFILES.in.sh.
 EOF
 
-for dir in libgwy; do
+for dir in "$@"; do
   echo >>$outfile.new
   echo "# $dir" >>$outfile.new
   find $dir -name \*.\[ch\] \

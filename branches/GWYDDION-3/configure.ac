@@ -20,6 +20,7 @@ AC_CONFIG_FILES([
   docs/Makefile
   docs/libgwy/Makefile
   po/Makefile.in
+  po-libgwy/Makefile.in
 ])
 
 AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options nostdinc])
@@ -46,10 +47,12 @@ if test "x$ac_cv_prog_cc_c99" = xno; then
   AC_MSG_ERROR([C99 standard conforming C compiler is required])
 fi
 
+GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$PACKAGE_TARNAME",[Gettext package name])
-AC_SUBST([GETTEXT_PACKAGE],[$PACKAGE_TARNAME])
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",
+                  [Prefix of gettext domain identifiers])
 
 IT_PROG_INTLTOOL([0.40],[no-xml])
 
@@ -95,6 +98,14 @@ _______EOF
 ],
 [
   gwy_math_exp10=$gwy_math_exp10
+])
+
+AC_CONFIG_COMMANDS([sed-po-makefiles],
+[
+  for x in libgwy; do
+    sed -e "/POTFILES =/r po-$x/POTFILES" po-$x/Makefile.in > po-$x/Makefile \
+      && touch po-$x/stamp-it
+  done
 ])
 
 AC_OUTPUT

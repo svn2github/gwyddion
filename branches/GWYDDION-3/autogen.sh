@@ -6,7 +6,7 @@
 # Get required version of a maintainer tool from configure.ac.  This ensures
 # the version required here and in configure.ac is the same.
 # Expected format: MACRO([VERSION...]) or MACRO(VERSION...)
-inherit_version_from_configure_ac() {
+inherit_reqver() {
   local macro=$1
   local v
   v=$(sed "s/^$macro([[]*\([0-9]*\)\.\([0-9]*\).*/\1 \2/;t;d" configure.ac)
@@ -14,7 +14,7 @@ inherit_version_from_configure_ac() {
     echo $v
   else
     echo "ERROR: Cannot find $macro in configure.ac!"
-    echo "       Check your setup and complain to $PROJECT maintainer."
+    echo "       Check your setup and complain to $project maintainer."
     exit 1
   fi
 }
@@ -86,13 +86,13 @@ check_tool() {
   fi
 
   if test -n "$diewhy"; then
-    echo "ERROR: $name at least $reqmajor.$reqminor is required to bootstrap $PROJECT."
+    echo "ERROR: $name at least $reqmajor.$reqminor is required to bootstrap $project."
     case $diewhy in
       version) echo "       You have only version $ver of $name installed.";;
       othercmd) echo "       It should also install command \`$othercmd' which is missing.";;
       otherversion) echo "       The version of \`$othercmd' differs from $cmd: $otherver != $ver.";;
       cmd) ;;
-      *) echo "       *** If you see this, shoot the $PROJECT maintainer! ***";;
+      *) echo "       *** If you see this, shoot the $project maintainer! ***";;
     esac
     echo "       Install the appropriate package for your operating system,"
     echo "       or get the source tarball of $name at"
@@ -109,8 +109,10 @@ if test -z "$*"; then
 fi
 
 DIE=0
-PROJECT=Gwyddion
+project=Gwyddion
+podirs="po po-libgwy"
 
+# Default tools.
 ACLOCAL=${ACLOCAL:-aclocal}
 AUTOCONF=${AUTOCONF:-autoconf}
 AUTOHEADER=${AUTOHEADER:-autoheader}
@@ -122,13 +124,15 @@ LIBTOOLIZE=${LIBTOOLIZE:-libtoolize}
 XGETTEXT=${XGETTEXT:-xgettext}
 CONFIGURE_FLAGS="--enable-gtk-doc"
 
-AUTOCONF_REQVER=$(inherit_version_from_configure_ac AC_PREREQ)
-AUTOMAKE_REQVER=$(inherit_version_from_configure_ac AM_INIT_AUTOMAKE)
-GETTEXT_REQVER=$(inherit_version_from_configure_ac AM_GNU_GETTEXT_VERSION)
-GTKDOC_REQVER=$(inherit_version_from_configure_ac GTK_DOC_CHECK)
-INTLTOOL_REQVER=$(inherit_version_from_configure_ac IT_PROG_INTLTOOL)
+# Get required versions from configure.ac
+AUTOCONF_REQVER=$(inherit_reqver AC_PREREQ)
+AUTOMAKE_REQVER=$(inherit_reqver AM_INIT_AUTOMAKE)
+GETTEXT_REQVER=$(inherit_reqver AM_GNU_GETTEXT_VERSION)
+GTKDOC_REQVER=$(inherit_reqver GTK_DOC_CHECK)
+INTLTOOL_REQVER=$(inherit_reqver IT_PROG_INTLTOOL)
 LIBTOOL_REQVER="1 5"
 
+# Check tool versions
 check_tool Autoconf "AUTOCONF"    "AUTOHEADER" $AUTOCONF_REQVER ftp://ftp.gnu.org/pub/gnu/autoconf/
 check_tool Automake "AUTOMAKE"    "ACLOCAL"    $AUTOMAKE_REQVER ftp://ftp.gnu.org/pub/gnu/automake/
 check_tool Gettext  "XGETTEXT"    "AUTOPOINT"  $GETTEXT_REQVER  ftp://ftp.gnu.org/pub/gnu/gettext/
@@ -141,7 +145,9 @@ if test "$DIE" = 1; then
 fi
 
 if test -x ./build/update-POTFILES.in.sh; then
-  ./build/update-POTFILES.in.sh
+  # XXX: This is a fake, add some real directory list once we have app files
+  ./build/update-POTFILES.in.sh po/POTFILES.in        libgwy
+  ./build/update-POTFILES.in.sh po-libgwy/POTFILES.in libgwy
 fi
 
 (
@@ -157,7 +163,7 @@ fi
   run $AUTOMAKE --add-missing --force-missing $AUTOMAKE_FLAGS
   ) || {
     echo "ERROR: Re-generating failed."
-    echo "       See above errors and complain to $PROJECT maintainer."
+    echo "       See above errors and complain to $project maintainer."
     exit 1
   }
 
@@ -165,6 +171,29 @@ fi
 rm -f intltool-extract.in intltool-merge.in intltool-update.in
 # We have our own gtk-doc.makefile, thanks.
 rm -f docs/gtk-doc.make
+# autopoint also adds heaps of useless files.
+for subdir in $podirs; do
+  (
+    cd $subdir && rm -f boldquot.sed en@boldquot.header en@quot.header \
+                        insert-header.sin Makevars.template quot.sed \
+                        remove-potcdate.sin Rules-quot
+  )
+  domain=gwyddion3${subdir#po}
+  if test $subdir != po; then
+    rm -f $subdir/Makefile.in.in
+    sed -e "s#^\(GETTEXT_PACKAGE = \)@GETTEXT_PACKAGE@#\1$domain#" \
+        po/Makefile.in.in >$subdir/Makefile.in.in
+  fi
+  sed -e "s#@domain@#$domain#" -e "s#@subdir@#$subdir#" \
+      build/Makevars.in >$subdir/Makevars
+done
 
+# Finally we can run configure
 echo ./configure $CONFIGURE_FLAGS "$@"
-exec ./configure $CONFIGURE_FLAGS "$@"
+./configure $CONFIGURE_FLAGS "$@" || exit 1
+
+# This has to be done somewhere.
+for subdir in $podirs; do
+  domain=gwyddion3${subdir#po}
+  make -C $subdir $domain.pot
+done

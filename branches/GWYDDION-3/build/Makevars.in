@@ -1,0 +1,8 @@
+# Makefile variables for PO directory in any package using GNU gettext.
+DOMAIN = @domain@
+subdir = @subdir@
+top_builddir = ..
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
+COPYRIGHT_HOLDER = David Necas (Yeti) and others
+MSGID_BUGS_ADDRESS = yeti@gwyddion.net
+EXTRA_LOCALE_CATEGORIES =

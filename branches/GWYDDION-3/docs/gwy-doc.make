@@ -79,15 +79,15 @@ docs: html-build.stamp
 scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	@echo 'gtk-doc: Scanning header files'
 	gtkdoc-scan --module=$(DOC_MODULE) \
-	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
-	            --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	            --rebuild-sections --rebuild-types \
-	            --deprecated-guards="GWY_DISABLE_DEPRECATED" \
-	            --ignore-decorators="_GWY_STATIC_INLINE"
+	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
+	    --rebuild-sections --rebuild-types \
+	    --deprecated-guards="GWY_DISABLE_DEPRECATED" \
+	    --ignore-decorators="_GWY_STATIC_INLINE"
 	if grep -l '^..*$$' $(DOC_MODULE).types >/dev/null 2>&1 ; then \
 		CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" \
 			gtkdoc-scangobj --module=$(DOC_MODULE) \
-			                --output-dir=$(builddir); \
+			        --output-dir=$(builddir); \
 	else \
 		rm -f $(SCANOBJ_FILES); \
 		touch $(SCANOBJ_FILES); \
@@ -105,12 +105,12 @@ $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)
 sgml-build.stamp: $(CFILE_GLOB) $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
 	@echo 'gtk-doc: Building XML'
 	gtkdoc-mkdb --module=$(DOC_MODULE) \
-	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
-	            --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	            --sgml-mode --output-format=xml \
-	            --expand-content-files="$(expand_content_files)" \
-	            --main-sgml-file=$(DOC_MAIN_SGML_FILE) \
-	            --default-includes=$(DOC_MODULE)/$(DOC_MODULE).h
+	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
+	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
+	    --sgml-mode --output-format=xml \
+	    --expand-content-files="$(expand_content_files)" \
+	    --main-sgml-file=$(DOC_MAIN_SGML_FILE) \
+	    --default-includes=$(DOC_MODULE)/$(DOC_MODULE).h
 	touch sgml-build.stamp
 
 sgml.stamp: sgml-build.stamp
@@ -124,12 +124,12 @@ html-build.stamp: sgml.stamp $(srcdir)/$(DOC_MAIN_SGML_FILE) $(content_files)
 	mkdir html
 	test -f $(DOC_MAIN_SGML_FILE) || cp -f $(srcdir)/$(DOC_MAIN_SGML_FILE) .
 	cd html && gtkdoc-mkhtml --path=$(abs_builddir) $(DOC_MODULE) \
-	                         ../$(DOC_MAIN_SGML_FILE)
+	                 ../$(DOC_MAIN_SGML_FILE)
 	test "x$(HTML_IMAGES)" == x || cp -f $(HTML_IMAGES) html/
 	cp $(top_srcdir)/docs/style.css html/
 	@echo 'gtk-doc: Fixing cross-references'
 	gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) \
-	               --module=$(DOC_MODULE) $(FIXXREF_OPTIONS)
+	       --module=$(DOC_MODULE) $(FIXXREF_OPTIONS)
 	touch html-build.stamp
 
 ##############
