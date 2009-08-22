@@ -40,8 +40,9 @@ enum {
     PROP_0,
     PROP_NAME,
     PROP_FILE_NAME,
-    PROP_IS_MODIFIABLE,
     PROP_IS_PREFERRED,
+    PROP_IS_MODIFIABLE,
+    PROP_IS_MODIFIED,
     N_PROPS
 };
 
@@ -76,6 +77,7 @@ static GwyResource*      parse                          (gchar *text,
 static gboolean          name_is_unique                 (GwyResource *resource,
                                                          GwyResourceClass *klass,
                                                          GError **error);
+static gchar*            construct_filename             (const gchar *resource_name);
 static void              gwy_resource_data_changed_impl (GwyResource *resource);
 
 /* Use a static propery -> trait map.  We could do it generically, too.
@@ -183,6 +185,14 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
+    pspec = g_param_spec_boolean("is-modified",
+                                 "Is modified",
+                                 "Whether a resource was modified, this is "
+                                 "set when data-changed signal is emitted",
+                                 FALSE,
+                                 G_PARAM_READABLE);
+    g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
+
     /**
      * GwyResource::data-changed:
      * @gwyresource: The #GwyResource which received the signal.
@@ -257,12 +267,16 @@ gwy_resource_get_property(GObject *object,
         g_value_set_string(value, resource->filename);
         break;
 
+        case PROP_IS_PREFERRED:
+        g_value_set_boolean(value, resource->is_preferred);
+        break;
+
         case PROP_IS_MODIFIABLE:
         g_value_set_boolean(value, resource->is_modifiable);
         break;
 
-        case PROP_IS_PREFERRED:
-        g_value_set_boolean(value, resource->is_preferred);
+        case PROP_IS_MODIFIED:
+        g_value_set_boolean(value, resource->is_modified);
         break;
 
         default:
@@ -525,29 +539,138 @@ gwy_resource_is_used(GwyResource *resource)
 }
 
 /**
- * gwy_resource_dump:
+ * gwy_resource_save:
  * @resource: A resource.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         #GFileError domains can occur.
  *
- * Dumps a resource to a textual (human readable) form.
+ * Saves a resource.
  *
- * Returns: Textual resource representation.
+ * The resource is actually save only if the @is_modified flag it set.
+ * If it fails to save self, the flag is kept set, otherwise it is cleared.
+ * Only modifiable resources can be saved and the file name is determined
+ * automatically (if the resources was loaded from a file originally, it will
+ * be saved to the same file).
+ *
+ * Returns: %TRUE if the operation succeeded, %FALSE if it failed.  Not saving
+ *          the resource because it was not modified counts as success.
  **/
-GString*
-gwy_resource_dump(GwyResource *resource)
+gboolean
+gwy_resource_save(GwyResource *resource,
+                  GError **error)
 {
-    void (*method)(GwyResource*, GString*);
-    GString *str;
+    g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
+    g_return_val_if_fail(resource->is_modifiable, FALSE);
 
-    g_return_val_if_fail(GWY_IS_RESOURCE(resource), NULL);
-    method = GWY_RESOURCE_GET_CLASS(resource)->dump;
-    g_return_val_if_fail(method, NULL);
+    if (!resource->is_modified)
+        return TRUE;
 
-    str = g_string_new(MAGIC_HEADER3);
-    g_string_append(str, G_OBJECT_TYPE_NAME(resource));
-    g_string_append_c(str, '\n');
-    method(resource, str);
+    GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
+    g_return_val_if_fail(klass && klass->dump, FALSE);
 
-    return str;
+    gchar *body = klass->dump(resource);
+    gchar *buffer = g_strconcat(MAGIC_HEADER3,
+                                G_OBJECT_TYPE_NAME(resource),
+                                "\n",
+                                "name ",
+                                resource->name,
+                                "\n",
+                                body,
+                                NULL);
+    g_free(body);
+
+    if (!resource->filename) {
+        gchar *dirname = gwy_user_directory(klass->name);
+        gchar *basename_sys = construct_filename(resource->name);
+        gchar *filename_sys = g_build_filename(dirname, basename_sys, NULL);
+        g_free(dirname);
+        g_free(basename_sys);
+
+        /* Avoid the numbering loop in the simple case. */
+        if (g_file_test(filename_sys, G_FILE_TEST_EXISTS)) {
+            GString *str = g_string_new(filename_sys);
+            gsize len = str->len;
+
+            for (guint i = 1; ; i++) {
+                g_string_truncate(str, len);
+                g_string_append_printf(str, "-%u", i);
+
+                if (!g_file_test(filename_sys, G_FILE_TEST_EXISTS))
+                    break;
+            }
+
+            g_free(filename_sys);
+            filename_sys = g_string_free(str, FALSE);
+        }
+        resource->filename = filename_sys;
+    }
+
+    gboolean ok = g_file_set_contents(resource->filename, buffer, -1, error);
+    g_free(buffer);
+
+    return ok;
+}
+
+static gchar*
+construct_filename(const gchar *resource_name)
+{
+    /*
+     * The name must be representable on any file system and in any code page.
+     * Therefore, it must consists of ASCII letters only!
+     */
+    static const gchar fallback_name[] = "Untitled";
+
+    g_return_val_if_fail(resource_name, g_strdup(fallback_name));
+
+    /* First get rid of bad ASCII characers because we know the encoding now.
+     * We might have troubles filtering them after the conversion.   Be very
+     * conservative, the name does not matter. */
+    gsize len = strlen(resource_name);
+    gchar *resname = g_slice_alloc(sizeof(gchar)*(len + 1));
+
+    gboolean garbage = FALSE;
+    gsize j = 0;
+    for (gsize i = 0; i < len; i++) {
+        if ((guchar)resource_name[i] >= 128
+            || g_ascii_isalnum(resource_name[i])
+            || resource_name[i] == '-'
+            || resource_name[i] == '.'
+            || resource_name[i] == '_') {
+            resname[j++] = resource_name[i];
+            garbage = FALSE;
+        }
+        else {
+            if (!garbage)
+                resname[j++] = '-';
+            garbage = TRUE;
+        }
+    }
+    resname[j] = '\0';
+
+    /* Then convert to filename encoding, piece by piece. */
+    GString *str = g_string_new(NULL);
+    GError *error = NULL;
+    do {
+        g_clear_error(&error);
+        gsize bytes_read;
+        gchar *filename_sys = g_filename_from_utf8(resname, -1,
+                                                   &bytes_read, NULL, &error);
+        if (filename_sys) {
+            g_string_append(str, filename_sys);
+            g_free(filename_sys);
+        }
+        resource_name += bytes_read;
+        if (*resource_name)
+            resource_name++;
+    } while (error && *resource_name);
+
+    g_clear_error(&error);
+    g_free(resname);
+
+    if (!str->len || (str->len == 1 && garbage))
+        g_string_assign(str, fallback_name);
+
+    return g_string_free(str, FALSE);;
 }
 
 /**
@@ -777,23 +900,6 @@ gwy_resource_data_changed_impl(GwyResource *resource)
 }
 
 /**
- * gwy_resource_data_saved:
- * @resource: A resource.
- *
- * Clears @is_modified flag of a resource.
- **/
-void
-gwy_resource_data_saved(GwyResource *resource)
-{
-    g_return_if_fail(GWY_IS_RESOURCE(resource));
-    if (!resource->is_modifiable)
-        g_warning("Constant resource ‘%s’ of type %s was passed to "
-                  "data_saved()",
-                  resource->name, G_OBJECT_TYPE_NAME(resource));
-    resource->is_modified = FALSE;
-}
-
-/**
  * gwy_resource_class_load:
  * @klass: A resource class.
  *
@@ -923,22 +1029,6 @@ name_is_unique(GwyResource *resource,
     return FALSE;
 }
 
-static gchar*
-build_filename(GwyResource *resource)
-{
-    GwyResourceClass *klass;
-
-    g_return_val_if_fail(GWY_IS_RESOURCE(resource), NULL);
-    if (!resource->is_modifiable)
-        g_warning("Filename of a constant resource ‘%s’ should not be needed",
-                  resource->name);
-
-    klass = GWY_RESOURCE_GET_CLASS(resource);
-    /* TODO: free gwy_user_directory() */
-    return g_build_filename(gwy_user_directory(klass->name),
-                            resource->name, NULL);
-}
-
 /**
  * gwy_resource_classes_finalize:
  *
@@ -1000,13 +1090,12 @@ gwy_resource_classes_finalize(void)
  *        resources.
  * @item_type: Inventory item type.  Most fields are pre-filled, but namely
  *             @type and @copy must be filled by particular resource type.
- * @data_changed: "data-changed" signal method.
+ * @data_changed: "data-changed" class signal handler.
  * @use: gwy_resource_use() virtual method.
  * @discard: gwy_resource_discard() virtual method.
- * @dump: gwy_resource_dump() virtual method, it only cares about resource
- *        data itself, the envelope is handled by #GwyResource.
- * @parse: Virtual method parsing back the text dump, in only cares about
- *         resource data itself, the envelope is handled by #GwyResource.
+ * @dump: Dumps resource data to text, the envelope is added by #GwyResource.
+ * @parse: Parses back the text dump, in parses only the
+ *         actual resource data, the envelope is handled by #GwyResource.
  *         The method is permitted to modify the contents of @text.
  *
  * Resource class.

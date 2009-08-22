@@ -89,8 +89,7 @@ struct _GwyResourceClass {
     /* Virtual table */
     void         (*use)    (GwyResource *resource);
     void         (*discard)(GwyResource *resource);
-    void         (*dump)   (GwyResource *resource,
-                            GString *string);
+    gchar*       (*dump)   (GwyResource *resource);
     GwyResource* (*parse)  (gchar *text,
                             GError **error);
 
