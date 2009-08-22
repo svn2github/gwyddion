@@ -31,10 +31,6 @@
 #error Byte order used on this system is not supported.
 #endif
 
-#ifdef I
-#undef I
-#endif
-
 static const guint sizes_from64[] = {
 /*  @  A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  */
     0, 0, 0, 1, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0,
