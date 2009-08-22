@@ -173,11 +173,11 @@ dist-check-gtkdoc:
 	@false
 endif
 
-dist-hook: dist-check-gtkdoc dist-hook-local
+dist-hook: dist-check-gtkdoc
 	mkdir $(distdir)/html
 	if test -s html/index.sgml; then d=html; else d=$(srcdir)/html; fi; \
 	cp -f $$d/* $(distdir)/html
 
-.PHONY: dist-hook-local docs
+.PHONY: docs
 
 # vim: set ft=make noet :
