@@ -250,7 +250,6 @@ gwy_inventory_new_with_items(const GwyInventoryItemType *itype,
         register_item(inventory, iter, item);
     }
 
-    inventory->is_initialized = TRUE;
     return inventory;
 }
 
@@ -270,8 +269,9 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
                             const GwyInventoryItemType *itype)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(g_sequence_get_length(inventory->items) == 0);
 
+    inventory->has_item_type = TRUE;
     inventory->item_type = *itype;
     if (itype->type) {
         inventory->is_object = g_type_is_a(itype->type, G_TYPE_OBJECT);
@@ -297,7 +297,7 @@ guint
 gwy_inventory_get_n_items(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), 0);
-    g_return_val_if_fail(inventory->is_initialized, 0);
+    g_return_val_if_fail(inventory->has_item_type, 0);
     return (guint)g_sequence_get_length(inventory->items);
 }
 
@@ -307,16 +307,13 @@ gwy_inventory_get_n_items(GwyInventory *inventory)
  *
  * Returns whether an inventory can create new items itself.
  *
- * The prerequistie is that item type is a serializable object.  It enables
- * functions like gwy_inventory_new_item().
- *
  * Returns: %TRUE if inventory can create new items itself.
  **/
 gboolean
 gwy_inventory_can_make_copies(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), FALSE);
-    g_return_val_if_fail(inventory->is_initialized, FALSE);
+    g_return_val_if_fail(inventory->has_item_type, FALSE);
     return inventory->can_make_copies;
 }
 
@@ -333,7 +330,7 @@ const GwyInventoryItemType*
 gwy_inventory_get_item_type(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     return &inventory->item_type;
 }
 
@@ -353,7 +350,7 @@ gwy_inventory_get_item(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     if ((iter = lookup_item(inventory, name)))
         return g_sequence_get(iter);
     else
@@ -379,7 +376,7 @@ gwy_inventory_get_item_or_default(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     if ((name && (iter = lookup_item(inventory, name)))
         || (inventory->default_key
             && (iter = lookup_item(inventory, inventory->default_key)))
@@ -408,7 +405,7 @@ gwy_inventory_get_nth_item(GwyInventory *inventory,
                            guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     guint nitems = (guint)g_sequence_get_length(inventory->items);
     g_return_val_if_fail(n <= nitems, NULL);
     if (G_UNLIKELY(n == nitems))
@@ -434,7 +431,7 @@ gwy_inventory_get_item_position(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), (guint)-1);
-    g_return_val_if_fail(inventory->is_initialized, (guint)-1);
+    g_return_val_if_fail(inventory->has_item_type, (guint)-1);
     if (!(iter = lookup_item(inventory, name)))
         return (guint)-1;
 
@@ -458,7 +455,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
                       gpointer user_data)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     g_return_if_fail(function);
 
     guint i = 0;
@@ -490,7 +487,7 @@ gwy_inventory_find(GwyInventory *inventory,
                    gpointer user_data)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     g_return_val_if_fail(predicate, NULL);
 
     guint i = 0;
@@ -516,7 +513,7 @@ gpointer
 gwy_inventory_get_default_item(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     if (!inventory->default_key)
         return NULL;
 
@@ -539,7 +536,7 @@ const gchar*
 gwy_inventory_get_default_item_name(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
 
     return inventory->default_key;
 }
@@ -558,7 +555,7 @@ gwy_inventory_set_default_item_name(GwyInventory *inventory,
                                     const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     if (!name && !inventory->default_key)
         return;
 
@@ -593,7 +590,7 @@ gwy_inventory_item_updated(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     if (!(iter = lookup_item(inventory, name)))
         g_warning("Item ‘%s’ does not exist", name);
     else
@@ -615,7 +612,7 @@ gwy_inventory_nth_item_updated(GwyInventory *inventory,
                                guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     g_return_if_fail(n < (guint)g_sequence_get_length(inventory->items));
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_UPDATED], 0, n);
@@ -640,7 +637,7 @@ gwy_inventory_insert_item(GwyInventory *inventory,
                           gpointer item)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     g_return_val_if_fail(item, NULL);
 
     const gchar *name = inventory->item_type.get_name(item);
@@ -690,7 +687,7 @@ gwy_inventory_insert_nth_item(GwyInventory *inventory,
                               guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     g_return_val_if_fail(item, NULL);
     guint nitems = (guint)g_sequence_get_length(inventory->items);
     g_return_val_if_fail(n <= nitems, NULL);
@@ -733,7 +730,7 @@ void
 gwy_inventory_restore_order(GwyInventory *inventory)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     if (inventory->is_sorted || !inventory->item_type.compare)
         return;
 
@@ -775,7 +772,7 @@ void
 gwy_inventory_forget_order(GwyInventory *inventory)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     inventory->is_sorted = FALSE;
 }
 
@@ -823,7 +820,7 @@ gwy_inventory_delete_item(GwyInventory *inventory,
                           const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
 
     GSequenceIter *iter;
     if (!(iter = lookup_item(inventory, name))) {
@@ -846,7 +843,7 @@ gwy_inventory_delete_nth_item(GwyInventory *inventory,
                               guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->is_initialized);
+    g_return_if_fail(inventory->has_item_type);
     g_return_if_fail(n < (guint)g_sequence_get_length(inventory->items));
 
     GSequenceIter *iter = g_sequence_get_iter_at_pos(inventory->items, n);
@@ -879,7 +876,7 @@ gwy_inventory_rename_item(GwyInventory *inventory,
                           const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     g_return_val_if_fail(newname, NULL);
     g_return_val_if_fail(inventory->item_type.rename, NULL);
 
@@ -962,7 +959,7 @@ gwy_inventory_new_item(GwyInventory *inventory,
                        const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->is_initialized, NULL);
+    g_return_val_if_fail(inventory->has_item_type, NULL);
     g_return_val_if_fail(inventory->can_make_copies, NULL);
 
     /* Find which item we should base copy on */
@@ -1046,8 +1043,8 @@ discard_item(GwyInventory *inventory,
         g_signal_handlers_disconnect_by_func(item, item_changed, inventory);
     g_sequence_remove(iter);
     g_hash_table_remove(inventory->hash, inventory->item_type.get_name(item));
-    if (inventory->item_type.dismantle)
-        inventory->item_type.dismantle(item);
+    if (inventory->item_type.destroy)
+        inventory->item_type.destroy(item);
     if (inventory->is_object)
         g_object_unref(item);
 }
@@ -1093,7 +1090,7 @@ make_hash(GwyInventory *inventory)
     g_assert(!inventory->hash);
     inventory->hash = g_hash_table_new(g_str_hash, g_str_equal);
 
-    const gchar* (*get_name)(gpointer) = inventory->item_type.get_name;
+    const gchar* (*get_name)(gconstpointer) = inventory->item_type.get_name;
     for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter)) {
@@ -1233,8 +1230,8 @@ invent_item_name(GwyInventory *inventory,
  *          the inventory does not know it, very bad things will happen and you
  *          will lose all your good karma.  Also, get_name() must atually
  *          return the new name after renaming.
- * @dismantle: Destructor/clean-up function called on item before it is removed
- *             from inventory.  May be %NULL.
+ * @destroy: Destructor/clean-up function called on item before it is removed
+ *           from inventory.  May be %NULL.
  * @copy: Function to create the copy of an item.  If this function and @rename
  *        are defined it is possible to use gwy_inventory_new_item().
  *        Inventory sets the copy's name immediately after creation, so it

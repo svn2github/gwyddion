@@ -53,17 +53,16 @@ typedef struct _GwyInventoryItemType GwyInventoryItemType;
 struct _GwyInventoryItemType {
     GType         type;
     const gchar  *watchable_signal;
-    const gchar* (*get_name)       (gpointer item);
+    const gchar* (*get_name)       (gconstpointer item);
     gboolean     (*is_fixed)       (gconstpointer item);
-    gint         (*compare)        (gconstpointer item1,
-                                    gconstpointer item2);
+    GCompareFunc compare;
     void         (*rename)         (gpointer item,
                                     const gchar *newname);
-    void         (*dismantle)      (gpointer item);
-    gpointer     (*copy)           (gpointer item);
+    GDestroyNotify destroy;
+    gpointer     (*copy)           (gconstpointer item);
     const GType* (*get_traits)     (gint *ntraits);
     const gchar* (*get_trait_name) (gint i);
-    void         (*get_trait_value)(gpointer item,
+    void         (*get_trait_value)(gconstpointer item,
                                     gint i,
                                     GValue *value);
 };
@@ -78,7 +77,7 @@ struct _GwyInventory {
     GHashTable *hash;
 
     GwyInventoryItemType item_type;
-    gboolean is_initialized : 1;
+    gboolean has_item_type : 1;
     gboolean is_sorted : 1;
     gboolean is_object : 1;
     gboolean is_watchable : 1;
