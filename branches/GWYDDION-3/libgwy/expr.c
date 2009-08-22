@@ -59,6 +59,7 @@ typedef enum {
     GWY_EXPR_CODE_ABS,
     GWY_EXPR_CODE_FLOOR,
     GWY_EXPR_CODE_CEIL,
+    GWY_EXPR_CODE_STEP,
     GWY_EXPR_CODE_SQRT,
     GWY_EXPR_CODE_CBRT,
     GWY_EXPR_CODE_SIN,
@@ -78,6 +79,11 @@ typedef enum {
     GWY_EXPR_CODE_ACOSH,
     GWY_EXPR_CODE_ASINH,
     GWY_EXPR_CODE_ATANH,
+    GWY_EXPR_CODE_EXP2,
+    GWY_EXPR_CODE_LOG2,
+    GWY_EXPR_CODE_ERF,
+    GWY_EXPR_CODE_ERFC,
+    GWY_EXPR_CODE_LGAMMA,
 } GwyExprOpCode;
 
 typedef enum {
@@ -152,6 +158,8 @@ make_function_1_1(exp)
 make_function_1_1(log)
 make_function_1_1(exp10)
 make_function_1_1(log10)
+make_function_1_1(exp2)
+make_function_1_1(log2)
 make_function_1_1(asin)
 make_function_1_1(acos)
 make_function_1_1(atan)
@@ -164,6 +172,9 @@ make_function_1_1(atanh)
 make_function_1_1(fabs)
 make_function_1_1(floor)
 make_function_1_1(ceil)
+make_function_1_1(erf)
+make_function_1_1(erfc)
+make_function_1_1(lgamma)
 make_function_2_1(pow)
 make_function_2_1(hypot)
 make_function_2_1(atan2)
@@ -176,6 +187,7 @@ static void gwy_expr_multiply(gdouble **s) { --*s; **s = *(*s+1) * **s; }
 static void gwy_expr_divide(gdouble **s) { --*s; **s = *(*s+1) / **s; }
 static void gwy_expr_max(gdouble **s) { --*s; **s = MAX(*(*s+1), **s); }
 static void gwy_expr_min(gdouble **s) { --*s; **s = MIN(*(*s+1), **s); }
+static void gwy_expr_step(gdouble **s) { **s = **s > 0.0; }
 
 static const GwyExprFunction call_table[] = {
     { NULL,                NULL,     0,  0,  0                       },
@@ -195,6 +207,7 @@ static const GwyExprFunction call_table[] = {
     { gwy_expr_fabs,       "abs",    1,  1,  GWY_EXPR_CODE_ABS,      },
     { gwy_expr_floor,      "floor",  1,  1,  GWY_EXPR_CODE_FLOOR,    },
     { gwy_expr_ceil,       "ceil",   1,  1,  GWY_EXPR_CODE_CEIL,     },
+    { gwy_expr_step,       "step",   1,  1,  GWY_EXPR_CODE_STEP,     },
     { gwy_expr_sqrt,       "sqrt",   1,  1,  GWY_EXPR_CODE_SQRT,     },
     { gwy_expr_cbrt,       "cbrt",   1,  1,  GWY_EXPR_CODE_CBRT,     },
     { gwy_expr_sin,        "sin",    1,  1,  GWY_EXPR_CODE_SIN,      },
@@ -214,6 +227,11 @@ static const GwyExprFunction call_table[] = {
     { gwy_expr_acosh,      "acosh",  1,  1,  GWY_EXPR_CODE_ACOSH,    },
     { gwy_expr_asinh,      "asinh",  1,  1,  GWY_EXPR_CODE_ASINH,    },
     { gwy_expr_atanh,      "atanh",  1,  1,  GWY_EXPR_CODE_ATANH,    },
+    { gwy_expr_exp2,       "exp2",   1,  1,  GWY_EXPR_CODE_EXP2,     },
+    { gwy_expr_log2,       "log2",   1,  1,  GWY_EXPR_CODE_LOG2,     },
+    { gwy_expr_erf,        "erf",    1,  1,  GWY_EXPR_CODE_ERF,      },
+    { gwy_expr_erfc,       "erfc",   1,  1,  GWY_EXPR_CODE_ERFC,     },
+    { gwy_expr_lgamma,     "lgamma", 1,  1,  GWY_EXPR_CODE_LGAMMA,   },
 };
 
 /* Maximum number of function arguments */
