@@ -670,7 +670,7 @@ check_size(gsize size,
     gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                        GWY_SERIALIZABLE_ERROR_TRUNCATED,
                        _("End of data was reached while reading value of type "
-                         "`%s'. It requires %" G_GSIZE_FORMAT " bytes but only "
+                         "‘%s’. It requires %" G_GSIZE_FORMAT " bytes but only "
                          "%" G_GSIZE_FORMAT " bytes remain."),
                        what, required_size, size);
     return FALSE;
@@ -1108,7 +1108,7 @@ gwy_serializable_deserialize(const guchar *buffer,
     if (size - pos != object_size)
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_PADDING,
-                           _("Object `%s' data is smaller than the space "
+                           _("Object ‘%s’ data is smaller than the space "
                              "alloted for it.  The padding was ignored."));
 
     /* Unpack everything, call request() only after that so that is its
@@ -1150,7 +1150,7 @@ get_serializable(const gchar *typename,
     if (!type) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not known. "
+                           _("Object type ‘%s’ is not known. "
                              "It was ignored."),
                            typename);
         return 0;
@@ -1161,7 +1161,7 @@ get_serializable(const gchar *typename,
     if (!G_TYPE_IS_INSTANTIATABLE(type)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not instantiable. "
+                           _("Object type ‘%s’ is not instantiable. "
                              "It was ignored."),
                            typename);
         return 0;
@@ -1169,7 +1169,7 @@ get_serializable(const gchar *typename,
     if (!g_type_is_a(type, GWY_TYPE_SERIALIZABLE)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not serializable. "
+                           _("Object type ‘%s’ is not serializable. "
                              "It was ignored."),
                            typename);
         return 0;
@@ -1179,7 +1179,7 @@ get_serializable(const gchar *typename,
     if (!*iface || !(*iface)->construct) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' does not implement "
+                           _("Object type ‘%s’ does not implement "
                              "deserialization. It was ignored."),
                            typename);
         return 0;
@@ -1323,7 +1323,7 @@ unpack_items(const guchar *buffer,
                                GWY_SERIALIZABLE_ERROR_DATA,
                                _("Data type 0x%02x is unknown. "
                                  "It could not be just skipped, complete "
-                                 "object %s was ignored."),
+                                 "object ‘%s’ was ignored."),
                                ctype, item->name);
             goto fail;
         }
@@ -1364,16 +1364,16 @@ fill_requested_items(GwySerializableItems *req_items,
         if (G_UNLIKELY(j == req_items->n_items)) {
             gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                                GWY_SERIALIZABLE_ERROR_ITEM,
-                               _("Unexpected item `%s' of type 0x%02x in the "
-                                 "representation of object %s was ignored"),
+                               _("Unexpected item ‘%s’ of type 0x%02x in the "
+                                 "representation of object ‘%s’ was ignored"),
                                name, ctype, typename);
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {
             gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                                GWY_SERIALIZABLE_ERROR_ITEM,
-                               _("Item `%s' of type 0x%02x is present multiple "
-                                 "times in the representation of object %s.  "
+                               _("Item ‘%s’ of type 0x%02x is present multiple "
+                                 "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
                                name, ctype, typename);
             seen[j]++;
@@ -1396,7 +1396,7 @@ fill_requested_items(GwySerializableItems *req_items,
 static inline void
 warn_nonzero_array_size(const GwySerializableItem *item)
 {
-    g_warning("A NULL array `%s' of type 0x%02x has still nonzero "
+    g_warning("A NULL array ‘%s’ of type 0x%02x has still nonzero "
               "size %" G_GSIZE_FORMAT "."
               "Please set item->array_size to zero when clearing "
               "the array."
