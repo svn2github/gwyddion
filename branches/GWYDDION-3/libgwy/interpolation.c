@@ -41,7 +41,7 @@ gwy_interpolation_get_weights(gdouble x,
 
     switch (interpolation) {
         /* Silently use first order B-spline instead of NN for symmetry */
-        case GWY_INTERPOLATION_ROUND:
+        case GWY_INTERPOLATION_BSPLINE1:
         if (x < 0.5) {
             w[0] = 1.0;
             w[1] = 0.0;
@@ -54,7 +54,7 @@ gwy_interpolation_get_weights(gdouble x,
             w[0] = w[1] = 0.5;
         break;
 
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE2:
         w[0] = 1.0 - x;
         w[1] = x;
         break;
@@ -66,14 +66,14 @@ gwy_interpolation_get_weights(gdouble x,
         w[3] = (-0.5 + x/2.0)*x*x;
         break;
 
-        case GWY_INTERPOLATION_BSPLINE:
+        case GWY_INTERPOLATION_BSPLINE4:
         w[0] = (1.0 - x)*(1.0 - x)*(1.0 - x)/6.0;
         w[1] = 2.0/3.0 - x*x*(1.0 - x/2.0);
         w[2] = (1.0/3.0 + x*(1.0 + x*(1.0 - x)))/2.0;
         w[3] = x*x*x/6.0;
         break;
 
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_OMOMS4:
         w[0] = 4.0/21.0 + (-11.0/21.0 + (0.5 - x/6.0)*x)*x;
         w[1] = 13.0/21.0 + (1.0/14.0 + (-1.0 + x/2.0)*x)*x;
         w[2] = 4.0/21.0 + (3.0/7.0 + (0.5 - x/2.0)*x)*x;
@@ -110,7 +110,7 @@ gwy_interpolation_get_weights(gdouble x,
         }
         break;
 
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         w[0] = -x*(x - 1.0)*(x - 2.0)/6.0;
         w[1] = (x*x - 1.0)*(x - 2.0)/2.0;
         w[2] = -x*(x + 1.0)*(x - 2.0)/2.0;
@@ -166,8 +166,8 @@ gwy_interpolate_values(gdouble x,
         return data[l];
 
     switch (interpolation) {
-        case GWY_INTERPOLATION_ROUND:
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE1:
+        case GWY_INTERPOLATION_BSPLINE2:
         gwy_interpolation_get_weights(rest, interpolation, w);
         return w[0]*data[l] + w[1]*data[l + 1];
         break;
@@ -175,12 +175,12 @@ gwy_interpolate_values(gdouble x,
         /* One cannot do B-spline and o-MOMS this way.  Read e.g.
          * `Interpolation Revisited' by Philippe Thevenaz for explanation.
          * Replace them with Keys. */
-        case GWY_INTERPOLATION_BSPLINE:
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_BSPLINE4:
+        case GWY_INTERPOLATION_OMOMS4:
         interpolation = GWY_INTERPOLATION_KEYS;
         case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         gwy_interpolation_get_weights(rest, interpolation, w);
         return w[0]*data[l - 1] + w[1]*data[l]
                + w[2]*data[l + 1] + w[3]*data[l + 2];
@@ -461,16 +461,16 @@ gboolean
 gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation)
 {
     switch (interpolation) {
-        case GWY_INTERPOLATION_ROUND:
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE1:
+        case GWY_INTERPOLATION_BSPLINE2:
         case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         return TRUE;
         break;
 
-        case GWY_INTERPOLATION_BSPLINE:
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_BSPLINE4:
+        case GWY_INTERPOLATION_OMOMS4:
         return FALSE;
         break;
 
@@ -492,16 +492,16 @@ gint
 gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
 {
     switch (interpolation) {
-        case GWY_INTERPOLATION_ROUND:
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE1:
+        case GWY_INTERPOLATION_BSPLINE2:
         return 2;
         break;
 
         case GWY_INTERPOLATION_KEYS:
-        case GWY_INTERPOLATION_BSPLINE:
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_BSPLINE4:
+        case GWY_INTERPOLATION_OMOMS4:
         case GWY_INTERPOLATION_NNA:
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         return 4;
         break;
 
@@ -533,18 +533,18 @@ gwy_interpolation_resolve_coeffs_1d(gint n,
     const gdouble *ab;
 
     switch (interpolation) {
-        case GWY_INTERPOLATION_ROUND:
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE1:
+        case GWY_INTERPOLATION_BSPLINE2:
         case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         return;
 
-        case GWY_INTERPOLATION_BSPLINE:
+        case GWY_INTERPOLATION_BSPLINE4:
         ab = synth_func_values_bspline3;
         break;
 
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_OMOMS4:
         ab = synth_func_values_omoms3;
         break;
 
@@ -584,18 +584,18 @@ gwy_interpolation_resolve_coeffs_2d(gint width,
     const gdouble *ab;
 
     switch (interpolation) {
-        case GWY_INTERPOLATION_ROUND:
-        case GWY_INTERPOLATION_LINEAR:
+        case GWY_INTERPOLATION_BSPLINE1:
+        case GWY_INTERPOLATION_BSPLINE2:
         case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
-        case GWY_INTERPOLATION_SCHAUM:
+        case GWY_INTERPOLATION_SCHAUM4:
         return;
 
-        case GWY_INTERPOLATION_BSPLINE:
+        case GWY_INTERPOLATION_BSPLINE4:
         ab = synth_func_values_bspline3;
         break;
 
-        case GWY_INTERPOLATION_OMOMS:
+        case GWY_INTERPOLATION_OMOMS4:
         ab = synth_func_values_omoms3;
         break;
 
@@ -910,16 +910,26 @@ gwy_interpolation_shift_block_1d(gint length,
 
 /**
  * GwyInterpolationType:
- * @GWY_INTERPOLATION_ROUND: Round interpolation (more precisely symmetric
- *                           nearest neighbour interpolation, i.e. values
- *                           exactly in the middle are mean values from the
- *                           two neighbours).
- * @GWY_INTERPOLATION_LINEAR: Linear interpolation.
+ * @GWY_INTERPOLATION_BSPLINE1: First-order (constant) B-spline interpolation.
+ *                              Also known as symmetric nearest neighbour
+ *                              interpolation, which differs from rounding in
+ *                              that values exactly in the middle are mean
+ *                              values from the two neighbours.
+ * @GWY_INTERPOLATION_ROUND: Rounding interpolation, this is an alias for
+ *                           %GWY_INTERPOLATION_BSPLINE1.  Note this is not
+ *                           true rounding interpolation, the support size is
+ *                           2, not 1.
+ * @GWY_INTERPOLATION_BSPLINE2: Second-order (linear) B-spline interpolation.
+ * @GWY_INTERPOLATION_LINEAR: Linear interpolation.   This is an alias for
+ *                            %GWY_INTERPOLATION_BSPLINE2.
  * @GWY_INTERPOLATION_KEYS: Cubic Keys interpolation (with a=-1/2).
- * @GWY_INTERPOLATION_BSPLINE: Cubic B-spline interpolation.
- * @GWY_INTERPOLATION_OMOMS: Cubic OMOMS interpolation.
+ * @GWY_INTERPOLATION_BSPLINE4: Fourth-order (cubic) B-spline interpolation.
+ * @GWY_INTERPOLATION_BSPLINE: An alias for %GWY_INTERPOLATION_BSPLINE4.
+ * @GWY_INTERPOLATION_OMOMS4: Fourth-order (cubic) o-MOMS interpolation.
+ * @GWY_INTERPOLATION_OMOMS: An alias for %GWY_INTERPOLATION_OMOMS4.
  * @GWY_INTERPOLATION_NNA: Nearest neighbour approximation.
- * @GWY_INTERPOLATION_SCHAUM: Cubic Schaum's interpolation.
+ * @GWY_INTERPOLATION_SCHAUM4: Fourth-order (cubic) Schaum's interpolation.
+ * @GWY_INTERPOLATION_SCHAUM: An alias for %GWY_INTERPOLATION_SCHAUM4.
  *
  * Interpolation types.
  **/
