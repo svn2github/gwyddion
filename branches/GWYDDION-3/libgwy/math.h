@@ -82,6 +82,8 @@ gwy_powi(double x, int i)
 
 #undef _GWY_STATIC_INLINE
 
+#define gwy_round(x) ((glong)floor((x) + 0.5))
+
 void    gwy_math_sort  (gdouble *array,
                         guint *index_array,
                         gsize n);

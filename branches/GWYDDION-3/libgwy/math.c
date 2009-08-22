@@ -640,4 +640,14 @@ jump_over:
  * This macro expands to an identifier.
  **/
 
+/**
+ * gwy_round:
+ * @x: Double value.
+ *
+ * Rounds a number to nearest integer.
+ *
+ * This macro evaluates its argument only once.
+ * This macro is usable as a single statement.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
