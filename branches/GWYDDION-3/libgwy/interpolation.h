@@ -39,6 +39,7 @@ typedef enum {
     GWY_INTERPOLATION_NNA      = 6,
     GWY_INTERPOLATION_SCHAUM4  = 7,
     GWY_INTERPOLATION_SCHAUM   = GWY_INTERPOLATION_SCHAUM4,
+    GWY_INTERPOLATION_BSPLINE6 = 8,
 } GwyInterpolationType;
 
 typedef enum {
@@ -49,44 +50,41 @@ typedef enum {
     GWY_EXTERIOR_FIXED_VALUE
 } GwyExteriorType;
 
-gdouble  gwy_interpolate_values                   (gdouble x,
-                                                   const gdouble *data,
-                                                   GwyInterpolationType interpolation);
 gdouble  gwy_interpolate_1d                       (gdouble x,
                                                    const gdouble *coeff,
                                                    GwyInterpolationType interpolation);
 gdouble  gwy_interpolate_2d                       (gdouble x,
                                                    gdouble y,
-                                                   gint rowstride,
+                                                   guint rowstride,
                                                    const gdouble *coeff,
                                                    GwyInterpolationType interpolation);
 gboolean gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation);
-gint     gwy_interpolation_get_support_size       (GwyInterpolationType interpolation);
-void     gwy_interpolation_resolve_coeffs_1d      (gint n,
+guint    gwy_interpolation_get_support_size       (GwyInterpolationType interpolation);
+void     gwy_interpolation_resolve_coeffs_1d      (guint n,
                                                    gdouble *data,
                                                    GwyInterpolationType interpolation);
-void     gwy_interpolation_resolve_coeffs_2d      (gint width,
-                                                   gint height,
-                                                   gint rowstride,
+void     gwy_interpolation_resolve_coeffs_2d      (guint width,
+                                                   guint height,
+                                                   guint rowstride,
                                                    gdouble *data,
                                                    GwyInterpolationType interpolation);
-void     gwy_interpolation_resample_block_1d      (gint length,
+void     gwy_interpolation_resample_block_1d      (guint length,
                                                    gdouble *data,
-                                                   gint newlength,
+                                                   guint newlength,
                                                    gdouble *newdata,
                                                    GwyInterpolationType interpolation,
                                                    gboolean preserve);
-void     gwy_interpolation_resample_block_2d      (gint width,
-                                                   gint height,
-                                                   gint rowstride,
+void     gwy_interpolation_resample_block_2d      (guint width,
+                                                   guint height,
+                                                   guint rowstride,
                                                    gdouble *data,
-                                                   gint newwidth,
-                                                   gint newheight,
-                                                   gint newrowstride,
+                                                   guint newwidth,
+                                                   guint newheight,
+                                                   guint newrowstride,
                                                    gdouble *newdata,
                                                    GwyInterpolationType interpolation,
                                                    gboolean preserve);
-void     gwy_interpolation_shift_block_1d         (gint length,
+void     gwy_interpolation_shift_block_1d         (guint length,
                                                    gdouble *data,
                                                    gdouble offset,
                                                    gdouble *newdata,
