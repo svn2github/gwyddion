@@ -248,7 +248,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *     iface->assign =    my_object_assign_impl;
  * }
  *
- * // Duplication is easy, create a new object and set @data
+ * // Duplication is easy, create a new object and set data
  * static GObject*
  * my_object_duplicate_impl(GwySerializable *serializable)
  * {
@@ -258,7 +258,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *     copy->data = myobject->data;
  * }
  *
- * // Assigning is even easier, just set @data
+ * // Assigning is even easier, just set data
  * static GObject*
  * my_object_assign_impl(GwySerializable *serializable,
  *                       GwySerializable *source)
