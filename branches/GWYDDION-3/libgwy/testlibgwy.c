@@ -36,6 +36,7 @@ test_memmem(void)
         1, 2, 0, 1, 2, 0, 0, 2, 2, 1, 2, 2,
     };
     static const gchar *needle = haystack;
+    static const gchar eye[3] = { 1, 2, 2 };
     static const gchar pin[3] = { 2, 0, 2 };
 
     /* Successes */
@@ -48,12 +49,16 @@ test_memmem(void)
              == haystack + 1);
     g_assert(gwy_memmem(haystack, sizeof(haystack), needle + 4, 3)
              == haystack + 4);
+    g_assert(gwy_memmem(haystack, sizeof(haystack), eye, sizeof(eye))
+             == haystack + sizeof(haystack) - sizeof(eye));
 
     /* Failures */
     g_assert(gwy_memmem(NULL, 0, needle, 1) == NULL);
     g_assert(gwy_memmem(haystack, sizeof(haystack)-1, needle, sizeof(haystack))
              == NULL);
     g_assert(gwy_memmem(haystack, sizeof(haystack), pin, sizeof(pin)) == NULL);
+    g_assert(gwy_memmem(haystack, sizeof(haystack)-1, eye, sizeof(eye))
+             == NULL);
 }
 
 /***************************************************************************
