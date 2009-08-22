@@ -1319,22 +1319,28 @@ try_set_value(GwyContainer *container,
               gboolean do_replace,
               gboolean do_create)
 {
-    GValue *old;
     gboolean changed;
 
     g_return_val_if_fail(GWY_IS_CONTAINER(container), FALSE);
     g_return_val_if_fail(key, FALSE);
     g_return_val_if_fail(G_IS_VALUE(value), FALSE);
 
+    GType type = G_VALUE_TYPE(value);
+
     /* Allow only some sane types to be stored, at least for now */
-    if (G_VALUE_HOLDS_OBJECT(value)) {
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
         GObject *obj = g_value_peek_pointer(value);
 
         g_return_val_if_fail(GWY_IS_SERIALIZABLE(obj), FALSE);
+        /* If someone sets a subclass of GObject, for instance a particular
+         * type, warn and change it to base object. */
+        if (type != G_TYPE_OBJECT) {
+            g_warning("Object values stored in GwyContainer should have the "
+                      "base type G_TYPE_OBJECT.");
+            type = G_TYPE_OBJECT;
+        }
     }
     else {
-        GType type = G_VALUE_TYPE(value);
-
         g_return_val_if_fail(G_TYPE_FUNDAMENTAL(type)
                              && type != G_TYPE_BOXED
                              && type != G_TYPE_POINTER
@@ -1342,7 +1348,8 @@ try_set_value(GwyContainer *container,
                              FALSE);
     }
 
-    old = (GValue*)g_hash_table_lookup(container->values, GINT_TO_POINTER(key));
+    GValue *old = (GValue*)g_hash_table_lookup(container->values,
+                                               GINT_TO_POINTER(key));
     if (old) {
         if (!do_replace)
             return FALSE;
@@ -1358,7 +1365,7 @@ try_set_value(GwyContainer *container,
         g_hash_table_insert(container->values, GINT_TO_POINTER(key), old);
         changed = TRUE;
     }
-    g_value_init(old, G_VALUE_TYPE(value));
+    g_value_init(old, type);
     if (G_VALUE_HOLDS_STRING(value))
         g_value_take_string(old, g_value_peek_pointer(value));
     else
