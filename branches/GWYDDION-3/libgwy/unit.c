@@ -611,6 +611,7 @@ parse(GwyUnit *unit,
     }
 
     canonicalize(unit);
+    g_string_free(buf, TRUE);
     g_free(utf8string);
     if (ppower10)
         *ppower10 = power10;
