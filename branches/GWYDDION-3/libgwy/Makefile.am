@@ -1,7 +1,7 @@
 # Process this file with automake to produce Makefile.in
 
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
-WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wundef -Wshadow -Wredundant-decls -Wlogical-op
+WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 # Must init
 EXTRA_DIST =
