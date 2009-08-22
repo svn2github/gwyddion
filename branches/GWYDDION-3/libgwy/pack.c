@@ -753,6 +753,9 @@ fail:
  * @shift: Constant to add to unpacked values.
  *
  * Unpacks values into an array of double precision floating point numbers.
+ *
+ * Since the caller knows how long the buffer must be to contain @len items,
+ * this function does not check its size (in fact, it does not know the size).
  **/
 void
 gwy_unpack_data(const gchar *format,
@@ -1123,5 +1126,30 @@ gwy_pack_error_quark(void)
  * Type <literal>x</literal> represents padding bytes and does not consume any
  * arguments.
  **/
+
+/**
+ * GwyPackError:
+ * @GWY_PACK_ERROR_FORMAT: Packing format is invalid.
+ * @GWY_PACK_ERROR_SIZE: Packed data size exceeds buffer size.
+ * @GWY_PACK_ERROR_ARGUMENTS: Arguments do not match format.
+ *                            At this moment it only concerns attempts to pack
+ *                            Pascal strings longer than 255 characters.
+ * @GWY_PACK_ERROR_DATA: Packed data do not match format, e.g. a nul-terminated
+ *                       string is requested but there is no nul character in
+ *                       the bufer.
+ *
+ * Error codes returned by binary data packing and unpacking.
+ **/
+
+/**
+ * GWY_PACK_ERROR:
+ *
+ * Error domain for binary data packing and unpacking.
+ *
+ * Errors in this domain will be from the #GwyPackError enumeration.
+ * See #GError for information on error domains.
+ **/
+
+
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
