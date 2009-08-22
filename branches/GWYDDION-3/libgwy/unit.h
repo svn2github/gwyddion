@@ -37,7 +37,7 @@ typedef struct {
     gint precision;
 } GwyUnitFormat;
 
-#define GWY_UNIT_INIT_FORMAT { 1.0, NULL, 0 }
+#define GWY_UNIT_INIT_FORMAT { 0.0, NULL, 0 }
 
 #define GWY_TYPE_UNIT \
     (gwy_unit_get_type())
@@ -123,6 +123,7 @@ void     gwy_unit_format_with_digits    (GwyUnit *unit,
                                          gdouble maximum,
                                          gint sdigits,
                                          GwyUnitFormat *format);
+void     gwy_unit_clear_format          (GwyUnitFormat *format);
 
 G_END_DECLS
 

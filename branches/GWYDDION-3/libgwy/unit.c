@@ -60,6 +60,9 @@ static GObject*     gwy_unit_duplicate_impl   (GwySerializable *serializable);
 static void         gwy_unit_assign_impl      (GwySerializable *destination,
                                                GwySerializable *source);
 
+static gdouble      find_number_format        (gdouble step,
+                                               gdouble maximum,
+                                               gint *precision);
 static gboolean     parse                     (GwyUnit *unit,
                                                const gchar *string,
                                                gint *power10);
@@ -68,11 +71,10 @@ static GwyUnit*     power_impl                (GwyUnit *unit,
                                                gint power);
 static GwyUnit*     canonicalize              (GwyUnit *unit);
 static const gchar* get_prefix                (gint power);
-static GString*     format                    (const GwyUnit *unit,
+static gchar*       format_unit               (const GwyUnit *unit,
                                                const GwyUnitStyleSpec *fs,
                                                gboolean standalone,
-                                               gint power10,
-                                               GString *string);
+                                               gint power10);
 
 static const struct {
     const gchar *prefix;
@@ -344,7 +346,7 @@ find_style_spec(GwyUnitFormatStyle style)
 
 /**
  * gwy_unit_to_string:
- * @unit: An unit.
+ * @unit: A physical unit.
  * @style: Unit format style.
  *
  * Obtains string representing a physical unit.
@@ -357,208 +359,8 @@ gwy_unit_to_string(GwyUnit *unit,
                    GwyUnitFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-
-    GString *string = format(unit, find_style_spec(style), TRUE, 0, NULL);
-    gchar *s = string->str;
-    g_string_free(string, FALSE);
-
-    return s;
+    return format_unit(unit, find_style_spec(style), TRUE, 0);
 }
-
-#if 0
-
-/**
- * gwy_unit_get_format_for_power10:
- * @unit: An unit.
- * @style: Unit format style.
- * @power10: Power of 10, in the same sense as gwy_unit_new_parse()
- *           returns it.
- * @format: A value format to set-up, may be %NULL, a new value format is
- *          allocated then.
- *
- * Finds format for representing a specific power-of-10 multiple of a unit.
- *
- * The values should be then printed as value/@format->magnitude
- * [@format->units] with @format->precision decimal places.
- *
- * This function does not change the precision field of @format.
- *
- * Returns: The value format.  If @format was %NULL, a newly allocated format
- *          is returned, otherwise (modified) @format itself is returned.
- **/
-GwyUnitFormat*
-gwy_unit_get_format_for_power10(GwyUnit *unit,
-                                   GwyUnitFormatStyle style,
-                                   gint power10,
-                                   GwyUnitFormat *format)
-{
-    const GwyUnitStyleSpec *spec;
-
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-
-    spec = find_style_spec(style);
-    if (!format)
-        format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
-
-    unit->power10 = power10;
-    format->magnitude = exp10(power10);
-    format->units_gstring = gwy_unit_format(unit, spec,
-                                               format->units_gstring);
-    format->units = format->units_gstring->str;
-
-    return format;
-}
-
-/**
- * gwy_unit_get_format:
- * @unit: An unit.
- * @style: Unit format style.
- * @value: Value the format should be suitable for.
- * @format: A value format to set-up, may be %NULL, a new value format is
- *          allocated then.
- *
- * Finds a good format for representing a value.
- *
- * The values should be then printed as value/@format->magnitude
- * [@format->units] with @format->precision decimal places.
- *
- * Returns: The value format.  If @format was %NULL, a newly allocated format
- *          is returned, otherwise (modified) @format itself is returned.
- **/
-GwyUnitFormat*
-gwy_unit_get_format(GwyUnit *unit,
-                       GwyUnitFormatStyle style,
-                       gdouble value,
-                       GwyUnitFormat *format)
-{
-    const GwyUnitStyleSpec *spec;
-
-    gwy_debug("");
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-
-    spec = find_style_spec(style);
-    if (!format)
-        format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
-
-    value = fabs(value);
-    if (!value) {
-        format->magnitude = 1;
-        format->precision = 2;
-    }
-    else
-        format->magnitude = gwy_math_humanize_numbers(value/36, value,
-                                                      &format->precision);
-    unit->power10 = gwy_round(log10(format->magnitude));
-    format->units_gstring = gwy_unit_format(unit, spec,
-                                               format->units_gstring);
-    format->units = format->units_gstring->str;
-
-    return format;
-}
-
-/**
- * gwy_unit_get_format_with_resolution:
- * @unit: A unit.
- * @style: Unit format style.
- * @maximum: The maximum value to be represented.
- * @resolution: The smallest step (approximately) that should make a visible
- *              difference in the representation.
- * @format: A value format to set-up, may be %NULL, a new value format is
- *          allocated then.
- *
- * Finds a good format for representing a range of values with given resolution.
- *
- * The values should be then printed as value/@format->magnitude
- * [@format->units] with @format->precision decimal places.
- *
- * Returns: The value format.  If @format was %NULL, a newly allocated format
- *          is returned, otherwise (modified) @format itself is returned.
- **/
-GwyUnitFormat*
-gwy_unit_get_format_with_resolution(GwyUnit *unit,
-                                       GwyUnitFormatStyle style,
-                                       gdouble maximum,
-                                       gdouble resolution,
-                                       GwyUnitFormat *format)
-{
-    const GwyUnitStyleSpec *spec;
-
-    gwy_debug("");
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-
-    spec = find_style_spec(style);
-    if (!format)
-        format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
-
-    maximum = fabs(maximum);
-    resolution = fabs(resolution);
-    if (!maximum) {
-        format->magnitude = 1;
-        format->precision = 2;
-    }
-    else
-        format->magnitude = gwy_math_humanize_numbers(resolution, maximum,
-                                                      &format->precision);
-    unit->power10 = gwy_round(log10(format->magnitude));
-    format->units_gstring = gwy_unit_format(unit, spec,
-                                               format->units_gstring);
-    format->units = format->units_gstring->str;
-
-    return format;
-}
-
-/**
- * gwy_unit_get_format_with_digits:
- * @unit: A unit.
- * @style: Unit format style.
- * @maximum: The maximum value to be represented.
- * @sdigits: The number of significant digits the value should have.
- * @format: A value format to set-up, may be %NULL, a new value format is
- *          allocated then.
- *
- * Finds a good format for representing a values with given number of
- * significant digits.
- *
- * The values should be then printed as value/@format->magnitude
- * [@format->units] with @format->precision decimal places.
- *
- * Returns: The value format.  If @format was %NULL, a newly allocated format
- *          is returned, otherwise (modified) @format itself is returned.
- **/
-GwyUnitFormat*
-gwy_unit_get_format_with_digits(GwyUnit *unit,
-                                   GwyUnitFormatStyle style,
-                                   gdouble maximum,
-                                   gint sdigits,
-                                   GwyUnitFormat *format)
-{
-    const GwyUnitStyleSpec *spec;
-
-    gwy_debug("");
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-
-    spec = find_style_spec(style);
-    if (!format)
-        format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
-
-    maximum = fabs(maximum);
-    if (!maximum) {
-        format->magnitude = 1;
-        format->precision = sdigits;
-    }
-    else
-        format->magnitude
-            = gwy_math_humanize_numbers(maximum/exp10(sdigits),
-                                        maximum, &format->precision);
-    unit->power10 = gwy_round(log10(format->magnitude));
-    format->units_gstring = gwy_unit_format(unit, spec,
-                                               format->units_gstring);
-    format->units = format->units_gstring->str;
-
-    return format;
-}
-
-#endif
 
 /**
  * gwy_unit_equal:
@@ -1099,20 +901,182 @@ canonicalize(GwyUnit *unit)
     return unit;
 }
 
-static GString*
-format(const GwyUnit *unit,
-       const GwyUnitStyleSpec *fs,
-       gboolean standalone,
-       gint power10,
-       GString *string)
+/**
+ * gwy_unit_format_for_power10:
+ * @unit: A physical unit.
+ * @style: Unit format style.
+ * @standalone: %TRUE for standalone units, %FALSE for units that
+ *              will appear directly after the numerical value (the format may
+ *              include a multiplication sign in this case).
+ * @power10: Power of 10, in the same sense as gwy_unit_new_parse()
+ *           returns it.
+ * @format: Value format to set-up or update.
+ *
+ * Finds format for representing a specific power-of-10 multiple of a physical
+ * unit.
+ *
+ * This function does not change the precision field of @format.
+ **/
+void
+gwy_unit_format_for_power10(GwyUnit *unit,
+                            GwyUnitFormatStyle style,
+                            gboolean standalone,
+                            gint power10,
+                            GwyUnitFormat *format)
 {
-    const gchar *prefix;
 
-    if (!string)
-        string = g_string_new("");
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(format);
+
+    format->magnitude = exp10(power10);
+    GWY_FREE(format->units);
+    format->units = format_unit(unit, find_style_spec(style), standalone,
+                                power10);
+}
+
+/**
+ * gwy_unit_format_with_resolution:
+ * @unit: A physical unit.
+ * @style: Unit format style.
+ * @standalone: %TRUE for standalone units, %FALSE for units that
+ *              will appear directly after the numerical value (the format may
+ *              include a multiplication sign in this case).
+ * @maximum: Maximum value to be represented.
+ * @resolution: Smallest step (approximately) that should make a visible
+ *              difference in the representation.
+ * @format: Value format to set-up or update.
+ *
+ * Finds a format for representing a range of values with given resolution.
+ **/
+void
+gwy_unit_format_with_resolution(GwyUnit *unit,
+                                GwyUnitFormatStyle style,
+                                gboolean standalone,
+                                gdouble maximum,
+                                gdouble resolution,
+                                GwyUnitFormat *format)
+{
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(format);
+
+    maximum = fabs(maximum);
+    resolution = fabs(resolution);
+    if (!maximum) {
+        format->magnitude = 1.0;
+        format->precision = 2;
+    }
     else
-        g_string_truncate(string, 0);
+        format->magnitude = find_number_format(resolution, maximum,
+                                               &format->precision);
 
+    GWY_FREE(format->units);
+    format->units = format_unit(unit, find_style_spec(style), standalone,
+                                gwy_round(log10(format->magnitude)));
+}
+
+/**
+ * gwy_unit_format_with_digits:
+ * @unit: A physical unit.
+ * @style: Unit format style.
+ * @standalone: %TRUE for standalone units, %FALSE for units that
+ *              will appear directly after the numerical value (the format may
+ *              include a multiplication sign in this case).
+ * @maximum: Maximum value to be represented.
+ * @sdigits: Number of significant digits the value should have.
+ * @format: Value format to set-up or update.
+ *
+ * Finds a format for representing a values with given number of significant
+ * digits.
+ **/
+void
+gwy_unit_format_with_digits(GwyUnit *unit,
+                            GwyUnitFormatStyle style,
+                            gboolean standalone,
+                            gdouble maximum,
+                            gint sdigits,
+                            GwyUnitFormat *format)
+{
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(format);
+
+    maximum = fabs(maximum);
+    if (!maximum) {
+        format->magnitude = 1;
+        format->precision = sdigits;
+    }
+    else
+        format->magnitude = find_number_format(maximum/exp10(sdigits),
+                                               maximum, &format->precision);
+
+    GWY_FREE(format->units);
+    format->units = format_unit(unit, find_style_spec(style), standalone,
+                                gwy_round(log10(format->magnitude)));
+}
+
+/**
+ * find_number_format:
+ * @unit: The smallest possible step.
+ * @maximum: The maximum possible value.
+ * @precision: A location to store printf() precession, if not %NULL.
+ *
+ * Finds a human-friendly format for a range of numbers.
+ *
+ * Returns: The magnitude i.e., a power of 1000.
+ **/
+static gdouble
+find_number_format(gdouble step,
+                   gdouble maximum,
+                   gint *precision)
+{
+    gdouble lm, lu, mag, q;
+
+    g_return_val_if_fail(step >= 0.0, 0.0);
+    g_return_val_if_fail(maximum >= 0.0, 0.0);
+
+    if (G_UNLIKELY(step == 0.0 || maximum == 0.0)) {
+        if (step > 0.0)
+            maximum = step;
+        else if (maximum > 0.0)
+            step = maximum;
+        else {
+            if (precision)
+                *precision = 1;
+            return 1.0;
+        }
+    }
+
+    lm = log10(maximum) + 1e-12;
+    lu = log10(step) - 1e-12;
+    mag = 3.0*floor(lm/3.0);
+    q = 3.0*ceil(lu/3.0);
+    if (q > mag)
+        q = 3.0*ceil((lu - 1.0)/3.0);
+    if (lu > -0.5 && lm < 3.1) {
+        while (lu > mag+2)
+            mag += 3.0;
+    }
+    else if (lm <= 0.5 && lm > -1.5) {
+        mag = 0.0;
+    }
+    else {
+        while (q > mag)
+            mag += 3.0;
+    }
+
+    if (precision) {
+        *precision = MAX(0, ceil(mag - lu));
+        *precision = MIN(*precision, 16);
+    }
+
+    return pow10(mag);
+}
+
+static gchar*
+format_unit(const GwyUnit *unit,
+            const GwyUnitStyleSpec *fs,
+            gboolean standalone,
+            gint power10)
+{
     /* if there is a single unit with negative exponent, move it to the end
      * TODO: we may want more sophistication here */
     gint move_me_to_end = -1;
@@ -1147,7 +1111,11 @@ format(const GwyUnit *unit,
         if (power10 % (3*abs(u->power)) == 0)
             prefix_bearer = move_me_to_end;
     }
+
     /* check whether we are not out of prefix range */
+    GString *string = g_string_new(NULL);
+    const gchar *prefix = "";
+
     if (prefix_bearer >= 0) {
         const GwySimpleUnit *u = &simple_unit_index(unit->units, prefix_bearer);
         prefix = get_prefix(power10/u->power);
@@ -1218,7 +1186,10 @@ format(const GwyUnit *unit,
         }
     }
 
-    return string;
+    gchar *retval = string->str;
+    g_string_free(string, FALSE);
+
+    return retval;
 }
 
 static const gchar*
@@ -1231,7 +1202,11 @@ get_prefix(gint power)
     return NULL;
 }
 
-/************************** Documentation ****************************/
+void
+gwy_unit_clear_format(GwyUnitFormat *format)
+{
+    GWY_FREE(format->units);
+}
 
 /**
  * SECTION: unit
@@ -1242,9 +1217,31 @@ get_prefix(gint power)
  * multiplied, etc. to give new units.
  *
  * It provides also methods for formatting of physical quantities.  There are
- * several methods computing value format (as a #GwyUnitFormat structure) with
- * given resolution -- gwy_unit_get_format_with_resolution(), or number of
+ * several methods available for constructing a value format with given
+ * resolution -- gwy_unit_get_format_with_resolution(), or number of
  * significant digits -- gwy_unit_get_format_with_digits().
+ *
+ * <refsect2 id='libgwy-unit-formatting'>
+ * <title>Formats</title>
+ * </refsect2>
+ *
+ * The functions for obtaining a value format fill or update a #GwyUnitFormat
+ * structure.  A new format can be created with g_new0() or as automatic
+ * variables (i.e. on stack), however, it has to be initialized with
+ * GWY_UNIT_INIT_FORMAT in this case.  When it is no longer needed it is
+ * necessary to free associated resourced with gwy_unit_clear_format().
+ * Note this function does not free the structure itself.
+ *
+ * |[
+ * GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
+ * GwyUnitFormat format = GWY_UNIT_INIT_FORMAT;
+ * gwy_unit_format_with_resolution(unit, GWY_UNIT_FORMAT_PLAIN, FALSE,
+ *                                 1e-6, 1e-9, &format);
+ * g_print("The value is: %.*f %s\n",
+ *         format->precision, value/format->magnitude, format->units);
+ * gwy_unit_clear_format(&format);
+ * g_object_unref(unit);
+ * ]|
  **/
 
 /**
@@ -1274,23 +1271,32 @@ get_prefix(gint power)
  * GwyUnitFormat:
  * @magnitude: Number to divide a quantity by (generally, a power of 1000).
  * @precision: Number of decimal places to format a quantity to.
- * @units: Units to put after quantity divided by @magnitude.  This is actually
- *         an alias to @units_gstring->str.
- * @units_gstring: #GString used to represent @units internally.
+ * @units: UUnits to put after quantity divided by @magnitude (if the format
+ *         was created with @standalone=%FALSE) or to some associated label
+ *         (if the format was created as standalone).
  *
- * A physical quantity formatting information.
+ * Physical quantity formatting information.
  *
- * The @magnitude and @precision fields can be directly modified if necessary.
- * Units must be always set with gwy_unit_format_set_units() to update
- * the internal representation properly.
+ * See <link linkend="libgwy-unit-formatting">Formatting</link> for examples.
  */
 
 /**
  * gwy_unit_duplicate:
- * @unit: An unit to duplicate.
+ * @unit: A physical unit.
  *
- * Convenience macro doing gwy_serializable_duplicate() with all the necessary
- * typecasting.
+ * Duplicates a physical unit.
+ *
+ * This is a convenience wrapper of gwy_serializable_duplicate().
+ **/
+
+/**
+ * gwy_unit_assign:
+ * @dest: Destination physical unit.
+ * @src: Source physicsl unit.
+ *
+ * Copies the value of a physical unit.
+ *
+ * This is a convenience wrapper of gwy_serializable_assign().
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
