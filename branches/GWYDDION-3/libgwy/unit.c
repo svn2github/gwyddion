@@ -30,7 +30,7 @@
 
 enum {
     CHANGED,
-    LAST_SIGNAL
+    N_SIGNALS
 };
 
 typedef struct {
@@ -136,7 +136,7 @@ static const GwySerializableItem serialize_items[] = {
     { .name = "unitstr", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
-static guint unit_signals[LAST_SIGNAL];
+static guint unit_signals[N_SIGNALS];
 
 G_DEFINE_TYPE_EXTENDED
     (GwyUnit, gwy_unit, G_TYPE_OBJECT, 0,
