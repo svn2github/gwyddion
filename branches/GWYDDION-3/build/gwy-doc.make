@@ -9,10 +9,13 @@ DOC_SOURCE_DIR = $(DOC_MODULE)
 # The top-level SGML file. You can change this if you want to.
 DOC_MAIN_SGML_FILE = $(DOC_MODULE).xml
 
-GWY_DOC_CFLAGS = -I$(top_srcdir) -I$(top_builddir) @LIBGWY_CFLAGS@
+GWY_DOC_CFLAGS = \
+	-I$(top_srcdir) \
+	-I$(top_builddir) \
+	@LIBGWY_DEPS_CFLAGS@
 GWY_DOC_LIBS = \
 	$(top_builddir)/libgwy/libgwy.la \
-	@LIBGWY_LIBS@
+	@LIBGWY_DEPS_LIBS@
 
 GTKDOC_CC = $(LIBTOOL) --mode=compile $(CC) $(GWY_DOC_CFLAGS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 GTKDOC_LD = $(LIBTOOL) --mode=link $(CC) $(GWY_DOC_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
