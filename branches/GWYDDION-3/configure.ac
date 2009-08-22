@@ -16,22 +16,35 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h:build/config.h.in])
 AC_CONFIG_FILES([
   Makefile
+  libgwy/Makefile
+  docs/Makefile
+  docs/libgwy/Makefile
   po/Makefile.in
 ])
 
-AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options])
+AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options nostdinc])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
 AC_SUBST([GWY_VERSION_MINOR],[gwy_version_minor])
 AC_SUBST([GWY_VERSION_MICRO],[gwy_version_micro])
 AC_SUBST([GWY_VERSION_STRING],[gwy_version_string])
+AM_CONDITIONAL([UNSTABLE_LIBRARY_RELEASE],[true])
 
 AC_CANONICAL_HOST
 
 GWY_MISSING_TOOLS=
-AC_PROG_LIBTOOL
-AC_PROG_CC
+
+AC_DISABLE_STATIC
+AC_PROG_CC_C99
 AC_PROG_CXX
+AC_USE_SYSTEM_EXTENSIONS
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
+AC_PROG_INSTALL
+
+if test "x$ac_cv_prog_cc_c99" = xno; then
+  AC_MSG_ERROR([C99 standard conforming C compiler is required])
+fi
 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
@@ -40,9 +53,49 @@ AC_SUBST([GETTEXT_PACKAGE],[$PACKAGE_TARNAME])
 
 IT_PROG_INTLTOOL([0.40],[no-xml])
 
-GTK_DOC_CHECK([1.10])
+GTK_DOC_CHECK([1.11])
 
 AM_PATH_PYTHON([2.2],,[GWY_MISSING_TOOLS="$GWY_MISSING_TOOLS python"])
 AM_CONDITIONAL([HAVE_PYTHON],[test "$PYTHON" != :])
 
+PKG_CHECK_MODULES([LIBGWY],[gio-2.0 >= 2.18])
+GWY_CHECK_LIBM
+
+m4_define([gwy_math_funcs],[exp10])
+
+GWY_CHECK_MATH_FUNCS([gwy_math_funcs])
+
+AC_CONFIG_COMMANDS([gwyconfig.h],
+[
+  outfile=gwyconfig.h-tmp
+  g=GENERATED
+  cat > $outfile <<_______EOF
+/*
+ * gwyconfig.h
+ * This is a $g file.  Please modify 'configure.ac'.
+ */
+
+#ifndef __GWY_CONFIG_H__
+#define __GWY_CONFIG_H__
+_______EOF
+
+  GWY_OUTPUT_MATH_FUNCS([gwy_math_funcs], [$outfile])
+
+  cat >>$outfile <<_______EOF
+
+#endif
+_______EOF
+
+  if cmp -s $outfile gwyconfig.h; then
+    AC_MSG_NOTICE([gwyconfig.h is unchanged])
+    rm -f $outfile
+  else
+    mv $outfile gwyconfig.h
+  fi
+],
+[
+  gwy_math_exp10=$gwy_math_exp10
+])
+
 AC_OUTPUT
+

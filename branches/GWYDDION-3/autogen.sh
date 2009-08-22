@@ -164,7 +164,7 @@ fi
 # These seem of no use.
 rm -f intltool-extract.in intltool-merge.in intltool-update.in
 # We have our own gtk-doc.makefile, thanks.
-#rm -f docs/gtk-doc.make
+rm -f docs/gtk-doc.make
 
 echo ./configure $CONFIGURE_FLAGS "$@"
 exec ./configure $CONFIGURE_FLAGS "$@"

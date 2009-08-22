@@ -1,5 +1,6 @@
+# Process this file with automake to produce Makefile.in
 # $Id$
 
-SUBDIRS = po
+SUBDIRS = libgwy po docs
 
 ACLOCAL_AMFLAGS = -I m4
