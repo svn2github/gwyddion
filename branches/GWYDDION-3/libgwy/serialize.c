@@ -54,19 +54,24 @@ typedef struct {
     guchar *data;
 } GwySerializableBuffer;
 
-static gsize                 calculate_sizes (GwySerializableItems *items,
-                                              gsize *pos);
-static void                  items_done      (const GwySerializableItems *items);
-static gboolean              dump_to_stream  (const GwySerializableItems *items,
-                                              GwySerializableBuffer *buffer);
-static GType                 get_serializable(const gchar *typename,
-                                              gpointer *classref,
-                                              const GwySerializableInterface **iface,
-                                              GwyErrorList **error_list);
-static GwySerializableItems* unpack_items    (const guchar *buffer,
-                                              gsize size,
-                                              GwyErrorList **error_list);
-static void                  free_items      (GwySerializableItems *items);
+static gsize                 calculate_sizes   (GwySerializableItems *items,
+                                                gsize *pos);
+static void                  items_done        (const GwySerializableItems *items);
+static gboolean              dump_to_stream    (const GwySerializableItems *items,
+                                                GwySerializableBuffer *buffer);
+static GObject*              deserialize_memory(const guchar *buffer,
+                                                gsize size,
+                                                gsize *bytes_consumed,
+                                                gboolean exact_size,
+                                                GwyErrorList **error_list);
+static GType                 get_serializable  (const gchar *typename,
+                                                gpointer *classref,
+                                                const GwySerializableInterface **iface,
+                                                GwyErrorList **error_list);
+static GwySerializableItems* unpack_items      (const guchar *buffer,
+                                                gsize size,
+                                                GwyErrorList **error_list);
+static void                  free_items        (GwySerializableItems *items);
 
 /**
  * gwy_deserialize_error_quark:
@@ -920,7 +925,8 @@ unpack_object(const guchar *buffer,
 {
     gsize rbytes;
 
-    if (!(*value = gwy_deserialize_memory(buffer, size, &rbytes, error_list)))
+    if (!(*value = deserialize_memory(buffer, size, &rbytes, FALSE,
+                                      error_list)))
         return 0;
 
     return rbytes;
@@ -981,6 +987,16 @@ gwy_deserialize_memory(const guchar *buffer,
                        gsize *bytes_consumed,
                        GwyErrorList **error_list)
 {
+    return deserialize_memory(buffer, size, bytes_consumed, TRUE, error_list);
+}
+
+static GObject*
+deserialize_memory(const guchar *buffer,
+                   gsize size,
+                   gsize *bytes_consumed,
+                   gboolean exact_size,
+                   GwyErrorList **error_list)
+{
     const GwySerializableInterface *iface;
     GwySerializableItems *items = NULL;
     const gchar *typename;
@@ -1005,16 +1021,18 @@ gwy_deserialize_memory(const guchar *buffer,
     if (!(type = get_serializable(typename, &classref, &iface, error_list)))
         goto fail;
 
-    /* We should no only fit, but the object size should be exactly size.
-     * If there is extra stuff, add an error, but do not fail. */
-    if (G_UNLIKELY(size - pos != object_size)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_PADDING,
-                           _("Object ‘%s’ data is smaller than the space "
-                             "alloted for it.  The padding was ignored."),
-                           typename);
-        size = object_size + pos;
+    if (exact_size) {
+        /* We should no only fit, but the object size should be exactly size.
+         * If there is extra stuff, add an error, but do not fail. */
+        if (G_UNLIKELY(size - pos != object_size)) {
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_PADDING,
+                               _("Object ‘%s’ data is smaller than the space "
+                                 "alloted for it.  The padding was ignored."),
+                               typename);
+        }
     }
+    size = object_size + pos;
 
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
