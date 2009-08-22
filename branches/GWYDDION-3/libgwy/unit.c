@@ -23,6 +23,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
+#include "libgwy/strfuncs.h"
 #include "libgwy/unit.h"
 #include "libgwy/libgwy-aliases.h"
 
@@ -87,12 +88,12 @@ SI_prefixes[] = {
     { "c",    -2  },
     { "m",    -3  },
     { "M",     6  },
+    /* People are extremely creative when it comes to \mu replacements...
+     * NB: The two μ below are different symbols. */
     { "µ",    -6  },
-    /* People are extremely creative when it comes to \mu replacements... */
     { "μ",    -6  },
     { "~",    -6  },
     { "u",    -6  },
-    { "\265", -6  },
     { "G",     9  },
     { "n",    -9  },
     { "T",     12 },
@@ -398,7 +399,7 @@ parse(GwyUnit *unit,
 {
     gdouble q;
     const gchar *end;
-    gchar *p, *e;
+    gchar *p, *e, *utf8string = NULL;
     guint n, i;
     gint pfpower, power10;
     gboolean dividing = FALSE;
@@ -422,6 +423,12 @@ parse(GwyUnit *unit,
         g_warning("Invalid character 0x%02x", *end);
         return FALSE;
     }
+
+    /* If the string is not UTF-8, assume it's Latin 1.  This is was people
+     * usually have in various files. */
+    if (!g_utf8_validate(string, -1, NULL))
+        string = utf8string = g_convert(string, -1, "UTF-8", "ISO-8859-1",
+                                        NULL, NULL, NULL);
 
     /* may start with a multiplier, but it must be a power of 10 */
     q = g_ascii_strtod(string, (gchar**)&end);
@@ -475,20 +482,9 @@ parse(GwyUnit *unit,
         g_string_append_len(buf, string, end - string);
 
         /* fix sloppy notations */
-        if (buf->str[0] == '\272') {
-            if (!buf->str[1])
-                g_string_assign(buf, "deg");
-            else {
-                g_string_erase(buf, 0, 1);
-                g_string_prepend(buf, "°");
-            }
-        }
-        else if (gwy_strequal(buf->str, "°"))
+        if (gwy_strequal(buf->str, "°"))
             g_string_assign(buf, "deg");
-        else if ((buf->str[0] == '\305' && !buf->str[1])
-                 || gwy_strequal(buf->str, "Å")
-                 || gwy_strequal(buf->str, "AA")
-                 || gwy_strequal(buf->str, "Ang"))
+        else if (gwy_stramong(buf->str, "Å", "AA", "Ang", NULL))
             g_string_assign(buf, "Å");
 
         /* get prefix, but be careful not to split mol to mili-ol */
@@ -514,14 +510,11 @@ parse(GwyUnit *unit,
         /* get unit power */
         GwySimpleUnit u;
         u.power = 1;
-        /*
-        if (buf->str[1] == '\262'
-            || strncmp(buf->str + 1, "²", sizeof("²")-1) == 0) {
+        if ((p = strstr(buf->str + 1, "²"))) {
             u.power = 2;
+            g_string_truncate(buf, p - buf->str);
         }
-        */
-        // XXX: Why in hell we start at +1?
-        if ((p = strstr(buf->str + 1, "<sup>"))) {
+        else if ((p = strstr(buf->str + 1, "<sup>"))) {
             u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
@@ -615,6 +608,7 @@ parse(GwyUnit *unit,
     }
 
     canonicalize(unit);
+    g_free(utf8string);
     if (ppower10)
         *ppower10 = power10;
 
