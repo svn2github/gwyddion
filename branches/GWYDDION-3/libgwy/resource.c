@@ -565,7 +565,8 @@ parse(const gchar *text,
     }
     else {
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                    _("Wrong or missing resource magic header."));
+                    _("Wrong or missing resource magic header in file ‘%s’."),
+                    filename);
         return NULL;
     }
 
@@ -582,13 +583,16 @@ parse(const gchar *text,
 
     if (G_UNLIKELY(!type)) {
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                    _("Resource type ‘%s’ is invalid."), typename);
+                    _("Resource type ‘%s’ of file ‘%s’ is invalid."),
+                   filename, typename);
         goto fail;
     }
-    if (G_UNLIKELY(type != expected_type)) {
+    /* Does it make sense to accept subclasses? */
+    if (G_UNLIKELY(g_type_is_a(!type, expected_type))) {
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
-                    _("Resource type ‘%s’ does not match expected type ‘%s’."),
-                    typename, g_type_name(expected_type));
+                    _("Resource type ‘%s’ of file ‘%s’ does not match "
+                      "the expected type ‘%s’."),
+                    filename, typename, g_type_name(expected_type));
         goto fail;
     }
     /* If the resource type matches the requested type yet the type is invalid
@@ -608,7 +612,9 @@ parse(const gchar *text,
             || !g_ascii_isspace(text[sizeof("name")]))
         {
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is missing."));
+                        _("Resource name is missing for "
+                          "version 3 resource ‘%s’ in file ‘%s’."),
+                        typename, filename);
             goto fail;
         }
 
@@ -617,21 +623,29 @@ parse(const gchar *text,
         len = strcspn(text, "\n\r");
         if (!len) {
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is missing."));
+                        _("Resource name is missing for "
+                          "version 3 resource ‘%s’ in file ‘%s’."),
+                        typename, filename);
             goto fail;
         }
 
         if (!g_utf8_validate(text, len, NULL)) {
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is not valid UTF-8."));
+                        _("Resource name is not valid UTF-8 for "
+                          "version 3 resource ‘%s’ in file ‘%s’."),
+                        typename, filename);
             goto fail;
         }
 
         name = g_strndup(text, len);
-        if (gwy_inventory_get_item(klass->inventory, name)) {
-            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource named ‘%s’ already exists."),
-                        name);
+
+        GwyResource *obstacle = gwy_inventory_get_item(klass->inventory, name);
+        if (obstacle) {
+            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
+                        _("Resource named ‘%s’ loaded from file ‘%s’ "
+                          "conflicts with already loaded resource from ‘%s’."),
+                        name, filename,
+                        obstacle->filename ? obstacle->filename : "<internal>");
             goto fail;
         }
 
@@ -639,7 +653,7 @@ parse(const gchar *text,
         text += strspn(text, " \t\n\r");
     }
 
-    if ((resource = klass->parse(text))) {
+    if ((resource = klass->parse(text, error))) {
         if (name) {
             resource->name = name;
             name = NULL;
@@ -763,13 +777,6 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
         }
 
         const gchar *filename = g_file_info_get_name(fileinfo);
-        /*
-        if (gwy_inventory_get_item(klass->inventory, name)) {
-            g_warning("Ignoring duplicite %s ‘%s’", klass->name, name);
-            continue;
-        }
-        */
-        /* FIXME */
         gchar *text = NULL;
         GError *error = NULL;
         if (!g_file_get_contents(filename, &text, NULL, &error)) {
@@ -793,7 +800,6 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
         g_free(text);
         g_object_unref(fileinfo);
     }
-
     g_object_unref(dir);
 }
 

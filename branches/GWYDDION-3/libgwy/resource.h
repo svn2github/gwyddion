@@ -32,6 +32,8 @@ typedef enum {
     GWY_RESOURCE_ERROR_HEADER = 1,
     GWY_RESOURCE_ERROR_TYPE,
     GWY_RESOURCE_ERROR_NAME,
+    GWY_RESOURCE_ERROR_DUPLICIT,
+    GWY_RESOURCE_ERROR_DATA,
 } GwyResourceError;
 
 GQuark gwy_resource_error_quark(void);
@@ -89,7 +91,8 @@ struct _GwyResourceClass {
     void         (*discard)(GwyResource *resource);
     void         (*dump)   (GwyResource *resource,
                             GString *string);
-    GwyResource* (*parse)  (const gchar *text);
+    GwyResource* (*parse)  (const gchar *text,
+                            GError **error);
 
     /*< private >*/
     void (*reserved1)(void);
