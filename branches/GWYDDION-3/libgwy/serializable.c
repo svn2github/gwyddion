@@ -593,7 +593,7 @@ gwy_serializable_deserialize(GInputStream *input,
 }
 
 /**
- * SECTION:serializable
+ * SECTION: serializable
  * @title: GwySerializable
  * @short_description: Serializable value-like object interface
  *
@@ -672,6 +672,12 @@ gwy_serializable_deserialize(GInputStream *input,
  * processed first.  This means that if done() of an object is invoked, all its
  * contained objects have been already process.  At the very end the item list
  * is freed too.
+ **/
+
+/**
+ * GwySerializable:
+ *
+ * Formal type of serializable objects.
  **/
 
 /**

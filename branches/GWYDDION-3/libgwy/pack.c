@@ -975,7 +975,7 @@ gwy_pack_error_quark(void)
 }
 
 /**
- * SECTION:pack
+ * SECTION: pack
  * @title: pack
  * @short_description: Binary data packing and unpacking
  *
@@ -1153,7 +1153,5 @@ gwy_pack_error_quark(void)
  * Errors in this domain will be from the #GwyPackError enumeration.
  * See #GError for information on error domains.
  **/
-
-
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -20,6 +20,12 @@
 #include "libgwy/macros.h"
 
 /**
+ * SECTION: macros
+ * @title: macros
+ * @short_description: Miscellaneous utility macros
+ **/
+
+/**
  * GWY_SWAP:
  * @t: C type.
  * @x: Variable of type @t to swap with @x.

@@ -20,6 +20,18 @@
 #include "libgwy/errorlist.h"
 #include <stdarg.h>
 
+/**
+ * gwy_error_list_add:
+ * @list: Pointer to error list or %NULL.
+ * @domain: Error domain.
+ * @code: Error code.
+ * @format: Error message printf()-style format.
+ * @...: arguments for @format.
+ *
+ * Adds a newly created error to an error list.
+ *
+ * Does nothing if @list is %NULL.  See also g_set_error().
+ **/
 void
 gwy_error_list_add(GwyErrorList **list,
                    GQuark domain,
@@ -39,6 +51,15 @@ gwy_error_list_add(GwyErrorList **list,
     *list = g_slist_prepend(*list, g_error_new_literal(domain, code, message));
 }
 
+/**
+ * gwy_error_list_clear:
+ * @list: Pointer to error list or %NULL.
+ *
+ * Clears all errors in an error list and destroys the list.
+ *
+ * If @list is not %NULL, it is reset to an empty list, i.e. %NULL is assigned
+ * to the location it points to.
+ **/
 void
 gwy_error_list_clear(GwyErrorList **list)
 {
@@ -54,5 +75,34 @@ gwy_error_list_clear(GwyErrorList **list)
     *list = NULL;
 }
 
+/**
+ * SECTION: errorlist
+ * @title: GwyErrorList
+ * @short_description: List of #GError<!-- -->s
+ *
+ * GwyErrorList is a plain #GSList containing pointers to #GErrors as the
+ * @data members.  You can use all #GSList functions on #GwyErrorList, a few
+ * additional functions are provided for convenient error list handling 
+ * Notice the calling convention differs from the usual #GSList functions and
+ * resembles more #GError functions.
+ *
+ * Errors are added to the list with gwy_error_list_add() in a stack-like
+ * fashion, i.e. the most recent error is the first item in the list.
+ *
+ * There is no function to create a #GwyErrorList because %NULL represents an
+ * empty list.  All items in the list hold some error, there are never any
+ * items with %NULL data members.
+ *
+ * To clear all errors in the list and destroy the list, call
+ * gwy_error_list_clear().
+ **/
+
+/**
+ * GwyErrorList:
+ *
+ * Representation of an error list.
+ *
+ * This is an alias of #GSList.
+ **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

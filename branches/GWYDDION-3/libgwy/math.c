@@ -575,7 +575,7 @@ jump_over:
 }
 
 /**
- * SECTION:math
+ * SECTION: math
  * @title: math
  * @short_description: Mathematical functions
  *
