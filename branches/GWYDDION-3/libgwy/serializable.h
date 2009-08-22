@@ -55,7 +55,6 @@ union _GwySerializableValue {
     guchar *v_string;
     GObject *v_object;
     gsize *v_size;
-    gboolean *v_boolean_array;
     guchar *v_char_array;
     guint32 *v_int32_array;
     guint64 *v_int64_array;
@@ -119,7 +118,7 @@ GType gwy_serializable_get_type(void);
 
 /* NOTE: We may need to use error lists here. */
 gboolean gwy_serializable_serialize  (GwySerializable *serializable,
-                                      GInputStream *input,
+                                      GOutputStream *output,
                                       GError **error);
 GObject* gwy_serializable_deserialize(GInputStream *input,
                                       GError **error);
