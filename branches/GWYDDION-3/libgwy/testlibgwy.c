@@ -335,20 +335,20 @@ gwy_ser_test_construct(GwySerializableItems *items,
     gpointer child;
 
     memcpy(it, default_items, sizeof(default_items));
-    gwy_serializable_filter_items(it, G_N_ELEMENTS(it), items, "GwySerTest",
-                                  error_list);
+    gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerTest",
+                                 error_list);
 
     if (it[3].array_size != 4) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_INVALID,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
                            "Item ‘raw’ has %" G_GSIZE_FORMAT " bytes "
                            "instead of 4.",
                            it[3].array_size);
         goto fail;
     }
     if ((child = it[4].value.v_object) && !GWY_IS_SER_TEST(child)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_INVALID,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
                            "Item ‘child’ is %s instead of GwySerTest.",
                            G_OBJECT_TYPE_NAME(child));
         goto fail;
@@ -483,7 +483,7 @@ test_serialize_simple(void)
     sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
     stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
     g_assert(ok);
     g_assert_cmpint(sertest->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
@@ -502,10 +502,9 @@ test_deserialize_simple(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
-    sertest = (GwySerTest*)gwy_serializable_deserialize(ser_test_simple,
-                                                        sizeof(ser_test_simple),
-                                                        &bytes_consumed,
-                                                        &error_list);
+    sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_simple,
+                                                  sizeof(ser_test_simple),
+                                                  &bytes_consumed, &error_list);
     g_assert(sertest);
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_simple));
@@ -560,7 +559,7 @@ test_serialize_data(void)
     sertest->strlist[1] = g_strdup("Wait a second...");
     stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
     g_assert(ok);
     g_assert_cmpint(sertest->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
@@ -581,10 +580,9 @@ test_deserialize_data(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
-    sertest = (GwySerTest*)gwy_serializable_deserialize(ser_test_data,
-                                                        sizeof(ser_test_data),
-                                                        &bytes_consumed,
-                                                        &error_list);
+    sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_data,
+                                                  sizeof(ser_test_data),
+                                                  &bytes_consumed, &error_list);
     g_assert(sertest);
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_data));
@@ -634,7 +632,7 @@ test_serialize_nested(void)
     grandchild = child->child = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
     stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
     g_assert(ok);
     g_assert_cmpint(sertest->done_called, ==, 0);
     g_assert_cmpint(child->done_called, ==, 0);
@@ -655,10 +653,9 @@ test_deserialize_nested(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
-    sertest = (GwySerTest*)gwy_serializable_deserialize(ser_test_nested,
-                                                        sizeof(ser_test_nested),
-                                                        &bytes_consumed,
-                                                        &error_list);
+    sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_nested,
+                                                  sizeof(ser_test_nested),
+                                                  &bytes_consumed, &error_list);
     g_assert(sertest);
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
@@ -709,8 +706,7 @@ test_serialize_error(void)
     for (gsize i = 1; i < 102; i++) {
         stream = g_memory_output_stream_new(malloc(i), i, NULL, &free);
         memstream = G_MEMORY_OUTPUT_STREAM(stream);
-        ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream,
-                                        &error);
+        ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
         g_assert(!ok);
         g_assert(error);
         g_assert_cmpint(sertest->done_called, ==, 0);
@@ -775,10 +771,9 @@ test_deserialize_garbage(void)
             }
         }
 
-        object = gwy_serializable_deserialize((const guchar*)buffer->data,
-                                              buffer->len,
-                                              &bytes_consumed,
-                                              &error_list);
+        object = gwy_deserialize_memory((const guchar*)buffer->data,
+                                        buffer->len,
+                                        &bytes_consumed, &error_list);
 
         /* No checks.  The goal is not to crash... */
         g_array_free(buffer, TRUE);
@@ -906,11 +901,11 @@ test_unit_serialize_one(GwyUnit *unit1)
 
     stream = g_memory_output_stream_new(malloc(100), 100, NULL, &free);
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(unit1), stream, &error);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(unit1), stream, &error);
     g_assert(ok);
     g_assert(error == NULL);
     len = g_memory_output_stream_get_data_size(memstream);
-    unit2 = (GwyUnit*)(gwy_serializable_deserialize
+    unit2 = (GwyUnit*)(gwy_deserialize_memory
                        (g_memory_output_stream_get_data(memstream),
                         g_memory_output_stream_get_data_size(memstream),
                         &len, &error_list));

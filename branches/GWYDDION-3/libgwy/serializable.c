@@ -36,26 +36,6 @@ gwy_serializable_get_type(void)
 }
 
 /**
- * gwy_serializable_error_quark:
- *
- * Gets the error domain for serialization and deserialization.
- *
- * See and use %GWY_SERIALIZABLE_ERROR.
- *
- * Returns: The error domain.
- **/
-GQuark
-gwy_serializable_error_quark(void)
-{
-    static GQuark error_domain = 0;
-
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("gwy-serializable-error-quark");
-
-    return error_domain;
-}
-
-/**
  * gwy_serializable_n_items:
  * @serializable: A serializable object.
  *
@@ -390,7 +370,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *             <para>This method must make any assumptions about the contents
  *             of @items.  Commonly, however, only items from a small
  *             predefined set are expected and then
- *             gwy_serializable_filter_items() can be used to simplify the
+ *             gwy_deserialize_filter_items() can be used to simplify the
  *             processing of the item list.</para>
  * @duplicate: <para>Creates a new object with all data identical to this
  *             object.</para>

@@ -67,6 +67,26 @@ static GwySerializableItems* unpack_items    (const guchar *buffer,
                                               GwyErrorList **error_list);
 static void                  free_items      (GwySerializableItems *items);
 
+/**
+ * gwy_deserialize_error_quark:
+ *
+ * Gets the error domain for deserialization.
+ *
+ * See and use %GWY_DESERIALIZE_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+GQuark
+gwy_deserialize_error_quark(void)
+{
+    static GQuark error_domain = 0;
+
+    if (!error_domain)
+        error_domain = g_quark_from_static_string("gwy-deserialize-error-quark");
+
+    return error_domain;
+}
+
 static void
 buffer_alloc(GwySerializableBuffer *buffer,
              gsize size)
@@ -271,7 +291,7 @@ buffer_write64(GwySerializableBuffer *buffer,
 }
 
 /**
- * gwy_serializable_serialize:
+ * gwy_serialize_gio:
  * @serializable: A serializable object.
  * @output: Output stream to write the serialized object to.
  * @error: Location to store the error occuring, %NULL to ignore.
@@ -285,9 +305,9 @@ buffer_write64(GwySerializableBuffer *buffer,
  * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
  **/
 gboolean
-gwy_serializable_serialize(GwySerializable *serializable,
-                           GOutputStream *output,
-                           GError **error)
+gwy_serialize_gio(GwySerializable *serializable,
+                  GOutputStream *output,
+                  GError **error)
 {
     GwySerializableItems items;
     GwySerializableBuffer buffer;
@@ -552,8 +572,8 @@ check_size(gsize size,
     if (G_LIKELY(size >= required_size))
         return TRUE;
 
-    gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                       GWY_SERIALIZABLE_ERROR_TRUNCATED,
+    gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                       GWY_DESERIALIZE_ERROR_TRUNCATED,
                        _("End of data was reached while reading value of type "
                          "‘%s’. It requires %" G_GSIZE_FORMAT " bytes but only "
                          "%" G_GSIZE_FORMAT " bytes remain."),
@@ -584,8 +604,8 @@ unpack_size(const guchar *buffer,
     *array_size = raw_size;
     if (G_UNLIKELY(*array_size != raw_size
                    || *array_size >= G_MAXSIZE/item_size)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_SIZE_T,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_SIZE_T,
                            _("Data of size larger than what can be "
                              "represented on this machine was encountered."));
         return 0;
@@ -829,8 +849,8 @@ unpack_name(const guchar *buffer,
     const guchar *s = memchr(buffer, '\0', size);
 
     if (G_UNLIKELY(!s)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_TRUNCATED,
                            _("End of data was reached while looking for the "
                              "end of a string."));
         return 0;
@@ -848,8 +868,8 @@ unpack_string(const guchar *buffer,
     const guchar *s = memchr(buffer, '\0', size);
 
     if (G_UNLIKELY(!s)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_TRUNCATED,
                            _("End of data was reached while looking for the "
                              "end of a string."));
         return 0;
@@ -898,8 +918,7 @@ unpack_object(const guchar *buffer,
 {
     gsize rbytes;
 
-    if (!(*value = gwy_serializable_deserialize(buffer, size, &rbytes,
-                                                error_list)))
+    if (!(*value = gwy_deserialize_memory(buffer, size, &rbytes, error_list)))
         return 0;
 
     return rbytes;
@@ -923,10 +942,9 @@ unpack_object_array(const guchar *buffer,
     if (*array_size) {
         *value = g_new0(GObject*, *array_size);
         for (gsize i = 0; i < *array_size; i++) {
-            if (!((*value)[i] = gwy_serializable_deserialize(buffer + position,
-                                                             size - position,
-                                                             &rbytes,
-                                                             error_list))) {
+            if (!((*value)[i] = gwy_deserialize_memory(buffer + position,
+                                                       size - position, &rbytes,
+                                                       error_list))) {
                 while (i--)
                     GWY_OBJECT_UNREF((*value)[i]);
                 GWY_FREE(*value);
@@ -941,10 +959,10 @@ unpack_object_array(const guchar *buffer,
 }
 
 /**
- * gwy_serializable_deserialize:
+ * gwy_deserialize_memory:
  * @buffer: Memory containing the serialized representation of one object.
  * @size: Size of @buffer in bytes.  If the buffer is larger than the
- *        object representation, non-fatal %GWY_SERIALIZABLE_ERROR_PADDING will
+ *        object representation, non-fatal %GWY_DESERIALIZE_ERROR_PADDING will
  *        be reported.
  * @bytes_consumed: Location to store the number of bytes actually consumed
  *                  from @buffer, or %NULL.
@@ -959,10 +977,10 @@ unpack_object_array(const guchar *buffer,
  * Returns: Newly created object on success, %NULL on failure.
  **/
 GObject*
-gwy_serializable_deserialize(const guchar *buffer,
-                             gsize size,
-                             gsize *bytes_consumed,
-                             GwyErrorList **error_list)
+gwy_deserialize_memory(const guchar *buffer,
+                       gsize size,
+                       gsize *bytes_consumed,
+                       GwyErrorList **error_list)
 {
     const GwySerializableInterface *iface;
     GwySerializableItems *items = NULL;
@@ -991,8 +1009,8 @@ gwy_serializable_deserialize(const guchar *buffer,
     /* We should no only fit, but the object size should be exactly size.
      * If there is extra stuff, add an error, but do not fail. */
     if (G_UNLIKELY(size - pos != object_size)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_PADDING,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_PADDING,
                            _("Object ‘%s’ data is smaller than the space "
                              "alloted for it.  The padding was ignored."),
                            typename);
@@ -1025,8 +1043,8 @@ get_serializable(const gchar *typename,
 
     type = g_type_from_name(typename);
     if (G_UNLIKELY(!type)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not known. "
                              "It was ignored."),
                            typename);
@@ -1036,16 +1054,16 @@ get_serializable(const gchar *typename,
     *classref = g_type_class_ref(type);
     g_assert(*classref);
     if (G_UNLIKELY(!G_TYPE_IS_INSTANTIATABLE(type))) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not instantiable. "
                              "It was ignored."),
                            typename);
         return 0;
     }
     if (G_UNLIKELY(!g_type_is_a(type, GWY_TYPE_SERIALIZABLE))) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not serializable. "
                              "It was ignored."),
                            typename);
@@ -1054,8 +1072,8 @@ get_serializable(const gchar *typename,
 
     *iface = g_type_interface_peek(*classref, GWY_TYPE_SERIALIZABLE);
     if (G_UNLIKELY(!*iface || !(*iface)->construct)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
                            _("Object type ‘%s’ does not implement "
                              "deserialization. It was ignored."),
                            typename);
@@ -1196,8 +1214,8 @@ unpack_items(const guchar *buffer,
                 goto fail;
         }
         else {
-            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                               GWY_SERIALIZABLE_ERROR_DATA,
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_DATA,
                                _("Data type 0x%02x is unknown. "
                                  "It could not be just skipped, complete "
                                  "object ‘%s’ was ignored."),
@@ -1291,7 +1309,7 @@ free_items(GwySerializableItems *items)
 }
 
 /**
- * gwy_serializable_filter_items:
+ * gwy_deserialize_filter_items:
  * @template_: List of expected items.  Generally, the values should be set to
  *             defaults.
  * @n_items: The number of items in the template.
@@ -1311,11 +1329,11 @@ free_items(GwySerializableItems *items)
  * This is a helper function for use in #GwySerializable construct() method.
  **/
 void
-gwy_serializable_filter_items(GwySerializableItem *template_,
-                              gsize n_items,
-                              GwySerializableItems *items,
-                              const gchar *type_name,
-                              GwyErrorList **error_list)
+gwy_deserialize_filter_items(GwySerializableItem *template_,
+                             gsize n_items,
+                             GwySerializableItems *items,
+                             const gchar *type_name,
+                             GwyErrorList **error_list)
 {
     guint8 *seen = g_new0(guint8, n_items);
 
@@ -1332,16 +1350,16 @@ gwy_serializable_filter_items(GwySerializableItem *template_,
         }
 
         if (G_UNLIKELY(j == n_items)) {
-            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                               GWY_SERIALIZABLE_ERROR_ITEM,
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_ITEM,
                                _("Unexpected item ‘%s’ of type 0x%02x in the "
                                  "representation of object ‘%s’ was ignored"),
                                name, ctype, type_name);
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {
-            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                               GWY_SERIALIZABLE_ERROR_ITEM,
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_ITEM,
                                _("Item ‘%s’ of type 0x%02x is present multiple "
                                  "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
@@ -1363,37 +1381,37 @@ gwy_serializable_filter_items(GwySerializableItem *template_,
 }
 
 /**
- * GWY_SERIALIZABLE_ERROR:
+ * GWY_DESERIALIZE_ERROR:
  *
  * Error domain for deserialization.
  *
- * Errors in this domain will be from the #GwySerializableError enumeration.
+ * Errors in this domain will be from the #GwyDeserializeError enumeration.
  * See #GError for information on error domains.
  **/
 
 /**
- * GwySerializableError:
- * @GWY_SERIALIZABLE_ERROR_TRUNCATED: Data ends in the middle of some item or
- *                                    there is not enough data to represent
- *                                    given object.  This error is fatal.
- * @GWY_SERIALIZABLE_ERROR_PADDING: There is too much data to represent given
- *                                  object.  This error is non-fatal: the extra
- *                                  data is just ignored.
- * @GWY_SERIALIZABLE_ERROR_SIZE_T: Size is not representable on this system.
- *                                 This can occur on legacy 32bit systems,
- *                                 however, they are incapable of holding such
- *                                 large data in core anyway.  This error is
- *                                 fatal.
- * @GWY_SERIALIZABLE_ERROR_OBJECT: Representation of an object of unknown or
- *                                 deserialization-incapable type was found.
- *                                 This error is fatal.
- * @GWY_SERIALIZABLE_ERROR_ITEM: Unexpected item was encountered.  This error
- *                               is non-fatal: such item is just ignored.
- * @GWY_SERIALIZABLE_ERROR_DATA: Uknown data type (#GwySerializableCType) was
- *                               encountered.  This error is fatal.
- * @GWY_SERIALIZABLE_ERROR_FATAL_MASK: Distinguishes fatal and non-fatal errors
- *                                     (fatal give non-zero value when masked
- *                                     with this mask).
+ * GwyDeserializeError:
+ * @GWY_DESERIALIZE_ERROR_TRUNCATED: Data ends in the middle of some item or
+ *                                   there is not enough data to represent
+ *                                   given object.  This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_PADDING: There is too much data to represent given
+ *                                 object.  This error is non-fatal: the extra
+ *                                 data is just ignored.
+ * @GWY_DESERIALIZE_ERROR_SIZE_T: Size is not representable on this system.
+ *                                This can occur on legacy 32bit systems,
+ *                                however, they are incapable of holding such
+ *                                large data in core anyway.  This error is
+ *                                fatal.
+ * @GWY_DESERIALIZE_ERROR_OBJECT: Representation of an object of unknown or
+ *                                deserialization-incapable type was found.
+ *                                This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_ITEM: Unexpected item was encountered.  This error
+ *                              is non-fatal: such item is just ignored.
+ * @GWY_DESERIALIZE_ERROR_DATA: Uknown data type (#GwySerializableCType) was
+ *                              encountered.  This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_FATAL_MASK: Distinguishes fatal and non-fatal errors
+ *                                    (fatal give non-zero value when masked
+ *                                    with this mask).
  *
  * Error codes returned by deserialization.
  *
@@ -1405,3 +1423,4 @@ gwy_serializable_filter_items(GwySerializableItem *template_,
  * top-level object.
  **/
 
+/* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

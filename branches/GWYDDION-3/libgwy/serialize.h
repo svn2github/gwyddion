@@ -26,38 +26,37 @@
 
 G_BEGIN_DECLS
 
-#define GWY_SERIALIZABLE_ERROR gwy_serializable_error_quark()
+#define GWY_DESERIALIZE_ERROR gwy_deserialize_error_quark()
 
 typedef enum {
-    GWY_SERIALIZABLE_ERROR_PADDING = 1,
-    GWY_SERIALIZABLE_ERROR_ITEM,
-    GWY_SERIALIZABLE_ERROR_FATAL_MASK = 1024,
-    GWY_SERIALIZABLE_ERROR_TRUNCATED
-        = GWY_SERIALIZABLE_ERROR_FATAL_MASK + GWY_SERIALIZABLE_ERROR_ITEM + 1,
-    GWY_SERIALIZABLE_ERROR_SIZE_T,
-    GWY_SERIALIZABLE_ERROR_OBJECT,
-    GWY_SERIALIZABLE_ERROR_DATA,
-    GWY_SERIALIZABLE_ERROR_INVALID,
-} GwySerializableError;
+    GWY_DESERIALIZE_ERROR_PADDING = 1,
+    GWY_DESERIALIZE_ERROR_ITEM,
+    GWY_DESERIALIZE_ERROR_FATAL_MASK = 1024,
+    GWY_DESERIALIZE_ERROR_TRUNCATED
+        = GWY_DESERIALIZE_ERROR_FATAL_MASK + GWY_DESERIALIZE_ERROR_ITEM + 1,
+    GWY_DESERIALIZE_ERROR_SIZE_T,
+    GWY_DESERIALIZE_ERROR_OBJECT,
+    GWY_DESERIALIZE_ERROR_DATA,
+    GWY_DESERIALIZE_ERROR_INVALID,
+} GwyDeserializeError;
 
-GQuark gwy_serializable_error_quark(void);
+GQuark gwy_deserialize_error_quark(void);
 
-gboolean gwy_serializable_serialize   (GwySerializable *serializable,
-                                       GOutputStream *output,
-                                       GError **error);
-GObject* gwy_serializable_deserialize (const guchar *buffer,
-                                       gsize size,
-                                       gsize *bytes_consumed,
-                                       GwyErrorList **error_list);
-void     gwy_serializable_filter_items(GwySerializableItem *template_,
-                                       gsize n_items,
-                                       GwySerializableItems *items,
-                                       const gchar *type_name,
-                                       GwyErrorList **error_list);
+gboolean gwy_serialize_gio           (GwySerializable *serializable,
+                                      GOutputStream *output,
+                                      GError **error);
+GObject* gwy_deserialize_memory      (const guchar *buffer,
+                                      gsize size,
+                                      gsize *bytes_consumed,
+                                      GwyErrorList **error_list);
+void     gwy_deserialize_filter_items(GwySerializableItem *template_,
+                                      gsize n_items,
+                                      GwySerializableItems *items,
+                                      const gchar *type_name,
+                                      GwyErrorList **error_list);
 
 G_END_DECLS
 
 #endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
-

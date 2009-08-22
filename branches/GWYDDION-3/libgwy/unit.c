@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
-#include "libgwy/serializable.h"
+#include "libgwy/serialize.h"
 #include "libgwy/unit.h"
 
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
@@ -226,7 +226,7 @@ gwy_unit_construct(GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
     GwySerializableItem item = serialize_items[0];
-    gwy_serializable_filter_items(&item, 1, items, "GwyUnit", error_list);
+    gwy_deserialize_filter_items(&item, 1, items, "GwyUnit", error_list);
 
     GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
     gwy_unit_set_from_string(unit, item.value.v_string, NULL);
