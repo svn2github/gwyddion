@@ -107,3 +107,5 @@ Resource:
   matches GwyInventory).
 - Errors are properly reported.
 
+Interpolation:
+- Inappropriate GWY_INTERPOLATION_NONE ‘interpolation’ type is gone.
