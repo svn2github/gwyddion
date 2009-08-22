@@ -1,0 +1,58 @@
+# Process this file with automake to produce Makefile.in
+
+PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
+WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wundef -Wshadow -Wredundant-decls -Wlogical-op
+
+# Must init
+EXTRA_DIST =
+CLEANFILES =
+MAINTAINERCLEANFILES =
+BUILT_SOURCES =
+
+libgwyincludedir = $(pkgincludedir)/libgwyddion
+test_programs = testlibgwy
+
+lib_LTLIBRARIES = libgwy.la
+noinst_PROGRAMS = $(test_programs)
+libgwyinclude_HEADERS = \
+	errorlist.h \
+	libgwy.h \
+	macros.h \
+	math.h \
+	pack.h \
+	serializable.h
+
+libgwy_la_SOURCES = \
+	errorlist.c \
+	macros.c \
+	math.c \
+	pack.c \
+	serializable.c
+
+testlibgwy_SOURCES = testlibgwy.c
+
+AM_CFLAGS = @LIBGWY_CFLAGS@ $(WARNINGS) $(PEDANTIC)
+AM_CPPFLAGS = \
+	-I$(top_builddir) \
+	-I$(top_srcdir) \
+	-DG_LOG_DOMAIN=\"Gwy\"
+
+# In following order do:
+# Any code change     C:   R++: A
+# Any iface change    C++: 0:   A
+# Adding ifaces       C:   R:   A++
+# Changing ifaces     C:   R:   0
+if UNSTABLE_LIBRARY_RELEASE
+version_info = -release @GWY_VERSION_STRING@
+else
+version_info = -version-info 0:0:0
+endif
+
+libgwy_la_LDFLAGS = @LIBGWY_LIBS@ $(version_info)
+testlibgwy_LDADD = libgwy.la
+
+include $(top_srcdir)/build/gtester.make
+
+clean-local:
+	rm -f core.* *~
+
