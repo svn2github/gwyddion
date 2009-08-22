@@ -91,3 +91,5 @@ for sym in sorted(declared_missing):
     loc = declared_symbols[sym]
     sys.stderr.write('Declared undefined symbol (%s, %s): %s\n'
                      % (lib, loc, sym))
+
+sys.exit(not (not exported_private and not declared_missing))
