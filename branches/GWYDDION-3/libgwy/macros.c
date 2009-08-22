@@ -25,7 +25,7 @@
  * @x: Variable of type @t to swap with @x.
  * @y: Variable of type @t to swap with @y.
  *
- * Swaps two variables.
+ * Swaps the values of two variables.
  *
  * More precisely, @x and @y must be usable as both lhs and rhs expressions of
  * type @t.
