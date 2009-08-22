@@ -411,7 +411,7 @@ parse(GwyUnit *unit,
 
     g_array_set_size(unit->units, 0);
     power10 = 0;
-    if (*ppower10)
+    if (ppower10)
         *ppower10 = 0;
 
     if (!string || !*string)
@@ -462,7 +462,7 @@ parse(GwyUnit *unit,
     while (g_ascii_isspace(*string))
         string++;
 
-    GString *buf = g_string_new("");
+    GString *buf = g_string_new(NULL);
 
     /* the rest are units */
     while (*string) {
@@ -621,7 +621,7 @@ parse(GwyUnit *unit,
     }
 
     canonicalize(unit);
-    if (*ppower10)
+    if (ppower10)
         *ppower10 = power10;
 
     return TRUE;
