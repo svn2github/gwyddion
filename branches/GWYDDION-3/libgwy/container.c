@@ -1543,6 +1543,8 @@ try_set_value(GwyContainer *container,
  * @value: #GValue with the value to set.
  *
  * Inserts or updates a value identified by name in a data container.
+ *
+ * The value is copied by the container.
  **/
 
 /**
@@ -1552,6 +1554,8 @@ try_set_value(GwyContainer *container,
  * @value: #GValue with the value to set.
  *
  * Inserts or updates a value identified by quark in a data container.
+ *
+ * The value is copied by the container.
  **/
 void
 gwy_container_set_value(GwyContainer *container,
