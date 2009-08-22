@@ -47,31 +47,34 @@ enum {
 
 const gchar *gwy_get_user_dir(void) { return ""; }
 
-static void         gwy_resource_finalize       (GObject *object);
-static void         gwy_resource_set_property   (GObject *object,
-                                                 guint prop_id,
-                                                 const GValue *value,
-                                                 GParamSpec *pspec);
-static void         gwy_resource_get_property   (GObject *object,
-                                                 guint prop_id,
-                                                 GValue *value,
-                                                 GParamSpec *pspec);
+static void         gwy_resource_finalize          (GObject *object);
+static void         gwy_resource_set_property      (GObject *object,
+                                                    guint prop_id,
+                                                    const GValue *value,
+                                                    GParamSpec *pspec);
+static void         gwy_resource_get_property      (GObject *object,
+                                                    guint prop_id,
+                                                    GValue *value,
+                                                    GParamSpec *pspec);
 static gboolean     gwy_resource_is_modifiable_impl(gconstpointer item);
-static const gchar* gwy_resource_get_item_name  (gconstpointer item);
-static gboolean     gwy_resource_compare        (gconstpointer item1,
-                                                 gconstpointer item2);
-static void         gwy_resource_rename         (gpointer item,
-                                                 const gchar *new_name);
-static const GType* gwy_resource_get_traits     (guint *ntraits);
-static const gchar* gwy_resource_get_trait_name (guint i);
-static void         gwy_resource_get_trait_value(gconstpointer item,
-                                                 guint i,
-                                                 GValue *value);
-static GwyResource* parse(const gchar *text,
-                          GType expected_type,
-                          const gchar *filename,
-                          GError **error);
-static void         gwy_resource_modified       (GwyResource *resource);
+static const gchar* gwy_resource_get_item_name     (gconstpointer item);
+static gboolean     gwy_resource_compare           (gconstpointer item1,
+                                                    gconstpointer item2);
+static void         gwy_resource_rename            (gpointer item,
+                                                    const gchar *new_name);
+static const GType* gwy_resource_get_traits        (guint *ntraits);
+static const gchar* gwy_resource_get_trait_name    (guint i);
+static void         gwy_resource_get_trait_value   (gconstpointer item,
+                                                    guint i,
+                                                    GValue *value);
+static GwyResource* parse                          (const gchar *text,
+                                                    GType expected_type,
+                                                    const gchar *filename,
+                                                    GError **error);
+static gboolean     name_is_unique                 (GwyResource *resource,
+                                                    GwyResourceClass *klass,
+                                                    GError **error);
+static void         gwy_resource_data_changed_impl (GwyResource *resource);
 
 /* Use a static propery -> trait map.  We could do it generically, too.
  * g_param_spec_pool_list() is ugly and slow is the minor problem, the major
@@ -134,7 +137,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
 
     klass->item_type = gwy_resource_item_type;
     klass->item_type.type = G_TYPE_FROM_CLASS(klass);
-    klass->data_changed = gwy_resource_modified;
+    klass->data_changed = gwy_resource_data_changed_impl;
 
     pspec = g_param_spec_string("name",
                                 "Name",
@@ -149,7 +152,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
     pspec = g_param_spec_string("file-name",
                                 "File name",
                                 "Name of file corresponding to the resource "
-                                "in system encoding, it may be NULL for "
+                                "in GLib encoding, it may be NULL for "
                                 "built-in or newly created resourced.",
                                 NULL, /* What is the default value good for? */
                                 G_PARAM_READABLE);
@@ -545,6 +548,22 @@ gwy_resource_dump(GwyResource *resource)
     return str;
 }
 
+/**
+ * gwy_resource_load:
+ * @filename_sys: Name of resource file to load, in GLib encoding.
+ * @expected_type: Expected resource type.  This must be a valid type, however,
+ *                 it is possible to pass %GWY_TYPE_RESOURCE which effectively
+ *                 accepts all possible resources.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         #GwyResourceError and #GFileError domains can occur.
+ *
+ * Loads a resource from a file.
+ *
+ * The resource is not added to the inventory neither is its name checked
+ * for uniqueness.
+ *
+ * Returns: A newly created resource object.
+ **/
 GwyResource*
 gwy_resource_load(const gchar *filename_sys,
                   GType expected_type,
@@ -692,25 +711,6 @@ parse(const gchar *text,
         }
     }
 
-    /* Check if the name does not comflict with an existing resource. */
-    GwyResource *obstacle = gwy_inventory_get_item(klass->inventory, name);
-    if (obstacle) {
-        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                  NULL, NULL, NULL);
-        gchar *ofilename_utf8 = (obstacle->filename
-                                 ? g_filename_to_utf8(obstacle->filename, -1,
-                                                      NULL, NULL, NULL)
-                                 : "<internal>");
-        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
-                    _("Resource named ‘%s’ loaded from file ‘%s’ "
-                      "conflicts with already loaded resource from ‘%s’."),
-                    name, filename_utf8, ofilename_utf8);
-        g_free(filename_utf8);
-        if (obstacle->filename)
-            g_free(ofilename_utf8);
-        GWY_OBJECT_UNREF(resource);
-    }
-
 fail:
     if (klass)
         g_type_class_unref(klass);
@@ -738,7 +738,7 @@ gwy_resource_data_changed(GwyResource *resource)
 }
 
 static void
-gwy_resource_modified(GwyResource *resource)
+gwy_resource_data_changed_impl(GwyResource *resource)
 {
     if (!resource->is_modifiable)
         g_warning("Constant resource ‘%s’ of type %s was modified",
@@ -845,7 +845,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
         GwyResource *resource
             = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
 
-        if (G_LIKELY(resource)) {
+        if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
             resource->is_modifiable = modifiable;
             resource->filename = filename_sys;
             resource->is_modified = FALSE;
@@ -861,6 +861,38 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
     g_object_unref(dir);
 }
 
+/* Check if the name does not conflict with an existing resource. */
+static gboolean
+name_is_unique(GwyResource *resource,
+               GwyResourceClass *klass,
+               GError **error)
+{
+    GwyResource *obstacle = gwy_inventory_get_item(klass->inventory,
+                                                   resource->name);
+    if (!obstacle)
+        return TRUE;
+
+    /* Do not bother with message formatting when errors are ingored. */
+    if (!error)
+        return FALSE;
+
+    gchar *filename_utf8 = g_filename_to_utf8(resource->filename, -1,
+                                              NULL, NULL, NULL);
+    gchar *ofilename_utf8 = (obstacle->filename
+                             ? g_filename_to_utf8(obstacle->filename, -1,
+                                                  NULL, NULL, NULL)
+                             : "<internal>");
+    g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
+                _("Resource named ‘%s’ loaded from file ‘%s’ "
+                  "conflicts with already loaded resource from ‘%s’."),
+                G_OBJECT_TYPE_NAME(resource), filename_utf8, ofilename_utf8);
+    g_free(filename_utf8);
+    if (obstacle->filename)
+        g_free(ofilename_utf8);
+
+    return FALSE;
+}
+
 static gchar*
 build_filename(GwyResource *resource)
 {
@@ -872,8 +904,9 @@ build_filename(GwyResource *resource)
                   resource->name);
 
     klass = GWY_RESOURCE_GET_CLASS(resource);
-    return g_build_filename(gwy_get_user_dir(),
-                            klass->name, resource->name, NULL);
+    /* TODO: free gwy_user_directory() */
+    return g_build_filename(gwy_user_directory(klass->name),
+                            resource->name, NULL);
 }
 
 /**
