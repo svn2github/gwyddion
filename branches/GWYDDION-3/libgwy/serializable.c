@@ -291,11 +291,14 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  *
  * <refsect2 id='libgwy-serializable-implementing'>
  * <title>Implementing #GwySerializable</title>
- * You can implement serialization and deserialization in your classes...
  * </refsect2>
+ *
+ * You can implement serialization and deserialization in your classes...
  *
  * <refsect2 id='libgwy-serializable-internals'>
  * <title>Gory Details of Serialization</title>
+ * </refsect2>
+ *
  * The following information is not strictly necessary for implementing
  * #GwySerializable interface in your classes, but it can help prevent wrong
  * decision about serialized representation of your objects.  Also, it might
@@ -335,7 +338,6 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  * processed first.  This means that if done() of an object is invoked, all its
  * contained objects have been already process.  At the very end the item list
  * is freed too.
- * </refsect2>
  **/
 
 /**
