@@ -1,9 +1,14 @@
 # Process this file with automake to produce Makefile.in
 # $Id$
 
+MAINTAINERCLEANFILES = \
+	gwyddion.vim \
+	libgwy3.pc
+
 EXTRA_DIST = \
 	gwyddion-vim-cfg.py \
-	gwyddion.vim
+	gwyddion.vim \
+	libgwy3.pc.in
 
 noinst_DATA = \
 	gwyddion.vim

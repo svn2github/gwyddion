@@ -24,6 +24,7 @@ AC_CONFIG_FILES([
   docs/Makefile
   docs/libgwy/Makefile
   data/Makefile
+  data/libgwy3.pc
 ])
 
 AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options nostdinc])
