@@ -237,6 +237,7 @@ gwy_serializable_n_items(GwySerializable *serializable)
 {
     const GwySerializableInterface *iface;
 
+    g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), 0);
     iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_val_if_fail(iface && iface->n_items, 1);
 
@@ -262,6 +263,7 @@ gwy_serializable_itemize(GwySerializable *serializable,
     const GwySerializableInterface *iface;
     GwySerializableItem *item;
 
+    g_return_if_fail(GWY_IS_SERIALIZABLE(serializable));
     iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface && iface->itemize);
 
@@ -287,6 +289,7 @@ gwy_serializable_done(GwySerializable *serializable)
 {
     const GwySerializableInterface *iface;
 
+    g_return_if_fail(GWY_IS_SERIALIZABLE(serializable));
     iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface);
 
@@ -593,6 +596,58 @@ gwy_serializable_deserialize(GInputStream *input,
 }
 
 /**
+ * gwy_serializable_duplicate:
+ * @serializable: A serializable object.
+ *
+ * Creates an object with identical value.
+ *
+ * This is a copy-constructor.  You can duplicate a %NULL, too, but you are
+ * discouraged from doing it.
+ *
+ * Returns: The newly created object copy.
+ **/
+GObject*
+gwy_serializable_duplicate(GwySerializable *serializable)
+{
+    const GwySerializableInterface *iface;
+
+    g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), NULL);
+    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    g_return_val_if_fail(iface && iface->duplicate, NULL);
+
+    return iface->duplicate(serializable);
+}
+
+/**
+ * gwy_serializable_assign:
+ * @source: A serializable object.
+ * @destination: An object of the same type as @source. More precisely,
+ *               @source may be subclass of @destination (the extra 
+ *               information is lost then).
+ *
+ * Copies the value of an object to another object.
+ **/
+void
+gwy_serializable_assign(GwySerializable *destination,
+                        GwySerializable *source)
+{
+    const GwySerializableInterface *iface;
+
+    if (source == destination)
+        return;
+
+    g_return_if_fail(GWY_IS_SERIALIZABLE(destination));
+    /* No need to check GWY_IS_SERIALIZABLE(source) */
+    g_return_if_fail(g_type_is_a(G_TYPE_FROM_INSTANCE(source),
+                                 G_TYPE_FROM_INSTANCE(destination)));
+
+    iface = GWY_SERIALIZABLE_GET_INTERFACE(destination);
+    g_return_val_if_fail(iface && iface->assign, NULL);
+
+    return iface->assign(destination, source);
+}
+
+/**
  * SECTION: serializable
  * @title: GwySerializable
  * @short_description: Serializable value-like object interface
@@ -758,28 +813,6 @@ gwy_serializable_deserialize(GInputStream *input,
  **/
 
 /**
- * gwy_serializable_assign:
- * @source: A serializable object.
- * @destination: An object of the same type as @source. More precisely,
- *               @source may be subclass of @destination (the extra 
- *               information is lost then).
- *
- * Copies the value of an object to another object.
- **/
-
-/**
- * gwy_serializable_duplicate:
- * @serializable: A serializable object.
- *
- * Creates an object with identical value.
- *
- * This is a copy-constructor.  You can duplicate a %NULL, too, but you are
- * discouraged from doing it.
- *
- * Returns: The newly created object copy.
- **/
-
-/**
  * GwySerializableInterface:
  * @g_interface: Parent class.
  * @n_items: Returns the number of items the object will flatten to, including
@@ -806,8 +839,9 @@ gwy_serializable_deserialize(GInputStream *input,
  *           allocate item list that contains all the items found instead.
  * @construct: Deserializes an object from array of flattened data items.
  * @duplicate: Creates a new object with all data identical to this object.
- * @assign: Makes all data of an object of the same class identical to the
- *          data of this object.
+ * @assign: Makes all data of an object identical to the data of another object
+ *          of the same class.  Implementations may assume that the is-a
+ *          relation is satisfied for the source object.
  *
  * Interface implemented by serializable objects.
  *

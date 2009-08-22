@@ -121,8 +121,8 @@ struct _GwySerializableInterface {
                                        GwyErrorList **error_list);
 
     GObject*              (*duplicate)(GwySerializable *serializable);
-    void                  (*assign)   (GwySerializable *source,
-                                       GwySerializable *destination);
+    void                  (*assign)   (GwySerializable *destination,
+                                       GwySerializable *source);
 };
 
 GType gwy_serializable_get_type(void);
@@ -133,8 +133,8 @@ gboolean gwy_serializable_serialize  (GwySerializable *serializable,
 GObject* gwy_serializable_deserialize(GInputStream *input,
                                       GwyErrorList **error_list);
 GObject* gwy_serializable_duplicate  (GwySerializable *serializable);
-void     gwy_serializable_assign     (GwySerializable *source,
-                                      GwySerializable *destination);
+void     gwy_serializable_assign     (GwySerializable *destination,
+                                      GwySerializable *source);
 
 gsize    gwy_serializable_n_items    (GwySerializable *serializable);
 void     gwy_serializable_itemize    (GwySerializable *serializable,
