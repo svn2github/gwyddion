@@ -439,17 +439,14 @@ find_self(void)
  * something like "C:\Program Files\Gwyddion3\lib\gwyddion3".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_LIBDIR</envar>, then libgwy and Gwyddion
- * installation directory follows.  Note if the environment variable holds
- * a value does not seem to be a Gwyddion library directory, its value is
+ * variable <envar>GWYDDION_LIBDIR</envar>, the libgwy and Gwyddion
+ * installation directory follow.  Note if the environment variable holds
+ * a value that does not seem to be a Gwyddion library directory, its value is
  * ignored.
  *
  * Returns: The requested subdirectory of Gwyddion system library directory
  *          as a newly allocated string.
- *          %NULL is returned if such directory could not be determined.  The
- *          returned directory is not guaranteed to exist even if it is a
- *          standard subdirectory such as "modules".  Someone might delete it
- *          just before this function returned, for instance.
+ *          %NULL is returned if such directory could not be determined.
  **/
 gchar*
 gwy_library_directory(const gchar *subdir)
@@ -473,17 +470,14 @@ gwy_library_directory(const gchar *subdir)
  * "C:\Program Files\Gwyddion3\share\gwyddion3".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_DATADIR</envar>, then libgwy and Gwyddion
- * installation directory follows.  Note if the environment variable holds
- * a value does not seem to be a Gwyddion data directory, its value is
+ * variable <envar>GWYDDION_DATADIR</envar>, the libgwy and Gwyddion
+ * installation directory follow.  Note if the environment variable holds
+ * a value that does not seem to be a Gwyddion data directory, its value is
  * ignored.
  *
  * Returns: The requested subdirectory of Gwyddion system data directory
  *          as a newly allocated string.
- *          %NULL is returned if such directory could not be determined.  The
- *          returned directory is not guaranteed to exist even if it is a
- *          standard subdirectory such as "pixmaps".  Someone might delete it
- *          just before this function returned, for instance.
+ *          %NULL is returned if such directory could not be determined.
  **/
 gchar*
 gwy_data_directory(const gchar *subdir)
@@ -506,15 +500,13 @@ gwy_data_directory(const gchar *subdir)
  * "C:\Program Files\Gwyddion\share\locale".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_LOCALE_DIR</envar>, then libgwy and Gwyddion
+ * variable <envar>GWYDDION_LOCALE_DIR</envar>, the libgwy and Gwyddion
  * installation directory follows.  Note if the environment variable holds
- * a value does not seem to be a locale directory, its value is ignored.
+ * a value that does not seem to be a locale directory, its value is ignored.
  *
  * Returns: The requested subdirectory of Gwyddion system locale directory
  *          as a newly allocated string.
- *          %NULL is returned if such directory could not be determined.  The
- *          returned directory is not guaranteed to exist.  Someone might
- *          delete it just before this function returned, for instance.
+ *          %NULL is returned if such directory could not be determined.
  **/
 gchar*
 gwy_locale_directory(const gchar *subdir)
@@ -578,15 +570,13 @@ find_user_dir(G_GNUC_UNUSED gpointer arg)
  * is unlikely that Yeti has an MS Windows account.
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>HOME</envar>, then a user directory determined by system
- * specific means.  Note if the environment variable holds a value does not
- * seem to be a writable directory, its value is ignored.
+ * variable <envar>HOME</envar>, then the user directory determined by system
+ * specific means.  Note if the environment variable holds a value that does
+ * not seem to be a writable directory, its value is ignored.
  *
  * Returns: The requested subdirectory of Gwyddion user directory
  *          as a newly allocated string.
- *          %NULL is returned if such directory could not be determined.  The
- *          returned directory is not guaranteed to exist.  Someone might
- *          delete it just before this function returned, for instance.
+ *          %NULL is returned if such directory could not be determined.
  **/
 gchar*
 gwy_user_directory(const gchar *subdir)
@@ -643,9 +633,7 @@ add_from_list(GPtrArray *paths,
  *
  * Obtains a list of library directories to look for libraries in.
  *
- * The list should be searched in given order.  It is not guaranteed that
- * all the returned directories exist, someone might delete them just before
- * this funcion returned, for instance.
+ * The list should be searched in given order.
  *
  * On a typical Unix system the list might look for instance
  * "/home/yeti/.gwyddion3", "/usr/local/lib64/gwyddion3",
@@ -673,9 +661,7 @@ gwy_library_search_path(const gchar *subdir)
  *
  * Obtains a list of data directories to look for data in.
  *
- * The list should be searched in given order.  It is not guaranteed that
- * all the returned directories exist, someone might delete them just before
- * this funcion returned, for instance.
+ * The list should be searched in given order.
  *
  * On a typical Unix system the list might look for instance
  * "/home/yeti/.gwyddion3", "/usr/local/share/gwyddion3",
@@ -704,6 +690,12 @@ gwy_data_search_path(const gchar *subdir)
  * SECTION: libgwy
  * @title: libgwy
  * @short_description: Library-level functions of libgwy
+ *
+ * None of the directories returned by the path finding functions is guaranteed
+ * to be writable, readable or exist at all.  Even though the existence and/or
+ * properties of the directories are checked on certain occassions, the
+ * directory might be deleted just between the check and your attempt to do
+ * something with it.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
