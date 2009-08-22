@@ -31,7 +31,7 @@ libgwy_la_SOURCES = \
 
 testlibgwy_SOURCES = testlibgwy.c
 
-AM_CFLAGS = @LIBGWY_CFLAGS@ $(WARNINGS) $(PEDANTIC)
+AM_CFLAGS = @LIBGWY_CFLAGS@ $(WARNINGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
