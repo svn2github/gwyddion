@@ -2342,9 +2342,9 @@ next:
  **/
 
 /**
- * gwy_unit_assign:
+ * gwy_container_assign:
  * @dest: Destination data container.
- * @src: Source physicsl unit.
+ * @src: Source data container.
  *
  * Copies the contents of a data container.
  *

@@ -27,6 +27,17 @@
  * SECTION: macros
  * @title: macros
  * @short_description: Miscellaneous utility macros
+ *
+ * Several macros are wrappers of resource freeing functions.  They differ from
+ * the original functions by setting the resource variable to an
+ * unallocated/invalid state (typically %NULL).  This improves readability
+ * of code such as #GObject dispose() methods that can simply do
+ * |[
+ * GWY_SIGNAL_HANDLER_DISCONNECT(object, handler);
+ * GWY_OBJECT_UNREF(object);
+ * ]|
+ * if they know @object and @handler have either valid values or they are nul.
+ * This code can be executed several times without errors from GLib.
  **/
 
 /**
@@ -51,6 +62,19 @@
  * Frees memory if it is allocated.
  *
  * This is an idempotent wrapper of g_free(): if @ptr is not %NULL
+ * g_free() is called on it and @ptr is set to %NULL.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
+ * GWY_SLICE_FREE:
+ * @ptr: Pointer (must be an l-value).
+ *
+ * Frees #GSlice-allocated memory if it is allocated.
+ *
+ * This is an idempotent wrapper of g_slice_free(): if @ptr is not %NULL
  * g_free() is called on it and @ptr is set to %NULL.
  *
  * This macro may evaluate its arguments several times.
@@ -96,7 +120,7 @@
  * Expands to %TRUE if strings are equal, to %FALSE otherwise.
  *
  * This is a shorthand for strcmp() which does not require mentally inverting
- * the result to test two strings for euality.
+ * the result to test two strings for equality.
  **/
 
 /**

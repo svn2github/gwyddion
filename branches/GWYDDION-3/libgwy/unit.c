@@ -1311,7 +1311,7 @@ gwy_unit_clear_format(GwyUnitFormat *format)
 /**
  * gwy_unit_assign:
  * @dest: Destination physical unit.
- * @src: Source physicsl unit.
+ * @src: Source physical unit.
  *
  * Copies the value of a physical unit.
  *
