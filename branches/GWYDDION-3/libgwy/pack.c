@@ -132,8 +132,8 @@ gwy_pack_pascal_real_le(guchar *p, gdouble x)
         s = 0x80;
     }
 
-    power = (gint)floor(gwy_log2(x));
-    x *= PASCAL_REAL_B/gwy_exp2(power);
+    power = (gint)floor(log2(x));
+    x *= PASCAL_REAL_B/exp2(power);
     if (x < PASCAL_REAL_B) {
         x *= 2.0;
         power--;
@@ -192,8 +192,8 @@ gwy_pack_pascal_real_be(guchar *p, gdouble x)
         s = 0x80;
     }
 
-    power = (gint)floor(gwy_log2(x));
-    x *= PASCAL_REAL_B/gwy_exp2(power);
+    power = (gint)floor(log2(x));
+    x *= PASCAL_REAL_B/exp2(power);
     if (x < PASCAL_REAL_B) {
         x *= 2.0;
         power--;
