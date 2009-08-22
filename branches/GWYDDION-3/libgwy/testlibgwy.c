@@ -84,6 +84,56 @@ test_memmem(void)
              == NULL);
 }
 
+G_GNUC_NULL_TERMINATED
+static void
+test_next_line_check(const gchar *text, ...)
+{
+    gchar *buf = g_strdup(text);
+    gchar *p = buf;
+    va_list ap;
+    const gchar *expected = NULL;
+
+    va_start(ap, text);
+    for (gchar *line = gwy_str_next_line(&p);
+         line;
+         line = gwy_str_next_line(&p)) {
+        expected = va_arg(ap, const gchar*);
+        g_assert(expected != NULL);
+        g_assert_cmpstr(line, ==, expected);
+    }
+    expected = va_arg(ap, const gchar*);
+    g_assert(expected == NULL);
+    va_end(ap);
+    g_free(buf);
+}
+
+static void
+test_next_line(void)
+{
+    test_next_line_check(NULL, NULL);
+    test_next_line_check("", NULL);
+    test_next_line_check("\r", "", NULL);
+    test_next_line_check("\n", "", NULL);
+    test_next_line_check("\r\n", "", NULL);
+    test_next_line_check("\r\r", "", "", NULL);
+    test_next_line_check("\n\n", "", "", NULL);
+    test_next_line_check("\r\n\r\n", "", "", NULL);
+    test_next_line_check("\n\r\n", "", "", NULL);
+    test_next_line_check("\r\r\n", "", "", NULL);
+    test_next_line_check("\r\n\r", "", "", NULL);
+    test_next_line_check("\n\r\r", "", "", "", NULL);
+    test_next_line_check("X", "X", NULL);
+    test_next_line_check("X\n", "X", NULL);
+    test_next_line_check("X\r", "X", NULL);
+    test_next_line_check("X\r\n", "X", NULL);
+    test_next_line_check("\nX", "", "X", NULL);
+    test_next_line_check("\rX", "", "X", NULL);
+    test_next_line_check("\r\nX", "", "X", NULL);
+    test_next_line_check("X\r\r", "X", "", NULL);
+    test_next_line_check("X\n\n", "X", "", NULL);
+    test_next_line_check("X\nY\rZ", "X", "Y", "Z", NULL);
+}
+
 /***************************************************************************
  *
  * Packing and unpacking
@@ -1679,6 +1729,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/version", test_version);
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/memmem", test_memmem);
+    g_test_add_func("/testlibgwy/next_line", test_next_line);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/sort", test_sort);
     g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
