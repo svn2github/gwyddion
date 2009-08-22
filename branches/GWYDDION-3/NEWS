@@ -13,10 +13,21 @@ Libraries in general:
             rendering -- does not need X11 or Gtk+
   - libgwyui: user interface, i.e. new widgets and UI helper functions
   - libgwyapp: modules, application-level functions
+- Libraries are thread-aware, similarly to GLib and Gtk+.  This means that they
+  protect their static data by locks, but individual objects do not use any
+  internal locking.
 - Libraries have a test suite (well, libgwy does), run `make check', if it
   passes run also `make check-valgrind'.
 - Intralibrary symbol resolution does not go through PLT, the technique was
   blatantly copied from GLib (though not the implementation).
+
+libgwy:
+- Explicit library initialization is no longer necessary (unless the library
+  user implements custom deserializers or otherwise needs to register all
+  types beforhand).
+- Functions for finding Gwyddion directories were reworked and unified among
+  Unix and Win32 systems (as far as the differences of Win32 from other systems
+  permit).
 
 Serialization:
 - GWY format was changed to version 3, with 64bit object and array sizes and
@@ -83,3 +94,16 @@ Inventory:
   simpler object for wrapping of static arrays with the tree model interface.
 - It has a proper default parameterless constructor, the item type can be set
   whenever the inventory is empty.
+- Fixed items are expressed with is_modifiable() method instead of is_fixed()
+  with the reverse meaning.
+
+Resource:
+- Resource name is included in the file, allowing for resource names not
+  representable in the file system (file name is used for 2.x resources).
+- Functions for saving and loading are available, low-level dump, restore and
+  modification bookkeeping functions were removed (some may reappear in a
+  different form the future, though).
+- Property is-const changed to is-modifiable with the inverse meaning (this
+  matches GwyInventory).
+- Errors are properly reported.
+
