@@ -118,6 +118,11 @@ gwy_memmem(gconstpointer haystack,
  * @buffer is updated to point after the end of the line and the "\n"
  * (or "\r" or "\r\n") is replaced with "\0", if present.
  *
+ * The final line may or may not be terminated with an EOL marker, its contents
+ * is returned in either case.  Note, however, that the empty string "" is not
+ * interpreted as an empty unterminated line.  Instead, %NULL is immediately
+ * returned.
+ *
  * The typical usage of gwy_str_next_line() is:
  * |[
  * gchar *p = text;
@@ -140,23 +145,23 @@ gwy_str_next_line(gchar **buffer)
         return NULL;
 
     gchar *q = *buffer;
-    gsize n = strcspn(*buffer, "\n\r");
-
-    if (n || *q) {
-        gchar *p = q + n;
-
-        if (p[0] == '\r' && p[1] == '\n') {
-            p[0] = p[1] = '\0';
-            *buffer = p+2;
-        }
-        else {
-            p[0] = '\0';
-            *buffer = p+1;
-        }
-    }
-    else
+    if (!*q) {
         *buffer = NULL;
+        return NULL;
+    }
 
+    gchar *p;
+    for (p = q; *p != '\n' && *p != '\r' && *p; p++)
+        ;
+    if (p[0] == '\r' && p[1] == '\n') {
+        *(p++) = '\0';
+        *(p++) = '\0';
+    }
+    else if (p[0]) {
+        *(p++) = '\0';
+    }
+
+    *buffer = p;
     return q;
 }
 
