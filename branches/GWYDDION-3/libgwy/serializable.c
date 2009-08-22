@@ -48,6 +48,10 @@ static gsize                 gwy_serializable_calculate_sizes(GwySerializableIte
 static void                  gwy_serializable_items_done     (const GwySerializableItems *items);
 static gboolean              gwy_serializable_dump_to_stream (const GwySerializableItems *items,
                                                               GwySerializableBuffer *buffer);
+static GType                 gwy_serializable_get_interface  (const gchar *typename,
+                                                              gpointer *classref,
+                                                              const GwySerializableInterface **iface,
+                                                              GwyErrorList **error_list);
 static GwySerializableItems* gwy_serializable_unpack_items   (const guchar *buffer,
                                                               gsize size,
                                                               GwyErrorList **error_list);
@@ -618,6 +622,44 @@ gwy_serializable_unpack_check_size(gsize size,
     return FALSE;
 }
 
+/* This is the only function that knows what integral is used to represent
+ * sizes. */
+static inline gsize
+gwy_serializable_unpack_size(const guchar *buffer,
+                             gsize size,
+                             gsize item_size,
+                             gsize *array_size,
+                             const gchar *name,
+                             GwyErrorList **error_list)
+{
+    guint64 raw_size;
+
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64),
+                                            "data-size", error_list))
+        return 0;
+    memcpy(&raw_size, buffer, sizeof(guint64));
+    raw_size = GINT64_FROM_LE(raw_size);
+    size -= sizeof(guint64);
+
+    /* Check whether the array length is representable and whether the total
+     * size is representable. */
+    *array_size = raw_size;
+    if (*array_size != raw_size || *array_size >= G_MAXSIZE/item_size) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_SIZE_T,
+                           _("Data of size larger than what can be "
+                             "represented on this machine was encountered."));
+        return 0;
+    }
+
+    /* And if the airhtmetic works, whether the data fits. */
+    if (!gwy_serializable_unpack_check_size(size, *array_size * item_size,
+                                            name, error_list))
+        return 0;
+
+    return sizeof(guint64);
+}
+
 static inline gsize
 gwy_serializable_unpack_boolean(const guchar *buffer,
                                 gsize size,
@@ -625,9 +667,9 @@ gwy_serializable_unpack_boolean(const guchar *buffer,
                                 GwyErrorList **error_list)
 {
     guint8 byte;
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8), "char",
-                                            error_list))
-        return FALSE;
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8),
+                                            "boolean", error_list))
+        return 0;
     byte = *buffer;
     *value = !!byte;
     return sizeof(guint8);
@@ -639,11 +681,31 @@ gwy_serializable_unpack_uint8(const guchar *buffer,
                               guint8 *value,
                               GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8), "boolean",
-                                            error_list))
-        return FALSE;
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8),
+                                            "int8", error_list))
+        return 0;
     *value = *buffer;
     return sizeof(guint8);
+}
+
+static inline gsize
+gwy_serializable_unpack_uint8_array(const guchar *buffer,
+                                    gsize size,
+                                    guint8 **value,
+                                    GwyErrorList **error_list)
+{
+    gsize array_size, rbytes;
+
+    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint8),
+                                                &array_size, "int8-array",
+                                                error_list)))
+        return 0;
+
+    buffer += rbytes;
+    GWY_FREE(*value);
+    *value = g_new(guint8, array_size);
+    memcpy(value, buffer, array_size*sizeof(guint8));
+    return rbytes + array_size*sizeof(guint8);
 }
 
 static inline gsize
@@ -652,9 +714,9 @@ gwy_serializable_unpack_uint32(const guchar *buffer,
                                guint32 *value,
                                GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint32), "int32",
-                                            error_list))
-        return FALSE;
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint32),
+                                            "int32", error_list))
+        return 0;
     memcpy(value, buffer, sizeof(guint32));
     *value = GINT32_FROM_LE(*value);
     return sizeof(guint32);
@@ -666,12 +728,29 @@ gwy_serializable_unpack_uint64(const guchar *buffer,
                                guint64 *value,
                                GwyErrorList **error_list)
 {
-    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64), "int64",
-                                            error_list))
-        return FALSE;
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64),
+                                            "int64", error_list))
+        return 0;
     memcpy(value, buffer, sizeof(guint64));
     *value = GINT64_FROM_LE(*value);
     return sizeof(guint64);
+}
+
+static inline gsize
+gwy_serializable_unpack_double(const guchar *buffer,
+                               gsize size,
+                               gdouble *value,
+                               GwyErrorList **error_list)
+{
+    GwySerializableValue u;
+
+    if (!gwy_serializable_unpack_check_size(size, sizeof(gdouble),
+                                            "double", error_list))
+        return 0;
+    memcpy(&u.v_uint64, buffer, sizeof(guint64));
+    u.v_uint64 = GINT64_FROM_LE(u.v_uint64);
+    *value = u.v_double;
+    return sizeof(gdouble);
 }
 
 static inline gsize
@@ -687,7 +766,7 @@ gwy_serializable_unpack_string(const guchar *buffer,
                            GWY_SERIALIZABLE_ERROR_TRUNCATED,
                            _("End of data was reached while looking for the "
                              "end of a string."));
-        return FALSE;
+        return 0;
     }
     *value = (const gchar*)buffer;
     return s-buffer + 1;
@@ -718,8 +797,7 @@ gwy_serializable_deserialize(const guchar *buffer,
     const GwySerializableInterface *iface;
     GwySerializableItems *items = NULL, *requested_items = NULL;
     const gchar *typename;
-    gsize pos = 0, rbytes, objsize;
-    guint64 object_size;
+    gsize pos = 0, rbytes, object_size;
     gpointer classref;
     GObject *object = NULL;
     GType type;
@@ -731,70 +809,20 @@ gwy_serializable_deserialize(const guchar *buffer,
     pos += rbytes;
 
     /* Object size */
-    if (!(rbytes = gwy_serializable_unpack_uint64(buffer + pos, size - pos,
-                                                  &object_size, error_list)))
+    if (!(rbytes = gwy_serializable_unpack_size(buffer + pos, size - pos, 1,
+                                                &object_size, "object",
+                                                error_list)))
         goto fail;
     pos += rbytes;
 
-    objsize = object_size;
-    if (objsize != object_size) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_SIZE_T,
-                           _("Object `%s' of size larger than what can be "
-                             "represented on this machine was encountered."),
-                           typename);
-        goto fail;
-    }
-
-    /* XXX: Here we can still overflow! */
-    if (!gwy_serializable_unpack_check_size(size - pos, objsize, "object",
-                                            error_list))
-        goto fail;
-
     /* Check if we can deserialize such thing. */
-    type = g_type_from_name(typename);
-    if (!type) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not known. "
-                             "It was ignored."),
-                           typename);
+    if (!(type = gwy_serializable_get_interface(typename, &classref, &iface,
+                                                error_list)))
         goto fail;
-    }
-
-    classref = g_type_class_ref(type);
-    g_assert(classref);
-    if (!G_TYPE_IS_INSTANTIATABLE(type)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not instantiable. "
-                             "It was ignored."),
-                           typename);
-        goto fail;
-    }
-    if (!g_type_is_a(type, GWY_TYPE_SERIALIZABLE)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' is not serializable. "
-                             "It was ignored."),
-                           typename);
-        goto fail;
-    }
-
-    iface = g_type_interface_peek(g_type_class_peek(type),
-                                  GWY_TYPE_SERIALIZABLE);
-    if (!iface || !iface->construct) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_OBJECT,
-                           _("Object type `%s' does not implement "
-                             "deserialization. It was ignored."),
-                           typename);
-        goto fail;
-    }
 
     /* We should no only fit, but the object size should be exactly size.
      * If there is extra stuff, add an error, but do not fail. */
-    if (size - pos != objsize)
+    if (size - pos != object_size)
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_PADDING,
                            _("Object `%s' data is smaller than the space "
@@ -802,7 +830,8 @@ gwy_serializable_deserialize(const guchar *buffer,
 
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
-    items = gwy_serializable_unpack_items(buffer + pos, objsize, error_list);
+    items = gwy_serializable_unpack_items(buffer + pos, object_size,
+                                          error_list);
     if (!items)
         goto fail;
 
@@ -817,6 +846,56 @@ fail:
     if (bytes_consumed)
         *bytes_consumed = size;
     return object;
+}
+
+static GType
+gwy_serializable_get_interface(const gchar *typename,
+                               gpointer *classref,
+                               const GwySerializableInterface **iface,
+                               GwyErrorList **error_list)
+{
+    GType type;
+
+    type = g_type_from_name(typename);
+    if (!type) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not known. "
+                             "It was ignored."),
+                           typename);
+        return 0;
+    }
+
+    *classref = g_type_class_ref(type);
+    g_assert(*classref);
+    if (!G_TYPE_IS_INSTANTIATABLE(type)) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not instantiable. "
+                             "It was ignored."),
+                           typename);
+        return 0;
+    }
+    if (!g_type_is_a(type, GWY_TYPE_SERIALIZABLE)) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not serializable. "
+                             "It was ignored."),
+                           typename);
+        return 0;
+    }
+
+    *iface = g_type_interface_peek(*classref, GWY_TYPE_SERIALIZABLE);
+    if (!*iface || !(*iface)->construct) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' does not implement "
+                             "deserialization. It was ignored."),
+                           typename);
+        return 0;
+    }
+
+    return type;
 }
 
 static GwySerializableItems*
