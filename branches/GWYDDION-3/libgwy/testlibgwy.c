@@ -793,13 +793,13 @@ test_deserialize_garbage(void)
 static void
 test_unit_parse(void)
 {
-    GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9;
     gint pw1, pw2, pw3, pw4, pw5, pw6, pw7, pw8, pw9;
+    gint pw11, pw12, pw13, pw14, pw15, pw16, pw17, pw18;
 
     /* Simple notations */
-    u1 = gwy_unit_new_from_string("m", &pw1);
-    u2 = gwy_unit_new_from_string("km", &pw2);
-    u3 = gwy_unit_new_from_string("Å", &pw3);
+    GwyUnit *u1 = gwy_unit_new_from_string("m", &pw1);
+    GwyUnit *u2 = gwy_unit_new_from_string("km", &pw2);
+    GwyUnit *u3 = gwy_unit_new_from_string("Å", &pw3);
 
     g_assert(gwy_unit_equal(u1, u2));
     g_assert(gwy_unit_equal(u2, u3));
@@ -813,9 +813,9 @@ test_unit_parse(void)
     g_object_unref(u3);
 
     /* Powers and comparision */
-    u4 = gwy_unit_new_from_string("um s^-1", &pw4);
-    u5 = gwy_unit_new_from_string("mm/ps", &pw5);
-    u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
+    GwyUnit *u4 = gwy_unit_new_from_string("um s^-1", &pw4);
+    GwyUnit *u5 = gwy_unit_new_from_string("mm/ps", &pw5);
+    GwyUnit *u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
 
     g_assert(gwy_unit_equal(u4, u5));
     g_assert(gwy_unit_equal(u5, u6));
@@ -829,9 +829,9 @@ test_unit_parse(void)
     g_object_unref(u6);
 
     /* Cancellation */
-    u7 = gwy_unit_new_from_string(NULL, &pw7);
-    u8 = gwy_unit_new_from_string("10%", &pw8);
-    u9 = gwy_unit_new_from_string("m^3 cm^-2/km", &pw9);
+    GwyUnit *u7 = gwy_unit_new_from_string(NULL, &pw7);
+    GwyUnit *u8 = gwy_unit_new_from_string("10%", &pw8);
+    GwyUnit *u9 = gwy_unit_new_from_string("m^3 cm^-2/km", &pw9);
 
     g_assert(gwy_unit_equal(u7, u8));
     g_assert(gwy_unit_equal(u8, u9));
@@ -843,6 +843,46 @@ test_unit_parse(void)
     g_object_unref(u7);
     g_object_unref(u8);
     g_object_unref(u9);
+
+    /* Silly notations: micron */
+    GwyUnit *u11 = gwy_unit_new_from_string("μs", &pw11);
+    GwyUnit *u12 = gwy_unit_new_from_string("µs", &pw12);
+    GwyUnit *u13 = gwy_unit_new_from_string("us", &pw13);
+    GwyUnit *u14 = gwy_unit_new_from_string("~s", &pw14);
+    GwyUnit *u15 = gwy_unit_new_from_string("\265s", &pw15);
+
+    g_assert(gwy_unit_equal(u11, u12));
+    g_assert(gwy_unit_equal(u12, u13));
+    g_assert(gwy_unit_equal(u13, u14));
+    g_assert(gwy_unit_equal(u14, u15));
+    g_assert(gwy_unit_equal(u15, u11));
+    g_assert_cmpint(pw11, ==, -6);
+    g_assert_cmpint(pw12, ==, -6);
+    g_assert_cmpint(pw13, ==, -6);
+    g_assert_cmpint(pw14, ==, -6);
+    g_assert_cmpint(pw15, ==, -6);
+
+    g_object_unref(u11);
+    g_object_unref(u12);
+    g_object_unref(u13);
+    g_object_unref(u14);
+    g_object_unref(u15);
+
+    /* Silly notations: squares */
+    GwyUnit *u16 = gwy_unit_new_from_string("m²", &pw16);
+    GwyUnit *u17 = gwy_unit_new_from_string("m m", &pw17);
+    GwyUnit *u18 = gwy_unit_new_from_string("m\262", &pw18);
+
+    g_assert(gwy_unit_equal(u16, u17));
+    g_assert(gwy_unit_equal(u17, u18));
+    g_assert(gwy_unit_equal(u18, u16));
+    g_assert_cmpint(pw16, ==, 0);
+    g_assert_cmpint(pw17, ==, 0);
+    g_assert_cmpint(pw18, ==, 0);
+
+    g_object_unref(u16);
+    g_object_unref(u17);
+    g_object_unref(u18);
 }
 
 static void
