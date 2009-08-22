@@ -93,9 +93,6 @@ static GwyResource* gwy_resource_parse_real     (const gchar *text,
                                                  GType expected_type,
                                                  gboolean is_const);
 static void         gwy_resource_modified       (GwyResource *resource);
-static void         gwy_resource_class_load_dir (const gchar *path,
-                                                 GwyResourceClass *klass,
-                                                 gboolean is_system);
 
 static guint resource_signals[LAST_SIGNAL] = { 0 };
 
@@ -325,7 +322,7 @@ gwy_resource_get_name(GwyResource *resource)
 }
 
 /**
- * gwy_resource_get_is_modifiable:
+ * gwy_resource_is_modifiable:
  * @resource: A resource.
  *
  * Returns whether a resource is modifiable.
@@ -334,7 +331,7 @@ gwy_resource_get_name(GwyResource *resource)
  *          resource.
  **/
 gboolean
-gwy_resource_get_is_modifiable(GwyResource *resource)
+gwy_resource_is_modifiable(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
     return !resource->is_const;
@@ -426,19 +423,19 @@ gwy_resource_class_get_item_type(GwyResourceClass *klass)
  *
  * Starts using a resource.
  *
- * Call to this function is necessary to use a resource properly.
- * It makes the resource to create any auxiliary structures that consume
+ * Calling this function is necessary to use a resource properly.
+ * It tells the resource to create any auxiliary structures that consume
  * considerable amount of memory and perform other initialization to
  * ready-to-use form.
  *
- * When a resource is no longer used, it should be released with
- * gwy_resource_release().
- *
  * In addition, it calls g_object_ref() on the resource.
  *
- * Resources usually exist through almost whole program lifetime from
- * #GObject perspective, but from the viewpoint of use this method is the
- * constructor and gwy_resource_release() is the destructor.
+ * When a resource is no longer used, it should be discarded with
+ * gwy_resource_discard() which releases the auxilary data.
+ *
+ * Although resources often exist through almost whole program lifetime from
+ * #GObject perspective, from the viewpoint of their use this method plays the
+ * role of constructor and gwy_resource_discard() is the destructor.
  **/
 void
 gwy_resource_use(GwyResource *resource)
@@ -456,7 +453,7 @@ gwy_resource_use(GwyResource *resource)
 }
 
 /**
- * gwy_resource_release:
+ * gwy_resource_discard:
  * @resource: A resource.
  *
  * Releases a resource.
@@ -466,7 +463,7 @@ gwy_resource_use(GwyResource *resource)
  * on it.  See gwy_resource_use() for more.
  **/
 void
-gwy_resource_release(GwyResource *resource)
+gwy_resource_discard(GwyResource *resource)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
     g_return_if_fail(resource->use_count);
@@ -474,7 +471,7 @@ gwy_resource_release(GwyResource *resource)
     if (!--resource->use_count) {
         void (*method)(GwyResource*);
 
-        method = GWY_RESOURCE_GET_CLASS(resource)->release;
+        method = GWY_RESOURCE_GET_CLASS(resource)->discard;
         if (method)
             method(resource);
     }
@@ -580,9 +577,13 @@ gwy_resource_parse_real(const gchar *text,
     g_return_val_if_fail(klass && klass->parse, NULL);
 
     resource = klass->parse(text, is_const);
-    if (resource)
-        g_string_assign(resource->name, name);
-    g_free(name);
+    if (resource) {
+        GWY_FREE(resource->name);
+        resource->name = name;
+        name = NULL;
+    }
+    else
+        g_free(name);
 
     return resource;
 }
@@ -658,20 +659,21 @@ gwy_resource_class_load(GwyResourceClass *klass)
     datadir = gwy_find_self_dir("data");
     path = g_build_filename(datadir, klass->name, NULL);
     g_free(datadir);
-    gwy_resource_class_load_dir(path, klass, TRUE);
+    gwy_resource_class_load_directory(klass, path, FALSE, NULL);
     g_free(path);
 
     path = g_build_filename(gwy_get_user_dir(), klass->name, NULL);
-    gwy_resource_class_load_dir(path, klass, FALSE);
+    gwy_resource_class_load_directory(klass, path, TRUE, NULL);
     g_free(path);
 
     gwy_inventory_restore_order(klass->inventory);
 }
 
-static void
-gwy_resource_class_load_dir(const gchar *path,
-                            GwyResourceClass *klass,
-                            gboolean is_system)
+void
+gwy_resource_class_load_directory(GwyResourceClass *klass,
+                                  const gchar *dirname,
+                                  gboolean modifiable,
+                                  GwyErrorList **error_list)
 {
     GDir *dir;
     GwyResource *resource;
@@ -679,7 +681,7 @@ gwy_resource_class_load_dir(const gchar *path,
     const gchar *name;
     gchar *filename, *text;
 
-    if (!(dir = g_dir_open(path, 0, NULL)))
+    if (!(dir = g_dir_open(dirname, 0, NULL)))
         return;
 
     while ((name = g_dir_read_name(dir))) {
@@ -691,7 +693,7 @@ gwy_resource_class_load_dir(const gchar *path,
             continue;
         }
         /* FIXME */
-        filename = g_build_filename(path, name, NULL);
+        filename = g_build_filename(dirname, name, NULL);
         if (!g_file_get_contents(filename, &text, NULL, &err)) {
             g_warning("Cannot read ‘%s’: %s", filename, err->message);
             g_clear_error(&err);
@@ -701,7 +703,7 @@ gwy_resource_class_load_dir(const gchar *path,
         g_free(filename);
 
         resource = gwy_resource_parse_real(text, G_TYPE_FROM_CLASS(klass),
-                                           is_system);
+                                           !modifiable);
         if (resource) {
             GWY_FREE(resource->name);
             resource->name = g_strdup(name);
@@ -811,7 +813,7 @@ gwy_resource_classes_finalize(void)
  *
  * #GwyResource is a base class for various application resources.  It defines
  * common interface: questioning resource name using gwy_resource_get_name(),
- * modifiability using gwy_resource_get_is_modifiable(), expressing user's
+ * modifiability using gwy_resource_is_modifiable(), expressing user's
  * favorites, loading resources from files and saving them.
  **/
 
@@ -831,7 +833,7 @@ gwy_resource_classes_finalize(void)
  *             @type and @copy must be filled by particular resource type.
  * @data_changed: "data-changed" signal method.
  * @use: gwy_resource_use() virtual method.
- * @release: gwy_resource_release() virtual method.
+ * @discard: gwy_resource_discard() virtual method.
  * @dump: gwy_resource_dump() virtual method, it only cares about resource
  *        data itself, the envelope is handled by #GwyResource.
  * @parse: gwy_resource_parse() virtual method, in only cares about resource

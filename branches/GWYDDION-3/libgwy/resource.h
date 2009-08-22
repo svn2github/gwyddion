@@ -22,6 +22,7 @@
 
 #include <glib-object.h>
 #include <libgwy/inventory.h>
+#include <libgwy/errorlist.h>
 
 G_BEGIN_DECLS
 
@@ -47,10 +48,11 @@ struct _GwyResource {
     gint use_count;
     gchar *name;
 
-    gboolean is_const;
-    gboolean is_modified;
-    gboolean is_preferred;
-    gboolean boolean1;
+    gboolean is_const : 1;
+    gboolean is_modified : 1;
+    gboolean is_preferred : 1;
+    gboolean is_boolean1 : 1;
+    gboolean is_boolean2 : 1;
     gint int1;
 
     gpointer reserved1;
@@ -73,7 +75,7 @@ struct _GwyResourceClass {
 
     /* Virtual table */
     void         (*use)    (GwyResource *resource);
-    void         (*release)(GwyResource *resource);
+    void         (*discard)(GwyResource *resource);
     void         (*dump)   (GwyResource *resource,
                             GString *string);
     GwyResource* (*parse)  (const gchar *text,
@@ -86,12 +88,12 @@ struct _GwyResourceClass {
 
 GType         gwy_resource_get_type           (void) G_GNUC_CONST;
 const gchar*  gwy_resource_get_name           (GwyResource *resource);
-gboolean      gwy_resource_get_is_modifiable  (GwyResource *resource);
+gboolean      gwy_resource_is_modifiable      (GwyResource *resource);
 gboolean      gwy_resource_get_is_preferred   (GwyResource *resource);
 void          gwy_resource_set_is_preferred   (GwyResource *resource,
                                                gboolean is_preferred);
 void          gwy_resource_use                (GwyResource *resource);
-void          gwy_resource_release            (GwyResource *resource);
+void          gwy_resource_discard            (GwyResource *resource);
 gboolean      gwy_resource_is_used            (GwyResource *resource);
 void          gwy_resource_data_changed       (GwyResource *resource);
 void          gwy_resource_data_saved         (GwyResource *resource);
@@ -103,6 +105,10 @@ const gchar*  gwy_resource_class_get_name     (GwyResourceClass *klass);
 const GwyInventoryItemType* gwy_resource_class_get_item_type(GwyResourceClass *klass);
 GwyInventory* gwy_resource_class_get_inventory(GwyResourceClass *klass);
 void          gwy_resource_class_load         (GwyResourceClass *klass);
+void          gwy_resource_class_load_directory(GwyResourceClass *klass,
+                                                const gchar *dirname,
+                                                gboolean modifiable,
+                                                GwyErrorList **error_list);
 gboolean      gwy_resource_class_mkdir        (GwyResourceClass *klass);
 void          gwy_resource_classes_finalize   (void);
 
