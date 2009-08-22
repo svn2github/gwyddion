@@ -32,12 +32,6 @@ enum {
 };
 
 typedef struct {
-    GQuark key;
-    GValue *value;
-    gboolean changed;
-} GwyKeyVal;
-
-typedef struct {
     GwyContainer *container;
     const gchar *prefix;
     gsize prefix_length;
@@ -47,14 +41,6 @@ typedef struct {
     GHFunc func;
     gpointer user_data;
 } PrefixData;
-
-typedef struct {
-    GwyContainer *container;
-    guint nprefixes;
-    const gchar **prefixes;
-    gboolean *pfxclosed;
-    gsize *pfxlengths;
-} PrefixListData;
 
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
 static void     value_destroy                  (gpointer data);
