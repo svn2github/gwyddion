@@ -91,7 +91,7 @@ struct _GwyResourceClass {
     void         (*discard)(GwyResource *resource);
     void         (*dump)   (GwyResource *resource,
                             GString *string);
-    GwyResource* (*parse)  (const gchar *text,
+    GwyResource* (*parse)  (gchar *text,
                             GError **error);
 
     /*< private >*/

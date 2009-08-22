@@ -45,8 +45,6 @@ enum {
     N_PROPS
 };
 
-const gchar *gwy_get_user_dir(void) { return ""; }
-
 static void         gwy_resource_finalize          (GObject *object);
 static void         gwy_resource_set_property      (GObject *object,
                                                     guint prop_id,
@@ -67,7 +65,7 @@ static const gchar* gwy_resource_get_trait_name    (guint i);
 static void         gwy_resource_get_trait_value   (gconstpointer item,
                                                     guint i,
                                                     GValue *value);
-static GwyResource* parse                          (const gchar *text,
+static GwyResource* parse                          (gchar *text,
                                                     GType expected_type,
                                                     const gchar *filename,
                                                     GError **error);
@@ -580,7 +578,7 @@ gwy_resource_load(const gchar *filename_sys,
 }
 
 static GwyResource*
-parse(const gchar *text,
+parse(gchar *text,
       GType expected_type,
       const gchar *filename_sys,
       GError **error)
@@ -977,6 +975,7 @@ gwy_resource_classes_finalize(void)
  *        data itself, the envelope is handled by #GwyResource.
  * @parse: Virtual method parsing back the text dump, in only cares about
  *         resource data itself, the envelope is handled by #GwyResource.
+ *         The method is permitted to modify the contents of @text.
  *
  * Resource class.
  **/
