@@ -21,6 +21,7 @@ libgwyinclude_HEADERS = \
 	math.h \
 	pack.h \
 	serializable.h \
+	serialize.h \
 	unit.h
 
 libgwy_la_SOURCES = \
@@ -29,6 +30,7 @@ libgwy_la_SOURCES = \
 	math.c \
 	pack.c \
 	serializable.c \
+	serialize.c \
 	unit.c
 
 testlibgwy_SOURCES = testlibgwy.c

@@ -21,7 +21,6 @@
 #define __GWY_SERIALIZABLE_H__
 
 #include <glib-object.h>
-#include <gio/gio.h>
 #include <libgwy/errorlist.h>
 
 G_BEGIN_DECLS
@@ -91,22 +90,6 @@ struct _GwySerializableItems {
     GwySerializableItem *items;
 };
 
-#define GWY_SERIALIZABLE_ERROR gwy_serializable_error_quark()
-
-typedef enum {
-    GWY_SERIALIZABLE_ERROR_PADDING = 1,
-    GWY_SERIALIZABLE_ERROR_ITEM,
-    GWY_SERIALIZABLE_ERROR_FATAL_MASK = 1024,
-    GWY_SERIALIZABLE_ERROR_TRUNCATED
-        = GWY_SERIALIZABLE_ERROR_FATAL_MASK + GWY_SERIALIZABLE_ERROR_ITEM + 1,
-    GWY_SERIALIZABLE_ERROR_SIZE_T,
-    GWY_SERIALIZABLE_ERROR_OBJECT,
-    GWY_SERIALIZABLE_ERROR_DATA,
-    GWY_SERIALIZABLE_ERROR_INVALID,
-} GwySerializableError;
-
-GQuark gwy_serializable_error_quark(void);
-
 typedef struct _GwySerializableInterface GwySerializableInterface;
 typedef struct _GwySerializable          GwySerializable;        /* dummy */
 
@@ -148,21 +131,9 @@ struct _GwySerializableInterface {
 
 GType    gwy_serializable_get_type    (void) G_GNUC_CONST;
 
-gboolean gwy_serializable_serialize   (GwySerializable *serializable,
-                                       GOutputStream *output,
-                                       GError **error);
-GObject* gwy_serializable_deserialize (const guchar *buffer,
-                                       gsize size,
-                                       gsize *bytes_consumed,
-                                       GwyErrorList **error_list);
 GObject* gwy_serializable_duplicate   (GwySerializable *serializable);
 void     gwy_serializable_assign      (GwySerializable *destination,
                                        GwySerializable *source);
-void     gwy_serializable_filter_items(GwySerializableItem *template_,
-                                       gsize n_items,
-                                       GwySerializableItems *items,
-                                       const gchar *type_name,
-                                       GwyErrorList **error_list);
 gsize    gwy_serializable_n_items     (GwySerializable *serializable);
 void     gwy_serializable_itemize     (GwySerializable *serializable,
                                        GwySerializableItems *items);
