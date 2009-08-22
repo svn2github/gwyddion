@@ -27,7 +27,7 @@ G_BEGIN_DECLS
 #define GWY_PACK_ERROR gwy_pack_error_quark()
 
 typedef enum {
-    GWY_PACK_ERROR_FORMAT,
+    GWY_PACK_ERROR_FORMAT = 1,
     GWY_PACK_ERROR_SIZE,
     GWY_PACK_ERROR_ARGUMENTS,
     GWY_PACK_ERROR_DATA,
