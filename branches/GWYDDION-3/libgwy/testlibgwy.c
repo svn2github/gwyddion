@@ -415,6 +415,8 @@ gwy_ser_test_construct(GwySerializableItems *items,
         memcpy(sertest->strlist, it[9].value.v_string_array,
                it[9].array_size*sizeof(gchar*));
         g_free(it[9].value.v_string_array);
+        it[9].value.v_string_array = NULL;
+        it[9].array_size = 0;
     }
 
     return G_OBJECT(sertest);
@@ -424,6 +426,13 @@ fail:
     GWY_FREE(it[2].value.v_string);
     GWY_FREE(it[3].value.v_uint8_array);
     GWY_OBJECT_UNREF(it[4].value.v_object);
+    if (it[9].value.v_string_array) {
+        for (gsize i = 0; i < it[9].array_size; i++)
+            g_free(it[9].value.v_string_array[i]);
+        g_free(it[9].value.v_string_array);
+        it[9].value.v_string_array = NULL;
+        it[9].array_size = 0;
+    }
 
     return NULL;
 }
@@ -798,7 +807,7 @@ test_deserialize_garbage(void)
 
     g_type_class_ref(GWY_TYPE_SER_TEST);
     for (gsize i = 0; i < niter; i++) {
-        GObject *object;
+        GObject *object = NULL;
         GwyErrorList *error_list = NULL;
         gsize bytes_consumed;
         guint n;
