@@ -167,12 +167,12 @@ gwy_unit_class_init(GwyUnitClass *klass)
  * The ::changed signal is emitted whenever unit changes.
  */
     unit_signals[CHANGED]
-        g_signal_new_class_handler("changed",
-                                   G_OBJECT_CLASS_TYPE(klass),
-                                   G_SIGNAL_RUN_FIRST,
-                                   NULL, NULL, NULL,
-                                   g_cclosure_marshal_VOID__VOID,
-                                   G_TYPE_NONE, 0);
+        = g_signal_new_class_handler("changed",
+                                     G_OBJECT_CLASS_TYPE(klass),
+                                     G_SIGNAL_RUN_FIRST,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
