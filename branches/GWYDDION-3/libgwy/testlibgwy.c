@@ -243,6 +243,9 @@ test_error_list(void)
 #define GWY_SER_TEST_GET_CLASS(obj) \
     (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_SER_TEST, GwySerTestClass))
 
+#define gwy_ser_test_duplicate(ser_test) \
+        (GWY_SER_TEST(gwy_serializable_duplicate(GWY_SERIALIZABLE(ser_test))))
+
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 
 typedef struct _GwySerTest      GwySerTest;
@@ -433,6 +436,43 @@ gwy_ser_test_done(GwySerializable *serializable)
     sertest->done_called++;
 }
 
+GwySerTest*
+gwy_ser_test_new_filled(gboolean flag,
+                        const gdouble *data,
+                        guint ndata,
+                        const gchar *str,
+                        guint32 raw)
+{
+    GwySerTest *sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+
+    sertest->flag = flag;
+    sertest->len = ndata;
+    if (sertest->len)
+        sertest->data = g_memdup(data, ndata*sizeof(gdouble));
+    sertest->s = g_strdup(str);
+    memcpy(sertest->raw, &raw, 4);
+
+    return sertest;
+}
+
+static GObject*
+gwy_ser_test_duplicate_(GwySerializable *serializable)
+{
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
+    GwySerTest *copy = gwy_ser_test_new_filled(sertest->flag,
+                                               sertest->data, sertest->len,
+                                               sertest->s, 0);
+    copy->dbl = sertest->dbl;
+    copy->i16 = sertest->i16;
+    copy->i32 = sertest->i32;
+    copy->i64 = sertest->i64;
+    memcpy(copy->raw, sertest->raw, 4);
+    copy->strlist = g_strdupv(sertest->strlist);
+    copy->child = gwy_ser_test_duplicate(sertest->child);
+
+    return G_OBJECT(copy);
+}
+
 static void
 gwy_ser_test_serializable_init(GwySerializableInterface *iface)
 {
@@ -440,8 +480,8 @@ gwy_ser_test_serializable_init(GwySerializableInterface *iface)
     iface->itemize   = gwy_ser_test_itemize;
     iface->done      = gwy_ser_test_done;
     iface->construct = gwy_ser_test_construct;
-    /*
     iface->duplicate = gwy_ser_test_duplicate_;
+    /*
     iface->assign = gwy_ser_test_assign_;
     */
 }
@@ -483,25 +523,6 @@ static void
 gwy_ser_test_init(GwySerTest *sertest)
 {
     sertest->dbl = G_LN2;
-}
-
-GwySerTest*
-gwy_ser_test_new_filled(gboolean flag,
-                        const gdouble *data,
-                        guint ndata,
-                        const gchar *str,
-                        guint32 raw)
-{
-    GwySerTest *sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
-
-    sertest->flag = flag;
-    sertest->len = ndata;
-    if (sertest->len)
-        sertest->data = g_memdup(data, ndata*sizeof(gdouble));
-    sertest->s = g_strdup(str);
-    memcpy(sertest->raw, &raw, 4);
-
-    return sertest;
 }
 
 static const guchar ser_test_simple[] = {
@@ -1325,6 +1346,52 @@ test_container_data(void)
     g_object_unref(container);
 }
 
+static void
+test_container_refcount(void)
+{
+    GwyContainer *container = gwy_container_new();
+
+    GwySerTest *st1 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
+    gwy_container_set_object_by_name(container, "/pfx/object", st1);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 2);
+
+    GwySerTest *st2 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
+    gwy_container_set_object_by_name(container, "/pfx/object", st2);
+    g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 2);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
+    g_object_unref(st1);
+
+    g_object_unref(container);
+    g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
+    g_object_unref(st2);
+
+    container = gwy_container_new();
+    st1 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    gwy_container_set_object_by_name(container, "/pfx/object", st1);
+    gwy_container_transfer(container, container, "/pfx", "/elsewhere",
+                           FALSE, TRUE);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 3);
+    st2 = gwy_container_get_object_by_name(container, "/elsewhere/object");
+    g_assert(st2 == st1);
+
+    gwy_container_transfer(container, container, "/pfx", "/faraway",
+                           TRUE, TRUE);
+    st2 = gwy_container_get_object_by_name(container, "/faraway/object");
+    g_assert(GWY_IS_SER_TEST(st2));
+    g_assert(st2 != st1);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 3);
+    g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
+    g_object_ref(st2);
+
+    g_object_unref(container);
+    g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
+    g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
+    g_object_unref(st1);
+    g_object_unref(st2);
+}
+
 /***************************************************************************
  *
  * Main
@@ -1359,6 +1426,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit-serialize", test_unit_serialize);
     /* Requires serializable, unit */
     g_test_add_func("/testlibgwy/container-data", test_container_data);
+    g_test_add_func("/testlibgwy/container-refcount", test_container_refcount);
 
     return g_test_run();
 }
