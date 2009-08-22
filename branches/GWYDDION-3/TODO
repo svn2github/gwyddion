@@ -1,3 +1,6 @@
+Build: Use -Bsymbolic instead of the alias craziness?  Or default to hidden
+       visibility since we have the symbol list anyway?
+
 Packing: Is unfinished.  Might need a review and go with the code-generation
          path instead.
 
