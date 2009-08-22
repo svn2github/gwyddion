@@ -110,7 +110,6 @@ void          gwy_resource_class_load_directory(GwyResourceClass *klass,
                                                 const gchar *dirname,
                                                 gboolean modifiable,
                                                 GwyErrorList **error_list);
-gboolean      gwy_resource_class_mkdir        (GwyResourceClass *klass);
 void          gwy_resource_classes_finalize   (void);
 
 G_END_DECLS
