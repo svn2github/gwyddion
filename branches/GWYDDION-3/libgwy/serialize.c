@@ -1268,11 +1268,14 @@ free_items(GwySerializableItems *items)
             case GWY_SERIALIZABLE_INT32_ARRAY:
             case GWY_SERIALIZABLE_INT64_ARRAY:
             case GWY_SERIALIZABLE_DOUBLE_ARRAY:
-            case GWY_SERIALIZABLE_STRING:
             if (item->value.v_int8_array)
                 GWY_FREE(item->value.v_int8_array);
             else if (G_UNLIKELY(item->array_size))
                 warn_nonzero_array_size(item);
+            break;
+
+            case GWY_SERIALIZABLE_STRING:
+            GWY_FREE(item->value.v_string);
             break;
 
             case GWY_SERIALIZABLE_STRING_ARRAY:
