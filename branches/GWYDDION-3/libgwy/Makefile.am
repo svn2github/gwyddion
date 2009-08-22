@@ -15,6 +15,7 @@ test_programs = testlibgwy
 lib_LTLIBRARIES = libgwy.la
 noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = \
+	container.h \
 	errorlist.h \
 	libgwy.h \
 	macros.h \
@@ -25,6 +26,7 @@ libgwyinclude_HEADERS = \
 	unit.h
 
 libgwy_la_SOURCES = \
+	container.c \
 	errorlist.c \
 	macros.c \
 	math.c \
