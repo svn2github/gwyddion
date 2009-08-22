@@ -1768,9 +1768,11 @@ gwy_serializable_assign(GwySerializable *destination,
  *             ownership by filling corresponding item values with %NULL and
  *             setting their @array_size to zero.  The caller takes care of
  *             freeing them if they are not consumed by construct().</para>
- *             <para>Commonly, this method expects only items from a small
- *             predefined set and can use gwy_serializable_filter_items()
- *             to simplify the processing of the item list.</para>
+ *             <para>This method must make any assumptions about the contents
+ *             of @items.  Commonly, however, only items from a small
+ *             predefined set are expected and then
+ *             gwy_serializable_filter_items() can be used to simplify the
+ *             processing of the item list.</para>
  * @duplicate: <para>Creates a new object with all data identical to this
  *             object.</para>
  * @assign: <para>Makes all data of this object identical to the data of
