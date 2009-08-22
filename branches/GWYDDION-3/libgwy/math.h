@@ -175,6 +175,10 @@ gwy_powi(double x, int i)
 # endif
 #endif
 
+void gwy_math_sort(gsize n,
+                   gdouble *array,
+                   guint *index_array);
+
 G_END_DECLS
 
 #endif
