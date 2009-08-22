@@ -661,7 +661,7 @@ test_deserialize_garbage(void)
     /* Make it realy reproducible. */
     g_rand_set_seed(rng, 42);
 
-    gsize niter = 10000;
+    gsize niter = g_test_slow() ? 100000 : 10000;
 
     for (gsize i = 0; i < niter; i++) {
         GObject *object;
@@ -674,7 +674,7 @@ test_deserialize_garbage(void)
         GArray *buffer = g_array_sized_new(FALSE, FALSE, 1, origs[n].size + 20);
         g_array_append_vals(buffer, origs[n].buffer, origs[n].size);
 
-        n = g_rand_int_range(rng, 1, 10);
+        n = g_rand_int_range(rng, 1, 12);
         for (guint j = 0; j < n; j++) {
             guint pos, pos2;
             guint8 b, b2;
