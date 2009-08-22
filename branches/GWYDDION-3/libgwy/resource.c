@@ -148,8 +148,9 @@ gwy_resource_class_init(GwyResourceClass *klass)
 
     pspec = g_param_spec_string("file-name",
                                 "File name",
-                                "Name of file corresponding to the resource, "
-                                "may be NULL",
+                                "Name of file corresponding to the resource "
+                                "in system encoding, it may be NULL for "
+                                "built-in or newly created resourced.",
                                 NULL, /* What is the default value good for? */
                                 G_PARAM_READABLE);
     g_object_class_install_property(gobject_class, PROP_FILE_NAME, pspec);
@@ -544,10 +545,25 @@ gwy_resource_dump(GwyResource *resource)
     return str;
 }
 
+GwyResource*
+gwy_resource_load(const gchar *filename_sys,
+                  GType expected_type,
+                  GError **error)
+{
+    GwyResource *resource = NULL;
+    gchar *text = NULL;
+
+    if (g_file_get_contents(filename_sys, &text, NULL, error))
+        resource = parse(text, expected_type, filename_sys, error);
+
+    GWY_FREE(text);
+    return resource;
+}
+
 static GwyResource*
 parse(const gchar *text,
       GType expected_type,
-      const gchar *filename,
+      const gchar *filename_sys,
       GError **error)
 {
     GwyResourceClass *klass = NULL;
@@ -564,9 +580,12 @@ parse(const gchar *text,
         version = 2;
     }
     else {
+        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                  NULL, NULL, NULL);
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
                     _("Wrong or missing resource magic header in file ‘%s’."),
-                    filename);
+                    filename_utf8);
+        g_free(filename_utf8);
         return NULL;
     }
 
@@ -574,25 +593,35 @@ parse(const gchar *text,
     gchar *typename = g_strndup(text, len);
     text = strchr(text + len, '\n');
     if (G_UNLIKELY(!text)) {
+        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                  NULL, NULL, NULL);
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
-                    _("Resource header is truncated."));
+                    _("Resource header of file ‘%s’ is truncated."),
+                    filename_utf8);
+        g_free(filename_utf8);
         goto fail;
     }
     text++;
     GType type = g_type_from_name(typename);
 
     if (G_UNLIKELY(!type)) {
+        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                  NULL, NULL, NULL);
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
                     _("Resource type ‘%s’ of file ‘%s’ is invalid."),
-                   filename, typename);
+                   filename_utf8, typename);
+        g_free(filename_utf8);
         goto fail;
     }
     /* Does it make sense to accept subclasses? */
     if (G_UNLIKELY(g_type_is_a(!type, expected_type))) {
+        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                  NULL, NULL, NULL);
         g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
                     _("Resource type ‘%s’ of file ‘%s’ does not match "
                       "the expected type ‘%s’."),
-                    filename, typename, g_type_name(expected_type));
+                    filename_utf8, typename, g_type_name(expected_type));
+        g_free(filename_utf8);
         goto fail;
     }
     /* If the resource type matches the requested type yet the type is invalid
@@ -608,32 +637,38 @@ parse(const gchar *text,
     /* Parse the name in v3 resources. */
     if (version == 3) {
         text += strspn(text, " \t\n\r");
-        if (!strncmp(text, "name", sizeof("name")-1)
-            || !g_ascii_isspace(text[sizeof("name")]))
+        len = sizeof("name")-1;
+        if (!strncmp(text, "name", len) || !g_ascii_isspace(text[len]))
         {
+            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                      NULL, NULL, NULL);
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                         _("Resource name is missing for "
                           "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename);
+                        typename, filename_utf8);
             goto fail;
         }
 
-        text += sizeof("name");
+        text += len+1;
         text += strspn(text, " \t\n\r");
         len = strcspn(text, "\n\r");
         if (!len) {
+            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                      NULL, NULL, NULL);
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                         _("Resource name is missing for "
                           "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename);
+                        typename, filename_utf8);
             goto fail;
         }
 
         if (!g_utf8_validate(text, len, NULL)) {
+            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                      NULL, NULL, NULL);
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
                         _("Resource name is not valid UTF-8 for "
                           "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename);
+                        typename, filename_utf8);
             goto fail;
         }
 
@@ -641,11 +676,19 @@ parse(const gchar *text,
 
         GwyResource *obstacle = gwy_inventory_get_item(klass->inventory, name);
         if (obstacle) {
+            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                      NULL, NULL, NULL);
+            gchar *ofilename_utf8 = (obstacle->filename
+                                     ? g_filename_to_utf8(obstacle->filename,
+                                                         -1, NULL, NULL, NULL)
+                                     : "<internal>");
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
                         _("Resource named ‘%s’ loaded from file ‘%s’ "
                           "conflicts with already loaded resource from ‘%s’."),
-                        name, filename,
-                        obstacle->filename ? obstacle->filename : "<internal>");
+                        name, filename_utf8, ofilename_utf8);
+            g_free(filename_utf8);
+            if (obstacle->filename)
+                g_free(ofilename_utf8);
             goto fail;
         }
 
@@ -659,8 +702,8 @@ parse(const gchar *text,
             name = NULL;
         }
         else {
-            name = g_path_get_basename(filename);
-            resource->name = g_filename_to_utf8(name, 0, NULL, NULL, NULL);
+            name = g_path_get_basename(filename_sys);
+            resource->name = g_filename_to_utf8(name, -1, NULL, NULL, NULL);
         }
     }
 
@@ -678,10 +721,10 @@ fail:
  *
  * Emits signal "data-changed" on a resource.
  *
- * It can be called only on non-constant resources.  The default handler
+ * It can be called only on non-constant resources.  The default class handler
  * sets @is_modified flag on the resource.
  *
- * Mostly useful in resource implementation.
+ * This function is primarily intended for resource implementation.
  **/
 void
 gwy_resource_data_changed(GwyResource *resource)
@@ -751,11 +794,11 @@ gwy_resource_class_load(GwyResourceClass *klass)
 
 void
 gwy_resource_class_load_directory(GwyResourceClass *klass,
-                                  const gchar *dirname,
+                                  const gchar *dirname_sys,
                                   gboolean modifiable,
                                   GwyErrorList **error_list)
 {
-    GFile *gfile = g_file_new_for_path(dirname);
+    GFile *gfile = g_file_new_for_path(dirname_sys);
     GFileEnumerator *dir
         = g_file_enumerate_children(gfile,
                                     G_FILE_ATTRIBUTE_STANDARD_TYPE ","
@@ -776,47 +819,30 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             continue;
         }
 
-        const gchar *filename = g_file_info_get_name(fileinfo);
-        gchar *text = NULL;
+        /* FIXME: Wrong type, must build the path manually? */
+        gchar *filename_sys = g_file_get_path(fileinfo);
         GError *error = NULL;
-        if (!g_file_get_contents(filename, &text, NULL, &error)) {
-            gwy_error_list_propagate(error_list, error);
-            g_object_unref(fileinfo);
-            continue;
-        }
+        GwyResource *resource
+            = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
 
-        GwyResource *resource = parse(text, G_TYPE_FROM_CLASS(klass), filename,
-                                      &error);
-        if (resource) {
+        if (G_LIKELY(resource)) {
             resource->is_modifiable = modifiable;
-            resource->filename = g_strdup(filename);
+            resource->filename = filename_sys;
             resource->is_modified = FALSE;
             gwy_inventory_insert_item(klass->inventory, resource);
             g_object_unref(resource);
         }
         else {
             gwy_error_list_propagate(error_list, error);
+            g_free(filename_sys);
         }
-        g_free(text);
         g_object_unref(fileinfo);
     }
     g_object_unref(dir);
 }
 
-/**
- * gwy_resource_build_filename:
- * @resource: A resource.
- *
- * Builds file name a resource should be saved to.
- *
- * If the resource has not been newly created, renamed, or system it was
- * probably loaded from file of the same name.
- *
- * Returns: Resource file name as a newly allocated string that must be freed
- *          by caller.
- **/
-gchar*
-gwy_resource_build_filename(GwyResource *resource)
+static gchar*
+build_filename(GwyResource *resource)
 {
     GwyResourceClass *klass;
 
