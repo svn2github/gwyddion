@@ -294,13 +294,14 @@ buffer_write64(GwySerializableBuffer *buffer,
  * gwy_serialize_gio:
  * @serializable: A serializable object.
  * @output: Output stream to write the serialized object to.
- * @error: Location to store the error occuring, %NULL to ignore.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         %G_IO_ERROR domain can occur.
  *
- * Serializes an object.
+ * Serializes an object to GIO stream in GWY format.
  *
- * The data writing employs internal buffering to avoid too many syscalls.
- * If the output stream is already buffered (e.g., #GBufferedOutputStream),
- * the output will be unnecessarily buffered twice.
+ * The data writing employs internal buffering.  If the output stream is
+ * already buffered (e.g., #GBufferedOutputStream), the output will be
+ * unnecessarily buffered twice.
  *
  * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
  **/
@@ -967,12 +968,9 @@ unpack_object_array(const guchar *buffer,
  * @bytes_consumed: Location to store the number of bytes actually consumed
  *                  from @buffer, or %NULL.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *              Errors from %GWY_DESERIALIZE_ERROR domain can occur.
  *
- * Deserializes an object.
- *
- * The initial reference count of the restored object is according to its
- * nature.  For instance, a #GInitiallyUnowned will have a floating reference,
- * a plain #GObject will have a reference count of 1, etc.
+ * Deserializes an object in GWY format from plain memory buffer.
  *
  * Returns: Newly created object on success, %NULL on failure.
  **/
@@ -1316,17 +1314,20 @@ free_items(GwySerializableItems *items)
  * @items: Item list passed to construct().
  * @type_name: Name of the deserialized type for error messages.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
  *
  * Fills the template of expected items with values from received item list.
  *
- * Values are moved from @items to @template.  This means the owner of
+ * This is a helper function for use in #GwySerializable construct() method.
+ *
+ * Expected values are moved from @items to @template.  This means the owner of
  * @template becomes the owner of dynamically allocated data in these items.
+ * Unexpected values are left in @items for the owner of @items to free them
+ * which normally means you do not need to concern yourself with them.
  *
  * An item template is identified by its name and type.  Items of the same
  * name but different type are permitted in @template (e.g. to accept old
- * serialization formats).
- *
- * This is a helper function for use in #GwySerializable construct() method.
+ * serialized representations for compatibility).
  **/
 void
 gwy_deserialize_filter_items(GwySerializableItem *template_,
@@ -1379,6 +1380,67 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 
     g_free(seen);
 }
+
+/**
+ * SECTION: serialize
+ * @title: serialize
+ * @short_description: Serializers and deserializers
+ * @see_also: #GwySerializable
+ *
+ * Methods of #GwySerializable abstract from the precise byte-for-byte
+ * representation of serialized objects.  It is conceivable to imagine using
+ * for instance HDF5 or XML as the binary format.  Functions available here at
+ * this moment, however, implement the GWY binary data format, version 3.
+ *
+ * Note the initial reference counts of restored objects are according to their
+ * nature.  For instance, a #GInitiallyUnowned will have a floating reference,
+ * a plain #GObject will have a reference count of 1, etc.
+ *
+ * <refsect2 id='libgwy-serialize-details'>
+ * <title>Details of Serialization</title>
+ * </refsect2>
+ *
+ * The following information is not necessary for implementing #GwySerializable
+ * interface in your classes, but it can help prevent wrong decision about
+ * serialized representation of your objects.  Also, it might help implementing
+ * a different serialization backend than GWY files.
+ *
+ * Serialization occurs in several steps.
+ *
+ * First, all objects are recursively asked to calulcate the number named data
+ * items they will serialize to (or provide a reasonable upper estimate of this
+ * number).  This is done simply by calling gwy_serializable_n_items() on the
+ * top-level object, objects that contain other objects must call their
+ * gwy_serializable_n_items() 
+ *
+ * Second, a #GwySerializableItems item list is created, with fixed size
+ * calculated in the first step.  All objects are then recursively asked to add
+ * items representing their data to this list.  This is done simply by calling
+ * gwy_serializable_itemize() on the top-level object.  The objects may
+ * sometimes need to represent certain data differently than the internal
+ * representation is, however, expensive transforms should be avoided,
+ * especially for arrays.  This step can allocate temporary structures.
+ *
+ * Third, sizes of each object are calcuated and stored into the object-header
+ * items created by gwy_serializable_itemize().  This again is done
+ * recursively, but the objects do not participate, the calculation works with
+ * the itemized list.  This step might not be necessary for different storage
+ * formats.
+ *
+ * Subsequently, the object tree flattened into an item list is written to the
+ * output stream, byte-swapping or otherwise normalizing the data on the fly if
+ * necessary.  This part strongly depends on the storage format.
+ *
+ * Finally, virtual method done() is called for all objects.  This step frees
+ * the temporary storage allocated in the itemization step, if any.  This is
+ * not done recursively so that objects need not to implement this method, even
+ * if they contain other objects, if they do not create any temporary data
+ * during itemize().  The methods are called from the inverse order than the
+ * objects, appear in the list, i.e. the most inner and last objects are
+ * processed first.  This means that if done() of an object is invoked, all its
+ * contained objects have been already process.  At the very end the item list
+ * is freed too.
+ **/
 
 /**
  * GWY_DESERIALIZE_ERROR:

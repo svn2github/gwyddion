@@ -186,12 +186,6 @@ gwy_serializable_assign(GwySerializable *destination,
  * deserialization).  This, on the other hand, permits to deserialize any saved
  * object individually and independently.
  *
- * Serialization and deserialization can fail for various reasons.  The errors
- * returned can be either from %GWY_SERIALIZABLE_ERROR or %G_IO_ERROR domain
- * (if GLib I/O streams are involved).  A number of errors that are not
- * considered fatal can occur during deserialization, these are reported in
- * the provided error list.
- *
  * Beside saving and restoration, all serializable classes implement a
  * copy-constructor that creates a duplicate of an existing object.  This
  * constructor is invoked with gwy_serializable_duplicate().  Furthermore, the
@@ -209,50 +203,6 @@ gwy_serializable_assign(GwySerializable *destination,
  * </refsect2>
  *
  * You can implement serialization and deserialization in your classes...
- *
- * <refsect2 id='libgwy-serializable-internals'>
- * <title>Gory Details of Serialization</title>
- * </refsect2>
- *
- * The following information is not strictly necessary for implementing
- * #GwySerializable interface in your classes, but it can help prevent wrong
- * decision about serialized representation of your objects.  Also, it might
- * help implementing a different serialization backend than GWY files, e.g.
- * HDF5.  Serialization occurs in several steps.
- *
- * First, all objects are recursively asked to calulcate the number named data
- * items they will serialize to (or provide a reasonable upper estimate of this
- * number).  This is done simply by calling gwy_serializable_n_items() on the
- * top-level object, objects that contain other objects must call their
- * gwy_serializable_n_items() 
- *
- * Second, a #GwySerializableItems item list is created, with fixed size
- * calculated in the first step.  All objects are then recursively asked to add
- * items representing their data to this list.  This is done simply by calling
- * gwy_serializable_itemize() on the top-level object.  The objects may
- * sometimes need to represent certain data differently than the internal
- * representation is, however, expensive transforms should be avoided,
- * especially for arrays.  This step can allocate temporary structures.
- *
- * Third, sizes of each object are calcuated and stored into the object-header
- * items created by gwy_serializable_itemize().  This again is done
- * recursively, but the objects do not participate, the calculation works with
- * the itemized list.  This step might not be necessary for different storage
- * formats.
- *
- * Subsequently, the object tree flattened into an item list is written to the
- * output stream, byte-swapping or otherwise normalizing the data on the fly if
- * necessary.  This part strongly depends on the storage format.
- *
- * Finally, virtual method done() is called for all objects.  This step frees
- * the temporary storage allocated in the itemization step, if any.  This is
- * not done recursively so that objects need not to implement this method, even
- * if they contain other objects, if they do not create any temporary data
- * during itemize().  The methods are called from the inverse order than the
- * objects, appear in the list, i.e. the most inner and last objects are
- * processed first.  This means that if done() of an object is invoked, all its
- * contained objects have been already process.  At the very end the item list
- * is freed too.
  **/
 
 /**
