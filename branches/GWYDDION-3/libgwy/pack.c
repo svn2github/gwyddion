@@ -974,7 +974,7 @@ gwy_pack_error_quark(void)
 /**
  * SECTION:pack
  * @title: pack
- * @short_description: Binary data packing and unpacking.
+ * @short_description: Binary data packing and unpacking
  *
  * Format specifiers must start with a byte order mark.
  * The possible byte orders are:
