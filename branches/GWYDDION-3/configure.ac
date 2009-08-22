@@ -47,6 +47,10 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+gwy_lib_path=`echo "$sys_lib_search_path_spec" | sed -e 's/  */:/g'`
+AC_DEFINE_UNQUOTED([GWY_LIB_PATH],["$gwy_lib_path"],
+                   [Define to system library search path])
+
 PKG_PROG_PKG_CONFIG([0.22])
 
 #############################################################################
