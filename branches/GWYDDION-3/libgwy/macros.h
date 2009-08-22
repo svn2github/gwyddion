@@ -26,6 +26,9 @@
 #define GWY_FREE(ptr) \
     do { if (ptr) { g_free(ptr); (ptr) = NULL; } } while (0)
 
+#define GWY_SLICE_FREE(type, ptr) \
+    do { if (ptr) { g_slice_free(type, ptr); (ptr) = NULL; } } while (0)
+
 #define GWY_OBJECT_UNREF(obj) \
     do { if (obj) { g_object_unref(obj); (obj) = NULL; } } while (0)
 
