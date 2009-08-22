@@ -17,6 +17,7 @@ AC_CONFIG_HEADERS([config.h:build/config.h.in])
 AC_CONFIG_FILES([
   Makefile
   m4/Makefile
+  build/Makefile
   libgwy/Makefile
   libgwy/version.h
   po/Makefile.in
@@ -102,8 +103,12 @@ if test "x$GLIBC21" = xyes; then
 fi
 
 #############################################################################
-# The Gtk+ Stack
-PKG_CHECK_MODULES([LIBGWY_DEPS],[gio-2.0 >= 2.18])
+# Base libraries
+PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.18])
+PKG_CHECK_MODULES([GSL],[gsl >= 1.8])
+
+AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS $GSL_CFLAGS"])
+AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS $GSL_LIBS"])
 
 #############################################################################
 # Valgrind
