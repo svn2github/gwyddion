@@ -131,19 +131,19 @@ gwy_interpolation_get_weights(gdouble x,
  *
  * Computes interpolated value from 2 or 4 equidistant values.
  *
- * For %GWY_INTERPOLATION_ROUND or %GWY_INTERPOLATION_LINEAR
- * it is enough to set middle two @data values, that to use @data in format
- * {0, data[i], data[i+1], 0} and function computes value at data[i+x]
- * (the outer values are not used).
+ * For %GWY_INTERPOLATION_ROUND or %GWY_INTERPOLATION_LINEAR @data should
+ * consists of two values, {data[i], data[i+1]}, and this function computes
+ * the value at data[i+x].
  *
- * For four value interpolations you have to prepare @data as
- * {data[i-1], data[i], data[i+1], data[i+2]} and function again
- * returns value at data[i+x].
+ * For four-value interpolations, you have to prepare @data as
+ * {data[i-1], data[i], data[i+1], data[i+2]}.  Again, this function returns
+ * the value at data[i+x].
  *
- * Interpolation with non-interpolating bases are silently replaced with an
- * interpolating function with the same support size.  See
- * gwy_interpolate_1d() for a function interpolating from
- * interpolation coefficients.
+ * Obviously, this function cannot be meaningfully used with interpolation
+ * types with a non-interpolating basis.  If such type is requested, it is
+ * silently replaced with an interpolating function with the same support size.
+ * See gwy_interpolate_1d() for a function interpolating from interpolation
+ * coefficients.
  *
  * Returns: Interpolated value.
  **/
@@ -893,13 +893,19 @@ gwy_interpolation_shift_block_1d(gint length,
  * @short_description: Low-level interpolation functions
  *
  * Data interpolation is usually pixel-like in Gwyddion, not function-like.
- * That means the contribution of individual data saples is preserved on
- * scaling (the area that <quote>belongs</quote> to all values is the same,
- * it is not reduced to half for edge pixels).
+ * That means that the contribution of individual data saples is preserved on
+ * scaling.  The area that <quote>belongs</quote> to all values is the same,
+ * it is not reduced to half for edge pixels.
  *
  * Most of the functions listed here are quite low-level.  Usually,
  * #GwyDataField and #GwyDataLine methods offer the same functionality with a
  * more convenient interface.
+ *
+ * At present, Gwyddion implements two-point and four-point interpolations.
+ * However, do not rely on this.  Generic code that works with any
+ * interpolation type should always use gwy_interpolation_get_support_size()
+ * and gwy_interpolation_has_interpolating_basis() to obtain the interpolation
+ * properties.
  **/
 
 /**
@@ -923,9 +929,8 @@ gwy_interpolation_shift_block_1d(gint length,
  * @GWY_EXTERIOR_UNDEFINED: The values corresponding to or calculated from
  *                          exterior data values are undefined, they may be
  *                          left unset or set to bogus values.  The caller
- *                          must handle them itself afterwards, for instance
- *                          by resizing the result to consist of valid data
- *                          only.
+ *                          must handle them afterwards, for instance by
+ *                          resizing the result to consist of valid data only.
  * @GWY_EXTERIOR_BORDER_EXTEND: Values of exterior pixels are considered to be
  *                              equal to the values of the nearest interior
  *                              pixels.
@@ -937,12 +942,12 @@ gwy_interpolation_shift_block_1d(gint length,
  * @GWY_EXTERIOR_FIXED_VALUE: Values of exterior pixels are considered to
  *                            be all equal to a user-specified value.
  *
- * Methods to handle pixels outside data.
+ * Methods of handling pixels outside data.
  *
  * At preset, only some functions offer the exterior handling method choice.
  * Other functions use a fixed method, for example area calculation uses
- * extension (border and mirror coincide), convolution uses mirror extension,
- * rotation fills exterior with a fixed value.
+ * extension (border and mirror coincide), convolution uses mirror extension
+ * and rotation fills exterior with a fixed value.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
