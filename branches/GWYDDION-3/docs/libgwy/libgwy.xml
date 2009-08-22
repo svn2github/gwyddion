@@ -11,6 +11,7 @@
     to GUI or data processing, and various utility functions.
   </para>
   <xi:include href="xml/macros.xml"/>
+  <xi:include href="xml/strfuncs.xml"/>
   <xi:include href="xml/math.xml"/>
   <xi:include href="xml/expr.xml"/>
   <xi:include href="xml/pack.xml"/>
