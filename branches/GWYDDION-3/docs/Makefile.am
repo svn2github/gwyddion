@@ -2,4 +2,4 @@
 # $Id$
 
 SUBDIRS = libgwy
-EXTRA_DIST = gwy-doc.make add-objects.py
+EXTRA_DIST = add-objects.py
