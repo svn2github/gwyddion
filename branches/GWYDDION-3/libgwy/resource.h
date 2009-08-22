@@ -100,7 +100,8 @@ void          gwy_resource_data_saved         (GwyResource *resource);
 gchar*        gwy_resource_build_filename     (GwyResource *resource);
 GString*      gwy_resource_dump               (GwyResource *resource);
 GwyResource*  gwy_resource_parse              (const gchar *text,
-                                               GType expected_type);
+                                               GType expected_type,
+                                               GError **error);
 const gchar*  gwy_resource_class_get_name     (GwyResourceClass *klass);
 const GwyInventoryItemType* gwy_resource_class_get_item_type(GwyResourceClass *klass);
 GwyInventory* gwy_resource_class_get_inventory(GwyResourceClass *klass);

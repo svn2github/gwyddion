@@ -526,6 +526,8 @@ gwy_resource_dump(GwyResource *resource)
  * @text: Textual resource representation.
  * @expected_type: Resource object type.  If not 0, only resources of give type
  *                 are allowed.  Zero value means any #GwyResource is allowed.
+ * @error: Location to store the error occuring, %NULL to ignore.  Errors from
+ *         FIXME domain can occur.
  *
  * Reconstructs a resource from human readable form.
  *
@@ -533,7 +535,8 @@ gwy_resource_dump(GwyResource *resource)
  **/
 GwyResource*
 gwy_resource_parse(const gchar *text,
-                   GType expected_type)
+                   GType expected_type,
+                   GError **error)
 {
     return gwy_resource_parse_real(text, expected_type, FALSE);
 }
