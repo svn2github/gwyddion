@@ -36,7 +36,7 @@
  * More precisely, @x and @y must be usable as both lhs and rhs expressions of
  * type @t.
  *
- * This macro evaluates its arguments several times.
+ * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  */
 
@@ -49,7 +49,7 @@
  * This is an idempotent wrapper of g_free(): if @ptr is not %NULL
  * g_free() is called on it and @ptr is set to %NULL.
  *
- * This macro evaluates its arguments several times.
+ * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  **/
 
@@ -65,7 +65,7 @@
  * If the object reference count is greater than one ensure it is referenced
  * elsewhere, otherwise it leaks memory.
  *
- * This macro evaluates its arguments several times.
+ * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  **/
 
@@ -80,8 +80,31 @@
  * nonzero and @obj is not %NULL, the signal handler identified by
  * @hid is disconnected and @hid is set to 0.
  *
- * This macro evaluates its arguments several times.
+ * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
+ **/
+
+/**
+ * gwy_strequal:
+ * @a: String.
+ * @b: Another string.
+ *
+ * Expands to %TRUE if strings are equal, to %FALSE otherwise.
+ *
+ * This is a shorthand for strcmp() which does not require mentally inverting
+ * the result to test two strings for euality.
+ **/
+
+/**
+ * gwy_memclear:
+ * @array: Pointer to an array of values to clear.
+ *         This argument may be evaluated several times.
+ * @n: Number of items to clear.
+ *
+ * Fills memory block representing an array with zeroes.
+ *
+ * This is a shorthand for memset(), with the number of bytes to fill
+ * calculated from the type of the pointer.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
