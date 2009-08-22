@@ -32,6 +32,8 @@ AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
 AC_SUBST([GWY_VERSION_MINOR],[gwy_version_minor])
 AC_SUBST([GWY_VERSION_MICRO],[gwy_version_micro])
 AC_SUBST([GWY_VERSION_STRING],[gwy_version_string])
+AC_SUBST([PACKAGE],[gwyddion3])
+AC_DEFINE([PACKAGE],["gwyddion3"],[Name of package])
 AM_CONDITIONAL([UNSTABLE_LIBRARY_RELEASE],[true])
 
 AC_CANONICAL_HOST
