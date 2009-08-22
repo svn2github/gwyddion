@@ -3,6 +3,9 @@ Packing: Is unfinished.  Might need a review and go with the code-generation
 
 Container: assign() does not emit signals.  Implement it via transfer()?
 
+Error list: Implement add() without copying, once the GLibc function is
+            available.
+
 Inventory: Make possible to change sort function, make possible to simply state
            that items are sorted by name (which requires GDataCompareFunc, not
            just GCompareFunc).
@@ -10,7 +13,7 @@ Inventory: Make possible to change sort function, make possible to simply state
 Math: Review and add other functions such as the matrix solvers, considering
       error reporting.
 
-Inventory: Convenience method for resource parsing (possibly dumping too).
+Resources: Convenience method for resource parsing (possibly dumping too).
            Make them really convenient, otherwise it does not make sense.
            One possibility is using properties, though defining propertis
            for all GwyRawFilePreset parameters seems a bit overkill.
