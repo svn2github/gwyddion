@@ -7,6 +7,10 @@ Global:
 - The code is written in C 99.  Legacy compilers will not compile it, recent
   GCC or MSVC8 should suffice.
 
+Requirements:
+- GNU Scientific Library (GSL) >= 1.10 is required.
+- GLib >= 2.18 is required.
+
 Libraries in general:
 - The mess of libraries was reorganized to:
   - libgwy: infrastructure, data processing, all data-like objects, basic
