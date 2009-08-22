@@ -60,10 +60,10 @@ struct _GwyInventoryItemType {
                                     const gchar *newname);
     GDestroyNotify destroy;
     gpointer     (*copy)           (gconstpointer item);
-    const GType* (*get_traits)     (gint *ntraits);
-    const gchar* (*get_trait_name) (gint i);
+    const GType* (*get_traits)     (guint *ntraits);
+    const gchar* (*get_trait_name) (guint i);
     void         (*get_trait_value)(gconstpointer item,
-                                    gint i,
+                                    guint i,
                                     GValue *value);
 };
 

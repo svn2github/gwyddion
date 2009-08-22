@@ -67,10 +67,10 @@ static gboolean     gwy_resource_compare        (gconstpointer item1,
                                                  gconstpointer item2);
 static void         gwy_resource_rename         (gpointer item,
                                                  const gchar *new_name);
-static const GType* gwy_resource_get_traits     (gint *ntraits);
-static const gchar* gwy_resource_get_trait_name (gint i);
+static const GType* gwy_resource_get_traits     (guint *ntraits);
+static const gchar* gwy_resource_get_trait_name (guint i);
 static void         gwy_resource_get_trait_value(gconstpointer item,
-                                                 gint i,
+                                                 guint i,
                                                  GValue *value);
 static GwyResource* gwy_resource_parse_real     (const gchar *text,
                                                  GType expected_type,
@@ -264,7 +264,7 @@ gwy_resource_rename(gpointer item,
 }
 
 static const GType*
-gwy_resource_get_traits(gint *ntraits)
+gwy_resource_get_traits(guint *ntraits)
 {
     if (ntraits)
         *ntraits = gwy_resource_ntraits;
@@ -273,18 +273,18 @@ gwy_resource_get_traits(gint *ntraits)
 }
 
 static const gchar*
-gwy_resource_get_trait_name(gint i)
+gwy_resource_get_trait_name(guint i)
 {
-    g_return_val_if_fail(i >= 0 && i < gwy_resource_ntraits, NULL);
+    g_return_val_if_fail(i < gwy_resource_ntraits, NULL);
     return gwy_resource_trait_names[i];
 }
 
 static void
 gwy_resource_get_trait_value(gconstpointer item,
-                             gint i,
+                             guint i,
                              GValue *value)
 {
-    g_return_if_fail(i >= 0 && i < gwy_resource_ntraits);
+    g_return_if_fail(i < gwy_resource_ntraits);
     g_value_init(value, gwy_resource_trait_types[i]);
     g_object_get_property(G_OBJECT(item), gwy_resource_trait_names[i], value);
 }
