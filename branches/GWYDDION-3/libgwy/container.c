@@ -621,21 +621,14 @@ hash_foreach(gpointer hkey, gpointer hvalue, gpointer hdata)
 GQuark*
 gwy_container_keys(GwyContainer *container)
 {
-    GArray *array;
-    GQuark *keys;
-    guint n;
-
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    n = g_hash_table_size(container->values);
+    guint n = g_hash_table_size(container->values);
     if (!n)
         return NULL;
 
-    array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n);
+    GArray *array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n);
     g_hash_table_foreach(container->values, keys_foreach, array);
-    keys = (GQuark*)array->data;
-    g_array_free(array, FALSE);
-
-    return keys;
+    return (GQuark*)g_array_free(array, FALSE);
 }
 
 static void
@@ -664,21 +657,14 @@ keys_foreach(gpointer hkey,
 const gchar**
 gwy_container_keys_by_name(GwyContainer *container)
 {
-    GPtrArray *array;
-    const gchar **keys;
-    guint n;
-
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    n = g_hash_table_size(container->values);
+    guint n = g_hash_table_size(container->values);
     if (!n)
         return NULL;
 
-    array = g_ptr_array_sized_new(n);
+    GPtrArray *array = g_ptr_array_sized_new(n);
     g_hash_table_foreach(container->values, keys_by_name_foreach, array);
-    keys = (const gchar**)array->pdata;
-    g_ptr_array_free(array, FALSE);
-
-    return keys;
+    return (const gchar**)g_ptr_array_free(array, FALSE);
 }
 
 static void
@@ -2097,10 +2083,7 @@ gwy_container_dump_to_text(GwyContainer *container)
     g_ptr_array_sort(pa, pstring_compare);
     g_ptr_array_add(pa, NULL);
 
-    gchar **retval = (gchar**)pa->pdata;
-    g_ptr_array_free(pa, FALSE);
-
-    return retval;
+    return (gchar**)g_ptr_array_free(pa, FALSE);
 }
 
 static guint

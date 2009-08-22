@@ -1178,10 +1178,7 @@ format_unit(const GwyUnit *unit,
         }
     }
 
-    gchar *retval = string->str;
-    g_string_free(string, FALSE);
-
-    return retval;
+    return g_string_free(string, FALSE);
 }
 
 static const gchar*
