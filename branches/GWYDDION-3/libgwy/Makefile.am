@@ -17,6 +17,7 @@ noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = \
 	container.h \
 	errorlist.h \
+	expr.h \
 	libgwy.h \
 	macros.h \
 	math.h \
@@ -28,6 +29,7 @@ libgwyinclude_HEADERS = \
 libgwy_la_SOURCES = \
 	container.c \
 	errorlist.c \
+	expr.c \
 	macros.c \
 	math.c \
 	pack.c \

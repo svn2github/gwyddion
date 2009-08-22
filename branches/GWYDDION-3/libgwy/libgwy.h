@@ -22,6 +22,7 @@
 
 #include <libgwy/container.h>
 #include <libgwy/errorlist.h>
+#include <libgwy/expr.h>
 #include <libgwy/macros.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
