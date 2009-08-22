@@ -1431,12 +1431,14 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * decision about serialized representation of your objects.  Also, it might
  * help implementing a different serialization backend than GWY files.</para>
  * <para>Serialization occurs in several steps.</para>
- * <para>First, all objects are recursively asked to calulcate the number named
+ * <para>First, all objects are recursively asked to calulcate the number of
+ * named
  * data items they will serialize to (or provide a reasonable upper estimate of
  * this number).  This is done simply by calling gwy_serializable_n_items() on
- * the top-level object, objects that contain other objects must call their
- * gwy_serializable_n_items().</para>
- * <para>Second, a #GwySerializableItems item list is created, with fixed size
+ * the top-level object, objects that contain other objects must call
+ * gwy_serializable_n_items() on these contained objects and sum the
+ * results.</para>
+ * <para>Second, a #GwySerializableItems item list is created, with size
  * calculated in the first step.  All objects are then recursively asked to add
  * items representing their data to this list.  This is done simply by calling
  * gwy_serializable_itemize() on the top-level object.  The objects may
@@ -1446,7 +1448,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * <para>Third, sizes of each object are calcuated and stored into the
  * object-header items created by gwy_serializable_itemize().  This again is
  * done recursively, but the objects do not participate, the calculation works
- * with the itemized list.  This step might not be necessary for different
+ * with the itemized list.  This step might not be necessary for other
  * storage formats.</para>
  * <para>Subsequently, the object tree flattened into an item list is written
  * to the output stream, byte-swapping or otherwise normalizing the data on the
@@ -1454,12 +1456,12 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * <para>Finally, virtual method done() is called for all objects.  This step
  * frees the temporary storage allocated in the itemization step, if any.  This
  * is not done recursively so that objects need not to implement this method,
- * even if they contain other objects, if they do not create any temporary data
- * during itemize().  The methods are called from the inverse order than the
- * objects, appear in the list, i.e. the most inner and last objects are
- * processed first.  This means that if done() of an object is invoked, all its
- * contained objects have been already process.  At the very end the item list
- * is freed too.</para>
+ * even if they contain other objects, if they themselves do not create any
+ * temporary data during itemize().  The methods are called in the inverse
+ * order than the objects appear in the list, i.e. the most inner and last
+ * objects are processed first.  This means that if done() of an object is
+ * invoked, all its contained objects have been already processed.  At the very
+ * end the item list is freed too.</para>
  * </refsect2>
  **/
 
