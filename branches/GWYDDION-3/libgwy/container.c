@@ -1308,6 +1308,10 @@ gwy_container_values_equal(const GValue *value1,
     g_return_val_if_reached(FALSE);
 }
 
+/*
+ * Ownership handling:
+ * Non-atomic values, i.e strings and objects, are taken, not duplicated.
+ */
 static gboolean
 try_set_value(GwyContainer *container,
               GQuark key,
@@ -1837,24 +1841,26 @@ gwy_container_assign_impl(GwySerializable *destination,
 }
 
 static void
-hash_duplicate_func(gpointer hkey, gpointer hvalue, gpointer hdata)
+set_copied_value(GwyContainer *container,
+                 GQuark key,
+                 const GValue *value)
 {
-    GQuark key = GPOINTER_TO_UINT(hkey);
-    GValue *value = (GValue*)hvalue;
-    GwyContainer *duplicate = (GwyContainer*)hdata;
     GType type = G_VALUE_TYPE(value);
-    GObject *object;
 
     switch (type) {
         case G_TYPE_OBJECT:
         /* objects have to be handled separately since we want a deep copy */
-        object = gwy_serializable_duplicate(g_value_get_object(value));
-        gwy_container_set_object(duplicate, key, object);
-        g_object_unref(object);
+        {
+            GObject *object = g_value_get_object(value);
+            object = gwy_serializable_duplicate(GWY_SERIALIZABLE(object));
+            gwy_container_set_object(container, key, object);
+            g_object_unref(object);
+        }
         break;
 
         case G_TYPE_STRING:
-        gwy_container_set_string(duplicate, key, g_value_dup_string(value));
+        /* strings have to be handled separately since we take them */
+        gwy_container_set_string(container, key, g_value_dup_string(value));
         break;
 
         case G_TYPE_BOOLEAN:
@@ -1862,14 +1868,24 @@ hash_duplicate_func(gpointer hkey, gpointer hvalue, gpointer hdata)
         case G_TYPE_INT:
         case G_TYPE_INT64:
         case G_TYPE_DOUBLE:
-        gwy_container_set_value(duplicate, key, value);
+        gwy_container_set_value(container, key, value);
         break;
 
         default:
-        g_warning("Cannot properly duplicate %s", g_type_name(type));
-        gwy_container_set_value(duplicate, key, value);
+        g_warning("Cannot properly copy value of type %s", g_type_name(type));
+        gwy_container_set_value(container, key, value);
         break;
     }
+}
+
+static void
+hash_duplicate_func(gpointer hkey, gpointer hvalue, gpointer hdata)
+{
+    GQuark key = GPOINTER_TO_UINT(hkey);
+    const GValue *value = (GValue*)hvalue;
+    GwyContainer *duplicate = (GwyContainer*)hdata;
+
+    set_copied_value(duplicate, key, value);
 }
 
 static void
@@ -1941,7 +1957,8 @@ hash_text_serialize_func(gpointer hkey, gpointer hvalue, gpointer hdata)
  *        duplicated.
  * @force: %TRUE to replace existing values in @dest.
  *
- * Copies a items from one place in container to another place.
+ * Copies a items from one place in a container to another place and/or another
+ * container.
  *
  * Returns: The number of actually transferred items.
  **/
@@ -1972,6 +1989,7 @@ gwy_container_transfer(GwyContainer *source,
         g_return_val_if_fail(!g_str_has_prefix(dest_prefix, source_prefix), 0);
     }
 
+    /* Build a list of item keys we need to tansfer. */
     pfdata.container = source;
     pfdata.prefix = source_prefix;
     pfdata.prefix_length = strlen(pfdata.prefix);
@@ -1992,10 +2010,11 @@ gwy_container_transfer(GwyContainer *source,
     if (pfdata.closed_prefix)
         pfdata.prefix_length--;
 
+    /* Transfer the items */
     pfdata.count = 0;
     for (l = pfdata.keylist; l; l = g_slist_next(l)) {
         val = (GValue*)g_hash_table_lookup(source->values, l->data);
-        if (!val) {
+        if (G_UNLIKELY(!val)) {
             g_critical("Container contents changed during "
                        "gwy_container_transfer().");
             break;
@@ -2003,9 +2022,25 @@ gwy_container_transfer(GwyContainer *source,
         if (!force && g_hash_table_lookup(dest->values, l->data))
             continue;
 
+        GType type = G_VALUE_TYPE(val);
         copy = g_new0(GValue, 1);
-        g_value_init(copy, G_VALUE_TYPE(val));
-        g_value_copy(val, copy);
+        g_value_init(copy, type);
+        /* This g_value_copy() makes a real copy of everything, including
+         * strings, but it only references objects while deep copy requires
+         * duplication. */
+        if (deep && type == G_TYPE_OBJECT) {
+            GwySerializable *serializable;
+            serializable = GWY_SERIALIZABLE(g_value_get_object(val));
+            if (G_UNLIKELY(!serializable)) {
+                g_critical("Cannot duplicate a nonserializable object.");
+                g_value_copy(val, copy);
+            }
+            else
+                g_value_take_object(copy,
+                                    gwy_serializable_duplicate(serializable));
+        }
+        else
+            g_value_copy(val, copy);
 
         g_string_truncate(key, dpflen);
         g_string_append(key,
