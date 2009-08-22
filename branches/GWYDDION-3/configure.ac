@@ -18,10 +18,11 @@ AC_CONFIG_FILES([
   Makefile
   m4/Makefile
   libgwy/Makefile
-  docs/Makefile
-  docs/libgwy/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
+  docs/Makefile
+  docs/libgwy/Makefile
+  data/Makefile
 ])
 
 AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options nostdinc])
