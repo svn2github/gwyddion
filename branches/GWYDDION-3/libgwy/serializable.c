@@ -378,7 +378,7 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
         if (!g_output_stream_write(output, &ctype, sizeof(guint8), NULL, error))
             return FALSE;
 
-        /* More stuff is in the following GWY_SERIALIZABLE_HEADER item. */
+        /* Serializable object follows... */
         if (ctype == GWY_SERIALIZABLE_OBJECT)
             continue;
 

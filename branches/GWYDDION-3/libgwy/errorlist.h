@@ -17,14 +17,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_LIBGWY_H__
-#define __GWY_LIBGWY_H__
+#ifndef __GWY_ERROR_LIST_H__
+#define __GWY_ERROR_LIST_H__
 
-#include <libgwy/errorlist.h>
-#include <libgwy/macros.h>
-#include <libgwy/math.h>
-#include <libgwy/pack.h>
-#include <libgwy/serializable.h>
+#include <glib.h>
+
+G_BEGIN_DECLS
+
+typedef GSList GwyErrorList;
+
+void gwy_error_list_add(GwyErrorList **list,
+                        GQuark domain,
+                        gint code,
+                        const gchar *format,
+                        ...);
+void gwy_error_list_clear(GwyErrorList **list);
+
+G_END_DECLS
 
 #endif
 
