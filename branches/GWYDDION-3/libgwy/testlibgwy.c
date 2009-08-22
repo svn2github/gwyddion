@@ -948,22 +948,41 @@ test_expr_evaluate(void)
     gdouble result;
     gboolean ok;
 
-    ok = gwy_expr_evaluate(expr, "1+1", &result, &error);
-    g_assert(ok);
-    g_assert(!error);
-    g_assert_cmpfloat(result, ==, 2.0);
-    g_clear_error(&error);
-
     ok = gwy_expr_evaluate(expr, "1/5 hypot(3 cos 0, sqrt 16)", &result, &error);
     g_assert(ok);
     g_assert(!error);
     g_assert_cmpfloat(fabs(result - 1.0), <, 1e-15);
     g_clear_error(&error);
 
+    ok = gwy_expr_evaluate(expr, "1+1", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(result, ==, 2.0);
+    g_clear_error(&error);
+
     ok = gwy_expr_evaluate(expr, "exp atanh (1/2)^2", &result, &error);
     g_assert(ok);
     g_assert(!error);
     g_assert_cmpfloat(fabs(result - 3.0), <, 1e-15);
+    g_clear_error(&error);
+
+    ok = gwy_expr_evaluate(expr, "exp lgamma 5/exp lgamma 4", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(fabs(result - 4.0), <, 1e-15);
+    g_clear_error(&error);
+
+    ok = gwy_expr_evaluate(expr, "-5(-4--3)(-1+2)", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(fabs(result - 5.0), <, 1e-15);
+    g_clear_error(&error);
+
+    ok = gwy_expr_evaluate(expr, "3^2^2*-3^-2 - hypot hypot 1,2,2",
+                           &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(fabs(result - 6.0), <, 1e-15);
     g_clear_error(&error);
 
     gwy_expr_free(expr);
@@ -989,7 +1008,7 @@ test_expr_vector(void)
     gsize nvars = gwy_expr_get_variables(expr, NULL);
     g_assert_cmpuint(nvars, ==, 4);
 
-    gsize n = 100000;
+    gsize n = 10000;
     gdouble **input = g_new0(gdouble*, nvars);
     for (gsize i = 1; i < nvars; i++) {
         input[i] = g_new(gdouble, n);
