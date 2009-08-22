@@ -48,7 +48,7 @@ gwy_exp10(double x) {
 # endif
 #endif
 
-#ifdef GWY_HAVE_POWI
+#ifdef __GNUC__
 # define gwy_powi __builtin_powi
 # ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define powi __builtin_powi
