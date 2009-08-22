@@ -27,26 +27,26 @@
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
 
-static void gwy_math_sort_plain(gsize n,
-                                gdouble *array);
-static void gwy_math_sort_index(gsize n,
-                                gdouble *array,
-                                guint *index_array);
+static void gwy_math_sort_plain(gdouble *array,
+                                gsize n);
+static void gwy_math_sort_index(gdouble *array,
+                                guint *index_array,
+                                gsize n);
 
 /* Quickly find median value in an array
  * based on public domain code by Nicolas Devillard */
 /**
  * gwy_math_median:
- * @n: Number of items in @array.
  * @array: Array of doubles.  It is modified by this function.  All values are
  *         kept, but their positions in the array change.
+ * @n: Number of items in @array.
  *
  * Finds median of an array of values using Quick select algorithm.
  *
  * Returns: The median value of @array.
  **/
 gdouble
-gwy_math_median(gsize n, gdouble *array)
+gwy_math_median(gdouble *array, gsize n)
 {
     gsize lo, hi;
     gsize median;
@@ -124,14 +124,14 @@ gwy_math_median(gsize n, gdouble *array)
  * the sorted array.
  **/
 void
-gwy_math_sort(gsize n,
-              gdouble *array,
-              guint *index_array)
+gwy_math_sort(gdouble *array,
+              guint *index_array,
+              gsize n)
 {
     if (index_array)
-        gwy_math_sort_index(n, array, index_array);
+        gwy_math_sort_index(array, index_array, n);
     else
-        gwy_math_sort_plain(n, array);
+        gwy_math_sort_plain(array, n);
 }
 
 /****************************************************************************
@@ -214,8 +214,8 @@ typedef struct {
    stack size is needed (actually O(1) in this case)!  */
 
 static void
-gwy_math_sort_plain(gsize n,
-                    gdouble *array)
+gwy_math_sort_plain(gdouble *array,
+                    gsize n)
 {
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
@@ -366,9 +366,9 @@ typedef struct {
  * instead of array indices when it effectively doubles the number of
  * variables.  This might force some variables from registers to memory... */
 static void
-gwy_math_sort_index(gsize n,
-                    gdouble *array,
-                    guint *index_array)
+gwy_math_sort_index(gdouble *array,
+                    guint *index_array,
+                    gsize n)
 {
     if (n < 2)
         /* Avoid lossage with unsigned arithmetic below.  */
