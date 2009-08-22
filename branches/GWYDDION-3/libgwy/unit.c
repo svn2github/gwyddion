@@ -161,12 +161,12 @@ gwy_unit_class_init(GwyUnitClass *klass)
 
     gobject_class->finalize = gwy_unit_finalize;
 
-/**
- * GwyUnit::changed:
- * @gwysiunit: The #GwyUnit which received the signal.
- *
- * The ::changed signal is emitted whenever unit changes.
- */
+    /**
+     * GwyUnit::changed:
+     * @gwysiunit: The #GwyUnit which received the signal.
+     *
+     * The ::changed signal is emitted whenever unit changes.
+     **/
     unit_signals[CHANGED]
         = g_signal_new_class_handler("changed",
                                      G_OBJECT_CLASS_TYPE(klass),
