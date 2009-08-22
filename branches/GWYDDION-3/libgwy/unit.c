@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define GWY_MATH_POLLUTE_NAMESPACE
 #include <config.h>
 #include <string.h>
 #include <stdlib.h>
@@ -428,7 +427,7 @@ parse(GwyUnit *unit,
     if (end != string) {
         string = end;
         power10 = gwy_round(log10(q));
-        if (q <= 0 || fabs(log(q/exp10(power10))) > 1e-13) {
+        if (q <= 0 || fabs(log(q/gwy_exp10(power10))) > 1e-13) {
             g_warning("Bad multiplier %g", q);
             power10 = 0;
         }
@@ -921,7 +920,7 @@ gwy_unit_format_for_power10(GwyUnit *unit,
     g_return_if_fail(GWY_IS_UNIT(unit));
     g_return_if_fail(format);
 
-    format->magnitude = exp10(power10);
+    format->magnitude = gwy_exp10(power10);
     GWY_FREE(format->units);
     format->units = format_unit(unit, find_style_spec(style), standalone,
                                 power10);
@@ -998,7 +997,7 @@ gwy_unit_format_with_digits(GwyUnit *unit,
         format->precision = sdigits;
     }
     else
-        format->magnitude = find_number_format(maximum/exp10(sdigits),
+        format->magnitude = find_number_format(maximum/gwy_exp10(sdigits),
                                                maximum, &format->precision);
 
     GWY_FREE(format->units);
