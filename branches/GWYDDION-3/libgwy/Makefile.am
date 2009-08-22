@@ -34,6 +34,7 @@ libgwy_la_SOURCES = \
 	errorlist.c \
 	expr.c \
 	inventory.c \
+	libgwy.c \
 	macros.c \
 	math.c \
 	pack.c \

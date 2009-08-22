@@ -19,8 +19,7 @@
 
 #include <string.h>
 #include <glib/gi18n.h>
-#include "libgwy/serialize.h"
-#include "libgwy/macros.h"
+#include "libgwy/libgwy.h"
 #include "libgwy/libgwy-aliases.h"
 
 /*
@@ -907,6 +906,7 @@ unpack_string_array(const guchar *buffer,
                 while (i--)
                     g_free((*value)[i]);
                 GWY_FREE(*value);
+                *array_size = 0;
                 position = 0;
                 break;
             }
@@ -957,6 +957,7 @@ unpack_object_array(const guchar *buffer,
                     GWY_OBJECT_UNREF((*value)[i]);
                 GWY_FREE(*value);
                 position = 0;
+                *array_size = 0;
                 break;
             }
             position += rbytes;
@@ -987,6 +988,8 @@ gwy_deserialize_memory(const guchar *buffer,
                        gsize *bytes_consumed,
                        GwyErrorList **error_list)
 {
+    /* This is a bit expensive.  But deserialization is expensive generally. */
+    gwy_type_init();
     return deserialize_memory(buffer, size, bytes_consumed, TRUE, error_list);
 }
 

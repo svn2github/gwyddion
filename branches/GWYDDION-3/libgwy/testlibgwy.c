@@ -563,6 +563,7 @@ test_deserialize_simple(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
+    g_type_class_ref(GWY_TYPE_SER_TEST);
     sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_simple,
                                                   sizeof(ser_test_simple),
                                                   &bytes_consumed, &error_list);
@@ -641,6 +642,7 @@ test_deserialize_data(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
+    g_type_class_ref(GWY_TYPE_SER_TEST);
     sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_data,
                                                   sizeof(ser_test_data),
                                                   &bytes_consumed, &error_list);
@@ -714,6 +716,7 @@ test_deserialize_nested(void)
     GwyErrorList *error_list = NULL;
     gsize bytes_consumed;
 
+    g_type_class_ref(GWY_TYPE_SER_TEST);
     sertest = (GwySerTest*)gwy_deserialize_memory(ser_test_nested,
                                                   sizeof(ser_test_nested),
                                                   &bytes_consumed, &error_list);
@@ -793,6 +796,7 @@ test_deserialize_garbage(void)
 
     gsize niter = g_test_slow() ? 100000 : 10000;
 
+    g_type_class_ref(GWY_TYPE_SER_TEST);
     for (gsize i = 0; i < niter; i++) {
         GObject *object;
         GwyErrorList *error_list = NULL;
@@ -1427,6 +1431,7 @@ test_container_serialize(void)
     g_assert(GWY_IS_CONTAINER(copy));
     g_assert(!error_list);
     g_assert_cmpuint(bytes_consumed, ==, len);
+    g_object_unref(stream);
     gwy_error_list_clear(&error_list);
 
     GwyUnit *unitcopy = NULL;
@@ -1459,7 +1464,6 @@ int
 main(int argc, char *argv[])
 {
     g_test_init(&argc, &argv, NULL);
-    g_type_init();
 
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/memmem", test_memmem);
