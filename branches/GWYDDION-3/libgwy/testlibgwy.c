@@ -350,6 +350,8 @@ gwy_ser_test_construct(GwySerializableItems *items,
     memcpy(sertest->raw, it[3].value.v_uint8_array, 4);
 
     sertest->child = child;
+    g_free(items->items);
+    g_free(items);
 
     return G_OBJECT(sertest);
 
@@ -358,6 +360,8 @@ fail:
     GWY_FREE(it[2].value.v_string);
     GWY_FREE(it[3].value.v_uint8_array);
     GWY_OBJECT_UNREF(it[4].value.v_object);
+    g_free(items->items);
+    g_free(items);
 
     return NULL;
 }
@@ -671,6 +675,75 @@ test_serialize_error(void)
     g_clear_error(&error);
 }
 
+static void
+test_deserialize_garbage(void)
+{
+    typedef struct { const guchar *buffer; gsize size; } OrigBuffer;
+    static const OrigBuffer origs[] = {
+        { ser_test_simple, sizeof(ser_test_simple), },
+        { ser_test_data,   sizeof(ser_test_data),   },
+        { ser_test_nested, sizeof(ser_test_nested), },
+    };
+    GRand *rng = g_rand_new();
+
+    /* Make it realy reproducible. */
+    g_rand_set_seed(rng, 42);
+
+    gsize niter = 10000;
+
+    for (gsize i = 0; i < niter; i++) {
+        GObject *object;
+        GwyErrorList *error_list = NULL;
+        gsize bytes_consumed;
+        guint n;
+
+        /* Choose a serialized representation and perturb it. */
+        n = g_rand_int_range(rng, 0, G_N_ELEMENTS(origs));
+        GArray *buffer = g_array_sized_new(FALSE, FALSE, 1, origs[n].size + 20);
+        g_array_append_vals(buffer, origs[n].buffer, origs[n].size);
+
+        n = g_rand_int_range(rng, 1, 10);
+        for (guint j = 0; j < n; j++) {
+            guint pos, pos2;
+            guint8 b, b2;
+
+            switch (g_rand_int_range(rng, 0, 3)) {
+                case 0:
+                pos = g_rand_int_range(rng, 0, buffer->len);
+                g_array_remove_index(buffer, pos);
+                break;
+
+                case 1:
+                pos = g_rand_int_range(rng, 0, buffer->len+1);
+                b = g_rand_int_range(rng, 0, 0x100);
+                g_array_insert_val(buffer, pos, b);
+                break;
+
+                case 2:
+                pos = g_rand_int_range(rng, 0, buffer->len);
+                pos2 = g_rand_int_range(rng, 0, buffer->len);
+                b = g_array_index(buffer, guint8, pos);
+                b2 = g_array_index(buffer, guint8, pos2);
+                g_array_index(buffer, guint8, pos) = b2;
+                g_array_index(buffer, guint8, pos2) = b;
+                break;
+            }
+        }
+
+        object = gwy_serializable_deserialize((const guchar*)buffer->data,
+                                              buffer->len,
+                                              &bytes_consumed,
+                                              &error_list);
+
+        /* No checks.  The goal is not to crash... */
+        g_array_free(buffer, TRUE);
+        GWY_OBJECT_UNREF(object);
+        gwy_error_list_clear(&error_list);
+    }
+
+    g_rand_free(rng);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -679,14 +752,16 @@ main(int argc, char *argv[])
 
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/pack", test_pack);
+    g_test_add_func("/testlibgwy/sort", test_sort);
     g_test_add_func("/testlibgwy/serialize-simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
     g_test_add_func("/testlibgwy/serialize-error", test_serialize_error);
+    /* Require error_list */
     g_test_add_func("/testlibgwy/deserialize-simple", test_deserialize_simple);
     g_test_add_func("/testlibgwy/deserialize-data", test_deserialize_data);
     g_test_add_func("/testlibgwy/deserialize-nested", test_deserialize_nested);
-    g_test_add_func("/testlibgwy/sort", test_sort);
+    g_test_add_func("/testlibgwy/deserialize-garbage", test_deserialize_garbage);
 
     return g_test_run();
 }
