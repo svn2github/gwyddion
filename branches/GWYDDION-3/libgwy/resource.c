@@ -97,6 +97,7 @@ static void         gwy_resource_modified       (GwyResource *resource);
 static guint resource_signals[LAST_SIGNAL] = { 0 };
 
 static GSList *all_resources = NULL;
+G_LOCK_DEFINE(all_resources);
 
 static const GwyInventoryItemType gwy_resource_item_type = {
     0,
@@ -653,11 +654,11 @@ gwy_resource_class_load(GwyResourceClass *klass)
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
     g_return_if_fail(klass->inventory);
 
-    gwy_inventory_forget_order(klass->inventory);
-
     type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
+    G_LOCK(all_resources);
     if (!g_slist_find(all_resources, type))
         all_resources = g_slist_prepend(all_resources, type);
+    G_UNLOCK(all_resources);
 
     datadir = gwy_find_self_dir("data");
     path = g_build_filename(datadir, klass->name, NULL);
@@ -668,8 +669,6 @@ gwy_resource_class_load(GwyResourceClass *klass)
     path = g_build_filename(gwy_get_user_dir(), klass->name, NULL);
     gwy_resource_class_load_directory(klass, path, TRUE, NULL);
     g_free(path);
-
-    gwy_inventory_restore_order(klass->inventory);
 }
 
 void
@@ -788,6 +787,10 @@ gwy_resource_class_mkdir(GwyResourceClass *klass)
  *
  * Note static resource classes that never called gwy_resource_class_load()
  * are excluded.
+ *
+ * It quite quite defeat the purpose of this function if the program was busy
+ * loading more resource classes in other threads when it is executed.  So, no
+ * locking is used and just do not do this.
  **/
 void
 gwy_resource_classes_finalize(void)
