@@ -1058,7 +1058,9 @@ unpack_object_array(const guchar *buffer,
 /**
  * gwy_serializable_deserialize:
  * @buffer: Memory containing the serialized representation of one object.
- * @size: Size of @buffer in bytes.
+ * @size: Size of @buffer in bytes.  If the buffer is larger than the
+ *        object representation, non-fatal %GWY_SERIALIZABLE_ERROR_PADDING will
+ *        be reported.
  * @bytes_consumed: Location to store the number of bytes actually consumed
  *                  from @buffer, or %NULL.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
@@ -1112,24 +1114,25 @@ gwy_serializable_deserialize(const guchar *buffer,
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
     items = unpack_items(buffer + pos, object_size, error_list);
+    // For bytes_consumed.
+    size = object_size;
     if (!items)
         goto fail;
 
-    /* Allow request() to be implemented but return %NULL. */
+    // Allow request() to be implemented and return %NULL
     if (iface->request)
         requested_items = iface->request();
 
     if (requested_items) {
         fill_requested_items(requested_items, items, typename, error_list);
         object = iface->construct(requested_items, error_list);
+        // construct() takes ownership of requested_items
     }
     else
         object = iface->construct(items, error_list);
 
 fail:
-    if (items)
-        free_items(items);
-
+    free_items(items);
     if (bytes_consumed)
         *bytes_consumed = size;
     return object;
@@ -1402,6 +1405,9 @@ warn_nonzero_array_size(const GwySerializableItem *item)
 static void
 free_items(GwySerializableItems *items)
 {
+    if (!items)
+        return;
+
     for (gsize i = 0; i < items->n_items; i++) {
         GwySerializableItem *item = items->items + i;
         GwySerializableCType ctype = item->ctype;
@@ -1729,40 +1735,48 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GwySerializableInterface:
  * @g_interface: Parent class.
- * @n_items: Returns the number of items the object will flatten to, including
- *           items of all contained objects (but excluding the object header
- *           items of self).  This method may return a reasonable upper
- *           estimate instead of the exact number; for instance, if objects
- *           of some class are known to need 5 to 7 items, this method can
- *           simply return 7.  It should use gwy_serializable_n_items() to
- *           calculate the numbers of items the contained objects will flatten
- *           to.
- * @itemize: Appends flattened representation of the object data to the @items
- *           array.  It should use gwy_serializable_itemize() to add the data
- *           of contained objects.  It returns the number of items
- *           corresponding to this object, <emphasis>not including</emphasis>
- *           items of contained objects: every contained object counts only as
- *           one item.
- * @done: Frees all temporary data created by itemize().  It is optional but
- *        if it is defined it is guaranteed to be called after each itemize().
- * @request: Speficies what data items and of what types construct() expects
- *           to get.  It then gets this very item list as the first argument,
- *           filled with deserialized item values.  Extra items or items of
- *           the wrong type are omitted and construct() needs not to care about
- *           them.  If this method is unimplemented or returns %NULL,
+ * @n_items: <para>Returns the number of items the object will flatten to,
+ *           including items of all contained objects (but excluding the object
+ *           header items of self).  It should use gwy_serializable_n_items()
+ *           to calculate the numbers of items the contained objects will
+ *           flatten to.</para>
+ *           <para>This method may return a reasonable upper estimate instead
+ *           of the exact number; for instance, if objects of some class are
+ *           known to need 5 to 7 items, n_items() can simply return 7.</para>
+ * @itemize: <para>Appends flattened representation of the object data to the
+ *           @items list.  It should use gwy_serializable_itemize() to add the
+ *           data of contained objects.</para>
+ *           <para>The number of items corresponding to this object is
+ *           returned, <emphasis>not including</emphasis> items of contained
+ *           objects: every contained object counts only as one item.</para>
+ * @done: <para>Frees all temporary data created by itemize().  This method
+ *        is optional but if it is defined it is guaranteed to be called after
+ *        each itemize().</para>
+ * @request: <para>Speficies what data items and of what types construct()
+ *           expects to get.  The returned structure is subsequently passed to
+ *           construct(), filled with deserialized item values.  Extra items or
+ *           items of the wrong type are omitted and construct() needs not to
+ *           care about them.  It is permitted to request several items of the
+ *           same name but different type.</para>
+ *           <para>If this method is unimplemented or returns %NULL,
  *           construct() gets a newly allocated item list that contains all the
- *           items instead.
- * @construct: Deserializes an object from array of flattened data items.
- *             All strings, objects and arrays in the item list are newly
- *             allocated and, ideally, this function takes ownership, fills the
- *             corresponding item values with %NULL<!-- -->s and sets their
- *             @array_size to zero.  Regardless whether construct() succeeds or
- *             not, non-%NULL dynamically allocated item values are freed by
- *             the caller.
- * @duplicate: Creates a new object with all data identical to this object.
- * @assign: Makes all data of an object identical to the data of another object
- *          of the same class.  Implementations may assume that the is-a
- *          relation is satisfied for the source object.
+ *           items.</para>
+ * @construct: <para>Deserializes an object from array of flattened data
+ *             items.</para>
+ *             <para>All strings, objects and arrays in the item list are newly
+ *             allocated.  If a filled item list from request() is returned the
+ *             method owns them and must free any such objects, or, better,
+ *             incorporate them.</para>
+ *             <para>If an arbitrary, non-requested, item list is
+ *             passed, the method can take ownership by filling corresponding
+ *             item values with %NULL and setting their @array_size to zero.
+ *             In this case, however, the caller takes care of freeing them
+ *             if they are not consumed by construct().</para>
+ * @duplicate: <para>Creates a new object with all data identical to this
+ *             object.</para>
+ * @assign: <para>Makes all data of this object identical to the data of
+ *          another object of the same class.  Implementations may assume that
+ *          the is-a relation is satisfied for the source object.</para>
  *
  * Interface implemented by serializable objects.
  *
