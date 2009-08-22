@@ -571,6 +571,7 @@ parse(const gchar *text,
     gchar *name = NULL;
     guint version;
 
+    /* Magic header */
     if (g_str_has_prefix(text, MAGIC_HEADER3)) {
         text += sizeof(MAGIC_HEADER3) - 1;
         version = 3;
@@ -589,6 +590,7 @@ parse(const gchar *text,
         return NULL;
     }
 
+    /* Resource type */
     guint len = strspn(text, G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS);
     gchar *typename = g_strndup(text, len);
     text = strchr(text + len, '\n');
@@ -674,28 +676,11 @@ parse(const gchar *text,
 
         name = g_strndup(text, len);
 
-        GwyResource *obstacle = gwy_inventory_get_item(klass->inventory, name);
-        if (obstacle) {
-            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                      NULL, NULL, NULL);
-            gchar *ofilename_utf8 = (obstacle->filename
-                                     ? g_filename_to_utf8(obstacle->filename,
-                                                         -1, NULL, NULL, NULL)
-                                     : "<internal>");
-            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
-                        _("Resource named ‘%s’ loaded from file ‘%s’ "
-                          "conflicts with already loaded resource from ‘%s’."),
-                        name, filename_utf8, ofilename_utf8);
-            g_free(filename_utf8);
-            if (obstacle->filename)
-                g_free(ofilename_utf8);
-            goto fail;
-        }
-
         text += len;
         text += strspn(text, " \t\n\r");
     }
 
+    /* Parse. */
     if ((resource = klass->parse(text, error))) {
         if (name) {
             resource->name = name;
@@ -705,6 +690,25 @@ parse(const gchar *text,
             name = g_path_get_basename(filename_sys);
             resource->name = g_filename_to_utf8(name, -1, NULL, NULL, NULL);
         }
+    }
+
+    /* Check if the name does not comflict with an existing resource. */
+    GwyResource *obstacle = gwy_inventory_get_item(klass->inventory, name);
+    if (obstacle) {
+        gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
+                                                  NULL, NULL, NULL);
+        gchar *ofilename_utf8 = (obstacle->filename
+                                 ? g_filename_to_utf8(obstacle->filename, -1,
+                                                      NULL, NULL, NULL)
+                                 : "<internal>");
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
+                    _("Resource named ‘%s’ loaded from file ‘%s’ "
+                      "conflicts with already loaded resource from ‘%s’."),
+                    name, filename_utf8, ofilename_utf8);
+        g_free(filename_utf8);
+        if (obstacle->filename)
+            g_free(ofilename_utf8);
+        GWY_OBJECT_UNREF(resource);
     }
 
 fail:
@@ -792,6 +796,21 @@ gwy_resource_class_load(GwyResourceClass *klass)
     g_strfreev(dirs);
 }
 
+/**
+ * gwy_resource_class_load_directory:
+ * @klass: Resource klass of the resources in the directory.
+ * @dirname: Directory to load resources from.
+ * @modifiable: %TRUE to create resources as modifiable, %FALSE to create them
+ *              as fixed.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *
+ * Loads all resources of given class from a directory.
+ *
+ * All files in the directory (except hidden and backup files as defined by
+ * GIO %G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN and
+ * %G_FILE_ATTRIBUTE_STANDARD_IS_BACKUP) are assumed to be resources of class
+ * @klass.  Subdirectories are ignored.
+ **/
 void
 gwy_resource_class_load_directory(GwyResourceClass *klass,
                                   const gchar *dirname_sys,
@@ -819,8 +838,9 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             continue;
         }
 
-        /* FIXME: Wrong type, must build the path manually? */
-        gchar *filename_sys = g_file_get_path(fileinfo);
+        gchar *filename_sys = g_build_filename(dirname_sys,
+                                               g_file_info_get_name(fileinfo),
+                                               NULL);
         GError *error = NULL;
         GwyResource *resource
             = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
