@@ -2,3 +2,13 @@ Packing: Is unfinished.  Might need a review and go with the code-generation
          path instead.
 
 Container: assign() does not emit signals.  Implement it via transfer()?
+
+Inventory: Make possible to change sort function, make possible to simply state
+           that items are sorted by name (which requires GDataCompareFunc, not
+           just GCompareFunc).
+
+Math: Review and add other functions such as the matrix solvers, considering
+      error reporting.
+
+libgwy: Review directory tests once we install the standard directory structure
+        (data and modules).

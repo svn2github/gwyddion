@@ -13,7 +13,8 @@ Libraries in general:
             rendering -- does not need X11 or Gtk+
   - libgwyui: user interface, i.e. new widgets and UI helper functions
   - libgwyapp: modules, application-level functions
-- Libraries have a test suite (well, libgwy does), run `make check'.
+- Libraries have a test suite (well, libgwy does), run `make check', if it
+  passes run also `make check-valgrind'.
 - Intralibrary symbol resolution does not go through PLT, the technique was
   blatantly copied from GLib (though not the implementation).
 
