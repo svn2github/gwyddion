@@ -39,10 +39,6 @@
 
 #endif
 
-/* This belongs to some strutils header? */
-#define gwy_strequal(a, b) \
-    (!strcmp((a), (b)))
-
 #define gwy_memclear(array, n) \
     memset((array), 0, (n)*sizeof((array)[0]))
 

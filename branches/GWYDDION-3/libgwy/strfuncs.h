@@ -24,6 +24,9 @@
 
 G_BEGIN_DECLS
 
+#define gwy_strequal(a, b) \
+    (!strcmp((a), (b)))
+
 guint    gwy_stramong     (const gchar *str,
                            ...);
 gchar*   gwy_str_next_line(gchar **buffer);

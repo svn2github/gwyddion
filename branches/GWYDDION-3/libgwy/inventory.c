@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
 #include "libgwy/inventory.h"
 #include "libgwy/libgwy-aliases.h"
 

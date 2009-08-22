@@ -153,4 +153,18 @@ gwy_str_next_line(gchar **buffer)
  * @short_description: String utility functions
  **/
 
+/**
+ * gwy_strequal:
+ * @a: String.
+ * @b: Another string.
+ *
+ * Expands to %TRUE if strings are equal, to %FALSE otherwise.
+ *
+ * This is a shorthand for strcmp() which does not require mentally inverting
+ * the result to test two strings for equality.
+ *
+ * Compared to g_str_equal(), the advantage of gwy_strequal() is that, being
+ * a macro, it can reduce to a GCC builtin.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

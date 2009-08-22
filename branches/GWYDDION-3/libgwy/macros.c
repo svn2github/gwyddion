@@ -113,17 +113,6 @@
  **/
 
 /**
- * gwy_strequal:
- * @a: String.
- * @b: Another string.
- *
- * Expands to %TRUE if strings are equal, to %FALSE otherwise.
- *
- * This is a shorthand for strcmp() which does not require mentally inverting
- * the result to test two strings for equality.
- **/
-
-/**
  * gwy_memclear:
  * @array: Pointer to an array of values to clear.
  *         This argument may be evaluated several times.
