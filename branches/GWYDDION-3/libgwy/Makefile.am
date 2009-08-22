@@ -25,6 +25,7 @@ libgwyinclude_HEADERS = \
 	macros.h \
 	math.h \
 	pack.h \
+	resource.h \
 	serializable.h \
 	serialize.h \
 	strfuncs.h \
@@ -40,6 +41,7 @@ libgwy_la_SOURCES = \
 	macros.c \
 	math.c \
 	pack.c \
+	resource.c \
 	serializable.c \
 	serialize.c \
 	strfuncs.c \

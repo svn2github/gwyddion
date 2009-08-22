@@ -27,6 +27,7 @@
 #include <libgwy/macros.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
+#include <libgwy/resource.h>
 #include <libgwy/serializable.h>
 #include <libgwy/serialize.h>
 #include <libgwy/strfuncs.h>
