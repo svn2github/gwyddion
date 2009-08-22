@@ -19,6 +19,7 @@ libgwyinclude_HEADERS = \
 	container.h \
 	errorlist.h \
 	expr.h \
+	inventory.h \
 	libgwy.h \
 	macros.h \
 	math.h \
@@ -32,6 +33,7 @@ libgwy_la_SOURCES = \
 	container.c \
 	errorlist.c \
 	expr.c \
+	inventory.c \
 	macros.c \
 	math.c \
 	pack.c \
