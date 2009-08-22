@@ -225,6 +225,7 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
     it = items->items + items->n_items;
     it->name = g_quark_to_string(key);
     it->array_size = 0;
+    items->n_items++;
 
     switch (type) {
         case G_TYPE_BOOLEAN:
@@ -268,8 +269,6 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
         return;
         break;
     }
-
-    items->n_items++;
 }
 
 static GObject*
