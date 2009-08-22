@@ -64,62 +64,61 @@ typedef struct {
 } SerializeData;
 */
 
-static void     gwy_container_serializable_init  (GwySerializableInterface *iface);
-static void     value_destroy(gpointer data);
-static void     gwy_container_finalize           (GObject *object);
-static void     gwy_container_dispose           (GObject *object);
-static void hash_object_dispose(gpointer hkey,
-                    gpointer hvalue,
-                    gpointer hdata);
-static GValue*  gwy_container_get_value_of_type  (GwyContainer *container,
-                                                  GQuark key,
-                                                  GType type);
-static GValue*  gwy_container_gis_value_of_type  (GwyContainer *container,
-                                                  GQuark key,
-                                                  GType type);
-static gboolean try_set_value                    (GwyContainer *container,
-                                                  GQuark key,
-                                                  const GValue *value,
-                                                  gboolean do_replace,
-                                                  gboolean do_create);
-/*
-static GByteArray* gwy_container_serialize       (GObject *object,
-                                                  GByteArray *buffer);
-static gsize    gwy_container_get_size           (GObject *object);
-static void     hash_serialize(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static GObject* gwy_container_deserialize        (const guchar *buffer,
-                                                  gsize size,
-                                                  gsize *position);
-*/
-static GObject* gwy_container_duplicate_impl     (GwySerializable *object);
-static void     gwy_container_assign_impl        (GwySerializable *destination,
-                                                  GwySerializable *source);
-static gboolean hash_remove_prefix(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static void     hash_foreach(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static void     keys_foreach(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static void     keys_by_name_foreach(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static void     hash_duplicate(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-static void     hash_find_keys(gpointer hkey,
-                                                  gpointer hvalue,
-                                                  gpointer hdata);
-
-static int      pstring_compare                  (const void *p,
-                                                  const void *q);
-static guint    token_length                     (const gchar *text);
-static gchar*   dequote_token                    (const gchar *tok,
-                                                  gsize *len);
+static void     gwy_container_serializable_init(GwySerializableInterface *iface);
+static void     value_destroy                  (gpointer data);
+static void     gwy_container_finalize         (GObject *object);
+static void     gwy_container_dispose          (GObject *object);
+static void     hash_object_dispose            (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static GValue*  gwy_container_get_value_of_type(GwyContainer *container,
+                                                GQuark key,
+                                                GType type);
+static GValue*  gwy_container_gis_value_of_type(GwyContainer *container,
+                                                GQuark key,
+                                                GType type);
+static gboolean try_set_value                  (GwyContainer *container,
+                                                GQuark key,
+                                                const GValue *value,
+                                                gboolean do_replace,
+                                                gboolean do_create);
+static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
+static void     hash_count_items               (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static gsize    gwy_container_itemize          (GwySerializable *serializable,
+                                                GwySerializableItems *items);
+static void     hash_itemize                   (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static GObject* gwy_container_construct        (GwySerializableItems *items,
+                                                GwyErrorList **error_list);
+static GObject* gwy_container_duplicate_impl   (GwySerializable *object);
+static void     gwy_container_assign_impl      (GwySerializable *destination,
+                                                GwySerializable *source);
+static gboolean hash_remove_prefix             (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static void     hash_foreach                   (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static void     keys_foreach                   (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static void     keys_by_name_foreach           (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static void     hash_duplicate                 (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static void     hash_find_keys                 (gpointer hkey,
+                                                gpointer hvalue,
+                                                gpointer hdata);
+static int      pstring_compare                (const void *p,
+                                                const void *q);
+static guint    token_length                   (const gchar *text);
+static gchar*   dequote_token                  (const gchar *tok,
+                                                gsize *len);
 
 static guint container_signals[N_SIGNALS];
 
@@ -132,6 +131,11 @@ gwy_container_serializable_init(GwySerializableInterface *iface)
 {
     iface->duplicate = gwy_container_duplicate_impl;
     iface->assign = gwy_container_assign_impl;
+    /* A bit unfortunate naming: gwy_container_n_items() counts the number of
+     * items. */
+    iface->n_items = gwy_container_n_items_impl;
+    iface->itemize = gwy_container_itemize;
+    iface->construct = gwy_container_construct;
 }
 
 static void
@@ -193,6 +197,236 @@ hash_object_dispose(G_GNUC_UNUSED gpointer hkey,
 
     if (G_VALUE_TYPE(value) == G_TYPE_OBJECT)
         g_value_reset(value);
+}
+
+static gsize
+gwy_container_n_items_impl(GwySerializable *serializable)
+{
+    gsize n_items = 0;
+    g_hash_table_foreach(GWY_CONTAINER(serializable)->values,
+                         hash_count_items, &n_items);
+    return n_items;
+}
+
+static void
+hash_count_items(G_GNUC_UNUSED gpointer hkey,
+                 gpointer hvalue,
+                 gpointer hdata)
+{
+    const GValue *value = (GValue*)hvalue;
+    gsize *n_items = (gsize*)hdata;
+
+    (*n_items)++;
+    if (G_VALUE_TYPE(value) == G_TYPE_OBJECT) {
+        GObject *object = g_value_get_object(value);
+        *n_items += gwy_serializable_n_items(GWY_SERIALIZABLE(object));
+    }
+}
+
+static gsize
+gwy_container_itemize(GwySerializable *serializable,
+                      GwySerializableItems *items)
+{
+    GwyContainer *container = GWY_CONTAINER(serializable);
+
+    g_hash_table_foreach(container->values, hash_itemize, items);
+    return g_hash_table_size(container->values);
+}
+
+static void
+hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
+{
+    GQuark key = GPOINTER_TO_UINT(hkey);
+    GValue *value = (GValue*)hvalue;
+    GwySerializableItems *items = (GwySerializableItems*)hdata;
+    GwySerializableItem *it;
+    GType type = G_VALUE_TYPE(value);
+
+    g_return_if_fail(items->len - items->n_items);
+    it = items->items + items->n_items;
+    it->name = g_quark_to_string(key);
+    it->array_size = 0;
+
+    switch (type) {
+        case G_TYPE_BOOLEAN:
+        it->ctype = GWY_SERIALIZABLE_BOOLEAN;
+        it->value.v_boolean = !!g_value_get_boolean(value);
+        break;
+
+        case G_TYPE_CHAR:
+        it->ctype = GWY_SERIALIZABLE_INT8;
+        it->value.v_int8 = g_value_get_char(value);
+        break;
+
+        case G_TYPE_INT:
+        it->ctype = GWY_SERIALIZABLE_INT32;
+        it->value.v_int32 = g_value_get_int(value);
+        break;
+
+        case G_TYPE_INT64:
+        it->ctype = GWY_SERIALIZABLE_INT64;
+        it->value.v_int64 = g_value_get_int64(value);
+        break;
+
+        case G_TYPE_DOUBLE:
+        it->ctype = GWY_SERIALIZABLE_DOUBLE;
+        it->value.v_double = g_value_get_double(value);
+        break;
+
+        case G_TYPE_STRING:
+        it->ctype = GWY_SERIALIZABLE_STRING;
+        it->value.v_string = (gchar*)g_value_get_string(value);
+        break;
+
+        case G_TYPE_OBJECT:
+        it->ctype = GWY_SERIALIZABLE_OBJECT;
+        it->value.v_object = g_value_get_object(value);
+        gwy_serializable_itemize(GWY_SERIALIZABLE(it->value.v_object), items);
+        break;
+
+        default:
+        g_warning("Cannot pack GValue holding %s", g_type_name(type));
+        return;
+        break;
+    }
+
+    items->n_items++;
+}
+
+static GObject*
+gwy_container_construct(GwySerializableItems *items,
+                        GwyErrorList **error_list)
+{
+}
+
+#if 0
+static GByteArray*
+gwy_container_serialize(GObject *object,
+                        GByteArray *buffer)
+{
+    GwyContainer *container;
+    gsize nitems = 0;
+    SerializeData sdata;
+
+    g_return_val_if_fail(GWY_IS_CONTAINER(object), buffer);
+    container = GWY_CONTAINER(object);
+
+    nitems = g_hash_table_size(container->values);
+    sdata.items = g_new0(GwySerializeItem, nitems);
+    sdata.i = 0;
+    g_hash_table_foreach(container->values, hash_serialize, &sdata);
+    buffer = gwy_serialize_object_items(buffer, GWY_CONTAINER_TYPE_NAME,
+                                        sdata.i, sdata.items);
+    g_free(sdata.items);
+
+    return buffer;
+}
+
+static gsize
+gwy_container_get_size(GObject *object)
+{
+    GwyContainer *container;
+    gsize nitems = 0, size;
+    SerializeData sdata;
+
+    g_return_val_if_fail(GWY_IS_CONTAINER(object), 0);
+    container = GWY_CONTAINER(object);
+
+    nitems = g_hash_table_size(container->values);
+    sdata.items = g_new0(GwySerializeItem, nitems);
+    sdata.i = 0;
+    g_hash_table_foreach(container->values, hash_serialize, &sdata);
+    size = gwy_serialize_get_items_size(GWY_CONTAINER_TYPE_NAME,
+                                        sdata.i, sdata.items);
+    g_free(sdata.items);
+
+    return size;
+}
+
+static GObject*
+gwy_container_deserialize(const guchar *buffer,
+                          gsize size,
+                          gsize *position)
+{
+    GwySerializeItem *items, *it;
+    GwyContainer *container;
+    GQuark key;
+    gsize i, nitems = 0;
+
+    g_return_val_if_fail(buffer, NULL);
+    items = gwy_deserialize_object_hash(buffer, size, position,
+                                        GWY_CONTAINER_TYPE_NAME, &nitems);
+    g_return_val_if_fail(items, NULL);
+
+    container = gwy_container_new();
+    for (i = 0; i < nitems; i++) {
+        it = items + i;
+        key = g_quark_from_string(it->name);
+        switch (it->ctype) {
+            case 'b':
+            gwy_container_set_boolean(container, key, it->value.v_boolean);
+            break;
+
+            case 'c':
+            gwy_container_set_uchar(container, key, it->value.v_char);
+            break;
+
+            case 'i':
+            gwy_container_set_int32(container, key, it->value.v_int32);
+            break;
+
+            case 'q':
+            gwy_container_set_int64(container, key, it->value.v_int64);
+            break;
+
+            case 'd':
+            gwy_container_set_double(container, key, it->value.v_double);
+            break;
+
+            case 's':
+            gwy_container_set_string(container, key, it->value.v_string);
+            break;
+
+            case 'o':
+            if (it->value.v_object) {
+                gwy_container_set_object(container, key, it->value.v_object);
+                g_object_unref(it->value.v_object);
+            }
+            break;
+
+            default:
+            g_critical("Container doesn't support type <%c>", it->ctype);
+            break;
+        }
+    }
+    g_free(items);
+
+    return (GObject*)container;
+}
+#endif
+
+static GObject*
+gwy_container_duplicate_impl(GwySerializable *object)
+{
+    GwyContainer *duplicate = gwy_container_new();
+    duplicate->in_construction = TRUE;
+    g_hash_table_foreach(GWY_CONTAINER(object)->values,
+                         hash_duplicate, duplicate);
+    duplicate->in_construction = FALSE;
+
+    return (GObject*)duplicate;
+}
+
+static void
+gwy_container_assign_impl(GwySerializable *destination,
+                          GwySerializable *source)
+{
+    GwyContainer *container = GWY_CONTAINER(destination);
+    GwyContainer *src = GWY_CONTAINER(source);
+
+    /* FIXME: Does not emit item-changed!? */
+    g_hash_table_remove_all(container->values);
+    g_hash_table_foreach(src->values, hash_duplicate, container);
 }
 
 /**
@@ -1674,194 +1908,6 @@ gwy_container_set_object(GwyContainer *container,
     g_value_set_object(&gvalue, value);  /* this increases refcount too */
     try_set_value(container, key, &gvalue, TRUE, TRUE);
     g_object_unref(value);
-}
-
-#if 0
-static GByteArray*
-gwy_container_serialize(GObject *object,
-                        GByteArray *buffer)
-{
-    GwyContainer *container;
-    gsize nitems = 0;
-    SerializeData sdata;
-
-    g_return_val_if_fail(GWY_IS_CONTAINER(object), buffer);
-    container = GWY_CONTAINER(object);
-
-    nitems = g_hash_table_size(container->values);
-    sdata.items = g_new0(GwySerializeItem, nitems);
-    sdata.i = 0;
-    g_hash_table_foreach(container->values, hash_serialize, &sdata);
-    buffer = gwy_serialize_object_items(buffer, GWY_CONTAINER_TYPE_NAME,
-                                        sdata.i, sdata.items);
-    g_free(sdata.items);
-
-    return buffer;
-}
-
-static gsize
-gwy_container_get_size(GObject *object)
-{
-    GwyContainer *container;
-    gsize nitems = 0, size;
-    SerializeData sdata;
-
-    g_return_val_if_fail(GWY_IS_CONTAINER(object), 0);
-    container = GWY_CONTAINER(object);
-
-    nitems = g_hash_table_size(container->values);
-    sdata.items = g_new0(GwySerializeItem, nitems);
-    sdata.i = 0;
-    g_hash_table_foreach(container->values, hash_serialize, &sdata);
-    size = gwy_serialize_get_items_size(GWY_CONTAINER_TYPE_NAME,
-                                        sdata.i, sdata.items);
-    g_free(sdata.items);
-
-    return size;
-}
-
-static void
-hash_serialize(gpointer hkey, gpointer hvalue, gpointer hdata)
-{
-    GQuark key = GPOINTER_TO_UINT(hkey);
-    GValue *value = (GValue*)hvalue;
-    SerializeData *sdata = (SerializeData*)hdata;
-    GwySerializeItem *it;
-    GType type = G_VALUE_TYPE(value);
-    gsize i;
-
-    i = sdata->i;
-    it = sdata->items + i;
-    it->name = g_quark_to_string(key);
-    switch (type) {
-        case G_TYPE_BOOLEAN:
-        it->ctype = 'b';
-        it->value.v_boolean = !!g_value_get_boolean(value);
-        break;
-
-        case G_TYPE_CHAR:
-        it->ctype = 'c';
-        it->value.v_char = g_value_get_uchar(value);
-        break;
-
-        case G_TYPE_INT:
-        it->ctype = 'i';
-        it->value.v_int32 = g_value_get_int(value);
-        break;
-
-        case G_TYPE_INT64:
-        it->ctype = 'q';
-        it->value.v_int64 = g_value_get_int64(value);
-        break;
-
-        case G_TYPE_DOUBLE:
-        it->ctype = 'd';
-        it->value.v_double = g_value_get_double(value);
-        break;
-
-        case G_TYPE_STRING:
-        it->ctype = 's';
-        it->value.v_string = (guchar*)g_value_get_string(value);
-        break;
-
-        case G_TYPE_OBJECT:
-        it->ctype = 'o';
-        it->value.v_object = g_value_get_object(value);
-        break;
-
-        default:
-        g_warning("Cannot pack GValue holding %s", g_type_name(type));
-        return;
-        break;
-    }
-
-    sdata->i++;
-}
-
-static GObject*
-gwy_container_deserialize(const guchar *buffer,
-                          gsize size,
-                          gsize *position)
-{
-    GwySerializeItem *items, *it;
-    GwyContainer *container;
-    GQuark key;
-    gsize i, nitems = 0;
-
-    g_return_val_if_fail(buffer, NULL);
-    items = gwy_deserialize_object_hash(buffer, size, position,
-                                        GWY_CONTAINER_TYPE_NAME, &nitems);
-    g_return_val_if_fail(items, NULL);
-
-    container = gwy_container_new();
-    for (i = 0; i < nitems; i++) {
-        it = items + i;
-        key = g_quark_from_string(it->name);
-        switch (it->ctype) {
-            case 'b':
-            gwy_container_set_boolean(container, key, it->value.v_boolean);
-            break;
-
-            case 'c':
-            gwy_container_set_uchar(container, key, it->value.v_char);
-            break;
-
-            case 'i':
-            gwy_container_set_int32(container, key, it->value.v_int32);
-            break;
-
-            case 'q':
-            gwy_container_set_int64(container, key, it->value.v_int64);
-            break;
-
-            case 'd':
-            gwy_container_set_double(container, key, it->value.v_double);
-            break;
-
-            case 's':
-            gwy_container_set_string(container, key, it->value.v_string);
-            break;
-
-            case 'o':
-            if (it->value.v_object) {
-                gwy_container_set_object(container, key, it->value.v_object);
-                g_object_unref(it->value.v_object);
-            }
-            break;
-
-            default:
-            g_critical("Container doesn't support type <%c>", it->ctype);
-            break;
-        }
-    }
-    g_free(items);
-
-    return (GObject*)container;
-}
-#endif
-
-static GObject*
-gwy_container_duplicate_impl(GwySerializable *object)
-{
-    GwyContainer *duplicate = gwy_container_new();
-    duplicate->in_construction = TRUE;
-    g_hash_table_foreach(GWY_CONTAINER(object)->values,
-                         hash_duplicate, duplicate);
-    duplicate->in_construction = FALSE;
-
-    return (GObject*)duplicate;
-}
-
-static void
-gwy_container_assign_impl(GwySerializable *destination,
-                          GwySerializable *source)
-{
-    GwyContainer *container = GWY_CONTAINER(destination);
-    GwyContainer *src = GWY_CONTAINER(source);
-
-    /* FIXME: Does not emit item-changed!? */
-    g_hash_table_remove_all(container->values);
-    g_hash_table_foreach(src->values, hash_duplicate, container);
 }
 
 static void
