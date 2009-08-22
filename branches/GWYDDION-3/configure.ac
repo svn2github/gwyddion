@@ -49,6 +49,8 @@ if test "x$ac_cv_prog_cc_c99" = xno; then
   AC_MSG_ERROR([C99 standard conforming C compiler is required])
 fi
 
+#############################################################################
+# I18n
 GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
@@ -58,18 +60,35 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",
 
 IT_PROG_INTLTOOL([0.40],[no-xml])
 
+#############################################################################
+# Gtk-doc
 GTK_DOC_CHECK([1.11])
 
+#############################################################################
+# Python
 AM_PATH_PYTHON([2.2],,[GWY_MISSING_TOOLS="$GWY_MISSING_TOOLS python"])
 AM_CONDITIONAL([HAVE_PYTHON],[test "$PYTHON" != :])
 
-PKG_CHECK_MODULES([LIBGWY],[gio-2.0 >= 2.18])
+#############################################################################
+# Math Functions
 GWY_CHECK_LIBM
 
 m4_define([gwy_math_funcs],[exp10])
-
 GWY_CHECK_MATH_FUNCS([gwy_math_funcs])
 
+#############################################################################
+# GLIBC >= 2.1
+gl_GLIBC21
+if test "x$GLIBC21" = xyes; then
+  AC_DEFINE([HAVE_MEMMEM],1,[Define if we have working memmem()])
+fi
+
+#############################################################################
+# The Gtk+ Stack
+PKG_CHECK_MODULES([LIBGWY],[gio-2.0 >= 2.18])
+
+#############################################################################
+# Write gwyconfig.h
 AC_CONFIG_COMMANDS([gwyconfig.h],
 [
   outfile=gwyconfig.h-tmp
@@ -102,6 +121,8 @@ _______EOF
   gwy_math_exp10=$gwy_math_exp10
 ])
 
+#############################################################################
+# Translation Makefiles
 AC_CONFIG_COMMANDS([sed-po-makefiles],
 [
   for x in libgwy; do
@@ -110,5 +131,7 @@ AC_CONFIG_COMMANDS([sed-po-makefiles],
   done
 ])
 
+#############################################################################
+# Output
 AC_OUTPUT
 
