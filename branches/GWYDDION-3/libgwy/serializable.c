@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include "libgwy/serializable.h"
+#include "libgwy/macros.h"
 
 /* This is acceptable for 4k page size, not that bad for 4M page size and
  * of course good for the sizes between too. */
@@ -94,7 +95,9 @@ gwy_serializable_buffer_finish(GwySerializableBuffer *buffer)
 static void
 gwy_serializable_buffer_dealloc(GwySerializableBuffer *buffer)
 {
-    g_free(buffer->data);
+    buffer->data -= buffer->len - buffer->bfree;
+    buffer->bfree = buffer->len;
+    GWY_FREE(buffer->data);
 }
 
 static gboolean
@@ -262,7 +265,7 @@ gwy_serializable_itemize(GwySerializable *serializable,
     iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface && iface->itemize);
 
-    g_return_if_fail(items->n_items >= items->len);
+    g_return_if_fail(items->n_items < items->len);
     item = items->items + items->n_items;
     items->n_items++;
     item->name = G_OBJECT_TYPE_NAME(G_OBJECT(serializable));
@@ -330,6 +333,7 @@ gwy_serializable_serialize(GwySerializable *serializable,
     ok = gwy_serializable_dump_to_stream(&items, &buffer);
     gwy_serializable_buffer_dealloc(&buffer);
     gwy_serializable_items_done(&items);
+    gwy_serializable_done(serializable);
     g_free(items.items);
 
     return ok;
@@ -384,7 +388,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
 
     n = header->array_size;
     size = strlen(header->name)+1 + 8 /* object size */;
-    for (i = 1; i < n; i++) {
+    for (i = 0; i < n; i++) {
         /* It is important to increment pos now because recusive invocations
          * expect pos already pointing to the header item. */
         const GwySerializableItem *item = items->items + (*pos)++;
@@ -398,7 +402,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
         else if ((typesize
                   = gwy_serializable_ctype_size(g_ascii_tolower(ctype)))) {
             g_warn_if_fail(item->array_size != 0);
-            size += typesize*item->array_size;
+            size += typesize*item->array_size + sizeof(guint64);
         }
         else if (ctype == GWY_SERIALIZABLE_STRING)
             size += strlen((const gchar*)item->value.v_string)+1;
@@ -469,8 +473,7 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
         /* Serializable object follows... */
         if (ctype == GWY_SERIALIZABLE_OBJECT)
             continue;
-
-        if (ctype == GWY_SERIALIZABLE_INT8) {
+        else if (ctype == GWY_SERIALIZABLE_INT8) {
             if (!gwy_serializable_buffer_write(buffer, &item->value.v_uint8,
                                                sizeof(guint8)))
                 return FALSE;
@@ -514,7 +517,8 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
                                                  item->array_size))
                 return FALSE;
         }
-        else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY) {
+        else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY
+                 || ctype == GWY_SERIALIZABLE_DOUBLE_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
             if (!gwy_serializable_buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
@@ -546,7 +550,7 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
         }
     }
 
-    return TRUE;
+    return gwy_serializable_buffer_finish(buffer);
 }
 
 /**

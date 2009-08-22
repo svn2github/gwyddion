@@ -113,7 +113,7 @@ struct _GwySerializableInterface {
     /* virtual table */
     gsize                 (*n_items)  (GwySerializable *serializable);
     gsize                 (*itemize)  (GwySerializable *serializable,
-                                        GwySerializableItems *items);
+                                       GwySerializableItems *items);
     void                  (*done)     (GwySerializable *serializable);
 
     GwySerializableItems* (*request)  (void);
