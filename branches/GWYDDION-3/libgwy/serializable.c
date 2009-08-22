@@ -943,7 +943,7 @@ unpack_name(const guchar *buffer,
 {
     const guchar *s = memchr(buffer, '\0', size);
 
-    if (!s) {
+    if (G_UNLIKELY(!s)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_TRUNCATED,
                            _("End of data was reached while looking for the "
@@ -962,7 +962,7 @@ unpack_string(const guchar *buffer,
 {
     const guchar *s = memchr(buffer, '\0', size);
 
-    if (!s) {
+    if (G_UNLIKELY(!s)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_TRUNCATED,
                            _("End of data was reached while looking for the "
@@ -1105,7 +1105,7 @@ gwy_serializable_deserialize(const guchar *buffer,
 
     /* We should no only fit, but the object size should be exactly size.
      * If there is extra stuff, add an error, but do not fail. */
-    if (size - pos != object_size) {
+    if (G_UNLIKELY(size - pos != object_size)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_PADDING,
                            _("Object ‘%s’ data is smaller than the space "
@@ -1147,7 +1147,7 @@ get_serializable(const gchar *typename,
     GType type;
 
     type = g_type_from_name(typename);
-    if (!type) {
+    if (G_UNLIKELY(!type)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not known. "
@@ -1158,7 +1158,7 @@ get_serializable(const gchar *typename,
 
     *classref = g_type_class_ref(type);
     g_assert(*classref);
-    if (!G_TYPE_IS_INSTANTIATABLE(type)) {
+    if (G_UNLIKELY(!G_TYPE_IS_INSTANTIATABLE(type))) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not instantiable. "
@@ -1166,7 +1166,7 @@ get_serializable(const gchar *typename,
                            typename);
         return 0;
     }
-    if (!g_type_is_a(type, GWY_TYPE_SERIALIZABLE)) {
+    if (G_UNLIKELY(!g_type_is_a(type, GWY_TYPE_SERIALIZABLE))) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
                            _("Object type ‘%s’ is not serializable. "
@@ -1176,7 +1176,7 @@ get_serializable(const gchar *typename,
     }
 
     *iface = g_type_interface_peek(*classref, GWY_TYPE_SERIALIZABLE);
-    if (!*iface || !(*iface)->construct) {
+    if (G_UNLIKELY(!*iface || !(*iface)->construct)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_OBJECT,
                            _("Object type ‘%s’ does not implement "
