@@ -18,5 +18,7 @@ Resources: Convenience method for resource parsing (possibly dumping too).
            One possibility is using properties, though defining propertis
            for all GwyRawFilePreset parameters seems a bit overkill.
 
+Interpolation: Calculate the coefficients for BSPLINE6 interpolation.
+
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).
