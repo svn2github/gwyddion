@@ -1,0 +1,57 @@
+Compared to Gwyddion 2.x:
+
+Serialization:
+- GWY format was changed to version 3, with 64bit object and array sizes and
+  support for 16bit integers.
+- Serialization and deserialization errors are reported through GError, i.e.
+  a malformed GWY file no longer causes the program to abort.
+- GwySerializable interface is binary format-agnostic.  That is, objects no
+  longer get into direct contact with the raw binary data which permits other
+  representations, for instance XML or HDF5.  Serializers and deserializers are
+  completely seprarated from the interface.
+- The methods of GwySerializable have changed in consequence, implementations
+  of the interface need to be rewritten.
+- GWY serialization can be performed to arbitrary GOutputStream: memory, file,
+  or something more fancy.
+- Serialization is streamed, i.e. it no longer requires to keep the complete
+  dump in core.
+- Method clone was replaced with assign which better represents the intention
+  and is called, again more closely following the OO patterns, on the assignee,
+  not the assigned object.
+- The interface now follows the usual convention with function arguments being
+  GwySerializable* instead of GObject*.
+
+Math:
+- Namespace is no longer polluted with unprefixed names, unless explicitly
+  requested.
+- There are much fewer fallback math functions as all C99 functions are assumed
+  to be available.
+- gwy_math_sort() can sort an index array along with the actual data.
+
+Pack:
+- Completely new. TODO
+
+Unit:
+- Renamed from GwySIUnit to GwyUnit.
+- GwyValueFormat can be simply allocated on stack (i.e. as an automatic
+  variable), and this is the expected typical use now.
+- Arithmetic functions follow the common convention and take the result as
+  the first argument (think a = b/c).
+- It has a proper default parameterless constructor, the number of functions
+  for construction from strings was reduced.
+- All formats support the standalone/after-value disctinction, consequently,
+  GWY_SI_VALUE_FORMAT_VFMARKUP was removed and formatting functions acquired
+  a new argument standalone.
+- There were some minor parser improvements, such as the support for ² symbol
+  and automatic attempt of Latin1 -> UTF-8 conversion if the input is not
+  valid UTF-8.
+
+Container:
+- Some unused functions were removed, signatures of other made more consistent
+  (strings are no longer guchar*, etc.).
+- gwy_container_transfer() can perform both shallow and deep copies.
+
+Expr:
+- Expressions can be UTF-8 strings (as opposed to ASCII) which permits UTF-8
+  identifier and constant names such as π or β₂.
+- It uses GSlice instead of the deprecated GMemChunk internally.
