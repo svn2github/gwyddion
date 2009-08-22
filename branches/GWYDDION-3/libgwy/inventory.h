@@ -108,20 +108,18 @@ struct _GwyInventoryClass {
     void (*reserved2)(void);
 };
 
-GType         gwy_inventory_get_type       (void) G_GNUC_CONST;
+GType         gwy_inventory_get_type             (void) G_GNUC_CONST;
 
-GwyInventory* gwy_inventory_new            (void);
-GwyInventory* gwy_inventory_new_with_type  (const GwyInventoryItemType *itype);
-GwyInventory* gwy_inventory_new_with_items (const GwyInventoryItemType *itype,
-                                            guint nitems,
-                                            gpointer pitems);
-void gwy_inventory_set_item_type  (GwyInventory *inventory,
-                                   const GwyInventoryItemType *itype);
-
-guint         gwy_inventory_get_n_items          (GwyInventory *inventory);
-gboolean      gwy_inventory_can_make_copies      (GwyInventory *inventory);
+GwyInventory* gwy_inventory_new                  (void);
+GwyInventory* gwy_inventory_new_with_type        (const GwyInventoryItemType *itype);
+GwyInventory* gwy_inventory_new_with_items       (const GwyInventoryItemType *itype,
+                                                  guint nitems,
+                                                  gpointer pitems);
+void          gwy_inventory_set_item_type        (GwyInventory *inventory,
+                                                  const GwyInventoryItemType *itype);
+guint         gwy_inventory_n_items              (GwyInventory *inventory);
 const GwyInventoryItemType* gwy_inventory_get_item_type(GwyInventory *inventory);
-
+gboolean      gwy_inventory_can_make_copies      (GwyInventory *inventory);
 gpointer      gwy_inventory_get_item             (GwyInventory *inventory,
                                                   const gchar *name);
 gpointer      gwy_inventory_get_item_or_default  (GwyInventory *inventory,
@@ -130,7 +128,6 @@ gpointer      gwy_inventory_get_nth_item         (GwyInventory *inventory,
                                                   guint n);
 guint         gwy_inventory_get_item_position    (GwyInventory *inventory,
                                                   const gchar *name);
-
 void          gwy_inventory_foreach              (GwyInventory *inventory,
                                                   GHFunc function,
                                                   gpointer user_data);
@@ -141,7 +138,6 @@ void          gwy_inventory_set_default_item_name(GwyInventory *inventory,
                                                   const gchar *name);
 const gchar*  gwy_inventory_get_default_item_name(GwyInventory *inventory);
 gpointer      gwy_inventory_get_default_item     (GwyInventory *inventory);
-
 void          gwy_inventory_item_updated         (GwyInventory *inventory,
                                                   const gchar *name);
 void          gwy_inventory_nth_item_updated     (GwyInventory *inventory,
