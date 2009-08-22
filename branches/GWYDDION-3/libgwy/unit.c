@@ -1291,15 +1291,12 @@ gwy_unit_format_gstring_print(GString *string,
  *
  * <refsect2 id='libgwy-unit-formatting'>
  * <title>Formatting</title>
- * </refsect2>
- *
- * The functions for obtaining a value format fill or update a #GwyUnitFormat
- * structure.  A new format can be created either with g_new0(), or as an
- * automatic variable (i.e. on stack).  However, it has to be initialized with
- * GWY_UNIT_INIT_FORMAT in the latter case.  When the format is no longer
- * needed it is necessary to free the associated resourced with
- * gwy_unit_clear_format().
- *
+ * <para>The functions for obtaining a value format fill or update a
+ * #GwyUnitFormat structure.  A new format can be created either with g_new0(),
+ * or as an automatic variable (i.e. on stack).  However, it has to be
+ * initialized with GWY_UNIT_INIT_FORMAT in the latter case.  When the format
+ * is no longer needed it is necessary to free the associated resourced with
+ * gwy_unit_clear_format().</para>
  * |[
  * GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
  * GwyUnitFormat format = GWY_UNIT_INIT_FORMAT;
@@ -1310,6 +1307,11 @@ gwy_unit_format_gstring_print(GString *string,
  * gwy_unit_clear_format(&format);
  * g_object_unref(unit);
  * ]|
+ * <para>With empty units, the space between the number and units needs to be
+ * avoided in some situations.  The convenience functions
+ * gwy_unit_format_snprint(), gwy_unit_format_strdup_print() and
+ * gwy_unit_format_gstring_print() take care of this.</para>
+ * </refsect2>
  **/
 
 /**
