@@ -1109,7 +1109,8 @@ gwy_serializable_deserialize(const guchar *buffer,
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_PADDING,
                            _("Object ‘%s’ data is smaller than the space "
-                             "alloted for it.  The padding was ignored."));
+                             "alloted for it.  The padding was ignored."),
+                           typename);
         size = object_size + pos;
     }
 
