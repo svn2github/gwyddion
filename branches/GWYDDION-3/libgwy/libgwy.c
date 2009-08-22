@@ -425,8 +425,9 @@ find_self(void)
  * Obtains the Gwyddion system library directory.
  *
  * This is where modules and other architecture-dependent files reside.
- * For instance, for a standard installation and %NULL @subdir the return value
- * would be "/usr/local/lib64/gwyddion".
+ * For instance, for a standard Unix installation and %NULL @subdir the return
+ * value would be "/usr/local/lib64/gwyddion".  On MS Windows, it can be
+ * something like "C:\Program Files\Gwyddion\lib\gwyddion".
  *
  * The highest precedence for determinig this directory has the environment
  * variable <envar>GWYDDION_LIBDIR</envar>, the libgwy and Gwyddion
@@ -456,9 +457,10 @@ gwy_library_directory(const gchar *subdir)
  * Obtains the Gwyddion system data directory.
  *
  * This is where pixmaps, false color gradients and other
- * architecture-independent files reside.  For instance, for a standard
+ * architecture-independent files reside.  For instance, for a standard Unix
  * installation and %NULL @subdir the return value would be
- * "/usr/local/share/gwyddion".
+ * "/usr/local/share/gwyddion".  On MS Windows, it can be something like
+ * "C:\Program Files\Gwyddion\share\gwyddion".
  *
  * The highest precedence for determinig this directory has the environment
  * variable <envar>GWYDDION_DATADIR</envar>, the libgwy and Gwyddion
@@ -488,8 +490,9 @@ gwy_data_directory(const gchar *subdir)
  * Obtains the Gwyddion system locale directory.
  *
  * This is where the translation files files reside.  For instance, for a
- * standard installation and %NULL @subdir the return value would be
- * "/usr/local/share/locale".
+ * standard Unix installation and %NULL @subdir the return value would be
+ * "/usr/local/share/locale".  On MS Windows, it can be something like
+ * "C:\Program Files\Gwyddion\share\locale".
  *
  * The highest precedence for determinig this directory has the environment
  * variable <envar>GWYDDION_LOCALE_DIR</envar>, the libgwy and Gwyddion
