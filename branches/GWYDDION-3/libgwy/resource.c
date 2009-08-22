@@ -172,8 +172,8 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_ntraits++;
 
     pspec = g_param_spec_boolean("is-modifiable",
-                                 "Is constant",
-                                 "Whether a resource is constant (system)",
+                                 "Is modifiable",
+                                 "Whether a resource is modifiable",
                                  FALSE,
                                  G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIABLE, pspec);
@@ -992,6 +992,17 @@ gwy_resource_classes_finalize(void)
 
 /**
  * GwyResourceError:
+ * @GWY_RESOURCE_ERROR_HEADER: Resource file has wrong or missing magic header.
+ * @GWY_RESOURCE_ERROR_TYPE: Resource type is invalid.
+ * @GWY_RESOURCE_ERROR_NAME: Resource name is invalid or missing.
+ * @GWY_RESOURCE_ERROR_DUPLICIT: Resource conflicts with an already existing
+ *                               resource of the same name.  Note
+ *                               gwy_resource_load() does not return this
+ *                               error because it does not put the resource to
+ *                               the inventory.
+ * @GWY_RESOURCE_ERROR_DATA: Resource data is invalid.  This error code is
+ *                           not used by #GwyResource, it is intended for
+ *                           resource implementations.
  *
  * Error codes returned by resource operations.
  **/
