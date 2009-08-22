@@ -18,13 +18,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
 
+#define GWY_MATH_POLLUTE_NAMESPACE
+#include "config.h"
 #include <string.h>
 #include <glib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/expr.h"
-
-#if 0
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
 
@@ -141,7 +141,7 @@ make_function_1_1(cos)
 make_function_1_1(tan)
 make_function_1_1(exp)
 make_function_1_1(log)
-make_function_1_1(pow10)
+make_function_1_1(exp10)
 make_function_1_1(log10)
 make_function_1_1(asin)
 make_function_1_1(acos)
@@ -197,7 +197,7 @@ static const GwyExprFunction call_table[] = {
     { gwy_expr_exp,        "exp",    1,  1,  GWY_EXPR_CODE_EXP,      },
     { gwy_expr_log,        "ln",     1,  1,  GWY_EXPR_CODE_LN,       },
     { gwy_expr_log,        "log",    1,  1,  GWY_EXPR_CODE_LOG,      },
-    { gwy_expr_pow10,      "pow10",  1,  1,  GWY_EXPR_CODE_POW10,    },
+    { gwy_expr_exp10,      "exp10",  1,  1,  GWY_EXPR_CODE_POW10,    },
     { gwy_expr_log10,      "log10",  1,  1,  GWY_EXPR_CODE_LOG10,    },
     { gwy_expr_cosh,       "cosh",   1,  1,  GWY_EXPR_CODE_COSH,     },
     { gwy_expr_sinh,       "sinh",   1,  1,  GWY_EXPR_CODE_SINH,     },
@@ -371,7 +371,7 @@ gwy_expr_stack_check_executability(GwyExpr *expr)
     if (nval != 1)
         return FALSE;
 
-    if (expr->slen < max) {
+    if ((gint)expr->slen < max) {
         expr->slen = max;
         expr->stack = g_renew(gdouble, expr->stack, expr->slen);
     }
@@ -660,7 +660,7 @@ gwy_expr_token_new0(GwyExpr *expr)
     expr->reservoir = token->next;
     if (expr->reservoir)
         expr->reservoir->prev = NULL;
-    gwy_clear(token, 1);
+    gwy_memclear(token, 1);
 
     return token;
 }
@@ -1520,8 +1520,8 @@ gwy_expr_resolve_variables(GwyExpr *expr,
     g_return_val_if_fail(!n || (names && indices), 0);
 
     requested = g_newa(gboolean, expr->identifiers->len);
-    gwy_clear(requested, expr->identifiers->len);
-    gwy_clear(indices, n);
+    gwy_memclear(requested, expr->identifiers->len);
+    gwy_memclear(indices, n);
     for (i = 0; i < n; i++) {
         for (j = 1; j < expr->identifiers->len; j++) {
             if (gwy_strequal(names[i],
@@ -1838,7 +1838,5 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  * #GwyExpr is an opaque data structure and should be only manipulated with the
  * functions below.
  **/
-
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
