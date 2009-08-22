@@ -22,6 +22,7 @@
 
 #include <glib-object.h>
 #include <gio/gio.h>
+#include <libgwy/errorlist.h>
 
 G_BEGIN_DECLS
 
@@ -110,26 +111,27 @@ struct _GwySerializableInterface {
     GTypeInterface g_interface;
 
     /* virtual table */
-    gsize    (*n_items)  (GwySerializable *serializable);
-    gsize    (*itemize)  (GwySerializable *serializable,
-                          GwySerializableItems *items);
-    void     (*done)     (GwySerializable *serializable);
+    gsize                 (*n_items)  (GwySerializable *serializable);
+    gsize                 (*itemize)  (GwySerializable *serializable,
+                                        GwySerializableItems *items);
+    void                  (*done)     (GwySerializable *serializable);
 
-    GObject* (*construct)(const GwySerializableItems *items);
+    GwySerializableItems* (*request)  (void);
+    GObject*              (*construct)(const GwySerializableItems *items,
+                                       GwyErrorList **error_list);
 
-    GObject* (*duplicate)(GwySerializable *serializable);
-    void     (*assign)   (GwySerializable *source,
-                          GwySerializable *destination);
+    GObject*              (*duplicate)(GwySerializable *serializable);
+    void                  (*assign)   (GwySerializable *source,
+                                       GwySerializable *destination);
 };
 
 GType gwy_serializable_get_type(void);
 
-/* NOTE: We may need to use error lists here. */
 gboolean gwy_serializable_serialize  (GwySerializable *serializable,
                                       GOutputStream *output,
                                       GError **error);
 GObject* gwy_serializable_deserialize(GInputStream *input,
-                                      GError **error);
+                                      GwyErrorList **error_list);
 GObject* gwy_serializable_duplicate  (GwySerializable *serializable);
 void     gwy_serializable_assign     (GwySerializable *source,
                                       GwySerializable *destination);
