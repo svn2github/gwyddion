@@ -22,11 +22,22 @@
 #include "config.h"
 #include <string.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/expr.h"
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
+
+#define GWY_CSET_UTF8_UPPER \
+    "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f" \
+    "\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f" \
+    "\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf" \
+    "\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf" \
+    "\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf" \
+    "\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf" \
+    "\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef" \
+    "\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd"
 
 /* things that can appear on code stack */
 typedef enum {
@@ -213,8 +224,8 @@ static const GwyExprFunction call_table[] = {
 static const GScannerConfig scanner_config = {
     /* character sets */
     " \t\n\r",
-    G_CSET_a_2_z G_CSET_A_2_Z,
-    G_CSET_a_2_z G_CSET_A_2_Z "0123456789_.",
+    G_CSET_a_2_z G_CSET_A_2_Z GWY_CSET_UTF8_UPPER,
+    G_CSET_a_2_z G_CSET_A_2_Z "0123456789_." GWY_CSET_UTF8_UPPER,
     NULL,
     /* case sensitive */
     TRUE,
@@ -232,22 +243,21 @@ static const GScannerConfig scanner_config = {
     FALSE, FALSE, 0,
 };
 
-static gboolean table_sanity_checked = FALSE;
-
-static gboolean
-gwy_expr_check_call_table_sanity(void)
+static gpointer
+check_call_table_sanity(G_GNUC_UNUSED gpointer arg)
 {
     gboolean ok = TRUE;
     guint i;
 
     for (i = 1; i < G_N_ELEMENTS(call_table); i++) {
         if (call_table[i].type != i) {
-            g_critical("Inconsistent call table at pos %u\n", i);
+            g_critical("Inconsistent call table: %u at pos %u\n",
+                       call_table[i].type, i);
             ok = FALSE;
         }
     }
 
-    return ok;
+    return GINT_TO_POINTER(ok);
 }
 
 /**
@@ -292,13 +302,15 @@ gwy_expr_stack_interpret(GwyExpr *expr)
     expr->sp = expr->stack - 1;
     for (i = 0; i < expr->in; i++) {
         const GwyExprCode *code = expr->input + i;
+        const gint type = (gint)code->type;
 
-        if (code->type == GWY_EXPR_CODE_CONSTANT)
+        if (type == GWY_EXPR_CODE_CONSTANT)
             *(++expr->sp) = code->value;
-        else if ((gint)code->type > 0)
-            call_table[code->type].function(&expr->sp);
+        else if (type > 0) {
+            call_table[type].function(&expr->sp);
+        }
         else
-            *(++expr->sp) = expr->variables[-(gint)code->type];
+            *(++expr->sp) = expr->variables[-type];
     }
 }
 
@@ -327,13 +339,14 @@ gwy_expr_stack_interpret_vectors(GwyExpr *expr,
         expr->sp = expr->stack - 1;
         for (i = 0; i < expr->in; i++) {
             const GwyExprCode *code = expr->input + i;
+            const gint type = (gint)code->type;
 
-            if (code->type == GWY_EXPR_CODE_CONSTANT)
+            if (type == GWY_EXPR_CODE_CONSTANT)
                 *(++expr->sp) = code->value;
-            else if ((gint)code->type > 0)
-                call_table[code->type].function(&expr->sp);
+            else if (type > 0)
+                call_table[type].function(&expr->sp);
             else
-                *(++expr->sp) = data[-(gint)code->type][j];
+                *(++expr->sp) = data[-type][j];
         }
         result[j] = expr->stack[0];
     }
@@ -762,7 +775,7 @@ gwy_expr_scan_tokens(GwyExpr *expr,
 
             default:
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_INVALID_TOKEN,
-                        "Invalid token");
+                        _("Invalid token 0x%02x encountered."), token);
             gwy_expr_token_list_delete(expr, tokens);
             return FALSE;
             break;
@@ -770,7 +783,8 @@ gwy_expr_scan_tokens(GwyExpr *expr,
     }
 
     if (!tokens) {
-        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_EMPTY, "No tokens");
+        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_EMPTY,
+                   _("Expression is empty."));
         return FALSE;
     }
 
@@ -942,6 +956,9 @@ gwy_expr_transform_values(GwyExpr *expr)
         else if (t->token != G_TOKEN_IDENTIFIER)
             continue;
 
+        if (!g_utf8_validate(t->value.v_identifier, -1, NULL)) {
+        }
+
         if (expr->constants) {
             if ((quark = g_quark_try_string(t->value.v_identifier))
                 && (cval = g_hash_table_lookup(expr->constants,
@@ -1012,13 +1029,13 @@ gwy_expr_transform_infix_ops(GwyExpr *expr,
         next = t->next;
         if (!next || !prev) {
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_MISSING_ARGUMENT,
-                        "Missing operator %c argument", operators[i]);
+                        _("Operator %c argument is missing"), operators[i]);
             gwy_expr_token_list_delete(expr, tokens);
             return NULL;
         }
         if (!prev->rpn_block || !next->rpn_block) {
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_INVALID_ARGUMENT,
-                        "Invalid operator %c argument", operators[i]);
+                        _("Operator %c argument is invalid"), operators[i]);
             gwy_expr_token_list_delete(expr, tokens);
             return NULL;
         }
@@ -1067,14 +1084,17 @@ gwy_expr_transform_functions(GwyExpr *expr,
             if (!arg) {
                 g_set_error(err, GWY_EXPR_ERROR,
                             GWY_EXPR_ERROR_MISSING_ARGUMENT,
-                            "Missing %s argument", call_table[func].name);
+                            _("Function %s expects %u arguments "
+                              "but only %d were given."),
+                            call_table[func].name);
                 gwy_expr_token_list_delete(expr, tokens);
                 return NULL;
             }
             if (!arg->rpn_block) {
                 g_set_error(err, GWY_EXPR_ERROR,
                             GWY_EXPR_ERROR_INVALID_ARGUMENT,
-                            "Invalid %s argument", call_table[func].name);
+                            _("Function %s argument is invalid"),
+                            call_table[func].name);
                 gwy_expr_token_list_delete(expr, tokens);
                 return NULL;
             }
@@ -1132,7 +1152,7 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
 
     if (tokens->token != G_TOKEN_LEFT_PAREN) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_OPENING_PARENTHESIS,
-                    "Missing opening parenthesis");
+                    _("Opening parenthesis is missing."));
         goto FAIL;
     }
     tokens = gwy_expr_token_list_delete_token(expr, tokens, tokens);
@@ -1174,12 +1194,12 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
     /* missing right parenthesis or empty parentheses */
     if (!t) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_CLOSING_PARENTHESIS,
-                    "Missing closing parenthesis");
+                    _("Closing parenthesis is missing."));
         goto FAIL;
     }
     if (!tokens) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_EMPTY_PARENTHESES,
-                    "Empty parentheses");
+                    _("Empty parentheses."));
         goto FAIL;
     }
 
@@ -1188,7 +1208,7 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
         if (t->token == G_TOKEN_COMMA) {
             if (!t->next || !t->prev) {
                 g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_STRAY_COMMA,
-                            "Stray comma");
+                            _("Unexpected comma."));
                 goto FAIL;
             }
             t = t->prev;
@@ -1227,7 +1247,7 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
     for (t = tokens; t; t = t->next) {
         if (!t->rpn_block) {
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_GARBAGE,
-                        "Stray symbol %d", t->token);
+                        _("Unexpected symbol %d."), t->token);
             goto FAIL;
         }
     }
@@ -1279,7 +1299,7 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
 
     if (expr->tokens->next) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_GARBAGE,
-                    "Trailing garbage");
+                    _("Expression contains trailing garbage."));
         gwy_expr_token_list_delete(expr, expr->tokens);
         expr->tokens = NULL;
         return FALSE;
@@ -1299,7 +1319,7 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
 
     if (!gwy_expr_stack_check_executability(expr)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NOT_EXECUTABLE,
-                    "Stack not executable");
+                   _("Expression is not executable."));
         return FALSE;
     }
 
@@ -1322,13 +1342,13 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
 GwyExpr*
 gwy_expr_new(void)
 {
+    static GOnce table_sanity_checked = G_ONCE_INIT;
+
     GwyExpr *expr;
 
-    if (!table_sanity_checked) {
-        if (!gwy_expr_check_call_table_sanity())
-            return NULL;
-        table_sanity_checked = TRUE;
-    }
+    g_once(&table_sanity_checked, check_call_table_sanity, NULL);
+    if (!table_sanity_checked.retval)
+        return NULL;
 
     expr = g_new0(GwyExpr, 1);
     expr->token_chunk = g_mem_chunk_new("GwyExprToken",
@@ -1408,7 +1428,7 @@ gwy_expr_evaluate(GwyExpr *expr,
 
     if (expr->identifiers->len > 1) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_UNRESOLVED_IDENTIFIERS,
-                    "Unresolved identifiers");
+                    _("Not all identifiers were resolved."));
         return FALSE;
     }
 
@@ -1439,6 +1459,13 @@ gwy_expr_compile(GwyExpr *expr,
 {
     g_return_val_if_fail(expr, FALSE);
     g_return_val_if_fail(text, FALSE);
+
+    if (!g_utf8_validate(text, -1, NULL)) {
+        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_UTF8,
+                    _("Expression is not valid UTF-8."));
+        expr->in = 0;
+        return FALSE;
+    }
 
     g_string_assign(expr->expr, text);
     if (!gwy_expr_parse(expr, err)
@@ -1604,15 +1631,27 @@ gwy_expr_constant_name_is_valid(const gchar *name)
 {
     guint i;
 
-    if (!name || !g_ascii_isalpha(*name))
+    if (!g_utf8_validate(name, -1, NULL))
         return FALSE;
 
-    for (i = 1; name[i]; i++) {
-        if (!g_ascii_isalnum(name[i]) && name[i] != '_')
-            return FALSE;
+    glong items_written;
+    gunichar *ucs4name =  g_utf8_to_ucs4_fast(name, -1, &items_written);
+
+    if (!ucs4name)
+        return FALSE;
+
+    if (!g_unichar_isalpha(*ucs4name)) {
+        g_free(ucs4name);
+        return FALSE;
     }
 
-    return TRUE;
+    for (i = 1; i < items_written; i++) {
+        if (!g_unichar_isalnum(ucs4name[i]) && ucs4name[i] != '_')
+            break;
+    }
+    g_free(ucs4name);
+
+    return i == items_written;
 }
 
 /**
@@ -1644,14 +1683,14 @@ gwy_expr_define_constant(GwyExpr *expr,
 
     if (!gwy_expr_constant_name_is_valid(name)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_CONSTANT_NAME,
-                    "Invalid constant name");
+                    _("Constant name is invalid"));
         return FALSE;
     }
 
     gwy_expr_initialize_scanner(expr);
     if (g_scanner_lookup_symbol(expr->scanner, name)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_CONSTANT_NAME,
-                    "Constant name clashes with function");
+                    _("Constant name clashes with function"));
         return FALSE;
     }
 
@@ -1820,6 +1859,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  * @GWY_EXPR_ERROR_UNRESOLVED_IDENTIFIERS: Expression contains unresolved
  *                                         identifiers.
  * @GWY_EXPR_ERROR_CONSTANT_NAME: Constant name is invalid.
+ * @GWY_EXPR_ERROR_UTF8: Expression is not valid UTF-8.
  *
  * Error codes returned by expression parsing and execution.
  **/
