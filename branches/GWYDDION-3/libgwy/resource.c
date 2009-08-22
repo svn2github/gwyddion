@@ -31,26 +31,19 @@
 
 enum {
     DATA_CHANGED,
-    LAST_SIGNAL
+    N_SIGNALS
 };
 
 enum {
     PROP_0,
     PROP_NAME,
+    PROP_FILE_NAME,
     PROP_IS_CONST,
     PROP_IS_PREFERRED,
-    PROP_LAST
+    N_PROPS
 };
 
 const gchar *gwy_get_user_dir(void) { return ""; }
-
-/* Use a static propery -> trait map.  We could do it generically, too.
- * g_param_spec_pool_list() is ugly and slow is the minor problem, the major
- * is that it does g_hash_table_foreach() so we would get different orders
- * on different invocations and have to sort it. */
-static GType gwy_resource_trait_types[PROP_LAST-1];
-static const gchar *gwy_resource_trait_names[PROP_LAST-1];
-static guint gwy_resource_ntraits = 0;
 
 static void         gwy_resource_finalize       (GObject *object);
 static void         gwy_resource_set_property   (GObject *object,
@@ -72,12 +65,20 @@ static const gchar* gwy_resource_get_trait_name (guint i);
 static void         gwy_resource_get_trait_value(gconstpointer item,
                                                  guint i,
                                                  GValue *value);
-static GwyResource* gwy_resource_parse_real     (const gchar *text,
+static GwyResource* gwy_resource_parse_impl     (const gchar *text,
                                                  GType expected_type,
                                                  gboolean is_const);
 static void         gwy_resource_modified       (GwyResource *resource);
 
-static guint resource_signals[LAST_SIGNAL] = { 0 };
+/* Use a static propery -> trait map.  We could do it generically, too.
+ * g_param_spec_pool_list() is ugly and slow is the minor problem, the major
+ * is that it does g_hash_table_foreach() so we would get different orders
+ * on different invocations and have to sort it. */
+static GType gwy_resource_trait_types[N_PROPS-1];
+static const gchar *gwy_resource_trait_names[N_PROPS-1];
+static guint gwy_resource_ntraits = 0;
+
+static guint resource_signals[N_SIGNALS];
 
 static GSList *all_resources = NULL;
 G_LOCK_DEFINE(all_resources);
@@ -122,6 +123,17 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
+    pspec = g_param_spec_string("file-name",
+                                "File name",
+                                "Name of file corresponding to the resource, "
+                                "may be NULL",
+                                NULL, /* What is the default value good for? */
+                                G_PARAM_READABLE);
+    g_object_class_install_property(gobject_class, PROP_FILE_NAME, pspec);
+    gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
+    gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
+    gwy_resource_ntraits++;
+
     pspec = g_param_spec_boolean("is-preferred",
                                  "Is preferred",
                                  "Whether a resource is preferred",
@@ -159,9 +171,8 @@ gwy_resource_class_init(GwyResourceClass *klass)
 }
 
 static void
-gwy_resource_init(GwyResource *resource)
+gwy_resource_init(G_GNUC_UNUSED GwyResource *resource)
 {
-    resource->name = g_strdup("");
 }
 
 static void
@@ -172,6 +183,7 @@ gwy_resource_finalize(GObject *object)
     if (resource->use_count)
         g_critical("Resource %p with nonzero use_count is finalized.", object);
     GWY_FREE(resource->name);
+    GWY_FREE(resource->filename);
 
     G_OBJECT_CLASS(gwy_resource_parent_class)->finalize(object);
 }
@@ -210,6 +222,10 @@ gwy_resource_get_property(GObject *object,
     switch (prop_id) {
         case PROP_NAME:
         g_value_set_string(value, resource->name);
+        break;
+
+        case PROP_FILE_NAME:
+        g_value_set_string(value, resource->filename);
         break;
 
         case PROP_IS_CONST:
@@ -522,11 +538,11 @@ gwy_resource_parse(const gchar *text,
                    GType expected_type,
                    GError **error)
 {
-    return gwy_resource_parse_real(text, expected_type, FALSE);
+    return gwy_resource_parse_impl(text, expected_type, FALSE);
 }
 
 static GwyResource*
-gwy_resource_parse_real(const gchar *text,
+gwy_resource_parse_impl(const gchar *text,
                         GType expected_type,
                         gboolean is_const)
 {
@@ -697,7 +713,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
         }
 
         GwyResource *resource
-            = gwy_resource_parse_real(text, G_TYPE_FROM_CLASS(klass),
+            = gwy_resource_parse_impl(text, G_TYPE_FROM_CLASS(klass),
                                       !modifiable);
         if (resource) {
             GWY_FREE(resource->name);

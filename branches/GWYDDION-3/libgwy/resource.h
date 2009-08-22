@@ -47,6 +47,7 @@ struct _GwyResource {
 
     gint use_count;
     gchar *name;
+    gchar *filename;
 
     gboolean is_const : 1;
     gboolean is_modified : 1;
