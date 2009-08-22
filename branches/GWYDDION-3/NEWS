@@ -78,6 +78,8 @@ Unit:
 - There were some minor parser improvements, such as the support for ² symbol
   and automatic attempt of Latin1 -> UTF-8 conversion if the input is not
   valid UTF-8.
+- Convenience value formatting functions that properly handle empty units
+  are available.
 
 Container:
 - Some unused functions were removed, signatures of other made more consistent
@@ -113,3 +115,4 @@ Resource:
 
 Interpolation:
 - Inappropriate GWY_INTERPOLATION_NONE ‘interpolation’ type is gone.
+- New 6-point interpolation GWY_INTERPOLATION_BSPLINE6 was added.
