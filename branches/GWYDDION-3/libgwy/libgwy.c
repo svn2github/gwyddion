@@ -49,9 +49,17 @@
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
+#ifdef G_OS_WIN32
+static const gchar *appdir = "Gwyddion";
+#endif
+#ifdef G_OS_UNIX
+static const gchar *appdir = "gwyddion";
+#endif
+
 static gchar *libdir = NULL;
 static gchar *datadir = NULL;
 static gchar *localedir = NULL;
+static gchar *userdir = NULL;
 
 #ifdef G_OS_WIN32
 static HMODULE libgwy_dll = NULL;
@@ -430,12 +438,13 @@ find_self(void)
  * something like "C:\Program Files\Gwyddion\lib\gwyddion".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_LIBDIR</envar>, the libgwy and Gwyddion
+ * variable <envar>GWYDDION_LIBDIR</envar>, then libgwy and Gwyddion
  * installation directory follows.  Note if the environment variable holds
  * a value does not seem to be a Gwyddion library directory, its value is
  * ignored.
  *
- * Returns: The requested subdirectory of Gwyddion system library directory.
+ * Returns: The requested subdirectory of Gwyddion system library directory
+ *          as a newly allocated string.
  *          %NULL is returned if such directory could not be determined.  The
  *          returned directory is not guaranteed to exist even if it is a
  *          standard subdirectory such as "modules".  Someone might delete it
@@ -463,12 +472,13 @@ gwy_library_directory(const gchar *subdir)
  * "C:\Program Files\Gwyddion\share\gwyddion".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_DATADIR</envar>, the libgwy and Gwyddion
+ * variable <envar>GWYDDION_DATADIR</envar>, then libgwy and Gwyddion
  * installation directory follows.  Note if the environment variable holds
  * a value does not seem to be a Gwyddion data directory, its value is
  * ignored.
  *
- * Returns: The requested subdirectory of Gwyddion system data directory.
+ * Returns: The requested subdirectory of Gwyddion system data directory
+ *          as a newly allocated string.
  *          %NULL is returned if such directory could not be determined.  The
  *          returned directory is not guaranteed to exist even if it is a
  *          standard subdirectory such as "pixmaps".  Someone might delete it
@@ -495,11 +505,12 @@ gwy_data_directory(const gchar *subdir)
  * "C:\Program Files\Gwyddion\share\locale".
  *
  * The highest precedence for determinig this directory has the environment
- * variable <envar>GWYDDION_LOCALE_DIR</envar>, the libgwy and Gwyddion
+ * variable <envar>GWYDDION_LOCALE_DIR</envar>, then libgwy and Gwyddion
  * installation directory follows.  Note if the environment variable holds
  * a value does not seem to be a locale directory, its value is ignored.
  *
- * Returns: The requested subdirectory of Gwyddion system locale directory.
+ * Returns: The requested subdirectory of Gwyddion system locale directory
+ *          as a newly allocated string.
  *          %NULL is returned if such directory could not be determined.  The
  *          returned directory is not guaranteed to exist.  Someone might
  *          delete it just before this function returned, for instance.
@@ -510,6 +521,80 @@ gwy_locale_directory(const gchar *subdir)
     find_self();
     if (localedir)
         return g_build_filename(localedir, subdir, NULL);
+    return NULL;
+}
+
+static gboolean
+userdir_seems_good(const gchar *path)
+{
+    if (!directory_seems_good(path, R_OK | X_OK | W_OK))
+        return FALSE;
+
+    /* No further tests? */
+
+    return TRUE;
+}
+
+static gpointer
+find_user_dir(G_GNUC_UNUSED gpointer arg)
+{
+    const gchar *dir;
+
+    /* Explicite variables */
+    if ((dir = g_getenv("HOME")) && userdir_seems_good(dir)) {
+        userdir = g_build_filename(dir, appdir, NULL);
+        return GUINT_TO_POINTER(TRUE);
+    }
+
+    /* GLib */
+#ifdef G_OS_WIN32
+    if ((dir = g_get_user_config_dir()) && userdir_seems_good(dir)) {
+        userdir = g_build_filename(dir, appdir, NULL);
+        return GUINT_TO_POINTER(TRUE);
+    }
+#endif
+
+#ifdef G_OS_UNIX
+    if ((dir = g_get_home_dir()) && userdir_seems_good(dir)) {
+        userdir = g_build_filename(dir, appdir, NULL);
+        return GUINT_TO_POINTER(TRUE);
+    }
+#endif
+
+    return GUINT_TO_POINTER(FALSE);
+}
+
+/**
+ * gwy_user_directory:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains the Gwyddion user directory.
+ *
+ * This is where the user configuration and resources reside.  For instance,
+ * for a typical Unix user yeti and %NULL @subdir the return value would be
+ * "/home/yeti/.gwyddion".  On MS Windows, it can be something like
+ * "C:\Documents and Settings\yeti\Application Data\Gwyddion".  Even though it
+ * is unlikely that Yeti has an MS Windows account.
+ *
+ * The highest precedence for determinig this directory has the environment
+ * variable <envar>HOME</envar>, then a user directory determined by system
+ * specific means.  Note if the environment variable holds a value does not
+ * seem to be a writable directory, its value is ignored.
+ *
+ * Returns: The requested subdirectory of Gwyddion user directory
+ *          as a newly allocated string.
+ *          %NULL is returned if such directory could not be determined.  The
+ *          returned directory is not guaranteed to exist.  Someone might
+ *          delete it just before this function returned, for instance.
+ **/
+gchar*
+gwy_user_directory(const gchar *subdir)
+{
+    static GOnce found_user = G_ONCE_INIT;
+    g_once(&found_user, find_user_dir, NULL);
+
+    if (userdir)
+        return g_build_filename(userdir, subdir, NULL);
     return NULL;
 }
 

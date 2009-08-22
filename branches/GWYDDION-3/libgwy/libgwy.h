@@ -40,6 +40,7 @@ void   gwy_type_init        (void);
 gchar* gwy_library_directory(const gchar *subdir);
 gchar* gwy_data_directory   (const gchar *subdir);
 gchar* gwy_locale_directory (const gchar *subdir);
+gchar* gwy_user_directory   (const gchar *subdir);
 
 G_END_DECLS
 
