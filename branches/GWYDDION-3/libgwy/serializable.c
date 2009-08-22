@@ -21,7 +21,7 @@
 #include "libgwy/serializable.h"
 
 static gsize gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                              GwySerializableItem **item);
+                                              gsize *pos);
 
 GType
 gwy_serializable_get_type(void)
@@ -130,7 +130,6 @@ gwy_serializable_serialize(GwySerializable *serializable,
                            GError **error)
 {
     GwySerializableItems items;
-    GwySerializableItem *item;
     gboolean ok = FALSE;
     gsize i;
 
@@ -143,8 +142,8 @@ gwy_serializable_serialize(GwySerializable *serializable,
 
     gwy_serializable_itemize(serializable, &items);
 
-    item = items.items;
-    gwy_serializable_calculate_sizes(&items, &item);
+    i = 0;
+    gwy_serializable_calculate_sizes(&items, &i);
 
     /* TODO */
 
@@ -200,55 +199,48 @@ gwy_serializable_ctype_size(GwySerializableCType ctype)
  * size changes. */
 gsize
 gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                 GwySerializableItem **item)
+                                 gsize *pos)
 {
-    GwySerializableItem *header = (*item)++;
+    GwySerializableItem *header = items->items + (*pos)++;
     gsize i, n, size;
 
     g_return_val_if_fail(header->ctype == GWY_SERIALIZABLE_HEADER, 0);
 
     n = header->array_size;
     size = strlen(header->name)+1 + 8 /* object size */;
-    for (i = 1; i < n; i++, (*item)++) {
-        GwySerializableCType ctype = (*item)->ctype;
+    for (i = 1; i < n; i++) {
+        /* It is important to increment pos now because recusive invocations
+         * expect pos already pointing to the header item. */
+        const GwySerializableItem *item = items->items + (*pos)++;
+        GwySerializableCType ctype = item->ctype;
         gsize typesize;
 
-        size += strlen((*item)->name)+1 + 1 /* ctype */;
+        size += strlen(item->name)+1 + 1 /* ctype */;
 
-        if ((typesize = gwy_serializable_ctype_size(ctype))) {
+        if ((typesize = gwy_serializable_ctype_size(ctype)))
             size += typesize;
-        }
         else if ((typesize
                   = gwy_serializable_ctype_size(g_ascii_tolower(ctype)))) {
-            g_warn_if_fail((*item)->array_size != 0);
-            size += typesize*(*item)->array_size;
+            g_warn_if_fail(item->array_size != 0);
+            size += typesize*item->array_size;
         }
-        else if (ctype == GWY_SERIALIZABLE_STRING) {
-            size += strlen((const gchar*)(*item)->value.v_string)+1;
-        }
-        else if (ctype == GWY_SERIALIZABLE_OBJECT) {
-            /* We have the 'o' item but the method wants the header item. */
-            (*item)++;
-            size += gwy_serializable_calculate_sizes(items, item);
-            (*item)--;
-        }
+        else if (ctype == GWY_SERIALIZABLE_STRING)
+            size += strlen((const gchar*)item->value.v_string)+1;
+        else if (ctype == GWY_SERIALIZABLE_OBJECT)
+            size += gwy_serializable_calculate_sizes(items, pos);
         else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
             gsize j, alen;
 
-            alen = (*item)->array_size;
+            alen = item->array_size;
             for (j = 0; j < alen; j++)
-                size += strlen((const gchar*)(*item)->value.v_string_array[j])+1;
+                size += strlen((const gchar*)item->value.v_string_array[j])+1;
         }
         else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
             gsize j, alen;
 
-            alen = (*item)->array_size;
-            /* We have the 'o' item but the method wants the header item. */
-            (*item)++;
-            for (j = 0; j < alen; j++) {
-                size += gwy_serializable_calculate_sizes(items, item);
-            }
-            (*item)--;
+            alen = item->array_size;
+            for (j = 0; j < alen; j++)
+                size += gwy_serializable_calculate_sizes(items, pos);
         }
         else {
             g_return_val_if_reached(0);
