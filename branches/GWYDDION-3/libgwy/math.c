@@ -135,6 +135,9 @@ gwy_math_sort(gdouble *array,
         sort_plain(array, n);
 }
 
+/* XXX: GSL has a sorting function for doubles too but it is 2-3x slower.
+ * Not good enough to replace this. */
+
 /****************************************************************************
  * Quicksort
  ****************************************************************************/

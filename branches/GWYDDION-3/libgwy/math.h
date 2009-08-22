@@ -54,6 +54,7 @@ gwy_exp10(double x) {
 #  define powi __builtin_powi
 # endif
 #else
+/* FIXME: GSL provides this too, but not in-line. */
 _GWY_STATIC_INLINE double gwy_powi (double x, int i);
 
 static inline double
