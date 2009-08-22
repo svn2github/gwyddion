@@ -24,12 +24,13 @@
 
 G_BEGIN_DECLS
 
-guint    gwy_stramong(const gchar *str,
-                      ...);
-gpointer gwy_memmem  (gconstpointer haystack,
-                      gsize haystack_len,
-                      gconstpointer needle,
-                      gsize needle_len);
+guint    gwy_stramong     (const gchar *str,
+                           ...);
+gchar*   gwy_str_next_line(gchar **buffer);
+gpointer gwy_memmem       (gconstpointer haystack,
+                           gsize haystack_len,
+                           gconstpointer needle,
+                           gsize needle_len);
 
 G_END_DECLS
 
