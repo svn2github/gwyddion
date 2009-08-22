@@ -59,7 +59,7 @@ gwy_interpolation_get_weights(gdouble x,
         w[1] = x;
         break;
 
-        case GWY_INTERPOLATION_KEY:
+        case GWY_INTERPOLATION_KEYS:
         w[0] = (-0.5 + (1.0 - x/2.0)*x)*x;
         w[1] = 1.0 + (-2.5 + 1.5*x)*x*x;
         w[2] = (0.5 + (2.0 - 1.5*x)*x)*x;
@@ -174,11 +174,11 @@ gwy_interpolate_values(gdouble x,
 
         /* One cannot do B-spline and o-MOMS this way.  Read e.g.
          * `Interpolation Revisited' by Philippe Thevenaz for explanation.
-         * Replace them with Key. */
+         * Replace them with Keys. */
         case GWY_INTERPOLATION_BSPLINE:
         case GWY_INTERPOLATION_OMOMS:
-        interpolation = GWY_INTERPOLATION_KEY;
-        case GWY_INTERPOLATION_KEY:
+        interpolation = GWY_INTERPOLATION_KEYS;
+        case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
         case GWY_INTERPOLATION_SCHAUM:
         gwy_interpolation_get_weights(rest, interpolation, w);
@@ -463,7 +463,7 @@ gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation)
     switch (interpolation) {
         case GWY_INTERPOLATION_ROUND:
         case GWY_INTERPOLATION_LINEAR:
-        case GWY_INTERPOLATION_KEY:
+        case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
         case GWY_INTERPOLATION_SCHAUM:
         return TRUE;
@@ -497,7 +497,7 @@ gwy_interpolation_get_support_size(GwyInterpolationType interpolation)
         return 2;
         break;
 
-        case GWY_INTERPOLATION_KEY:
+        case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_BSPLINE:
         case GWY_INTERPOLATION_OMOMS:
         case GWY_INTERPOLATION_NNA:
@@ -535,7 +535,7 @@ gwy_interpolation_resolve_coeffs_1d(gint n,
     switch (interpolation) {
         case GWY_INTERPOLATION_ROUND:
         case GWY_INTERPOLATION_LINEAR:
-        case GWY_INTERPOLATION_KEY:
+        case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
         case GWY_INTERPOLATION_SCHAUM:
         return;
@@ -586,7 +586,7 @@ gwy_interpolation_resolve_coeffs_2d(gint width,
     switch (interpolation) {
         case GWY_INTERPOLATION_ROUND:
         case GWY_INTERPOLATION_LINEAR:
-        case GWY_INTERPOLATION_KEY:
+        case GWY_INTERPOLATION_KEYS:
         case GWY_INTERPOLATION_NNA:
         case GWY_INTERPOLATION_SCHAUM:
         return;
@@ -915,7 +915,7 @@ gwy_interpolation_shift_block_1d(gint length,
  *                           exactly in the middle are mean values from the
  *                           two neighbours).
  * @GWY_INTERPOLATION_LINEAR: Linear interpolation.
- * @GWY_INTERPOLATION_KEY: Cubic Key's interpolation (with a=-1/2).
+ * @GWY_INTERPOLATION_KEYS: Cubic Keys interpolation (with a=-1/2).
  * @GWY_INTERPOLATION_BSPLINE: Cubic B-spline interpolation.
  * @GWY_INTERPOLATION_OMOMS: Cubic OMOMS interpolation.
  * @GWY_INTERPOLATION_NNA: Nearest neighbour approximation.

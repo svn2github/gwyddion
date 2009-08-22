@@ -29,7 +29,7 @@ typedef enum {
     /* Keep compatibility, Gwyddion 2.x had NONE = 0 here */
     GWY_INTERPOLATION_ROUND   = 1,
     GWY_INTERPOLATION_LINEAR  = 2,
-    GWY_INTERPOLATION_KEY     = 3,
+    GWY_INTERPOLATION_KEYS    = 3,
     GWY_INTERPOLATION_BSPLINE = 4,
     GWY_INTERPOLATION_OMOMS   = 5,
     GWY_INTERPOLATION_NNA     = 6,
