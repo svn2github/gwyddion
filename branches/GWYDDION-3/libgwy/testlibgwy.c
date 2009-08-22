@@ -18,7 +18,14 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include "libgwy/libgwy.h"
+
+/***************************************************************************
+ *
+ * Packing and unpacking
+ *
+ ***************************************************************************/
 
 static void
 test_pack(void)
@@ -82,6 +89,12 @@ test_pack(void)
     g_free(buf);
 }
 
+/***************************************************************************
+ *
+ * Math sorting
+ *
+ ***************************************************************************/
+
 static gboolean
 test_sort_is_strictly_ordered(const gdouble *array, gsize n)
 {
@@ -143,6 +156,12 @@ test_sort(void)
     g_free(array);
 }
 
+/***************************************************************************
+ *
+ * Error lists
+ *
+ ***************************************************************************/
+
 static void
 test_error_list(void)
 {
@@ -169,13 +188,344 @@ test_error_list(void)
     gwy_error_list_clear(NULL);
 }
 
+/***************************************************************************
+ *
+ * Serialization and deserialization
+ *
+ ***************************************************************************/
+
+#define GWY_TYPE_SER_TEST \
+    (gwy_ser_test_get_type())
+#define GWY_SER_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_SER_TEST, GwySerTest))
+#define GWY_IS_SER_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_SER_TEST))
+#define GWY_SER_TEST_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_SER_TEST, GwySerTestClass))
+
+GType gwy_ser_test_get_type(void) G_GNUC_CONST;
+
+typedef struct _GwySerTest      GwySerTest;
+typedef struct _GwySerTestClass GwySerTestClass;
+
+struct _GwySerTestClass {
+    GObjectClass g_object_class;
+};
+
+struct _GwySerTest {
+    GObject g_object;
+
+    guint len;
+    gboolean flag;
+    gdouble *data;
+    gchar *s;
+    guchar raw[4];
+    GwySerTest *child;
+
+    /* Testing stuff. */
+    gint done_called;
+};
+
+static gsize
+gwy_ser_test_n_items(GwySerializable *serializable)
+{
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
+
+    return 5 + (sertest->child
+                ? gwy_serializable_n_items(GWY_SERIALIZABLE(sertest->child))
+                : 0);
+}
+
+static gsize
+gwy_ser_test_itemize(GwySerializable *serializable,
+                     GwySerializableItems *items)
+{
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
+    GwySerializableItem *item;
+    gsize n_items = 0;
+
+    if (sertest->flag) {
+        g_return_val_if_fail(items->len - items->n_items, 0);
+        item = items->items + items->n_items++, n_items++;
+
+        item->name = "flag";
+        item->value.v_boolean = sertest->flag;
+        item->ctype = GWY_SERIALIZABLE_BOOLEAN;
+    }
+
+    if (sertest->len) {
+        g_return_val_if_fail(items->len - items->n_items, 0);
+        item = items->items + items->n_items++, n_items++;
+
+        item->name = "data";
+        item->array_size = sertest->len;
+        item->value.v_double_array = sertest->data;
+        item->ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY;
+    }
+
+    if (sertest->s) {
+        g_return_val_if_fail(items->len - items->n_items, 0);
+        item = items->items + items->n_items++, n_items++;
+
+        item->name = "s";
+        item->value.v_string = sertest->s;
+        item->ctype = GWY_SERIALIZABLE_STRING;
+    }
+
+    g_return_val_if_fail(items->len - items->n_items, 0);
+    item = items->items + items->n_items++, n_items++;
+
+    item->name = "raw";
+    item->array_size = 4;
+    item->value.v_uint8_array = sertest->raw;
+    item->ctype = GWY_SERIALIZABLE_INT8_ARRAY;
+
+    if (sertest->child) {
+        g_return_val_if_fail(items->len - items->n_items, 0);
+        item = items->items + items->n_items++, n_items++;
+
+        item->name = "child";
+        item->value.v_object = G_OBJECT(sertest->child);
+        item->ctype = GWY_SERIALIZABLE_OBJECT;
+        gwy_serializable_itemize(GWY_SERIALIZABLE(sertest->child), items);
+    }
+
+    sertest->done_called--;
+
+    return n_items;
+}
+
+static void
+gwy_ser_test_done(GwySerializable *serializable)
+{
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
+
+    sertest->done_called++;
+}
+
+static void
+gwy_ser_test_serializable_init(GwySerializableInterface *iface)
+{
+    iface->n_items = gwy_ser_test_n_items;
+    iface->itemize = gwy_ser_test_itemize;
+    iface->done = gwy_ser_test_done;
+    /*
+    iface->request = gwy_ser_test_request;
+    iface->construct = gwy_ser_test_construct;
+    iface->duplicate = gwy_ser_test_duplicate_;
+    iface->assign = gwy_ser_test_assign_;
+    */
+}
+
+G_DEFINE_TYPE_EXTENDED
+    (GwySerTest, gwy_ser_test, G_TYPE_OBJECT, 0,
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_ser_test_serializable_init))
+
+static void
+gwy_ser_test_dispose(GObject *object)
+{
+    GwySerTest *sertest = GWY_SER_TEST(object);
+
+    GWY_OBJECT_UNREF(sertest->child);
+    G_OBJECT_CLASS(gwy_ser_test_parent_class)->dispose(object);
+}
+
+static void
+gwy_ser_test_finalize(GObject *object)
+{
+    GwySerTest *sertest = GWY_SER_TEST(object);
+
+    GWY_FREE(sertest->data);
+    GWY_FREE(sertest->s);
+    G_OBJECT_CLASS(gwy_ser_test_parent_class)->finalize(object);
+}
+
+static void
+gwy_ser_test_class_init(GwySerTestClass *klass)
+{
+    GObjectClass *g_object_class = G_OBJECT_CLASS(klass);
+
+    g_object_class->dispose = gwy_ser_test_dispose;
+    g_object_class->finalize = gwy_ser_test_finalize;
+}
+
+static void
+gwy_ser_test_init(G_GNUC_UNUSED GwySerTest *sertest)
+{
+}
+
+GwySerTest*
+gwy_ser_test_new_filled(gboolean flag,
+                        const gdouble *data,
+                        guint ndata,
+                        const gchar *str,
+                        guint32 raw)
+{
+    GwySerTest *sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+
+    sertest->flag = flag;
+    sertest->len = ndata;
+    if (sertest->len)
+        sertest->data = g_memdup(data, ndata*sizeof(gdouble));
+    sertest->s = g_strdup(str);
+    memcpy(sertest->raw, &raw, 4);
+
+    return sertest;
+}
+
+static void
+test_serialize_simple(void)
+{
+    static const guchar expected[] = {
+        0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0x11,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x72, 0x61, 0x77, 0x00, 0x43,
+        0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    GwySerTest *sertest;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    gboolean ok;
+    guint len;
+
+    sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    g_assert(ok);
+    g_assert_cmpint(sertest->done_called, ==, 0);
+    len = g_memory_output_stream_get_data_size(memstream);
+    g_assert_cmpuint(len, ==, sizeof(expected));
+    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
+                    expected, sizeof(expected)) == 0);
+    g_object_unref(stream);
+    g_object_unref(sertest);
+    g_clear_error(&error);
+}
+
+static void
+test_serialize_data(void)
+{
+    static const guchar expected[] = {
+        0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0x53,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x6c, 0x61, 0x67, 0x00,
+        0x62, 0x01, 0x64, 0x61, 0x74, 0x61, 0x00, 0x44, 0x04, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f,
+        0x18, 0x2d, 0x44, 0x54, 0xfb, 0x21, 0x09, 0x40, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0xf0, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+        0x73, 0x00, 0x73, 0x54, 0x65, 0x73, 0x74, 0x20, 0x54, 0x65, 0x73, 0x74,
+        0x00, 0x72, 0x61, 0x77, 0x00, 0x43, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x78, 0x56, 0x34, 0x12
+    };
+    static const gdouble data[] = { 1.0, G_PI, HUGE_VAL, -0.0 };
+
+    GwySerTest *sertest;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    gboolean ok;
+    guint len;
+
+    /* Less simple object */
+    sertest = gwy_ser_test_new_filled(TRUE, data, G_N_ELEMENTS(data),
+                                      "Test Test", 0x12345678);
+    stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    g_assert(ok);
+    g_assert_cmpint(sertest->done_called, ==, 0);
+    len = g_memory_output_stream_get_data_size(memstream);
+    g_assert_cmpuint(len, ==, sizeof(expected));
+    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
+                    expected, sizeof(expected)) == 0);
+    g_object_unref(stream);
+    g_object_unref(sertest);
+    g_clear_error(&error);
+}
+
+static void
+test_serialize_nested(void)
+{
+    static const guchar expected[] = {
+        0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0x67,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x72, 0x61, 0x77, 0x00, 0x43,
+        0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x63, 0x68, 0x69, 0x6c, 0x64, 0x00, 0x6f, 0x47, 0x77, 0x79, 0x53, 0x65,
+        0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x72, 0x61, 0x77, 0x00, 0x43, 0x04, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63, 0x68, 0x69, 0x6c, 0x64,
+        0x00, 0x6f, 0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74,
+        0x00, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x72, 0x61, 0x77,
+        0x00, 0x43, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00
+    };
+
+    GwySerTest *sertest, *child, *grandchild;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    gboolean ok;
+    guint len;
+
+    /* Nested objects */
+    sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    child = sertest->child = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    grandchild = child->child = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    g_assert(ok);
+    g_assert_cmpint(sertest->done_called, ==, 0);
+    g_assert_cmpint(child->done_called, ==, 0);
+    g_assert_cmpint(grandchild->done_called, ==, 0);
+    len = g_memory_output_stream_get_data_size(memstream);
+    g_file_set_contents("foo.gwy", g_memory_output_stream_get_data(memstream),
+                        len, NULL);
+    g_assert_cmpuint(len, ==, sizeof(expected));
+    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
+                    expected, sizeof(expected)) == 0);
+    g_object_unref(stream);
+    g_object_unref(sertest);
+    g_clear_error(&error);
+}
+
+static void
+test_serialize_error(void)
+{
+    static const gdouble data[] = { 1.0, G_PI, HUGE_VAL, -0.0 };
+
+    GwySerTest *sertest;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    gboolean ok;
+
+    /* Too small buffer */
+    sertest = gwy_ser_test_new_filled(TRUE, data, G_N_ELEMENTS(data),
+                                      "Test Test", 0x12345678);
+    stream = g_memory_output_stream_new(malloc(100), 100, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
+    g_assert(!ok);
+    g_assert_cmpint(sertest->done_called, ==, 0);
+    g_object_unref(stream);
+    g_object_unref(sertest);
+    g_clear_error(&error);
+}
+
 int
 main(int argc, char *argv[])
 {
     g_test_init(&argc, &argv, NULL);
+    g_type_init();
 
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/pack", test_pack);
+    g_test_add_func("/testlibgwy/serialize-simple", test_serialize_simple);
+    g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
+    g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
+    g_test_add_func("/testlibgwy/serialize-error", test_serialize_error);
     g_test_add_func("/testlibgwy/sort", test_sort);
 
     return g_test_run();
