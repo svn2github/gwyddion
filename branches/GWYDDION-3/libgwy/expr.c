@@ -441,9 +441,9 @@ gwy_expr_stack_print(GwyExpr *expr)
 static void
 gwy_expr_stack_fold_constants(GwyExpr *expr)
 {
-    guint from, to, last_constants;
+    guint from, to;
+    gint last_constants = 0;
 
-    last_constants = 0;
     for (from = to = 0; from < expr->in; from++, to++) {
         GwyExprCode *code = expr->input + from;
 
@@ -457,13 +457,11 @@ gwy_expr_stack_fold_constants(GwyExpr *expr)
 
             if (last_constants >= func->in_values) {
                 gdouble tmp[GWY_EXPR_FUNC_MAX_ARGS];
-                gdouble *sp;
-                guint i;
 
-                for (i = 0; i < func->in_values; i++)
+                for (guint i = 0; i < (guint)func->in_values; i++)
                     tmp[i] = expr->input[to + i - func->in_values].value;
 
-                sp = tmp + func->in_values - 1;
+                gdouble *sp = tmp + func->in_values - 1;
                 func->function(&sp);
 
                 last_constants += func->out_values;
@@ -471,7 +469,7 @@ gwy_expr_stack_fold_constants(GwyExpr *expr)
                 to += func->out_values;
                 to -= func->in_values;
 
-                for (i = 0; i < func->out_values; i++) {
+                for (guint i = 0; i < (guint)func->out_values; i++) {
                     code = expr->input + to - func->out_values + i;
                     code->value = tmp[0];
                     code->type = GWY_EXPR_CODE_CONSTANT;
@@ -1038,7 +1036,7 @@ gwy_expr_transform_infix_ops(GwyExprToken *tokens,
         if (t->rpn_block)
             continue;
         for (i = 0; operators[i]; i++) {
-            if (t->token == (guint)operators[i])
+            if (t->token == operators[i])
                 break;
         }
         if (!operators[i])
