@@ -52,19 +52,23 @@ typedef struct {
     guchar *data;
 } GwySerializableBuffer;
 
-static gsize                 calculate_sizes (GwySerializableItems *items,
-                                              gsize *pos);
-static void                  items_done      (const GwySerializableItems *items);
-static gboolean              dump_to_stream  (const GwySerializableItems *items,
-                                              GwySerializableBuffer *buffer);
-static GType                 get_serializable(const gchar *typename,
-                                              gpointer *classref,
-                                              const GwySerializableInterface **iface,
-                                              GwyErrorList **error_list);
-static GwySerializableItems* unpack_items    (const guchar *buffer,
-                                              gsize size,
-                                              GwyErrorList **error_list);
-static void                  free_items      (GwySerializableItems *items);
+static gsize                 calculate_sizes     (GwySerializableItems *items,
+                                                  gsize *pos);
+static void                  items_done          (const GwySerializableItems *items);
+static gboolean              dump_to_stream      (const GwySerializableItems *items,
+                                                  GwySerializableBuffer *buffer);
+static GType                 get_serializable    (const gchar *typename,
+                                                  gpointer *classref,
+                                                  const GwySerializableInterface **iface,
+                                                  GwyErrorList **error_list);
+static GwySerializableItems* unpack_items        (const guchar *buffer,
+                                                  gsize size,
+                                                  GwyErrorList **error_list);
+static void                  fill_requested_items(GwySerializableItems *req_items,
+                                                  GwySerializableItems *items,
+                                                  const gchar *typename,
+                                                  GwyErrorList **error_list);
+static void                  free_items          (GwySerializableItems *items);
 
 GType
 gwy_serializable_get_type(void)
@@ -1111,9 +1115,16 @@ gwy_serializable_deserialize(const guchar *buffer,
     if (!items)
         goto fail;
 
-    /* Allow the method return %NULL even it is implemented. */
+    /* Allow request() to be implemented but return %NULL. */
     if (iface->request)
         requested_items = iface->request();
+
+    if (requested_items) {
+        fill_requested_items(requested_items, items, typename, error_list);
+        object = iface->construct(requested_items, error_list);
+    }
+    else
+        object = iface->construct(items, error_list);
 
 fail:
     if (items)
@@ -1322,6 +1333,59 @@ unpack_items(const guchar *buffer,
 fail:
     /* TODO */
     return NULL;
+}
+
+static void
+fill_requested_items(GwySerializableItems *req_items,
+                     GwySerializableItems *items,
+                     const gchar *typename,
+                     GwyErrorList **error_list)
+{
+    guint8 *seen = g_new0(guint8, req_items->n_items);
+
+    for (gsize i = 0; i < items->n_items; i++) {
+        GwySerializableItem *reqitem, *item = items->items + i;
+        const GwySerializableCType ctype = item->ctype;
+        const gchar *name = item->name;
+        gsize j;
+
+        for (j = 0; j < req_items->n_items; j++) {
+            reqitem = req_items->items + j;
+            if (reqitem->ctype == ctype
+                && gwy_strequal(reqitem->name, name))
+                break;
+        }
+
+        if (G_UNLIKELY(j == req_items->n_items)) {
+            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                               GWY_SERIALIZABLE_ERROR_ITEM,
+                               _("Unexpected item `%s' of type 0x%02x in the "
+                                 "representation of object %s was ignored"),
+                               name, ctype, typename);
+            continue;
+        }
+        if (G_UNLIKELY(seen[j] == 1)) {
+            gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                               GWY_SERIALIZABLE_ERROR_ITEM,
+                               _("Item `%s' of type 0x%02x is present multiple "
+                                 "times in the representation of object %s.  "
+                                 "Values other than the first were ignored."),
+                               name, ctype, typename);
+            seen[j]++;
+            continue;
+        }
+        seen[j]++;
+
+        /* Give ownership to req_items. */
+        memcpy(&reqitem->value, &item->value, sizeof(GwySerializableValue));
+        item->value.v_uint8_array = NULL;
+
+        reqitem->array_size = item->array_size;
+        item->array_size = 0;
+    }
+
+
+    g_free(seen);
 }
 
 static inline void
@@ -1649,10 +1713,11 @@ gwy_serializable_assign(GwySerializable *destination,
  *        if it is defined it is guaranteed to be called after each itemize().
  * @request: Speficies what data items and of what types construct() expects
  *           to get.  It then gets this very item list as the first argument,
- *           filled with deserialized item values.  Extra items are omitted
- *           and construct() needs not to care about them.  If this method
- *           is unimplemented or returns %NULL, construct() gets a newly
- *           allocate item list that contains all the items found instead.
+ *           filled with deserialized item values.  Extra items or items of
+ *           the wrong type are omitted and construct() needs not to care about
+ *           them.  If this method is unimplemented or returns %NULL,
+ *           construct() gets a newly allocated item list that contains all the
+ *           items instead.
  * @construct: Deserializes an object from array of flattened data items.
  *             All strings, objects and arrays in the item list are newly
  *             allocated and, ideally, this function takes ownership, fills the
