@@ -124,7 +124,8 @@ gwy_memmem(gconstpointer haystack,
  * for (gchar *line = gwy_str_next_line(&p);
  *      line;
  *      line = gwy_str_next_line(&p)) {
- *     // Do something with line
+ *     g_strstrip(line);
+ *     // Do something more with line
  * }
  * ]|
  *
