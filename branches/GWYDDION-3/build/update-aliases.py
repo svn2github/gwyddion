@@ -79,7 +79,7 @@ for line in file(infilename):
 
     t = template % {'function': function, 'attributes': attributes}
     output.extend(x.rstrip() for x in t.split('\n'))
-output.extend(x.rstrip() for x in footer.split('\n'))
+output.extend(x.rstrip() for x in footer.split('\n') if x.rstrip())
 
 diff = difflib.unified_diff(orig, output, outfilename, outfilename + '.new')
 # There seems to be no easy way to tell whether the generator is empty
