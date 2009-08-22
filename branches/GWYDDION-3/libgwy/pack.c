@@ -47,7 +47,7 @@ static const guint sizes_from64[] = {
  * @format: Packing format specifier.
  * @error: Return location for the error, or %NULL.
  *
- * Get the data size corresponding to a binary data packing format.
+ * Gets the data size corresponding to a binary data packing format.
  *
  * Since this functions does not get the actual data, it cannot determine the
  * lengths of variable-length items such as strings.  The minimum lengths are
@@ -116,7 +116,7 @@ gwy_pack_size(const gchar *format,
  * @error: Return location for the error, or %NULL.
  * @...: Pointers to data to pack.
  *
- * Pack binary data into a memory buffer.
+ * Packs binary data into a memory buffer.
  *
  * This function validitates the format string, but it does not check validity
  * (or even number) of the arguments.
@@ -200,7 +200,7 @@ gwy_pack(const gchar *format,
         }
         else if (f == 's') {
             while (count) {
-                const guchar *arg = *va_arg(ap, const guchar**);
+                const gchar *arg = *va_arg(ap, const gchar**);
                 itemsize = strlen(arg) + 1;
                 if (G_UNLIKELY(pos + itemsize > size)) {
                     g_set_error(error, GWY_PACK_ERROR, GWY_PACK_ERROR_SIZE,
@@ -213,7 +213,7 @@ gwy_pack(const gchar *format,
         }
         else if (f == 'p') {
             while (count) {
-                const guchar *arg = *va_arg(ap, const guchar**);
+                const gchar *arg = *va_arg(ap, const gchar**);
                 itemsize = strlen(arg);
                 if (G_UNLIKELY(pos + itemsize + 1 > size)) {
                     g_set_error(error, GWY_PACK_ERROR, GWY_PACK_ERROR_SIZE,
@@ -319,7 +319,7 @@ fail:
  * @error: Return location for the error, or %NULL.
  * @...: Pointers to locations to fill with the unpacked data.
  *
- * Unpack binary data from a memory buffer.
+ * Unpacks binary data from a memory buffer.
  *
  * String data pointers are filled with newly allocated strings that must be
  * freed with g_free() by the caller.  If an error occurs all allocated memory
@@ -525,6 +525,171 @@ fail:
         g_ptr_array_free(to_free, TRUE);
     }
     return 0;
+}
+
+/**
+ * gwy_unpack_data:
+ * @byteorder: Byte order marker character.
+ * @format: Format character.  Not all formats are implemented.
+ *          XXX: more to be said.
+ * @buffer: Packed data.
+ * @len: Number of data items to unpack.
+ * @data: Array to store unpacked data to.
+ * @data_stride: Stride to use in @data (measured in items).
+ * @factor: Factor to multiply unpacked values with.
+ * @shift: Constant to add to unpacked values.
+ *
+ * Unpacks values into an array of double precision floating point numbers.
+ **/
+void
+gwy_unpack_data(gchar byteorder,
+                gchar format,
+                gconstpointer buffer,
+                gsize len,
+                gdouble *data,
+                gint data_stride,
+                gdouble factor,
+                gdouble shift)
+{
+    gsize i;
+
+    if (byteorder == DIRECT_ORDER) {
+        if (format == 'd') {
+            const gdouble *p = (const gdouble*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'f') {
+            const gfloat *p = (const gfloat*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'h') {
+            const gint16 *p = (const gint16*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'H') {
+            const guint16 *p = (const guint16*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'i') {
+            const gint32 *p = (const gint32*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'I') {
+            const guint32 *p = (const guint32*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'q') {
+            const gint64 *p = (const gint64*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'Q') {
+            const guint64 *p = (const guint64*)buffer;
+            for (i = len; i; i--) {
+                *data = (*(p++))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else {
+            g_critical("Format %c is not implemented", format);
+        }
+    }
+    else if (byteorder == SWAP_ORDER) {
+        if (format == 'd') {
+            union { guint64 i; gdouble f; } u;
+            const guint64 *p = (const guint64*)buffer;
+            for (i = len; i; i--) {
+                u.i = *(p++);
+                u.i = GUINT64_SWAP_LE_BE(u.i);
+                *data = u.f*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'f') {
+            union { guint32 i; gfloat f; } u;
+            const guint32 *p = (const guint32*)buffer;
+            for (i = len; i; i--) {
+                u.i = *(p++);
+                u.i = GUINT32_SWAP_LE_BE(u.i);
+                *data = u.f*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'h') {
+            const gint16 *p = (const gint16*)buffer;
+            for (i = len; i; i--) {
+                gint16 u = *(p++);
+                *data = ((gint16)GUINT16_SWAP_LE_BE(u))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'H') {
+            const guint16 *p = (const guint16*)buffer;
+            for (i = len; i; i--) {
+                guint16 u = *(p++);
+                *data = GUINT16_SWAP_LE_BE(u)*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'i') {
+            const gint32 *p = (const gint32*)buffer;
+            for (i = len; i; i--) {
+                gint32 u = *(p++);
+                *data = ((gint32)GUINT32_SWAP_LE_BE(u))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'I') {
+            const guint32 *p = (const guint32*)buffer;
+            for (i = len; i; i--) {
+                guint32 u = *(p++);
+                *data = GUINT32_SWAP_LE_BE(u)*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'q') {
+            const gint64 *p = (const gint64*)buffer;
+            for (i = len; i; i--) {
+                gint64 u = *(p++);
+                *data = ((gint64)GUINT64_SWAP_LE_BE(u))*factor + shift;
+                data += data_stride;
+            }
+        }
+        else if (format == 'Q') {
+            const guint64 *p = (const guint64*)buffer;
+            for (i = len; i; i--) {
+                guint64 u = *(p++);
+                *data = GUINT64_SWAP_LE_BE(u)*factor + shift;
+                data += data_stride;
+            }
+        }
+        else {
+            g_critical("Format %c is not implemented", format);
+        }
+    }
+    else {
+        g_critical("Invalid byte order %c", byteorder);
+    }
 }
 
 /**

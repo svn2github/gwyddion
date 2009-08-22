@@ -44,6 +44,14 @@ gsize  gwy_unpack          (const gchar *format,
                             gsize size,
                             GError **error,
                             ...);
+void   gwy_unpack_data     (gchar byteorder,
+                            gchar format,
+                            gconstpointer buffer,
+                            gsize len,
+                            gdouble *data,
+                            gint data_stride,
+                            gdouble factor,
+                            gdouble shift);
 
 #endif
 
