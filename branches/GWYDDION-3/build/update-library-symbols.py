@@ -45,9 +45,13 @@ for filename in sys.argv[1:]:
 if sys.argv[1:]:
     del output[-1]
 
-diff = difflib.unified_diff(orig, output, outfilename, outfilename + '.new')
-# There seems to be no easy way to tell whether the generator is empty
-diff = '\n'.join(x.rstrip() for x in diff)
-if diff:
+if orig:
+    diff = difflib.unified_diff(orig, output, outfilename, outfilename + '.new')
+    # There seems to be no easy way to tell whether the generator is empty
+    diff = '\n'.join(x.rstrip() for x in diff)
+else:
+    diff = ''
+
+if diff or not orig:
     file(outfilename, 'w').write('\n'.join(output))
     print diff
