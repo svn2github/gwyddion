@@ -91,7 +91,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 		touch $(SCANOBJ_FILES); \
 	fi
 	if test -s $(DOC_MODULE).hierarchy; then \
-		$(PYTHON) $(ADD_OBJECTS) $(DOC_MODULE)-sections.txt $(DOC_MODULE).hierarchy $(ADDOBJECTS_OPTIONS); \
+		$(PYTHON) $(ADD_OBJECTS) $(DOC_MODULE)-sections.txt $(DOC_MODULE).hierarchy $(DOC_MODULE).interfaces $(ADDOBJECTS_OPTIONS); \
 	fi
 	touch scan-build.stamp
 
