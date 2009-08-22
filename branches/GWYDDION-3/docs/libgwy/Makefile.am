@@ -26,7 +26,7 @@ content_files =
 expand_content_files=
 
 # This includes the standard gtk-doc make rules.
-include $(top_srcdir)/docs/gwy-doc.make
+include $(top_srcdir)/build/gwy-doc.make
 
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
