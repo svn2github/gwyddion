@@ -1059,7 +1059,7 @@ find_number_format(gdouble step,
         *precision = MIN(*precision, 16);
     }
 
-    return pow10(mag);
+    return exp10(mag);
 }
 
 static gchar*
