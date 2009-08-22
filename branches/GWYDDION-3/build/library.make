@@ -18,7 +18,7 @@ check-symbols: $(library_la) $(library_decl)
 
 $(library).symbols: $(libgwyinclude_HEADERS)
 	$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
-	    $(libgwyinclude_HEADERS) >$(library).symbols
+	     $(library).symbols $(libgwyinclude_HEADERS)
 
 $(library)-aliases.h: $(library).symbols
 	$(PYTHON) $(top_srcdir)/build/update-aliases.py h \
