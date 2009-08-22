@@ -22,6 +22,7 @@ libgwyinclude_HEADERS = \
 	error-list.h \
 	expr.h \
 	inventory.h \
+	interpolation.h \
 	libgwy.h \
 	macros.h \
 	math.h \
@@ -38,6 +39,7 @@ libgwy3_la_SOURCES = \
 	error-list.c \
 	expr.c \
 	inventory.c \
+	interpolation.c \
 	libgwy.c \
 	macros.c \
 	math.c \

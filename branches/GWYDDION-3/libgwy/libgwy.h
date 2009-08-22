@@ -24,6 +24,7 @@
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/inventory.h>
+#include <libgwy/interpolation.h>
 #include <libgwy/macros.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
