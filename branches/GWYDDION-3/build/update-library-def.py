@@ -3,7 +3,7 @@
 import sys, re, difflib
 
 if len(sys.argv) != 3:
-    print 'Usage: update-library-def OUTPUTFILE.def LIBRARY.symbols'
+    print 'Usage: update-library-def.py OUTPUTFILE.def LIBRARY.symbols'
     sys.exit(0)
 
 outfilename = sys.argv[1]

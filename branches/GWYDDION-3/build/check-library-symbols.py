@@ -2,7 +2,7 @@
 import sys, os, re, glob
 
 if len(sys.argv) != 4:
-  print "Usage: check-library-symbols: LIBRARY.la LIBRARY-decl.txt HEADER-DIRECTORY"
+  print "Usage: check-library-symbols.py: LIBRARY.la LIBRARY-decl.txt HEADER-DIRECTORY"
   sys.exit(1)
 
 laname = sys.argv[1]

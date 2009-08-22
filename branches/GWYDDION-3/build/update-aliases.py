@@ -42,7 +42,7 @@ footer_c = """\
 """
 
 if len(sys.argv) != 3:
-    print 'Usage: update-aliases OUTPUTFILE.{c|h} LIBRARY.symbols'
+    print 'Usage: update-aliases.py OUTPUTFILE.{c|h} LIBRARY.symbols'
     sys.exit(0)
 
 outfilename = sys.argv[1]
