@@ -36,9 +36,8 @@
 #endif
 
 #include <glib/gstdio.h>
-#include "libgwy/macros.h"
-#include "libgwy/inventory.h"
-#include "libgwy/resource.h"
+#include <gio/gio.h>
+#include <libgwy/libgwy.h>
 #include "libgwy/libgwy-aliases.h"
 
 #define MAGIC_HEADER "Gwyddion resource "
@@ -57,9 +56,6 @@ enum {
 };
 
 const gchar *gwy_get_user_dir(void) { return ""; }
-gchar *gwy_find_self_dir(const gchar *p) { return g_strdup(""); }
-gboolean gwy_filename_ignore(const gchar *f) { return FALSE; }
-
 
 /* Use a static propery -> trait map.  We could do it generically, too.
  * g_param_spec_pool_list() is ugly and slow is the minor problem, the major
@@ -648,27 +644,23 @@ gwy_resource_data_saved(GwyResource *resource)
 void
 gwy_resource_class_load(GwyResourceClass *klass)
 {
-    gpointer type;
-    gchar *path, *datadir;
-
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
     g_return_if_fail(klass->inventory);
 
-    type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
+    gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
     G_LOCK(all_resources);
     if (!g_slist_find(all_resources, type))
         all_resources = g_slist_prepend(all_resources, type);
     G_UNLOCK(all_resources);
 
-    datadir = gwy_find_self_dir("data");
-    path = g_build_filename(datadir, klass->name, NULL);
-    g_free(datadir);
-    gwy_resource_class_load_directory(klass, path, FALSE, NULL);
-    g_free(path);
-
-    path = g_build_filename(gwy_get_user_dir(), klass->name, NULL);
-    gwy_resource_class_load_directory(klass, path, TRUE, NULL);
-    g_free(path);
+    gchar *userdir = gwy_user_directory(klass->name);
+    gchar **dirs = gwy_data_search_path(klass->name);
+    for (gchar **d = dirs; *d; d++) {
+        gboolean writable = userdir && gwy_strequal(*d, userdir);
+        gwy_resource_class_load_directory(klass, *d, writable, NULL);
+    }
+    GWY_FREE(userdir);
+    g_strfreev(dirs);
 }
 
 void
@@ -677,46 +669,59 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
                                   gboolean modifiable,
                                   GwyErrorList **error_list)
 {
-    GDir *dir;
-    GwyResource *resource;
-    GError *err = NULL;
-    const gchar *name;
-    gchar *filename, *text;
-
-    if (!(dir = g_dir_open(dirname, 0, NULL)))
+    GFile *gfile = g_file_new_for_path(dirname);
+    GFileEnumerator *dir
+        = g_file_enumerate_children(gfile,
+                                    G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                                    G_FILE_ATTRIBUTE_STANDARD_NAME ","
+                                    G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
+                                    G_FILE_ATTRIBUTE_STANDARD_IS_BACKUP,
+                                    0, NULL, NULL);
+    g_object_unref(gfile);
+    if (!dir)
         return;
 
-    while ((name = g_dir_read_name(dir))) {
-        if (gwy_filename_ignore(name))
+    GFileInfo *fileinfo;
+    while ((fileinfo = g_file_enumerator_next_file(dir, NULL, NULL))) {
+        if (g_file_info_get_file_type(fileinfo) != G_FILE_TYPE_REGULAR
+            || g_file_info_get_is_hidden(fileinfo)
+            || g_file_info_get_is_backup(fileinfo)) {
+            g_object_unref(fileinfo);
             continue;
+        }
 
+        const gchar *filename = g_file_info_get_name(fileinfo);
+        /*
         if (gwy_inventory_get_item(klass->inventory, name)) {
             g_warning("Ignoring duplicite %s ‘%s’", klass->name, name);
             continue;
         }
+        */
         /* FIXME */
-        filename = g_build_filename(dirname, name, NULL);
+        gchar *text = NULL;
+        GError *err = NULL;
         if (!g_file_get_contents(filename, &text, NULL, &err)) {
             g_warning("Cannot read ‘%s’: %s", filename, err->message);
             g_clear_error(&err);
-            g_free(filename);
+            g_object_unref(fileinfo);
             continue;
         }
-        g_free(filename);
 
-        resource = gwy_resource_parse_real(text, G_TYPE_FROM_CLASS(klass),
-                                           !modifiable);
+        GwyResource *resource
+            = gwy_resource_parse_real(text, G_TYPE_FROM_CLASS(klass),
+                                      !modifiable);
         if (resource) {
             GWY_FREE(resource->name);
-            resource->name = g_strdup(name);
+            //resource->name = g_strdup(name);
             resource->is_modified = FALSE;
             gwy_inventory_insert_item(klass->inventory, resource);
             g_object_unref(resource);
         }
         g_free(text);
+        g_object_unref(fileinfo);
     }
 
-    g_dir_close(dir);
+    g_object_unref(dir);
 }
 
 /**
