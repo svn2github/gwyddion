@@ -312,7 +312,7 @@ gwy_container_remove(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_remove_by_prefix:
+ * gwy_container_remove_prefix:
  * @container: A container.
  * @prefix: A nul-terminated id prefix.
  *
@@ -323,7 +323,7 @@ gwy_container_remove(GwyContainer *container, GQuark key)
  * Returns: The number of values removed.
  **/
 guint
-gwy_container_remove_by_prefix(GwyContainer *container, const gchar *prefix)
+gwy_container_remove_prefix(GwyContainer *container, const gchar *prefix)
 {
     PrefixData pfdata;
     GSList *l;
@@ -792,7 +792,7 @@ gwy_container_gis_boolean(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_uchar_by_name:
+ * gwy_container_get_char_by_name:
  * @c: A container.
  * @n: String item key.
  *
@@ -800,7 +800,7 @@ gwy_container_gis_boolean(GwyContainer *container,
  **/
 
 /**
- * gwy_container_get_uchar:
+ * gwy_container_get_char:
  * @container: A container.
  * @key: #GQuark item key.
  *
@@ -808,17 +808,17 @@ gwy_container_gis_boolean(GwyContainer *container,
  *
  * Returns: The character as #guchar.
  **/
-guchar
-gwy_container_get_uchar(GwyContainer *container, GQuark key)
+gchar
+gwy_container_get_char(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
     p = gwy_container_get_value_of_type(container, key, G_TYPE_UCHAR);
-    return G_LIKELY(p) ? g_value_get_uchar(p) : 0;
+    return G_LIKELY(p) ? g_value_get_char(p) : 0;
 }
 
 /**
- * gwy_container_gis_uchar_by_name:
+ * gwy_container_gis_char_by_name:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the unsigned char to update.
@@ -830,7 +830,7 @@ gwy_container_get_uchar(GwyContainer *container, GQuark key)
  **/
 
 /**
- * gwy_container_gis_uchar:
+ * gwy_container_gis_char:
  * @container: A container.
  * @key: #GQuark item key.
  * @value: Pointer to the unsigned char to update.
@@ -841,14 +841,14 @@ gwy_container_get_uchar(GwyContainer *container, GQuark key)
  *          such unsigned char in the container.
  **/
 gboolean
-gwy_container_gis_uchar(GwyContainer *container,
-                        GQuark key,
-                        guchar *value)
+gwy_container_gis_char(GwyContainer *container,
+                       GQuark key,
+                       gchar *value)
 {
     GValue *p;
 
     if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_UCHAR))) {
-        *value = g_value_get_uchar(p);
+        *value = g_value_get_char(p);
         return TRUE;
     }
     return FALSE;
@@ -1422,7 +1422,7 @@ gwy_container_set_boolean(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_uchar_by_name:
+ * gwy_container_set_char_by_name:
  * @c: A container.
  * @n: String item key.
  * @v: An unsigned character.
@@ -1431,7 +1431,7 @@ gwy_container_set_boolean(GwyContainer *container,
  **/
 
 /**
- * gwy_container_set_uchar:
+ * gwy_container_set_char:
  * @container: A container.
  * @key: #GQuark item key.
  * @value: An unsigned character.
@@ -1439,15 +1439,15 @@ gwy_container_set_boolean(GwyContainer *container,
  * Stores an unsigned character into @container, identified by @key.
  **/
 void
-gwy_container_set_uchar(GwyContainer *container,
-                        GQuark key,
-                        guchar value)
+gwy_container_set_char(GwyContainer *container,
+                       GQuark key,
+                       gchar value)
 {
     GValue gvalue;
 
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_UCHAR);
-    g_value_set_uchar(&gvalue, value);
+    g_value_set_char(&gvalue, value);
     gwy_container_try_set_one(container, key, &gvalue, TRUE, TRUE);
 }
 
@@ -2053,29 +2053,31 @@ pstring_compare_callback(const void *p, const void *q)
 }
 
 /**
- * gwy_container_serialize_to_text:
+ * gwy_container_dump_to_text:
  * @container: A container.
  *
- * Creates a text representation of @container contents.
+ * Creates a text representation of a container contents.
  *
- * Note only simple data types are supported as serialization of compound
- * objects is not controllable.
+ * Only simple data types are supported as serialization of compound objects is
+ * not controllable.
  *
  * Returns: A pointer array, each item containing string with one container
  * item representation (name, type, value).  The array is sorted by name.
  **/
-GPtrArray*
-gwy_container_serialize_to_text(GwyContainer *container)
+gchar**
+gwy_container_dump_to_text(GwyContainer *container)
 {
-    GPtrArray *pa;
-
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
 
-    pa = g_ptr_array_new();
+    GPtrArray *pa = g_ptr_array_new();
     g_hash_table_foreach(container->values, hash_text_serialize_func, pa);
     g_ptr_array_sort(pa, pstring_compare_callback);
+    g_ptr_array_add(pa, NULL);
 
-    return pa;
+    gchar **retval = (gchar**)pa->pdata;
+    g_ptr_array_free(pa, FALSE);
+
+    return retval;
 }
 
 static guint
@@ -2211,7 +2213,7 @@ gwy_container_new_from_text(const gchar *text)
                 }
                 sscanf(tok+2, "%x", &c);
             }
-            gwy_container_set_uchar(container, key, (guchar)c);
+            gwy_container_set_char(container, key, (gchar)c);
         }
         /* int32 */
         else if (typelen+1 == sizeof("int32")
@@ -2271,7 +2273,7 @@ next:
  * A new container can be created with gwy_container_new(), items can be stored
  * with function like gwy_container_set_double(), read with
  * gwy_container_get_double(), and removed with gwy_container_remove() or
- * gwy_container_remove_by_prefix(). A presence of a value can be tested with
+ * gwy_container_remove_prefix(). A presence of a value can be tested with
  * gwy_container_contains(), convenience functions for reading (updating) a
  * value only if it is present like gwy_container_gis_double(), are available
  * too.
