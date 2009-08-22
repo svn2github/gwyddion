@@ -567,8 +567,6 @@ test_serialize_nested(void)
     g_assert_cmpint(child->done_called, ==, 0);
     g_assert_cmpint(grandchild->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
-    g_file_set_contents("foo.gwy", g_memory_output_stream_get_data(memstream),
-                        len, NULL);
     g_assert_cmpuint(len, ==, sizeof(ser_test_nested));
     g_assert(memcmp(g_memory_output_stream_get_data(memstream),
                     ser_test_nested, sizeof(ser_test_nested)) == 0);
