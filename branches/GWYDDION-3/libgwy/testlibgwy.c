@@ -1025,7 +1025,7 @@ test_expr_evaluate(void)
     g_assert_cmpfloat(fabs(result - 6.0), <, 1e-15);
     g_clear_error(&error);
 
-    gwy_expr_free(expr);
+    g_object_unref(expr);
 }
 
 static void
@@ -1097,7 +1097,7 @@ test_expr_vector(void)
     g_free(input);
     g_free(result);
 
-    gwy_expr_free(expr);
+    g_object_unref(expr);
 }
 
 static void
@@ -1152,7 +1152,7 @@ test_expr_garbage(void)
 
     g_string_free(garbage, TRUE);
     g_rand_free(rng);
-    gwy_expr_free(expr);
+    g_object_unref(expr);
 }
 
 /***************************************************************************

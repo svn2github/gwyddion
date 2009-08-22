@@ -1,11 +1,11 @@
 /*
- *  @(#) $Id$
- *  Copyright (C) 2003 David Necas (Yeti), Petr Klapetek.
- *  E-mail: yeti@gwyddion.net, klapetek@gwyddion.net.
+ *  $Id$
+ *  Copyright (C) 2009 David Necas (Yeti).
+ *  E-mail: yeti@gwyddion.net.
  *
- *  This program is free software; you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
@@ -14,14 +14,13 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __GWY_EXPR_H__
 #define __GWY_EXPR_H__
 
-#include <glib/gerror.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -44,12 +43,34 @@ typedef enum {
     GWY_EXPR_ERROR_NAME_CLASH,
 } GwyExprError;
 
-typedef struct _GwyExpr GwyExpr;
+#define GWY_TYPE_EXPR \
+    (gwy_expr_get_type())
+#define GWY_EXPR(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_EXPR, GwyExpr))
+#define GWY_EXPR_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_CAST((klass), GWY_TYPE_EXPR, GwyExprClass))
+#define GWY_IS_EXPR(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_EXPR))
+#define GWY_IS_EXPR_CLASS(klass) \
+    (G_TYPE_CHECK_CLASS_TYPE((klass), GWY_TYPE_EXPR))
+#define GWY_EXPR_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_EXPR, GwyExprClass))
+
+typedef struct _GwyExpr      GwyExpr;
+typedef struct _GwyExprClass GwyExprClass;
+
+struct _GwyExpr {
+    GObject g_object;
+};
+
+struct _GwyExprClass {
+    GObjectClass g_object_class;
+};
 
 GQuark       gwy_expr_error_quark       (void);
 
+GType        gwy_expr_get_type          (void) G_GNUC_CONST;
 GwyExpr*     gwy_expr_new               (void);
-void         gwy_expr_free              (GwyExpr *expr);
 gboolean     gwy_expr_evaluate          (GwyExpr *expr,
                                          const gchar *text,
                                          gdouble *result,
