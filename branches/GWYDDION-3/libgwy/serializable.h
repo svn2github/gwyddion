@@ -89,7 +89,9 @@ struct _GwySerializableItems {
 
 typedef enum {
     GWY_SERIALIZABLE_ERROR_TRUNCATED,
-    GWY_SERIALIZABLE_ERROR_SIZE,
+    GWY_SERIALIZABLE_ERROR_PADDING,
+    GWY_SERIALIZABLE_ERROR_SIZE_T,
+    GWY_SERIALIZABLE_ERROR_OBJECT,
 } GwySerializableError;
 
 GQuark gwy_serializable_error_quark(void);

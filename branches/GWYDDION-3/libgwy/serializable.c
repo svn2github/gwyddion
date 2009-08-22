@@ -25,6 +25,7 @@
  */
 
 #include <string.h>
+#include <glib/gi18n.h>
 #include "libgwy/serializable.h"
 #include "libgwy/macros.h"
 
@@ -42,11 +43,15 @@ typedef struct {
     guchar *data;
 } GwySerializableBuffer;
 
-static gsize    gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                                 gsize *pos);
-static void     gwy_serializable_items_done     (const GwySerializableItems *items);
-static gboolean gwy_serializable_dump_to_stream (const GwySerializableItems *items,
-                                                 GwySerializableBuffer *buffer);
+static gsize                 gwy_serializable_calculate_sizes(GwySerializableItems *items,
+                                                              gsize *pos);
+static void                  gwy_serializable_items_done     (const GwySerializableItems *items);
+static gboolean              gwy_serializable_dump_to_stream (const GwySerializableItems *items,
+                                                              GwySerializableBuffer *buffer);
+static GwySerializableItems* gwy_serializable_unpack_items   (const guchar *buffer,
+                                                              gsize size,
+                                                              GwyErrorList **error_list);
+static void                  gwy_serializable_free_items     (GwySerializableItems *items);
 
 GType
 gwy_serializable_get_type(void)
@@ -595,27 +600,84 @@ gwy_serializable_items_done(const GwySerializableItems *items)
     }
 }
 
+static inline gboolean
+gwy_serializable_unpack_check_size(gsize size,
+                                   gsize required_size,
+                                   const gchar *what,
+                                   GwyErrorList **error_list)
+{
+    if (G_LIKELY(size >= required_size))
+        return TRUE;
+
+    gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                       GWY_SERIALIZABLE_ERROR_TRUNCATED,
+                       _("End of data was reached while reading value of type "
+                         "`%s'. It requires %" G_GSIZE_FORMAT " bytes but only "
+                         "%" G_GSIZE_FORMAT " bytes remain."),
+                       what, required_size, size);
+    return FALSE;
+}
+
+static inline gsize
+gwy_serializable_unpack_boolean(const guchar *buffer,
+                                gsize size,
+                                gboolean *value,
+                                GwyErrorList **error_list)
+{
+    guint8 byte;
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8), "char",
+                                            error_list))
+        return FALSE;
+    byte = *buffer;
+    *value = !!byte;
+    return sizeof(guint8);
+}
+
+static inline gsize
+gwy_serializable_unpack_uint8(const guchar *buffer,
+                              gsize size,
+                              guint8 *value,
+                              GwyErrorList **error_list)
+{
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint8), "boolean",
+                                            error_list))
+        return FALSE;
+    *value = *buffer;
+    return sizeof(guint8);
+}
+
+static inline gsize
+gwy_serializable_unpack_uint32(const guchar *buffer,
+                               gsize size,
+                               guint32 *value,
+                               GwyErrorList **error_list)
+{
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint32), "int32",
+                                            error_list))
+        return FALSE;
+    memcpy(value, buffer, sizeof(guint32));
+    *value = GINT32_FROM_LE(*value);
+    return sizeof(guint32);
+}
+
 static inline gsize
 gwy_serializable_unpack_uint64(const guchar *buffer,
                                gsize size,
                                guint64 *value,
                                GwyErrorList **error_list)
 {
-    if (size < sizeof(guint64)) {
-        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
-                           "End of data was reached while reading int64.");
+    if (!gwy_serializable_unpack_check_size(size, sizeof(guint64), "int64",
+                                            error_list))
         return FALSE;
-    }
     memcpy(value, buffer, sizeof(guint64));
     *value = GINT64_FROM_LE(*value);
-    return sizeof(gint64);
+    return sizeof(guint64);
 }
 
 static inline gsize
 gwy_serializable_unpack_string(const guchar *buffer,
                                gsize size,
-                               const guchar **value,
+                               const gchar **value,
                                GwyErrorList **error_list)
 {
     const guchar *s = memchr(buffer, '\0', size);
@@ -623,10 +685,11 @@ gwy_serializable_unpack_string(const guchar *buffer,
     if (!s) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_TRUNCATED,
-                           "End of data was reached while reading string.");
+                           _("End of data was reached while looking for the "
+                             "end of a string."));
         return FALSE;
     }
-    *value = buffer;
+    *value = (const gchar*)buffer;
     return s-buffer + 1;
 }
 
@@ -652,9 +715,14 @@ gwy_serializable_deserialize(const guchar *buffer,
                              gsize *bytes_consumed,
                              GwyErrorList **error_list)
 {
-    const guchar *typename;
+    const GwySerializableInterface *iface;
+    GwySerializableItems *items = NULL, *requested_items = NULL;
+    const gchar *typename;
     gsize pos = 0, rbytes, objsize;
     guint64 object_size;
+    gpointer classref;
+    GObject *object = NULL;
+    GType type;
 
     /* Type name */
     if (!(rbytes = gwy_serializable_unpack_string(buffer + pos, size - pos,
@@ -671,23 +739,131 @@ gwy_serializable_deserialize(const guchar *buffer,
     objsize = object_size;
     if (objsize != object_size) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_SIZE,
-                           "Object size is not representable on this machine.");
+                           GWY_SERIALIZABLE_ERROR_SIZE_T,
+                           _("Object `%s' of size larger than what can be "
+                             "represented on this machine was encountered."),
+                           typename);
         goto fail;
     }
 
     /* XXX: Here we can still overflow! */
-    if (object_size + pos > size) {
+    if (!gwy_serializable_unpack_check_size(size - pos, objsize, "object",
+                                            error_list))
+        goto fail;
+
+    /* Check if we can deserialize such thing. */
+    type = g_type_from_name(typename);
+    if (!type) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
-                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
-                           "End of data was reached while reading object.");
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not known. "
+                             "It was ignored."),
+                           typename);
         goto fail;
     }
 
+    classref = g_type_class_ref(type);
+    g_assert(classref);
+    if (!G_TYPE_IS_INSTANTIATABLE(type)) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not instantiable. "
+                             "It was ignored."),
+                           typename);
+        goto fail;
+    }
+    if (!g_type_is_a(type, GWY_TYPE_SERIALIZABLE)) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' is not serializable. "
+                             "It was ignored."),
+                           typename);
+        goto fail;
+    }
+
+    iface = g_type_interface_peek(g_type_class_peek(type),
+                                  GWY_TYPE_SERIALIZABLE);
+    if (!iface || !iface->construct) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_OBJECT,
+                           _("Object type `%s' does not implement "
+                             "deserialization. It was ignored."),
+                           typename);
+        goto fail;
+    }
+
+    /* We should no only fit, but the object size should be exactly size.
+     * If there is extra stuff, add an error, but do not fail. */
+    if (size - pos != objsize)
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_PADDING,
+                           _("Object `%s' data is smaller than the space "
+                             "alloted for it.  The padding was ignored."));
+
+    /* Unpack everything, call request() only after that so that is its
+     * quaranteed construct() is called after request(). */
+    items = gwy_serializable_unpack_items(buffer + pos, objsize, error_list);
+    if (!items)
+        goto fail;
+
+    /* Allow the method return %NULL even it is implemented. */
+    if (iface->request)
+        requested_items = iface->request();
+
 fail:
+    if (items)
+        gwy_serializable_free_items(items);
+
     if (bytes_consumed)
         *bytes_consumed = size;
-    return NULL;
+    return object;
+}
+
+static GwySerializableItems*
+gwy_serializable_unpack_items(const guchar *buffer,
+                              gsize size,
+                              GwyErrorList **error_list)
+{
+}
+
+static void
+gwy_serializable_free_items(GwySerializableItems *items)
+{
+    gsize i;
+
+    for (i = 0; i < items->n_items; i++) {
+        GwySerializableItem *item = items->items + i;
+        GwySerializableCType ctype = item->ctype;
+
+        switch (ctype) {
+            case GWY_SERIALIZABLE_OBJECT:
+            GWY_OBJECT_UNREF(item->value.v_object);
+            break;
+
+            case GWY_SERIALIZABLE_INT8_ARRAY:
+            case GWY_SERIALIZABLE_INT32_ARRAY:
+            case GWY_SERIALIZABLE_INT64_ARRAY:
+            case GWY_SERIALIZABLE_DOUBLE_ARRAY:
+            case GWY_SERIALIZABLE_STRING:
+            GWY_FREE(item->value.v_int8_array);
+            break;
+
+            case GWY_SERIALIZABLE_STRING_ARRAY:
+            /* TODO */
+            break;
+
+            case GWY_SERIALIZABLE_OBJECT_ARRAY:
+            /* TODO */
+            break;
+
+            default:
+            g_assert(g_ascii_islower(ctype));
+            break;
+        }
+    }
+
+    g_free(items->items);
+    g_free(items);
 }
 
 /**
