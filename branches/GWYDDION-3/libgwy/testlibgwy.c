@@ -1475,7 +1475,7 @@ typedef struct {
     gint value;
 } GwyItemTest;
 
-static item_destroy_count;
+static int item_destroy_count;
 
 static GwyItemTest*
 item_new(const gchar *name, gint value)
