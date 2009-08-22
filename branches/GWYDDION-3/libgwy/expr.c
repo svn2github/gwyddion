@@ -969,6 +969,7 @@ gwy_expr_transform_values(GwyExpr *expr,
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME,
                         _("Invalid identifier name %s."),
                         t->value.v_identifier);
+            /* FIXME: Do we need to free something here, or not? */
             return FALSE;
         }
 
@@ -1698,7 +1699,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
 /************************** Documentation ****************************/
 
 /**
- * SECTION:gwyexpr
+ * SECTION: expr
  * @title: GwyExpr
  * @short_description: Arithmetic expression parser and evaluator
  *
