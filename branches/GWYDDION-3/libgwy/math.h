@@ -21,7 +21,7 @@
 #define __GWY_MATH_H__
 
 #include <math.h>
-#include <glib/gutils.h>
+#include <glib.h>
 #include <gwyconfig.h>
 
 G_BEGIN_DECLS
