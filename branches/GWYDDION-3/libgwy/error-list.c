@@ -18,7 +18,7 @@
  */
 
 #include <stdarg.h>
-#include "libgwy/errorlist.h"
+#include "libgwy/error-list.h"
 #include "libgwy/libgwy-aliases.h"
 
 /**
@@ -81,7 +81,7 @@ gwy_error_list_clear(GwyErrorList **list)
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION: errorlist
+ * SECTION: error-list
  * @title: GwyErrorList
  * @short_description: List of #GError<!-- -->s
  *

@@ -18,7 +18,7 @@ lib_LTLIBRARIES = libgwy.la
 noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = \
 	container.h \
-	errorlist.h \
+	error-list.h \
 	expr.h \
 	inventory.h \
 	libgwy.h \
@@ -34,7 +34,7 @@ libgwyinclude_HEADERS = \
 
 libgwy_la_SOURCES = \
 	container.c \
-	errorlist.c \
+	error-list.c \
 	expr.c \
 	inventory.c \
 	libgwy.c \

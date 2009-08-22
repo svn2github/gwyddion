@@ -12,6 +12,7 @@
   </para>
   <xi:include href="xml/libgwy.xml"/>
   <xi:include href="xml/macros.xml"/>
+  <xi:include href="xml/error-list.xml"/>
   <xi:include href="xml/strfuncs.xml"/>
   <xi:include href="xml/math.xml"/>
   <xi:include href="xml/expr.xml"/>

@@ -21,7 +21,7 @@
 #define __GWY_LIBGWY_H__
 
 #include <libgwy/container.h>
-#include <libgwy/errorlist.h>
+#include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/inventory.h>
 #include <libgwy/macros.h>

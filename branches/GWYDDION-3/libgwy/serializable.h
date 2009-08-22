@@ -21,7 +21,7 @@
 #define __GWY_SERIALIZABLE_H__
 
 #include <glib-object.h>
-#include <libgwy/errorlist.h>
+#include <libgwy/error-list.h>
 
 G_BEGIN_DECLS
 
