@@ -756,7 +756,7 @@ unpack_uint8_array(const guchar *buffer,
     buffer += rbytes;
     if (*array_size) {
         *value = g_new(guint8, *array_size);
-        memcpy(value, buffer, *array_size*sizeof(guint8));
+        memcpy(*value, buffer, *array_size*sizeof(guint8));
     }
     return rbytes + *array_size*sizeof(guint8);
 }
@@ -1333,8 +1333,10 @@ unpack_items(const guchar *buffer,
         items->n_items++;
     }
 
+    return items;
+
 fail:
-    /* TODO */
+    free_items(items);
     return NULL;
 }
 
