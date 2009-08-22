@@ -14,7 +14,7 @@ GWY_DOC_CFLAGS = \
 	-I$(top_builddir) \
 	@LIBGWY_DEPS_CFLAGS@
 GWY_DOC_LIBS = \
-	$(top_builddir)/libgwy/libgwy.la \
+	$(top_builddir)/libgwy/libgwy3.la \
 	@LIBGWY_DEPS_LIBS@
 
 GTKDOC_CC = $(LIBTOOL) --mode=compile $(CC) $(GWY_DOC_CFLAGS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)

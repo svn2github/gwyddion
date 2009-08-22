@@ -5,6 +5,7 @@ PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 library = libgwy
+libsuffix = 3
 libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
 
@@ -14,7 +15,7 @@ CLEANFILES = $(library).supp
 MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
-lib_LTLIBRARIES = libgwy.la
+lib_LTLIBRARIES = libgwy3.la
 noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = \
 	container.h \
@@ -32,7 +33,7 @@ libgwyinclude_HEADERS = \
 	unit.h \
 	version.h
 
-libgwy_la_SOURCES = \
+libgwy3_la_SOURCES = \
 	container.c \
 	error-list.c \
 	expr.c \
@@ -71,10 +72,10 @@ else
 version_info = -version-info 0:0:0
 endif
 
-libgwy_la_LDFLAGS = @LIBGWY_DEPS_LIBS@ $(version_info)
+libgwy3_la_LDFLAGS = @LIBGWY_DEPS_LIBS@ $(version_info)
 
 testlibgwy_CFLAGS = $(AM_CFLAGS) @VALGRIND_CFLAGS@
-testlibgwy_LDADD = libgwy.la
+testlibgwy_LDADD = libgwy3.la
 
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
