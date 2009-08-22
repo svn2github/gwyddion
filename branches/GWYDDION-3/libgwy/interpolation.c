@@ -18,9 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include <string.h>
-#include <libgwy/macros.h>
 #include <libgwy/math.h>
 #include <libgwy/interpolation.h>
 
