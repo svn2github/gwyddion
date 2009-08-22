@@ -586,11 +586,11 @@ jump_over:
  * <itemizedlist>
  *   <listitem>
  *     Namespace-clean, that is prefixed with <literal>gwy_</literal>.
- *     For instance, gwy_cbrt() or gwy_hypot().  These are defined always.
+ *     For instance, gwy_exp10().  These are defined always.
  *   </listitem>
  *   <listitem>
  *     Bare-named, i.e. with the same name as the C library function, for
- *     instance cbrt() ot hypot().  There are defined only when explicitly
+ *     instance exp10().  There are defined only when explicitly
  *     requested with:
  * |[#define GWY_MATH_POLLUTE_NAMESPACE]|
  *     to avoid problems when Gwyddion headers are included indirectly or
@@ -618,127 +618,6 @@ jump_over:
  * exp10:
  *
  * System function <literal>exp10</literal> or alias of gwy_exp10().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_exp2:
- * @x: Exponent of 2.
- *
- * Calculates the value of 2 raised to given power.
- *
- * Returns: Value of 2 raised to @x.
- **/
-
-/**
- * exp2:
- *
- * System function <literal>exp2</literal> or alias of gwy_exp2().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_log2:
- * @x: Number.
- *
- * Calculates the base 2 logarithm of a number.
- *
- * Returns: Base 2 logarithm of @x.
- **/
-
-/**
- * log2:
- *
- * System function <literal>log2</literal> or alias of gwy_log2().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_cbrt:
- * @x: Number.
- *
- * Calculates the real cube root of a number.
- *
- * Returns: Cube root of @x.
- **/
-
-/**
- * cbrt:
- *
- * System function <literal>cbrt</literal> or alias of gwy_cbrt().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_hypot:
- * @x: Triangle side.
- * @y: Triangle side.
- *
- * Calculates the length of the hypotenuse of a right-angled triangle.
- *
- * Returns: Length of hypotenuse of a right-angled triangle with sides @x and
- *          @y.
- **/
-
-/**
- * hypot:
- *
- * System function <literal>hypot</literal> or alias of gwy_hypot().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_acosh:
- * @x: Number.
- *
- * Calculates the inverse hyperbolic cosine of a number.
- *
- * Returns: Inverse hyperbolic cosine of @x.
- **/
-
-/**
- * acosh:
- *
- * System function <literal>acosh</literal> or alias of gwy_acosh().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_asinh:
- * @x: Number.
- *
- * Calculates the inverse hyperbolic sine of a number.
- *
- * Returns: Inverse hyperbolic sine of @x.
- **/
-
-/**
- * asinh:
- *
- * System function <literal>asinh</literal> or alias of gwy_asinh().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_atanh:
- * @x: Number.
- *
- * Calculates the inverse hyperbolic tangent of a number.
- *
- * Returns: Inverse hyperbolic tangent of @x.
- **/
-
-/**
- * atanh:
- *
- * System function <literal>atanh</literal> or alias of gwy_atanh().
  *
  * This macro expands to an identifier.
  **/
