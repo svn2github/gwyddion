@@ -27,10 +27,17 @@
 #include <string.h>
 #include "libgwy/serializable.h"
 
+enum {
+    GWY_SERIALIZE_BUFFER_SIZE = 65536,
+    GWY_SERIALIZE_BUFFER_SIZE32 = GWY_SERIALIZE_BUFFER_SIZE/sizeof(guint32),
+    GWY_SERIALIZE_BUFFER_SIZE64 = GWY_SERIALIZE_BUFFER_SIZE/sizeof(guint64),
+};
+
 static gsize    gwy_serializable_calculate_sizes(GwySerializableItems *items,
                                                  gsize *pos);
 static void     gwy_serializable_items_done     (const GwySerializableItems *items);
 static gboolean gwy_serializable_dump_to_stream (const GwySerializableItems *items,
+                                                 gpointer *buffer,
                                                  GOutputStream *output,
                                                  GError **error);
 
@@ -146,6 +153,7 @@ gwy_serializable_serialize(GwySerializable *serializable,
 {
     GwySerializableItems items;
     gboolean ok = FALSE;
+    gpointer buffer = NULL;
     gsize i = 0;
 
     g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), FALSE);
@@ -157,7 +165,8 @@ gwy_serializable_serialize(GwySerializable *serializable,
 
     gwy_serializable_itemize(serializable, &items);
     gwy_serializable_calculate_sizes(&items, &i);
-    ok = gwy_serializable_dump_to_stream(&items, output, error);
+    ok = gwy_serializable_dump_to_stream(&items, &buffer, output, error);
+    g_free(buffer);
     gwy_serializable_items_done(&items);
     g_free(items.items);
 
@@ -256,6 +265,76 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
     return header->value.v_size = size;
 }
 
+static gboolean
+gwy_serializable_write_swap32(const guint32 *values,
+                              gsize len,
+                              gpointer *buffer,
+                              GOutputStream *output,
+                              GError **error)
+{
+    const gsize n = len/GWY_SERIALIZE_BUFFER_SIZE32;
+    guint32 *bvalues;
+    gsize i, j;
+
+    if (!*buffer)
+        *buffer = g_malloc(GWY_SERIALIZE_BUFFER_SIZE);
+
+    bvalues = (guint32*)buffer;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < GWY_SERIALIZE_BUFFER_SIZE32; j++)
+            bvalues[j] = GUINT32_TO_LE(values[j]);
+
+        if (!g_output_stream_write_all(output, bvalues,
+                                       GWY_SERIALIZE_BUFFER_SIZE,
+                                       NULL, NULL, error))
+            return FALSE;
+
+        values += GWY_SERIALIZE_BUFFER_SIZE32;
+    }
+
+    i = len % GWY_SERIALIZE_BUFFER_SIZE32;
+    for (j = 0; j < i; j++)
+        bvalues[j] = GUINT32_SWAP_LE_BE(values[j]);
+
+    return g_output_stream_write_all(output, bvalues, sizeof(guint32)*i,
+                                     NULL, NULL, error);
+}
+
+static gboolean
+gwy_serializable_write_swap64(const guint64 *values,
+                              gsize len,
+                              gpointer *buffer,
+                              GOutputStream *output,
+                              GError **error)
+{
+    const gsize n = len/GWY_SERIALIZE_BUFFER_SIZE64;
+    guint64 *bvalues;
+    gsize i, j;
+
+    if (!*buffer)
+        *buffer = g_malloc(GWY_SERIALIZE_BUFFER_SIZE);
+
+    bvalues = (guint64*)buffer;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < GWY_SERIALIZE_BUFFER_SIZE64; j++)
+            bvalues[j] = GUINT64_TO_LE(values[j]);
+
+        if (!g_output_stream_write_all(output, bvalues,
+                                       GWY_SERIALIZE_BUFFER_SIZE,
+                                       NULL, NULL, error))
+            return FALSE;
+
+        values += GWY_SERIALIZE_BUFFER_SIZE64;
+    }
+
+    i = len % GWY_SERIALIZE_BUFFER_SIZE64;
+    for (j = 0; j < i; j++)
+        bvalues[j] = GUINT64_SWAP_LE_BE(values[j]);
+
+    return g_output_stream_write_all(output, bvalues, sizeof(guint64)*i,
+                                     NULL, NULL, error);
+}
+
 /**
  * gwy_serializable_dump_to_stream:
  * @items: List of flattened object tree items.
@@ -270,6 +349,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  **/
 static gboolean
 gwy_serializable_dump_to_stream(const GwySerializableItems *items,
+                                gpointer *buffer,
                                 GOutputStream *output,
                                 GError **error)
 {
@@ -328,11 +408,65 @@ gwy_serializable_dump_to_stream(const GwySerializableItems *items,
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_STRING) {
-            if (!g_output_stream_write_all(output,
-                                           item->value.v_string,
-                                           strlen(item->value.v_string),
+            const gchar *s = item->value.v_string;
+            if (!g_output_stream_write_all(output, s, strlen(s)+1,
                                            NULL, NULL, error))
                 return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT8_ARRAY) {
+            guint64 v = GUINT64_TO_LE(item->array_size);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+            if (!g_output_stream_write_all(output,
+                                           item->value.v_uint8_array,
+                                           item->array_size,
+                                           NULL, NULL, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT32_ARRAY) {
+            guint64 v = GUINT64_TO_LE(item->array_size);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+            if (!gwy_serializable_write_swap32(item->value.v_uint32_array,
+                                               item->array_size,
+                                               buffer, output, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY) {
+            guint64 v = GUINT64_TO_LE(item->array_size);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+            if (!gwy_serializable_write_swap64(item->value.v_uint64_array,
+                                               item->array_size,
+                                               buffer, output, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
+            guint64 v = GUINT64_TO_LE(item->array_size);
+            gsize j;
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+
+            for (j = 0; j < item->array_size; j++) {
+                const gchar *s = item->value.v_string_array[j];
+                if (!g_output_stream_write_all(output, s, strlen(s)+1,
+                                               NULL, NULL, error))
+                    return FALSE;
+            }
+        }
+        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
+            guint64 v = GUINT64_TO_LE(item->array_size);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+            /* Serialized objects follow... */
+        }
+        else {
+            g_return_val_if_reached(FALSE);
         }
     }
 
