@@ -243,16 +243,16 @@ gwy_ser_test_n_items(GwySerializable *serializable)
 
 // The remaining members get zero-initialized which saves us from doing it.
 static const GwySerializableItem default_items[] = {
-    { .name = "flag",  .ctype = GWY_SERIALIZABLE_BOOLEAN,      },
-    { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
-    { .name = "s",     .ctype = GWY_SERIALIZABLE_STRING,       },
-    { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
-    { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    { .name = "dbl",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
-    { .name = "i16",   .ctype = GWY_SERIALIZABLE_INT16,        },
-    { .name = "i32",   .ctype = GWY_SERIALIZABLE_INT32,        },
-    { .name = "i64",   .ctype = GWY_SERIALIZABLE_INT64,        },
-    { .name = "ss",    .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
+    /*0*/ { .name = "flag",  .ctype = GWY_SERIALIZABLE_BOOLEAN,      },
+    /*1*/ { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*2*/ { .name = "s",     .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*3*/ { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
+    /*4*/ { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+    /*5*/ { .name = "dbl",   .ctype = GWY_SERIALIZABLE_DOUBLE,       },
+    /*6*/ { .name = "i16",   .ctype = GWY_SERIALIZABLE_INT16,        },
+    /*7*/ { .name = "i32",   .ctype = GWY_SERIALIZABLE_INT32,        },
+    /*8*/ { .name = "i64",   .ctype = GWY_SERIALIZABLE_INT64,        },
+    /*9*/ { .name = "ss",    .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
 };
 
 #define add_item(id) \
@@ -360,9 +360,19 @@ gwy_ser_test_construct(GwySerializableItems *items,
     sertest->len  = it[1].array_size;
     sertest->data = it[1].value.v_double_array;
     sertest->s    = it[2].value.v_string;
+    sertest->dbl  = it[5].value.v_double;
+    sertest->i16  = it[6].value.v_int16;
+    sertest->i32  = it[7].value.v_int32;
+    sertest->i64  = it[8].value.v_int64;
     memcpy(sertest->raw, it[3].value.v_uint8_array, 4);
     g_free(it[3].value.v_uint8_array);
     sertest->child = child;
+    if (it[9].value.v_string_array) {
+        sertest->strlist = g_new0(gchar*, it[9].array_size + 1);
+        memcpy(sertest->strlist, it[9].value.v_string_array,
+               it[9].array_size*sizeof(gchar*));
+        g_free(it[9].value.v_string_array);
+    }
 
     return G_OBJECT(sertest);
 
@@ -417,6 +427,7 @@ gwy_ser_test_finalize(GObject *object)
     GWY_FREE(sertest->data);
     GWY_FREE(sertest->s);
     G_OBJECT_CLASS(gwy_ser_test_parent_class)->finalize(object);
+    g_strfreev(sertest->strlist);
 }
 
 static void
@@ -508,7 +519,7 @@ test_deserialize_simple(void)
 }
 
 static const guchar ser_test_data[] = {
-    0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0x53,
+    0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x54, 0x65, 0x73, 0x74, 0x00, 0xad,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x6c, 0x61, 0x67, 0x00,
     0x62, 0x01, 0x64, 0x61, 0x74, 0x61, 0x00, 0x44, 0x04, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f,
@@ -516,7 +527,14 @@ static const guchar ser_test_data[] = {
     0x00, 0x00, 0xf0, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
     0x73, 0x00, 0x73, 0x54, 0x65, 0x73, 0x74, 0x20, 0x54, 0x65, 0x73, 0x74,
     0x00, 0x72, 0x61, 0x77, 0x00, 0x43, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x78, 0x56, 0x34, 0x12
+    0x00, 0x00, 0x78, 0x56, 0x34, 0x12, 0x64, 0x62, 0x6c, 0x00, 0x64, 0x5e,
+    0x5a, 0x75, 0x04, 0x23, 0xcf, 0xe2, 0x3f, 0x69, 0x31, 0x36, 0x00, 0x68,
+    0x34, 0x12, 0x69, 0x33, 0x32, 0x00, 0x69, 0xef, 0xbe, 0xad, 0xde, 0x69,
+    0x36, 0x34, 0x00, 0x71, 0x80, 0x70, 0x60, 0x50, 0x40, 0x30, 0x20, 0x10,
+    0x73, 0x73, 0x00, 0x53, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x46, 0x69, 0x72, 0x73, 0x74, 0x20, 0x74, 0x68, 0x69, 0x6e, 0x67, 0x73,
+    0x20, 0x66, 0x69, 0x72, 0x73, 0x74, 0x00, 0x57, 0x61, 0x69, 0x74, 0x20,
+    0x61, 0x20, 0x73, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x2e, 0x2e, 0x2e, 0x00
 };
 
 static void
@@ -533,6 +551,13 @@ test_serialize_data(void)
 
     sertest = gwy_ser_test_new_filled(TRUE, data, G_N_ELEMENTS(data),
                                       "Test Test", 0x12345678);
+    sertest->i16 = 0x1234;
+    sertest->i32 = (gint32)0xdeadbeef;
+    sertest->i64 = G_GINT64_CONSTANT(0x1020304050607080);
+    sertest->dbl = sin(G_PI/5);
+    sertest->strlist = g_new0(gchar*, 3);
+    sertest->strlist[0] = g_strdup("First things first");
+    sertest->strlist[1] = g_strdup("Wait a second...");
     stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
     memstream = G_MEMORY_OUTPUT_STREAM(stream);
     ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
@@ -568,6 +593,13 @@ test_deserialize_data(void)
     g_assert_cmpuint(sertest->len, ==, G_N_ELEMENTS(data));
     g_assert(memcmp(sertest->data, data, sizeof(data)) == 0);
     g_assert_cmpstr(sertest->s, ==, "Test Test");
+    g_assert_cmpfloat(sertest->dbl, ==, sin(G_PI/5));
+    g_assert_cmpint(sertest->i16, ==, 0x1234);
+    g_assert_cmpint(sertest->i32, ==, (gint32)0xdeadbeef);
+    g_assert_cmpint(sertest->i64, ==, G_GINT64_CONSTANT(0x1020304050607080));
+    g_assert_cmpuint(g_strv_length(sertest->strlist), ==, 2);
+    g_assert_cmpstr(sertest->strlist[0], ==, "First things first");
+    g_assert_cmpstr(sertest->strlist[1], ==, "Wait a second...");
 
     GWY_OBJECT_UNREF(sertest);
 }
