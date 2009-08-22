@@ -442,8 +442,6 @@ hash_foreach_func(gpointer hkey, gpointer hvalue, gpointer hdata)
  *          in no particular order.  The number of items can be obtained
  *          with gwy_container_n_items().  If there are no items, %NULL
  *          is returned.
- *
- * Since: 2.7
  **/
 GQuark*
 gwy_container_keys(GwyContainer *container)
@@ -806,14 +804,14 @@ gwy_container_gis_boolean(GwyContainer *container,
  *
  * Returns the unsigned character in @container identified by @key.
  *
- * Returns: The character as #guchar.
+ * Returns: The character as #gchar.
  **/
 gchar
 gwy_container_get_char(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_UCHAR);
+    p = gwy_container_get_value_of_type(container, key, G_TYPE_CHAR);
     return G_LIKELY(p) ? g_value_get_char(p) : 0;
 }
 
@@ -847,7 +845,7 @@ gwy_container_gis_char(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_UCHAR))) {
+    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_CHAR))) {
         *value = g_value_get_char(p);
         return TRUE;
     }
@@ -1283,8 +1281,8 @@ gwy_container_values_equal(const GValue *value1,
         case G_TYPE_BOOLEAN:
         return !g_value_get_boolean(value1) == !g_value_get_boolean(value2);
 
-        case G_TYPE_UCHAR:
-        return g_value_get_uchar(value1) == g_value_get_uchar(value2);
+        case G_TYPE_CHAR:
+        return g_value_get_char(value1) == g_value_get_char(value2);
 
         case G_TYPE_INT:
         return g_value_get_int(value1) == g_value_get_int(value2);
@@ -1457,7 +1455,7 @@ gwy_container_set_char(GwyContainer *container,
     GValue gvalue;
 
     gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_UCHAR);
+    g_value_init(&gvalue, G_TYPE_CHAR);
     g_value_set_char(&gvalue, value);
     try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
@@ -1722,7 +1720,7 @@ hash_serialize_func(gpointer hkey, gpointer hvalue, gpointer hdata)
         it->value.v_boolean = !!g_value_get_boolean(value);
         break;
 
-        case G_TYPE_UCHAR:
+        case G_TYPE_CHAR:
         it->ctype = 'c';
         it->value.v_char = g_value_get_uchar(value);
         break;
@@ -1871,7 +1869,7 @@ set_copied_value(GwyContainer *container,
         break;
 
         case G_TYPE_BOOLEAN:
-        case G_TYPE_UCHAR:
+        case G_TYPE_CHAR:
         case G_TYPE_INT:
         case G_TYPE_INT64:
         case G_TYPE_DOUBLE:
@@ -1914,7 +1912,7 @@ hash_text_serialize_func(gpointer hkey, gpointer hvalue, gpointer hdata)
                             k, g_value_get_boolean(value) ? "True" : "False");
         break;
 
-        case G_TYPE_UCHAR:
+        case G_TYPE_CHAR:
         c = g_value_get_uchar(value);
         if (g_ascii_isprint(c) && !g_ascii_isspace(c))
             v = g_strdup_printf("\"%s\" char %c", k, c);
