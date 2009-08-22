@@ -1552,10 +1552,10 @@ item_get_name(gconstpointer item)
 }
 
 static gboolean
-item_is_fixed(gconstpointer item)
+item_is_modifiable(gconstpointer item)
 {
     const GwyItemTest *itemtest = (const GwyItemTest*)item;
-    return itemtest->value < 0;
+    return itemtest->value >= 0;
 }
 
 static gint
@@ -1601,7 +1601,7 @@ test_inventory_data(void)
         0,
         NULL,
         item_get_name,
-        item_is_fixed,
+        item_is_modifiable,
         item_compare,
         item_rename,
         item_destroy,

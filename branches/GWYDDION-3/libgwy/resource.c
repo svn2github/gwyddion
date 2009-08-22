@@ -38,7 +38,7 @@ enum {
     PROP_0,
     PROP_NAME,
     PROP_FILE_NAME,
-    PROP_IS_CONST,
+    PROP_IS_MODIFIABLE,
     PROP_IS_PREFERRED,
     N_PROPS
 };
@@ -54,7 +54,7 @@ static void         gwy_resource_get_property   (GObject *object,
                                                  guint prop_id,
                                                  GValue *value,
                                                  GParamSpec *pspec);
-static gboolean     gwy_resource_get_is_const   (gconstpointer item);
+static gboolean     gwy_resource_is_modifiable_impl(gconstpointer item);
 static const gchar* gwy_resource_get_item_name  (gconstpointer item);
 static gboolean     gwy_resource_compare        (gconstpointer item1,
                                                  gconstpointer item2);
@@ -67,7 +67,8 @@ static void         gwy_resource_get_trait_value(gconstpointer item,
                                                  GValue *value);
 static GwyResource* gwy_resource_parse_impl     (const gchar *text,
                                                  GType expected_type,
-                                                 gboolean is_const);
+                                                 gboolean is_modifiable,
+                                                 GError **error);
 static void         gwy_resource_modified       (GwyResource *resource);
 
 /* Use a static propery -> trait map.  We could do it generically, too.
@@ -87,7 +88,7 @@ static const GwyInventoryItemType gwy_resource_item_type = {
     0,
     "data-changed",
     &gwy_resource_get_item_name,
-    &gwy_resource_get_is_const,
+    &gwy_resource_is_modifiable_impl,
     &gwy_resource_compare,
     &gwy_resource_rename,
     NULL,
@@ -144,12 +145,12 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
 
-    pspec = g_param_spec_boolean("is-const",
+    pspec = g_param_spec_boolean("is-modifiable",
                                  "Is constant",
                                  "Whether a resource is constant (system)",
                                  FALSE,
                                  G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
-    g_object_class_install_property(gobject_class, PROP_IS_CONST, pspec);
+    g_object_class_install_property(gobject_class, PROP_IS_MODIFIABLE, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
     gwy_resource_ntraits++;
@@ -197,8 +198,8 @@ gwy_resource_set_property(GObject *object,
     GwyResource *resource = GWY_RESOURCE(object);
 
     switch (prop_id) {
-        case PROP_IS_CONST:
-        resource->is_const = g_value_get_boolean(value);
+        case PROP_IS_MODIFIABLE:
+        resource->is_modifiable = g_value_get_boolean(value);
         break;
 
         case PROP_IS_PREFERRED:
@@ -228,8 +229,8 @@ gwy_resource_get_property(GObject *object,
         g_value_set_string(value, resource->filename);
         break;
 
-        case PROP_IS_CONST:
-        g_value_set_boolean(value, resource->is_const);
+        case PROP_IS_MODIFIABLE:
+        g_value_set_boolean(value, resource->is_modifiable);
         break;
 
         case PROP_IS_PREFERRED:
@@ -250,10 +251,10 @@ gwy_resource_get_item_name(gconstpointer item)
 }
 
 static gboolean
-gwy_resource_get_is_const(gconstpointer item)
+gwy_resource_is_modifiable_impl(gconstpointer item)
 {
     GwyResource *resource = (GwyResource*)item;
-    return resource->is_const;
+    return resource->is_modifiable;
 }
 
 static gboolean
@@ -272,7 +273,7 @@ gwy_resource_rename(gpointer item,
 {
     GwyResource *resource = (GwyResource*)item;
 
-    g_return_if_fail(!resource->is_const);
+    g_return_if_fail(resource->is_modifiable);
 
     GWY_FREE(resource->name);
     resource->name = g_strdup(new_name);
@@ -334,7 +335,7 @@ gboolean
 gwy_resource_is_modifiable(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return !resource->is_const;
+    return resource->is_modifiable;
 }
 
 /**
@@ -527,7 +528,7 @@ gwy_resource_dump(GwyResource *resource)
  * @expected_type: Resource object type.  If not 0, only resources of give type
  *                 are allowed.  Zero value means any #GwyResource is allowed.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
- *         FIXME domain can occur.
+ *         FIXME FIXME domain can occur.
  *
  * Reconstructs a resource from human readable form.
  *
@@ -538,13 +539,14 @@ gwy_resource_parse(const gchar *text,
                    GType expected_type,
                    GError **error)
 {
-    return gwy_resource_parse_impl(text, expected_type, FALSE);
+    return gwy_resource_parse_impl(text, expected_type, TRUE, error);
 }
 
 static GwyResource*
 gwy_resource_parse_impl(const gchar *text,
                         GType expected_type,
-                        gboolean is_const)
+                        gboolean is_modifiable,
+                        GError **error)
 {
     GwyResourceClass *klass;
     GwyResource *resource;
@@ -579,8 +581,9 @@ gwy_resource_parse_impl(const gchar *text,
     klass = GWY_RESOURCE_CLASS(g_type_class_peek_static(type));
     g_return_val_if_fail(klass && klass->parse, NULL);
 
-    resource = klass->parse(text, is_const);
+    resource = klass->parse(text);
     if (resource) {
+        resource->is_modifiable = is_modifiable;
         GWY_FREE(resource->name);
         resource->name = name;
         name = NULL;
@@ -612,7 +615,7 @@ gwy_resource_data_changed(GwyResource *resource)
 static void
 gwy_resource_modified(GwyResource *resource)
 {
-    if (resource->is_const)
+    if (!resource->is_modifiable)
         g_warning("Constant resource ‘%s’ of type %s was modified",
                   resource->name, G_OBJECT_TYPE_NAME(resource));
     resource->is_modified = TRUE;
@@ -628,7 +631,7 @@ void
 gwy_resource_data_saved(GwyResource *resource)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    if (resource->is_const)
+    if (!resource->is_modifiable)
         g_warning("Constant resource ‘%s’ of type %s was passed to "
                   "data_saved()",
                   resource->name, G_OBJECT_TYPE_NAME(resource));
@@ -704,23 +707,25 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
         */
         /* FIXME */
         gchar *text = NULL;
-        GError *err = NULL;
-        if (!g_file_get_contents(filename, &text, NULL, &err)) {
-            g_warning("Cannot read ‘%s’: %s", filename, err->message);
-            g_clear_error(&err);
+        GError *error = NULL;
+        if (!g_file_get_contents(filename, &text, NULL, &error)) {
+            gwy_error_list_propagate(error_list, error);
             g_object_unref(fileinfo);
             continue;
         }
 
         GwyResource *resource
             = gwy_resource_parse_impl(text, G_TYPE_FROM_CLASS(klass),
-                                      !modifiable);
+                                      modifiable, &error);
         if (resource) {
             GWY_FREE(resource->name);
             //resource->name = g_strdup(name);
             resource->is_modified = FALSE;
             gwy_inventory_insert_item(klass->inventory, resource);
             g_object_unref(resource);
+        }
+        else {
+            gwy_error_list_propagate(error_list, error);
         }
         g_free(text);
         g_object_unref(fileinfo);
@@ -747,7 +752,7 @@ gwy_resource_build_filename(GwyResource *resource)
     GwyResourceClass *klass;
 
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), NULL);
-    if (resource->is_const)
+    if (!resource->is_modifiable)
         g_warning("Filename of a constant resource ‘%s’ should not be needed",
                   resource->name);
 

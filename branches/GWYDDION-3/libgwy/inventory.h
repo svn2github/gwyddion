@@ -54,7 +54,7 @@ struct _GwyInventoryItemType {
     GType         type;
     const gchar  *watchable_signal;
     const gchar* (*get_name)       (gconstpointer item);
-    gboolean     (*is_fixed)       (gconstpointer item);
+    gboolean     (*is_modifiable)  (gconstpointer item);
     GCompareFunc compare;
     void         (*rename)         (gpointer item,
                                     const gchar *newname);

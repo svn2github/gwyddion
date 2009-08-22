@@ -792,10 +792,10 @@ delete_item(GwyInventory *inventory,
             const gchar *name,
             guint n)
 {
-    if (inventory->item_type.is_fixed) {
+    if (inventory->item_type.is_modifiable) {
         gpointer item = g_sequence_get(iter);
-        if (inventory->item_type.is_fixed(item)) {
-            g_warning("Cannot delete fixed item ‘%s’", name);
+        if (!inventory->item_type.is_modifiable(item)) {
+            g_warning("Cannot delete non-modifiable item ‘%s’", name);
             return;
         }
     }
@@ -888,8 +888,9 @@ gwy_inventory_rename_item(GwyInventory *inventory,
     }
 
     gpointer item = g_sequence_get(iter);
-    if (inventory->item_type.is_fixed && inventory->item_type.is_fixed(item)) {
-        g_warning("Cannot rename fixed item ‘%s’", name);
+    if (inventory->item_type.is_modifiable
+        && !inventory->item_type.is_modifiable(item)) {
+        g_warning("Cannot rename non-modifiable item ‘%s’", name);
         return NULL;
     }
     if (gwy_strequal(name, newname))
@@ -1215,10 +1216,12 @@ invent_item_name(GwyInventory *inventory,
  * @get_name: Returns item name (the string is owned by item and it is assumed
  *            to exist until item ceases to exist or is renamed).  This
  *            function is obligatory.
- * @is_fixed: If not %NULL and returns %TRUE for some item, such an item
- *            cannot be removed from inventory and it cannot be renamed.
- *            Fixed items can be freely added though.  This is checked each
- *            time an attempt is made to chage the item.
+ * @is_modifiable: If not %NULL and returns %FALSE for some item, such an item
+ *                 cannot be removed from inventory and it cannot be renamed.
+ *                 Non-modifiable items can be freely added though.
+ *                 Modifiability is checked on each attempt to change the item.
+ *                 If this method is unimplemented, items are considered
+ *                 modifiable.
  * @compare: Item comparation function for sorting.
  *           If %NULL, inventory never attempts to keep any item order
  *           and gwy_inventory_restore_order() does nothing.

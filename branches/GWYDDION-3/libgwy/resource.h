@@ -49,7 +49,7 @@ struct _GwyResource {
     gchar *name;
     gchar *filename;
 
-    gboolean is_const : 1;
+    gboolean is_modifiable : 1;
     gboolean is_modified : 1;
     gboolean is_preferred : 1;
     gboolean is_boolean1 : 1;
@@ -79,8 +79,7 @@ struct _GwyResourceClass {
     void         (*discard)(GwyResource *resource);
     void         (*dump)   (GwyResource *resource,
                             GString *string);
-    GwyResource* (*parse)  (const gchar *text,
-                            gboolean is_const);
+    GwyResource* (*parse)  (const gchar *text);
 
     /*< private >*/
     void (*reserved1)(void);
