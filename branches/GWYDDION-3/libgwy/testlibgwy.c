@@ -716,6 +716,109 @@ test_deserialize_garbage(void)
     g_rand_free(rng);
 }
 
+/***************************************************************************
+ *
+ * Units
+ *
+ ***************************************************************************/
+
+static void
+test_unit_parse(void)
+{
+    GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9;
+    gint pw1, pw2, pw3, pw4, pw5, pw6, pw7, pw8, pw9;
+
+    /* Simple notations */
+    u1 = gwy_unit_new_from_string("m", &pw1);
+    u2 = gwy_unit_new_from_string("km", &pw2);
+    u3 = gwy_unit_new_from_string("Å", &pw3);
+
+    g_assert(gwy_unit_equal(u1, u2));
+    g_assert(gwy_unit_equal(u2, u3));
+    g_assert(gwy_unit_equal(u3, u1));
+    g_assert_cmpint(pw1, ==, 0);
+    g_assert_cmpint(pw2, ==, 3);
+    g_assert_cmpint(pw3, ==, -10);
+
+    g_object_unref(u1);
+    g_object_unref(u2);
+    g_object_unref(u3);
+
+    /* Powers and comparision */
+    u4 = gwy_unit_new_from_string("um s^-1", &pw4);
+    u5 = gwy_unit_new_from_string("mm/ps", &pw5);
+    u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
+
+    g_assert(gwy_unit_equal(u4, u5));
+    g_assert(gwy_unit_equal(u5, u6));
+    g_assert(gwy_unit_equal(u6, u4));
+    g_assert_cmpint(pw4, ==, -6);
+    g_assert_cmpint(pw5, ==, 9);
+    g_assert_cmpint(pw6, ==, 4);
+
+    g_object_unref(u4);
+    g_object_unref(u5);
+    g_object_unref(u6);
+
+    /* Cancellation */
+    u7 = gwy_unit_new_from_string(NULL, &pw7);
+    u8 = gwy_unit_new_from_string("10%", &pw8);
+    u9 = gwy_unit_new_from_string("m^3 cm^-2/km", &pw9);
+
+    g_assert(gwy_unit_equal(u7, u8));
+    g_assert(gwy_unit_equal(u8, u9));
+    g_assert(gwy_unit_equal(u9, u7));
+    g_assert_cmpint(pw7, ==, 0);
+    g_assert_cmpint(pw8, ==, -1);
+    g_assert_cmpint(pw9, ==, 1);
+
+    g_object_unref(u7);
+    g_object_unref(u8);
+    g_object_unref(u9);
+}
+
+static void
+test_unit_arithmetic(void)
+{
+    GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9, *u0;
+
+    u1 = gwy_unit_new_from_string("kg m s^-2", NULL);
+    u2 = gwy_unit_new_from_string("s/kg", NULL);
+    u3 = gwy_unit_new_from_string("m/s", NULL);
+
+    u4 = gwy_unit_multiply(NULL, u1, u2);
+    g_assert(gwy_unit_equal(u1, u4));
+
+    u5 = gwy_unit_power(NULL, u1, -1);
+    u6 = gwy_unit_power_multiply(NULL, u5, 2, u2, -2);
+    u7 = gwy_unit_power(NULL, u3, 2);
+    g_assert(gwy_unit_equal(u6, u7));
+
+    u8 = gwy_unit_nth_root(NULL, u6, 2);
+    g_assert(gwy_unit_equal(u8, u3));
+
+    u9 = gwy_unit_divide(NULL, u8, u3);
+    u0 = gwy_unit_new();
+    g_assert(gwy_unit_equal(u9, u0));
+
+    g_object_unref(u1);
+    g_object_unref(u2);
+    g_object_unref(u3);
+    g_object_unref(u4);
+    g_object_unref(u5);
+    g_object_unref(u6);
+    g_object_unref(u7);
+    g_object_unref(u8);
+    g_object_unref(u9);
+    g_object_unref(u0);
+}
+
+/***************************************************************************
+ *
+ * Main
+ *
+ ***************************************************************************/
+
 int
 main(int argc, char *argv[])
 {
@@ -734,6 +837,9 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/deserialize-data", test_deserialize_data);
     g_test_add_func("/testlibgwy/deserialize-nested", test_deserialize_nested);
     g_test_add_func("/testlibgwy/deserialize-garbage", test_deserialize_garbage);
+    /* Require serializable */
+    g_test_add_func("/testlibgwy/unit-parse", test_unit_parse);
+    g_test_add_func("/testlibgwy/unit-arithmetic", test_unit_arithmetic);
 
     return g_test_run();
 }
