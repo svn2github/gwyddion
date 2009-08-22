@@ -126,9 +126,7 @@ struct _GwyExpr {
     GPtrArray *identifiers;    /* variable names */
     const gdouble *variables;    /* user-filled variable values */
     /* Tokens */
-    GMemChunk *token_chunk;
     GwyExprToken *tokens;
-    GwyExprToken *reservoir;    /* deleted tokens accumulate here */
     /* Compiled RPN representation */
     GwyExprCode *input;    /* compiled expression */
     guint in;    /* nonzero in is a mark of successful compilation */
@@ -485,7 +483,7 @@ gwy_expr_stack_fold_constants(GwyExpr *expr)
  ****************************************************************************/
 
 /**
- * gwy_expr_token_list_last:
+ * token_list_last:
  * @tokens: A list of tokens.
  *
  * Returns last token in list.
@@ -493,7 +491,7 @@ gwy_expr_stack_fold_constants(GwyExpr *expr)
  * Returns: The last token, %NULL if list is empty.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_last(GwyExprToken *tokens)
+token_list_last(GwyExprToken *tokens)
 {
     if (G_UNLIKELY(!tokens))
         return NULL;
@@ -505,7 +503,7 @@ gwy_expr_token_list_last(GwyExprToken *tokens)
 
 /* XXX: used only once */
 /**
- * gwy_expr_token_list_length:
+ * token_list_length:
  * @tokens: A list of tokens.
  *
  * Counts tokens in a list.
@@ -513,7 +511,7 @@ gwy_expr_token_list_last(GwyExprToken *tokens)
  * Returns: Token list length.
  **/
 static inline guint
-gwy_expr_token_list_length(GwyExprToken *tokens)
+token_list_length(GwyExprToken *tokens)
 {
     guint i = 0;
 
@@ -526,7 +524,7 @@ gwy_expr_token_list_length(GwyExprToken *tokens)
 }
 
 /**
- * gwy_expr_token_list_prepend:
+ * token_list_prepend:
  * @tokens: A list of tokens.
  * @token: A token.
  *
@@ -535,7 +533,7 @@ gwy_expr_token_list_length(GwyExprToken *tokens)
  * Returns: The new list head, that is @token.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_prepend(GwyExprToken *tokens,
+token_list_prepend(GwyExprToken *tokens,
                             GwyExprToken *token)
 {
     token->next = tokens;
@@ -547,7 +545,7 @@ gwy_expr_token_list_prepend(GwyExprToken *tokens,
 
 /* XXX: used only once */
 /**
- * gwy_expr_token_list_reverse:
+ * token_list_reverse:
  * @tokens: A list of tokens.
  *
  * Reverts the order in a token list.
@@ -555,7 +553,7 @@ gwy_expr_token_list_prepend(GwyExprToken *tokens,
  * Returns: The new list head.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_reverse(GwyExprToken *tokens)
+token_list_reverse(GwyExprToken *tokens)
 {
     GwyExprToken *end;
 
@@ -571,7 +569,7 @@ gwy_expr_token_list_reverse(GwyExprToken *tokens)
 }
 
 /**
- * gwy_expr_token_list_concat:
+ * token_list_concat:
  * @head: First token list.
  * @tail: Second token list.
  *
@@ -580,7 +578,7 @@ gwy_expr_token_list_reverse(GwyExprToken *tokens)
  * Returns: The new list head.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_concat(GwyExprToken *head,
+token_list_concat(GwyExprToken *head,
                            GwyExprToken *tail)
 {
     GwyExprToken *end;
@@ -588,7 +586,7 @@ gwy_expr_token_list_concat(GwyExprToken *head,
     if (!head)
         return tail;
 
-    end = gwy_expr_token_list_last(head);
+    end = token_list_last(head);
     end->next = tail;
     if (tail)
         tail->prev = end;
@@ -597,8 +595,7 @@ gwy_expr_token_list_concat(GwyExprToken *head,
 }
 
 /**
- * gwy_expr_token_list_delete_token:
- * @expr: An expression.
+ * token_list_delete_token:
  * @tokens: A list of tokens.
  * @token: A token.
  *
@@ -609,9 +606,8 @@ gwy_expr_token_list_concat(GwyExprToken *head,
  * Returns: The new list head.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_delete_token(GwyExpr *expr,
-                                 GwyExprToken *tokens,
-                                 GwyExprToken *token)
+token_list_delete_token(GwyExprToken *tokens,
+                        GwyExprToken *token)
 {
     if (token->prev)
         token->prev->next = token->next;
@@ -622,13 +618,13 @@ gwy_expr_token_list_delete_token(GwyExpr *expr,
         token->next->prev = token->prev;
 
     token->prev = NULL;
-    expr->reservoir = gwy_expr_token_list_prepend(expr->reservoir, token);
+    g_slice_free(GwyExprToken, token);
 
     return tokens;
 }
 
 /**
- * gwy_expr_token_list_insert:
+ * token_list_insert:
  * @tokens: A list of tokens.
  * @before: A token to insert @token before.
  * @token: Token to insert.
@@ -638,12 +634,12 @@ gwy_expr_token_list_delete_token(GwyExpr *expr,
  * Returns: The new list head.
  **/
 static inline GwyExprToken*
-gwy_expr_token_list_insert(GwyExprToken *tokens,
+token_list_insert(GwyExprToken *tokens,
                            GwyExprToken *before,
                            GwyExprToken *token)
 {
     if (!before->prev)
-        return gwy_expr_token_list_prepend(tokens, token);
+        return token_list_prepend(tokens, token);
 
     token->prev = before->prev;
     token->next = before;
@@ -653,34 +649,10 @@ gwy_expr_token_list_insert(GwyExprToken *tokens,
     return tokens;
 }
 
-/**
- * gwy_expr_token_new0:
- * @expr: An expression.
- *
- * Allocates (or revives) and initialized a new token.
- *
- * Returns: A new token, initialized to zero/%NULL.
- **/
-static inline GwyExprToken*
-gwy_expr_token_new0(GwyExpr *expr)
-{
-    GwyExprToken *token;
-
-    if (G_UNLIKELY(!expr->reservoir))
-        return g_chunk_new0(GwyExprToken, expr->token_chunk);
-
-    token = expr->reservoir;
-    expr->reservoir = token->next;
-    if (expr->reservoir)
-        expr->reservoir->prev = NULL;
-    gwy_memclear(token, 1);
-
-    return token;
-}
+#define gwy_expr_token_new0() g_slice_new0(GwyExprToken)
 
 /**
- * gwy_expr_token_list_delete:
- * @expr: An expression.
+ * token_list_delete:
  * @tokens: A token list.
  *
  * Actually frees token list.
@@ -690,15 +662,13 @@ gwy_expr_token_new0(GwyExpr *expr)
  * scanner tokens.
  **/
 static void
-gwy_expr_token_list_delete(GwyExpr *expr,
-                           GwyExprToken *tokens)
+token_list_delete(GwyExprToken *tokens)
 {
     GwyExprToken *t;
 
     for (t = tokens; t; t = t->next) {
         if (t->rpn_block) {
-            expr->reservoir = gwy_expr_token_list_concat(t->rpn_block,
-                                                         expr->reservoir);
+            g_slice_free_chain(GwyExprToken, t->rpn_block, next);
         }
         else {
             switch (t->token) {
@@ -715,7 +685,7 @@ gwy_expr_token_list_delete(GwyExpr *expr,
             }
         }
     }
-    expr->reservoir = gwy_expr_token_list_concat(tokens, expr->reservoir);
+    g_slice_free_chain(GwyExprToken, tokens, next);
 }
 
 /****************************************************************************
@@ -743,7 +713,7 @@ gwy_expr_scan_tokens(GwyExpr *expr,
 
     if (expr->tokens) {
         g_warning("Token list residua from last run");
-        gwy_expr_token_list_delete(expr, expr->tokens);
+        token_list_delete(expr->tokens);
     }
     expr->tokens = NULL;
 
@@ -763,10 +733,10 @@ gwy_expr_scan_tokens(GwyExpr *expr,
             case G_TOKEN_FLOAT:
             case G_TOKEN_SYMBOL:
             case G_TOKEN_IDENTIFIER:
-            t = gwy_expr_token_new0(expr);
+            t = gwy_expr_token_new0();
             t->token = token;
             t->value = expr->scanner->value;
-            tokens = gwy_expr_token_list_prepend(tokens, t);
+            tokens = token_list_prepend(tokens, t);
             /* TODO: steal token value from scanner to avoid string duplication
              * and freeing */
             scanner->value.v_string = NULL;
@@ -776,7 +746,7 @@ gwy_expr_scan_tokens(GwyExpr *expr,
             default:
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_INVALID_TOKEN,
                         _("Invalid token 0x%02x encountered."), token);
-            gwy_expr_token_list_delete(expr, tokens);
+            token_list_delete(tokens);
             return FALSE;
             break;
         }
@@ -788,7 +758,7 @@ gwy_expr_scan_tokens(GwyExpr *expr,
         return FALSE;
     }
 
-    expr->tokens = gwy_expr_token_list_reverse(tokens);
+    expr->tokens = token_list_reverse(tokens);
     return TRUE;
 }
 
@@ -828,9 +798,7 @@ gwy_expr_rectify_token_list(GwyExpr *expr)
                           && prev->token != G_TOKEN_RIGHT_PAREN)) {
                 prev = t;
                 t = t->next;
-                expr->tokens = gwy_expr_token_list_delete_token(expr,
-                                                                expr->tokens,
-                                                                prev);
+                expr->tokens = token_list_delete_token(expr->tokens, prev);
             }
             else
                 t = t->next;
@@ -844,9 +812,9 @@ gwy_expr_rectify_token_list(GwyExpr *expr)
             if (prev && (prev->token == G_TOKEN_FLOAT
                          || prev->token == G_TOKEN_RIGHT_PAREN
                          || prev->token == G_TOKEN_IDENTIFIER)) {
-                prev = gwy_expr_token_new0(expr);
+                prev = gwy_expr_token_new0();
                 prev->token = '*';
-                expr->tokens = gwy_expr_token_list_insert(expr->tokens,
+                expr->tokens = token_list_insert(expr->tokens,
                                                           t, prev);
             }
             t = t->next;
@@ -988,10 +956,10 @@ gwy_expr_transform_values(GwyExpr *expr,
 
     for (t = expr->tokens; t; t = t->next) {
         if (t->token == G_TOKEN_FLOAT) {
-            code = gwy_expr_token_new0(expr);
+            code = gwy_expr_token_new0();
             code->token = GWY_EXPR_CODE_CONSTANT;
             code->value.v_float = t->value.v_float;
-            t->rpn_block = gwy_expr_token_list_prepend(t->rpn_block, code);
+            t->rpn_block = token_list_prepend(t->rpn_block, code);
             continue;
         }
         else if (t->token != G_TOKEN_IDENTIFIER)
@@ -1008,10 +976,10 @@ gwy_expr_transform_values(GwyExpr *expr,
             if ((quark = g_quark_try_string(t->value.v_identifier))
                 && (cval = g_hash_table_lookup(expr->constants,
                                                GUINT_TO_POINTER(quark)))) {
-                code = gwy_expr_token_new0(expr);
+                code = gwy_expr_token_new0();
                 code->token = GWY_EXPR_CODE_CONSTANT;
                 code->value.v_float = *cval;
-                t->rpn_block = gwy_expr_token_list_prepend(t->rpn_block, code);
+                t->rpn_block = token_list_prepend(t->rpn_block, code);
                 continue;
             }
         }
@@ -1024,9 +992,9 @@ gwy_expr_transform_values(GwyExpr *expr,
         }
         if (i == expr->identifiers->len)
             g_ptr_array_add(expr->identifiers, t->value.v_identifier);
-        code = gwy_expr_token_new0(expr);
+        code = gwy_expr_token_new0();
         code->token = -i;
-        t->rpn_block = gwy_expr_token_list_prepend(t->rpn_block, code);
+        t->rpn_block = token_list_prepend(t->rpn_block, code);
     }
 
     return TRUE;
@@ -1034,7 +1002,6 @@ gwy_expr_transform_values(GwyExpr *expr,
 
 /**
  * gwy_expr_transform_infix_ops:
- * @expr: An expression.
  * @tokens: A token list.
  * @right_to_left: %TRUE to process operators right to left, %FALSE to
  *                 left to right.
@@ -1047,8 +1014,7 @@ gwy_expr_transform_values(GwyExpr *expr,
  * Returns: Converted @tokens (it's changed in place), %NULL on failure.
  **/
 static GwyExprToken*
-gwy_expr_transform_infix_ops(GwyExpr *expr,
-                             GwyExprToken *tokens,
+gwy_expr_transform_infix_ops(GwyExprToken *tokens,
                              gboolean right_to_left,
                              const gchar *operators,
                              const GwyExprOpCode *codes,
@@ -1057,7 +1023,7 @@ gwy_expr_transform_infix_ops(GwyExpr *expr,
     GwyExprToken *prev, *next, *code, *t;
     guint i;
 
-    for (t = right_to_left ? gwy_expr_token_list_last(tokens) : tokens;
+    for (t = right_to_left ? token_list_last(tokens) : tokens;
          t;
          t = right_to_left ? t->prev : t->next) {
         if (t->rpn_block)
@@ -1075,26 +1041,26 @@ gwy_expr_transform_infix_ops(GwyExpr *expr,
         if (!next || !prev) {
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_MISSING_ARGUMENT,
                         _("Operator %c argument is missing"), operators[i]);
-            gwy_expr_token_list_delete(expr, tokens);
+            token_list_delete(tokens);
             return NULL;
         }
         if (!prev->rpn_block || !next->rpn_block) {
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_INVALID_ARGUMENT,
                         _("Operator %c argument is invalid"), operators[i]);
-            gwy_expr_token_list_delete(expr, tokens);
+            token_list_delete(tokens);
             return NULL;
         }
 
         /* Convert */
-        code = gwy_expr_token_new0(expr);
+        code = gwy_expr_token_new0();
         code->token = codes[i];
-        prev->rpn_block = gwy_expr_token_list_concat(prev->rpn_block, code);
-        prev->rpn_block = gwy_expr_token_list_concat(next->rpn_block,
+        prev->rpn_block = token_list_concat(prev->rpn_block, code);
+        prev->rpn_block = token_list_concat(next->rpn_block,
                                                      prev->rpn_block);
         prev->token = G_TOKEN_NONE;
         t = prev;
-        tokens = gwy_expr_token_list_delete_token(expr, tokens, t->next);
-        tokens = gwy_expr_token_list_delete_token(expr, tokens, t->next);
+        tokens = token_list_delete_token(tokens, t->next);
+        tokens = token_list_delete_token(tokens, t->next);
     }
 
     return tokens;
@@ -1102,7 +1068,6 @@ gwy_expr_transform_infix_ops(GwyExpr *expr,
 
 /**
  * gwy_expr_transform_functions:
- * @expr: An expression.
  * @tokens: A token list.
  * @err: Location to store conversion error to.
  *
@@ -1111,14 +1076,13 @@ gwy_expr_transform_infix_ops(GwyExpr *expr,
  * Returns: Converted @tokens (it's changed in place), %NULL on failure.
  **/
 static GwyExprToken*
-gwy_expr_transform_functions(GwyExpr *expr,
-                             GwyExprToken *tokens,
+gwy_expr_transform_functions(GwyExprToken *tokens,
                              GError **err)
 {
     GwyExprToken *arg, *code, *t;
     guint func, nargs, i;
 
-    for (t = gwy_expr_token_list_last(tokens); t; t = t->prev) {
+    for (t = token_list_last(tokens); t; t = t->prev) {
         if (t->token != G_TOKEN_SYMBOL)
             continue;
 
@@ -1132,7 +1096,7 @@ gwy_expr_transform_functions(GwyExpr *expr,
                             _("Function %s expects %u arguments "
                               "but only %d were given."),
                             call_table[func].name, nargs, i);
-                gwy_expr_token_list_delete(expr, tokens);
+                token_list_delete(tokens);
                 return NULL;
             }
             if (!arg->rpn_block) {
@@ -1140,22 +1104,22 @@ gwy_expr_transform_functions(GwyExpr *expr,
                             GWY_EXPR_ERROR_INVALID_ARGUMENT,
                             _("Function %s argument is invalid"),
                             call_table[func].name);
-                gwy_expr_token_list_delete(expr, tokens);
+                token_list_delete(tokens);
                 return NULL;
             }
         }
 
         /* Convert */
-        code = gwy_expr_token_new0(expr);
+        code = gwy_expr_token_new0();
         code->token = func;
-        t->rpn_block = gwy_expr_token_list_prepend(t->rpn_block, code);
+        t->rpn_block = token_list_prepend(t->rpn_block, code);
 
         for (i = 0; i < nargs; i++) {
             arg = t->next;
             t->token = G_TOKEN_NONE;
-            t->rpn_block = gwy_expr_token_list_concat(arg->rpn_block,
+            t->rpn_block = token_list_concat(arg->rpn_block,
                                                       t->rpn_block);
-            tokens = gwy_expr_token_list_delete_token(expr, tokens, arg);
+            tokens = token_list_delete_token(tokens, arg);
         }
     }
 
@@ -1186,7 +1150,7 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
     GwyExprOpCode add_operators[] = {
         GWY_EXPR_CODE_ADD, GWY_EXPR_CODE_SUBTRACT,
     };
-    GwyExprToken *t, *subblock, *remaindr = NULL;
+    GwyExprToken *t, *subblock, *remainder_ = NULL;
     static guint level = 0;
 
     if (!tokens) {
@@ -1200,18 +1164,18 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
                     _("Opening parenthesis is missing."));
         goto FAIL;
     }
-    tokens = gwy_expr_token_list_delete_token(expr, tokens, tokens);
+    tokens = token_list_delete_token(tokens, tokens);
 
     /* isolate the list (parenthesization level) we are responsible for */
     for (t = tokens; t; t = t->next) {
         /* split rest of list to remainder */
         if (t->token == G_TOKEN_RIGHT_PAREN) {
             if (t->next) {
-                remaindr = t->next;
-                remaindr->prev = NULL;
+                remainder_ = t->next;
+                remainder_->prev = NULL;
                 t->next = NULL;
             }
-            tokens = gwy_expr_token_list_delete_token(expr, tokens, t);
+            tokens = token_list_delete_token(tokens, t);
             break;
         }
         else if (t->token == G_TOKEN_LEFT_PAREN) {
@@ -1257,32 +1221,32 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
                 goto FAIL;
             }
             t = t->prev;
-            tokens = gwy_expr_token_list_delete_token(expr, tokens, t->next);
+            tokens = token_list_delete_token(tokens, t->next);
         }
     }
 
     /* 1. Functions */
-    if (!(tokens = gwy_expr_transform_functions(expr, tokens, err))) {
+    if (!(tokens = gwy_expr_transform_functions(tokens, err))) {
         g_assert(!err || *err);
         goto FAIL;
     }
 
     /* 2. Power operator */
-    if (!(tokens = gwy_expr_transform_infix_ops(expr, tokens, TRUE, "^",
+    if (!(tokens = gwy_expr_transform_infix_ops(tokens, TRUE, "^",
                                                 pow_operators, err))) {
         g_assert(!err || *err);
         goto FAIL;
     }
 
     /* 3. Multiplicative operators */
-    if (!(tokens = gwy_expr_transform_infix_ops(expr, tokens, FALSE, "*/%",
+    if (!(tokens = gwy_expr_transform_infix_ops(tokens, FALSE, "*/%",
                                                 mult_operators, err))) {
         g_assert(!err || *err);
         goto FAIL;
     }
 
     /* 4. Additive operators */
-    if (!(tokens = gwy_expr_transform_infix_ops(expr, tokens, FALSE, "+-",
+    if (!(tokens = gwy_expr_transform_infix_ops(tokens, FALSE, "+-",
                                                 add_operators, err))) {
         g_assert(!err || *err);
         goto FAIL;
@@ -1297,13 +1261,13 @@ gwy_expr_transform_to_rpn_real(GwyExpr *expr,
         }
     }
 
-    tokens = gwy_expr_token_list_concat(tokens, remaindr);
+    tokens = token_list_concat(tokens, remainder_);
     level--;
     return tokens;
 
 FAIL:
-    gwy_expr_token_list_delete(expr, tokens);
-    gwy_expr_token_list_delete(expr, remaindr);
+    token_list_delete(tokens);
+    token_list_delete(remainder_);
     level--;
     return NULL;
 }
@@ -1329,12 +1293,12 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
     guint i;
 
     /* parenthesize token list */
-    t = gwy_expr_token_new0(expr);
+    t = gwy_expr_token_new0();
     t->token = G_TOKEN_RIGHT_PAREN;
-    expr->tokens = gwy_expr_token_list_concat(expr->tokens, t);
-    t = gwy_expr_token_new0(expr);
+    expr->tokens = token_list_concat(expr->tokens, t);
+    t = gwy_expr_token_new0();
     t->token = G_TOKEN_LEFT_PAREN;
-    expr->tokens = gwy_expr_token_list_prepend(expr->tokens, t);
+    expr->tokens = token_list_prepend(expr->tokens, t);
 
     expr->tokens = gwy_expr_transform_to_rpn_real(expr, expr->tokens, err);
     if (!expr->tokens) {
@@ -1345,12 +1309,12 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
     if (expr->tokens->next) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_GARBAGE,
                     _("Expression contains trailing garbage."));
-        gwy_expr_token_list_delete(expr, expr->tokens);
+        token_list_delete(expr->tokens);
         expr->tokens = NULL;
         return FALSE;
     }
 
-    expr->in = gwy_expr_token_list_length(expr->tokens->rpn_block);
+    expr->in = token_list_length(expr->tokens->rpn_block);
     if (expr->in > expr->ilen) {
         expr->ilen = expr->in;
         expr->input = g_renew(GwyExprCode, expr->input, expr->ilen);
@@ -1359,7 +1323,7 @@ gwy_expr_transform_to_rpn(GwyExpr *expr,
         expr->input[i].type = t->token;
         expr->input[i].value = t->value.v_float;
     }
-    gwy_expr_token_list_delete(expr, expr->tokens);
+    token_list_delete(expr->tokens);
     expr->tokens = NULL;
 
     if (!gwy_expr_stack_check_executability(expr)) {
@@ -1396,10 +1360,6 @@ gwy_expr_new(void)
         return NULL;
 
     expr = g_new0(GwyExpr, 1);
-    expr->token_chunk = g_mem_chunk_new("GwyExprToken",
-                                        sizeof(GwyExprToken),
-                                        32*sizeof(GwyExprToken),
-                                        G_ALLOC_ONLY);
 
     /* We could also put constants into scanner's symbol table, but then
      * we have to tell them apart when we get some symbol from scanner. */
@@ -1419,8 +1379,7 @@ gwy_expr_new(void)
 void
 gwy_expr_free(GwyExpr *expr)
 {
-    gwy_expr_token_list_delete(expr, expr->tokens);
-    g_mem_chunk_destroy(expr->token_chunk);
+    token_list_delete(expr->tokens);
     if (expr->identifiers)
        g_ptr_array_free(expr->identifiers, TRUE);
     if (expr->scanner)
