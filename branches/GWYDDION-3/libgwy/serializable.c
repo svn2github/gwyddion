@@ -1489,6 +1489,8 @@ gwy_serializable_assign(GwySerializable *destination,
  * @GWY_SERIALIZABLE_INT8: Denotes a character (8bit integer).
  * @GWY_SERIALIZABLE_INT8_ARRAY: Denotes a character (8bit integer) array.
  * @GWY_SERIALIZABLE_BOOLEAN: Denotes a one-byte boolean.
+ * @GWY_SERIALIZABLE_INT16: Denotes a 16bit integer.
+ * @GWY_SERIALIZABLE_INT16_ARRAY: Denotes an array of 16bit integers.
  * @GWY_SERIALIZABLE_INT32: Denotes a 32bit integer.
  * @GWY_SERIALIZABLE_INT32_ARRAY: Denotes an array of 32bit integers.
  * @GWY_SERIALIZABLE_INT64: Denotes a 64bit integer.
