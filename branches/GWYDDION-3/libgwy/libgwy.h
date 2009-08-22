@@ -25,6 +25,7 @@
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
 #include <libgwy/serializable.h>
+#include <libgwy/unit.h>
 
 #endif
 

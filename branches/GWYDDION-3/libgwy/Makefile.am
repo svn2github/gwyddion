@@ -20,14 +20,16 @@ libgwyinclude_HEADERS = \
 	macros.h \
 	math.h \
 	pack.h \
-	serializable.h
+	serializable.h \
+	unit.h
 
 libgwy_la_SOURCES = \
 	errorlist.c \
 	macros.c \
 	math.c \
 	pack.c \
-	serializable.c
+	serializable.c \
+	unit.c
 
 testlibgwy_SOURCES = testlibgwy.c
 
