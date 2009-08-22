@@ -816,68 +816,35 @@ gwy_container_gis_value_of_type(GwyContainer *container,
  * gwy_container_get_value_by_name:
  * @c: A container.
  * @n: String item key.
+ * @v: #GValue to update, it can be either zero-initialized or containing
+ *     a value. If item does not exist, it is left untouched.
  *
- * Gets the value in container @c identified by name @n.
+ * Gets a generic value from a container using a string identifier.
+ *
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
+ * such data in the container.
  **/
 
 /**
  * gwy_container_get_value:
  * @container: A container.
  * @key: #GQuark item key.
+ * @value: #GValue to update, it can be either zero-initialized or containing
+ *         a value. If item does not exist, it is left untouched.
  *
- * Returns the value in @container identified by @key.
+ * Gets a generic value from a container using a quark identifier.
  *
- * Returns: The value as a #GValue.
- **/
-GValue
-gwy_container_get_value(GwyContainer *container, GQuark key)
-{
-    GValue gvalue;
-    GValue *p;
-
-    gwy_memclear(&gvalue, 1);
-    p = gwy_container_get_value_of_type(container, key, 0);
-    if (G_LIKELY(p)) {
-        g_value_init(&gvalue, G_VALUE_TYPE(p));
-        g_value_copy(p, &gvalue);
-    }
-
-    return gvalue;
-}
-
-/**
- * gwy_container_gis_value_by_name:
- * @c: A container.
- * @n: String item key.
- * @v: Pointer to a #GValue to update. If item does not exist,
- *     it is left untouched.
- *
- * Get-if-set a generic value from a container.
- *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
- * such value in the container.
- **/
-
-/**
- * gwy_container_gis_value:
- * @container: A container.
- * @key: #GQuark item key.
- * @value: Pointer to a #GValue to update. If item does not exist,
- *         it is left untouched.
- *
- * Get-if-set a generic value from a container.
- *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
- *          such value in the container.
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
+ *          such data in the container.
  **/
 gboolean
-gwy_container_gis_value(GwyContainer *container,
+gwy_container_get_value(GwyContainer *container,
                         GQuark key,
                         GValue *value)
 {
     GValue *p;
 
-    if (!(p = gwy_container_gis_value_of_type(container, key, 0)))
+    if (!(p = gwy_container_get_value_of_type(container, key, 0)))
         return FALSE;
 
     if (G_VALUE_TYPE(value))
@@ -893,7 +860,7 @@ gwy_container_gis_value(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the boolean in container @c identified by name @n.
+ * Gets a boolean from a container using a string identifier.
  **/
 
 /**
@@ -901,9 +868,9 @@ gwy_container_gis_value(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the boolean in @container identified by @key.
+ * Gets a boolean from a container using a quark identifier.
  *
- * Returns: The boolean as #gboolean.
+ * Returns: The boolean value.
  **/
 gboolean
 gwy_container_get_boolean(GwyContainer *container, GQuark key)
@@ -920,9 +887,9 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the boolean to update.
  *
- * Get-if-set a boolean from a container.
+ * Updates a boolean from a container using a string identifier.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such boolean in the container.
  **/
 
@@ -932,9 +899,9 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the boolean to update.
  *
- * Get-if-set a boolean from a container.
+ * Updates a boolean from a container using a quark identifier.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such boolean in the container.
  **/
 gboolean
@@ -956,7 +923,7 @@ gwy_container_gis_boolean(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the unsigned character in container @c identified by name @n.
+ * Gets a character from a container using a string identifier.
  **/
 
 /**
@@ -964,7 +931,7 @@ gwy_container_gis_boolean(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the unsigned character in @container identified by @key.
+ * Gets a character from a container using a quark identifier.
  *
  * Returns: The character as #gchar.
  **/
@@ -981,24 +948,24 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
  * gwy_container_gis_char_by_name:
  * @c: A container.
  * @n: String item key.
- * @v: Pointer to the unsigned char to update.
+ * @v: Pointer to the character to update.
  *
- * Get-if-set an unsigned char from a container.
+ * Updates a character from a container using a string identifier.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
- * such unsigned char in the container.
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
+ * such character in the container.
  **/
 
 /**
  * gwy_container_gis_char:
  * @container: A container.
  * @key: #GQuark item key.
- * @value: Pointer to the unsigned char to update.
+ * @value: Pointer to the character to update.
  *
- * Get-if-set an unsigned char from a container.
+ * Updates a character from a container using a quark identifier.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
- *          such unsigned char in the container.
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
+ *          such character in the container.
  **/
 gboolean
 gwy_container_gis_char(GwyContainer *container,
@@ -1019,7 +986,7 @@ gwy_container_gis_char(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the 32bit integer in container @c identified by name @n.
+ * Gets a 32bit integer from a container using a string identifier.
  **/
 
 /**
@@ -1027,9 +994,9 @@ gwy_container_gis_char(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the 32bit integer in @container identified by @key.
+ * Gets a 32bit integer from a container using a quark identifier.
  *
- * Returns: The integer as #guint32.
+ * Returns: The integer as #gint32.
  **/
 gint32
 gwy_container_get_int32(GwyContainer *container, GQuark key)
@@ -1046,9 +1013,9 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the 32bit integer to update.
  *
- * Get-if-set a 32bit integer from a container.
+ * Updates a 32bit integer from a container using a string identifier.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such 32bit integer in the container.
  **/
 
@@ -1058,9 +1025,9 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the 32bit integer to update.
  *
- * Get-if-set a 32bit integer from a container.
+ * Updates a 32bit integer from a container using a quark identifier.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such 32bit integer in the container.
  **/
 gboolean
@@ -1082,7 +1049,7 @@ gwy_container_gis_int32(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the enum in container @c identified by name @n.
+ * Gets an enum value from a container using a string identifier.
  *
  * Note enums are treated as 32bit integers.
  **/
@@ -1092,11 +1059,11 @@ gwy_container_gis_int32(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the enum in @container identified by @key.
+ * Gets an enum value from a container using a quark identifier.
  *
  * Note enums are treated as 32bit integers.
  *
- * Returns: The enum as #gint.
+ * Returns: The enum as #guint.
  **/
 guint
 gwy_container_get_enum(GwyContainer *container, GQuark key)
@@ -1110,11 +1077,11 @@ gwy_container_get_enum(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the enum to update.
  *
- * Get-if-set an enum from a container.
+ * Updates an enum from a container using a string identifier.
  *
  * Note enums are treated as 32bit integers.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such enum in the container.
  **/
 
@@ -1124,11 +1091,11 @@ gwy_container_get_enum(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the enum to update.
  *
- * Get-if-set an enum from a container.
+ * Updates an enum from a container using a quark identifier.
  *
  * Note enums are treated as 32bit integers.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such enum in the container.
  **/
 /* FIXME: this is probably wrong.  It's here to localize the problem with
@@ -1152,7 +1119,7 @@ gwy_container_gis_enum(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the 64bit integer in container @c identified by name @n.
+ * Gets a 64bit integer from a container using a string identifier.
  **/
 
 /**
@@ -1160,9 +1127,9 @@ gwy_container_gis_enum(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the 64bit integer in @container identified by @key.
+ * Gets a 64bit integer from a container using a quark identifier.
  *
- * Returns: The 64bit integer as #guint64.
+ * Returns: The integer as #gint64.
  **/
 gint64
 gwy_container_get_int64(GwyContainer *container, GQuark key)
@@ -1179,9 +1146,9 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the 64bit integer to update.
  *
- * Get-if-set a 64bit integer from a container.
+ * Updates a 64bit integer from a container using a string identifier.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such 64bit integer in the container.
  **/
 
@@ -1191,9 +1158,9 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the 64bit integer to update.
  *
- * Get-if-set a 64bit integer from a container.
+ * Updates a 64bit integer from a container using a quark identifier.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such 64bit integer in the container.
  **/
 gboolean
@@ -1215,7 +1182,7 @@ gwy_container_gis_int64(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the double in container @c identified by name @n.
+ * Gets a double from a container using a string identifier.
  **/
 
 /**
@@ -1223,7 +1190,7 @@ gwy_container_gis_int64(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the double in @container identified by @key.
+ * Gets a double from a container using a quark identifier.
  *
  * Returns: The double as #gdouble.
  **/
@@ -1242,9 +1209,9 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the double to update.
  *
- * Get-if-set a double from a container.
+ * Updates a double from a container using a string identifier.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such double in the container.
  **/
 
@@ -1254,9 +1221,9 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the double to update.
  *
- * Get-if-set a double from a container.
+ * Updates a double from a container using a quark identifier.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such double in the container.
  **/
 gboolean
@@ -1278,7 +1245,7 @@ gwy_container_gis_double(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the string in container @c identified by name @n.
+ * Gets a string from a container using a string identifier.
  *
  * The returned string must be treated as constant and never freed or modified.
  **/
@@ -1288,7 +1255,7 @@ gwy_container_gis_double(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the string in @container identified by @key.
+ * Gets a string from a container using a quark identifier.
  *
  * The returned string must be treated as constant and never freed or modified.
  *
@@ -1309,12 +1276,12 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the string pointer to update.
  *
- * Get-if-set a string from a container.
+ * Updates a string from a container using a string identifier.
  *
- * The string eventually stored in @v must be treated as constant and
- * never freed or modified.
+ * The string stored in @v if this function succeeds must be treated as
+ * constant and never freed or modified.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such string in the container.
  **/
 
@@ -1324,12 +1291,12 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the string pointer to update.
  *
- * Get-if-set a string from a container.
+ * Updates a string from a container using a quark identifier.
  *
- * The string eventually stored in @value must be treated as constant and
- * never freed or modified.
+ * The string stored in @value if this function succeeds must be treated as
+ * constant and never freed or modified.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such string in the container.
  **/
 gboolean
@@ -1351,9 +1318,9 @@ gwy_container_gis_string(GwyContainer *container,
  * @c: A container.
  * @n: String item key.
  *
- * Gets the object in container @c identified by name @n.
+ * Gets an object from a container using a string identifier.
  *
- * The returned object doesn't have its reference count increased, use
+ * The returned object does not have its reference count increased, use
  * g_object_ref() if you want to access it even when @container may cease
  * to exist.
  **/
@@ -1363,9 +1330,9 @@ gwy_container_gis_string(GwyContainer *container,
  * @container: A container.
  * @key: #GQuark item key.
  *
- * Returns the object in @container identified by @key.
+ * Gets an object from a container using a quark identifier.
  *
- * The returned object doesn't have its reference count increased, use
+ * The returned object does not have its reference count increased, use
  * g_object_ref() if you want to access it even when @container may cease
  * to exist.
  *
@@ -1386,13 +1353,13 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
  * @n: String item key.
  * @v: Pointer to the object pointer to update.
  *
- * Get-if-set an object from a container.
+ * Updates an object from a container using a string identifier.
  *
- * The object eventually stored in @value doesn't have its reference count
- * increased, use g_object_ref() if you want to access it even when
- * @container may cease to exist.
+ * The object stored in @v if this function succeeds does not have its
+ * reference count increased, use g_object_ref() if you want to access it even
+ * when @container may cease to exist.
  *
- * Expands to %TRUE if @value was actually updated, %FALSE when there is no
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
  * such object in the container.
  **/
 
@@ -1402,13 +1369,13 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
  * @key: #GQuark item key.
  * @value: Pointer to the object pointer to update.
  *
- * Get-if-set an object from a container.
+ * Updates an object from a container using a quark identifier.
  *
- * The object eventually stored in @value doesn't have its reference count
- * increased, use g_object_ref() if you want to access it even when
- * @container may cease to exist.
+ * The object stored in @value if this function succeeds does not have its
+ * reference count increased, use g_object_ref() if you want to access it even
+ * when @container may cease to exist.
  *
- * Returns: %TRUE if @v was actually updated, %FALSE when there is no
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such object in the container.
  **/
 gboolean
@@ -1571,7 +1538,7 @@ gwy_container_set_value(GwyContainer *container,
  * @n: String item key.
  * @v: A boolean.
  *
- * Stores a boolean into container @c, identified by name @n.
+ * Stores a boolean identified by a string into a container.
  **/
 
 /**
@@ -1580,7 +1547,7 @@ gwy_container_set_value(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A boolean.
  *
- * Stores a boolean into @container, identified by @key.
+ * Stores a boolean identified by a quark into a container.
  **/
 void
 gwy_container_set_boolean(GwyContainer *container,
@@ -1599,18 +1566,18 @@ gwy_container_set_boolean(GwyContainer *container,
  * gwy_container_set_char_by_name:
  * @c: A container.
  * @n: String item key.
- * @v: An unsigned character.
+ * @v: A character.
  *
- * Stores an unsigned character into container @c, identified by name @n.
+ * Stores a character identified by a string into a container.
  **/
 
 /**
  * gwy_container_set_char:
  * @container: A container.
  * @key: #GQuark item key.
- * @value: An unsigned character.
+ * @value: A character.
  *
- * Stores an unsigned character into @container, identified by @key.
+ * Stores a character identified by a quark into a container.
  **/
 void
 gwy_container_set_char(GwyContainer *container,
@@ -1631,7 +1598,7 @@ gwy_container_set_char(GwyContainer *container,
  * @n: String item key.
  * @v: A 32bit integer.
  *
- * Stores a 32bit integer into container @c, identified by name @n.
+ * Stores a 32bit integer identified by a string into a container.
  **/
 
 /**
@@ -1640,7 +1607,7 @@ gwy_container_set_char(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A 32bit integer.
  *
- * Stores a 32bit integer into @container, identified by @key.
+ * Stores a 32bit integer identified by a quark into a container.
  **/
 void
 gwy_container_set_int32(GwyContainer *container,
@@ -1661,7 +1628,7 @@ gwy_container_set_int32(GwyContainer *container,
  * @n: String item key.
  * @v: An enum.
  *
- * Stores an enum into container @c, identified by name @n.
+ * Stores an enum value identified by a string into a container.
  *
  * Note enums are treated as 32bit integers.
  **/
@@ -1672,7 +1639,7 @@ gwy_container_set_int32(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: An enum integer.
  *
- * Stores an enum into @container, identified by @key.
+ * Stores an enum value identified by a quark into a container.
  *
  * Note enums are treated as 32bit integers.
  **/
@@ -1692,7 +1659,7 @@ gwy_container_set_enum(GwyContainer *container,
  * @n: String item key.
  * @v: A 64bit integer.
  *
- * Stores a 64bit integer into container @c, identified by name @n.
+ * Stores a 64bit integer identified by a string into a container.
  **/
 
 /**
@@ -1701,7 +1668,7 @@ gwy_container_set_enum(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A 64bit integer.
  *
- * Stores a 64bit integer into @container, identified by @key.
+ * Stores a 64bit integer identified by a quark into a container.
  **/
 void
 gwy_container_set_int64(GwyContainer *container,
@@ -1722,7 +1689,7 @@ gwy_container_set_int64(GwyContainer *container,
  * @n: String item key.
  * @v: A double integer.
  *
- * Stores a double into container @c, identified by name @n.
+ * Stores a double identified by a string into a container.
  **/
 
 /**
@@ -1731,7 +1698,7 @@ gwy_container_set_int64(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A double.
  *
- * Stores a double into @container, identified by @key.
+ * Stores a double identified by a quark into a container.
  **/
 void
 gwy_container_set_double(GwyContainer *container,
@@ -1752,9 +1719,9 @@ gwy_container_set_double(GwyContainer *container,
  * @n: String item key.
  * @v: A nul-terminated string.
  *
- * Stores a string into container @c, identified by name @n.
+ * Stores a string identified by a string into a container.
  *
- * The container takes ownership of the string, so it can't be used on
+ * The container takes ownership of the string, so it cannot be used on
  * static strings, use g_strdup() to duplicate them first.
  **/
 
@@ -1764,9 +1731,9 @@ gwy_container_set_double(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A nul-terminated string.
  *
- * Stores a string into @container, identified by @key.
+ * Stores a string identified by a quark into a container.
  *
- * The container takes ownership of the string, so it can't be used on
+ * The container takes ownership of the string, so it cannot be used on
  * static strings, use g_strdup() to duplicate them first.
  **/
 void
@@ -1788,7 +1755,7 @@ gwy_container_set_string(GwyContainer *container,
  * @n: String item key.
  * @v: An object to store into container.
  *
- * Stores an object into container @c, identified by name @n.
+ * Stores an object identified by a string into a container.
  *
  * See gwy_container_set_object() for details.
  **/
@@ -1799,7 +1766,7 @@ gwy_container_set_string(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: Object to store into the container.
  *
- * Stores an object into @container, identified by @key.
+ * Stores an object identified by a quark into a container.
  *
  * The container claims ownership on the object, i.e. its reference count is
  * incremented.
