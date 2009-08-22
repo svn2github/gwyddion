@@ -44,16 +44,24 @@ typedef struct {
 } PrefixData;
 
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
-static void     value_destroy                  (gpointer data);
+static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
+static gsize    gwy_container_itemize          (GwySerializable *serializable,
+                                                GwySerializableItems *items);
 static void     gwy_container_finalize         (GObject *object);
 static void     gwy_container_dispose          (GObject *object);
+static GObject* gwy_container_construct        (GwySerializableItems *items,
+                                                GwyErrorList **error_list);
+static GObject* gwy_container_duplicate_impl   (GwySerializable *object);
+static void     gwy_container_assign_impl      (GwySerializable *destination,
+                                                GwySerializable *source);
+static void     value_destroy                  (gpointer data);
 static void     hash_object_dispose            (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
-static GValue*  gwy_container_get_value_of_type(GwyContainer *container,
+static GValue*  get_value_of_type              (GwyContainer *container,
                                                 GQuark key,
                                                 GType type);
-static GValue*  gwy_container_gis_value_of_type(GwyContainer *container,
+static GValue*  gis_value_of_type              (GwyContainer *container,
                                                 GQuark key,
                                                 GType type);
 static gboolean try_set_value                  (GwyContainer *container,
@@ -61,20 +69,12 @@ static gboolean try_set_value                  (GwyContainer *container,
                                                 const GValue *value,
                                                 gboolean do_replace,
                                                 gboolean do_create);
-static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
 static void     hash_count_items               (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
-static gsize    gwy_container_itemize          (GwySerializable *serializable,
-                                                GwySerializableItems *items);
 static void     hash_itemize                   (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
-static GObject* gwy_container_construct        (GwySerializableItems *items,
-                                                GwyErrorList **error_list);
-static GObject* gwy_container_duplicate_impl   (GwySerializable *object);
-static void     gwy_container_assign_impl      (GwySerializable *destination,
-                                                GwySerializable *source);
 static gboolean hash_remove_prefix             (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
@@ -739,7 +739,7 @@ gwy_container_rename(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_value_of_type:
+ * get_value_of_type:
  * @container: A container.
  * @key: #GQuark item key.
  * @type: Value type to get.  Can be %NULL to not check value type.
@@ -747,14 +747,14 @@ gwy_container_rename(GwyContainer *container,
  * Low level function to get a value from a container.
  *
  * Causes a warning when no such value exists, or it's of a wrong type.
- * Use gwy_container_gis_value_of_type() to get value that may not exist.
+ * Use gis_value_of_type() to get value that may not exist.
  *
  * Returns: The value identified by @key; %NULL on failure.
  **/
 static GValue*
-gwy_container_get_value_of_type(GwyContainer *container,
-                                GQuark key,
-                                GType type)
+get_value_of_type(GwyContainer *container,
+                  GQuark key,
+                  GType type)
 {
     GValue *p;
 
@@ -776,7 +776,7 @@ gwy_container_get_value_of_type(GwyContainer *container,
 }
 
 /**
- * gwy_container_gis_value_of_type:
+ * gis_value_of_type:
  * @container: A container.
  * @key: #GQuark item key.
  * @type: Value type to get.  Can be %NULL to not check value type.
@@ -788,7 +788,7 @@ gwy_container_get_value_of_type(GwyContainer *container,
  * Returns: The value identified by @key, or %NULL.
  **/
 static GValue*
-gwy_container_gis_value_of_type(GwyContainer *container,
+gis_value_of_type(GwyContainer *container,
                                 GQuark key,
                                 GType type)
 {
@@ -843,7 +843,7 @@ gwy_container_get_value(GwyContainer *container,
 {
     GValue *p;
 
-    if (!(p = gwy_container_get_value_of_type(container, key, 0)))
+    if (!(p = get_value_of_type(container, key, 0)))
         return FALSE;
 
     if (G_VALUE_TYPE(value))
@@ -876,7 +876,7 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_BOOLEAN);
+    p = get_value_of_type(container, key, G_TYPE_BOOLEAN);
     return G_LIKELY(p) ? !!g_value_get_boolean(p) : FALSE;
 }
 
@@ -910,7 +910,7 @@ gwy_container_gis_boolean(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_BOOLEAN))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_BOOLEAN))) {
         *value = !!g_value_get_boolean(p);
         return TRUE;
     }
@@ -939,7 +939,7 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_CHAR);
+    p = get_value_of_type(container, key, G_TYPE_CHAR);
     return G_LIKELY(p) ? g_value_get_char(p) : 0;
 }
 
@@ -973,7 +973,7 @@ gwy_container_gis_char(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_CHAR))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_CHAR))) {
         *value = g_value_get_char(p);
         return TRUE;
     }
@@ -1002,7 +1002,7 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_INT);
+    p = get_value_of_type(container, key, G_TYPE_INT);
     return G_LIKELY(p) ? g_value_get_int(p) : 0;
 }
 
@@ -1036,7 +1036,7 @@ gwy_container_gis_int32(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_INT))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_INT))) {
         *value = g_value_get_int(p);
         return TRUE;
     }
@@ -1135,7 +1135,7 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_INT64);
+    p = get_value_of_type(container, key, G_TYPE_INT64);
     return G_LIKELY(p) ? g_value_get_int64(p) : 0;
 }
 
@@ -1169,7 +1169,7 @@ gwy_container_gis_int64(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_INT64))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_INT64))) {
         *value = g_value_get_int64(p);
         return TRUE;
     }
@@ -1198,7 +1198,7 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_DOUBLE);
+    p = get_value_of_type(container, key, G_TYPE_DOUBLE);
     return G_LIKELY(p) ? g_value_get_double(p) : 0.0;
 }
 
@@ -1232,7 +1232,7 @@ gwy_container_gis_double(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_DOUBLE))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_DOUBLE))) {
         *value = g_value_get_double(p);
         return TRUE;
     }
@@ -1265,7 +1265,7 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_STRING);
+    p = get_value_of_type(container, key, G_TYPE_STRING);
     return G_LIKELY(p) ? g_value_get_string(p) : NULL;
 }
 
@@ -1305,7 +1305,7 @@ gwy_container_gis_string(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_STRING))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_STRING))) {
         *value = g_value_get_string(p);
         return TRUE;
     }
@@ -1342,7 +1342,7 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
 {
     GValue *p;
 
-    p = gwy_container_get_value_of_type(container, key, G_TYPE_OBJECT);
+    p = get_value_of_type(container, key, G_TYPE_OBJECT);
     return G_LIKELY(p) ? (gpointer)g_value_get_object(p) : NULL;
 }
 
@@ -1384,7 +1384,7 @@ gwy_container_gis_object(GwyContainer *container,
 {
     GValue *p;
 
-    if ((p = gwy_container_gis_value_of_type(container, key, G_TYPE_OBJECT))) {
+    if ((p = gis_value_of_type(container, key, G_TYPE_OBJECT))) {
         *(GObject**)value = g_value_get_object(p);
         return TRUE;
     }
@@ -1392,8 +1392,8 @@ gwy_container_gis_object(GwyContainer *container,
 }
 
 static gboolean
-gwy_container_values_equal(const GValue *value1,
-                           const GValue *value2)
+values_are_equal(const GValue *value1,
+                 const GValue *value2)
 {
     GType type;
 
@@ -1479,7 +1479,7 @@ try_set_value(GwyContainer *container,
         if (!do_replace)
             return FALSE;
         g_assert(G_IS_VALUE(old));
-        changed = !gwy_container_values_equal(value, old);
+        changed = !values_are_equal(value, old);
         g_value_unset(old);
     }
     else {
@@ -1971,7 +1971,7 @@ gwy_container_transfer(GwyContainer *source,
         gboolean exists = (copy != NULL);
         if (!force && exists)
             continue;
-        if (exists && gwy_container_values_equal(val, copy))
+        if (exists && values_are_equal(val, copy))
             continue;
 
         if (exists)
