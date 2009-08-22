@@ -236,65 +236,6 @@ gwy_ser_test_n_items(GwySerializable *serializable)
                 : 0);
 }
 
-static gsize
-gwy_ser_test_itemize(GwySerializable *serializable,
-                     GwySerializableItems *items)
-{
-    GwySerTest *sertest = GWY_SER_TEST(serializable);
-    GwySerializableItem *item;
-    gsize n_items = 0;
-
-    if (sertest->flag) {
-        g_return_val_if_fail(items->len - items->n_items, 0);
-        item = items->items + items->n_items++, n_items++;
-
-        item->name = "flag";
-        item->value.v_boolean = sertest->flag;
-        item->ctype = GWY_SERIALIZABLE_BOOLEAN;
-    }
-
-    if (sertest->len) {
-        g_return_val_if_fail(items->len - items->n_items, 0);
-        item = items->items + items->n_items++, n_items++;
-
-        item->name = "data";
-        item->array_size = sertest->len;
-        item->value.v_double_array = sertest->data;
-        item->ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY;
-    }
-
-    if (sertest->s) {
-        g_return_val_if_fail(items->len - items->n_items, 0);
-        item = items->items + items->n_items++, n_items++;
-
-        item->name = "s";
-        item->value.v_string = sertest->s;
-        item->ctype = GWY_SERIALIZABLE_STRING;
-    }
-
-    g_return_val_if_fail(items->len - items->n_items, 0);
-    item = items->items + items->n_items++, n_items++;
-
-    item->name = "raw";
-    item->array_size = 4;
-    item->value.v_uint8_array = sertest->raw;
-    item->ctype = GWY_SERIALIZABLE_INT8_ARRAY;
-
-    if (sertest->child) {
-        g_return_val_if_fail(items->len - items->n_items, 0);
-        item = items->items + items->n_items++, n_items++;
-
-        item->name = "child";
-        item->value.v_object = G_OBJECT(sertest->child);
-        item->ctype = GWY_SERIALIZABLE_OBJECT;
-        gwy_serializable_itemize(GWY_SERIALIZABLE(sertest->child), items);
-    }
-
-    sertest->done_called--;
-
-    return n_items;
-}
-
 // The remaining members get zero-initialized which saves us from doing it.
 static const GwySerializableItem default_items[] = {
     { .name = "flag",  .ctype = GWY_SERIALIZABLE_BOOLEAN,      },
@@ -303,6 +244,52 @@ static const GwySerializableItem default_items[] = {
     { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
     { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
 };
+
+#define add_item(id) \
+    g_return_val_if_fail(items->len - items->n_items, 0); \
+    items->items[items->n_items++] = it[id]; \
+    n_items++
+
+static gsize
+gwy_ser_test_itemize(GwySerializable *serializable,
+                     GwySerializableItems *items)
+{
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
+    GwySerializableItem it[G_N_ELEMENTS(default_items)];
+    gsize n_items = 0;
+
+    memcpy(it, default_items, sizeof(default_items));
+
+    if (sertest->flag) {
+        it[0].value.v_boolean = sertest->flag;
+        add_item(0);
+    }
+
+    if (sertest->data) {
+        it[1].value.v_double_array = sertest->data;
+        it[1].array_size = sertest->len;
+        add_item(1);
+    }
+
+    if (sertest->s) {
+        it[2].value.v_string = sertest->s;
+        add_item(2);
+    }
+
+    it[3].value.v_uint8_array = sertest->raw;
+    it[3].array_size = 4;
+    add_item(3);
+
+    if (sertest->child) {
+        it[4].value.v_object = G_OBJECT(sertest->child);
+        add_item(4);
+        gwy_serializable_itemize(GWY_SERIALIZABLE(sertest->child), items);
+    }
+
+    sertest->done_called--;
+
+    return n_items;
+}
 
 static GObject*
 gwy_ser_test_construct(GwySerializableItems *items,
@@ -334,15 +321,11 @@ gwy_ser_test_construct(GwySerializableItems *items,
     GwySerTest *sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
 
     sertest->flag = it[0].value.v_boolean;
-
-    sertest->len = it[1].array_size;
+    sertest->len  = it[1].array_size;
     sertest->data = it[1].value.v_double_array;
-
-    sertest->s = it[2].value.v_string;
-
+    sertest->s    = it[2].value.v_string;
     memcpy(sertest->raw, it[3].value.v_uint8_array, 4);
     g_free(it[3].value.v_uint8_array);
-
     sertest->child = child;
 
     return G_OBJECT(sertest);
