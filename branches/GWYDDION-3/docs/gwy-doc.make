@@ -41,6 +41,12 @@ EXTRA_DIST = \
 DOC_STAMPS = scan-build.stamp sgml-build.stamp html-build.stamp \
 	sgml.stamp html.stamp
 
+SCAN_FILES = \
+	$(DOC_MODULE)-sections.txt \
+	$(DOC_MODULE)-decl-list.txt \
+	$(DOC_MODULE)-decl.txt \
+	$(DOC_MODULE).types
+
 SCANOBJ_FILES = \
 	$(DOC_MODULE).args \
 	$(DOC_MODULE).hierarchy \
@@ -53,13 +59,7 @@ REPORT_FILES = \
 	$(DOC_MODULE)-undeclared.txt \
 	$(DOC_MODULE)-unused.txt
 
-CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS)
-
-DISTCLEANFILES = \
-	$(DOC_MODULE)-sections.txt \
-	$(DOC_MODULE)-decl-list.txt \
-	$(DOC_MODULE)-decl.txt \
-	$(DOC_MODULE).types
+CLEANFILES = $(SCAN_FILES) $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS)
 
 HFILE_GLOB = \
 	$(top_srcdir)/$(DOC_SOURCE_DIR)/*.h \
@@ -78,23 +78,19 @@ docs: html-build.stamp
 
 scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	@echo 'gtk-doc: Scanning header files'
-	if test -f Makefile.am; then \
-		x=; \
-	else \
-		x=--source-dir=$(top_builddir)/$(DOC_SOURCE_DIR); \
-	fi; \
 	gtkdoc-scan --module=$(DOC_MODULE) \
-	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) $x \
+	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
+	            --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
 	            --rebuild-sections --rebuild-types \
 	            --deprecated-guards="GWY_DISABLE_DEPRECATED" \
 	            --ignore-decorators="_GWY_STATIC_INLINE"
 	if grep -l '^..*$$' $(DOC_MODULE).types >/dev/null 2>&1 ; then \
 		CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" \
-			gtkdoc-scangobj --module=$(DOC_MODULE) --output-dir=$(builddir); \
+			gtkdoc-scangobj --module=$(DOC_MODULE) \
+			                --output-dir=$(builddir); \
 	else \
-		for i in $(SCANOBJ_FILES); do \
-			test -f $$i || touch $$i ; \
-		done \
+		rm -f $(SCANOBJ_FILES); \
+		touch $(SCANOBJ_FILES); \
 	fi
 	if test -s $(DOC_MODULE).hierarchy; then \
 		$(PYTHON) $(ADD_OBJECTS) $(DOC_MODULE)-sections.txt $(DOC_MODULE).hierarchy $(ADDOBJECTS_OPTIONS); \
@@ -108,13 +104,9 @@ $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)
 
 sgml-build.stamp: $(CFILE_GLOB) $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
 	@echo 'gtk-doc: Building XML'
-	if test -f Makefile.am; then \
-		x=; \
-	else \
-		x=--source-dir=$(top_builddir)/$(DOC_SOURCE_DIR); \
-	fi; \
 	gtkdoc-mkdb --module=$(DOC_MODULE) \
-	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) $x \
+	            --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
+	            --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
 	            --sgml-mode --output-format=xml \
 	            --expand-content-files="$(expand_content_files)" \
 	            --main-sgml-file=$(DOC_MAIN_SGML_FILE) \
@@ -131,20 +123,19 @@ html-build.stamp: sgml.stamp $(srcdir)/$(DOC_MAIN_SGML_FILE) $(content_files)
 	rm -rf html
 	mkdir html
 	test -f $(DOC_MAIN_SGML_FILE) || cp -f $(srcdir)/$(DOC_MAIN_SGML_FILE) .
-	cd html && gtkdoc-mkhtml --path=$(abs_builddir) $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
+	cd html && gtkdoc-mkhtml --path=$(abs_builddir) $(DOC_MODULE) \
+	                         ../$(DOC_MAIN_SGML_FILE)
 	test "x$(HTML_IMAGES)" == x || cp -f $(HTML_IMAGES) html/
-	echo cp $(top_srcdir)/docs/style.css html/
+	cp $(top_srcdir)/docs/style.css html/
 	@echo 'gtk-doc: Fixing cross-references'
-	gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) $(FIXXREF_OPTIONS)
+	gtkdoc-fixxref --module-dir=html --html-dir=$(HTML_DIR) \
+	               --module=$(DOC_MODULE) $(FIXXREF_OPTIONS)
 	touch html-build.stamp
 
 ##############
 
 clean-local:
-	rm -rf *~ *.bak .libs $(DOC_MODULE)-scan.*
-
-distclean-local:
-	rm -rf xml
+	rm -rf *~ *.bak .libs $(DOC_MODULE)-scan.* xml
 	test -f Makefile.am || rm -f $(DOC_MAIN_SGML_FILE)
 
 maintainer-clean-local:
