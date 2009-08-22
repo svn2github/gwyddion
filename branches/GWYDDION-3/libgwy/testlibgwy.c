@@ -23,6 +23,41 @@
 
 /***************************************************************************
  *
+ * String functions
+ *
+ ***************************************************************************/
+
+/* FIXME: On GNU systems we test the libc memmem() which is not exactly what
+ * we want. */
+static void
+test_memmem(void)
+{
+    static const gchar haystack[] = {
+        1, 2, 0, 1, 2, 0, 0, 2, 2, 1, 2, 2,
+    };
+    static const gchar *needle = haystack;
+    static const gchar pin[3] = { 2, 0, 2 };
+
+    /* Successes */
+    g_assert(gwy_memmem(NULL, 0, NULL, 0) == NULL);
+    g_assert(gwy_memmem(haystack, 0, NULL, 0) == haystack);
+    for (gsize n = 0; n <= sizeof(haystack); n++)
+        g_assert(gwy_memmem(haystack, sizeof(haystack), needle, n) == haystack);
+
+    g_assert(gwy_memmem(haystack, sizeof(haystack), needle + 4, 2)
+             == haystack + 1);
+    g_assert(gwy_memmem(haystack, sizeof(haystack), needle + 4, 3)
+             == haystack + 4);
+
+    /* Failures */
+    g_assert(gwy_memmem(NULL, 0, needle, 1) == NULL);
+    g_assert(gwy_memmem(haystack, sizeof(haystack)-1, needle, sizeof(haystack))
+             == NULL);
+    g_assert(gwy_memmem(haystack, sizeof(haystack), pin, sizeof(pin)) == NULL);
+}
+
+/***************************************************************************
+ *
  * Packing and unpacking
  *
  ***************************************************************************/
@@ -1168,6 +1203,7 @@ main(int argc, char *argv[])
     g_type_init();
 
     g_test_add_func("/testlibgwy/error_list", test_error_list);
+    g_test_add_func("/testlibgwy/memmem", test_memmem);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/sort", test_sort);
     g_test_add_func("/testlibgwy/expr-evaluate", test_expr_evaluate);
