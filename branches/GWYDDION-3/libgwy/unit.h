@@ -31,6 +31,14 @@ typedef enum {
     GWY_UNIT_FORMAT_TEX
 } GwyUnitFormatStyle;
 
+typedef struct {
+    gdouble magnitude;
+    gchar *units;
+    gint precision;
+} GwyUnitFormat;
+
+#define GWY_UNIT_INIT_FORMAT { 1.0, NULL, 0 }
+
 #define GWY_TYPE_UNIT \
     (gwy_unit_get_type())
 #define GWY_UNIT(obj) \
@@ -46,13 +54,6 @@ typedef enum {
 
 typedef struct _GwyUnit      GwyUnit;
 typedef struct _GwyUnitClass GwyUnitClass;
-
-typedef struct {
-    gdouble magnitude;
-    GString *units_gstring;
-    gchar *units;
-    gint precision;
-} GwyUnitFormat;
 
 struct _GwyUnit {
     GObject g_object;
@@ -72,58 +73,56 @@ struct _GwyUnitClass {
 };
 
 #define gwy_unit_duplicate(unit) \
-        (GWY_UNIT(gwy_serializable_duplicate(G_OBJECT(unit))))
+        (GWY_UNIT(gwy_serializable_duplicate(GWY_SERIALIZABLE(unit))))
+#define gwy_unit_assign(dest, src) \
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src))
 
-GType          gwy_unit_get_type              (void) G_GNUC_CONST;
+GType    gwy_unit_get_type              (void) G_GNUC_CONST;
 
-GwyUnit*       gwy_unit_new                   (void);
-GwyUnit*       gwy_unit_new_from_string       (const gchar *unit_string,
-                                               gint *power10);
-void           gwy_unit_set_from_string       (GwyUnit *unit,
-                                               const gchar *unit_string,
-                                               gint *power10);
-gchar*         gwy_unit_get_string            (GwyUnit *unit,
-                                               GwyUnitFormatStyle style);
-GwyUnit*       gwy_unit_multiply              (GwyUnit *unit,
-                                               GwyUnit *op1,
-                                               GwyUnit *op2);
-GwyUnit*       gwy_unit_divide                (GwyUnit *unit,
-                                               GwyUnit *op1,
-                                               GwyUnit *op2);
-GwyUnit*       gwy_unit_power                 (GwyUnit *unit,
-                                               GwyUnit *op,
-                                               gint power);
-GwyUnit*       gwy_unit_nth_root              (GwyUnit *unit,
-                                               GwyUnit *op,
-                                               gint ipower);
-GwyUnit*       gwy_unit_power_multiply        (GwyUnit *unit,
-                                               GwyUnit *op1,
-                                               gint power1,
-                                               GwyUnit *op2,
-                                               gint power2);
-gboolean       gwy_unit_equal                 (GwyUnit *unit,
-                                               GwyUnit *op);
-GwyUnitFormat* gwy_unit_format_for_power10    (GwyUnit *unit,
-                                               GwyUnitFormatStyle style,
-                                               gboolean standalone,
-                                               gint power10,
-                                               GwyUnitFormat *format);
-GwyUnitFormat* gwy_unit_format_with_resolution(GwyUnit *unit,
-                                               GwyUnitFormatStyle style,
-                                               gboolean standalone,
-                                               gdouble maximum,
-                                               gdouble resolution,
-                                               GwyUnitFormat *format);
-GwyUnitFormat* gwy_unit_format_with_digits    (GwyUnit *unit,
-                                               GwyUnitFormatStyle style,
-                                               gboolean standalone,
-                                               gdouble maximum,
-                                               gint sdigits,
-                                               GwyUnitFormat *format);
-GwyUnitFormat* gwy_unit_format_new            (void);
-void           gwy_unit_format_free           (GwyUnitFormat *format);
-void           gwy_unit_format_set_units      (GwyUnitFormat *format,
-                                               const gchar *units);
+GwyUnit* gwy_unit_new                   (void);
+GwyUnit* gwy_unit_new_from_string       (const gchar *unit_string,
+                                         gint *power10);
+void     gwy_unit_set_from_string       (GwyUnit *unit,
+                                         const gchar *unit_string,
+                                         gint *power10);
+gchar*   gwy_unit_to_string             (GwyUnit *unit,
+                                         GwyUnitFormatStyle style);
+GwyUnit* gwy_unit_multiply              (GwyUnit *unit,
+                                         GwyUnit *op1,
+                                         GwyUnit *op2);
+GwyUnit* gwy_unit_divide                (GwyUnit *unit,
+                                         GwyUnit *op1,
+                                         GwyUnit *op2);
+GwyUnit* gwy_unit_power                 (GwyUnit *unit,
+                                         GwyUnit *op,
+                                         gint power);
+GwyUnit* gwy_unit_nth_root              (GwyUnit *unit,
+                                         GwyUnit *op,
+                                         gint ipower);
+GwyUnit* gwy_unit_power_multiply        (GwyUnit *unit,
+                                         GwyUnit *op1,
+                                         gint power1,
+                                         GwyUnit *op2,
+                                         gint power2);
+gboolean gwy_unit_equal                 (GwyUnit *unit,
+                                         GwyUnit *op);
+void     gwy_unit_format_for_power10    (GwyUnit *unit,
+                                         GwyUnitFormatStyle style,
+                                         gboolean standalone,
+                                         gint power10,
+                                         GwyUnitFormat *format);
+void     gwy_unit_format_with_resolution(GwyUnit *unit,
+                                         GwyUnitFormatStyle style,
+                                         gboolean standalone,
+                                         gdouble maximum,
+                                         gdouble resolution,
+                                         GwyUnitFormat *format);
+void     gwy_unit_format_with_digits    (GwyUnit *unit,
+                                         GwyUnitFormatStyle style,
+                                         gboolean standalone,
+                                         gdouble maximum,
+                                         gint sdigits,
+                                         GwyUnitFormat *format);
 
 G_END_DECLS
 

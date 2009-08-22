@@ -17,12 +17,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define GWY_MATH_POLLUTE_NAMESPACE
+#include <config.h>
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serializable.h"
 #include "libgwy/unit.h"
+
+#define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
 
 enum {
     CHANGED,
@@ -32,7 +36,6 @@ enum {
 typedef struct {
     GQuark unit;
     gshort power;
-    gshort traits;
 } GwySimpleUnit;
 
 typedef struct {
@@ -45,27 +48,31 @@ typedef struct {
     const gchar *power_unit_separator;
 } GwyUnitStyleSpec;
 
-static void     gwy_unit_finalize         (GObject *object);
-static void     gwy_unit_serializable_init(GwySerializableInterface *iface);
-static gsize    gwy_unit_n_items          (GwySerializable *serializable);
-static gsize    gwy_unit_itemize          (GwySerializable *serializable,
-                                           GwySerializableItems *items);
-static void     gwy_unit_done             (GwySerializable *serializable);
-static GObject* gwy_unit_construct        (GwySerializableItems *items,
-                                           GwyErrorList **error_list);
-static GObject* gwy_unit_duplicate_impl   (GwySerializable *serializable);
-static void     gwy_unit_assign_impl      (GwySerializable *destination,
-                                           GwySerializable *source);
-static gboolean     gwy_unit_parse             (GwyUnit *unit,
-                                                   const gchar *string);
-static GwyUnit*   gwy_unit_power_real        (GwyUnit *unit,
-                                                   gint power,
-                                                   GwyUnit *result);
-static GwyUnit*   gwy_unit_canonicalize      (GwyUnit *unit);
-static const gchar* gwy_unit_prefix            (gint power);
-static GString*     gwy_unit_format            (GwyUnit *unit,
-                                                   const GwyUnitStyleSpec *fs,
-                                                   GString *string);
+static void         gwy_unit_finalize         (GObject *object);
+static void         gwy_unit_serializable_init(GwySerializableInterface *iface);
+static gsize        gwy_unit_n_items          (GwySerializable *serializable);
+static gsize        gwy_unit_itemize          (GwySerializable *serializable,
+                                               GwySerializableItems *items);
+static void         gwy_unit_done             (GwySerializable *serializable);
+static GObject*     gwy_unit_construct        (GwySerializableItems *items,
+                                               GwyErrorList **error_list);
+static GObject*     gwy_unit_duplicate_impl   (GwySerializable *serializable);
+static void         gwy_unit_assign_impl      (GwySerializable *destination,
+                                               GwySerializable *source);
+
+static gboolean     parse                     (GwyUnit *unit,
+                                               const gchar *string,
+                                               gint *power10);
+static GwyUnit*     power_impl                (GwyUnit *unit,
+                                               GwyUnit *op,
+                                               gint power);
+static GwyUnit*     canonicalize              (GwyUnit *unit);
+static const gchar* get_prefix                (gint power);
+static GString*     format                    (const GwyUnit *unit,
+                                               const GwyUnitStyleSpec *fs,
+                                               gboolean standalone,
+                                               gint power10,
+                                               GString *string);
 
 static const struct {
     const gchar *prefix;
@@ -123,6 +130,10 @@ static const GwyUnitStyleSpec *format_styles[] = {
     &format_style_TeX,
 };
 
+static const GwySerializableItem serialize_items[] = {
+    { .name = "unitstr", .ctype = GWY_SERIALIZABLE_STRING, },
+};
+
 static guint unit_signals[LAST_SIGNAL];
 
 G_DEFINE_TYPE_EXTENDED
@@ -134,6 +145,7 @@ gwy_unit_serializable_init(GwySerializableInterface *iface)
 {
     iface->n_items   = gwy_unit_n_items;
     iface->itemize   = gwy_unit_itemize;
+    iface->done      = gwy_unit_done;
     iface->construct = gwy_unit_construct;
     iface->duplicate = gwy_unit_duplicate_impl;
     iface->assign    = gwy_unit_assign_impl;
@@ -181,13 +193,25 @@ gwy_unit_finalize(GObject *object)
 static gsize
 gwy_unit_n_items(G_GNUC_UNUSED GwySerializable *serializable)
 {
-    return 1;
+    return G_N_ELEMENTS(serialize_items);
 }
 
 static gsize
 gwy_unit_itemize(GwySerializable *serializable,
                  GwySerializableItems *items)
 {
+    GwyUnit *unit = GWY_UNIT(serializable);
+
+    unit->serialize_str = gwy_unit_to_string(unit, GWY_UNIT_FORMAT_PLAIN);
+    if (!*unit->serialize_str)
+        return 0;
+
+    g_return_val_if_fail(items->len - items->n_items, 0);
+    items->items[items->n_items] = serialize_items[0];
+    items->items[items->n_items].value.v_string = unit->serialize_str;
+    items->n_items++;
+
+    return 1;
 }
 
 static void
@@ -202,6 +226,14 @@ static GObject*
 gwy_unit_construct(GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
+    GwySerializableItem item = serialize_items[0];
+    gwy_serializable_filter_items(&item, 1, items, "GwyUnit", error_list);
+
+    GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
+    gwy_unit_set_from_string(unit, item.value.v_string, NULL);
+    GWY_FREE(item.value.v_string);
+
+    return G_OBJECT(unit);
 }
 
 static GObject*
@@ -214,6 +246,8 @@ gwy_unit_duplicate_impl(GwySerializable *serializable)
                                          unit->units->len);
     g_array_append_vals(duplicate->units,
                         unit->units->data, unit->units->len);
+
+    return G_OBJECT(duplicate);
 }
 
 static void
@@ -232,212 +266,76 @@ gwy_unit_assign_impl(GwySerializable *destination,
 }
 
 
-#if 0
-static GByteArray*
-gwy_unit_serialize(GObject *obj,
-                      GByteArray *buffer)
-{
-    GwyUnit *unit;
-    GByteArray *retval;
-
-    g_return_val_if_fail(GWY_IS_UNIT(obj), NULL);
-
-    unit = GWY_UNIT(obj);
-    {
-        gchar *unitstr = gwy_unit_get_string(unit,
-                                                GWY_UNIT_FORMAT_PLAIN);
-        GwySerializeSpec spec[] = {
-            { 's', "unitstr", &unitstr, NULL, },
-        };
-        gwy_debug("unitstr = <%s>", unitstr);
-        retval = gwy_serialize_pack_object_struct(buffer,
-                                                  GWY_UNIT_TYPE_NAME,
-                                                  G_N_ELEMENTS(spec), spec);
-        g_free(unitstr);
-        return retval;
-    }
-}
-
-static gsize
-gwy_unit_get_size(GObject *obj)
-{
-    GwyUnit *unit;
-    gsize size;
-
-    g_return_val_if_fail(GWY_IS_UNIT(obj), 0);
-
-    unit = GWY_UNIT(obj);
-    size = gwy_serialize_get_struct_size(GWY_UNIT_TYPE_NAME, 0, NULL);
-    /* Just estimate */
-    size += 20*unit->units->len;
-
-    return size;
-}
-
-static GObject*
-gwy_unit_deserialize(const guchar *buffer,
-                        gsize size,
-                        gsize *position)
-{
-    gchar *unitstr = NULL;
-    GwySerializeSpec spec[] = {
-        { 's', "unitstr", &unitstr, NULL, },
-    };
-    GwyUnit *unit;
-
-    g_return_val_if_fail(buffer, NULL);
-
-    if (!gwy_serialize_unpack_object_struct(buffer, size, position,
-                                            GWY_UNIT_TYPE_NAME,
-                                            G_N_ELEMENTS(spec), spec)) {
-        return NULL;
-    }
-
-    if (unitstr && !*unitstr) {
-        g_free(unitstr);
-        unitstr = NULL;
-    }
-    unit = gwy_unit_new(unitstr);
-    g_free(unitstr);
-
-    return (GObject*)unit;
-}
-
-
-static GObject*
-gwy_unit_duplicate_real(GObject *object)
-{
-    GwyUnit *unit, *duplicate;
-
-    g_return_val_if_fail(GWY_IS_UNIT(object), NULL);
-    unit = GWY_UNIT(object);
-    duplicate = gwy_unit_new_parse("", NULL);
-    g_array_append_vals(duplicate->units,
-                        unit->units->data, unit->units->len);
-
-    return (GObject*)duplicate;
-}
-
-static void
-gwy_unit_clone_real(GObject *source, GObject *copy)
-{
-    GwyUnit *unit, *clone;
-
-    g_return_if_fail(GWY_IS_UNIT(source));
-    g_return_if_fail(GWY_IS_UNIT(copy));
-
-    unit = GWY_UNIT(source);
-    clone = GWY_UNIT(copy);
-    if (gwy_unit_equal(unit, clone))
-        return;
-
-    g_array_set_size(clone->units, 0);
-    g_array_append_vals(clone->units,
-                        unit->units->data, unit->units->len);
-    g_signal_emit(copy, unit_signals[VALUE_CHANGED], 0);
-}
-
 /**
  * gwy_unit_new:
- * @unit_string: Unit string (it can be %NULL for an empty unit).
  *
- * Creates a new unit from string representation.
+ * Creates a new physical unit.
  *
- * Unit string represents unit with no prefixes
- * (e. g. "m", "N", "A", etc.)
- *
- * Returns: A new unit.
+ * Returns: A new physical unit.
  **/
 GwyUnit*
-gwy_unit_new(const char *unit_string)
+gwy_unit_new(void)
 {
-    return gwy_unit_new_parse(unit_string, NULL);
+    return g_object_newv(GWY_TYPE_UNIT, 0, NULL);
 }
 
 /**
- * gwy_unit_new_parse:
- * @unit_string: Unit string (it can be %NULL for an empty unit).
- * @power10: Where power of 10 should be stored (or %NULL).
+ * gwy_unit_new_from_string:
+ * @unit_string: Unit string.   It can be %NULL for an empty unit.
+ * @power10: Location to store the power of 10, or %NULL to ignore.
  *
- * Creates a new unit from string representation.
+ * Creates a new physical unit from a string representation.
  *
- * This is a more powerful version of gwy_unit_new(): @unit_string may
- * be a relatively complex unit, with prefixes, like "pA/s" or "km^2".
- * Beside conversion to a base unit like "A/s" or "m^2" it also computes
- * the power of 10 one has to multiply the base unit with to get an equivalent
- * of @unit_string.
+ * Relatively complex notations are recognized in @unit_string, namely
+ * prefixes, powers and inverse powers such as "pA/s" or "km^2".  Beside
+ * conversion to the base unit such as "A/s" or "m^2" this constructor also
+ * computes the power of 10 one has to multiply the base unit with to get an
+ * equivalent of @unit_string.
  *
  * For example, for <literal>"pA/s"</literal> it will store -12 to @power10
- * because 1 pA/s is 1e-12 A/s, for <literal>"km^2"</literal> it will store 6
- * to @power10 because 1 km^2 is 1e6 m^2.
+ * because 1 pA/s is 10<superscript>-12</superscript> A/s, for
+ * <literal>"km^2"</literal> it will store 6 to @power10 because 1
+ * km<superscript>2</superscript> is 10<superscript>6</superscript>
+ * m<superscript>2</superscript>.
  *
- * Returns: A new unit.
+ * Returns: A new physical unit.
  **/
 GwyUnit*
-gwy_unit_new_parse(const char *unit_string,
-                      gint *power10)
+gwy_unit_new_from_string(const char *unit_string,
+                         gint *power10)
 {
-    GwyUnit *unit;
-
-    gwy_debug("");
-    unit = g_object_new(GWY_TYPE_UNIT, NULL);
+    GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
     unit->units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
-    gwy_unit_parse(unit, unit_string);
-    if (power10)
-        *power10 = unit->power10;
+    parse(unit, unit_string, power10);
 
     return unit;
 }
 
 /**
  * gwy_unit_set_from_string:
- * @unit: An unit.
- * @unit_string: Unit string to set @unit from (it can be %NULL for an empty
- *               unit).
+ * @unit: A physical unit.
+ * @unit_string: Unit string.  It can be %NULL for an empty unit.
+ * @power10: Location to store the power of 10, or %NULL to ignore.
  *
- * Sets string that represents unit.
+ * Sets a physical unit from a string representation.
  *
- * It must be base unit with no prefixes (e. g. "m", "N", "A", etc.).
+ * See gwy_unit_new_from_string().
  **/
 void
 gwy_unit_set_from_string(GwyUnit *unit,
-                            const gchar *unit_string)
+                         const gchar *unit_string,
+                         gint *power10)
 {
     g_return_if_fail(GWY_IS_UNIT(unit));
-    gwy_unit_set_from_string_parse(unit, unit_string, NULL);
-}
-
-/**
- * gwy_unit_set_from_string_parse:
- * @unit: An unit.
- * @unit_string: Unit string to set @unit from (it can be %NULL for an empty
- *               unit).
- * @power10: Where power of 10 should be stored (or %NULL).
- *
- * Changes an unit according to string representation.
- *
- * This is a more powerful version of gwy_unit_set_from_string(), please
- * see gwy_unit_new_parse() for some discussion.
- **/
-void
-gwy_unit_set_from_string_parse(GwyUnit *unit,
-                                  const gchar *unit_string,
-                                  gint *power10)
-{
-    g_return_if_fail(GWY_IS_UNIT(unit));
-
-    gwy_unit_parse(unit, unit_string);
-    if (power10)
-        *power10 = unit->power10;
-
-    g_signal_emit(unit, unit_signals[VALUE_CHANGED], 0);
+    parse(unit, unit_string, power10);
+    g_signal_emit(unit, unit_signals[CHANGED], 0);
 }
 
 static inline const GwyUnitStyleSpec*
-gwy_unit_find_style_spec(GwyUnitFormatStyle style)
+find_style_spec(GwyUnitFormatStyle style)
 {
     if ((guint)style > GWY_UNIT_FORMAT_TEX) {
-        g_warning("Invalid format style");
+        g_warning("Invalid format style %u", style);
         style = GWY_UNIT_FORMAT_PLAIN;
     }
 
@@ -445,31 +343,29 @@ gwy_unit_find_style_spec(GwyUnitFormatStyle style)
 }
 
 /**
- * gwy_unit_get_string:
+ * gwy_unit_to_string:
  * @unit: An unit.
  * @style: Unit format style.
  *
- * Obtains string representing a unit.
+ * Obtains string representing a physical unit.
  *
  * Returns: A newly allocated string that represents the base unit (with no
  *          prefixes).
  **/
 gchar*
-gwy_unit_get_string(GwyUnit *unit,
-                       GwyUnitFormatStyle style)
+gwy_unit_to_string(GwyUnit *unit,
+                   GwyUnitFormatStyle style)
 {
-    GString *string;
-    gchar *s;
-
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    string = gwy_unit_format(unit, gwy_unit_find_style_spec(style),
-                                NULL);
-    s = string->str;
+    GString *string = format(unit, find_style_spec(style), TRUE, 0, NULL);
+    gchar *s = string->str;
     g_string_free(string, FALSE);
 
     return s;
 }
+
+#if 0
 
 /**
  * gwy_unit_get_format_for_power10:
@@ -500,12 +396,12 @@ gwy_unit_get_format_for_power10(GwyUnit *unit,
 
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    spec = gwy_unit_find_style_spec(style);
+    spec = find_style_spec(style);
     if (!format)
         format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
 
     unit->power10 = power10;
-    format->magnitude = pow10(power10);
+    format->magnitude = exp10(power10);
     format->units_gstring = gwy_unit_format(unit, spec,
                                                format->units_gstring);
     format->units = format->units_gstring->str;
@@ -540,7 +436,7 @@ gwy_unit_get_format(GwyUnit *unit,
     gwy_debug("");
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    spec = gwy_unit_find_style_spec(style);
+    spec = find_style_spec(style);
     if (!format)
         format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
 
@@ -552,7 +448,7 @@ gwy_unit_get_format(GwyUnit *unit,
     else
         format->magnitude = gwy_math_humanize_numbers(value/36, value,
                                                       &format->precision);
-    unit->power10 = GWY_ROUND(log10(format->magnitude));
+    unit->power10 = gwy_round(log10(format->magnitude));
     format->units_gstring = gwy_unit_format(unit, spec,
                                                format->units_gstring);
     format->units = format->units_gstring->str;
@@ -590,7 +486,7 @@ gwy_unit_get_format_with_resolution(GwyUnit *unit,
     gwy_debug("");
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    spec = gwy_unit_find_style_spec(style);
+    spec = find_style_spec(style);
     if (!format)
         format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
 
@@ -603,7 +499,7 @@ gwy_unit_get_format_with_resolution(GwyUnit *unit,
     else
         format->magnitude = gwy_math_humanize_numbers(resolution, maximum,
                                                       &format->precision);
-    unit->power10 = GWY_ROUND(log10(format->magnitude));
+    unit->power10 = gwy_round(log10(format->magnitude));
     format->units_gstring = gwy_unit_format(unit, spec,
                                                format->units_gstring);
     format->units = format->units_gstring->str;
@@ -641,7 +537,7 @@ gwy_unit_get_format_with_digits(GwyUnit *unit,
     gwy_debug("");
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
-    spec = gwy_unit_find_style_spec(style);
+    spec = find_style_spec(style);
     if (!format)
         format = (GwyUnitFormat*)g_new0(GwyUnitFormat, 1);
 
@@ -652,49 +548,14 @@ gwy_unit_get_format_with_digits(GwyUnit *unit,
     }
     else
         format->magnitude
-            = gwy_math_humanize_numbers(maximum/pow10(sdigits),
+            = gwy_math_humanize_numbers(maximum/exp10(sdigits),
                                         maximum, &format->precision);
-    unit->power10 = GWY_ROUND(log10(format->magnitude));
+    unit->power10 = gwy_round(log10(format->magnitude));
     format->units_gstring = gwy_unit_format(unit, spec,
                                                format->units_gstring);
     format->units = format->units_gstring->str;
 
     return format;
-}
-
-/**
- * unit_format_free:
- * @format: A value format to free.
- *
- * Frees a value format structure.
- **/
-void
-gwy_unit_format_free(GwyUnitFormat *format)
-{
-    if (format->units_gstring)
-        g_string_free(format->units_gstring, TRUE);
-    g_free(format);
-}
-
-/**
- * unit_format_set_units:
- * @format: A value format to set units of.
- * @units: The units string.
- *
- * Sets the units field of a value format structure.
- *
- * This function keeps the @units and @units_gstring fields consistent.
- **/
-void
-gwy_unit_format_set_units(GwyUnitFormat *format,
-                                   const gchar *units)
-{
-    if (!format->units_gstring)
-        format->units_gstring = g_string_new(units);
-    else
-        g_string_assign(format->units_gstring, units);
-
-    format->units = format->units_gstring->str;
 }
 
 #endif
@@ -718,12 +579,12 @@ gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
         return FALSE;
 
     for (guint i = 0; i < unit->units->len; i++) {
-        const GwySimpleUnit *u = &g_array_index(unit->units, GwySimpleUnit, i);
+        const GwySimpleUnit *u = &simple_unit_index(unit->units, i);
         guint j;
 
         for (j = 0; j < op->units->len; j++) {
-            if (g_array_index(op->units, GwySimpleUnit, j).unit == u->unit) {
-                if (g_array_index(op->units, GwySimpleUnit, j).power != u->power)
+            if (simple_unit_index(op->units, j).unit == u->unit) {
+                if (simple_unit_index(op->units, j).power != u->power)
                     return FALSE;
                 break;
             }
@@ -735,22 +596,22 @@ gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
     return TRUE;
 }
 
-#if 0
-
 static gboolean
-gwy_unit_parse(GwyUnit *unit,
-                  const gchar *string)
+parse(GwyUnit *unit,
+      const gchar *string,
+      gint *ppower10)
 {
-    GwySimpleUnit unit;
     gdouble q;
     const gchar *end;
     gchar *p, *e;
-    gint n, i, pfpower;
-    GString *buf;
+    guint n, i;
+    gint pfpower, power10;
     gboolean dividing = FALSE;
 
     g_array_set_size(unit->units, 0);
-    unit->power10 = 0;
+    power10 = 0;
+    if (*ppower10)
+        *ppower10 = 0;
 
     if (!string || !*string)
         return TRUE;
@@ -771,10 +632,10 @@ gwy_unit_parse(GwyUnit *unit,
     q = g_ascii_strtod(string, (gchar**)&end);
     if (end != string) {
         string = end;
-        unit->power10 = GWY_ROUND(log10(q));
-        if (q <= 0 || fabs(log(q/pow10(unit->power10))) > 1e-13) {
+        power10 = gwy_round(log10(q));
+        if (q <= 0 || fabs(log(q/exp10(power10))) > 1e-13) {
             g_warning("Bad multiplier %g", q);
-            unit->power10 = 0;
+            power10 = 0;
         }
         else if (g_str_has_prefix(string, "<sup>")) {
             string += strlen("<sup>");
@@ -784,7 +645,7 @@ gwy_unit_parse(GwyUnit *unit,
             else if (!g_str_has_prefix(end, "</sup>"))
                 g_warning("Expected </sup> after exponent");
             else
-                unit->power10 *= n;
+                power10 *= n;
             string = end;
         }
         else if (string[0] == '^') {
@@ -793,14 +654,14 @@ gwy_unit_parse(GwyUnit *unit,
             if (end == string)
                 g_warning("Bad exponent %s", string);
             else
-                unit->power10 *= n;
+                power10 *= n;
             string = end;
         }
     }
     while (g_ascii_isspace(*string))
         string++;
 
-    buf = g_string_new("");
+    GString *buf = g_string_new("");
 
     /* the rest are units */
     while (*string) {
@@ -856,29 +717,37 @@ gwy_unit_parse(GwyUnit *unit,
         }
 
         /* get unit power */
-        unit.power = 1;
+        GwySimpleUnit u;
+        u.power = 1;
+        /*
+        if (buf->str[1] == '\262'
+            || strncmp(buf->str + 1, "²", sizeof("²")-1) == 0) {
+            u.power = 2;
+        }
+        */
+        // XXX: Why in hell we start at +1?
         if ((p = strstr(buf->str + 1, "<sup>"))) {
-            unit.power = strtol(p + strlen("<sup>"), &e, 10);
+            u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
                 g_warning("Bad power %s", p);
-                unit.power = 1;
+                u.power = 1;
             }
-            else if (!unit.power || abs(unit.power) > 12) {
-                g_warning("Bad power %d", unit.power);
-                unit.power = 1;
+            else if (!u.power || abs(u.power) > 12) {
+                g_warning("Bad power %d", u.power);
+                u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
         }
         else if ((p = strchr(buf->str + 1, '^'))) {
-            unit.power = strtol(p + 1, &e, 10);
+            u.power = strtol(p + 1, &e, 10);
             if (e == p + 1 || *e) {
                 g_warning("Bad power %s", p);
-                unit.power = 1;
+                u.power = 1;
             }
-            else if (!unit.power || abs(unit.power) > 12) {
-                g_warning("Bad power %d", unit.power);
-                unit.power = 1;
+            else if (!u.power || abs(u.power) > 12) {
+                g_warning("Bad power %d", u.power);
+                u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
         }
@@ -889,10 +758,10 @@ gwy_unit_parse(GwyUnit *unit,
                          || buf->str[i-1] == '-'))
                 i--;
             if (i != buf->len) {
-                unit.power = strtol(buf->str + i, NULL, 10);
-                if (!unit.power || abs(unit.power) > 12) {
-                    g_warning("Bad power %d", unit.power);
-                    unit.power = 1;
+                u.power = strtol(buf->str + i, NULL, 10);
+                if (!u.power || abs(u.power) > 12) {
+                    g_warning("Bad power %d", u.power);
+                    u.power = 1;
                 }
                 g_string_truncate(buf, i);
             }
@@ -907,6 +776,10 @@ gwy_unit_parse(GwyUnit *unit,
             pfpower -= 2;
             g_string_assign(buf, "");
         }
+        else if (gwy_strequal(buf->str, "‰")) {
+            pfpower -= 3;
+            g_string_assign(buf, "");
+        }
 
         /* elementary sanity */
         if (!g_utf8_validate(buf->str, -1, (const gchar**)&p)) {
@@ -916,23 +789,21 @@ gwy_unit_parse(GwyUnit *unit,
         if (!buf->len) {
             /* maybe it's just percentage.  cross fingers and proceed. */
             if (dividing)
-                unit.power = -unit.power;
-            unit->power10 += unit.power * pfpower;
+                u.power = -u.power;
+            power10 += u.power * pfpower;
         }
         else if (!g_ascii_isalpha(buf->str[0]) && (guchar)buf->str[0] < 128)
             g_warning("Invalid base unit: %s", buf->str);
         else {
             /* append it */
-            unit.unit = g_quark_from_string(buf->str);
+            u.unit = g_quark_from_string(buf->str);
             if (dividing)
-                unit.power = -unit.power;
-            gwy_debug("<%s:%u> %d\n", buf->str, unit.unit, unit.power);
-            unit->power10 += unit.power * pfpower;
-            g_array_append_val(unit->units, unit);
+                u.power = -u.power;
+            power10 += u.power * pfpower;
+            g_array_append_val(unit->units, u);
         }
 
-        /* TODO: scan known obscure units */
-        unit.traits = 0;
+        /* TODO: scan known obscure units, implement traits */
 
         /* get to the next token, looking for division */
         while (g_ascii_isspace(*end))
@@ -948,282 +819,270 @@ gwy_unit_parse(GwyUnit *unit,
         string = end;
     }
 
-    gwy_unit_canonicalize(unit);
+    canonicalize(unit);
+    if (*ppower10)
+        *ppower10 = power10;
 
     return TRUE;
 }
 
 /**
  * gwy_unit_multiply:
- * @siunit1: An unit.
- * @siunit2: An unit.
- * @result: An unit to set to product of @siunit1 and @siunit2.  It is
- *          safe to pass one of @siunit1, @siunit2. It can be %NULL
- *          too, a new unit is created then and returned.
+ * @unit: A physical unit.
+ * @op1: One multiplication operand.
+ * @op2: Other multiplication operand.
  *
- * Multiplies two units.
+ * Multiplies two physical units.
  *
- * Returns: When @result is %NULL, a newly created unit that has to be
- *          dereferenced when no longer used later.  Otherwise @result itself
- *          is simply returned, its reference count is NOT increased.
+ * It is safe to pass one of @op1, @op2 as @unit.
+ *
+ * It is even possible to pass %NULL as @unit.   A new unit is then created and
+ * returned.  In this case, and only in this case, the caller acquires a new
+ * reference on the returned object and must dispose of it accordingly.
+ *
+ * Returns: Product of physical units @op1 and @op2.
  **/
 GwyUnit*
-gwy_unit_multiply(GwyUnit *siunit1,
-                     GwyUnit *siunit2,
-                     GwyUnit *result)
+gwy_unit_multiply(GwyUnit *unit,
+                  GwyUnit *op1,
+                  GwyUnit *op2)
 {
-    return gwy_unit_power_multiply(siunit1, 1, siunit2, 1, result);
+    return gwy_unit_power_multiply(unit, op1, 1, op2, 1);
 }
 
 /**
  * gwy_unit_divide:
- * @siunit1: An unit.
- * @siunit2: An unit.
- * @result: An unit to set to quotient of @siunit1 and @siunit2.  It is
- *          safe to pass one of @siunit1, @siunit2. It can be %NULL
- *          too, a new unit is created then and returned.
+ * @unit: A physical unit.
+ * @op1: Numerator operand.
+ * @op2: Denominator operand.
  *
- * Divides two units.
+ * Divides two physical units.
  *
- * Returns: When @result is %NULL, a newly created unit that has to be
- *          dereferenced when no longer used later.  Otherwise @result itself
- *          is simply returned, its reference count is NOT increased.
+ * See gwy_unit_multiply() for argument discussion.
+ *
+ * Returns: Ratio of physical units @op1 and @op2.
  **/
 GwyUnit*
-gwy_unit_divide(GwyUnit *siunit1,
-                   GwyUnit *siunit2,
-                   GwyUnit *result)
+gwy_unit_divide(GwyUnit *unit,
+                GwyUnit *op1,
+                GwyUnit *op2)
 {
-    return gwy_unit_power_multiply(siunit1, 1, siunit2, -1, result);
+    return gwy_unit_power_multiply(unit, op1, 1, op2, -1);
 }
 
 /**
  * gwy_unit_power:
- * @unit: An unit.
- * @power: Power to raise @unit to.
- * @result: An unit to set to power of @unit.  It is safe to pass
- *          @unit itself.  It can be %NULL too, a new unit is created
- *          then and returned.
+ * @unit: A physical unit.
+ * @op: Base operand.
+ * @power: Power to raise @op to.
  *
- * Computes a power of an unit.
+ * Computes the power of a physical unit.
  *
- * Returns: When @result is %NULL, a newly created unit that has to be
- *          dereferenced when no longer used later.  Otherwise @result itself
- *          is simply returned, its reference count is NOT increased.
+ * See gwy_unit_multiply() for argument discussion.
+ *
+ * Returns: Physical unit @op raised to @power.
  **/
 GwyUnit*
 gwy_unit_power(GwyUnit *unit,
-                  gint power,
-                  GwyUnit *result)
+               GwyUnit *op,
+               gint power)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-    g_return_val_if_fail(!result || GWY_IS_UNIT(result), NULL);
+    g_return_val_if_fail(GWY_IS_UNIT(op), NULL);
+    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
 
-    if (!result)
-        result = gwy_unit_new(NULL);
+    if (!unit)
+        unit = gwy_unit_new();
 
-    gwy_unit_power_real(unit, power, result);
-    g_signal_emit(result, unit_signals[VALUE_CHANGED], 0);
+    power_impl(unit, op, power);
+    g_signal_emit(unit, unit_signals[CHANGED], 0);
 
-    return result;
+    return unit;
 }
 
 static GwyUnit*
-gwy_unit_power_real(GwyUnit *unit,
-                       gint power,
-                       GwyUnit *result)
+power_impl(GwyUnit *unit,
+           GwyUnit *op,
+           gint power)
 {
-    GArray *units;
-    GwySimpleUnit *unit;
-    gint j;
+    /* Perform power in place */
+    if (unit == op) {
+        if (power) {
+            for (guint j = 0; j < unit->units->len; j++) {
+                GwySimpleUnit *u = &simple_unit_index(unit->units, j);
+                u->power *= power;
+            }
+        }
+        else
+            g_array_set_size(unit->units, 0);
 
-    units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
-    result->power10 = power*unit->power10;
+        return unit;
+    }
+
+    GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 
     if (power) {
-        g_array_append_vals(units, unit->units->data, unit->units->len);
-        for (j = 0; j < units->len; j++) {
-            unit = &g_array_index(units, GwySimpleUnit, j);
-            unit->power *= power;
+        g_array_append_vals(units, op->units->data, op->units->len);
+        for (guint j = 0; j < units->len; j++) {
+            GwySimpleUnit *u = &simple_unit_index(units, j);
+            u->power *= power;
         }
     }
 
-    g_array_set_size(result->units, 0);
-    g_array_append_vals(result->units, units->data, units->len);
+    g_array_set_size(unit->units, 0);
+    g_array_append_vals(unit->units, units->data, units->len);
     g_array_free(units, TRUE);
 
-    return result;
+    return unit;
 }
 
 /**
  * gwy_unit_nth_root:
- * @unit: An unit.
- * @ipower: The root to take: 2 means a quadratic root, 3 means cubic root,
+ * @unit: A physical unit.
+ * @op: Base operand.
+ * @ipower: Root to take: 2 means a quadratic root, 3 means cubic root,
  *          etc.
- * @result: An unit to set to power of @unit.  It is safe to pass
- *          @unit itself.  It can be %NULL too, a new unit is created
- *          then and returned.
  *
- * Calulates n-th root of an unit.
+ * Calulates n-th root of a physical unit.
  *
  * This operation fails if the result would have fractional powers that
  * are not representable by #GwyUnit.
  *
- * Returns: On success: When @result is %NULL, a newly created unit that
- *          has to be dereferenced when no longer used later, otherwise
- *          @result itself is simply returned, its reference count is NOT
- *          increased. On failure %NULL is always returned.
+ * See gwy_unit_multiply() for argument discussion.
  *
- * Since: 2.5
+ * Returns: On success, @ipower-th root of physical unit @op.  On failure,
+ *          %NULL.
  **/
 GwyUnit*
 gwy_unit_nth_root(GwyUnit *unit,
-                     gint ipower,
-                     GwyUnit *result)
+                  GwyUnit *op,
+                  gint ipower)
 {
-    GArray *units;
-    GwySimpleUnit *unit;
-    gint j;
-
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-    g_return_val_if_fail(!result || GWY_IS_UNIT(result), NULL);
+    g_return_val_if_fail(GWY_IS_UNIT(op), NULL);
+    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
     g_return_val_if_fail(ipower > 0, NULL);
 
     /* Check applicability */
-    for (j = 0; j < unit->units->len; j++) {
-        unit = &g_array_index(unit->units, GwySimpleUnit, j);
-        if (unit->power % ipower != 0)
+    for (guint j = 0; j < op->units->len; j++) {
+        GwySimpleUnit *u = &simple_unit_index(op->units, j);
+        if (u->power % ipower != 0)
             return NULL;
     }
 
-    units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
-    /* XXX: Applicability not required */
-    result->power10 = unit->power10/ipower;
+    GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 
-    if (!result)
-        result = gwy_unit_new(NULL);
+    if (!unit)
+        unit = gwy_unit_new();
 
-    g_array_append_vals(units, unit->units->data, unit->units->len);
-    for (j = 0; j < units->len; j++) {
-        unit = &g_array_index(units, GwySimpleUnit, j);
-        unit->power /= ipower;
+    g_array_append_vals(units, op->units->data, op->units->len);
+    for (guint j = 0; j < units->len; j++) {
+        GwySimpleUnit *u = &simple_unit_index(units, j);
+        u->power /= ipower;
     }
 
-    g_array_set_size(result->units, 0);
-    g_array_append_vals(result->units, units->data, units->len);
+    g_array_set_size(unit->units, 0);
+    g_array_append_vals(unit->units, units->data, units->len);
     g_array_free(units, TRUE);
 
-    g_signal_emit(result, unit_signals[VALUE_CHANGED], 0);
+    g_signal_emit(unit, unit_signals[CHANGED], 0);
 
-    return result;
+    return unit;
 }
 
 /**
  * gwy_unit_power_multiply:
- * @siunit1: An unit.
- * @power1: Power to raise @siunit1 to.
- * @siunit2: An unit.
- * @power2: Power to raise @siunit2 to.
- * @result: An unit to set to @siunit1^@power1*@siunit2^@power2.
- *          It is safe to pass @siunit1 or @siunit2.  It can be %NULL too,
- *          a new unit is created then and returned.
+ * @unit: A physical unit.
+ * @op1: First operand.
+ * @power1: Power to raise @op1 to.
+ * @op2: Second operand.
+ * @power2: Power to raise @op2 to.
  *
- * Computes the product of two units raised to arbitrary powers.
+ * Computes the product of two physical units raised to arbitrary powers.
+ *
+ * See gwy_unit_multiply() for argument discussion.
  *
  * This is the most complex unit arithmetic function.  It can be easily
  * chained when more than two units are to be multiplied.
  *
- * Returns: When @result is %NULL, a newly created unit that has to be
- *          dereferenced when no longer used later.  Otherwise @result itself
- *          is simply returned, its reference count is NOT increased.
- *
- * Since: 2.4
+ * Returns: Product of physical units @op1 and @op2 raised to specified powers.
  **/
 GwyUnit*
-gwy_unit_power_multiply(GwyUnit *siunit1,
-                           gint power1,
-                           GwyUnit *siunit2,
-                           gint power2,
-                           GwyUnit *result)
+gwy_unit_power_multiply(GwyUnit *unit,
+                        GwyUnit *op1,
+                        gint power1,
+                        GwyUnit *op2,
+                        gint power2)
 {
-    GwyUnit *op2 = NULL;
-    GwySimpleUnit *unit, *unit2;
-    gint i, j;
+    GwyUnit *myop2 = NULL;
 
-    g_return_val_if_fail(GWY_IS_UNIT(siunit1), NULL);
-    g_return_val_if_fail(GWY_IS_UNIT(siunit2), NULL);
-    g_return_val_if_fail(!result || GWY_IS_UNIT(result), NULL);
+    g_return_val_if_fail(GWY_IS_UNIT(op1), NULL);
+    g_return_val_if_fail(GWY_IS_UNIT(op2), NULL);
+    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
 
-    if (!result)
-        result = gwy_unit_new(NULL);
+    if (!unit)
+        unit = gwy_unit_new();
 
-    /* Try to avoid hard work by making siunit2 the simplier one */
-    if (siunit1->units->len < siunit2->units->len
+    /* Try to avoid hard work by making op2 the simplier one */
+    if (op1->units->len < op2->units->len
         || (power2 && !power1)
-        || (siunit2 == result && siunit1 != result)) {
-        GWY_SWAP(GwyUnit*, siunit1, siunit2);
+        || (op2 == unit && op1 != unit)) {
+        GWY_SWAP(GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
-    gwy_unit_power_real(siunit1, power1, result);
+    power_impl(unit, op1, power1);
     if (!power2) {
-        gwy_unit_canonicalize(result);
-        return result;
+        canonicalize(unit);
+        return unit;
     }
 
-    /* When the second operand is the same object as the result, we have to
+    /* When the second operand is the same object as the unit, we have to
      * operate on a temporary copy */
-    if (siunit2 == result) {
-        op2 = gwy_unit_duplicate(siunit2);
-        siunit2 = op2;
+    if (op2 == unit) {
+        myop2 = gwy_unit_duplicate(op2);
+        op2 = myop2;
     }
 
-    result->power10 += power2*siunit2->power10;
-    for (i = 0; i < siunit2->units->len; i++) {
-        unit2 = &g_array_index(siunit2->units, GwySimpleUnit, i);
+    for (guint i = 0; i < op2->units->len; i++) {
+        GwySimpleUnit *u2 = &simple_unit_index(op2->units, i);
 
-        for (j = 0; j < result->units->len; j++) {
-            unit = &g_array_index(result->units, GwySimpleUnit, j);
-            gwy_debug("[%d] %u == [%d] %u",
-                      i, unit2->unit, j, unit->unit);
-            if (unit2->unit == unit->unit) {
-                unit->power += power2*unit2->power;
+        guint j;
+        for (j = 0; j < unit->units->len; j++) {
+            GwySimpleUnit *u = &simple_unit_index(unit->units, j);
+            if (u2->unit == u->unit) {
+                u->power += power2*u2->power;
                 break;
             }
         }
-        if (j == result->units->len) {
-            g_array_append_val(result->units, *unit2);
-            unit = &g_array_index(result->units, GwySimpleUnit,
-                                  result->units->len - 1);
-            unit->power *= power2;
+        if (j == unit->units->len) {
+            g_array_append_val(unit->units, *u2);
+            GwySimpleUnit *u = &simple_unit_index(unit->units,
+                                                  unit->units->len - 1);
+            u->power *= power2;
         }
     }
-    gwy_unit_canonicalize(result);
-    gwy_object_unref(op2);
-    g_signal_emit(result, unit_signals[VALUE_CHANGED], 0);
+    canonicalize(unit);
+    GWY_OBJECT_UNREF(myop2);
+    g_signal_emit(unit, unit_signals[CHANGED], 0);
 
-    return result;
+    return unit;
 }
 
 static GwyUnit*
-gwy_unit_canonicalize(GwyUnit *unit)
+canonicalize(GwyUnit *unit)
 {
-    GwySimpleUnit *dst, *src;
-    gint i, j;
+    guint i, j;
 
     /* consolidate multiple occurences of the same unit */
     i = 0;
     while (i < unit->units->len) {
-        src = &g_array_index(unit->units, GwySimpleUnit, i);
-
+        GwySimpleUnit *src = &simple_unit_index(unit->units, i);
         for (j = 0; j < i; j++) {
-            dst = &g_array_index(unit->units, GwySimpleUnit, j);
+            GwySimpleUnit *dst = &simple_unit_index(unit->units, j);
             if (src->unit == dst->unit) {
                 dst->power += src->power;
                 g_array_remove_index(unit->units, i);
                 break;
             }
         }
-
         if (j == i)
             i++;
     }
@@ -1231,25 +1090,23 @@ gwy_unit_canonicalize(GwyUnit *unit)
     /* remove units with zero power */
     i = 0;
     while (i < unit->units->len) {
-        if (g_array_index(unit->units, GwySimpleUnit, i).power)
+        if (simple_unit_index(unit->units, i).power)
             i++;
-        else {
+        else
             g_array_remove_index(unit->units, i);
-        }
     }
 
     return unit;
 }
 
 static GString*
-gwy_unit_format(GwyUnit *unit,
-                   const GwyUnitStyleSpec *fs,
-                   gint power10,
-                   GString *string)
+format(const GwyUnit *unit,
+       const GwyUnitStyleSpec *fs,
+       gboolean standalone,
+       gint power10,
+       GString *string)
 {
-    const gchar *prefix = "No GCC, this can't be used uninitialized";
-    GwySimpleUnit *unit;
-    gint i, prefix_bearer, move_me_to_end;
+    const gchar *prefix;
 
     if (!string)
         string = g_string_new("");
@@ -1258,11 +1115,11 @@ gwy_unit_format(GwyUnit *unit,
 
     /* if there is a single unit with negative exponent, move it to the end
      * TODO: we may want more sophistication here */
-    move_me_to_end = -1;
+    gint move_me_to_end = -1;
     if (unit->units->len > 1) {
-        for (i = 0; i < unit->units->len; i++) {
-            unit = &g_array_index(unit->units, GwySimpleUnit, i);
-            if (unit->power < 0) {
+        for (guint i = 0; i < unit->units->len; i++) {
+            const GwySimpleUnit *u = &simple_unit_index(unit->units, i);
+            if (u->power < 0) {
                 if (move_me_to_end >= 0) {
                     move_me_to_end = -1;
                     break;
@@ -1273,33 +1130,35 @@ gwy_unit_format(GwyUnit *unit,
     }
 
     /* find a victim to prepend a prefix to.  mwhahaha */
-    prefix_bearer = -1;
+    gint prefix_bearer = -1;
     if (power10) {
-        for (i = 0; i < unit->units->len; i++) {
-            if (i == move_me_to_end)
+        for (guint i = 0; i < unit->units->len; i++) {
+            if (i == (guint)move_me_to_end)
                 continue;
-            unit = &g_array_index(unit->units, GwySimpleUnit, i);
-            if (power10 % (3*abs(unit->power)) == 0) {
+            const GwySimpleUnit *u = &simple_unit_index(unit->units, i);
+            if (power10 % (3*abs(u->power)) == 0) {
                 prefix_bearer = i;
                 break;
             }
         }
     }
     if (power10 && prefix_bearer < 0 && move_me_to_end >= 0) {
-        unit = &g_array_index(unit->units, GwySimpleUnit, move_me_to_end);
-        if (power10 % (3*abs(unit->power)) == 0)
+        const GwySimpleUnit *u = &simple_unit_index(unit->units, move_me_to_end);
+        if (power10 % (3*abs(u->power)) == 0)
             prefix_bearer = move_me_to_end;
     }
     /* check whether we are not out of prefix range */
     if (prefix_bearer >= 0) {
-        unit = &g_array_index(unit->units, GwySimpleUnit, prefix_bearer);
-        prefix = gwy_unit_prefix(power10/unit->power);
+        const GwySimpleUnit *u = &simple_unit_index(unit->units, prefix_bearer);
+        prefix = get_prefix(power10/u->power);
         if (!prefix)
             prefix_bearer = -1;
     }
 
     /* if we were unable to place the prefix, we must add a power of 10 */
     if (power10 && prefix_bearer < 0) {
+        if (!standalone)
+            g_string_append(string, fs->power10_times);
         switch (power10) {
             case -1:
             g_string_append(string, "0.1");
@@ -1316,7 +1175,7 @@ gwy_unit_format(GwyUnit *unit,
             default:
             if (fs->power10_open)
                 g_string_append(string, fs->power10_open);
-            g_string_append_printf(string, "%d", unit->power10);
+            g_string_append_printf(string, "%d", power10);
             if (fs->power_close)
                 g_string_append(string, fs->power_close);
             break;
@@ -1326,34 +1185,34 @@ gwy_unit_format(GwyUnit *unit,
     }
 
     /* append units */
-    for (i = 0; i < unit->units->len; i++) {
-        if (i == move_me_to_end)
+    for (guint i = 0; i < unit->units->len; i++) {
+        if (i == (guint)move_me_to_end)
             continue;
         if (i > 1 || (i && move_me_to_end)) {
             g_string_append(string, fs->unit_times);
         }
-        unit = &g_array_index(unit->units, GwySimpleUnit, i);
-        if (i == prefix_bearer)
+        const GwySimpleUnit *u = &simple_unit_index(unit->units, i);
+        if (i == (guint)prefix_bearer)
             g_string_append(string, prefix);
-        g_string_append(string, g_quark_to_string(unit->unit));
-        if (unit->power != 1) {
+        g_string_append(string, g_quark_to_string(u->unit));
+        if (u->power != 1) {
             if (fs->power_open)
                 g_string_append(string, fs->power_open);
-            g_string_append_printf(string, "%d", unit->power);
+            g_string_append_printf(string, "%d", u->power);
             if (fs->power_close)
                 g_string_append(string, fs->power_close);
         }
     }
     if (move_me_to_end >= 0) {
         g_string_append(string, fs->unit_division);
-        unit = &g_array_index(unit->units, GwySimpleUnit, move_me_to_end);
+        const GwySimpleUnit *u = &simple_unit_index(unit->units, move_me_to_end);
         if (move_me_to_end == prefix_bearer)
             g_string_append(string, prefix);
-        g_string_append(string, g_quark_to_string(unit->unit));
-        if (unit->power != -1) {
+        g_string_append(string, g_quark_to_string(u->unit));
+        if (u->power != -1) {
             if (fs->power_open)
                 g_string_append(string, fs->power_open);
-            g_string_append_printf(string, "%d", -unit->power);
+            g_string_append_printf(string, "%d", -u->power);
             if (fs->power_close)
                 g_string_append(string, fs->power_close);
         }
@@ -1363,18 +1222,14 @@ gwy_unit_format(GwyUnit *unit,
 }
 
 static const gchar*
-gwy_unit_prefix(gint power)
+get_prefix(gint power)
 {
-    gint i;
-
-    for (i = 0; i < G_N_ELEMENTS(SI_prefixes); i++) {
+    for (guint i = 0; i < G_N_ELEMENTS(SI_prefixes); i++) {
         if (SI_prefixes[i].power10 == power)
             return SI_prefixes[i].prefix;
     }
     return NULL;
 }
-
-#endif
 
 /************************** Documentation ****************************/
 
