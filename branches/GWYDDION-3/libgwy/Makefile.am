@@ -72,6 +72,8 @@ testlibgwy_LDADD = libgwy.la
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
 
+# Run the test program but do not execute any tests.  This produces a list of
+# ‘standard’ GLib error we want to filter out.
 $(library).supp: testlibgwy$(EXEEXT)
 	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
 	    --tool=memcheck --leak-check=full --show-reachable=yes \
@@ -80,6 +82,8 @@ $(library).supp: testlibgwy$(EXEEXT)
 	    -e 's/<insert a suppression name here>/Suppression/' \
 	    $(library).supp
 
+# Run the test program with all tests (unless TEST_FLAGS says otherwise) under
+# valgrind and report any problems.
 check-valgrind: $(library).supp
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
 	    --show-reachable=yes --suppressions=$(library).supp \
