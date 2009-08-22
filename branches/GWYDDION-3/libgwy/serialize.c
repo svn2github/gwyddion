@@ -1406,7 +1406,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
     g_slice_free1(sizeof(guint8)*n_items, seen);
 }
 
-#define __GWY_SERIALIZE_C__
+#define __LIBGWY_SERIALIZE_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

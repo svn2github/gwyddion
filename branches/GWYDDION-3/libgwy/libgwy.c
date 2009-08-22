@@ -683,7 +683,7 @@ gwy_data_search_path(const gchar *subdir)
     return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
-#define __GWY_LIBGWY_C__
+#define __LIBGWY_LIBGWY_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

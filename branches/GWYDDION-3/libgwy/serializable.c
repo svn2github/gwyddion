@@ -169,7 +169,7 @@ gwy_serializable_assign(GwySerializable *destination,
     return iface->assign(destination, source);
 }
 
-#define __GWY_SERIALIZABLE_C__
+#define __LIBGWY_SERIALIZABLE_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

@@ -975,7 +975,7 @@ gwy_pack_error_quark(void)
     return error_domain;
 }
 
-#define __GWY_PACK_C__
+#define __LIBGWY_PACK_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

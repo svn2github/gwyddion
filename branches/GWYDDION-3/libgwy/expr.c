@@ -1749,7 +1749,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
     return g_hash_table_remove(priv->constants, GUINT_TO_POINTER(quark));
 }
 
-#define __GWY_EXPR_C__
+#define __LIBGWY_EXPR_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

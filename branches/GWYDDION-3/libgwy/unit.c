@@ -1196,7 +1196,7 @@ gwy_unit_clear_format(GwyUnitFormat *format)
     GWY_FREE(format->units);
 }
 
-#define __GWY_UNIT_C__
+#define __LIBGWY_UNIT_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

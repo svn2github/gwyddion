@@ -1061,7 +1061,7 @@ gwy_resource_classes_finalize(void)
     all_resources = NULL;
 }
 
-#define __GWY_RESOURCE_C__
+#define __LIBGWY_RESOURCE_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

@@ -575,7 +575,7 @@ jump_over:
     }
 }
 
-#define __GWY_MATH_C__
+#define __LIBGWY_MATH_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

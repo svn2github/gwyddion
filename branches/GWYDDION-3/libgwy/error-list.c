@@ -100,7 +100,7 @@ gwy_error_list_clear(GwyErrorList **list)
     *list = NULL;
 }
 
-#define __GWY_ERROR_LIST_C__
+#define __LIBGWY_ERROR_LIST_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

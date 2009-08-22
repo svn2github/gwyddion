@@ -2245,7 +2245,7 @@ next:
     return container;
 }
 
-#define __GWY_CONTAINER_C__
+#define __LIBGWY_CONTAINER_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

@@ -73,7 +73,7 @@ gwy_version_string(void)
     return GWY_VERSION_STRING;
 }
 
-#define __GWY_VERSION_C__
+#define __LIBGWY_VERSION_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

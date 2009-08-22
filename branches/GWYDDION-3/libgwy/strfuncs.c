@@ -155,7 +155,7 @@ gwy_str_next_line(gchar **buffer)
     return q;
 }
 
-#define __GWY_STRFUNCS_C__
+#define __LIBGWY_STRFUNCS_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**

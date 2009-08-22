@@ -1151,7 +1151,7 @@ invent_item_name(GwyInventory *inventory,
     return NULL;
 }
 
-#define __GWY_INVENTORY_C__
+#define __LIBGWY_INVENTORY_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**
