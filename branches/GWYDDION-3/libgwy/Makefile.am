@@ -59,6 +59,13 @@ testlibgwy_LDADD = libgwy.la
 
 include $(top_srcdir)/build/gtester.make
 
+check-symbols: .libs/libgwy.la $(top_builddir)/docs/libgwy/libgwy-decl.txt
+	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
+	    .libs/libgwy.la \
+	    $(top_builddir)/docs/libgwy/libgwy-decl.txt \
+	    $(srcdir)
+
 clean-local:
 	rm -f core.* *~
 
+.PHONY: check-symbols
