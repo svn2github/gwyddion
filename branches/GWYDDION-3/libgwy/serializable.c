@@ -52,23 +52,19 @@ typedef struct {
     guchar *data;
 } GwySerializableBuffer;
 
-static gsize                 calculate_sizes     (GwySerializableItems *items,
-                                                  gsize *pos);
-static void                  items_done          (const GwySerializableItems *items);
-static gboolean              dump_to_stream      (const GwySerializableItems *items,
-                                                  GwySerializableBuffer *buffer);
-static GType                 get_serializable    (const gchar *typename,
-                                                  gpointer *classref,
-                                                  const GwySerializableInterface **iface,
-                                                  GwyErrorList **error_list);
-static GwySerializableItems* unpack_items        (const guchar *buffer,
-                                                  gsize size,
-                                                  GwyErrorList **error_list);
-static void                  fill_requested_items(GwySerializableItems *req_items,
-                                                  GwySerializableItems *items,
-                                                  const gchar *typename,
-                                                  GwyErrorList **error_list);
-static void                  free_items          (GwySerializableItems *items);
+static gsize                 calculate_sizes (GwySerializableItems *items,
+                                              gsize *pos);
+static void                  items_done      (const GwySerializableItems *items);
+static gboolean              dump_to_stream  (const GwySerializableItems *items,
+                                              GwySerializableBuffer *buffer);
+static GType                 get_serializable(const gchar *typename,
+                                              gpointer *classref,
+                                              const GwySerializableInterface **iface,
+                                              GwyErrorList **error_list);
+static GwySerializableItems* unpack_items    (const guchar *buffer,
+                                              gsize size,
+                                              GwyErrorList **error_list);
+static void                  free_items      (GwySerializableItems *items);
 
 GType
 gwy_serializable_get_type(void)
@@ -1080,7 +1076,7 @@ gwy_serializable_deserialize(const guchar *buffer,
                              GwyErrorList **error_list)
 {
     const GwySerializableInterface *iface;
-    GwySerializableItems *items = NULL, *requested_items = NULL;
+    GwySerializableItems *items = NULL;
     const gchar *typename;
     gsize pos = 0, rbytes, object_size;
     gpointer classref;
