@@ -3,7 +3,7 @@
 from __future__ import generators
 import sys, re
 
-debug = True
+#debug = True
 
 if len(sys.argv) < 4:
     print sys.argv[0], 'SECTION_FILE OBJECT_FILE INTERFACE-FILE [--standard-files=FILE,...]'
