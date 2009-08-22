@@ -17,7 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include "libgwy/serializable.h"
+
+static gsize gwy_serializable_calculate_sizes(GwySerializableItems *items,
+                                              GwySerializableItem **item);
 
 GType
 gwy_serializable_get_type(void)
@@ -91,6 +95,170 @@ gwy_serializable_itemize(GwySerializable *serializable,
 }
 
 /**
+ * gwy_serializable_done:
+ * @serializable: A serializable object.
+ *
+ * Frees temporary storage allocated by object itemization.
+ *
+ * This function calls the virtual table method done(), if the class has any.
+ **/
+void
+gwy_serializable_done(GwySerializable *serializable)
+{
+    const GwySerializableInterface *iface;
+
+    iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
+    g_return_if_fail(iface);
+
+    if (iface->done)
+        iface->done(serializable);
+}
+
+/**
+ * gwy_serializable_serialize:
+ * @serializable: A serializable object.
+ * @output: Output stream to write the serialized object to.
+ * @error: Location to store the error occuring, %NULL to ignore.
+ *
+ * Serializes an object.
+ *
+ * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
+ **/
+gboolean
+gwy_serializable_serialize(GwySerializable *serializable,
+                           GOutputStream *output,
+                           GError **error)
+{
+    GwySerializableItems items;
+    GwySerializableItem *item;
+    gboolean ok = FALSE;
+    gsize i;
+
+    g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), FALSE);
+    g_return_val_if_fail(G_IS_OUTPUT_STREAM(output), FALSE);
+
+    items.len = gwy_serializable_n_items(serializable);
+    items.items = g_new(GwySerializableItem, items.len);
+    items.n_items = 0;
+
+    gwy_serializable_itemize(serializable, &items);
+
+    item = items.items;
+    gwy_serializable_calculate_sizes(&items, &item);
+
+    /* TODO */
+
+    /* The zeroth item is always an object header. */
+    for (i = items.len-1; i > 0; i--) {
+        const GwySerializableItem *item = items.items + i;
+        if (item->ctype == GWY_SERIALIZABLE_OBJECT)
+            gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
+    }
+
+    g_free(items.items);
+
+    return ok;
+}
+
+/**
+ * gwy_serializable_ctype_size:
+ * @ctype: Component type.
+ *
+ * Computes type size based on type letter.
+ *
+ * Returns: Size in bytes, 0 for arrays and other nonatomic types.
+ **/
+static inline gsize G_GNUC_CONST
+gwy_serializable_ctype_size(GwySerializableCType ctype)
+{
+    switch (ctype) {
+        case GWY_SERIALIZABLE_CHAR:
+        case GWY_SERIALIZABLE_BOOLEAN:
+        return sizeof(guchar);
+        break;
+
+        case GWY_SERIALIZABLE_INT32:
+        return sizeof(gint32);
+        break;
+
+        case GWY_SERIALIZABLE_INT64:
+        return sizeof(gint64);
+        break;
+
+        case GWY_SERIALIZABLE_DOUBLE:
+        return sizeof(gdouble);
+        break;
+
+        default:
+        return 0;
+        break;
+    }
+}
+
+/* The value is returned for convenience, it permits us to declare item as
+ * const even when recusring, because we do not access the fields after the
+ * size changes. */
+gsize
+gwy_serializable_calculate_sizes(GwySerializableItems *items,
+                                 GwySerializableItem **item)
+{
+    GwySerializableItem *header = (*item)++;
+    gsize i, n, size;
+
+    g_return_val_if_fail(header->ctype == GWY_SERIALIZABLE_HEADER, 0);
+
+    n = header->array_size;
+    size = strlen(header->name)+1 + 8 /* object size */;
+    for (i = 1; i < n; i++, (*item)++) {
+        GwySerializableCType ctype = (*item)->ctype;
+        gsize typesize;
+
+        size += strlen((*item)->name)+1 + 1 /* ctype */;
+
+        if ((typesize = gwy_serializable_ctype_size(ctype))) {
+            size += typesize;
+        }
+        else if ((typesize
+                  = gwy_serializable_ctype_size(g_ascii_tolower(ctype)))) {
+            g_warn_if_fail((*item)->array_size != 0);
+            size += typesize*(*item)->array_size;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING) {
+            size += strlen((const gchar*)(*item)->value.v_string)+1;
+        }
+        else if (ctype == GWY_SERIALIZABLE_OBJECT) {
+            /* We have the 'o' item but the method wants the header item. */
+            (*item)++;
+            size += gwy_serializable_calculate_sizes(items, item);
+            (*item)--;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
+            gsize j, alen;
+
+            alen = (*item)->array_size;
+            for (j = 0; j < alen; j++)
+                size += strlen((const gchar*)(*item)->value.v_string_array[j])+1;
+        }
+        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
+            gsize j, alen;
+
+            alen = (*item)->array_size;
+            /* We have the 'o' item but the method wants the header item. */
+            (*item)++;
+            for (j = 0; j < alen; j++) {
+                size += gwy_serializable_calculate_sizes(items, item);
+            }
+            (*item)--;
+        }
+        else {
+            g_return_val_if_reached(0);
+        }
+    }
+
+    return header->value.v_size = size;
+}
+
+/**
  * SECTION:serializable
  * @title: GwySerializable
  * @short_description: Serializable value-like object interface
@@ -122,8 +290,51 @@ gwy_serializable_itemize(GwySerializable *serializable,
  * <literal>foo</literal> is the lowercase class name.
  *
  * <refsect2 id='libgwy-serializable-implementing'>
- * <title>Implementing GwySerializable</title>
+ * <title>Implementing #GwySerializable</title>
  * You can implement serialization and deserialization in your classes...
+ * </refsect2>
+ *
+ * <refsect2 id='libgwy-serializable-internals'>
+ * <title>Gory Details of Serialization</title>
+ * The following information is not strictly necessary for implementing
+ * #GwySerializable interface in your classes, but it can help prevent wrong
+ * decision about serialized representation of your objects.  Also, it might
+ * help implementing a different serialization backend than GWY files, e.g.
+ * HDF5.  Serialization occurs in several steps.
+ *
+ * First, all objects are recursively asked to calulcate the number named data
+ * items they will serialize to (or provide a reasonable upper estimate of this
+ * number).  This is done simply by calling gwy_serializable_n_items() on the
+ * top-level object, objects that contain other objects must call their
+ * gwy_serializable_n_items() 
+ *
+ * Second, a #GwySerializableItems item list is created, with fixed size
+ * calculated in the first step.  All objects are then recursively asked to add
+ * items representing their data to this list.  This is done simply by calling
+ * gwy_serializable_itemize() on the top-level object.  The objects may
+ * sometimes need to represent certain data differently than the internal
+ * representation is, however, expensive transforms should be avoided,
+ * especially for arrays.  This step can allocate temporary structures.
+ *
+ * Third, sizes of each object are calcuated and stored into the object-header
+ * items created by gwy_serializable_itemize().  This again is done
+ * recursively, but the objects do not participate, the calculation works with
+ * the itemized list.  This step might not be necessary for different storage
+ * formats.
+ *
+ * Subsequently, the object tree flattened into an item list is written to the
+ * output stream, byte-swapping or otherwise normalizing the data on the fly if
+ * necessary.  This part strongly depends on the storage format.
+ *
+ * Finally, virtual method done() is called for all objects.  This step frees
+ * the temporary storage allocated in the itemization step, if any.  This is
+ * not done recursively so that objects need not to implement this method, even
+ * if they contain other objects, if they do not create any temporary data
+ * during itemize().  The methods are called from the inverse order than the
+ * objects, appear in the list, i.e. the most inner and last objects are
+ * processed first.  This means that if done() of an object is invoked, all its
+ * contained objects have been already process.  At the very end the item list
+ * is freed too.
  * </refsect2>
  **/
 
@@ -148,7 +359,7 @@ gwy_serializable_itemize(GwySerializable *serializable,
  * Type of serializable value.
  *
  * The type is a single character, i.e. a value smaller than 256.  It is the
- * same as the character used in gwy files to denote the corresponding type.
+ * same as the character used in GWY files to denote the corresponding type.
  **/
 
 /**
@@ -213,17 +424,6 @@ gwy_serializable_itemize(GwySerializable *serializable,
  **/
 
 /**
- * gwy_serializable_serialize:
- * @serializable: A serializable object.
- * @output: Output stream to write the serialized object to.
- * @error: Location to store the error occuring, %NULL to ignore.
- *
- * Serializes an object.
- *
- * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
- **/
-
-/**
  * gwy_serializable_deserialize:
  * @input: Input stream to read the serialized object from.
  * @error: Location to store the error occuring, %NULL to ignore.
@@ -265,9 +465,11 @@ gwy_serializable_itemize(GwySerializable *serializable,
  * @n_items: Returns the number of items the object will flatten to, including
  *           items of all contained objects (but excluding the object header
  *           items of self).  This method may return a reasonable upper
- *           estimate instead of the exact number.  It should use
- *           gwy_serializable_n_items() to calculate the numbers of items
- *           the contained objects will flatten to.
+ *           estimate instead of the exact number; for instance, if objects
+ *           of some class are known to need 5 to 7 items, this method can
+ *           simply return 7.  It should use gwy_serializable_n_items() to
+ *           calculate the numbers of items the contained objects will flatten
+ *           to.
  * @itemize: Appends flattened representation of the object data to the @items
  *           array.  It should use gwy_serializable_itemize() to add the data
  *           of contained objects.  It returns the number of items

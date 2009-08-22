@@ -34,7 +34,7 @@ typedef enum {
     GWY_SERIALIZABLE_CHAR         = 'c',
     GWY_SERIALIZABLE_CHAR_ARRAY   = 'C',
     GWY_SERIALIZABLE_BOOLEAN      = 'b',
-    GWY_SERIALIZABLE_INT32        = 'b',
+    GWY_SERIALIZABLE_INT32        = 'i',
     GWY_SERIALIZABLE_INT32_ARRAY  = 'I',
     GWY_SERIALIZABLE_INT64        = 'q',
     GWY_SERIALIZABLE_INT64_ARRAY  = 'Q',
@@ -54,7 +54,7 @@ union _GwySerializableValue {
     gdouble v_double;
     guchar *v_string;
     GObject *v_object;
-    gsize *v_size;
+    gsize v_size;
     guchar *v_char_array;
     guint32 *v_int32_array;
     guint64 *v_int64_array;
@@ -129,6 +129,7 @@ void     gwy_serializable_assign     (GwySerializable *source,
 gsize    gwy_serializable_n_items    (GwySerializable *serializable);
 void     gwy_serializable_itemize    (GwySerializable *serializable,
                                       GwySerializableItems *items);
+void     gwy_serializable_done       (GwySerializable *serializable);
 
 G_END_DECLS
 
