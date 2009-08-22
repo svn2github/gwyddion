@@ -917,8 +917,48 @@ gwy_expr_parse(GwyExpr *expr,
 }
 
 /**
+ * gwy_expr_identifier_name_is_valid:
+ * @name: Constant identifier.
+ *
+ * Checks whether constant name is a valid identifier.
+ *
+ * Valid identifier must start with a letter, continue with alphanumeric
+ * characters (or underscores).
+ *
+ * Returns: %TRUE if @name is a possible constant name, %FALSE otherwise.
+ **/
+static gboolean
+gwy_expr_identifier_name_is_valid(const gchar *name)
+{
+    guint i;
+
+    if (!g_utf8_validate(name, -1, NULL))
+        return FALSE;
+
+    glong items_written;
+    gunichar *ucs4name =  g_utf8_to_ucs4_fast(name, -1, &items_written);
+
+    if (!ucs4name)
+        return FALSE;
+
+    if (!g_unichar_isalpha(*ucs4name)) {
+        g_free(ucs4name);
+        return FALSE;
+    }
+
+    for (i = 1; i < items_written; i++) {
+        if (!g_unichar_isalnum(ucs4name[i]) && ucs4name[i] != '_')
+            break;
+    }
+    g_free(ucs4name);
+
+    return i == items_written;
+}
+
+/**
  * gwy_expr_transform_values:
  * @expr: An expression.
+ * @err: Location to store error to, or %NULL.
  *
  * Converts constants to single-items RPN lists and indexes identifiers.
  *
@@ -930,7 +970,8 @@ gwy_expr_parse(GwyExpr *expr,
  * Returns: %TRUE on success, %FALSE if transformation failed.
  **/
 static gboolean
-gwy_expr_transform_values(GwyExpr *expr)
+gwy_expr_transform_values(GwyExpr *expr,
+                          GError **err)
 {
     GwyExprToken *code, *t;
     GQuark quark;
@@ -956,7 +997,11 @@ gwy_expr_transform_values(GwyExpr *expr)
         else if (t->token != G_TOKEN_IDENTIFIER)
             continue;
 
-        if (!g_utf8_validate(t->value.v_identifier, -1, NULL)) {
+        if (!gwy_expr_identifier_name_is_valid(t->value.v_identifier)) {
+            g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME,
+                        _("Invalid identifier name %s."),
+                        t->value.v_identifier);
+            return FALSE;
         }
 
         if (expr->constants) {
@@ -1086,7 +1131,7 @@ gwy_expr_transform_functions(GwyExpr *expr,
                             GWY_EXPR_ERROR_MISSING_ARGUMENT,
                             _("Function %s expects %u arguments "
                               "but only %d were given."),
-                            call_table[func].name);
+                            call_table[func].name, nargs, i);
                 gwy_expr_token_list_delete(expr, tokens);
                 return NULL;
             }
@@ -1469,7 +1514,7 @@ gwy_expr_compile(GwyExpr *expr,
 
     g_string_assign(expr->expr, text);
     if (!gwy_expr_parse(expr, err)
-        || !gwy_expr_transform_values(expr)
+        || !gwy_expr_transform_values(expr, err)
         || !gwy_expr_transform_to_rpn(expr, err)) {
         g_assert(!err || *err);
         expr->in = 0;
@@ -1616,52 +1661,13 @@ gwy_expr_vector_execute(GwyExpr *expr,
 }
 
 /**
- * gwy_expr_constant_name_is_valid:
- * @name: Constant identifier.
- *
- * Checks whether constant name is a valid identifier.
- *
- * Valid identifier must start with a letter, continue with alphanumeric
- * characters (or underscores).
- *
- * Returns: %TRUE if @name is a possible constant name, %FALSE otherwise.
- **/
-static gboolean
-gwy_expr_constant_name_is_valid(const gchar *name)
-{
-    guint i;
-
-    if (!g_utf8_validate(name, -1, NULL))
-        return FALSE;
-
-    glong items_written;
-    gunichar *ucs4name =  g_utf8_to_ucs4_fast(name, -1, &items_written);
-
-    if (!ucs4name)
-        return FALSE;
-
-    if (!g_unichar_isalpha(*ucs4name)) {
-        g_free(ucs4name);
-        return FALSE;
-    }
-
-    for (i = 1; i < items_written; i++) {
-        if (!g_unichar_isalnum(ucs4name[i]) && ucs4name[i] != '_')
-            break;
-    }
-    g_free(ucs4name);
-
-    return i == items_written;
-}
-
-/**
  * gwy_expr_define_constant:
  * @expr: An expression evaluator.
  * @name: Name of constant to define.
  * @value: Constant numeric value.
  * @err: Location to store error to, or %NULL.
- *       Only %GWY_EXPR_ERROR_CONSTANT_NAME error from #GwyExprError domain can
- *       occur.
+ *       Only %GWY_EXPR_ERROR_IDENTIFIER_NAME error from #GwyExprError domain
+ *       can occur.
  *
  * Defines a symbolic constant.
  *
@@ -1681,15 +1687,15 @@ gwy_expr_define_constant(GwyExpr *expr,
     g_return_val_if_fail(expr, FALSE);
     g_return_val_if_fail(name, FALSE);
 
-    if (!gwy_expr_constant_name_is_valid(name)) {
-        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_CONSTANT_NAME,
-                    _("Constant name is invalid"));
+    if (!gwy_expr_identifier_name_is_valid(name)) {
+        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME,
+                    _("Identifier name is invalid"));
         return FALSE;
     }
 
     gwy_expr_initialize_scanner(expr);
     if (g_scanner_lookup_symbol(expr->scanner, name)) {
-        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_CONSTANT_NAME,
+        g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NAME_CLASH,
                     _("Constant name clashes with function"));
         return FALSE;
     }
@@ -1858,7 +1864,8 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  * @GWY_EXPR_ERROR_STRAY_COMMA: A comma at the start or end of list.
  * @GWY_EXPR_ERROR_UNRESOLVED_IDENTIFIERS: Expression contains unresolved
  *                                         identifiers.
- * @GWY_EXPR_ERROR_CONSTANT_NAME: Constant name is invalid.
+ * @GWY_EXPR_ERROR_IDENTIFIER_NAME: Identifier name is invalid.
+ * @GWY_EXPR_ERROR_NAME_CLASH: Name clashes with built-in symbol.
  * @GWY_EXPR_ERROR_UTF8: Expression is not valid UTF-8.
  *
  * Error codes returned by expression parsing and execution.
