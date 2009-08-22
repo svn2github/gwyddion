@@ -1,0 +1,7 @@
+Gwyddion 3 was written from scratch by Yeti <yeti@gwyddion.net>.
+
+=== Copies ===
+The GNU C library
+    gwy_math_sort() is a direct specialization of glibc's quicksort(), written
+    by Douglas C. Schmidt, for doubles, see libgwy/gwymath.c for more.
+
