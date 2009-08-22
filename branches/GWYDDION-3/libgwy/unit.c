@@ -1240,7 +1240,7 @@ gwy_unit_clear_format(GwyUnitFormat *format)
 /**
  * GwyUnit:
  *
- * Object representing of physical units.
+ * Object representing physical units.
  *
  * The #GwyUnit struct contains private data only and should be accessed
  * using the functions below.
