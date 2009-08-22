@@ -1010,7 +1010,11 @@ gwy_pack_error_quark(void)
  * the table below.  Each can be preceeded by a decimal number that denotes the
  * number of subsequent arguments that will be of this type.  For instance,
  * "4i" means that four 32bit integer arguments follow and is fully equivalent
- * to "iiii".  The first form is typically slightly more efficient though.
+ * to "iiii".  The first form is usually slightly more efficient.
+ *
+ * To make the specifiers more readable, whitespace characters are permitted
+ * (and ignored) anywhere between the specifiers and even between number and
+ * argument type, numbers may not be split though.
  *
  * <informaltable>
  * <tgroup cols='3' align='left'>
