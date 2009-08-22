@@ -176,18 +176,16 @@ gwy_unit_class_init(GwyUnitClass *klass)
 }
 
 static void
-gwy_unit_init(G_GNUC_UNUSED GwyUnit *unit)
+gwy_unit_init(GwyUnit *unit)
 {
+    unit->units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 }
 
 static void
 gwy_unit_finalize(GObject *object)
 {
     GwyUnit *unit = (GwyUnit*)object;
-
-    if (unit->units)
-        g_array_free(unit->units, TRUE);
-
+    g_array_free(unit->units, TRUE);
     G_OBJECT_CLASS(gwy_unit_parent_class)->finalize(object);
 }
 
@@ -243,10 +241,7 @@ gwy_unit_duplicate_impl(GwySerializable *serializable)
     GwyUnit *unit = GWY_UNIT(serializable);
 
     GwyUnit *duplicate = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    duplicate->units = g_array_sized_new(FALSE, FALSE, sizeof(GwySimpleUnit),
-                                         unit->units->len);
-    g_array_append_vals(duplicate->units,
-                        unit->units->data, unit->units->len);
+    g_array_append_vals(duplicate->units, unit->units->data, unit->units->len);
 
     return G_OBJECT(duplicate);
 }
@@ -306,7 +301,6 @@ gwy_unit_new_from_string(const char *unit_string,
                          gint *power10)
 {
     GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    unit->units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
     parse(unit, unit_string, power10);
 
     return unit;
@@ -813,33 +807,34 @@ gwy_unit_power_multiply(GwyUnit *unit,
                         GwyUnit *op2,
                         gint power2)
 {
-    GwyUnit *myop2 = NULL;
-
     g_return_val_if_fail(GWY_IS_UNIT(op1), NULL);
     g_return_val_if_fail(GWY_IS_UNIT(op2), NULL);
     g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
 
+    /* Ensure unit is different from at least one of op1, op2 */
+    if (unit == op1 && unit == op2)
+        return gwy_unit_power(unit, unit, power1 + power2);
+
     if (!unit)
         unit = gwy_unit_new();
 
-    /* Try to avoid hard work by making op2 the simplier one */
-    if (op1->units->len < op2->units->len
-        || (power2 && !power1)
-        || (op2 == unit && op1 != unit)) {
+    /* Try to avoid hard work by making op2 the simplier one, but primarily
+     * make it different from unit. */
+    if (op2 == unit) {
         GWY_SWAP(GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
+    else if (op1 != unit && (op1->units->len < op2->units->len
+                             || (power2 && !power1))) {
+        GWY_SWAP(GwyUnit*, op1, op2);
+        GWY_SWAP(gint, power1, power2);
+    }
+    g_assert(op2 != unit);
+
     power_impl(unit, op1, power1);
     if (!power2) {
         canonicalize(unit);
         return unit;
-    }
-
-    /* When the second operand is the same object as the unit, we have to
-     * operate on a temporary copy */
-    if (op2 == unit) {
-        myop2 = gwy_unit_duplicate(op2);
-        op2 = myop2;
     }
 
     for (guint i = 0; i < op2->units->len; i++) {
@@ -861,7 +856,6 @@ gwy_unit_power_multiply(GwyUnit *unit,
         }
     }
     canonicalize(unit);
-    GWY_OBJECT_UNREF(myop2);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 
     return unit;
