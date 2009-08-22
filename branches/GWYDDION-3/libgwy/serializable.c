@@ -19,15 +19,24 @@
 
 /*
  * XXX assertions:
- * sizeof(gsize) <= sizeof(guint64)
- * sizeof(gchar) == 1
  * sizeof(gdouble) == sizeof(guint64)
  */
-
 #include <string.h>
 #include <glib/gi18n.h>
 #include "libgwy/serializable.h"
 #include "libgwy/macros.h"
+
+#if (GLIB_SIZEOF_SIZE_T > 8)
+#error Serialization is not implemented for size_t longer than 8 bytes.
+#endif
+
+/* Note we use run-time conditions for endianess-branching even though it is
+ * known at compile time.  This is to get the big-endian branch at least
+ * syntax-checked.  A good optimizing compiler then eliminates the unused
+ * branch entirely so we do not need to care. */
+#if (G_BYTE_ORDER != G_LITTLE_ENDIAN && G_BYTE_ORDER != G_BIG_ENDIAN)
+#error Byte order used on this system is not supported.
+#endif
 
 /* This is acceptable for 4k page size, not that bad for 4M page size and
  * of course good for the sizes between too. */
@@ -644,7 +653,8 @@ gwy_serializable_unpack_size(const guchar *buffer,
     /* Check whether the array length is representable and whether the total
      * size is representable. */
     *array_size = raw_size;
-    if (*array_size != raw_size || *array_size >= G_MAXSIZE/item_size) {
+    if (G_UNLIKELY(*array_size != raw_size
+                   || *array_size >= G_MAXSIZE/item_size)) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
                            GWY_SERIALIZABLE_ERROR_SIZE_T,
                            _("Data of size larger than what can be "
@@ -691,21 +701,23 @@ gwy_serializable_unpack_uint8(const guchar *buffer,
 static inline gsize
 gwy_serializable_unpack_uint8_array(const guchar *buffer,
                                     gsize size,
+                                    gsize *array_size,
                                     guint8 **value,
                                     GwyErrorList **error_list)
 {
-    gsize array_size, rbytes;
+    gsize rbytes;
 
     if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint8),
-                                                &array_size, "int8-array",
+                                                array_size, "int8-array",
                                                 error_list)))
         return 0;
 
     buffer += rbytes;
-    GWY_FREE(*value);
-    *value = g_new(guint8, array_size);
-    memcpy(value, buffer, array_size*sizeof(guint8));
-    return rbytes + array_size*sizeof(guint8);
+    if (*array_size) {
+        *value = g_new(guint8, *array_size);
+        memcpy(value, buffer, *array_size*sizeof(guint8));
+    }
+    return rbytes + *array_size*sizeof(guint8);
 }
 
 static inline gsize
@@ -723,6 +735,37 @@ gwy_serializable_unpack_uint32(const guchar *buffer,
 }
 
 static inline gsize
+gwy_serializable_unpack_uint32_array(const guchar *buffer,
+                                     gsize size,
+                                     gsize *array_size,
+                                     guint32 **value,
+                                     GwyErrorList **error_list)
+{
+    gsize rbytes;
+
+    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint32),
+                                                array_size, "int32-array",
+                                                error_list)))
+        return 0;
+
+    buffer += rbytes;
+    if (*array_size) {
+        *value = g_new(guint32, *array_size);
+        memcpy(value, buffer, *array_size*sizeof(guint32));
+    }
+    if (G_BYTE_ORDER == G_BIG_ENDIAN) {
+        gsize i;
+
+        for (i = 0; i < *array_size; i++) {
+            /* The default swapping macros evaulate the value multiple times. */
+            guint32 v = (*value)[i];
+            (*value)[i] = GUINT32_SWAP_LE_BE(v);
+        }
+    }
+    return rbytes + *array_size*sizeof(guint32);
+}
+
+static inline gsize
 gwy_serializable_unpack_uint64(const guchar *buffer,
                                gsize size,
                                guint64 *value,
@@ -737,27 +780,88 @@ gwy_serializable_unpack_uint64(const guchar *buffer,
 }
 
 static inline gsize
+gwy_serializable_unpack_uint64_array(const guchar *buffer,
+                                     gsize size,
+                                     gsize *array_size,
+                                     guint64 **value,
+                                     GwyErrorList **error_list)
+{
+    gsize rbytes;
+
+    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(guint64),
+                                                array_size, "int64-array",
+                                                error_list)))
+        return 0;
+
+    buffer += rbytes;
+    if (*array_size) {
+        *value = g_new(guint64, *array_size);
+        memcpy(value, buffer, *array_size*sizeof(guint64));
+    }
+    if (G_BYTE_ORDER == G_BIG_ENDIAN) {
+        gsize i;
+
+        for (i = 0; i < *array_size; i++) {
+            /* The default swapping macros evaulate the value multiple times. */
+            guint64 v = (*value)[i];
+            (*value)[i] = GUINT64_SWAP_LE_BE(v);
+        }
+    }
+    return rbytes + *array_size*sizeof(guint64);
+}
+
+/* The code says `int64', that is correct we only care about the size. */
+static inline gsize
 gwy_serializable_unpack_double(const guchar *buffer,
                                gsize size,
-                               gdouble *value,
+                               guint64 *value,
                                GwyErrorList **error_list)
 {
-    GwySerializableValue u;
-
     if (!gwy_serializable_unpack_check_size(size, sizeof(gdouble),
                                             "double", error_list))
         return 0;
-    memcpy(&u.v_uint64, buffer, sizeof(guint64));
-    u.v_uint64 = GINT64_FROM_LE(u.v_uint64);
-    *value = u.v_double;
+    memcpy(value, buffer, sizeof(gdouble));
+    *value = GINT64_FROM_LE(*value);
     return sizeof(gdouble);
 }
 
+/* The code says `int64', that is correct we only care about the size. */
 static inline gsize
-gwy_serializable_unpack_string(const guchar *buffer,
-                               gsize size,
-                               const gchar **value,
-                               GwyErrorList **error_list)
+gwy_serializable_unpack_double_array(const guchar *buffer,
+                                     gsize size,
+                                     gsize *array_size,
+                                     guint64 **value,
+                                     GwyErrorList **error_list)
+{
+    gsize rbytes;
+
+    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, sizeof(gdouble),
+                                                array_size, "double-array",
+                                                error_list)))
+        return 0;
+
+    buffer += rbytes;
+    if (*array_size) {
+        *value = g_new(guint64, *array_size);
+        memcpy(value, buffer, *array_size*sizeof(gdouble));
+    }
+    if (G_BYTE_ORDER == G_BIG_ENDIAN) {
+        gsize i;
+
+        for (i = 0; i < *array_size; i++) {
+            /* The default swapping macros evaulate the value multiple times. */
+            guint64 v = (*value)[i];
+            (*value)[i] = GUINT64_SWAP_LE_BE(v);
+        }
+    }
+    return rbytes + *array_size*sizeof(gdouble);
+}
+
+static inline gsize
+gwy_serializable_unpack_name(const guchar *buffer,
+                             gsize size,
+                             const gchar **value,
+                             GwyErrorList **error_list)
 {
     const guchar *s = memchr(buffer, '\0', size);
 
@@ -770,6 +874,60 @@ gwy_serializable_unpack_string(const guchar *buffer,
     }
     *value = (const gchar*)buffer;
     return s-buffer + 1;
+}
+
+static inline gsize
+gwy_serializable_unpack_string(const guchar *buffer,
+                               gsize size,
+                               gchar **value,
+                               GwyErrorList **error_list)
+{
+    const guchar *s = memchr(buffer, '\0', size);
+
+    if (!s) {
+        gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
+                           GWY_SERIALIZABLE_ERROR_TRUNCATED,
+                           _("End of data was reached while looking for the "
+                             "end of a string."));
+        return 0;
+    }
+    *value = g_memdup(buffer, s-buffer + 1);
+    return s-buffer + 1;
+}
+
+static inline gsize
+gwy_serializable_unpack_string_array(const guchar *buffer,
+                                     gsize size,
+                                     gsize *array_size,
+                                     gchar ***value,
+                                     GwyErrorList **error_list)
+{
+    gsize rbytes, i, position = 0;
+
+    if (!(rbytes = gwy_serializable_unpack_size(buffer, size, 1,
+                                                array_size, "string-array",
+                                                error_list)))
+        return 0;
+    position += rbytes;
+
+    if (*array_size) {
+        *value = g_new0(gchar*, *array_size);
+        for (i = 0; i < *array_size; i++) {
+            if (!(rbytes = gwy_serializable_unpack_string(buffer + position,
+                                                          size - position,
+                                                          *value + i,
+                                                          error_list))) {
+                while (i--)
+                    g_free((*value)[i]);
+                GWY_FREE(*value);
+                position = 0;
+                break;
+            }
+            position += rbytes;
+        }
+    }
+
+    return position;
 }
 
 /**
@@ -803,8 +961,8 @@ gwy_serializable_deserialize(const guchar *buffer,
     GType type;
 
     /* Type name */
-    if (!(rbytes = gwy_serializable_unpack_string(buffer + pos, size - pos,
-                                                  &typename, error_list)))
+    if (!(rbytes = gwy_serializable_unpack_name(buffer + pos, size - pos,
+                                                &typename, error_list)))
         goto fail;
     pos += rbytes;
 
@@ -903,6 +1061,12 @@ gwy_serializable_unpack_items(const guchar *buffer,
                               gsize size,
                               GwyErrorList **error_list)
 {
+    GwySerializableItems *items;
+
+    items = g_new(GwySerializableItems, 1);
+    items->len = 16;
+    items->items = g_new(GwySerializableItem, items->len);
+    items->n_items = 0;
 }
 
 static void
