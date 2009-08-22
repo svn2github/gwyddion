@@ -1464,6 +1464,7 @@ int
 main(int argc, char *argv[])
 {
     g_test_init(&argc, &argv, NULL);
+    g_type_init();
 
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/memmem", test_memmem);
