@@ -92,7 +92,7 @@ struct _GwyInventory {
 };
 
 struct _GwyInventoryClass {
-    GObjectClass parent_class;
+    GObjectClass g_object_class;
 
     /* Signals */
     void (*item_inserted)(GwyInventory *inventory,

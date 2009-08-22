@@ -1195,6 +1195,13 @@ invent_item_name(GwyInventory *inventory,
  **/
 
 /**
+ * GwyInventoryClass:
+ * @g_object_class: Parent class.
+ *
+ * Class of item inventories.
+ **/
+
+/**
  * GwyInventoryItemType:
  * @type: Object type, if item is object or other type with registered GType.
  *        May be zero to indicate an unregistered item type.
