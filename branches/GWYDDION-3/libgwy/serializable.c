@@ -144,7 +144,7 @@ gwy_serializable_duplicate(GwySerializable *serializable)
  * gwy_serializable_assign:
  * @source: A serializable object.
  * @destination: An object of the same type as @source. More precisely,
- *               @source may be subclass of @destination (the extra 
+ *               @source may be subclass of @destination (the extra
  *               information is lost then).
  *
  * Copies the value of an object to another object.
@@ -208,7 +208,120 @@ gwy_serializable_assign(GwySerializable *destination,
  * <refsect2 id='libgwy-serializable-implementing'>
  * <title>Implementing #GwySerializable</title>
  * <para>You can implement serialization and deserialization in your
- * classes...</para>
+ * classes.  There is a convenience macro %GWY_IMPLEMENT_SERIALIZABLE available
+ * declaring implementation of the interface in the type function.  The copy
+ * constructor and assignment operators are usually easy so we focus on
+ * serialization and deserialization.</para>
+ * |[
+ * // Standard object structure definitions
+ * typedef struct _MyObject      MyObject;
+ * typedef struct _MyObjectClass MyObjectClass;
+ *
+ * struct _MyObject {
+ *     GObject g_object;
+ *     gint32 data;
+ * };
+ *
+ * struct _MyObjectClass {
+ *     GObjectClass g_object_class;
+ * };
+ *
+ * // Define the type
+ * G_DEFINE_TYPE_EXTENDED
+ *     (MyObject, my_object, G_TYPE_OBJECT, 0,
+ *      GWY_IMPLEMENT_SERIALIZABLE(my_object_serializable_init))
+ *
+ * // Serialized data specification, used both in itemize() and construct()
+ * static const GwySerializableItem default_items[] = {
+ *     { .name = "data", .ctype = GWY_SERIALIZABLE_INT32, },
+ * };
+ *
+ * // Implement the interface
+ * static void
+ * my_object_serializable_init(GwySerializableInterface *iface)
+ * {
+ *     iface->n_items   = my_object_n_items;
+ *     iface->itemize   = my_object_itemize;
+ *     iface->done      = my_object_done;
+ *     iface->construct = my_object_construct;
+ *     iface->duplicate = my_object_duplicate_impl;
+ *     iface->assign =    my_object_assign_impl;
+ * }
+ *
+ * // Duplication is easy, create a new object and set @data
+ * static GObject*
+ * my_object_duplicate_impl(GwySerializable *serializable)
+ * {
+ *     MyObject *myobject = GWY_MY_OBJECT(serializable);
+ *     MyObject *copy = g_object_newv(MY_TYPE_OBJECT, 0, NULL);
+ *
+ *     copy->data = myobject->data;
+ * }
+ *
+ * // Assigning is even easier, just set @data
+ * static GObject*
+ * my_object_assign_impl(GwySerializable *serializable,
+ *                       GwySerializable *source)
+ * {
+ *     MyObject *myobject = GWY_MY_OBJECT(serializable);
+ *     MyObject *src = GWY_MY_OBJECT(source);
+ *
+ *     src->data = myobject->data;
+ * }
+ *
+ * // Our object needs at most one item and it does not contain any child
+ * // objects.  Thus we can simply return a constant.
+ * static gsize
+ * my_object_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+ * {
+ *     return 1;
+ * }
+ *
+ * #define add_item(id) \
+ *     g_return_val_if_fail(items->len - items->n_items, 0); \
+ *     items->items[items->n_items++] = it[id]; \
+ *     n_items++
+ *
+ * // Fill the item list with actual object data.  This is a bit
+ * // overcomplicated for such a simple object as MyObject, of course.
+ * static gsize
+ * my_object_itemize(GwySerializable *serializable,
+ *                   GwySerializableItems *items)
+ * {
+ *     MyObject *myobject = GWY_MY_OBJECT(serializable);
+ *     GwySerializableItem it[G_N_ELEMENTS(default_items)];
+ *     gsize n_items = 0;
+ *
+ *     memcpy(it, default_items, sizeof(default_items));
+ *
+ *     // Do not store the data if it has the default value
+ *     if (myobject->data) {
+ *         it[0].value.v_int32 = myobject->data;
+ *         add_item(0);
+ *     }
+ *
+ *     return n_items;
+ * }
+ *
+ * // Construct the object from item list.  The data item does not need to be
+ * // present, in this case the default zero value is used.  Also, for more
+ * // complicated objects the deserialization can fail or resources need to be
+ * // released; see GwySerializableInterface for the clean-up rules.
+ * static GObject*
+ * my_object_construct(GwySerializableItems *items,
+ *                     GwyErrorList **error_list)
+ * {
+ *     GwySerializableItem it[G_N_ELEMENTS(default_items)];
+ *
+ *     memcpy(it, default_items, sizeof(default_items));
+ *     gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "MyObject",
+ *                                  error_list);
+ *
+ *     myobject->data = it[0].value.v_int32;
+ *
+ *     return G_OBJECT(myobject);
+ * }
+ * ]|
  * </refsect2>
  **/
 
@@ -329,6 +442,10 @@ gwy_serializable_assign(GwySerializable *destination,
  *             predefined set are expected and then
  *             gwy_deserialize_filter_items() can be used to simplify the
  *             processing of the item list.</para>
+ *             <para>This method is free to create an object of any type, not
+ *             necessarily of the class implementing this method.  This is
+ *             intentional, however, it should not be abused without
+ *             a good reason.</para>
  * @duplicate: <para>Creates a new object with all data identical to this
  *             object.  This method is expected to create a deep copy.
  *             Classes may provide other methods for shallow copies.</para>
