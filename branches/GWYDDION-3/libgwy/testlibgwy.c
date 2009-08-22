@@ -820,6 +820,52 @@ test_unit_arithmetic(void)
     g_object_unref(u0);
 }
 
+static void
+test_unit_serialize_one(GwyUnit *unit1)
+{
+    GwyUnit *unit2;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    GwyErrorList *error_list = NULL;
+    gsize len;
+    gboolean ok;
+
+    stream = g_memory_output_stream_new(malloc(100), 100, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(unit1), stream, &error);
+    g_assert(ok);
+    g_assert(error == NULL);
+    len = g_memory_output_stream_get_data_size(memstream);
+    unit2 = (GwyUnit*)(gwy_serializable_deserialize
+                       (g_memory_output_stream_get_data(memstream),
+                        g_memory_output_stream_get_data_size(memstream),
+                        &len, &error_list));
+    g_assert_cmpuint(len, ==, g_memory_output_stream_get_data_size(memstream));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert(GWY_IS_UNIT(unit2));
+    g_assert(gwy_unit_equal(unit2, unit1));
+
+    g_object_unref(stream);
+    g_object_unref(unit2);
+}
+
+static void
+test_unit_serialize(void)
+{
+    GwyUnit *unit;
+
+    /* Trivial unit */
+    unit = gwy_unit_new();
+    test_unit_serialize_one(unit);
+    g_object_unref(unit);
+
+    /* Less trivial unit */
+    unit = gwy_unit_new_from_string("kg m s^-2/nA", NULL);
+    test_unit_serialize_one(unit);
+    g_object_unref(unit);
+}
+
 /***************************************************************************
  *
  * Main
@@ -839,14 +885,15 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
     g_test_add_func("/testlibgwy/serialize-error", test_serialize_error);
-    /* Require error_list */
+    /* Requires error_list */
     g_test_add_func("/testlibgwy/deserialize-simple", test_deserialize_simple);
     g_test_add_func("/testlibgwy/deserialize-data", test_deserialize_data);
     g_test_add_func("/testlibgwy/deserialize-nested", test_deserialize_nested);
     g_test_add_func("/testlibgwy/deserialize-garbage", test_deserialize_garbage);
-    /* Require serializable */
+    /* Requires serializable, error_list */
     g_test_add_func("/testlibgwy/unit-parse", test_unit_parse);
     g_test_add_func("/testlibgwy/unit-arithmetic", test_unit_arithmetic);
+    g_test_add_func("/testlibgwy/unit-serialize", test_unit_serialize);
 
     return g_test_run();
 }
