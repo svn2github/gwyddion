@@ -706,14 +706,18 @@ test_serialize_error(void)
     /* Too small buffer */
     sertest = gwy_ser_test_new_filled(TRUE, data, G_N_ELEMENTS(data),
                                       "Test Test", 0x12345678);
-    stream = g_memory_output_stream_new(malloc(100), 100, NULL, &free);
-    memstream = G_MEMORY_OUTPUT_STREAM(stream);
-    ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream, &error);
-    g_assert(!ok);
-    g_assert_cmpint(sertest->done_called, ==, 0);
-    g_object_unref(stream);
+    for (gsize i = 1; i < 102; i++) {
+        stream = g_memory_output_stream_new(malloc(i), i, NULL, &free);
+        memstream = G_MEMORY_OUTPUT_STREAM(stream);
+        ok = gwy_serializable_serialize(GWY_SERIALIZABLE(sertest), stream,
+                                        &error);
+        g_assert(!ok);
+        g_assert(error);
+        g_assert_cmpint(sertest->done_called, ==, 0);
+        g_object_unref(stream);
+        g_clear_error(&error);
+    }
     g_object_unref(sertest);
-    g_clear_error(&error);
 }
 
 static void
