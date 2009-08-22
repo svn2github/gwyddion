@@ -24,6 +24,7 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/unit.h"
+#include "libgwy/libgwy-aliases.h"
 
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
 
@@ -1196,6 +1197,9 @@ gwy_unit_clear_format(GwyUnitFormat *format)
 {
     GWY_FREE(format->units);
 }
+
+#define __GWY_UNIT_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: unit

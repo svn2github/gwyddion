@@ -79,7 +79,6 @@ const gchar* gwy_expr_get_expression    (GwyExpr *expr);
 
 G_END_DECLS
 
-#endif /* __GWY_EXPR_H__ */
+#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
-

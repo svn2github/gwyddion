@@ -21,6 +21,7 @@
 #include <glib/gi18n.h>
 #include "libgwy/serialize.h"
 #include "libgwy/macros.h"
+#include "libgwy/libgwy-aliases.h"
 
 /*
  * XXX assertions:
@@ -1383,6 +1384,9 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 
     g_slice_free1(sizeof(guint8)*n_items, seen);
 }
+
+#define __GWY_SERIALIZE_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: serialize

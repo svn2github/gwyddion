@@ -23,6 +23,7 @@
 
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/libgwy-aliases.h"
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
@@ -573,6 +574,9 @@ jump_over:
         }
     }
 }
+
+#define __GWY_MATH_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: math

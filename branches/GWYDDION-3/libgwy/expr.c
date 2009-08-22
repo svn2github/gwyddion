@@ -26,6 +26,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/expr.h"
+#include "libgwy/libgwy-aliases.h"
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
 
@@ -1723,7 +1724,8 @@ gwy_expr_undefine_constant(GwyExpr *expr,
     return g_hash_table_remove(expr->constants, GUINT_TO_POINTER(quark));
 }
 
-/************************** Documentation ****************************/
+#define __GWY_EXPR_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: expr

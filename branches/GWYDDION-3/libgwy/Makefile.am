@@ -9,7 +9,8 @@ CLEANFILES =
 MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
-libgwyincludedir = $(pkgincludedir)/libgwyddion
+library = libgwy
+libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
 
 lib_LTLIBRARIES = libgwy.la
@@ -60,14 +61,8 @@ libgwy_la_LDFLAGS = @LIBGWY_LIBS@ $(version_info)
 testlibgwy_LDADD = libgwy.la
 
 include $(top_srcdir)/build/gtester.make
-
-check-symbols: .libs/libgwy.la $(top_builddir)/docs/libgwy/libgwy-decl.txt
-	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
-	    .libs/libgwy.la \
-	    $(top_builddir)/docs/libgwy/libgwy-decl.txt \
-	    $(srcdir)
+include $(top_srcdir)/build/library.make
 
 clean-local:
 	rm -f core.* *~
 
-.PHONY: check-symbols

@@ -17,8 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libgwy/errorlist.h"
 #include <stdarg.h>
+#include "libgwy/errorlist.h"
+#include "libgwy/libgwy-aliases.h"
 
 /**
  * gwy_error_list_add:
@@ -75,6 +76,9 @@ gwy_error_list_clear(GwyErrorList **list)
     g_slist_free(*list);
     *list = NULL;
 }
+
+#define __GWY_ERROR_LIST_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: errorlist

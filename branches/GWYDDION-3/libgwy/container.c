@@ -25,6 +25,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/container.h"
 #include "libgwy/serialize.h"
+#include "libgwy/libgwy-aliases.h"
 
 enum {
     ITEM_CHANGED,
@@ -2264,7 +2265,8 @@ next:
     return container;
 }
 
-/************************** Documentation ****************************/
+#define __GWY_CONTAINER_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: container

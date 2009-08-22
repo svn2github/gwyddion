@@ -17,10 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "libgwy/pack.h"
-#include "libgwy/math.h"
 #include <string.h>
 #include <stdarg.h>
+#include "libgwy/pack.h"
+#include "libgwy/math.h"
+#include "libgwy/libgwy-aliases.h"
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define DIRECT_ORDER '<'
@@ -973,6 +974,9 @@ gwy_pack_error_quark(void)
 
     return error_domain;
 }
+
+#define __GWY_PACK_C__
+#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: pack
