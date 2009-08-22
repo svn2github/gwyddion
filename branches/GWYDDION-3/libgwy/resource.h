@@ -26,6 +26,16 @@
 
 G_BEGIN_DECLS
 
+#define GWY_RESOURCE_ERROR gwy_resource_error_quark()
+
+typedef enum {
+    GWY_RESOURCE_ERROR_HEADER = 1,
+    GWY_RESOURCE_ERROR_TYPE,
+    GWY_RESOURCE_ERROR_NAME,
+} GwyResourceError;
+
+GQuark gwy_resource_error_quark(void);
+
 #define GWY_TYPE_RESOURCE \
     (gwy_resource_get_type())
 #define GWY_RESOURCE(obj) \
@@ -99,9 +109,6 @@ void          gwy_resource_data_changed       (GwyResource *resource);
 void          gwy_resource_data_saved         (GwyResource *resource);
 gchar*        gwy_resource_build_filename     (GwyResource *resource);
 GString*      gwy_resource_dump               (GwyResource *resource);
-GwyResource*  gwy_resource_parse              (const gchar *text,
-                                               GType expected_type,
-                                               GError **error);
 const gchar*  gwy_resource_class_get_name     (GwyResourceClass *klass);
 const GwyInventoryItemType* gwy_resource_class_get_item_type(GwyResourceClass *klass);
 GwyInventory* gwy_resource_class_get_inventory(GwyResourceClass *klass);

@@ -22,12 +22,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <libgwy/libgwy.h>
 #include "libgwy/libgwy-aliases.h"
 
-#define MAGIC_HEADER "Gwyddion resource "
+#define MAGIC_HEADER2 "Gwyddion resource "
+#define MAGIC_HEADER3 "Gwyddion3 resource "
 
 enum {
     DATA_CHANGED,
@@ -65,10 +67,10 @@ static const gchar* gwy_resource_get_trait_name (guint i);
 static void         gwy_resource_get_trait_value(gconstpointer item,
                                                  guint i,
                                                  GValue *value);
-static GwyResource* gwy_resource_parse_impl     (const gchar *text,
-                                                 GType expected_type,
-                                                 gboolean is_modifiable,
-                                                 GError **error);
+static GwyResource* parse(const gchar *text,
+                          GType expected_type,
+                          const gchar *filename,
+                          GError **error);
 static void         gwy_resource_modified       (GwyResource *resource);
 
 /* Use a static propery -> trait map.  We could do it generically, too.
@@ -99,6 +101,26 @@ static const GwyInventoryItemType gwy_resource_item_type = {
 };
 
 G_DEFINE_ABSTRACT_TYPE(GwyResource, gwy_resource, G_TYPE_OBJECT)
+
+/**
+ * gwy_resource_error_quark:
+ *
+ * Gets the error domain for resource operations.
+ *
+ * See and use %GWY_RESOURCE_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+GQuark
+gwy_resource_error_quark(void)
+{
+    static GQuark error_domain = 0;
+
+    if (!error_domain)
+        error_domain = g_quark_from_static_string("gwy-resource-error-quark");
+
+    return error_domain;
+}
 
 static void
 gwy_resource_class_init(GwyResourceClass *klass)
@@ -514,7 +536,7 @@ gwy_resource_dump(GwyResource *resource)
     method = GWY_RESOURCE_GET_CLASS(resource)->dump;
     g_return_val_if_fail(method, NULL);
 
-    str = g_string_new(MAGIC_HEADER);
+    str = g_string_new(MAGIC_HEADER3);
     g_string_append(str, G_OBJECT_TYPE_NAME(resource));
     g_string_append_c(str, '\n');
     method(resource, str);
@@ -522,75 +544,117 @@ gwy_resource_dump(GwyResource *resource)
     return str;
 }
 
-/**
- * gwy_resource_parse:
- * @text: Textual resource representation.
- * @expected_type: Resource object type.  If not 0, only resources of give type
- *                 are allowed.  Zero value means any #GwyResource is allowed.
- * @error: Location to store the error occuring, %NULL to ignore.  Errors from
- *         FIXME FIXME domain can occur.
- *
- * Reconstructs a resource from human readable form.
- *
- * Returns: Newly created resource (or %NULL).
- **/
-GwyResource*
-gwy_resource_parse(const gchar *text,
-                   GType expected_type,
-                   GError **error)
-{
-    return gwy_resource_parse_impl(text, expected_type, TRUE, error);
-}
-
 static GwyResource*
-gwy_resource_parse_impl(const gchar *text,
-                        GType expected_type,
-                        gboolean is_modifiable,
-                        GError **error)
+parse(const gchar *text,
+      GType expected_type,
+      const gchar *filename,
+      GError **error)
 {
-    GwyResourceClass *klass;
-    GwyResource *resource;
-    GType type;
-    gchar *name;
-    guint len;
+    GwyResourceClass *klass = NULL;
+    GwyResource *resource = NULL;
+    gchar *name = NULL;
+    guint version;
 
-    if (!g_str_has_prefix(text, MAGIC_HEADER)) {
-        g_warning("Wrong resource magic header");
+    if (g_str_has_prefix(text, MAGIC_HEADER3)) {
+        text += sizeof(MAGIC_HEADER3) - 1;
+        version = 3;
+    }
+    else if (g_str_has_prefix(text, MAGIC_HEADER2)) {
+        text += sizeof(MAGIC_HEADER2) - 1;
+        version = 2;
+    }
+    else {
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
+                    _("Wrong or missing resource magic header."));
         return NULL;
     }
 
-    text += sizeof(MAGIC_HEADER) - 1;
-    len = strspn(text, G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS);
-    name = g_strndup(text, len);
+    guint len = strspn(text, G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS);
+    gchar *typename = g_strndup(text, len);
     text = strchr(text + len, '\n');
-    if (!text) {
-        g_warning("Truncated resource header");
-        return NULL;
+    if (G_UNLIKELY(!text)) {
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_HEADER,
+                    _("Resource header is truncated."));
+        goto fail;
     }
     text++;
-    type = g_type_from_name(name);
-    if (!type
-        || (expected_type && type != expected_type)
-        || !g_type_is_a(type, GWY_TYPE_RESOURCE)
-        || !G_TYPE_IS_INSTANTIATABLE(type)
-        || G_TYPE_IS_ABSTRACT(type)) {
-        g_warning("Wrong resource type ‘%s’", name);
-        g_free(name);
-        return NULL;
+    GType type = g_type_from_name(typename);
+
+    if (G_UNLIKELY(!type)) {
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
+                    _("Resource type ‘%s’ is invalid."), typename);
+        goto fail;
     }
-    klass = GWY_RESOURCE_CLASS(g_type_class_peek_static(type));
+    if (G_UNLIKELY(type != expected_type)) {
+        g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_TYPE,
+                    _("Resource type ‘%s’ does not match expected type ‘%s’."),
+                    typename, g_type_name(expected_type));
+        goto fail;
+    }
+    /* If the resource type matches the requested type yet the type is invalid
+     * this is a programmer's error.  Fail ungracefully.  */
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE)
+                         && G_TYPE_IS_INSTANTIATABLE(type)
+                         && !G_TYPE_IS_ABSTRACT(type),
+                         NULL);
+
+    klass = GWY_RESOURCE_CLASS(g_type_class_ref(type));
     g_return_val_if_fail(klass && klass->parse, NULL);
 
-    resource = klass->parse(text);
-    if (resource) {
-        resource->is_modifiable = is_modifiable;
-        GWY_FREE(resource->name);
-        resource->name = name;
-        name = NULL;
-    }
-    else
-        g_free(name);
+    /* Parse the name in v3 resources. */
+    if (version == 3) {
+        text += strspn(text, " \t\n\r");
+        if (!strncmp(text, "name", sizeof("name")-1)
+            || !g_ascii_isspace(text[sizeof("name")]))
+        {
+            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                        _("Resource name is missing."));
+            goto fail;
+        }
 
+        text += sizeof("name");
+        text += strspn(text, " \t\n\r");
+        len = strcspn(text, "\n\r");
+        if (!len) {
+            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                        _("Resource name is missing."));
+            goto fail;
+        }
+
+        if (!g_utf8_validate(text, len, NULL)) {
+            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                        _("Resource name is not valid UTF-8."));
+            goto fail;
+        }
+
+        name = g_strndup(text, len);
+        if (gwy_inventory_get_item(klass->inventory, name)) {
+            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
+                        _("Resource named ‘%s’ already exists."),
+                        name);
+            goto fail;
+        }
+
+        text += len;
+        text += strspn(text, " \t\n\r");
+    }
+
+    if ((resource = klass->parse(text))) {
+        if (name) {
+            resource->name = name;
+            name = NULL;
+        }
+        else {
+            name = g_path_get_basename(filename);
+            resource->name = g_filename_to_utf8(name, 0, NULL, NULL, NULL);
+        }
+    }
+
+fail:
+    if (klass)
+        g_type_class_unref(klass);
+    GWY_FREE(typename);
+    GWY_FREE(name);
     return resource;
 }
 
@@ -714,12 +778,11 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             continue;
         }
 
-        GwyResource *resource
-            = gwy_resource_parse_impl(text, G_TYPE_FROM_CLASS(klass),
-                                      modifiable, &error);
+        GwyResource *resource = parse(text, G_TYPE_FROM_CLASS(klass), filename,
+                                      &error);
         if (resource) {
-            GWY_FREE(resource->name);
-            //resource->name = g_strdup(name);
+            resource->is_modifiable = modifiable;
+            resource->filename = g_strdup(filename);
             resource->is_modified = FALSE;
             gwy_inventory_insert_item(klass->inventory, resource);
             g_object_unref(resource);
@@ -827,10 +890,25 @@ gwy_resource_classes_finalize(void)
  * @discard: gwy_resource_discard() virtual method.
  * @dump: gwy_resource_dump() virtual method, it only cares about resource
  *        data itself, the envelope is handled by #GwyResource.
- * @parse: gwy_resource_parse() virtual method, in only cares about resource
- *         data itself, the envelope is handled by #GwyResource.
+ * @parse: Virtual method parsing back the text dump, in only cares about
+ *         resource data itself, the envelope is handled by #GwyResource.
  *
  * Resource class.
+ **/
+
+/**
+ * GWY_RESOURCE_ERROR:
+ *
+ * Error domain for resource operations.
+ *
+ * Errors in this domain will be from the #GwyResourceError enumeration.
+ * See #GError for information on error domains.
+ **/
+
+/**
+ * GwyResourceError:
+ *
+ * Error codes returned by resource operations.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
