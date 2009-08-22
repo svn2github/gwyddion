@@ -56,13 +56,6 @@ typedef struct {
     gsize *pfxlengths;
 } PrefixListData;
 
-/*
-typedef struct {
-    GwySerializeItem *items;
-    gint i;
-} SerializeData;
-*/
-
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
 static void     value_destroy                  (gpointer data);
 static void     gwy_container_finalize         (GObject *object);
