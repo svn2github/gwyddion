@@ -1919,16 +1919,15 @@ gwy_container_transfer(GwyContainer *source,
                        gboolean force)
 {
     PrefixData pfdata;
-    GValue *val, *copy;
     GString *key;
-    GQuark quark;
     guint dpflen;
-    GSList *l;
 
     g_return_val_if_fail(GWY_IS_CONTAINER(source), 0);
     g_return_val_if_fail(GWY_IS_CONTAINER(dest), 0);
-    g_return_val_if_fail(source_prefix, 0);
-    g_return_val_if_fail(dest_prefix, 0);
+    if (!source_prefix)
+        source_prefix = "";
+    if (!dest_prefix)
+        dest_prefix = "";
     if (source == dest) {
         if (gwy_strequal(source_prefix, dest_prefix))
             return 0;
@@ -1953,26 +1952,35 @@ gwy_container_transfer(GwyContainer *source,
     pfdata.keylist = g_slist_reverse(pfdata.keylist);
     key = g_string_new(dest_prefix);
     dpflen = strlen(dest_prefix);
-    if (dest_prefix[dpflen - 1] == GWY_CONTAINER_PATHSEP)
+    if (dpflen && dest_prefix[dpflen - 1] == GWY_CONTAINER_PATHSEP)
         dpflen--;
     if (pfdata.closed_prefix)
         pfdata.prefix_length--;
 
     /* Transfer the items */
     pfdata.count = 0;
-    for (l = pfdata.keylist; l; l = g_slist_next(l)) {
-        val = (GValue*)g_hash_table_lookup(source->values, l->data);
+    for (GSList *l = pfdata.keylist; l; l = g_slist_next(l)) {
+        GValue *val = (GValue*)g_hash_table_lookup(source->values, l->data);
         if (G_UNLIKELY(!val)) {
             g_critical("Container contents changed during "
                        "gwy_container_transfer().");
             break;
         }
-        if (!force && g_hash_table_lookup(dest->values, l->data))
+
+        GValue *copy = (GValue*)g_hash_table_lookup(dest->values, l->data);
+        gboolean exists = (copy != NULL);
+        if (!force && exists)
+            continue;
+        if (exists && gwy_container_values_equal(val, copy))
             continue;
 
+        if (exists)
+            g_value_unset(copy);
+        else
+            copy = g_new0(GValue, 1);
         GType type = G_VALUE_TYPE(val);
-        copy = g_new0(GValue, 1);
         g_value_init(copy, type);
+
         /* This g_value_copy() makes a real copy of everything, including
          * strings, but it only references objects while deep copy requires
          * duplication. */
@@ -1994,8 +2002,9 @@ gwy_container_transfer(GwyContainer *source,
         g_string_append(key,
                         g_quark_to_string(GPOINTER_TO_UINT(l->data))
                         + pfdata.prefix_length);
-        quark = g_quark_from_string(key->str);
-        g_hash_table_insert(dest->values, GUINT_TO_POINTER(quark), copy);
+        GQuark quark = g_quark_from_string(key->str);
+        if (!exists)
+            g_hash_table_insert(dest->values, GUINT_TO_POINTER(quark), copy);
         g_signal_emit(dest, container_signals[ITEM_CHANGED], quark, quark);
         pfdata.count++;
     }
