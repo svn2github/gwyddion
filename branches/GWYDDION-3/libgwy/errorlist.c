@@ -49,6 +49,7 @@ gwy_error_list_add(GwyErrorList **list,
     message = g_strdup_vprintf(format, ap);
     va_end(ap);
     *list = g_slist_prepend(*list, g_error_new_literal(domain, code, message));
+    g_free(message);
 }
 
 /**
