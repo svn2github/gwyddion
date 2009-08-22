@@ -29,11 +29,6 @@ G_BEGIN_DECLS
 /* This is necessary to fool gtk-doc that ignores static inline functions */
 #define _GWY_STATIC_INLINE static inline
 
-_GWY_STATIC_INLINE double gwy_exp10(double x);
-_GWY_STATIC_INLINE double gwy_powi (double x, int i);
-
-#undef _GWY_STATIC_INLINE
-
 /*
  * The empty comments fix gtk-doc.
  * See http://bugzilla.gnome.org/show_bug.cgi?id=481811
@@ -42,6 +37,8 @@ _GWY_STATIC_INLINE double gwy_powi (double x, int i);
 #ifdef GWY_HAVE_EXP10
 # define gwy_exp10 exp10
 #else
+_GWY_STATIC_INLINE double gwy_exp10(double x);
+
 static inline double
 gwy_exp10(double x) {
     return /**/ pow(10.0, x);
@@ -57,6 +54,8 @@ gwy_exp10(double x) {
 #  define powi __builtin_powi
 # endif
 #else
+_GWY_STATIC_INLINE double gwy_powi (double x, int i);
+
 static inline double
 gwy_powi(double x, int i)
 {
@@ -80,6 +79,8 @@ gwy_powi(double x, int i)
 #  define powi gwy_powi
 # endif
 #endif
+
+#undef _GWY_STATIC_INLINE
 
 void    gwy_math_sort  (gdouble *array,
                         guint *index_array,
