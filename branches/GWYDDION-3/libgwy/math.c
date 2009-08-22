@@ -1,5 +1,5 @@
 /*
- *  @(#) $Id: pack.c 7 2009-01-03 19:16:14Z yeti $
+ *  @(#) $Id$
  *  Copyright (C) 2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
