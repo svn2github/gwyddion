@@ -323,10 +323,13 @@ gwy_serializable_assign(GwySerializable *destination,
  *             gwy_deserialize_filter_items() can be used to simplify the
  *             processing of the item list.</para>
  * @duplicate: <para>Creates a new object with all data identical to this
- *             object.</para>
+ *             object.  This method is expected to create a deep copy.
+ *             Classes may provide other methods for shallow copies.</para>
  * @assign: <para>Makes all data of this object identical to the data of
  *          another object of the same class.  Implementations may assume that
- *          the is-a relation is satisfied for the source object.</para>
+ *          the is-a relation is satisfied for the source object.  This method
+ *          is expected to perform a deep copy.  Classes may provide other
+ *          methods for shallow copies.</para>
  *
  * Interface implemented by serializable objects.
  *
