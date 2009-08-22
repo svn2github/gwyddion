@@ -108,8 +108,11 @@ void          gwy_resource_use                (GwyResource *resource);
 void          gwy_resource_discard            (GwyResource *resource);
 gboolean      gwy_resource_is_used            (GwyResource *resource);
 void          gwy_resource_data_changed       (GwyResource *resource);
-void          gwy_resource_data_saved         (GwyResource *resource);
-GString*      gwy_resource_dump               (GwyResource *resource);
+GwyResource*  gwy_resource_load               (const gchar *filename_sys,
+                                               GType expected_type,
+                                               GError **error);
+gboolean      gwy_resource_save               (GwyResource *resource,
+                                               GError **error);
 const gchar*  gwy_resource_class_get_name     (GwyResourceClass *klass);
 const GwyInventoryItemType* gwy_resource_class_get_item_type(GwyResourceClass *klass);
 GwyInventory* gwy_resource_class_get_inventory(GwyResourceClass *klass);
