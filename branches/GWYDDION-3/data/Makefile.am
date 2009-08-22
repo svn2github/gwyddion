@@ -1,5 +1,5 @@
 # Process this file with automake to produce Makefile.in
-# $Id: Makefile.am 126 2009-01-20 19:41:15Z yeti $
+# $Id$
 
 EXTRA_DIST = \
 	gwyddion-vim-cfg.py \

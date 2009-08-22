@@ -1,5 +1,5 @@
 # Process this file with automake to produce Makefile.in
-# $Id: Makefile.am 77 2009-01-17 23:21:18Z yeti $
+# $Id$
 
 EXTRA_DIST = $(m4_files)
 
