@@ -79,7 +79,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	gtkdoc-scan --module=$(DOC_MODULE) \
 	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
 	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	    --ignore-headers=$(top_srcdir)/$(DOC_SOURCE_DIR)/$(DOC_MODULE)-aliases.h \
+	    --ignore-headers=$(DOC_MODULE)-aliases.h \
 	    --rebuild-sections --rebuild-types \
 	    --deprecated-guards="GWY_DISABLE_DEPRECATED" \
 	    --ignore-decorators="_GWY_STATIC_INLINE"
@@ -106,7 +106,7 @@ sgml-build.stamp: $(CFILE_GLOB) $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MO
 	gtkdoc-mkdb --module=$(DOC_MODULE) \
 	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
 	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	    --ignore-files=$(top_srcdir)/$(DOC_SOURCE_DIR)/$(DOC_MODULE)-aliases.c \
+	    --ignore-files=$(DOC_MODULE)-aliases.c \
 	    --sgml-mode --output-format=xml \
 	    --expand-content-files="$(expand_content_files)" \
 	    --main-sgml-file=$(DOC_MAIN_SGML_FILE) \
@@ -161,8 +161,7 @@ install-data-local:
 	test -n "$$d"
 
 uninstall-local:
-	rm -f $(DESTDIR)$(TARGET_DIR)/*
-	rmdir $(DESTDIR)$(TARGET_DIR)
+	rm -f $(DESTDIR)$(TARGET_DIR)
 
 #
 # Require gtk-doc when making dist
@@ -178,8 +177,8 @@ endif
 dist-hook: dist-check-gtkdoc
 	mkdir $(distdir)/html
 	if test -s html/index.sgml; then d=html; else d=$(srcdir)/html; fi; \
-	$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
 	cp -f $$d/* $(distdir)/html
+	$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
 
 .PHONY: docs
 
