@@ -1,0 +1,4 @@
+Packing: Is unfinished.  Might need a review and go with the code-generation
+         path instead.
+
+Container: assign() does not emit signals.  Implement it via transfer()?
