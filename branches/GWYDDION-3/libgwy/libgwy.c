@@ -329,7 +329,7 @@ check_base_dir(const gchar *basedir,
                gchar **plocaledir)
 {
     if (plibdir) {
-        gchar *path = g_build_filename(basedir, "lib", "gwyddion", NULL);
+        gchar *path = g_build_filename(basedir, "lib", PACKAGE, NULL);
         if (libdir_seems_good(path))
             *plibdir = path;
         else
@@ -337,7 +337,7 @@ check_base_dir(const gchar *basedir,
     }
 
     if (pdatadir) {
-        gchar *path = g_build_filename(basedir, "share", "gwyddion", NULL);
+        gchar *path = g_build_filename(basedir, "share", PACKAGE, NULL);
         if (datadir_seems_good(path))
             *pdatadir = path;
         else
