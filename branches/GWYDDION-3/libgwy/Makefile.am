@@ -1,4 +1,5 @@
 # Process this file with automake to produce Makefile.in
+# $Id$
 
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
