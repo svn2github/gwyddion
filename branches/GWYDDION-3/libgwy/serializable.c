@@ -1601,10 +1601,44 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GWY_SERIALIZABLE_ERROR:
  *
- * Error domain for serialization and deserialization.
+ * Error domain for deserialization.
  *
  * Errors in this domain will be from the #GwySerializableError enumeration.
  * See #GError for information on error domains.
+ **/
+
+/**
+ * GwySerializableError:
+ * @GWY_SERIALIZABLE_ERROR_TRUNCATED: Data ends in the middle of some item or
+ *                                    there is not enough data to represent
+ *                                    given object.  This error is fatal.
+ * @GWY_SERIALIZABLE_ERROR_PADDING: There is too much data to represent given
+ *                                  object.  This error is non-fatal: the extra
+ *                                  data is just ignored.
+ * @GWY_SERIALIZABLE_ERROR_SIZE_T: Size is not representable on this system.
+ *                                 This can occur on legacy 32bit systems,
+ *                                 however, they are incapable of holding such
+ *                                 large data in core anyway.  This error is
+ *                                 fatal.
+ * @GWY_SERIALIZABLE_ERROR_OBJECT: Representation of an object of unknown or
+ *                                 deserialization-incapable type was found.
+ *                                 This error is fatal.
+ * @GWY_SERIALIZABLE_ERROR_ITEM: Unexpected item was encountered.  This error
+ *                               is non-fatal: such item is just ignored.
+ * @GWY_SERIALIZABLE_ERROR_DATA: Uknown data type (#GwySerializableCType) was
+ *                               encountered.  This error is fatal.
+ * @GWY_SERIALIZABLE_ERROR_FATAL_MASK: Distinguishes fatal and non-fatal errors
+ *                                     (fatal give non-zero value when masked
+ *                                     with this mask).
+ *
+ * Error codes returned by deserialization.
+ *
+ * In the error code descriptions, fatal error means aborting of
+ * deserialization of the object that is just being unpacked.  Non-fatal errors
+ * are competely recoverable.  If the deserialization of a contained object
+ * is aborted, the unpacking of the container object still continues.
+ * Therefore, fatal errors are truly fatal only if they occur for the
+ * top-level object.
  **/
 
 /**
