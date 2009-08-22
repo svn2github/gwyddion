@@ -936,6 +936,113 @@ test_unit_serialize(void)
 
 /***************************************************************************
  *
+ * Expr
+ *
+ ***************************************************************************/
+
+static void
+test_expr_evaluate(void)
+{
+    GwyExpr *expr = gwy_expr_new();
+    GError *error = NULL;
+    gdouble result;
+    gboolean ok;
+
+    ok = gwy_expr_evaluate(expr, "1+1", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(result, ==, 2.0);
+    g_clear_error(&error);
+
+    ok = gwy_expr_evaluate(expr, "1/5 hypot(3 cos 0, sqrt 16)", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(fabs(result - 1.0), <, 1e-15);
+    g_clear_error(&error);
+
+    ok = gwy_expr_evaluate(expr, "exp atanh (1/2)^2", &result, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_assert_cmpfloat(fabs(result - 3.0), <, 1e-15);
+    g_clear_error(&error);
+
+    gwy_expr_free(expr);
+}
+
+static void
+test_expr_vector(void)
+{
+    GwyExpr *expr = gwy_expr_new();
+    GError *error = NULL;
+    gboolean ok;
+
+    ok = gwy_expr_define_constant(expr, "π", G_PI, &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_clear_error(&error);
+
+    ok = gwy_expr_compile(expr, "sqrt(a^2+π*β/c2)-sqrt(a^2+π*c2/β)", &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_clear_error(&error);
+
+    gsize nvars = gwy_expr_get_variables(expr, NULL);
+    g_assert_cmpuint(nvars, ==, 4);
+
+    gsize n = 100000;
+    gdouble **input = g_new0(gdouble*, nvars);
+    for (gsize i = 1; i < nvars; i++) {
+        input[i] = g_new(gdouble, n);
+        for (gsize j = 0; j < n; j++) {
+            input[i][j] = j/(0.1 + i);
+        }
+    }
+    gdouble *result = g_new(gdouble, n);
+
+    const gchar *varnames[] = { "a", "β", "c2" };
+    guint indices[G_N_ELEMENTS(varnames)];
+    gsize extravars = gwy_expr_resolve_variables(expr, G_N_ELEMENTS(varnames),
+                                                 varnames, indices);
+    g_assert_cmpuint(extravars, ==, 0);
+    g_assert_cmpuint(indices[0], >=, 1);
+    g_assert_cmpuint(indices[0], <=, 3);
+    g_assert_cmpuint(indices[1], >=, 1);
+    g_assert_cmpuint(indices[1], <=, 3);
+    g_assert_cmpuint(indices[2], >=, 1);
+    g_assert_cmpuint(indices[2], <=, 3);
+    g_assert_cmpuint(indices[0], !=, indices[1]);
+    g_assert_cmpuint(indices[1], !=, indices[2]);
+    g_assert_cmpuint(indices[2], !=, indices[0]);
+
+    // Execute normally
+    gwy_expr_vector_execute(expr, n, (const gdouble**)input, result);
+    for (gsize j = 0; j < n; j++) {
+        gdouble a = input[indices[0]][j];
+        gdouble beta = input[indices[1]][j];
+        gdouble c2 = input[indices[2]][j];
+        gdouble values[] = { 0, input[1][j], input[2][j], input[3][j] };
+        gdouble expected = sqrt(a*a+G_PI*beta/c2) - sqrt(a*a+G_PI*c2/beta);
+        gdouble evaluated = gwy_expr_execute(expr, values);
+        if (!isnan(expected) && isnan(result[j])) {
+            g_assert_cmpfloat(fabs(expected - result[j]), <, 1e-15);
+            g_assert_cmpfloat(fabs(expected - evaluated), <, 1e-15);
+        }
+    }
+    // Execute ovewriting one of the input fields
+    gwy_expr_vector_execute(expr, n, (const gdouble**)input, input[1]);
+    // Compare.
+    g_assert(memcmp(input[1], result, n*sizeof(gdouble)) == 0);
+
+    for (gsize i = 1; i < nvars; i++)
+        g_free(input[i]);
+    g_free(input);
+    g_free(result);
+
+    gwy_expr_free(expr);
+}
+
+/***************************************************************************
+ *
  * Main
  *
  ***************************************************************************/
@@ -949,6 +1056,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/sort", test_sort);
+    g_test_add_func("/testlibgwy/expr-evaluate", test_expr_evaluate);
+    g_test_add_func("/testlibgwy/expr-vector", test_expr_vector);
     g_test_add_func("/testlibgwy/serialize-simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
