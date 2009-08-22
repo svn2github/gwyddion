@@ -1231,9 +1231,9 @@ container_item_changed(G_GNUC_UNUSED GwyContainer *container,
 }
 
 static void
-container_this_item_changed(G_GNUC_UNUSED GwyContainer *container,
-                            G_GNUC_UNUSED gpointer arg1,
-                            guint *called)
+container_item_changed_count(G_GNUC_UNUSED GwyContainer *container,
+                             G_GNUC_UNUSED gpointer arg1,
+                             guint *called)
 {
     (*called)++;
 }
@@ -1252,7 +1252,7 @@ test_container_data(void)
     g_signal_connect(container, "item-changed",
                      G_CALLBACK(container_item_changed), &item_key);
     g_signal_connect(container, "item-changed::/pfx/int",
-                     G_CALLBACK(container_this_item_changed), &int_changed);
+                     G_CALLBACK(container_item_changed_count), &int_changed);
 
     item_key = "";
     gwy_container_set_int32_by_name(container, "/pfx/int", 42);
@@ -1392,6 +1392,63 @@ test_container_refcount(void)
     g_object_unref(st2);
 }
 
+static void
+test_container_serialize(void)
+{
+    GwyContainer *container = gwy_container_new();
+    gwy_container_set_char_by_name(container, "char", '\xfe');
+    gwy_container_set_boolean_by_name(container, "bool", TRUE);
+    gwy_container_set_int32_by_name(container, "int32", -123456);
+    gwy_container_set_int64_by_name(container, "int64", -12345678);
+    gwy_container_set_string_by_name(container, "string", g_strdup("Mud"));
+    gwy_container_set_double_by_name(container, "double", G_E);
+    GwyUnit *unit = gwy_unit_new_from_string("uPa", NULL);
+    gwy_container_set_object_by_name(container, "unit", unit);
+    g_object_unref(unit);
+
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    GError *error = NULL;
+    gboolean ok = gwy_serialize_gio(GWY_SERIALIZABLE(container), stream,
+                                    &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_clear_error(&error);
+
+    gsize len = g_memory_output_stream_get_data_size(memstream);
+    const guchar *buffer = g_memory_output_stream_get_data(memstream);
+    gsize bytes_consumed = 0;
+    GwyErrorList *error_list = NULL;
+    GwyContainer *copy = GWY_CONTAINER(gwy_deserialize_memory(buffer, len,
+                                                              &bytes_consumed,
+                                                              &error_list));
+    g_assert(GWY_IS_CONTAINER(copy));
+    g_assert(!error_list);
+    g_assert_cmpuint(bytes_consumed, ==, len);
+    gwy_error_list_clear(&error_list);
+
+    GwyUnit *unitcopy = NULL;
+    g_assert(gwy_container_gis_object_by_name(container, "unit", &unitcopy));
+    g_assert(GWY_IS_UNIT(unitcopy));
+    g_assert(gwy_unit_equal(unitcopy, unit));
+
+    guint change_count = 0;
+    g_signal_connect(container, "item-changed",
+                     G_CALLBACK(container_item_changed_count), &change_count);
+    gwy_container_transfer(copy, container, "", "", FALSE, TRUE);
+    /* Unit must change, but others should be detected as same-value. */
+    g_assert_cmpuint(change_count, ==, 1);
+    /* Not even units can change here. */
+    gwy_container_transfer(copy, container, "", "", FALSE, TRUE);
+    /* Unit must change, but others should be detected as same-value. */
+    gwy_container_transfer(copy, container, "", "", TRUE, TRUE);
+
+    g_object_unref(copy);
+    g_object_unref(container);
+}
+
 /***************************************************************************
  *
  * Main
@@ -1427,6 +1484,7 @@ main(int argc, char *argv[])
     /* Requires serializable, unit */
     g_test_add_func("/testlibgwy/container-data", test_container_data);
     g_test_add_func("/testlibgwy/container-refcount", test_container_refcount);
+    g_test_add_func("/testlibgwy/container-serialize", test_container_serialize);
 
     return g_test_run();
 }
