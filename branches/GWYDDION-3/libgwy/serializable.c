@@ -1530,7 +1530,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * @title: GwySerializable
  * @short_description: Serializable value-like object interface
  *
- * GwySerializable is an abstract interface for data-like objects that can be
+ * #GwySerializable is an abstract interface for data-like objects that can be
  * serialized and deserialized.  You can serialize any object implementing this
  * interface with gwy_serializable_serialize() and the restore (deserialize) it
  * with gwy_serializable_deserialize().
