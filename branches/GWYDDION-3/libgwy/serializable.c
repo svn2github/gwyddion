@@ -570,14 +570,17 @@ gwy_serializable_items_done(const GwySerializableItems *items)
  *           corresponding to this object, <emphasis>not including</emphasis>
  *           items of contained objects: every contained object counts only as
  *           one item.
- * @done: Frees all temporary data created by itemize().  It is guaranteed to
- *        be called after each itemize().
+ * @done: Frees all temporary data created by itemize().  It is optional but
+ *        if it is defined it is guaranteed to be called after each itemize().
  * @construct: Deserializes an object from array of flattened data items.
  * @duplicate: Creates a new object with all data identical to this object.
  * @assign: Makes all data of an object of the same class identical to the
  *          data of this object.
  *
  * Interface implemented by serializable objects.
+ *
+ * The object class must implement all the methods, except done() which is
+ * optional.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
