@@ -1426,48 +1426,41 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  *
  * <refsect2 id='libgwy-serialize-details'>
  * <title>Details of Serialization</title>
- * </refsect2>
- *
- * The following information is not necessary for implementing #GwySerializable
- * interface in your classes, but it can help prevent wrong decision about
- * serialized representation of your objects.  Also, it might help implementing
- * a different serialization backend than GWY files.
- *
- * Serialization occurs in several steps.
- *
- * First, all objects are recursively asked to calulcate the number named data
- * items they will serialize to (or provide a reasonable upper estimate of this
- * number).  This is done simply by calling gwy_serializable_n_items() on the
- * top-level object, objects that contain other objects must call their
- * gwy_serializable_n_items() 
- *
- * Second, a #GwySerializableItems item list is created, with fixed size
+ * <para>The following information is not necessary for implementing
+ * #GwySerializable interface in your classes, but it can help prevent wrong
+ * decision about serialized representation of your objects.  Also, it might
+ * help implementing a different serialization backend than GWY files.</para>
+ * <para>Serialization occurs in several steps.</para>
+ * <para>First, all objects are recursively asked to calulcate the number named
+ * data items they will serialize to (or provide a reasonable upper estimate of
+ * this number).  This is done simply by calling gwy_serializable_n_items() on
+ * the top-level object, objects that contain other objects must call their
+ * gwy_serializable_n_items().</para>
+ * <para>Second, a #GwySerializableItems item list is created, with fixed size
  * calculated in the first step.  All objects are then recursively asked to add
  * items representing their data to this list.  This is done simply by calling
  * gwy_serializable_itemize() on the top-level object.  The objects may
  * sometimes need to represent certain data differently than the internal
  * representation is, however, expensive transforms should be avoided,
- * especially for arrays.  This step can allocate temporary structures.
- *
- * Third, sizes of each object are calcuated and stored into the object-header
- * items created by gwy_serializable_itemize().  This again is done
- * recursively, but the objects do not participate, the calculation works with
- * the itemized list.  This step might not be necessary for different storage
- * formats.
- *
- * Subsequently, the object tree flattened into an item list is written to the
- * output stream, byte-swapping or otherwise normalizing the data on the fly if
- * necessary.  This part strongly depends on the storage format.
- *
- * Finally, virtual method done() is called for all objects.  This step frees
- * the temporary storage allocated in the itemization step, if any.  This is
- * not done recursively so that objects need not to implement this method, even
- * if they contain other objects, if they do not create any temporary data
+ * especially for arrays.  This step can allocate temporary structures.</para>
+ * <para>Third, sizes of each object are calcuated and stored into the
+ * object-header items created by gwy_serializable_itemize().  This again is
+ * done recursively, but the objects do not participate, the calculation works
+ * with the itemized list.  This step might not be necessary for different
+ * storage formats.</para>
+ * <para>Subsequently, the object tree flattened into an item list is written
+ * to the output stream, byte-swapping or otherwise normalizing the data on the
+ * fly if necessary.  This part strongly depends on the storage format.</para>
+ * <para>Finally, virtual method done() is called for all objects.  This step
+ * frees the temporary storage allocated in the itemization step, if any.  This
+ * is not done recursively so that objects need not to implement this method,
+ * even if they contain other objects, if they do not create any temporary data
  * during itemize().  The methods are called from the inverse order than the
  * objects, appear in the list, i.e. the most inner and last objects are
  * processed first.  This means that if done() of an object is invoked, all its
  * contained objects have been already process.  At the very end the item list
- * is freed too.
+ * is freed too.</para>
+ * </refsect2>
  **/
 
 /**

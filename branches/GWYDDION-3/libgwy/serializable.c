@@ -184,13 +184,14 @@ gwy_serializable_assign(GwySerializable *destination,
  * with gwy_serializable_deserialize().
  *
  * Gwyddion implements a simple serialization model: only tree-like structures
- * of objects formed by ownership can be serialized and restored.  Any
+ * of objects, formed by ownership, can be serialized and restored.  Any
  * inter-object relations other than plain ownership must be stored in some
  * weak form and there is no explicit support for this.  Moreover, only object
  * values are preserved, their identities are lost (in particular, signals,
- * user data and similar attributes are not subject of serialization and
- * deserialization).  This, on the other hand, permits to deserialize any saved
- * object individually and independently.
+ * user data and similar attributes are not subject to serialization and
+ * deserialization).  This, on the other hand, means that any saved object can
+ * be restored individually and independently and still be in a meaningful
+ * state.
  *
  * Beside saving and restoration, all serializable classes implement a
  * copy-constructor that creates a duplicate of an existing object.  This
@@ -206,9 +207,9 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * <refsect2 id='libgwy-serializable-implementing'>
  * <title>Implementing #GwySerializable</title>
+ * <para>You can implement serialization and deserialization in your
+ * classes...</para>
  * </refsect2>
- *
- * You can implement serialization and deserialization in your classes...
  **/
 
 /**
