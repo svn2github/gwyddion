@@ -368,6 +368,9 @@ gwy_unit_to_string(GwyUnit *unit,
 gboolean
 gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
 {
+    g_return_val_if_fail(GWY_IS_UNIT(unit), FALSE);
+    g_return_val_if_fail(GWY_IS_UNIT(op), FALSE);
+
     if (op == unit)
         return TRUE;
 
