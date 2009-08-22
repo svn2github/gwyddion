@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_SERIALIZABLE_H__
-#define __GWY_SERIALIZABLE_H__
+#ifndef __LIBGWY_SERIALIZABLE_H__
+#define __LIBGWY_SERIALIZABLE_H__
 
 #include <glib-object.h>
 #include <libgwy/error-list.h>

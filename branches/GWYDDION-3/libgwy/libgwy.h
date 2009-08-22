@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_LIBGWY_H__
-#define __GWY_LIBGWY_H__
+#ifndef __LIBGWY_LIBGWY_H__
+#define __LIBGWY_LIBGWY_H__
 
 #include <libgwy/container.h>
 #include <libgwy/error-list.h>

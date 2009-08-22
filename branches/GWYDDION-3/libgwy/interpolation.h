@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_INTERPOLATION_H__
-#define __GWY_INTERPOLATION_H__
+#ifndef __LIBGWY_INTERPOLATION_H__
+#define __LIBGWY_INTERPOLATION_H__
 
 #include <glib.h>
 

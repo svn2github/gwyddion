@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_SERIALIZE_H__
-#define __GWY_SERIALIZE_H__
+#ifndef __LIBGWY_SERIALIZE_H__
+#define __LIBGWY_SERIALIZE_H__
 
 #include <glib-object.h>
 #include <gio/gio.h>

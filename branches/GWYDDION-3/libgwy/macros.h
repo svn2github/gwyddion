@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_MACROS_H__
-#define __GWY_MACROS_H__
+#ifndef __LIBGWY_MACROS_H__
+#define __LIBGWY_MACROS_H__
 
 #define GWY_SWAP(t, x, y) \
     do { t ___gwy_swap; ___gwy_swap = x; x = y; y = ___gwy_swap; } while (0)

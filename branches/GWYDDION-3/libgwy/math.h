@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_MATH_H__
-#define __GWY_MATH_H__
+#ifndef __LIBGWY_MATH_H__
+#define __LIBGWY_MATH_H__
 
 #include <math.h>
 #include <glib.h>

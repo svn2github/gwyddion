@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_PACK_H__
-#define __GWY_PACK_H__
+#ifndef __LIBGWY_PACK_H__
+#define __LIBGWY_PACK_H__
 
 #include <glib.h>
 

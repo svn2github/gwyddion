@@ -9,7 +9,7 @@ libsuffix = 3
 libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
 mkenum_name = types
-mkenum_id = GWY_TYPES
+mkenum_id = LIBGWY_TYPES
 mkenum_headers = \
 	container.h \
 	error-list.h \

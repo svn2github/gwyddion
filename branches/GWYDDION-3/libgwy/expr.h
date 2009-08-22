@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_EXPR_H__
-#define __GWY_EXPR_H__
+#ifndef __LIBGWY_EXPR_H__
+#define __LIBGWY_EXPR_H__
 
 #include <glib-object.h>
 
