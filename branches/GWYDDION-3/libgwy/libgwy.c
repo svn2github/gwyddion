@@ -664,7 +664,7 @@ gwy_library_search_path(const gchar *subdir)
     add_unique_string(paths, gwy_library_directory(subdir));
     add_from_list(paths, GWY_LIB_PATH, subdir);
     g_ptr_array_add(paths, NULL);
-    return g_ptr_array_free(paths, FALSE);
+    return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
 /**
@@ -694,7 +694,7 @@ gwy_data_search_path(const gchar *subdir)
     add_unique_string(paths, gwy_data_directory(subdir));
     add_from_list(paths, g_getenv("XDG_DATA_DIRS"), subdir);
     g_ptr_array_add(paths, NULL);
-    return g_ptr_array_free(paths, FALSE);
+    return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
 #define __GWY_LIBGWY_C__
