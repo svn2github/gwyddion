@@ -31,26 +31,30 @@ typedef struct _GwySerializableItem  GwySerializableItem;
 typedef struct _GwySerializableItems GwySerializableItems;
 
 typedef enum {
-    GWY_SERIALIZABLE_HEADER       = 0,
-    GWY_SERIALIZABLE_INT8         = 'c',
-    GWY_SERIALIZABLE_INT8_ARRAY   = 'C',
-    GWY_SERIALIZABLE_BOOLEAN      = 'b',
-    GWY_SERIALIZABLE_INT32        = 'i',
-    GWY_SERIALIZABLE_INT32_ARRAY  = 'I',
-    GWY_SERIALIZABLE_INT64        = 'q',
-    GWY_SERIALIZABLE_INT64_ARRAY  = 'Q',
-    GWY_SERIALIZABLE_DOUBLE       = 'd',
-    GWY_SERIALIZABLE_DOUBLE_ARRAY = 'D',
-    GWY_SERIALIZABLE_STRING       = 's',
-    GWY_SERIALIZABLE_STRING_ARRAY = 'S',
-    GWY_SERIALIZABLE_OBJECT       = 'o',
-    GWY_SERIALIZABLE_OBJECT_ARRAY = 'O',
+    GWY_SERIALIZABLE_HEADER        = 0,
+    GWY_SERIALIZABLE_INT8          = 'c',
+    GWY_SERIALIZABLE_INT8_ARRAY    = 'C',
+    GWY_SERIALIZABLE_BOOLEAN       = 'b',
+    GWY_SERIALIZABLE_INT16         = 'h',
+    GWY_SERIALIZABLE_INT16_ARRAY   = 'H',
+    GWY_SERIALIZABLE_INT32         = 'i',
+    GWY_SERIALIZABLE_INT32_ARRAY   = 'I',
+    GWY_SERIALIZABLE_INT64         = 'q',
+    GWY_SERIALIZABLE_INT64_ARRAY   = 'Q',
+    GWY_SERIALIZABLE_DOUBLE        = 'd',
+    GWY_SERIALIZABLE_DOUBLE_ARRAY  = 'D',
+    GWY_SERIALIZABLE_STRING        = 's',
+    GWY_SERIALIZABLE_STRING_ARRAY  = 'S',
+    GWY_SERIALIZABLE_OBJECT        = 'o',
+    GWY_SERIALIZABLE_OBJECT_ARRAY  = 'O',
 } GwySerializableCType;
 
 union _GwySerializableValue {
     gboolean v_boolean;
     gint8 v_int8;
     guint8 v_uint8;
+    gint16 v_int16;
+    guint16 v_uint16;
     gint32 v_int32;
     guint32 v_uint32;
     gint64 v_int64;
@@ -62,6 +66,8 @@ union _GwySerializableValue {
     gsize v_size;
     gint8 *v_int8_array;
     guint8 *v_uint8_array;
+    gint16 *v_int16_array;
+    guint16 *v_uint16_array;
     gint32 *v_int32_array;
     guint32 *v_uint32_array;
     gint64 *v_int64_array;
@@ -73,9 +79,9 @@ union _GwySerializableValue {
 };
 
 struct _GwySerializableItem {
+    GwySerializableValue value;
     const gchar *name;
     gsize array_size;
-    GwySerializableValue value;
     guchar ctype;
 };
 

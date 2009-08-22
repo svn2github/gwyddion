@@ -163,6 +163,63 @@ buffer_write(GwySerializableBuffer *buffer,
 }
 
 static gboolean
+buffer_write_size(GwySerializableBuffer *buffer,
+                  gsize size)
+{
+    guint64 size64 = size;
+
+    size64 = GUINT64_TO_LE(size64);
+    return buffer_write(buffer, &size64, sizeof(guint64));
+}
+
+static gboolean
+buffer_write16(GwySerializableBuffer *buffer,
+               const guint16 *data16,
+               gsize n)
+{
+    guint16 *bdata16;
+    gsize i;
+
+    if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+        return buffer_write(buffer, data16, sizeof(guint16)*n);
+
+    /* Only swap aligned data.
+     * First, we do not want to mess with the leftover bytes, second, the
+     * mem-swapping instructions usually work much better on aligned data.*/
+    if (buffer->bfree % sizeof(guint16) != 0) {
+        if (!buffer_finish(buffer))
+            return FALSE;
+    }
+
+    while (n >= buffer->bfree/sizeof(guint16)) {
+        bdata16 = (guint16*)buffer->data;
+        for (i = buffer->bfree/sizeof(guint16); i; i--) {
+            /* The default swapping macros evaulate the value multiple times. */
+            guint16 v = *(data16++);
+            *(bdata16++) = GUINT16_SWAP_LE_BE(v);
+        }
+        n -= buffer->bfree/sizeof(guint16);
+        buffer->data -= buffer->len - buffer->bfree;
+        buffer->bfree = buffer->len;
+        if (!g_output_stream_write_all(buffer->output,
+                                       buffer->data, buffer->len,
+                                       NULL, NULL, buffer->error))
+            return FALSE;
+    }
+
+    bdata16 = (guint16*)buffer->data;
+    for (i = buffer->bfree/sizeof(guint16); i; i--) {
+        /* The default swapping macros evaulate the value multiple times. */
+        guint16 v = *(data16++);
+        *(bdata16++) = GUINT16_SWAP_LE_BE(v);
+    }
+    buffer->data += sizeof(guint16)*n;
+    buffer->bfree -= sizeof(guint16)*n;
+
+    return TRUE;
+}
+
+static gboolean
 buffer_write32(GwySerializableBuffer *buffer,
                const guint32 *data32,
                gsize n)
@@ -397,6 +454,10 @@ ctype_size(GwySerializableCType ctype)
         return sizeof(guint8);
         break;
 
+        case GWY_SERIALIZABLE_INT16:
+        return sizeof(guint16);
+        break;
+
         case GWY_SERIALIZABLE_INT32:
         return sizeof(gint32);
         break;
@@ -522,6 +583,11 @@ dump_to_stream(const GwySerializableItems *items,
             if (!buffer_write(buffer, &v, sizeof(guint8)))
                 return FALSE;
         }
+        else if (ctype == GWY_SERIALIZABLE_INT16) {
+            guint16 v = GUINT16_TO_LE(item->value.v_uint16);
+            if (!buffer_write(buffer, &v, sizeof(guint16)))
+                return FALSE;
+        }
         else if (ctype == GWY_SERIALIZABLE_INT32) {
             guint32 v = GUINT32_TO_LE(item->value.v_uint32);
             if (!buffer_write(buffer, &v, sizeof(guint32)))
@@ -539,28 +605,28 @@ dump_to_stream(const GwySerializableItems *items,
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT8_ARRAY) {
-            guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!buffer_write(buffer, &v, sizeof(guint64)))
+            if (!buffer_write_size(buffer, item->array_size)
+                || !buffer_write(buffer, item->value.v_uint8_array,
+                                 item->array_size))
                 return FALSE;
-            if (!buffer_write(buffer,
-                              item->value.v_uint8_array, item->array_size))
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT16_ARRAY) {
+            if (!buffer_write_size(buffer, item->array_size)
+                || !buffer_write16(buffer, item->value.v_uint16_array,
+                                   item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT32_ARRAY) {
-            guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!buffer_write(buffer, &v, sizeof(guint64)))
-                return FALSE;
-            if (!buffer_write32(buffer,
-                                item->value.v_uint32_array, item->array_size))
+            if (!buffer_write_size(buffer, item->array_size)
+                || !buffer_write32(buffer, item->value.v_uint32_array,
+                                   item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_INT64_ARRAY
                  || ctype == GWY_SERIALIZABLE_DOUBLE_ARRAY) {
-            guint64 v = GUINT64_TO_LE(item->array_size);
-            if (!buffer_write(buffer, &v, sizeof(guint64)))
-                return FALSE;
-            if (!buffer_write64(buffer,
-                                item->value.v_uint64_array, item->array_size))
+            if (!buffer_write_size(buffer, item->array_size)
+                || !buffer_write64(buffer, item->value.v_uint64_array,
+                                   item->array_size))
                 return FALSE;
         }
         else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
@@ -709,6 +775,49 @@ unpack_uint8_array(const guchar *buffer,
         memcpy(value, buffer, *array_size*sizeof(guint8));
     }
     return rbytes + *array_size*sizeof(guint8);
+}
+
+static inline gsize
+unpack_uint16(const guchar *buffer,
+              gsize size,
+              guint16 *value,
+              GwyErrorList **error_list)
+{
+    if (!check_size(size, sizeof(guint16), "int16", error_list))
+        return 0;
+    memcpy(value, buffer, sizeof(guint16));
+    *value = GINT16_FROM_LE(*value);
+    return sizeof(guint16);
+}
+
+static inline gsize
+unpack_uint16_array(const guchar *buffer,
+                    gsize size,
+                    gsize *array_size,
+                    guint16 **value,
+                    GwyErrorList **error_list)
+{
+    gsize rbytes;
+
+    if (!(rbytes = unpack_size(buffer, size, sizeof(guint16),
+                               array_size, "int16-array", error_list)))
+        return 0;
+    buffer += rbytes;
+
+    if (*array_size) {
+        *value = g_new(guint16, *array_size);
+        memcpy(value, buffer, *array_size*sizeof(guint16));
+    }
+    if (G_BYTE_ORDER == G_BIG_ENDIAN) {
+        gsize i;
+
+        for (i = 0; i < *array_size; i++) {
+            /* The default swapping macros evaulate the value multiple times. */
+            guint16 v = (*value)[i];
+            (*value)[i] = GUINT16_SWAP_LE_BE(v);
+        }
+    }
+    return rbytes + *array_size*sizeof(guint16);
 }
 
 static inline gsize
@@ -1086,6 +1195,11 @@ unpack_items(const guchar *buffer,
                                         error_list)))
                 goto fail;
         }
+        else if (ctype == GWY_SERIALIZABLE_INT16) {
+            if (!(rbytes = unpack_uint16(buffer, size, &item->value.v_uint16,
+                                         error_list)))
+                goto fail;
+        }
         else if (ctype == GWY_SERIALIZABLE_INT32) {
             if (!(rbytes = unpack_uint32(buffer, size, &item->value.v_uint32,
                                          error_list)))
@@ -1111,6 +1225,13 @@ unpack_items(const guchar *buffer,
                                               &item->array_size,
                                               &item->value.v_uint8_array,
                                               error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT16_ARRAY) {
+            if (!(rbytes = unpack_uint16_array(buffer, size,
+                                               &item->array_size,
+                                               &item->value.v_uint16_array,
+                                               error_list)))
                 goto fail;
         }
         else if (ctype == GWY_SERIALIZABLE_INT32_ARRAY) {
@@ -1180,6 +1301,7 @@ free_items(GwySerializableItems *items)
             break;
 
             case GWY_SERIALIZABLE_INT8_ARRAY:
+            case GWY_SERIALIZABLE_INT16_ARRAY:
             case GWY_SERIALIZABLE_INT32_ARRAY:
             case GWY_SERIALIZABLE_INT64_ARRAY:
             case GWY_SERIALIZABLE_DOUBLE_ARRAY:
