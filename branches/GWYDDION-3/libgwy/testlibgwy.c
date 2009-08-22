@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#undef G_DISABLE_ASSERT
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/libgwy.h"
