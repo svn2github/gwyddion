@@ -245,6 +245,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
         else {
             g_return_val_if_reached(0);
         }
+        g_return_val_if_fail(*pos <= items->len, 0);
     }
 
     return header->value.v_size = size;
