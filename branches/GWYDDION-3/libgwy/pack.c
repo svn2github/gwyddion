@@ -687,6 +687,14 @@ gwy_unpack_data(gchar byteorder,
                 data += data_stride;
             }
         }
+        else if (format == 'r') {
+            const guchar *p = (const guchar*)buffer;
+            for (i = len; i; i--) {
+                *data = gwy_unpack_pascal_real_direct(p)*factor + shift;
+                data += data_stride;
+                p += 6;
+            }
+        }
         else {
             g_critical("Format %c is not implemented", format);
         }
@@ -758,6 +766,14 @@ gwy_unpack_data(gchar byteorder,
                 guint64 u = *(p++);
                 *data = GUINT64_SWAP_LE_BE(u)*factor + shift;
                 data += data_stride;
+            }
+        }
+        else if (format == 'r') {
+            const guchar *p = (const guchar*)buffer;
+            for (i = len; i; i--) {
+                *data = gwy_unpack_pascal_real_swap(p)*factor + shift;
+                data += data_stride;
+                p += 6;
             }
         }
         else {
