@@ -1,5 +1,5 @@
 /*
- *  $Id$
+ *  $Id: container.c 240 2009-01-26 21:36:35Z yeti $
  *  Copyright (C) 2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
@@ -17,25 +17,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_LIBGWY_H__
-#define __GWY_LIBGWY_H__
+#ifndef __GWY_VERSION_H__
+#define __GWY_VERSION_H__
 
-#include <libgwy/container.h>
-#include <libgwy/errorlist.h>
-#include <libgwy/expr.h>
-#include <libgwy/inventory.h>
-#include <libgwy/macros.h>
-#include <libgwy/math.h>
-#include <libgwy/pack.h>
-#include <libgwy/serializable.h>
-#include <libgwy/serialize.h>
-#include <libgwy/strfuncs.h>
-#include <libgwy/unit.h>
-#include <libgwy/version.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 
-void gwy_type_init(void);
+#define GWY_VERSION_MAJOR  @GWY_VERSION_MAJOR@
+#define GWY_VERSION_MINOR  @GWY_VERSION_MINOR@
+#define GWY_VERSION_STRING "@GWY_VERSION_STRING@"
+
+gint         gwy_version_major (void);
+gint         gwy_version_minor (void);
+const gchar* gwy_version_string(void);
 
 G_END_DECLS
 

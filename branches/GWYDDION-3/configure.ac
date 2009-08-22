@@ -18,6 +18,7 @@ AC_CONFIG_FILES([
   Makefile
   m4/Makefile
   libgwy/Makefile
+  libgwy/version.h
   po/Makefile.in
   po-libgwy/Makefile.in
   docs/Makefile

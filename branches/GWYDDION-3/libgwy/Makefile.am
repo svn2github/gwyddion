@@ -4,7 +4,7 @@ PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 # Must init
-EXTRA_DIST =
+EXTRA_DIST = version.h.in
 CLEANFILES =
 MAINTAINERCLEANFILES =
 BUILT_SOURCES =
@@ -27,7 +27,8 @@ libgwyinclude_HEADERS = \
 	serializable.h \
 	serialize.h \
 	strfuncs.h \
-	unit.h
+	unit.h \
+	version.h
 
 libgwy_la_SOURCES = \
 	container.c \
@@ -41,7 +42,8 @@ libgwy_la_SOURCES = \
 	serializable.c \
 	serialize.c \
 	strfuncs.c \
-	unit.c
+	unit.c \
+	version.c
 
 testlibgwy_SOURCES = testlibgwy.c
 
