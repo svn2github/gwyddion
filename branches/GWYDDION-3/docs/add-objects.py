@@ -15,7 +15,7 @@ if not __builtins__.__dict__.has_key('enumerate'):
             i += 1
 
 if len(sys.argv) < 3:
-    print sys.argv[0], 'SECTION_FILE OBJECT_FILE [--ignore=FILE,...]'
+    print sys.argv[0], 'SECTION_FILE OBJECT_FILE [--standard-files=FILE,...]'
     sys.exit(1)
 
 title_re = re.compile(r'<TITLE>(?P<object>\w+)</TITLE>')
