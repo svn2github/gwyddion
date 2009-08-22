@@ -24,6 +24,20 @@
 
 /***************************************************************************
  *
+ * Version
+ *
+ ***************************************************************************/
+
+static void
+test_version(void)
+{
+    g_assert_cmpuint(GWY_VERSION_MAJOR, ==, gwy_version_major());
+    g_assert_cmpuint(GWY_VERSION_MINOR, ==, gwy_version_minor());
+    g_assert_cmpstr(GWY_VERSION_STRING, ==, gwy_version_string());
+}
+
+/***************************************************************************
+ *
  * String functions
  *
  ***************************************************************************/
@@ -1615,6 +1629,7 @@ main(int argc, char *argv[])
     g_test_init(&argc, &argv, NULL);
     g_type_init();
 
+    g_test_add_func("/testlibgwy/version", test_version);
     g_test_add_func("/testlibgwy/error_list", test_error_list);
     g_test_add_func("/testlibgwy/memmem", test_memmem);
     g_test_add_func("/testlibgwy/pack", test_pack);
