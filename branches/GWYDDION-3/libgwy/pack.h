@@ -22,6 +22,8 @@
 
 #include <glib.h>
 
+G_BEGIN_DECLS
+
 #define GWY_PACK_ERROR gwy_pack_error_quark()
 
 typedef enum {
@@ -52,6 +54,8 @@ void   gwy_unpack_data     (gchar byteorder,
                             gint data_stride,
                             gdouble factor,
                             gdouble shift);
+
+G_END_DECLS
 
 #endif
 

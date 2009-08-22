@@ -18,6 +18,7 @@
  */
 
 #include "libgwy/pack.h"
+#include "libgwy/math.h"
 #include <string.h>
 #include <stdarg.h>
 
@@ -326,6 +327,50 @@ fail:
     return 0;
 }
 
+/* Takes 6 bytes */
+static gdouble
+gwy_unpack_pascal_real_le(const guchar *p)
+{
+    gdouble x;
+
+    if (!p[0])
+        return 0.0;
+    
+    x = 1.0 + ((((p[1]/256.0 + p[2])/256.0 + p[3])/256.0 + p[4])/256.0
+               + (p[5] & 0x7f))/128.0;
+    if (p[5] & 0x80)
+        x = -x;
+
+    return x*gwy_powi(2.0, (gint)p[0] - 129);
+}
+
+/* Takes 6 bytes */
+static gdouble
+gwy_unpack_pascal_real_be(const guchar *p)
+{
+    gdouble x;
+
+    if (!p[5])
+        return 0.0;
+    
+    x = 1.0 + ((((p[4]/256.0 + p[3])/256.0 + p[2])/256.0 + p[1])/256.0
+               + (p[0] & 0x7f))/128.0;
+    if (p[0] & 0x80)
+        x = -x;
+
+    return x*gwy_powi(2.0, (gint)p[5] - 129);
+}
+
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define gwy_unpack_pascal_real_direct gwy_unpack_pascal_real_le
+#define gwy_unpack_pascal_real_swap gwy_unpack_pascal_real_be
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define gwy_unpack_pascal_real_direct gwy_unpack_pascal_real_be
+#define gwy_unpack_pascal_real_swap gwy_unpack_pascal_real_le
+#else
+#error Byte order used on this system is not supported.
+#endif
+
 /**
  * gwy_unpack:
  * @format: Packing format specifier.
@@ -417,9 +462,10 @@ gwy_unpack(const gchar *format,
         else if (f == 'r') {
             while (count) {
                 gdouble *arg = va_arg(ap, gdouble*);
-                /* TODO: actually convert the numbers */
-                /* TODO: do not forget swapping */
-                memset(arg, 0, sizeof(gdouble));
+                if (do_swap)
+                    *arg = gwy_unpack_pascal_real_swap(buffer + pos);
+                else
+                    *arg = gwy_unpack_pascal_real_direct(buffer + pos);
                 pos += itemsize;
                 count--;
             }
