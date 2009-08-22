@@ -4,29 +4,31 @@
 
 BUILT_SOURCES += $(library)-aliases.c $(library)-aliases.h
 
+library_symbols = $(library)$(libsuffix).symbols
+library_la = .libs/$(library)$(libsuffix).la
+library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
+
 EXTRA_DIST += \
-	$(library)$(libsuffix).symbols \
+	$(library_symbols) \
 	$(library)-aliases.c \
 	$(library)-aliases.h
 
-library_la = .libs/$(library)$(libsuffix).la
-library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
 
 check-symbols: $(library_la) $(library_decl)
 	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
 	    $(library_la) $(library_decl) $(srcdir)
 
-$(library).symbols: $(libgwyinclude_HEADERS)
+$(library_symbols): $(libgwyinclude_HEADERS)
 	$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
-	     $(library)$(libsuffix).symbols $(libgwyinclude_HEADERS)
+	     $(library_symbols) $(libgwyinclude_HEADERS)
 
-$(library)-aliases.h: $(library)$(libsuffix).symbols
+$(library)-aliases.h: $(library_symbols)
 	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library)-aliases.h $(library)$(libsuffix).symbols
+	    $(library)-aliases.h $(library_symbols)
 
-$(library)-aliases.c: $(library).symbols
+$(library)-aliases.c: $(library_symbols)
 	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library)-aliases.c $(library)$(libsuffix).symbols
+	    $(library)-aliases.c $(library_symbols)
 
 .PHONY: check-symbols
 
