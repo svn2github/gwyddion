@@ -17,7 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef __GWY_MACROS_H__
+#define __GWY_MACROS_H__
+
 #define GWY_SWAP(t, x, y) \
     do { t ___gwy_swap; ___gwy_swap = x; x = y; y = ___gwy_swap; } while (0)
+
+#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
