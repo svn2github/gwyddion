@@ -17,11 +17,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * XXX assertions:
+ * sizeof(gsize) <= sizeof(guint64)
+ * sizeof(gchar) == 1
+ * sizeof(gdouble) == sizeof(guint64)
+ */
+
 #include <string.h>
 #include "libgwy/serializable.h"
 
-static gsize gwy_serializable_calculate_sizes(GwySerializableItems *items,
-                                              gsize *pos);
+static gsize    gwy_serializable_calculate_sizes(GwySerializableItems *items,
+                                                 gsize *pos);
+static void     gwy_serializable_items_done     (const GwySerializableItems *items);
+static gboolean gwy_serializable_dump_to_stream (const GwySerializableItems *items,
+                                                 GOutputStream *output,
+                                                 GError **error);
 
 GType
 gwy_serializable_get_type(void)
@@ -66,7 +77,7 @@ gwy_serializable_n_items(GwySerializable *serializable)
 /**
  * gwy_serializable_itemize:
  * @serializable: A serializable object.
- * @items: List of flattened object tree to append the representation of
+ * @items: List of flattened object tree items to append the representation of
  *         @serializable to.
  *
  * Creates a flattened representation of a serializable object.
@@ -122,6 +133,10 @@ gwy_serializable_done(GwySerializable *serializable)
  *
  * Serializes an object.
  *
+ * The data will be written in many small chunks (generally, 3 writes per an
+ * item).  Therefore if @output is not a plain memory buffer, it should be
+ * wrapped by #GBufferedOutputStream to reduce the number of syscalls.
+ *
  * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
  **/
 gboolean
@@ -131,7 +146,7 @@ gwy_serializable_serialize(GwySerializable *serializable,
 {
     GwySerializableItems items;
     gboolean ok = FALSE;
-    gsize i;
+    gsize i = 0;
 
     g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), FALSE);
     g_return_val_if_fail(G_IS_OUTPUT_STREAM(output), FALSE);
@@ -141,19 +156,9 @@ gwy_serializable_serialize(GwySerializable *serializable,
     items.n_items = 0;
 
     gwy_serializable_itemize(serializable, &items);
-
-    i = 0;
     gwy_serializable_calculate_sizes(&items, &i);
-
-    /* TODO */
-
-    /* The zeroth item is always an object header. */
-    for (i = items.len-1; i > 0; i--) {
-        const GwySerializableItem *item = items.items + i;
-        if (item->ctype == GWY_SERIALIZABLE_OBJECT)
-            gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
-    }
-
+    ok = gwy_serializable_dump_to_stream(&items, output, error);
+    gwy_serializable_items_done(&items);
     g_free(items.items);
 
     return ok;
@@ -171,9 +176,9 @@ static inline gsize G_GNUC_CONST
 gwy_serializable_ctype_size(GwySerializableCType ctype)
 {
     switch (ctype) {
-        case GWY_SERIALIZABLE_CHAR:
+        case GWY_SERIALIZABLE_INT8:
         case GWY_SERIALIZABLE_BOOLEAN:
-        return sizeof(guchar);
+        return sizeof(guint8);
         break;
 
         case GWY_SERIALIZABLE_INT32:
@@ -212,7 +217,7 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
         /* It is important to increment pos now because recusive invocations
          * expect pos already pointing to the header item. */
         const GwySerializableItem *item = items->items + (*pos)++;
-        GwySerializableCType ctype = item->ctype;
+        const GwySerializableCType ctype = item->ctype;
         gsize typesize;
 
         size += strlen(item->name)+1 + 1 /* ctype */;
@@ -249,6 +254,108 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
     }
 
     return header->value.v_size = size;
+}
+
+/**
+ * gwy_serializable_dump_to_stream:
+ * @items: List of flattened object tree items.
+ * @output: Output stream to write the serialized object to.
+ * @error: Location to store the error occuring, %NULL to ignore.
+ *
+ * Write itemized object tree list into an output stream.
+ *
+ * Byte-swapping and similar transforms are done on-the-fly, as necessary.
+ *
+ * Returns: %TRUE if the operation succeeded, %FALSE if it failed.
+ **/
+static gboolean
+gwy_serializable_dump_to_stream(const GwySerializableItems *items,
+                                GOutputStream *output,
+                                GError **error)
+{
+    gsize i;
+
+    for (i = 0; i < items->n_items; i++) {
+        const GwySerializableItem *item = items->items + i;
+        /* Use the single-byte type here to faciliate writing. */
+        const guint8 ctype = item->ctype;
+        gsize len = strlen(item->name) + 1;
+
+        if (!g_output_stream_write(output, item->name, len, NULL, error))
+            return FALSE;
+
+        if (ctype == GWY_SERIALIZABLE_HEADER) {
+            /* The size stored in GWY files exludes the name and itself. */
+            guint64 v = item->value.v_size - len - sizeof(guint64);
+
+            v = GUINT64_TO_LE(v);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+            continue;
+        }
+
+        if (!g_output_stream_write(output, &ctype, sizeof(guint8), NULL, error))
+            return FALSE;
+
+        /* More stuff is in the following GWY_SERIALIZABLE_HEADER item. */
+        if (ctype == GWY_SERIALIZABLE_OBJECT)
+            continue;
+
+        if (ctype == GWY_SERIALIZABLE_INT8) {
+            if (!g_output_stream_write(output,
+                                       &item->value.v_uint8,
+                                       sizeof(guint8),
+                                       NULL, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_BOOLEAN) {
+            guint8 v = !!item->value.v_boolean;
+            if (!g_output_stream_write(output, &v, sizeof(guint8), NULL, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT32) {
+            guint32 v = GUINT32_TO_LE(item->value.v_uint32);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint32),
+                                           NULL, NULL, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_INT64
+                 || ctype == GWY_SERIALIZABLE_DOUBLE) {
+            guint64 v = GUINT64_TO_LE(item->value.v_uint64);
+            if (!g_output_stream_write_all(output, &v, sizeof(guint64),
+                                           NULL, NULL, error))
+                return FALSE;
+        }
+        else if (ctype == GWY_SERIALIZABLE_STRING) {
+            if (!g_output_stream_write_all(output,
+                                           item->value.v_string,
+                                           strlen(item->value.v_string),
+                                           NULL, NULL, error))
+                return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+/**
+ * gwy_serializable_items_done:
+ * @items: List of flattened object tree items.
+ *
+ * Call method done on all objects that need it, in reverse order.
+ **/
+static void
+gwy_serializable_items_done(const GwySerializableItems *items)
+{
+    gsize i;
+
+    /* The zeroth item is always an object header. */
+    for (i = items->len-1; i > 0; i--) {
+        const GwySerializableItem *item = items->items + i;
+        if (item->ctype == GWY_SERIALIZABLE_OBJECT)
+            gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
+    }
 }
 
 /**
@@ -337,8 +444,8 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  * GwySerializableCType:
  * @GWY_SERIALIZABLE_HEADER: Denotes object header item.  This has no use in
  *                           interface impementation.
- * @GWY_SERIALIZABLE_CHAR: Denotes a character.
- * @GWY_SERIALIZABLE_CHAR_ARRAY: Denotes a character array.
+ * @GWY_SERIALIZABLE_INT8: Denotes a character (8bit integer).
+ * @GWY_SERIALIZABLE_INT8_ARRAY: Denotes a character (8bit integer) array.
  * @GWY_SERIALIZABLE_BOOLEAN: Denotes a one-byte boolean.
  * @GWY_SERIALIZABLE_INT32: Denotes a 32bit integer.
  * @GWY_SERIALIZABLE_INT32_ARRAY: Denotes an array of 32bit integers.
@@ -353,31 +460,23 @@ gwy_serializable_calculate_sizes(GwySerializableItems *items,
  *
  * Type of serializable value.
  *
- * The type is a single character, i.e. a value smaller than 256.  It is the
+ * The type is a single byte, i.e. a value smaller than 256.  It is the
  * same as the character used in GWY files to denote the corresponding type.
  **/
 
 /**
  * GwySerializableValue:
- * @v_boolean: Boolean value member.
- * @v_char: Character value member.
- * @v_int32: 32bit integer value member.
- * @v_int64: 64bit integer value member.
- * @v_double: IEEE double value member.
- * @v_string: C string value member.
- * @v_object: Object type member.
- * @v_size: Size type member.  This member type has no use in interface
- *          implementations (it corresponds to %GWY_SERIALIZABLE_HEADER).
- * @v_char_array: Character array value member.
- * @v_int32_array: 32bit integer array value member.
- * @v_int64_array: 64bit integer array value member.
- * @v_double_array: IEEE double array value member.
- * @v_string_array: C string array value member.
- * @v_object_array: Object array value member.
  *
  * Representation of individual values of object serializable data.
  *
  * See #GwySerializableCType for corresponding type specifiers.
+ *
+ * Member @v_size has no use in interface implementations (it corresponds to
+ * %GWY_SERIALIZABLE_HEADER), it is used only in object header items in the
+ * flattened object tree.
+ *
+ * Signed and unsigned integer members are provided for convenience, the
+ * serialization does not distinguish between signed and unsigned integers.
  **/
 
 /**

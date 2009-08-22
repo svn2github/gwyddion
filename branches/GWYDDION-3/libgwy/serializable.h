@@ -31,8 +31,8 @@ typedef struct _GwySerializableItems GwySerializableItems;
 
 typedef enum {
     GWY_SERIALIZABLE_HEADER       = 0,
-    GWY_SERIALIZABLE_CHAR         = 'c',
-    GWY_SERIALIZABLE_CHAR_ARRAY   = 'C',
+    GWY_SERIALIZABLE_INT8         = 'c',
+    GWY_SERIALIZABLE_INT8_ARRAY   = 'C',
     GWY_SERIALIZABLE_BOOLEAN      = 'b',
     GWY_SERIALIZABLE_INT32        = 'i',
     GWY_SERIALIZABLE_INT32_ARRAY  = 'I',
@@ -48,18 +48,26 @@ typedef enum {
 
 union _GwySerializableValue {
     gboolean v_boolean;
-    guchar v_char;
-    guint32 v_int32;
-    guint64 v_int64;
+    gint8 v_int8;
+    guint8 v_uint8;
+    gint32 v_int32;
+    guint32 v_uint32;
+    gint64 v_int64;
+    guint64 v_uint64;
     gdouble v_double;
-    guchar *v_string;
+    gchar *v_string;
+    guchar *v_ustring;
     GObject *v_object;
     gsize v_size;
-    guchar *v_char_array;
-    guint32 *v_int32_array;
-    guint64 *v_int64_array;
+    gint8 *v_int8_array;
+    guint8 *v_uint8_array;
+    gint32 *v_int32_array;
+    guint32 *v_uint32_array;
+    gint64 *v_int64_array;
+    guint64 *v_uint64_array;
     gdouble *v_double_array;
-    guchar **v_string_array;
+    gchar **v_string_array;
+    guchar **v_ustring_array;
     GObject **v_object_array;
 };
 
