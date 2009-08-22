@@ -102,6 +102,7 @@ typedef enum {
     GWY_SERIALIZABLE_ERROR_SIZE_T,
     GWY_SERIALIZABLE_ERROR_OBJECT,
     GWY_SERIALIZABLE_ERROR_DATA,
+    GWY_SERIALIZABLE_ERROR_INVALID,
 } GwySerializableError;
 
 GQuark gwy_serializable_error_quark(void);
@@ -138,7 +139,7 @@ struct _GwySerializableInterface {
     void                  (*done)     (GwySerializable *serializable);
 
     GwySerializableItems* (*request)  (void);
-    GObject*              (*construct)(const GwySerializableItems *items,
+    GObject*              (*construct)(GwySerializableItems *items,
                                        GwyErrorList **error_list);
 
     GObject*              (*duplicate)(GwySerializable *serializable);
