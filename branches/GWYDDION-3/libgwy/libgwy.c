@@ -50,10 +50,10 @@
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
 #ifdef G_OS_WIN32
-static const gchar *appdir = "Gwyddion";
+static const gchar *packagedir = "Gwyddion";
 #endif
 #ifdef G_OS_UNIX
-static const gchar *appdir = "gwyddion";
+static const gchar *packagedir = "gwyddion";
 #endif
 
 static gchar *libdir = NULL;
@@ -259,7 +259,8 @@ fix_module_directory(gchar *path)
 static gboolean
 directory_seems_good(const gchar *path, guint mode)
 {
-    return (g_file_test(path, G_FILE_TEST_IS_DIR)
+    return (g_path_is_absolute(path)
+            && g_file_test(path, G_FILE_TEST_IS_DIR)
             && g_access(path, mode));
 }
 
@@ -542,21 +543,21 @@ find_user_dir(G_GNUC_UNUSED gpointer arg)
 
     /* Explicite variables */
     if ((dir = g_getenv("HOME")) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, appdir, NULL);
+        userdir = g_build_filename(dir, packagedir, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 
     /* GLib */
 #ifdef G_OS_WIN32
     if ((dir = g_get_user_config_dir()) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, appdir, NULL);
+        userdir = g_build_filename(dir, packagedir, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 #endif
 
 #ifdef G_OS_UNIX
     if ((dir = g_get_home_dir()) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, appdir, NULL);
+        userdir = g_build_filename(dir, packagedir, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 #endif
@@ -596,6 +597,104 @@ gwy_user_directory(const gchar *subdir)
     if (userdir)
         return g_build_filename(userdir, subdir, NULL);
     return NULL;
+}
+
+static void
+add_unique_string(GPtrArray *paths,
+                  gchar *str)
+{
+    if (!str)
+        return;
+
+    for (gsize i = 0; i < paths->len; i++) {
+        if (gwy_strequal(g_ptr_array_index(paths, i), str)) {
+            g_free(str);
+            return;
+        }
+    }
+
+    if (directory_seems_good(str, R_OK | X_OK))
+        g_ptr_array_add(paths, str);
+    else
+        g_free(str);
+}
+
+static void
+add_from_list(GPtrArray *paths,
+              const gchar *list,
+              const gchar *subdir)
+{
+    if (!list)
+        return;
+
+    gchar *s = g_strdup(list);
+    gchar *end = s + strlen(s) + 1;
+
+    g_strdelimit(s, G_SEARCHPATH_SEPARATOR_S, '\0');
+    for (gchar *p = s; p != end; p += strlen(p) + 1)
+        add_unique_string(paths, g_build_filename(p, packagedir, subdir, NULL));
+
+    g_free(s);
+}
+
+/**
+ * gwy_library_search_path:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains a list of library directories to look for libraries in.
+ *
+ * The list should be searched in given order.  It is not guaranteed that
+ * all the returned directories exist, someone might delete them just before
+ * this funcion returned, for instance.
+ *
+ * On a typical Unix system the list might look for instance
+ * "/home/yeti/.gwyddion", "/usr/local/lib64/gwyddion", "/usr/lib64/gwyddion".
+ * On MS Windows, it will be probably quite short.
+ *
+ * Returns: %NULL-terminated list of directories, to be freed with
+ *          g_strfreev().
+ **/
+gchar**
+gwy_library_search_path(const gchar *subdir)
+{
+    GPtrArray *paths = g_ptr_array_new();
+
+    /* TODO: Specific environment variables, if necessary. */
+    add_unique_string(paths, gwy_user_directory(subdir));
+    add_unique_string(paths, gwy_library_directory(subdir));
+    add_from_list(paths, GWY_LIB_PATH, subdir);
+    g_ptr_array_add(paths, NULL);
+    return g_ptr_array_free(paths, FALSE);
+}
+
+/**
+ * gwy_data_search_path:
+ * @subdir: Subdirectory to return, or %NULL for the base directory.
+ *
+ * Obtains a list of data directories to look for data in.
+ *
+ * The list should be searched in given order.  It is not guaranteed that
+ * all the returned directories exist, someone might delete them just before
+ * this funcion returned, for instance.
+ *
+ * On a typical Unix system the list might look for instance
+ * "/home/yeti/.gwyddion", "/usr/local/share/gwyddion", "/usr/share/gwyddion".
+ * On MS Windows, it will be probably quite short.
+ *
+ * Returns: %NULL-terminated list of directories, to be freed with
+ *          g_strfreev().
+ **/
+gchar**
+gwy_data_search_path(const gchar *subdir)
+{
+    GPtrArray *paths = g_ptr_array_new();
+
+    /* TODO: Specific environment variables, if necessary. */
+    add_unique_string(paths, gwy_user_directory(subdir));
+    add_unique_string(paths, gwy_data_directory(subdir));
+    add_from_list(paths, g_getenv("XDG_DATA_DIRS"), subdir);
+    g_ptr_array_add(paths, NULL);
+    return g_ptr_array_free(paths, FALSE);
 }
 
 #define __GWY_LIBGWY_C__
