@@ -32,6 +32,11 @@
 #error Byte order used on this system is not supported.
 #endif
 
+#define PASCAL_REAL_B 1099511627776.0
+#define PASCAL_REAL_2B 2199023255552.0
+
+enum { PASCAL_REAL_BIAS = 129 };
+
 static const guint sizes_from64[] = {
 /*  @  A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  */
     0, 0, 0, 1, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0,
@@ -108,6 +113,136 @@ gwy_pack_size(const gchar *format,
 
     return size;
 }
+
+/* Writes 6 bytes */
+static void
+gwy_pack_pascal_real_le(guchar *p, gdouble x)
+{
+    guchar s = 0;
+    union { guint64 i; guchar c[8]; } u;
+    gint power;
+
+    if (!x) {
+        memset(p, 0, 6);
+        return;
+    }
+
+    if (x < 0.0) {
+        x = -x;
+        s = 0x80;
+    }
+
+    power = (gint)floor(gwy_log2(x));
+    x *= PASCAL_REAL_B/gwy_exp2(power);
+    if (x < PASCAL_REAL_B) {
+        x *= 2.0;
+        power--;
+    }
+    x = floor(x + 0.499);
+    if (x >= PASCAL_REAL_2B) {
+        x = floor(x/2.0 + 0.499);
+        power++;
+    }
+
+    /* Crude domain handling.  We could perhaps use denormalized numbers for
+     * small underflows, but... */
+    power += PASCAL_REAL_BIAS;
+    if (G_UNLIKELY(power < 0)) {
+        memset(p, 0, 6);
+        return;
+    }
+    if (G_UNLIKELY(power > 255)) {
+        memset(p, 0xff, 6);
+        p[5] &= (0x7f | s);
+        return;
+    }
+
+    p[0] = (guint)power;
+    
+    u.i = (guint64)(x - PASCAL_REAL_B);
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+    memcpy(p + 1, u.c, 5);
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+    p[1] = u.c[7];
+    p[2] = u.c[6];
+    p[3] = u.c[5];
+    p[4] = u.c[4];
+    p[5] = u.c[3];
+#else
+#error Byte order used on this system is not supported.
+#endif
+    p[5] |= s;
+}
+
+/* Writes 6 bytes */
+static void
+gwy_pack_pascal_real_be(guchar *p, gdouble x)
+{
+    guchar s = 0;
+    union { guint64 i; guchar c[8]; } u;
+    gint power;
+
+    if (!x) {
+        memset(p, 0, 6);
+        return;
+    }
+
+    if (x < 0.0) {
+        x = -x;
+        s = 0x80;
+    }
+
+    power = (gint)floor(gwy_log2(x));
+    x *= PASCAL_REAL_B/gwy_exp2(power);
+    if (x < PASCAL_REAL_B) {
+        x *= 2.0;
+        power--;
+    }
+    x = floor(x + 0.499);
+    if (x >= PASCAL_REAL_2B) {
+        x = floor(x/2.0 + 0.499);
+        power++;
+    }
+
+    /* Crude domain handling.  We could perhaps use denormalized numbers for
+     * small underflows, but... */
+    power += PASCAL_REAL_BIAS;
+    if (G_UNLIKELY(power < 0)) {
+        memset(p, 0, 6);
+        return;
+    }
+    if (G_UNLIKELY(power > 255)) {
+        memset(p, 0xff, 6);
+        p[0] &= (0x7f | s);
+        return;
+    }
+
+    p[5] = (guint)power;
+    
+    u.i = (guint64)(x - PASCAL_REAL_B);
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+    memcpy(p, u.c + 3, 5);
+#elif (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+    p[4] = u.c[0];
+    p[3] = u.c[1];
+    p[2] = u.c[2];
+    p[1] = u.c[3];
+    p[0] = u.c[4];
+#else
+#error Byte order used on this system is not supported.
+#endif
+    p[0] |= s;
+}
+
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define gwy_pack_pascal_real_direct gwy_pack_pascal_real_le
+#define gwy_pack_pascal_real_swap gwy_pack_pascal_real_be
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define gwy_pack_pascal_real_direct gwy_pack_pascal_real_be
+#define gwy_pack_pascal_real_swap gwy_pack_pascal_real_le
+#else
+#error Byte order used on this system is not supported.
+#endif
 
 /**
  * gwy_pack:
@@ -192,9 +327,10 @@ gwy_pack(const gchar *format,
         else if (f == 'r') {
             while (count) {
                 const gdouble arg = *va_arg(ap, const gdouble*);
-                /* TODO: actually convert the numbers */
-                /* TODO: do not forget swapping */
-                memset(buffer + pos, 0, itemsize);
+                if (do_swap)
+                    gwy_pack_pascal_real_swap(buffer + pos, arg);
+                else
+                    gwy_pack_pascal_real_direct(buffer + pos, arg);
                 pos += itemsize;
                 count--;
             }
@@ -341,7 +477,7 @@ gwy_unpack_pascal_real_le(const guchar *p)
     if (p[5] & 0x80)
         x = -x;
 
-    return x*gwy_powi(2.0, (gint)p[0] - 129);
+    return x*gwy_powi(2.0, (gint)p[0] - PASCAL_REAL_BIAS);
 }
 
 /* Takes 6 bytes */
@@ -358,7 +494,7 @@ gwy_unpack_pascal_real_be(const guchar *p)
     if (p[0] & 0x80)
         x = -x;
 
-    return x*gwy_powi(2.0, (gint)p[5] - 129);
+    return x*gwy_powi(2.0, (gint)p[5] - PASCAL_REAL_BIAS);
 }
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)

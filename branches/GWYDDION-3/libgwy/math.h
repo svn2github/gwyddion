@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 
 _GWY_STATIC_INLINE double gwy_exp10(double x);
 _GWY_STATIC_INLINE double gwy_exp2 (double x);
+_GWY_STATIC_INLINE double gwy_log2 (double x);
 _GWY_STATIC_INLINE double gwy_cbrt (double x);
 _GWY_STATIC_INLINE double gwy_hypot(double x, double y);
 _GWY_STATIC_INLINE double gwy_acosh(double x);
@@ -52,7 +53,7 @@ static inline double
 gwy_exp10(double x) {
     return /**/ pow(10.0, x);
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define exp10 gwy_exp10
 # endif
 #endif
@@ -64,8 +65,20 @@ static inline double
 gwy_exp2(double x) {
     return /**/ pow(2.0, x);
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define exp2 gwy_exp2
+# endif
+#endif
+
+#ifdef GWY_HAVE_LOG2
+# define gwy_log2 log2
+#else
+static inline double
+gwy_log2(double x) {
+    return /**/ log(x)/G_LN2;
+}
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
+#  define log2 gwy_log2
 # endif
 #endif
 
@@ -76,7 +89,7 @@ static inline double
 gwy_cbrt(double x) {
     return /**/ pow(x, 1.0/3.0);
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define cbrt gwy_cbrt
 # endif
 #endif
@@ -88,7 +101,7 @@ static inline double
 gwy_hypot(double x, double y) {
     return /**/ sqrt(x*x + y*y);
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define hypot gwy_hypot
 # endif
 #endif
@@ -101,7 +114,7 @@ gwy_acosh(double x)
 {
     return /**/ log(x + sqrt(x*x - 1.0));
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define acosh gwy_acosh
 # endif
 #endif
@@ -114,7 +127,7 @@ gwy_asinh(double x)
 {
     return /**/ log(x + sqrt(x*x + 1.0));
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define asinh gwy_asinh
 # endif
 #endif
@@ -127,14 +140,14 @@ gwy_atanh(double x)
 {
     return /**/ log((1.0 + x)/(1.0 - x));
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define atanh gwy_atanh
 # endif
 #endif
 
 #ifdef GWY_HAVE_POWI
 # define gwy_powi __builtin_powi
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define powi __builtin_powi
 # endif
 #else
@@ -157,7 +170,7 @@ gwy_powi(double x, int i)
     }
     return /**/ r;
 }
-# ifndef GWY_MATH_NAMESPACE_CLEAN
+# ifdef GWY_MATH_POLLUTE_NAMESPACE
 #  define powi gwy_powi
 # endif
 #endif
