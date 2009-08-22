@@ -92,7 +92,7 @@ gwy_pack_size(const gchar *format,
         /* Test this after numbers.  We do not allow them segmented. */
         if (g_ascii_isspace(f))
             continue;
-       
+
         g_warn_if_fail(count || !seen_count);
         itemsize = (f >= 64 && f < 128) ? sizes_from64[f - 64] : 0;
         if (G_UNLIKELY(!itemsize)) {
@@ -158,7 +158,7 @@ gwy_pack_pascal_real_le(guchar *p, gdouble x)
     }
 
     p[0] = (guint)power;
-    
+
     u.i = (guint64)(x - PASCAL_REAL_B);
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
     memcpy(p + 1, u.c, 5);
@@ -218,7 +218,7 @@ gwy_pack_pascal_real_be(guchar *p, gdouble x)
     }
 
     p[5] = (guint)power;
-    
+
     u.i = (guint64)(x - PASCAL_REAL_B);
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
     memcpy(p, u.c + 3, 5);
@@ -299,7 +299,7 @@ gwy_pack(const gchar *format,
         /* Test this after numbers.  We do not allow them segmented. */
         if (g_ascii_isspace(f))
             continue;
-       
+
         if (G_UNLIKELY(seen_count && !count)) {
             g_warning("Zero item count");
             seen_count = FALSE;
@@ -471,7 +471,7 @@ gwy_unpack_pascal_real_le(const guchar *p)
 
     if (!p[0])
         return 0.0;
-    
+
     x = 1.0 + ((((p[1]/256.0 + p[2])/256.0 + p[3])/256.0 + p[4])/256.0
                + (p[5] & 0x7f))/128.0;
     if (p[5] & 0x80)
@@ -488,7 +488,7 @@ gwy_unpack_pascal_real_be(const guchar *p)
 
     if (!p[5])
         return 0.0;
-    
+
     x = 1.0 + ((((p[4]/256.0 + p[3])/256.0 + p[2])/256.0 + p[1])/256.0
                + (p[0] & 0x7f))/128.0;
     if (p[0] & 0x80)
@@ -570,7 +570,7 @@ gwy_unpack(const gchar *format,
         /* Test this after numbers.  We do not allow them segmented. */
         if (g_ascii_isspace(f))
             continue;
-       
+
         if (G_UNLIKELY(seen_count && !count)) {
             g_warning("Zero item count");
             seen_count = FALSE;
