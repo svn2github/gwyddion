@@ -1064,9 +1064,44 @@ gwy_serializable_unpack_items(const guchar *buffer,
     GwySerializableItems *items;
 
     items = g_new(GwySerializableItems, 1);
-    items->len = 16;
-    items->items = g_new(GwySerializableItem, items->len);
+    items->len = 8;
+    items->items = g_new0(GwySerializableItem, items->len);
     items->n_items = 0;
+
+    while (size) {
+        gsize rbytes;
+        const gchar *compname;
+        guint8 ctype;
+
+        /* Grow items if necessary */
+        if (items->n_items == items->len) {
+            items->len = 2*items->len;
+            items->items = g_renew(GwySerializableItem, items->items,
+                                   items->len);
+            gwy_memclear(items->items + items->n_items,
+                         items->len - items->n_items);
+        }
+
+        /* Component name */
+        if (!(rbytes = gwy_serializable_unpack_name(buffer, size,
+                                                    &compname, error_list)))
+            goto fail;
+        buffer += rbytes;
+        size -= rbytes;
+
+        /* Component type */
+        if (!(rbytes = gwy_serializable_unpack_uint8(buffer, size,
+                                                     &ctype, error_list)))
+            goto fail;
+        buffer += rbytes;
+        size -= rbytes;
+
+        /* The data */
+    }
+
+fail:
+    /* TODO */
+    return NULL;
 }
 
 static void
