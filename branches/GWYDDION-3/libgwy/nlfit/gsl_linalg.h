@@ -344,7 +344,7 @@ gsl_linalg_bidiag_unpack2 (gsl_matrix * A,
   const size_t M = A->size1;
   const size_t N = A->size2;
 
-  const size_t K = GSL_MIN(M, N);
+  const size_t K = MIN(M, N);
 
   if (M < N)
     {
@@ -926,7 +926,7 @@ gsl_linalg_SV_decomp (gsl_matrix * A, gsl_matrix * V, gsl_vector * S,
 
   const size_t M = A->size1;
   const size_t N = A->size2;
-  const size_t K = GSL_MIN (M, N);
+  const size_t K = MIN(M, N);
 
   if (M < N)
     {
@@ -1234,7 +1234,7 @@ gsl_linalg_QRPT_decomp (gsl_matrix * A, gsl_vector * tau, gsl_permutation * p, i
   const size_t M = A->size1;
   const size_t N = A->size2;
 
-  if (tau->size != GSL_MIN (M, N))
+  if (tau->size != MIN(M, N))
     {
       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
     }
@@ -1263,7 +1263,7 @@ gsl_linalg_QRPT_decomp (gsl_matrix * A, gsl_vector * tau, gsl_permutation * p, i
           gsl_vector_set (norm, i, x);
         }
 
-      for (i = 0; i < GSL_MIN (M, N); i++)
+      for (i = 0; i < MIN(M, N); i++)
         {
           /* Bring the column of largest norm into the pivot position */
 
@@ -1357,7 +1357,7 @@ gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector *
   const size_t M = QR->size1;
   const size_t N = QR->size2;
 
-  if (tau->size != GSL_MIN (M, N))
+  if (tau->size != MIN(M, N))
     {
       GSL_ERROR ("size of tau must be MIN(M,N)", GSL_EBADLEN);
     }
@@ -1371,7 +1371,7 @@ gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector *
 
       /* compute Q^T v */
 
-      for (i = 0; i < GSL_MIN (M, N); i++)
+      for (i = 0; i < MIN(M, N); i++)
         {
           gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
           gsl_vector_const_view h = gsl_vector_const_subvector (&(c.vector), i, M - i);

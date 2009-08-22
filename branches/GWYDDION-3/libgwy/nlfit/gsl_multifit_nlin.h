@@ -1079,7 +1079,7 @@ lmpar (gsl_matrix * r, const gsl_permutation * perm, const gsl_vector * qtf,
 
   if (par_upper == 0)
     {
-      par_upper = GSL_DBL_MIN / GSL_MIN_DBL(delta, 0.1);
+      par_upper = GSL_DBL_MIN/GSL_MIN_DBL(delta, 0.1);
     }
 
 #ifdef DEBUG
@@ -1476,7 +1476,7 @@ lm_iteration:
           temp = p1;
         }
 
-      state->delta = temp * GSL_MIN_DBL (state->delta, pnorm/p1);
+      state->delta = temp * GSL_MIN_DBL(state->delta, pnorm/p1);
 
       state->par /= temp;
 #ifdef DEBUG
@@ -1560,7 +1560,7 @@ lmder_alloc (void *vstate, size_t n, size_t p)
 
   state->r = r;
 
-  tau = gsl_vector_calloc (GSL_MIN(n, p));
+  tau = gsl_vector_calloc (MIN(n, p));
 
   if (tau == 0)
     {
