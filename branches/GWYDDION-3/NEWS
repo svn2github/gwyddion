@@ -3,6 +3,7 @@
 Compared to Gwyddion 2.x:
 
 Global:
+- Gwyddion is licensed under GNU General Public License version 3 (or later).
 - The code is written in C 99.  Legacy compilers will not compile it, recent
   GCC or MSVC8 should suffice.
 
@@ -45,7 +46,7 @@ Math:
 - gwy_math_sort() can sort an index array along with the actual data.
 
 Pack:
-- Completely new. TODO
+- Completely new. FIXME
 
 Unit:
 - Renamed from GwySIUnit to GwyUnit.
@@ -74,3 +75,8 @@ Expr:
 - It uses GSlice instead of the deprecated GMemChunk internally.
 - A few more math functions were added.
 
+Inventory:
+- It is internally based on GSequence, which permitted to get rid of some
+  really ugly code.
+- It no longer supports constant inventories.  FIXME: There should be some
+  simpler object for wrapping of static arrays with the tree model interface.
