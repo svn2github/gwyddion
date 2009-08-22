@@ -60,6 +60,7 @@ GWY_CHECK_GNUC_VISIBILITY
 
 #############################################################################
 # I18n
+GETTEXT_PACKAGE=gwyddion3
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION([0.17])
 AC_SUBST(GETTEXT_PACKAGE)
