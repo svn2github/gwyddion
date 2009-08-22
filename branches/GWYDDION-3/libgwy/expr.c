@@ -721,8 +721,8 @@ gwy_expr_scan_tokens(GwyExpr *expr,
     if (expr->tokens) {
         g_warning("Token list residua from last run");
         token_list_delete(expr->tokens);
+        expr->tokens = NULL;
     }
-    expr->tokens = NULL;
 
     scanner = expr->scanner;
     while ((token = g_scanner_get_next_token(scanner))) {
@@ -739,13 +739,18 @@ gwy_expr_scan_tokens(GwyExpr *expr,
             case '~':
             case G_TOKEN_FLOAT:
             case G_TOKEN_SYMBOL:
-            case G_TOKEN_IDENTIFIER:
             t = gwy_expr_token_new0();
             t->token = token;
             t->value = expr->scanner->value;
             tokens = token_list_prepend(tokens, t);
-            /* TODO: steal token value from scanner to avoid string duplication
-             * and freeing */
+            break;
+
+            case G_TOKEN_IDENTIFIER:
+            t = gwy_expr_token_new0();
+            t->token = token;
+            t->value.v_string = expr->scanner->value.v_string;
+            tokens = token_list_prepend(tokens, t);
+            /* Steal the string from GScanner */
             scanner->value.v_string = NULL;
             scanner->token = G_TOKEN_NONE;
             break;
@@ -957,8 +962,11 @@ gwy_expr_transform_values(GwyExpr *expr,
         /* pos 0 is always unused */
         g_ptr_array_add(expr->identifiers, NULL);
     }
-    else
+    else {
+        for (i = 1; i < expr->identifiers->len; i++)
+            GWY_FREE(g_ptr_array_index(expr->identifiers, i));
         g_ptr_array_set_size(expr->identifiers, 1);
+    }
 
     for (t = expr->tokens; t; t = t->next) {
         if (t->token == G_TOKEN_FLOAT) {
@@ -975,7 +983,8 @@ gwy_expr_transform_values(GwyExpr *expr,
             g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_IDENTIFIER_NAME,
                         _("Invalid identifier name %s."),
                         t->value.v_identifier);
-            /* FIXME: Do we need to free something here, or not? */
+            token_list_delete(expr->tokens);
+            expr->tokens = NULL;
             return FALSE;
         }
 
@@ -983,6 +992,7 @@ gwy_expr_transform_values(GwyExpr *expr,
             if ((quark = g_quark_try_string(t->value.v_identifier))
                 && (cval = g_hash_table_lookup(expr->constants,
                                                GUINT_TO_POINTER(quark)))) {
+                g_free(t->value.v_identifier);
                 code = gwy_expr_token_new0();
                 code->token = GWY_EXPR_CODE_CONSTANT;
                 code->value.v_float = *cval;
@@ -1394,8 +1404,12 @@ void
 gwy_expr_free(GwyExpr *expr)
 {
     token_list_delete(expr->tokens);
-    if (expr->identifiers)
-       g_ptr_array_free(expr->identifiers, TRUE);
+    if (expr->identifiers) {
+        GPtrArray *pa = expr->identifiers;
+        for (gsize i = 0; i < pa->len; i++)
+            g_free(g_ptr_array_index(pa, i));
+        g_ptr_array_free(pa, TRUE);
+    }
     if (expr->scanner)
         g_scanner_destroy(expr->scanner);
     if (expr->constants)
