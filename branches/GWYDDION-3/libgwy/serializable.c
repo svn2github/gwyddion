@@ -790,7 +790,7 @@ unpack_uint16_array(const guchar *buffer,
 
     if (*array_size) {
         *value = g_new(guint16, *array_size);
-        memcpy(value, buffer, *array_size*sizeof(guint16));
+        memcpy(*value, buffer, *array_size*sizeof(guint16));
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         gsize i;
@@ -833,7 +833,7 @@ unpack_uint32_array(const guchar *buffer,
 
     if (*array_size) {
         *value = g_new(guint32, *array_size);
-        memcpy(value, buffer, *array_size*sizeof(guint32));
+        memcpy(*value, buffer, *array_size*sizeof(guint32));
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         gsize i;
@@ -876,7 +876,7 @@ unpack_uint64_array(const guchar *buffer,
 
     if (*array_size) {
         *value = g_new(guint64, *array_size);
-        memcpy(value, buffer, *array_size*sizeof(guint64));
+        memcpy(*value, buffer, *array_size*sizeof(guint64));
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         gsize i;
@@ -921,7 +921,7 @@ unpack_double_array(const guchar *buffer,
 
     if (*array_size) {
         *value = g_new(guint64, *array_size);
-        memcpy(value, buffer, *array_size*sizeof(gdouble));
+        memcpy(*value, buffer, *array_size*sizeof(gdouble));
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         gsize i;
