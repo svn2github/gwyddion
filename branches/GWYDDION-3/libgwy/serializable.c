@@ -500,11 +500,13 @@ calculate_sizes(GwySerializableItems *items,
         else if (ctype == GWY_SERIALIZABLE_OBJECT)
             size += calculate_sizes(items, pos);
         else if (ctype == GWY_SERIALIZABLE_STRING_ARRAY) {
+            size += sizeof(guint64);
             gsize alen = item->array_size;
             for (gsize j = 0; j < alen; j++)
                 size += strlen((const gchar*)item->value.v_string_array[j])+1;
         }
         else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
+            size += sizeof(guint64);
             gsize alen = item->array_size;
             for (gsize j = 0; j < alen; j++)
                 size += calculate_sizes(items, pos);
