@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim: set ts=2 sw=2 et:
 # NB: This script may actually need bash.  You have been warned.
 # You can override the default tool choice by setting AUTOCONF, etc.
 # These should be bare executables, options go to AUTOCONF_FLAGS, etc.
@@ -145,9 +146,7 @@ if test "$DIE" = 1; then
 fi
 
 if test -x ./build/update-POTFILES.in.sh; then
-  # XXX: This is a fake, add some real directory list once we have app files
-  ./build/update-POTFILES.in.sh po/POTFILES.in        libgwy
-  ./build/update-POTFILES.in.sh po-libgwy/POTFILES.in libgwy
+  ./build/update-POTFILES.in.sh
 fi
 
 (
