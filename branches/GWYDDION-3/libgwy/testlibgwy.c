@@ -18,9 +18,16 @@
  */
 
 #undef G_DISABLE_ASSERT
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/libgwy.h"
+
+#ifdef HAVE_VALGRIND
+#include <valgrind/valgrind.h>
+#else
+#define RUNNING_ON_VALGRIND 0
+#endif
 
 /***************************************************************************
  *
@@ -31,6 +38,7 @@
 static void
 test_version(void)
 {
+    /* These must hold. */
     g_assert_cmpuint(GWY_VERSION_MAJOR, ==, gwy_version_major());
     g_assert_cmpuint(GWY_VERSION_MINOR, ==, gwy_version_minor());
     g_assert_cmpstr(GWY_VERSION_STRING, ==, gwy_version_string());
@@ -42,8 +50,8 @@ test_version(void)
  *
  ***************************************************************************/
 
-/* FIXME: On GNU systems we test the libc memmem() which is not exactly what
- * we want. */
+/* FIXME: On GNU systems we test the libc memmem() here.  On the other hand,
+ * this is the implementation we are going to use, so let's test it. */
 static void
 test_memmem(void)
 {
@@ -150,6 +158,7 @@ test_pack(void)
  *
  ***************************************************************************/
 
+/* Return %TRUE if @array is ordered. */
 static gboolean
 test_sort_is_strictly_ordered(const gdouble *array, gsize n)
 {
@@ -162,6 +171,8 @@ test_sort_is_strictly_ordered(const gdouble *array, gsize n)
     return TRUE;
 }
 
+/* Return %TRUE if @array is ordered and its items correspond to @orig_array
+ * items with permutations given by @index_array. */
 static gboolean
 test_sort_is_ordered_with_index(const gdouble *array, const guint *index_array,
                                 const gdouble *orig_array, gsize n)
@@ -223,21 +234,26 @@ test_error_list(void)
     GwyErrorList *errlist = NULL;
     GError *err;
 
+    /* A simple error. */
     gwy_error_list_add(&errlist, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
                        "Just testing...");
     g_assert_cmpuint(g_slist_length(errlist), ==, 1);
 
+    /* Several errors. */
     gwy_error_list_add(&errlist, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
                        "Just testing %d...", 2);
     g_assert_cmpuint(g_slist_length(errlist), ==, 2);
+    /* The latter must be on top. */
     err = errlist->data;
     g_assert_cmpuint(err->domain, ==, GWY_PACK_ERROR);
     g_assert_cmpuint(err->code, ==, GWY_PACK_ERROR_FORMAT);
     g_assert_cmpstr(err->message, ==, "Just testing 2...");
 
+    /* Destruction. */
     gwy_error_list_clear(&errlist);
     g_assert_cmpuint(g_slist_length(errlist), ==, 0);
 
+    /* Ignoring errors. */
     gwy_error_list_add(NULL, GWY_PACK_ERROR, GWY_PACK_ERROR_FORMAT,
                        "Ignored error");
     gwy_error_list_clear(NULL);
@@ -555,6 +571,8 @@ static const guchar ser_test_simple[] = {
     0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
+/* Serialize a simple GwySerTest object and check if it matches byte-for-byte
+ * with the stored representation above. */
 static void
 test_serialize_simple(void)
 {
@@ -580,6 +598,8 @@ test_serialize_simple(void)
     g_clear_error(&error);
 }
 
+/* Deserialize a simple GwySerTest object and check if the restored data match
+ * what we expect (mostly defaults). */
 static void
 test_deserialize_simple(void)
 {
@@ -622,6 +642,8 @@ static const guchar ser_test_data[] = {
     0x61, 0x20, 0x73, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x2e, 0x2e, 0x2e, 0x00
 };
 
+/* Serialize a GwySerTest object with some non-trivial data and check if it
+ * matches byte-for-byte with the stored representation above. */
 static void
 test_serialize_data(void)
 {
@@ -657,6 +679,8 @@ test_serialize_data(void)
     g_clear_error(&error);
 }
 
+/* Deserialize a GwySerTest object with some non-trivial data and check if the
+ * restored data match what we expect. */
 static void
 test_deserialize_data(void)
 {
@@ -703,6 +727,9 @@ static const guchar ser_test_nested[] = {
     0x00, 0x00
 };
 
+/* Serialize a GwySerTest object with contained GwySerTest objects (2 levels
+ * deep) and check if it matches byte-for-byte with the stored representation
+ * above. */
 static void
 test_serialize_nested(void)
 {
@@ -733,6 +760,8 @@ test_serialize_nested(void)
     g_clear_error(&error);
 }
 
+/* Deserialize a GwySerTest object with contained GwySerTest objects (2 levels
+ * deep) and check if the restored object tree looks as expected. */
 static void
 test_deserialize_nested(void)
 {
@@ -777,6 +806,7 @@ test_deserialize_nested(void)
     GWY_OBJECT_UNREF(sertest);
 }
 
+/* Serialization to a one-byte too short buffer, check failure. */
 static void
 test_serialize_error(void)
 {
@@ -804,6 +834,8 @@ test_serialize_error(void)
     g_object_unref(sertest);
 }
 
+/* Randomly perturb serialized object representations above and try to
+ * deserialize the result. */
 static void
 test_deserialize_garbage(void)
 {
@@ -1626,6 +1658,9 @@ test_inventory_data(void)
 int
 main(int argc, char *argv[])
 {
+    if (RUNNING_ON_VALGRIND)
+        g_setenv("G_SLICE", "always-malloc", TRUE);
+
     g_test_init(&argc, &argv, NULL);
     g_type_init();
 

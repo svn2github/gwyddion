@@ -80,3 +80,5 @@ Inventory:
   really ugly code.
 - It no longer supports constant inventories.  FIXME: There should be some
   simpler object for wrapping of static arrays with the tree model interface.
+- It has a proper default parameterless constructor, the item type can be set
+  whenever the inventory is empty.

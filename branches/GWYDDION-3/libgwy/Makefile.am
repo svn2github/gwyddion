@@ -3,15 +3,15 @@
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
-# Must init
-EXTRA_DIST = version.h.in
-CLEANFILES =
-MAINTAINERCLEANFILES =
-BUILT_SOURCES =
-
 library = libgwy
 libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
+
+# Must init
+EXTRA_DIST = version.h.in
+CLEANFILES = $(library).supp
+MAINTAINERCLEANFILES =
+BUILT_SOURCES =
 
 lib_LTLIBRARIES = libgwy.la
 noinst_PROGRAMS = $(test_programs)
@@ -47,7 +47,7 @@ libgwy_la_SOURCES = \
 
 testlibgwy_SOURCES = testlibgwy.c
 
-AM_CFLAGS = @LIBGWY_CFLAGS@ $(WARNINGS)
+AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
@@ -64,11 +64,26 @@ else
 version_info = -version-info 0:0:0
 endif
 
-libgwy_la_LDFLAGS = @LIBGWY_LIBS@ $(version_info)
+libgwy_la_LDFLAGS = @LIBGWY_DEPS_LIBS@ $(version_info)
+
+testlibgwy_CFLAGS = $(AM_CFLAGS) @VALGRIND_CFLAGS@
 testlibgwy_LDADD = libgwy.la
 
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
+
+$(library).supp: testlibgwy$(EXEEXT)
+	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
+	    --tool=memcheck --leak-check=full --show-reachable=yes \
+	    ./testlibgwy -l >/dev/null 5>$(library).supp
+	$(SED) -i -e '/^==/d' \
+	    -e 's/<insert a suppression name here>/Suppression/' \
+	    $(library).supp
+
+check-valgrind: $(library).supp
+	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
+	    --show-reachable=yes --suppressions=$(library).supp \
+	    ./testlibgwy $(TEST_FLAGS)
 
 clean-local:
 	rm -f core.* *~

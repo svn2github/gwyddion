@@ -39,12 +39,15 @@ AC_CANONICAL_HOST
 GWY_MISSING_TOOLS=
 
 AC_DISABLE_STATIC
+AM_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
+
+PKG_PROG_PKG_CONFIG([0.22])
 
 #############################################################################
 # Compiler
@@ -91,7 +94,16 @@ fi
 
 #############################################################################
 # The Gtk+ Stack
-PKG_CHECK_MODULES([LIBGWY],[gio-2.0 >= 2.18])
+PKG_CHECK_MODULES([LIBGWY_DEPS],[gio-2.0 >= 2.18])
+
+#############################################################################
+# Valgrind
+PKG_CHECK_EXISTS([valgrind],
+                 [gwy_enable_valgrind=yes
+                  PKG_CHECK_MODULES([VALGRIND],[valgrind])
+                  AC_DEFINE([HAVE_VALGRIND],1,[Define if we have valgrind])],
+                 [gwy_enable_valgrind=no])
+AM_CONDITIONAL([HAVE_VALGRIND],[test "x$gwy_enable_valgrind" = xyes])
 
 #############################################################################
 # Write gwyconfig.h
