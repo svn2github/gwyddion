@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-
+#include <glib/gi18n.h>
 #include "libgwy/macros.h"
 #include "libgwy/container.h"
-#include "libgwy/serializable.h"
+#include "libgwy/serialize.h"
 
 enum {
     ITEM_CHANGED,
@@ -297,113 +297,56 @@ static GObject*
 gwy_container_construct(GwySerializableItems *items,
                         GwyErrorList **error_list)
 {
-}
+    GwyContainer *container = gwy_container_new();
 
-#if 0
-static GByteArray*
-gwy_container_serialize(GObject *object,
-                        GByteArray *buffer)
-{
-    GwyContainer *container;
-    gsize nitems = 0;
-    SerializeData sdata;
-
-    g_return_val_if_fail(GWY_IS_CONTAINER(object), buffer);
-    container = GWY_CONTAINER(object);
-
-    nitems = g_hash_table_size(container->values);
-    sdata.items = g_new0(GwySerializeItem, nitems);
-    sdata.i = 0;
-    g_hash_table_foreach(container->values, hash_serialize, &sdata);
-    buffer = gwy_serialize_object_items(buffer, GWY_CONTAINER_TYPE_NAME,
-                                        sdata.i, sdata.items);
-    g_free(sdata.items);
-
-    return buffer;
-}
-
-static gsize
-gwy_container_get_size(GObject *object)
-{
-    GwyContainer *container;
-    gsize nitems = 0, size;
-    SerializeData sdata;
-
-    g_return_val_if_fail(GWY_IS_CONTAINER(object), 0);
-    container = GWY_CONTAINER(object);
-
-    nitems = g_hash_table_size(container->values);
-    sdata.items = g_new0(GwySerializeItem, nitems);
-    sdata.i = 0;
-    g_hash_table_foreach(container->values, hash_serialize, &sdata);
-    size = gwy_serialize_get_items_size(GWY_CONTAINER_TYPE_NAME,
-                                        sdata.i, sdata.items);
-    g_free(sdata.items);
-
-    return size;
-}
-
-static GObject*
-gwy_container_deserialize(const guchar *buffer,
-                          gsize size,
-                          gsize *position)
-{
-    GwySerializeItem *items, *it;
-    GwyContainer *container;
-    GQuark key;
-    gsize i, nitems = 0;
-
-    g_return_val_if_fail(buffer, NULL);
-    items = gwy_deserialize_object_hash(buffer, size, position,
-                                        GWY_CONTAINER_TYPE_NAME, &nitems);
-    g_return_val_if_fail(items, NULL);
-
-    container = gwy_container_new();
-    for (i = 0; i < nitems; i++) {
-        it = items + i;
-        key = g_quark_from_string(it->name);
+    for (gsize i = 0; i < items->n_items; i++) {
+        GwySerializableItem *it = items->items + i;
+        GQuark key = g_quark_from_string(it->name);
         switch (it->ctype) {
-            case 'b':
+            case GWY_SERIALIZABLE_BOOLEAN:
             gwy_container_set_boolean(container, key, it->value.v_boolean);
             break;
 
-            case 'c':
-            gwy_container_set_uchar(container, key, it->value.v_char);
+            case GWY_SERIALIZABLE_INT8:
+            gwy_container_set_char(container, key, it->value.v_int8);
             break;
 
-            case 'i':
+            case GWY_SERIALIZABLE_INT32:
             gwy_container_set_int32(container, key, it->value.v_int32);
             break;
 
-            case 'q':
+            case GWY_SERIALIZABLE_INT64:
             gwy_container_set_int64(container, key, it->value.v_int64);
             break;
 
-            case 'd':
+            case GWY_SERIALIZABLE_DOUBLE:
             gwy_container_set_double(container, key, it->value.v_double);
             break;
 
-            case 's':
+            case GWY_SERIALIZABLE_STRING:
+            /* This takes the string which is exactly what we need. */
             gwy_container_set_string(container, key, it->value.v_string);
+            it->value.v_string = NULL;
             break;
 
             case 'o':
             if (it->value.v_object) {
                 gwy_container_set_object(container, key, it->value.v_object);
-                g_object_unref(it->value.v_object);
+                GWY_OBJECT_UNREF(it->value.v_object);
             }
             break;
 
             default:
-            g_critical("Container doesn't support type <%c>", it->ctype);
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_INVALID,
+                               _("GwyContainer cannot store data of type "
+                                 "0x%02x."), it->ctype);
             break;
         }
     }
-    g_free(items);
 
-    return (GObject*)container;
+    return G_OBJECT(container);
 }
-#endif
 
 static GObject*
 gwy_container_duplicate_impl(GwySerializable *object)
