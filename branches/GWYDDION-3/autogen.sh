@@ -183,6 +183,8 @@ for subdir in $podirs; do
     rm -f $subdir/Makefile.in.in
     sed -e "s#^\(GETTEXT_PACKAGE = \)@GETTEXT_PACKAGE@#\1$domain#" \
         po/Makefile.in.in >$subdir/Makefile.in.in
+  else
+    rm -f $subdir/Makefile.in.in~
   fi
   sed -e "s#@domain@#$domain#" -e "s#@subdir@#$subdir#" \
       build/Makevars.in >$subdir/Makevars
