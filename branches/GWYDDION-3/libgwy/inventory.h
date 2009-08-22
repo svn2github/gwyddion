@@ -53,8 +53,8 @@ typedef struct _GwyInventoryItemType GwyInventoryItemType;
 struct _GwyInventoryItemType {
     GType         type;
     const gchar  *watchable_signal;
-    gboolean     (*is_fixed)       (gconstpointer item);
     const gchar* (*get_name)       (gpointer item);
+    gboolean     (*is_fixed)       (gconstpointer item);
     gint         (*compare)        (gconstpointer item1,
                                     gconstpointer item2);
     void         (*rename)         (gpointer item,

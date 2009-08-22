@@ -33,11 +33,6 @@ enum {
     N_SIGNALS
 };
 
-typedef struct {
-    gpointer p;
-    guint i;
-} ArrayItem;
-
 static void         gwy_inventory_finalize(GObject *object);
 static void         gwy_inventory_dispose (GObject *object);
 static void         make_hash             (GwyInventory *inventory);
@@ -1161,23 +1156,16 @@ invent_item_name(GwyInventory *inventory,
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION:gwyinventory
+ * SECTION: inventory
  * @title: GwyInventory
  * @short_description: Ordered item inventory, indexed by both name and
  *                     position.
- * @see_also: #GwyContainer,  #GwyInventoryModel
+ * @see_also: #GwyContainer, #GwyInventoryModel
  *
  * #GwyInventory is a uniform container that offers both hash table and array
- * (sorted or unsorted) interfaces.  Both types of read access are fast,
- * operations that modify it may be slower.  Inventory can also maintain a
- * notion of default item.
- *
- * #GwyInventory can be used both as an actual container for some data, or just
- * wrap a static array with a the same interface so the actual storage is
- * opaque to inventory user.  The former kind of inventories can be created
- * with gwy_inventory_new() or gwy_inventory_new_with_items(); constant inventory
- * is created with gwy_inventory_new_from_array().  Contantess of an inventory
- * can be tested with gwy_inventory_is_const().
+ * (sorted or unsorted) interfaces.  Both types of access are fast.  Inventory
+ * can also maintain a notion of default item used as a fallback or default
+ * in certain cases.
  *
  * Possible operations with data items stored in an inventory are specified
  * upon inventory creation with #GwyInventoryItemType structure.  Not all
@@ -1187,6 +1175,10 @@ invent_item_name(GwyInventory *inventory,
  * inventory (this capability can be tested with
  * gwy_inventory_can_make_copies()).
  *
+ * #GwyInventory is also designed to be used as storage backend for
+ * #GtkTreeModel<!-- -->s.  Upon modification, it emits signals that directly
+ * map onto #GtkTreeModel signals.
+ *
  * Item can have `traits', that is data that can be obtained generically. They
  * are similar to #GObject properties.  Actually, if items are objects, they
  * should simply map object properties to traits.  But it is possible to define
@@ -1195,6 +1187,8 @@ invent_item_name(GwyInventory *inventory,
 
 /**
  * GwyInventory:
+ *
+ * Object representing an inventory of named objects.
  *
  * The #GwyInventory struct contains private data only and should be accessed
  * using the functions below.
@@ -1208,17 +1202,17 @@ invent_item_name(GwyInventory *inventory,
  * @watchable_signal: Item signal name to watch, used only for objects.
  *                    When item emits this signal, inventory emits
  *                    "item-updated" signal for it.
- *                    May be %NULL to indicate no signal should be watched,
- *                    you can still emit "item-updated" with
+ *                    May be %NULL to indicate no signal should be watched.
+ *                    you can still emit "item-updated" manually with
  *                    gwy_inventory_item_updated() or
  *                    gwy_inventory_nth_item_updated().
- * @is_fixed: If not %NULL and returns %TRUE for some item, such an item
- *            cannot be removed from inventory, fixed items can be only
- *            added.  This is checked each time an attempt is made to remove
- *            an item.
  * @get_name: Returns item name (the string is owned by item and it is assumed
  *            to exist until item ceases to exist or is renamed).  This
  *            function is obligatory.
+ * @is_fixed: If not %NULL and returns %TRUE for some item, such an item
+ *            cannot be removed from inventory and it cannot be renamed.
+ *            Fixed items can be freely added though.  This is checked each
+ *            time an attempt is made to chage the item.
  * @compare: Item comparation function for sorting.
  *           If %NULL, inventory never attempts to keep any item order
  *           and gwy_inventory_restore_order() does nothing.
@@ -1226,17 +1220,18 @@ invent_item_name(GwyInventory *inventory,
  *           disabled with gwy_inventory_forget_order() or it was created
  *           with gwy_inventory_new_with_items() and the initial array was
  *           not sorted according to @compare.
- * @rename: Function to rename an item.  If not %NULL, calls to
- *          gwy_inventory_rename_item() are possible.  Note items must not
- *          be renamed by any other means than this method, because when
- *          an item is renamed and inventory does not know it, very bad
- *          things will happen and you will lose all your good karma.
- * @dismantle: Called on item before it's removed from inventory.  May be
- *             %NULL.
- * @copy: Method to create a copy of an item.  If this function and @rename are
- *        defined, calls to gwy_inventory_new_item() are possible.  Inventory
- *        sets the copy's name immediately after creation, so it normally
- *        does not matter which name @copy gives it.
+ * @rename: Function to rename an item.  If not %NULL, it is possible to use
+ *          gwy_inventory_rename_item().  Note items must not be renamed by any
+ *          other means than this method, because when an item is renamed and
+ *          the inventory does not know it, very bad things will happen and you
+ *          will lose all your good karma.  Also, get_name() must atually
+ *          return the new name after renaming.
+ * @dismantle: Destructor/clean-up function called on item before it is removed
+ *             from inventory.  May be %NULL.
+ * @copy: Function to create the copy of an item.  If this function and @rename
+ *        are defined it is possible to use gwy_inventory_new_item().
+ *        Inventory sets the copy's name immediately after creation, so it
+ *        normally does not matter which name @copy gives it.
  * @get_traits: Function to get item traits.  It returns array of item trait
  *              #GTypes (keeping its ownership) and if @nitems is not %NULL,
  *              it stores the length of returned array there.
