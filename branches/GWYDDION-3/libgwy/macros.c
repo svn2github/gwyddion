@@ -34,4 +34,48 @@
  * This macro is usable as a single statement.
  */
 
+/**
+ * GWY_FREE:
+ * @ptr: Pointer (must be an l-value).
+ *
+ * Frees memory if it is allocated.
+ *
+ * This is an idempotent wrapper of g_free(): if @ptr is not %NULL
+ * g_free() is called on it and @ptr is set to %NULL.
+ *
+ * This macro evaluates its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
+ * GWY_OBJECT_UNREF:
+ * @obj: Pointer to #GObject or %NULL (must be an l-value).
+ *
+ * Unreferences an object if it exists.
+ *
+ * This is an idempotent wrapper of g_object_unref(): if @obj is not %NULL
+ * g_object_unref() is called on it and @obj is set to %NULL.
+ *
+ * If the object reference count is greater than one ensure it is referenced
+ * elsewhere, otherwise it leaks memory.
+ *
+ * This macro evaluates its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
+ * GWY_SIGNAL_HANDLER_DISCONNECT:
+ * @obj: Pointer to #GObject or %NULL.
+ * @hid: Id of a signal handler connected to @obj, or 0 (must be an l-value).
+ *
+ * Disconnects a signal handler if it exists.
+ *
+ * This is an idempotent wrapper of g_signal_handler_disconnect(): if @hid is
+ * nonzero and @obj is not %NULL, the signal handler identified by
+ * @hid is disconnected and @hid is set to 0.
+ *
+ * This macro evaluates its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
