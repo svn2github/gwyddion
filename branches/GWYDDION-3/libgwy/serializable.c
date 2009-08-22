@@ -129,8 +129,10 @@ gwy_serializable_done(GwySerializable *serializable)
 GObject*
 gwy_serializable_duplicate(GwySerializable *serializable)
 {
-    const GwySerializableInterface *iface;
+    if (!serializable)
+        return NULL;
 
+    const GwySerializableInterface *iface;
     g_return_val_if_fail(GWY_IS_SERIALIZABLE(serializable), NULL);
     iface = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_val_if_fail(iface && iface->duplicate, NULL);
