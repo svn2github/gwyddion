@@ -295,32 +295,25 @@ gwy_ser_test_itemize(GwySerializable *serializable,
     return n_items;
 }
 
-static GwySerializableItems*
-gwy_ser_test_request(void)
-{
-    static const GwySerializableItem default_items[] = {
-        { .name = "flag",  .ctype = GWY_SERIALIZABLE_BOOLEAN,      },
-        { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
-        { .name = "s",     .ctype = GWY_SERIALIZABLE_STRING,       },
-        { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
-        { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
-    };
-
-    GwySerializableItems *items;
-
-    items = g_new0(GwySerializableItems, 1);
-    items->len = items->n_items = G_N_ELEMENTS(default_items);
-    items->items = g_memdup(default_items, sizeof(default_items));
-
-    return items;
-}
+// The remaining members get zero-initialized which saves us from doing it.
+static const GwySerializableItem default_items[] = {
+    { .name = "flag",  .ctype = GWY_SERIALIZABLE_BOOLEAN,      },
+    { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    { .name = "s",     .ctype = GWY_SERIALIZABLE_STRING,       },
+    { .name = "raw",   .ctype = GWY_SERIALIZABLE_INT8_ARRAY,   },
+    { .name = "child", .ctype = GWY_SERIALIZABLE_OBJECT,       },
+};
 
 static GObject*
 gwy_ser_test_construct(GwySerializableItems *items,
                        GwyErrorList **error_list)
 {
-    GwySerializableItem *it = items->items;
+    GwySerializableItem it[G_N_ELEMENTS(default_items)];
     gpointer child;
+
+    memcpy(it, default_items, sizeof(default_items));
+    gwy_serializable_filter_items(it, G_N_ELEMENTS(it), items, "GwySerTest",
+                                  error_list);
 
     if (it[3].array_size != 4) {
         gwy_error_list_add(error_list, GWY_SERIALIZABLE_ERROR,
@@ -348,10 +341,9 @@ gwy_ser_test_construct(GwySerializableItems *items,
     sertest->s = it[2].value.v_string;
 
     memcpy(sertest->raw, it[3].value.v_uint8_array, 4);
+    g_free(it[3].value.v_uint8_array);
 
     sertest->child = child;
-    g_free(items->items);
-    g_free(items);
 
     return G_OBJECT(sertest);
 
@@ -360,8 +352,6 @@ fail:
     GWY_FREE(it[2].value.v_string);
     GWY_FREE(it[3].value.v_uint8_array);
     GWY_OBJECT_UNREF(it[4].value.v_object);
-    g_free(items->items);
-    g_free(items);
 
     return NULL;
 }
@@ -380,7 +370,6 @@ gwy_ser_test_serializable_init(GwySerializableInterface *iface)
     iface->n_items   = gwy_ser_test_n_items;
     iface->itemize   = gwy_ser_test_itemize;
     iface->done      = gwy_ser_test_done;
-    iface->request   = gwy_ser_test_request;
     iface->construct = gwy_ser_test_construct;
     /*
     iface->duplicate = gwy_ser_test_duplicate_;

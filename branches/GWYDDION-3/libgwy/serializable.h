@@ -138,7 +138,6 @@ struct _GwySerializableInterface {
                                        GwySerializableItems *items);
     void                  (*done)     (GwySerializable *serializable);
 
-    GwySerializableItems* (*request)  (void);
     GObject*              (*construct)(GwySerializableItems *items,
                                        GwyErrorList **error_list);
 
@@ -147,23 +146,27 @@ struct _GwySerializableInterface {
                                        GwySerializable *source);
 };
 
-GType gwy_serializable_get_type(void);
+GType    gwy_serializable_get_type    (void) G_GNUC_CONST;
 
-gboolean gwy_serializable_serialize  (GwySerializable *serializable,
-                                      GOutputStream *output,
-                                      GError **error);
-GObject* gwy_serializable_deserialize(const guchar *buffer,
-                                      gsize size,
-                                      gsize *bytes_consumed,
-                                      GwyErrorList **error_list);
-GObject* gwy_serializable_duplicate  (GwySerializable *serializable);
-void     gwy_serializable_assign     (GwySerializable *destination,
-                                      GwySerializable *source);
-
-gsize    gwy_serializable_n_items    (GwySerializable *serializable);
-void     gwy_serializable_itemize    (GwySerializable *serializable,
-                                      GwySerializableItems *items);
-void     gwy_serializable_done       (GwySerializable *serializable);
+gboolean gwy_serializable_serialize   (GwySerializable *serializable,
+                                       GOutputStream *output,
+                                       GError **error);
+GObject* gwy_serializable_deserialize (const guchar *buffer,
+                                       gsize size,
+                                       gsize *bytes_consumed,
+                                       GwyErrorList **error_list);
+GObject* gwy_serializable_duplicate   (GwySerializable *serializable);
+void     gwy_serializable_assign      (GwySerializable *destination,
+                                       GwySerializable *source);
+void     gwy_serializable_filter_items(GwySerializableItem *template_,
+                                       gsize n_items,
+                                       GwySerializableItems *items,
+                                       const gchar *type_name,
+                                       GwyErrorList **error_list);
+gsize    gwy_serializable_n_items     (GwySerializable *serializable);
+void     gwy_serializable_itemize     (GwySerializable *serializable,
+                                       GwySerializableItems *items);
+void     gwy_serializable_done        (GwySerializable *serializable);
 
 G_END_DECLS
 
