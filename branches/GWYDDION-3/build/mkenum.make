@@ -1,0 +1,42 @@
+# Generic glib-mkenum rules.
+# @(#) $Id$
+# Variables: mkenum_name mkenum_id mkenum_headers
+# Adds to: BUILT_SOURCES CLEANFILES DISTCLEANFILES
+
+GLIB_MKENUMS = @GLIB_MKENUMS@
+
+mkenum_built_sources = $(mkenum_name).h $(mkenum_name).c
+
+mkenum_stamp_files = $(mkenum_name).h.stamp
+mkenum_c_template = $(top_srcdir)/build/mkenum.c.template
+mkenum_h_template = $(top_srcdir)/build/mkenum.h.template
+# Keep the `GENERATED' string quoted to prevent match here
+mkenum_fix_output = \
+	| sed -e 's/@'ID'@/$(mkenum_id)/g' \
+	      -e 's/@'OWN_HEADER'@/$(mkenum_name).h/g' \
+	      -e '1s:.*:/* This is a 'GENERATED' file. */:'
+
+CLEANFILES += $(mkenum_stamp_files)
+DISTCLEANFILES += $(mkenum_built_sources)
+BUILT_SOURCES += $(mkenum_built_sources)
+
+$(mkenum_name).h: $(mkenum_name).h.stamp
+	@true
+
+$(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template)
+	$(GLIB_MKENUMS) --template $(mkenum_h_template) $(mkenum_headers) \
+		$(mkenum_fix_output) \
+		>$(mkenum_name).h.tmp \
+	&& ( cmp -s $(mkenum_name).h.tmp $(mkenum_name).h \
+		|| cp $(mkenum_name).h.tmp $(mkenum_name).h ) \
+	&& rm -f $(mkenum_name).h.tmp \
+	&& echo timestamp >$(mkenum_name).h.stamp
+
+$(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template)
+	$(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
+		$(mkenum_fix_output) \
+		>$(mkenum_name).c.tmp \
+	&& cp $(mkenum_name).c.tmp $(mkenum_name).c  \
+	&& rm -f $(mkenum_name).c.tmp
+
+# vim: set ft=make noet :

@@ -110,6 +110,23 @@ AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS"])
 AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS"])
 
 #############################################################################
+# GLib tools
+AC_MSG_CHECKING([for glib-genmarshal])
+GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
+AC_MSG_RESULT([$GLIB_GENMARSHAL])
+AC_SUBST(GLIB_GENMARSHAL)
+
+AC_MSG_CHECKING([for glib-mkenums])
+GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
+AC_MSG_RESULT([$GLIB_MKENUMS])
+AC_SUBST(GLIB_MKENUMS)
+
+#AC_MSG_CHECKING([for gobject-query])
+#GOBJECT_QUERY=`$PKG_CONFIG --variable=gobject_query glib-2.0`
+#AC_MSG_RESULT([$GOBJECT_QUERY])
+#AC_SUBST(GOBJECT_QUERY)
+
+#############################################################################
 # Valgrind
 PKG_CHECK_EXISTS([valgrind],
                  [gwy_enable_valgrind=yes

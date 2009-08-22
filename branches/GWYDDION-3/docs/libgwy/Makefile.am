@@ -4,6 +4,9 @@
 # The name of the module, e.g. 'glib'.
 DOC_MODULE = libgwy
 
+# Source files to ignore, put both headers and code here.  Also directories.
+IGNORE_SRC = nlfit
+
 # Extra options to pass to add-objects.py
 #ADDOBJECTS_OPTIONS = --standard-files=gwyddiontypes
 ADDOBJECTS_OPTIONS =

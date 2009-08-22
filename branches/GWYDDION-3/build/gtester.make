@@ -49,6 +49,7 @@ test-report perf-report full-report:	$(test_programs)
 	    rm -rf "$$GTESTER_LOGDIR"/ ; \
 	    ${GTESTER_REPORT} --version 2>/dev/null 1>&2 ; test "$$?" != 0 || ${GTESTER_REPORT} $@.xml >$@.html ; \
 	  }
+
 .PHONY: test test-report perf-report full-report
 # run make test as part of make check
 check-local: test

@@ -8,16 +8,9 @@ library = libgwy
 libsuffix = 3
 libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
-
-# Must init
-EXTRA_DIST = version.h.in
-CLEANFILES = $(library).supp
-MAINTAINERCLEANFILES =
-BUILT_SOURCES =
-
-lib_LTLIBRARIES = libgwy3.la
-noinst_PROGRAMS = $(test_programs)
-libgwyinclude_HEADERS = \
+mkenum_name = types
+mkenum_id = GWY_TYPES
+mkenum_headers = \
 	container.h \
 	error-list.h \
 	expr.h \
@@ -34,7 +27,19 @@ libgwyinclude_HEADERS = \
 	unit.h \
 	version.h
 
+# Must init
+EXTRA_DIST = version.h.in
+CLEANFILES = $(library).supp
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
+BUILT_SOURCES =
+
+lib_LTLIBRARIES = libgwy3.la
+noinst_PROGRAMS = $(test_programs)
+libgwyinclude_HEADERS = $(mkenum_headers) $(mkenum_name).h
+
 libgwy3_la_SOURCES = \
+	$(mkenum_name).c \
 	container.c \
 	error-list.c \
 	expr.c \
@@ -81,6 +86,7 @@ testlibgwy_LDADD = libgwy3.la
 
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
+include $(top_srcdir)/build/mkenum.make
 
 # Run the test program but do not execute any tests.  This produces a list of
 # ‘standard’ GLib error we want to filter out.

@@ -1,6 +1,7 @@
 # Generic library symbol rules.
 # $Id$
 # Variables: library
+# Adds to: BUILT_SOURCES EXTRA_DIST
 
 library_symbols = $(library)$(libsuffix).symbols
 library_la = .libs/$(library)$(libsuffix).la
@@ -14,7 +15,6 @@ EXTRA_DIST += \
 	$(library_symbols) \
 	$(library_aliases).c \
 	$(library_aliases).h
-
 
 check-symbols: $(library_la) $(library_decl)
 	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
