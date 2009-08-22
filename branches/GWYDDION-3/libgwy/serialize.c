@@ -319,7 +319,7 @@ gwy_serialize_gio(GwySerializable *serializable,
     g_return_val_if_fail(G_IS_OUTPUT_STREAM(output), FALSE);
 
     items.len = gwy_serializable_n_items(serializable);
-    items.items = g_new(GwySerializableItem, items.len);
+    items.items = g_slice_alloc0(sizeof(GwySerializableItem)*items.len);
     items.n_items = 0;
 
     gwy_serializable_itemize(serializable, &items);
@@ -331,7 +331,7 @@ gwy_serialize_gio(GwySerializable *serializable,
     buffer_dealloc(&buffer);
     items_done(&items);
     gwy_serializable_done(serializable);
-    g_free(items.items);
+    g_slice_free1(sizeof(GwySerializableItem)*items.len, items.items);
 
     return ok;
 }
@@ -1339,7 +1339,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                              const gchar *type_name,
                              GwyErrorList **error_list)
 {
-    guint8 *seen = g_new0(guint8, n_items);
+    guint8 *seen = g_slice_alloc0(sizeof(guint8)*n_items);
 
     for (gsize i = 0; i < items->n_items; i++) {
         GwySerializableItem *item = items->items + i;
@@ -1381,7 +1381,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         item->array_size = 0;
     }
 
-    g_free(seen);
+    g_slice_free1(sizeof(guint8)*n_items, seen);
 }
 
 /**
