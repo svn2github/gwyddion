@@ -1060,6 +1060,61 @@ test_expr_vector(void)
     gwy_expr_free(expr);
 }
 
+static void
+test_expr_garbage(void)
+{
+    static const gchar *tokens[] = {
+        "~", "+", "-", "*", "/", "%", "^", "(", "(", "(", ")", ")", ")",  ",",
+        "abs", "acos", "acosh", "asin", "asinh", "atan", "atan2", "atanh",
+        "cbrt", "ceil", "cos", "cosh", "erf", "erfc", "exp", "exp10", "exp2",
+        "floor", "hypot", "lgamma", "ln", "log", "log10", "log2", "max", "min",
+        "mod", "pow", "sin", "sinh", "sqrt", "step", "tan", "tanh",
+    };
+    GwyExpr *expr = gwy_expr_new();
+
+    gsize n = 10000;
+    GString *garbage = g_string_new(NULL);
+    GRand *rng = g_rand_new();
+    guint count = 0;
+
+    g_rand_set_seed(rng, 42);
+
+    /* No checks.  The goal is not to crash... */
+    for (gsize i = 0; i < n; i++) {
+        GError *error = NULL;
+        gdouble result;
+        gboolean ok;
+        gsize ntoks = g_rand_int_range(rng, 0, 10)
+                       + g_rand_int_range(rng, 0, 20);
+
+        g_string_truncate(garbage, 0);
+        for (gsize j = 0; j < ntoks; j++) {
+            gsize what = g_rand_int_range(rng, 0, G_N_ELEMENTS(tokens) + 5);
+
+            if (g_rand_int_range(rng, 0, 10))
+                g_string_append_c(garbage, ' ');
+
+            if (what == G_N_ELEMENTS(tokens))
+                g_string_append_c(garbage, g_rand_int_range(rng, 1, 0x100));
+            else if (what < G_N_ELEMENTS(tokens))
+                g_string_append(garbage, tokens[what]);
+            else
+                g_string_append_printf(garbage, "%g", -log(g_rand_double(rng)));
+        }
+
+        ok = gwy_expr_evaluate(expr, garbage->str, &result, &error);
+        g_assert(ok || error);
+        g_clear_error(&error);
+        if (ok)
+            count++;
+    }
+    g_assert_cmpuint(count, ==, 38);
+
+    g_string_free(garbage, TRUE);
+    g_rand_free(rng);
+    gwy_expr_free(expr);
+}
+
 /***************************************************************************
  *
  * Main
@@ -1077,6 +1132,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/sort", test_sort);
     g_test_add_func("/testlibgwy/expr-evaluate", test_expr_evaluate);
     g_test_add_func("/testlibgwy/expr-vector", test_expr_vector);
+    g_test_add_func("/testlibgwy/expr-garbage", test_expr_garbage);
     g_test_add_func("/testlibgwy/serialize-simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
