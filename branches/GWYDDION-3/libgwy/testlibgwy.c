@@ -981,7 +981,7 @@ test_expr_vector(void)
     g_assert(!error);
     g_clear_error(&error);
 
-    ok = gwy_expr_compile(expr, "sqrt(a^2+π*β/c2)-sqrt(a^2+π*c2/β)", &error);
+    ok = gwy_expr_compile(expr, "sqrt(a^2+π*β/c₂)-sqrt(a^2+π*c₂/β)", &error);
     g_assert(ok);
     g_assert(!error);
     g_clear_error(&error);
@@ -999,7 +999,7 @@ test_expr_vector(void)
     }
     gdouble *result = g_new(gdouble, n);
 
-    const gchar *varnames[] = { "a", "β", "c2" };
+    const gchar *varnames[] = { "a", "β", "c₂" };
     guint indices[G_N_ELEMENTS(varnames)];
     gsize extravars = gwy_expr_resolve_variables(expr, G_N_ELEMENTS(varnames),
                                                  varnames, indices);
