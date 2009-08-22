@@ -1479,26 +1479,26 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/memmem", test_memmem);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/sort", test_sort);
-    g_test_add_func("/testlibgwy/expr-evaluate", test_expr_evaluate);
-    g_test_add_func("/testlibgwy/expr-vector", test_expr_vector);
-    g_test_add_func("/testlibgwy/expr-garbage", test_expr_garbage);
-    g_test_add_func("/testlibgwy/serialize-simple", test_serialize_simple);
-    g_test_add_func("/testlibgwy/serialize-data", test_serialize_data);
-    g_test_add_func("/testlibgwy/serialize-nested", test_serialize_nested);
-    g_test_add_func("/testlibgwy/serialize-error", test_serialize_error);
+    g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
+    g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
+    g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
+    g_test_add_func("/testlibgwy/serialize/simple", test_serialize_simple);
+    g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
+    g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
+    g_test_add_func("/testlibgwy/serialize/error", test_serialize_error);
     /* Requires error_list */
-    g_test_add_func("/testlibgwy/deserialize-simple", test_deserialize_simple);
-    g_test_add_func("/testlibgwy/deserialize-data", test_deserialize_data);
-    g_test_add_func("/testlibgwy/deserialize-nested", test_deserialize_nested);
-    g_test_add_func("/testlibgwy/deserialize-garbage", test_deserialize_garbage);
+    g_test_add_func("/testlibgwy/deserialize/simple", test_deserialize_simple);
+    g_test_add_func("/testlibgwy/deserialize/data", test_deserialize_data);
+    g_test_add_func("/testlibgwy/deserialize/nested", test_deserialize_nested);
+    g_test_add_func("/testlibgwy/deserialize/garbage", test_deserialize_garbage);
     /* Requires serializable, error_list */
-    g_test_add_func("/testlibgwy/unit-parse", test_unit_parse);
-    g_test_add_func("/testlibgwy/unit-arithmetic", test_unit_arithmetic);
-    g_test_add_func("/testlibgwy/unit-serialize", test_unit_serialize);
+    g_test_add_func("/testlibgwy/unit/parse", test_unit_parse);
+    g_test_add_func("/testlibgwy/unit/arithmetic", test_unit_arithmetic);
+    g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
     /* Requires serializable, unit */
-    g_test_add_func("/testlibgwy/container-data", test_container_data);
-    g_test_add_func("/testlibgwy/container-refcount", test_container_refcount);
-    g_test_add_func("/testlibgwy/container-serialize", test_container_serialize);
+    g_test_add_func("/testlibgwy/container/data", test_container_data);
+    g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
+    g_test_add_func("/testlibgwy/container/serialize", test_container_serialize);
 
     return g_test_run();
 }
