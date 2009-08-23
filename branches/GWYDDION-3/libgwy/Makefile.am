@@ -40,7 +40,6 @@ noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = $(mkenum_headers) $(mkenum_name).h
 
 libgwy3_la_SOURCES = \
-	$(mkenum_name).c \
 	container.c \
 	error-list.c \
 	expr.c \
@@ -55,6 +54,7 @@ libgwy3_la_SOURCES = \
 	serializable.c \
 	serialize.c \
 	strfuncs.c \
+	types.c \
 	unit.c \
 	version.c
 
