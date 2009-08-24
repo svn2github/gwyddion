@@ -26,6 +26,7 @@ mkenum_headers = \
 	serialize.h \
 	strfuncs.h \
 	unit.h \
+	value-format.h \
 	version.h
 
 # Must init
@@ -56,6 +57,7 @@ libgwy3_la_SOURCES = \
 	strfuncs.c \
 	types.c \
 	unit.c \
+	value-format.c \
 	version.c
 
 testlibgwy_SOURCES = testlibgwy.c
