@@ -69,6 +69,22 @@
  **/
 
 /**
+ * GWY_STRING_FREE:
+ * @str: A #GString (must be an l-value).
+ *
+ * Frees a #GString if it is allocated.
+ *
+ * This is an idempotent wrapper of g_string_free(): if @str is not %NULL
+ * g_string_free() is called on it and @str is set to %NULL.
+ *
+ * The return value of g_string_free() is not made accessible, use the original
+ * if you need that.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ **/
+
+/**
  * GWY_SLICE_FREE:
  * @ptr: Pointer (must be an l-value).
  *
