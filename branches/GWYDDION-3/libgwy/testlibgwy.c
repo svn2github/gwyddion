@@ -1168,34 +1168,30 @@ test_value_format_simple(void)
 {
     GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
     GwyValueFormat *format;
-    const gchar *output;
 
     /* Base cases */
     format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
                                              1e-6, 1e-9, NULL);
-    output = gwy_value_format_print(format, 1.23456e-7);
-    g_assert_cmpstr(output, ==, "0.123 µm");
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7), ==, "0.123 µm");
+    g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7), ==, "0.123");
 
     gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
                                     1e-7, 1e-10, format);
-    output = gwy_value_format_print(format, 1.23456e-7);
-    g_assert_cmpstr(output, ==, "123.5 nm");
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7), ==, "123.5 nm");
+    g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7), ==, "123.5");
 
     gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
                                     1e-7, 1e-9, format);
-    output = gwy_value_format_print(format, 1.23456e-7);
-    g_assert_cmpstr(output, ==, "123 nm");
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7), ==, "123 nm");
 
     /* Near-base cases, ensure values differing by step are distinguishable */
     gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
                                     1e-7, 1.01e-10, format);
-    output = gwy_value_format_print(format, 1.23456e-7);
-    g_assert_cmpstr(output, ==, "123.5 nm");
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7), ==, "123.5 nm");
 
     gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
                                     1e-7, 0.99e-10, format);
-    output = gwy_value_format_print(format, 1.23456e-7);
-    g_assert_cmpstr(output, ==, "123.46 nm");
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7), ==, "123.46 nm");
 
     /* Fancy formatting with base not a power of 10 */
     g_object_set(format,
@@ -1205,8 +1201,7 @@ test_value_format_simple(void)
                  "glue", " ",
                  "units", "deg",
                  NULL);
-    output = gwy_value_format_print(format, G_PI/6.0);
-    g_assert_cmpstr(output, ==, "30.0 deg");
+    g_assert_cmpstr(gwy_value_format_print(format, G_PI/6.0), ==, "30.0 deg");
 
     g_object_unref(format);
     g_object_unref(unit);
