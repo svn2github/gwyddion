@@ -1159,6 +1159,43 @@ test_unit_serialize(void)
 
 /***************************************************************************
  *
+ * Value formatting
+ *
+ ***************************************************************************/
+
+static void
+test_value_format_simple(void)
+{
+    GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
+    GwyValueFormat *format;
+    const gchar *output;
+
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-6, 1e-9, NULL);
+    output = gwy_value_format_print(format, 1.23456e-7);
+    g_assert_cmpstr(output, ==, "0.123 µm");
+
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                    1e-7, 1e-10, format);
+    output = gwy_value_format_print(format, 1.23456e-7);
+    g_assert_cmpstr(output, ==, "123.5 nm");
+
+    g_object_set(format,
+                 "style", GWY_VALUE_FORMAT_PLAIN,
+                 "base", G_PI/180.0,
+                 "precision", 1,
+                 "glue", " ",
+                 "units", "deg",
+                 NULL);
+    output = gwy_value_format_print(format, G_PI/6.0);
+    g_assert_cmpstr(output, ==, "30.0 deg");
+
+    g_object_unref(format);
+    g_object_unref(unit);
+}
+
+/***************************************************************************
+ *
  * Expr
  *
  ***************************************************************************/
@@ -1748,6 +1785,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit/parse", test_unit_parse);
     g_test_add_func("/testlibgwy/unit/arithmetic", test_unit_arithmetic);
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
+    /* Requires unit */
+    g_test_add_func("/testlibgwy/value_format/simple", test_value_format_simple);
     /* Requires serializable, unit */
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
