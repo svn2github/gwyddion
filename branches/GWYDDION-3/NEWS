@@ -8,7 +8,6 @@ Global:
   GCC or MSVC8 should suffice.
 
 Requirements:
-- GNU Scientific Library (GSL) >= 1.10 is required.
 - GLib >= 2.18 is required.
 
 Libraries in general:
@@ -66,20 +65,17 @@ Pack:
 
 Unit:
 - Renamed from GwySIUnit to GwyUnit.
-- GwyValueFormat can be simply allocated on stack (i.e. as an automatic
-  variable), and this is the expected typical use now.
+- GwyValueFormat is an object now, it provides convenience formatting methods
+  that are suggested to be used instead of manual formatting.
 - Arithmetic functions follow the common convention and take the result as
   the first argument (think a = b/c).
 - It has a proper default parameterless constructor, the number of functions
   for construction from strings was reduced.
 - All formats support the standalone/after-value disctinction, consequently,
-  GWY_SI_VALUE_FORMAT_VFMARKUP was removed and formatting functions acquired
-  a new argument standalone.
+  GWY_SI_VALUE_FORMAT_VFMARKUP was removed.
 - There were some minor parser improvements, such as the support for ² symbol
   and automatic attempt of Latin1 -> UTF-8 conversion if the input is not
   valid UTF-8.
-- Convenience value formatting functions that properly handle empty units
-  are available.
 
 Container:
 - Some unused functions were removed, signatures of other made more consistent
