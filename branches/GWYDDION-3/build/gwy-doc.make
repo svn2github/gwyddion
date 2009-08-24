@@ -1,5 +1,5 @@
 # Generic gtk-doc rules.
-# $Id: gtk-doc.mk 8521 2007-09-11 21:15:47Z yeti-dn $
+# $Id$
 
 # The directory containing the source code. Relative to $(top_srcdir).
 # gtk-doc will search all .c & .h files beneath here for inline comments
