@@ -1054,6 +1054,7 @@ find_number_format(gdouble step,
                    gdouble maximum,
                    guint *precision)
 {
+    const gdouble eps = 1e-12;
     gdouble lm, lu, mag, q;
 
     g_return_val_if_fail(step >= 0.0, 0.0);
@@ -1071,8 +1072,8 @@ find_number_format(gdouble step,
         }
     }
 
-    lm = log10(maximum) + 1e-12;
-    lu = log10(step) - 1e-12;
+    lm = log10(maximum) + eps;
+    lu = log10(step) - eps;
     mag = 3.0*floor(lm/3.0);
     q = 3.0*ceil(lu/3.0);
     if (q > mag)
@@ -1090,7 +1091,8 @@ find_number_format(gdouble step,
     }
 
     if (precision) {
-        *precision = MAX(0, ceil(mag - lu));
+        /* eps was good for mag, but here it gives us one digit too much */
+        *precision = MAX(0, ceil(mag - lu - 2*eps));
         *precision = MIN(*precision, 16);
     }
 
