@@ -352,7 +352,7 @@ gwy_resource_get_trait_value(gconstpointer item,
  * gwy_resource_get_name:
  * @resource: A resource.
  *
- * Returns resource name.
+ * Returns the resource name.
  *
  * Returns: Name of @resource.  The string is owned by @resource and must not
  *          be modfied or freed.
@@ -401,7 +401,7 @@ gwy_resource_get_is_preferred(GwyResource *resource)
  * @is_preferred: %TRUE to make @resource preferred, %FALSE to make it not
  *                preferred.
  *
- * Sets preferability of a resource.
+ * Sets the preferability of a resource.
  **/
 void
 gwy_resource_set_is_preferred(GwyResource *resource,
@@ -416,7 +416,7 @@ gwy_resource_set_is_preferred(GwyResource *resource,
  * gwy_resource_class_get_name:
  * @klass: A resource class.
  *
- * Gets the name of resource class.
+ * Gets the name of a resource class.
  *
  * This is an simple identifier usable for example as directory name.
  *
@@ -434,7 +434,7 @@ gwy_resource_class_get_name(GwyResourceClass *klass)
  * gwy_resource_class_get_inventory:
  * @klass: A resource class.
  *
- * Gets inventory which holds resources of a resource class.
+ * Gets the inventory which holds resources of a resource class.
  *
  * Returns: Resource class inventory.
  **/
@@ -449,7 +449,7 @@ gwy_resource_class_get_inventory(GwyResourceClass *klass)
  * gwy_resource_class_get_item_type:
  * @klass: A resource class.
  *
- * Gets inventory item type for a resource class.
+ * Gets the inventory item type for a resource class.
  *
  * Returns: Inventory item type.
  **/
