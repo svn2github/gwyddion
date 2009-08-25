@@ -413,5 +413,44 @@
       </para>
     </sect3>
   </sect2>
+  <sect2 id='curvature'>
+    <title>Curvature</title>
+    <indexterm><primary>curvature</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Curvature</guimenuitem>
+        </menuchoice>
+      </para>
+    <para>
+      The global surface curvature parameters are calculated by fitting a
+      quadratic polynomial and finding its main axes.  Positive signs of the
+      curvature radii correspond to a concave (cup-like) surface, whereas
+      negative signs to convex (cap-like) surface, mixed signs mean a
+      saddle-like surface.
+    </para>
+    <para>
+      Beside the parameter table, it is possible to set the line selection on
+      the data to the fitted quadratic surface axes and/or directly read
+      profiles along them.  The zero of the abscissa is placed to the
+      intersection of the axes.
+    </para>
+    <para>
+      Similarly to the background subtraction functions, if a mask is present
+      on the data the module offers to include or exclude the data under mask.
+    </para>
+    <informalfigure id='fig-curvature'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='curvature.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Curvature dialog screenshot showing the strong deflection of a glass
+          plate with a thin film with compressive internal stress.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
