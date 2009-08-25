@@ -91,7 +91,7 @@ xhtml: xhtml.stamp
 formulas: formulas.stamp
 
 @HTML_TRUE@formulas.stamp: xml-extract.py $(XML_SOURCES)
-@HTML_TRUE@	$(PYTHON) xml-extract.py $(XML_SOURCES)
+@HTML_TRUE@	$(PYTHON) xml-extract.py formulas $(XML_SOURCES)
 @HTML_TRUE@	+cd ./formulas && $(GMAKE)
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
 @HTML_TRUE@	cp formulas/eq-*.png xhtml
