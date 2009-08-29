@@ -67,36 +67,35 @@ struct _GwyExprClass {
     GObjectClass g_object_class;
 };
 
-GQuark       gwy_expr_error_quark       (void);
-
-GType        gwy_expr_get_type          (void) G_GNUC_CONST;
-GwyExpr*     gwy_expr_new               (void);
-gboolean     gwy_expr_evaluate          (GwyExpr *expr,
-                                         const gchar *text,
-                                         gdouble *result,
-                                         GError **err);
-gboolean     gwy_expr_compile           (GwyExpr *expr,
-                                         const gchar *text,
-                                         GError **err);
-guint        gwy_expr_resolve_variables (GwyExpr *expr,
-                                         guint n,
-                                         const gchar * const *names,
-                                         guint *indices);
-gint         gwy_expr_get_variables     (GwyExpr *expr,
-                                         gchar ***names);
-gdouble      gwy_expr_execute           (GwyExpr *expr,
-                                         const gdouble *values);
-void         gwy_expr_vector_execute    (GwyExpr *expr,
-                                         guint n,
-                                         const gdouble **data,
-                                         gdouble *result);
-gboolean     gwy_expr_define_constant   (GwyExpr *expr,
-                                         const gchar *name,
-                                         gdouble value,
-                                         GError **err);
-gboolean     gwy_expr_undefine_constant (GwyExpr *expr,
-                                         const gchar *name);
-const gchar* gwy_expr_get_expression    (GwyExpr *expr);
+GQuark       gwy_expr_error_quark      (void)                       G_GNUC_CONST;
+GType        gwy_expr_get_type         (void)                       G_GNUC_CONST;
+GwyExpr*     gwy_expr_new              (void)                       G_GNUC_MALLOC;
+gboolean     gwy_expr_evaluate         (GwyExpr *expr,
+                                        const gchar *text,
+                                        gdouble *result,
+                                        GError **err);
+gboolean     gwy_expr_compile          (GwyExpr *expr,
+                                        const gchar *text,
+                                        GError **err);
+guint        gwy_expr_resolve_variables(GwyExpr *expr,
+                                        guint n,
+                                        const gchar * const *names,
+                                        guint *indices);
+gint         gwy_expr_get_variables    (GwyExpr *expr,
+                                        gchar ***names);
+gdouble      gwy_expr_execute          (GwyExpr *expr,
+                                        const gdouble *values);
+void         gwy_expr_vector_execute   (GwyExpr *expr,
+                                        guint n,
+                                        const gdouble **data,
+                                        gdouble *result);
+gboolean     gwy_expr_define_constant  (GwyExpr *expr,
+                                        const gchar *name,
+                                        gdouble value,
+                                        GError **err);
+gboolean     gwy_expr_undefine_constant(GwyExpr *expr,
+                                        const gchar *name);
+const gchar* gwy_expr_get_expression   (GwyExpr *expr)              G_GNUC_PURE;
 
 G_END_DECLS
 

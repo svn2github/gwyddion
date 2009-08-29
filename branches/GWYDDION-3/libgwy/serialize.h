@@ -39,15 +39,14 @@ typedef enum {
     GWY_DESERIALIZE_ERROR_INVALID,
 } GwyDeserializeError;
 
-GQuark gwy_deserialize_error_quark(void);
-
+GQuark   gwy_deserialize_error_quark (void)                           G_GNUC_CONST;
 gboolean gwy_serialize_gio           (GwySerializable *serializable,
                                       GOutputStream *output,
                                       GError **error);
 GObject* gwy_deserialize_memory      (const guchar *buffer,
                                       gsize size,
                                       gsize *bytes_consumed,
-                                      GwyErrorList **error_list);
+                                      GwyErrorList **error_list)      G_GNUC_MALLOC;
 void     gwy_deserialize_filter_items(GwySerializableItem *template_,
                                       gsize n_items,
                                       GwySerializableItems *items,

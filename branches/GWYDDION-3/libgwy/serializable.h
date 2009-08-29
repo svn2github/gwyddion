@@ -129,15 +129,14 @@ struct _GwySerializableInterface {
                                        GwySerializable *source);
 };
 
-GType    gwy_serializable_get_type    (void) G_GNUC_CONST;
-
-GObject* gwy_serializable_duplicate   (GwySerializable *serializable);
-void     gwy_serializable_assign      (GwySerializable *destination,
-                                       GwySerializable *source);
-gsize    gwy_serializable_n_items     (GwySerializable *serializable);
-void     gwy_serializable_itemize     (GwySerializable *serializable,
-                                       GwySerializableItems *items);
-void     gwy_serializable_done        (GwySerializable *serializable);
+GType    gwy_serializable_get_type (void)                           G_GNUC_CONST;
+GObject* gwy_serializable_duplicate(GwySerializable *serializable)  G_GNUC_MALLOC;
+void     gwy_serializable_assign   (GwySerializable *destination,
+                                    GwySerializable *source);
+gsize    gwy_serializable_n_items  (GwySerializable *serializable);
+void     gwy_serializable_itemize  (GwySerializable *serializable,
+                                    GwySerializableItems *items);
+void     gwy_serializable_done     (GwySerializable *serializable);
 
 G_END_DECLS
 

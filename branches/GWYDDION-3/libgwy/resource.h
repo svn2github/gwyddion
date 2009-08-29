@@ -98,30 +98,30 @@ struct _GwyResourceClass {
     void (*reserved2)(void);
 };
 
-GType         gwy_resource_get_type           (void) G_GNUC_CONST;
-const gchar*  gwy_resource_get_name           (GwyResource *resource);
-gboolean      gwy_resource_is_modifiable      (GwyResource *resource);
-gboolean      gwy_resource_get_is_preferred   (GwyResource *resource);
-void          gwy_resource_set_is_preferred   (GwyResource *resource,
-                                               gboolean is_preferred);
-void          gwy_resource_use                (GwyResource *resource);
-void          gwy_resource_discard            (GwyResource *resource);
-gboolean      gwy_resource_is_used            (GwyResource *resource);
-void          gwy_resource_data_changed       (GwyResource *resource);
-GwyResource*  gwy_resource_load               (const gchar *filename_sys,
-                                               GType expected_type,
-                                               GError **error);
-gboolean      gwy_resource_save               (GwyResource *resource,
-                                               GError **error);
-const gchar*  gwy_resource_class_get_name     (GwyResourceClass *klass);
-const GwyInventoryItemType* gwy_resource_class_get_item_type(GwyResourceClass *klass);
-GwyInventory* gwy_resource_class_get_inventory(GwyResourceClass *klass);
-void          gwy_resource_class_load         (GwyResourceClass *klass);
-void          gwy_resource_class_load_directory(GwyResourceClass *klass,
-                                                const gchar *dirname,
-                                                gboolean modifiable,
-                                                GwyErrorList **error_list);
-void          gwy_resource_classes_finalize   (void);
+GType                       gwy_resource_get_type            (void)                       G_GNUC_CONST;
+const gchar*                gwy_resource_get_name            (GwyResource *resource)      G_GNUC_PURE;
+gboolean                    gwy_resource_is_modifiable       (GwyResource *resource)      G_GNUC_PURE;
+gboolean                    gwy_resource_get_is_preferred    (GwyResource *resource)      G_GNUC_PURE;
+void                        gwy_resource_set_is_preferred    (GwyResource *resource,
+                                                              gboolean is_preferred);
+void                        gwy_resource_use                 (GwyResource *resource);
+void                        gwy_resource_discard             (GwyResource *resource);
+gboolean                    gwy_resource_is_used             (GwyResource *resource)      G_GNUC_PURE;
+void                        gwy_resource_data_changed        (GwyResource *resource);
+GwyResource*                gwy_resource_load                (const gchar *filename_sys,
+                                                              GType expected_type,
+                                                              GError **error)             G_GNUC_MALLOC;
+gboolean                    gwy_resource_save                (GwyResource *resource,
+                                                              GError **error);
+const gchar*                gwy_resource_class_get_name      (GwyResourceClass *klass)    G_GNUC_PURE;
+const GwyInventoryItemType* gwy_resource_class_get_item_type (GwyResourceClass *klass)    G_GNUC_PURE;
+GwyInventory*               gwy_resource_class_get_inventory (GwyResourceClass *klass)    G_GNUC_PURE;
+void                        gwy_resource_class_load          (GwyResourceClass *klass);
+void                        gwy_resource_class_load_directory(GwyResourceClass *klass,
+                                                              const gchar *dirname,
+                                                              gboolean modifiable,
+                                                              GwyErrorList **error_list);
+void                        gwy_resource_classes_finalize    (void);
 
 G_END_DECLS
 

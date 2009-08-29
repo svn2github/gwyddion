@@ -61,106 +61,105 @@ struct _GwyContainerClass {
 #define gwy_container_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src))
 
-GType         gwy_container_get_type        (void) G_GNUC_CONST;
-GwyContainer* gwy_container_new             (void);
-guint         gwy_container_n_items         (GwyContainer *container);
-GQuark*       gwy_container_keys            (GwyContainer *container);
-const gchar** gwy_container_keys_by_name    (GwyContainer *container);
-GType         gwy_container_value_type      (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_contains        (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_get_value       (GwyContainer *container,
-                                             GQuark key,
-                                             GValue *value);
-void          gwy_container_set_value       (GwyContainer *container,
-                                             GQuark key,
-                                             const GValue *value);
-gboolean      gwy_container_remove          (GwyContainer *container,
-                                             GQuark key);
-guint         gwy_container_remove_prefix   (GwyContainer *container,
-                                             const gchar *prefix);
-gboolean      gwy_container_rename          (GwyContainer *container,
-                                             GQuark key,
-                                             GQuark newkey,
-                                             gboolean force);
-guint         gwy_container_transfer        (GwyContainer *source,
-                                             GwyContainer *dest,
-                                             const gchar *source_prefix,
-                                             const gchar *dest_prefix,
-                                             gboolean deep,
-                                             gboolean force);
-guint         gwy_container_foreach         (GwyContainer *container,
-                                             const gchar *prefix,
-                                             GHFunc function,
-                                             gpointer user_data);
-void          gwy_container_set_boolean     (GwyContainer *container,
-                                             GQuark key,
-                                             gboolean value);
-gboolean      gwy_container_get_boolean     (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_boolean     (GwyContainer *container,
-                                             GQuark key,
-                                             gboolean *value);
-void          gwy_container_set_char        (GwyContainer *container,
-                                             GQuark key,
-                                             gchar value);
-gchar         gwy_container_get_char        (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_char        (GwyContainer *container,
-                                             GQuark key,
-                                             gchar *value);
-void          gwy_container_set_int32       (GwyContainer *container,
-                                             GQuark key,
-                                             gint32 value);
-gint32        gwy_container_get_int32       (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_int32       (GwyContainer *container,
-                                             GQuark key,
-                                             gint32 *value);
-void          gwy_container_set_enum        (GwyContainer *container,
-                                             GQuark key,
-                                             guint value);
-guint         gwy_container_get_enum        (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_enum        (GwyContainer *container,
-                                             GQuark key,
-                                             guint *value);
-void          gwy_container_set_int64       (GwyContainer *container,
-                                             GQuark key,
-                                             gint64 value);
-gint64        gwy_container_get_int64       (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_int64       (GwyContainer *container,
-                                             GQuark key,
-                                             gint64 *value);
-void          gwy_container_set_double      (GwyContainer *container,
-                                             GQuark key,
-                                             gdouble value);
-gdouble       gwy_container_get_double      (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_double      (GwyContainer *container,
-                                             GQuark key,
-                                             gdouble *value);
-void          gwy_container_set_string      (GwyContainer *container,
-                                             GQuark key,
-                                             gchar *value);
-const gchar*  gwy_container_get_string      (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_string      (GwyContainer *container,
-                                             GQuark key,
-                                             const gchar **value);
-void          gwy_container_set_object      (GwyContainer *container,
-                                             GQuark key,
-                                             gpointer value);
-gpointer      gwy_container_get_object      (GwyContainer *container,
-                                             GQuark key);
-gboolean      gwy_container_gis_object      (GwyContainer *container,
-                                             GQuark key,
-                                             gpointer value);
-
-gchar**       gwy_container_dump_to_text    (GwyContainer *container);
-GwyContainer* gwy_container_new_from_text   (const gchar *text);
+GType         gwy_container_get_type     (void)                       G_GNUC_CONST;
+GwyContainer* gwy_container_new          (void)                       G_GNUC_MALLOC;
+guint         gwy_container_n_items      (GwyContainer *container)    G_GNUC_PURE;
+GQuark*       gwy_container_keys         (GwyContainer *container)    G_GNUC_MALLOC;
+const gchar** gwy_container_keys_by_name (GwyContainer *container)    G_GNUC_MALLOC;
+GType         gwy_container_value_type   (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_contains     (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_get_value    (GwyContainer *container,
+                                          GQuark key,
+                                          GValue *value);
+void          gwy_container_set_value    (GwyContainer *container,
+                                          GQuark key,
+                                          const GValue *value);
+gboolean      gwy_container_remove       (GwyContainer *container,
+                                          GQuark key);
+guint         gwy_container_remove_prefix(GwyContainer *container,
+                                          const gchar *prefix);
+gboolean      gwy_container_rename       (GwyContainer *container,
+                                          GQuark key,
+                                          GQuark newkey,
+                                          gboolean force);
+guint         gwy_container_transfer     (GwyContainer *source,
+                                          GwyContainer *dest,
+                                          const gchar *source_prefix,
+                                          const gchar *dest_prefix,
+                                          gboolean deep,
+                                          gboolean force);
+guint         gwy_container_foreach      (GwyContainer *container,
+                                          const gchar *prefix,
+                                          GHFunc function,
+                                          gpointer user_data);
+void          gwy_container_set_boolean  (GwyContainer *container,
+                                          GQuark key,
+                                          gboolean value);
+gboolean      gwy_container_get_boolean  (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_boolean  (GwyContainer *container,
+                                          GQuark key,
+                                          gboolean *value);
+void          gwy_container_set_char     (GwyContainer *container,
+                                          GQuark key,
+                                          gchar value);
+gchar         gwy_container_get_char     (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_char     (GwyContainer *container,
+                                          GQuark key,
+                                          gchar *value);
+void          gwy_container_set_int32    (GwyContainer *container,
+                                          GQuark key,
+                                          gint32 value);
+gint32        gwy_container_get_int32    (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_int32    (GwyContainer *container,
+                                          GQuark key,
+                                          gint32 *value);
+void          gwy_container_set_enum     (GwyContainer *container,
+                                          GQuark key,
+                                          guint value);
+guint         gwy_container_get_enum     (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_enum     (GwyContainer *container,
+                                          GQuark key,
+                                          guint *value);
+void          gwy_container_set_int64    (GwyContainer *container,
+                                          GQuark key,
+                                          gint64 value);
+gint64        gwy_container_get_int64    (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_int64    (GwyContainer *container,
+                                          GQuark key,
+                                          gint64 *value);
+void          gwy_container_set_double   (GwyContainer *container,
+                                          GQuark key,
+                                          gdouble value);
+gdouble       gwy_container_get_double   (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_double   (GwyContainer *container,
+                                          GQuark key,
+                                          gdouble *value);
+void          gwy_container_set_string   (GwyContainer *container,
+                                          GQuark key,
+                                          gchar *value);
+const gchar*  gwy_container_get_string   (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_string   (GwyContainer *container,
+                                          GQuark key,
+                                          const gchar **value);
+void          gwy_container_set_object   (GwyContainer *container,
+                                          GQuark key,
+                                          gpointer value);
+gpointer      gwy_container_get_object   (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_object   (GwyContainer *container,
+                                          GQuark key,
+                                          gpointer value);
+gchar**       gwy_container_dump_to_text (GwyContainer *container)    G_GNUC_MALLOC;
+GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MALLOC;
 
 #define gwy_container_value_type_by_name(c,n)    gwy_container_value_type(c,g_quark_try_string(n))
 #define gwy_container_contains_by_name(c,n)      gwy_container_contains(c,g_quark_try_string(n))

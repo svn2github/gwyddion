@@ -52,14 +52,14 @@ typedef enum {
 
 gdouble  gwy_interpolate_1d                       (gdouble x,
                                                    const gdouble *coeff,
-                                                   GwyInterpolationType interpolation);
+                                                   GwyInterpolationType interpolation) G_GNUC_PURE;
 gdouble  gwy_interpolate_2d                       (gdouble x,
                                                    gdouble y,
                                                    guint rowstride,
                                                    const gdouble *coeff,
-                                                   GwyInterpolationType interpolation);
-gboolean gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation);
-guint    gwy_interpolation_get_support_size       (GwyInterpolationType interpolation);
+                                                   GwyInterpolationType interpolation) G_GNUC_PURE;
+gboolean gwy_interpolation_has_interpolating_basis(GwyInterpolationType interpolation) G_GNUC_CONST;
+guint    gwy_interpolation_get_support_size       (GwyInterpolationType interpolation) G_GNUC_CONST;
 void     gwy_interpolation_resolve_coeffs_1d      (guint n,
                                                    gdouble *data,
                                                    GwyInterpolationType interpolation);

@@ -54,10 +54,9 @@ struct _GwyFitterClass {
     GObjectClass g_object_class;
 };
 
-GQuark       gwy_fitter_error_quark       (void);
-
-GType        gwy_fitter_get_type          (void) G_GNUC_CONST;
-GwyFitter*     gwy_fitter_new               (void);
+GQuark     gwy_fitter_error_quark(void) G_GNUC_CONST;
+GType      gwy_fitter_get_type   (void) G_GNUC_CONST;
+GwyFitter* gwy_fitter_new        (void) G_GNUC_MALLOC;
 
 G_END_DECLS
 

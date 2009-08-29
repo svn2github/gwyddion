@@ -27,14 +27,14 @@ G_BEGIN_DECLS
 #define gwy_strequal(a, b) \
     (!strcmp((a), (b)))
 
-G_GNUC_NULL_TERMINATED
+
 guint    gwy_stramong     (const gchar *str,
-                           ...);
+                           ...)                    G_GNUC_NULL_TERMINATED G_GNUC_PURE;
 gchar*   gwy_str_next_line(gchar **buffer);
 gpointer gwy_memmem       (gconstpointer haystack,
                            gsize haystack_len,
                            gconstpointer needle,
-                           gsize needle_len);
+                           gsize needle_len)       G_GNUC_PURE;
 
 G_END_DECLS
 

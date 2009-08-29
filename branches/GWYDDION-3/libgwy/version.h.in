@@ -28,9 +28,9 @@ G_BEGIN_DECLS
 #define GWY_VERSION_MINOR  @GWY_VERSION_MINOR@
 #define GWY_VERSION_STRING "@GWY_VERSION_STRING@"
 
-gint         gwy_version_major (void);
-gint         gwy_version_minor (void);
-const gchar* gwy_version_string(void);
+gint         gwy_version_major (void) G_GNUC_CONST;
+gint         gwy_version_minor (void) G_GNUC_CONST;
+const gchar* gwy_version_string(void) G_GNUC_CONST;
 
 G_END_DECLS
 
