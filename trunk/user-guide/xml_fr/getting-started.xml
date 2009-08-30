@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: install.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='getting-started' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Démarrer</title>
+  <para>
+    Ce chapitre décrit divers concepts et termes basiques, tels que les masques
+    ou les sélections, l'organisation des données dans Gwyddion ainsi que
+    l'interface utilisateur.
+  </para>
+  <para>
+    Les descriptions sont relativement exhaustives, et certains sujets vers
+    la fin de ce chapitre, comme l'import de fichiers bruts ou le contrôle
+    à distance, peuvent être considérés comme avancés et inutiles pour un usage
+    habituel. Comme son nom ne l'indique pas, il n'est pas nécessaire de lire
+    entièrement ce chapitre pour utiliser Gwyddion. L'interface utilisateur 
+    est intuitive et la plupart desfonctionnalités peuvent être découvertes
+    en s'amusant avec le logiciel. Les explications des concepts basqiques
+    et des composants fournies ici devraient normalement faciliter ces
+    découvertes.
+  </para>
+  <tip>
+    Commande
+    <menuchoice>
+      <guimenu>Méta</guimenu>
+      <guimenuitem>Astuce du Jour</guimenuitem>
+    </menuchoice>
+    affiche des astuces pour traiter les données, et décrit des fonctionnalités
+    utiles que vous auriez pu ignorer.
+  </tip>
+  <xi:include href='main-window.xml'/>
+  <xi:include href='data-browser.xml'/>
+  <xi:include href='managing-files.xml'/>
+  <xi:include href='data-windows.xml'/>
+  <xi:include href='graph-windows.xml'/>
+  <xi:include href='tools.xml'/>
+  <xi:include href='color-map.xml'/>
+  <xi:include href='presentations-masks.xml'/>
+  <xi:include href='selections.xml'/>
+  <xi:include href='opengl-3d-view.xml'/>
+  <xi:include href='single-point-spectra.xml'/>
+  <xi:include href='metadata.xml'/>
+  <xi:include href='remote-control.xml'/>
+  <xi:include href='raw-file-import.xml'/>
+  <xi:include href='plugins.xml'/>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->
