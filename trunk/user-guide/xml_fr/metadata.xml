@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='metadata'>
+  <title>Les Meta-Données</title>
+  <para>
+    On appelle méta-données les informations annexes et les valeurs décrivant 
+    certaines données ou conditions de mesures. Elle peuvent par exemple
+    inclure le mode SPM, le biais de la sonde, la fréquence de scan, la date
+    de mesure ou des commentaire de l'utilisateur.
+  </para>
+  <para>
+    Les méta-données sont définies pour chaque canal. Celles du canal courant
+    peuvent être affichées avec commande 
+    <menuchoice>
+      <guimenu>Meta-données</guimenu>
+      <guimenuitem>Navigateur de Meta-données</guimenuitem>
+    </menuchoice>.
+    Le navigateur liste toutes les méta-données par paires Nom / Valeur.
+    Il est possible de modifier, supprimer ou ajouter des valeurs. Il est
+    aussi possible d'exporter toutes les méta-données d'un canal vers un fichier
+    texte à l'aide du bouton <guibutton>Enregistrer</guibutton>.
+  </para>
+  <para>
+    Le niveau de support des méta-données varie fortement d'un format de fichier
+    à un autre. Pour les formats bien documenté ou permetant l'import de toutes
+    les méta-données on a en général accès à un grand nombre de données
+    auxiliaires, même les paramètres de réglage les plus obscurs d'un matériel
+    peuvent être listées. Inversement, il est possible qu'aucune méta-donnée
+    ne soit importée à partir de votre fichier, soit parce qu'il n'en contient
+    pas, soit parce que la méthode pour les lire n'est pas connue.
+  </para>
+  <informalfigure id='fig-metadata-browser'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='metadata_browser.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Navigateur de méta-données affichant les informations d'un fichier
+        Nanoscope.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
