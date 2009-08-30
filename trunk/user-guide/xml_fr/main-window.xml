@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='main-window'>
+  <title>La Fenêtre Principale</title>
+  <para>
+    La fenêtre principale, aussi appelée boîte à outils, est l'une des deux
+    fenêtres qui apparaît après le démarrage de Gwyddion (sans ouvrir de 
+    fichier). La seconde est le <link linkend='data-browser'>navigateur de
+    données</link>. La fermeture de cette fenêtre entraîne la fermeture de
+    Gwyddion.
+  </para>
+  <para>
+    La boîte à outils de Gwyddion contient l'ensemble des menus et plusieurs
+    groupes de boutons reliés aux fontions et outils les plus communs. Les 
+    menus regroupent les fonctions de la manière suivante : 
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guimenu>Fichiers</guimenu>
+      </term>
+      <listitem>
+        <para>
+          regroupe les commandes servant à 
+          <link linkend='managing-files'>l'ouverture et la sauvegarde des
+          fichiers</link>. On y trouve aussi certaines commandes globales 
+          (telle que <guimenuitem>Quitter</guimenuitem>). L' 
+          <link linkend='document-history'>historique des fichiers récemment
+          ouverts</link> est accessible avec
+          <menuchoice>
+            <guimenu>Fichiers</guimenu>
+            <guisubmenu>Ouvrir un fichier récent</guisubmenu>
+            <guimenuitem>Historique</guimenuitem>
+          </menuchoice>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Editer</guimenu>
+      </term>
+      <listitem>
+        <para>
+          permet de modifier l'historique des commandes 
+          (<guimenuitem>Annuler</guimenuitem>, <guimenuitem>Rétablir</guimenuitem>)
+          et donne accès aux éditeurs des différentes ressources du logiciel, 
+          telles que les gradients et matériaux pour les présentations en
+          fausses couleurs et en 3D, ou la couleur par défaut pour le
+          <link linkend='presentations-masks'>masquage des données</link>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Traitement des Données</guimenu>
+      </term>
+      <listitem>
+        <para>
+          est automatiquement créé à partir de tous les modules de traitement
+          des données présents dans le répertoire des modules de Gwyddion 
+          (en fonction du système d'exploitation). Ce menu ainsi que les 
+          boutons du panneau <guilabel>Outils</guilabel> contient la plupart des
+          fonctions dont vous aurez besoin pour analyser vos données SPM. 
+          Quelques unes de ces fonctions snot aussi présentes dans le panneau
+          <guilabel>Traitement des Données</guilabel>.  Ces boutons servent
+          de raccourcis vers les fonctions les plus courantes du menu 
+          <guimenu>Traitement des Données</guimenu>.  Toutes les fonctions du 
+          panneau <guilabel>Traitement des Données</guilabel> se trouvent 
+          également dans le menu.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Graphe</guimenu>
+      </term>
+      <listitem>
+        <para>
+          est similaire au menu <guimenu>Traitement des données</guimenu>, mais
+          il ne propose que des fonctions liées aux graphiques. Le
+          <link linkend='graph-processing'>traitement des graphes</link> permet
+          d'ajuster des fonctions, d'exporter les données, etc. Le panneau
+          <guilabel>Graphe</guilabel> contient lui aussi quelques unes des
+          fonctiosn les plus courantes du menu <guimenu>Graphe</guimenu>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Métadonnées</guimenu>
+      </term>
+      <listitem>
+        <para>
+          donne accès à différentes informations annexes, telles que les
+          <link linkend='metadata'>métadonnées</link> des fichiers de mesures
+          (par exemple la vitesse de scan, le voltage de la sonde, etc.) et des
+          informations sur <application>Gwyddion</application>.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Finally, you can find some rows of buttons in the main window.  Buttons
+    in <guilabel>View</guilabel> panel offer zooming functions (that are
+    often more easily invoked by keyboard shortcuts or just rezising the data
+    window) and <link linkend='opengl-3d-view'>3D data display</link>.
+    Panels <guilabel>Data Process</guilabel> and <guilabel>Graph</guilabel>
+    contain selected functions from <guimenu>Data Process</guimenu> and
+    <guimenu>Graph</guimenu> menus as described above.
+  </para>
+  <para>
+    Le panneau <guilabel>Outils</guilabel> contient les 
+    <link linkend='tools'>outils</link>, c'est-à-dire les fonctions 
+    travaillant directement avec les sélections sur la fenêtre de données. Ces
+    fonctions ne sont accessibles qu'à partir des boutons de ce panneau.
+  </para>
+  <informalfigure id='fig-main-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='main_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre principale et fenêtre de données montrant la surface d'une
+        puce (exemple de fichier Gwyddion <filename>chip.gwy</filename>).
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
