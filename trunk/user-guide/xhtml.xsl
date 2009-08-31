@@ -20,7 +20,6 @@
   <xsl:param name="menuchoice.menu.separator" select="' → '"/>
   <xsl:param name="html.stylesheet.type">text/css</xsl:param>
   <xsl:param name="html.stylesheet">user-guide.css</xsl:param>
-  <xsl:param name="base.dir">xhtml/</xsl:param>
   <!-- Unfortunately it seems I cannot just override book -->
   <xsl:param name="generate.toc">
   appendix  toc,title

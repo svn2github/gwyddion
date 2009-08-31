@@ -15,7 +15,9 @@ INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
 DISTNAME = $(BASENAME)-$(VERSION)
 DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
 MAIN_XML_SOURCE = xml/$(PACKAGE).xml
+MAIN_XML_SOURCE_fr = xml_fr/$(PACKAGE).xml
 XML_SOURCES := $(wildcard xml/*.xml)
+XML_SOURCES_fr := $(wildcard xml_fr/*.xml)
 FORMULA_SOURCES := $(wildcard formulas/*.tex)
 IMAGES := $(shell $(PYTHON) xml-extract.py imageinfo $(XML_SOURCES)) PNG:stacked3.png
 XHTML_IMAGES := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
@@ -67,22 +69,35 @@ all: $(ALL_TARGETS)
 Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
-pdf: $(PACKAGE).pdf
+pdf: $(PACKAGE).pdf $(PACKAGE)-fr.pdf
 
 @PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
 @PDF_TRUE@	rm -rf pdf
 @PDF_TRUE@	mkdir pdf
 @PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
 
+@PDF_TRUE@$(PACKAGE)-fr.pdf: $(XML_SOURCES_fr) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
+@PDF_TRUE@	rm -rf pdf_fr
+@PDF_TRUE@	mkdir pdf_fr
+@PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf_fr --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE_fr)
+
 %.txt: %.html
 	$(HTML2TXT) $< >$@
 
-xhtml: xhtml.stamp
+xhtml: xhtml.stamp xhtml_fr.stamp
 
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
 @HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_PNG_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
-@HTML_TRUE@	$(XSLTPROC_CMD) xhtml.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml xhtml.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
+@HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
+@HTML_TRUE@	cp user-guide.css xhtml
+@HTML_TRUE@	touch $@
+
+@HTML_TRUE@xhtml_fr.stamp: formulas.stamp $(XML_SOURCES_fr) $(IMAGE_PNG_IMAGES) xhtml.xsl
+@HTML_TRUE@	test -d xhtml_fr || mkdir xhtml_fr
+@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml_fr xhtml.xsl $(MAIN_XML_SOURCE_fr)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 @HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 @HTML_TRUE@	cp user-guide.css xhtml
@@ -119,8 +134,8 @@ man: $(MAN_PAGES)
 clean:
 	+cd ./formulas && $(GMAKE) clean
 	-rm $(patsubst %,images/%,$(BUILT_IMAGES))
-	-rm -rf xhtml *.stamp xml/*~ *~ fixpngres
-	-rm -rf $(PACKAGE).pdf pdf
+	-rm -rf xhtml xhtml_fr *.stamp xml/*~ *~ fixpngres
+	-rm -rf $(PACKAGE).pdf $(PACKAGE)-fr.pdf pdf pdf_fr
 	-rm -rf $(MAN_PAGES)
 
 distclean: clean
