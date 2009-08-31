@@ -89,7 +89,7 @@ xhtml: xhtml.stamp xhtml_fr.stamp
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
 @HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_PNG_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml || mkdir xhtml
-@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml xhtml.xsl $(MAIN_XML_SOURCE)
+@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml/ xhtml.xsl $(MAIN_XML_SOURCE)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 @HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 @HTML_TRUE@	cp user-guide.css xhtml
@@ -97,7 +97,7 @@ xhtml: xhtml.stamp xhtml_fr.stamp
 
 @HTML_TRUE@xhtml_fr.stamp: formulas.stamp $(XML_SOURCES_fr) $(IMAGE_PNG_IMAGES) xhtml.xsl
 @HTML_TRUE@	test -d xhtml_fr || mkdir xhtml_fr
-@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml_fr xhtml.xsl $(MAIN_XML_SOURCE_fr)
+@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml_fr/ xhtml.xsl $(MAIN_XML_SOURCE_fr)
 @HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
 @HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
 @HTML_TRUE@	cp user-guide.css xhtml
