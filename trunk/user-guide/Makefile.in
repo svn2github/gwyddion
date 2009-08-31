@@ -186,3 +186,5 @@ help:
 
 .PHONY: all clean dist pdf xhtml formulas dist-xhtml help version distclean
 .PRECIOUS: Makefile
+
+# vim: set ts=4 sw=4 noet :
