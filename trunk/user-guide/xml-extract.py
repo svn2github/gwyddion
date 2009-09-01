@@ -130,7 +130,7 @@ mode = sys.argv[1]
 files = sys.argv[2:]
 if mode == 'formulas':
     extract_formulas(files)
-if mode == 'imageinfo':
+elif mode == 'imageinfo':
     extract_imageinfo(files)
 else:
     sys.stderr.write('Wrong mode %s\n' % mode)

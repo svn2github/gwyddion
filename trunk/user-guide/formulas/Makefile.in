@@ -2,7 +2,7 @@ GSED = @GSED@
 SHELL = @SHELL@
 
 TEXS := $(wildcard eq-*.tex)
-PNGS := $(subst .tex,.png,$(FORMULAS))
+PNGS := $(subst .tex,.png,$(TEXS))
 TEMPLATES = header.tex footer.tex defs.tex
 
 T = TEMP-

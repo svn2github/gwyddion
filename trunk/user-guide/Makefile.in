@@ -1,8 +1,11 @@
 export
+.SECONDEXPANSION:
 
 VERSION = @PACKAGE_VERSION@
 BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
+LANGUAGES = en fr
+expand_langs = $(patsubst %,$(1),$(LANGUAGES))
 
 GMAKE = @GMAKE@
 GSED = @GSED@
@@ -14,12 +17,11 @@ INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
 
 DISTNAME = $(BASENAME)-$(VERSION)
 DISTNAMEXHTML = $(BASENAME)-xhtml-$(VERSION)
-MAIN_XML_SOURCE = xml/$(PACKAGE).xml
+MAIN_XML_SOURCE_en = xml_en/$(PACKAGE).xml
 MAIN_XML_SOURCE_fr = xml_fr/$(PACKAGE).xml
-XML_SOURCES := $(wildcard xml/*.xml)
+XML_SOURCES_en := $(wildcard xml_en/*.xml)
 XML_SOURCES_fr := $(wildcard xml_fr/*.xml)
-FORMULA_SOURCES := $(wildcard formulas/*.tex)
-IMAGES := $(shell $(PYTHON) xml-extract.py imageinfo $(XML_SOURCES)) PNG:stacked3.png
+IMAGES := $(shell $(PYTHON) xml-extract.py imageinfo $(XML_SOURCES_en)) PNG:stacked3.png
 XHTML_IMAGES := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
 PDF_IMAGES := $(patsubst PDF:%,%,$(filter PDF:%,$(IMAGES)))
 PNG_IMAGES := $(filter-out eq-%.png,$(XHTML_IMAGES))
@@ -55,6 +57,8 @@ TEX_STYLES = user-guide.sty
 BUILD_FILES = README Makefile.in user-guide.iss.in \
 	aclocal.m4 configure configure.ac xml-extract.py
 
+WORKDIRS = $(call expand_langs,xhtml_%) $(call expand_langs,pdf_%)
+
 @HTML_TRUE@html_target = xhtml
 @HTML_FALSE@html_target =
 @PDF_TRUE@pdf_target = pdf
@@ -69,52 +73,38 @@ all: $(ALL_TARGETS)
 Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
-pdf: $(PACKAGE).pdf $(PACKAGE)-fr.pdf
+pdf: $(call expand_langs,$(PACKAGE)-%.pdf)
 
-@PDF_TRUE@$(PACKAGE).pdf: $(XML_SOURCES) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
-@PDF_TRUE@	rm -rf pdf
-@PDF_TRUE@	mkdir pdf
-@PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE)
-
-@PDF_TRUE@$(PACKAGE)-fr.pdf: $(XML_SOURCES_fr) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
-@PDF_TRUE@	rm -rf pdf_fr
-@PDF_TRUE@	mkdir pdf_fr
-@PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf_fr --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE_fr)
+@PDF_TRUE@$(PACKAGE)-%.pdf: $$(XML_SOURCES_$$*) $(IMAGE_PNG_IMAGES) $(IMAGE_PDF_IMAGES) $(TEX_STYLES) dblatex.xsl
+@PDF_TRUE@	rm -rf pdf_$*
+@PDF_TRUE@	mkdir pdf_$*
+@PDF_TRUE@	$(DBLATEX_CMD) --tmpdir=pdf_$* --pdf --xsl-user=dblatex.xsl --output=$@ $(MAIN_XML_SOURCE_$*)
 
 %.txt: %.html
 	$(HTML2TXT) $< >$@
 
-xhtml: xhtml.stamp xhtml_fr.stamp
+xhtml: $(call expand_langs,xhtml_%.stamp)
 
 # FIXME: Avoid building if only images change.  Depend on CSS in xhtml too.
-@HTML_TRUE@xhtml.stamp: formulas.stamp $(XML_SOURCES) $(IMAGE_PNG_IMAGES) xhtml.xsl
-@HTML_TRUE@	test -d xhtml || mkdir xhtml
-@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml/ xhtml.xsl $(MAIN_XML_SOURCE)
-@HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-@HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
-@HTML_TRUE@	cp user-guide.css xhtml
-@HTML_TRUE@	touch $@
-
-@HTML_TRUE@xhtml_fr.stamp: formulas.stamp $(XML_SOURCES_fr) $(IMAGE_PNG_IMAGES) xhtml.xsl
-@HTML_TRUE@	test -d xhtml_fr || mkdir xhtml_fr
-@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml_fr/ xhtml.xsl $(MAIN_XML_SOURCE_fr)
-@HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-@HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml
-@HTML_TRUE@	cp user-guide.css xhtml
+@HTML_TRUE@xhtml_%.stamp: formulas.stamp $$(XML_SOURCES_$$*) $(IMAGE_PNG_IMAGES) xhtml.xsl
+@HTML_TRUE@	test -d xhtml_$* || mkdir xhtml_$*
+@HTML_TRUE@	$(XSLTPROC_CMD) --stringparam base.dir xhtml_$*/ xhtml.xsl $(MAIN_XML_SOURCE_$*)
+@HTML_TRUE@	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml_$*/*.html
+@HTML_TRUE@	@cp formulas/eq-*.png xhtml_$*
+@HTML_TRUE@	@cp $(patsubst %,images/%,$(PNG_IMAGES)) xhtml_$*
+@HTML_TRUE@	cp user-guide.css xhtml_$*
 @HTML_TRUE@	touch $@
 
 formulas: formulas.stamp
 
-@HTML_TRUE@formulas.stamp: xml-extract.py $(XML_SOURCES)
-@HTML_TRUE@	$(PYTHON) xml-extract.py formulas $(XML_SOURCES)
+@HTML_TRUE@formulas.stamp: xml-extract.py $(XML_SOURCES_en)
+@HTML_TRUE@	$(PYTHON) xml-extract.py formulas $(XML_SOURCES_en)
 @HTML_TRUE@	+cd ./formulas && $(GMAKE)
-@HTML_TRUE@	test -d xhtml || mkdir xhtml
-@HTML_TRUE@	cp formulas/eq-*.png xhtml
 @HTML_TRUE@	touch $@
 
 man: $(MAN_PAGES)
 
-@MAN_TRUE@%.1: xml/%.xml
+@MAN_TRUE@%.1: xml_en/%.xml
 @MAN_TRUE@	$(XSLTPROC_CMD) man.xsl $<
 
 @PNG_TRUE@fixpngres: fixpngres.c
@@ -133,10 +123,10 @@ man: $(MAN_PAGES)
 
 clean:
 	+cd ./formulas && $(GMAKE) clean
-	-rm $(patsubst %,images/%,$(BUILT_IMAGES))
-	-rm -rf xhtml xhtml_fr *.stamp xml/*~ *~ fixpngres
-	-rm -rf $(PACKAGE).pdf $(PACKAGE)-fr.pdf pdf pdf_fr
-	-rm -rf $(MAN_PAGES)
+	-rm -f $(patsubst %,images/%,$(BUILT_IMAGES))
+	-rm -rf $(WORKDIRS) xml/*~
+	-rm -f $(call expand_langs,$(PACKAGE)-%.pdf) *.stamp fixpngres *~
+	-rm -f $(MAN_PAGES)
 
 distclean: clean
 	+cd ./formulas && $(GMAKE) distclean
@@ -144,10 +134,11 @@ distclean: clean
 
 dist:
 	-rm -rf $(DISTNAME)
-	mkdir $(DISTNAME) $(DISTNAME)/xml $(DISTNAME)/images
+	mkdir $(DISTNAME) $(call expand_langs,$(DISTNAME)/xml_%) $(DISTNAME)/images
 	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
 	cp $(DIST_IMAGES) $(DISTNAME)/images
-	cp $(XML_SOURCES) $(DISTNAME)/xml
+	cp $(XML_SOURCES_en) $(DISTNAME)/xml_en
+	cp $(XML_SOURCES_fr) $(DISTNAME)/xml_fr
 	+cd ./formulas && $(GMAKE) dist
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
