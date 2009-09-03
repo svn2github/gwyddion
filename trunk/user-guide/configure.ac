@@ -3,7 +3,6 @@ AC_CONFIG_SRCDIR(xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
   user-guide.iss \
-  formulas/Makefile \
   formulas/render.sh \
 )
 
@@ -134,11 +133,17 @@ PKG_CHECK_MODULES([PNG],[libpng],,[
 "
 ])
 
-GWY_CONDITIONAL([HTML],[test x = "x$GWY_HTML_MISSING"])
-GWY_CONDITIONAL([PDF],[test x = "x$GWY_PDF_MISSING"])
-GWY_CONDITIONAL([PNG],[test x = "x$GWY_PNG_MISSING"])
-GWY_CONDITIONAL([SVG],[test x = "x$GWY_SVG_MISSING"])
-GWY_CONDITIONAL([MAN],[test x = "x$GWY_MAN_MISSING"])
+if test x = "x$GWY_HTML_MISSING"; then XHTML_ENABLE=xhtml; else XHTML_ENABLE=; fi
+if test x = "x$GWY_PDF_MISSING"; then PDF_ENABLE=pdf; else PDF_ENABLE=; fi
+if test x = "x$GWY_MAN_MISSING"; then MAN_ENABLE=man; else MAN_ENABLE=; fi
+if test x = "x$GWY_PNG_MISSING"; then PNG_ENABLE=png; else PNG_ENABLE=; fi
+if test x = "x$GWY_SVG_MISSING"; then SVG_ENABLE=svg; else SVG_ENABLE=; fi
+
+AC_SUBST([XHTML_ENABLE])
+AC_SUBST([PDF_ENABLE])
+AC_SUBST([MAN_ENABLE])
+AC_SUBST([PNG_ENABLE])
+AC_SUBST([SVG_ENABLE])
 
 AC_OUTPUT
 

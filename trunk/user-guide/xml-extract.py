@@ -28,11 +28,12 @@ class Parser(object):
 class FormulaParser(Parser):
     def StartElementHandler(self, name, attributes):
         Parser.StartElementHandler(self, name, attributes)
-        if name == 'informalequation':
+        if name in ('informalequation', 'inlineequation'):
             self.lineno = self.parser.CurrentLineNumber
             if 'id' not in attributes:
-                sys.stderr.write('%s:%d: missing id on <%s> '
-                                 % (self.filename, self.lineno, name))
+                if name == 'informalequation':
+                    sys.stderr.write('%s:%d: missing id on <%s>\n'
+                                     % (self.filename, self.lineno, name))
                 self.fid = None
                 return
             self.fid = attributes['id']
@@ -43,7 +44,9 @@ class FormulaParser(Parser):
             self.formulas[self.fid] = ''
 
     def EndElementHandler(self, name):
-        if name == 'informalequation':
+        if name in ('informalequation', 'inlineequation'):
+            if not self.fid:
+                return
             if self.stash != None and self.formulas[self.fid] != self.stash:
                 sys.stderr.write('%s:%d: conflicting definition of formula %s\n'
                                  % (self.filename, self.lineno, self.fid))
@@ -63,8 +66,8 @@ class FormulaParser(Parser):
 
         if (p[-1][0] != 'phrase'
             or p[-2][0] != 'textobject' or p[-2][1].get('role') != 'tex'
-            or p[-3][0] != 'mediaobject'
-            or p[-4][0] != 'informalequation'):
+            or p[-3][0] not in ('mediaobject', 'inlinemediaobject')
+            or p[-4][0] not in ('informalequation', 'inlineequation')):
             return
 
         data = data.rstrip()
@@ -115,22 +118,33 @@ def extract_formulas(filenames):
     for k, v in sorted(parser.formulas.items()):
         update_file('formulas/%s.tex' % k, v)
 
+def extract_formulainfo(filenames):
+    parser = FormulaParser('utf-8')
+    for filename in filenames:
+        parser.parse_file(filename)
+    for k in sorted(parser.formulas.keys()):
+        print 'formulas/%s.tex' % k
+
 def extract_imageinfo(filenames):
     parser = ImageParser('utf-8')
     for filename in filenames:
         parser.parse_file(filename)
     for k, v in sorted(parser.imageinfo.items()):
-        print '%s:%s' % (v, k)
+        print '%s:images/%s' % (v, k)
 
 if len(sys.argv) < 2:
-    print 'Usage: %s {formulas|imageinfo} FILES...' % sys.argv[0]
+    print 'Usage: %s {formulas|formulainfo|imageinfo} FILES...' % sys.argv[0]
     sys.exit(0)
 
 mode = sys.argv[1]
 files = sys.argv[2:]
 if mode == 'formulas':
     extract_formulas(files)
+if mode == 'formulainfo':
+    extract_formulainfo(files)
 elif mode == 'imageinfo':
     extract_imageinfo(files)
 else:
     sys.stderr.write('Wrong mode %s\n' % mode)
+
+# vim: set ts=4 sw=4 et :

@@ -1,17 +1,3 @@
-# Simulate AM_CONDITIONAL
-AC_DEFUN([GWY_CONDITIONAL],
-[
-if $2; then
-  $1[]_TRUE=
-  $1[]_FALSE=#
-else
-  $1[]_TRUE=#
-  $1[]_FALSE=
-fi
-AC_SUBST($1[]_TRUE)
-AC_SUBST($1[]_FALSE)
-])
-
 # Checks the location of the XML Catalog
 # Usage:
 #   JH_PATH_XML_CATALOG([ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
