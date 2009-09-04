@@ -19,7 +19,13 @@ class Parser(object):
         self.parser = xml.parsers.expat.ParserCreate(*self.parserargs)
         self._setup_handlers()
         self.path = []
-        self.parser.ParseFile(file(filename))
+        try:
+            self.parser.ParseFile(file(filename))
+        except xml.parsers.expat.ExpatError as err:
+            sys.stderr.write('%s:%d: %s (col %d)\n'
+                             % (filename, err.lineno,
+                                xml.parsers.expat.ErrorString(err.code),
+                                err.offset+1))
         del self.parser
 
     def __init__(self, *args):
