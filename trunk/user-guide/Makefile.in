@@ -103,7 +103,7 @@ ifeq ($(PDF_ENABLE),pdf)
 $$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1)) $$(TEX_STYLES) dblatex.xsl
 	rm -rf pdf_$(1)
 	mkdir pdf_$(1)
-	$$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$@ $$(MAIN_XML_SOURCE_$(1))
+	$$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
 endif
 
 .PHONY: xhtml_$(1) pdf_$(1)
