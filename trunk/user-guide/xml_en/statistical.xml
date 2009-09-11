@@ -869,7 +869,7 @@ W_1(K_x) = \int_{-\infty}^\infty W(K_x,K_y)\,\d K_y
           <textobject role='tex'>
             <phrase>
 <![CDATA[
-W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^M |\hat P_j(K_x)|^2
+W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^N |\hat P_j(K_x)|^2
 ]]>
             </phrase>
           </textobject>
