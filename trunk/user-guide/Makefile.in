@@ -205,10 +205,11 @@ dist-pdf: pdf
 	    cp -f user-guide-$$x.pdf $(BASENAME)-$$x-$(VERSION).pdf; \
 	done
 
+# FIXME: We need to figure out versioning of translations.
 version:
 	d=`date --iso`; \
 	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac; \
-	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml/user-guide.xml
+	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml_en/user-guide.xml
 	autoconf && ./configure
 
 help:
