@@ -146,7 +146,7 @@ mode = sys.argv[1]
 files = sys.argv[2:]
 if mode == 'formulas':
     extract_formulas(files)
-if mode == 'formulainfo':
+elif mode == 'formulainfo':
     extract_formulainfo(files)
 elif mode == 'imageinfo':
     extract_imageinfo(files)
