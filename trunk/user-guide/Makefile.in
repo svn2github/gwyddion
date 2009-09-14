@@ -75,7 +75,12 @@ IMAGES_PDF_$(1) := $$(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES_$(1))))
 IMAGES_PNG_PDF_$(1) := $$(patsubst %.pdf,%.png,$$(IMAGES_PDF_$(1)))
 IMAGES_PNG_$(1) := $$(filter-out $$(IMAGES_PNG_PDF_$(1)),$$(filter-out images/eq-%,$$(IMAGES_PNG_ALL_$(1))))
 
+# FIXME FIXME FIXME: Terrible hack.  Must update the times otherwise make
+# gets stuck in an infinite loop.  However, we'd rather update the PNG file
+# directly to avoid a rebuild.  And, of course, avoid running touch as
+# many times as we have formulas...
 $$(FORMULAS_TEX_$(1)): formulas_$(1).stamp
+	@touch $$(FORMULAS_TEX_$(1))
 
 ifeq ($(XHTML_ENABLE),xhtml)
 formulas_$(1).stamp: $$(XML_SOURCES_$(1))
@@ -106,7 +111,6 @@ $$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1
 	$$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
 endif
 
-.PHONY: xhtml_$(1) pdf_$(1)
 endef
 
 all: $(ALL_TARGETS)
@@ -238,8 +242,13 @@ else
 endif
 	@echo "version      Update version number to current date"
 
-.PHONY: all clean pdf xhtml help version distclean
-.PHONY: dist dist-xhtml dist-pdf
+.PHONY: \
+	all help version clean distclean \
+	dist dist-xhtml dist-pdf \
+	xhtml xhtml_en xhtml_fr $(call expand_langs,xhtml_%) \
+	pdf pdf_en pdf_fr $(call expand_langs,pdf_%) \
+	man
+
 .PRECIOUS: Makefile
 
 # vim: set ts=4 sw=4 noet :
