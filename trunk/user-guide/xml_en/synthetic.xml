@@ -165,7 +165,7 @@
         <listitem>
           <para>
             The root mean square value of the heights (or of the differences
-            from the mean plane which, however, always is to the
+            from the mean plane which, however, always is the
             <inlineequation>
               <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
               <alt>z=0</alt>
