@@ -63,11 +63,8 @@ ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 define LANGUAGE_template
 XML_DIR_$(1) := xml_$(1)
 XML_SOURCES_$(1) := $$(wildcard $$(XML_DIR_$(1))/*.xml)
-MAIN_XML_SOURCE_$(1) := $$(XML_DIR_$(1))/$$(PACKAGE).xml
+MAIN_XML_SOURCE_$(1) := $$(XML_DIR_$(1))/$(PACKAGE).xml
 CLEAN_DIRS_$(1) := xhtml_$(1) pdf_$(1)
-
-FORMULAS_TEX_$(1) := $$(shell $$(XML_EXTRACT) formulainfo $$(XML_SOURCES_$(1)))
-FORMULAS_PNG_$(1) := $$(patsubst formulas/%.tex,images/%.png,$$(FORMULAS_TEX_$(1)))
 
 IMAGES_$(1) := $$(shell $$(XML_EXTRACT) imageinfo $$(XML_SOURCES_$(1))) $$(IMAGES_EXTRA)
 IMAGES_PNG_ALL_$(1) := $$(patsubst PNG:%,%,$$(filter PNG:%,$$(IMAGES_$(1))))
@@ -75,17 +72,15 @@ IMAGES_PDF_$(1) := $$(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES_$(1))))
 IMAGES_PNG_PDF_$(1) := $$(patsubst %.pdf,%.png,$$(IMAGES_PDF_$(1)))
 IMAGES_PNG_$(1) := $$(filter-out $$(IMAGES_PNG_PDF_$(1)),$$(filter-out images/eq-%,$$(IMAGES_PNG_ALL_$(1))))
 
-# FIXME FIXME FIXME: Terrible hack.  Must update the times otherwise make
-# gets stuck in an infinite loop.  However, we'd rather update the PNG file
-# directly to avoid a rebuild.  And, of course, avoid running touch as
-# many times as we have formulas...
-$$(FORMULAS_TEX_$(1)): formulas_$(1).stamp
-	@touch $$(FORMULAS_TEX_$(1))
-
 ifeq ($(XHTML_ENABLE),xhtml)
-formulas_$(1).stamp: $$(XML_SOURCES_$(1))
-	$$(XML_EXTRACT) formulas $$^
-	touch $$@
+formulas/%_$(1).stamp: $$(XML_DIR_$(1))/%.xml
+	$(XML_EXTRACT) formulas $$^
+	@touch $$@
+
+formulas_$(1).deps: $$(XML_SOURCES_$(1))
+	@$(XML_EXTRACT) formuladeps $$^ >$$@
+
+-include formulas_$(1).deps
 endif
 
 xhtml_$(1): xhtml_$(1).stamp
@@ -94,21 +89,20 @@ ifeq ($(XHTML_ENABLE),xhtml)
 xhtml_$(1).stamp: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_ALL_$(1)) xhtml.xsl
 	rm -rf xhtml_$(1)
 	mkdir xhtml_$(1)
-	$$(XSLTPROC_CMD) --stringparam base.dir xhtml_$(1)/ xhtml.xsl $$(MAIN_XML_SOURCE_$(1))
-	$$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml_$(1)/*.html
-	@cp $$(FORMULAS_PNG_$(1)) xhtml_$(1)/
-	@cp $$(IMAGES_PNG_$(1)) xhtml_$(1)/
+	$(XSLTPROC_CMD) --stringparam base.dir xhtml_$(1)/ xhtml.xsl $$(MAIN_XML_SOURCE_$(1))
+	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml_$(1)/*.html
+	@cp $$(IMAGES_PNG_ALL_$(1)) xhtml_$(1)/
 	cp user-guide.css xhtml_$(1)
 	touch $$@
 endif
 
-pdf_$(1): $$(PACKAGE)-$(1).pdf
+pdf_$(1): $(PACKAGE)-$(1).pdf
 
 ifeq ($(PDF_ENABLE),pdf)
-$$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1)) $$(TEX_STYLES) dblatex.xsl
+$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1)) $$(TEX_STYLES) dblatex.xsl
 	rm -rf pdf_$(1)
 	mkdir pdf_$(1)
-	$$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
+	$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
 endif
 
 endef
@@ -134,7 +128,7 @@ IMAGES_BUILT := $(foreach f,pdf png,$(patsubst %.svg,%.$(f),$(IMAGES_SVG)))
 IMAGES_DIST := $(IMAGES_SVG) $(IMAGES_PNG_SOURCE) $(IMAGES_PNG)
 
 images/eq-%.png: formulas/eq-%.png
-	cp -f $< $@
+	@cp -f $< $@
 
 formulas/%.png: formulas/%.tex $(FORMULA_SUPPORT)
 	cd formulas && $(RENDER) "$*"
@@ -166,11 +160,11 @@ fixpngres: fixpngres.c
 endif
 
 clean:
-	-@rm -f formulas/TEMP-* formulas/*.png
-	-@rm -f $(FORMULAS_PNG) $(FORMULAS_TEX)
+	-@rm -f formulas/TEMP-* formulas/*.stamp formulas/eq-*.tex
+	-@rm -f formulas/eq-*.png images/eq-*.png
 	-@rm -f $(IMAGES_BUILT)
 	-rm -rf $(CLEAN_DIRS)
-	-rm -f *.stamp fixpngres formulas/pngsize *~ */*~
+	-rm -f *.stamp *.deps fixpngres formulas/pngsize *~ */*~
 	-rm -f $(call expand_langs,$(PACKAGE)-%.pdf) $(MAN_PAGES)
 
 distclean: clean

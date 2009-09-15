@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import xml.parsers.expat
-import sys
+import sys, re
 
 class Parser(object):
     def StartElementHandler(self, name, attributes):
@@ -106,6 +106,11 @@ class ImageParser(Parser):
         Parser.__init__(self, *args)
         self.imageinfo = {}
 
+def write_file(filename, content):
+    content = content.encode('utf-8')
+    print 'Writing %s...' % filename
+    file(filename, 'w').write(content)
+
 def update_file(filename, content):
     content = content.encode('utf-8')
     try:
@@ -122,14 +127,23 @@ def extract_formulas(filenames):
     for filename in filenames:
         parser.parse_file(filename)
     for k, v in sorted(parser.formulas.items()):
-        update_file('formulas/%s.tex' % k, v)
+        write_file('formulas/%s.tex' % k, v)
 
-def extract_formulainfo(filenames):
+def extract_formuladeps(filenames):
     parser = FormulaParser('utf-8')
     for filename in filenames:
+        parser.formulas = {}
         parser.parse_file(filename)
-    for k in sorted(parser.formulas.keys()):
-        print 'formulas/%s.tex' % k
+        if not parser.formulas:
+            continue
+        print '.PRECIOUS: ' + ' '.join('formulas/%s.png' % k
+                                       for k in sorted(parser.formulas.keys()))
+        stampname = re.sub(r'xml_(\w+)/(.*)\.xml', r'formulas/\2_\1.stamp',
+                           filename)
+        print '.PRECIOUS: ' + stampname
+        for k in sorted(parser.formulas.keys()):
+            targetname = 'formulas/%s.tex' % k
+            print '%s: %s\n\t@touch %s\n' % (targetname, stampname, targetname)
 
 def extract_imageinfo(filenames):
     parser = ImageParser('utf-8')
@@ -139,15 +153,15 @@ def extract_imageinfo(filenames):
         print '%s:images/%s' % (v, k)
 
 if len(sys.argv) < 2:
-    print 'Usage: %s {formulas|formulainfo|imageinfo} FILES...' % sys.argv[0]
+    print 'Usage: %s {formulas|formuladeps|imageinfo} FILES...' % sys.argv[0]
     sys.exit(0)
 
 mode = sys.argv[1]
 files = sys.argv[2:]
 if mode == 'formulas':
     extract_formulas(files)
-elif mode == 'formulainfo':
-    extract_formulainfo(files)
+elif mode == 'formuladeps':
+    extract_formuladeps(files)
 elif mode == 'imageinfo':
     extract_imageinfo(files)
 else:
