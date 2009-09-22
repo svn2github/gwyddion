@@ -1,0 +1,16 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+datarootdir=@datarootdir@
+
+gwymoduledir=@libdir@/@PACKAGE@/modules
+gwyplugindir=@libexecdir@/@PACKAGE@/modules
+gwypixmapdir=@datadir@/@PACKAGE@/pixmaps
+
+Name: Gwyddion
+Description: Gwyddion library
+Version: @VERSION@
+Requires: glib-2.0 >= 2.6.0 gtk+-2.0 >= 2.6.0 pangoft2 @GTKGLEXT_DEPENDENCY@ @FFTW3_DEPENDENCY@
+Libs: -L${libdir} -lgwyapp2 -lgwymodule2 -lgwydgets2 -lgwydraw2 -lgwyprocess2 -lgwyddion2
+Cflags: -I${includedir}/gwyddion -I${libdir}/gwyddion/include
