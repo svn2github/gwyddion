@@ -300,8 +300,8 @@
         <listitem>
           <para>
             The shape (type) of placed objects.  At present the possibilities
-            include half-spheres, pyramids, tetrahedrons and some more weird
-            shapes.
+            include half-spheres, boxes, pyramids, tetrahedrons and some more
+            weird shapes.
           </para>
         </listitem>
       </varlistentry>
