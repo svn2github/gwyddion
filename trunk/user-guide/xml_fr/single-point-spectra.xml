@@ -6,14 +6,14 @@
   <title>Les Spectres Ponctuels</title>
   <indexterm><primary>spectres</primary></indexterm>
   <para>
-    <application>Gwyddion</application> possède quelques fonctions basiques
-    de visualisation et d'extraction pour les données de spectroscopie
+    <application>Gwyddion</application> possÃ¨de quelques fonctions basiques
+    de visualisation et d'extraction pour les donnÃ©es de spectroscopie
     ponctuelle (nous appelons ici <quote>spectres</quote> toutes courbes
-    mesurées ou rattachées à des points individuels de l'échantillon). Si
-    l'import de spectre est supporté par un type de fichier, ceux-ci 
-    apparaîtront dans l'onglet <guilabel>Spectres</guilabel> du
-    <link linkend='data-browser'>nafigateur de données</link>. Des spectres
-    indépendants peuvent être ajoutées aux données bi-dimensionnelles en 
+    mesurÃ©es ou rattachÃ©es Ã  des points individuels de l'Ã©chantillon). Si
+    l'import de spectre est supportÃ© par un type de fichier, ceux-ci 
+    apparaÃ®tront dans l'onglet <guilabel>Spectres</guilabel> du
+    <link linkend='data-browser'>nafigateur de donnÃ©es</link>. Des spectres
+    indÃ©pendants peuvent Ãªtre ajoutÃ©es aux donnÃ©es bi-dimensionnelles en 
     utilisant Standalone spectra la 
     <link linkend='file-merging'>fusion de fichers</link>.
   </para>
@@ -31,15 +31,15 @@
     <para>
       L'outil de base pour la visualisation et l'extraction est l'outil
       Spectroscopie Ponctuelle. Il affiche une liste des points de mesure et
-      affiche leurs positions dans la fenêtre de données. Les courbes
-      individuelles peuvent être sélectionnées dans la liste ou sur les croix
-      dans la fenêtre de données. Si le fichier contient plusieurs groupes de
-      spectres, on peut sélectionner celui que l'on souhaite dans l'onglet
-      <guilabel>Spectres</guilabel> du navigateur de données.
+      affiche leurs positions dans la fenÃªtre de donnÃ©es. Les courbes
+      individuelles peuvent Ãªtre sÃ©lectionnÃ©es dans la liste ou sur les croix
+      dans la fenÃªtre de donnÃ©es. Si le fichier contient plusieurs groupes de
+      spectres, on peut sÃ©lectionner celui que l'on souhaite dans l'onglet
+      <guilabel>Spectres</guilabel> du navigateur de donnÃ©es.
     </para>
     <para>
       Le bouton <guibutton>Appliquer</guibutton> extrait le groupe de courbes
-      sélectionnées vers un graphe qui peut alors être analysé par les fonctions
+      sÃ©lectionnÃ©es vers un graphe qui peut alors Ãªtre analysÃ© par les fonctions
       standard des graphes.
     </para>
     <informalfigure id='fig-spectro-tool'>
@@ -48,9 +48,9 @@
           <imagedata fileref='spectro-tool.png' format='PNG'/>
         </imageobject>
         <caption>
-          Une fenêtre de données montrant plusieurs points de mesure et l'outil
+          Une fenÃªtre de donnÃ©es montrant plusieurs points de mesure et l'outil
           de spectrscsopie ponctuelle affichant les courbes de trois points
-          sélectionnés.
+          sÃ©lectionnÃ©s.
           A data window with measurement points displayed and the point
           spectroscopy tool showing curves from three selected points.
         </caption>

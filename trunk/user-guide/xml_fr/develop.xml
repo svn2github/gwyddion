@@ -3,27 +3,26 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <chapter id='development'>
-  <title>Développer Gwyddion</title>
+  <title>DÃ©velopper Gwyddion</title>
   <para>
-    Nous vous encourageons à devenir un développeur de Gwyddion.
+    Nous vous encourageons Ã  devenir un dÃ©veloppeur de Gwyddion.
   </para>
   <para>
-    Si vous souhaitez participer au développement, nous vous conseillons de
-    démarrer avec les exemples de modules simples (voir le tutoriel des
+    Si vous souhaitez participer au dÃ©veloppement, nous vous conseillons de
+    dÃ©marrer avec les exemples de modules simples (voir le tutoriel des
     modules), pour voir comment fonctionne le logiciel.
-    Si vous écrivez un module ou un greffon, nous vous encourageons à le
+    Si vous Ã©crivez un module ou un greffon, nous vous encourageons Ã  le
     partager avec les autres utilisateurs de Gwyddion. Faites le nous savoir, 
-    de manière à ce que nous puissions mettre un lien vers vos modules ou
-    greffons, ou même pour l'inclure dans Gwyddion. Evidemment vous n'êtes pas
-    obligés de vous limiter à des modules ou des greffons, mais cela devrait 
-    être plus facile de démarrer par là.
+    de maniÃ¨re Ã  ce que nous puissions mettre un lien vers vos modules ou
+    greffons, ou mÃªme pour l'inclure dans Gwyddion. Evidemment vous n'Ãªtes pas
+    obligÃ©s de vous limiter Ã  des modules ou des greffons, mais cela devrait 
+    Ãªtre plus facile de dÃ©marrer par lÃ .
   </para>
   <sect2 id='api-references'>
-    <title>Référence API</title>
+    <title>RÃ©fÃ©rence API</title>
     <para>
-      De nombreuses fonctions peuvent vous aider à développer votre module.
-      There are many functions that can help you while developing your module.
-      Référez-vous aux références API à la 
+      De nombreuses fonctions peuvent vous aider Ã  dÃ©velopper votre module.
+      RÃ©fÃ©rez-vous aux rÃ©fÃ©rences API Ã  la
       <ulink url='http://gwyddion.net/documentation/'>Section documentation
         </ulink> de la page internet du projet.
     </para>
@@ -32,14 +31,14 @@
     <title>Signaler un bug</title>
     <para>
       Nous recevrons avec plaisir un rapport de bug si vous trouvez des erreurs
-      dans Gwyddion. Pour cela, décrivez autant que possible la situation
-      aboutissant au bug, précisez le système d'exploitation et la version de
-      Gwyddion utilisée. Vous pouvez aussi nous envoyer les données SPM 
-      utilisées lorsque le problème est apparu, en général nécessaires pour les
-      bugs liés à l'ouverture ou la sauveagrde d'un fichier.
+      dans Gwyddion. Pour cela, dÃ©crivez autant que possible la situation
+      aboutissant au bug, prÃ©cisez le systÃ¨me d'exploitation et la version de
+      Gwyddion utilisÃ©e. Vous pouvez aussi nous envoyer les donnÃ©es SPM 
+      utilisÃ©es lorsque le problÃ¨me est apparu, en gÃ©nÃ©ral nÃ©cessaires pour les
+      bugs liÃ©s Ã  l'ouverture ou la sauveagrde d'un fichier.
     </para>
     <para>
-      La meilleure méthode pour signaler un bug est d'envoyer un e-mail à
+      La meilleure mÃ©thode pour signaler un bug est d'envoyer un e-mail Ã 
       <email>klapetek@gwyddion.net</email>.
     </para>
   </sect2>

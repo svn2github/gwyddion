@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <chapter id='data-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
-  <title>Traitement des Données et Analyse</title>
+  <title>Traitement des DonnÃ©es et Analyse</title>
   <xi:include href='basic.xml'/>
   <xi:include href='interpolation.xml'/>
   <xi:include href='leveling.xml'/>
