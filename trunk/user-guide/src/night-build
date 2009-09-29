@@ -81,10 +81,12 @@ else
   call user_guide_man
   # LIST-END
   touch .releaseme
-  for x in user-guide.pdf xhtml/index.xhtml; do
-    if ! test -s $x; then
-      rm -f .releaseme
-      break
-    fi
+  for lang in $(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in); do
+    for x in user-guide-$lang.pdf xhtml_$lang/index.xhtml; do
+      if ! test -s $x; then
+        rm -f .releaseme
+        break
+      fi
+    done
   done
 fi
