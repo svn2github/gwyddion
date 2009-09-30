@@ -82,7 +82,7 @@ else
   # LIST-END
   touch .releaseme
   for lang in $(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in); do
-    for x in user-guide-$lang.pdf xhtml_$lang/index.xhtml; do
+    for x in user-guide-$lang.pdf xhtml_$lang/index.html; do
       if ! test -s $x; then
         rm -f .releaseme
         break
