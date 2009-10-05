@@ -8,11 +8,14 @@
     This chapter provides reference for various formats, syntaxes and command
     options that you might find helpful.  Most are related to advanced use
     of Gwyddion, except perhaps the
-    <link linkend='keyboard-shortcuts'>table of common keyboard shortcuts</link>.
+    <link linkend='keyboard-shortcuts'>table of common keyboard shortcuts</link>
+    and
+    <link linkend='file-format-support'>table of supported file formats</link>.
   </para>
   <xi:include href='gwyddion.xml'/>
   <xi:include href='gwyddion-thumbnailer.xml'/>
   <xi:include href='keyboard-shortcuts.xml'/>
+  <xi:include href='file-formats.xml'/>
   <xi:include href='expressions.xml'/>
   <xi:include href='resources.xml'/>
   <xi:include href='gwyfile-format.xml'/>
