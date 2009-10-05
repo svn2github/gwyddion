@@ -11,7 +11,7 @@
     <itemizedlist>
       <listitem>
         Capability to stores complete processing state of the individual data,
-        including masks, selections and other settings.
+        including masks, selections and other properties.
       </listitem>
       <listitem>
         Arbitrary number of channels, graphs and spectrum sets, with arbitrary
@@ -23,15 +23,12 @@
       </listitem>
     </itemizedlist>
     Therefore, we recommned to use this format for saving of processed files.
-    If you open our sample files, you can see that each one is plotted in
-    different false color palette.  This is a consequence of the fact that
-    Gwyddion stores the full state of the data window including its palette.
   </para>
   <para>
     Other data file formats are handled with appropriate file loading and
     saving modules. Beside a large number of file formats used in scanning
     probe microscopy, graphical file types (PNG, JPEG, TIFF, TARGA) and raw
-    binary and ASCII data can be imported too.  If your SPM data format is not
+    binary and text data can be imported too.  If your SPM data format is not
     supported by Gwyddion yet or it is loaded incorrectly, you are encouraged
     to write an import module (if you can program) or contact the maintainers
     to help them improve the support.
@@ -50,36 +47,21 @@
       Many SPM file formats use identical file extensions such as
       <filename>.img</filename>, <filename>.afm</filename> or
       <filename>.dat</filename>.  This, however,
-      cannot confuse Gwyddion because it detects the file format automatically
-      based solely on file contents.  Thanks to the efficiency of the automated
-      detection you should rarely need to intervene and select file types
-      manually.
+      cannot confuse Gwyddion because it detects the file format automatically,
+      based solely on file contents.  The only exceptions are the imports of
+      various raw data, either two-dimensional or graph, that have to be
+      choosed explicitly in the file open dialog.
       See <link linkend='raw-file-import'>Raw Data File Import</link>
       for details of import of data from unsupported formats and from
       <link linkend='pixmap-file-import'>pixmap images</link>.
     </para>
     <para>
-      If necessary, it is possible to enforce an attempt to load the file
-      assuming a particular format by expanding the <guilabel>File
-        type</guilabel> selector and choosing a file type.  However, if the
-      file format is not detected automatically it is quite unlikely the file
-      can be loaded at all.
-    </para>
-    <para>
-      By enabling <guilabel>Show only loadable files of selected
-        type</guilabel> the file list can be limited only to the selected
-      type.  The file type label then indicates the filtering by appending
-      <guilabel>(filtered)</guilabel> to the end.  In the case of
-      <guilabel>Automatically detected</guilabel> file type this means
-      the list to files is limited to those Gwyddion thinks it can load.
-      This can be very convenient, on the other hand it can slow down listing
-      of directories with many files.
-    </para>
-    <para>
-      Once a file type is selected it remains selected even in subsequent
-      file open dialog invocations.  If you seem to be suddenly unable to
-      load a file, check the file type is set to the corresponding
-      type, or to <guilabel>Automatically detected</guilabel>.
+      By enabling <guilabel>Show only loadable files</guilabel> the file list
+      can be limited only to files that Gwyddion recognizes automatically.
+      The file type label then indicates the filtering by appending
+      <guilabel>(filtered)</guilabel> to the end.  This can be often
+      convenient, on the other hand it can slow down listing of directories
+      with many files.
     </para>
     <informalfigure id='fig-file-open-screenshot'>
       <mediaobject>
