@@ -10,7 +10,7 @@
     of Gwyddion, except perhaps the
     <link linkend='keyboard-shortcuts'>table of common keyboard shortcuts</link>
     and
-    <link linkend='file-format-support'>table of supported file formats</link>.
+    <link linkend='file-formats'>table of supported file formats</link>.
   </para>
   <xi:include href='gwyddion.xml'/>
   <xi:include href='gwyddion-thumbnailer.xml'/>
