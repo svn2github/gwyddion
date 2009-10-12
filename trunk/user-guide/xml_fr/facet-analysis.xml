@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: facet-analysis.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect2 id='facet-analysis'>
+  <title>Analyse des Facettes</title>
+  <indexterm><primary>analyse des facettes</primary></indexterm>
+  <para>
+    <menuchoice>
+      <guimenu>Traitement des Données</guimenu>
+      <guisubmenu>Statistiques</guisubmenu>
+      <guimenuitem>Analyse des Facettes</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>
+    L'analyse des facettes permet d'étudier de manière interactive l'orientation
+    des facettes présentes dans les données, et de marquer les facettes ayant
+    des orientations spécifiques sur l'image. La vue de gauche affiche les
+    données avec une prévisualisation des facettes marquées. La vue de droite,
+    que l'on appellera par la suite le visualisateur de facettes, affiche la
+    distribution bi-dimensionnelle des pentes.
+  </para>
+  <para>
+    Le centre du visualisateur de facettes correspond toujours à une inclinaison
+    nulle (facettes horizontales), la pente selon la direction
+    <inlineequation>
+      <mathphrase><phrase role='math'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    augmente vers la droite et la gauche, et la pente selon la direction 
+    <inlineequation>
+      <mathphrase><phrase role='math'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>
+    augmente vers les bords haut et bas. Le système de coordonnées exact est un
+    peu complexe, il s'adapte à la plage de pentes présentes dans les données
+    affichées.
+  </para>
+  <para>
+    La <guilabel>taille des facettes</guilabel> contrôle le rayon du plan ajusté
+    localement à chaque point pour déterminer l'inclinaison locale. La valeur 0
+    signifie qu'aucun ajustement n'est réalisé, l'inclinaison locale est
+    déterminée à partir des dérivées symétriques en
+    <inlineequation>
+      <mathphrase><phrase role='math'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    et
+    <inlineequation>
+      <mathphrase><phrase role='math'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>
+    en chaque point. Le choix de la taille de voisinage est cruciale pour
+    obtenir des résultats corects : elle doit être plus petite que les détails
+    auxquels on s'intéresse pour éviter leur filtrage, tout en étant
+    suffisamment grande pour éliminer le bruit présent dans l'imaage.
+  </para>
+  <informalfigure id='fig-facet-analysis-sizes'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='facet-analysis-sizes.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Illustration de influence de la taille du plan ajusté sur la
+        distribution d'un scan fortement bruité d'une surface DLC délaminée. On
+        peut constater que la distribution est complètement noyée dans le bruit
+        pour les petites tailles de plan. Les valeurs de voisinage sont : (a) 0,
+        (b) 2, (c) 4, (d) 7. Les plages d'angle et de couleur sont appliquées
+        sur la dynamique complète de l'image, c'est-à-dire qu'elles varient
+        d'une image à une autre.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    La vue des données et le visualisateur de facettes permettent de
+    sélectionner un point avec la souris et lire l'inclinaison de la normale à
+    la facette correspondante
+    <inlineequation>
+      <mathphrase><phrase role='math'>ϑ</phrase></mathphrase>
+      <alt>\vartheta</alt>
+    </inlineequation>
+    et la direction
+     <inlineequation>
+      <mathphrase><phrase role='math'>φ</phrase></mathphrase>
+      <alt>\varphi</alt>
+    </inlineequation>
+    sous <guilabel>Normale</guilabel>. Lorsque vous sélectionnez un point sur la
+    vue des données, la sélection du visualisateur de facette est mise à jour
+    pour afficher l'inclinaison sur ce point.
+  </para>
+  <para>
+    Le bouton <guibutton>Trouver le Maximum</guibutton> ajuste la sélection
+    du visualisateur de facette sur la maximum de la distribution des pentes
+    (il s'agit de la position initiale de la sélection).
+  </para>
+  <para>
+    Le bouton <guibutton>Marquer</guibutton> met à jour le masque avec les zones
+    ayant une pente similaire à la pente sélectionnée. Plus précisément, les
+    zones ayant une pente dans la <guilabel>Tolérance</guilabel> de la pente
+    sélectionnée. Le visualisateur de facettes affiche alors l'ensemble des
+    pentes correspondant aux points marqués (notez que cet ensemble peut ne
+    pas être circulaire dans le visualisateur de facettes, mais il ne s'agit
+    que d'un effet de projection). L'inclinaison moyenne de tous les points
+    dans la plage de pentes sélectionnée est affichée sous 
+    <guilabel>Normale Moyenne</guilabel>.
+  </para>
+</sect2>
+<!-- vim: set ts=2 sw=2 et : -->
