@@ -9,7 +9,7 @@ BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
 DISTNAME = $(BASENAME)-$(VERSION)
 
-LANGUAGES = en fr
+LANGUAGES = en fr ru
 expand_langs = $(patsubst %,$(1),$(LANGUAGES))
 gather_langs = $(sort $(foreach x,$(call expand_langs,$(1)_%),$($(x))))
 
