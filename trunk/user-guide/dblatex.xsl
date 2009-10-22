@@ -1,13 +1,38 @@
 <?xml version='1.0'?>
 <!-- $Id$
+     vim: set ts=2 sw=2 et :
      customize dblatex XSL stylesheets -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version='1.0'>
 
+<xsl:param name="gwy.latex.language">
+  <xsl:choose>
+    <xsl:when test='/book[@xml:lang="en"]'>
+      <xsl:text>english</xsl:text>
+    </xsl:when>
+    <xsl:when test='/book[@xml:lang="fr"]'>
+      <xsl:text>french</xsl:text>
+    </xsl:when>
+    <xsl:when test='/book[@xml:lang="ru"]'>
+      <xsl:text>russian</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <!-- As good as anything else and we don't have to special-case it... -->
+      <xsl:text>english</xsl:text>
+      <xsl:message>Warning: xml:lang is not set on book, cannot determine the language.</xsl:message>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:param>
+
 <xsl:param name="latex.encoding">utf8</xsl:param>
-<xsl:param name="latex.class.options">a4paper,10pt,twoside</xsl:param>
+<xsl:param name="latex.class.options">a4paper,10pt,twoside,<xsl:value-of select='$gwy.latex.language'/></xsl:param>
 
 <xsl:variable name="latex.begindocument">
   <xsl:text>\usepackage{ltablex}&#10;</xsl:text>
+  <xsl:text>\usepackage{mathtext}&#10;</xsl:text>
+  <xsl:text>\usepackage{cmap}&#10;</xsl:text>
+  <xsl:text>\usepackage[</xsl:text>
+  <xsl:value-of select='$gwy.latex.language'/>
+  <xsl:text>]{babel}&#10;</xsl:text>
   <xsl:text>\input{user-guide.sty}&#10;</xsl:text>
   <xsl:text>\begin{document}&#10;</xsl:text>
 </xsl:variable>
