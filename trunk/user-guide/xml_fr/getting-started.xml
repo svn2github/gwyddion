@@ -29,19 +29,19 @@
     affiche des astuces pour traiter les données, et décrit des fonctionnalités
     utiles que vous auriez pu ignorer.
   </tip>
-<!--  <xi:include href='main-window.xml'/> -->
+  <xi:include href='main-window.xml'/>
 <!--  <xi:include href='data-browser.xml'/> -->
 <!--  <xi:include href='managing-files.xml'/> -->
-<!--  <xi:include href='data-windows.xml'/> -->
-<!--  <xi:include href='graph-windows.xml'/> -->
+  <xi:include href='data-windows.xml'/>
+  <xi:include href='graph-windows.xml'/>
 <!--  <xi:include href='tools.xml'/> -->
 <!--  <xi:include href='color-map.xml'/> -->
 <!--  <xi:include href='presentations-masks.xml'/> -->
 <!--  <xi:include href='selections.xml'/> -->
 <!--  <xi:include href='opengl-3d-view.xml'/> -->
-<!--  <xi:include href='single-point-spectra.xml'/> -->
-<!--  <xi:include href='metadata.xml'/> -->
-<!--  <xi:include href='remote-control.xml'/> -->
-<!--  <xi:include href='plugins.xml'/> -->
+  <xi:include href='single-point-spectra.xml'/>
+  <xi:include href='metadata.xml'/>
+<!--  <xi:include href='raw-file-import.xml'/> -->
+  <xi:include href='plugins.xml'/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
