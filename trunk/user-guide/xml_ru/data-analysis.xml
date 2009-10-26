@@ -1,20 +1,10 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id$ -->
-<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
-               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<chapter id='data-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
-  <title>Data Processing and Analysis</title>
-  <para>
-    The number and breadth of data manipulation and analysis functions is one
-    of the Gwyddion main strenghts.  The description of their principles and
-    applications is the purpose of this chapter, with focus on the explanation
-    of how they work and what they calculate or perform.  Elements of their
-    user interface are also occasionaly described where it seems useful,
-    nevertheless, it is assumed the reader is familiar with the basic
-    organization of data and controls in Gwydion, as described in the
-    <link linkend='getting-started'>previous chapter</link>.
-  </para>
-  <xi:include href='basic.xml'/>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="data-analysis">
+  <title>Обработка и анализ данных</title>
+  <para>Количество и широта функций обработки и анализа данных ‒ одно из главных достоинств Gwyddion. Эта глава посвящена описанию принципов их работы и возможных применений.Особое внимание уделялось объяснению того, как они работают и что они вычисляют или показывают. Элементы их интерфейса пользователя также местами описываются там, где это может быть полезно, однако, считается что читатель знаком с основами организации данных и элементов управления Gwydion, как описывалось в <link linkend="getting-started">предыдущей главе</link>.</para>
+  <xi:include href="basic.xml"/>
   <!--
   <xi:include href='interpolation.xml'/>
   <xi:include href='leveling.xml'/>
@@ -35,4 +25,3 @@
   -->
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
-
