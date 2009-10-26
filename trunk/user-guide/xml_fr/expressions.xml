@@ -5,12 +5,12 @@
 <sect1 id='expression-syntax'>
   <title>Expressions</title>
   <para>
-    Les expressions utilisées dans le module Arithmétique, les formules de
-    caractéristiques des grains ou dans les fonctions d'ajustement de courbes
+    Les expressions utilisÃ©es dans le module ArithmÃ©tique, les formules de
+    caractÃ©ristiques des grains ou dans les fonctions d'ajustement de courbes
     ont une syntaxe similaire au langages de programmation les plus communs.
   </para>
   <para>
-    Tous les nombres sont des réels (en virgule flottante), L'écriture des
+    Tous les nombres sont des rÃ©els (en virgule flottante), L'Ã©criture des
     nombre utilise une notation standard. Voici quelques exemples de nombres
     valides :
     <literal>1</literal>,
@@ -20,14 +20,14 @@
   </para>
   <para>
     Les noms des fonctions, constantes, et variables commencent par une lettre
-    continuent avec zéro ou plusieurs lettre, chiffres ou underscores. Voici
+    continuent avec zÃ©ro ou plusieurs lettre, chiffres ou underscores. Voici
     quelques exemples d'identifiants valides :
     <literal>pow10</literal> (une fonction),
     <literal>Pi</literal> (une constante),
     <literal>d2_2</literal> (une variable).
   </para>
   <para>
-    L'application des opérations est résumée dans la table qui suit.
+    L'application des opÃ©rations est rÃ©sumÃ©e dans la table qui suit.
   </para>
   <para>
     <informaltable frame='none' id='table-expressions-precedence'>
@@ -36,18 +36,18 @@
         <thead>
           <row>
             <entry>Operation</entry>
-            <entry>Associativité</entry>
+            <entry>AssociativitÃ©</entry>
             <entry>Exemples</entry>
           </row>
         </thead>
         <tbody>
           <row>
-            <entry>parenthèses</entry>
+            <entry>parenthÃ¨ses</entry>
             <entry>N.A.</entry>
             <entry><literal>(x)</literal></entry>
           </row>
           <row>
-            <entry>appel de fonction et opérateurs unaires</entry>
+            <entry>appel de fonction et opÃ©rateurs unaires</entry>
             <entry>de la droite vers la gauche</entry>
             <entry><literal>-sqrt 3</literal></entry>
           </row>
@@ -71,12 +71,12 @@
     </informaltable>
   </para>
   <para>
-    Notez que <literal>-3^2</literal> is 9, c'est-à-dire
-    <literal>(-3)^2</literal>, comme en <command>c</command>, mais à l'inverse
+    Notez que <literal>-3^2</literal> is 9, c'est-Ã -dire
+    <literal>(-3)^2</literal>, comme en <command>c</command>, mais Ã  l'inverse
     de Perl ou Python.
   </para>
   <para>
-    Les opérateurs et fonctions disponibles sont listés dans la table suivante.
+    Les opÃ©rateurs et fonctions disponibles sont listÃ©s dans la table suivante.
   </para>
   <para>
     <informaltable frame='none' id='table-expression-operators'>
@@ -91,15 +91,15 @@
         <tbody>
           <row>
             <entry><literal>+</literal> (unaire)</entry>
-            <entry>aucune opération</entry>
+            <entry>aucune opÃ©ration</entry>
           </row>
           <row>
             <entry><literal>-</literal> (unaire)</entry>
-            <entry>valeur négative</entry>
+            <entry>valeur nÃ©gative</entry>
           </row>
           <row>
             <entry><literal>~</literal></entry>
-            <entry>valeur négative (équivalent à <literal>-</literal>)</entry>
+            <entry>valeur nÃ©gative (Ã©quivalent Ã  <literal>-</literal>)</entry>
           </row>
           <row>
             <entry><literal>+</literal> (binaire)</entry>
@@ -131,15 +131,15 @@
           </row>
           <row>
             <entry><literal>floor</literal></entry>
-            <entry>arrondi à l'entier inférieur</entry>
+            <entry>arrondi Ã  l'entier infÃ©rieur</entry>
           </row>
           <row>
             <entry><literal>ceil</literal></entry>
-            <entry>arrondi à l'entier supérieur</entry>
+            <entry>arrondi Ã  l'entier supÃ©rieur</entry>
           </row>
           <row>
             <entry><literal>sqrt</literal></entry>
-            <entry>racine carrée</entry>
+            <entry>racine carrÃ©e</entry>
           </row>
           <row>
             <entry><literal>cbrt</literal></entry>
@@ -215,7 +215,7 @@
           </row>
           <row>
             <entry><literal>pow</literal></entry>
-            <entry>puissance, <literal>pow(x,y)</literal> égale <literal>x^y</literal></entry>
+            <entry>puissance, <literal>pow(x,y)</literal> Ã©gale <literal>x^y</literal></entry>
           </row>
           <row>
             <entry><literal>min</literal></entry>
@@ -227,11 +227,11 @@
           </row>
           <row>
             <entry><literal>mod</literal></entry>
-            <entry>modulo en virgule flottance, <literal>mod(x,y)</literal> égale <literal>x % y</literal></entry>
+            <entry>modulo en virgule flottance, <literal>mod(x,y)</literal> Ã©gale <literal>x % y</literal></entry>
           </row>
           <row>
             <entry><literal>hypot</literal></entry>
-            <entry>distance euclidienne (hypothénuse), <literal>hypot(x,y)</literal> égale <literal>sqrt(x^2+y^2)</literal></entry>
+            <entry>distance euclidienne (hypothÃ©nuse), <literal>hypot(x,y)</literal> Ã©gale <literal>sqrt(x^2+y^2)</literal></entry>
           </row>
           <row>
             <entry><literal>atan2</literal></entry>
@@ -242,12 +242,12 @@
     </informaltable>
   </para>
   <para>
-    Quelques particularités permettent de faciliter l'écriture d'expressions :
+    Quelques particularitÃ©s permettent de faciliter l'Ã©criture d'expressions :
     <itemizedlist>
       <listitem>
         <para>
           Les signes de multiplications sont optionnels, vous pouvez les
-          remplacer par des espaces (ou même aucun espace dans cerains cas). Par
+          remplacer par des espaces (ou mÃªme aucun espace dans cerains cas). Par
           exemple <literal>3/4 Pi</literal> et <literal>5(4+3)(2+1)</literal>
           sont des expressions valides. Mais <literal>3a</literal> n'est pas
           valide, <literal>3e-4</literal> signifie toujours
@@ -256,22 +256,22 @@
       </listitem>
       <listitem>
         <para>
-          In n'existe aucune différence entre les appels de fonction et les
-          opérateurs unaires, les parenthèses peuvent donc être souvent ommises.
+          In n'existe aucune diffÃ©rence entre les appels de fonction et les
+          opÃ©rateurs unaires, les parenthÃ¨ses peuvent donc Ãªtre souvent ommises.
           Par exemple <literal>sqrt 5</literal> et
           <literal>hypot hypot 3,4,5</literal> sont des expressions valides. La
-          dernière serait utilisée avec les parenthèses de la manière suivante :
+          derniÃ¨re serait utilisÃ©e avec les parenthÃ¨ses de la maniÃ¨re suivante :
           <literal>hypot(hypot(3,4),5)</literal>.
         </para>
         <para>
-          Notez cependant que les appels de fonction ont une priorité supérieure
-          à tout autre opérateur, ainsi
-          <literal>sin Pi/2</literal> est équivalent à
+          Notez cependant que les appels de fonction ont une prioritÃ© supÃ©rieure
+          Ã  tout autre opÃ©rateur, ainsi
+          <literal>sin Pi/2</literal> est Ã©quivalent Ã 
           <literal>(sin Pi)/2</literal>, et non <literal>sin(Pi/2)</literal>.
         </para>
       </listitem>
     </itemizedlist>
-    En cas de doute, écrivez les expressions sous leur forme la plus complète.
+    En cas de doute, Ã©crivez les expressions sous leur forme la plus complÃ¨te.
   </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
