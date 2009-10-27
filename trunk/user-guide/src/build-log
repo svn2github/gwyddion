@@ -5,6 +5,7 @@ projectdir=$PWD
 logdir=$projectdir/../buildlog
 tmplog=tmplog
 
+languages=$(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in)
 source $HOME/.bashrc
 cd $logdir
 
@@ -74,9 +75,35 @@ function printerr() {
   cat $tmplog
 }
 
+function printerr_lang() {
+  f=$1
+  shift
+
+  for lang in $languages; do
+    test -s $f-$lang.err || continue
+    cat --squeeze-blank $f-$lang.err \
+    | {
+      if test -s $f.ignore; then
+        grep -v -f $f.ignore
+      else
+        cat
+      fi
+    } | {
+      if test -n "$1"; then
+        $@
+      else
+        cat
+      fi
+    } >$tmplog
+    test -s $tmplog || return
+    echo "=====[ $f-$lang ]====="
+    cat $tmplog
+  done
+}
+
 printerr user_guide_autostuff
-printerr user_guide_xhtml
-printerr user_guide_pdf
+printerr_lang user_guide_xhtml
+printerr_lang user_guide_pdf
 printerr user_guide_man
 
 rm *.ignore $tmplog
