@@ -12,8 +12,8 @@
   <xi:include href="presentations.xml"/>
   -->
   <xi:include href="edit.xml"/>
-  <!--
   <xi:include href="edit-extended.xml"/>
+  <!--
   <xi:include href="statistical.xml"/>
   <xi:include href="roughness-iso.xml"/>
   <xi:include href="grains.xml"/>
