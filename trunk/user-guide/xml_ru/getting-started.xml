@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: install.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="getting-started">
+  <title>Приступая к работе</title>
+  <para>Этот раздел вводит некоторые основные концепции и термины, такие, как маски и выделенные области, объясняет организацию данных в Gwyddion и описывает интерфейс пользователя.</para>
+  <para>Описания достаточно подробны и некоторые из тем, затронутых ближе к концу раздела, такие как импорт необработанных данных или подключаемые модули, могут считаться углублёнными и не предназначенными для ежедневного использования. Таким образом, несмотря на название, не обязательно читать эту главу целиком чтобы справиться с работой в Gwyddion. Пользовательский интерфейс Gwyddion достаточно интуитивен и достаточно много можно узнать просто играясь с настройками. Пояснение основных идей и компонент, приведённое здесь, возможно просто упростит процесс открытия.</para>
+  <tip>Команда <menuchoice><guimenu>Мета</guimenu><guimenuitem>Совет дня</guimenuitem></menuchoice> показывает советы по обработке данных и показывает полезные возможности. которые вы могли упустить.</tip>
+  <!--
+  <xi:include href="main-window.xml"/>
+  -->
+  <xi:include href="data-browser.xml"/>
+  <!--
+  <xi:include href="managing-files.xml"/>
+  -->
+  <xi:include href="data-windows.xml"/>
+  <!--
+  <xi:include href="graph-windows.xml"/>
+  <xi:include href="tools.xml"/>
+  -->
+  <xi:include href="color-map.xml"/>
+  <!--
+  <xi:include href="presentations-masks.xml"/>
+  <xi:include href="selections.xml"/>
+  <xi:include href="opengl-3d-view.xml"/>
+  <xi:include href="single-point-spectra.xml"/>
+  <xi:include href="metadata.xml"/>
+  <xi:include href="raw-file-import.xml"/>
+  <xi:include href="plugins.xml"/>
+  -->
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->
