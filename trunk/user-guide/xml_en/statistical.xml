@@ -1066,10 +1066,10 @@ W_{\rm r}(K) = \sigma^2T{KT\over(1+K^2T^2)^{3/2}}
         </inlineequation>
         are calculated according to following formulas:
       </para>
-      <informalequation id='eq-minkowski-functionals'>
+      <informalequation id='eq-minkowski-functionals.en'>
         <mediaobject>
           <imageobject>
-            <imagedata fileref='eq-minkowski-functionals.png' format='PNG'/>
+            <imagedata fileref='eq-minkowski-functionals.en.png' format='PNG'/>
           </imageobject>
           <textobject role='tex'>
             <phrase>

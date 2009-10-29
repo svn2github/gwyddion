@@ -155,10 +155,10 @@
       created, with Polynomial distortion.  It performs transforms that
       can be expressed as
     </para>
-    <informalequation id='eq-polynomial-distortion'>
+    <informalequation id='eq-polynomial-distortion.en'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='eq-polynomial-distortion.png' format='PNG'/>
+          <imagedata fileref='eq-polynomial-distortion.en.png' format='PNG'/>
         </imageobject>
         <textobject role='tex'>
           <phrase>
