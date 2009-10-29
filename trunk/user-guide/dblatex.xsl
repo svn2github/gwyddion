@@ -4,7 +4,7 @@
      customize dblatex XSL stylesheets -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version='1.0'>
 
-<xsl:param name="gwy.latex.language">
+<xsl:param name='gwy.latex.language'>
   <xsl:choose>
     <xsl:when test='/book[@xml:lang="en"]'>
       <xsl:text>english</xsl:text>
@@ -25,6 +25,32 @@
 
 <xsl:param name="latex.encoding">utf8</xsl:param>
 <xsl:param name="latex.class.options">a4paper,10pt,twoside,<xsl:value-of select='$gwy.latex.language'/></xsl:param>
+
+<!-- Note: All XeTeX stuff removed, also UTF-8 branching because we always
+     use UTF-8.  -->
+<xsl:template name="encode.before.style">
+  <xsl:text>\newif\ifxetex&#10;\xetexfalse&#10;</xsl:text>
+  <!-- Standard latex font setup -->
+  <!--
+  <xsl:choose>
+    <xsl:when test='$gwy.latex.language="russian"'>
+      <xsl:text>\usepackage[T2A,T2D]{fontenc}&#10;</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+    -->
+      <xsl:text>\usepackage[T2A,T2D,T1]{fontenc}&#10;</xsl:text>
+   <!--
+    </xsl:otherwise>
+  </xsl:choose>
+  -->
+  <xsl:text>\usepackage{ucs}&#10;</xsl:text>
+  <xsl:text>\usepackage[utf8x]{inputenc}&#10;</xsl:text>
+  <xsl:text>\def\hyperparamadd{unicode=true}&#10;</xsl:text>
+</xsl:template>
+
+<xsl:template name="encode.after.style">
+  <xsl:text>\lstset{inputencoding=utf8x, extendedchars=\true}&#10;</xsl:text>
+</xsl:template>
 
 <xsl:variable name="latex.begindocument">
   <xsl:text>\usepackage{ltablex}&#10;</xsl:text>
