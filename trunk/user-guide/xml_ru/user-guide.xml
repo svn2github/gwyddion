@@ -65,7 +65,7 @@
   <!--
   <xi:include href='gpl.xml'/>
   <xi:include href='fdl.xml'/>
-  <index id='subject-index'/>
   -->
+  <index id='subject-index'/>
 </book>
 <!-- vim: set ts=2 sw=2 et : -->
