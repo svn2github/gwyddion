@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: unrotate.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect2 id="unrotate">
+  <title>Исправить разворот <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_unrotate-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+  <indexterm><primary>коррекция поворота</primary></indexterm>
+  <indexterm><primary>исправить поворот</primary></indexterm>
+  <para>
+    <menuchoice>
+      <guimenu>Обработка данных</guimenu>
+      <guisubmenu>Исправить данные</guisubmenu>
+      <guimenuitem>Исправить разворот</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>Исправить разворот может автоматически сделать главные оси изображения параллельными с горизонтальными или вертикальными краями изображения. Чтобы это работало, у данных должны быть эти главные оси, следовательно этот метод наиболее полезен при сканировании искусственных и, возможно, кристаллических структур.</para>
+  <para>Поворот, необходимый чтобы выровнять изображение – показанный как <guilabel>Поправка</guilabel> – рассчитывается из пиков на угловом <link linkend="slope-distribution">распределении наклонов</link> предполагая преобладающий тип структуры, или симметрию. Симметрия также может быть оценена автоматически, но можно выбрать какой-то тип симметрии вручную и оставить модулю расчёт только соответствующего корректирующего поворота. Следует заметить. что если вы выбрали тип структуры не соответствующий реальной, то рассчитанный поворот редко когда будет иметь смысл.</para>
+  <para>Рекомендуется перед расчётом выровнять данные (or <link linkend="facet-level">выровнять грани</link>) поскольку общий наклон может исказить рассчитанный поворот.</para>
+  <informalfigure id="fig-unrotate-directions">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="unrotate-symmetries.pdf" format="PDF"/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref="unrotate-symmetries.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>Схема симметрий коррекции поворота</phrase>
+      </textobject>
+      <caption>Ориентация главных осей в соответствии с типами симметрии, доступных при коррекции поворота.</caption>
+    </mediaobject>
+  </informalfigure>
+  <para>Тип предполагаемой структуры может быть задан с помощью меню выбора <guilabel>Предполагаемая</guilabel>. Доступны следующие варианты: <variablelist><varlistentry><term> Найденная </term><listitem><para> Автоматически найденная симметрия, показанная выше как <guilabel>Найдена</guilabel>. </para></listitem></varlistentry><varlistentry><term> Параллельная </term><listitem><para> Параллельные линии, одна главная ось. </para></listitem></varlistentry><varlistentry><term> Треугольная </term><listitem><para> Треугольная симметрия, три главных оси (односторонних) под углом в 120 градусов. </para></listitem></varlistentry><varlistentry><term> Квадратная </term><listitem><para> Квадратная симметрия, две главных оси ориентированных примерно вдоль сторон изображения. </para></listitem></varlistentry><varlistentry><term> Ромбическая </term><listitem><para> Ромбическая симметрия, две главных оси ориентированных примерно вдоль диагоналей. Отличием от квадратной является предпочтительная ориентация вдоль диагоналей (а не параллельно краям изображения). </para></listitem></varlistentry><varlistentry><term> Гексагональная </term><listitem><para> Гексагональная симметрия, три главных оси (двунаправленных) под углом 120 градусов. </para></listitem></varlistentry></variablelist></para>
+</sect2>
+<!-- vim: set ts=2 sw=2 et : -->
