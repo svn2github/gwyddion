@@ -28,10 +28,14 @@
   <!--
   <xi:include href="introduction.xml"/>
   <xi:include href="install.xml"/>
+  -->
   <xi:include href="getting-started.xml"/>
   <xi:include href="data-analysis.xml"/>
+  <!--
   <xi:include href="summaries.xml"/>
+  -->
   <xi:include href="develop.xml"/>
+  <!--
   <xi:include href="gpl.xml"/>
   <xi:include href="fdl.xml"/>
   -->

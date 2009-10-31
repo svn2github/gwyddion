@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: edit-extended.xml 9499 2009-07-18 17:57:05Z yeti-dn $ -->
+<!-- @(#) $Id: edit-extended.xml 10318 2009-10-29 13:57:58Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="edit-extended">
   <title>Расширенное редактирование данных</title>
@@ -70,10 +70,10 @@
       </menuchoice>
     </para>
     <para>Общее искривление в горизонтальной плоскости может быть компенсировано или, наоборот, внесено с помощью полиномиального искривления. Оно производит преобразования, которые могут быть выражены как</para>
-    <informalequation id="eq-polynomial-distortion">
+    <informalequation id="eq-polynomial-distortion.en">
       <mediaobject>
         <imageobject>
-          <imagedata fileref="eq-polynomial-distortion.png" format="PNG"/>
+          <imagedata fileref="eq-polynomial-distortion.en.png" format="PNG"/>
         </imageobject>
         <textobject role="tex">
           <phrase>
