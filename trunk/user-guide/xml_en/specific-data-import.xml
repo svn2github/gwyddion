@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='specific-data-import'>
+  <title>Specific Data Import</title>
+  <para>
+    Import of several other types of data is not automatic and it requires
+    human intervention.
+  </para>
+  <sect2 id='pixmap-file-import'>
+    <title>Graphics Formats</title>
+    <para>
+      Importing data from image formats such as PNG, TIFF, JPEG or BMP is
+      similar to import from raw/unknown file formats, only simplier.
+    </para>
+    <para>
+      It is simplier because the file structure is known and the file format is
+      automatically detected.  Hence the file type does need to be selected
+      explicitly.  However, the data interpretation is still unknown and must
+      be specified manually.  The Pixmap import dialog therefore resembles the
+      <guilabel>Information</guilabel> tab of raw data import, requiring you to
+      set the physical dimensions and value scale.
+    </para>
+    <para>
+      Note the physical dimensions suggested there are not obtained from
+      the file, they are simply the last values used.  Some SPM data format
+      are based on an image format (typically, TIFF is used as the base)
+      and contain the information about physical scales and units, albeit
+      stored in a manufacturer-specific way.  In this case a separate import
+      module can be written for this particular format to load the files
+      automatically with correctly scaled values.
+    </para>
+  </sect2>
+  <sect2 id='graph-curve-import'>
+    <title>Graph Curves</title>
+    <para>
+      Simple two-column text files containing curve data can be imported as
+      graph curves.  In some cases, these files are recognized automatically.
+      They can also be explicitly selected as <guilabel>ASCII graph curve
+        files</guilabel> in the file open dialog, causing the import module to
+      try harder to load the file as a graph data.
+    </para>
+    <para>
+      The import dialog shows a preview of the graph and permits to set the
+      units and labels.
+    </para>
+  </sect2>
+  <sect2 id='raw-xyz-import'>
+    <title>XYZ Data</title>
+    <indexterm>
+      <primary>XYZ data</primary>
+    </indexterm>
+    <para>
+      Three-column text files containing XYZ data are imported by selecting
+      the <guilabel>XYZ data files</guilabel> file type.  Again, they can be
+      recognized automatically but requesting this format explicitly makes the
+      module to try harder to load the file as XYZ data.
+    </para>
+    <para>
+      Since Gwyddion only works with data in a regular grid irregular XYZ data
+      must be interpolated to a regular grid upon import.  In fact, the XYZ
+      data import module serves two different purposes:
+    </para>
+    <itemizedlist>
+      <listitem>
+        loading of data in a regular grid that were just saved as XYZ data
+        – if the data is found to be in a regular grind only a very simple
+        import dialog is presented where you can set the units because the
+        import is straightforward;
+      </listitem>
+      <listitem>
+        regularization and interpolation of irregular XYZ data – this case is
+        much less straightforward and the rest of this section will discuss
+        the options you have and some of the pitfalls.
+      </listitem>
+    </itemizedlist>
+    <para>
+      The import dialog permits to set the basic parameters as the regularized
+      data resolution and range and lateral and value units.  However, the most
+      important option is <guilabel>Interpolation type</guilabel>:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Round</term>
+        <listitem>
+          <para>
+            This interpolation is analogous to the Round interpolation for
+            regular grids.  The interpolated value in a point in the plane
+            equals to the value of the nearest point in the XYZ point set.
+            This means the Voronoi triangulation is performed and each Voronoi
+            cell is <quote>filled</quote> with the value of the nearest point.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Linear</term>
+        <listitem>
+          <para>
+            This interpolation is analogous to the Linear interpolation for
+            regular grids.  The interpolated value in a point is calculated
+            from the three vertices of the Delaunay triangulation triangle
+            containing the point.  As the tree vertices uniquely determine
+            a plane in the space, the value in the point is defined by this
+            plane.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Field</term>
+        <listitem>
+          <para>
+            The value in a point is the weighted average of all the XYZ point
+            set where the weight is proportional to the inverse fourth power of
+            the mutual distance.  Since all XYZ data points are considered for
+            the calculation of each interpolated point this method can be very
+            slow.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      The former two interpolation types are based on Delaunay/Voronoi
+      triangulation which is not well-defined for point sets where more than
+      two points line on a line or more than three lie on a circle.  If this
+      happens the triangulation fails and the import module displays an error
+      message.
+    </para>
+    <para>
+      The values outside the convex hull of the XYZ point set in the plane are
+      influenced by <guilabel>Exterior type</guilabel>:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Border</term>
+        <listitem>
+          <para>
+            The point set is not amended in any way and the values on the
+            convex hull simply extend to the infinity.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Mirror</term>
+        <listitem>
+          <para>
+            The point set is amended by points <quote>reflected</quote> about
+            the bounding box sides.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Periodic</term>
+        <listitem>
+          <para>
+            The point set is amended by periodically repeated points from
+            around the opposite side of bounding box.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-triangulation'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='triangulation.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='triangulation.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Delaunay triangulation displayed on linear (left), round (centre)
+          and field (right) interpolation of a irregular set of points.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -270,18 +270,5 @@
       selected preset.
     </para>
   </sect2>
-  <sect2 id='pixmap-file-import'>
-    <title>Import from Graphics Formats</title>
-    <para>
-      Importing data from image formats such as PNG, TIFF, JPEG or BMP is
-      similar to import from raw/unknown file formats, only simplier.
-      It is simplier because the file structure is known, although its
-      interpretation is unknown.  The Pixmap import dialog therefore
-      resembles the <guilabel>Information</guilabel> tab of raw file,
-      requiring you to set the physical dimensions and value scale manually.
-      Note the physical dimensions suggested there are not obtained from
-      the file, they are simply the last values used.
-    </para>
-  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

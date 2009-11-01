@@ -10,7 +10,7 @@
     important advantages:
     <itemizedlist>
       <listitem>
-        Capability to stores complete processing state of the individual data,
+        Capability to store the complete state of the individual data,
         including masks, selections and other properties.
       </listitem>
       <listitem>
@@ -44,20 +44,31 @@
       <primary>loading</primary>
     </indexterm>
     <para>
-      Many SPM file formats use identical file extensions such as
+      Files are opened using
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guisubmenu>Open</guisubmenu>
+      </menuchoice>.
+      The file type is detected automatically, based solely on the file
+      content.  Since the same extensions such as
       <filename>.img</filename>, <filename>.afm</filename> or
-      <filename>.dat</filename>.  This, however,
-      cannot confuse Gwyddion because it detects the file format automatically,
-      based solely on file contents.  The only exceptions are the imports of
-      various raw data, either two-dimensional or graph, that have to be
-      choosed explicitly in the file open dialog.
-      See <link linkend='raw-file-import'>Raw Data File Import</link>
-      for details of import of data from unsupported formats and from
-      <link linkend='pixmap-file-import'>pixmap images</link>.
+      <filename>.dat</filename> are used by many different SPM file types this
+      approach is superior to relying on file extensions.
     </para>
     <para>
-      By enabling <guilabel>Show only loadable files</guilabel> the file list
-      can be limited only to files that Gwyddion recognizes automatically.
+      The only exception is the import of various raw data, either
+      two-dimensional or graph, that must be chosen explicitly in the file open
+      dialog.
+      See sections <link linkend='raw-file-import'>Raw Data File Import</link>
+      for details of import of raw data and manual extraction of data from
+      unsupported formats and
+      <link linkend='specific-data-import'>Specific Data Import</link> for
+      import of XYZ data, pixmap image data and graph data.
+    </para>
+    <para>
+      The list of files in the file open dialog can be limited to only files
+      Gwyddion recognizes as loadable by enabling the <guilabel>Show only
+        loadable files</guilabel> option.
       The file type label then indicates the filtering by appending
       <guilabel>(filtered)</guilabel> to the end.  This can be often
       convenient, on the other hand it can slow down listing of directories
@@ -84,11 +95,15 @@
       <primary>merging</primary>
     </indexterm>
     <para>
-      File merging is similar to normal file loading, except that the
-      selected file (or files) is merged into the current open file.  In
-      other words, channels, graphs and spectra, together with all their
-      settings and properties are added to those already present in the
-      current file.
+      File merging, performed by
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guisubmenu>Open</guisubmenu>
+      </menuchoice>,
+      is similar to normal file loading, except that the selected file (or
+      files) is merged into the current open file.  In other words, channels,
+      graphs and spectra, together with all their settings and properties are
+      added to those already present in the current file.
     </para>
   </sect2>
   <sect2 id='file-saving'>

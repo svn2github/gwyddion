@@ -36,6 +36,7 @@ IMAGES_SVG = \
 	images/profile-interpolation.svg \
 	images/step-edge.svg \
 	images/surface-area-vertices.svg \
+	images/triangulation.svg \
 	images/unrotate-symmetries.svg \
 	images/volume-pixel-weights.svg \
 	images/wavelet-daubechies20.svg \
@@ -45,7 +46,10 @@ IMAGES_SVG = \
 	images/windowing-fft.svg
 
 IMAGES_PNG_SOURCE = \
-	images/profile-interpolation-image.png
+	images/profile-interpolation-image.png \
+	images/triangulation-field.png \
+	images/triangulation-linear.png \
+	images/triangulation-round.png
 
 MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 
