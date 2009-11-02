@@ -19,7 +19,9 @@
   <xi:include href="statistical.xml"/>
   <xi:include href="roughness-iso.xml"/>
   <xi:include href="grains.xml"/>
+  -->
   <xi:include href="fourier-transform.xml"/>
+  <!--
   <xi:include href="wavelet-transform.xml"/>
   <xi:include href="fractal.xml"/>
   <xi:include href="tip.xml"/>
