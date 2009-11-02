@@ -251,6 +251,20 @@
           </para>
         </listitem>
       </varlistentry>
+      <varlistentry id='dependency-unique'>
+        <term>
+          <ulink url='http://www.gnome.org/~ebassi/source/'>LibUnique</ulink> ≥ 1.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables <link linkend='remote-control'>remote control</link> based
+            on D-BUS or whatever technology is currently in.
+          </para>
+        </listitem>
+      </varlistentry>
       <varlistentry id='dependency-libxmu'>
         <term>
           <ulink url='http://www.x.org/'>LibXmu</ulink>, X11 only
