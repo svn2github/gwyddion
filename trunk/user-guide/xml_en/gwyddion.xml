@@ -121,8 +121,15 @@
         <listitem>
           <para>
             Succeeds if an instance of Gwyddion is already running on the
-            display and prints its window id (<type>Window</type> on X11,
-            <type>HWND</type> on Win32).  Fails if none is running.
+            display and prints its instance identifier.  Fails if none is
+            running.
+          </para>
+          <para>
+            The instance identifier depends on the remote control backend in
+            use.  In some cases it is useful as a global window identifier,
+            in some it is not.  With libXmu this option prints the X11
+            <type>Window</type>, on Win32 <type>HWND</type> is printed, while
+            with LibUnique the startup id is printed.
           </para>
         </listitem>
       </varlistentry>
