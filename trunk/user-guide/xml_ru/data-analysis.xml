@@ -24,7 +24,9 @@
   <!--
   <xi:include href="wavelet-transform.xml"/>
   <xi:include href="fractal.xml"/>
+  -->
   <xi:include href="tip.xml"/>
+  <!--
   <xi:include href="multidata.xml"/>
   <xi:include href="graph.xml"/>
   <xi:include href="synthetic.xml"/>
