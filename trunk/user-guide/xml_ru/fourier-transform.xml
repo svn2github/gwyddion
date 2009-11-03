@@ -166,9 +166,10 @@ w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
           <entry>Кайзер  <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation></entry>
           <entry><inlineequation id="eq-windowing-kaiser"><inlinemediaobject><imageobject><imagedata fileref="eq-windowing-kaiser.png" format="PNG"/></imageobject><textobject role="tex"><phrase><![CDATA[
 \displaystyle
-w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
+w_{\rm Kaiser,\alpha}(x) = 
+{ \BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
                           \over\BesselI0(\pi\alpha)}
-]]></phrase></textobject></inlinemediaobject></inlineequation>, где <inlineequation><mathphrase>I<subscript>0</subscript></mathphrase><alt>\BesselI0</alt></inlineequation> - модифицированная функция Бесселя нулевого порядка и <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation> - параметр.</entry>
+]]></phrase></textobject></inlinemediaobject></inlineequation> where <inlineequation><mathphrase>I<subscript>0</subscript></mathphrase><alt>\BesselI0</alt></inlineequation> is the modified Bessel function of zeroth order and <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation> is a parameter</entry>
         </row>
       </tbody>
     </tgroup>
