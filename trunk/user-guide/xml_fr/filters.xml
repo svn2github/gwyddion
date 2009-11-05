@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: filtres.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='filtres'>
+  <title>Filtres</title>
+  <sect2 id='basic-filtres'>
+    <title>
+      Outil Filtres Basiques
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_filtre-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      L'outil <link linkend='basic-filtres'>Filtres Basiques</link> vous permet
+      d'appliquer différents filtres simples sur votre image. Ces filtres
+      peuvent être utiles pour supprimer le bruit ; toutefois, les données
+      mesurées seront altérées, il faut donc prendre soin de ne pas détruire
+      certains détails important de l'image.
+    </para>
+    <itemizedlist>
+      <listitem id='filtre-mean'>
+        <indexterm>
+          <primary>moyenne</primary>
+          <secondary>filtre</secondary>
+        </indexterm>
+        Filtre moyenne – prend comme valeur la moyenne des valeurs voisines.
+      </listitem>
+      <listitem id='filtre-median'>
+        <indexterm>
+          <primary>médiane</primary>
+          <secondary>filtre</secondary>
+        </indexterm>
+        Filtre médian – prend comme valeur la médiane des valeurs voisines.
+      </listitem>
+      <listitem id='filtre-conservative-denoise'>
+        <indexterm><primary>filtre de débruitage conservatif</primary></indexterm>
+        Filtre de débruitage conservatif – vérifie que la valeur n'est pas un
+        extrême par rapport aux valeurs voisines. Si tel est le cas, le filtre
+        substitue la valeur par la valeur la plus haute (ou plus basse)
+        suivante.
+      </listitem>
+      <listitem id='filtre-kuwahara'>
+        <indexterm><primary>filtre Kuwahara</primary></indexterm>
+        Filtre Kuwahara – filtre de lissage conservant les bords.
+      </listitem>
+      <listitem id='filtre-minimum'>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>filtre</secondary>
+        </indexterm>
+        <indexterm><primary>filtre d'érosion</primary></indexterm>
+        Filtre minimum –  aussi connu sous le nom de filtre d'érosion, il
+        remplace la valeur par le minimum des valeurs voisines.
+      </listitem>
+      <listitem id='filtre-maximum'>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>filtre</secondary>
+        </indexterm>
+        <indexterm><primary>filtre de dilation</primary></indexterm>
+        Filtre maximum – aussi connu sous le nom de filtre de dilatation, il
+        remplace la valeur par le maximum des valeurs voisines.
+      </listitem>
+      <listitem id='filtre-dechecker'>
+        <indexterm><primary>filtre de décarèlement</primary></indexterm>
+        <indexterm><primary>filtre de suppression de motif carrelé</primary></indexterm>
+        Filtre de décarèlement – filtre de lissage spécialement conçu pour
+        supprimer les motifs carrelés d'une image, tout en conservant les autres
+        détails. Il s'agit d'un filtre de convolution utilisant un noyau
+        <informalequation id='eq-filtres-dechecker'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-filtres-dechecker.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>Matrice de coeffiecients 5 × 5 du filtre de décarèlement</phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+w_{\rm dechecker}
+  = \pmatrix{0&1/144&-1/72&1/144&0\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             -1/72&1/9&7/9&1/9&-1/72\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             0&1/144&-1/72&1/144&0\cr}
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+      <listitem id='filtre-gaussian'>
+        <indexterm><primary>filtre gaussien</primary></indexterm>
+        Filtre gaussien – filtre de lissage, le paramètre de la taille détermine
+        la largeur à mi-hauteur de la gaussienne (FWHM, full width at half
+        maximum) of the Gaussian. La relation entre la largeur à mi-hauteur et
+        <inlineequation>
+          <mathphrase>σ</mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        est
+        <informalequation id='eq-gaussian-fwhm'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-gaussian-fwhm.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>relation largeur à mi-hauteur - sigma pour une gaussienne</phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+    </itemizedlist>
+    <tip>
+      Ces filtres sont appliqués par défaut sur tout l'image. Vous pouvez
+      toutefois appliquer le filtre à une région spécifique de l'image en la
+      sélectionnant à l'aide la souris. Ceci peut être utile pour corriger
+      des défauts de mesure au sein d'une bonne image. Pour appliquer à nouveau
+      le filtre sur toute l'image, il suffit de cliquer à n'importe quel endroit
+      de l'image.
+    </tip>
+    <para>
+      Il existe d'autre filtres de débruitage dans Gwyddion, par exemple le
+      filtrage basé sur la transformée en ondelettes discrète (DWT) ou la
+      transformée de Fourier rapide (FFT).
+      Voyez la section
+      <link linkend='edit-extended'>Correction Avancée des Données</link> pour
+      plus de détails.
+    </para>
+    <para>
+      S'il vous faut seulement supprimer quelques valeurs visiblement fausses
+      de vos données SPM, vous pouvez aussi essayer le module
+      <link linkend='mask-of-outliers'>Masquer les Points Aberrants</link>
+      ainsi que le module
+      <link linkend='remove-data-under-mask'>Supprimer les Données sous le Masque</link>.
+      Voyez la section
+      <link linkend='editing-correction'>Correction des Données</link> pour plus
+      de détails.
+    </para>
+    <informalfigure id='fig-filtres-screenshot'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='filtre.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Capture d'écran de l'outil Filtre avec le filtre médian appliqué à une
+          sélection rectangulaire
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='convolution-filtre'>
+    <title>Convolution</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Transformées</guisubmenu>
+        <guisubmenu>Filre de Convolution</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Des convolutions avec des noyaux allant jusqu'à
+      <inlineequation>
+        <mathphrase>9 × 9</mathphrase>
+        <alt>9\times9</alt>
+      </inlineequation>
+      peuvent être appliquées à l'aide du module
+      <link linkend='convolution-filtre'>Filtre de convolution</link>.
+    </para>
+    <para>
+      Le <guilabel>Diviseur</guilabel> represente un facteur commun divisant
+      tous les coefficients avant que le filtre ne soit appliqué. Ce qui permet
+      d'utiliser des coefficients dénormalisés plus faciles à utiliser. La
+      normalisation peut être aussi calculée automatiquement lorsque la case
+      <guilabel>automatic</guilabel> est cochée. Lorsque la somme des
+      coefficients est non nulle, la normalisation permet de rendre le filtre
+      conservatif, c'est-à-dire que le facteur normalise la somme des
+      coefficients à un. Lorsque la somme des coefficients est nulle, le facteur
+      automatique devient simplement égal à un.
+    </para>
+    <para>
+      Comme la plupart des filtres utilisés en pratique présentent différents
+      types de symétrie, les coefficients peuvent être automatiquement
+      complétés selon le type de symétrie sélectionné (pair, impaire). Notez
+      que la complétion n'a lieu qu'après avoir pressé <keycap>Entrée</keycap>
+      lors de la saisie des coefficients.
+    </para>
+    <para>
+      Lors de la première installation, seul un filtre Identité est présent (qui
+      n'est pas particulièrement utile vu qu'il ne fait rien). Ce filtre ne peut
+      être modifé. Utilisez le bouton <guilabel>Nouveau</guilabel> de la page
+      <guilabel>Préréglages</guilabel> pour en créer un nouveau.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
