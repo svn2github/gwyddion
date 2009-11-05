@@ -11,7 +11,7 @@
   <informalfigure id="fig-data-window">
     <mediaobject>
       <imageobject>
-        <imagedata fileref="data_window.png" format="PNG"/>
+        <imagedata fileref="data_window.ru.png" format="PNG"/>
       </imageobject>
       <caption>Окно данных с открытыми всеми тремя доступными контекстными меню.</caption>
     </mediaobject>
