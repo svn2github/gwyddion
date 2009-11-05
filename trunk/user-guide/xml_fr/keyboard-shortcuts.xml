@@ -180,7 +180,7 @@
           <entry>
             <menuchoice>
               <guimenu>Traitement des Données</guimenu>
-              <guimenuitem>Répéter la dernière opération</guimenuitem>
+              <guimenuitem>Répéter</guimenuitem>
             </menuchoice>
           </entry>
           <entry>boîte à outils, fenêtre de données, fenêtre 3D,
@@ -196,7 +196,7 @@
           <entry>
             <menuchoice>
               <guimenu>Traitement des Données</guimenu>
-              <guimenuitem>Remontrer la dernière opération</guimenuitem>
+              <guimenuitem>Remontrer</guimenuitem>
             </menuchoice>
           </entry>
           <entry>boîte à outils, fenêtre de données, fenêtre 3D,

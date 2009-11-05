@@ -7,10 +7,10 @@
 <!--  <xi:include href='basic.xml'/> -->
 <!--  <xi:include href='interpolation.xml'/> -->
 <!--  <xi:include href='leveling.xml'/> -->
-<!--  <xi:include href='filters.xml'/> -->
+  <xi:include href='filters.xml'/>
 <!--  <xi:include href='presentations.xml'/> -->
 <!--  <xi:include href='edit.xml'/> -->
-<!--  <xi:include href='edit-extended.xml'/> -->
+  <xi:include href='edit-extended.xml'/>
 <!--  <xi:include href='statistical.xml'/> -->
 <!--  <xi:include href='roughness-iso.xml'/> -->
 <!--  <xi:include href='grains.xml'/> -->
@@ -19,6 +19,6 @@
 <!--  <xi:include href='fractal.xml'/> -->
 <!--  <xi:include href='tip.xml'/> -->
 <!--  <xi:include href='multidata.xml'/> -->
-<!--  <xi:include href='graph.xml'/> -->
+  <xi:include href='graph.xml'/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->

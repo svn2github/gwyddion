@@ -22,36 +22,36 @@
         Chacun est libre de copier et de distribuer des copies conformes de
         cette Licence, mais nul n'est autorisé à la modifier.
       </para>
-      <para>
-        Ceci est une traduction française non officielle de la Licence de
-        Documentation Libre GNU. Elle n'a pas été publiée par la Free Software
-        Foundation, et ne fixe pas légalement les conditions de redistribution
-        des documents qui l'utilisent – seul le texte original en anglais le
-        fait. Nous espérons toutefois que cette traduction aidera les
-        francophones à mieux comprendre la FDL GNU.
-        L'original en anglais de la licence est disponible à l'adresse
-        suivante :
-        <ulink url='http://www.ruby-doc.org/docs/beginner-fr/xhtml/FDL.html'>http://www.ruby-doc.org/docs/beginner-fr/xhtml/FDL.html</ulink>.
-      </para>
-      <para>
-        Version 1.0 FR (Jean-Luc Fortin, juillet 2000)
-      </para>
-      <para>
-        Version 1.1 FR (Christian Casteyde, mars 2001)
-      </para>
-      <para>
-        Version 1.1.1 FR (César Alexanian, mars 2001)
-      </para>
-      <para>
-        Version 1.1.2r2 FR (Christian Casteyde et César Alexanian, juin 2001)
-      </para>
-      <para>
-        Version 1.2 FR (François Riguet, octobre 2009)
-      </para>
     </legalnotice>
     <releaseinfo>Version 1.2, Novembre 2002</releaseinfo>
   </appendixinfo>
   <title>Licence de Documentation Libre GNU</title>
+  <para>
+    Ceci est une traduction française non officielle de la Licence de
+    Documentation Libre GNU. Elle n'a pas été publiée par la Free Software
+    Foundation, et ne fixe pas légalement les conditions de redistribution
+    des documents qui l'utilisent – seul le texte original en anglais le
+    fait. Nous espérons toutefois que cette traduction aidera les
+    francophones à mieux comprendre la FDL GNU.
+    L'original en anglais de la licence est disponible à l'adresse
+    suivante :
+    <ulink url='http://www.ruby-doc.org/docs/beginner-fr/xhtml/FDL.html'>http://www.ruby-doc.org/docs/beginner-fr/xhtml/FDL.html</ulink>.
+  </para>
+  <para>
+    Version 1.0 FR (Jean-Luc Fortin, juillet 2000)
+  </para>
+  <para>
+    Version 1.1 FR (Christian Casteyde, mars 2001)
+  </para>
+  <para>
+    Version 1.1.1 FR (César Alexanian, mars 2001)
+  </para>
+  <para>
+    Version 1.1.2r2 FR (Christian Casteyde et César Alexanian, juin 2001)
+  </para>
+  <para>
+    Version 1.2 FR (François Riguet, octobre 2009)
+  </para>
   <simplesect id='gfdl-0'>
     <title>Preambule</title>
     <para>
