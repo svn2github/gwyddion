@@ -165,7 +165,7 @@ h = \sqrt{h_x^2 + h_y^2}
         <caption>Вклад конфигураций пикселей в оцениваемую длину поверхности (сверху). Серые квадраты представляют пиксели внутри зерна, белые - внешние пиксели. Оценочный вклад каждой конфигурации: a) <inlineequation><mathphrase><phrase role="mathvar">h</phrase>/2</mathphrase><alt>h/2</alt></inlineequation>, (b1), (b2) <inlineequation><mathphrase><phrase role="mathvar">h</phrase></mathphrase><alt>h</alt></inlineequation>, (c) <inlineequation><mathphrase><phrase role="mathvar">h<subscript>y</subscript></phrase></mathphrase><alt>h_y</alt></inlineequation>, (d) <inlineequation><mathphrase><phrase role="mathvar">h<subscript>x</subscript></phrase></mathphrase><alt>h_x</alt></inlineequation>, (e) <inlineequation><mathphrase><phrase role="mathvar">h</phrase>/2</mathphrase><alt>h/2</alt></inlineequation>. Случаи (b1) и (b2) отличаются только формой сегментов-многоугольников, оценочные длины поверхности одинаковы. Нижняя часть рисунка показывает, как сегменты объединяются, чтобы образовать многоугольник.</caption>
       </mediaobject>
     </informalfigure>
-    <para id="grain-volume-calculation"><indexterm><primary>расчёт объёма</primary></indexterm> Объём зерна после вычета базиса, оценивается как объём точно такой же фигуры, верхняя поверхность которой использовалась для <link linkend="fig-surface-area-vertices">расчёта площади поверхности</link>. Следует отметить, что для объёма между вершинами метод эквивалентен классическому двумерному методу интеграции трапеций. Однако, мы рассчитываем объём под маской с центрами на вершинах, поэтому их вклад в интеграл распределён иначе, как показано на рисунке ниже.</para>
+    <para id="grain-volume-calculation"><indexterm><primary>расчёт объёма</primary></indexterm> Объём зерна после вычета базиса, оценивается как объём точно такой же фигуры, верхняя поверхность которой использовалась для <link linkend="fig-surface-area-vertices">расчёта площади поверхности</link>. Следует отметить, что для объёма, ограниченного многогранником, метод эквивалентен классическому двумерному методу интегрирования с помощью трапеций. Однако, мы рассчитываем объём под маской с центрами на гранях фигуры, поэтому их вклад в интеграл распределён иначе, как показано на рисунке ниже.</para>
     <informalfigure id="fig-volume-pixel-weights">
       <mediaobject>
         <imageobject>
@@ -174,7 +174,7 @@ h = \sqrt{h_x^2 + h_y^2}
         <imageobject>
           <imagedata fileref="volume-pixel-weights.png" format="PNG"/>
         </imageobject>
-        <caption>Вклад отдельных пикселей в объём одного пикселя (серый).</caption>
+        <caption>Вклад отдельных пикселей в объём одного пикселя (серого).</caption>
       </mediaobject>
     </informalfigure>
   </sect2>
