@@ -189,13 +189,15 @@ dist:
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
 
-# FIXME: Distribute French too
-dist-xhtml: xhtml_en.stamp
-	for x in en; do \
+# FIXME: Distribute all langs
+dist-xhtml: xhtml
+	for x in $(LANGUAGES); do \
 	    d=$(BASENAME)-xhtml-$$x-$(VERSION); \
 	    rm -rf $$d; \
 	    mkdir $$d; \
-	    cp xhtml_$$x/* user-guide.iss $$d; \
+	    cp xhtml_$$x/* $$d; \
+	    ll=`echo $$x | $(GSED) 's/en/English/;s/fr/French/;s/ru/Russian/'`; \
+	    sed "s/@LANGUAGE@/$$ll/g" user-guide.iss >$$d/user-guide.iss; \
 	    chmod 755 $$d; \
 	    chmod 644 $$d/*; \
 	    tar -zcf $$d.tar.gz $$d; \
