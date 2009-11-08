@@ -10,7 +10,7 @@
       <guiicon>
         <inlinemediaobject>
           <imageobject>
-            <imagedata fileref='gwy_filtre-24.png' format='PNG'/>
+            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
           </imageobject>
         </inlinemediaobject>
       </guiicon>
@@ -153,7 +153,7 @@ w_{\rm dechecker}
     <informalfigure id='fig-filtres-screenshot'>
       <mediaobject>
         <imageobject>
-          <imagedata fileref='filtre.png' format='PNG'/>
+          <imagedata fileref='filter.png' format='PNG'/>
         </imageobject>
         <caption>
           Capture d'écran de l'outil Filtre avec le filtre médian appliqué à une
