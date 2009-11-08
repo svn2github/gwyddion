@@ -14,8 +14,8 @@
   <xi:include href="managing-files.xml"/>
   -->
   <xi:include href="data-windows.xml"/>
-  <!--
   <xi:include href="graph-windows.xml"/>
+  <!--
   <xi:include href="tools.xml"/>
   -->
   <xi:include href="color-map.xml"/>
