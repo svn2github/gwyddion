@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!-- @(#) $Id: filtres.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!-- @(#) $Id: filters.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='filtres'>
+<sect1 id='filters'>
   <title>Filtres</title>
-  <sect2 id='basic-filtres'>
+  <sect2 id='basic-filters'>
     <title>
       Outil Filtres Basiques
       <guiicon>
@@ -16,39 +16,39 @@
       </guiicon>
     </title>
     <para>
-      L'outil <link linkend='basic-filtres'>Filtres Basiques</link> vous permet
+      L'outil <link linkend='basic-filters'>Filtres Basiques</link> vous permet
       d'appliquer différents filtres simples sur votre image. Ces filtres
       peuvent être utiles pour supprimer le bruit ; toutefois, les données
       mesurées seront altérées, il faut donc prendre soin de ne pas détruire
       certains détails important de l'image.
     </para>
     <itemizedlist>
-      <listitem id='filtre-mean'>
+      <listitem id='filter-mean'>
         <indexterm>
           <primary>moyenne</primary>
           <secondary>filtre</secondary>
         </indexterm>
         Filtre moyenne – prend comme valeur la moyenne des valeurs voisines.
       </listitem>
-      <listitem id='filtre-median'>
+      <listitem id='filter-median'>
         <indexterm>
           <primary>médiane</primary>
           <secondary>filtre</secondary>
         </indexterm>
         Filtre médian – prend comme valeur la médiane des valeurs voisines.
       </listitem>
-      <listitem id='filtre-conservative-denoise'>
+      <listitem id='filter-conservative-denoise'>
         <indexterm><primary>filtre de débruitage conservatif</primary></indexterm>
         Filtre de débruitage conservatif – vérifie que la valeur n'est pas un
         extrême par rapport aux valeurs voisines. Si tel est le cas, le filtre
         substitue la valeur par la valeur la plus haute (ou plus basse)
         suivante.
       </listitem>
-      <listitem id='filtre-kuwahara'>
+      <listitem id='filter-kuwahara'>
         <indexterm><primary>filtre Kuwahara</primary></indexterm>
         Filtre Kuwahara – filtre de lissage conservant les bords.
       </listitem>
-      <listitem id='filtre-minimum'>
+      <listitem id='filter-minimum'>
         <indexterm>
           <primary>minimum</primary>
           <secondary>filtre</secondary>
@@ -57,25 +57,25 @@
         Filtre minimum –  aussi connu sous le nom de filtre d'érosion, il
         remplace la valeur par le minimum des valeurs voisines.
       </listitem>
-      <listitem id='filtre-maximum'>
+      <listitem id='filter-maximum'>
         <indexterm>
           <primary>maximum</primary>
           <secondary>filtre</secondary>
         </indexterm>
-        <indexterm><primary>filtre de dilation</primary></indexterm>
+        <indexterm><primary>filtre de dilatation</primary></indexterm>
         Filtre maximum – aussi connu sous le nom de filtre de dilatation, il
         remplace la valeur par le maximum des valeurs voisines.
       </listitem>
-      <listitem id='filtre-dechecker'>
+      <listitem id='filter-dechecker'>
         <indexterm><primary>filtre de décarèlement</primary></indexterm>
         <indexterm><primary>filtre de suppression de motif carrelé</primary></indexterm>
         Filtre de décarèlement – filtre de lissage spécialement conçu pour
         supprimer les motifs carrelés d'une image, tout en conservant les autres
         détails. Il s'agit d'un filtre de convolution utilisant un noyau
-        <informalequation id='eq-filtres-dechecker'>
+        <informalequation id='eq-filters-dechecker'>
           <mediaobject>
             <imageobject>
-              <imagedata fileref='eq-filtres-dechecker.png' format='PNG'/>
+              <imagedata fileref='eq-filters-dechecker.png' format='PNG'/>
             </imageobject>
             <textobject>
               <phrase>Matrice de coeffiecients 5 × 5 du filtre de décarèlement</phrase>
@@ -95,7 +95,7 @@ w_{\rm dechecker}
           </mediaobject>
         </informalequation>
       </listitem>
-      <listitem id='filtre-gaussian'>
+      <listitem id='filter-gaussian'>
         <indexterm><primary>filtre gaussien</primary></indexterm>
         Filtre gaussien – filtre de lissage, le paramètre de la taille détermine
         la largeur à mi-hauteur de la gaussienne (FWHM, full width at half
@@ -150,7 +150,7 @@ w_{\rm dechecker}
       <link linkend='editing-correction'>Correction des Données</link> pour plus
       de détails.
     </para>
-    <informalfigure id='fig-filtres-screenshot'>
+    <informalfigure id='fig-filters-screenshot'>
       <mediaobject>
         <imageobject>
           <imagedata fileref='filter.png' format='PNG'/>
@@ -162,7 +162,7 @@ w_{\rm dechecker}
       </mediaobject>
     </informalfigure>
   </sect2>
-  <sect2 id='convolution-filtre'>
+  <sect2 id='convolution-filter'>
     <title>Convolution</title>
     <para>
       <menuchoice>
@@ -178,7 +178,7 @@ w_{\rm dechecker}
         <alt>9\times9</alt>
       </inlineequation>
       peuvent être appliquées à l'aide du module
-      <link linkend='convolution-filtre'>Filtre de convolution</link>.
+      <link linkend='convolution-filter'>Filtre de convolution</link>.
     </para>
     <para>
       Le <guilabel>Diviseur</guilabel> represente un facteur commun divisant
