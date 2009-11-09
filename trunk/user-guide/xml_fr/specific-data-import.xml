@@ -1,0 +1,189 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: specific-data-import.xml 10335 2009-11-01 21:54:24Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='specific-data-import'>
+  <title>Import de Données Spécifiques</title>
+  <para>
+    L'import de plusieurs types de données ne se fait pas automatiquement et
+    nécessite une intervention de l'utilisateur.
+  </para>
+  <sect2 id='pixmap-file-import'>
+    <title>Formats Graphiques </title>
+    <para>
+      L'import de données sous un format d'image tel que PNG, TIFF, JPEG ou BMP
+      est similaire à l'import de données brutes/inconnues, la procédure est
+      juste plus simple.
+    </para>
+    <para>
+      Cette simplicité vient du fait que la structure du fichier est connue et
+      que le format est automatiquement reconnu. Le type de fichier n'a ainsi
+      pas besoin d'être sélectionné de manière explicite. Toutefois,
+      l'interprétation des données n'est <emphasis>a priori</emphasis> pas
+      connue et doit donc être spécifiée manuellement. La fenêtre de dialogue
+      d'import d'image est ainsi semblable à l'onglet
+      <guilabel>Information</guilabel> de l'import de données brutes, celle-ci
+      vous invitera à spécifier les dimensions physiques et l'échelle de
+      hauteur.
+    </para>
+    <para>
+      Notez que les dimensions physiques proposées ne sont pas obtenues à partir
+      du fichier, elles correspondent seulement aux dernières valeurs utilisées.
+      Certains formats de données SPM sont basés sur des format d'images (basés
+      en général sur le format TIFF) et contiennent les informations sur les
+      échelles physiques et les unités, ceux-ci sont toutefois stockés d'une
+      manière propre au constructeur. Dans ce cas, un module d'import spécifique
+      peut être développé pour ce format précis afin de charger les fichiers
+      automatiquement avec les bonnes échelles.
+    </para>
+  </sect2>
+  <sect2 id='graph-curve-import'>
+    <title>Courbes</title>
+    <para>
+      On peut importer des courbes sous la forme de simples fichiers textes
+      contenant les données en deux colonnes. Dans certains cas ces fichiers
+      sont reconnus automatiquement. Ils peuvent aussi être sélectionnés
+      explicitement en choisissant <guilabel>Graphes ASCII</guilabel> dans la
+      fenêtre d'ouverture de fichier, forçant le module d'import à tenter de
+      charger le fichier en tant que courbe.
+    </para>
+    <para>
+      La fenêtre de dialogue affiche une prévisualisation du graphe et permet
+      de régler les unités et les légendes.
+    </para>
+  </sect2>
+  <sect2 id='raw-xyz-import'>
+    <title>Données XYZ</title>
+    <indexterm>
+      <primary>Données XYZ</primary>
+    </indexterm>
+    <para>
+      L'import de données XYZ sous la forme de fichiers texte contenant trois
+      colonnes peut se faire en choisissant le type
+      <guilabel>Coordonnées XYZ</guilabel>. Là encore, ces fichiers peuvent être
+      reconnus automatiquement mais la sélection explicite de ce type de format
+      force le module à charger le fichier en tant que données XYZ.
+    </para>
+    <para>
+      Gwyddion fonctionne uniquement avec des données régulièrement espacées,
+      les données XYZ irrégulièrement espacées doivent être interpolées lors de
+      l'import. En fait, le module d'import de données XYZ sert à deux choses :
+    </para>
+    <itemizedlist>
+      <listitem>
+        le chargement des données régulièrement espacées enregistrées auparavant
+        sous forme de coordonnées XYZ – s'il s'avère que les données sont
+        régulièrement espacées l'import est assez trivial, et une simple fenêtre
+        de dialogue apparaîtra pour vous permettre de régler les unités ;
+      </listitem>
+      <listitem>
+        la régularisation et l'interpolation des données XYZ irrégulièrement
+        espacées – ce cas est bien moins trivial à traiter, la suite de cette
+        section présente les différentes options disponibles ainsi que leurs
+        inconvénients.
+      </listitem>
+    </itemizedlist>
+    <para>
+      La fenêtre d'import permet de régler les paramètres de base telles que la
+      résolution et la plage des données régularisées, ainsi que les unités
+      latérales et de hauteur. Mais l'option la plus importante est le
+      <guilabel>Type d'interpolation</guilabel>:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Arrondi</term>
+        <listitem>
+          <para>
+            Cette interpolation est analogue à l'interpolation arrondie pour
+            les grilles régulières. La valeur interpolée en un point du plan est
+            égale à la valeur du point le plus proche dans l'ensemble des points
+            XYZ. Cela signifie que la triangulation de Voronoi est utilisée et
+            que chaque cellule de Voronoi est <quote>remplie</quote> avec la
+            valeur du point le plus proche.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Linéaire</term>
+        <listitem>
+          <para>
+            Cette interpolation est analogue à l'interpolation linéaire pour
+            les grilles régulières. La valeur interpolée en un point est
+            calculée à partir des trois vertex du triangle contenant le point
+            obtenu par triangulation de Delaunay. Comme les troix vertex
+            déterminent un plan unique de l'espace, la valeur en ce point est
+            définie par ce plan.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Global</term>
+        <listitem>
+          <para>
+            La valeur en un point correspond à la moyenne pondérée de tous les
+            points de l'ensemble des données, où le poids est proportionnel à
+            l'inverse de la puissance quatrième de la distance mutuelle. Cette
+            méthode peut être très lente car toutes les coordonnées XYZ sont
+            utilisées pour le calcul de chaque point.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Ces deux derniers types d'interpolation sont basés sur la triangulation de
+      Delaunay/Voronoi, celle-ci étant mal définie pour les ensembles de points
+      contenant plus de deux points disposés sur une même ligne ou plus de trois
+      points placés sur un cercle. Dans ces cas précis, la triangulation échoue
+      et le module d'import affiche une message d'erreur.
+    </para>
+    <para>
+      Les valeurs en dehors de l'ensemble des points XYZ sont influencées par le
+      <guilabel>Type d'exterieur</guilabel>:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Bord</term>
+        <listitem>
+          <para>
+            L'ensemble des points n'est pas modifié et les valeurs présentes
+            sur le bord de l'ensemble des points sont étendues à l'infini.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Miroir</term>
+        <listitem>
+          <para>
+            Des points <quote>réfléchis</quote> par rapport aux côtés du volume
+            limite sont ajoutés à l'ensemble des points.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Periodique</term>
+        <listitem>
+          <para>
+            Des points répétés périodiquement par rapport aux côtés opppsés
+            du volume limite sont ajoutés à l'ensemble des points.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-triangulation'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='triangulation.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='triangulation.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Triangulation de Delaunay affichée avec l'interpolation linéaire
+          (à gauche), arrondie (au centre) et globale (à droite) d'un ensemble de
+          points irrégulièrement espacés.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
