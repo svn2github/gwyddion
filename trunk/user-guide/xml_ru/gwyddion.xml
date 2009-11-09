@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: gwyddion.xml 10338 2009-11-02 15:58:14Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<refentry id="gwyddion">
+  <refentryinfo>
+    <productname>gwyddion</productname>
+    <author><othername>Yeti</othername></author>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gwyddion</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>gwyddion</refname>
+    <refpurpose>Отображение и анализ данных СЗМ</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv id="gwyddion-synopsis">
+    <title>Аннотация</title>
+    <cmdsynopsis>
+      <command>gwyddion</command>
+      <arg rep="repeat"><replaceable>ОПЦИЯ</replaceable></arg>
+      <arg rep="repeat"><replaceable>ФАЙЛ</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1 id="gwyddion-description">
+    <title>Описание</title>
+    <para>Gwyddion - графическая программа отображения и анализа данных СЗМ (Сканирующей Зондовой Микроскопии), написанная с использованием Gtk+.</para>
+  </refsect1>
+
+  <refsect1 id="gwyddion-options">
+    <title>Опции</title>
+    <para>Программа принимает все стандартные опции Gtk+, Gdk, и GtkGLExt, такие, как <option>--display</option> или <option>--sync</option>. Смотрите документацию по этим пакетам для описания опций тулкитов.</para>
+    <para>Поведение опции удалённого управления  <option>--remote-<replaceable>*</replaceable></option> не определено, когда более, чем один экземпляр Gwyddion запущен на данном дисплее. Они могут выбирать произвольный экземпляр программы для работы с ним.</para>
+    <para>Опции Gwyddion:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>Выводит короткую справку и завершается.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>Выводит информацию о версии и завершается.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--no-splash</option>
+        </term>
+        <listitem>
+          <para>Отключает заставку при старте.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="remote-control">
+        <term>
+          <option>--remote-new</option>
+        </term>
+        <listitem>
+          <para>Открывает на экране файлы заданные в командной строке в запущенном экземпляре Gwyddion. Запускает новый экземпляр, если ни одного не запущено.</para>
+          <para>Вероятно, это наиболее полезная из опций удалённого управления. Ассоциации с типами файлов обычно настроены для запуска Gwyddion с этой опцией.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--remote-existing</option>
+        </term>
+        <listitem>
+          <para>Запускает файлы. указанные в командной строке в уже запущенном экземпляре Gwyddion. Возвращает ошибку, если ни одного экземпляра не запущено.</para>
+          <para>Может быть полезно для случая, если вы хотите обрабатывать ситуацию с незапущенным Gwyddion иным способом, отличным от его запуска.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--remote-query</option>
+        </term>
+        <listitem>
+          <para>
+            Succeeds if an instance of Gwyddion is already running on the
+            display and prints its instance identifier.  Fails if none is
+            running.
+          </para>
+          <para>
+            The instance identifier depends on the remote control backend in
+            use.  In some cases it is useful as a global window identifier,
+            in some it is not.  With libXmu this option prints the X11
+            <type>Window</type>, on Win32 <type>HWND</type> is printed, while
+            with LibUnique the startup id is printed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--check</option>
+        </term>
+        <listitem>
+          <para>Вместо запуска пользовательского интерфейса и открытия <replaceable>FILE</replaceable>, загружает файлы, проверяет их на наличие ошибок (выводя ошибки на стандартный вывод ошибок stderr) и завершается.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--log-to-file</option>
+        </term>
+        <listitem>
+          <para>Перенаправляет сообщения от GLib, Gtk+, Gwyddion, и т.д. в <filename>~/.gwyddion/gwyddion.log</filename> или в файл. указанный в переменной окружения <link linkend="GWYDDION_LOGFILE"><envar>GWYDDION_LOGFILE</envar></link>. Следует отметить, что сообщения всегда перенаправляются в файл на платформе Win32, таким образом, эта опция не действует на этой платформе.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--debug-objects</option>
+        </term>
+        <listitem>
+          <para>Печатает список объектов созданных при запуске, с временами создания и удаления или счётчиком ссылок при выходе из программы. Полезно только для разработчиков.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--startup-time</option>
+        </term>
+        <listitem>
+          <para>Печатает общее время, затраченное на выполнение различных задач при старте (и закрытии). Полезно только для разработчиков и людей, собирающихся пожаловаться на слишком медленный запуск.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1 id="gwyddion-environment">
+    <title>Окружение</title>
+    <para>На Linux/Unix следующие переменные окружения используются для переопределения вкомпилированных путей установки (версия под MS Windows всегда рассматривает пути относительно места установки). Они предназначены для переопределения системных путей установки и не являются списком путей, они могут содержать только один путь.</para>
+    <variablelist>
+      <varlistentry id="GWYDDION_DATADIR">
+        <term>
+          <envar>GWYDDION_DATADIR</envar>
+        </term>
+        <listitem>
+          <para>Основной каталог данных, где ресурсы (цветовые градиенты, материалы OpenGL, …) были установлены. Gwyddion ищет ресурсы в его подкаталоге <filename>gwyddion</filename>. </para>
+          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${datadir}</varname> обычно установленное в <filename>/usr/local/share</filename>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="GWYDDION_LIBDIR">
+        <term>
+          <envar>GWYDDION_LIBDIR</envar>
+        </term>
+        <listitem>
+          <para>Основной каталог модулей, куда они были установлены. Gwyddion ищет модули в его подкаталоге  <filename>gwyddion/modules</filename>.</para>
+          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${libdir}</varname> обычно установленное в <filename>/usr/local/lib</filename> или <filename>/usr/local/lib64</filename>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="GWYDDION_LIBEXECDIR">
+        <term>
+          <envar>GWYDDION_LIBEXECDIR</envar>
+        </term>
+        <listitem>
+          <para>Основной каталог lib-exec, куда были установлены подключаемые модули. Gwyddion ищет подключаемые модули в его подкаталоге  <filename>gwyddion/modules</filename>.</para>
+          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${libexecdir}</varname> обычно установленное в <filename>/usr/local/libexec</filename>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="GWYDDION_LOCALEDIR">
+        <term>
+          <envar>GWYDDION_LOCALEDIR</envar>
+        </term>
+        <listitem>
+          <para>Каталог данных о локализации, куда были установлены каталоги сообщений (переводы).</para>
+          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${datadir}/locale</varname> обычно установленное в <filename>/usr/local/share/locale</filename>.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>Другие переменные, которые влияют на поведение <application>Gwyddion</application> при запуске включают в себя <ulink url="http://library.gnome.org/devel/glib/stable/glib-running.html">переменные GLib+</ulink> и <ulink url="http://library.gnome.org/devel/gtk/stable/gtk-running.html">переменные Gtk+</ulink>, а также некоторые специфичные для Gwyddion переменные.</para>
+    <variablelist>
+      <varlistentry id="GWYDDION_LOGFILE">
+        <term>
+          <envar>GWYDDION_LOGFILE</envar>
+        </term>
+        <listitem>
+          <para>Имя файла. куда перенаправляются сообщения журналов. На MS Windows сообщения всегда отправляются в файл. поскольку работа с терминалом там весьма затруднительна. Местоположение журналов по умолчанию, <filename>gwyddion.log</filename> в каталоге Documents and Settings пользователя, может быть переопределено с помощью <envar>GWYDDION_LOGFILE</envar>. На unix, сообщения по умолчанию отправляются на терминал и эта переменная будет действовать только при задании опции <option>--log-to-file</option>.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1 id="gwyddion-files">
+    <title>Файлы</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/settings</filename>
+        </term>
+        <listitem>
+          <para>Сохранённые пользовательские настройки и состояния инструментов. Не стоит редактировать при запущенном Gwyddion, он всё равно перезапишет при выходе.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename>~/.gwyddion/glmaterials</filename>, <filename>~/.gwyddion/gradients</filename>, ...</term>
+        <listitem>
+          <para>Пользовательские каталоги с различными ресурсами (материалами OpenGL, цветовыми градиентами, ...).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/glmaterials</filename>, <filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/gradients</filename> ...</term>
+        <listitem>
+          <para>То же самое для общесистемных ресурсов.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/pixmaps</filename>
+        </term>
+        <listitem>
+          <para>Каталог для пользовательских иконок. В основном полезно при установке модулей в домашний каталог.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/pixmaps</filename>,</term>
+        <listitem>
+          <para>То же для общесистемных иконок</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/modules</filename>
+        </term>
+        <listitem>
+          <para>Каталог для пользовательских модулей. Они должны находиться в подкаталогах <filename>file</filename>, <filename>graph</filename>,  <filename>process</filename> и <filename>tools</filename> в зависимости от их вида, хотя это больше обычай, чем обязательное правило.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename><envar>$GWYDDION_LIBDIR</envar>/gwyddion/modules</filename>,</term>
+        <listitem>
+          <para>То же для общесистемных модулей.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/plugins</filename>
+        </term>
+        <listitem>
+          <para>Каталог для пользовательских подключаемых модулей. Они должны находиться в подкаталогах <filename>file</filename> и <filename>process</filename> в зависимости от их вида.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename><envar>$GWYDDION_LIBEXECDIR</envar>/gwyddion/plugins</filename>,</term>
+        <listitem>
+          <para>То же для общесистемных подключаемых модулей</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/pygwy</filename>
+        </term>
+        <listitem>
+          <para>Каталог для пользовательских скриптов и модулей на python.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id="gwyddion-see-also">
+    <title>См. также</title>
+    <para><citerefentry><refentrytitle>gwyddion-thumbnailer</refentrytitle><manvolnum>1</manvolnum></citerefentry>, <citerefentry><refentrytitle>gxsm</refentrytitle><manvolnum>1</manvolnum></citerefentry></para>
+  </refsect1>
+</refentry>
+<!-- vim: set ts=2 sw=2 et : -->
