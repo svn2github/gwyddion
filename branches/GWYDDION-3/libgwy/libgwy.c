@@ -32,6 +32,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #ifndef R_OK
 #define R_OK 4
 #endif
@@ -135,6 +139,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
  *   GWYDDION_LOCALE_DIR
  * - /proc/self/map (only on Linux)
  * - g_win32_get_package_installation_directory_of_module() (only on Win32)
+ * - bundle installation directory (only on Mac OS X)
  * - compile-time prefix
  * - gwyddion program path
  *
@@ -239,6 +244,44 @@ get_unix_module_directory(void)
 #else
 static gchar*
 get_unix_module_directory(void)
+{
+    return NULL;
+}
+#endif
+
+#ifdef __APPLE__
+/* Note: This returns directly the main directory, not library directory. */
+static gchar*
+get_osx_module_directory(const gchar *dirname)
+{
+    /* XXX: What is the return type of CFBundleGetMainBundle()? */
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFURLRef res_url = CFBundleCopyResourcesDirectoryURL(bundle);
+    CFURLRef bundle_url = CFBundleCopyBundleURL(bundle);
+    gchar *retval = NULL;
+
+    if (res_url && bundle_url && !CFEqual(res_url, bundle_url)) {
+        guint len = 1024;
+        gchar *path = g_new(gchar, len);
+
+        while (!CFURLGetFileSystemRepresentation(res_url, true,
+                                                 (UInt8*)path, len)) {
+            len *= 2;
+            path = g_renew(path, gchar, len);
+        }
+        retval = g_strdup(path);
+        g_free(path);
+    }
+    if (res_url)
+        CFRelease(res_url);
+    if (bundle_url)
+        CFRelease(bundle_url);
+
+    return retval;
+}
+#else
+static gchar*
+get_osx_module_directory(void)
 {
     return NULL;
 }
@@ -359,6 +402,7 @@ static gpointer
 find_self_impl(G_GNUC_UNUSED gpointer arg)
 {
     GetModuleDirectoryFunc get_module_directory[] = {
+        &get_osx_module_directory,
         &get_unix_module_directory,
         &get_win32_module_directory,
     };
