@@ -54,10 +54,10 @@
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
 #ifdef G_OS_WIN32
-static const gchar *packagedir = "Gwyddion3";
+#define PACKAGEDIR "Gwyddion3"
 #endif
 #ifdef G_OS_UNIX
-static const gchar *packagedir = "gwyddion3";
+#define PACKAGEDIR "gwyddion3"
 #endif
 
 static gchar *libdir = NULL;
@@ -593,21 +593,21 @@ find_user_dir(G_GNUC_UNUSED gpointer arg)
 
     /* Explicite variables */
     if ((dir = g_getenv("HOME")) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, packagedir, NULL);
+        userdir = g_build_filename(dir, "." PACKAGEDIR, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 
     /* GLib */
 #ifdef G_OS_WIN32
     if ((dir = g_get_user_config_dir()) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, packagedir, NULL);
+        userdir = g_build_filename(dir, PACKAGEDIR, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 #endif
 
 #ifdef G_OS_UNIX
     if ((dir = g_get_home_dir()) && userdir_seems_good(dir)) {
-        userdir = g_build_filename(dir, packagedir, NULL);
+        userdir = g_build_filename(dir, "." PACKAGEDIR, NULL);
         return GUINT_TO_POINTER(TRUE);
     }
 #endif
@@ -680,7 +680,7 @@ add_from_list(GPtrArray *paths,
 
     g_strdelimit(s, G_SEARCHPATH_SEPARATOR_S, '\0');
     for (gchar *p = s; p != end; p += strlen(p) + 1)
-        add_unique_string(paths, g_build_filename(p, packagedir, subdir, NULL));
+        add_unique_string(paths, g_build_filename(p, PACKAGEDIR, subdir, NULL));
 
     g_free(s);
 }
