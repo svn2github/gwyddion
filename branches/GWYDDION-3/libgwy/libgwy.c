@@ -254,7 +254,6 @@ get_unix_module_directory(void)
 static gchar*
 get_osx_module_directory(const gchar *dirname)
 {
-    /* XXX: What is the return type of CFBundleGetMainBundle()? */
     CFBundleRef bundle = CFBundleGetMainBundle();
     CFURLRef res_url = CFBundleCopyResourcesDirectoryURL(bundle);
     CFURLRef bundle_url = CFBundleCopyBundleURL(bundle);
@@ -287,18 +286,36 @@ get_osx_module_directory(void)
 }
 #endif
 
+static gboolean
+try_remove_trailing_directory(gchar *path, guint len,
+                              const gchar *suffix)
+{
+    guint slen = strlen(suffix);
+
+    if (slen < len)
+        return FALSE;
+
+    if (memcmp(path + len - slen, suffix, slen) == 0) {
+        path[len - slen] = '\0';
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void
 fix_module_directory(gchar *path)
 {
     if (!path)
         return;
 
-    if (g_str_has_suffix(path, G_DIR_SEPARATOR_S "bin")) {
-        path[strlen(path) - strlen(G_DIR_SEPARATOR_S "bin")] = '\0';
-    }
-    else if (g_str_has_suffix(path, G_DIR_SEPARATOR_S "lib")) {
-        path[strlen(path) - strlen(G_DIR_SEPARATOR_S "lib")] = '\0';
-    }
+    guint len = strlen(path);
+    if (try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "bin")
+        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib")
+        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib64")
+        || try_remove_trailing_directory(path, len, G_DIR_SEPARATOR_S "lib32"))
+        return;
+
+    return;
 }
 
 static gboolean
