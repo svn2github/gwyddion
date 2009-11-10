@@ -65,6 +65,8 @@ static gchar *userdir = NULL;
 static HMODULE libgwy_dll = NULL;
 #endif
 
+typedef gchar* (*GetModuleDirectoryFunc)(void);
+
 /**
  * gwy_type_init:
  *
@@ -356,8 +358,13 @@ check_base_dir(const gchar *basedir,
 static gpointer
 find_self_impl(G_GNUC_UNUSED gpointer arg)
 {
+    GetModuleDirectoryFunc get_module_directory[] = {
+        &get_unix_module_directory,
+        &get_win32_module_directory,
+    };
     gchar *basedir, *path;
     const gchar *dir;
+    guint i;
 
     /* Explicite variables */
     if ((dir = g_getenv("GWYDDION_LIBDIR")) && libdir_seems_good(dir))
@@ -369,29 +376,19 @@ find_self_impl(G_GNUC_UNUSED gpointer arg)
     if (libdir && datadir && localedir)
         return GUINT_TO_POINTER(TRUE);
 
-    /* Unix library installation */
-    if ((basedir = get_unix_module_directory())) {
-        fix_module_directory(basedir);
-        check_base_dir(basedir,
-                       libdir ? NULL : &libdir,
-                       datadir ? NULL : &datadir,
-                       localedir ? NULL : &localedir);
-        g_free(basedir);
+    /* Operating system dependent location mechanisms */
+    for (i = 0; i < G_N_ELEMENTS(get_module_directory); i++) {
+        if ((basedir = get_module_directory[i]())) {
+            fix_module_directory(basedir);
+            check_base_dir(basedir,
+                           libdir ? NULL : &libdir,
+                           datadir ? NULL : &datadir,
+                           localedir ? NULL : &localedir);
+            g_free(basedir);
+        }
+        if (libdir && datadir && localedir)
+            return GUINT_TO_POINTER(TRUE);
     }
-    if (libdir && datadir && localedir)
-        return GUINT_TO_POINTER(TRUE);
-
-    /* Windows library installation */
-    if ((basedir = get_win32_module_directory())) {
-        fix_module_directory(basedir);
-        check_base_dir(basedir,
-                       libdir ? NULL : &libdir,
-                       datadir ? NULL : &datadir,
-                       localedir ? NULL : &localedir);
-        g_free(basedir);
-    }
-    if (libdir && datadir && localedir)
-        return GUINT_TO_POINTER(TRUE);
 
     /* Compile-time defaults */
     if ((dir = GWY_LIBDIR) && libdir_seems_good(dir))
