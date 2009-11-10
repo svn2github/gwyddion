@@ -28,7 +28,7 @@ AC_CONFIG_FILES([
   data/libgwy3.pc
 ])
 
-AM_INIT_AUTOMAKE([1.10 gnu -Wall check-news dist-lzma no-dist-gzip std-options nostdinc])
+AM_INIT_AUTOMAKE([1.11 gnu -Wall check-news dist-xz no-dist-gzip std-options nostdinc])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
 AC_SUBST([GWY_VERSION_MINOR],[gwy_version_minor])
