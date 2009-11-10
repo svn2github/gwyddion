@@ -158,8 +158,8 @@ init_types(G_GNUC_UNUSED gpointer arg)
  * - g_get_home_dir()
  *
  * If neither leads to a suitable directory, fail.  An application should give
- * a warning if it find that gwy_user_directory() returns NULL and avoid
- * saving configuration.  It needs to check whether it actualy succeeded
+ * a warning if it finds that gwy_user_directory() returns NULL and avoid
+ * saving configuration.  It needs to check whether it actually succeeded
  * anyway.
  *
  * 3. GATHERING ALL DIRECTORIES
@@ -751,7 +751,7 @@ gwy_data_search_path(const gchar *subdir)
  *
  * None of the directories returned by the path finding functions is guaranteed
  * to be writable, readable or exist at all.  Even though the existence and/or
- * properties of the directories are checked on certain occassions, the
+ * properties of the directories are verified on certain occassions, the
  * directory might be deleted just between the check and your attempt to do
  * something with it.
  **/
