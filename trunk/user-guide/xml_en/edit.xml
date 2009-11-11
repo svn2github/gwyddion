@@ -271,8 +271,7 @@
     </title>
     <indexterm><primary>line correction</primary></indexterm>
     <para>
-      Profiles taken in the fast scanning axis
-      (usually
+      Profiles taken in the fast scanning axis (usually
       <inlineequation>
         <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
         <alt>x</alt>
@@ -302,20 +301,25 @@
       Line correction functions in <guisubmenu>Correct Data</guisubmenu>
       perform only horizontal line corrections, therefore one has to rotate
       the image to perform column-wise correction.  They include:
-      <itemizedlist>
-        <listitem>
-          <guimenuitem>Match Line Correction</guimenuitem>,
-        </listitem>
-        <listitem>
-          <guimenuitem>Median Line Correction</guimenuitem>,
-        </listitem>
-        <listitem>
-          <guimenuitem>Modus Line Correction</guimenuitem>, and
-        </listitem>
-        <listitem>
-          <guimenuitem>Step Line Correction</guimenuitem>.
-        </listitem>
-      </itemizedlist>
+    </para>
+    <itemizedlist>
+      <listitem>
+        <guimenuitem>Match Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Median Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Modus Line Correction</guimenuitem>, and
+      </listitem>
+      <listitem>
+        <guimenuitem>Median Difference Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Step Line Correction</guimenuitem>.
+      </listitem>
+    </itemizedlist>
+    <para>
       The first three are very similar, they all align rows of the data field
       to minimize some quantity.  As the names indicate,
       <guimenuitem>Median Line Correction</guimenuitem> matches line medians
@@ -328,12 +332,19 @@
       type of data than others.
     </para>
     <para>
+      Function <guimenuitem>Median Difference Line Correction</guimenuitem>
+      shifts the lines so that the median of differences (between vertical
+      neighbour pixels) becomes zero, instead of the difference of medians.
+      Therefore it better preserves large features while it is more sensitive
+      to completely bogus lines.
+    </para>
+    <para>
       Function <guimenuitem>Step Line Correction</guimenuitem> differs from
-      them.  It attempts to identify misaligned segments in the rows and
-      correct the height of each such segment individually.  Therefore it
-      is often able to correct data with discontinuities in the middle of
-      a row.  This function is rather experimental and the exact way it
-      works can be subject of futher changes.
+      the others.  It attempts to identify misaligned segments within the rows
+      and correct the height of each such segment individually.  Therefore it
+      is often able to correct data with discontinuities in the middle of a
+      row.  This function is rather experimental and the exact way it works can
+      be subject of futher changes.
     </para>
   </sect2>
   <sect2 id='path-level'>
