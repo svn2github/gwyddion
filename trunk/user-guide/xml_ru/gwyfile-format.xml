@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: gwyfile-format.xml 9502 2009-07-18 21:47:20Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="gwyfile-format">
+  <title>Формат файлов Gwyddion</title>
+  <para>Родные для <application>Gwyddion</application> файлы данных состоят из древоподобной структуры сериализованных объектов. В общем, эти объекты могут быть различного вида и включать в себя другие объекты (следовательно. структура древоподобная). В понимании работы может сильно помочь <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>, простой демонстратор структуры файла. доступный на сайте проекта, если с ним поработать какое-то время и посмотреть содержимое различных файлов.</para>
+  <para>Прежде всего, мы описываем физическую структуру файла безотносительно возможной интерпретации содержимого.</para>
+  <sect2 id="gwyfile-byte-order">
+    <title>Порядок байтов</title>
+    <para>Все данные хранятся в формате младший сначала (little-endian, также известном, как LSB или Intel).</para>
+  </sect2>
+  <sect2 id="gwyfile-file-header">
+    <title>Заголовок файла</title>
+    <para>Заголовок файла состоит из четырёх байтов (магическое число) со значениями символов ASCII <literal>GWYP</literal>.</para>
+    <para>Это новый формат файла, также существует более старая версия формата с заголовком <literal>GWYO</literal>. Она не будет обсуждаться здесь.</para>
+  </sect2>
+  <sect2 id="gwyfile-file-data">
+    <title>Данные файла</title>
+    <para>Остальная часть файла состоит из переведённых в последовательную форму (сериализованных) объектов <type>GwyContainer</type>, которые содержат все данные. Они сохраняются точно так же, как и любые другие объекты, что описано в следующей секции.</para>
+  </sect2>
+  <sect2 id="gwyfile-object-layout">
+    <title>Размещение объекта</title>
+    <para>Объект состоит из трёх частей (в следующем порядке): <itemizedlist><listitem> Имя типа, сохранённое в виде строки ASCII-символов, заканчивающейся <constant>NUL</constant>. Это имя типа в системе типов GObject. </listitem><listitem> Размер сериализованных данных, сохранённый как 32-битное целое без знака. Он не включает размер имени типа и сам себя. </listitem><listitem> Список компонентов. Компоненты - именованные части данных объекта, каждый определенного типа данных из следующих: атомарный тип, массив атомарных типов, или снова объект. Они сохраняются без определённого порядка. </listitem></itemizedlist></para>
+  </sect2>
+  <sect2 id="gwyfile-components">
+    <title>Компоненты</title>
+    <para>Каждый компонент состоит из трёх частей (в следующем порядке): <itemizedlist><listitem> Название, сохранённое как строка, завершенная <constant>NUL</constant>. </listitem><listitem> Тип, сохраняется как один байт без знака (символ). Таблица возможных типов компонентов представлена ниже. </listitem><listitem> данные. сохраняются в том виде, который наиболее подходит для определённого их вида. </listitem></itemizedlist></para>
+  </sect2>
+  <sect2 id="gwyfile-data-types">
+    <title>Типы данных</title>
+    <para>Доступные атомарные типы данных приведены в нижеследующей таблице:</para>
+    <para>
+      <informaltable id="table-gwyfile-atomic-types">
+        <tgroup cols="3" align="left">
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Тип</entry>
+              <entry>Символ</entry>
+              <entry>Примечание</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>булев</entry>
+              <entry><literal>b</literal></entry>
+              <entry>Сохраняется как байт, ноль = false, не ноль (обычно 1) = true</entry>
+            </row>
+            <row>
+              <entry>символ</entry>
+              <entry><literal>c</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>32битное целое</entry>
+              <entry><literal>i</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>64битное целое</entry>
+              <entry><literal>q</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>double</entry>
+              <entry><literal>d</literal></entry>
+              <entry>число двойной точности с плавающей точкой по стандарту IEEE 754</entry>
+            </row>
+            <row>
+              <entry>строка</entry>
+              <entry><literal>s</literal></entry>
+              <entry>Заканчивающаяся <constant>NUL</constant></entry>
+            </row>
+            <row>
+              <entry>объект</entry>
+              <entry><literal>o</literal></entry>
+              <entry>Переведённый в последовательную форму объект, как описано выше</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Каждый атомарный тип, кроме булевого (boolean) имеет своего двойника в виде массива. Символ типа для всех массивов тот же, что и для атомарного типа, только он написан в верхнем регистре. Массивы хранятся как 32-битная длина массива без знака (число элементов), затем значения элементов. Список типов данных для массивов приведён ниже:</para>
+    <para>
+      <informaltable id="table-gwyfile-array-types">
+        <tgroup cols="3" align="left">
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Тип</entry>
+              <entry>Символ</entry>
+              <entry>Примечание</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>массив символов</entry>
+              <entry><literal>C</literal></entry>
+              <entry>Не завершается <constant>NUL</constant></entry>
+            </row>
+            <row>
+              <entry>массив 32битных целых</entry>
+              <entry><literal>I</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>массив 64битных целых</entry>
+              <entry><literal>Q</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>массив double</entry>
+              <entry><literal>D</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>массив строк</entry>
+              <entry><literal>S</literal></entry>
+              <entry/>
+            </row>
+            <row>
+              <entry>массив объектов</entry>
+              <entry><literal>O</literal></entry>
+              <entry>Буква O в верхнем регистре, не ноль</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id="gwyfile-data-objects">
+    <title>Отдельные объекты</title>
+    <para>Ещё не написано</para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

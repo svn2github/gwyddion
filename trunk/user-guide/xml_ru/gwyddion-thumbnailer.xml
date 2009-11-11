@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: gwyddion-thumbnailer.xml 9520 2009-07-21 11:34:37Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<refentry id="gwyddion-thumbnailer">
+  <refentryinfo>
+    <productname>gwyddion</productname>
+    <author><othername>Yeti</othername></author>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gwyddion-thumbnailer</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>gwyddion-thumbnailer</refname>
+    <refpurpose>Создаёт миниатюрные изображения для файлов данных СЗМ</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv id="gwyddion-thumbnailer-synopsis">
+    <title>Краткая справка</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <group choice="req">
+        <arg choice="plain">--version</arg>
+        <arg choice="plain">--help</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep="repeat"><replaceable>ОПЦИЯ</replaceable></arg>
+      <arg choice="req"><replaceable>РЕЖИМ</replaceable></arg>
+      <arg rep="repeat"><replaceable>АРГУМЕНТ</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1 id="gwyddion-thumbnailer-description">
+    <title>Описание</title>
+    <para>Gwyddion-thumbnailer создаёт миниатюрные изображения для файлов данных СЗМ (Сканирующей Зондовой Микроскопии). В зависимости от режима работы, описанного ниже, миниатюры записываются чтобы соответствовать различным стандартам рабочего стола, таким образом, что они могут отображаться в <citerefentry><refentrytitle>nautilus</refentrytitle><manvolnum>1</manvolnum></citerefentry>, <citerefentry><refentrytitle>thunar</refentrytitle><manvolnum>1</manvolnum></citerefentry> и подобных менеджерах файлов.</para>
+    <para>Gwyddion-thumbnailer загружает и отображает файлы используя  библиотеки и модули <citerefentry><refentrytitle>gwyddion</refentrytitle><manvolnum>1</manvolnum></citerefentry>, следовательно. он создаёт миниатюры для всех форматов файлов. поддерживаемые установленной версией Gwyddion. Также это означает использование настроек Gwyddion, т.е. градиента псевдоцвета используемого в Gwyddion и также на него оказывают влияние те же переменные окружения, что и на Gwyddion.</para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-informative-options">
+    <title>Информационные опции</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>Печатает краткую справку и завершает работу.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>Печатает информацию о версии и завершает работу.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-thumbnailing-options">
+    <title>Опции создания миниатюр</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--update</option>
+        </term>
+        <listitem>
+          <para>Записывает миниатюры только если они ещё не созданы или кажутся устаревшими. По умолчанию, gwyddion-thumbnailer переписывает существующие миниатюры даже если они кажутся не устаревшими.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-mode">
+    <title>Режим</title>
+    <para>Доступно три режима создания миниатюр: <option>gnome2</option>, <option>tms</option> и <option>kde4</option>; и один специальный режим: <option>check</option>. Они описаны ниже.</para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-gnome2">
+    <title>Gnome 2</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep="repeat"><replaceable>ОПЦИЯ</replaceable></arg>
+      <arg choice="plain">gnome2</arg>
+      <arg choice="plain"><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice="plain"><replaceable>INPUT-FILE</replaceable></arg>
+      <arg choice="plain"><replaceable>OUTPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>В режиме <option>gnome2</option>, gwyddion-thumbnailer создаёт миниатюрные изображения в PNG в соответствии со спецификациями на миниатюры Gnome. Используя соглашения из этих спецификаций, он должен запускаться как </para>
+    <informalexample>
+      <programlisting>gwyddion-thumbnailer gnome2 %s %i %o</programlisting>
+    </informalexample>
+    <para>Gwyddion устанавливает соответствующие схемы GConf и включает создание миниатюр для всех типов фалов, которые он поддерживает по умолчанию, так что обычно это должно просто работать и ничего не нужно настраивать вручную.</para>
+    <para>Миниатюры, созданные в режиме <option>gnome2</option> идентичны миниатюрам созданным в режиме <option>tms</option>, включая все дополнительные блоки PNG (в том случае, если указан тот же <replaceable>MAX-SIZE</replaceable>, что и в режиме <replaceable>MAX-SIZE</replaceable>, конечно).</para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-tms">
+    <title>TMS</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep="repeat"><replaceable>ОПЦИЯ</replaceable></arg>
+      <arg choice="plain">tms</arg>
+      <arg choice="plain"><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice="plain"><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>В режиме <option>tms</option> gwyddion-thumbnailer создаёт миниатюры в соответствии с Thumbnail Managing Standard (стандартом управления миниатюрами). Аргумент <replaceable>MAX-SIZE</replaceable> должен быть равен <option>128</option> или <option>normal</option> (оба означают 128 точек) или <option>256</option> или <option>large</option> (обаз означают 256 пикселей).</para>
+    <para>Имя выходного файла не задаётся, поскольку оно описано в TMS. миниатюры помещаются в каталоги для нормальных (normal) или больших (large) в соответствии с заданным <replaceable>MAX-SIZE</replaceable>.</para>
+    <para>Этот режим также может быть полезен для создания партии миниатюр вручную. Например, чтобы создать их для всех файлов <filename>*.afm</filename> в каталоге <filename>scans</filename> и его подкаталогах можно запустить</para>
+    <informalexample>
+      <programlisting><![CDATA[
+find scans -type f -name '*.afm' -print0 \\
+    | xargs -0 -n 1 gwyddion-thumbnailer --update tms normal
+]]></programlisting>
+    </informalexample>
+    <para>После этого можно сделать кофе, поскольку это займёт некоторое время.</para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-kde4">
+    <title>KDE 4</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice="plain">kde4</arg>
+      <arg choice="plain"><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice="plain"><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>В режиме <option>kde4</option>, gwyddion-thumbnailer создаёт PNG-миниатюры которые затем передаются модулю KDE gwythumbcreator. миниатюры, снова те же самые, что и в других режимах, записываются в стандартный вывод.</para>
+    <para><emphasis>НЕ</emphasis> используйте этот режим из командной строки. Он документирован для полноты, однако, протокол обмена между gwythumbcreator и gwyddion-thumbnailer следует считать закрытым и он может поменяться в любое время.</para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-check">
+    <title>Check</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice="plain">check</arg>
+      <arg choice="plain"><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>Режим <option>check</option> не предназначен для создания миниатюр. Вместо этого gwyddion-thumbnailer выводит информацию о доступных миниатюрах для <replaceable>INPUT-FILE</replaceable> и кешированных ошибках создания миниатюр отдельными приложениями, как описано в TMS.</para>
+    <para>Например, если миниатюра нормального размера есть и она не устарела, большой миниатюры не существует и была одна кешированная ошибка gnome-thumbnail-factory, вывод будет следующим:</para>
+    <informalexample>
+      <literallayout><computeroutput>File:   <replaceable>INPUT-FILE</replaceable>
+URI:    file:///home/me/Pictures/naughty/broken-tip3/<replaceable>INPUT-FILE</replaceable>
+Normal: /home/me/.thumbnails/normal/<replaceable>MD5</replaceable>.png
+        status: OK
+Large:  /home/me/.thumbnails/large/<replaceable>MD5</replaceable>.png
+        status: Thumbnail does not exist or stat() fails on it.
+Failed: /home/me/.thumbnails/fail/gnome-thumbnail-factory/<replaceable>MD5</replaceable>.png</computeroutput></literallayout>
+    </informalexample>
+    <para>URI - канонический URI входного файла, <replaceable>MD5</replaceable> - шестнадцатиричное представление контрольной суммы MD5 URI, как предписывает TMS. Если не было кешированных ошибок, строки Failed не печатаются.</para>
+    <para>Эта функция может использоваться для проверки миниатюр любого типа, не обязательно созданных gwyddion или gwyddion-thumbnailer. В будущем, однако, может выводится ошибка если миниатюра не содержит специфичной для Gwyddion информации.</para>
+  </refsect1>
+  <refsect1 id="gwyddion-see-also">
+    <title>См. также</title>
+    <para><citerefentry><refentrytitle>gwyddion</refentrytitle><manvolnum>1</manvolnum></citerefentry>,</para>
+  </refsect1>
+</refentry>
