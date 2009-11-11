@@ -19,7 +19,6 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
-    <!-- Module aistfile.c contains no magic. -->
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -65,20 +64,20 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- From module burleigh.c -->
-    <row>
-      <entry>Burleigh IMG v2.1</entry>
-      <entry>.img</entry>
-      <entry>burleigh</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
     <!-- From module burleigh_bii.c -->
     <row>
       <entry>Burleigh BII</entry>
       <entry>.bii</entry>
       <entry>burleigh_bii</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module burleigh.c -->
+    <row>
+      <entry>Burleigh IMG v2.1</entry>
+      <entry>.img</entry>
+      <entry>burleigh</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -272,20 +271,20 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- From module nanoscope-ii.c -->
-    <row>
-      <entry>Veeco Nanoscope II</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope-ii</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
     <!-- From module nanoscope.c -->
     <row>
       <entry>Veeco Nanoscope III</entry>
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module nanoscope-ii.c -->
+    <row>
+      <entry>Veeco Nanoscope II</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope-ii</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -370,6 +369,15 @@
       <entry>Да<footnote id="table-file-formats-fn3"><para>Обычно с потерями, предназначено для демонстрационных целей. 16битный экспорт в градациях серого возможен в PNG, TIFF и PNM.</para></footnote></entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module pltfile.c -->
+    <row>
+      <entry>Nanosurf PLT</entry>
+      <entry>.plt</entry>
+      <entry>pltfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module pnifile.c -->
     <row>
       <entry>Pacific Nanotechnology PNI</entry>
@@ -420,6 +428,15 @@
       <entry>any</entry>
       <entry>rawgraph</entry>
       <entry>Да<footnote id="table-file-formats-fn4"><para>В настоящее время поддерживаются только простые данные в две колонки, импортируемые как кривые графиков.</para></footnote></entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module rawxyz.c -->
+    <row>
+      <entry>XYZ data</entry>
+      <entry>.xyz, .dat</entry>
+      <entry>rawxyz</entry>
+      <entry>Да<footnote id="table-file-formats-fn5"><para>Данные XYZ интерполируются на правильную сетку при импорте.</para></footnote></entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
@@ -530,15 +547,6 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
     <!-- From module spmlab.c -->
     <row>
       <entry>Thermicroscopes SPMLab R4-R7</entry>
@@ -553,6 +561,15 @@
       <entry>Thermicroscopes SPMLab данные с плавающей точкой</entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
