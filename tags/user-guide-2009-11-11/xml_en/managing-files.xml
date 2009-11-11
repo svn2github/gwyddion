@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='managing-files'>
+  <title>Managing Files</title>
+  <para>
+    Gwyddion uses its <link linkend='gwyfile-format'>custom data format</link>
+    (<filename>.gwy</filename>) to store data.  This format has the following
+    important advantages:
+    <itemizedlist>
+      <listitem>
+        Capability to store the complete state of the individual data,
+        including masks, selections and other properties.
+      </listitem>
+      <listitem>
+        Arbitrary number of channels, graphs and spectrum sets, with arbitrary
+        dimensions and units of both dimensions and values.
+      </listitem>
+      <listitem>
+        Double-precision representation of all data, preventing information
+        loss due to rounding.
+      </listitem>
+    </itemizedlist>
+    Therefore, we recommned to use this format for saving of processed files.
+  </para>
+  <para>
+    Other data file formats are handled with appropriate file loading and
+    saving modules. Beside a large number of file formats used in scanning
+    probe microscopy, graphical file types (PNG, JPEG, TIFF, TARGA) and raw
+    binary and text data can be imported too.  If your SPM data format is not
+    supported by Gwyddion yet or it is loaded incorrectly, you are encouraged
+    to write an import module (if you can program) or contact the maintainers
+    to help them improve the support.
+  </para>
+  <para>
+    The <link linkend='file-formats'>list of all supported file formats</link>
+    can be found in chapter Summaries and Tables.
+  </para>
+  <sect2 id='file-loading'>
+    <title>File Loading</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>loading</primary>
+    </indexterm>
+    <para>
+      Files are opened using
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guisubmenu>Open</guisubmenu>
+      </menuchoice>.
+      The file type is detected automatically, based solely on the file
+      content.  Since the same extensions such as
+      <filename>.img</filename>, <filename>.afm</filename> or
+      <filename>.dat</filename> are used by many different SPM file types this
+      approach is superior to relying on file extensions.
+    </para>
+    <para>
+      The only exception is the import of various raw data, either
+      two-dimensional or graph, that must be chosen explicitly in the file open
+      dialog.
+      See sections <link linkend='raw-file-import'>Raw Data File Import</link>
+      for details of import of raw data and manual extraction of data from
+      unsupported formats and
+      <link linkend='specific-data-import'>Specific Data Import</link> for
+      import of XYZ data, pixmap image data and graph data.
+    </para>
+    <para>
+      The list of files in the file open dialog can be limited to only files
+      Gwyddion recognizes as loadable by enabling the <guilabel>Show only
+        loadable files</guilabel> option.
+      The file type label then indicates the filtering by appending
+      <guilabel>(filtered)</guilabel> to the end.  This can be often
+      convenient, on the other hand it can slow down listing of directories
+      with many files.
+    </para>
+    <informalfigure id='fig-file-open-screenshot'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='file-open.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          File open dialog with expanded file type options and channel preview.
+          The small text above the preview shows the module used to load the
+          file (sis) and the number of channels (ch), graphs (gr) and
+          single-point spectra (sps) in the file.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='file-merging'>
+    <title>File Merging</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>merging</primary>
+    </indexterm>
+    <para>
+      File merging, performed by
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guisubmenu>Open</guisubmenu>
+      </menuchoice>,
+      is similar to normal file loading, except that the selected file (or
+      files) is merged into the current open file.  In other words, channels,
+      graphs and spectra, together with all their settings and properties are
+      added to those already present in the current file.
+    </para>
+  </sect2>
+  <sect2 id='file-saving'>
+    <title>File Saving</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>saving</primary>
+    </indexterm>
+    <para>
+      Much of the previous paragraphs applies to file saving too.  One of the
+      main differences is the reliability of automatic file type determination.
+      While loading can and does examine the file contents, saving depends
+      on file name and extension.  Combined with the large number of
+      different file types using the same extension such as
+      <filename>.img</filename>, <filename>.afm</filename> or
+      <filename>.dat</filename> it leads to ambiguities.  Select the file
+      type explicitly before saving if you are unsure.
+    </para>
+    <para>
+      Since the only file type able to fully represent Gwyddion data
+      structures is its native data format, saving to
+      a <filename>.gwy</filename> file is the only proper saving.  Saving to
+      other file formats essentially consists of exporting of a limited
+      subset of the data, typically only the active channel (without masks
+      and presentations).  Therefore it does <emphasis>not</emphasis>
+      change the file name of the current file to the just saved file name.
+    </para>
+  </sect2>
+  <sect2 id='document-history'>
+    <title>Document History</title>
+    <indexterm>
+      <primary>file</primary>
+      <primary>recently open</primary>
+    </indexterm>
+    <para>
+      The history of recently opened files can be accessed with
+      <menuchoice>
+        <guimenu>File</guimenu>
+        <guisubmenu>Open Recent</guisubmenu>
+      </menuchoice>.
+      The submenu contains the last 10 recently used files for quick recalling,
+      an extensive recent file history is accessed with the last item
+      <guimenuitem>Document History</guimenuitem>.
+    </para>
+    <para>
+      Document history lists the files sorted by the last access time (the
+      most recently accessed at the top), with previews and some additional
+      information about a selected channel.  The function of the bottom row
+      of buttons is following:
+      <variablelist>
+        <varlistentry>
+          <term><guibutton>Prune</guibutton></term>
+          <listitem>
+            Removes history entries of files that have been deleted or are
+            no longer accessible for other reasons.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guibutton>Close</guibutton></term>
+          <listitem>
+            Closes the document history window.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guibutton>Open</guibutton></term>
+          <listitem>
+            Opens the selected file.  This can be also achieved by activating
+            the selected row, either by double-clicking or with the keyboard.
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+    <para>
+      The history can be searched/filtered by file name using the filter
+      controls above the buttons.  The filter is activated by pressing
+      <keycap>Enter</keycap> in the filter pattern entry.  To display all
+      history entries, clear the entry and activate it.  The filter pattern
+      is interpreted in two ways:
+      <itemizedlist>
+        <listitem>
+          If the pattern contains wildcards, i.e. <literal>*</literal> or
+          <literal>?</literal>, it is interpreted as file glob.  This means
+          <literal>?</literal> represents a signle arbitrary character,
+          <literal>*</literal> represents an arbitrary sequence of zero or
+          more characters, and the file name has to precisely match the
+          pattern.  Note directory separators (<literal>/</literal> or
+          <literal>\</literal>) are not treated specially, therefore in the
+          pattern <literal>*.sis</literal> the initial <literal>*</literal>
+          matches all leading directory components.  The pattern syntax is
+          described in
+          <ulink url='http://library.gnome.org/devel/glib/stable/glib-Glob-style-pattern-matching.html#glib-Glob-style-pattern-matching.description'>GPatternSpec</ulink>
+          documentation.
+        </listitem>
+        <listitem>
+          If the pattern does not contain any wildcards, it is directly
+          searched as a part of the file name.
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Search case sensitivity, controlled by option <guilabel>Case
+        sensitive</guilabel>, is useful mainly on systems distinguishing
+      letter case in file names, such as Unix.  On systems that do not
+      distinguish the case themselves it is recommended to keep the setting
+      on case insensitive.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

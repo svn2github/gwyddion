@@ -1,0 +1,45 @@
+Some random remarks:
+
+* If you downloaded and unpacked this and wonder what to do with it, you
+  downloaded the wrong package.  This is the DocBook source code.  Get the
+  ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
+
+* xml/      contains the XML DocBook sources
+  formulas/ contains rules for TeX formula rendering and will contain the
+            extracted and rendered formulas
+  images/   contains bitmap images
+  xhtml/    will contain the compiled XHTML
+
+* GNU make is required; configure detects whether you have it, but you may
+  still have to type (for example)
+
+    gmake
+
+  to build the guide.
+
+* You may need to specify location of the XML catalog to configure:
+
+    ./configure --with-xml-catalog=/usr/local/share/xml/catalog
+
+* After svn checkout, run autoconf to generate configure.
+
+* The source is really source, i.e. generated files are not distributed.  To
+  build the various output formats (well, XHTML or PDF at this moment) a
+  number of auxiliary tools is necessary to render math formulas, convert
+  images to suitable output formats, etc.
+
+  configure is your friend, it does not abort when something is missing.
+  Instead, it checks for all the tools and at the end it prints what you will
+  be unable to build and why.
+
+* Some of the images and graphs were generated.  The programs, gnuplot scripts
+  and other tools are not distributed in the tarballs.  However, you can find
+  them in src/ subdirectory of the subversion repository
+
+  https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/user-guide/
+
+* The user guide is licensed under either GNU GPL or GNU FDL, see the guide
+  text for the full license and author list.
+
+  Autoconf checks were borrowed from various sources.  The copright notices
+  can be found at the beginings of the code snippets.

@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='main-window'>
+  <title>Main Window</title>
+  <para>
+    The main window, also called toolbox, is one of the two Gwyddion windows
+    that appear after program start (with no files given to open), the other
+    is the <link linkend='data-browser'>data browser</link>.  Closing the
+    main window causes Gwyddion to exit.
+  </para>
+  <para>
+    The toolbox contains the set of Gwyddion menus and from several rows of
+    buttons connected with common functions and tools.  The menus group the
+    functions as follows:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guimenu>File</guimenu>
+      </term>
+      <listitem>
+        <para>
+          associates commands that are used for
+          <link linkend='managing-files'>file loading and saving</link>.
+          Certain global commands (e. g. <guimenuitem>Exit</guimenuitem>) are
+          located here too. The <link linkend='document-history'>history of
+          recently opened files</link> can be browsed with
+          <menuchoice>
+            <guimenu>File</guimenu>
+            <guisubmenu>Open Recent</guisubmenu>
+            <guimenuitem>Document History</guimenuitem>
+          </menuchoice>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Edit</guimenu>
+      </term>
+      <listitem>
+        <para>
+          provides history manipulation commands
+          (<guimenuitem>Undo</guimenuitem>, <guimenuitem>Redo</guimenuitem>)
+          and editors of miscellaneous global resources, such as
+          gradients and materials for false color and 3D data representation
+          or the default color used for
+          <link linkend='presentations-masks'>data masking</link>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Data Process</guimenu>
+      </term>
+      <listitem>
+        <para>
+          is built automatically from all data processing modules
+          available in the Gwyddion module directory (depending on the
+          operating system).  This menu together with
+          <guilabel>Tools</guilabel> panel of buttons contain most of the
+          commands you will need at analyzing your SPM data.  A subset of
+          these functions is also available in <guilabel>Data
+            Process</guilabel> button panel.  These buttons serve as
+          shortcuts to commonly used functions from <guimenu>Data
+            Process</guimenu> menu.  All functions accessible from
+          <guilabel>Data Process</guilabel> button panel can be found in the
+          menu too.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Graph</guimenu>
+      </term>
+      <listitem>
+        <para>
+          is similar to <guimenu>Data Process</guimenu>, except it
+          consists of graph functions. <link linkend='graph-processing'>Graph
+            processing</link> includes function fitting, exporting graph data
+          etc.  Button panel <guilabel>Graph</guilabel> again contains
+          a subset of the commonly used functions from <guimenu>Graph</guimenu>
+          menu.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Meta</guimenu>
+      </term>
+      <listitem>
+        <para>
+          contains commands that provide various auxiliary information.
+          Namely height field <link linkend='metadata'>metadata</link> (e.g.
+          scanning speed, tip voltage, etc.) and information about
+          <application>Gwyddion</application> itself.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Finally, you can find some rows of buttons in the main window.  Buttons
+    in <guilabel>View</guilabel> panel offer zooming functions (that are
+    often more easily invoked by keyboard shortcuts or just rezising the data
+    window) and <link linkend='opengl-3d-view'>3D data display</link>.
+    Panels <guilabel>Data Process</guilabel> and <guilabel>Graph</guilabel>
+    contain selected functions from <guimenu>Data Process</guimenu> and
+    <guimenu>Graph</guimenu> menus as described above.
+  </para>
+  <para>
+    Panel <guilabel>Tools</guilabel> contains
+    <link linkend='tools'>tools</link>, i.e. functions that directly work
+    with selections on data windows.  These functions are accessible only
+    from this button panel.
+  </para>
+  <informalfigure id='fig-main-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='main_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Main window and a data window showing microchip surface (Gwyddion
+        sample file <filename>chip.gwy</filename>).
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

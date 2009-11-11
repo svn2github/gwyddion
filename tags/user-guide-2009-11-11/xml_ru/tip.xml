@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: tip.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="tip-convolution-artefacts">
+  <title>Артефакты взаимодействия с зондом</title>
+  <para>Артефакты взаимодействия с зондом являются одним из главных источников ошибок в СЗМ. Поскольку зонд никогда не является идеальным (подобно дельта-функции), мы нередко наблюдаем искажения изображения, связанные с этим явлением. Можно даже увидеть изображение зонда на скане поверхности, если на поверхности присутствуют острые особенности.</para>
+  <informalfigure id="fig-tip-alltips-scans">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="alltips.png" format="PNG"/>
+      </imageobject>
+      <caption>Изображения поверхности ZnSe, измеренной четырьмя разными зондами (более или менее испорченными).</caption>
+    </mediaobject>
+  </informalfigure>
+  <para>Мы, к счастью, можем смоделировать и/или исправить влияние зонда используя алгоритмы расширения и/или эрозии, соответственно. Эти алгоритмы были опубликованы Вильярубия (см. [<link linkend="tip-convolution-artefacts-ref-1">1</link>]).</para>
+  <sect2 id="tip-obtaining-geometry">
+    <title>Получение геометрии зонда</title>
+    <indexterm>
+      <primary>зонд</primary>
+      <secondary>моделирование</secondary>
+    </indexterm>
+    <para>Для исследования влияния зонда на данные мы должны прежде знать его геометрию. В общем случае, геометрия зонда может быть получена следующими способами:</para>
+    <orderedlist>
+      <listitem>используя спецификации поставщика (геометрию зонда, радиус острия и угол)</listitem>
+      <listitem>используя сканирующую электронную микроскопию или другую независимую методику измерения свойств зонда.</listitem>
+      <listitem>используя известный образец для характеризации зондов (с острыми краями)</listitem>
+      <listitem>используя алгоритм слепой оценки зонда с использованием образцов для тестирования зондов или других подходящих</listitem>
+    </orderedlist>
+    <para id="tip-model">В Gwyddion можно использовать первый и последний из предложенных подходов. Большая часть зондов с простой геометрией может быть смоделирована используя модель зонда (<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зонд</guisubmenu><guimenuitem>Модель зонда</guimenuitem></menuchoice>) . Этот вид задания геометрии может быть весьма эффективен, если нам нужно только проверить карту достоверности или провести моделирование влияния зонда.</para>
+    <para id="tip-blind-estimate">Чтобы получить более детальную (и более приближенную к реальности) модель структуры зонда можно использовать алгоритм слепой оценки (<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зонд</guisubmenu><guimenuitem>Слепая оценка</guimenuitem></menuchoice>).</para>
+    <para>Слепая оценка зонда основана на применении хорошо известного факта. что на некоторых данных о поверхности мы можем непосредственно увидеть изображения отдельных деталей зонда. Алгоритм перебирает все данные поверхности и в каждой точке пытается уточнить каждую точку зонда в соответствии с наибольшим наклоном в направлении между заданной точкой зонда и его острием.</para>
+    <para>В Gwyddion можно использовать две модификации вышеприведённого алгоритма: <emphasis>частичная</emphasis> оценка зонда, которая использует только ограниченное число наиболее высоких точек изображения и  <emphasis>полная</emphasis> оценка, которая использует изображение целиком (и, вследствие этого, гораздо медленнее). В модуле оценки зонда Gwyddion можно также использовать частичную оценку как начальную точку для полной оценки. Это должно улучшить скорость работы полной оценки.</para>
+    <informalfigure id="fig-tip-alltips">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="alltips2.png" format="PNG"/>
+        </imageobject>
+        <caption>изображения зондов СЗМ, полученные из данных <link linkend="fig-tip-alltips-scans">предыдущего рисунка</link> используя алгоритм слепой оценки.</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id="tip-operations">
+    <title>Свёртка зонда и восстановление поверхности</title>
+    <indexterm>
+      <primary>зонд</primary>
+      <secondary>свёртка</secondary>
+    </indexterm>
+    <para id="tip-convolution">Когда нам известна геометрия зонда, мы можем использовать свёртку зонда (расширение) для моделирования процесса получения данных. для этого используется модуль расширения (<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зонд</guisubmenu><guimenuitem>Расширение</guimenuitem></menuchoice>). Это может быть, в частности, полезно при работе с данными, полученными в результате численного моделирования (см., например, [<link linkend="tip-convolution-artefacts-ref-2">2</link>]).</para>
+    <para>Следует заметить, что этот алгоритм (также, как и следующие два) требует совместимых данных о скане и о зонде, т.е. физические величины размера точек скана и точек изображения зонда должны быть одинаковыми. Это соотношение автоматически гарантируется для моделей зонда, полученных методом слепой оценки на том же наборе данных (или на данных с похожей размерностью). Если изображение получено другим путём, вам возможно придётся пересчитать его.</para>
+    <informalfigure id="fig-tip-simulated-convolution">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="fractaltips.png" format="PNG"/>
+        </imageobject>
+        <caption>Модель фрактальной поверхности до (слева) и после (справа) свёртки с зондом.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para id="tip-surface-reconstruction"><indexterm><primary>зонд</primary><secondary>вычитание</secondary></indexterm> Обратной операцией к свёртке является восстановление поверхности (эрозия), которая позволяет частично исправить влияние зонда на данные изображения. Для этого используйте функцию восстановления поверхности (<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зонд</guisubmenu><guimenuitem>Восстановление поверхности</guimenuitem></menuchoice>). Конечно, те данные, которые соответствуют точкам, где зонд не касался поверхности (т.е. поры) не могут быть восстановлены, т.к. об этих точках нет информации.</para>
+    <informalfigure id="fig-tip-reconstruction">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="reconstruction.png" format="PNG"/>
+        </imageobject>
+        <caption>Исходное и восстановленное изображение ZnSe полученное испорченным зондом СЗМ.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para id="tip-certainty-map"><indexterm><primary>зонд</primary><secondary>карта достоверности</secondary></indexterm> Как видно, наиболее проблемными участками изображения СЗМ являются точки, где зонд касался поверхности не в одной точке, а в нескольких. В этих точках наблюдается потеря информации. Алгоритм карты достоверности может пометить те точки, где зонд вероятно касался поверхности только одной точкой.</para>
+    <informalfigure id="fig-tip-certainty-map">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="certainty-map.png" format="PNG"/>
+        </imageobject>
+        <caption>Карта достоверности. полученная со стандартной решетки. Следует отметить, что параметры модели зонда были взяты с технического описания для демонстрационных целей . Слева образец, справа – он же с картой достоверности.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para>Алгоритм карты достоверности следовательно может использоваться для выделения на изображении СЗМ данных, повреждённых в результате взаимодействия с зондом необратимым образом. Для анализа данных СЗМ на изображениях с большими уклонами всегда важно проверять наличие подобных точек. В Gwyddion можно использовать функцию карты достоверностей для создания этих карт (<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зонд</guisubmenu><guimenuitem>Карта достоверности</guimenuitem></menuchoice>).</para>
+  </sect2>
+  <sect2 id="tip-convolution-artefacts-ref">
+    <title>Источники</title>
+    <para id="tip-convolution-artefacts-ref-1">[1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.</para>
+    <para id="tip-convolution-artefacts-ref-2">[2] <ulink url="http://klapetek.cz/download.html">P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink></para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

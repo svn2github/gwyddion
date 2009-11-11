@@ -1,0 +1,206 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: edit-extended.xml 9499 2009-07-18 17:57:05Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='edit-extended'>
+  <title>Correction Avancée des Données</title>
+  <para>
+     Cette section présente certains modules conçus pour réaliser des
+     corrections particulières des données SPM. L'utilisation des outils
+     basiques de d'édition présentés dans le chpitre
+     <link linkend='editing-correction' endterm='editing-correction.title'/>
+     permet de corriger la plupart des défauts locaux de scan que l'on trouve
+     souvent sur les images de mesure SPM. Il existe aussi de nombreuses sources
+     d'erreurs liées aux méthodes de mesure SPM aboutissant à des erreurs
+     globales, telles que l'apparition de défauts basse-fréquence ou des dérives
+     des données le long de l'axe lent du scan.
+  </para>
+  <sect2 id='drift-compensation'>
+    <title>Compensation de la Dérive</title>
+    <indexterm><primary>compensation de la dérive</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Compenser la Dérive</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      La compensation de la dérive calcule et/ou corrige la dérive le long de
+      l'axe rapide (horizontal) du scan. Cet effet peut être causé par des
+      effets thermiques ou une rigidité mécanique insuffisante de l'instrument
+      de mesure.
+    </para>
+    <para>
+      Le graphe de dérive, une des sorties possibles du module, affiche le
+      déplacement horizontal de chaque ligne par rapport à une ligne de
+      référence (qui peut être en principe choisi de manière arbitraire, en
+      pratique la référence est déterminée de manière à minimiser la quantité de
+      données sortant de l'image après compensation), avec la coordonnée
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+        <alt>y</alt>
+      </inlineequation>
+      de la ligne en abscisse.
+    </para>
+    <para>
+      La dérive est calculée en deux étapes :
+      <orderedlist>
+        <listitem>
+          Un décalage mutuel horizontal est estimé pour chaque couple de lignes
+          dont la distance est inférieure à <guilabel>Search range</guilabel>.
+          Il s'agit du décalage donnant la corrélation maximale entre les deux
+          lignes. On obtient alors l'ensemble des estimations des dérives
+          locales (ainsi qu'une valeur de corrélation maximale permettant
+          d'évaluer leur similarité).
+        </listitem>
+        <listitem>
+          Les décalages globaux sont calculés à partir des décalages locaux.
+          Pour l'instant la méthode utilisée est très simple mais elle semble
+          suffisante dans la plupart des cas : les dérivées des dérives locales
+          sont ajustées pour chaque ligne sur les estimations des dérives
+          locales, le décalage global est ensuite obtenu par intégration
+          (c'est-à-dire en sommant des dérives locales).
+        </listitem>
+      </orderedlist>
+    </para>
+    <para>
+      L'option <guilabel>Exclure l'asymétrie lineaire</guilabel> soustrait le
+      terme linéaire du décalage calculé, ce qui peut être utile lorsque l'image
+      est anisotrope et qu'elle contient des structures censées être orientés
+      selon une direction non parallèle aux bords de l'image.
+    </para>
+    <informalfigure id='fig-drift-correction'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='drift-corrected-graph.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Exemple de correction de dérive :
+          (a) données originales montrant une forte dérive selon l'axe rapide de scan,
+          (b) données corrigées,
+          (c) courbe de dérive calculée.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='fft-filter-1d'>
+    <title>Filtre FFT 1D</title>
+    <indexterm>
+      <primary>Transformée de Fourier</primary>
+      <secondary>Filtrage 1D</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Filtrage FFT 1D</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Le filtrage de Fourier est une des manières les plus puissantes de
+      supprimer du bruit d'une image. La transformée de Fourier de l'image est
+      tout d'abord calculée. Un filtre est ensuite appliqué à cette transformée.
+      La transformée inverse est finalement calculée pour obtenir l'image
+      finale. Gwyddion utilise la transformée de Fourier rapide (FFT, Fast
+      Fourier Transform) pour accélerer le calcul.
+    </para>
+    <para>
+      Dans le filtre de FFT 1D, les fréquences devant être supprimées du spectre
+      (type de suppression : vide) ou soustraites aux fréquences voisines (type
+      de suppression : supprimer) peuvent être sélectionnées en marquant les
+      zones correspondantes dans le graphe du spectre de puissance. La sélection
+      peut être facilement inversée en choisissant le type de filtre. Le filtre
+      FFT 1D peut être utilisé à la fois pour les directions horizontales et
+      verticales.
+    </para>
+  </sect2>
+  <sect2 id='fft-filter-2d'>
+    <title>Filtre 2D FFT</title>
+    <indexterm>
+      <primary>Transformée de Fourier</primary>
+      <secondary>Filtrage 2D</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Filtrage FFT 2D</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+     Le filtrage FFT 2D est similaire à la variante 1D (voir plus haut) mais il
+     utilise une transformée de Fourier en 2D. Les fréquences spatiales devant
+     être filtrées doivent ainsi être sélectionnées en 2D à l'aide d'un éditeur
+     de masque. Comme les fréquences sont liées au centre de l'image
+     (correspondant à la fréquence nulle), le masque peut être lié à ce centre
+     (origine des coordonnées) lors de l'édition. Il existe de plus différents
+     types d'affichage et de sortie – l'image ou le module des coefficients
+     peuvent être extraits (ou les deux à la fois).
+    </para>
+    <para>
+     Notez que le filtre ré-échantillonne généralement les données à une
+     dimension adaptée à l'algorithme de FFT (FFTW ou Gwyddion FFT). Comme cela
+     peut affecter les résultats, une information sur la taille de l'image
+     ré-échantillonnée est affichée dans la fenêtre du module.
+    </para>
+  </sect2>
+  <sect2 id='polynomial-distort'>
+    <title>Distortion Polynômiale</title>
+    <indexterm><primary>distortion dans le plan xy</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Distortion Polynômiale</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Une distortion dans le plan horizontal peut être corrigée ou créée à
+      l'aide la distorsion polynômiale. Cet outil effectue des transformée
+      pouvant être exprimées sous la forme
+    </para>
+    <informalequation id='eq-polynomial-distortion'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='eq-polynomial-distortion.png' format='PNG'/>
+        </imageobject>
+        <textobject role='tex'>
+          <phrase>
+<![CDATA[
+\eqnarray{
+x_{\rm old}&=&P_x(x_{\rm new}, y_{\rm new}),\cr
+y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
+}
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      où
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>P<subscript>x</subscript></phrase></mathphrase>
+        <alt>P_x</alt>
+      </inlineequation>
+      et
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>P<subscript>y</subscript></phrase></mathphrase>
+        <alt>P_y</alt>
+      </inlineequation>
+      sont des polynômes pouvant atteindre le troisième ordre et utilisant des
+      coefficients définis par l'utilisateur. Notez la direction de la
+      transformation des coordonnées – la direction inverse ne garantirait pas
+      une fonction non équivoque.
+    </para>
+    <para>
+      Les coefficients du polynôme sont sans unité, i.e. comme si les plages de
+      coordonnéess étaient toujours [0, 1]. Si la case
+      <guilabel>Mise à jour automatique</guilabel> est activée, la touche
+      <keysym>Entrée</keysym> lors de la saisie d'un coefficient (ou simplement
+      le déplacement vers une autre case) permet de mettre à jour la
+      prévisualisation du résultat.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

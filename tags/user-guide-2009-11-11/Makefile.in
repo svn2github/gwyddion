@@ -1,0 +1,254 @@
+XHTML_ENABLE = @XHTML_ENABLE@
+PDF_ENABLE = @PDF_ENABLE@
+MAN_ENABLE = @MAN_ENABLE@
+PNG_ENABLE = @PNG_ENABLE@
+SVG_ENABLE = @SVG_ENABLE@
+
+VERSION = @PACKAGE_VERSION@
+BASENAME = @PACKAGE_TARNAME@
+PACKAGE = @PACKAGE_SHORTNAME@
+DISTNAME = $(BASENAME)-$(VERSION)
+
+LANGUAGES = en fr ru
+expand_langs = $(patsubst %,$(1),$(LANGUAGES))
+gather_langs = $(sort $(foreach x,$(call expand_langs,$(1)_%),$($(x))))
+
+GMAKE = @GMAKE@
+GSED = @GSED@
+PYTHON = @PYTHON@
+XSLTPROC_CMD = @XSLTPROC@ --xinclude
+DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
+INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
+XML_EXTRACT = $(PYTHON) ./xml-extract.py
+RENDER = $(SHELL) ./render.sh
+
+FORMULA_TEMPLATES := header.tex footer.tex defs.tex
+FORMULA_SUPPORT := $(patsubst %,formulas/%,$(FORMULA_TEMPLATES) pngsize render.sh)
+IMAGES_EXTRA = PNG:images/stacked3.png
+
+IMAGES_SVG = \
+	images/boundary-length.svg \
+	images/gaussian-acf.svg \
+	images/gaussian-hhcf.svg \
+	images/gaussian-psdf.svg \
+	images/grain-bounding-dims.svg \
+	images/inclination.svg \
+	images/profile-interpolation.svg \
+	images/step-edge.svg \
+	images/surface-area-vertices.svg \
+	images/triangulation.svg \
+	images/unrotate-symmetries.svg \
+	images/volume-pixel-weights.svg \
+	images/wavelet-daubechies20.svg \
+	images/wavelet-daubechies4.svg \
+	images/wavelet-haar.svg \
+	images/windowing-win.svg \
+	images/windowing-fft.svg
+
+IMAGES_PNG_SOURCE = \
+	images/profile-interpolation-image.png \
+	images/triangulation-field.png \
+	images/triangulation-linear.png \
+	images/triangulation-round.png
+
+MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
+
+XSL_STYLES = xhtml.xsl dblatex.xsl man.xsl \
+	version-greater-or-equal.xsl docbook-xsl-version.xsl
+CSS_STYLES = user-guide.css
+TEX_STYLES = user-guide.sty
+BUILD_FILES = README Makefile.in user-guide.iss.in \
+	aclocal.m4 configure configure.ac xml-extract.py
+
+WORKDIRS = $(call expand_langs,xhtml_%) $(call expand_langs,pdf_%)
+
+ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
+
+define LANGUAGE_template
+XML_DIR_$(1) := xml_$(1)
+XML_SOURCES_$(1) := $$(wildcard $$(XML_DIR_$(1))/*.xml)
+MAIN_XML_SOURCE_$(1) := $$(XML_DIR_$(1))/$(PACKAGE).xml
+CLEAN_DIRS_$(1) := xhtml_$(1) pdf_$(1)
+
+IMAGES_$(1) := $$(shell $$(XML_EXTRACT) imageinfo $$(XML_SOURCES_$(1))) $$(IMAGES_EXTRA)
+IMAGES_PNG_ALL_$(1) := $$(patsubst PNG:%,%,$$(filter PNG:%,$$(IMAGES_$(1))))
+IMAGES_PDF_$(1) := $$(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES_$(1))))
+IMAGES_PNG_PDF_$(1) := $$(patsubst %.pdf,%.png,$$(IMAGES_PDF_$(1)))
+IMAGES_PNG_$(1) := $$(filter-out $$(IMAGES_PNG_PDF_$(1)),$$(filter-out images/eq-%,$$(IMAGES_PNG_ALL_$(1))))
+
+ifeq ($(XHTML_ENABLE),xhtml)
+formulas/%_$(1).stamp: $$(XML_DIR_$(1))/%.xml
+	$(XML_EXTRACT) formulas $$^
+	@touch $$@
+
+formulas_$(1).deps: $$(XML_SOURCES_$(1))
+	@$(XML_EXTRACT) formuladeps $$^ >$$@
+
+-include formulas_$(1).deps
+endif
+
+xhtml_$(1): xhtml_$(1).stamp
+
+ifeq ($(XHTML_ENABLE),xhtml)
+xhtml_$(1).stamp: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_ALL_$(1)) xhtml.xsl
+	rm -rf xhtml_$(1)
+	mkdir xhtml_$(1)
+	$(XSLTPROC_CMD) --stringparam base.dir xhtml_$(1)/ xhtml.xsl $$(MAIN_XML_SOURCE_$(1))
+	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml_$(1)/*.html
+	@cp $$(IMAGES_PNG_ALL_$(1)) xhtml_$(1)/
+	cp user-guide.css xhtml_$(1)
+	touch $$@
+endif
+
+pdf_$(1): $(PACKAGE)-$(1).pdf
+
+ifeq ($(PDF_ENABLE),pdf)
+$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1)) $$(TEX_STYLES) dblatex.xsl
+	rm -rf pdf_$(1)
+	mkdir pdf_$(1)
+	$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
+endif
+
+endef
+
+all: $(ALL_TARGETS)
+
+$(foreach l,$(LANGUAGES),$(eval $(call LANGUAGE_template,$(l))))
+
+Makefile: Makefile.in ./config.status
+	./config.status Makefile
+
+xhtml: $(call expand_langs,xhtml_%)
+
+pdf: $(call expand_langs,pdf_%)
+
+XML_SOURCES := $(call gather_langs,XML_SOURCES)
+FORMULAS_PNG := $(call gather_langs,FORMULAS_PNG)
+FORMULAS_TEX := $(call gather_langs,FORMULAS_TEX)
+IMAGES_PNG := $(call gather_langs,IMAGES_PNG)
+CLEAN_DIRS := $(call gather_langs,CLEAN_DIRS)
+
+IMAGES_BUILT := $(foreach f,pdf png,$(patsubst %.svg,%.$(f),$(IMAGES_SVG)))
+IMAGES_DIST := $(IMAGES_SVG) $(IMAGES_PNG_SOURCE) $(IMAGES_PNG)
+
+images/eq-%.png: formulas/eq-%.png
+	@cp -f $< $@
+
+formulas/%.png: formulas/%.tex $(FORMULA_SUPPORT)
+	cd formulas && $(RENDER) "$*"
+
+formulas/pngsize: formulas/pngsize.c
+	cd formulas && $(CC) -o pngsize pngsize.c
+
+ifeq ($(SVG_ENABLE),svg)
+images/%.png: images/%.svg
+	cd images && \
+	    $(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$*.png" --file="$*.svg"
+
+images/%.pdf: images/%.svg
+	cd images && \
+	    $(INKSCAPE_CMD) --export-pdf="$*.pdf" --file="$*.svg"
+endif
+
+man: $(MAN_PAGES)
+
+ifeq ($(MAN_ENABLE),man)
+%.1: xml_en/%.xml
+	$(XSLTPROC_CMD) man.xsl $<
+endif
+
+ifeq ($(PNG_ENABLE),png)
+fixpngres: fixpngres.c
+	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
+endif
+
+clean:
+	-@rm -f formulas/TEMP-* formulas/*.stamp formulas/eq-*.tex
+	-@rm -f formulas/eq-*.png images/eq-*.png
+	-@rm -f $(IMAGES_BUILT)
+	-rm -rf $(CLEAN_DIRS)
+	-rm -f *.stamp *.deps fixpngres formulas/pngsize *~ */*~
+	-rm -f $(call expand_langs,$(PACKAGE)-%.pdf) $(MAN_PAGES)
+
+distclean: clean
+	-rm -f formulas/render.sh
+	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
+
+dist:
+	-rm -rf $(DISTNAME)
+	mkdir $(DISTNAME) $(DISTNAME)/formulas $(DISTNAME)/images
+	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
+	cp $(IMAGES_DIST) $(DISTNAME)/images
+	cp formulas/pngsize.c formulas/render.sh.in $(DISTNAME)/formulas
+	cp $(patsubst %,formulas/%,$(FORMULA_TEMPLATES)) $(DISTNAME)/formulas
+	for x in $(LANGUAGES); do \
+	    mkdir $(DISTNAME)/xml_$$x; \
+	    cp xml_$$x/*.xml $(DISTNAME)/xml_$$x/; \
+	done
+	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
+	rm -rf $(DISTNAME)
+
+# FIXME: Distribute all langs
+dist-xhtml: xhtml
+	for x in $(LANGUAGES); do \
+	    d=$(BASENAME)-xhtml-$$x-$(VERSION); \
+	    rm -rf $$d; \
+	    mkdir $$d; \
+	    cp xhtml_$$x/* $$d; \
+	    ll=`echo $$x | $(GSED) 's/en/English/;s/fr/French/;s/ru/Russian/'`; \
+	    sed "s/@LANGUAGE@/$$ll/g" user-guide.iss >$$d/user-guide.iss; \
+	    chmod 755 $$d; \
+	    chmod 644 $$d/*; \
+	    tar -zcf $$d.tar.gz $$d; \
+	    rm -rf $$d; \
+	done
+
+dist-pdf: pdf
+	for x in $(LANGUAGES); do \
+	    cp -f user-guide-$$x.pdf $(BASENAME)-$$x-$(VERSION).pdf; \
+	done
+
+# FIXME: We need to figure out versioning of translations.
+version:
+	d=`date --iso`; \
+	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac; \
+	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml_en/user-guide.xml
+	autoconf && ./configure
+
+help:
+	@echo "all          Compile User guide to all available formats ($(ALL_TARGETS))"
+ifeq ($(XHTML_ENABLE),xhtml)
+	@echo "xhtml        Compile User guide to XHTML"
+else
+	@echo "xhtml        Compile User guide to XHTML (not available)"
+endif
+ifeq ($(PDF_ENABLE),pdf)
+	@echo "pdf          Compile User guide to PDF"
+else
+	@echo "pdf          Compile User guide to PDF (not available)"
+endif
+ifeq ($(MAN_ENABLE),man)
+	@echo "man          Compile Unix manual pages for commands"
+else
+	@echo "man          Compile Unix manual pages for commands (not available)"
+endif
+	@echo "dist         Create tarball with DocBook sources"
+	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
+ifeq ($(PNG_ENABLE),png)
+	@echo "fixpngres    Build fixpngres tool"
+else
+	@echo "fixpngres    Build fixpngres tool (not available)"
+endif
+	@echo "version      Update version number to current date"
+
+.PHONY: \
+	all help version clean distclean \
+	dist dist-xhtml dist-pdf \
+	xhtml xhtml_en xhtml_fr $(call expand_langs,xhtml_%) \
+	pdf pdf_en pdf_fr $(call expand_langs,pdf_%) \
+	man
+
+.PRECIOUS: Makefile
+
+# vim: set ts=4 sw=4 noet :

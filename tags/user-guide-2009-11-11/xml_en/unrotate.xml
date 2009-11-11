@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect2 id='unrotate'>
+  <title>
+    Unrotate
+    <guiicon>
+      <inlinemediaobject>
+        <imageobject>
+          <imagedata fileref='gwy_unrotate-24.png' format='PNG'/>
+        </imageobject>
+      </inlinemediaobject>
+    </guiicon>
+  </title>
+  <indexterm><primary>rotation correction</primary></indexterm>
+  <indexterm><primary>unrotate</primary></indexterm>
+  <para>
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Correct Data</guisubmenu>
+      <guimenuitem>Unrotate</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>
+    Unrotate can automatically make principal directions in an image
+    parallel with horizontal and/or vertical image edges.  For that to work,
+    the data need to have some principal directions, therefore it is most
+    useful for scans of artifical and possibly crystallic structures.
+  </para>
+  <para>
+    The rotation necessary to straighten the image – displayed
+    as <guilabel>Correction</guilabel> – is calculated from peaks
+    in angular <link linkend='slope-distribution'>slope distribution</link>
+    assuming a prevalent type of structure, or symmetry.
+    The symmetry can be estimated automatically too, but it is possible to
+    select a particular symmetry type manually and let the module calculate
+    only corresponding rotation correction.  Note if you assume a
+    structure type that does not match the actual structure, the calculated
+    rotation is rarely meaningful.
+  </para>
+  <para>
+    It is recommended to level (or
+    <link linkend='facet-level'>facet-level</link>) the data
+    first as overall slope can skew the calculated rotations.
+  </para>
+  <informalfigure id='fig-unrotate-directions'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='unrotate-symmetries.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='unrotate-symmetries.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>Unrotate symmetries scheme</phrase>
+      </textobject>
+      <caption>
+        Orientations of prevalent directions corresponding to Unrotate symmetry
+        types.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    The assumed structure type can be set with <guilabel>Assume</guilabel>
+    selector.  Following choices are possible:
+    <variablelist>
+      <varlistentry>
+        <term>
+          Detected
+        </term>
+        <listitem>
+          <para>
+            Automatically detected symmetry type, displayed above as
+            <guilabel>Detected</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Parallel
+        </term>
+        <listitem>
+          <para>
+            Parallel lines, one prevalent direction.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Triangular
+        </term>
+        <listitem>
+          <para>
+            Triangular symmetry, three prevalent directions (unilateral) by
+            120 degrees.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Square
+        </term>
+        <listitem>
+          <para>
+            Square symmetry, two prevalent directions oriented
+            approximately along image sides.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Rhombic
+        </term>
+        <listitem>
+          <para>
+            Rhombic symmetry, two prevalent directions oriented approximately
+            along diagonals.  The only difference from Square is the
+            preferred diagonal orientation (as opposed to parallel with
+            sides).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Hexagonal
+        </term>
+        <listitem>
+          <para>
+            Hexagonal symmetry, three prevalent directions (bilateral) by 120
+            degrees.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+</sect2>
+<!-- vim: set ts=2 sw=2 et : -->

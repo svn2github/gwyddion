@@ -1,0 +1,199 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='edit-extended'>
+  <title>Extended Data Edit</title>
+  <para>
+     This section presents extended modules designed for editing (correcting)
+     SPM data. Using simple data editing tools presented in chapter
+     <link linkend='editing-correction' endterm='editing-correction.title'/>
+     it is possible to correct many local scanning defects that
+     can be found on SPM images. There are also many error sources within SPM
+     methods that lead to global errors, like low frequencies modulated on
+     the data or data drift in the slow scanning axis.
+  </para>
+  <sect2 id='drift-compensation'>
+    <title>Drift Compensation</title>
+    <indexterm><primary>drift compensation</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Compensate Drift</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Compensate Drift calculates and/or corrects drift in the fast scanning
+      axis (horizontal).  This adverse effect can be caused by thermal
+      effects or insufficient mechanical rigidity of the measuring device.
+    </para>
+    <para>
+      The drift graph, which is one of possible outputs,
+      represents the horizontal shift of individual rows compared to
+      a reference row (which could be in principle chosen arbitrarily, in
+      practice the zero shift is chosen to minimize the amount of data
+      sticking out of the image after compensation), with the row
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+        <alt>y</alt>
+      </inlineequation>-coordinate
+      on the abscissa.
+    </para>
+    <para>
+      The drift is determined in two steps:
+      <orderedlist>
+        <listitem>
+          A mutual horizontal offset is estimated for each couple of rows not
+          more distant than <guilabel>Search range</guilabel>.  It is
+          estimated as the offset value giving the maximum mutual correlation
+          of the two rows.  Thus a set of local row drift estimations is
+          obtained (together with the maximum correlation scores providing
+          an estimate of their actual similarity).
+        </listitem>
+        <listitem>
+          Global offsets are calculated from the local ones.  At present the
+          method is very simple as it seems sufficient in most cases: local
+          drift derivatives are fitted for each row onto the local drift
+          estimations and the global drift is then obtained by intergration
+          (i.e. summing the local drifts).
+        </listitem>
+      </orderedlist>
+    </para>
+    <para>
+      Option <guilabel>Exclude linear skew</guilabel> subtracts the linear
+      term from the calculated drift, it can be useful when the image is
+      anisotropic and its features are supposed to be oriented in a direction
+      not paralled to the image sides.
+    </para>
+    <informalfigure id='fig-drift-correction'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='drift-corrected-graph.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Drift correction example:
+          (a) original data exhibiting strong drift in the fast scan axis,
+          (b) corrected data,
+          (c) calculated drift graph.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='fft-filter-1d'>
+    <title>1D FFT Filter</title>
+    <indexterm>
+      <primary>Fourier transform</primary>
+      <secondary>1D filtering</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>1D FFT Filtering</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      One excellent way of removing frequency based of noise from an image is
+      to use Fourier filtering.  First, the Fourier transform of the image is
+      calculated.  Next, a filter is applied to this transform.  Finally, the
+      inverse transform is applied to obtain a filtered image.  Gwyddion uses
+      the Fast Fourier Transform (or FFT) to make this intensive calculation
+      much faster.
+    </para>
+    <para>
+      Within the 1D FFT filter the frequencies that should be removed from
+      spectrum (suppress type: null) or supressed to value of neighbouring
+      frequencies (suppress type: suppress) can be selected by marking
+      appropriate areas in the power spectrum graph. The selection can be
+      inverted easily using the Filter type choice. 1D FFT filter can be used
+      both for horizontal and vertical direction.
+    </para>
+  </sect2>
+  <sect2 id='fft-filter-2d'>
+    <title>2D FFT Filter</title>
+    <indexterm>
+      <primary>Fourier transform</primary>
+      <secondary>2D filtering</secondary>
+    </indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>2D FFT Filtering</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+     2D FFT filter acts similarly as the 1D variant (see above) but using 2D
+     FFT transform. Therefore, the spatial frequencies that should be
+     filtered must be selected in 2D using mask editor. As the frequencies
+     are related to center of the image (corresponding to zero frequency),
+     the mask can snapped to the center (coordinate system origin) while
+     being edited. There are also different display and output modes that are
+     self-explanatory – image or FFT coefficients can be outputted by module
+     (or both).
+    </para>
+    <para>
+     Note that the filter usually resamples the data to size that fits to
+     the available FFT algorithm (FFTW or Gwyddion FFT). As this may affect
+     results, the resampled image size information is stated in the module
+     window.
+    </para>
+  </sect2>
+  <sect2 id='polynomial-distort'>
+    <title>Polynomial Distortion</title>
+    <indexterm><primary>distortion in xy plane</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Polynomial Distortion</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      General distortion in the horizontal plane can be compensated, or
+      created, with Polynomial distortion.  It performs transforms that
+      can be expressed as
+    </para>
+    <informalequation id='eq-polynomial-distortion.en'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='eq-polynomial-distortion.en.png' format='PNG'/>
+        </imageobject>
+        <textobject role='tex'>
+          <phrase>
+<![CDATA[
+\eqnarray{
+x_{\rm old}&=&P_x(x_{\rm new}, y_{\rm new}),\cr
+y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
+}
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>P<subscript>x</subscript></phrase></mathphrase>
+        <alt>P_x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>P<subscript>y</subscript></phrase></mathphrase>
+        <alt>P_y</alt>
+      </inlineequation>
+      are polynomials up to the third total order with user-defined
+      coefficients.  Note the direction of the coordinate transform – the
+      reverse direction would not guarantee an unambiguous mapping.
+    </para>
+    <para>
+      The polynomial coefficients are entered as scale-free, i.e.
+      as if the coordinate ranges were always [0, 1].  If
+      <guilabel>Instant updates</guilabel> are enabled, pressing
+      <keysym>Enter</keysym> in a coefficient entry (or just leaving moving
+      keyboard focus elsewhere) updates the preview.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

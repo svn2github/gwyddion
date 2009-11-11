@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: grains.xml 9504 2009-07-18 21:54:33Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="grain-analysis">
+  <title>Анализ зёрен</title>
+  <indexterm><primary>выделение зёрен</primary></indexterm>
+  <para>В Gwyddion реализовано несколько алгоритмов для работы с зёрнами. Прежде всего, можно использовать простые пороговые алгоритмы (порог по высоте, наклону и кривизне). Эти процедуры могут быть очень эффективны для анализа частиц (чтобы пометить частицы лежащие на ровной поверхности).</para>
+  <para id="grain-threshold"><indexterm><primary>выделение зёрен по порогу</primary></indexterm> В Gwyddion пороговые методы доступны в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Пометить по порогу</guimenuitem></menuchoice>. В этом модуле реализованы пороги по высоте, наклону и кривизне. Результаты отдельных пороговых методов можно объединять вместе используя несколько операторов.</para>
+  <para id="grain-remove-thresholding">Подобным образом можно удалить зёрна с маски используя пункт меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Зёрна</guisubmenu><guimenuitem>Удалить зёрна</guimenuitem></menuchoice>. Методы максимальной высоты и порога размера можно использовать для удаления ложных зёрен, вызванных шумом или, например, пылинками. Также можно использовать интерактивный инструмент удаления зёрен для удаления их вручную.</para>
+  <sect2 id="grain-watershed">
+    <title>Водораздел</title>
+    <indexterm><primary>выделение зёрен по водоразделу</primary></indexterm>
+    <para>Для более сложных структур данных эффективность пороговых алгоритмов может оказаться весьма плохой. Для этих данных выделение зёрен или частиц  более эффективно можно проводить с помощью <emphasis>алгоритма водораздела</emphasis>.</para>
+    <para>Алгоритм водораздела обычно задействуется для определения локальных минимумов и разделения изображения на сегменты в обработке изображений. Поскольку проблема определения положения зёрен может сводиться к проблеме нахождения локальных экстремумов на поверхности, этот алгоритм также можно использовать для нужд разделения и выделения зёрен. Для удобства в дальнейшем мы будем считать данные инвертированными в направлении <inlineequation><mathphrase><phrase role="mathvar">z</phrase></mathphrase><alt>z</alt></inlineequation> при описании этого алгоритма (т.е. вершины зёрен формируют локальные минимумы в нижеследующем тексте). Мы применяем две стадии анализа зёрен (см. [<link linkend="grain-analysis-ref-1">1</link>]):</para>
+    <orderedlist>
+      <listitem>В каждой точке инвертированной поверхности помещается виртуальная капля воды. В случае, если капля не находится в локальном минимуме, она следует по пути наискорейшего спуска чтобы минимизировать свою потенциальную энергию. Как только капля достигает любого локального минимума, она остаётся там и покоится на поверхности. Подобным образом она частично заполняет объём локального минимума (см. рисунок ниже и его подпись). Этот процесс повторяется несколько раз. В результате получается система озёр различного размера, заполняющих впадины в инвертированной поверхности. После этого рассчитывается площадь каждого озера и наименьшие из них отбрасываются в предположении, что они формируются в локальных минимумах, образованных шумом. Большие озёра используются для определения положения зёрен. Подобным образом можно устранить шум на данных АСМ.</listitem>
+      <listitem>Зёрна, найденные на первом шаге, помечаются (каждое своим уникальным номером). Капли воды продолжают падать на поверхность и заполнять локальные минимумы. Поскольку зёрна уже обнаружены и помечены после первого шага, следующие пять ситуаций возможны после достижения каплей локального минимума: <orderedlist><listitem> Капля достигла места, ранее отмеченного как определённое зерно. В этом случае капля объединяется с зерном, т.е. помечается как часть того же зерна. </listitem><listitem> Капля достигла места, где нет зерна, но отмеченное зерно найдено в ближайшей окрестности капли. В этом случае капля снова объединяется с зерном. </listitem><listitem> Капля достигла места, где нет зерён, и при этом зёрен не было даже в ближайшей окрестности капли. В этом случае капля никак не помечается. </listitem><listitem> Капля достигла места, где нет зерна, но более одного отмеченного зерна найдено в ближайшей окрестности. (т.е. в окрестности нашлось два разных зерна). В этом случае капля помечается как граница зерна. </listitem><listitem> Капля достигла места, помеченного как граница зерна. В этом случае капля также помечается как граница зерна. </listitem></orderedlist></listitem>
+    </orderedlist>
+    <para>Таким путём мы определяем положения отдельных зёрен и затем определяем объём, занятый каждым зерном по отдельности.</para>
+    <informalfigure id="fig-grain-marking">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="allgrains.png" format="PNG"/>
+        </imageobject>
+        <caption>Изображение зернистой структуры поверхности (a) и соответствующие результаты порога по высоте (b), кривизне (c), и алгоритма водораздела (d). С помощью алгоритма водораздела можно разделить изображение на сегменты даже лучше.</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id="grain-analysis-statistics">
+    <title>Статистика</title>
+    <indexterm><primary>количество зёрен</primary></indexterm>
+    <para>Свойства зёрен можно изучать с помощью нескольких функций. Простейшей из них является статистика зёрен.</para>
+    <sect3 id="grain-statistics">
+      <title>Статистика</title>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Зёрна</guisubmenu>
+          <guimenuitem>Статистика</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Эта функция рассчитывает общее число помеченных зёрен, их общую площадь (площадь проекции) как в виде абсолютного значения, так и в виде доли общей площади поля данных, среднюю площадь и сторону эквивалентного квадрата для отдельного зерна.</para>
+      <para>Общие характеристики области под маской могут быть получены с помощью инструмента <quote>статистические величины</quote> когда включена опция <guilabel>Использовать маску</guilabel>. Если инвертировать маску та же информация может быть получена об областях вне зёрен.</para>
+    </sect3>
+    <sect3 id="grain-distributions">
+      <title>Распределения зёрен <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_grains_graph-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Зёрна</guisubmenu>
+          <guimenuitem>Распределения</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Распределения зёрен является наиболее мощным и сложным инструментом. Он работает в двух режимах: построение графиков и экспорт необработанных данных. В режиме построения графиков выбранные характеристики отдельных зёрен, рассчитываются, собираются, и строятся в виде суммарных графиков, показывающих их распределения.</para>
+      <para>Импорт необработанных данных полезен для экспертов, которым нужно, например, коррелировать характеристики отдельных зёрен. В этом режиме выбранные характеристики зёрен рассчитываются и записываются в виде таблицы в текстовый файл, где каждая строка соответствует отдельному зерну, а столбцы соответствуют выбранным зёрнам. Порядок следования столбцов тот же, что и порядок следования величин в диалоговом окне; все величины записыватся в единицах измерения СИ, что обычно для <application>Gwyddion</application>.</para>
+    </sect3>
+    <sect3 id="grain-correlation">
+      <title>Корреляция свойств зёрен</title>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Зёрна</guisubmenu>
+          <guimenuitem>Коррелировать</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Корреляция зёрен строит график одной выбранной величины зёрен как функцию другой величины, показывая корреляции между ними.</para>
+    </sect3>
+    <sect3 id="grain-measure">
+      <title>Инструмент измерения зёрен <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_grains_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <para>Инструмент измерения зёрен является интерактивным способом получения той же информации об отдельных зёрнах, что и <link linkend="grain-distributions">Распределения зёрен</link> в режиме экспорта необработанных данных. После выбора зерна мышью в окне данных, все доступные величины показываются в окне инструмента.</para>
+      <para>Помимо физических характеристик, этот инструмент также показывает номер зерна. Номера зёрен соотвествуют номерам строк (начиная с 1) в файлах, экспортированных инструментом <link linkend="grain-distributions">распределений зёрен</link>.</para>
+    </sect3>
+  </sect2>
+  <sect2 id="grain-properties">
+    <title>Свойства зёрен</title>
+    <para>Инструменты <link linkend="grain-distributions">распределений зёрен</link> и <link linkend="grain-measure">измерения зёрен</link> могут рассчитывать следующие свойства зёрен:</para>
+    <variablelist>
+      <varlistentry>
+        <term>Свойства значений</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><indexterm><primary>минимум</primary><secondary>зерна</secondary></indexterm><guilabel>Минимум</guilabel>, минимальное значение (высота), найденное внутри зерна.</listitem>
+            <listitem><indexterm><primary>максимум</primary><secondary>зерна</secondary></indexterm><guilabel>Максимум</guilabel>, максимальное значение (высота), найденное внутри зерна.</listitem>
+            <listitem><indexterm><primary>среднее</primary><secondary>зерна</secondary></indexterm><guilabel>Среднее</guilabel>, среднее всех значений внутри зерна, средняя высота зерна.</listitem>
+            <listitem><indexterm><primary>срединное</primary><secondary>зерна</secondary></indexterm><guilabel>Срединное</guilabel>, срединное всех значений внутри зерна, срединная высота зерна.</listitem>
+            <listitem><indexterm><primary>минимум</primary><secondary>на границе зерна</secondary></indexterm><guilabel>Минимум на границе</guilabel>, минимальное значение (высота) найденное на внутренней границе зерна, т.е. внутри множества точек. лежащих внутри зерна, но по крайней мере одна из соседних точек которых лежит вне зерна.</listitem>
+            <listitem><indexterm><primary>максимум</primary><secondary>на границе зерна</secondary></indexterm><guilabel>Максимум на границе</guilabel>, максимальное значение (высота) найденное на внутренней границе зерна, т.е. внутри множества точек. лежащих внутри зерна, но по крайней мере одна из соседних точек которых лежит вне зерна.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Свойства площадей</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><guilabel>Площадь проекции</guilabel>, площадь проекции зерна на плоскость.</listitem>
+            <listitem><guilabel>Сторона эквивалентного квадрата</guilabel>, сторона квадрата с той же площадью проекции, что и у зерна.</listitem>
+            <listitem><guilabel>Радиус эквивалентного диска</guilabel>, радиус диска с той же площадью проекции, что и у зерна.</listitem>
+            <listitem><guilabel>Площадь поверхности</guilabel>, площадь поверхности зерна, см. раздел <link linkend="surface-area-calculation">статистические величины</link> для описания метода оценки площади поверхности.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Свойства границы</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><guilabel>Длина границы проекции</guilabel>, длина проекции границы зерна на горизонтальную плоскость (а не на реальную трёхмерную поверхность). Метод оценки длины границы описан ниже.</listitem>
+            <listitem><guilabel>Минимальный ограничивающий размер</guilabel>, минимальный размер зерна в горизонтальной плоскости. Может быть показан как минимальная ширина зазора в горизонтальной плоскости, через который может пройти зерно.</listitem>
+            <listitem><guilabel>Направление минимального ограничивающего размера</guilabel>, направление зазора из описания предыдущей величины. Если зерно обладает симметрией, при которой таких направлений несколько, выбирается одно из них.</listitem>
+            <listitem><guilabel>Максимальный ограничивающий размер</guilabel>, максимальный размер зерна в горизонтальной плоскости. Может быть показан как максимальная ширина зазора в горизонтальной плоскости, который можно заполнить зерном.</listitem>
+            <listitem><guilabel>Направление максимального ограничивающего размера</guilabel>, направление зазора из описания предыдущей величины. Если зерно обладает симметрией, при которой таких направлений несколько, выбирается одно из них.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Свойства объёмов</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><guilabel>Объём между нулевой плоскостью и поверхностью</guilabel>, объём между поверхностью зерна и плоскостью <inlineequation><mathphrase><phrase role="mathvar">z</phrase> = 0</mathphrase><alt>z=0</alt></inlineequation>. Значения ниже нуля формируют отрицательные объёмы. Уровень нуля должен быть установлен на разумное значение чтобы получать вменяемые результаты (нередко достаточно <link linkend="fix-zero">исправить нуль</link>), что является достоинством этого метода: можно использовать базисную плоскость по выбору.</listitem>
+            <listitem><guilabel>Объём между поверхностью и плоскостью, проходящей через минимум</guilabel>, объём между поверхностью зерна и плоскостью <inlineequation><mathphrase><phrase role="mathvar">z</phrase> = <phrase role="mathvar">z</phrase><subscript>min</subscript></mathphrase><alt>z=z_{\rm min}</alt></inlineequation>, где <inlineequation><mathphrase><phrase role="mathvar">z</phrase><subscript>min</subscript></mathphrase><alt>z_{\rm min}</alt></inlineequation> - минимальное значение (высота), найденное внутри зерна. Этот метод учитывает окружающую зерно поверхность, но обычно недооценивает объём, особенно для малых зёрен.</listitem>
+            <listitem><guilabel>Объём между поверхностью и фоном, вычисленным по Лапласу</guilabel>, объём между поверхностью зерна и базовой поверхностью, образованной интерполяцией окружающей зерно поверхности по Лапласу. Другими словами, это объём. который исчезнет после использования инструментов <link linkend="remove-data-under-mask">удаления данных под маской</link> or <link linkend="tool-remove-grains">удаления зёрен</link> с лапласовой интерполяцией зерна. Это один из наиболее сложных методов, с другой стороны его результаты труднее всего предугадать.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Свойства расположения</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><guilabel>Положение центра x</guilabel>, горизонтальная координата центра зерна. Поскольку площадь зерна определяется как площадь под соответствующими точками маски, цент зерна размером с пиксель будет иметь полуцелые координаты, не целые. Смещение начала координат поля данных учитывается (если оно есть).</listitem>
+            <listitem><guilabel>Положение центра y</guilabel>, вертикальная координата центра зерна. См. выше интерпретацию.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Свойства наклонов</term>
+        <listitem>
+          <itemizedlist>
+            <listitem><guilabel>Наклон θ</guilabel>, отклонение нормали к средней плоскости от оси <inlineequation><mathphrase><phrase role="mathvar">z</phrase></mathphrase><alt>z</alt></inlineequation>, см. раздел про <link linkend="inclinations-coordinates">наклоны</link> для более подробной информации.</listitem>
+            <listitem><guilabel>Наклон φ</guilabel>, азимут наклона, как он был задан в определении <link linkend="inclinations-coordinates">наклонов</link>.</listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id="fig-grain-bounding-dims">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="grain-bounding-dims.pdf" format="PDF"/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref="grain-bounding-dims.png" format="PNG"/>
+        </imageobject>
+        <caption>Максимальные и минимальные ограничивающие размеры зерна.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para id="boundary-length-calculation"><indexterm><primary>расчёт длины границы</primary></indexterm> Длина границы зерна оценивается путём суммирования оценочного вклада каждой комбинации из четырёх точек границы. Вклады показаны на следующем рисунке для каждого вида конфигурации, где <inlineequation><mathphrase><phrase role="mathvar">h<subscript>x</subscript></phrase></mathphrase><alt>h_x</alt></inlineequation> и <inlineequation><mathphrase><phrase role="mathvar">h<subscript>y</subscript></phrase></mathphrase><alt>h_y</alt></inlineequation> - размеры пикселей вдоль соответствующих осей и <inlineequation><mathphrase><phrase role="mathvar">h</phrase></mathphrase><alt>h</alt></inlineequation> - длина диагонали пикселя: <informalequation id="eq-grain-boundary-pixel-diagonal"><mediaobject><imageobject><imagedata fileref="eq-grain-boundary-pixel-diagonal.png" format="PNG"/></imageobject><textobject role="tex"><phrase><![CDATA[
+h = \sqrt{h_x^2 + h_y^2}
+]]></phrase></textobject></mediaobject></informalequation>Вклады соответствуют один в один длинам сегментов границы многоугольника, которым аппроксимируется форма зерна. Создание эквивалентной формы многоугольника также показано на рисунке.</para>
+    <informalfigure id="fig-boundary-length">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="boundary-length.pdf" format="PDF"/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref="boundary-length.png" format="PNG"/>
+        </imageobject>
+        <caption>Вклад конфигураций пикселей в оцениваемую длину поверхности (сверху). Серые квадраты представляют пиксели внутри зерна, белые - внешние пиксели. Оценочный вклад каждой конфигурации: a) <inlineequation><mathphrase><phrase role="mathvar">h</phrase>/2</mathphrase><alt>h/2</alt></inlineequation>, (b1), (b2) <inlineequation><mathphrase><phrase role="mathvar">h</phrase></mathphrase><alt>h</alt></inlineequation>, (c) <inlineequation><mathphrase><phrase role="mathvar">h<subscript>y</subscript></phrase></mathphrase><alt>h_y</alt></inlineequation>, (d) <inlineequation><mathphrase><phrase role="mathvar">h<subscript>x</subscript></phrase></mathphrase><alt>h_x</alt></inlineequation>, (e) <inlineequation><mathphrase><phrase role="mathvar">h</phrase>/2</mathphrase><alt>h/2</alt></inlineequation>. Случаи (b1) и (b2) отличаются только формой сегментов-многоугольников, оценочные длины поверхности одинаковы. Нижняя часть рисунка показывает, как сегменты объединяются, чтобы образовать многоугольник.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para id="grain-volume-calculation"><indexterm><primary>расчёт объёма</primary></indexterm> Объём зерна после вычета базиса, оценивается как объём точно такой же фигуры, верхняя поверхность которой использовалась для <link linkend="fig-surface-area-vertices">расчёта площади поверхности</link>. Следует отметить, что для объёма, ограниченного многогранником, метод эквивалентен классическому двумерному методу интегрирования с помощью трапеций. Однако, мы рассчитываем объём под маской с центрами на гранях фигуры, поэтому их вклад в интеграл распределён иначе, как показано на рисунке ниже.</para>
+    <informalfigure id="fig-volume-pixel-weights">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="volume-pixel-weights.pdf" format="PDF"/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref="volume-pixel-weights.png" format="PNG"/>
+        </imageobject>
+        <caption>Вклад отдельных пикселей в объём одного пикселя (серого).</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id="grain-analysis-ref">
+    <title>Источники</title>
+    <para id="grain-analysis-ref-1">[1] <ulink url="http://klapetek.cz/download.html"> Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter: Acta Physica Slovaca, 3 (223-230), 2003 </ulink></para>
+  </sect2>
+  <!--  Doesn't work well, needs serious formatting improvements.
+  <bibliography>
+    <biblioentry>
+      <biblioset relation='article'>
+        <authorgroup>
+          <author><firstname>Petr</firstname><surname>Klapetek</surname></author>
+          <author><firstname>Ivan</firstname><surname>Ohlídal</surname></author>
+          <author><firstname>Daniel</firstname><surname>Franta</surname></author>
+          <author><firstname>Alberto</firstname><surname>Montaigne-Ramil</surname></author>
+          <author><firstname>Alberta</firstname><surname>Bonanni</surname></author>
+          <author><firstname>David</firstname><surname>Stifter</surname></author>
+          <author><firstname>Helmut</firstname><surname>Stifter</surname></author>
+        </authorgroup>
+        <title>Atomic force microscopy characterization of ZnTe epitaxial films</title>
+      </biblioset>
+      <biblioset relation='journal'>
+        <title>Acta Physica Slovaca</title>
+        <volumenum>3</volumenum>
+        <pagenums>223-230</pagenums>
+        <pubdate>2003</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+  -->
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

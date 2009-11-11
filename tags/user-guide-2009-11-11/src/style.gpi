@@ -1,0 +1,14 @@
+set style data line
+set style line 1 pt 65 ps 1 lw 1.5 lc rgb '#008000'
+set style line 2 pt 65 ps 1 lw 1.5 lc rgb '#e00000'
+set style line 3 pt 65 ps 1 lw 1.5 lc rgb '#0040c0'
+set style line 4 pt 65 ps 1 lw 1.5 lc rgb '#a07010'
+set style line 5 pt 65 ps 1 lw 1.5 lc rgb '#a000b0'
+set style line 6 pt 65 ps 1 lw 1.5 lc rgb '#ffe000'
+set style line 7 pt 65 ps 1 lw 1.5 lc rgb '#00c0f0'
+set style line 8 pt 65 ps 1 lw 1.5 lc rgb '#f06000'
+set style line 9 pt 65 ps 1 lw 1.5 lc rgb '#a0a0a0'
+set style line 10 lt 2 lc rgb '#808080' lw 0.5
+set style line 11 lt 1 lc rgb 'black' lw 3
+set grid ls 10
+set key reverse left Left samplen 1.5 spacing 1.2

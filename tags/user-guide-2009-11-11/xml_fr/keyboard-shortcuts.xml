@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: keyboard-shortcuts.xml 9469 2009-07-16 20:22:10Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='keyboard-shortcuts'>
+  <title>Raccourcis Clavier</title>
+  <informaltable frame='topbot' id='table-keyboard-shortcuts'>
+    <tgroup cols='4' align='left'>
+    <?dblatex llXX?>
+      <thead>
+        <row>
+          <entry>Raccourci</entry>
+          <entry>Menu équivalent</entry>
+          <entry>Contexte</entry>
+          <entry>Action</entry>
+        </row>
+      </thead>
+      <tbody valign='top'>
+        <row>
+          <entry><keycap>Ctrl-Q</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Quitter</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Quitter <application>Gwyddion</application>.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-O</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Ouvrir</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Oucrir un fichier de données.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-S</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Enregistrer</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Sauvegarde les données courantes (un nom de fichier vous sera
+            demandé s'il n'en a pas).
+          </entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-S</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Enregistrer Sous</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Sauvegarde les données courantes sous un nom différentes. Le nom
+            de fichier associé avec les données est remplacé par le nouveau nom.
+          </entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-M</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Fichier</guimenu>
+              <guimenuitem>Fusionner</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Fusionne les données d'un fichier vers le fichier courant.
+          </entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Z</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Annuler</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Annule la dernière opération appliquée sur les données
+          courantes.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Y</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Rétablir</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Refait la dernière opération appliquée sur les données
+          courantes.</entry>
+        </row>
+        <!-- FIXME: doesn't work after databrowserization
+        <row>
+          <entry><keycap>Ctrl-D</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Dupliquer</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Duplique les données dans la fenêtre de données courante, y compris
+            toutes les informations associées excepté le nom de fichier.
+          </entry>
+        </row>
+        -->
+        <row>
+          <entry><keycap>Ctrl-K</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Supprimer le Masque</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Supprime le masque de la fenêtre de données courante.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-K</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Editer</guimenu>
+              <guimenuitem>Supprimer la Présentation</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>Supprime la présentation de la fenêtre de données courante.</entry>
+        </row>
+        <row>
+          <entry><keycap>+</keycap></entry>
+          <entry></entry>
+          <entry>fenêtre de données</entry>
+          <entry>Zoom la fenêtre de données courante.</entry>
+        </row>
+        <row>
+          <entry><keycap>=</keycap></entry>
+          <entry></entry>
+          <entry>fenêtre de données</entry>
+          <entry>Zoome la fenêtre de données courante.</entry>
+        </row>
+        <row>
+          <entry><keycap>-</keycap></entry>
+          <entry></entry>
+          <entry>fenêtre de données</entry>
+          <entry>Dézoome la fenêtre de données courante.</entry>
+        </row>
+        <row>
+          <entry><keycap>Z</keycap></entry>
+          <entry></entry>
+          <entry>fenêtre de données</entry>
+          <entry>Affiche la fenêtre de données courante à l'échelle 1:1.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-F</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Traitement des Données</guimenu>
+              <guimenuitem>Répéter</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Répète la dernière fonction utilisée en conservant les paramètres.
+            Normalement l'opération est refaite sans interaction, mais si cette
+            dernière est nécessaire une fenêtre de dialogue apparaîtra.
+          </entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-F</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Traitement des Données</guimenu>
+              <guimenuitem>Remontrer</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>boîte à outils, fenêtre de données, fenêtre 3D,
+          fenêtre de graphe, fenêtre d'outil</entry>
+          <entry>
+            Remontre la fenêtre de dialogue de la dernière opération utilisée.
+            Si l'opération n'a pas de paramètre à ajuster, elle est appliquée
+            directement..
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

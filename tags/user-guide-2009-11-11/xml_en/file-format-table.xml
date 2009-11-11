@@ -1,0 +1,637 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informaltable frame='none' id='table-file-formats'>
+  <indexterm>
+    <primary>file</primary>
+    <primary>supported formats</primary>
+  </indexterm>
+  <tgroup cols='6' align='left'>
+    <?dblatex XXXccc?>
+    <thead>
+      <row>
+        <entry>File Format</entry>
+        <entry>Extensions</entry>
+        <entry>Module</entry>
+        <entry>Read</entry>
+        <entry>Write</entry>
+        <entry>SPS</entry>
+      </row>
+    </thead>
+    <tbody>
+    <!-- This is a GENERATED file. -->
+    <!-- From module apefile.c -->
+    <row>
+      <entry>APE Research DAT</entry>
+      <entry>.dat</entry>
+      <entry>apefile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module asciiexport.c -->
+    <row>
+      <entry>Text matrix of data values</entry>
+      <entry>.txt</entry>
+      <entry>asciiexport</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module assing-afm.c -->
+    <row>
+      <entry>Assing AFM</entry>
+      <entry>.afm</entry>
+      <entry>assing-afm</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module attocube.c -->
+    <row>
+      <entry>Attocube Systems ASC</entry>
+      <entry>.asc</entry>
+      <entry>attocube</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module bcrfile.c -->
+    <row>
+      <entry>Image Metrology BCR, BCRF</entry>
+      <entry>.bcr, .bcrf</entry>
+      <entry>bcrfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module burleigh_bii.c -->
+    <row>
+      <entry>Burleigh BII</entry>
+      <entry>.bii</entry>
+      <entry>burleigh_bii</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module burleigh.c -->
+    <row>
+      <entry>Burleigh IMG v2.1</entry>
+      <entry>.img</entry>
+      <entry>burleigh</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module burleigh_exp.c -->
+    <row>
+      <entry>Burleigh exported data</entry>
+      <entry>.txt, .bin</entry>
+      <entry>burleigh_exp</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module createc.c -->
+    <row>
+      <entry>Createc DAT</entry>
+      <entry>.dat</entry>
+      <entry>createc</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module dmefile.c -->
+    <row>
+      <entry>DME Rasterscope</entry>
+      <entry>.img</entry>
+      <entry>dmefile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module ecsfile.c -->
+    <row>
+      <entry>ECS</entry>
+      <entry>.img</entry>
+      <entry>ecsfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module ezdfile.c -->
+    <row>
+      <entry>Nanosurf EZD, NID</entry>
+      <entry>.ezd, .nid</entry>
+      <entry>ezdfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module gwyfile.c -->
+    <row>
+      <entry>Gwyddion native data</entry>
+      <entry>.gwy</entry>
+      <entry>gwyfile</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+    </row>
+    <!-- From module hdf4file.c -->
+    <row>
+      <entry>Psi HDF4</entry>
+      <entry>.hdf</entry>
+      <entry>hdf4file</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module hitachi-afm.c -->
+    <row>
+      <entry>Hitachi AFM</entry>
+      <entry>.afm</entry>
+      <entry>hitachi-afm</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module igorfile.c -->
+    <row>
+      <entry>WaveMetrics IGOR binary wave v5</entry>
+      <entry>.ibw</entry>
+      <entry>igorfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module intematix.c -->
+    <row>
+      <entry>Intematix SDF</entry>
+      <entry>.sdf</entry>
+      <entry>intematix</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module jeol.c -->
+    <row>
+      <entry>JEOL</entry>
+      <entry>.tif</entry>
+      <entry>jeol</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module jpkscan.c -->
+    <row>
+      <entry>JPK Instruments</entry>
+      <entry>.jpk</entry>
+      <entry>jpkscan</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module mapvue.c -->
+    <row>
+      <entry>MapVue</entry>
+      <entry>.map</entry>
+      <entry>mapvue</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- Module matfile.c contains no magic. -->
+    <!-- From module metropro.c -->
+    <row>
+      <entry>Zygo MetroPro DAT</entry>
+      <entry>.dat</entry>
+      <entry>metropro</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module microprof.c -->
+    <row>
+      <entry>MicroProf TXT</entry>
+      <entry>.txt</entry>
+      <entry>microprof</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <row>
+      <entry>MicroProf FRT</entry>
+      <entry>.frt</entry>
+      <entry>microprof</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module mifile.c -->
+    <row>
+      <entry>Molecular Imaging MI</entry>
+      <entry>.mi</entry>
+      <entry>mifile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Limited<footnote id="table-file-formats-fn1"><para>Spectra curves are imported as graphs, positional information is lost.</para></footnote></entry>
+    </row>
+    <!-- From module nanoeducator.c -->
+    <row>
+      <entry>Nanoeducator</entry>
+      <entry>.mspm, .stm, .spm</entry>
+      <entry>nanoeducator</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanonics.c -->
+    <row>
+      <entry>Nanonics NAN</entry>
+      <entry>.nan</entry>
+      <entry>nanonics</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanonis.c -->
+    <row>
+      <entry>Nanonis SXM</entry>
+      <entry>.sxm</entry>
+      <entry>nanonis</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanoscan.c -->
+    <row>
+      <entry>Nanoscan XML</entry>
+      <entry>.xml</entry>
+      <entry>nanoscan</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanoscope.c -->
+    <row>
+      <entry>Veeco Nanoscope III</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanoscope-ii.c -->
+    <row>
+      <entry>Veeco Nanoscope II</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope-ii</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nanotop.c -->
+    <row>
+      <entry>Nanotop SPM</entry>
+      <entry>.spm</entry>
+      <entry>nanotop</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module netcdf.c -->
+    <row>
+      <entry>GSXM NetCDF</entry>
+      <entry>.nc</entry>
+      <entry>netcdf</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module nt-mdt.c -->
+    <row>
+      <entry>NT-MDT</entry>
+      <entry>.mdt</entry>
+      <entry>nt-mdt</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
+    </row>
+    <!-- From module ols.c -->
+    <row>
+      <entry>Olympus LEX 3000</entry>
+      <entry>.ols</entry>
+      <entry>ols</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module omicron.c -->
+    <row>
+      <entry>Omicron SCALA</entry>
+      <entry>.par, .tf*, .tb*, .sf*, .sb*</entry>
+      <entry>omicron</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Yes</entry>
+    </row>
+    <!-- From module omicronmatrix.c -->
+    <row>
+      <entry>Omicron MATRIX</entry>
+      <entry>.mtrx</entry>
+      <entry>omicronmatrix</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module opdfile.c -->
+    <row>
+      <entry>Wyko OPD</entry>
+      <entry>.opd</entry>
+      <entry>opdfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <row>
+      <entry>Wyko ASCII</entry>
+      <entry>.asc</entry>
+      <entry>opdfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module pixmap.c -->
+    <row>
+      <entry>Pixmap images</entry>
+      <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
+      <entry>pixmap</entry>
+      <entry>Yes<footnote id="table-file-formats-fn2"><para>Import support relies on Gdk-Pixbuf and hence may vary among systems.
+16bit depth is not supported.</para></footnote></entry>
+      <entry>Yes<footnote id="table-file-formats-fn3"><para>Usually lossy, intended for presentational purposes.  16bit grayscale
+export is possible to PNG, TIFF and PNM.</para></footnote></entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module pltfile.c -->
+    <row>
+      <entry>Nanosurf PLT</entry>
+      <entry>.plt</entry>
+      <entry>pltfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module pnifile.c -->
+    <row>
+      <entry>Pacific Nanotechnology PNI</entry>
+      <entry>.pni</entry>
+      <entry>pnifile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module psia.c -->
+    <row>
+      <entry>PSIA</entry>
+      <entry>.tiff</entry>
+      <entry>psia</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module quesant.c -->
+    <row>
+      <entry>Quesant AFM</entry>
+      <entry>.afm</entry>
+      <entry>quesant</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module rawfile.c -->
+    <row>
+      <entry>Raw text files</entry>
+      <entry>any</entry>
+      <entry>rawfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <row>
+      <entry>Raw binary files</entry>
+      <entry>any</entry>
+      <entry>rawfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module rawgraph.c -->
+    <row>
+      <entry>Graph text data (raw)</entry>
+      <entry>any</entry>
+      <entry>rawgraph</entry>
+      <entry>Yes<footnote id="table-file-formats-fn4"><para>At present, only simple two-column data, imported as graph curves, are
+supported.</para></footnote></entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module rawxyz.c -->
+    <row>
+      <entry>XYZ data</entry>
+      <entry>.xyz, .dat</entry>
+      <entry>rawxyz</entry>
+      <entry>Yes<footnote id="table-file-formats-fn5"><para>XYZ data are interpolated to a regular grid upon import.</para></footnote></entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module rhk-sm3.c -->
+    <row>
+      <entry>RHK Instruments SM3</entry>
+      <entry>.sm3</entry>
+      <entry>rhk-sm3</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+    </row>
+    <!-- From module rhk-sm4.c -->
+    <row>
+      <entry>RHK Instruments SM4</entry>
+      <entry>.sm4</entry>
+      <entry>rhk-sm4</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module rhk-spm32.c -->
+    <row>
+      <entry>RHK Instruments SM2</entry>
+      <entry>.sm2</entry>
+      <entry>rhk-spm32</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
+    </row>
+    <!-- From module sdfile.c -->
+    <row>
+      <entry>Surfstand Surface Data File</entry>
+      <entry>.sdf</entry>
+      <entry>sdfile</entry>
+      <entry>Yes</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+    </row>
+    <row>
+      <entry>Micromap SDFA</entry>
+      <entry>.sdfa</entry>
+      <entry>sdfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module seiko.c -->
+    <row>
+      <entry>Seiko SII</entry>
+      <entry>.xqb, .xqd, .xqt</entry>
+      <entry>seiko</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module sensofar.c -->
+    <row>
+      <entry>Sensofar PLu v2000</entry>
+      <entry>.plu</entry>
+      <entry>sensofar</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module sensolytics.c -->
+    <row>
+      <entry>Sensolytics DAT</entry>
+      <entry>.dat</entry>
+      <entry>sensolytics</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module shimadzu.c -->
+    <row>
+      <entry>Shimadzu</entry>
+      <entry><!--FIXME--></entry>
+      <entry>shimadzu</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module sicmfile.c -->
+    <row>
+      <entry>IonScope SICM</entry>
+      <entry>.img</entry>
+      <entry>sicmfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module sis.c -->
+    <row>
+      <entry>Surface Imaging Systems</entry>
+      <entry>.sis</entry>
+      <entry>sis</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module spip-asc.c -->
+    <row>
+      <entry>SPIP ASCII</entry>
+      <entry>.asc</entry>
+      <entry>spip-asc</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module spmlab.c -->
+    <row>
+      <entry>Thermicroscopes SPMLab R4-R7</entry>
+      <entry>.tfr, .ffr, etc.</entry>
+      <entry>spmlab</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module spmlabf.c -->
+    <row>
+      <entry>Thermicroscopes SPMLab floating point</entry>
+      <entry>.flt</entry>
+      <entry>spmlabf</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module stmprg.c -->
+    <row>
+      <entry>Omicron STMPRG</entry>
+      <entry>tp*, ta*</entry>
+      <entry>stmprg</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module stpfile.c -->
+    <row>
+      <entry>Molecular Imaging STP</entry>
+      <entry>.stp</entry>
+      <entry>stpfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module surffile.c -->
+    <row>
+      <entry>Surf</entry>
+      <entry>.sur</entry>
+      <entry>surffile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module unisoku.c -->
+    <row>
+      <entry>Unisoku</entry>
+      <entry>.hdr, .dat</entry>
+      <entry>unisoku</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module witfile.c -->
+    <row>
+      <entry>WITec</entry>
+      <entry>.wit</entry>
+      <entry>witfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    <!-- From module wsxmfile.c -->
+    <row>
+      <entry>Nanotec WSxM</entry>
+      <entry>.tom</entry>
+      <entry>wsxmfile</entry>
+      <entry>Yes</entry>
+      <entry>No</entry>
+      <entry>No</entry>
+    </row>
+    </tbody>
+  </tgroup>
+</informaltable>

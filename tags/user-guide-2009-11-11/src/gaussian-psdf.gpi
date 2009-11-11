@@ -1,0 +1,6 @@
+NAME = 'PSDF'
+xscale=1e6
+yscale=1e-27
+set xlabel 'K_x [μm^{-1}]'
+set ylabel 'W_1 [nm^3]'
+set key top right

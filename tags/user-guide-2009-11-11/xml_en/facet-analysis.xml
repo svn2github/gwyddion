@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect2 id='facet-analysis'>
+  <title>Facet Analysis</title>
+  <indexterm><primary>facet analysis</primary></indexterm>
+  <para>
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Statistics</guisubmenu>
+      <guimenuitem>Facet Analysis</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>
+    Facet analysis enables to interactively study orientations of facets
+    occuring in the data and mark facets of specific orientations on the
+    image. The left view displays data with preview of marked facets. The
+    right smaller view, called facet view below, displays two-dimensional
+    slope distribution.
+  </para>
+  <para>
+    The centre of facet view always correspond to zero inclination (horizontal
+    facets), slope in
+    <inlineequation>
+      <mathphrase><phrase role='math'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>-direction
+    increases towards left and right border and slope in
+    <inlineequation>
+      <mathphrase><phrase role='math'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>-direction
+    increases towards top and bottom borders.  The exact coordinate system is a
+    bit complex and it adapts to the range of slopes in the particular data
+    displayed.
+  </para>
+  <para>
+    <guilabel>Facet plane size</guilabel> controls the size (radius) of plane
+    locally fitted in each point to determine the local inclination.  The
+    special value 0 stands for no plane fitting, the local inclination is
+    determined from symmetric
+    <inlineequation>
+      <mathphrase><phrase role='math'>x</phrase></mathphrase>
+      <alt>x</alt>
+    </inlineequation>
+    and
+    <inlineequation>
+      <mathphrase><phrase role='math'>y</phrase></mathphrase>
+      <alt>y</alt>
+    </inlineequation>
+    derivatives in each point.  The choice of neighbourhood size is crucial for
+    meaningful results: it must be smaller than the features one is interested
+    in to avoid their smoothing, on the other hand it has to be large enough to
+    suppress noise present in the image.
+  </para>
+  <informalfigure id='fig-facet-analysis-sizes'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='facet-analysis-sizes.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Illustration of the influence of fitted plane size on the distribution
+        of a scan of a delaminated DLC surface with considerable fine noise.
+        One can see the distribution is completely obscured by the noise at
+        small plane sizes.  The neighbourhood sizes are: (a) 0, (b) 2, (c) 4,
+        (d) 7.  The angle and false color mappings are full-scale for each
+        particular image, i.e. they vary among them.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Both facet view and data view allow to select a point with mouse and read
+    corresponding facet normal inclination value
+    <inlineequation>
+      <mathphrase><phrase role='math'>ϑ</phrase></mathphrase>
+      <alt>\vartheta</alt>
+    </inlineequation>
+    and direction
+     <inlineequation>
+      <mathphrase><phrase role='math'>φ</phrase></mathphrase>
+      <alt>\varphi</alt>
+    </inlineequation>
+    under <guilabel>Normal</guilabel>.  When you select a point on data view,
+    the facet view selection is updated to show inclination in this point.
+  </para>
+  <para>
+    Button <guibutton>Find Maximum</guibutton> sets facet view selection
+    to slope distribution maximum (the initial selection position).
+  </para>
+  <para>
+    Button <guibutton>Mark</guibutton> updates the mask of areas with slope
+    similar to the selected slope.  More precisely, of areas with slope
+    within <guilabel>Tolerance</guilabel> from the selected slope.  The facet
+    view then displays the set of slopes corresponding to marked points
+    (note the set of selected slopes may not look circular on facet view,
+    but this is only due to selected projection).  Average inclination
+    of all points in selected range of slopes is displayed under
+    <guilabel>Mean Normal</guilabel>.
+  </para>
+</sect2>
+<!-- vim: set ts=2 sw=2 et : -->

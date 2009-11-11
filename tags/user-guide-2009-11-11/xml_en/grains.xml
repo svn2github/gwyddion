@@ -1,0 +1,616 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='grain-analysis'>
+  <title>Grain Analysis</title>
+  <indexterm><primary>grain marking</primary></indexterm>
+  <para>
+    There are several grain-related algorithms implemented in Gwyddion. First
+    of all, simple thresholding algorithms can be used (height, slope or
+    curvature thresholding). These procedures can be very efficient namely
+    within particle analysis (to mark particles located on flat surface).
+  </para>
+  <para id='grain-threshold'>
+    <indexterm><primary>threshold grain marking</primary></indexterm>
+    Thresholding methods can be accessed within Gwyddion as
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Mark by Threshold</guimenuitem>
+    </menuchoice>.
+    Height, slope and curvature thresholding is implemented within this module.
+    The results of each individual thresholding methods can be merged together
+    using several operators.
+  </para>
+  <para id='grain-remove-thresholding'>
+    Similarly, the grains can be removed from the mask using
+    <menuchoice>
+      <guimenu>Data Process</guimenu>
+      <guisubmenu>Grains</guisubmenu>
+      <guimenuitem>Remove Grains</guimenuitem>
+    </menuchoice> menu choice.
+    Maximum height and/or size thresholding methods can be used to eliminate
+    false grains occurred by noise or some dust particles, for example. You can
+    use also interactive grain removal tool for doing this manually.
+  </para>
+  <sect2 id='grain-watershed'>
+    <title>Watershed</title>
+    <indexterm><primary>watershed grain marking</primary></indexterm>
+    <para>
+      For more complicated data structures the effectiveness of thresholding
+      algorithms can be very poor. For these data a <emphasis>watershed
+        algorithm</emphasis> can be used more effectively for grain or particle
+      marking.
+    </para>
+    <para>
+      The watershed algorithm is usually employed for local minima
+      determination and image segmentation in image processing. As the problem
+      of determining the grain positions can be understood as the problem of
+      finding local extremes on the surface this algorithm can be used also for
+      purposes of grain segmentation or marking. For convenience in the
+      following we will treat the data inverted in the
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+        <alt>z</alt>
+      </inlineequation>
+      direction while describing the algorithm (i.e.
+      the grain tops are forming local minima in the following text). We
+      applied two stages of the grain analysis
+      (see [<link linkend='grain-analysis-ref-1'>1</link>]):
+    </para>
+    <orderedlist>
+      <listitem>
+        At each point of the inverted surface the virtual water drop was
+        placed. In the case that the drop was not already in a local minimum it
+        followed the steepest descent path to minimize its potential energy. As
+        soon as the drop reached any local minimum it stopped here and rested
+        on the surface. In this way it filled the local minimum partially by
+        its volume (see figure below and its caption). This process was
+        repeated several times. As the result a system of lakes of different
+        sizes filling the inverted surface depressions was obtained. Then the
+        area of each of the lakes was evaluated and the smallest lakes were
+        removed under assumption that they were formed in the local minima
+        originated by noise. The larger lakes were used to identify the
+        positions of the grains. In this way the noise in the AFM data was
+        eliminated.
+      </listitem>
+      <listitem>
+        The grains found in the step 1 were marked (each one by a different
+        number). The water drops continued in falling to the surface and
+        filling the local minima. As the grains were already identified and
+        marked after the first step, the next five situations could happen as
+        soon as the drop reached a local minimum.
+        <orderedlist>
+          <listitem>
+            The drop reached the place previously marked as a concrete grain.
+            In this case the drop was merged with the grain, i. e. it was
+            marked as a part of the same grain.
+          </listitem>
+          <listitem>
+            The drop reached the place where no grain was found but a concrete
+            grain was found in the closest neighbourhood of the drop. In this
+            case the drop was merged with the grain again.
+          </listitem>
+          <listitem>
+            The drop reached the place where no grain was found and no grain
+            was found even in the closest neighbourhood of the drop. In that
+            case the drop was not marked at all.
+          </listitem>
+          <listitem>
+            The drop reached the place where no grain was found but more than
+            one concrete grain was found in the closest neighbourhood (e. g.
+            two different grains were found in the neighbourhood). In this case
+            the drop was marked as the grain boundary.
+          </listitem>
+          <listitem>
+            The drop reached the place marked as grain boundary. In this case
+            the drop was marked as the grain boundary too.
+          </listitem>
+        </orderedlist>
+      </listitem>
+    </orderedlist>
+    <para>
+      In this way we can identify the grain positions and then determine the
+      volume occupied by each grain separately.
+    </para>
+    <informalfigure id='fig-grain-marking'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='allgrains.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Image of grain-like surface structure (a) and corresponding results
+          of height thresholding (b), curvature thresholding (c), and
+          watershed (d) algorithm.   Within watershed algorithm it is possible
+          to segment image even further.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='grain-analysis-statistics'>
+    <title>Statistics</title>
+    <indexterm><primary>number of grains</primary></indexterm>
+    <para>
+      Grain properties can be studied using several functions. The simplest of
+      them is Grain Statistics
+    </para>
+    <sect3 id='grain-statistics'>
+      <title>Grain Statistics</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Statistics</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        This function calculates the total number of marked grains, their total
+        (projected) area both as an absolute value and as a fraction of total
+        data field area, and the mean area and equivalent square size of one
+        grain.
+      </para>
+      <para>
+        Overall characteristics of the marked area can be also obtained with
+        Statistical Quantities tool when its <guilabel>Use mask</guilabel>
+        option is switched on.  By inverting the mask the same information
+        can be obtained also for the non-grain area.
+      </para>
+    </sect3>
+    <sect3 id='grain-distributions'>
+      <title>
+        Grain Distributions
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_graph-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Distributions</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Grain Distributions is the most powerful and complex tool. It has two
+        basic modes of operation: graph plotting and raw data export. In
+        graph plotting mode selected characteristics of individual grains are
+        calculated, gathered and summary graphs showing their distributions
+        are plotted.
+      </para>
+      <para>
+        Raw data export is useful for experts who need for example to
+        correlate properties of individual grains.  In this mode selected
+        grain characteristics are calculated and dumped to a text file table
+        where each row corresponds to one grain and columns correspond to
+        requested quantities.  The order of the colums is the same as the
+        relative order of the quantities in the dialog; all values are
+        written in base SI units, as is usual in
+        <application>Gwyddion</application>.
+      </para>
+    </sect3>
+    <sect3 id='grain-correlation'>
+      <title>
+        Grain Property Correlation
+      </title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Grains</guisubmenu>
+          <guimenuitem>Correlate</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Grain correlation plots a graph of one selected graph quantity as
+        the function of another grain quantity, visualizing correlations
+        between them.
+      </para>
+    </sect3>
+    <sect3 id='grain-measure'>
+      <title>
+        Grain Measurement Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <para>
+        The grain measurement tool is the interactive method to obtain the
+        same information about individual grains as
+        <link linkend='grain-distributions'>Grain Distributions</link> in raw
+        mode.  After selecting a grain on the data window with mouse, all
+        the available quantities are displayed in the tool window.
+      </para>
+      <para>
+        Beside physical characteristics this tool also displays the grain
+        number.  Grain numbers corresponds to row numbers (counting from 1)
+        in files exported by
+        <link linkend='grain-distributions'>Grain Distributions</link>.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='grain-properties'>
+    <title>Grain Properties</title>
+    <para>
+      <link linkend='grain-distributions'>Grain Distributions</link>
+      and <link linkend='grain-measure'>Grain measurement tool</link>
+      can calculate the following grain properties:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>Value-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Minimum</guilabel>,
+              the minimum value (height) occuring inside the grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Maximum</guilabel>,
+              the maximum value (height) occuring inside the grain.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>mean</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Mean</guilabel>,
+              the mean of all values occuring inside the grain, that is the
+              mean grain height.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>median</primary>
+                <secondary>of a grain</secondary>
+              </indexterm>
+              <guilabel>Median</guilabel>
+              the median of all values occuring inside the grain, that is the
+              median grain height.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>minimum</primary>
+                <secondary>on a grain boundary</secondary>
+              </indexterm>
+              <guilabel>Minimum on boundary</guilabel>,
+              the maximum value (height) occuring on the inner grain boundary.
+              This means within the set of pixels that lie inside the grain
+              but at least one of their neighbours lies outside.
+            </listitem>
+            <listitem>
+              <indexterm>
+                <primary>maximum</primary>
+                <secondary>on a grain boundary</secondary>
+              </indexterm>
+              <guilabel>Maximum on boundary</guilabel>,
+              the maximum value (height) occuring on the inner grain boundary,
+              defined similarly to the minimum.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Area-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Projected area</guilabel>,
+              the projected (flat) area of the grain.
+            </listitem>
+            <listitem>
+              <guilabel>Equivalent square side</guilabel>,
+              the side of the square with the same projected area as the
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Equivalent disc radius</guilabel>,
+              the radius of the disc with the same projected area as the
+              grain.
+            </listitem>
+            <listitem>
+              <guilabel>Surface area</guilabel>,
+              the surface area of the grain, see
+              <link linkend='surface-area-calculation'>statistical
+                quantities</link> section for description of the surface area
+              estimation method.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Boundary-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Projected boundary length</guilabel>,
+              the length of the grain boundary projected to the horizontal
+              plane (that is not taken on the real three-dimensional
+              surface).  The method of boundary length estimation is
+              described below.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum bounding size</guilabel>,
+              the minimum dimension of the grain in the horizontal plane.  It
+              can be visualized as the minimum width of a gap in the
+              horizontal plane the grain could pass through.
+            </listitem>
+            <listitem>
+              <guilabel>Minimum bounding direction</guilabel>,
+              the direction of the gap from the previous item.  If the grain
+              exhibits a symmetry that makes several directions to qualify,
+              an arbitrary direction is chosen.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum bounding size</guilabel>,
+              the maximum dimension of the grain in the horizontal plane.  It
+              can be visualized as the maximum width of a gap in the
+              horizontal plane the grain could fill up.
+            </listitem>
+            <listitem>
+              <guilabel>Maximum bounding direction</guilabel>,
+              the direction of the gap from the previous item.  If the grain
+              exhibits a symmetry that makes several directions to qualify,
+              an arbitrary direction is chosen.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Volume-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Zero basis</guilabel>,
+              the volume between grain surface and the plane
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
+                <alt>z=0</alt>
+              </inlineequation>.
+              Values below zero form negative volumes.  The zero level must be
+              set to a reasonable value (often
+              <link linkend='fix-zero'>Fix Zero</link> is sufficient) for
+              the results to make sense, which is also the advantage of
+              this method: one can use basis plane of his choice.
+            </listitem>
+            <listitem>
+              <guilabel>Grain minimum basis</guilabel>,
+              the volume between grain surface and the plane
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase> = <phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
+                <alt>z=z_{\rm min}</alt>
+              </inlineequation>,
+              where
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
+                <alt>z_{\rm min}</alt>
+              </inlineequation>
+              is the minimum value (height) occuring in the grain.  This
+              method accounts for grain surrounding but it typically
+              underestimates the volume, especially for small grains.
+            </listitem>
+            <listitem>
+              <guilabel>Laplacian backround basis</guilabel>,
+              the volume between grain surface and the basis surface formed
+              by laplacian interpolation of surrounding values.  In other
+              words, this is the volume that would disappear after using
+              <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
+              or
+              <link linkend='tool-remove-grains'>Grain Remover</link> tool
+              with Laplacian interpolation on the grain.  This is the most
+              sophisticated method, on the other hand it is the hardest to
+              develop intuition for.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Position-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Center x position</guilabel>,
+              the horizontal coordinate of the grain centre.  Since the
+              grain area is defined as the area covered by the
+              corresponding mask pixels, the centre of a single-pixel grain
+              has half-integer coordinates, not integer ones.  Data field
+              origin offset (if any) is taken into account.
+            </listitem>
+            <listitem>
+              <guilabel>Center y position</guilabel>,
+              the verical coordinate of the grain centre.  See above for
+              the interpretation.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Slope-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Inclination θ</guilabel>,
+              the deviation of the normal to the mean plane from the
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+                <alt>z</alt>
+              </inlineequation>-axis,
+              see <link linkend='inclinations-coordinates'>inclinations</link>
+              for details.
+            </listitem>
+            <listitem>
+              <guilabel>Inclination φ</guilabel>,
+              the azimuth of the slope, as defined in
+              <link linkend='inclinations-coordinates'>inclinations</link>.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-grain-bounding-dims'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='grain-bounding-dims.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='grain-bounding-dims.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Maximum and minimum bounding dimensions and angles of a grain.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='boundary-length-calculation'>
+      <indexterm><primary>boundary length calculation</primary></indexterm>
+      The grain boundary length is estimated by summing estimated contributions
+      of each four-pixel configuration on the boundary.  The contributions
+      are displayed on the following figure for each type of configuration,
+      where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+        <alt>h_x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+        <alt>h_y</alt>
+      </inlineequation>
+      are pixel dimension along corresponding axes and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
+        <alt>h</alt>
+      </inlineequation>
+      is the length of the pixel diagonal:
+      <informalequation id='eq-grain-boundary-pixel-diagonal'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='eq-grain-boundary-pixel-diagonal.png' format='PNG'/>
+          </imageobject>
+          <textobject role='tex'>
+            <phrase>
+<![CDATA[
+h = \sqrt{h_x^2 + h_y^2}
+]]>
+            </phrase>
+          </textobject>
+        </mediaobject>
+      </informalequation>
+      The contributions correspond one-to-one to lenghts of segments of the
+      boundary of a polygon approximating the grain shape.  The construction of
+      the equivalent polygonal shape can also be seen in the figure.
+    </para>
+    <informalfigure id='fig-boundary-length'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='boundary-length.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='boundary-length.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Contributions of pixel configurations to the estimated boundary
+          length (top).  Grey squares represent pixels inside the grain, white
+          squares represent outside pixels.  The estimated contribution of each
+          configuration is:
+          (a) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
+            <alt>h/2</alt>
+          </inlineequation>,
+          (b1), (b2) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
+            <alt>h</alt>
+          </inlineequation>,
+          (c) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
+            <alt>h_y</alt>
+          </inlineequation>,
+          (d) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
+            <alt>h_x</alt>
+          </inlineequation>,
+          (e) <inlineequation>
+            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
+            <alt>h/2</alt>
+          </inlineequation>.
+          Cases (b1) and (b2) differ only in the visualization of the
+          polygonal shape segments, the estimated boundary lengths are
+          identical.  The bottom part of the figure illustrates how the
+          segments join to form the polygon.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='grain-volume-calculation'>
+      <indexterm><primary>volume calculation</primary></indexterm>
+      The grain volume is, after subtracting the basis, estimated as the
+      volume of exactly the same body whose upper surface is used for
+      <link linkend='fig-surface-area-vertices'>surface area calculation</link>.
+      Note for the volume between vertices this is equivalent to the classic
+      two-dimensional trapezoid integration method.  However, we calculate the
+      volume under a mask centered on vertices, therefore their contribution
+      to the integral is distributed differently as shown in the following
+      figure.
+    </para>
+    <informalfigure id='fig-volume-pixel-weights'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='volume-pixel-weights.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='volume-pixel-weights.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Contributions of individual pixels to the volume of single pixel
+          (grey).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='grain-analysis-ref'>
+    <title>References</title>
+    <para id='grain-analysis-ref-1'>
+      [1] <ulink url='http://klapetek.cz/download.html'>
+        Petr Klapetek, Ivan Ohlídal, Daniel Franta, Alberto Montaigne-Ramil, Alberta Bonanni, David Stifter, Helmut Sitter:
+        Acta Physica Slovaca, 3 (223-230), 2003
+      </ulink>
+    </para>
+  </sect2>
+  <!--  Doesn't work well, needs serious formatting improvements.
+  <bibliography>
+    <biblioentry>
+      <biblioset relation='article'>
+        <authorgroup>
+          <author><firstname>Petr</firstname><surname>Klapetek</surname></author>
+          <author><firstname>Ivan</firstname><surname>Ohlídal</surname></author>
+          <author><firstname>Daniel</firstname><surname>Franta</surname></author>
+          <author><firstname>Alberto</firstname><surname>Montaigne-Ramil</surname></author>
+          <author><firstname>Alberta</firstname><surname>Bonanni</surname></author>
+          <author><firstname>David</firstname><surname>Stifter</surname></author>
+          <author><firstname>Helmut</firstname><surname>Stifter</surname></author>
+        </authorgroup>
+        <title>Atomic force microscopy characterization of ZnTe epitaxial films</title>
+      </biblioset>
+      <biblioset relation='journal'>
+        <title>Acta Physica Slovaca</title>
+        <volumenum>3</volumenum>
+        <pagenums>223-230</pagenums>
+        <pubdate>2003</pubdate>
+      </biblioset>
+    </biblioentry>
+  </bibliography>
+  -->
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

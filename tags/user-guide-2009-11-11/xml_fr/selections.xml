@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: selections.xml 9381 2009-07-10 06:50:26Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='selections'>
+  <title>Selections</title>
+  <para>
+    Tous les <link linkend='tools'>outils</link> interactifs ainsi que certains
+    traitements permettent de sélectionner différentes formes géométriques à
+    l'aide de la souris : des points, des lignes, des rectangles et de
+    cercles / ellipses. Les sélections existantes peuvent être modifiées en
+    faisant glisser les coins, les extrémités ou les sélections elles mêmes.
+    Lorsque le curseur de la souris se trouve à proximité d'un point de contrôle
+    de la sélection, celui-ci change de forme pour indiquer la possibilité
+    d'éditer ce point.
+  </para>
+  <para>
+    Chaque outil utilise en général un seul type de sélection, et lorsque il est
+    activé sur une fenêtre de données, il change le mode de sélection vers ce
+    type précis. Les sélections d'un autre type que celles affichées sont
+    enregistrées et rappellées lorsqu'un outil les utilisant est activé. Par
+    exemple lorsque vous sélectionnez plusieurs lignes à l'aide de l'outil
+    d'extraction de profils, puis passez à l'analyse statistique (les lignes
+    disparaissent) et sélectionnez une zone rectangulaire pour en calculer les
+    caractéristiques statistiques, puis revenez à l'extraction de
+    profils, le rectangle disparaît et les lignes apparaissent à nouveau.
+  </para>
+  <para id='selection-sharing'>
+    Les outils qui utilisent les même types de sélection se les partagent – par
+    exemple les fonctions statistiques et l'analyse statistique utilisent des
+    sélections rectangulaires.
+    Pour calculer la distribution de hauteur de la zone rectangulaire que vous
+    avez sélectionné pour en calculer les données statistiques, il vous suffira
+    de simplement changer d'outil.
+  </para>
+  <informalfigure id='fig-selections'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='selections-vlsi.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre de données ayant trois lignes sélectionnées, deux horizontales
+        et une verticale.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Si vous sauvegardez les données sous le format de fichier Gwyddion
+    (<filename>.gwy</filename>), toutes les sélections seront sauvegardées avec
+    les données et rappellées lors de l'ouverture suivante du fichier puis de
+    l'outil approprié.
+  </para>
+  <para>
+    Vous pouvez restreindre la forme de la sélection en appuyant sur la touche
+    Maj tout en sélectionnant, ce qui facilite la création d'une forme à partir
+    d'un type de forme.
+    La touche Maj de restreindre
+    <itemizedlist>
+      <listitem>
+        les sélections rectangulaires en sélections carrées,
+      </listitem>
+      <listitem>
+        les sélections elliptiques en sélections circulaires,
+      </listitem>
+      <listitem>
+        les directions des lignes sélectionnées à des multiples de 15°.
+      </listitem>
+    </itemizedlist>
+  </para>
+
+  <sect2 id='selection-manager'>
+    <title>Gestionnaire de Sélection</title>
+    <para>
+      Le gestionnaire de sélection est un <link linkend='tools'>outil</link>
+      spécial affichant la liste des sélections présentes sur un canal, et
+      permettant de les copier dans d'autres canaux.
+    </para>
+    <para>
+      Pour chaque sélection, l'outil affiche son nom, qui correspond à la
+      manière dont il est identifié au sein du fichier
+      <filename>.gwy</filename> ; le type de sélection et le nombre d'objets
+      (points, lignes, rectangles, …) sélectionnés. En général, il n'y a au plus
+      qu'une sélection pour un type donné car celles-ci sont partagées par les
+      outils tel que  <link linkend='selection-sharing'>décrit plus haut</link>.
+      Toutefois il peut arriver que certaines sélections spéciales soient
+      présentes, telle que montré dans la figure suivante montrant deux
+      sélections ponctuelles.
+    </para>
+    <informalfigure id='fig-selection-manager'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='selection-manager.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Gestionnaire de Sélection montrant plusieurs sélections présentes dans
+          les données.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      Il est possible de supprimer des sélections en les choisissant parmi la
+      liste puis en pressant la touche <keycode>Suppr</keycode> – ceci équivaut
+      à remettre à zéro la sélection de l'outil correspondant. Le bouton
+      <guibutton>Effacer tout</guibutton> supprime toutes les sélections.
+    </para>
+    <para>
+      Cependant, la fonction la plus intéressante du Gestionnaire de Sélection
+      est la possibilité de copier les sélections. Il existe deux façons de
+      copier une sélection dans un autre canal :
+    </para>
+    <itemizedlist>
+      <listitem>
+        Faire glisser une ligne de la liste des sélections vers une fenêtre de
+        données permet de copier la sélection vers cette fenêtre.
+      </listitem>
+      <listitem>
+        Cliquer le bouton <guibutton>Distribuer</guibutton> permet de copier
+        la sélection vers tous les autres canaux du fichier. Si le paramètre
+        <guilabel>vers tous les fichier</guilabel> est activé, la sélection est
+        copiée vers tous les canaux de tous les fichiers ouverts.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Les sélections sont copiées uniquement vers les canaux ayant des unités
+      latérales compatibles. Cela signifie qu'une sélection dans un canal
+      ayant pour unité des mètres ne pourra être distribuée vers un canal
+      affichant une PSDF bi-dimensionnelle ou une distribution des pentes
+      bi-dimensionnelle..
+    </para>
+    <para>
+      Si les dimensions physiques de la cible ne sont pas suffisantes pour
+      contenir tous les objets de la sélection copiée, seuls les objets de
+      dimensions adaptées seront copiées (ce qui veut dire qu'il est possible
+      que rien ne soit copié).
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

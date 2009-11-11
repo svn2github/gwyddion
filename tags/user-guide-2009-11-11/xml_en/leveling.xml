@@ -1,0 +1,456 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='leveling-and-background'>
+  <title>Data Leveling and Background Subtraction</title>
+  <sect2 id='leveling'>
+    <title>Leveling</title>
+    <para>
+      The data obtained from SPM microscopes are
+      <!--TODO: should it be "are" or "is"?-->
+      very often not leveled at all; the microscope directly outputs raw data
+      values computed from piezoscanner voltage, strain gauge, interferometer or
+      other detection system values. This way of exporting data enables the user
+      to choose his/her own method of leveling data.
+    </para>
+    <para>
+      The choice of leveling method should be based on your SPM system
+      configuration. Basically, for systems with independent scanner(s) for
+      each axis, plane leveling should be sufficient. For systems with
+      scanner(s) moving in all three axes (tube scanners) 2nd order polynomial
+      leveling should be used.
+    </para>
+    <para>
+      Of course, you can use higher order leveling for any data, however, this
+      can supress real features on the surface (namely waviness of the surface)
+      and therefore alter the statistical functions and quantities evaluated
+      from the surface.
+    </para>
+    <sect3 id='fix-zero'>
+      <title>Fix Zero and Zero Mean Value</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Fix Zero</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Zero Mean Value</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        The simplest modules that are connected with data leveling are
+        <link linkend='fix-zero'>Fix Zero</link> and
+        <link linkend='fix-zero'>Zero Mean Value</link>
+        that simply set the average height of the data to put the minimum
+        to zero (Fix Zero) or mean value to zero (Zero Mean Value).
+      </para>
+    </sect3>
+    <sect3 id='plane-level'>
+      <title>
+        Plane Level
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>plane leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>mean plane subtraction</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Plane Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Plane leveling is usually one of the first functions applied to raw SPM
+        data. The plane is computed from all the image points and is subtracted
+        from the data.
+      </para>
+      <para>
+        If a mask is present plane leveling offers to use the data under mask
+        for the plane fitting, exclude the data under mask or ignore the maks
+        and use the entire data.
+      </para>
+      <tip>
+        You can quickly apply plane leveling by simply right-clicking on
+        the image window and selecting <guimenuitem>Level</guimenuitem>.
+      </tip>
+    </sect3>
+    <sect3 id='three-point-level'>
+      <title>
+        Three Point Leveling Tool
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>three-point leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>three-point</secondary>
+      </indexterm>
+      <para>
+        The <guilabel>Three Point Leveling</guilabel>
+        tool can be used for leveling very complicated surface structures.
+        The user can simply mark three points in the image that should be at
+        the same level, and then click <guibutton>Apply</guibutton>. The plane
+        is computed from these three points and is subtracted from the data.
+      </para>
+    </sect3>
+    <sect3 id='facet-level'>
+      <title>
+        Facet Level
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_facet_level-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>facet leveling</primary></indexterm>
+      <indexterm>
+        <primary>leveling</primary>
+        <secondary>to align facets horizontally</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Facet Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <link linkend='facet-level'>Facet Level</link> levels data by
+        subtracting a plane similarly to the standard
+        <link linkend='plane-level'>Plane Level</link> function.
+        However, the plane is determined differently: it makes facets of the
+        surface as horizontal as possible. Thus for surfaces with flat
+        horizontal areas it leads to much better results than the standard
+        Plane Level especially if large objects are present.
+      </para>
+      <para>
+        On the other hand, it is not suitable for some types of surface.
+        These includes random surfaces, data with considerable fine noise
+        and non-topographic images as the method does not work well if the
+        typical lateral dimensions and <quote>heights</quote> differ by
+        many orders.
+      </para>
+      <para>
+        Similarly to <link linkend='plane-level'>Plane Level</link>, Facet
+        Level can include or exclude the data under mask.  This choice is
+        offered only if a mask is present.
+      </para>
+      <para>
+        Finding the orientation of the facets is an iterative process that
+        works as follows.  First, the variation of local normals is determined:
+        <informalequation id='eq-facet-level-dispersion'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-facet-level-dispersion.png' format='PNG'/>
+            </imageobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+\beta^2 = {1\over N} \sum_{i=1}^N \vec n_i^2
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase><subscript>i</subscript></phrase></mathphrase>
+          <alt>\vec n_i</alt>
+        </inlineequation>
+        is the vector of local facet normal (see
+        <link linkend='inclinations-coordinates'>inclination coordinates</link>)
+        in the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>i</phrase></mathphrase>
+          <alt>i</alt>
+        </inlineequation>-th
+        pixel.  Then the prevalent normal is estimated as
+        <informalequation id='eq-facet-level-new-normal'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-facet-level-new-normal.png' format='PNG'/>
+            </imageobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+\vec n = {\displaystyle \sum_{i=1}^N \vec n_i
+                        \exp\left(-c{\vec n_i^2\over\beta^2}\right)
+          \over
+          \displaystyle \sum_{i=1}^N
+                        \exp\left(-c{\vec n_i^2\over\beta^2}\right)}
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>c</phrase> = 1/20</mathphrase>
+          <alt>c=1/20</alt>
+        </inlineequation>
+        is a constant.  Consequently, the plane corresponding to the prevalent
+        normal
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
+          <alt>\vec n</alt>
+        </inlineequation>
+        is subtracted and these three steps are repeated until the process
+        converges.  The gaussian weighting factors serve to pick a single
+        set of similar local facet normals and converge to their mean
+        direction.  Without these factors, the procedure would obviously
+        converge in one step to the overall mean normal – and hence would
+        be completely equivalent to plain plane leveling.
+      </para>
+      <informalfigure id='fig-facet-level'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='level-plane-facet.png' format='PNG'/>
+          </imageobject>
+          <caption>
+            Facet Level example:
+            (a) uncorrected, sloping data;
+            (b) data leveled by standard plane fitting (Plane Level);
+            (c) data leveled by Facet Level.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id='level-rotate'>
+      <title>Level Rotate</title>
+      <indexterm><primary>rotation leveling</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Level Rotate</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <link linkend='level-rotate'>Level Rotate</link> behaves similarly to
+        <link linkend='plane-level'>Plane Level</link>, however it does
+        not simply subtract the fitted plane from the data. Instead, this module
+        takes the fitted plane parameters and rotates the image data by a
+        calculated amount to make it lie in a plane. So unlike
+        <link linkend='plane-level'>Plane Level</link>, this
+        module should therefore preserve angle data in the image.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='background-subtraction'>
+    <title>Background Subtraction</title>
+    <indexterm><primary>background subtraction</primary></indexterm>
+    <para>
+      Gwyddion has several special modules for background subtraction. All
+      allow you to extract the subtracted background to a separate data window.
+    </para>
+    <tip>
+      For finer control, you can use any of Gwyddion's
+      <link linkend='basic-filters'>filtering tools</link> on an image,
+      and then use the <link linkend='data-arithmetic'>Data Arithmetic</link>
+      module to subtract the results from your original image.
+    </tip>
+    <sect3 id='polynomial-level'>
+      <title>
+        Polynomial Background
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>polynomial background</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Polynomial Background</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fits data by a polynomial of the given order and subtracts this
+        polynomial.  In the <guilabel>Independent degree</guilabel> mode
+        the horizontal and vertical polynomial orders can be generally set
+        separately, i.e. the fitted polynomial is
+        <informalequation id='eq-polynomial-independent-degree'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-polynomial-independent-degree.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with independent maximum x and y
+                degrees
+              </phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+\sum_{j=0}^m \sum_{k=0}^n a_{j,k} x^j y^k
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>m</phrase></mathphrase>
+          <alt>m</alt>
+        </inlineequation>
+        and
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
+          <alt>n</alt>
+        </inlineequation>
+        are the selected horizontal and vertical polynomial degrees,
+        respectively.  In the <guilabel>Limited total degree</guilabel> mode
+        the fitted polynomial is
+        <informalequation id='eq-polynomial-total-degree'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-polynomial-total-degree.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>
+                2D polynomial expression with limited total degree
+              </phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+\sum_{j+k \le n} a_{j,k} x^j y^k
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+        where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
+          <alt>n</alt>
+        </inlineequation>
+        is the selected total polynomial degree.
+      </para>
+      <para>
+        Similarly to <link linkend='plane-level'>Plane Level</link>, polynomial
+        background subtraction can include or exclude the data under mask.
+        This choice is offered only if a mask is present.
+      </para>
+    </sect3>
+    <sect3 id='revolve-arc'>
+      <title>Revolve Arc</title>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Revolve Arc</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Revolves virtual <quote>arc</quote> of given radius horizontally or
+        vertically over (or under) the data. The envelope of this arc is
+        treated as a background, resulting in removal of features larger than
+        the arc radius (approximately).
+      </para>
+    </sect3>
+    <sect3 id='median-level'>
+      <title>Median Level</title>
+      <indexterm>
+        <primary>median</primary>
+        <secondary>background removal</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Median Level</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Filters data with a median filter using a large kernel and treats the
+        result as background. Only features smaller than approximately the
+        kernel size will be kept.
+      </para>
+      <note>This method can be very slow.</note>
+    </sect3>
+    <sect3 id='fit-sphere'>
+      <title>Fit Sphere</title>
+      <indexterm><primary>sphere fitting</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Fit sphere</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        Fits part of sphere surface on the data. Sphere orientation (i.e.
+        centre position) and initial fit values can be preset before fitting.
+        Marquardt-Levenberg fitting routine is used to calculate the result.
+      </para>
+    </sect3>
+  </sect2>
+  <sect2 id='curvature'>
+    <title>Curvature</title>
+    <indexterm><primary>curvature</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Level</guisubmenu>
+          <guimenuitem>Curvature</guimenuitem>
+        </menuchoice>
+      </para>
+    <para>
+      The global surface curvature parameters are calculated by fitting a
+      quadratic polynomial and finding its main axes.  Positive signs of the
+      curvature radii correspond to a concave (cup-like) surface, whereas
+      negative signs to convex (cap-like) surface, mixed signs mean a
+      saddle-like surface.
+    </para>
+    <para>
+      Beside the parameter table, it is possible to set the line selection on
+      the data to the fitted quadratic surface axes and/or directly read
+      profiles along them.  The zero of the abscissa is placed to the
+      intersection of the axes.
+    </para>
+    <para>
+      Similarly to the background subtraction functions, if a mask is present
+      on the data the module offers to include or exclude the data under mask.
+    </para>
+    <informalfigure id='fig-curvature'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='curvature.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Curvature dialog screenshot showing the strong deflection of a glass
+          plate with a thin film with compressive internal stress.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

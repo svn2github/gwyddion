@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='graph-windows'>
+  <title>Graph Window</title>
+  <para>
+    Graph window is used for 1D data processing. They are created by
+    appropriate tools or modules that extract graphs from height field
+    data.  Currently, it is not possible to import standalone graphs into
+    application as the main intent of Gwyddion is to provide tools for
+    analyzing height fields, not graphs.
+  </para>
+  <para>
+    Graph window consist of three tabs: the first two represent graphical and
+    tabular views of the 1D data and the third one shows a list of graph
+    curves.  Several tools connected with viewing 1D data are available
+    directly in the graph window toolbar, namely zoom buttons and logarithmic
+    axis buttons.  To reach all the possible operations use
+    <menuchoice>
+      <guimenu>Graph</guimenu>
+    </menuchoice>
+    menu in the Gwyddion main window.
+  </para>
+  <informalfigure id='fig-graph-window'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='graph_window.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        A graph window with three profiles.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    To edit curve presentation one can either click on the curve in the
+    graph or activate (double-click) the corresponding row in
+    <guilabel>Curves</guilabel>.  Individual curves can be deleted by
+    selecting them in <guilabel>Curves</guilabel> and pressing
+    <keycap>Delete</keycap>.  It is also possible to copy individual curves
+    to other graphs by dragging their curve list rows onto them (provided the
+    graphs are unit-wise compatible).
+  </para>
+  <para>
+    Clicking on a graph axis brings a dialog with axis properties and graph
+    key properties can be edited after double-clicing on it.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

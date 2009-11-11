@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: gwyddion.xml 9523 2009-07-21 15:35:29Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<refentry id='gwyddion'>
+  <refentryinfo>
+    <productname>gwyddion</productname>
+    <author><othername>Yeti</othername></author>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gwyddion</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>gwyddion</refname>
+    <refpurpose>Visualisation et analyse de données SPM</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv id='gwyddion-synopsis'>
+    <title>Synopsis</title>
+    <cmdsynopsis>
+      <command>gwyddion</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg rep='repeat'><replaceable>FILE</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1 id='gwyddion-description'>
+    <title>Description</title>
+    <para>
+      Gwyddion est un programme basé sur Gtk+ permettant de visualiser
+      et analyser des données SPM (Scanning Probe Microscope).
+    </para>
+  </refsect1>
+
+  <refsect1 id='gwyddion-options'>
+    <title>Options</title>
+    <para>
+      Le programme accepte toutes les options standard de Gtk+, Gdk, et GtkGLExt
+      telles que <option>--display</option> ou <option>--sync</option>.
+      Référez-vous à la documentation de ces composants pour une description
+      de ces options.
+    </para>
+    <para>
+      Le comportement des options de contrôle à distance
+      <option>--remote-<replaceable>*</replaceable></option> est indéfini
+      lorsque plusieurs sessions de Gwyddion sont lancées. Elles peuvent choisir
+      de manière arbitraire une session avec laquelle elles communiquent.
+    </para>
+    <para>
+      Options Gwyddion :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche une aide brève.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche les informations de version.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--no-splash</option>
+        </term>
+        <listitem>
+          <para>
+            Désactive l'écran de démarrage du programme.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='remote-control'>
+        <term>
+          <option>--remote-new</option>
+        </term>
+        <listitem>
+          <para>
+            Ouvre les fichiers donnés dans la ligne de commande dans une session
+            déjà lancée de Gwyddion. Lance une nouvelle session si aucune autre
+            ne tourne.
+          </para>
+          <para>
+            Cette option est probablement la plus utile.  Les associations de
+            type de fichiers sont généralement créées pour lancer Gwyddion avec
+            cette option par défaut.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--remote-existing</option>
+        </term>
+        <listitem>
+          <para>
+            Ouvre les fichiers donnés dans la ligne de commande dans une session
+            déjà lancée de Gwyddion. Cette option échoue si aucune session
+            de Gwyddion ne tourne.
+          </para>
+          <para>
+            Cette option est utile si vous souhaitez gérer le cas où Gwyddion ne
+            tourne pas.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--remote-query</option>
+        </term>
+        <listitem>
+          <para>
+            Cette option réussit si une session de Gwyddion est déjà lancée à
+            à l'écran, elle affiche son identifiant de fenêtre
+            (<type>Window</type> sur X11, <type>HWND</type> sur Win32).  Elle
+            échoue si aucune session ne tourne.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--check</option>
+        </term>
+        <listitem>
+          <para>
+            Au lieu de lancer l'interface graphique et d'ouvrir les
+            <replaceable>FICHIER</replaceable>s, cette option charge les
+            fichiers et réalise un test d'intgrité sur ceux-ci (en affichant
+            les erreurs vers la sortie standard).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--log-to-file</option>
+        </term>
+        <listitem>
+          <para>
+            Dirige les messages provenant de GLib, Gtk+, Gwyddion, etc. vers
+            <filename>~/.gwyddion/gwyddion.log</filename> ou le fichier donné
+            dans la variable d'environnement
+            <link linkend='GWYDDION_LOGFILE'><envar>GWYDDION_LOGFILE</envar></link>.
+            Notez que sous Win32 ces messages sont toujours dirigés vers un
+            fichier, cette option n'a donc aucun effet sous cet OS.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--debug-objects</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche la liste des objets créés durant le fonctionnement du
+            programme, avec leur instant de création et de destruction. Utile
+            pour les dévelopeurs uniquement.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--startup-time</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche l'heure de démarrage (et de fin) de différentes taches.
+            Utile pour les dévelopeurs ou pour les utilisateurs se plaignant
+            d'un démarrage trop lent.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1 id='gwyddion-environment'>
+    <title>Environnement</title>
+    <para>
+      Sur les sytèmes Linux/Unix, les variables d'environnement suivantes
+      peuvent être utilisées pour outre-passer les chemins d'installation
+      pré-définis (MS Windows pointe toujours vers les dossiers relativement
+      au chemin dans lequel il a été installé). Notez que ces variables sont
+      censées outre-passer les chemins d'installations du système, il ne s'agit
+      pas de liste de chemins, elles ne peuvent contenir qu'un seul chemin.
+    </para>
+    <variablelist>
+      <varlistentry id='GWYDDION_DATADIR'>
+        <term>
+          <envar>GWYDDION_DATADIR</envar>
+        </term>
+        <listitem>
+          <para>
+            Dossier de base des données où les ressources (gradients de
+            couleurs, matériaux OpenGL, …) sont installées. Gwyddion pointe vers
+            le sous-dossier <filename>gwyddion</filename> pour les ressource.
+          </para>
+          <para>
+            Lorqu'il n'est pas défini, la valeur par défaut correspond au
+            dossier pré-défini dans la variable <varname>${datadir}</varname>,
+            qui est en général <filename>/usr/local/share</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='GWYDDION_LIBDIR'>
+        <term>
+          <envar>GWYDDION_LIBDIR</envar>
+        </term>
+        <listitem>
+          <para>
+            Dossier de base des librairies dans lequel les modules sont
+            installés.  Gwyddion pointe vers le sous-dossier
+            <filename>gwyddion/modules</filename> pour les modules.
+          </para>
+          <para>
+            Lorqu'il n'est pas défini, la valeur par défaut correspond au
+            dossier pré-défini dans la variable <varname>${libdir}</varname>,
+            qui est en général <filename>/usr/local/lib</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='GWYDDION_LIBEXECDIR'>
+        <term>
+          <envar>GWYDDION_LIBEXECDIR</envar>
+        </term>
+        <listitem>
+          <para>
+            Dossier de base lib-exec directory dans lequel les greffons sont
+            installés were installed.Gwyddion pointe vers le
+            sous-dossier <filename>gwyddion/plugins</filename> pour les greffons.
+          </para>
+          <para>
+            Lorqu'il n'est pas défini, la valeur par défaut correspond au
+            dossier pré-défini dans la variable <varname>${libexecdir}</varname>,
+            qui est en général <filename>/usr/local/libexec</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='GWYDDION_LOCALEDIR'>
+        <term>
+          <envar>GWYDDION_LOCALEDIR</envar>
+        </term>
+        <listitem>
+          <para>
+            Dossier des traductions dans lequel les catalogues de messages sont
+            installés.
+          </para>
+          <para>
+            Lorqu'il n'est pas défini, la valeur par défaut correspond au
+            dossier pré-défini dans la variable
+            <varname>${datadir}/locale</varname>, qui est en général
+            <filename>/usr/local/share/locale</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      D'autres variables influencent le fonctionnement de
+      <application>Gwyddion</application>, par exemple
+      <ulink url='http://library.gnome.org/devel/glib/stable/glib-running.html'>les variables GLib+</ulink>
+      et
+      <ulink url='http://library.gnome.org/devel/gtk/stable/gtk-running.html'>les variables Gtk+</ulink>
+      ainsi que certaines variables spécifiques à Gwyddion :
+    </para>
+    <variablelist>
+      <varlistentry id='GWYDDION_LOGFILE'>
+        <term>
+          <envar>GWYDDION_LOGFILE</envar>
+        </term>
+        <listitem>
+          <para>
+            Il s'agit du nom du fichier vers lequel sont dirigés les messages
+            de log. Sous MS Windows, les messages sont toujours dirigés vers un
+            fichier, car l'utilisation du terminal y est pratiquement
+            abandonnée. L'amplacement par défaut du fichier de log,
+            <filename>gwyddion.log</filename> dans le dossier Documents and
+            Settings de l'utilisateur, peut être modifié par
+            <envar>GWYDDION_LOGFILE</envar>. Sous Unix, les messages vont par
+            défaut vers le terminal et cette variable d'environnement n'a
+            d'effet que si <option>--log-to-file</option> est donné.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1 id='gwyddion-files'>
+    <title>Fichiers</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/settings</filename>
+        </term>
+        <listitem>
+          <para>
+            Paramètres utilisateur enregistrés et état des outils. Ne pas éditer
+            lorsque Gwyddion fonctionne, car il écrira sur ce fichier lors de la
+            fermeture.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/glmaterials</filename>,
+          <filename>~/.gwyddion/gradients</filename>,
+          ...
+        </term>
+        <listitem>
+          <para>
+            Dossiers utilisateurs contenant différentes ressources (matériaux
+            OpenGL materials, gradients de couleur, ...).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/glmaterials</filename>,
+          <filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/gradients</filename>
+          ...
+        </term>
+        <listitem>
+          <para>
+            Dossiers système contenant les ressources.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/pixmaps</filename>
+        </term>
+        <listitem>
+          <para>
+            Dossier dans lequel l'utilisateur peut placer ses icônes. Utile
+            pour l'installation de modules chez soi.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/pixmaps</filename>,
+        </term>
+        <listitem>
+          <para>
+            Dossier système contenant les icônes.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/modules</filename>
+        </term>
+        <listitem>
+          <para>
+            Dossier dans lequel l'utilisateur peut placer ses modules. Ceux-ci
+            doivent être placés dans les sous-dossiers
+            <filename>file</filename>, <filename>graph</filename>,
+            <filename>process</filename>, <filename>layer</filename>, et
+            <filename>tools</filename> selon leur nature, bien qu'il s'agisse
+            avant tout d'une convention.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename><envar>$GWYDDION_LIBDIR</envar>/gwyddion/modules</filename>,
+        </term>
+        <listitem>
+          <para>
+            Dossier système contenant les modules.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/plugins</filename>
+        </term>
+        <listitem>
+          <para>
+            Dossier dans lequel l'utilisateur peut placer ses greffons. Ceux-ci
+            doivent être placés dans les sous-dossiers
+            <filename>file</filename> et <filename>process</filename>
+            selon leur nature.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename><envar>$GWYDDION_LIBEXECDIR</envar>/gwyddion/plugins</filename>,
+        </term>
+        <listitem>
+          <para>
+            Dossier système contenant les greffons.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <filename>~/.gwyddion/pygwy</filename>
+        </term>
+        <listitem>
+          <para>
+            Dossier contenant les modules et scripts python utilisateur.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id="gwyddion-see-also">
+    <title>Voir aussi</title>
+    <para>
+      <citerefentry>
+        <refentrytitle>gwyddion-thumbnailer</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>,
+      <citerefentry>
+        <refentrytitle>gxsm</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>
+    </para>
+  </refsect1>
+</refentry>
+<!-- vim: set ts=2 sw=2 et : -->

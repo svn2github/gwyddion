@@ -1,0 +1,24 @@
+[Setup]
+AppName=Gwyddion User Guide (@LANGUAGE@)
+AppVersion=@PACKAGE_VERSION@
+AppVerName=Gwyddion User Guide (@LANGUAGE@) @PACKAGE_VERSION@
+AppPublisherURL=http://gwyddion.net/
+AppCopyright=Copyright (C) 2004-2007,2009 Petr Klapetek, David Necas (Yeti), Christopher Anderson
+DefaultDirName={pf}\Gwyddion-User-Guide-@LANGUAGE@
+DefaultGroupName=Gwyddion
+DisableStartupPrompt=yes
+WindowShowCaption=yes
+WindowVisible=no
+Compression=bzip/9
+SourceDir=.
+OutputDir=.
+OutputBaseFilename=Gwyddion-User-Guide-@LANGUAGE@-XHTML-@PACKAGE_VERSION@
+
+[Files]
+Source: "*.html"; DestDir: "{app}"
+Source: "*.png"; DestDir: "{app}"
+Source: "*.css"; DestDir: "{app}"
+
+[Icons]
+Name: "{group}\User Guide"; Filename: "{app}\index.html"
+Name: "{group}\Uninstall User Guide"; Filename: "{uninstallexe}"

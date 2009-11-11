@@ -1,0 +1,230 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: tip.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='tip-convolution-artefacts'>
+  <title>Artefacts de Convolution de Sonde</title>
+  <para>
+    Les artefacts de convolution de sonde sont l'une des plus importantes
+    sources d'erreurs des mesures SPM. Comme la sonde n'est jamais idéale
+    (comme la fonction delta) on observe souvent un certain niveau de distorsion
+    généré par cet effet. On peut même observer la sonde imagée sur l'image du
+    scan alors que des détails fins sont présents sur la surface.
+  </para>
+  <informalfigure id='fig-tip-alltips-scans'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='alltips.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Images d'une surface de ZnSe mesurée avec quatre sondes différentes
+        (plus ou moins en mauvais état).
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Heureusement, on peut simuler et/ou corriger les effets des sondes à l'aide
+    d'algorithme respectivement de dilatation et/ou d'érosion. Ces algorithmes
+    ont été publiés par Villarubia
+    (voir [<link linkend='tip-convolution-artefacts-ref-1'>1</link>]).
+  </para>
+  <sect2 id='tip-obtaining-geometry'>
+    <title>Obtenir la géométrie de la sonde</title>
+    <indexterm>
+      <primary>sonde</primary>
+      <secondary>modélisation</secondary>
+    </indexterm>
+    <para>
+      Pour étudier l'influence de la sonde sur les données nous devons d'abord
+      connaître sa géométrie. En général, celle-ci peut être déterminée de 
+      différentes façons :
+    </para>
+    <orderedlist>
+      <listitem>
+        utiliser les données du fabricant (géométrie de lal sonde, rayon et
+        angle de la pointe et tip geometry)
+      </listitem>
+      <listitem>
+        utiliser un microscope électronique à balayage ou une technique
+        similaire permettant de déterminer les propriétés de la sonde.
+      </listitem>
+      <listitem>
+        utiliser un échantillon de caractérisation de sonde (ayant des bords
+        raides).
+      </listitem>
+      <listitem>
+        utiliser un algorithme d'estimation à l'aveugle en combinaison avec
+        des échantillons de caractérisation de sonde ou d'autres échantillons
+        adaptés.
+      </listitem>
+    </orderedlist>
+    <para id='tip-model'>
+      Avec Gwyddion, nous pouvons utiliser la première et la dernière approche
+      mentionnées. La plupart des géométries basiques des sondes peuvent être
+      simulées à l'aide de la modélisation de sonde
+      (<menuchoice>
+        <guimenu>Traitement de Données</guimenu>
+        <guisubmenu>TSondeip</guisubmenu>
+        <guimenuitem>Modélisation de Sonde</guimenuitem>
+      </menuchoice>).
+      Cette manière de spécifier la géométrie peut être très efficace lorsque
+      l'on souhaite simplement vérifier une carte d'incertitude ou effectuer une
+      simulation de convolution de sonde.
+    </para>
+    <para id='tip-blind-estimate'>
+      Vous pouvez utiliser l'algorithme d'estimation à l'aveugle pour obtenir
+      une structure de sonde plus détaillée (et plus réaliste)
+      (<menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Sonde</guisubmenu>
+        <guimenuitem>Estimation à l'Aveugle</guimenuitem>
+      </menuchoice>).
+    </para>
+    <para>
+      L'algorithme d'estimation à l'aveugle dérive du fait que l'on peut
+      directement voir certains détails de la sonde sur des points des données.
+      L'algorithme itère sur toute la surface, et tente en chaque point de
+      déterminer chaque point de la sonde en fonction de la pente la plus forte
+      dans la direction allant du point de la sonde à sa pointe.
+    </para>
+    <para>
+      Gwyddion permet d'utiliser cet algorithm de deux manières :
+      l'estimation <emphasis>partielle</emphasis> qui utilise un nombre de
+      points limité parmi les plus élevés dans l'image, et l'estimation
+      <emphasis>complète</emphasis> qui utiliser l'image entière (et qui ainsi
+      bien plus lente). Le module d'estimation permet aussi d'utiliser
+      l'estimation partielle comme point de départ de l'estimation complète.
+      Ceci doit permettre d'améliorer la vitesse de calcul de l'estimation
+      complète.
+    </para>
+    <informalfigure id='fig-tip-alltips'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='alltips2.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Sondes SPM obtenues à partir des données de la
+          <link linkend='fig-tip-alltips-scans'>figure précédente</link>
+          en utilisant l'algorithme d'estimation à l'aveugle.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='tip-operations'>
+    <title>Convolution de Sonde et Reconstruction de Surface</title>
+    <indexterm>
+      <primary>sonde</primary>
+      <secondary>convolution</secondary>
+    </indexterm>
+    <para id='tip-convolution'>
+      Lorsqu'on connaît la géométrie de la sonde, on peut utiliser l'algorithme
+      de convolution (dilatation) de sonde afin de simuler le processus
+      d'aquisition des données. Il faut dans ce cas utiliser le module
+      Dilatation
+      (<menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Sonde</guisubmenu>
+        <guimenuitem>Dilatation</guimenuitem>
+      </menuchoice>).
+      Ceci peut être utile lorsqu'on travaille sur des données résultant de
+      simulations numériques
+      (voir par exemple
+      [<link linkend='tip-convolution-artefacts-ref-2'>2</link>]).
+    </para>
+    <para>
+      Notez que ces algorithmes (ainsi que les deux qui suivent) nécessitent
+      que les données du scan et de la sonde soient compatibles, c'est-à-dire
+      que les dimensions physiques des pixels du scan et de l'image de la sonde
+      soient identiques. Cette relation est naturellement obtenue par estimation
+      à l'aveugle utilisée sur les mêmes données (ou des données correspondant
+      à une mesure identique). Vous devrez ré-échantillonner l'image de la sonde
+      si vous l'avez obtenue par un autre moyen.
+    </para>
+    <informalfigure id='fig-tip-simulated-convolution'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='fractaltips.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Surface fractale simulée avant (à gauche) et après (à droite) la
+          convolution de la sonde.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='tip-surface-reconstruction'>
+      <indexterm>
+        <primary>sonde</primary>
+        <secondary>déconvolution</secondary>
+      </indexterm>
+      L'opposé de la convolution de sonde correspond à la reconstruction de
+      surface (érosion), que l'on peut utiliser pour corriger partiellement
+      l'influence de la sonde sur les données. La fonction Reconstruction de
+      Surface permet de réaliser cette opération
+      (<menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Sonde</guisubmenu>
+        <guimenuitem>Reconstruction Surface</guimenuitem>
+      </menuchoice>).
+      Evidemment, les données correspondant à des points de l'image n'ayant pas
+      été en contact avec la sonde (des pores par exemple) ne peuvent être
+      reconstruites car il n'existe aucune information sur ces points.
+    </para>
+    <informalfigure id='fig-tip-reconstruction'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='reconstruction.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Image originale et reconstruite d'un échantillon de ZnSe mesurée avec
+          une sonde cassée.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para id='tip-certainty-map'>
+      <indexterm>
+        <primary>sonde</primary>
+        <secondary>carte d'incertitude</secondary>
+      </indexterm>
+      Comme on peut le voir, les parties d'une images de scan posant le plus de
+      problèmes sont les points où la sonde ne touche pas la surface en un seul
+      point mais en plusieurs. On a une perte d'information pour ces points.
+      L'algorithme de la carte d'incertitude permet de marquer les points pour
+      lesquels la surface a été probablement touchée en un seul point.
+    </para>
+    <informalfigure id='fig-tip-certainty-map'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='certainty-map.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Cartes d'incertitude obtenue avec un réseau standard. Notez que les
+          paramètres de la sonde modélisée ont été pris dans les données du
+          fabricant pour des raisons d'illustration. A gauche : échantillon, à
+          droite : échantillon avec la carte d'incertitude.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      L'algorithme de la carte d'incertitude permet donc de marquer sur l'image
+      les données corrompues de manière définitice par la convolution de la
+      sonde. Il est important de vérifier la présence de ces points lors de
+      l'analyse de données de surfaces présentant de fortes pentes. Vous pouvez
+      utiliser la fonction Carte d'Incertitude de Gwyddion pour créer ces cartes
+      (<menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Sonde</guisubmenu>
+        <guimenuitem>Carte d'incertitude</guimenuitem>
+      </menuchoice>).
+    </para>
+  </sect2>
+  <sect2 id='tip-convolution-artefacts-ref'>
+    <title>Références</title>
+    <para id='tip-convolution-artefacts-ref-1'>
+      [1] J. S. Villarubia, J. Res. Natl. Inst. Stand. Technol. 102 (1997) 425.
+    </para>
+    <para id='tip-convolution-artefacts-ref-2'>
+      [2] <ulink url='http://klapetek.cz/download.html'>P. Klapetek, I. Ohlídal, Ultramicroscopy, 94 (19-29), 2003</ulink>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

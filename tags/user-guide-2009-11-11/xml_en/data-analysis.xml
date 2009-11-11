@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: install.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='data-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Data Processing and Analysis</title>
+  <para>
+    The number and breadth of data manipulation and analysis functions is one
+    of the Gwyddion main strenghts.  The description of their principles and
+    applications is the purpose of this chapter, with focus on the explanation
+    of how they work and what they calculate or perform.  Elements of their
+    user interface are also occasionaly described where it seems useful,
+    nevertheless, it is assumed the reader is familiar with the basic
+    organization of data and controls in Gwydion, as described in the
+    <link linkend='getting-started'>previous chapter</link>.
+  </para>
+  <xi:include href='basic.xml'/>
+  <xi:include href='interpolation.xml'/>
+  <xi:include href='leveling.xml'/>
+  <xi:include href='filters.xml'/>
+  <xi:include href='presentations.xml'/>
+  <xi:include href='edit.xml'/>
+  <xi:include href='edit-extended.xml'/>
+  <xi:include href='statistical.xml'/>
+  <xi:include href='roughness-iso.xml'/>
+  <xi:include href='grains.xml'/>
+  <xi:include href='fourier-transform.xml'/>
+  <xi:include href='wavelet-transform.xml'/>
+  <xi:include href='fractal.xml'/>
+  <xi:include href='tip.xml'/>
+  <xi:include href='multidata.xml'/>
+  <xi:include href='graph.xml'/>
+  <xi:include href='synthetic.xml'/>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->

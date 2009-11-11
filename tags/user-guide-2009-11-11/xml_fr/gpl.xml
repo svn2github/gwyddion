@@ -1,0 +1,556 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: gpl.xml 9392 2009-07-10 09:55:51Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<appendix id='gpl'>
+  <appendixinfo>
+    <title>Licence Publique Générale GNU</title>
+    <pubdate>Version 2, Juin 1991</pubdate>
+    <copyright>
+      <year>1989, 1991</year>
+      <holder>Free Software Foundation, Inc.</holder>
+    </copyright>
+    <legalnotice id='gpl-legalnotice'>
+      <para>
+        <address>Free Software Foundation, Inc.
+          <street>51 Franklin Street, Fifth Floor</street>,
+          <city>Boston</city>,
+          <state>MA</state>
+          <postcode>02110-1301</postcode>
+          <country>USA</country>
+        </address>
+      </para>
+      <para>
+        Toute personne est autorisée à copier textuellement et à diffuser des
+        copies de ce document de licence, mais aucune modification n'est
+        autorisée.
+      </para>
+    </legalnotice>
+    <releaseinfo> Version 2, Juin 1991</releaseinfo>
+  </appendixinfo>
+  <title>Licence Publique Générale GNU</title>
+  <para>
+    NOTICE D'ACCOMPAGNEMENT DE LA TRADUCTION NON OFFICIELLE À CONSERVER DANS
+    TOUTE REPRODUCTION DE CETTE TRADUCTION
+  </para>
+  <para>
+    Ceci est une traduction non officielle de la GNU General Public License en
+    français. Elle n'a pas été publiée par la Free Software Foundation, et
+    ne détermine pas les termes de distribution pour les logiciels qui
+    utilisent la GNU GPL--seul le texte anglais original de la GNU GPL en a le
+    droit. Cependant, nous espérons que cette traduction aidera les
+    francophones à mieux comprendre la GPL.
+  </para>
+  <para>
+    L'original de cette traduction est disponible à l'adresse suivante :
+    <ulink url='http://www.code-aster.org/V2/UPLOAD/DOC/Telechargement/GPL_fr.pdf'>http://www.code-aster.org/V2/UPLOAD/DOC/Telechargement/GPL_fr.pdf</ulink>.
+  </para>
+  <simplesect id='gpl-1'>
+    <title>Préambule</title>
+    <para>
+      Les licences de la plupart des logiciels sont conçues pour limiter votre
+      liberté de les partager et de les modifier. En revanche, la Licence
+      Publique Générale GNU est destinée à garantir votre liberté de partager et
+      de modifier le logiciel libre, à assurer que le logiciel soit libre pour
+      tous ses utilisateurs. Cette Licence Publique Générale s'applique à la
+      plupart des logiciels de la Free Software Foundation et à tout autre
+      programme dont les auteurs s'engagent à l'utiliser. (Quelques autres
+      logiciels de la Free Software Foundation sont toutefois couverts par la
+      Licence Publique Générale pour Bibliothèques GNU). Vous pouvez aussi
+      l'appliquer à vos programmes.
+    </para>
+    <para>
+      Lorsque nous parlons de logiciel libre, nous nous référons à la liberté,
+      non au prix.
+      Nos Licences Publiques Générales vous permettent de bénéficier de la
+      liberté de distribuer des copies de logiciels libres (et de faire payer
+      ce service si vous le souhaitez), de recevoir le code source ou de
+      pouvoir l'obtenir si vous le voulez, de pouvoir modifier le logiciel ou
+      d'en utiliser des parties dans de nouveaux programmes libres, et de savoir
+      que vous pouvez faire tout cela.
+    </para>
+    <para>
+      Pour protéger vos droits, nous devons faire des restrictions qui empêchent
+      quiconque de vous refuser ces droits ou de vous demander de céder ces
+      droits. Ces restrictions se traduisent pour vous par certaines
+      responsabilités si vous diffusez des exemplaires du logiciel ou si vous le
+      modifiez.
+    </para>
+    <para>
+      Ainsi par exemple, si vous distribuez des copies d'un tel programme, que
+      ce soit gratuitement ou moyennant paiement, vous devez accorder aux
+      destinataires tous les droits dont vous disposez. Vous devez vous assurer
+      qu'eux-mêmes reçoivent également ou puissent obtenir le code source et
+      vous devez leur montrer ces dispositions afin qu'ils connaissent leurs
+      droits.
+    </para>
+    <para>
+      Nous protégeons vos droits en deux étapes :
+      <orderedlist>
+        <listitem>
+          <para>
+             nous protégeons le logiciel par copyright et
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+             nous vous proposons cette licence qui vous donne l'autorisation
+             juridique de copier, de distribuer et/ou de modifier le logiciel.
+          </para>
+        </listitem>
+      </orderedlist>
+    </para>
+    <para>
+      De la même manière, pour la protection de chacun des auteurs et la nôtre,
+      nous voulons nous assurer que chacun a bien compris qu'il n'y a pas de 
+      garantie portant sur ce logiciel libre. Si le logiciel est modifié par un
+      tiers et transmis, nous voulons que ses destinataires sachent que le 
+      logiciel dont ils disposent n'est pas l'original, pour que des problèmes 
+      introduits par des tiers ne rejaillissent pas sur la réputation des 
+      auteurs d'origine.
+    </para>
+    <para>
+      Enfin, tout programme libre est constamment menacé par des brevets de 
+      logiciel. Nous souhaitons éviter le danger que des sous-distributeurs d'un
+      programme libre obtiennent des licences de brevet, ce qui aurait pour
+      effet de rendre le programme propriétaire. Pour empêcher cela, nous avons
+      établi clairement que tout brevet doit faire l'objet d’une concession de 
+      licence qui en permette l’utilisation par toute personne, ou d’aucune
+      concession de licence du tout.
+    </para>
+    <para>
+      Ci-dessous vous trouverez les dispositions précises concernant la copie, 
+      la distribution et la modification.
+    </para>
+  </simplesect>
+  <simplesect id='gpl-2'>
+    <title>DISPOSITIONS RELATIVES A LA COPIE, LA DISTRIBUTION ET LA 
+    MODIFICATION</title>
+    <sect2 id='gpl-2-0'>
+      <title>Section 0</title>
+      <para>
+         Cette Licence s'applique à tout programme ou autre œuvre qui comporte 
+         une mention placée par le détenteur de copyright établissant qu'il peut
+         être distribué selon les dispositions de la Licence Publique Générale.
+         Ci-après, le <quote>Programme</quote> désigne tout programme ou toute
+         œuvre et une <quote>œuvre basée sur le Programme</quote> désigne soit 
+         le Programme, soit une œuvre dérivée au titre de la législation du 
+         copyright, autrement dit une œuvre comprenant le Programme ou une 
+         partie de ce Programme, textuellement ou avec des modifications et/ou
+         traduit dans un autre langage. (Ci-après, la traduction est incluse
+         sans limitation dans le terme <quote>modification</quote>). Chaque
+         concessionnaire de licence est désigné par <quote>vous</quote>.
+      </para>
+      <para>
+        Des opérations autres que la copie, la distribution et la modification
+        ne sont pas concernées par cette Licence et sortent de son champ
+        d'application. L’exécution du Programme n'est pas limitée, et les
+        résultats du Programme ne sont couverts que si leur contenu constitue
+        une œuvre basée sur le Programme (indépendamment du fait qu'elle ait été
+        réalisée par exécution du Programme ou non). La véracité de ce qui
+        précède, dépend de ce que fait le Programme.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-1'>
+      <title>Section 1</title>
+      <para>
+         Vous pouvez copier et distribuer des copies textuelles du code source
+         du Programme tel que vous le recevez, sur tout support, à condition que
+         vous ayez publié visiblement et d'une manière appropriée sur chaque
+         exemplaire, une mention de copyright appropriée et un déni de garantie,
+         conservé intact toutes les mentions qui se réfèrent à cette Licence et
+         à l'absence de toute garantie, et donné à tous autres destinataires du
+         Programme, un exemplaire de cette Licence avec le Programme.
+      </para>
+      <para>
+        Vous pouvez demander un paiement pour l'action matérielle du transfert
+        d'un exemplaire et vous pouvez, à votre discrétion, proposer une
+        protection de garantie en échange d'une redevance.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-2'>
+      <title>Section 2</title>
+      <para>
+         Vous pouvez modifier votre ou vos exemplaires du Programme ou d'une
+         partie de ce Programme, constituant ainsi une œuvre basée sur le
+         Programme, et copier et distribuer ces modifications ou cette œuvre
+         selon les dispositions de la <link linkend='gpl-2-1'>Section 1</link>
+         ci-dessus, sous réserve que vous satisfassiez à toutes ces conditions :
+        <orderedlist>
+          <listitem>
+            <para>
+               Vous devez faire en sorte que les fichiers modifiés portent des
+               mentions visibles établissant que vous les avez modifiés, ainsi
+               que la date de toute modification.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Vous devez faire en sorte que toute œuvre que vous distribuez ou
+              publiez, qui entièrement ou partiellement contient le Programme ou
+              est dérivé du Programme ou d’une partie de celui-ci, fasse l'objet
+              d'une licence comme un tout, sans frais pour les tiers, selon les
+              dispositions de cette Licence.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Si le programme modifié lit normalement des commandes d'une
+              manière interactive lors de son exécution, vous devez faire en
+              sorte que, lorsque commence cette utilisation interactive de la
+              manière la plus ordinaire, soit imprimée ou apparaisse une annonce
+              comprenant un avis de copyright approprié et un avis selon lequel
+              il n'y a pas de garantie (ou au contraire, précisant que vous
+              assurez une garantie) et que les utilisateurs peuvent redistribuer
+              le programme selon ces conditions, et rappelant à l'utilisateur
+              comment visualiser un exemplaire de cette Licence.
+              <note>
+                <title>Exception:</title>
+                <para>
+                  Si le Programme lui-même est interactif mais n'imprime pas
+                  normalement une telle annonce, il n'est pas nécessaire que
+                  votre œuvre basée sur le Programme imprime une annonce).
+                </para>
+              </note>
+            </para>
+          </listitem>
+        </orderedlist>
+      </para>
+      <para>
+        Ces conditions s'appliquent à l'œuvre modifiée comme un tout. Si des
+        sections identifiables de cette œuvre ne sont pas dérivées du Programme
+        et peuvent raisonnablement être considérées comme des œuvres
+        indépendantes et distinctes en elles-mêmes, cette Licence, et ses
+        dispositions, ne s'appliquent pas à ces sections lorsque vous les
+        distribuez comme œuvres distinctes. Mais lorsque vous distribuez les
+        mêmes sections comme une partie d'un ensemble qui constitue une œuvre
+        basée sur le Programme, la distribution de l'ensemble doit être
+        effectuée selon les dispositions de cette Licence, dont les
+        autorisations pour d'autres concessionnaires de licence s'étendent à
+        l'ensemble, et ainsi à chacune des parties indépendamment de la personne
+        qui les a écrites.
+      </para>
+      <para>
+        Ainsi, cette section n'est pas destinée à revendiquer des droits ou à
+        contester vos droits sur une œuvre entièrement écrite par vous-même,
+        mais à exercer le droit de contrôler la distribution des œuvres dérivées
+        ou des œuvres collectives, basées sur le Programme.
+      </para>
+      <para>
+        De plus, la moindre agrégation au Programme (ou à une œuvre basée sur le
+        Programme) d'une autre œuvre non basée sur le Programme, sur un volume
+        de sauvegarde ou un support de distribution, ne fait pas entrer l'autre
+        œuvre dans le champ d'application de cette Licence.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-3'>
+      <title>Section 3</title>
+      <para>
+        Vous pouvez copier et distribuer le Programme (ou une œuvre basée sur le
+        Programme au titre de la <link linkend='gpl-2-2'>Section 2</link> en
+        code objet ou sous forme exécutable selon les dispositions des
+        <link linkend='gpl-2-1'>Sections 1</link> et
+        <link linkend='gpl-2-2'>2</link> ci-dessus, sous réserve de procéder à
+        l'une des actions suivantes :
+        <orderedlist>
+          <listitem>
+            <para>
+               L'accompagner du code source complet correspondant, lisible en
+               machine, qui sera distribué selon les dispositions des Sections 1
+               et 2 ci-dessus, sur un support habituellement utilisé pour
+               l'échange de logiciels ; ou
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+               L'accompagner d'une proposition écrite, valable pendant au moins
+               trois ans, de fournir à un tiers quelconque, moyennant un
+               paiement qui n'est pas supérieur au coût de la réalisation
+               matérielle de la distribution de la source, une copie complète,
+               lisible en machine, du code source correspondant, qui sera
+               distribuée selon les dispositions des Sections 1 et 2 ci-dessus,
+               sur un support habituellement utilisé pour l'échange de logiciels
+                ; ou
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+               L'accompagner des informations que vous avez reçues quant à la
+               proposition de distribuer le code source correspondant.
+               (Cette alternative n'est autorisée que pour la distribution non
+               commerciale et uniquement si vous avez reçu le programme en code
+               objet ou sous une forme exécutable, avec cette proposition, en
+               accord avec l’alinéa b ci-dessus).
+            </para>
+          </listitem>
+        </orderedlist>
+      </para>
+      <para>
+        Le code source d'une œuvre représente la forme privilégiée d'une œuvre
+        pour lui apporter des modifications. Pour un programme exécutable, le
+        code source complet désigne tous les codes source de tous les modules
+        qu'elle contient, plus des fichiers de définition d'interface associés,
+        plus les scripts utilisés pour contrôler la compilation et
+        l'installation du programme exécutable. Cependant, à titre d'exception
+        spéciale, le code source distribué ne doit pas comporter quoi que ce
+        soit qui est normalement distribué (sous forme code source ou binaire)
+        avec les composants principaux (compilateur, noyaux et autres) du
+        système d'exploitation sur lequel fonctionne le programme exécutable,
+        sauf si ce composant lui-même accompagne le programme exécutable.
+      </para>
+      <para>
+        Si la distribution du programme exécutable ou du code objet est
+        effectuée par une proposition d'accès à une copie à partir d'un endroit
+        désigné, la proposition d'accès équivalente pour copier le code source à
+        partir de cet endroit, compte comme une diffusion du code source, même
+        si les tiers ne sont pas tenus de copier la source avec le code objet.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-4'>
+      <title>Section 4</title>
+      <para>
+        Vous ne pouvez pas copier, modifier, concéder de sous-licence ou
+        diffuser le Programme si ce n'est pas expressément prévu au titre de
+        cette Licence. Toute tentative de copier, modifier, concéder une
+        sous-licence ou distribuer le Programme d'une autre manière est nulle et
+        mettra automatiquement fin à vos droits au titre de cette Licence.
+        Cependant, les parties qui ont reçu des copies ou des droits de votre
+        part au titre de cette Licence, ne verront pas leurs Licences résiliées,
+        dans la mesure où ces parties respectent pleinement cette Licence.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-5'>
+      <title>Section 5</title>
+      <para>
+        Vous n'êtes pas tenu d'accepter cette Licence puisque vous ne l'avez pas
+        signée. Toutefois, seule cette Licence vous accorde l'autorisation de
+        modifier ou de distribuer le Programme ou ses œuvres dérivées. Ces
+        actions sont prohibées par la loi si vous n'acceptez pas cette Licence.
+        De ce fait, en modifiant ou en distribuant le Programme (ou une œuvre
+        basée sur le Programme), vous faites état de votre acceptation de cette
+        Licence et de toutes ses dispositions relatives à la copie, la
+        distribution ou la modification du Programme ou des œuvres dérivées.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-6'>
+      <title>Section 6</title>
+      <para>
+         Chaque fois que vous redistribuez le Programme (ou une œuvre basée sur
+         le Programme), le destinataire reçoit automatiquement une licence du
+         concédant de licence initial, pour copier, distribuer ou modifier le
+         Programme, sous réserve des présentes clauses et dispositions. Vous ne
+         pouvez pas imposer de restrictions supplémentaires à l'exercice par le
+         destinataire des droits accordés par les présentes. Vous n'êtes pas
+         responsable d'assurer le respect par des tiers de cette Licence.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-7'>
+      <title>Section 7</title>
+      <para>
+         Si, du fait d'une décision d'un tribunal ou d'une allégation
+         d'infraction à l'égard d'un brevet ou pour toute autre raison (non
+         limitée aux questions de brevet), des conditions vous sont imposées
+         (que ce soit par décision judiciaire, par accord ou par d'autre
+         manière) qui contredisent les dispositions de cette Licence, elles ne
+         vous dispensent pas des dispositions de cette Licence. Si vous ne
+         pouvez pas assurer une distribution en satisfaisant simultanément à
+         vos obligations au titre de cette Licence et à toutes autres
+         obligations applicables, alors en conséquence vous ne pouvez pas du
+         tout distribuer le Programme. Ainsi par exemple, si une licence de
+         brevet ne permettait pas une redistribution du Programme, sans
+         redevances, par les personnes qui recevraient des copies directement ou
+         indirectement par votre intermédiaire, la seule manière de satisfaire à
+         la fois cette condition et cette Licence serait de s’abstenir
+         complètement de distribuer le Programme.
+      </para>
+      <para>
+        Si une quelconque partie de cette section est considérée comme invalide
+        ou inapplicable dans des circonstances particulières, le reste de cette
+        section s'appliquera et la section dans son ensemble s'appliquera dans
+        d'autres circonstances.
+      </para>
+      <para>
+        Cette section n'a pas pour objet de vous inciter à commettre une
+        infraction à l'égard de brevets ou d'autres droits de propriété, ni de
+        contester la validité d’une quelconque de ces prétentions, mais elle a
+        pour seul objet de protéger l'intégrité du système de distribution du
+        logiciel libre, mis en œuvre par les pratiques de licence publique. De
+        nombreuses personnes ont réalisé des contributions généreuses à la gamme
+        étendue de logiciels distribués grâce à ce système, en se fondant sur
+        l'application constante d'un tel système. Il appartient à l'auteur ou au
+        donateur de décider s'il souhaite diffuser le logiciel selon un autre
+        système, et un concessionnaire de licence ne peut pas imposer ce choix.
+      </para>
+      <para>
+        Cette section est destinée à rendre parfaitement clair ce qui est
+        considéré être une conséquence du reste de cette Licence.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-8'>
+      <title>Section 8</title>
+      <para>
+         Si la distribution et/ou l'utilisation du Programme est limitée dans
+         certains pays, soit par des brevets, soit par des interfaces protégées
+         par copyright, le détenteur du copyright original qui place le
+         Programme sous cette Licence, peut ajouter une limitation géographique
+         explicite de distribution, excluant ces pays, afin que la distribution
+         ne soit autorisée que dans les pays ou parmi les pays qui ne sont pas
+         exclus de la sorte. Dans ce cas, cette Licence incorpore les
+         limitations comme si elles figuraient dans le corps de cette Licence.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-9'>
+      <title>Section 9</title>
+      <para>
+         La Free Software Foundation peut publier, de temps à autre, des
+         versions révisées et/ou nouvelles de la Licence Publique Générale. Ces
+         nouvelles versions seront similaires dans leur esprit à la présente
+         version, mais elles pourront en différer dans le détail pour traiter de
+         nouveaux problèmes ou de nouvelles questions.
+      </para>
+      <para>
+        Chaque version reçoit un numéro de version distinctif. Si le Programme
+        précise un numéro de version de cette Licence qui lui est applicable
+        ainsi que <quote>toute version ultérieure</quote>, vous avez la
+        possibilité de suivre les clauses et dispositions de cette version ou
+        d’une quelconque version ultérieure, publiée par la Free Software
+        Foundation. Si le Programme ne spécifie pas de numéro de version pour
+        cette Licence, vous pouvez choisir toute version publiée par la Free
+        Software Foundation.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-10'>
+      <title>Section 10</title>
+      <para>
+        Si vous souhaitez incorporer des parties du Programme dans d'autres
+        programmes libres dont les conditions de diffusion sont différentes,
+        vous devez prendre contact avec l'auteur pour demander son autorisation.
+        Pour les logiciels qui sont protégés par copyright par la Free Software
+        Foundation, prenez contact avec la Free Software Foundation, nous
+        faisons parfois des exceptions dans ce cas. Notre décision sera guidée
+        par le bouble objectif de préserver le statut libre de tous les dérivés
+        de nos logiciels libres et d'encourager le partage et la réutilisation
+        de logiciels d'une manière générale.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-11'>
+      <title>ABSENCE DE GARANTIE Section 11</title>
+      <para>
+         LA LICENCE DE CE PROGRAMME ETANT ACCORDEE GRATUITEMENT, CE
+PROGRAMME NE BENEFICIE PAS DE GARANTIE, DANS LA MESURE AUTORISEE
+PAR LA LOI APPLICABLE. SAUF MENTION ECRITE CONTRAIRE, LES TITULAIRES
+DE COPYRIGHT ET/OU LES AUTRES PARTIES FOURNISSENT LE PROGRAMME
+<quote>TEL QUEL</quote> SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU IMPLICITE, Y
+COMPRIS, NOTAMMENT, LES GARANTIES IMPLICITES DE QUALIFICATION DE
+MISE SUR LE MARCHE ET D'ADAPTATION A UN USAGE PARTICULIER. VOUS
+SUPPORTEZ L'INTEGRALITE DU RISQUE RELATIF A LA QUALITE ET AUX
+PERFORMANCES DE CE PROGRAMME. SI LE PROGRAMME SE REVELAIT
+DEFECTUEUX, VOUS ASSUMERIEZ LES COUTS DE TOUTE INTERVENTION,
+REPARATION OU CORRECTION NECESSAIRE.
+      </para>
+    </sect2>
+    <sect2 id='gpl-2-12'>
+      <title>Section 12</title>
+      <para>
+         EN AUCUN CAS, SAUF OBLIGATION DE LA LOI EN VIGUEUR OU ACCORD
+ECRIT, AUCUN TITULAIRE DE COPYRIGHT OU AUCUNE AUTRE PARTIE
+SUSCEPTIBLE DE MODIFIER ET/OU DE REDISTRIBUER LE PROGRAMME DANS
+LES CONDITIONS CI-DESSUS, NE SERA RESPONSABLE VIS A VIS DE VOUS DE
+DOMMAGES, Y COMPRIS DE DOMMAGES GENERAUX, SPECIAUX,
+SECONDAIRES OU INDIRECTS DECOULANT DE L'UTILISATION OU DE
+L'IMPOSSIBILITE D'UTILISER LE PROGRAMME (Y COMPRIS, NOTAMMENT, LES
+PERTES DE DONNEES, LES DONNEES RENDUES INEXACTES, LES PREJUDICES
+SUBIS PAR VOUS OU PAR DES TIERS OU L’IMPOSSIBILITE POUR LE
+PROGRAMME DE FONCTIONNER AVEC TOUS AUTRES PROGRAMMES), MEME SI
+CE TITULAIRE OU CETTE AUTRE PARTIE A ETE INFORME DE LA POSSIBILITE
+DE TELS DOMMAGES.
+      </para>
+      <para>
+        FIN DES DISPOSITIONS
+      </para>
+    </sect2>
+  </simplesect>
+  <simplesect id='gpl-3'>
+    <title>Comment appliquer ces dispositions à vos nouveaux programmes</title>
+    <para>
+      Si vous développez un nouveau programme et que vous souhaitez que son
+      utilisation soit la plus large possible dans le public, le meilleur moyen
+      est d'en faire un logiciel libre que tout le monde pourra reproduire et
+      modifier selon ces dispositions.
+    </para>
+    <para>
+      Pour cela, joignez les mentions suivantes au programme. Il est plus sûr de
+      les joindre au début de chaque fichier source pour transmettre le plus
+      efficacement l'exclusion de garantie, et chaque fichier doit comporter au
+      moins la ligne de <quote>copyright</quote> et un pointeur vers l'endroit
+      où se trouve l'avis complet.
+    </para>
+    <programlisting>
+      &lt;Une ligne pour donner le nom du programme et une indication de son
+objet.&gt;
+      Copyright (C) &lt;année&gt; &lt;nom de l'auteur&gt;
+      Ce programme est un logiciel libre. Vous pouvez le distribuer et/ou
+le modifier selon les dispositions de la Licence Publique Générale
+telle qu'elle est publiée par la Free Software Foundation, version 2
+de la Licence ou (à votre choix) toute version ultérieure.
+
+      Ce programme est diffusé avec l'espoir qu'il sera utile, mais SANS
+GARANTIE, sans même la GARANTIE IMPLICITE DE QUALIFICATION DE MISE
+SUR LE MARCHE ou D'ADAPTATION A UNE UTILISATION PARTICULIERE. Voir
+pour de plus amples détails la Licence Publique Générale GNU.
+
+      Vous avez dû recevoir un exemplaire de la Licence Publique Générale
+GNU avec ce Programme. Si ce n'est pas le cas, veuillez écrire à la
+Free Software Foundation, Inc. 59 Temple Place - Suite 330, Boston,
+MA 02111-1307, USA.
+    </programlisting>
+    <para>
+      Ajoutez également des informations sur la manière de prendre contact avec
+      vous par courrier électronique et courrier traditionnel.
+    </para>
+    <para>
+      Si le programme est interactif, préparez en sortie une courte notice telle
+      que celle-ci lors du démarrage en mode interactif :
+    </para>
+    <programlisting>
+      Gnomovision version 69, Copyright (C) année et nom de l'auteur
+Gnomovision fonctionne ABSOLUMENT SANS GARANTIE. Pour de plus amples
+détails, tapez <quote>show w</quote>. Ceci est un logiciel libre et vous avez le
+droit de le redistribuer sous certaines conditions ; tapez <quote>show c</quote>
+pour de plus amples détails.
+    </programlisting>
+    <para>
+      Les commandes hypothétiques <quote>show w</quote> et
+      <quote>"show c</quote> doivent ouvrir les parties appropriées de la
+      Licence Publique Générale. Naturellement, les commandes que vous utilisez
+      peuvent être dénommées autrement et il peut même s'agir de clics de souris
+      ou de rubriques de menu, selon ce que permet votre programme.
+    </para>
+    <para>
+      Vous devez également obtenir de votre employeur (si vous travaillez comme
+      programmeur) ou de votre école, le cas échéant, la signature d'un
+      <quote>désistement de copyright</quote> si nécessaire (modifiez les noms) :
+     </para>
+    <informalexample>
+      <literallayout>
+      Yoyodine, Inc., par les présentes, se désiste de tout intérêt de copyright
+      sur le programme <quote>Gnomovision</quote> (qui fait des passages au
+      niveau des compilateurs)
+
+      Ecrit par James Hacker
+
+      &lt;Signature de TyCoon&gt;, 1er avril 1989
+      TyCoon, Président
+      </literallayout>
+    </informalexample>
+    <para>
+      Cette Licence Publique Générale ne permet pas l'incorporation de votre
+      programme dans des programmes propriétaires. Si votre programme est une
+      bibliothèque de sous-programmes, vous pouvez considérer qu'il est plus
+      utile d'autoriser des liens des applications propriétaires avec la
+      bibliothèque. Si c'est ce que vous voulez faire, utilisez la Licence
+      Publique Générale pour Bibliothèques GNU plutôt que cette Licence.
+    </para>
+  </simplesect>
+</appendix>
+<!-- vim: set ts=2 sw=2 et : -->

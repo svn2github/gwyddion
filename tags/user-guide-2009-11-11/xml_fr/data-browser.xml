@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: data-browser.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='data-browser'>
+  <title>Navigateur de Données</title>
+  <indexterm><primary>navigateur de données</primary></indexterm>
+  <para>
+    Le navigateur de données se présente sous la forme d'une fenêtre affichant
+    la structure du fichier sélectionné. Il présente le contenu tel que Gwyddion
+    se le représente, l'organisation de celui-ci peut donc changer sensiblement
+    de celui donné par le logiciel original.
+  </para>
+  <para>
+    Gwyddion supporte un nombre quelconque de donnée bi-dimensionnelles pour un
+    fichier donné. En fonction du contexte, ceux-ci sont généralement appelés
+    canaux ou champs de données dans ce guide. Les dimensions des canaux dans un
+    fichier peuvent varier, de même que que les dimensions ou les valeurs
+    peuvent être des quantités physiques arbitraires.
+  </para>
+  <para>
+    De plus, des données uni-dimensionnelles réprésentées sous forme de graphes
+    ou de spectres peuvent être présent dans un même fichier. Le navigateur de
+    données est ainsi un outil permettant d'afficher et de gérer tous les
+    données disponibles dans un fichier.
+  </para>
+  <informalfigure id='fig-data-browser'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='data_browser.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Navigateur de données affichant différents canaux.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='data-browser-operating'>
+    <title>Contrôler le Navigateur</title>
+    <para>
+      Comme le navigateur affiche en permanence la structure du fichier
+      sélectionné, son contenu change lorsque vous passez d'une fenêtre à une
+      autre, pouvant aussi montrer des données de fichiers différents.
+      Il n'y a aucune différence entre les fichiers Gwyddion natifs
+      (<filename>.gwy</filename>) et les autres types de fichier. Lorsqu'un
+      fichier est chargé, sa structure est affichée comme s'il s'agissait d'un
+      fichier Gwyddion.
+    </para>
+    <para>
+      Le navigateur de données comporte trois onglets, un pour chaque type de
+      données que peut contenir un fichier :
+      <itemizedlist>
+        <listitem><guilabel>Canaux</guilabel></listitem>
+        <listitem><guilabel>Graphes</guilabel></listitem>
+        <listitem><guilabel>Spectres</guilabel></listitem>
+      </itemizedlist>
+      Chaque liste donne les noms des données ainsi que certaines propriétés
+      supplémentaires en fonction du type de données. Les noms peuvent être
+      modifiés en double-cliquant dessus.
+    </para>
+    <para>
+      Les canaux, graphes et spectres peuvent être supprimés, dupliqués ou
+      extraits individuellement vers un nouveau fichier Gwyddion natif à l'aide
+      des boutons situés en bas du navigateur. Il est aussi possible de les
+      copier vers un nouveau fichier en faisant glisser une ligne du navigateur
+      vers une fenêtre quelconque du fichier ciblé.
+    </para>
+    <para>
+      Le bouton fermer situé en haut à droite du navigateur permet de fermer le
+      fichier courant, en annulant toutes les modifications non enregistrées.
+      Un fichier sera aussi fermé lorsque toutes les fenêtres qui lui sont
+      associées sont fermées.
+    </para>
+    <para>
+      Si le navigateur de données est fermé, vous pouvez l'ouvrir en utilisant
+      le menu
+      <menuchoice>
+        <guimenu>Méta-données</guimenu>
+        <guimenuitem>Navigateur de Données</guimenuitem>
+      </menuchoice>.
+    </para>
+  </sect2>
+  <sect2 id='data-browser-channels'>
+    <title>Canaux</title>
+    <para>
+      La liste des canaux montre des vignettes de chaque canal, des cases à
+      cocher permettant de choisir la visibilité d'un canal (i.e. son affichage
+      à l'écran), ainsi que le nom des canaux. A droite du nom la présence d'une
+      <link linkend='presentations-masks'>présentation et/ou d'un masque</link>
+      est indiquée par les lettres suivantes :
+      <itemizedlist>
+        <listitem><guilabel>M</guilabel> – masque</listitem>
+        <listitem><guilabel>P</guilabel> – présentation</listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='data-browser-graphs'>
+    <title>Graphes</title>
+    <para>
+      La liste des graphes affiche des cases à cocher contrôlant la visibilité
+      des graphes, ainsi que le nom de ceux-ci. Le nombre de courbes d'un graphe
+      donné est affiché à droite de son nom.
+    </para>
+  </sect2>
+  <sect2 id='data-browser-spectra'>
+    <title>Spectres</title>
+    <para>
+      La liste des spectres affiche le nom des spectres ainsi que le nombre de
+      points présents dans ceux-ci. Il n'y a pas de cases à cocher permettant de
+      contrôler la visibilité car les spectres ponctuels sont affichés et
+      traités uniquement en relation avec les données bi-dimensionnelles à
+      l'aide de
+      <link linkend='single-point-spectra'>l'outil spectroscopie</link>, .
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

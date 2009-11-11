@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='selections'>
+  <title>Selections</title>
+  <para>
+    All interactive <link linkend='tools'>tools</link> and some other
+    processing methods allow to select geometrical shapes on data with mouse:
+    points, lines, rectangles, circles/ellipses.  Existing selections can be
+    similarly modified by dragging corners, endpoints, or complete
+    selections.  When mouse cursor is moved near to an editable point of
+    a selection, is changes its shape to indicate the possibility to edit
+    this point.
+  </para>
+  <para>
+    Each tool typically uses only one type of selection and when it is
+    activated on a data window, it sets the selection mode to this type.
+    Selections of other types than currently displayed are remembered and
+    they are recalled when a tool which uses them is activated again.  E.g.
+    when you select several lines with Profile extraction tool, then switch
+    to Statistical quantities (the lines disappear) and select a rectangular
+    area to calculate statistical characteristics of, and then switch back to
+    Profile extraction, the rectangle disappears and the lines appear again.
+  </para>
+  <para id='selection-sharing'>
+    Tools that use the same type of selection – e.g. both Statistical
+    functions and Statistical quantities use rectangular selection – share
+    it.  To calculate height distribution of the same rectangle you have
+    selected for statistical quantities, it is sufficient to switch the tool.
+  </para>
+  <informalfigure id='fig-selections'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='selections-vlsi.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Data window with three selected lines, two horizontal and one vertical.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    If you save data in Gwyddion native file format
+    (<filename>.gwy</filename>), all selections are saved together with data
+    and recalled the next time the file is opened and appropriate tool
+    chosen.
+  </para>
+  <para>
+    Pressing Shift during selection restricts the degrees of freedom of the
+    shape, making it easier to draw shapes form a specific subset.
+    Specifically, pressing Shift restricts
+    <itemizedlist>
+      <listitem>
+        rectanglular selections to perfect squares,
+      </listitem>
+      <listitem>
+        elliptical selections to perfect circles,
+      </listitem>
+      <listitem>
+        directions of line selections to multiples of 15°.
+      </listitem>
+    </itemizedlist>
+  </para>
+
+  <sect2 id='selection-manager'>
+    <title>Selection Manager</title>
+    <para>
+      The selection manager is a special <link linkend='tools'>tool</link>
+      that displays the list of all selections in a channel and enables to
+      copy them to other channels.
+    </para>
+    <para>
+      For each selection, the selection shows the name, which is how the
+      selection is identified in the <filename>.gwy</filename> file; the
+      selection type and the number of objects (points, lines, rectangles, …)
+      selected.  Usually, there is at most one selection of any type because
+      they are shared among the tools as
+      <link linkend='selection-sharing'>described above</link>.  Neverthesless,
+      sometimes there are special or private selections present as shown on the
+      following figure displaying two point-wise selections.
+    </para>
+    <informalfigure id='fig-selection-manager'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='selection-manager.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Selection Manager showing several selections present in the data.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      It is possible to delete individual selections by choosing them in the
+      list and pressing <keycode>Delete</keycode> – this is equivalent to
+      clearing the selection in the corresponding tool.  The
+      <guibutton>Clear</guibutton> button removes all selections.
+    </para>
+    <para>
+      However, the most interesting function of Selection Manager is selection
+      copying.  There are two ways to copy a selection to another channel:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Dragging a row from the selection list onto a data window copies
+        the selection to this data window.
+      </listitem>
+      <listitem>
+        Clicking the <guibutton>Distribute</guibutton> button copies the
+        selection to all other channels in the file.  Or, if
+        <guilabel>to all files</guilabel> is enabled, to all channels in
+        all open files.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Selections are copied only to channels with compatible lateral units.
+      This means that a selection in a normal channel with meters as the
+      lateral units will not be distributed to a two-dimensional PSDF channel
+      or a two-dimensional slope distribution.
+    </para>
+    <para>
+      If the physical dimensions of the target data are not sufficient to
+      contain all the objects of the copied selection then only those objects
+      that fit are copied (this can also mean nothing is copied).
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

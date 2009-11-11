@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: file-formats.xml 10212 2009-10-05 13:28:19Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="file-formats">
+  <title>Поддерживаемые форматы файлов</title>
+  <xi:include href="file-format-table.xml"/>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

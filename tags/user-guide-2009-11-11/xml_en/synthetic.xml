@@ -1,0 +1,405 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='synthetic'>
+  <title>Synthetic Surfaces</title>
+  <para>
+    Beside functions for analysis of measured data, Gwyddion provides
+    several generators of artificial surfaces that can be used for testing or
+    simulations also outside Gwyddion.
+  </para>
+  <para>
+    All the surface generators share a certain set of parameters, determining
+    the dimensions and scales of the created surface and the random number
+    generator controls.  These parameters are described below, the parameters
+    specific to each generator are described in the corresponding subsections.
+  </para>
+  <para>
+    Image parameters:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guilabel>Horizontal, Vertical size</guilabel>
+      </term>
+      <listitem>
+        <para>
+          The horizontal and vertical resolution of the generated surface in
+          pixels.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Square image</guilabel>
+      </term>
+      <listitem>
+        <para>
+          This option, when enabled, forces the horizontal and vertical
+          resolution to be identical.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Width, Height</guilabel>
+      </term>
+      <listitem>
+        <para>
+          The horizontal and vertical physical dimensions of the generated
+          surface in selected units.  Note square pixels are assumed so,
+          changing one causes the other to be recalculated.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Dimension, Value units</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Units of the lateral dimensions (<guilabel>Width</guilabel>,
+          <guilabel>Height</guilabel>) and of the values (heights).  The units
+          chosen here also determine the units of non-dimensionless parameters
+          of the individual generators.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guibutton><guilabel>Like Current Channel</guilabel></guibutton>
+      </term>
+      <listitem>
+        <para>
+          Clicking this button fills all the above parameters according to
+          the current channel.
+        </para>
+        <para>
+          Note that while the units of values are updated, the value scale is
+          defined by generator-specific parameters that might not be directly
+          derivable from the statistical properties of the current channel.
+          Hence these parameters are not recalculated.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Replace the current channel</guilabel>
+      </term>
+      <listitem>
+        <para>
+          This option has two effects.  First, it causes the dimensions and
+          scales to be automatically updated each time the function is used as
+          if <guibutton><guilabel>Like Current Channel</guilabel></guibutton>
+          was clicked.  Second, it makes the generated surface replace the
+          current channel instead of creating a new channel.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Random generator controls:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guilabel>Random seed</guilabel>
+      </term>
+      <listitem>
+        <para>
+          The random number generator seed.  Choosing the same parameters and
+          resolutions and the same random seed causes the same surface to be
+          generated, even on different computers.  Different seeds lead to
+          different surfaces with the same overall characteristics given by
+          the generator parameters.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guibutton><guilabel>New</guilabel></guibutton>
+      </term>
+      <listitem>
+        <para>
+          Replaces the seed with a random number.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guilabel>Randomize</guilabel>
+      </term>
+      <listitem>
+        <para>
+          Enabling this option makes the seed to be chosen randomly every time
+          the generator is run.  This permits to conveniently re-run the
+          generator with a new seed simply by pressing <keycap>Ctrl-F</keycap>
+          (see <link linkend='keyboard-shortcuts'>keyboard shortcuts</link>).
+        </para>
+      </listitem>
+    </varlistentry>
+    <para>
+      All generated surfaces are periodic (i.e. perfectly tilable).
+    </para>
+  </variablelist>
+  <sect2 id='spectral-synthetis'>
+    <title>Spectral</title>
+    <para>
+      Spectral synthesis module creates randomly rough surfaces by constructing
+      the Fourier transform of the surface according to specified parameters
+      and then performing the inverse Fourier transform to obtain the real
+      surface.
+    </para>
+    <para>
+      The Fourier image parameters define the shape of the PSDF, i.e. the
+      Fourier coefficient modulus, the phases are chosen randomly.  At present,
+      all generated surfaces are isotropic, i.e. the PSDF is radially
+      symmetric.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The root mean square value of the heights (or of the differences
+            from the mean plane which, however, always is the
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
+              <alt>z=0</alt>
+            </inlineequation>
+            plane).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Minimum, maximum frequency</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The minimum and maximum spatial frequency.  Increasing the minimum
+            frequency leads to <quote>flattening</quote> of the image, i.e. to
+            removal of large features.  Decreasing the maximum frequency
+            limits the sharpness of the features.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Enable Gaussian multiplier</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Enables the multiplication of the Fourier coefficients by a
+            Gaussian function that in the real space corresponds to the
+            convolution with a Gaussian.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Autocorrelation length</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The autocorrelation length of the Gaussian (see section
+            <link linkend='autocorrelation-1d'>Statistical Analysis</link> for
+            the discussion of autocorrelation functions).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Enable power multiplier</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Enables multiplication by factor proportional to
+            <inlineequation>
+              <mathphrase>1/<phrase role='mathvar'>k</phrase><superscript><phrase role='mathvar'>p</phrase></superscript></mathphrase>
+              <alt>1/k^p</alt>
+            </inlineequation>,
+            where
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>k</phrase></mathphrase>
+              <alt>k</alt>
+            </inlineequation>
+            is the spatial frequency and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>p</phrase></mathphrase>
+              <alt>p</alt>
+            </inlineequation>
+            is the power.  This permits to generate various fractal surfaces.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Power</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The power
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>p</phrase></mathphrase>
+              <alt>p</alt>
+            </inlineequation>.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-spectral'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-spectral.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial surfaces generated by spectral synthesis: a narrow range
+          of spatial frequencies (left), Gaussian random surface (centre) and a
+          fractal surface generated with power multiplier of 1.5 (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='object-synthetis'>
+    <title>Objects</title>
+    <para>
+      The object placement method permits to create random surfaces composed
+      of features of a particular shape.  The algorithm is simple: the given
+      number of objects is placed on random positions at the surface.  For each
+      object placed, the new heights are changed to
+      <inlineequation>
+        <mathphrase>max(<phrase role='mathvar'>z</phrase>, <phrase role='mathvar'>z</phrase><subscript>0</subscript> + <phrase role='mathvar'>h</phrase>)</mathphrase>
+        <alt>\max(z,z_0+h)</alt>
+      </inlineequation>,
+      where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+        <alt>z</alt>
+      </inlineequation>
+      is the current height at a particular pixel,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
+        <alt>h</alt>
+      </inlineequation>
+      is the height of the object at this pixel (assuming a zero basis) and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase><subscript>0</subscript></mathphrase>
+        <alt>z_0</alt>
+      </inlineequation>
+      is the current minimum height over the basis of the object being placed.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Shape</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The shape (type) of placed objects.  At present the possibilities
+            include half-spheres, boxes, pyramids, tetrahedrons and some more
+            weird shapes.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Coverage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The average number of times an object covers a pixel on the image.
+            Coverage value of 1 means the surface would be exactly once covered
+            by the objects provived that thay covered it uniformly.  Larger
+            values mean more layers of objects – and slower image generation.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Size</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The object size, usually the side of a containing square.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Aspect Ratio</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The ratio between the
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+              <alt>y</alt>
+            </inlineequation>
+            dimensions of an object – with respect to same base proportions.
+          </para>
+          <para>
+            Changing the aspect ratio does not always imply mere geometrical
+            scaling, e.g. objects called nuggets change between half-spheres
+            and rods when the ratio is changed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Height</guilabel>
+        </term>
+        <listitem>
+          <para>
+            A quantity proportional to the height of the object, normally
+            the height of the highest point.
+          </para>
+          <para>
+            Checking <guilabel>Scales with size</guilabel> makes unperturbed
+            heights to scale proportionally with object size.  Otherwise the
+            height is independent on size.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The rotation of objects with respect to some base orientation,
+            measured counterclockwise.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Each parameter can be randomized for individual objects, this is
+      controlled by <guilabel>Variance</guilabel>.  For multiplicative
+      quantities (all except orientation), the distribution is log-normal
+      with the RMS value of the logarithmed quantity given by
+      <guilabel>Variance</guilabel>.
+    </para>
+    <informalfigure id='fig-synthetic-objects'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-objects.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial surfaces generated by object placement: spheres of varied
+          size (left), narrow thatches of varied direction (centre), nuggets
+          of varied aspect ratio (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

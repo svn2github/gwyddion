@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: fourier-transform.xml 9491 2009-07-17 20:12:43Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="fourier-transform">
+  <title>Преобразование Фурье</title>
+  <indexterm><primary>преобразование Фурье</primary></indexterm>
+  <para>Двумерное преобразование Фурье доступно через меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Интегральные преобразования</guisubmenu><guimenuitem>2D БПФ</guimenuitem></menuchoice>, где реализовано быстрое преобразование Фурье (БПФ, FFT). Преобразование Фурье раскладывает сигнал на его гармонические составляющие, и, таким образом, его можно использовать при изучении спектральных частот, присутствующих в данных СЗМ.</para>
+  <para>Модуль <guilabel>2D FFT</guilabel> предоставляет несколько типов вывода: <itemizedlist><listitem> Абсолютное значение – одноимённая величина комплексного коэффициента Фурье, пропорциональная квадратному корню функции спектральной плотности мощности (ФСПМ, PSDF). </listitem><listitem> Фаза – фаза комплексного коэффициента (используется редко). </listitem><listitem> Действительная часть – действительная часть комплексного коэффициента. </listitem><listitem> Мнимая часть – мнимая часть комплексного коэффициента. </listitem></itemizedlist> и некоторые их комбинации для удобства.</para>
+  <para id="psdf-section"><indexterm><primary>функция спектральной плотности мощности</primary><secondary>сечение</secondary></indexterm> Радиальные сечения двумерной ФСПМ могут быть с лёгкостью получены с помощью меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Статистика</guisubmenu><guimenuitem>Сечение ФСПМ</guimenuitem></menuchoice>. Некоторые другие функции, расчитывающие спектральные плотности, описаны в разделе <link linkend="power-spectral-density-1d">Статистический анализ</link>.  Также возможно фильтровать изображения в частотных интервалах используя <link linkend="fft-filter-1d">одномерную</link> или <link linkend="fft-filter-2d">двумерную</link> фильтрацию БПФ.</para>
+  <para>Следует отметить, что преобразование Фурье считает данные бесконечно протяженными, и, следовательно. накладывает некоторые периодические граничные условия. Поскольку реальные данные не обладают этими свойствами, необходимо использовать некоторую оконную функцию для выравнивания данных на границах изображения. Если вы этого не сделаете, БПФ будет считать данные обработанными прямоугольной функцией окна, которая имеет действительно плохой Фурье-образ, что приводит к искажению Фурье-спектра.</para>
+  <para id="windowing">Gwyddion предлагает на выбор несколько функций окна. Большинство из них образовано набором синусов и косинусов, которые корректно приглушают данные на краях. В следующей таблице оконных формул независимая переменная <inlineequation><mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></inlineequation> лежит в диапазоне <inlineequation><mathphrase>(0, 1)</mathphrase><alt>(0,1)</alt></inlineequation>, что соответствует нормализации абсциссы; для простоты переменная <inlineequation><mathphrase><phrase role="mathvar">ξ</phrase> = 2π<phrase role="mathvar">x</phrase></mathphrase><alt>\xi=2\pi x</alt></inlineequation> используется в ряде формул. Доступные виды оконных функцию включают в себя:</para>
+  <informaltable frame="none" id="table-windowing-types">
+    <tgroup cols="2" align="left">
+      <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Название</entry>
+          <entry>Формула</entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>Нет</entry>
+          <entry>1</entry>
+        </row>
+        <row>
+          <entry>Прямоугольное</entry>
+          <entry>0.5 в граничных точках, 1 во всех остальных</entry>
+        </row>
+        <row>
+          <entry>Ханн</entry>
+          <entry>
+            <inlineequation id="eq-windowing-hann">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-hann.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Hann}(x) = 0.5-0.5\cos\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Хэмминг</entry>
+          <entry>
+            <inlineequation id="eq-windowing-hamming">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-hamming.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Hamming}(x) = 0.54-0.46\cos\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Блэкмен</entry>
+          <entry>
+            <inlineequation id="eq-windowing-blackmann">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-blackmann.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Blackmann}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Ланцош</entry>
+          <entry>
+            <inlineequation id="eq-windowing-lanczos">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-lanczos.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Lanczos}(x) = \sinc \pi(2x-1)
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Велч</entry>
+          <entry>
+            <inlineequation id="eq-windowing-welch">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-welch.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Welch}(x) = 4x(1-x)
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Наттолл</entry>
+          <entry>
+            <inlineequation id="eq-windowing-nutall">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-nutall.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm Nutall}(x) = 0.355768 - 0.487396\cos\xi
+                  + 0.144232\cos2\xi - 0.012604\cos3\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Плоская вершина</entry>
+          <entry>
+            <inlineequation id="eq-windowing-flat-top">
+              <inlinemediaobject>
+                <imageobject>
+                  <imagedata fileref="eq-windowing-flat-top.png" format="PNG"/>
+                </imageobject>
+                <textobject role="tex">
+                  <phrase>
+<![CDATA[
+w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
+                    - 0.097\cos3\xi + 0.008\cos4\xi
+]]>
+                  </phrase>
+                </textobject>
+              </inlinemediaobject>
+            </inlineequation>
+          </entry>
+        </row>
+        <row>
+          <entry>Кайзер  <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation></entry>
+          <entry><inlineequation id="eq-windowing-kaiser"><inlinemediaobject><imageobject><imagedata fileref="eq-windowing-kaiser.png" format="PNG"/></imageobject><textobject role="tex"><phrase><![CDATA[
+\displaystyle
+w_{\rm Kaiser,\alpha}(x) = 
+{ \BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
+                          \over\BesselI0(\pi\alpha)}
+]]></phrase></textobject></inlinemediaobject></inlineequation> where <inlineequation><mathphrase>I<subscript>0</subscript></mathphrase><alt>\BesselI0</alt></inlineequation> is the modified Bessel function of zeroth order and <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation> is a parameter</entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <informalfigure id="fig-windowing-win">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="windowing-win.pdf" format="PDF"/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref="windowing-win.png" format="PNG"/>
+      </imageobject>
+      <caption>Оконные функции: Ханна, Хэмминга, Блэкмена, Ланцоша, Велча, Наттола, с плоской вершиной, Кайзера 2,5.</caption>
+    </mediaobject>
+  </informalfigure>
+  <informalfigure id="fig-windowing-fft">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="windowing-fft.pdf" format="PDF"/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref="windowing-fft.png" format="PNG"/>
+      </imageobject>
+      <caption>Огибающие частотного отклика оконных функций: Ханна, Хэмминга, Блэкмена, Ланцоша, Велча, Наттола, с плоской вершиной, Кайзера 2,5.</caption>
+    </mediaobject>
+  </informalfigure>
+  <para>Преобразования Фурье данных с размерами, которые не раскладываются на малые простые числа могут быть очень медленными – и многие программы реализуют БПФ только для массивов, размер которых кратен степени двух.</para>
+  <para>В <application>Gwyddion</application>, тем не менее, преобразование Фурье может использоваться к полям данных и линиям произвольного размера, без использования передискретизации данных (по крайней мере начиная с версии 2.8). Преобразования Фурье рассчитываются либо с использованием знаменитой библиотеки <link linkend="dependency-fftw">FFTW</link>, либо, если она недоступна, используя встроенные в Gwyddion функции, которые работают медленнее, но так же могут работать с данными произвольной длины.</para>
+  <para>Тем не менее, если размер данных не раскладывается на малые простые числа, преобразование работает заметно медленнее. Следовательно, желательно преобразовывать поля данных с <quote>правильными</quote> размерами.</para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: expressions.xml 9612 2009-08-17 13:47:12Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='expression-syntax'>
+  <title>Expressions</title>
+  <para>
+    Les expressions utilisées dans le module Arithmétique, les formules de
+    caractéristiques des grains ou dans les fonctions d'ajustement de courbes
+    ont une syntaxe similaire au langages de programmation les plus communs.
+  </para>
+  <para>
+    Tous les nombres sont des réels (en virgule flottante), L'écriture des
+    nombre utilise une notation standard. Voici quelques exemples de nombres
+    valides :
+    <literal>1</literal>,
+    <literal>.707</literal>,
+    <literal>2.661</literal>,
+    <literal>8.2e-34</literal>.
+  </para>
+  <para>
+    Les noms des fonctions, constantes, et variables commencent par une lettre
+    continuent avec zéro ou plusieurs lettre, chiffres ou underscores. Voici
+    quelques exemples d'identifiants valides :
+    <literal>pow10</literal> (une fonction),
+    <literal>Pi</literal> (une constante),
+    <literal>d2_2</literal> (une variable).
+  </para>
+  <para>
+    L'application des opérations est résumée dans la table qui suit.
+  </para>
+  <para>
+    <informaltable frame='none' id='table-expressions-precedence'>
+      <tgroup cols='3' align='left'>
+        <?dblatex lll?>
+        <thead>
+          <row>
+            <entry>Operation</entry>
+            <entry>Associativité</entry>
+            <entry>Exemples</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>parenthèses</entry>
+            <entry>N.A.</entry>
+            <entry><literal>(x)</literal></entry>
+          </row>
+          <row>
+            <entry>appel de fonction et opérateurs unaires</entry>
+            <entry>de la droite vers la gauche</entry>
+            <entry><literal>-sqrt 3</literal></entry>
+          </row>
+          <row>
+            <entry>puissance</entry>
+            <entry>de la droite vers la gauche</entry>
+            <entry><literal>2^16</literal></entry>
+          </row>
+          <row>
+            <entry>multiplication, division, et modulo</entry>
+            <entry>de la gauche vers la droite</entry>
+            <entry><literal>9/2 * 8</literal></entry>
+          </row>
+          <row>
+            <entry>addition et soustractio</entry>
+            <entry>de la gauche vers la droite</entry>
+            <entry><literal>3 - 4 + 5</literal></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Notez que <literal>-3^2</literal> is 9, c'est-à-dire
+    <literal>(-3)^2</literal>, comme en <command>c</command>, mais à l'inverse
+    de Perl ou Python.
+  </para>
+  <para>
+    Les opérateurs et fonctions disponibles sont listés dans la table suivante.
+  </para>
+  <para>
+    <informaltable frame='none' id='table-expression-operators'>
+      <tgroup cols='2' align='left'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Operateur</entry>
+            <entry>Signification</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>+</literal> (unaire)</entry>
+            <entry>aucune opération</entry>
+          </row>
+          <row>
+            <entry><literal>-</literal> (unaire)</entry>
+            <entry>valeur négative</entry>
+          </row>
+          <row>
+            <entry><literal>~</literal></entry>
+            <entry>valeur négative (équivalent à <literal>-</literal>)</entry>
+          </row>
+          <row>
+            <entry><literal>+</literal> (binaire)</entry>
+            <entry>addition</entry>
+          </row>
+          <row>
+            <entry><literal>-</literal> (binaire)</entry>
+            <entry>soustraction</entry>
+          </row>
+          <row>
+            <entry><literal>*</literal></entry>
+            <entry>multiplication</entry>
+          </row>
+          <row>
+            <entry><literal>/</literal></entry>
+            <entry>division</entry>
+          </row>
+          <row>
+            <entry><literal>%</literal></entry>
+            <entry>modulo en virgule flottante</entry>
+          </row>
+          <row>
+            <entry><literal>^</literal></entry>
+            <entry>puissance</entry>
+          </row>
+          <row>
+            <entry><literal>abs</literal></entry>
+            <entry>valeur absolue</entry>
+          </row>
+          <row>
+            <entry><literal>floor</literal></entry>
+            <entry>arrondi à l'entier inférieur</entry>
+          </row>
+          <row>
+            <entry><literal>ceil</literal></entry>
+            <entry>arrondi à l'entier supérieur</entry>
+          </row>
+          <row>
+            <entry><literal>sqrt</literal></entry>
+            <entry>racine carrée</entry>
+          </row>
+          <row>
+            <entry><literal>cbrt</literal></entry>
+            <entry>racine cubique</entry>
+          </row>
+          <row>
+            <entry><literal>sin</literal></entry>
+            <entry>sinus</entry>
+          </row>
+          <row>
+            <entry><literal>cos</literal></entry>
+            <entry>cosinus</entry>
+          </row>
+          <row>
+            <entry><literal>tan</literal></entry>
+            <entry>tangente</entry>
+          </row>
+          <row>
+            <entry><literal>asin</literal></entry>
+            <entry>arcsinus</entry>
+          </row>
+          <row>
+            <entry><literal>acos</literal></entry>
+            <entry>arccosinus</entry>
+          </row>
+          <row>
+            <entry><literal>atan</literal></entry>
+            <entry>arc tangente</entry>
+          </row>
+          <row>
+            <entry><literal>exp</literal></entry>
+            <entry>exponentielle en bas e</entry>
+          </row>
+          <row>
+            <entry><literal>ln</literal></entry>
+            <entry>logarithme en base e</entry>
+          </row>
+          <row>
+            <entry><literal>log</literal></entry>
+            <entry>base-e logarithm function</entry>
+          </row>
+          <row>
+            <entry><literal>pow10</literal></entry>
+            <entry>exponentielle en base 10</entry>
+          </row>
+          <row>
+            <entry><literal>log10</literal></entry>
+            <entry>logarithme en base 10</entry>
+          </row>
+          <row>
+            <entry><literal>sinh</literal></entry>
+            <entry>sinus hyperbolique</entry>
+          </row>
+          <row>
+            <entry><literal>cosh</literal></entry>
+            <entry>cosinus hyperbolique</entry>
+          </row>
+          <row>
+            <entry><literal>tanh</literal></entry>
+            <entry>tangente hyperbolique</entry>
+          </row>
+          <row>
+            <entry><literal>asinh</literal></entry>
+            <entry>sinus hyperbolique inverse</entry>
+          </row>
+          <row>
+            <entry><literal>acosh</literal></entry>
+            <entry>cosinus hyperbolique inverse</entry>
+          </row>
+          <row>
+            <entry><literal>atanh</literal></entry>
+            <entry>tangente hyperbolique inverse</entry>
+          </row>
+          <row>
+            <entry><literal>pow</literal></entry>
+            <entry>puissance, <literal>pow(x,y)</literal> égale <literal>x^y</literal></entry>
+          </row>
+          <row>
+            <entry><literal>min</literal></entry>
+            <entry>minimum de deux valeurs</entry>
+          </row>
+          <row>
+            <entry><literal>max</literal></entry>
+            <entry>maximum de deux valeurs</entry>
+          </row>
+          <row>
+            <entry><literal>mod</literal></entry>
+            <entry>modulo en virgule flottance, <literal>mod(x,y)</literal> égale <literal>x % y</literal></entry>
+          </row>
+          <row>
+            <entry><literal>hypot</literal></entry>
+            <entry>distance euclidienne (hypothénuse), <literal>hypot(x,y)</literal> égale <literal>sqrt(x^2+y^2)</literal></entry>
+          </row>
+          <row>
+            <entry><literal>atan2</literal></entry>
+            <entry>arctangente de deux variables</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </para>
+  <para>
+    Quelques particularités permettent de faciliter l'écriture d'expressions :
+    <itemizedlist>
+      <listitem>
+        <para>
+          Les signes de multiplications sont optionnels, vous pouvez les
+          remplacer par des espaces (ou même aucun espace dans cerains cas). Par
+          exemple <literal>3/4 Pi</literal> et <literal>5(4+3)(2+1)</literal>
+          sont des expressions valides. Mais <literal>3a</literal> n'est pas
+          valide, <literal>3e-4</literal> signifie toujours
+          <literal>0.0003</literal>, et non <literal>3*e - 4</literal>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          In n'existe aucune différence entre les appels de fonction et les
+          opérateurs unaires, les parenthèses peuvent donc être souvent ommises.
+          Par exemple <literal>sqrt 5</literal> et
+          <literal>hypot hypot 3,4,5</literal> sont des expressions valides. La
+          dernière serait utilisée avec les parenthèses de la manière suivante :
+          <literal>hypot(hypot(3,4),5)</literal>.
+        </para>
+        <para>
+          Notez cependant que les appels de fonction ont une priorité supérieure
+          à tout autre opérateur, ainsi
+          <literal>sin Pi/2</literal> est équivalent à
+          <literal>(sin Pi)/2</literal>, et non <literal>sin(Pi/2)</literal>.
+        </para>
+      </listitem>
+    </itemizedlist>
+    En cas de doute, écrivez les expressions sous leur forme la plus complète.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

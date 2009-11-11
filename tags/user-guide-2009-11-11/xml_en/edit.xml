@@ -1,0 +1,395 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='editing-correction' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title id='editing-correction.title'>Data Edit and Correction</title>
+  <indexterm><primary>defect correction</primary></indexterm>
+  <para>
+    There are several modules that enable direct or indirect editing of the
+    SPM data. In principal, most of the data processing modules change the data
+    in one way or another. However, in this section we would like to describe
+    the modules and tools that are specifically designed to correct local
+    defects in an image. The functions below remove <quote>bad</quote> data
+    from an image, and then fill it in using an interpolation algorithm.
+  </para>
+  <sect2 id='remove-spots'>
+    <title>
+      Remove Spots Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      The <link linkend='remove-spots'>Remove Spots</link> tool can be used
+      for removing very small parts of the image that are considered
+      a scanning error, dust particle or anything else that should not be
+      present in the data. Note that doing so can dramatically alter the
+      resulting statistical parameters of the surface, so be sure not to
+      remove things that are really present on the surface.
+    </para>
+    <para>
+      While using this tool you can pick up position of the spot to magnify
+      its neighbourhood in the tool window. Then, in the tool window, select
+      a rectangle around the area that should be removed. You can then select
+      one of several interpolation methods for creating data in place of the
+      former <quote>spot</quote>:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Hyperbolic flatten - uses information from selected area boundaries to
+        interpolate the information inside area.
+      </listitem>
+      <listitem>
+        Pseudo-Laplace and Laplace solver - solves Laplace equation to
+        calculate data inside area; the boundary is treated as virtual source.
+      </listitem>
+      <listitem>
+        Fractal correction - uses whole image to determine fractal dimension.
+        Then tries to create randomly rough data that have the same fractal
+        dimension and put them into the area.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Clicking <guibutton>Apply</guibutton> will execute the selected algorithm.
+    </para>
+    <para>
+      <note>
+      Spot removal will only work for regions of size 64 × 64 pixels or
+      smaller. To remove larger regions, create a mask using the
+      <link linkend='tool-mask-editor'>Mask Editor</link> tool, then use
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem><link linkend='remove-data-under-mask'>Remove Data Under Mask</link></guimenuitem>
+      </menuchoice>.
+      </note>
+    </para>
+  </sect2>
+  <sect2 id='remove-grains'>
+    <title>
+      Remove Grains Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      This simple tool removes manually selected connected parts of mask
+      or interpolates the data under them, or possibly both.  The part of
+      mask to remove is selected by clicking on it with left mouse button.
+    </para>
+  </sect2>
+  <sect2 id='remove-scars'>
+    <title>
+      Remove Scars
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_scars-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>scars correction</primary></indexterm>
+    <indexterm><primary>strokes correction</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Remove Scars</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Scars (or stripes, strokes) are parts of the image that are corrupted
+      by a very common scanning error: local fault of the closed loop. Line
+      defects are usually parallel to the fast scanning axis in the image.
+      This function will automatically find and remove these scars, using
+      neighbourhood lines to <quote>fill-in</quote> the gaps.  The method
+      is run with the last settings used in <link linkend='mark-scars'>Mark
+        Scars</link>.
+    </para>
+  </sect2>
+  <sect2 id='mark-scars'>
+    <title>Mark Scars</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Mark Scars</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Similarly, the <classname>Mark Scars</classname> module can create a mask
+      of the points treated as scars. Unlike
+      <link linkend='remove-scars'>Remove Scars</link>
+      which directly interpolates the located defects, this module lets you
+      interactively set several parameters which can fine-tune the scar
+      selection process:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Maximum width – only scars that are as thin or thinner than this value
+        (in pixels) will be marked.
+      </listitem>
+      <listitem>
+        Minimum length – only scars that are as long or longer than this value
+        (in pixels) will be marked.
+      </listitem>
+      <listitem>
+        Hard threshold – the minimum difference of the value from the
+        neighbouring upper and lower lines to be considered a defect.
+        The units are relative to image RMS.
+      </listitem>
+      <listitem>
+        Soft threshold – values differing at least this much do not form
+        defects themselves, but they are attached to defects obtained from
+        the hard threshold if they touch one.
+      </listitem>
+      <listitem>
+        Positive, Negative, Both – the type of defects to remove.  Positive
+        means defects with outlying values above the normal values (peaks),
+        negative means defects with outlying values below the normal values
+        (holes).
+      </listitem>
+    </itemizedlist>
+    <para>
+      After clicking <guibutton>Ok</guibutton> the new scar mask will be applied
+      to the image. Other modules or tools can then be run to edit this data.
+    </para>
+    <informalfigure id='fig-scars'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='remove-scars.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Scrars removal example</phrase>
+        </textobject>
+        <caption>
+          Scars marking and removal example:
+          (a) original data with defects,
+          (b) data with marked deffects,
+          (c) corrected data.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='remove-data-under-mask'>
+    <indexterm>
+      <primary>interpolation</primary>
+      <secondary>of data under mask</secondary>
+    </indexterm>
+    <title>
+      Remove Data Under Mask
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_remove_under_mask-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Remove Data Under Mask</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      This function substitutes the data under the mask by the solution of
+      solving the Laplacian equation. The data values around the masked areas
+      define the boundary conditions.  The solution is calculated iteratively
+      and it can take some time to converge.
+    </para>
+  </sect2>
+  <sect2 id='fractal-correction'>
+    <title>Fractal Correction</title>
+    <indexterm><primary>fractal interpolation</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Fractal Correction</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      The Fractal Correction module, like the
+      <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
+      module, replaces data under the mask. However, it uses
+      a different algorithm to come up with the new data: The fractal dimension
+      of the whole image is first computed, and then the areas under the mask
+      are substituted by a randomly rough surface having the same fractal
+      dimension.
+      The root mean square value of the height irregularities (roughness)
+      is not changed by using this module.
+    </para>
+    <note>This calculation can take some time, so please be patient.</note>
+    <warning>
+      Running this module on data that do not have fractal properties can cause
+      really unrealistic results and is strictly not recommended.
+    </warning>
+  </sect2>
+  <sect2 id='mask-of-outliers'>
+    <title>Mask of Outliers</title>
+    <indexterm><primary>outliers correction</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+        <guimenuitem>Mask of Outliers</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      This module creates mask of areas in the data that not pass the
+      <inlineequation>
+        <mathphrase>3σ</mathphrase>
+        <alt>3\sigma</alt>
+      </inlineequation>
+      criterion. All the values above and below this confidence interval
+      are marked in mask and can be edited or processed by other modules
+      afterwards.
+    </para>
+  </sect2>
+  <sect2 id='line-correction'>
+    <title>
+      Line Correction
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_line_level-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>line correction</primary></indexterm>
+    <para>
+      Profiles taken in the fast scanning axis (usually
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+        <alt>x</alt>
+      </inlineequation>-axis)
+      can be mutually shifted by some amount or have slightly different slopes.
+      The basic line correction functions deal with this type of discrepancy.
+      Several functions can be used: The
+      <link linkend='line-polynomial'>Polynomial</link> and
+      <link linkend='path-level'>Path level</link> tools and then several
+      procedures under
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Correct Data</guisubmenu>
+      </menuchoice>
+      menu.
+    </para>
+    <para id='line-polynomial'>
+      The Polynomial tool fits each horizontal or vertical line by
+      a polynomial up to the third order and then subtracts the fitted
+      polynomial – a very frequently used function in basic processing of raw
+      SPM data. It also permits to exclude or include selected area from the
+      fit. The inclusion or exclusion only applies to the lines interseting
+      the selected area.  Other lines are always fitted using all data
+      values.
+    </para>
+    <para>
+      Line correction functions in <guisubmenu>Correct Data</guisubmenu>
+      perform only horizontal line corrections, therefore one has to rotate
+      the image to perform column-wise correction.  They include:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <guimenuitem>Match Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Median Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Modus Line Correction</guimenuitem>, and
+      </listitem>
+      <listitem>
+        <guimenuitem>Median Difference Line Correction</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Step Line Correction</guimenuitem>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      The first three are very similar, they all align rows of the data field
+      to minimize some quantity.  As the names indicate,
+      <guimenuitem>Median Line Correction</guimenuitem> matches line medians
+      while <guimenuitem>Modus Line Correction</guimenuitem> attempts to match
+      line (pseudo)modus.
+      <guimenuitem>Match Line Correction</guimenuitem> minimizes certain
+      line difference function that gives more weight to flat areas and less
+      weight to areas with large slopes.  The effect of all three functions
+      is often very similar, although some can be more suitable for certain
+      type of data than others.
+    </para>
+    <para>
+      Function <guimenuitem>Median Difference Line Correction</guimenuitem>
+      shifts the lines so that the median of differences (between vertical
+      neighbour pixels) becomes zero, instead of the difference of medians.
+      Therefore it better preserves large features while it is more sensitive
+      to completely bogus lines.
+    </para>
+    <para>
+      Function <guimenuitem>Step Line Correction</guimenuitem> differs from
+      the others.  It attempts to identify misaligned segments within the rows
+      and correct the height of each such segment individually.  Therefore it
+      is often able to correct data with discontinuities in the middle of a
+      row.  This function is rather experimental and the exact way it works can
+      be subject of futher changes.
+    </para>
+  </sect2>
+  <sect2 id='path-level'>
+    <title>
+      Path Leveling Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>path leveling</primary></indexterm>
+    <indexterm>
+      <primary>leveling</primary>
+      <secondary>along paths</secondary>
+    </indexterm>
+    <para>
+      The <guilabel>Path Leveling</guilabel>
+      tool can be used to correct the heights in an arbitrary subset of rows
+      in complicated images.
+    </para>
+    <para>
+      First, one selects a number of straight lines on the data.  The
+      intersections of these lines with the rows then form a set of points
+      in each row that is used for leveling.  The rows are moved up or down
+      to minimize the difference between the heights of the points of
+      adjacent rows.  Rows that are not intersected by any line are not
+      moved (relatively to neighbouring rows).
+    </para>
+    <informalfigure id='fig-path-level'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='path-level.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Path Level example:
+          (a) uncorrected data with steps that the automated method may
+          fail to correct, two suitable leveling lines are selected;
+          (b) the result of Path Level application with line width 5.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <xi:include href='unrotate.xml'/>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

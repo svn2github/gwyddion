@@ -1,0 +1,275 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='fractal-analysis'>
+  <title>Fractal Analysis</title>
+  <para>
+    In practice objects exhibiting random properties are encountered. It is
+    often assumed that these objects exhibit the self-affine properties in
+    a certain range of scales. Self-affinity is a generalization of
+    self-similarity which is the basic property of most of the deterministic
+    fractals. A part of self-affine object is similar to whole object after
+    anisotropic scaling. Many randomly rough surfaces are assumed to belong
+    to the random objects that exhibit the self-affine properties and they
+    are treated self-affine statistical fractals. Of course, these surfaces
+    can be studied using atomic force microscopy (AFM). The results of the
+    fractal analysis of the self-affine random surfaces using AFM are often
+    used to classify these surfaces prepared by various technological
+    procedures
+    [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>,<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>].
+  </para>
+  <para id='fractal-dimension'>
+    <indexterm><primary>fractal dimension</primary></indexterm>
+    Within Gwyddion, there are different methods of fractal analysis
+    implemented within
+  <menuchoice>
+    <guimenu>Data Process</guimenu>
+    <guisubmenu>Statistics</guisubmenu>
+    <guimenuitem>Fractal analysis</guimenuitem>
+  </menuchoice>.
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        Cube counting method
+        [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>]
+      </term>
+      <listitem>
+        is derived directly from a definition of box-counting fractal
+        dimension. The algorithm is based on the following steps: a cubic
+        lattice with lattice constant l is superimposed on the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+          <alt>z</alt>
+        </inlineequation>-expanded surface.
+        Initially
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>is set
+        at
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>X</phrase>/2</mathphrase>
+          <alt>X/2</alt>
+        </inlineequation>
+        (where
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>X</phrase></mathphrase>
+          <alt>X</alt>
+        </inlineequation>
+        is length of edge of the surface), resulting in a lattice of
+        <inlineequation>
+          <mathphrase>2×2×2 = 8</mathphrase>
+          <alt>2\times2\times2=8</alt>
+        </inlineequation>
+        cubes.  Then
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
+          <alt>N(l)</alt>
+        </inlineequation>
+        is the number of all cubes that contain at least one pixel of the
+        image.  The lattice constant
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>
+        is then reduced stepwise by factor of 2 and the process repeated
+        until
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>
+        is equal to the distance between two adjacent pixels. The slope of
+        a plot of
+        <inlineequation>
+          <mathphrase>log(<phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
+          <alt>\log N(l)</alt>
+        </inlineequation>
+        versus
+        <inlineequation>
+          <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
+          <alt>\log 1/l</alt>
+        </inlineequation>
+        gives the fractal dimension
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript></mathphrase>
+          <alt>D_{\rm f}</alt>
+        </inlineequation>
+        directly.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Triangulation method
+        [<link linkend='fractal-analysis-ref-1'>1</link>]
+      </term>
+      <listitem>
+        is very similar to cube counting method and is also based directly on
+        the box-counting fractal dimension definition. The method works as
+        follows: A grid of unit dimension
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>
+        is placed on the surface. This defines the location of the vertices of
+        a number of triangles.  When, for example,
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase> = <phrase role='mathvar'>X</phrase>/4</mathphrase>
+          <alt>l=X/4</alt>
+        </inlineequation>,
+        the surface is covered by 32 triangles of different areas inclined at
+        various angles with respect to the
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
+          <alt>xy</alt>
+        </inlineequation>
+        plane.  The areas of all triangles are calculated and summed to obtain
+        an approximation of the surface area
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
+          <alt>S(l)</alt>
+        </inlineequation>
+        corresponding to
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>.
+        The grid size is then decreased by successive factor of 2, as before,
+        and the process continues until
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
+          <alt>l</alt>
+        </inlineequation>
+        corresponds to distance between two adjacent pixel points.
+        The slope of a plot of
+        <inlineequation>
+          <mathphrase>log(<phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
+          <alt>S(l)</alt>
+        </inlineequation>
+        versus
+        <inlineequation>
+          <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
+          <alt>\log 1/l</alt>
+        </inlineequation>
+        then corresponds to
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>D<subscript>f</subscript></phrase> − 2</mathphrase>
+          <alt>D_{\rm f}-2</alt>
+        </inlineequation>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Variance method
+        [<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>]
+      </term>
+      <listitem>
+        is based on the scale dependence of the
+        variance of fractional Brownian motion. In practice, in the variance
+        method one divides the full surface into equal-sized squared boxes, and
+        the variance (power of RMS value of heights), is calculated for
+        particular box size. Fractal dimension is
+        evaluated from the slope
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
+          <alt>\beta</alt>
+        </inlineequation>
+        of a least-square regression line fit to the data points in log-log
+        plot of variance as
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 3 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
+          <alt>D_{\rm f} = 3-\beta/2</alt>
+        </inlineequation>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        Power spectrum method
+        [<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>,<link linkend='fractal-analysis-ref-5'>5</link>]
+      </term>
+      <listitem>
+        is based on the power spectrum dependence of fractional Brownian
+        motion. In the power spectrum method, every line height profiles that
+        forms the image is Fourier transformed and the power spectrum evaluated
+        and then all these power spectra are averaged. Fractal dimension is
+        evaluated from the slope In the power spectrum method, every line
+        height profiles that forms the image is Fourier transformed and the
+        power spectrum evaluated and then all these power spectra are averaged.
+        Fractal dimension is evaluated from the slope
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
+          <alt>\beta</alt>
+        </inlineequation>
+        of a least-square regression line fit to the data points in log-log
+        plot of power spectrum as
+        <inlineequation>
+          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 7/2 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
+          <alt>D_{\rm f}=7/2-\beta/2</alt>
+        </inlineequation>.
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    The axes in Fractal Dimension graphs always show already logarithmed
+    quantities, therefore the linear dependences mentioned above corresponds
+    to straight lines there.  The measure of the axes should be treated as
+    arbitrary.
+  </para>
+  <para>
+    Note, that results of different methods differ. This fact is caused by
+    systematic error of different fractal analysis approaches.
+  </para>
+  <informalfigure id='fig-fractal-dimension-screenshot'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='fractal.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fractal Dimension dialog.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Moreover, the results of the fractal analysis can be influenced strongly by
+    the tip convolution. We recommned therefore to check the certainty map
+    before fractal analysis. In cases when the surface is influenced a lot by
+    tip imaging, the results of the fractal analysis can be misrepresented
+    strongly.
+  </para>
+  <para>
+    Note, that algorithms that can be used within the fractal analysis module
+    are also used in Fractal Correction module and Fractal Correction option
+    of Remove Spots tool.
+  </para>
+  <sect2 id='fractal-analysis-ref'>
+    <title>References</title>
+    <para id='fractal-analysis-ref-1'>
+      [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal
+      character of cold-deposited silver films determined by low-temperature
+      scanning tunneling microscopy. Physical Review B, Volume 51, Number 16,
+      15 April 1995, 51
+    </para>
+    <para id='fractal-analysis-ref-2'>
+      [2] W. Zahn, A. Zösch: The dependance of fractal dimension on measuring
+      conditions of scanning probe microscopy. Fresenius J Analen Chem (1999)
+      365: 168-172
+    </para>
+    <para id='fractal-analysis-ref-3'>
+      [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken:
+      Quantitative characerization of individual particle sutfaces by fractal
+      analysis of scanning electron microscope images. Fresenius J Analen
+      Chem (1994) 350: 440-447
+    </para>
+    <para id='fractal-analysis-ref-4'>
+      [4] A. Mannelquist, N. Almquist, S. Fredriksson: Influence of tip
+      geometry on fractal analysis of atomic force microscopy images. Appl.
+      Phys. A 66,1998, 891-895
+    </para>
+    <para id='fractal-analysis-ref-5'>
+      [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
+      fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

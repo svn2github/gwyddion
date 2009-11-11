@@ -1,0 +1,358 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='multidata'>
+  <title>Multiple Data</title>
+  <sect2 id='data-arithmetic'>
+    <title>Arithmetic</title>
+    <indexterm><primary>arithmetic on data</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Arithmetic</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Data Arithmetic module makes possible to perform arbitrary point-wise
+      operations on a single data field or corresponding points of several
+      data fields (currently up to five).  And although it is not its primary
+      function it can be also used as a calculator with immediate expression
+      evaluation.  The expression syntax is described in section
+      <link linkend='expression-syntax'>Expressions</link>.
+    </para>
+    <para>
+      The data fields to operate on are called <guilabel>Operands</guilabel>
+      and they are denoted <userinput>d1</userinput>, …,
+      <userinput>d5</userinput>.
+      In addition to values, local
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+        <alt>x</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
+        <alt>y</alt>
+      </inlineequation>-derivatives
+      are denoted <userinput>bx1</userinput>, <userinput>by1</userinput>,
+      <userinput>bx2</userinput>, …, <userinput>by5</userinput>.
+    </para>
+    <para>
+      The data fields that actually appear in the expression have to be
+      compatible, i.e. their dimensions (both pixel and physical) have to be
+      identical.  Other data fields (i.e. those not actually entering the
+      expression) are irrelevant.  The result is always put into a newly
+      created data field.
+    </para>
+    <para>
+      Examples:
+      <informalexample>
+        <userinput>-d1</userinput>
+      </informalexample>
+      performs value inversion – very similar to Invert Value, except that
+      Invert Value reflects about the mean value while now we simply change
+      all values to negative,
+      <informalexample>
+        <userinput>(d1 - d2)^2</userinput>
+      </informalexample>
+      calculates squared difference between two data fields.
+    </para>
+    <para>
+      In the calculator mode the expression is immediately evaluated as it is
+      typed and the result is displayed below Expression entry.  No special
+      action is necessary to switch between data field expressions and
+      calculator: expressions containing only numeric quantities are
+      immediately evaluated, expressions referring to data fields are used to
+      calculate a new data field.
+    </para>
+  </sect2>
+  <sect2 id='immerse'>
+    <title>Detail Immersion</title>
+    <indexterm><primary>detail image immersion</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Immerse</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Immerse insets a detail, high-resolution image into a larger image.
+      The image the function was run on forms the large, base image.
+    </para>
+    <para>
+      The detail can positioned manually on the large image with mouse.
+      Button <guibutton>Improve</guibutton> can then be used to find the
+      exact coordinates in the neighbourhood of the current position that give
+      the maximum correlation between the detail and the large image.
+      Or the best-match position can be searched through the whole image
+      with <guibutton>Locate</guibutton>.
+    </para>
+    <para>
+      It should be noted the correlation search is insensitive to value scales
+      and offsets, therefore the automated matching is based solely on
+      data features, absolute heights play no role.
+    </para>
+    <para>
+      <guilabel>Result Sampling</guilabel> controls the size and resolution
+      of the result image:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Upsample large image</guilabel>
+        </term>
+        <listitem>
+          The resolution of the result is determined by the resolution of
+          the inset detail.  Therefore the large image is scaled up.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Downsample detail</guilabel>
+        </term>
+        <listitem>
+          The resolution of the result is determined by the resolution of
+          the large image.  The detail is downsampled.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      <guilabel>Detail Leveling</guilabel> selects the transform of the
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+        <alt>z</alt>
+      </inlineequation>
+      values of the detail:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>None</guilabel>
+        </term>
+        <listitem>
+          No
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+            <alt>z</alt>
+          </inlineequation>
+          value adjustment is performed.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Mean value</guilabel>
+        </term>
+        <listitem>
+          All values of the detail image are shifted by a constant to make
+          its mean value match the mean value of the corresponding area of
+          the large image.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='merge'>
+    <title>Merging</title>
+    <indexterm><primary>merging images</primary></indexterm>
+    <indexterm><primary>joining images</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Merge</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Images that form parts of a larger image can be merged together with
+      Merge.  The image the function was run on forms corresponds to the base
+      image, the image selected with <guilabel>Merge with</guilabel>
+      represents the second operand. The side of the base image the second one
+      will be attached to is controlled with
+      <guilabel>Put second operand</guilabel> selector.
+    </para>
+    <para>
+      If the images match perfectly, they can be simply placed side by side
+      with no adjustments.  This behaviour is selected by option
+      <guilabel>None</guilabel> of alignment control
+      <guilabel>Align second operand</guilabel>.
+    </para>
+    <para>
+      However, usually adjustments are necessary.  Option
+      <guilabel>Correlation</guilabel> selects automated alignment by
+      correlation-based search of the best match.  The search is performed
+      both in the direction parallel to the attaching side and in the
+      perpendicular direction.  If a parallel shift is present, the result is
+      expanded to contain both images fully (with undefined data filled with
+      a background value).
+    </para>
+    <para>
+      Option <guilabel>Boundary treatment</guilabel> is useful only for the
+      latter case of imperfectly aligned images.  It controls the treatment
+      of overlapping areas in the source images:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>First operand</guilabel>
+        </term>
+        <listitem>
+          Values in overlapping areas are taken from the first, base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Second operand</guilabel>
+        </term>
+        <listitem>
+          Values in overlapping areas are taken from the second image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Smooth</guilabel>
+        </term>
+        <listitem>
+          A smooth transition between the first and the second image is made
+          through the overlapping area by using a weighted average with
+          a suitable weighting function.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='cross-correlation'>
+    <title>Cross-Correlation</title>
+    <indexterm><primary>cross-correlation</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Cross-correlation</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Module finds local correlations between details on two different
+      images. As an ideal output, the shift of every pixel on the first image
+      as seen on the second image is returned. This can be used for
+      determining local changes on the surface while imaged twice (shifts can
+      be for example due to some sample deformation or microscope
+      malfunction).
+    </para>
+    <para>
+      For every pixel on the first operand (actual window), the module takes
+      its neighbourhood and searches for the best correlation in the second
+      operand within defined area. The postion of the correlation maximum is
+      used to set up the value of shift for the mentioned pixel on the first
+      operand.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Second operand</guilabel>
+        </term>
+        <listitem>
+          Image to be used for comparison with the first operand - base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Search size</guilabel>
+        </term>
+        <listitem>
+          Used to set the area whera algoritgm will search for the local
+          neighbourhood (on the second operand). Should be larger than window
+          size. Increase this size if there are big differences between the
+          compared images.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Window size</guilabel>
+        </term>
+        <listitem>
+          Used to set the local neighbourhood size (on the first operand).
+          Should be smaller than search size. Increasing this value can
+          improve the module functionality, but it will surely slow down the
+          computation.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Output type</guilabel>
+        </term>
+        <listitem>
+          Determines the output (pixel shift) format.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Add low score threshold mask</guilabel>
+        </term>
+        <listitem>
+          For some pixels (with not very pronounced neighbourhood) the
+          correlation scores can be small everywhere, but the algorithm
+          anyway picks some maximum value from the scores. To see these
+          pixels and possibly remove them from any further considerations you
+          can let the module to set mask of low-score pixel shifts that have
+          larger probability to be not accurately determined.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='mask-by-correlation'>
+    <title>Mask by Correlation</title>
+    <indexterm><primary>correlation search</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Mask by Correlation</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Module searches for a given correlation pattern within the actual
+      image. The resulting pattern position is marked as a mask in the data
+      window.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Correlation kernel</guilabel>
+        </term>
+        <listitem>
+          Image to be found on the base image.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Output type</guilabel>
+        </term>
+        <listitem>
+          There are several possibilities what to output: local correlation
+          maxima (single points), masks of kernel size for each correlation
+          maximum (good for presentation purposes), or simply the correlation
+          score.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Correlation method</guilabel>
+        </term>
+        <listitem>
+          Algorithm for computing correlation can be selected here.
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Threshold</guilabel>
+        </term>
+        <listitem>
+          Threshold for determining whether the local maximum will be treated
+          as <quote>correlation kernel found here</quote>.
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

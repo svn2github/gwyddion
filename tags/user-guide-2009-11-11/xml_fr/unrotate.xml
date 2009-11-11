@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: unrotate.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect2 id='unrotate'>
+  <title>
+    Dérotation
+    <guiicon>
+      <inlinemediaobject>
+        <imageobject>
+          <imagedata fileref='gwy_unrotate-24.png' format='PNG'/>
+        </imageobject>
+      </inlinemediaobject>
+    </guiicon>
+  </title>
+  <indexterm><primary>correction de la rotation</primary></indexterm>
+  <indexterm><primary>dérotation</primary></indexterm>
+  <para>
+    <menuchoice>
+      <guimenu>Traitement des Données</guimenu>
+      <guisubmenu>Correction des Données</guisubmenu>
+      <guimenuitem>Dérotation</guimenuitem>
+    </menuchoice>
+  </para>
+  <para>
+    La dérotation permet d'ajuster automatiquement les directions principales
+    d'une image de manière à ce qu'elles soient parallèles avec les bords
+    horizontaux et/ou verticaux de l'image. Pour ce calcul, les données doivent
+    présenter des directions principales, ce qui en fait une fonction utile
+    pour les scans des structures artificielles ou cristallines.
+  </para>
+  <para>
+    La rotation nécessaire pour redresser l'image – affichée dans
+    <guilabel>Correction</guilabel> – est calculée à partir des pics présents
+    dans la <link linkend='slope-distribution'>distribution angulaire des pentes</link>
+    en supposant qu'il existe un type de structure ou une symétrie principale.
+    La symétrie peut être estimée de manière automatique, mais il est aussi
+    possible de sélectionner un type de symétrie particulier et laisser le
+    module calculer la correction de rotation correspondante. Notez que si vous
+    sélectionnez un type ne correspondant pas à la structure, la rotation
+    calculée aura peut de chance d'être correcte.
+  </para>
+  <para>
+    Il est recommandé de commencer par mettre à niveau (ou
+    <link linkend='facet-level'>mettre à niveau les facettes</link>) les
+    données, car la pente globale peut biaiser la calcul de la rotation.
+  </para>
+  <informalfigure id='fig-unrotate-directions'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='unrotate-symmetries.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='unrotate-symmetries.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>Symétries de dérotation</phrase>
+      </textobject>
+      <caption>
+        Orientations des directions principales correspondant aux types de
+        symétrie de dérotation.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Le type de structure supposé peut être modifié avec la sélection
+    <guilabel>Hypothèse</guilabel>. Les choix suivants sont disponibles :
+    <variablelist>
+      <varlistentry>
+        <term>
+          Detecté
+        </term>
+        <listitem>
+          <para>
+            Type de symétrie détecté automatiquement, affiché ci-dessus avec
+            <guilabel>Detecté</guilabel>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Parallèle
+        </term>
+        <listitem>
+          <para>
+            Lignes parallèles, une seule direction principale.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Triangulaire
+        </term>
+        <listitem>
+          <para>
+            Symétrie triangulaire, trois directions principales (unilatérales)
+            à 120 degrés.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Carré
+        </term>
+        <listitem>
+          <para>
+            Symétrie carrée, deux directions principales orientées
+            approximativement le long des côtés de l'image.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Rhombique
+        </term>
+        <listitem>
+          <para>
+            Symétrie rhombique, deux directions principales orientées
+            approximativement selon les diagonales. La seule différence avec
+            la symétrie carrée est l'orientation diagonale (contrairement
+            au parallélisme par rapport aux côtés).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Hexagonal
+        </term>
+        <listitem>
+          <para>
+            Symétrie hexagonale, trois directions principales (bilatérales) à
+            120 degrés.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+</sect2>
+<!-- vim: set ts=2 sw=2 et : -->

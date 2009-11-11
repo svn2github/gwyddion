@@ -1,0 +1,574 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='roughness-iso'>
+  <title>One-Dimensional Roughness Parameters</title>
+  <indexterm>
+    <primary>roughness</primary>
+    <secondary>ISO parameters</secondary>
+  </indexterm>
+  <para>
+    Standardized one-dimensional roughness parameters can be evaluated with
+    the <link linkend='tool-roughness'>roughness tool</link>.
+  </para>
+  <para>
+    The one-dimensional texture is split to waviness (the low-frequency
+    components defining the overall shape) and roughness (the high-frequency
+    components) at the cut-off frequency.  This frequency is specified in the
+    units of the Nyquist frequency, that is value 1.0 corresponds to the
+    Nyquist frequency.
+  </para>
+  <para>
+    In the following formulas we assume the mean value of
+    <inlineequation>
+      <mathphrase><phrase role='mathvar'>r<subscript>j</subscript></phrase></mathphrase>
+      <alt>r_j</alt>
+    </inlineequation>
+    is zero, i.e.
+    <informalequation id='eq-roughness-iso-rj'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='eq-roughness-iso-rj.png' format='PNG'/>
+        </imageobject>
+        <textobject role='tex'>
+          <phrase>
+<![CDATA[
+r_j = z_j - \bar z
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+  </para>
+  <sect2 id='roughness-iso-amplitude'>
+    <title>Roughness Amplitude Parameters</title>
+    <variablelist>
+      <varlistentry id='iso-Ra'>
+        <term>
+          Roughness Average
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+            <alt>R_{\rm a}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997, ISO
+            4287/1-1997.
+          </para>
+          <para>
+            Arithmetical mean deviation. The average deviation of all points
+            roughness profile from a mean line over the evaluation length
+            <informalequation id='eq-roughness-iso-Ra'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Ra.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm a} = {1\over N} \sum_{j=1}^N |r_j|
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+          <para>
+            An older means of specifying a range for
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+              <alt>R_{\rm a}</alt>
+            </inlineequation>
+            is RHR.  This is a symbol on a drawing specifying a minimum and
+            maximum value for
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>a</subscript></mathphrase>
+              <alt>R_{\rm a}</alt>
+            </inlineequation>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rq'>
+        <term>
+          Root Mean Square Roughness
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>q</subscript></mathphrase>
+            <alt>R_{\rm q}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ISO 4287-1997, ISO 4287/1-1997.
+          </para>
+          <para>
+            The average of the measured height deviations taken within the
+            evaluation length and measured from the mean line
+            <informalequation id='eq-roughness-iso-Rq'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rq.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm q} = \sqrt{{1\over N} \sum_{j=1}^N r_j^2}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rt'>
+        <term>
+          Maximum Height of the Profile
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>t</subscript></mathphrase>
+            <alt>R_{\rm t}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ISO 4287-1997.
+          </para>
+          <para>
+            Maximum peak-to-peak-valley height. The absolute value between
+            the highest and lowest peaks
+            <informalequation id='eq-roughness-iso-Rt'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rt.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm t} = \left| \min\limits_{1\le j\le N} r_j  \right|
+            + \left| \max\limits_{1\le j\le N} r_j \right|
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rm-Rv'>
+        <term>
+          Maximum Profile Valley Depth
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>v</subscript></mathphrase>
+            <alt>R_{\rm v}</alt>
+          </inlineequation>,
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>m</subscript></mathphrase>
+            <alt>R_{\rm m}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997,
+            ISO 4287/1-1997.
+          </para>
+          <para>
+            Lowest valley. There is the depth of the deepest valley in the
+            roghness profile over the evaluation length
+            <informalequation id='eq-roughness-iso-Rv'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rv.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm v} = \left| \min\limits_{1\le j\le N} r_j \right|
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rp'>
+        <term>
+          Maximum Profile Peak Height
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>p</subscript></mathphrase>
+            <alt>R_{\rm p}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997,
+            ISO 4287/1-1997.
+          </para>
+          <para>
+            Highest peak. There is the height of the highest peak in the
+            roughness profile over the evaluation length
+            <informalequation id='eq-roughness-iso-Rp'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rp.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm p} = \left| \max\limits_{1\le j\le N} r_j \right|
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rtm'>
+        <term>
+          Average Maximum Height of the Profile
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>t<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm t}m}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ASME B46.1-1995, ISO 4287-1997.
+          </para>
+          <para>
+            Mean peak-to-valley roughness. It is determined by the difference
+            between the highest peak ant the lowest valley within multiple
+            samples in the evaluation length
+            <informalequation id='eq-roughness-iso-Rtm'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rtm.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{{\rm t}m} = R_{{\rm v}m} + R_{{\rm p}m}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+            where
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>v<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm v}m}</alt>
+            </inlineequation>
+            and
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>p<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm p}m}</alt>
+            </inlineequation>
+            are defined below.
+          </para>
+          <para>
+            For profile data it is based on five sample lengths
+            (<phrase role='mathvar'>m</phrase> = 5).
+            The number of samples corresponded with the ISO standard.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rvm'>
+        <term>
+          Average Maximum Profile Valley Depth
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>v<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm v}m}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The mean valley depth based on one peak per sampling length.
+            The single deepest valley is found in five sampling lengths
+            (<inlineequation>
+              <mathphrase><phrase role='mathvar'>m</phrase> = 5</mathphrase>
+              <alt>m=5</alt>
+            </inlineequation>)
+            and then averaged
+            <informalequation id='eq-roughness-iso-Rvm'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rvm.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{{\rm v}m} = {1\over m} \sum_{i=1}^m R_{{\rm v}i}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+            where
+            <informalequation id='eq-roughness-iso-Rvi'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rvi.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{{\rm v}i} = \left| \min r_j \right|
+\quad\hbox{for}\quad
+(i-1){N\over m} < j < i{N\over m}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rpm'>
+        <term>
+          Average Maximum Profile Peak Height
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>p<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+            <alt>R_{{\rm p}m}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The mean peak height based on one peak per sampling length.
+            The single highest peak is found in five sampling lengths
+            (<inlineequation>
+              <mathphrase><phrase role='mathvar'>m</phrase> = 5</mathphrase>
+              <alt>m=5</alt>
+            </inlineequation>)
+            and then averaged
+            <informalequation id='eq-roughness-iso-Rpm'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rpm.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{{\rm p}m} = {1\over m} \sum_{i=1}^m R_{{\rm p}i}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+            where
+            <informalequation id='eq-roughness-iso-Rpi'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rpi.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{{\rm p}i} = \left| \max r_j \right|
+\quad\hbox{for}\quad
+(i-1){N\over m} < j < i{N\over m}
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-R3z'>
+        <term>
+          Base roughness depth
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>3<phrase role='mathvar'>z</phrase></subscript></mathphrase>
+            <alt>R_{3z}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The distance between the third highest peak and the third lowest
+            valley. A peak is a portion of the surface above the mean line
+            crossings.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-R3zISO'>
+        <term>
+          Base roughness profile depth
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>3<phrase role='mathvar'>z</phrase>ISO</subscript></mathphrase>
+            <alt>R_{3z\rm ISO}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The height of the third highest peak from the third lowest valley
+            per sampling length. The base roughness depth is found in five
+            sampling lengths and then averaged.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rz'>
+        <term>
+          Ten-point height
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript><phrase role='mathvar'>z</phrase></subscript></mathphrase>
+            <alt>R_z</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997
+          </para>
+          <para>
+            The average absolute value of the five highest peaks and the five
+            lowest valleys over the evaluation length.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-RzISO'>
+        <term>
+          Average peak-to-valley profile roughness
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript><phrase role='mathvar'>z</phrase>ISO</subscript></mathphrase>
+            <alt>R_{z\rm ISO}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The average peak-to-valley roughness based on one peak and one
+            valley per sampling length. The single largest deviation is found
+            in five sampling lengths and then averaged. It is identical to
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>R</phrase><subscript>t<phrase role='mathvar'>m</phrase></subscript></mathphrase>
+              <alt>R_{{\rm t}m}</alt>
+            </inlineequation>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-ADF'>
+        <term>
+          The Amplitude Distribution Function ADF
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The amplitude distribution function s a probability function that
+            gives the probability that a profile of the surface has a certain
+            height
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
+              <alt>z</alt>
+            </inlineequation>
+            at any position
+            <inlineequation>
+              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
+              <alt>x</alt>
+            </inlineequation>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-BRC'>
+        <term>
+          The Bearing Ratio Curve BRC
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            The Bearing Ratio Curve is related to the ADF, it is the
+            corresponding cumulative probability distribution and sees much
+            greater use in surface finish. The bearing ratio curve is the
+            integral (from the top down) of the ADF.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rsk'>
+        <term>
+          Skewness
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>sk</subscript></mathphrase>
+            <alt>R_{\rm sk}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            Skewness is a parameter that describes the shape of the ADF.
+            Skewness is a simple measure of the asymmetry of the ADF, or,
+            equivalently, it measures the symmetry of the variation of a
+            profile about its mean line
+            <informalequation id='eq-roughness-iso-Rsk'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rsk.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm sk}= {1\over N R_q^3} \sum_{j=1}^N r_j^3
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rku'>
+        <term>
+          Kurtosis
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>R</phrase><subscript>ku</subscript></mathphrase>
+            <alt>R_{\rm ku}</alt>
+          </inlineequation>
+        </term>
+        <listitem>
+          <para>
+            Standards: ISO 4287-1997.
+          </para>
+          <para>
+            Kurtosis is the ADF shape parameter considered. Kurtosis relates
+            to the uniformity of the ADF or, equivalently, to the spikiness
+            of the profile.
+            <informalequation id='eq-roughness-iso-Rku'>
+              <mediaobject>
+                <imageobject>
+                  <imagedata fileref='eq-roughness-iso-Rku.png' format='PNG'/>
+                </imageobject>
+                <textobject role='tex'>
+                  <phrase>
+<![CDATA[
+R_{\rm ku}= {1\over N R_q^4} \sum_{j=1}^N r_j^4
+]]>
+                  </phrase>
+                </textobject>
+              </mediaobject>
+            </informalequation>
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

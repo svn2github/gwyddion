@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: introduction.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='summaries' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Summaries and Tables</title>
+  <para>
+    This chapter provides reference for various formats, syntaxes and command
+    options that you might find helpful.  Most are related to advanced use
+    of Gwyddion, except perhaps the
+    <link linkend='keyboard-shortcuts'>table of common keyboard shortcuts</link>
+    and
+    <link linkend='file-formats'>table of supported file formats</link>.
+  </para>
+  <xi:include href='gwyddion.xml'/>
+  <xi:include href='gwyddion-thumbnailer.xml'/>
+  <xi:include href='keyboard-shortcuts.xml'/>
+  <xi:include href='file-formats.xml'/>
+  <xi:include href='expressions.xml'/>
+  <xi:include href='resources.xml'/>
+  <xi:include href='gwyfile-format.xml'/>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->

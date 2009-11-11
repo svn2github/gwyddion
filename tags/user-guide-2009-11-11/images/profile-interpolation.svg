@@ -1,0 +1,3075 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="387.27094"
+   height="346.88702"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="profile-interpolation.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs4">
+    <inkscape:path-effect
+       effect="ruler"
+       id="path-effect3218"
+       is_visible="true"
+       unit="px"
+       mark_distance="16.85"
+       mark_length="5"
+       minor_mark_length="2"
+       major_mark_steps="6"
+       shift="0"
+       offset="0"
+       mark_dir="both"
+       border_marks="both" />
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective3003"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3104"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3157"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3210"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4004"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:path-effect
+       effect="ruler"
+       id="path-effect3218-3"
+       is_visible="true"
+       unit="px"
+       mark_distance="2.1"
+       mark_length="5"
+       minor_mark_length="2"
+       major_mark_steps="48"
+       shift="0"
+       offset="0"
+       mark_dir="both"
+       border_marks="both" />
+    <inkscape:perspective
+       id="perspective4051"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2911"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt12"
+       xlink:href="#gpPt11"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
+       id="gpPt11"
+       xlink:href="#gpPt3"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt10"
+       xlink:href="#gpPt9"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       transform="scale(-1,-1)"
+       id="gpPt9"
+       xlink:href="#gpPt7"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt8"
+       xlink:href="#gpPt7"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <path
+       d="m 0,-1.33 -1.33,2 2.66,0 z"
+       style="stroke-width:0.44400001"
+       id="gpPt7" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt6"
+       xlink:href="#gpPt5"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <circle
+       r="1"
+       cy="0"
+       cx="0"
+       style="stroke-width:0.44400001"
+       id="gpPt5"
+       sodipodi:cx="0"
+       sodipodi:cy="0"
+       sodipodi:rx="1"
+       sodipodi:ry="1" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt4"
+       xlink:href="#gpPt3"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <rect
+       height="2"
+       width="2"
+       y="-1"
+       x="-1"
+       style="stroke-width:0.44400001"
+       id="gpPt3" />
+    <path
+       d="M -1,0 1,0 M 0,-1 0,1 m -1,-2 2,2 m -2,0 2,-2"
+       style="stroke-width:0.44400001"
+       id="gpPt2" />
+    <path
+       d="M -1,-1 1,1 M 1,-1 -1,1"
+       style="stroke-width:0.44400001"
+       id="gpPt1" />
+    <path
+       d="M -1,0 H 1 M 0,-1 v 2"
+       style="stroke-width:0.44400001"
+       id="gpPt0" />
+    <circle
+       r="1"
+       id="gpDot"
+       cx="0"
+       cy="0"
+       sodipodi:cx="0"
+       sodipodi:cy="0"
+       sodipodi:rx="1"
+       sodipodi:ry="1" />
+    <inkscape:perspective
+       id="perspective5430"
+       inkscape:persp3d-origin="110 : 133.33333 : 1"
+       inkscape:vp_z="220 : 200 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 200 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt12-5"
+       xlink:href="#gpPt11-3"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
+       id="gpPt11-3"
+       xlink:href="#gpPt3-3"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt10-4"
+       xlink:href="#gpPt9-9"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       transform="scale(-1,-1)"
+       id="gpPt9-9"
+       xlink:href="#gpPt7-0"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt8-2"
+       xlink:href="#gpPt7-0"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <path
+       d="m 0,-1.33 -1.33,2 2.66,0 z"
+       style="stroke-width:0.44400001"
+       id="gpPt7-0" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt6-5"
+       xlink:href="#gpPt5-0"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <circle
+       r="1"
+       cy="0"
+       cx="0"
+       style="stroke-width:0.44400001"
+       id="gpPt5-0"
+       sodipodi:cx="0"
+       sodipodi:cy="0"
+       sodipodi:rx="1"
+       sodipodi:ry="1" />
+    <use
+       style="fill:currentColor;stroke:none"
+       id="gpPt4-6"
+       xlink:href="#gpPt3-3"
+       x="0"
+       y="0"
+       width="405.88544"
+       height="326.42191" />
+    <rect
+       height="2"
+       width="2"
+       y="-1"
+       x="-1"
+       style="stroke-width:0.44400001"
+       id="gpPt3-3" />
+    <path
+       d="M -1,0 1,0 M 0,-1 0,1 m -1,-2 2,2 m -2,0 2,-2"
+       style="stroke-width:0.44400001"
+       id="gpPt2-9" />
+    <path
+       d="M -1,-1 1,1 M 1,-1 -1,1"
+       style="stroke-width:0.44400001"
+       id="gpPt1-9" />
+    <path
+       d="M -1,0 H 1 M 0,-1 v 2"
+       style="stroke-width:0.44400001"
+       id="gpPt0-4" />
+    <circle
+       r="1"
+       id="gpDot-4"
+       cx="0"
+       cy="0"
+       sodipodi:cx="0"
+       sodipodi:cy="0"
+       sodipodi:rx="1"
+       sodipodi:ry="1" />
+    <inkscape:perspective
+       id="perspective8576"
+       inkscape:persp3d-origin="115 : 120 : 1"
+       inkscape:vp_z="230 : 180 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 180 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.0557603"
+     inkscape:cx="148.0262"
+     inkscape:cy="93.872685"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="753"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-223.17828,-146.6232)">
+    <g
+       id="g4031"
+       transform="translate(0,-18.131868)">
+      <image
+         sodipodi:absref="/home/yeti/Projects/Gwyddion/user-guide/images/profile-interpolation-image.png"
+         xlink:href="profile-interpolation-image.png"
+         width="159.90388"
+         height="119.81439"
+         id="image3005"
+         x="223.17828"
+         y="180.07217" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:original-d="m 272.5115,270.09971 80.81867,-60.10492"
+         inkscape:path-effect="#path-effect3218"
+         id="path3216"
+         d="m 272.5115,270.09971 80.81867,-60.10492 m -77.83487,64.11702 -5.9676,-8.0242 m 17.69809,-4.43847 -2.38704,-3.20968 m 15.90781,-6.84573 -2.38704,-3.20968 m 15.90781,-6.84573 -2.38704,-3.20968 m 15.90781,-6.84573 -2.38704,-3.20968 m 15.90781,-6.84573 -2.38704,-3.20968 m 17.39214,-4.21093 -5.9676,-8.0242"
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+    <g
+       id="g4035"
+       transform="translate(1.0181274,-23.103882)">
+      <image
+         sodipodi:absref="/home/yeti/Projects/Gwyddion/user-guide/images/profile-interpolation-image.png"
+         xlink:href="profile-interpolation-image.png"
+         width="159.90388"
+         height="119.81439"
+         id="image3005-1"
+         x="222.16016"
+         y="372.79803" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:original-d="m 271.49338,462.82555 80.81868,-60.10492"
+         inkscape:path-effect="#path-effect3218-3"
+         id="path3216-0"
+         d="m 271.49338,462.82555 80.81868,-60.10492 m -77.83488,64.11702 -5.9676,-8.0242 m 5.8624,4.36374 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07213,1.95648 -2.38705,-3.20967 m 4.07213,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20967 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07213,1.95648 -2.38705,-3.20968 m 4.07213,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20967 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20967 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07213,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20967 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07213,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07213,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20967 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07213,1.95649 -2.38705,-3.20968 m 4.07213,1.95648 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 4.07212,1.95649 -2.38704,-3.20968 m 4.07212,1.95648 -2.38704,-3.20968 m 5.79718,4.41225 -5.9676,-8.0242"
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="222.44"
+       y="153.46109"
+       id="text4039"><tspan
+         sodipodi:role="line"
+         id="tspan4041"
+         x="222.44"
+         y="153.46109">Natural resolution profile</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:9px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:DejaVu Sans;-inkscape-font-specification:DejaVu Sans"
+       x="222.44"
+       y="338.327"
+       id="text4039-3"><tspan
+         sodipodi:role="line"
+         id="tspan4041-9"
+         x="222.44"
+         y="338.327">High resolution profile</tspan></text>
+    <g
+       id="g8593"
+       transform="translate(384.78286,136.62144)">
+      <g
+         id="g7358"
+         style="color:#ffffff;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7360"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7362"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7364"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7366"
+           d="m 38.1,106.2 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7368"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7370"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7372"
+           d="m 38.1,106.2 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7374"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,108.4)">
+          <text
+             id="text7376">
+            <tspan
+               id="tspan7378">3</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7380"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7382"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7384"
+           d="m 38.1,93 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7386"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7388"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7390"
+           d="m 38.1,93 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7392"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,95.2)">
+          <text
+             id="text7394">
+            <tspan
+               id="tspan7396">4</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7398"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7400"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7402"
+           d="m 38.1,79.8 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7404"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7406"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7408"
+           d="m 38.1,79.8 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7410"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,82)">
+          <text
+             id="text7412">
+            <tspan
+               id="tspan7414">5</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7416"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7418"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7420"
+           d="m 38.1,66.6 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7422"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7424"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7426"
+           d="m 38.1,66.6 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7428"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,68.8)">
+          <text
+             id="text7430">
+            <tspan
+               id="tspan7432">6</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7434"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7436"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7438"
+           d="m 38.1,53.4 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7440"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7442"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7444"
+           d="m 38.1,53.4 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7446"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,55.6)">
+          <text
+             id="text7448">
+            <tspan
+               id="tspan7450">7</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7452"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7454"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7456"
+           d="m 38.1,40.2 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7458"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7460"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7462"
+           d="m 38.1,40.2 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7464"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,42.4)">
+          <text
+             id="text7466">
+            <tspan
+               id="tspan7468">8</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7470"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7472"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7474"
+           d="m 38.1,27 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7476"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7478"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7480"
+           d="m 38.1,27 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7482"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,29.2)">
+          <text
+             id="text7484">
+            <tspan
+               id="tspan7486">9</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7488"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7490"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7492"
+           d="M 38.1,106.2 38.1,27"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7494"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7496"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7498"
+           d="m 38.1,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7500"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(38.1,117.4)">
+          <text
+             id="text7502" />
+        </g>
+      </g>
+      <g
+         id="g7504"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7506"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7508"
+           d="M 56.4,106.2 56.4,27"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7510"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7512"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7514"
+           d="m 56.4,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7516"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(56.4,117.4)">
+          <text
+             id="text7518" />
+        </g>
+      </g>
+      <g
+         id="g7520"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7522"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7524"
+           d="M 74.8,106.2 74.8,27"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7526"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7528"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7530"
+           d="m 74.8,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7532"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(74.8,117.4)">
+          <text
+             id="text7534" />
+        </g>
+      </g>
+      <g
+         id="g7536"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7538"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7540"
+           d="M 93.1,106.2 93.1,27"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7542"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7544"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7546"
+           d="m 93.1,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7548"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(93.1,117.4)">
+          <text
+             id="text7550" />
+        </g>
+      </g>
+      <g
+         id="g7552"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7554"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7556"
+           d="m 111.4,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7558"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7560"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7562"
+           d="m 111.4,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7564"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(111.4,117.4)">
+          <text
+             id="text7566" />
+        </g>
+      </g>
+      <g
+         id="g7568"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7570"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7572"
+           d="m 129.8,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7574"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7576"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7578"
+           d="m 129.8,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7580"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.8,117.4)">
+          <text
+             id="text7582" />
+        </g>
+      </g>
+      <g
+         id="g7584"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7586"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7588"
+           d="m 148.1,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7590"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7592"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7594"
+           d="m 148.1,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7596"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(148.1,117.4)">
+          <text
+             id="text7598" />
+        </g>
+      </g>
+      <g
+         id="g7600"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7602"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7604"
+           d="m 166.4,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7606"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7608"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7610"
+           d="m 166.4,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7612"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(166.4,117.4)">
+          <text
+             id="text7614" />
+        </g>
+      </g>
+      <g
+         id="g7616"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7618"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7620"
+           d="m 184.7,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7622"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7624"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7626"
+           d="m 184.7,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7628"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(184.7,117.4)">
+          <text
+             id="text7630" />
+        </g>
+      </g>
+      <g
+         id="g7632"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7634"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7636"
+           d="m 203.1,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7638"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7640"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7642"
+           d="m 203.1,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7644"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(203.1,117.4)">
+          <text
+             id="text7646" />
+        </g>
+      </g>
+      <g
+         id="g7648"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7650"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7652"
+           d="m 221.4,106.2 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7654"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7656"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7658"
+           d="m 221.4,106.2 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7660"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(221.4,117.4)">
+          <text
+             id="text7662" />
+        </g>
+        <path
+           id="path7664"
+           d="m 38.1,27 0,79.2 183.3,0 0,-79.2 -183.3,0 z" />
+        <g
+           id="g7666"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="matrix(0,-1,1,0,19.4,66.6)">
+          <text
+             id="text7668">
+            <tspan
+               id="tspan7670">z [nm]</tspan>
+          </text>
+        </g>
+        <g
+           id="g7672"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.7,15.7)">
+          <text
+             id="text7674">
+            <tspan
+               id="tspan7676">Round interpolation, natural resolution</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7678"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7680"
+         style="color:#ff0000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter">
+        <use
+           id="use7682"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,38.1,29)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use7684"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,73.9,51.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use7686"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,109.7,76.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use7688"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,145.5,94.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use7690"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,181.3,91.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use7692"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,217.1,78.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+      </g>
+      <g
+         id="g7694"
+         style="color:#ff0000;fill:none;stroke:#008000;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7696"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7698"
+           d="m 38.1,27 0,79.2 183.3,0 0,-79.2 -183.3,0 z" />
+      </g>
+      <g
+         id="g7700"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7702"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7704"
+           d="m 38.1,221.4 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7706"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7708"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7710"
+           d="m 38.1,221.4 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7712"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,223.6)">
+          <text
+             id="text7714">
+            <tspan
+               id="tspan7716">3</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7718"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7720"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7722"
+           d="m 38.1,208.2 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7724"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7726"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7728"
+           d="m 38.1,208.2 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7730"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,210.4)">
+          <text
+             id="text7732">
+            <tspan
+               id="tspan7734">4</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7736"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7738"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7740"
+           d="m 38.1,195 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7742"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7744"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7746"
+           d="m 38.1,195 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7748"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,197.2)">
+          <text
+             id="text7750">
+            <tspan
+               id="tspan7752">5</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7754"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7756"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7758"
+           d="m 38.1,181.8 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7760"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7762"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7764"
+           d="m 38.1,181.8 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7766"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,184)">
+          <text
+             id="text7768">
+            <tspan
+               id="tspan7770">6</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7772"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7774"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7776"
+           d="m 38.1,168.6 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7778"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7780"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7782"
+           d="m 38.1,168.6 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7784"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,170.8)">
+          <text
+             id="text7786">
+            <tspan
+               id="tspan7788">7</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7790"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7792"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7794"
+           d="m 38.1,155.4 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7796"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7798"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7800"
+           d="m 38.1,155.4 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7802"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,157.6)">
+          <text
+             id="text7804">
+            <tspan
+               id="tspan7806">8</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7808"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7810"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7812"
+           d="m 38.1,142.2 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7814"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7816"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7818"
+           d="m 38.1,142.2 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g7820"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,144.4)">
+          <text
+             id="text7822">
+            <tspan
+               id="tspan7824">9</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g7826"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7828"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7830"
+           d="m 38.1,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7832"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7834"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7836"
+           d="m 38.1,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7838"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(38.1,232.6)">
+          <text
+             id="text7840" />
+        </g>
+      </g>
+      <g
+         id="g7842"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7844"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7846"
+           d="m 56.4,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7848"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7850"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7852"
+           d="m 56.4,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7854"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(56.4,232.6)">
+          <text
+             id="text7856" />
+        </g>
+      </g>
+      <g
+         id="g7858"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7860"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7862"
+           d="m 74.8,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7864"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7866"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7868"
+           d="m 74.8,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7870"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(74.8,232.6)">
+          <text
+             id="text7872" />
+        </g>
+      </g>
+      <g
+         id="g7874"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7876"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7878"
+           d="m 93.1,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7880"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7882"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7884"
+           d="m 93.1,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7886"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(93.1,232.6)">
+          <text
+             id="text7888" />
+        </g>
+      </g>
+      <g
+         id="g7890"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7892"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7894"
+           d="m 111.4,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7896"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7898"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7900"
+           d="m 111.4,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7902"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(111.4,232.6)">
+          <text
+             id="text7904" />
+        </g>
+      </g>
+      <g
+         id="g7906"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7908"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7910"
+           d="m 129.8,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7912"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7914"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7916"
+           d="m 129.8,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7918"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.8,232.6)">
+          <text
+             id="text7920" />
+        </g>
+      </g>
+      <g
+         id="g7922"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7924"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7926"
+           d="m 148.1,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7928"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7930"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7932"
+           d="m 148.1,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7934"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(148.1,232.6)">
+          <text
+             id="text7936" />
+        </g>
+      </g>
+      <g
+         id="g7938"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7940"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7942"
+           d="m 166.4,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7944"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7946"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7948"
+           d="m 166.4,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7950"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(166.4,232.6)">
+          <text
+             id="text7952" />
+        </g>
+      </g>
+      <g
+         id="g7954"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7956"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7958"
+           d="m 184.7,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7960"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7962"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7964"
+           d="m 184.7,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7966"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(184.7,232.6)">
+          <text
+             id="text7968" />
+        </g>
+      </g>
+      <g
+         id="g7970"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7972"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7974"
+           d="m 203.1,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7976"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7978"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7980"
+           d="m 203.1,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7982"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(203.1,232.6)">
+          <text
+             id="text7984" />
+        </g>
+      </g>
+      <g
+         id="g7986"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7988"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7990"
+           d="m 221.4,221.4 0,-79.2"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g7992"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g7994"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path7996"
+           d="m 221.4,221.4 0,-4.5 m 0,-74.7 0,4.5" />
+        <g
+           id="g7998"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(221.4,232.6)">
+          <text
+             id="text8000" />
+        </g>
+        <path
+           id="path8002"
+           d="m 38.1,142.2 0,79.2 183.3,0 0,-79.2 -183.3,0 z" />
+        <g
+           id="g8004"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="matrix(0,-1,1,0,19.4,181.8)">
+          <text
+             id="text8006">
+            <tspan
+               id="tspan8008">z [nm]</tspan>
+          </text>
+        </g>
+        <g
+           id="g8010"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.7,130.9)">
+          <text
+             id="text8012">
+            <tspan
+               id="tspan8014">Round interpolation, high resolution</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8016"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8018"
+         style="color:#ff0000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter">
+        <use
+           id="use8020"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,38.1,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8022"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,41.9,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8024"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,45.7,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8026"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,49.5,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8028"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,53.3,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8030"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,57.1,144.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8032"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,61,152.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8034"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,64.8,152.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8036"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,68.6,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8038"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,72.4,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8040"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,76.2,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8042"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,80,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8044"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,83.8,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8046"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,87.6,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8048"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,91.4,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8050"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,95.2,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8052"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,99,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8054"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,102.8,166.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8056"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,106.7,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8058"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,110.5,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8060"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,114.3,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8062"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,118.1,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8064"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,121.9,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8066"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,125.7,191.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8068"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,129.5,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8070"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,133.3,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8072"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,137.1,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8074"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,140.9,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8076"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,144.7,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8078"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,148.5,210.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8080"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,152.4,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8082"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,156.2,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8084"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,160,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8086"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,163.8,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8088"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,167.6,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8090"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,171.4,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8092"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,175.2,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8094"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,179,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8096"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,182.8,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8098"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,186.6,206.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8100"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,190.4,194.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8102"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,194.3,194.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8104"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,198.1,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8106"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,201.9,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8108"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,205.7,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8110"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,209.5,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8112"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,213.3,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8114"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,217.1,193.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+      </g>
+      <g
+         id="g8116"
+         style="color:#ff0000;fill:none;stroke:#008000;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8118"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8120"
+           d="m 38.1,142.2 0,79.2 183.3,0 0,-79.2 -183.3,0 z" />
+      </g>
+      <g
+         id="g8122"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8124"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8126"
+           d="m 38.1,331.2 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8128"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8130"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8132"
+           d="m 38.1,331.2 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8134"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,333.4)">
+          <text
+             id="text8136">
+            <tspan
+               id="tspan8138">3</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8140"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8142"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8144"
+           d="m 38.1,318.9 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8146"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8148"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8150"
+           d="m 38.1,318.9 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8152"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,321.1)">
+          <text
+             id="text8154">
+            <tspan
+               id="tspan8156">4</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8158"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8160"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8162"
+           d="m 38.1,306.6 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8164"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8166"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8168"
+           d="m 38.1,306.6 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8170"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,308.8)">
+          <text
+             id="text8172">
+            <tspan
+               id="tspan8174">5</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8176"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8178"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8180"
+           d="m 38.1,294.3 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8182"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8184"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8186"
+           d="m 38.1,294.3 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8188"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,296.5)">
+          <text
+             id="text8190">
+            <tspan
+               id="tspan8192">6</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8194"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8196"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8198"
+           d="m 38.1,282 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8200"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8202"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8204"
+           d="m 38.1,282 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8206"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,284.2)">
+          <text
+             id="text8208">
+            <tspan
+               id="tspan8210">7</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8212"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8214"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8216"
+           d="m 38.1,269.7 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8218"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8220"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8222"
+           d="m 38.1,269.7 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8224"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,271.9)">
+          <text
+             id="text8226">
+            <tspan
+               id="tspan8228">8</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8230"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8232"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8234"
+           d="m 38.1,257.4 183.3,0"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8236"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8238"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8240"
+           d="m 38.1,257.4 4.5,0 m 178.8,0 -4.5,0" />
+        <g
+           id="g8242"
+           style="font-size:7.5px;text-anchor:end;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(34,259.6)">
+          <text
+             id="text8244">
+            <tspan
+               id="tspan8246">9</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8248"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8250"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8252"
+           d="m 38.1,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8254"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8256"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8258"
+           d="m 38.1,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8260"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(38.1,342.4)">
+          <text
+             id="text8262">
+            <tspan
+               id="tspan8264">0</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8266"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8268"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8270"
+           d="m 56.4,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8272"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8274"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8276"
+           d="m 56.4,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8278"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(56.4,342.4)">
+          <text
+             id="text8280">
+            <tspan
+               id="tspan8282">2</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8284"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8286"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8288"
+           d="m 74.8,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8290"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8292"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8294"
+           d="m 74.8,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8296"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(74.8,342.4)">
+          <text
+             id="text8298">
+            <tspan
+               id="tspan8300">4</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8302"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8304"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8306"
+           d="m 93.1,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8308"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8310"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8312"
+           d="m 93.1,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8314"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(93.1,342.4)">
+          <text
+             id="text8316">
+            <tspan
+               id="tspan8318">6</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8320"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8322"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8324"
+           d="m 111.4,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8326"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8328"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8330"
+           d="m 111.4,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8332"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(111.4,342.4)">
+          <text
+             id="text8334">
+            <tspan
+               id="tspan8336">8</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8338"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8340"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8342"
+           d="m 129.8,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8344"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8346"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8348"
+           d="m 129.8,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8350"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.8,342.4)">
+          <text
+             id="text8352">
+            <tspan
+               id="tspan8354">10</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8356"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8358"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8360"
+           d="m 148.1,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8362"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8364"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8366"
+           d="m 148.1,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8368"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(148.1,342.4)">
+          <text
+             id="text8370">
+            <tspan
+               id="tspan8372">12</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8374"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8376"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8378"
+           d="m 166.4,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8380"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8382"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8384"
+           d="m 166.4,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8386"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(166.4,342.4)">
+          <text
+             id="text8388">
+            <tspan
+               id="tspan8390">14</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8392"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8394"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8396"
+           d="m 184.7,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8398"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8400"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8402"
+           d="m 184.7,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8404"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(184.7,342.4)">
+          <text
+             id="text8406">
+            <tspan
+               id="tspan8408">16</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8410"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8412"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8414"
+           d="m 203.1,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8416"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8418"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8420"
+           d="m 203.1,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8422"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(203.1,342.4)">
+          <text
+             id="text8424">
+            <tspan
+               id="tspan8426">18</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8428"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8430"
+         style="color:#008000;fill:none;stroke:currentColor;stroke-width:0.34999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8432"
+           d="m 221.4,331.2 0,-73.8"
+           style="stroke:#808080" />
+      </g>
+      <g
+         id="g8434"
+         style="color:#008000;fill:none;stroke:#808080;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8436"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8438"
+           d="m 221.4,331.2 0,-4.5 m 0,-69.3 0,4.5" />
+        <g
+           id="g8440"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(221.4,342.4)">
+          <text
+             id="text8442">
+            <tspan
+               id="tspan8444">20</tspan>
+          </text>
+        </g>
+        <path
+           id="path8446"
+           d="m 38.1,257.4 0,73.8 183.3,0 0,-73.8 -183.3,0 z" />
+        <g
+           id="g8448"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="matrix(0,-1,1,0,19.4,294.3)">
+          <text
+             id="text8450">
+            <tspan
+               id="tspan8452">z [nm]</tspan>
+          </text>
+        </g>
+        <g
+           id="g8454"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.7,355.9)">
+          <text
+             id="text8456">
+            <tspan
+               id="tspan8458">x [nm]</tspan>
+          </text>
+        </g>
+        <g
+           id="g8460"
+           style="font-size:7.5px;text-anchor:middle;fill:#000000;stroke:none;font-family:DejaVu Sans"
+           transform="translate(129.7,246.1)">
+          <text
+             id="text8462">
+            <tspan
+               id="tspan8464">Key interpolation, high resolution</tspan>
+          </text>
+        </g>
+      </g>
+      <g
+         id="g8466"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8468"
+         style="color:#ff0000;fill:none;stroke:currentColor;stroke-width:1.04999995;stroke-linecap:butt;stroke-linejoin:miter">
+        <use
+           id="use8470"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,38.1,259.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8472"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,41.9,260.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8474"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,45.7,261.7)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8476"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,49.5,262.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8478"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,53.3,264)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8480"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,57.1,265.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8482"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,61,266.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8484"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,64.8,267.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8486"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,68.6,268.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8488"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,72.4,270.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8490"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,76.2,272.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8492"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,80,274.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8494"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,83.8,276.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8496"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,87.6,278.8)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8498"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,91.4,281.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8500"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,95.2,284.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8502"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,99,287.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8504"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,102.8,290.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8506"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,106.7,294.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8508"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,110.5,297.7)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8510"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,114.3,301.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8512"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,118.1,305)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8514"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,121.9,308.5)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8516"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,125.7,311.7)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8518"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,129.5,314.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8520"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,133.3,317)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8522"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,137.1,319)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8524"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,140.9,320.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8526"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,144.7,321.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8528"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,148.5,321.4)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8530"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,152.4,321.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8532"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,156.2,320.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8534"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,160,319.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8536"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,163.8,317.8)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8538"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,167.6,316.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8540"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,171.4,314.7)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8542"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,175.2,313)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8544"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,179,311.3)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8546"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,182.8,309.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8548"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,186.6,308.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8550"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,190.4,306.8)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8552"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,194.3,305.8)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8554"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,198.1,305.1)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8556"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,201.9,304.7)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8558"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,205.7,304.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8560"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,209.5,304.6)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8562"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,213.3,304.9)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+        <use
+           id="use8564"
+           style="color:#008000"
+           transform="matrix(2.25,0,0,2.25,217.1,305.2)"
+           xlink:href="#gpPt12-5"
+           x="0"
+           y="0"
+           width="1"
+           height="1" />
+      </g>
+      <g
+         id="g8566"
+         style="color:#ff0000;fill:none;stroke:#008000;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter" />
+      <g
+         id="g8568"
+         style="color:#000000;fill:none;stroke:currentColor;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter">
+        <path
+           id="path8570"
+           d="m 38.1,257.4 0,73.8 183.3,0 0,-73.8 -183.3,0 z" />
+      </g>
+    </g>
+  </g>
+</svg>

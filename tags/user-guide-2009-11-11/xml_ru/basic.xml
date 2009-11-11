@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="basic-operations">
+  <title>Базовые действия</title>
+  <para>Считывание значений и базовые геометрические операции представляют собой основу любой программы обработки данных. Gwyddion предлагает большой набор функций для </para>
+  <sect2 id="modules-basic">
+    <title>Базовые действия с двумерными данными</title>
+    <para>С помощью основных модулей можно совершить следующие операции с двумерным полем данных:</para>
+    <itemizedlist>
+      <listitem id="scale"><indexterm><primary>масштабирование</primary></indexterm><indexterm><primary>передискретизация</primary></indexterm>Перемасштабировать данные к выбранным размерам или масштабу используя выбранный метод интерполяции можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Масштабировать</guimenuitem></menuchoice></listitem>
+      <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрировать данные можно с помощью <link linkend="tool-crop">инструмента <quote>Кадрирование</quote></link> как внутри существующего канала, так и перенося результат в новый канал (с помощью опции <guilabel>Создать новый канал</guilabel>). При включении опции <guilabel>Сохранять пространственные смещения</guilabel>, координаты левого верхнего угла получившегося изображения будут соответствовать координатам его же у выбранного, иначе они будут установлены в  <inlineequation><mathphrase>(0, 0)</mathphrase><alt>(0,0)</alt></inlineequation>.</listitem>
+      <listitem id="rotate"><indexterm><primary>поворот</primary><secondary>на угол. кратный прямому</secondary></indexterm><indexterm><primary>поворот</primary><secondary>на произвольный угол</secondary></indexterm> Повернуть данные на угол кратный прямому или на произвольно заданный можно с помощью одной из функций: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Повернуть по часовой</guimenuitem></menuchoice>, <guimenuitem>Повернуть против часовой</guimenuitem> или <guimenuitem>Повернуть на угол</guimenuitem>.</listitem>
+      <listitem id="flip"><indexterm><primary>переворот</primary><secondary>горизонтально</secondary></indexterm><indexterm><primary>переворот</primary><secondary>вертикально</secondary></indexterm> Перевернуть данные горизонтально (т.е. относительно вертикальной оси) и вертикально (т.е. относительно горизонтальной) можно с помощью меню<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть горизонтально</guimenuitem></menuchoice> и <guimenuitem>Перевернуть вертикально</guimenuitem>, сответственно.</listitem>
+      <listitem id="flip-both">Отразить данные относительно центра (т.е. относительно обеих осей) можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть обе оси</guimenuitem></menuchoice>.</listitem>
+      <listitem id="invert-value"><indexterm><primary>инверсия значений</primary></indexterm> Перевернуть данные можно с помощью функции <guimenuitem>Инвертировать значение</guimenuitem>: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Инвертировать значение</guimenuitem></menuchoice>. Данные инвертируются относительно среднего, поэтому оно остаётся неизменным.</listitem>
+      <listitem id="square-samples"><indexterm><primary>пропорции</primary><secondary>передискретизация в квадратные пиксели</secondary></indexterm> Увеличить число точек данных, чтобы сделать пиксели квадратными можно с помощью команды  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Сделать квадратным</guimenuitem></menuchoice>. В большинстве сканов пиксели и так квадратные, поэтому эта опция на них не действует.</listitem>
+    </itemizedlist>
+    <para id="calibrate">Более того, модуль перекалибровки может быть использован для изменения физических размеров, калибровки значений данных и даже для того, чтобы изменить единицы измерения значений и пространственных размеров: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перекалибровать</guimenuitem></menuchoice>.</para>
+  </sect2>
+  <sect2 id="basic-value-reading">
+    <title>Считывание значений</title>
+    <para>Простейший способ чтения данных это поместить мышиный курсор поверх точки. в которой необходимо считать значение. Координаты при этом показываются в строке состояния <link linkend="data-windows">окна данных</link> или <link linkend="graph-windows">окна графика</link>.</para>
+    <sect3 id="read-value">
+      <title>Инструмент чтения значений <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>Инструмент чтения значения</primary></indexterm>
+      <indexterm><primary>измерение уклона</primary></indexterm>
+      <indexterm>
+        <primary>наклон</primary>
+        <secondary>чтение данных</secondary>
+      </indexterm>
+      <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов чтения данных. Он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <inlineequation><mathphrase><phrase role="mathvar">z</phrase></mathphrase><alt>z</alt></inlineequation> новым нулевым уровнем.</para>
+      <para><guilabel>Считать значение</guilabel>также может показывать наклон локальной грани. <guilabel>Радиус усреднения</guilabel> снова определяет радиус области, используемой для аппроксимации плоскостью.</para>
+    </sect3>
+    <sect3 id="inclinations-coordinates">
+      <title>Наклоны</title>
+      <indexterm>
+        <primary>наклон</primary>
+        <secondary>расчёт</secondary>
+      </indexterm>
+      <para>Во всех инструментах Gwyddion, наклоны плоскости и грани показываются в сферических углах <inlineequation><mathphrase>(<phrase role="mathvar">ϑ</phrase>, <phrase role="mathvar">φ</phrase>)</mathphrase><alt>(\vartheta,\varphi)</alt></inlineequation> вектора нормали к плоскости.</para>
+      <para>Угол <inlineequation><mathphrase><phrase role="mathvar">ϑ</phrase></mathphrase><alt>\vartheta</alt></inlineequation> является углом между направлением вверх и нормалью, это означает, что <inlineequation><mathphrase><phrase role="mathvar">ϑ</phrase> = 0</mathphrase><alt>\vartheta=0</alt></inlineequation> для горизонтальных граней и увеличивается с наклоном. Угол всегда больше нуля.</para>
+      <para>Угол <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation> - отсчитываемый против часовой угол между осью inlineequation&gt;<mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></para>
+      <informalfigure id="fig-inclination-coordinates">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="inclination.pdf" format="PDF"/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref="inclination.png" format="PNG"/>
+          </imageobject>
+          <textobject>
+            <phrase>Измерение положения граней</phrase>
+          </textobject>
+          <caption>Ориентация грани поверхности (показана синим) измеряется как угол против часовой от оси  <inlineequation><mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></inlineequation> до проекции вектора нормали к грани <inlineequation><mathphrase><phrase role="mathvar"><phrase role="vector">n</phrase></phrase></mathphrase><alt>\vec{n}</alt></inlineequation> на плоскость <inlineequation><mathphrase><phrase role="mathvar">xy</phrase></mathphrase><alt>xy</alt></inlineequation>.</caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id="distance">
+      <title>Инструмент измерения расстояний<guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_distance-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>инструмент измерения Расстояний</primary></indexterm>
+      <indexterm><primary>измерение расстояний </primary></indexterm>
+      <indexterm><primary>измерение углов</primary></indexterm>
+      <para>Расстояния и разницы могут быть измерены с помощью инструмента <guilabel>Расстояние</guilabel>. Он показывает горизонтальные (<inlineequation><mathphrase>Δ<phrase role="mathvar">x</phrase></mathphrase><alt>\Delta x</alt></inlineequation>), вертикальные (<inlineequation><mathphrase>Δ<phrase role="mathvar">y</phrase></mathphrase><alt>\Delta y</alt></inlineequation>) и суммарные расстояния на плоскости(<inlineequation><mathphrase><phrase role="mathvar">R</phrase></mathphrase><alt>R</alt></inlineequation>); азимут <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation> (измеренный подобно наклону <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation>) и разность значений конечных точек(<inlineequation><mathphrase>Δ<phrase role="mathvar">z</phrase></mathphrase><alt>\Delta z</alt></inlineequation>) для набора выбранных линий.</para>
+      <para>Расстояния могут быть скопированы в буфер обмена или сохранены в текстовый файл с помощью кнопок под списком.</para>
+      <informalfigure id="fig-distance-screenshot">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="distances.png" format="PNG"/>
+          </imageobject>
+          <textobject>
+            <phrase>Снимок экрана диалогового окна измерения расстояний.</phrase>
+          </textobject>
+          <caption>Инструмент измерения расстояний с тремя выбранными линиями.</caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+  </sect2>
+  <sect2 id="profile">
+    <title>Извлечение профиля <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_profile-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <indexterm><primary>извлечение профиля</primary></indexterm>
+    <para>Инструмент извлечения профиля доступен с панели инструментов. Можно использовать мышь для рисования нескольких профилей на изображении, которые впоследствии могут быть перемещены и выровнены. Диалоговое окно включает в себя мгновенный предпросмотр графика. Профили могут быть различно <quote>толщины</quote>, что означает использование большего числа точек данных в направлении перпендикуляра к направлению профиля для расчёта точки профиля в более толстых профилях. Это может быть весьма полезно для уменьшения шума при измерении объектов правильной формы.</para>
+    <para>После того, как профили выбраны, они могут быть извлечены в графики (как отдельные. так и сгруппированные в одном окне графика), которые в свою очередь могут быть проанализированы соответствующими функциями.</para>
+    <informalfigure id="fig-profile-screenshot">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="profiles.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>Снимок экрана диалога извлечения профилей</phrase>
+        </textobject>
+        <caption>Инструмент извлечения профилей с тремя извлеченными и раскрытыми настройками.</caption>
+      </mediaobject>
+    </informalfigure>
+    <para>Кривая профиля строится по данным, извлеченным через регулярные интервалы вдоль выбранной линии. Значения в точках, которые не попадают точно в центр пикселя (что обычно случается с наклонными линиями) интерполируются с использованием выбранного режима <link linkend="interpolation">интерполяции</link>. Если не задано определённое число точек с помощью опции <guilabel>Фикс. разр.</guilabel>, число точек соответствует длине линии в пикселях. Это означает. что для полностью горизонтальных и вертикальных линий интерполяция не используется.</para>
+    <informalfigure id="fig-profile-interpolation">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="profile-interpolation.pdf" format="PDF"/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref="profile-interpolation.png" format="PNG"/>
+        </imageobject>
+        <textobject>
+          <phrase>Схема интерполяции субпикселей профиля</phrase>
+        </textobject>
+        <caption>Иллюстрация выборки данных при извлечении профиля для наклонных линий. Схемы слева показывают точки вдоль линии где считываются данные для естественного и очень высокого разрешения. Графики справа показывают извлечённые значения. Сравнение естественного профиля и профиля высокого разрешения снятых с интерполяцией округлением показывает, что действительно точки данных кривой с естественным разрешением образуют подмножество точек профиля высокого разрешения. Влияние метода интерполяции на значения данных вне узлов сетки показано на нижних двух графиках, сравнивающих интерполяцию округлением и бикубическую при высоком разрешении.</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

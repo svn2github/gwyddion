@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<book xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang='ru' lang='ru'>
+  <bookinfo>
+    <title>Руководство пользователя Gwyddion</title>
+    <author>
+      <firstname>Petr</firstname>
+      <surname>Klapetek</surname>
+    </author>
+    <author>
+      <firstname>David</firstname>
+      <surname>Nečas</surname>
+    </author>
+    <author>
+      <firstname>Christopher</firstname>
+      <surname>Anderson</surname>
+    </author>
+    <copyright>
+      <year>2004–2007, 2009</year>
+      <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
+    </copyright>
+    <releaseinfo>Версия 2009-07-31. Работа над этим руководством не закончена.</releaseinfo>
+    <legalnotice id="legalnotice">
+      <para>Разрешается копировать, распространять и/или модифицировать этот документ на условиях: <itemizedlist><listitem><para> <link linkend="gfdl">GNU Free Documentation License</link>, версии 1.2 или любой более поздней выпущенной Free Software Foundation; без неизменяемых разделов, без текста на первой и последней страницах обложки. Копия лицензии доступна в разделе <link linkend="gfdl">GNU Free Documentation License</link>. </para></listitem><listitem><para> <link linkend="gpl">GNU General Public License</link>, версии 2 или любой более поздней выпущенной Free Software Foundation. Копия лицензии доступна в разделе <link linkend="gpl">GNU General Public License</link>. </para></listitem></itemizedlist></para>
+    </legalnotice>
+  </bookinfo>
+  <!--
+  <xi:include href="introduction.xml"/>
+  <xi:include href="install.xml"/>
+  -->
+  <xi:include href="getting-started.xml"/>
+  <xi:include href="data-analysis.xml"/>
+  <xi:include href="summaries.xml"/>
+  <xi:include href="develop.xml"/>
+  <xi:include href="gpl.xml"/>
+  <xi:include href="fdl.xml"/>
+  <index id="subject-index"/>
+</book>
+<!-- vim: set ts=2 sw=2 et : -->

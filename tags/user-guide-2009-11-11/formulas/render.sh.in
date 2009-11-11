@@ -1,0 +1,21 @@
+set -e
+t="TEMP-$1"
+convertopts="-type Grayscale -scale 38.2% -fx u^1.3"
+cat defs.tex header.tex "$1".tex footer.tex >"$t".tex
+@TEX@ --interaction=batchmode "$t".tex
+@DVIPS@ -q -E -o "$t".ps "$t".dvi
+. ./"$t".bbox
+@GSED@ -i -e "s/^\(%%BoundingBox:\).*/\\1 $x0 $y0 $x1 $y1/" "$t".ps
+@GS@ -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile="$t".png "$t".ps
+eval $(./pngsize <"$t".png)
+if test $h -gt 1600; then
+  echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2
+  . "$t".bbox
+  eval $(@GSED@ -n '/^\\.size=/{s/^\\//;s/pt$//;p}' header.tex)
+  w=$((($w*($x1 - $x0) + $hsize/2)/$hsize))
+  h=$((($h*($y1 - $y0) + $vsize/2)/$vsize))
+  @CONVERT@ -crop ${w}x$h $convertopts "$t".png "$1".png
+else
+  @CONVERT@  $convertopts "$t".png "$1".png
+fi
+rm "$t".*

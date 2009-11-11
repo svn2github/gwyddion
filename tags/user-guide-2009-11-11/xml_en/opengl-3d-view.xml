@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='opengl-3d-view'>
+  <title>OpenGL 3D Data Display</title>
+  <indexterm>
+    <primary>3D</primary>
+    <secondary>data display</secondary>
+  </indexterm>
+  <para>
+    Three-dimensional OpenGL display of the current data window can be invoked
+    with the button with symbol of cube in <guilabel>View</guilabel> button
+    row of main window.
+  </para>
+  <para>
+    This feature is optional, i.e. it can be disabled at compile time. It can
+    also happen that while Gwyddion is capable of 3D data display your system
+    does not support it.  In both cases an attempt to invoke 3D view gives an
+    error message explaining which of the two cases occured.  In the former
+    case you have to ask the producers of Gwyddion executables to build them
+    with 3D support or build Gwyddion yourself from source code. If it is the
+    latter case, refer to your operating system guide on how to enable OpenGL
+    3D capabilities.
+  </para>
+  <para>
+    The 3D window has two possible forms: with basic and expanded controls.
+    It starts with basic controls only, this form is displayed on
+    <link linkend='fig-opengl-3d-view-screenshot'>following figure</link>.
+    It can be switched to the expanded form (and back) with an expander button
+    it the upper right corner.  Clicking on the view with right mouse button
+    brings a quick color gradient/GL material selector.
+  </para>
+  <informalfigure id='fig-opengl-3d-view-screenshot' float='0'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='opengl-3d-view.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Three-dimensional OpenGL data display window with basic controls.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='opengl-3d-view-basic-controls'>
+    <title>Basic Controls</title>
+    <para>
+      Basic 3D window contains interaction mode controls at the right side of
+      the view.  By default, dragging the view with mouse rotates it
+      horizontally and vertically.  All possible modes are listed below:
+      <itemizedlist>
+        <listitem>
+          Rotation – this is the default.  Dragging the view horizontally
+          rotates it around <phrase role='mathvar'>z</phrase>-axis, vertical drag
+          rotates it around horizontal axis parallel with the plane of view.
+        </listitem>
+        <listitem>
+          Scale – dragging the view right and down enlarges it, drag in the
+          opposite direction makes it smaller.
+        </listitem>
+        <listitem>
+          Z-scale – dragging the view up (down) increases (decreases) the
+          <phrase role='mathvar'>z</phrase>-scale, making the hills and valleys
+          more or less pronounced.
+        </listitem>
+        <listitem>
+          Light rotation – this possibility is available only in lighting
+          visualization mode.  Dragging the view changes position of light
+          source similarly to rotation of data in normal rotation mode.
+        </listitem>
+      </itemizedlist>
+      The basic controls also include an image export button.
+    </para>
+    <para>
+      When basic controls are shown it is possible to switch between the modes
+      using keys
+      <keycap>R</keycap> (rotation),
+      <keycap>S</keycap> (scale),
+      <keycap>V</keycap> (value scale)
+      and <keycap>L</keycap> (light rotation).
+    </para>
+  </sect2>
+  <sect2 id='opengl-3d-view-full-controls'>
+    <title>Full Controls</title>
+    <para>
+      In expanded controls the mode buttons are located in top row, however
+      their function does not change.  In addition, there are several tabs
+      with options below them:
+      <itemizedlist>
+        <listitem>
+          <guilabel>Basic</guilabel> – controls to set rotations and scales
+          numerically and to switch on an off axes, axis labels, and
+          perspective projection.
+        </listitem>
+        <listitem>
+          <guilabel>Light &amp; Material</guilabel> – visualization settings.
+          Gwyddion 3D view has two basic visualization modes: gradient, in
+          which the data are simply colored with a false color scale exactly
+          like in normal 2D view; and material, in which the data are
+          presented as an OpenGL material rendered according to light
+          position.  This tab also contains controls to set light position
+          numerically.
+        </listitem>
+        <listitem>
+          <guilabel>Labels</guilabel> – fine tuning of sizes, positions,
+          and other properties of axis labels.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='opengl-3d-view-saving-images'>
+    <title>Saving Images</title>
+    <para>
+      The 3D view can be saved into a bitmap image with the
+      <guibutton>Save</guibutton> button.  The output is currently always
+      a PNG (Portable Network Graphics) image with exactly the same size and
+      contents as displayed on the screen.  Entering a different file
+      extensions than <filename>.png</filename> still produces an image in
+      PNG format, albeit with a confusing extension.
+    </para>
+    <para>
+      Note due to the peculiarities of certain operating systems, graphics
+      drivers and windowing environments, artefacts may sometimes appear on
+      the exported image in parts corresponding to obscured parts of the 3D
+      view.  If you encounter this problem, make sure the 3D view is not
+      obscured by other windows during the image export.
+    </para>
+  </sect2>
+  <sect2 id='opengl-material-editor'>
+    <title>OpenGL Material Editor</title>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>material editting</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>choosing default material</secondary>
+    </indexterm>
+    <para>OpenGL material editor can be invoked with
+      <menuchoice>
+        <guimenu>Edit</guimenu>
+        <guimenuitem>GL Materials</guimenuitem>
+      </menuchoice>.
+      The controls in the material list are the same as in the
+      <link linkend='color-gradient-editor'>color gradient editor</link> list
+      and the material management works identically.  The actual editor is of
+      course different.  It allows to edit four quantities defining the
+      material:
+      <itemizedlist>
+        <listitem>
+          ambient color
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>a,α</subscript></mathphrase>
+            <alt>k_{{\rm a},\alpha}</alt>
+          </inlineequation>
+          (where
+          <inlineequation>
+            <mathphrase>α = red, green, blue</mathphrase>
+            <alt>\alpha = \rm red, green, blue</alt>
+          </inlineequation>),
+          controlling the reflection of ambient
+          light that is assumed come uniformly from all directions,
+        </listitem>
+        <listitem>
+          diffuse color
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>d,α</subscript></mathphrase>
+            <alt>k_{{\rm d},\alpha}</alt>
+</inlineequation>,
+          describing the diffuse reflection which is independent on the
+          direction of incident light and whose apparent brightness is
+          independent of the viewing angle,
+        </listitem>
+        <listitem>
+          specular color
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>k</phrase><subscript>s,α</subscript></mathphrase>
+            <alt>k_{{\rm s},\alpha}</alt>
+</inlineequation>,
+          controlling the specular reflection with reflected light intensity
+          dependent on the angle between the observing direction and the
+          direction of light that would be reflected by an ideal mirror with
+          the same normal, and
+        </listitem>
+        <listitem>
+          shininess
+          <inlineequation>
+            <mathphrase><phrase role='mathvar'>s</phrase></mathphrase>
+            <alt>s</alt>
+          </inlineequation>,
+          a numeric exponent determining how much the specular reflection
+          resembles an ideal mirror, smaller values mean rougher surfaces,
+          higher values mean smoother surfaces.
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      If we denote
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>L</phrase></phrase></mathphrase>
+        <alt>\vec L</alt>
+      </inlineequation>
+      the normal vector pointing from the observed surface point to the light
+      source,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>V</phrase></phrase></mathphrase>
+        <alt>\vec V</alt>
+      </inlineequation>
+      the normal vector to the observer,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>N</phrase></phrase></mathphrase>
+        <alt>\vec N</alt>
+</inlineequation>
+      the normal vector to the surface
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'><phrase role='vector'>R</phrase></phrase></mathphrase>
+        <alt>\vec R</alt>
+</inlineequation>
+      the normal vector in the direction of ideal mirror reflection, the
+      observed light intensity in OpenGL lighting model can be expressed as
+    </para>
+    <informalequation id='eq-opengl-light-model'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='eq-opengl-light-model.png' format='PNG'/>
+        </imageobject>
+        <textobject role='tex'>
+          <phrase>
+<![CDATA[
+I_\alpha = k_{a,\alpha}I_{a,\alpha}
+           + k_{d,\alpha}I_{d,\alpha} (\vec N\cdot\vec L)
+           + k_{s,\alpha}I_{s,\alpha} (\vec R\cdot\vec V)^s
+]]>
+          </phrase>
+        </textobject>
+      </mediaobject>
+    </informalequation>
+    <para>
+      where
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>a,α</subscript></mathphrase>
+        <alt>I_{{\rm a},\alpha}</alt>
+      </inlineequation>,
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>d,α</subscript></mathphrase>
+        <alt>I_{{\rm d},\alpha}</alt>
+      </inlineequation>
+      and
+      <inlineequation>
+        <mathphrase><phrase role='mathvar'>I</phrase><subscript>s,α</subscript></mathphrase>
+        <alt>I_{{\rm s},\alpha}</alt>
+      </inlineequation>
+      are the ambient, diffuse and specular light source intensities,
+      respectively.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

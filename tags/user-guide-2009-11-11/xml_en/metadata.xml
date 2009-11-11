@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='metadata'>
+  <title>Metadata</title>
+  <para>
+    Auxiliary information and values describing certain data and the
+    conditions it was measured on are called metadata in Gwyddion.  They may
+    include the SPM mode, tip bias, scanning frequency, measurement date and
+    time or user comments.
+  </para>
+  <para>
+    Metadata are always per-channel.  The metadata for the current channel
+    can be displayed with
+    <menuchoice>
+      <guimenu>Meta</guimenu>
+      <guimenuitem>Metadata Browser</guimenuitem>
+    </menuchoice>
+    command.  The browser lists all available metadata as Name, Value pairs.
+    It also enables to modify and delete values or add new ones.  It is
+    possible to export all metadata of a channel to a text file with
+    <guibutton>Save</guibutton> button.
+  </para>
+  <para>
+    The level of metadata support differs wildly between file formats.
+    For file formats that are well documented and/or allow to import all
+    metainformation generically lots of auxiliary data including obscure
+    hardware settings can be listed.  On the other hand it is possible that
+    no metadata is imported from your files, for example when they contain
+    no auxiliary data or it is not known how to read it.
+  </para>
+  <informalfigure id='fig-metadata-browser'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='metadata_browser.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Metadata browser showing the metadata of a Nanoscope file.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

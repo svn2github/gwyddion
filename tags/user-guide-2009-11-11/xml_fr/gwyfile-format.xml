@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: gwyfile-format.xml 9502 2009-07-18 21:47:20Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gwyfile-format'>
+  <title>Format des Fichiers Gwyddion</title>
+  <para>
+    Les fichiers de données au format <application>Gwyddion</application>
+    consistent en une structure en arborescence de plusieurs objets sérialisés.
+    En général ces objets peuvent être de différents types ou même contenir
+    d'autres objets (ce qui explique l'arborescence). L'utilisation de
+    <ulink url='http://gwyddion.net/gwydump.php'><command>gwydump</command></ulink>,
+    peut être très instructive pour examiner le contenu de divers fichiers, il
+    s'agit d'un simple visualisateur de structure de fichier disponible sur le
+    site internet du projet.
+  </para>
+  <para>
+    Nous allons tout d'abord décrire la structure physique du fichier sans
+    considérer l'interprétation possible des données contenues dans celui-ci.
+  </para>
+  <sect2 id='gwyfile-byte-order'>
+    <title>Ordre des Octets</title>
+    <para>
+      Toutes les données sont enregistrées avec l'ordre des octets little-endian
+      (<quote>petit-boutiste</quote> ou <quote>miniboutiste</quote>, aussi connu
+      sous le nom LSB ou Intel).
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-file-header'>
+    <title>En-tête de Fichier</title>
+    <para>
+      L'en-tête de fichier est constitué de quatre octets (nombre magique) avec
+      avec les valeurs ASCII correspondant aux caractères
+      <literal>GWYP</literal>.
+    </para>
+    <para>
+      Il s'agit du nouveau format de fichier, une version plus ancienne
+      contenant l'en-tête maqigue <literal>GWYO</literal> existe aussi. Ce point
+      ne sera pas discuté ici.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-file-data'>
+    <title>Données</title>
+    <para>
+      Le reste du fichier consiste en un objet <type>GwyContainer</type>
+      contenant toutes les données. Il est enregistré exactement de la même
+      manière que tout autre objet, telle que décrit dans la section qui suit.
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-object-layout'>
+    <title>Structure d'un Objet</title>
+    <para>
+      Un objet est constitué de trois parties (dans l'ordre suivant) :
+      <itemizedlist>
+        <listitem>
+          Nom du type d'objet, enregistré sous la forme d'une chaîne de
+          caractères ASCII se terminant par <constant>NUL</constant>. Il s'agit
+          du nom dans le système de types GObject.
+        </listitem>
+        <listitem>
+          Tailles des données sérialisées, enregistrée sous la forme d'un entier
+          non signé de 32 bits. Il n'inclue pas la taille du nom du type ni sa
+          propre taille.
+        </listitem>
+        <listitem>
+          La liste des composants. Ceux-ci sont des parties nommées des données
+          de l'objet, un pour chaque type de données : un type atomique, un
+          tableau de types atomiques, ou encore un objet. Ils ne sont
+          enregistrés dans aucun ordre particulier.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-components'>
+    <title>Composants</title>
+    <para>
+      Chaque composant est constitué de trois parties (dans l'ordre suivant) :
+      <itemizedlist>
+        <listitem>
+          Le nom, enregistré sous la forme d'une chaîne de caractères se
+          terminant par <constant>NUL</constant>.
+        </listitem>
+        <listitem>
+          Le type, enregistré sous la forme d'un unique octet non signé
+          (caractère). La table des types de composants est présentée plus bas.
+        </listitem>
+        <listitem>
+          Les données, enregistrées sous la forme adéquate en fonction du type.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-data-types'>
+    <title>Types de Données</title>
+    <para>
+      Les types atomiques de données sont listés dans le tableau suivant :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-atomic-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Caractère</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>booléen</entry>
+              <entry><literal>b</literal></entry>
+              <entry>
+                Stocké sous forme d'octet, zéro correspond à faux, et non nul (
+                normalement 1) correspond à vrai
+              </entry>
+            </row>
+            <row>
+              <entry>caractère</entry>
+              <entry><literal>c</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>entier 32bit</entry>
+              <entry><literal>i</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>entier 64bit</entry>
+              <entry><literal>q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>double</entry>
+              <entry><literal>d</literal></entry>
+              <entry>
+                Nombre à virgule flottante en double précision IEEE 754
+              </entry>
+            </row>
+            <row>
+              <entry>chaîne de caractères</entry>
+              <entry><literal>s</literal></entry>
+              <entry>
+                Se terminant par <constant>NUL</constant>
+              </entry>
+            </row>
+            <row>
+              <entry>objet</entry>
+              <entry><literal>o</literal></entry>
+              <entry>
+                Objet tel que décrit plus haut
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>
+      Chaque type atomique, sauf le booléen, possède son tableau équivalent. Les
+      types de caractère des tableaux sont les mêmes que leur équivalent
+      atomique, à part le fait qu'ils sont en majuscule. Les tableaux sont
+      enregistrés sous la forme d'une valeur non signée en 32 bits (donnant le
+      nombre d'éléments), suivie des valeurs des éléments. Les types de tableaux
+      de données sont listés dans la table suivante :
+    </para>
+    <para>
+      <informaltable id='table-gwyfile-array-types'>
+        <tgroup cols='3' align='left'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Caractère</entry>
+              <entry>Note</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>tableau de caractères</entry>
+              <entry><literal>C</literal></entry>
+              <entry>
+                Ne se terminant pas par <constant>NUL</constant>
+              </entry>
+            </row>
+            <row>
+              <entry>tableau d'entiers 32bit</entry>
+              <entry><literal>I</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>tableau d'entiers 64bit</entry>
+              <entry><literal>Q</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>tableau de doubles</entry>
+              <entry><literal>D</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>tableau de chaînes de caractères</entry>
+              <entry><literal>S</literal></entry>
+              <entry></entry>
+            </row>
+            <row>
+              <entry>tableau d'objects</entry>
+              <entry><literal>O</literal></entry>
+              <entry>O majuscule, et non zéro</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id='gwyfile-data-objects'>
+    <title>Objets Particuliers</title>
+    <para>
+      A écrire.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

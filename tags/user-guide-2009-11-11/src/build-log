@@ -1,0 +1,109 @@
+#!/bin/bash
+# @(#) $Id$
+pkgname=gwyddion
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+tmplog=tmplog
+
+languages=$(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in)
+source $HOME/.bashrc
+cd $logdir
+
+cat >user_guide_xhtml.ignore <<':'
+^$
+^Writing xhtml_../.*\.html .*
+^(inkscape:[0-9]\+): Gdk-CRITICAL \*\*: gdk_display_list_devices: assertion `GDK_IS_DISPLAY (display)' failed
+':'
+:
+
+
+cat >user_guide_pdf.ignore <<':'
+^$
+^(inkscape:[0-9]\+): Gdk-CRITICAL \*\*: gdk_display_list_devices: assertion `GDK_IS_DISPLAY (display)' failed
+^/usr/lib/python2\.6/site-packages/dbtexmf/dblatex/grubber/util\.py:8: DeprecationWarning: the md5 module is deprecated; use hashlib instead
+^  import md5
+^Build the listings\.\.\.
+^XSLT stylesheets DocBook -  LaTeX 2e (0\.2\.9)
+^=\+$
+^Build user-guide\.pdf
+^processing index [-a-zA-Z/]\+/pdf_../user-guide_tmp\.idx\.\.\.
+^This is makeindex, version .*
+^Scanning style file /usr/share/dblatex/latex/scripts/doc\.ist\.\.\.\.done ([0-9]\+ attributes redefined, 0 ignored)\.
+^Scanning input file [-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.\.done ([0-9]\+ entries accepted, 0 rejected)\.
+^Sorting entries\.\.\.\.done ([0-9]\+ comparisons)\.
+^Generating output file [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ind\.\.\.\.done ([0-9]\+ lines written, 0 warnings)\.
+^Output written in [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ind\.
+^Transcript written in [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ilg\.
+':'
+:
+
+
+cat >user_guide_man.ignore <<':'
+Warn: AUTHOR sect\.: no personblurb|contrib for Yeti                gwyddion-thumbnailer
+Note: AUTHOR sect\.: see see http://docbook\.sf\.net/el/contrib       gwyddion-thumbnailer
+Note: AUTHOR sect\.: see see http://docbook\.sf\.net/el/personblurb   gwyddion-thumbnailer
+Note: Writing gwyddion-thumbnailer\.1
+Warn: AUTHOR sect\.: no personblurb|contrib for Yeti                gwyddion
+Note: AUTHOR sect\.: see see http://docbook\.sf\.net/el/contrib       gwyddion
+Note: AUTHOR sect\.: see see http://docbook\.sf\.net/el/personblurb   gwyddion
+Note: Writing gwyddion\.1
+':'
+:
+
+
+function printerr() {
+  f=$1
+  shift
+
+  test -s $f.err || return
+  cat --squeeze-blank $f.err \
+  | {
+    if test -s $f.ignore; then
+      grep -v -f $f.ignore
+    else
+      cat
+    fi
+  } | {
+    if test -n "$1"; then
+      $@
+    else
+      cat
+    fi
+  } >$tmplog
+  test -s $tmplog || return
+  echo "=====[ $f ]====="
+  cat $tmplog
+}
+
+function printerr_lang() {
+  f=$1
+  shift
+
+  for lang in $languages; do
+    test -s $f-$lang.err || continue
+    cat --squeeze-blank $f-$lang.err \
+    | {
+      if test -s $f.ignore; then
+        grep -v -f $f.ignore
+      else
+        cat
+      fi
+    } | {
+      if test -n "$1"; then
+        $@
+      else
+        cat
+      fi
+    } >$tmplog
+    test -s $tmplog || return
+    echo "=====[ $f-$lang ]====="
+    cat $tmplog
+  done
+}
+
+printerr user_guide_autostuff
+printerr_lang user_guide_xhtml
+printerr_lang user_guide_pdf
+printerr user_guide_man
+
+rm *.ignore $tmplog

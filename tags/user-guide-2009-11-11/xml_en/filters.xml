@@ -1,0 +1,207 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='filters'>
+  <title>Filters</title>
+  <sect2 id='basic-filters'>
+    <title>
+      Basic Filters Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_filter-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      The <link linkend='basic-filters'>Basic Filters</link> tool
+      lets you apply several simple filters to your image. This can be very
+      useful for data denoising; however, the real measured data will get
+      altered in the process, so great care should be taken not to destroy
+      important features of the image.
+    </para>
+    <itemizedlist>
+      <listitem id='filter-mean'>
+        <indexterm>
+          <primary>mean</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        Mean filter – takes the mean value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem id='filter-median'>
+        <indexterm>
+          <primary>median</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        Median filter – takes the median value of neighborhood of the
+        filtered value as the value.
+      </listitem>
+      <listitem id='filter-conservative-denoise'>
+        <indexterm><primary>conservative denoise filter</primary></indexterm>
+        Conservative denoise filter – checks whether the value is not extreme
+        within the neighborhood. If yes, filter substitutes the value by
+        of the next highest (lowest) value.
+      </listitem>
+      <listitem id='filter-kuwahara'>
+        <indexterm><primary>Kuwahara filter</primary></indexterm>
+        Kuwahara filter – is an edge-preserving smoothing filter.
+      </listitem>
+      <listitem id='filter-minimum'>
+        <indexterm>
+          <primary>minimum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        <indexterm><primary>erosion filter</primary></indexterm>
+        Minimum filter – also known as erode filter, replaces values by
+        minimum found in neighborhood.
+      </listitem>
+      <listitem id='filter-maximum'>
+        <indexterm>
+          <primary>maximum</primary>
+          <secondary>filter</secondary>
+        </indexterm>
+        <indexterm><primary>dilation filter</primary></indexterm>
+        Maximum filter – also known as dilate filter, replaces values by
+        maximum found in neighborhood.
+      </listitem>
+      <listitem id='filter-dechecker'>
+        <indexterm><primary>dechecker filter</primary></indexterm>
+        <indexterm><primary>checker pattern removal filter</primary></indexterm>
+        Dechecker filter – a smoothing filter specially designed to remove
+        checker pattern from the image while preserving other details.  It is
+        a convolution filter with kernel
+        <informalequation id='eq-filters-dechecker'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-filters-dechecker.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>Dechecker filter 5 × 5 coefficient matrix</phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+w_{\rm dechecker}
+  = \pmatrix{0&1/144&-1/72&1/144&0\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             -1/72&1/9&7/9&1/9&-1/72\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             0&1/144&-1/72&1/144&0\cr}
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+      <listitem id='filter-gaussian'>
+        <indexterm><primary>gaussian filter</primary></indexterm>
+        Gaussian filter – a smoothing filter, the size parameter determines
+        the FWHM (full width at half maximum) of the Gaussian.  The relation
+        between FWHM
+        and <inlineequation>
+          <mathphrase>σ</mathphrase>
+          <alt>\sigma</alt>
+        </inlineequation>
+        is
+        <informalequation id='eq-gaussian-fwhm'>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref='eq-gaussian-fwhm.png' format='PNG'/>
+            </imageobject>
+            <textobject>
+              <phrase>FWHM-sigma relation for Gaussian</phrase>
+            </textobject>
+            <textobject role='tex'>
+              <phrase>
+<![CDATA[
+{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
+]]>
+              </phrase>
+            </textobject>
+          </mediaobject>
+        </informalequation>
+      </listitem>
+    </itemizedlist>
+    <tip>
+      By default, these filters will be applied to the entire
+      image. However, you can apply a filter to a specific region within your
+      image by selecting it with the mouse. This can be useful for correcting
+      badly measured areas within a good image. To apply a filter to the entire
+      image again, just click once anywhere within the image window.
+    </tip>
+    <para>
+      Moreover, there are more denoising functions in Gwyddion, for example
+      DWT denoising and FFT filtering.
+      For details see section
+      <link linkend='edit-extended'>Extended Data Edit</link>.
+    </para>
+    <para>
+      If you need to only suppress some values in the SPM data that are
+      obviously wrong, you can also try the
+      <link linkend='mask-of-outliers'>Mask of Outliers</link>
+      module and the
+      <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
+      module.
+      For details see section
+      <link linkend='editing-correction'>Data Edit</link>.
+    </para>
+    <informalfigure id='fig-filters-screenshot'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='filter.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Screenshot of filter tool with median filter applied to a rectangular
+          selection
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='convolution-filter'>
+    <title>Convolution</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Integral Transforms</guisubmenu>
+        <guisubmenu>Convolution Filter</guisubmenu>
+      </menuchoice>
+    </para>
+    <para>
+      Convolutions with arbitrary kernels up to
+      <inlineequation>
+        <mathphrase>9 × 9</mathphrase>
+        <alt>9\times9</alt>
+      </inlineequation>
+      can be performed with
+      the <link linkend='convolution-filter'>Convolution Filter</link>
+      module.
+    </para>
+    <para>
+      The <guilabel>Divisor</guilabel> entry represents a common factor all
+      the coefficients are divided before applying the filter.  This allows
+      to use denormalized coefficients that are often nicer numbers.  The
+      normalization can be also calculated automatically when
+      <guilabel>automatic</guilabel> is checked.  When the sum of the
+      coefficients is nonzero, it makes the filter sum-preserving, i.e. it
+      the factor normalizes the sum of coefficients to unity.  When the sum
+      of the coefficients is zero, the automatic factor is simply let equal
+      to 1.
+    </para>
+    <para>
+      Since many filters used in practice exhibit various types of symmetry,
+      the coefficients can be automatically completed according to the
+      selected symmetry type (odd, even).  Note the completion is performed
+      on pressing <keycap>Enter</keycap> in the coefficient entry.
+    </para>
+    <para>
+      In a fresh installation only a sample Identity filter is present (which
+      is not particularly useful as it does nothing).  This filter cannot be
+      modified, to create a new filter use the <guilabel>New</guilabel> button
+      on the <guilabel>Presets</guilabel> page.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

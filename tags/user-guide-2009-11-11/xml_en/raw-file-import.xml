@@ -1,0 +1,274 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='raw-file-import'>
+  <title>Raw Data File Import</title>
+  <para>
+    Both raw ASCII and binary data files and files in unsupported formats
+    can be imported with rawfile module – with some effort.
+    Raw data import can be explicitly invoked by selecting
+    <guilabel>Raw data files</guilabel> type in the file open dialog.
+    It can be also set to appear automatically when you try to open a file
+    in an unknown format.  This is controlled in the raw file dialog by
+    option <guilabel>Automatically offer raw data import of unknown
+      files</guilabel>.
+  </para>
+  <sect2 id='raw-file-import-information'>
+    <title>Information</title>
+    <para>
+      Its first tab, <guilabel>Information</guilabel>, allows to set basic
+      file information:
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Horizontal size</guilabel></term>
+          <term><guilabel>Vertical size</guilabel></term>
+          <listitem>
+            <para>
+              Horizontal and vertical data resolution (number of samples).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Square sample</guilabel></term>
+          <listitem>
+            <para>
+              Fixes horizontal and vertical resolution to the same value.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Width</guilabel></term>
+          <term><guilabel>Height</guilabel></term>
+          <listitem>
+            <para>
+              Physical sample dimensions.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Identical measure</guilabel></term>
+          <listitem>
+            <para>
+              Keeps the ratio between physical dimension and number of
+              samples equal for horizontal and vertical direction, that is
+              the data has square pixels.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Z-scale (per sample unit)</guilabel></term>
+          <listitem>
+            <para>
+              The factor to multiply raw data with to get physical values.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+  <sect2 id='raw-file-import-data-format'>
+    <title>Data Format</title>
+    <para>
+      On the second tab, <guilabel>Data Format</guilabel>, particular data
+      format can be chosen. There are two independent possibilities:
+      <guilabel>Text data</guilabel> and <guilabel>Binary data</guilabel>.
+    </para>
+    <para>
+      Text files are assumed to be organized by lines, each line containing
+      a one data row, data being represented by integers or floating point
+      numbers in standard notation.  Following options are available:
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Start from line</guilabel></term>
+          <listitem>
+            <para>
+              The line data starts at, that is the number of lines to ignore
+              from file start.  All types of end-of-line markers (Unix,
+              MS-DOS, Macintosh) are recognized.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Each row skip</guilabel></term>
+          <listitem>
+            <para>
+              The number of fields to ignore at the begining of each line.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Field delimiter</guilabel></term>
+          <term><guilabel>Other delimiter</guilabel></term>
+          <listitem>
+            <para>
+              If delimiter is <guimenuitem>Any whitespace</guimenuitem>, then
+              any nonzero number of whitespace characters counts as field
+              delimiter.  If a whitespace character is selected, the
+              delimiter must be this character.  Otherwise field are
+              separated by specified character or string and all whitespace
+              around delimiters is ignored.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Decimal separator is comma</guilabel></term>
+          <listitem>
+            <para>
+              By default, floating point numbers are assumed to use decimal
+              point.  This option changes it to comma.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+    <para>
+      Following options are available for binary files:
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Binary data</guilabel></term>
+          <listitem>
+            <para>
+              You can either select one of predefined standard data formats,
+              or <guimenuitem>User defined</guimenuitem> to specify
+              a format with odd number of bits per sample or other
+              peculiarities.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Byte swap pattern</guilabel></term>
+          <listitem>
+            <para>
+              How bytes in samples are swapped.  This option is only
+              available for predefined formats larger than one byte.
+              Its bits correspond to groups of bytes to swap: if
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>j</phrase></mathphrase>
+                <alt>j</alt>
+              </inlineequation>-th
+              bit is set, adjacent groups of
+              <inlineequation>
+                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
+                <alt>2^j</alt>
+              </inlineequation>
+              bits are swapped.
+            </para>
+            <para>
+              For example, value 3 means sample will be divided into couples
+              (bit 1) of bytes and adjacent couples of bytes swapped,
+              and then divided into single bytes (bit 0) and adjacent bytes
+              swapped.  The net effect is reversal of byte order in groups
+              of four bytes.  More generally, if you want to reverse byte
+              order in groups of size
+              <inlineequation>
+                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
+                <alt>2^j</alt>
+              </inlineequation>,
+              which is the common case, use byte swap pattern
+              <inlineequation>
+                <mathphrase><phrase role='mathvar'>j</phrase> − 1</mathphrase>
+                <alt>j-1</alt>
+              </inlineequation>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Start at offset</guilabel></term>
+          <listitem>
+            <para>
+              Offset in file, in bytes, the data starts at.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Sample size</guilabel></term>
+          <listitem>
+            <para>
+              Size of one sample in bits for user defined formats.  E.g.,
+              if you have a file with only 4 bits per sample, type 4 here.
+              For predefined formats, their sample size is displayed, but
+              it is not modifiable.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>After each sample skip</guilabel></term>
+          <listitem>
+            <para>
+              The number of bits to skip after each sample.
+            </para>
+            <para>
+              Usually, samples are adjacent to each other in the file.  But
+              sometimes there are unused bits or bytes between them, that
+              can be speficified with this option.  Note for predefined
+              types the value must be a multiple of 8 (i.e., only whole
+              bytes can be skipped).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>After each row skip</guilabel></term>
+          <listitem>
+            <para>
+              The number of bits to skip after each sample in addition
+              to bits skipped after each sample.
+            </para>
+            <para>
+              Usually, rows are adjacent to each other in the file.  But
+              sometimes there are unused bits or bytes between them, that
+              can be speficified with this option.  Note for predefined
+              types the value must be a multiple of 8 (i.e., only whole
+              bytes can be skipped).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Reverse bits in bytes</guilabel></term>
+          <listitem>
+            <para>
+              Whether the order of bits in each byte should be reversed.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Reverse bits in samples</guilabel></term>
+          <listitem>
+            <para>
+              Whether the order bits in each sample should be reversed for
+              user defined samples.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Samples are signed</guilabel></term>
+          <listitem>
+            <para>
+              Whether samples are to be interpreted as signed numbers
+              (as opposed to unsigned).
+              For predefined formats, their signedness is displayed, but
+              it is not modifiable.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+  <sect2 id='raw-file-import-presets'>
+    <title>Presets</title>
+    <para>
+      Import settings can be saved as presets that allow to easily import
+      the same file – or the same file type –
+      later.
+    </para>
+    <para>
+      Button <guibutton>Store</guibutton> saves current import settings
+      under the name in <guilabel>Preset name</guilabel> field.
+      <guibutton>Rename</guibutton> renames currently selected preset to
+      specified name, <guibutton>Delete</guibutton> deletes selected preset,
+      and <guibutton>Load</guibutton> replaced current import setting with
+      selected preset.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='introduction'>
+  <title>Introduction</title>
+  <para>
+    This guide was last updated to version 2.19 of Gwyddion.
+    The latest version this guide can be found at
+    <ulink url='http://gwyddion.net/documentation/'>http://gwyddion.net/documentation/</ulink>.
+  </para>
+  <sect1 id='motivation'>
+    <title>Motivation</title>
+    <para>
+      <ulink url='http://gwyddion.net/'><application>Gwyddion</application></ulink>
+      is a modular program for SPM data analysis. Primarily it is
+      supposed to be used for analysis of height fields obtained by means of
+      scanning probe microscopy techniques (AFM, MFM, STM, NSOM), but
+      generally it can be used for any other height field analysis or image
+      analysis.
+      Gwyddion is Free Software (and Open Source Software), covered by
+      <ulink url='http://www.gnu.org/licenses/gpl.html'>GNU General Public License</ulink>
+      (GNU GPL).
+    </para>
+    <para>
+      The main idea behind Gwyddion developement is to provide modular
+      program for 2D data analysis that could be easily extended by modules
+      and plug-ins with no need of core recompilation. Moreover, the status of
+      free software enables to provide source codes to developers and users,
+      which makes the further program improvement easier.
+    </para>
+    <para>
+      Gwyddion can be currently used with Linux/Unix (including Mac OS X) and
+      Microsoft Windows operating systems. Both families of systems can be
+      used also for developement. For graphical interface,
+      <ulink url='http://www.gtk.org/'>Gtk+</ulink> widget toolkit is used,
+      therefore it can be basically ported on any system
+      that is supported by Gtk+.
+    </para>
+    <para>
+      Gwyddion core developement is currently funded by
+      <ulink url='http://www.cmi.cz/?lang=2'>Czech Metrology Institute</ulink>.
+      The project started as a part of the Nanomet initiative (covered by
+      Euromet) in August, 2004. It is supposed that more persons and
+      institutions will participate on developement. Project is open for
+      anyone. Welcome…
+    </para>
+  </sect1>
+  <sect1 id='licensing'>
+    <title>Licensing</title>
+    <para>
+      Gwyddion is covered by
+      <link linkend='gpl'>GNU General Public License</link>
+      (GNU GPL).  The full license text is also included as file
+      <filename>COPYING</filename> in the source distribution (MS Windows
+      installers contain it as file <filename>COPYING.wri</filename>).
+      In brief, this license means that:
+      <itemizedlist>
+        <listitem>
+          <para>
+            You can freely use the program.  You can freely make copies,
+            modify and distribute them.  You can download the program and its
+            source code from Gwyddion web pages and modify it as you want.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            If you decide to distribute it, the modified code is still covered
+            by the same license.  In particular, you have to offer the source
+            code too.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The same holds for extensions, e.g. if you write an import module
+            for a new file type or a new data analysis function it has to be
+            licensed under GNU GPL (if you distribute it).
+          </para>
+          <para>
+            However, it is also possible to execute third-party programs from
+            Gwyddion and these do not necessarily have to be distributed under
+            the same license – if they are not derived works of Gwyddion
+            (which, admittely, is not always easy to determine).
+          </para>
+        </listitem>
+      </itemizedlist>
+      The main reasons, why the program is covered by this kind of license
+      are here: first of all, this licensing policy enables us to make
+      modular program that can be easily developed my many persons from
+      different institutions. Second, this license protects the rights of
+      developers that their code, here given to public, cannot be copied and
+      used for closed proprietary products.
+    </para>
+  </sect1>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<book xmlns:xi='http://www.w3.org/2001/XInclude' xml:lang='en' lang='en'>
+  <bookinfo>
+    <title>Gwyddion user guide</title>
+    <author>
+      <firstname>Petr</firstname>
+      <surname>Klapetek</surname>
+    </author>
+    <author>
+      <firstname>David</firstname>
+      <surname>Nečas</surname>
+    </author>
+    <author>
+      <firstname>Christopher</firstname>
+      <surname>Anderson</surname>
+    </author>
+    <copyright>
+      <year>2004–2007, 2009</year>
+      <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
+    </copyright>
+    <releaseinfo>
+      Version 2009-11-11.  This guide is a work in progress.
+    </releaseinfo>
+    <legalnotice id='legalnotice'>
+      <para>
+        Permission is granted to copy, distribute and/or modify this document
+        under the terms of either
+        <itemizedlist>
+          <listitem>
+            <para>
+              The <link linkend='gfdl'>GNU Free Documentation License</link>,
+              Version 1.2 or any later version published by the
+              Free Software Foundation; with no Invariant Sections,
+              no Front-Cover Texts, and no Back-Cover Texts.
+              A copy of the license is included in the section entitled
+              <link linkend='gfdl'>GNU Free Documentation License</link>.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The <link linkend='gpl'>GNU General Public License</link>,
+              Version 2 or any later version published by the
+              Free Software Foundation. A copy of the license is included
+              in the section entitled
+              <link linkend='gpl'>GNU General Public License</link>.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </legalnotice>
+  </bookinfo>
+  <xi:include href='introduction.xml'/>
+  <xi:include href='install.xml'/>
+  <xi:include href='getting-started.xml'/>
+  <xi:include href='data-analysis.xml'/>
+  <xi:include href='summaries.xml'/>
+  <xi:include href='develop.xml'/>
+  <xi:include href='gpl.xml'/>
+  <xi:include href='fdl.xml'/>
+  <index id='subject-index'/>
+</book>
+<!-- vim: set ts=2 sw=2 et : -->

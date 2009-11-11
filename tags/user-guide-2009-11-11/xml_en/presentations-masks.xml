@@ -1,0 +1,398 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='presentations-masks'>
+  <title>Presentations and Masks</title>
+  <sect2 id='presentations-introduction'>
+    <indexterm><primary>presentation</primary></indexterm>
+    <title>Presentations</title>
+    <para>
+      Presentations can be used to show the height field in another way than as
+      a false color map of the heights, for instance with shading or with
+      highlighted edges.  It is also possible to superimpose an arbitrary data
+      field over another one as the presentation.
+    </para>
+    <para>
+      Note the superimposed presentation is really only a presentation, it is
+      never used for calculations.  In all data processing functions or tools
+      the results are always computed from the original underlying data.  Since
+      presentations can be computationaly intensive to calculate, they are not
+      automatically updated when the underlying data change.  The various
+      presentations available are described in section
+      <link linkend='presentations'>Presentations</link>.
+    </para>
+    <para>
+      The presence of presentation over the data is indicated by flag
+      <guilabel>P</guilabel> in the
+      <link linkend='data-browser-channels'>data browser</link> and also by the
+      empty false color map ruler on the right side of the
+      <link linkend='data-windows'>data window</link> that does not display
+      any ticks nor the minimum and maximum value.
+    </para>
+  </sect2>
+  <sect2 id='masks-introduction'>
+    <indexterm><primary>mask</primary></indexterm>
+    <title>Masks</title>
+    <para>
+      Masks are used for special areal selections, e.g. grains, defects or
+      factes with certain orientation.  Masks can have any shape and within the
+      data window and they are visualized by a color overlayed over the data.
+      The mask color and opacity can be changed in the right-click context
+      menu of the data window.
+    </para>
+    <para>
+      Since grain marking is the most common use of masks, several functions
+      that operate on marked areas are called <quote>grain</quote> functions,
+      e.g.  Grain Statistics.  Also, a contignuous part of mask is sometimes
+      called grain in this guide.  However, since a mask does not bear any
+      information how it was created all mask functions can be used with masks of
+      any origin.
+    </para>
+  </sect2>
+  <informalfigure id='fig-mask-presentation-scheme'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='data-show-mask.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>
+          Mask (top), presentation (middle), original data (bottom)
+        </phrase>
+      </textobject>
+      <caption>
+        Visualization of masks and presentations.  If you look from above they
+        can be imagined to be stacked as in the picture.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Both masks and presentations can be removed from the data by functions
+    in the right-click menu of the
+    <link linkend='data-windows'>data window</link>, or with
+    <link linkend='keyboard-shortcuts'>keyboard shortcuts</link>.
+  </para>
+  <informalfigure id='fig-mask-presentation'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='mask.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>A data field shown with a mask and a presentation</phrase>
+      </textobject>
+      <caption>
+        Data in default false color representation (left), with superimposed
+        mask visualized with a red color (centre) and with shading presentation
+        (right).
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='masks'>
+    <title>Working with Masks</title>
+    <para>
+      The mask-related functions can be divided into three main groups:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Creation
+        </term>
+        <listitem>
+          <para>
+            Masks are created by various types of marking functions, namely
+            grain marking functions
+            (<link linkend='grain-threshold'>Mark by Threshold</link>,
+            <link linkend='grain-watershed'>Mark by Watershed</link>),
+            defect marking functions
+            (<link linkend='mask-of-outliers'>Mask of Outliers</link>,
+            <link linkend='mark-scars'>Mark Scars</link>)
+            and feature marking functions
+            (<link linkend='mask-by-correlation'>Mask by Correlation</link>,
+            <link linkend='facet-analysis'>Facet Analysis</link>,
+            <link linkend='tip-certainty-map'>Certainty Map</link>).
+            In addition, some general mask editting functions provide means to
+            create masks from scratch.
+          </para>
+          <para>
+            Masks are also used to mark invalid pixels in files imported from
+            formats that distinguish between valid and invalid pixels since
+            Gwyddion does not have a concept of invalid pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Application
+        </term>
+        <listitem>
+          <para>
+            In general, the mask-covered area is considered to be the area of
+            interest, i.e. the area to operate on.  This applies namely to
+            statistical functions such as the
+            <link linkend='stat-quantities'>Statstical Quantities tool</link>.
+            Function
+            <link linkend='remove-data-under-mask'>Remove Data Under Mask</link>
+            replaces the data under mask, while the
+            <link linkend='remove-grains'>Remove Grains tool</link> can perform
+            such replacement for individual grains.  There are several functions
+            for the examination of grain properties, see section
+            <link linkend='grain-analysis-statistics'>Grain Statstics</link>.
+          </para>
+          <para>
+            Some functions ask whether to consider the area under mask included
+            or excluded (or ignore the mask), namely
+            <link linkend='leveling'>leveling functions</link>.  Such choice is
+            offered only if a mask is present on the data.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Editting
+        </term>
+        <listitem>
+          <para>
+            A few basic mask operations, such as inversion or complete removal,
+            are available in
+            <menuchoice>
+              <guimenu>Data Process</guimenu>
+              <guisubmenu>Mask</guisubmenu>
+            </menuchoice>
+            menu.  More advanced functions include the grain-oriented
+            <link linkend='remove-grains'>Remove Grains tool</link> and
+            <link linkend='grain-remove-thresholding'>Remove by Threshold</link>
+            that provide different means to remove parts of the mask, as well
+            as
+            <link linkend='mask-editor'>Mask Editor tool</link> and
+            <link linkend='mark-with'>Mark With</link>
+            focused on general mask editting.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='mask-editor'>
+    <title>
+      Mask Editor Tool
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_mask_editor-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      The Mask Editor is the basic mask modification tool.  It provides two
+      groups of functions: editing of the mask by drawing shapes directly in
+      the data window and global operations with the mask such as inversion
+      or growing and shrinking.  The drawing operations are controlled by the
+      buttons in the <guilabel>Editor</guilabel> group.
+    </para>
+    <para>
+      Buttons in the <guilabel>Mode</guilabel> row select how the shape drawn
+      in the data window will modify the mask:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Set
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            The mask is set to the drawn shape, discarding any mask already
+            present.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Add
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_add-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            The mask is extended by the drawn shape (if there is no mask yet
+            a mask is created).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Subtract
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_subtract-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            The drawn shape is cut out from the mask
+            This function has no effect if there is no mask.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Intersect
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_intersect-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            The mask is set to the intersection of the drawn shape and the
+            already present mask.
+            This function has no effect if there is no mask.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Buttons in the <guilabel>Shape</guilabel> row control which shape is
+      drawn on the mask.  The choices include rectangles, ellipses and thin
+      lines.
+    </para>
+    <para>
+      The basic global operation with masks, i.e. inversion, removal and
+      filling the entire data field area with a mask are available in the
+      <guilabel>Actions</guilabel> row.  Additional operations include:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guibutton>Grow</guibutton>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_grow-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Extends the mask by <guilabel>Amount</guilabel> pixels on each
+            side.  More precisely, the mask is extended by one pixel on each
+            side and this is repeated <guilabel>Amount</guilabel> times.
+          </para>
+          <para>
+            Normally, growing does not distinguish between individual parts of
+            the mask.   Parts that grow so much that they touch therefore
+            merge.  This can be prevented by <guilabel>Prevent grain merging
+              by growing</guilabel> which makes individual parts of the mask
+            stop growing once there is only one-pixel space between them.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guibutton>Shrink</guibutton>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_shrink-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Reduces the mask by <guilabel>Amount</guilabel> pixels from each
+            side.  More precisely, the mask is reduced by one pixel from each
+            side and this is repeated <guilabel>Amount</guilabel> times.
+          </para>
+          <para>
+            The reduction may or may not occur from the data field borders.
+            This is controlled by the <guilabel>Shrink from border</guilabel>
+            check box.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='mark-with'>
+    <title>Mark With</title>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Mask</guisubmenu>
+        <guimenuitem>Mark With</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Mark With can create or modify masks using another mask or data of the
+      same dimensions.  The operations that can be applied to the current mask
+      are the same as in the
+      <link linkend='mask-editor'>Mask Editor tool</link>: creation,
+      union, subtraction and intersection.  The source of the other mask can
+      be one of the following:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Mask
+        </term>
+        <listitem>
+          <para>
+            This is the simplest case, a mask can be combined with another mask
+            using the specified logical operations.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Data
+        </term>
+        <listitem>
+          <para>
+            In the Data mode, another height field is used as the other mask
+            source.  The mask consists of pixels within a range of heights,
+            specified as relative values within the total range.  To use pixels
+            outside a certain range for the masking, set the upper bound to a
+            smaller value than the lower bound.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Presentation
+        </term>
+        <listitem>
+          <para>
+            The Presentation mode differs from Data mode only in that a
+            presentation is used instead of the data.
+          </para>
+          <para>
+            This is an exception to the rule stating that presentations are
+            never used for further processing.  Sometimes it can be useful to
+            mark, for instance, edges found on the data even though the
+            corresponding presentation visualizes a quantity weird from the
+            physical point of view.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='development'>
+  <title>Developing Gwyddion</title>
+  <para>
+    You are encouraged to become a developer of Gwyddion.
+  </para>
+  <para>
+    If you want to become developer, we recommend you to start with some
+    simple modules (see module tutorial), to see how the application works.
+    If you write a module or plug-in, you are encouraged to share it here
+    with other Gwyddion users.  Let us know, so that we can link your
+    modules or plug-ins to these pages or even include in it Gwyddion. You
+    don't have to limit yourself to modules or plug-ins of course, but they
+    should be easier to start with.
+  </para>
+  <sect2 id='api-references'>
+    <title>API References</title>
+    <para>
+      There are many functions that can help you while developing your module.
+      See API reference at
+      <ulink url='http://gwyddion.net/documentation/'>Documentation
+        section</ulink> of the project web.
+    </para>
+  </sect2>
+  <sect2 id='bug-reports'>
+    <title>Bug reports</title>
+    <para>
+      We will be very happy if you send as bug reports if you find errors in
+      Gwyddion. For doing this, please, specify as much as possible the
+      situation that led to error, operating system and Gwyddion version
+      used. You can also send us the SPM data that were being processed when
+      the problem was found, this is necessary namely for reporting bugs
+      related to file loading and saving.
+    </para>
+    <para>
+      The preferred bug reporting method is to send an e-mail to
+      <email>klapetek@gwyddion.net</email>.
+    </para>
+  </sect2>
+</chapter>

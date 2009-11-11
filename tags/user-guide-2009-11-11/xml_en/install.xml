@@ -1,0 +1,1220 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<chapter id='installation'>
+  <title>Installation</title>
+  <para>
+    <application>Gwyddion</application> source code and binaries can be
+    downloaded from the
+    <ulink url='http://gwyddion.net/download.php'>download</ulink>
+    web page of the project, or alternatively from raw
+    <ulink url='http://sourceforge.net/project/showfiles.php?group_id=121723'>SourceForge.net download page</ulink>.
+    The installation slightly varies depending on the operating system used.
+    However, basically it consist of two steps:
+    <itemizedlist>
+      <listitem>
+        <para>
+          Installing the <ulink url='http://www.gtk.org/'>Gtk+</ulink> widget
+          toolkit (if not already done).
+        </para>
+      </listitem>
+      <listitem>
+        <para>Installing Gwyddion</para>
+      </listitem>
+    </itemizedlist>
+    The first step is necessary at first <application>Gwyddion</application>
+    installation on operating systems that do not come with Gtk+.
+    The version of Gtk+ necessary for your system (and where to obtain it) is
+    described in the next sections.
+  </para>
+  <para>
+    Generally, one needs Gtk+ libraries (run-time package) for running
+    <application>Gwyddion</application>
+    and a Gtk+ development package for <application>Gwyddion</application>
+    compilation from source code and development.
+  </para>
+  <para>
+    Beside Gtk+, Gwyddion can optionally utilize also other software libraries
+    and components that are described in section
+    <link linkend='installation-dependencies'>Build Dependencies</link>.
+    This is mainly important if you build Gwyddion from the source code and
+    hence can control what features it will include.
+  </para>
+  <para>
+    We recommend to download
+    <ulink url='http://gwyddion.net/download.php#sample-files'>sample
+      <application>Gwyddion</application> files</ulink>
+    too. They are in native <application>Gwyddion</application> format
+    and represent typical AFM data.
+  </para>
+
+  <sect1 id='installation-unix'>
+    <title>Linux/Unix Packages</title>
+    <para>
+      Some GNU/Linux and Unix systems may provide binary packages of Gwyddion.
+      The <ulink url='http://gwyddion.net/download.php'>download</ulink> page
+      of the project also tracks known packages and packaging efforts.  For
+      instance, Debian, Ubuntu, Gentoo, openSuSE or FreeBSD
+      offer Gwyddion packages.  If your operating system provides such a
+      package and it is recent enough, install it using the standard means of
+      the operating system.  Otherwise proceed with compilation from source
+      code.
+    </para>
+    <para>
+      On Linux distributions using the
+      <ulink url='http://www.rpm.org/'>RPM Package Manager</ulink>,
+      such as Fedora, openSuSE or Mandriva, you can also build a package
+      yourself from the source code, as
+      <link linkend='installation-unix-source-rpm'>described below</link>.
+    </para>
+  </sect1>
+
+  <sect1 id='installation-ms-windows'>
+    <title>MS Windows Packages</title>
+    <para>
+      If you never had any Gtk+ based application on your system (for example
+      bitmap editor
+      <ulink url='http://www.gimp.org/'><application>GIMP</application></ulink>)
+      you will need to install Gtk+ run-time environment on your computer prior
+      to <application>Gwyddion</application> installation.
+      Gtk+ is a library designed for portable creating of graphical user
+      interface (windows, buttons, etc.) that is available on many operating
+      systems. Therefore applications using Gtk+ can be ported to various
+      operating systems, including Microsoft Windows.
+    </para>
+    <para>
+      Note that there are several Gtk+ packages for MS Windows operating
+      systems available on the internet. Some of them include all required
+      components (like GtkGLExt and LibXML2), some do not. We recommend
+      <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe'>GladeWin32</ulink>
+      packages that are known to contain all required components and we
+      build Gwyddion MS Windows executables with them.
+    </para>
+    <para>
+      For installation of <application>Gwyddion</application> follow these
+      steps:
+    </para>
+    <itemizedlist>
+      <listitem>
+        Download the Gtk+ run-time environment installer from
+        <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe'>Gladewin32</ulink>,
+        version 2.8 or higher, and install it.
+      </listitem>
+      <listitem>
+        Download <ulink url='http://gwyddion.net/download.php#stable-windows'><application>Gwyddion</application> installer</ulink> and install
+        <application>Gwyddion</application>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      The installer offers a choice of languages to use for the user
+      interface.  After installation, the lagnauge can be changed by editting
+      registry keys in <command>regedit</command>.  For user-settings, edit
+      <informalexample>
+        <literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal>
+      </informalexample>
+      while
+      <informalexample>
+        <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal>
+      </informalexample>
+      can be set for system-wide default.  The list of available languages
+      include:
+    </para>
+    <informaltable frame='none' id='table-locales'>
+      <tgroup cols='2'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry><envar>gwy_locale</envar></entry>
+            <entry>Language</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>cs_CZ.UTF-8</literal></entry>
+            <entry>Czech (Czech Republic)</entry>
+          </row>
+          <row>
+            <entry><literal>de_DE.UTF-8</literal></entry>
+            <entry>German (Germany)</entry>
+          </row>
+          <row>
+            <entry><literal>en_US.UTF-8</literal></entry>
+            <entry>English (Unites States)</entry>
+          </row>
+          <row>
+            <entry><literal>fr_FR.UTF-8</literal></entry>
+            <entry>French (France)</entry>
+          </row>
+          <row>
+            <entry><literal>it_IT.UTF-8</literal></entry>
+            <entry>Italian (Italy)</entry>
+          </row>
+          <row>
+            <entry><literal>ru_RU.UTF-8</literal></entry>
+            <entry>Russian (Russia)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+
+  <sect1 id='installation-dependencies'>
+    <title>Build Dependencies</title>
+    <para>
+      The following table lists packages required to build
+      <application>Gwyddion</application> from source code.  The table does not
+      include common software compilation prerequisites like the C compiler or
+      <command>make</command>.  Operating system specifics are described
+      in following sections dedicated to building on particular operating
+      systems.
+    </para>
+    <variablelist>
+      <title>Build Dependencies</title>
+      <varlistentry id='dependency-gtk'>
+        <term>
+          <ulink url='http://www.gtk.org/'>Gtk+</ulink>
+          ≥ 2.8.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Required.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-pkg-config'>
+        <term>
+          <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
+          ≥ 0.16
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Required.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gtkglext'>
+        <term>
+          <ulink url='http://gtkglext.sourceforge.net/'>GtkGLExt</ulink>
+          ≥ 1.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables OpenGL 3D data views.
+          </para>
+          <para>
+            The MS Windows build system is set up to require GtkGLExt and
+            manual adjustments are necessary to disable it there.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-libxml2'>
+        <term>
+          <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
+          ≥ 2.<varname>x</varname>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables import of SPML files.
+          </para>
+          <para>
+            The MS Windows build system is set up to require LibXML2 and
+            manual adjustments are necessary to disable it there.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-fftw'>
+        <term>
+          <ulink url='http://www.fftw.org/'>FFTW3</ulink>
+          ≥ 3.0 (32bit),
+          ≥ 3.1 (64bit),
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Speeds up various integral transforms, power spectrum and
+            correlation operations.
+          </para>
+          <para>
+            Building with FFTW3 enabled is currently unsupported on MS Windows,
+            although it is probably possible with some effort and manual
+            adjustments.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-unique'>
+        <term>
+          <ulink url='http://www.gnome.org/~ebassi/source/'>LibUnique</ulink> ≥ 1.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables <link linkend='remote-control'>remote control</link> based
+            on D-BUS or whatever technology is currently in.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-libxmu'>
+        <term>
+          <ulink url='http://www.x.org/'>LibXmu</ulink>, X11 only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables <link linkend='remote-control'>remote control</link> on
+            X11.  This is a standard X Window System library and everyone
+            having X probably has its runtime files.  However, since the
+            modularization of X in Xorg 7.0 it is distributed separately and
+            therefore you might not have its development files installed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-pygtk2'>
+        <term>
+          <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables pygwy, the Gwyddion Python scripting interface.
+          </para>
+          <para>
+            Note that pygwy is not fully functional on MS Windows at this
+            moment.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gtksourceview'>
+        <term>
+          <ulink url='http://gtksourceview.sourceforge.net/'>GtkSourceView</ulink>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables syntax highlighting in the Python scripting console.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-desktop-file-utils'>
+        <term>
+          <ulink url='http://www.freedesktop.org/software/desktop-file-utils'>desktop-file-utils</ulink>,
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables basic desktop integration to Freedesktop-conforming
+            environments, such as installation of Gwyddion to the menus and
+            file associations.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gconf2'>
+        <term>
+          <ulink url='http://projects.gnome.org/gconf/'>GConf2</ulink>,
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Optional.</emphasis>
+          </para>
+          <para>
+            Enables better GNOME and XFce integration, in particular automatic
+            generation of SPM file thumbnails in Nautilus and Thunar.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect1>
+
+  <sect1 id='installation-unix-source'>
+    <title>Linux/Unix from Source Code Tarball</title>
+    <para>
+      <application>Gwyddion</application> Unix build system is based on
+      GNU autotools
+      (<ulink url='http://www.gnu.org/software/autoconf/'>autoconf</ulink>,
+      <ulink url='http://www.gnu.org/software/automake/'>automake</ulink>,
+      <ulink url='http://www.gnu.org/software/libtool/'>libtool</ulink>), like
+      most of current Unix Free and Open Source Software.  If you have ever
+      compiled software from source code, you very likely met autotools and
+      already know how to proceed.  This section shall describe the
+      compilation procedure in enough detail even for the uninitiated though.
+      File <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL'><filename>INSTALL</filename></ulink>
+      in the top-level directory of the
+      source tarball contains generic GNU autotools installation instructions.
+      <application>Gwyddion</application> specific information can be found in
+      file <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL.gwyddion'><filename>INSTALL.gwyddion</filename></ulink>.
+      Since this file comes with a particular version of
+      <application>Gwyddion</application> it may contain more concrete or
+      up-to-date information and you should follow it instead of this general
+      guide should they disagree.
+    </para>
+    <sect2 id='installation-unix-source-quick'>
+      <title>Quick Instructions</title>
+      <para>
+        If you know the drill:
+      </para>
+      <informalexample>
+        <literallayout><userinput>tar -jxvf gwyddion-2.19.tar.bz2
+cd gwyddion-2.19
+./configure
+make install</userinput></literallayout>
+      </informalexample>
+    </sect2>
+    <sect2 id='installation-unix-source-unpacking'>
+      <title>Source Unpacking</title>
+      <para>
+        Unpack the source code tarball with
+        <informalexample>
+          <literallayout><userinput>tar -jxvf gwyddion-2.19.tar.bz2</userinput></literallayout>
+        </informalexample>
+        replacing 2.19 with the actual version number. It will create directory
+        <filename>gwyddion-2.19</filename> (again, with the actual version
+        number in place of 2.19), <command>cd</command> to this directory.
+        All other compilation actions will take place there.
+      </para>
+      <para>
+        If your operating system does not come with bzip2 you might want to
+        download <filename>gwyddion-2.19.tar.gz</filename> (compressed with
+        gzip) instead and unpack it with
+        <informalexample>
+          <literallayout><userinput>tar -zxvf gwyddion-2.19.tar.gz</userinput></literallayout>
+        </informalexample>
+        However, modern Unix and Unix-like systems come with both bzip2 and
+        gzip so, the considerably smaller
+        <filename>gwyddion-2.19.tar.bz2</filename> should be normally the
+        better choice.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-configuration'>
+      <title>Configuration</title>
+      <para>
+        Run
+        <informalexample>
+          <literallayout><userinput>./configure</userinput></literallayout>
+        </informalexample>
+        to configure <application>Gwyddion</application>.
+      </para>
+      <para>
+        The <command>configure</command> shell script attempts to guess correct
+        values for various system-dependent variables used during compilation.
+        It uses those values to create a <filename>Makefile</filename> in each
+        directory of the package, a couple of header <filename>.h</filename>
+        files containing system-dependent definitions and a few other
+        system-dependent auxiliary files.
+        Finally, it creates a shell script <command>config.status</command> that
+        you can run in the future to recreate the current configuration, and
+        a file <filename>config.log</filename>.  This file contains the details
+        of the detection process and it is helpful to include it in compilation
+        related bug reports.
+      </para>
+      <para>
+        If <command>configure</command> reports missing required packages,
+        install these packages and re-run it.  The same applies to the case
+        when <command>configure</command> passes but you find you have not
+        installed an optional package you want to compile
+        <application>Gwyddion</application> with.  It is possible a package
+        is not found or it is misdetected even if you have installed it, namely
+        when it is installed into a non-standard directory. In this case it
+        is necessary to adjust certain environment variables to make
+        <command>configure</command> able to find the packages:
+        <variablelist>
+          <varlistentry>
+            <term><envar>PKG_CONFIG_PATH</envar></term>
+            <listitem>
+              <para>
+                Most packages come with so called
+                <ulink url='http://pkgconfig.freedesktop.org/wiki/'>pkg-config</ulink>
+                files (<filename>.pc</filename>) that describe how programs
+                should compile and link with them.  <command>configure</command>
+                uses information from these files, therefore
+                <envar>PKG_CONFIG_PATH</envar> must be set to list all
+                non-standard directories with relevant pkg-config files.
+                To add for instance a Gtk+ installation in
+                <filename>/opt/gnome</filename> and a FFTW3 installation in
+                <filename>$HOME/opt/fftw3</filename> one can do
+                <userinput>PKG_CONFIG_PATH=/opt/gnome/lib/pkgconfig:$HOME/opt/fftw3/lib/pkgconfig; export PKG_CONFIG_PATH</userinput>
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+              <envar>PATH</envar>,
+              <envar>LD_LIBRARY_PATH</envar>
+            </term>
+            <listitem>
+              <para>
+                It may be necessary to adjust these variables to include
+                non-standard directories with executables and libraries of
+                relevant packages, respectively.
+              </para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>
+              <envar>CPPFLAGS</envar>,
+              <envar>LDFLAGS</envar>
+            </term>
+            <listitem>
+              <para>
+                It may be necessary to adjust these variables to include
+                non-standard directories with header files and libraries of
+                packages that do not come with pkg-config files, for example
+                for libTIFF in <filename>/usr/local</filename> one can do
+                <userinput>CPPFLAGS=-I/usr/local/include; export CPPFLAGS</userinput>
+                and
+                <userinput>LDFLAGS=-L/usr/local/lib; export LDFLAGS</userinput>.
+              </para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </para>
+      <para>
+        The directory <application>Gwyddion</application> will install to and
+        various optional features can be enabled/disabled
+        with <command>configure</command> command line
+        options. To obtain the complete list of these options, run
+        <informalexample>
+          <literallayout><userinput>./configure --help</userinput></literallayout>
+        </informalexample>
+        Option <option>--prefix</option> sets the base installation
+        directory. Program components will be installed into its
+        <filename>bin</filename>, <filename>lib</filename>,
+        <filename>share</filename>, etc. subdirectories (they will be created
+        if they do not exist). More detailed control is possible with options
+        specifying particular subdirectories as <option>--bindir</option>,
+        <option>--libdir</option>.  The default prefix is
+        <filename>/usr/local/bin</filename>, to install
+        <application>Gwyddion</application> to your home directory you
+        may want to use for instance
+        <informalexample>
+          <literallayout><userinput>./configure --prefix=$HOME/opt/gwyddion</userinput></literallayout>
+        </informalexample>
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-configuration2'>
+      <title>Configuration tweaks</title>
+      <para>
+        Optional features can be enabled/disabled with options such as
+        <option>--with-fftw3</option>/<option>--without-fftw3</option>
+        (for FFTW3):
+        <informalexample>
+          <literallayout><userinput>./configure --with-fftw3</userinput></literallayout>
+        </informalexample>
+        By default all optional features are enabled if their prerequisites
+        are found.  A brief summary enabled and disabled optional features is
+        printed near the end of <command>configure</command> output.
+      </para>
+      <para>
+        Certain auxiliary installation actions can be disabled in
+        <command>configure</command>: Updating of Freedesktop files can be
+        disabled with <userinput>--disable-desktop-file-update</userinput>.
+        Installation of GConf2 schemas can be disabled with
+        <userinput>--disable-schemas-install</userinput>.  However, the usual
+        reason for disabling these actions is that Gwyddion is installed into
+        a staging area instead of the final directory (commonly done when
+        building Linux packages).  In this case the auxiliary actions are
+        disabled automatically by non-empty <varname>DESTDIR</varname> (see
+        <link linkend='installation-unix-source-installation'>installation</link>)
+        and hence they need not be disabled in <command>configure</command>.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-compilation'>
+      <title>Compilation</title>
+      <para>
+        Run
+        <informalexample>
+          <literallayout><userinput>make</userinput></literallayout>
+        </informalexample>
+        and wait until <application>Gwyddion</application> is compiled.  If
+        <command>configure</command> finished without errors the compilation
+        should pass too.
+      </para>
+      <para>
+        If you need to do unusual things to compile the package, please try to
+        figure out how <command>configure</command> could detect whether and
+        what to do, and e-mail patches or instructions to the bug-report
+        address so they can be considered for the next release.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-installation'>
+      <title>Installation</title>
+      <para>
+        Run
+        <informalexample>
+          <literallayout><userinput>make install</userinput></literallayout>
+        </informalexample>
+        to install <application>Gwyddion</application> to the target directory.
+        If you install <application>Gwyddion</application> to a system
+        directory you have to become root for running this command, for
+        example using sudo:
+        <informalexample>
+          <literallayout><userinput>sudo make install</userinput></literallayout>
+        </informalexample>
+        Note <application>Gwyddion</application> has to be installed to be run,
+        it is not possible to run it uninstalled.
+      </para>
+      <para>
+        To install <application>Gwyddion</application> to a staging area,
+        for example for packaging, set <command>make</command>
+        <varname>DESTDIR</varname> variable to a prefix that will be
+        prepended to all target directories:
+        <informalexample>
+          <literallayout><userinput>make install DESTDIR=/var/tmp/gwyddion-buildroot</userinput></literallayout>
+        </informalexample>
+        Do <emphasis>not</emphasis> override individual directory variables as
+        <varname>bindir</varname>, <varname>libdir</varname>.
+      </para>
+      <para>
+        If you do not install to a system directory, e.g. install to a
+        subdirectory of your home directory, you may need to adjust the
+        following variables during installation:
+        <itemizedlist>
+          <listitem>
+            <varname>GCONF_SCHEMA_CONFIG_SOURCE</varname> – location of GConf2
+            schemas
+          </listitem>
+          <listitem>
+            <varname>KDE4_MODULE_DIR</varname> – location of KDE4 modules
+          </listitem>
+        </itemizedlist>
+        Also, variable <varname>XDG_DATA_DIRS</varname> might need to be
+        adjusted after installation to get full desktop integration.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-deinstallation'>
+      <title>Deinstallation</title>
+      <para>
+        Run
+        <informalexample>
+          <literallayout><userinput>make uninstall</userinput></literallayout>
+        </informalexample>
+        in the directory you previously compiled
+        <application>Gwyddion</application> to remove it.  If you have lost
+        the source directory meanwhile you can try to unpack, configure and
+        build it exactly as before and then issue
+        <userinput>make uninstall</userinput>, although this relies on your
+        ability to reproduce the build process.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-rpm'>
+      <title>RPM Packages</title>
+      <para>
+        It is possible to build RPM packages on RPM-based GNU/Linux
+        distributions directly from source code tarballs with
+        <informalexample>
+          <literallayout><userinput>rpmbuild -tb gwyddion-2.19.tar.bz2</userinput></literallayout>
+        </informalexample>
+        where 2.19 is to be replaced with the actual version as above.
+        This method was tested mainly on Fedora, openSuSE and Mandriva and
+        the RPM spec file contains some specific provisions for these systems.
+        Specific support for other RPM-based systems can be added on request.
+      </para>
+    </sect2>
+  </sect1>
+
+  <sect1 id='installation-osx'>
+    <title>Mac OS X</title>
+    <para>
+      Much of the previous generic
+      <link linkend='installation-unix-source'>Unix/Linux installation
+        section</link> applies also to OS X.  Therefore this section deals
+      mainly with the specifics of OS X installation, some of the steps
+      listed here are explained in more detail in the generic Unix section.
+    </para>
+    <para>
+      Beside building everything on your own (good luck), at this time there
+      are two ways to install <application>Gwyddion</application>:
+      <itemizedlist>
+        <listitem>
+          using <ulink url='http://www.macports.org/'>MacPorts</ulink>
+          (formerly Darwinports) and building from a Portfile.
+        </listitem>
+        <listitem>
+          using <ulink url='http://fink.sourceforge.net/'>Fink</ulink> and
+          compiling <application>Gwyddion</application> the common Unix way,
+        </listitem>
+      </itemizedlist>
+    </para>
+    <sect2 id='installation-osx-preparation'>
+      <title>Preparation</title>
+      <para>
+        To install and run <application>Gwyddion</application> you need the
+        Xcode Tools and X (SDK and App) installed. They where located on your
+        CDs/DVDs. The Xcode Tools where located on the first DVD as
+        XcodeTools.mpkg below Xcode Tools, the X11SDK is located as
+        X11SDK.pkg below the Packages Folder within Xcode Tools. X11 is
+        localted as X11User.pkg below
+        <filename>System/Installation/Packages</filename> even on the first
+        DVD. If you have an CD Set the Discs may differ.
+
+		The people from MacPorts recommending using the newest version of
+		XCode. For further information look at the
+		<ulink url='http://www.macports.org/install.php'>MacPorts Install Page</ulink>.
+
+        <!-- XXX rowue: look where you find it on ppc -->
+		<!-- rowue: 10.4 PPC is one DVD -->
+        Also you should have some experience using
+        <application>Terminal.app</application>.  All the commands in the
+        the rest of this section are to be entered and run in
+        <application>Terminal.app</application>.
+      </para>
+      <para>
+        See <link linkend='installation-dependencies'>installation
+          dependencies</link> section for an overview of required and
+        optional packages to install prior to
+        <application>Gwyddion</application> installation. The following table
+        summarizes how they are called in the two software collections:
+      </para>
+      <informaltable frame='none' id='table-osx-package-names'>
+        <tgroup cols='3'>
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Package</entry>
+              <entry>Fink</entry>
+              <entry>MacPorts</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Gtk+</entry>
+              <entry>gtk+2</entry>
+              <entry>gtk2</entry>
+            </row>
+            <row>
+              <entry>GtkGLExt</entry>
+              <entry>gtkglext1</entry>
+              <entry>gtkglext</entry>
+            </row>
+            <row>
+              <entry>FFTW3</entry>
+              <entry>fftw3</entry>
+              <entry>fftw-3</entry>
+            </row>
+            <row>
+              <entry>LibXML2</entry>
+              <entry>libxml2</entry>
+              <entry>libxml2</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </sect2>
+    <sect2 id='installation-osx-macports'>
+      <title>MacPorts</title>
+      <para>
+        MacPorts is an <application>Port</application> based System for
+        porting and installing Open Source/GNU software to OS X. It's based
+        on using installation files called <quote>Portfiles</quote> which
+        where describing the steps to compile and install an application. So
+        it's far easy to port software to OS X using MacPorts but every
+        computer has to compile the application.
+        Get and install
+        <ulink url='http://www.macports.org/'>MacPorts</ulink>.
+        After you installed MacPorts, run
+        <informalexample>
+          <literallayout><userinput>sudo port selfupdate</userinput></literallayout>
+        </informalexample>
+        to update MacPorts to the latest version.
+      </para>
+
+	  <para>
+	    Usually installing ports with MacPorts is easy. But since X11 is not
+		the native Desktop for OS X, things went a litte worse. So it is
+		recommended to install an alternative X11 before installing
+		<application>Gwyddion</application>. The recommended alternatives
+		are <ulink url='http://http://xquartz.macosforge.org/'>XQuartz</ulink>
+		on Leopard and the Port <application>xorg-server</application> on
+		Tiger.
+
+		After installing the suggested X11-System, 
+		<application>Gwyddion</application> can be then build and installed
+        simply by
+        <informalexample>
+          <literallayout><userinput>sudo port install gwyddion</userinput></literallayout>
+        </informalexample>
+		To install <application>xorg-server</application> (Tiger) simply type
+        <informalexample>
+          <literallayout><userinput>sudo port install xorg-server</userinput></literallayout>
+        </informalexample>
+		this is <emphasis>needed</emphasis> for the 3D view on tiger.
+
+        After everything is done, you will find the StartUp-Icon
+		below <filename>/Applications/MacPorts</filename>.
+      </para>
+    </sect2>
+    <sect2 id='installation-osx-fink'>
+      <title>Fink</title>
+      <para>
+        <!-- XXX: a few more words about fink -->
+        Get and install
+        <ulink url='http://fink.sourceforge.net/'>Fink</ulink>.
+        After you installed Fink run
+        <informalexample>
+          <literallayout><userinput>apt-get update</userinput></literallayout>
+        </informalexample>
+        to update the database of available packages and install Gwyddion
+        with
+        <informalexample>
+          <literallayout><userinput>apt-get install gwyddion</userinput></literallayout>
+        </informalexample>
+        To install Gwyddion from source code, for instance if you want to
+        install a development version, you need to install the required
+        packages listed in the <link linkend='table-osx-package-names'>above
+          table</link> and then follow the generic
+        <link linkend='installation-unix-source'>Unix installation
+          section</link> instructions.
+      </para>
+    </sect2>
+    <sect2 id='installation-osx-running'>
+      <title>Running</title>
+      <para>
+	    On MacPorts you simply click on the StartUp-Icon and
+		wait until <application>Gwyddion</application> appears. Using
+		Fink or an self-compiled version you should follow 
+		the steps below:
+
+        Start <application>X11.app</application> and type
+        in <application>Terminal.app</application>
+        <informalexample>
+          <literallayout><userinput>export DISPLAY=":0"</userinput></literallayout>
+        </informalexample>
+        Then run <application>Gwyddion</application> from the folder it
+        was installed to.  This is typically
+        <filename>/usr/local/bin</filename> for Fink.  So for example for
+        Fink run:
+        <informalexample>
+          <literallayout><userinput>/usr/local/bin/gwyddion</userinput></literallayout>
+        </informalexample>
+        You can also configure <application>X11.app</application>
+        to run <application>Gwyddion</application> via:
+        Locate X11.app in your dock, open the menu, choose Applications,
+        choose Customize from the next menu. Here you can choose add and
+        enter the name (gwyddion for example) as <guilabel>Menu Name</guilabel>
+        and the complete path to gwddion (e.g. /usr/local/bin/gwyddion)
+        as <guilabel>Command</guilabel>. After this you
+        can choose gwyddion from the X11 menue.
+      </para>
+    </sect2>
+  </sect1>
+
+  <sect1 id='installation-ms-windows-source'>
+    <title>MS Windows from Source Code Tarball</title>
+    <para>
+      <application>Gwyddion</application> MS Windows build system uses the
+      <application>Microsoft Visual C++</application> (MSVC) compiler
+      (version 6 is tested and recommended, albeit it is a bit older).  It
+      primarily consists of a set of <command>nmake</command> makefiles,
+      that is the compilation is done from the command line.  This approach
+      has several advantages with respect to reproducibility and automation of
+      the process. Furthermore, it enables easy synchronization of Unix and MS
+      Windows build systems.  The necessity to use command line may be
+      considered a disadvantage though you should find the compilation process
+      quite simple even you are not used to use the command line much.
+    </para>
+    <para>
+      In addition to MSVC you need to install Gtk+ development environment.
+      Again, we recommend to use the
+      <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-dev-2.12.9-win32-2.exe'>GladeWin32</ulink>
+      package.  Note it also contains the complete run-time environment,
+      therefore you do not need to install the run-time package if you install
+      the development one.
+    </para>
+    <sect2 id='installation-ms-windows-source-unpacking'>
+      <title>Unpacking</title>
+      <para>
+        Unpack the source code tarball with your favorite (de)compression
+        program or file manager. Tarballs compressed with
+        <ulink url='http://www.bzip.org/'>bzip2</ulink>
+        (<filename>.bz2</filename>)
+        are considerably smaller than
+        <ulink url='http://www.gzip.org/'>gzip</ulink> compressed tarballs
+        (<filename>.gz</filename>), however support for bzip2 compression used
+        to be less widespread than gzip compression support in MS Windows
+        programs. Most recent programs support both, for example
+        <ulink url='http://www.7-zip.org/'><application>7zip</application></ulink>
+        which is also Free Software.
+      </para>
+      <para>
+        The unpacking will create directory
+        <filename>gwyddion-2.19</filename> (with 2.19 replaced with the actual
+        version number) where all other compilation actions will take place.
+      </para>
+    </sect2>
+    <sect2 id='installation-ms-windows-source-configuration'>
+      <title>Configuration</title>
+      <para>
+        Open file <filename>make.msc</filename> in a text editor.  It starts
+        approximately as follows:
+      </para>
+      <informalexample>
+        <programlisting><![CDATA[
+# @(#) $]]><![CDATA[Id: make.msc 8812 2008-12-02 08:49:22Z xhorak $
+#
+# XXX: Set following to your Gtk+-Development and MSVC paths
+#
+# The uncommented paths should work for default MSVC 6 installation and for
+# default GladeWin32 installation.
+# If you have GtkGLext separate from Gtk+, define GTKGLEXT_TOP accordingly.
+# If you have LibXML2 separate from Gtk+, define LIBXML2_TOP accordingly.
+GTK_TOP = C:\Gtk
+GTKGLEXT_TOP = $(GTK_TOP)
+LIBXML2_TOP = $(GTK_TOP)
+#GTKGLEXT_TOP = C:\GtkGLExt\1.0
+#LIBXML2_TOP = C:\libxml2
+MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
+]]></programlisting>
+      </informalexample>
+      <para>
+        Check and correct the paths according to the instructions.  Often,
+        no modifications are necessary as the paths in the file represent the
+        default installation directories of each program.
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><envar>GTK_TOP</envar></term>
+          <listitem>
+            It should point to the top-level directory of Gtk+ installation,
+            that is the directory containing <filename>bin</filename>,
+            <filename>lib</filename>, <filename>share</filename>, etc.
+            subdirectories.  We will refer to its value as to
+            <envar>$(GTK_TOP)</envar> below.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>GTKGLEXT_TOP</envar></term>
+          <listitem>
+            It should point to the corresponding top-level directory of
+            GtkGLExt installation.  This differs from <envar>$(GTK_TOP)</envar>
+            only if you do not use GladeWin32 and have installed
+            GtkGLExt separately.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>LIBXML2_TOP</envar></term>
+          <listitem>
+            It should point to the corresponding top-level directory of
+            LibXML2 installation.  This differs from <envar>$(GTK_TOP)</envar>
+            only if you do not use GladeWin32 and have installed
+            LibXML2 separately.
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>MSC_TOP</envar></term>
+          <listitem>
+            It should point to the top-level directory of MSVC installation.
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Run a shell (command line, MS-DOS prompt), switch to the source
+        directory and run <command>vcvars32.bat</command> there.
+        This batch file is provided by MSVC and sets certain environment
+        variables the command-line compiler and linker require, it also
+        makes them directly executable by setting <envar>PATH</envar>.  Note
+        <command>vcvars32.bat</command> may not be in <envar>PATH</envar>
+        itself but it should be easy to locate.
+      </para>
+    </sect2>
+    <sect2 id='installation-ms-windows-source-compilation'>
+      <title>Compilation</title>
+      <para>
+        Run
+        <informalexample>
+          <literallayout><userinput>nmake -f makefile.msc</userinput></literallayout>
+        </informalexample>
+        to compile Gwyddion and
+        <informalexample>
+          <literallayout><userinput>nmake -f makefile.msc install</userinput></literallayout>
+        </informalexample>
+        to install it into a staging area, namely subdirectory
+        <filename>inst</filename> (created by this command).  If something
+        goes wrong with the second step and you wish to start it again,
+        remove directory <filename>inst</filename> and file
+        <filename>inst.stamp</filename> first for a clean start.
+      </para>
+    </sect2>
+    <sect2 id='installation-ms-windows-source-installation'>
+      <title>Installation</title>
+      <para>
+        The layout of the staging area in <filename>inst</filename> exactly
+        the same as of the final installation.  Therefore you can also run
+        <application>Gwyddion</application> directly from it
+        (<filename>gwyddion.exe</filename> is found directly in
+        <filename>inst</filename>).  Except if you have never run
+        <application>Gwyddion</application> before, it will not find the
+        run-time Gtk+ libraries (DLLs) it needs.  Run
+        <command>regedit</command>, create in
+        <informalexample>
+          <literal>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\Current Version\App Paths\Gwyddion.exe</literal>
+        </informalexample>
+        a string key <literal>Path</literal> and put
+        <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> there (here again
+        <envar>$(GTK_TOP)</envar> is to be replaced with the corresponding
+        directory set in <filename>make.msc</filename>, do not put
+        <quote><literal>$(GTK_TOP)</literal></quote> there literally).  If you
+        have separate GtkGLExt and/or LibXML2, add also their
+        <filename>lib</filename> and <filename>bin</filename> directories,
+        separated by semicolons.  If you cannot edit global registry under
+        <literal>HKEY_LOCAL_MACHINE</literal>, set the path under
+        <literal>HKEY_CURRENT_USER</literal> for the current user only.
+      </para>
+      <para>
+        Now you can either run <application>Gwyddion</application> from
+        <filename>inst</filename> or copy the directory elsewhere, possibly
+        renaming it.
+      </para>
+    </sect2>
+    <sect2 id='installation-ms-windows-source-installers'>
+      <title>Executable Installers</title>
+      <para>
+        To create an executable installer you need
+        <ulink url='http://www.jrsoftware.org/isinfo.php'>Inno Setup</ulink>,
+        version 4 or newer.  Open <filename>inst/gwyddion.iss</filename> and
+        build the installer, it will create
+        <filename>Gwyddion-2.19.exe</filename> (with 2.19 replaced with the
+        actual version number), again in <filename>inst</filename>.  You can
+        repeat this procedure with <filename>inst/gwyddion-devel.iss</filename>
+        to obtain <filename>Gwyddion-Development-2.19.exe</filename>, should
+        you ever need it.
+      </para>
+    </sect2>
+  </sect1>
+
+  <sect1 id='installation-devel'>
+    <title>Subversion Checkout, Development</title>
+    <para>
+      <application>Gwyddion</application> uses
+      <ulink url='http://subversion.tigris.org/'>Subversion</ulink>
+      version control system for source code revision management.  The
+      organization of the repository is described
+      <ulink url='http://gwyddion.net/resources.php#subversion'>on project
+        web pages</ulink>.  For example the current head revision of
+      the program itself can be checked out with
+      <informalexample>
+        <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout>
+      </informalexample>
+    </para>
+    <para>
+      The reposition does not contain any generated files, no matter how
+      exotic tools may be necessary to generate them.  Therefore additional
+      packages are required and there are also certain platform limitations.
+      The additional tools and packages required for development are the same
+      as for compilation from <application>Subversion</application> checkout.
+      More precisely, one needs all the tools to build from a fresh checkout,
+      while development may require only a subset of them or even none,
+      depending on the type and extent of the changes.
+    </para>
+    <itemizedlist>
+      <title>Additional development build dependencies</title>
+      <listitem>
+        <ulink url='http://www.gnu.org/software/autoconf/'>GNU autoconf</ulink> ≥ 2.60
+      </listitem>
+      <listitem>
+        <ulink url='http://www.gnu.org/software/automake/'>GNU automake</ulink> ≥ 1.7
+      </listitem>
+      <listitem>
+        <ulink url='http://www.gnu.org/software/libtool/'>GNU libtool</ulink> ≥ 1.4
+      </listitem>
+      <listitem>
+        <ulink url='http://www.python.org/'>Python</ulink> ≥ 2.2
+      </listitem>
+      <listitem>
+        <ulink url='http://www.perl.org/'>Perl5</ulink>
+      </listitem>
+      <listitem>
+        <ulink url='http://www.gtk.org/gtk-doc/'>gtk-doc</ulink> ≥ 1.8
+      </listitem>
+      <listitem>
+        <ulink url='http://www.gnu.org/software/gettext/'>GNU gettext</ulink> ≥ 0.12, including development stuff
+      </listitem>
+      <listitem>
+        probably GNU versions of most tools: the compiler, binutils, …
+      </listitem>
+    </itemizedlist>
+    <sect2 id='installation-devel-unix'>
+      <title>Linux/Unix</title>
+      <para>
+        After a fresh checkout, run <userinput>./autogen.sh</userinput> with
+        any arguments you would give to <command>configure</command>.
+        Note it automatically adds <option>--enable-maintainer-mode</option>.
+        This option enables <command>make</command> rules for creation and
+        updates of files that are distributed in the source code tarball (and
+        thus they are not generated during normal compilation).  Generally, you
+        should always use this <command>configure</command> option when you
+        intend to change the program in a non-trivial way.
+      </para>
+      <para>
+        <command>autogen.sh</command> can fail even if you have sufficient
+        versions of autotools installed.  Some operating system do not install
+        general <command>autoconf</command> or <command>automake</command>
+        commands, only versioned commands such as
+        <command>autoconf261</command> or <command>automake19</command>.
+        This makes particularly hard to find for example
+        <quote><command>automake</command> 1.9 or newer</quote> and therefore
+        <command>autogen.sh</command> does not attempt it at all.  You can
+        either create unversioned symbolic links to the versioned commands or
+        run <command>autogen.sh</command> as follows:
+        <informalexample>
+          <userinput>
+            AUTOCONF=autoconf261 AUTOHEADER=autoheader261 ./autogen.sh
+          </userinput>
+        </informalexample>
+        You may need to set the following variables:
+        <envar>ACLOCAL</envar>,
+        <envar>AUTOCONF</envar>,
+        <envar>AUTOHEADER</envar>,
+        <envar>AUTOM4TE</envar>,
+        <envar>AUTOMAKE</envar>,
+        <envar>LIBTOOLIZE</envar>.
+        In addition, some operating systems may install
+        <command>autoconf</command> macros in a place
+        <command>aclocal</command> does not find them by default.  This can
+        be fixed by setting variable <envar>ACLOCAL_FLAGS</envar> to give
+        <command>aclocal</command> additional search paths:
+        <informalexample>
+          <userinput>
+            ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh
+          </userinput>
+        </informalexample>
+      </para>
+      <para>
+        It is often necessary to combine these adjustments.
+        For instance on FreeBSD, where all tools are versioned, one typically
+        invokes (broken to lines for easier reading):
+        <informalexample>
+          <literallayout><userinput>AUTOCONF=autoconf261 \
+AUTOHEADER=autoheader261 \
+AUTOM4TE=autom4te261 \
+AUTOMAKE=automake19 \
+ACLOCAL=aclocal19 \
+ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
+CPPFLAGS=-I/usr/local/include \
+LDFLAGS=-L/usr/local/lib \
+./autogen.sh --prefix=<replaceable>...</replaceable></userinput></literallayout>
+        </informalexample>
+      </para>
+      <para>
+        If <command>autogen.sh</command> passes you can compile the program
+        as usual.  However, a few things remain to generate.
+      </para>
+      <para>
+        Developer documentation is built with <userinput>make docs</userinput>.
+        This has to be done explicitly, documentation is never (re)built
+        automatically, option <option>--enable-gtk-doc</option> of
+        <command>configure</command> only makes the <literal>docs</literal>
+        target available (this option is on by default, therefore
+        <literal>docs</literal> is made available when
+        <application>gtk-doc</application> is detected).
+      </para>
+      <para>
+        MSVC files are built with <userinput>./utils/update-msvc.py</userinput>
+        which must be run from the top-level source directory (if you have
+        Python interpreter installed elsewhere than in
+        <filename>/usr/bin</filename>, run it as
+        <userinput>python ./utils/update-msvc.py</userinput>).  This tool
+        takes care of keeping MSVC makefiles and other files up to date with
+        Unix files that are taken as the primary source.  More precisely
+        <command>update-msvc.py</command> reads
+        <itemizedlist>
+          <listitem>
+            lists of source and header files, modules, libraries and data files
+            from <filename>Makefile.am</filename>
+          </listitem>
+          <listitem>
+            compiled libraries in <filename>.libs</filename> directories
+          </listitem>
+          <listitem>
+            <command>gcc</command>-generated compilation dependencies in
+            <filename>.deps</filename> directories
+          </listitem>
+          <listitem>
+            template files to fill, these have extension
+            <filename>.gwt</filename>, for example
+            <filename>makefile.msc.gwt</filename> is a template for
+            <filename>makefile.msc</filename>
+          </listitem>
+        </itemizedlist>
+        and it writes
+        <itemizedlist>
+          <listitem>
+            filled template files (namely makefiles)
+          </listitem>
+          <listitem>
+            <filename>.def</filename> files with lists of symbols to export
+            from individual libraries
+          </listitem>
+        </itemizedlist>
+        Evidently, it is necessary to perform a full project build first (with
+        all optional features enabled) to generate these files properly.
+      </para>
+      <para>
+        One can think of <command>update-msvc.py</command> as a simple custom
+        automake, because its basic task is to generate makefiles
+        from <filename>Makefile.am</filename>.
+      </para>
+    </sect2>
+    <sect2 id='installation-devel-ms-windows'>
+      <title>MS Windows</title>
+      <para>
+        As one can see from the previous section, a direct build from a
+        <application>Subversion</application> checkout is not possible on MS
+        Windows due to the inability to generate certain files there.
+        Development is possible, although certain changes, namely additions
+        of new files and refactorizations, require manual synchronization of
+        files that could be updated automatically on a Unix-like system.
+      </para>
+      <para>
+        Fortunately plenty of free Unix-like systems is available, namely
+        various GNU/Linux distributions.  In the most desperate case one can
+        use such a system for the checkout, build all necessary files, make
+        a tarball and transfer it to MS Windows.  This is equivalent to the
+        use of nightly tarballs except that these tarballs can be generated
+        any time.
+      </para>
+      <para>
+        However, it is also possible – and much more convenient – to build
+        on MS Windows in the very same directory as on a GNU/Linux system.
+        It is only necessary to share the build directory (typically in the
+        home directory) with the Windows system using Samba.  The GNU/Linux
+        system can run either on a different physical computer or it can run
+        on a virtual machine on the same computer as the host Windows system,
+        for example in WMware player.  (This setup can be also reversed by
+        running MS Windows on a virtual machine but this is not the point of
+        this section.)
+      </para>
+      <para>
+        When one runs builds for several operating systems from one
+        directory, certain care has to be taken to avoid confusion due to
+        the use of files corresponding to a different operating system.
+        Fortunately, the only files that overlap between the Unix and MS
+        Windows build systems are configuration headers
+        <filename>config.h</filename> and <filename>gwyconfig.h</filename>.  To
+        update them after switch to MS Windows, just delete them, they will be
+        re-created as a part of the build.  To update them after switch to
+        GNU/Linux, run <userinput>./config.status</userinput>.
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->

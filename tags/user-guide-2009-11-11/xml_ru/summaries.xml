@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: introduction.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="summaries">
+  <title>Сводки и таблицы </title>
+  <para>Этот раздел предоставляет справочные данные о различных форматах, синтаксисе и опциях команд, которые могут оказаться полезными. Большая часть относится к  продвинутому использованию Gwyddion, кроме, возможно, <link linkend="keyboard-shortcuts">таблицы общих сочетаний клавиш</link> и <link linkend="file-formats">таблицы поддерживаемых файловых форматов</link>.</para>
+  <xi:include href="gwyddion.xml"/>
+  <!--
+  <xi:include href="gwyddion-thumbnailer.xml"/>
+  <xi:include href="keyboard-shortcuts.xml"/>
+  -->
+  <xi:include href="file-formats.xml"/>
+  <xi:include href="expressions.xml"/>
+  <!--
+  <xi:include href="resources.xml"/>
+  <xi:include href="gwyfile-format.xml"/>
+  -->
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->

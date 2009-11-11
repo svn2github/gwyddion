@@ -1,0 +1,109 @@
+#!/bin/bash
+# @(#) $Id$
+disabled=
+pkgname=user-guide
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+
+source $HOME/.bashrc
+export LC_ALL=C
+export CFLAGS="-ggdb -O2"
+PATH="$HOME/bin:$PATH"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  exec >$logdir/$1.log
+  exec 2>$logdir/$1.err
+  cd $projectdir
+  for x in $disabled; do
+    if test "$1" = "$x"; then
+      echo disabled
+      return
+    fi
+  done
+  $@
+}
+
+# execute a per-language function/command with logging and some setup
+function call_langs() {
+  for lang in $languages; do
+    exec >$logdir/$1-$lang.log
+    exec 2>$logdir/$1-$lang.err
+    cd $projectdir
+    for x in $disabled; do
+      if test "$1" = "$x"; then
+        echo disabled
+        return
+      fi
+    done
+    $@
+  done
+}
+
+# =====[ components ]========================================================
+function user_guide_autostuff() {
+  autoconf
+  CONFIG_SHELL=/bin/sh ./configure
+  # This runs configure again...
+  make -k version
+}
+
+
+function user_guide_xhtml() {
+  make -k xhtml LANGUAGES=$lang
+  make -k dist-xhtml LANGUAGES=$lang
+}
+
+
+function user_guide_pdf() {
+  make -k pdf LANGUAGES=$lang
+  make -k dist-pdf LANGUAGES=$lang
+}
+
+
+function user_guide_man() {
+  make -k man
+}
+
+
+function help() {
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call\(_langs\)\? *//'
+}
+
+# =====[ main ]==============================================================
+cd $projectdir
+test -d $logdir || mkdir $logdir
+
+languages=$(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in)
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  rm -f .releaseme
+  for x in $(help); do
+    rm -f $logdir/$x.{log,err} $logdir/$x-??.{log,err}
+  done
+  # LIST-BEGIN
+  call user_guide_autostuff
+  call_langs user_guide_xhtml
+  call_langs user_guide_pdf
+  call user_guide_man
+  # LIST-END
+  touch .releaseme
+  for lang in $languages; do
+    for x in user-guide-$lang.pdf xhtml_$lang/index.html; do
+      if ! test -s $x; then
+        rm -f .releaseme
+        break
+      fi
+    done
+  done
+fi
