@@ -1,4 +1,4 @@
-AC_INIT([Gwyddion user guide], [2009-07-31], [klapetek@gwyddion.net])
+AC_INIT([Gwyddion user guide], [2009-11-11], [klapetek@gwyddion.net])
 AC_CONFIG_SRCDIR(xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
