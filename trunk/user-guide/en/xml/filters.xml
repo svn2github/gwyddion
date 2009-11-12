@@ -73,56 +73,14 @@
         Dechecker filter – a smoothing filter specially designed to remove
         checker pattern from the image while preserving other details.  It is
         a convolution filter with kernel
-        <informalequation id='eq-filters-dechecker'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-filters-dechecker.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>Dechecker filter 5 × 5 coefficient matrix</phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-w_{\rm dechecker}
-  = \pmatrix{0&1/144&-1/72&1/144&0\cr
-             1/144&-1/18&1/9&-1/18&1/144\cr
-             -1/72&1/9&7/9&1/9&-1/72\cr
-             1/144&-1/18&1/9&-1/18&1/144\cr
-             0&1/144&-1/72&1/144&0\cr}
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
+        <xi:include href="eq-filter-dechecker.xml"/>
       </listitem>
       <listitem id='filter-gaussian'>
         <indexterm><primary>gaussian filter</primary></indexterm>
         Gaussian filter – a smoothing filter, the size parameter determines
         the FWHM (full width at half maximum) of the Gaussian.  The relation
-        between FWHM
-        and <inlineequation>
-          <mathphrase>σ</mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
-        is
-        <informalequation id='eq-gaussian-fwhm'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-gaussian-fwhm.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>FWHM-sigma relation for Gaussian</phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
+        between FWHM and <xi:include href="eqi-sigma.xml"/> is
+        <xi:include href="eq-gaussian-fwhm.xml"/>
       </listitem>
     </itemizedlist>
     <tip>
@@ -170,11 +128,7 @@ w_{\rm dechecker}
       </menuchoice>
     </para>
     <para>
-      Convolutions with arbitrary kernels up to
-      <inlineequation>
-        <mathphrase>9 × 9</mathphrase>
-        <alt>9\times9</alt>
-      </inlineequation>
+      Convolutions with arbitrary kernels up to <xi:include href="eqi-9x9.xml"/>
       can be performed with
       the <link linkend='convolution-filter'>Convolution Filter</link>
       module.

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-bspline'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-bspline.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Interpolation weights for B-Spline</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
+w_{-1}&{1\over6}(1-x)^3\cr
+w_0&{2\over3}-x^2(1-{x\over2})\cr
+w_1&{1\over6}+{1\over2}x\bigl(1+x(1-x)\bigr)\cr
+w_2&{1\over6}x^3\cr
+}}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

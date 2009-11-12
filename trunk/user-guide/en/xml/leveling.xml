@@ -8,7 +8,6 @@
     <title>Leveling</title>
     <para>
       The data obtained from SPM microscopes are
-      <!--TODO: should it be "are" or "is"?-->
       very often not leveled at all; the microscope directly outputs raw data
       values computed from piezoscanner voltage, strain gauge, interferometer or
       other detection system values. This way of exporting data enables the user
@@ -160,68 +159,20 @@
       <para>
         Finding the orientation of the facets is an iterative process that
         works as follows.  First, the variation of local normals is determined:
-        <informalequation id='eq-facet-level-dispersion'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-facet-level-dispersion.png' format='PNG'/>
-            </imageobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-\beta^2 = {1\over N} \sum_{i=1}^N \vec n_i^2
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase><subscript>i</subscript></phrase></mathphrase>
-          <alt>\vec n_i</alt>
-        </inlineequation>
-        is the vector of local facet normal (see
-        <link linkend='inclinations-coordinates'>inclination coordinates</link>)
-        in the
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>i</phrase></mathphrase>
-          <alt>i</alt>
-        </inlineequation>-th
-        pixel.  Then the prevalent normal is estimated as
-        <informalequation id='eq-facet-level-new-normal'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-facet-level-new-normal.png' format='PNG'/>
-            </imageobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-\vec n = {\displaystyle \sum_{i=1}^N \vec n_i
-                        \exp\left(-c{\vec n_i^2\over\beta^2}\right)
-          \over
-          \displaystyle \sum_{i=1}^N
-                        \exp\left(-c{\vec n_i^2\over\beta^2}\right)}
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>c</phrase> = 1/20</mathphrase>
-          <alt>c=1/20</alt>
-        </inlineequation>
-        is a constant.  Consequently, the plane corresponding to the prevalent
-        normal
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
-          <alt>\vec n</alt>
-        </inlineequation>
-        is subtracted and these three steps are repeated until the process
-        converges.  The gaussian weighting factors serve to pick a single
-        set of similar local facet normals and converge to their mean
-        direction.  Without these factors, the procedure would obviously
-        converge in one step to the overall mean normal – and hence would
-        be completely equivalent to plain plane leveling.
+        <xi:include href="eq-facet-level-dispersion.xml"/>
+        where <xi:include href="eqi-vec-n_i.xml"/> is the vector of local facet
+        normal (see <link linkend='inclinations-coordinates'>inclination
+          coordinates</link>) in the <xi:include href="eqi-i.xml"/>-th pixel.
+        Then the prevalent normal is estimated as
+        <xi:include href='eq-facet-level-new-normal.xml'/>
+        where <xi:include href="eqi-c-is-1-over-20.xml"/> is a constant.
+        Subsequently, the plane corresponding to the prevalent normal
+        <xi:include href="eqi-vec-n.xml"/> is subtracted and these three steps
+        are repeated until the process converges.  The gaussian weighting
+        factors serve to pick a single set of similar local facet normals and
+        converge to their mean direction.  Without these factors, the procedure
+        would obviously converge in one step to the overall mean normal – and
+        hence would be completely equivalent to plain plane leveling.
       </para>
       <informalfigure id='fig-facet-level'>
         <mediaobject>
@@ -295,64 +246,14 @@
         polynomial.  In the <guilabel>Independent degree</guilabel> mode
         the horizontal and vertical polynomial orders can be generally set
         separately, i.e. the fitted polynomial is
-        <informalequation id='eq-polynomial-independent-degree'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-polynomial-independent-degree.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>
-                2D polynomial expression with independent maximum x and y
-                degrees
-              </phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-\sum_{j=0}^m \sum_{k=0}^n a_{j,k} x^j y^k
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>m</phrase></mathphrase>
-          <alt>m</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
-          <alt>n</alt>
-        </inlineequation>
+        <xi:include href="eq-polynomial-independent-degree.xml"/>
+        where <xi:include href="eqi-m.xml"/> and <xi:include href="eqi-n.xml"/>
         are the selected horizontal and vertical polynomial degrees,
         respectively.  In the <guilabel>Limited total degree</guilabel> mode
         the fitted polynomial is
-        <informalequation id='eq-polynomial-total-degree'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-polynomial-total-degree.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>
-                2D polynomial expression with limited total degree
-              </phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-\sum_{j+k \le n} a_{j,k} x^j y^k
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>n</phrase></mathphrase>
-          <alt>n</alt>
-        </inlineequation>
-        is the selected total polynomial degree.
+        <xi:include href="eq-polynomial-limited-total-degree.xml"/>
+        where <xi:include href="eqi-n.xml"/> is the selected total polynomial
+        degree.
       </para>
       <para>
         Similarly to <link linkend='plane-level'>Plane Level</link>, polynomial

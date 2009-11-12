@@ -142,17 +142,9 @@
             <para>
               How bytes in samples are swapped.  This option is only
               available for predefined formats larger than one byte.
-              Its bits correspond to groups of bytes to swap: if
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>j</phrase></mathphrase>
-                <alt>j</alt>
-              </inlineequation>-th
-              bit is set, adjacent groups of
-              <inlineequation>
-                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
-                <alt>2^j</alt>
-              </inlineequation>
-              bits are swapped.
+              Its bits correspond to groups of bytes to swap: if the
+              <xi:include href="eqi-j.xml"/>-th bit is set, adjacent groups of
+              <xi:include href="eqi-2-to-j.xml"/> bits are swapped.
             </para>
             <para>
               For example, value 3 means sample will be divided into couples
@@ -160,16 +152,9 @@
               and then divided into single bytes (bit 0) and adjacent bytes
               swapped.  The net effect is reversal of byte order in groups
               of four bytes.  More generally, if you want to reverse byte
-              order in groups of size
-              <inlineequation>
-                <mathphrase>2<superscript><phrase role='mathvar'>j</phrase></superscript></mathphrase>
-                <alt>2^j</alt>
-              </inlineequation>,
+              order in groups of size <xi:include href="eqi-2-to-j.xml"/>,
               which is the common case, use byte swap pattern
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>j</phrase> − 1</mathphrase>
-                <alt>j-1</alt>
-              </inlineequation>.
+              <xi:include href="eqi-j-minus-1.xml"/>.
             </para>
           </listitem>
         </varlistentry>

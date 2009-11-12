@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-w1234'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-w1234.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Four-point interpolation weighted sum</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

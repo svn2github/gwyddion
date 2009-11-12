@@ -73,21 +73,14 @@
       <replaceable>red</replaceable>, <replaceable>green</replaceable>,
       <replaceable>blue</replaceable> and <replaceable>alpha</replaceable>
       components is placed in the interval
-      <inlineequation>
-        <mathphrase>[0, 1]</mathphrase>
-        <alt>[0,1]</alt>
-      </inlineequation>
-      where 0 corresponds to the gradient start, 1 corresponds to the end.
-      The color is interpolated linearly between the specified points.
+      <xi:include href="eqi-interval-0-1.xml"/> where 0 corresponds to the
+      gradient start, 1 corresponds to the end. The color is interpolated
+      linearly between the specified points.
     </para>
     <para>
       The positions must form an increasing sequence from 0 to 1 (i.e.
       the minimum number of color points is two). The range of the color
-      components is also
-      <inlineequation>
-        <mathphrase>[0, 1]</mathphrase>
-        <alt>[0,1]</alt>
-      </inlineequation>.
+      components is also <xi:include href="eqi-interval-0-1.xml"/>.
       Note the alpha value, corresponding to opacity, is unused and must be
       given as 1 (fully opaque).
     </para>
@@ -125,10 +118,7 @@ Gwyddion resource GwyGradient
       See section <link linkend='opengl-material-editor'>OpenGL Material
         Editor</link> for explanation of the components.  They are followed by
       a line containing the shininess, again as a number from the interval
-      <inlineequation>
-        <mathphrase>[0, 1]</mathphrase>
-        <alt>[0,1]</alt>
-      </inlineequation>.
+      <xi:include href="eqi-interval-0-1.xml"/>.
     </para>
     <para>
       Note the emission component, while read and written by Gwyddion, is

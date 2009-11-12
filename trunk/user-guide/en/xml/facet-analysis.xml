@@ -21,38 +21,22 @@
   </para>
   <para>
     The centre of facet view always correspond to zero inclination (horizontal
-    facets), slope in
-    <inlineequation>
-      <mathphrase><phrase role='math'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>-direction
+    facets), slope in <xi:include href="eqi-x.xml"/>-direction
     increases towards left and right border and slope in
-    <inlineequation>
-      <mathphrase><phrase role='math'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>-direction
-    increases towards top and bottom borders.  The exact coordinate system is a
-    bit complex and it adapts to the range of slopes in the particular data
-    displayed.
+    <xi:include href="eqi-x.xml"/>-direction increases towards top and bottom
+    borders.  The exact coordinate system is a bit complex and it adapts to the
+    range of slopes in the particular data displayed.
   </para>
   <para>
     <guilabel>Facet plane size</guilabel> controls the size (radius) of plane
     locally fitted in each point to determine the local inclination.  The
     special value 0 stands for no plane fitting, the local inclination is
-    determined from symmetric
-    <inlineequation>
-      <mathphrase><phrase role='math'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    and
-    <inlineequation>
-      <mathphrase><phrase role='math'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>
-    derivatives in each point.  The choice of neighbourhood size is crucial for
-    meaningful results: it must be smaller than the features one is interested
-    in to avoid their smoothing, on the other hand it has to be large enough to
-    suppress noise present in the image.
+    determined from symmetric <xi:include href="eqi-x.xml"/>
+    and <xi:include href="eqi-y.xml"/> derivatives in each point.  The choice
+    of neighbourhood size is crucial for meaningful results: it must be smaller
+    than the features one is interested in to avoid their smoothing, on the
+    other hand it has to be large enough to suppress noise present in the
+    image.
   </para>
   <informalfigure id='fig-facet-analysis-sizes'>
     <mediaobject>
@@ -71,16 +55,9 @@
   </informalfigure>
   <para>
     Both facet view and data view allow to select a point with mouse and read
-    corresponding facet normal inclination value
-    <inlineequation>
-      <mathphrase><phrase role='math'>ϑ</phrase></mathphrase>
-      <alt>\vartheta</alt>
-    </inlineequation>
-    and direction
-     <inlineequation>
-      <mathphrase><phrase role='math'>φ</phrase></mathphrase>
-      <alt>\varphi</alt>
-    </inlineequation>
+    corresponding facet
+    normal inclination value <xi:include href="eqi-theta.xml"/>
+    and direction <xi:include href="eqi-phi.xml"/>
     under <guilabel>Normal</guilabel>.  When you select a point on data view,
     the facet view selection is updated to show inclination in this point.
   </para>

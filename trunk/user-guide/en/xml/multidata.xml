@@ -26,16 +26,8 @@
       The data fields to operate on are called <guilabel>Operands</guilabel>
       and they are denoted <userinput>d1</userinput>, …,
       <userinput>d5</userinput>.
-      In addition to values, local
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-        <alt>x</alt>
-      </inlineequation>
-      and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-        <alt>y</alt>
-      </inlineequation>-derivatives
+      In addition to values, local <xi:include href="eqi-x.xml"/>
+      and <xi:include href="eqi-y.xml"/>-derivatives
       are denoted <userinput>bx1</userinput>, <userinput>by1</userinput>,
       <userinput>bx2</userinput>, …, <userinput>by5</userinput>.
     </para>
@@ -121,11 +113,7 @@
     </variablelist>
     <para>
       <guilabel>Detail Leveling</guilabel> selects the transform of the
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-        <alt>z</alt>
-      </inlineequation>
-      values of the detail:
+      <xi:include href="eqi-z.xml"/> values of the detail:
     </para>
     <variablelist>
       <varlistentry>
@@ -133,12 +121,7 @@
           <guilabel>None</guilabel>
         </term>
         <listitem>
-          No
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-            <alt>z</alt>
-          </inlineequation>
-          value adjustment is performed.
+          No <xi:include href="eqi-z.xml"/> value adjustment is performed.
         </listitem>
       </varlistentry>
       <varlistentry>

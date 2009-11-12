@@ -59,10 +59,7 @@
             presentation often help to visualize certain features, but the
             produced values are hard or impossible to assign any physical
             meaning to.  Hence the value range of the new channel is always
-            <inlineequation>
-              <mathphrase>[0, 1]</mathphrase>
-              <alt>[0,1]</alt>
-            </inlineequation>.
+            <xi:include href="eqi-interval-0-1.xml"/>.
           </para>
         </listitem>
       </varlistentry>
@@ -124,21 +121,7 @@
       processing for example.  The kernels for horizontal filters are listed
       below, vertical kernels differ only by reflection about
       main diagonal.
-      <informalequation id='eq-filters-sobel-prewitt'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-filters-sobel-prewitt.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-w_{\rm prewitt} = \pmatrix{1/3&0&-1/3\cr1/3&0&-1/3\cr1/3&0&-1/3\cr}\;,\quad
-w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+      <xi:include href="eq-filters-sobel-prewitt.xml"/>
     </para>
   </sect2>
   <sect2 id='edge'>
@@ -222,25 +205,8 @@ w_{\rm sobel} = \pmatrix{1/4&0&-1/4\cr1/2&0&-1/2\cr1/4&0&-1/4\cr}
           <para>
             Laplacian presents a simple convolution with
             the following kernel (that is the limit of discrete Laplacian of
-            Gaussians filter for
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>σ</phrase> → 0</mathphrase>
-              <alt>\sigma\to0</alt>
-            </inlineequation>):
-            <informalequation id='eq-filters-laplacian'>
-              <mediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-filters-laplacian.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
-]]>
-                  </phrase>
-                </textobject>
-              </mediaobject>
-            </informalequation>
+            Gaussians filter for <xi:include href="eqi-sigma-to-0.xml"/>):
+            <xi:include href="eq-filters-laplacian.xml"/>
           </para>
         </listitem>
       </varlistentry>
@@ -321,34 +287,14 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
           <para>
             An edge detector which visualizes areas that are locally very
             non-planar. It fits a plane through a circular neighbourhood of
-            radius 2.5 pixels centered around each sample and then calculates
-            residual sum of squares of this fit reduced to plane slope, i.e.
-            divided by
-            <inlineequation>
-              <mathphrase>1 + <phrase role='mathvar'>b<subscript>x</subscript></phrase><superscript>2</superscript> + <phrase role='mathvar'>b<subscript>y</subscript></phrase><superscript>2</superscript></mathphrase>
-              <alt>1+b_x^2+b_y^2</alt>
-            </inlineequation>
-            where
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>b<subscript>x</subscript></phrase></mathphrase>
-              <alt>b_x</alt>
-            </inlineequation>
-            and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>b<subscript>y</subscript></phrase></mathphrase>
-              <alt>b_y</alt>
-            </inlineequation>
-            are the plane coefficients in
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-              <alt>x</alt>
-            </inlineequation>
-            and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-              <alt>y</alt>
-            </inlineequation>
-            directions, respectively.
+            radius 2.5 pixels centered around each sample and then it
+            calculates residual sum of squares of this fit reduced to plane
+            slope, i.e. divided by
+            <xi:include href="eqi-1-plus-b_x-to-2-plus-b_y-to-2.xml"/>
+            where <xi:include href="eqi-b_x.xml"/>
+            and <xi:include href="eqi-b_y.xml"/>
+            are the plane coefficients in <xi:include href="eqi-x.xml"/> and
+            <xi:include href="eqi-y.xml"/> directions, respectively.
             The square root is then displayed.
           </para>
         </listitem>
@@ -363,15 +309,11 @@ w_{\rm laplace} = \pmatrix{0&1/4&0\cr1/4&-1&1/4\cr0&1/4&0\cr}
         </term>
         <listitem>
           <para>
-            Visualizes the angle
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
-              <alt>\vartheta</alt>
-            </inlineequation>
-            of local plane inclination.  Technically this function belongs
-            among step detectors, however, the accentuation of steps in its
-            output is not very strong and it is more intended for easy visual
-            comparison of different slopes present in the image.
+            Visualizes the angle <xi:include href="eqi-theta.xml"/> of local
+            plane inclination.  Technically this function belongs among step
+            detectors, however, the accentuation of steps in its output is not
+            very strong and it is more intended for easy visual comparison of
+            different slopes present in the image.
           </para>
         </listitem>
       </varlistentry>

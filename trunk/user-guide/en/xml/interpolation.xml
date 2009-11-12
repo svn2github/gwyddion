@@ -38,10 +38,7 @@
           of the expected position and finds therefore the closest data value
           at integer position.
           Its polynomial degree is 0, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>-1</superscript></mathphrase>
-            <alt>C^{-1}</alt>
-          </inlineequation>
+          <xi:include href="eqi-C-to-minus-1.xml"/>
           and order 1.
         </para>
       </listitem>
@@ -53,50 +50,15 @@
         <para>
           Linear interpolation is a linear interpolation
           between the two closest data values. The value
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-            <alt>z</alt>
-          </inlineequation>
-          at point of relative position
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>x</alt>
-          </inlineequation>
-          is obtained as
-          <informalequation id='eq-interpolation-linear'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-linear.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Linear interpolation formula</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-z = (1-x)z_0 + xz_1
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
-          where
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase><subscript>0</subscript></mathphrase>
-            <alt>z_0</alt>
-          </inlineequation>
-          and
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase><subscript>1</subscript></mathphrase>
-            <alt>z_1</alt>
-          </inlineequation>
-          are values at the preceding and following points, respectively.
+          <xi:include href="eqi-z.xml"/> at point of relative position
+          <xi:include href="eqi-x.xml"/> is obtained as
+          <xi:include href="eq-interpolation-linear.xml"/>
+          where <xi:include href="eqi-z_0.xml"/> and
+          <xi:include href="eqi-z_1.xml"/> are values at the preceding and
+          following points, respectively.
           Its polynomial degree is 1, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
-            <alt>C^0</alt>
-          </inlineequation>
-          and order 2.  It is identical to the second-order B-spline.
+          <xi:include href="eqi-C-to-0.xml"/> and order 2.  It is identical to
+          the second-order B-spline.
         </para>
       </listitem>
     </varlistentry>
@@ -106,71 +68,18 @@ z = (1-x)z_0 + xz_1
       <listitem>
         <para>
           Key interpolation (more precisely Key's interpolation with
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>a</phrase> = −1/2</mathphrase>
-            <alt>a=-1/2</alt>
-          </inlineequation>
+          <xi:include href="eqi-a-is-minus-1-over-2.xml"/>
           which has the highest interpolation order) makes use also of values
           in the before-preceding and after-following points
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase><subscript>-1</subscript></mathphrase>
-            <alt>z_{-1}</alt>
-          </inlineequation>
-          and
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z</phrase><subscript>2</subscript></mathphrase>
-            <alt>z_2</alt>
-          </inlineequation>,
-          respectively.  In other words it has support of length 4, The value
-          is then obtained as
-          <informalequation id='eq-interpolation-w1234'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-w1234.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Four-point interpolation weighted sum</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-z = w_{-1}z_{-1} + w_0z_0 + w_1z_1 + w_2z_2
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
+          <xi:include href="eqi-z_minus-1.xml"/> and
+          <xi:include href="eqi-z_2.xml"/>, respectively.  In other words it
+          has support of length 4, The value is then obtained as
+          <xi:include href="eq-interpolation-w1234.xml"/>
           where
-          <informalequation id='eq-interpolation-key'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-key.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Interpolation weights for Key</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-\def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
-w_{-1}&\bigl(-{1\over2} + (1 - {x\over2})x\bigr)x\cr
-w_0&1 + (-{5\over2} + {2\over2}x)x^2\cr
-w_1&\bigl({1\over2} + (2 - {3\over2}x)x\bigr)x\cr
-w_2&(-{1\over2} + {x\over2})x^2\cr
-}}
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
+          <xi:include href="eqi-interpolation-key.xml"/>
           are the interpolation weights.
           Key's interpolation degree is 3, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>1</superscript></mathphrase>
-            <alt>C^1</alt>
-          </inlineequation>
-          and order 3.
+          <xi:include href="eqi-C-to-1.xml"/> and order 3.
         </para>
       </listitem>
     </varlistentry>
@@ -181,35 +90,9 @@ w_2&(-{1\over2} + {x\over2})x^2\cr
         <para>
           Schaum interpolation (more precisely fourth-order Schaum) has also
           support of length 4.  The interpolation weights are
-          <informalequation id='eq-interpolation-schaum'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-schaum.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Interpolation weights for Schaum</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-\def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
-w_{-1}&-{1\over6}x(x-1)(x-2)\cr
-w_0&{1\over2}(x^2-1)(x-2)\cr
-w_1&-{1\over2}x(x+1)(x-2)\cr
-w_2&{1\over6}x(x^2-1)\cr
-}}
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
+          <xi:include href="eqi-interpolation-schaum.xml"/>
           Its polynomial degree is 3, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
-            <alt>C^0</alt>
-          </inlineequation>
-          and order 4.
+          <xi:include href="eqi-C-to-0.xml"/> and order 4.
         </para>
       </listitem>
     </varlistentry>
@@ -221,45 +104,12 @@ w_2&{1\over6}x(x^2-1)\cr
           Nearest neighbour approximation is again calculated from the
           closest four data values but unlike all others it is not
           piecewise-polynomial. The interpolation weights are
-          <informalequation id='eq-interpolation-nna'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-nna.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Interpolation weights for NNA</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-w_k = {{\displaystyle{1\over r_k^4}}
-    \over\sum\limits_{j=-1}^2 {\displaystyle{1\over r_j^4}}}\;,\quad
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
-          for
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>k</phrase> = -1, 0, 1, 2</mathphrase>
-            <alt>k=-1,0,1,2</alt>
-          </inlineequation>, where
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>r</phrase><subscript>-1</subscript> = 1 + <phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>r_{-1}=1+x</alt>
-          </inlineequation>,
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>r</phrase><subscript>0</subscript> = <phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>r_0=x</alt>
-          </inlineequation>,
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>r</phrase><subscript>1</subscript> = 1 − <phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>r_1=1-x</alt>
-          </inlineequation>,
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>r</phrase><subscript>2</subscript> = 2 − <phrase role='mathvar'>x</phrase></mathphrase>
-            <alt>r_2=2-x</alt>
-          </inlineequation>.
+          <xi:include href="eq-interpolation-nna.xml"/>
+          for <xi:include href="eqi-k-is-minus-1-to-2.xml"/>, where
+          <xi:include href="eqi-r_minus-1-is-1-plus-x.xml"/>,
+          <xi:include href="eqi-r_0-is-x.xml"/>,
+          <xi:include href="eqi-r_1-is-1-minus-x.xml"/>,
+          <xi:include href="eqi-r_2-is-2-minus-x.xml"/>.
           Its order is 1.
         </para>
       </listitem>
@@ -269,41 +119,13 @@ w_k = {{\displaystyle{1\over r_k^4}}
       <term>B-spline</term>
       <listitem>
         <para>
-          B-spline was misimplemented up to version 2.1 (inclusive) and it
-          blurred data.  It should be avoided in these old versions.
           The weights are
-          <informalequation id='eq-interpolation-bspline'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-bspline.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Interpolation weights for B-Spline</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-\def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
-w_{-1}&{1\over6}(1-x)^3\cr
-w_0&{2\over3}-x^2(1-{x\over2})\cr
-w_1&{1\over6}+{1\over2}x\bigl(1+x(1-x)\bigr)\cr
-w_2&{1\over6}x^3\cr
-}}
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
+          <xi:include href="eq-interpolation-bspline.xml"/>.
           However, they are not used with directly function values as above,
           but with interpolation coefficients calculated from function
           values [<link linkend='interpolation-ref-1'>1</link>].
           Its polynomial degree is 3, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>2</superscript></mathphrase>
-            <alt>C^2</alt>
-          </inlineequation>
-          and order 4.
+          <xi:include href="eqi-C-to-2.xml"/> and order 4.
         </para>
       </listitem>
     </varlistentry>
@@ -312,41 +134,13 @@ w_2&{1\over6}x^3\cr
       <term>O-MOMS</term>
       <listitem>
         <para>
-          O-MOMS was misimplemented up to version 2.1 (inclusive) and it
-          blurred data.  It should be avoided in these old versions.
           The weights are
-          <informalequation id='eq-interpolation-omoms'>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref='eq-interpolation-omoms.png' format='PNG'/>
-              </imageobject>
-              <textobject>
-                <phrase>Interpolation weights for O-MOMS</phrase>
-              </textobject>
-              <textobject role='tex'>
-                <phrase>
-<![CDATA[
-\def\Q{\vphantom{(^)_y}}
-\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
-w_{-1}&{4\over21}+\bigl(-{11\over21}+({1\over2}-{x\over6})x\bigr)x\cr
-w_0&{13\over21}+\bigl({1\over14}+(-1+{x\over2})x\bigr)x\cr
-w_1&{4\over21}+\bigl({3\over7}+({1\over2}-{x\over2})x\bigr)x\cr
-w_2&({1\over42}+{1\over6}x^2)x\cr
-}}
-]]>
-                </phrase>
-              </textobject>
-            </mediaobject>
-          </informalequation>
+          <xi:include href="eq-interpolation-omoms.xml"/>
           However, they are not used directly with function values as above,
           but with interpolation coefficients calculated from function
           values [<link linkend='interpolation-ref-1'>1</link>].
           Its polynomial degree is 3, regularity
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>C</phrase><superscript>0</superscript></mathphrase>
-            <alt>C^0</alt>
-          </inlineequation>
-          and order 4.
+          <xi:include href="eqi-C-to-0.xml"/> and order 4.
         </para>
       </listitem>
     </varlistentry>

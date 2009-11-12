@@ -34,11 +34,7 @@
       a reference row (which could be in principle chosen arbitrarily, in
       practice the zero shift is chosen to minimize the amount of data
       sticking out of the image after compensation), with the row
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-        <alt>y</alt>
-      </inlineequation>-coordinate
-      on the abscissa.
+      <xi:include href="eqi-y.xml"/>-coordinate on the abscissa.
     </para>
     <para>
       The drift is determined in two steps:
@@ -155,37 +151,13 @@
       created, with Polynomial distortion.  It performs transforms that
       can be expressed as
     </para>
-    <informalequation id='eq-polynomial-distortion.en'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-polynomial-distortion.en.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\eqnarray{
-x_{\rm old}&=&P_x(x_{\rm new}, y_{\rm new}),\cr
-y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
-}
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
+    <xi:include href="eq-polynomial-distortion.xml"/>
     <para>
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>P<subscript>x</subscript></phrase></mathphrase>
-        <alt>P_x</alt>
-      </inlineequation>
-      and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>P<subscript>y</subscript></phrase></mathphrase>
-        <alt>P_y</alt>
-      </inlineequation>
-      are polynomials up to the third total order with user-defined
-      coefficients.  Note the direction of the coordinate transform – the
-      reverse direction would not guarantee an unambiguous mapping.
+      where <xi:include href="eqi-P_x.xml"/> and
+      <xi:include href="eqi-P_y.xml"/> are polynomials up to the third total
+      order with user-defined coefficients.  Note the direction of the
+      coordinate transform – the reverse direction would not guarantee an
+      unambiguous mapping.
     </para>
     <para>
       The polynomial coefficients are entered as scale-free, i.e.

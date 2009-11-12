@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-linear'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-linear.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Linear interpolation formula</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+z = (1-x)z_0 + xz_1
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

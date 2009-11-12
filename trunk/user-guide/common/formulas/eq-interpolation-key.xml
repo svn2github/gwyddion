@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-key'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-key.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Interpolation weights for Key</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
+w_{-1}&\bigl(-{1\over2} + (1 - {x\over2})x\bigr)x\cr
+w_0&1 + (-{5\over2} + {2\over2}x)x^2\cr
+w_1&\bigl({1\over2} + (2 - {3\over2}x)x\bigr)x\cr
+w_2&(-{1\over2} + {x\over2})x^2\cr
+}}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

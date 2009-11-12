@@ -14,28 +14,10 @@
     uses functions that are localized in both the real and Fourier space.
     Generally, the wavelet transform can be expressed by the following
     equation:
-  </para>
-  <informalequation id='eq-wavelet-transform-continuous'>
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref='eq-wavelet-transform-continuous.png' format='PNG'/>
-      </imageobject>
-      <textobject role='tex'>
-        <phrase>
-<![CDATA[
-F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
-]]>
-        </phrase>
-      </textobject>
-    </mediaobject>
-  </informalequation>
-  <para>
+    <xi:include href="eq-wavelet-transform-continuous.xml"/>
     where the * is the complex conjugate symbol and function
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>ψ</phrase></mathphrase>
-      <alt>\psi</alt>
-    </inlineequation>
-    is some function which can differ though it must obey certain rules.
+    <xi:include href="eqi-psi.xml"/> is some function.  This function can
+    be chosen arbitrarily provided that obeys certain rules.
   </para>
   <para>
     As it is seen, the Wavelet transform is in fact an infinite set of
@@ -108,94 +90,30 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
       functions must be orthogonal to its discrete translations implies
       some mathematical conditions on them which are mentioned everywhere,
       e.g. the dilation equation
+      <xi:include href="eq-wavelet-dilation-equation.xml"/>
+      where <xi:include href="eqi-S.xml"/> is a scaling factor (usually chosen
+      as 2). Moreover, the area between the function must be normalized and
+      scaling function must be ortogonal to its integer translates, i.e.
+      <xi:include href="eq-wavelet-orthogonality.xml"/>
     </para>
-    <informalequation id='eq-wavelet-dilation-equation'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-dilation-equation.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\phi(x) = \sum_{k=-\infty}^\infty a_k\phi(Sx-k)
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
-    <para>
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>S</phrase></mathphrase>
-        <alt>S</alt>
-      </inlineequation>
-      is a scaling factor (usually chosen as 2). Moreover, the area between
-      the function must be normalized and scaling function must be ortogonal
-      to its integer translates, i.e.
-    </para>
-    <informalequation id='eq-wavelet-orthogonality'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-orthogonality.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\int_{-\infty}^\infty \phi(x)\,\phi(x+l)\,\d x = \delta_{0,l}
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
     <para>
       After introducing some more conditions (as the restrictions above
       does not produce unique solution) we can obtain results of all this
       equations, i.e. the finite set of coefficients
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>a<subscript>k</subscript></phrase></mathphrase>
-        <alt>a_k</alt>
-      </inlineequation>
-      which define the scaling function and also the wavelet. The wavelet
-      is obtained from the scaling function as
-    </para>
-    <informalequation id='eq-wavelet-expression-scaling-func'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-expression-scaling-func.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\psi(x) = \sum_{k=-\infty}^\infty (-1)^k a_{N-1-k} \psi(2x-k)
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
-    <para>
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
-        <alt>N</alt>
-      </inlineequation>
-      is an even integer. The set of wavelets than forms an orthonormal basis
-      which we use to decompose signal. Note that usually only few of the
-      coefficients
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>a<subscript>k</subscript></phrase></mathphrase>
-        <alt>a_k</alt>
-      </inlineequation>
-      are nonzero which simplifies the calculations.
+      <xi:include href="eqi-a_k.xml"/> that define the scaling function and
+      also the wavelet. The wavelet is obtained from the scaling function as
+      <xi:include href="eq-wavelet-scaling-function.xml"/> where
+      <xi:include href="eqi-N.xml"/> is an even integer. The set of wavelets
+      than forms an orthonormal basis which we use to decompose signal. Note
+      that usually only few of the coefficients
+      <xi:include href="eqi-a_k.xml"/> are nonzero which simplifies the
+      calculations.
     </para>
     <para>
       In the following figure, some wavelet scaling functions and wavelets
       are plotted. The most known family of orthonormal wavelets is
       a family of Daubechies. Her wavelets are usually denominated by the
-      number of nonzero coefficients
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>a<subscript>k</subscript></phrase></mathphrase>
-        <alt>a_k</alt>
-      </inlineequation>,
+      number of nonzero coefficients <xi:include href="eqi-a_k.xml"/>,
       so we usually talk about Daubechies 4, Daubechies 6, etc. wavelets.
       Roughly said, with the increasing number of wavelet coeficients the
       functions become more smooth. See the comparison of wavelets Daubechies
@@ -250,41 +168,13 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
       algorithm two filters – smoothing and non-smoothing one are
       constructed from the wavelet coefficients and those filters
       are recurrently used to obtain data for all the scales. If the total
-      number of data
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>D</phrase> = 2<superscript><phrase role='mathvar'>N</phrase></superscript></mathphrase>
-        <alt>D=2^N</alt>
-      </inlineequation>
-      is used and signal length is
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>L</phrase></mathphrase>
-        <alt>L</alt>
-      </inlineequation>,
-      first
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>D</phrase>/2</mathphrase>
-        <alt>D/2</alt>
-      </inlineequation>
-      data at scale
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>L</phrase>/2<superscript><phrase role='mathvar'>N</phrase> - 1</superscript></mathphrase>
-        <alt>L/2^{N-1}</alt>
-      </inlineequation>
-      are computed, then
-      <inlineequation>
-        <mathphrase>(<phrase role='mathvar'>D</phrase>/2)/2</mathphrase>
-        <alt>(D/2)/2</alt>
-      </inlineequation>
-      data at scale
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>L</phrase>/2<superscript><phrase role='mathvar'>N</phrase> - 2</superscript></mathphrase>
-        <alt>L/2^{N-2}</alt>
-      </inlineequation>, …
-      up to finally obtaining 2 data at scale
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>L</phrase>/2</mathphrase>
-        <alt>L/2</alt>
-      </inlineequation>.
+      number of data <xi:include href="eqi-D-is-2-to-N.xml"/> is used and
+      the signal length is <xi:include href="eqi-L.xml"/>, first
+      <xi:include href="eqi-D-over-2.xml"/> data at scale
+      <xi:include href="eqi-L-over-2-to-N-minus-1.xml"/> are computed, then
+      <xi:include href="eqi-D-over-2-over-2.xml"/> data at scale
+      <xi:include href="eqi-L-over-2-to-N-minus-2.xml"/>, … up to finally
+      obtaining 2 data at scale <xi:include href="eqi-L-over-2.xml"/>.
       The result of this algorithm is an array of the same length as the
       input one, where the data are usually sorted from the largest scales
       to the smallest ones.
@@ -308,27 +198,8 @@ F(a,b) = \int_{-\infty}^\infty f(x)\,\psi^*_{(a,b)}(x)\,\d x
       For threshold
       determination within these methods we first determine the noise
       variance guess given by
-    </para>
-    <informalequation id='eq-wavelet-variance-guess'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-variance-guess.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\hat\sigma = {\mathop{\rm Median}|Y_{ij}|\over0.6745}
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
-    <para>
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>Y<subscript>ij</subscript></phrase></mathphrase>
-        <alt>Y_{ij}</alt>
-      </inlineequation>
+      <xi:include href="eq-wavelet-variance-guess.xml"/>
+      where <xi:include href="eqi-Y_ij.xml"/>
       corresponds to all the coefficients of the highst scale subband of
       the decomposition (where most of the noise is assumend to be
       present). Alternatively, the noise variance can be obtained in an

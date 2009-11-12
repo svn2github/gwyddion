@@ -147,46 +147,26 @@
       material:
       <itemizedlist>
         <listitem>
-          ambient color
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>k</phrase><subscript>a,α</subscript></mathphrase>
-            <alt>k_{{\rm a},\alpha}</alt>
-          </inlineequation>
-          (where
-          <inlineequation>
-            <mathphrase>α = red, green, blue</mathphrase>
-            <alt>\alpha = \rm red, green, blue</alt>
-          </inlineequation>),
+          ambient color <xi:include href="eqi-k_a-alpha.xml"/>
+          (where <xi:include href="eqi-alpha-is-red-green-blue.xml"/>),
           controlling the reflection of ambient
           light that is assumed come uniformly from all directions,
         </listitem>
         <listitem>
-          diffuse color
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>k</phrase><subscript>d,α</subscript></mathphrase>
-            <alt>k_{{\rm d},\alpha}</alt>
-</inlineequation>,
+          diffuse color <xi:include href="eqi-k_d-alpha.xml"/>,
           describing the diffuse reflection which is independent on the
           direction of incident light and whose apparent brightness is
           independent of the viewing angle,
         </listitem>
         <listitem>
-          specular color
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>k</phrase><subscript>s,α</subscript></mathphrase>
-            <alt>k_{{\rm s},\alpha}</alt>
-</inlineequation>,
+          specular color <xi:include href="eqi-k_s-alpha.xml"/>,
           controlling the specular reflection with reflected light intensity
           dependent on the angle between the observing direction and the
           direction of light that would be reflected by an ideal mirror with
           the same normal, and
         </listitem>
         <listitem>
-          shininess
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>s</phrase></mathphrase>
-            <alt>s</alt>
-          </inlineequation>,
+          shininess <xi:include href="eqi-s.xml"/>,
           a numeric exponent determining how much the specular reflection
           resembles an ideal mirror, smaller values mean rougher surfaces,
           higher values mean smoother surfaces.
@@ -194,61 +174,17 @@
       </itemizedlist>
     </para>
     <para>
-      If we denote
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'><phrase role='vector'>L</phrase></phrase></mathphrase>
-        <alt>\vec L</alt>
-      </inlineequation>
-      the normal vector pointing from the observed surface point to the light
-      source,
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'><phrase role='vector'>V</phrase></phrase></mathphrase>
-        <alt>\vec V</alt>
-      </inlineequation>
-      the normal vector to the observer,
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'><phrase role='vector'>N</phrase></phrase></mathphrase>
-        <alt>\vec N</alt>
-</inlineequation>
-      the normal vector to the surface
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'><phrase role='vector'>R</phrase></phrase></mathphrase>
-        <alt>\vec R</alt>
-</inlineequation>
-      the normal vector in the direction of ideal mirror reflection, the
-      observed light intensity in OpenGL lighting model can be expressed as
-    </para>
-    <informalequation id='eq-opengl-light-model'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-opengl-light-model.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-I_\alpha = k_{a,\alpha}I_{a,\alpha}
-           + k_{d,\alpha}I_{d,\alpha} (\vec N\cdot\vec L)
-           + k_{s,\alpha}I_{s,\alpha} (\vec R\cdot\vec V)^s
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
-    <para>
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>I</phrase><subscript>a,α</subscript></mathphrase>
-        <alt>I_{{\rm a},\alpha}</alt>
-      </inlineequation>,
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>I</phrase><subscript>d,α</subscript></mathphrase>
-        <alt>I_{{\rm d},\alpha}</alt>
-      </inlineequation>
-      and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>I</phrase><subscript>s,α</subscript></mathphrase>
-        <alt>I_{{\rm s},\alpha}</alt>
-      </inlineequation>
+      If we denote <xi:include href="eqi-vec-L.xml"/> the normal vector
+      pointing from the observed surface point to the light source,
+      <xi:include href="eqi-vec-V.xml"/> the normal vector to the observer,
+      <xi:include href="eqi-vec-N.xml"/> the normal vector to the surface and
+      <xi:include href="eqi-vec-R.xml"/> the normal vector in the direction of
+      ideal mirror reflection, the observed light intensity in OpenGL lighting
+      model can be expressed as
+      <xi:include href="eq-opengl-light-model.xml"/> where
+      <xi:include href="eqi-I_a-alpha.xml"/>,
+      <xi:include href="eqi-I_d-alpha.xml"/> and
+      <xi:include href="eqi-I_s-alpha.xml"/>
       are the ambient, diffuse and specular light source intensities,
       respectively.
     </para>

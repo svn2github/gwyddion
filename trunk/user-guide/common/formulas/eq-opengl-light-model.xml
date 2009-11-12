@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-opengl-light-model'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-opengl-light-model.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+I_\alpha = k_{a,\alpha}I_{a,\alpha}
+           + k_{d,\alpha}I_{d,\alpha} (\vec N\cdot\vec L)
+           + k_{s,\alpha}I_{s,\alpha} (\vec R\cdot\vec V)^s
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

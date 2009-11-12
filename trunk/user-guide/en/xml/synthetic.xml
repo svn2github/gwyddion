@@ -166,11 +166,7 @@
           <para>
             The root mean square value of the heights (or of the differences
             from the mean plane which, however, always is the
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
-              <alt>z=0</alt>
-            </inlineequation>
-            plane).
+            <xi:include href="eqi-z-is-0.xml"/> plane).
           </para>
         </listitem>
       </varlistentry>
@@ -218,21 +214,10 @@
         <listitem>
           <para>
             Enables multiplication by factor proportional to
-            <inlineequation>
-              <mathphrase>1/<phrase role='mathvar'>k</phrase><superscript><phrase role='mathvar'>p</phrase></superscript></mathphrase>
-              <alt>1/k^p</alt>
-            </inlineequation>,
-            where
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>k</phrase></mathphrase>
-              <alt>k</alt>
-            </inlineequation>
-            is the spatial frequency and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>p</phrase></mathphrase>
-              <alt>p</alt>
-            </inlineequation>
-            is the power.  This permits to generate various fractal surfaces.
+            <xi:include href="eqi-1-over-k-to-p.xml"/>, where
+            <xi:include href="eqi-k.xml"/>
+            is the spatial frequency and <xi:include href="eqi-p.xml"/> is the
+            power.  This permits to generate various fractal surfaces.
           </para>
         </listitem>
       </varlistentry>
@@ -242,11 +227,7 @@
         </term>
         <listitem>
           <para>
-            The power
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>p</phrase></mathphrase>
-              <alt>p</alt>
-            </inlineequation>.
+            The power <xi:include href="eqi-p.xml"/>.
           </para>
         </listitem>
       </varlistentry>
@@ -271,25 +252,10 @@
       of features of a particular shape.  The algorithm is simple: the given
       number of objects is placed on random positions at the surface.  For each
       object placed, the new heights are changed to
-      <inlineequation>
-        <mathphrase>max(<phrase role='mathvar'>z</phrase>, <phrase role='mathvar'>z</phrase><subscript>0</subscript> + <phrase role='mathvar'>h</phrase>)</mathphrase>
-        <alt>\max(z,z_0+h)</alt>
-      </inlineequation>,
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-        <alt>z</alt>
-      </inlineequation>
-      is the current height at a particular pixel,
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
-        <alt>h</alt>
-      </inlineequation>
-      is the height of the object at this pixel (assuming a zero basis) and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>z</phrase><subscript>0</subscript></mathphrase>
-        <alt>z_0</alt>
-      </inlineequation>
+      <xi:include href="eqi-max-z-z_0-plus-h.xml"/>, where
+      <xi:include href="eqi-z.xml"/> is the current height at a particular
+      pixel, <xi:include href="eqi-h.xml"/> is the height of the object at this
+      pixel (assuming a zero basis) and <xi:include href="eqi-z_0.xml"/>
       is the current minimum height over the basis of the object being placed.
     </para>
     <variablelist>
@@ -334,17 +300,9 @@
         </term>
         <listitem>
           <para>
-            The ratio between the
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-              <alt>x</alt>
-            </inlineequation>
-            and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-              <alt>y</alt>
-            </inlineequation>
-            dimensions of an object – with respect to same base proportions.
+            The ratio between the <xi:include href="eqi-x.xml"/> and
+            <xi:include href="eqi-y.xml"/> dimensions of an object – with
+            respect to same base proportions.
           </para>
           <para>
             Changing the aspect ratio does not always imply mere geometrical

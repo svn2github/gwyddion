@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-omoms'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-omoms.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Interpolation weights for O-MOMS</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\def\Q{\vphantom{(^)_y}}
+\vcenter{\normalbaselines\ialign{\hfil\bmath#=\Q\emath&\bmath#\Q\emath\hfil\cr
+w_{-1}&{4\over21}+\bigl(-{11\over21}+({1\over2}-{x\over6})x\bigr)x\cr
+w_0&{13\over21}+\bigl({1\over14}+(-1+{x\over2})x\bigr)x\cr
+w_1&{4\over21}+\bigl({3\over7}+({1\over2}-{x\over2})x\bigr)x\cr
+w_2&({1\over42}+{1\over6}x^2)x\cr
+}}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

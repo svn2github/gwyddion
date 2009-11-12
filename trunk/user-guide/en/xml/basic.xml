@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
-'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='basic-operations'>
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='basic-operations' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Basic Operations</title>
   <para>
     Value-reading and basic geometrical operations represent the core of any
@@ -36,11 +36,7 @@
         With <guilabel>Keep lateral offsets</guilabel> option enabled, the top
         left corner coordinates of the resulting image correspond to the
         top left corner of the selection, otherwise the top left corner
-        coordinates are set to
-        <inlineequation>
-          <mathphrase>(0, 0)</mathphrase>
-          <alt>(0,0)</alt>
-        </inlineequation>.
+        coordinates are set to <xi:include href="eqi-coord-0-0.xml"/>.
       </listitem>
       <listitem id='rotate'>
         <indexterm>
@@ -163,11 +159,7 @@
         is controlled by option <guilabel>Averaging radius</guilabel>.  When
         the radius is 1, the value of a single pixel is displayed (as the
         simplest method does).  Button <guibutton>Set Zero</guibutton> shifts
-        the surface to make the current
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-          <alt>z</alt>
-        </inlineequation>
+        the surface to make the current <xi:include href='eqi-z.xml'/>
         the new zero level.
       </para>
       <para>
@@ -184,49 +176,21 @@
       </indexterm>
       <para>
         In all Gwyddion tools, facet and plane inclinations are displayed as
-        the spherical angles
-        <inlineequation>
-          <mathphrase>(<phrase role='mathvar'>ϑ</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
-          <alt>(\vartheta,\varphi)</alt>
-        </inlineequation>
+        the spherical angles <xi:include href="eqi-theta-phi.xml"/>
         of the plane normal vector.
       </para>
       <para>
-        Angle
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
-          <alt>\vartheta</alt>
-        </inlineequation>
-        is the angle between the upward direction and the normal, this means
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>ϑ</phrase> = 0</mathphrase>
-          <alt>\vartheta=0</alt>
-        </inlineequation>
-        for horizontal facets and it increases with the slope. It is always
-        positive.
+        Angle <xi:include href="eqi-theta.xml"/> is the angle between the
+        upward direction and the normal, this means that
+        <xi:include href="eqi-theta-is-0.xml"/> for horizontal facets and it
+        increases with the slope. It is always positive.
       </para>
       <para>
-        Angle
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>φ</phrase> </mathphrase>
-          <alt>\varphi</alt>
-        </inlineequation>
-        is the counter-clockwise measured angle between axis
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-          <alt>x</alt>
-        </inlineequation>
-        and the projection of the normal to the
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
-          <alt>xy</alt>
-        </inlineequation>
-        plane, as
-        displayed on the following figure.  For facets it means
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
-          <alt>\varphi</alt>
-        </inlineequation>
+        Angle <xi:include href="eqi-phi.xml"/> is the counter-clockwise
+        measured angle between axis <xi:include href="eqi-x.xml"/> and the
+        projection of the normal to the <xi:include href="eqi-xy.xml"/> plane,
+        as displayed on the following figure.  For facets it means
+        <xi:include href="eqi-phi.xml"/>
         corresponds to the downward direction of the facet.
       </para>
       <informalfigure id='fig-inclination-coordinates'>
@@ -242,22 +206,10 @@
           </textobject>
           <caption>
             Surface facet (displayed blue) orientation measured as the
-            counterclockwise angle from
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-              <alt>x</alt>
-            </inlineequation>-axis
+            counterclockwise angle from <xi:include href="eqi-x.xml"/>-axis
             to the projection of facet normal vector
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'><phrase role='vector'>n</phrase></phrase></mathphrase>
-              <alt>\vec{n}</alt>
-            </inlineequation>
-            to
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
-              <alt>xy</alt>
-            </inlineequation>
-            plane.
+            <xi:include href="eqi-vec-n.xml"/>
+            to <xi:include href="eqi-xy.xml"/> plane.
           </caption>
         </mediaobject>
       </informalfigure>
@@ -278,36 +230,13 @@
       <indexterm><primary>angle measurement</primary></indexterm>
       <para>
         Distances and differences can be measured with the
-        <guilabel>Distance</guilabel> tool.  It displays the horizontal
-        (<inlineequation>
-          <mathphrase>Δ<phrase role='mathvar'>x</phrase></mathphrase>
-          <alt>\Delta x</alt>
-        </inlineequation>),
-        vertical
-        (<inlineequation>
-          <mathphrase>Δ<phrase role='mathvar'>y</phrase></mathphrase>
-          <alt>\Delta y</alt>
-        </inlineequation>)
-        and total planar
-        (<inlineequation>
-          <mathphrase><phrase role='mathvar'>R</phrase></mathphrase>
-          <alt>R</alt>
-        </inlineequation>)
-        distances; the azimuth
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
-          <alt>\varphi</alt>
-        </inlineequation>
-        (measured identically to inclination
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
-          <alt>\varphi</alt>
-        </inlineequation>)
-        and the endpoint value difference
-        (<inlineequation>
-          <mathphrase>Δ<phrase role='mathvar'>z</phrase></mathphrase>
-          <alt>\Delta z</alt>
-        </inlineequation>)
+        <guilabel>Distance</guilabel> tool.  It displays the
+        horizontal (<xi:include href="eqi-Delta-x.xml"/>),
+        vertical (<xi:include href="eqi-Delta-y.xml"/>)
+        and total planar (<xi:include href="eqi-R.xml"/>) distances;
+        the azimuth <xi:include href="eqi-phi.xml"/>
+        (measured identically to inclination <xi:include href="eqi-phi.xml"/>)
+        and the endpoint value difference <xi:include href="eqi-Delta-z.xml"/>
         for a set of lines selected on the data.
       </para>
       <para>

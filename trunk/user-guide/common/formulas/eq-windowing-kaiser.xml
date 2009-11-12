@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<inlineequation id='eq-windowing-kaiser'>
+  <inlinemediaobject>
+    <imageobject>
+      <imagedata fileref='eq-windowing-kaiser.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\displaystyle
+w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
+                          \over\BesselI0(\pi\alpha)}
+]]>
+      </phrase>
+    </textobject>
+  </inlinemediaobject>
+</inlineequation>
+<!-- vim: set ts=2 sw=2 et : -->

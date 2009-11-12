@@ -68,20 +68,10 @@
     Gwyddion offers several windowing functions. Most of them are formed by
     some sine and cosine functions that damp data correctly at the edges.
     In the following windowing formula table the independent variable
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    is from interval
-    <inlineequation>
-      <mathphrase>(0, 1)</mathphrase>
-      <alt>(0,1)</alt>
-    </inlineequation>,
+    <xi:include href="eqi-x.xml"/>
+    is from interval <xi:include href="eqi-interval-0-1.xml"/>
     which corresponds to the normalized abscissa; for simplicity variable
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>ξ</phrase> = 2π<phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>\xi=2\pi x</alt>
-    </inlineequation>
+    <xi:include href="eqi-xi-is-2pix.xml"/>
     is used in some formulas.  The available windowing types include:
   </para>
   <informaltable frame='none' id='table-windowing-types'>
@@ -104,173 +94,39 @@
         </row>
         <row>
           <entry>Hann</entry>
-          <entry>
-            <inlineequation id='eq-windowing-hann'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-hann.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Hann}(x) = 0.5-0.5\cos\xi
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-hann.xml"/></entry>
         </row>
         <row>
           <entry>Hamming</entry>
-          <entry>
-            <inlineequation id='eq-windowing-hamming'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-hamming.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Hamming}(x) = 0.54-0.46\cos\xi
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-hamming.xml"/></entry>
         </row>
         <row>
           <entry>Blackmann</entry>
-          <entry>
-            <inlineequation id='eq-windowing-blackmann'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-blackmann.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Blackmann}(x) = 0.42 - 0.5\cos\xi + 0.08\cos2\xi
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-blackmann.xml"/></entry>
         </row>
         <row>
           <entry>Lanczos</entry>
-          <entry>
-            <inlineequation id='eq-windowing-lanczos'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-lanczos.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Lanczos}(x) = \sinc \pi(2x-1)
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-lanczos.xml"/></entry>
         </row>
         <row>
           <entry>Welch</entry>
-          <entry>
-            <inlineequation id='eq-windowing-welch'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-welch.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Welch}(x) = 4x(1-x)
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-welch.xml"/></entry>
         </row>
         <row>
           <entry>Nutall</entry>
-          <entry>
-            <inlineequation id='eq-windowing-nutall'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-nutall.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm Nutall}(x) = 0.355768 - 0.487396\cos\xi
-                  + 0.144232\cos2\xi - 0.012604\cos3\xi
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-nutall.xml"/></entry>
         </row>
         <row>
           <entry>Flat-top</entry>
-          <entry>
-            <inlineequation id='eq-windowing-flat-top'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-flat-top.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
-                    - 0.097\cos3\xi + 0.008\cos4\xi
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-          </entry>
+          <entry><xi:include href="eq-windowing-flat-top.xml"/></entry>
         </row>
         <row>
-          <entry>Kaiser
-             <inlineequation>
-              <mathphrase>α</mathphrase>
-              <alt>\alpha</alt>
-            </inlineequation>
-          </entry>
+          <entry>Kaiser <xi:include href="eqi-alpha.xml"/></entry>
           <entry>
-            <inlineequation id='eq-windowing-kaiser'>
-              <inlinemediaobject>
-                <imageobject>
-                  <imagedata fileref='eq-windowing-kaiser.png' format='PNG'/>
-                </imageobject>
-                <textobject role='tex'>
-                  <phrase>
-<![CDATA[
-\displaystyle
-w_{\rm Kaiser,\alpha}(x) = {\BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
-                          \over\BesselI0(\pi\alpha)}
-]]>
-                  </phrase>
-                </textobject>
-              </inlinemediaobject>
-            </inlineequation>
-            where <inlineequation>
-              <mathphrase>I<subscript>0</subscript></mathphrase>
-              <alt>\BesselI0</alt>
-            </inlineequation>
+            <xi:include href="eq-windowing-kaiser.xml"/>,
+            where <xi:include href="eqi-BesselI0.xml"/>
             is the modified Bessel function of zeroth order and
-            <inlineequation>
-              <mathphrase>α</mathphrase>
-              <alt>\alpha</alt>
-            </inlineequation>
-            is a parameter
+            <xi:include href="eqi-alpha.xml"/> is a parameter
           </entry>
         </row>
       </tbody>

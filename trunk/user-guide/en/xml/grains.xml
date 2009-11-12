@@ -50,12 +50,8 @@
       finding local extremes on the surface this algorithm can be used also for
       purposes of grain segmentation or marking. For convenience in the
       following we will treat the data inverted in the
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-        <alt>z</alt>
-      </inlineequation>
-      direction while describing the algorithm (i.e.
-      the grain tops are forming local minima in the following text). We
+      <xi:include href="eqi-z.xml"/> direction while describing the algorithm
+      (i.e. the grain tops are forming local minima in the following text). We
       applied two stages of the grain analysis
       (see [<link linkend='grain-analysis-ref-1'>1</link>]):
     </para>
@@ -377,10 +373,7 @@
             <listitem>
               <guilabel>Zero basis</guilabel>,
               the volume between grain surface and the plane
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>z</phrase> = 0</mathphrase>
-                <alt>z=0</alt>
-              </inlineequation>.
+              <xi:include href="eqi-z-is-0.xml"/>.
               Values below zero form negative volumes.  The zero level must be
               set to a reasonable value (often
               <link linkend='fix-zero'>Fix Zero</link> is sufficient) for
@@ -390,18 +383,11 @@
             <listitem>
               <guilabel>Grain minimum basis</guilabel>,
               the volume between grain surface and the plane
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>z</phrase> = <phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
-                <alt>z=z_{\rm min}</alt>
-              </inlineequation>,
-              where
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>z</phrase><subscript>min</subscript></mathphrase>
-                <alt>z_{\rm min}</alt>
-              </inlineequation>
-              is the minimum value (height) occuring in the grain.  This
-              method accounts for grain surrounding but it typically
-              underestimates the volume, especially for small grains.
+              <xi:include href="eqi-z-is-z_min.xml"/>, where
+              <xi:include href="eqi-z_min.xml"/> is the minimum value (height)
+              occuring in the grain.  This method accounts for grain
+              surrounding but it typically underestimates the volume,
+              especially for small grains.
             </listitem>
             <listitem>
               <guilabel>Laplacian backround basis</guilabel>,
@@ -445,10 +431,7 @@
             <listitem>
               <guilabel>Inclination θ</guilabel>,
               the deviation of the normal to the mean plane from the
-              <inlineequation>
-                <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-                <alt>z</alt>
-              </inlineequation>-axis,
+              <xi:include href="eqi-z.xml"/>-axis,
               see <link linkend='inclinations-coordinates'>inclinations</link>
               for details.
             </listitem>
@@ -479,36 +462,11 @@
       The grain boundary length is estimated by summing estimated contributions
       of each four-pixel configuration on the boundary.  The contributions
       are displayed on the following figure for each type of configuration,
-      where
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
-        <alt>h_x</alt>
-      </inlineequation>
-      and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
-        <alt>h_y</alt>
-      </inlineequation>
-      are pixel dimension along corresponding axes and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
-        <alt>h</alt>
-      </inlineequation>
-      is the length of the pixel diagonal:
-      <informalequation id='eq-grain-boundary-pixel-diagonal'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-grain-boundary-pixel-diagonal.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-h = \sqrt{h_x^2 + h_y^2}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+      where <xi:include href="eqi-h_x.xml"/> and
+      <xi:include href="eqi-h_y.xml"/> are pixel dimension along corresponding
+      axes and <xi:include href="eqi-h.xml"/> is the length of the pixel
+      diagonal:
+      <xi:include href="eq-grain-boundary-pixel-diagonal.xml"/>
       The contributions correspond one-to-one to lenghts of segments of the
       boundary of a polygon approximating the grain shape.  The construction of
       the equivalent polygonal shape can also be seen in the figure.
@@ -526,26 +484,11 @@ h = \sqrt{h_x^2 + h_y^2}
           length (top).  Grey squares represent pixels inside the grain, white
           squares represent outside pixels.  The estimated contribution of each
           configuration is:
-          (a) <inlineequation>
-            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
-            <alt>h/2</alt>
-          </inlineequation>,
-          (b1), (b2) <inlineequation>
-            <mathphrase><phrase role='mathvar'>h</phrase></mathphrase>
-            <alt>h</alt>
-          </inlineequation>,
-          (c) <inlineequation>
-            <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
-            <alt>h_y</alt>
-          </inlineequation>,
-          (d) <inlineequation>
-            <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
-            <alt>h_x</alt>
-          </inlineequation>,
-          (e) <inlineequation>
-            <mathphrase><phrase role='mathvar'>h</phrase>/2</mathphrase>
-            <alt>h/2</alt>
-          </inlineequation>.
+          (a) <xi:include href="eqi-h-over-2.xml"/>,
+          (b1), (b2) <xi:include href="eqi-h.xml"/>,
+          (c) <xi:include href="eqi-h_y.xml"/>,
+          (d) <xi:include href="eqi-h_x.xml"/>,
+          (e) <xi:include href="eqi-h-over-2.xml"/>.
           Cases (b1) and (b2) differ only in the visualization of the
           polygonal shape segments, the estimated boundary lengths are
           identical.  The bottom part of the figure illustrates how the

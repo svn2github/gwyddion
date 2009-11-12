@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-interpolation-nna'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-interpolation-nna.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Interpolation weights for NNA</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+w_k = {{\displaystyle{1\over r_k^4}}
+    \over\sum\limits_{j=-1}^2 {\displaystyle{1\over r_j^4}}}\;,\quad
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -38,65 +38,21 @@
       <listitem>
         is derived directly from a definition of box-counting fractal
         dimension. The algorithm is based on the following steps: a cubic
-        lattice with lattice constant l is superimposed on the
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>z</phrase></mathphrase>
-          <alt>z</alt>
-        </inlineequation>-expanded surface.
-        Initially
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>is set
-        at
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>X</phrase>/2</mathphrase>
-          <alt>X/2</alt>
-        </inlineequation>
-        (where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>X</phrase></mathphrase>
-          <alt>X</alt>
-        </inlineequation>
-        is length of edge of the surface), resulting in a lattice of
-        <inlineequation>
-          <mathphrase>2×2×2 = 8</mathphrase>
-          <alt>2\times2\times2=8</alt>
-        </inlineequation>
-        cubes.  Then
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
-          <alt>N(l)</alt>
-        </inlineequation>
-        is the number of all cubes that contain at least one pixel of the
-        image.  The lattice constant
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>
-        is then reduced stepwise by factor of 2 and the process repeated
-        until
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>
-        is equal to the distance between two adjacent pixels. The slope of
-        a plot of
-        <inlineequation>
-          <mathphrase>log(<phrase role='mathvar'>N</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
-          <alt>\log N(l)</alt>
-        </inlineequation>
-        versus
-        <inlineequation>
-          <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
-          <alt>\log 1/l</alt>
-        </inlineequation>
-        gives the fractal dimension
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript></mathphrase>
-          <alt>D_{\rm f}</alt>
-        </inlineequation>
-        directly.
+        lattice with lattice constant <xi:include href="eqi-l.xml"/>
+        is superimposed on the <xi:include href="eqi-z.xml"/>-expanded surface.
+        Initially <xi:include href="eqi-l.xml"/> is set at
+        <xi:include href="eqi-X-over-2.xml"/>
+        (where <xi:include href="eqi-X.xml"/> is length of edge of the
+        surface), resulting in a lattice of
+        <xi:include href="eqi-2x2x2-is-8.xml"/> cubes.  Then
+        <xi:include href="eqi-N-of-l.xml"/> is the number of all cubes that
+        contain at least one pixel of the image.  The lattice constant
+        <xi:include href="eqi-l.xml"/> is then reduced stepwise by factor of
+        2 and the process repeated until <xi:include href="eqi-l.xml"/>
+        equals to the distance between two adjacent pixels. The slope of
+        a plot of <xi:include href="eqi-log_N_of_l.xml"/> versus
+        <xi:include href="eqi-log-1-over-l.xml"/>
+        gives the fractal dimension <xi:include href="eqi-D_f.xml"/> directly.
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -107,56 +63,21 @@
       <listitem>
         is very similar to cube counting method and is also based directly on
         the box-counting fractal dimension definition. The method works as
-        follows: A grid of unit dimension
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>
+        follows: A grid of unit dimension <xi:include href="eqi-l.xml"/>
         is placed on the surface. This defines the location of the vertices of
         a number of triangles.  When, for example,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase> = <phrase role='mathvar'>X</phrase>/4</mathphrase>
-          <alt>l=X/4</alt>
-        </inlineequation>,
+        <xi:include href="eqi-l-is-X-over-4.xml"/>,
         the surface is covered by 32 triangles of different areas inclined at
-        various angles with respect to the
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>xy</phrase></mathphrase>
-          <alt>xy</alt>
-        </inlineequation>
+        various angles with respect to the <xi:include href="eqi-xy.xml"/>
         plane.  The areas of all triangles are calculated and summed to obtain
-        an approximation of the surface area
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>)</mathphrase>
-          <alt>S(l)</alt>
-        </inlineequation>
-        corresponding to
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>.
+        an approximation of the surface area <xi:include href="eqi-S_of_l.xml"/>
+        corresponding to <xi:include href="eqi-l.xml"/>.
         The grid size is then decreased by successive factor of 2, as before,
-        and the process continues until
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>l</phrase></mathphrase>
-          <alt>l</alt>
-        </inlineequation>
+        and the process continues until <xi:include href="eqi-l.xml"/>
         corresponds to distance between two adjacent pixel points.
-        The slope of a plot of
-        <inlineequation>
-          <mathphrase>log(<phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>l</phrase>))</mathphrase>
-          <alt>S(l)</alt>
-        </inlineequation>
-        versus
-        <inlineequation>
-          <mathphrase>log(1/<phrase role='mathvar'>l</phrase>)</mathphrase>
-          <alt>\log 1/l</alt>
-        </inlineequation>
-        then corresponds to
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>D<subscript>f</subscript></phrase> − 2</mathphrase>
-          <alt>D_{\rm f}-2</alt>
-        </inlineequation>.
+        The slope of a plot of <xi:include href="eqi-S_of_l.xml"/> versus
+        <xi:include href="eqi-log-1-over-l.xml"/> then corresponds to
+        <xi:include href="eqi-D_f-minus-2.xml"/>.
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -170,17 +91,10 @@
         method one divides the full surface into equal-sized squared boxes, and
         the variance (power of RMS value of heights), is calculated for
         particular box size. Fractal dimension is
-        evaluated from the slope
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
-          <alt>\beta</alt>
-        </inlineequation>
+        evaluated from the slope <xi:include href="eqi-beta.xml"/>
         of a least-square regression line fit to the data points in log-log
         plot of variance as
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 3 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
-          <alt>D_{\rm f} = 3-\beta/2</alt>
-        </inlineequation>.
+        <xi:include href="eqi-D_f-is-3-minus-beta-over-2.xml"/>.
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -197,16 +111,9 @@
         height profiles that forms the image is Fourier transformed and the
         power spectrum evaluated and then all these power spectra are averaged.
         Fractal dimension is evaluated from the slope
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>β</phrase></mathphrase>
-          <alt>\beta</alt>
-        </inlineequation>
-        of a least-square regression line fit to the data points in log-log
-        plot of power spectrum as
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>D</phrase><subscript>f</subscript> = 7/2 − <phrase role='mathvar'>β</phrase>/2</mathphrase>
-          <alt>D_{\rm f}=7/2-\beta/2</alt>
-        </inlineequation>.
+        <xi:include href="eqi-beta.xml"/> of a least-square regression line fit
+        to the data points in log-log plot of power spectrum as
+        <xi:include href="eqi-D_fis-7-over-2-minus-beta-over-2.xml"/>.
       </listitem>
     </varlistentry>
   </variablelist>
