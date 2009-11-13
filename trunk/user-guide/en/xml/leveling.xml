@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='leveling-and-background'>
+<sect1 id='leveling-and-background' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Data Leveling and Background Subtraction</title>
   <sect2 id='leveling'>
     <title>Leveling</title>

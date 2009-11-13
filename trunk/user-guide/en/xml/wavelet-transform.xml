@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='wavelet-transform'>
+<sect1 id='wavelet-transform' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>Wavelet Transform</title>
   <indexterm><primary>wavelet transform</primary></indexterm>
   <para>

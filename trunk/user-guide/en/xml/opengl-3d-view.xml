@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='opengl-3d-view'>
+<sect1 id='opengl-3d-view' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>OpenGL 3D Data Display</title>
   <indexterm>
     <primary>3D</primary>

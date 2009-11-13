@@ -2,7 +2,7 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<sect1 id='roughness-iso'>
+<sect1 id='roughness-iso' xmlns:xi='http://www.w3.org/2001/XInclude'>
   <title>One-Dimensional Roughness Parameters</title>
   <indexterm>
     <primary>roughness</primary>
