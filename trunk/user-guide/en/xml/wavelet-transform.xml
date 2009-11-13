@@ -208,54 +208,13 @@
       or for each subband (for scale adaptive thresholding) or for each
       pixel neighbourhood within subband (for scale and space adaptive
       thresholding) the variance is the computed as
+      <xi:include href="eq-wavelet-variance-sum.xml"/>
     </para>
-    <informalequation id='eq-wavelet-variance-sum'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-variance-sum.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\hat\sigma_Y^2 = {1\over n^2} \sum_{i,j=1}^n Y_{ij}^2
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
     <para>
       Treshold value is finally computed as
-    </para>
-    <informalequation id='eq-wavelet-threshold-value'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-wavelet-threshold-value.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-T(\hat\sigma_X) = \hat\sigma^2/\hat\sigma_X
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
-    <para>
+      <xi:include href="eq-wavelet-threshold-value.xml"/>
       where
-      <informalequation id='eq-wavelet-sigma-X'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-wavelet-sigma-X.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-\hat\sigma_X = \sqrt{\max(\hat\sigma_Y^2-\hat\sigma^2, 0)}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+      <xi:include href="eq-wavelet-sigma-X.xml"/>
       When threshold for given scale is known, we can remove all the
       coefficients smaller than threshold value (hard thresholding) or we
       can lower the absolute value of these coefficients by threshold value
@@ -291,24 +250,13 @@ T(\hat\sigma_X) = \hat\sigma^2/\hat\sigma_X
       the definition of the wavelet transform, i.e. we are computing
       a convolution of the signal with the scaled wavelet. For each scale
       we obtain by this way an array of the same length
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
-        <alt>N</alt>
-      </inlineequation>
-      as the signal has. By using
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>M</phrase></mathphrase>
-        <alt>M</alt>
-      </inlineequation>
-      arbitrarily chosen scales we obtain a field
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>N×M</phrase></mathphrase>
-        <alt>N\times M</alt>
-      </inlineequation>
-      that represents the time-frequency plane directly. The algoritm used
-      for this computaion can be based on a direct convolution or on a
-      convolution by means of multiplication in Fourier space (this is
-      sometimes called Fast wavelet transform).
+      <xi:include href="eqi-N.xml"/> as the signal has. By using
+      <xi:include href="eqi-M.xml"/> arbitrarily chosen scales we obtain
+      a field <xi:include href="eqi-NxM.xml"/> that represents the
+      time-frequency plane directly. The algoritm used for this computaion can
+      be based on a direct convolution or on a convolution by means of
+      multiplication in Fourier space (this is sometimes called Fast wavelet
+      transform).
     </para>
     <para>
       The choice of the wavelet that is used for time-frequency

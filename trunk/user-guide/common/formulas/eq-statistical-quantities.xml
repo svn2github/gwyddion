@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-statistical-quantities'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-statistical-quantities.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\sigma = \mu_2^{1/2}\;,\quad
+\gamma_1 = {\mu_3\over\mu_2^{3/2}}\;,\quad
+\gamma_2 = {\mu_4\over\mu_2^{2\vphantom{/}}} - 3
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

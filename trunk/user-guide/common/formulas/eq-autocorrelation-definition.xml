@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-autocorrelation-definition'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-autocorrelation-definition.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\eqnarray{
+  G(\tau_x,\tau_y)
+  &=
+  &\dint_{-\infty}^\infty z_1z_2w(z_1,z_2,\tau_x,\tau_y)
+                          \,\d z_1\,\d z_2\hfil\cr
+  &=
+  &\lim_{S\to\infty} {1\over S}
+        \dint_S \xi(x_1,y_1)\,\xi(x_1+\tau_x,y_1+\tau_y) \,\d x_1\,\d y_1\cr
+}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

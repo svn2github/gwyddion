@@ -36,7 +36,7 @@
         With <guilabel>Keep lateral offsets</guilabel> option enabled, the top
         left corner coordinates of the resulting image correspond to the
         top left corner of the selection, otherwise the top left corner
-        coordinates are set to <xi:include href="eqi-coord-0-0.xml"/>.
+        coordinates are set to <xi:include href="eqi-coords-0-0.xml"/>.
       </listitem>
       <listitem id='rotate'>
         <indexterm>

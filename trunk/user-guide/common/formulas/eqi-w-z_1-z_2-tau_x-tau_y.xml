@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<inlineequation>
+  <mathphrase><phrase role='mathvar'>w</phrase>(<phrase role='mathvar'>z</phrase><subscript>1</subscript>,
+    <phrase role='mathvar'>z</phrase><subscript>2</subscript>,
+    <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript>,
+    <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript>)</mathphrase>
+  <alt>w(z_1,z_2,\tau_x,\tau_y)</alt>
+</inlineequation>
+<!-- vim: set ts=2 sw=2 et : -->

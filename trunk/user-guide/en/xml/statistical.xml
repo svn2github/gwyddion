@@ -13,92 +13,30 @@
   </para>
   <para>
     Scanning probe microscopy data are usually represented as a two-dimensional
-    data field of size
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>N</phrase>×<phrase role='mathvar'>M</phrase></mathphrase>
-      <alt>N\times M</alt>
-    </inlineequation>,
-    where
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
-      <alt>N</alt>
-    </inlineequation>
-    and
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>M</phrase></mathphrase>
-      <alt>M</alt>
-    </inlineequation>
+    data field of size <xi:include href="eqi-NxM.xml"/>, where
+    <xi:include href="eqi-N.xml"/> and <xi:include href="eqi-M.xml"/>
     are the number of rows and columns of the data field, respectively.
     The real area of the field is denoted as
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>L<subscript>x</subscript></phrase>×<phrase role='mathvar'>L<subscript>y</subscript></phrase></mathphrase>
-      <alt>L_x\times L_y</alt>
-    </inlineequation>
-    where
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>L<subscript>x</subscript></phrase></mathphrase>
-      <alt>L_x</alt>
-    </inlineequation>
-    and
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>L<subscript>y</subscript></phrase></mathphrase>
-      <alt>L_y</alt>
-    </inlineequation>
-    are the dimensions along the respective axes. The sampling interval (distance
-    between two adjacent points within the scan) is denoted
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>Δ</phrase></mathphrase>
-      <alt>\Delta</alt>
-    </inlineequation>.
-    We assume that the
-    sampling interval is the same in
-    both the
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    and
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>
-    direction. We assume that the surface height at a given point
-    <inlineequation>
-      <mathphrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
-      <alt>(x,y)</alt>
-    </inlineequation>
-    can be described by a random function
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>ξ</phrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
-      <alt>\xi(x,y)</alt>
-    </inlineequation>
-    that has given statistical properties.
+    <xi:include href="eqi-L_x-times-L_y.xml"/>
+    where <xi:include href="eqi-L_x.xml"/> and <xi:include href="eqi-L_y.xml"/>
+    are the dimensions along the respective axes. The sampling interval
+    (distance between two adjacent points within the scan) is denoted
+    <xi:include href="eqi-Delta.xml"/>. We assume that the sampling interval is
+    the same in both the <xi:include href="eqi-x.xml"/> and
+    <xi:include href="eqi-y.xml"/> direction and that the surface height at a
+    given point <xi:include href="eqi-coords-x-y.xml"/> can be described by a
+    random function <xi:include href="eqi-xi-x-y.xml"/> that has given
+    statistical properties.
   </para>
   <para>
     Note that the AFM data are usually collected as line scans along the
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    axis that are concatenated together to form the two-dimensional image.
-    Therefore, the scanning speed in the
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    direction is considerably higher than the scanning speed in the
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>
-    direction. As a result, the statistical properties of AFM data are usually
-    collected along the
-    <inlineequation>
-      <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
-    profiles as these are less affected by low frequency noise and thermal
-    drift of the sample.
+    <xi:include href="eqi-x.xml"/> axis that are concatenated together to form
+    the two-dimensional image. Therefore, the scanning speed in the
+    <xi:include href="eqi-x.xml"/> direction is considerably higher than the
+    scanning speed in the <xi:include href="eqi-y.xml"/> direction. As a
+    result, the statistical properties of AFM data are usually collected along
+    the <xi:include href="eqi-x.xml"/> profiles as these are less affected by
+    low frequency noise and thermal drift of the sample.
   </para>
   <sect2 id='stat-quantities'>
     <title>
@@ -148,19 +86,13 @@
         data variance.
       </listitem>
       <listitem>
-        Ra value of the height irregularities: this quantity is similar to
-        RMS value with the only difference in exponent (power)
-        within the data variance sum. As for the RMS this exponent is
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>q</phrase> = 2</mathphrase>
-          <alt>q=2</alt>
-        </inlineequation>,
-        the Ra value is computed with exponent
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>q</phrase> = 1</mathphrase>
-          <alt>q=1</alt>
-        </inlineequation>
-        and absolute values of the data (zero mean).
+        <xi:include href="eqi-R_a.xml"/> value of the height irregularities:
+        this quantity is similar to RMS value with the only difference in
+        exponent (power) within the data variance sum. As for the RMS this
+        exponent is <xi:include href="eqi-q-is-2.xml"/>, the
+        <xi:include href="eqi-R_a.xml"/> value is computed with exponent
+        <xi:include href="eqi-q-is-1.xml"/> and absolute values of the data
+        (zero mean).
       </listitem>
       <listitem>
         Height distribution skewness: computed from 3rd central moment of data
@@ -188,100 +120,28 @@
       window and the tool will reset.
     </tip>
     <para>
-      More precisely, RMS (<inlineequation>
-        <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
-        <alt>\sigma</alt>
-      </inlineequation>),
-      skewness
-      (<inlineequation>
-        <mathphrase>γ<subscript>1</subscript></mathphrase>
-        <alt>\gamma_1</alt>
-      </inlineequation>),
-      and kurtosis
-      (<inlineequation>
-        <mathphrase>γ<subscript>2</subscript></mathphrase>
-        <alt>\gamma_2</alt>
-      </inlineequation>)
-      are computed from central moments of
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>i</phrase></mathphrase>
-        <alt>i</alt>
-      </inlineequation>-th
-      order
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>μ<subscript>i</subscript></phrase></mathphrase>
-        <alt>\mu_i</alt>
-      </inlineequation>
-      according to the following formulas:
+      More precisely, RMS (<xi:include href="eqi-sigma.xml"/>), skewness
+      (<xi:include href="eqi-gamma_1.xml"/>), and kurtosis
+      (<xi:include href="eqi-gamma_2.xml"/>) are computed from central moments
+      of <xi:include href="eqi-i.xml"/>-th order
+      <xi:include href="eqi-mu_i.xml"/> according to the following formulas:
+      <xi:include href="eq-statistical-quantities.xml"/>
     </para>
-    <informalequation id='eq-statistical-quantities'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-statistical-quantities.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\sigma = \mu_2^{1/2}\;,\quad
-\gamma_1 = {\mu_3\over\mu_2^{3/2}}\;,\quad
-\gamma_2 = {\mu_4\over\mu_2^{2\vphantom{/}}} - 3
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
     <para id='surface-area-calculation'>
       <indexterm><primary>surface area calculation</primary></indexterm>
       The surface area is estimated by the following method.
-      Let
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>z<subscript>i</subscript></phrase></mathphrase>
-        <alt>z_i</alt>
-      </inlineequation>
-      for
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>i</phrase> = 1, 2, 3, 4</mathphrase>
-        <alt>i=1,2,3,4</alt>
-      </inlineequation>
-      denote values in
-      four neighbour points (pixel centres), and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h<subscript>x</subscript></phrase></mathphrase>
-        <alt>h_x</alt>
-      </inlineequation>
-      and
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>h<subscript>y</subscript></phrase></mathphrase>
-        <alt>h_y</alt>
-      </inlineequation>
-      pixel dimensions along corresponding axes.  If an additional point is
-      placed in the centre of the rectangle which corresponds to the common
-      corner of the four pixels (using the mean value of the pixels),
-      four triangles are formed and the surface area can be
-      approximated by summing their areas. This leads to the following formulas
-      for the area of one triangle (top) and the surface area of one
+      Let <xi:include href="eqi-z_i.xml"/> for
+      <xi:include href="eqi-i-is-1-to-4.xml"/> denote values in four neighbour
+      points (pixel centres), and <xi:include href="eqi-h_x.xml"/> and
+      <xi:include href="eqi-h_y.xml"/> pixel dimensions along corresponding
+      axes.  If an additional point is placed in the centre of the rectangle
+      which corresponds to the common corner of the four pixels (using the mean
+      value of the pixels), four triangles are formed and the surface area can
+      be approximated by summing their areas. This leads to the following
+      formulas for the area of one triangle (top) and the surface area of one
       pixel (bottom):
+      <xi:include href="eq-area-calculation.xml"/>
     </para>
-    <informalequation id='eq-area-calculation'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-area-calculation.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\eqnarray{
-    A_{12}&=
-    &{h_xh_y\over4} \sqrt{1 + \left({z_1-z_2\over h_x}\right)^{\!\!2}
-                          + \left({z_1+z_2-2\bar z\over h_y}\right)^{\!\!2}}\cr
-    \noalign{\medskip}
-    A&=&A_{12} + A_{23} + A_{34} + A_{41}\cr
-}
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
     <para>
       The method is now well-defined for inner pixels of the region.  Each
       value participates on eight triangles, two with each of the four
@@ -305,13 +165,10 @@
           Surface area calculation triangulation scheme (left).  Application
           of the triangulation scheme to a three-pixel masked area (right),
           e.g. a grain.  The small circles represent pixel-center vertices
-          <inlineequation>
-            <mathphrase><phrase role='mathvar'>z<subscript>i</subscript></phrase></mathphrase>
-            <alt>z_i</alt>
-          </inlineequation>,
-          thin dashed lines stand for pixel boundaries while thick lines
-          symbolize the triangulation.  The surface area estimate equals to the
-          area covered by the mask (grey) in this scheme.
+          <xi:include href="eqi-z_i.xml"/>, thin dashed lines stand for pixel
+          boundaries while thick lines symbolize the triangulation.  The
+          surface area estimate equals to the area covered by the mask (grey)
+          in this scheme.
         </caption>
       </mediaobject>
     </informalfigure>
@@ -334,18 +191,9 @@
       Within the tool window, you can select which function to evaluate using
       the selection box on the left labeled <guilabel>Output Type</guilabel>.
       The graph preview will update automatically. You can select in which
-      direction to evaluate
-      (<inlineequation>
-        <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-        <alt>x</alt>
-      </inlineequation>
-      or
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-        <alt>y</alt>
-      </inlineequation>),
-      but as stated above, we recommend using the fast scanning axis direction.
-      You can also select which
+      direction to evaluate (horizontal or vertical), but as stated above, we
+      recommend using the fast scanning axis direction. You can also select
+      which
       <link linkend='interpolation'>interpolation</link> method to use.
       When you are finished, click <guibutton>Apply</guibutton> to close the
       tool window and output a new graph window containing the statistical data.
@@ -373,41 +221,16 @@
         the tangent of the angle, not the angle itself.
       </para>
       <para>
-        The normalization of the densities
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>ρ</phrase>(<phrase role='mathvar'>p</phrase>)</mathphrase>
-          <alt>\varrho(p)</alt>
-        </inlineequation>
-        (where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>x</phrase></mathphrase>
-          <alt>p</alt>
-        </inlineequation>
-        is the corresponding quantity, height or slope) is such that
+        The normalization of the densities <xi:include href="eqi-rho-of-p.xml"/>
+        (where <xi:include href="eqi-p.xml"/> is the corresponding quantity,
+        height or slope) is such that
+        <xi:include href="eq-distribution-density-normalization.xml"/>
       </para>
-      <informalequation id='eq-distribution-density-normalization'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-distribution-density-normalization.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-\int_{-\infty}^\infty \varrho(x)\,\d x = 1
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         Evidently, the scale of the values is then independent on the number
         of data points and the number of histogram buckets.  The cumulative
         distributions are integrals of the densities and they have values
-        from interval
-        <inlineequation>
-          <mathphrase>[0, 1]</mathphrase>
-          <alt>[0,1]</alt>
-        </inlineequation>.
+        from interval <xi:include href="eqi-interval-0-1.xml"/>.
       </para>
     </sect3>
     <sect3 id='first-order-vs-second-order-quantities'>
@@ -430,141 +253,30 @@
       <indexterm><primary>autocorrelation function (2D)</primary></indexterm>
       <para>
         The autocorrelation function is given by
-      </para>
-      <informalequation id='eq-autocorrelation-definition'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-autocorrelation-definition.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-\eqnarray{
-  G(\tau_x,\tau_y)
-  &=
-  &\dint_{-\infty}^\infty z_1z_2w(z_1,z_2,\tau_x,\tau_y)
-                          \,\d z_1\,\d z_2\hfil\cr
-  &=
-  &\lim_{S\to\infty} {1\over S}
-        \dint_S \xi(x_1,y_1)\,\xi(x_1+\tau_x,y_1+\tau_y) \,\d x_1\,\d y_1\cr
-}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>z</phrase><subscript>1</subscript></mathphrase>
-          <alt>z_1</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>z</phrase><subscript>2</subscript></mathphrase>
-          <alt>z_2</alt>
-        </inlineequation>
-        are the values of heights at points
-        <inlineequation>
-          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>)</mathphrase>
-          <alt>(x_1,y_1)</alt>
-        </inlineequation>,
-        <inlineequation>
-          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>)</mathphrase>
-          <alt>(x_2,y_2)</alt>
-        </inlineequation>;
-        furthermore,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript> = 
-            <phrase role='mathvar'>x</phrase><subscript>1</subscript> − 
-            <phrase role='mathvar'>x</phrase><subscript>2</subscript></mathphrase>
-          <alt>\tau_x=x_1-x_2</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript> = 
-            <phrase role='mathvar'>y</phrase><subscript>1</subscript> − 
-            <phrase role='mathvar'>y</phrase><subscript>2</subscript></mathphrase>
-          <alt>\tau_y=y_1-y_2</alt>
-        </inlineequation>.
-        The function
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>w</phrase>(<phrase role='mathvar'>z</phrase><subscript>1</subscript>,
-            <phrase role='mathvar'>z</phrase><subscript>2</subscript>,
-            <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript>,
-            <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript>)</mathphrase>
-          <alt>w(z_1,z_2,\tau_x,\tau_y)</alt>
-        </inlineequation>
+        <xi:include href="eq-autocorrelation-definition.xml"/>
+        where <xi:include href="eqi-z_1.xml"/> and
+        <xi:include href="eqi-z_2.xml"/> are the values of heights at points
+        <xi:include href="eqi-coords-x_1-y_1.xml"/>,
+        <xi:include href="eqi-coords-x_2-y_2.xml"/>; furthermore,
+        <xi:include href="eqi-tau_x-is-x_1-minus-x_2.xml"/> and
+        <xi:include href="eqi-tau_y-is-y_1-minus-y_2.xml"/>.
+        The function <xi:include href="eqi-w-z_1-z_2-tau_x-tau_y.xml"/>
         denotes the two-dimensional probability density of the random function
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>ξ</phrase>(<phrase role='mathvar'>x</phrase>, <phrase role='mathvar'>y</phrase>)</mathphrase>
-          <alt>\xi(x,y)</alt>
-        </inlineequation>
-        corresponding to points
-        <inlineequation>
-          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>1</subscript>, <phrase role='mathvar'>y</phrase><subscript>1</subscript>)</mathphrase>
-          <alt>(x_1,y_1)</alt>
-        </inlineequation>,
-        <inlineequation>
-          <mathphrase>(<phrase role='mathvar'>x</phrase><subscript>2</subscript>, <phrase role='mathvar'>y</phrase><subscript>2</subscript>)</mathphrase>
-          <alt>(x_2,y_2)</alt>
-        </inlineequation>
-        and the distance between these points
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase></mathphrase>
-          <alt>\tau</alt>
-        </inlineequation>.
+        <xi:include href="eqi-xi-x-y.xml"/> corresponding to points
+        <xi:include href="eqi-coords-x_1-y_1.xml"/>,
+        <xi:include href="eqi-coords-x_2-y_2.xml"/>, and the distance between
+        these points <xi:include href="eqi-tau.xml"/>.
       </para>
       <para id='autocorrelation-2d'>
         From the discrete AFM data one can evaluate this function as
-      </para>
-      <informalequation id='eq-autocorrelation-discrete-2d'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-autocorrelation-discrete-2d.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-G(m,n) = {1\over (N-n)(M-m)}
-         \sum_{l=1}^{N-n} \sum_{k=1}^{M-m} z_{k+m,l+n} z_{k,l}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript>/<phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
-          <alt>m\tau_x/\Delta_x</alt>
-        </inlineequation>,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript>/<phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
-          <alt>m\tau_y/\Delta_y</alt>
-        </inlineequation>.
-        The function can thus be evaluated in a discrete set
-        of values of
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
-          <alt>\tau_x</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
-          <alt>\tau_y</alt>
-        </inlineequation>
-        separated by the sampling intervals
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>x</phrase></subscript></mathphrase>
-          <alt>\Delta_x</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>Δ</phrase><subscript><phrase role='mathvar'>y</phrase></subscript></mathphrase>
-          <alt>\Delta_y</alt>
-        </inlineequation>,
-        respectively.
+        <xi:include href="eq-autocorrelation-discrete-2d.xml"/>
+        where <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>,
+        <xi:include href="eqi-n-is-tau_y-over-Delta-y.xml"/>.
+        The function can thus be evaluated in a discrete set of values of
+        <xi:include href="eqi-tau_x.xml"/> and
+        <xi:include href="eqi-tau_y.xml"/> separated by the sampling intervals
+        <xi:include href="eqi-Delta-x.xml"/> and
+        <xi:include href="eqi-Delta-y.xml"/>, respectively.
         The two-dimensional autocorrelation function can be calculated with
         <menuchoice>
           <guimenu>Data Process</guimenu>
@@ -577,71 +289,21 @@ G(m,n) = {1\over (N-n)(M-m)}
         autocorrelation function based only on profiles along the fast
         scanning axis. It can therefore be evaluated from the discrete AFM data
         values as
+        <xi:include href="eq-autocorrelation-discrete-1d.xml"/>
       </para>
-      <informalequation id='eq-autocorrelation-discrete-1d'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-autocorrelation-discrete-1d.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-G_x(m) = G(m, 0) = {1\over N(M-m)}
-                    \sum_{l=1}^N \sum_{k=1}^{M-m} z_{k+m,l} z_{k,l}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
-        The one-dimensional autocorrelation function is often assumed to have the
-        form of a Gaussian, i.e. it can be given by the following relation
-      </para>
-      <informalequation id='eq-autocorrelation-gaussian'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-autocorrelation-gaussian.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-G_x(\tau_x) = \sigma^2\exp(-\tau_x^2/T^2)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
-        denotes the root mean square deviation of the heights and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
-          <alt>T</alt>
-        </inlineequation>
+        The one-dimensional autocorrelation function is often assumed to have
+        the form of a Gaussian, i.e. it can be given by the following relation
+        <xi:include href="eqi-autocorrelation-gaussian.xml"/>
+        where <xi:include href="eqi-sigma.xml"/> denotes the root mean square
+        deviation of the heights and <xi:include href="eqi-T.xml"/>
         denotes the autocorrelation length.
       </para>
       <para>
         For the exponential autocorrelation function we have the following
         relation
+        <xi:include href="eqi-autocorrelation-exponential.xml"/>
       </para>
-      <informalequation id='eq-autocorrelation-exponential'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-autocorrelation-exponential.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <informalfigure id='fig-gaussian-acf'>
         <mediaobject>
           <imageobject>
@@ -653,16 +315,8 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
           <caption>
             Autocorrelation function obtained for simulated Gaussian randomly
             rough surface (i.e. with a Gaussian autocorrelation function)
-            with
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>σ</phrase> ≈ 20 nm</mathphrase>
-              <alt>\sigma\approx20\rm\,nm</alt>
-            </inlineequation>
-            and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>T</phrase> ≈ 300 nm</mathphrase>
-              <alt>T\approx300\rm\,nm</alt>
-            </inlineequation>.
+            with <xi:include href="eqi-sigma-approx-20-nm.xml"/> and
+            <xi:include href="eqi-T-approx-300-nm.xml"/>.
           </caption>
         </mediaobject>
       </informalfigure>
@@ -690,100 +344,30 @@ G_x(\tau_x) = \sigma^2\exp(-\tau_x/T)
         height-height correlation function based only on profiles along the fast
         scanning axis. It can therefore be evaluated from the discrete AFM data
         values as
-      </para>
-      <informalequation id='eq-height-height-correlation-discrete'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-height-height-correlation-discrete.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-H_x(\tau_x) = {1\over N(M-m)}
-              \sum_{l=1}^N \sum_{n=1}^{M-m} (z_{n+m,l} - z_{n,l})^2
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>m</phrase> = <phrase role='mathvar'>τ</phrase>/<phrase role='mathvar'>Δ</phrase></mathphrase>
-          <alt>m=\tau/\Delta</alt>
-        </inlineequation>.
+        <xi:include href="eqi-height-height-correlation-discrete.xml"/>
+        where <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>.
         The function thus can be evaluated in a discrete set of values of
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>τ</phrase></mathphrase>
-          <alt>\tau</alt>
-        </inlineequation>
-        separated by the sampling interval
-         <inlineequation>
-          <mathphrase><phrase role='mathvar'>Δ</phrase></mathphrase>
-          <alt>\Delta</alt>
-        </inlineequation>.
+        <xi:include href="eqi-tau_x.xml"/> separated by the sampling interval
+        <xi:include href="eqi-Delta-x.xml"/>.
       </para>
       <para>
         The one-dimensional height-height correlation function is often
         assumed to be Gaussian, i.e. given by the following relation
-      </para>
-      <informalequation id='eq-height-height-correlation-gaussian'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-height-height-correlation-gaussian.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x^2\over T^2}\right) \right]
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
-        denotes the root mean square deviation of the heights and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
-          <alt>T</alt>
-        </inlineequation>
+        <xi:include href="eq-height-height-correlation-gaussian.xml"/>
+        where <xi:include href="eqi-sigma.xml"/> denotes the root mean square
+        deviation of the heights and <xi:include href="eqi-T.xml"/> denotes the
+        autocorrelation length.
       </para>
       <para>
         For the exponential height-height correlation function we have the
         following relation
+        <xi:include href="eq-height-height-correlation-exponential.xml"/>
       </para>
-      <informalequation id='eq-height-height-correlation-exponential'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-height-height-correlation-exponential.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         In the following figure the height-height correlation function obtained
         for a simulated Gaussian surface is plotted. It is fitted using the
         formula shown above. The resulting values of
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
-          <alt>T</alt>
-        </inlineequation>
+        <xi:include href="eqi-sigma.xml"/> and <xi:include href="eqi-T.xml"/>
         obtained by fitting the HHCF are practically the same as for the ACF.
       </para>
       <informalfigure id='fig-gaussian-hhcf'>
@@ -797,15 +381,8 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
           <caption>
             Height-height correlation function obtained for simulated Gaussian
             randomly rough surface with
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>σ</phrase> ≈ 20 nm</mathphrase>
-              <alt>\sigma\approx20\rm\,nm</alt>
-            </inlineequation>
-            and
-            <inlineequation>
-              <mathphrase><phrase role='mathvar'>T</phrase> ≈ 300 nm</mathphrase>
-              <alt>T\approx300\rm\,nm</alt>
-            </inlineequation>.
+            <xi:include href="eqi-sigma-approx-20-nm.xml"/> and
+            <xi:include href="eqi-T-approx-300-nm.xml"/>.
           </caption>
         </mediaobject>
       </informalfigure>
@@ -819,141 +396,39 @@ H_x(\tau_x) = 2\sigma^2\left[ 1 - \exp\left(-{\tau_x\over T}\right) \right]
       <para>
         The two-dimensional power spectral density function can be written in
         terms of the Fourier transform of the autocorrelation function
+        <xi:include href="eq-power-spectral-density-fft.xml"/>
       </para>
-      <informalequation id='eq-power-spectral-density-fft'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-fft.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W(K_x,K_y) = {1\over4\pi}
-             \dint_{-\infty}^\infty
-                 G(\tau_x,\tau_y)
-                 \,\e^{-\im(K_x\tau_x + K_y\tau_y)}
-                 \,\d\tau_x\,\d\tau_y
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         Similarly to the autocorrelation function, we also usually evaluate
         the one-dimensional power spectral density function which is given by
         the equation
+        <xi:include href="eq-power-spectral-density-1d.xml"/>
       </para>
-      <informalequation id='eq-power-spectral-density-1d'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-1d.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_1(K_x) = \int_{-\infty}^\infty W(K_x,K_y)\,\d K_y
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         This function can be evaluated by means of the Fast Fourier Transform
         as follows:
+        <xi:include href="eq-power-spectral-density-1d-fft.xml"/>
+        where <xi:include href="eqi-P_j-of-K_x.xml"/> is the Fourier
+        coefficient of the <xi:include href="eqi-j.xml"/>-th row, i.e.
+        <xi:include href="eq-power-spectral-density-Pj.xml"/>
       </para>
-      <informalequation id='eq-power-spectral-density-1d-fft'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-1d-fft.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_1(K_x) = {2\pi\over NMh} \sum_{j=0}^N |\hat P_j(K_x)|^2
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        where
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>P<subscript>j</subscript></phrase>(<phrase role='mathvar'>K<subscript>x</subscript></phrase>)</mathphrase>
-          <alt>P_j(K_x)</alt>
-        </inlineequation>
-        is the Fourier coefficient of the
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>j</phrase></mathphrase>
-          <alt>j</alt>
-        </inlineequation>-th
-        row, i.e.
-      </para>
-      <informalequation id='eq-power-spectral-density-Pj'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-Pj.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-\hat P_j(K_x) = {h\over2\pi} \sum_{k=0}^N z_{kj} \exp(-\im K_xkh)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         If we choose the Gaussian ACF, the corresponding Gaussian
         relation for the PSDF is
       </para>
-      <informalequation id='eq-power-spectral-density-1d-gaussian'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-1d-gaussian.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_1(K_x) = {\sigma^2T\over2\sqrt\pi} \exp(-K_x^2T^2/4)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         For the surface with exponential ACF we have
+        <xi:include href="eq-power-spectral-density-1d-exponential.xml"/>
       </para>
-      <informalequation id='eq-power-spectral-density-1d-exponential'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-1d-exponential.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <para>
         In the following figure the resulting PSDF and its fit for the same
         surface as used in the
         <link linkend='fig-gaussian-acf'>ACF</link> and
         <link linkend='fig-gaussian-hhcf'>HHCF</link> fitting are
         plotted. We can see that the function can be again fitted by Gaussian
-        PSDF. The resulting values of
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>σ</phrase></mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>T</phrase></mathphrase>
-          <alt>T</alt>
-        </inlineequation>
-        were practically same as those from the HHCF and ACF fit.
+        PSDF. The resulting values of <xi:include href="eqi-sigma.xml"/> and
+        <xi:include href="eqi-T.xml"/> were practically same as those from the
+        HHCF and ACF fit.
       </para>
       <informalfigure id='fig-gaussian-psdf'>
         <mediaobject>
@@ -974,62 +449,16 @@ W_1(K_x) = {\sigma^2T\over\pi} {1\over1+K_x^2T^2}
           <primary>power spectral density function</primary>
           <secondary>radial</secondary>
         </indexterm>
-        We can also introduce radial PSDF
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>W</phrase><subscript>r</subscript>(<phrase role='mathvar'>K</phrase>)</mathphrase>
-          <alt>W_{\rm r}(K)</alt>
-        </inlineequation>,
-        which of course contains the same information as the one-dimensional
-        PSDF for isotropic rough surfaces:
-      </para>
-      <informalequation id='eq-power-spectral-density-radial'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-radial.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_{\rm r}(K) = \int_0^{2\pi} W(K\cos\varphi,K\sin\varphi)\,K\,\d\varphi
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+        We can also introduce the radial PSDF
+        <xi:include href="eqi-W_r-of-K.xml"/> which of course contains the same
+        information as the one-dimensional PSDF for isotropic rough surfaces:
+        <xi:include href="eq-power-spectral-density-radial.xml"/>
       <para>
         For a surface with Gaussian ACF this function is expressed as
+        <xi:include href="eq-power-spectral-density-radial-gaussian.xml"/>
+        while for exponential-ACF surface as
+        <xi:include href="eq-power-spectral-density-radial-exponential.xml"/>
       </para>
-      <informalequation id='eq-power-spectral-density-radial-gaussian'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-radial-gaussian.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_{\rm r}(K) = {\sigma^2T\over2}\,KT\exp(-K^2T^2/4)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        while for exponential ACF surface as
-      </para>
-      <informalequation id='eq-power-spectral-density-radial-exponential'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-power-spectral-density-radial-exponential.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-W_{\rm r}(K) = \sigma^2T{KT\over(1+K^2T^2)^{3/2}}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
       <tip>
         Within Gwyddion you can fit all statistical functions presented here
         by their Gaussian and exponential forms. To do this, fist click
@@ -1049,94 +478,28 @@ W_{\rm r}(K) = \sigma^2T{KT\over(1+K^2T^2)^{3/2}}
       <para>
         The Minkowski functionals are used to describe global geometric
         characteristics of structures.  Two-dimensional discrete variants of
-        volume
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>V</phrase></mathphrase>
-          <alt>V</alt>
-        </inlineequation>,
-        surface
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>S</phrase></mathphrase>
-          <alt>S</alt>
-        </inlineequation>,
-        and connectivity (Euler-Poincaré Characteristic)
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>χ</phrase></mathphrase>
-          <alt>\chi</alt>
-        </inlineequation>
-        are calculated according to following formulas:
-      </para>
-      <informalequation id='eq-minkowski-functionals.en'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-minkowski-functionals.en.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-V = {N_{\rm white}\over N}\;,\quad
-S = {N_{\rm bound}\over N}\;,\quad
-\chi = {C_{\rm white} - C_{\rm black}\over N}
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
-      <para>
-        Here
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>N</phrase></mathphrase>
-          <alt>B</alt>
-        </inlineequation>
-        denotes the total number of pixels,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>N</phrase><subscript>white</subscript></mathphrase>
-          <alt>N_{\rm white}</alt>
-        </inlineequation>
-        denotes the number of <quote>white</quote> pixels, that is pixels above
-        the threshold. Pixels below the threshold are referred to as
-        <quote>black</quote>.  Symbol
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>N</phrase><subscript>bound</subscript></mathphrase>
-          <alt>N_{\rm bound}</alt>
-        </inlineequation>
-        denotes the number of white-black pixel boundaries.
-        Finally,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>C</phrase><subscript>white</subscript></mathphrase>
-          <alt>C_{\rm white}</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>C</phrase><subscript>black</subscript></mathphrase>
-          <alt>C_{\rm black}</alt>
-        </inlineequation>
-        denote the number of continuous sets of white and black pixels
-        respectively.
+        volume <xi:include href="eqi-V.xml"/>, surface
+        <xi:include href="eqi-S.xml"/> and connectivity (Euler-Poincaré
+        Characteristic) <xi:include href="eqi-chi.xml"/> are calculated
+        according to the following formulas:
+        <xi:include href="eq-minkowski-functionals.xml"/>
+        Here <xi:include href="eqi-N.xml"/> denotes the total number of pixels,
+        <xi:include href="eqi-N_white.xml"/> denotes the number of
+        <quote>white</quote> pixels, that is pixels above the threshold. Pixels
+        below the threshold are referred to as <quote>black</quote>.  Symbol
+        <xi:include href="eqi-N_bound.xml"/> denotes the number of white-black
+        pixel boundaries. Finally, <xi:include href="eqi-C_white.xml"/> and
+        <xi:include href="eqi-C_black.xml"/> denote the number of continuous
+        sets of white and black pixels respectively.
       </para>
       <para>
         For an image with continuous set of values the functionals are
         parametrized by the height threshold value
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>ϑ</phrase></mathphrase>
-          <alt>\vartheta</alt>
-        </inlineequation>
-        that divides white pixels from black, that is they can be viewed as
-        functions of this parameter. And these functions
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>V</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
-          <alt>V(\vartheta)</alt>
-        </inlineequation>,
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>S</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
-          <alt>S(\vartheta)</alt>
-        </inlineequation>
-        and
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>χ</phrase>(<phrase role='mathvar'>ϑ</phrase>)</mathphrase>
-          <alt>\chi(\vartheta)</alt>
-        </inlineequation>
-        are plotted.
+        <xi:include href="eqi-theta.xml"/> that divides white pixels from
+        black, that is they can be viewed as functions of this parameter. And
+        these functions <xi:include href="eqi-V-of-theta.xml"/>,
+        <xi:include href="eqi-S-of-theta.xml"/> and
+        <xi:include href="eqi-chi-of-theta.xml"/> are plotted.
       </para>
     </sect3>
   </sect2>
@@ -1185,10 +548,7 @@ S = {N_{\rm bound}\over N}\;,\quad
           <secondary>of a row/column</secondary>
         </indexterm>
         RMS value of the height irregularities computed from data variance
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>R</phrase><subscript>q</subscript></mathphrase>
-          <alt>R_{\rm q}</alt>
-        </inlineequation>.
+        <xi:include href="eqi-R_q.xml"/>.
       </listitem>
       <listitem>
         Skewness and kurtosis of the height distribution.
@@ -1202,29 +562,11 @@ S = {N_{\rm bound}\over N}\;,\quad
         row (column).
       </listitem>
       <listitem>
-        Tangent of
-        <inlineequation>
-          <mathphrase><phrase role='mathvar'>β</phrase><subscript>0</subscript></mathphrase>
-          <alt>\beta_0</alt>
-        </inlineequation>.
-        This is a characteristics of
-        the steepnes of local slopes, closely related to the behaviour of
-        autocorrelation and height-height correlation functions at zero.  For
-        discrete values it is calculated as follows:
-        <informalequation id='eq-tan-beta0'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-tan-beta0.png' format='PNG'/>
-            </imageobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-\tan^2\beta_0 = {1\over (N-1)h^2} \sum_{i=1}^{N-1} (z_i - z_{i-1})^2
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
+        Tangent of <xi:include href="eqi-beta_0.xml"/>. This is a
+        characteristics of the steepnes of local slopes, closely related to the
+        behaviour of autocorrelation and height-height correlation functions at
+        zero.  For discrete values it is calculated as follows:
+        <xi:include href="eq-tan-beta0.xml"/>
       </listitem>
       <listitem>
         Standard roughness parameters
@@ -1265,64 +607,21 @@ S = {N_{\rm bound}\over N}\;,\quad
       a local plane through the neighbourhood of each point and using its
       gradient.  <guimenuitem>Slope Distribution</guimenuitem> has also
       another mode operation called <guilabel>Per-angle graph</guilabel>.
-      in which it plots the distribution of
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>r</phrase><superscript>2</superscript></mathphrase>
-        <alt>r^2</alt>
-      </inlineequation>
-      over
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>φ</phrase></mathphrase>
-        <alt>\varphi</alt>
-      </inlineequation>
-      where we introduced polar coordinates
-      <inlineequation>
-        <mathphrase>(<phrase role='mathvar'>r</phrase>, <phrase role='mathvar'>φ</phrase>)</mathphrase>
-        <alt>(r,\varphi)</alt>
-      </inlineequation>
-      in the plane of derivatives. The relation between the derivative
-      Cartesian coordinates of the two-dimensional slope distribution and the
+      in which it plots the distribution of <xi:include href="eqi-r-to-2.xml"/>
+      over <xi:include href="eqi-phi.xml"/> where we introduced polar
+      coordinates <xi:include href="eqi-coords-r-phi.xml"/> in the plane of
+      derivatives. The relation between the derivative Cartesian coordinates of
+      the two-dimensional slope distribution and the
       <link linkend='inclinations-coordinates'>facet inclination angles</link>
       are given by the following formula:
-      <informalequation id='eq-facet-theta-phi'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-facet-theta-phi.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-\vartheta = \atan\hypot\left({\d z\over\d x}, {\d z\over\d y}\right)\;,\quad
-\varphi = \atan_2\left({\d z\over\d y}, -{\d z\over\d x}\right)
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+      <xi:include href="eq-facet-theta-phi.xml"/>
     </para>
     <para id='angle-distribution'>
       <guimenuitem>Angle Distribution</guimenuitem> function is
       a visualization tool that does not calculate a distribution in the
-      strict sense.  For each derivative
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>v</phrase></mathphrase>
-        <alt>v</alt>
-      </inlineequation>
-      the circle of points satisfying
-      <informalequation id='eq-angle-distribution'>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref='eq-angle-distribution.png' format='PNG'/>
-          </imageobject>
-          <textobject role='tex'>
-            <phrase>
-<![CDATA[
-2\vec r\mathop.\vec v = r^2
-]]>
-            </phrase>
-          </textobject>
-        </mediaobject>
-      </informalequation>
+      strict sense.  For each derivative <xi:include href="eqi-v.xml"/> the
+      circle of points satisfying
+      <xi:include href="eq-angle-distribution.xml"/>
       is drawn.  The number of points on the circle is given by
       <guilabel>Number of steps</guilabel>.
     </para>

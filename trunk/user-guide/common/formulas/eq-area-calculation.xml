@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-area-calculation'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-area-calculation.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\eqnarray{
+    A_{12}&=
+    &{h_xh_y\over4} \sqrt{1 + \left({z_1-z_2\over h_x}\right)^{\!\!2}
+                          + \left({z_1+z_2-2\bar z\over h_y}\right)^{\!\!2}}\cr
+    \noalign{\medskip}
+    A&=&A_{12} + A_{23} + A_{34} + A_{41}\cr
+}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

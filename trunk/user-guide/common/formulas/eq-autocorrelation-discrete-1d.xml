@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 9433 2009-07-14 21:59:08Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-autocorrelation-discrete-1d'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-autocorrelation-discrete-1d.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+G_x(m) = G(m, 0) = {1\over N(M-m)}
+                    \sum_{l=1}^N \sum_{k=1}^{M-m} z_{k+m,l} z_{k,l}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->
