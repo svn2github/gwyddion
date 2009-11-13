@@ -294,7 +294,7 @@
       <para>
         The one-dimensional autocorrelation function is often assumed to have
         the form of a Gaussian, i.e. it can be given by the following relation
-        <xi:include href="eqi-autocorrelation-gaussian.xml"/>
+        <xi:include href="eq-autocorrelation-gaussian.xml"/>
         where <xi:include href="eqi-sigma.xml"/> denotes the root mean square
         deviation of the heights and <xi:include href="eqi-T.xml"/>
         denotes the autocorrelation length.
@@ -302,7 +302,7 @@
       <para>
         For the exponential autocorrelation function we have the following
         relation
-        <xi:include href="eqi-autocorrelation-exponential.xml"/>
+        <xi:include href="eq-autocorrelation-exponential.xml"/>
       </para>
       <informalfigure id='fig-gaussian-acf'>
         <mediaobject>
@@ -344,7 +344,7 @@
         height-height correlation function based only on profiles along the fast
         scanning axis. It can therefore be evaluated from the discrete AFM data
         values as
-        <xi:include href="eqi-height-height-correlation-discrete.xml"/>
+        <xi:include href="eq-height-height-correlation-discrete.xml"/>
         where <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>.
         The function thus can be evaluated in a discrete set of values of
         <xi:include href="eqi-tau_x.xml"/> separated by the sampling interval
@@ -453,6 +453,7 @@
         <xi:include href="eqi-W_r-of-K.xml"/> which of course contains the same
         information as the one-dimensional PSDF for isotropic rough surfaces:
         <xi:include href="eq-power-spectral-density-radial.xml"/>
+      </para>
       <para>
         For a surface with Gaussian ACF this function is expressed as
         <xi:include href="eq-power-spectral-density-radial-gaussian.xml"/>

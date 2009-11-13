@@ -76,7 +76,7 @@
           has support of length 4, The value is then obtained as
           <xi:include href="eq-interpolation-w1234.xml"/>
           where
-          <xi:include href="eqi-interpolation-key.xml"/>
+          <xi:include href="eq-interpolation-key.xml"/>
           are the interpolation weights.
           Key's interpolation degree is 3, regularity
           <xi:include href="eqi-C-to-1.xml"/> and order 3.
@@ -90,7 +90,7 @@
         <para>
           Schaum interpolation (more precisely fourth-order Schaum) has also
           support of length 4.  The interpolation weights are
-          <xi:include href="eqi-interpolation-schaum.xml"/>
+          <xi:include href="eq-interpolation-schaum.xml"/>
           Its polynomial degree is 3, regularity
           <xi:include href="eqi-C-to-0.xml"/> and order 4.
         </para>

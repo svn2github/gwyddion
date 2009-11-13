@@ -43,9 +43,9 @@
           </para>
           <para>
             An older means of specifying a range for
-            <xi:include href="eqi-Ra.xml"/>
+            <xi:include href="eqi-R_a.xml"/>
             is RHR.  This is a symbol on a drawing specifying a minimum and
-            maximum value for <xi:include href="eqi-Ra.xml"/>.
+            maximum value for <xi:include href="eqi-R_a.xml"/>.
           </para>
         </listitem>
       </varlistentry>
@@ -60,7 +60,7 @@
           <para>
             The average of the measured height deviations taken within the
             evaluation length and measured from the mean line
-            <xi:include href="eqi-roughness-iso-Rq.xml"/>
+            <xi:include href="eq-roughness-iso-Rq.xml"/>
           </para>
         </listitem>
       </varlistentry>
@@ -125,7 +125,7 @@
             Mean peak-to-valley roughness. It is determined by the difference
             between the highest peak ant the lowest valley within multiple
             samples in the evaluation length
-            <xi:include href="eqi-roughness-iso-Rtm.xml"/>
+            <xi:include href="eq-roughness-iso-Rtm.xml"/>
             where <xi:include href="eqi-R_vm.xml"/> and
             <xi:include href="eqi-R_pm.xml"/> are defined below.
           </para>
@@ -280,7 +280,7 @@
             Skewness is a simple measure of the asymmetry of the ADF, or,
             equivalently, it measures the symmetry of the variation of a
             profile about its mean line
-            <xi:include href="eqi-roughness-iso-Rsk.xml"/>
+            <xi:include href="eq-roughness-iso-Rsk.xml"/>
           </para>
         </listitem>
       </varlistentry>
@@ -296,7 +296,7 @@
             Kurtosis is the ADF shape parameter considered. Kurtosis relates
             to the uniformity of the ADF or, equivalently, to the spikiness
             of the profile.
-            <xi:include href="eqi-roughness-iso-Rku.xml"/>
+            <xi:include href="eq-roughness-iso-Rku.xml"/>
           </para>
         </listitem>
       </varlistentry>

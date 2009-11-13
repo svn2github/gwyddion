@@ -73,7 +73,7 @@
         Dechecker filter – a smoothing filter specially designed to remove
         checker pattern from the image while preserving other details.  It is
         a convolution filter with kernel
-        <xi:include href="eq-filter-dechecker.xml"/>
+        <xi:include href="eq-filters-dechecker.xml"/>
       </listitem>
       <listitem id='filter-gaussian'>
         <indexterm><primary>gaussian filter</primary></indexterm>

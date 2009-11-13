@@ -50,7 +50,7 @@
         <xi:include href="eqi-l.xml"/> is then reduced stepwise by factor of
         2 and the process repeated until <xi:include href="eqi-l.xml"/>
         equals to the distance between two adjacent pixels. The slope of
-        a plot of <xi:include href="eqi-log_N_of_l.xml"/> versus
+        a plot of <xi:include href="eqi-log-N-of-l.xml"/> versus
         <xi:include href="eqi-log-1-over-l.xml"/>
         gives the fractal dimension <xi:include href="eqi-D_f.xml"/> directly.
       </listitem>
@@ -70,12 +70,12 @@
         the surface is covered by 32 triangles of different areas inclined at
         various angles with respect to the <xi:include href="eqi-xy.xml"/>
         plane.  The areas of all triangles are calculated and summed to obtain
-        an approximation of the surface area <xi:include href="eqi-S_of_l.xml"/>
+        an approximation of the surface area <xi:include href="eqi-S-of-l.xml"/>
         corresponding to <xi:include href="eqi-l.xml"/>.
         The grid size is then decreased by successive factor of 2, as before,
         and the process continues until <xi:include href="eqi-l.xml"/>
         corresponds to distance between two adjacent pixel points.
-        The slope of a plot of <xi:include href="eqi-S_of_l.xml"/> versus
+        The slope of a plot of <xi:include href="eqi-log-S-of-l.xml"/> versus
         <xi:include href="eqi-log-1-over-l.xml"/> then corresponds to
         <xi:include href="eqi-D_f-minus-2.xml"/>.
       </listitem>
@@ -113,7 +113,7 @@
         Fractal dimension is evaluated from the slope
         <xi:include href="eqi-beta.xml"/> of a least-square regression line fit
         to the data points in log-log plot of power spectrum as
-        <xi:include href="eqi-D_fis-7-over-2-minus-beta-over-2.xml"/>.
+        <xi:include href="eqi-D_f-is-7-over-2-minus-beta-over-2.xml"/>.
       </listitem>
     </varlistentry>
   </variablelist>
