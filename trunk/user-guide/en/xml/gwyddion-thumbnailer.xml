@@ -236,7 +236,7 @@ Failed: /home/me/.thumbnails/fail/gnome-thumbnail-factory/<replaceable>MD5</repl
       Gwyddion-specific information though.
     </para>
   </refsect1>
-  <refsect1 id="gwyddion-see-also">
+  <refsect1 id="gwyddion-thumbnailer-see-also">
     <title>See also</title>
     <para>
       <citerefentry>
