@@ -52,7 +52,7 @@ def xinclude(match):
             fnm = os.path.join(p, filename)
             text = file(fnm).read()
             currentfile.append(fnm)
-            text = subxinclude(xinclude, subcruft('', text))
+            text = subxinclude(xinclude, subcruft('', text).strip())
             del currentfile[-1]
             return text
         except IOError:
