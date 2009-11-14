@@ -2,10 +2,10 @@
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
           'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<informalequation id='eq-polynomial-total-degree'>
+<informalequation id='eq-polynomial-limited-total-degree'>
   <mediaobject>
     <imageobject>
-      <imagedata fileref='eq-polynomial-total-degree.png' format='PNG'/>
+      <imagedata fileref='eq-polynomial-limited-total-degree.png' format='PNG'/>
     </imageobject>
     <textobject>
       <phrase>
