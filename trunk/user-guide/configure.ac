@@ -1,10 +1,15 @@
 AC_INIT([Gwyddion user guide], [2009-11-11], [klapetek@gwyddion.net])
-AC_CONFIG_SRCDIR(xhtml.xsl)
+AC_CONFIG_SRCDIR(common/xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
+  en/Makefile \
   user-guide.iss \
-  formulas/render.sh \
+  common/render.sh \
 )
+
+#LANGUAGES="en fr ru"
+LANGUAGES=en
+AC_SUBST(LANGUAGES)
 
 PACKAGE_SHORTNAME=user-guide
 AC_SUBST(PACKAGE_SHORTNAME)

@@ -1,3 +1,4 @@
+LANGUAGES = @LANGUAGES@
 XHTML_ENABLE = @XHTML_ENABLE@
 PDF_ENABLE = @PDF_ENABLE@
 MAN_ENABLE = @MAN_ENABLE@
@@ -9,7 +10,6 @@ BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
 DISTNAME = $(BASENAME)-$(VERSION)
 
-LANGUAGES = en fr ru
 expand_langs = $(patsubst %,$(1),$(LANGUAGES))
 gather_langs = $(sort $(foreach x,$(call expand_langs,$(1)_%),$($(x))))
 
@@ -60,108 +60,32 @@ TEX_STYLES = user-guide.sty
 BUILD_FILES = README Makefile.in user-guide.iss.in \
 	aclocal.m4 configure configure.ac xml-extract.py
 
-WORKDIRS = $(call expand_langs,xhtml_%) $(call expand_langs,pdf_%)
-
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 
-define LANGUAGE_template
-XML_DIR_$(1) := xml_$(1)
-XML_SOURCES_$(1) := $$(wildcard $$(XML_DIR_$(1))/*.xml)
-MAIN_XML_SOURCE_$(1) := $$(XML_DIR_$(1))/$(PACKAGE).xml
-CLEAN_DIRS_$(1) := xhtml_$(1) pdf_$(1)
-
-IMAGES_$(1) := $$(shell $$(XML_EXTRACT) imageinfo $$(XML_SOURCES_$(1))) $$(IMAGES_EXTRA)
-IMAGES_PNG_ALL_$(1) := $$(patsubst PNG:%,%,$$(filter PNG:%,$$(IMAGES_$(1))))
-IMAGES_PDF_$(1) := $$(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES_$(1))))
-IMAGES_PNG_PDF_$(1) := $$(patsubst %.pdf,%.png,$$(IMAGES_PDF_$(1)))
-IMAGES_PNG_$(1) := $$(filter-out $$(IMAGES_PNG_PDF_$(1)),$$(filter-out images/eq-%,$$(IMAGES_PNG_ALL_$(1))))
-
-ifeq ($(XHTML_ENABLE),xhtml)
-formulas/%_$(1).stamp: $$(XML_DIR_$(1))/%.xml
-	$(XML_EXTRACT) formulas $$^
-	@touch $$@
-
-formulas_$(1).deps: $$(XML_SOURCES_$(1))
-	@$(XML_EXTRACT) formuladeps $$^ >$$@
-
--include formulas_$(1).deps
-endif
-
-xhtml_$(1): xhtml_$(1).stamp
-
-ifeq ($(XHTML_ENABLE),xhtml)
-xhtml_$(1).stamp: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_ALL_$(1)) xhtml.xsl
-	rm -rf xhtml_$(1)
-	mkdir xhtml_$(1)
-	$(XSLTPROC_CMD) --stringparam base.dir xhtml_$(1)/ xhtml.xsl $$(MAIN_XML_SOURCE_$(1))
-	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml_$(1)/*.html
-	@cp $$(IMAGES_PNG_ALL_$(1)) xhtml_$(1)/
-	cp user-guide.css xhtml_$(1)
-	touch $$@
-endif
-
-pdf_$(1): $(PACKAGE)-$(1).pdf
-
-ifeq ($(PDF_ENABLE),pdf)
-$(PACKAGE)-$(1).pdf: $$(XML_SOURCES_$(1)) $$(IMAGES_PNG_$(1)) $$(IMAGES_PDF_$(1)) $$(TEX_STYLES) dblatex.xsl
-	rm -rf pdf_$(1)
-	mkdir pdf_$(1)
-	$(DBLATEX_CMD) --tmpdir=pdf_$(1) --pdf --xsl-user=dblatex.xsl --output=$$@ $$(MAIN_XML_SOURCE_$(1))
-endif
-
-endef
-
 all: $(ALL_TARGETS)
-
-$(foreach l,$(LANGUAGES),$(eval $(call LANGUAGE_template,$(l))))
 
 Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
-xhtml: $(call expand_langs,xhtml_%)
+xhtml: common/pngsize
+	for x in $(LANGUAGES); do \
+		cd $$x && $(MAKE) xhtml; \
+		cd ..; \
+	done
 
-pdf: $(call expand_langs,pdf_%)
-
-XML_SOURCES := $(call gather_langs,XML_SOURCES)
-FORMULAS_PNG := $(call gather_langs,FORMULAS_PNG)
-FORMULAS_TEX := $(call gather_langs,FORMULAS_TEX)
-IMAGES_PNG := $(call gather_langs,IMAGES_PNG)
-CLEAN_DIRS := $(call gather_langs,CLEAN_DIRS)
-
-IMAGES_BUILT := $(foreach f,pdf png,$(patsubst %.svg,%.$(f),$(IMAGES_SVG)))
-IMAGES_DIST := $(IMAGES_SVG) $(IMAGES_PNG_SOURCE) $(IMAGES_PNG)
-
-images/eq-%.png: formulas/eq-%.png
-	@cp -f $< $@
-
-formulas/%.png: formulas/%.tex $(FORMULA_SUPPORT)
-	cd formulas && $(RENDER) "$*"
-
-formulas/pngsize: formulas/pngsize.c
-	cd formulas && $(CC) -o pngsize pngsize.c
-
-ifeq ($(SVG_ENABLE),svg)
-images/%.png: images/%.svg
-	cd images && \
-	    $(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$*.png" --file="$*.svg"
-
-images/%.pdf: images/%.svg
-	cd images && \
-	    $(INKSCAPE_CMD) --export-pdf="$*.pdf" --file="$*.svg"
-endif
-
-man: $(MAN_PAGES)
-
-ifeq ($(MAN_ENABLE),man)
-%.1: xml_en/%.xml
-	$(XSLTPROC_CMD) man.xsl $<
-endif
+pdf:
+	for x in $(LANGUAGES); do \
+		cd $$x && $(MAKE) pdf; \
+		cd ..; \
+	done
 
 ifeq ($(PNG_ENABLE),png)
-fixpngres: fixpngres.c
-	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
+common/fixpngres: common/fixpngres.c
+	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o common/fixpngres common/fixpngres.c
 endif
+
+common/pngsize: common/pngsize.c
+	cd common && $(CC) -o pngsize pngsize.c
 
 clean:
 	-@rm -f formulas/TEMP-* formulas/*.stamp formulas/eq-*.tex
@@ -180,7 +104,7 @@ dist:
 	mkdir $(DISTNAME) $(DISTNAME)/formulas $(DISTNAME)/images
 	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
 	cp $(IMAGES_DIST) $(DISTNAME)/images
-	cp formulas/pngsize.c formulas/render.sh.in $(DISTNAME)/formulas
+	cp common/pngsize.c common/render.sh.in $(DISTNAME)/common
 	cp $(patsubst %,formulas/%,$(FORMULA_TEMPLATES)) $(DISTNAME)/formulas
 	for x in $(LANGUAGES); do \
 	    mkdir $(DISTNAME)/xml_$$x; \

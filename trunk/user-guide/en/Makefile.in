@@ -1,0 +1,228 @@
+abs_top_builddir = @abs_top_builddir@
+abs_top_srcdir = @abs_top_srcdir@
+
+XHTML_ENABLE = @XHTML_ENABLE@
+PDF_ENABLE = @PDF_ENABLE@
+MAN_ENABLE = @MAN_ENABLE@
+PNG_ENABLE = @PNG_ENABLE@
+SVG_ENABLE = @SVG_ENABLE@
+
+LANGUAGE = en
+LANGUAGE_LONG = English
+VERSION = @PACKAGE_VERSION@
+BASENAME = @PACKAGE_TARNAME@
+PACKAGE = @PACKAGE_SHORTNAME@
+DISTNAME = $(BASENAME)-$(VERSION)
+
+GMAKE = @GMAKE@
+GSED = @GSED@
+PYTHON = @PYTHON@
+COMMON = $(abs_top_srcdir)/common
+DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(COMMON)/images --xslt="@XSLTPROC@" --debug
+INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
+XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
+XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
+RENDER = $(SHELL) $(COMMON)/render.sh
+
+FORMULA_TEMPLATES := header.tex footer.tex defs.tex
+FORMULA_SUPPORT := $(patsubst %,$(COMMON)/%,$(FORMULA_TEMPLATES) pngsize render.sh)
+IMAGES_EXTRA = PNG:$(COMMON)/images/stacked3.png
+
+IMAGES_SVG = \
+	$(COMMON)/images/boundary-length.svg \
+	$(COMMON)/images/gaussian-acf.svg \
+	$(COMMON)/images/gaussian-hhcf.svg \
+	$(COMMON)/images/gaussian-psdf.svg \
+	$(COMMON)/images/grain-bounding-dims.svg \
+	$(COMMON)/images/inclination.svg \
+	$(COMMON)/images/profile-interpolation.svg \
+	$(COMMON)/images/step-edge.svg \
+	$(COMMON)/images/surface-area-vertices.svg \
+	$(COMMON)/images/triangulation.svg \
+	$(COMMON)/images/unrotate-symmetries.svg \
+	$(COMMON)/images/volume-pixel-weights.svg \
+	$(COMMON)/images/wavelet-daubechies20.svg \
+	$(COMMON)/images/wavelet-daubechies4.svg \
+	$(COMMON)/images/wavelet-haar.svg \
+	$(COMMON)/images/windowing-win.svg \
+	$(COMMON)/images/windowing-fft.svg
+
+IMAGES_PNG_SOURCE = \
+	$(COMMON)/images/profile-interpolation-image.png \
+	$(COMMON)/images/triangulation-field.png \
+	$(COMMON)/images/triangulation-linear.png \
+	$(COMMON)/images/triangulation-round.png
+
+MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
+
+XSL_STYLES = xhtml.xsl dblatex.xsl man.xsl \
+	version-greater-or-equal.xsl docbook-xsl-version.xsl
+CSS_STYLES = user-guide.css
+TEX_STYLES = user-guide.sty
+BUILD_FILES = README Makefile.in user-guide.iss.in \
+	aclocal.m4 configure configure.ac xml-extract.py
+
+ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
+
+COMMON_FORUMULAS := $(wildcard $(COMMON)/formulas/*.xml)
+LANG_FORMULAS := $(wildcard formulas/*.xml)
+XML_SOURCES := $(wildcard xml/*.xml)
+XML_SOURCES_ALL := $(XML_SOURCES) $(COMMON_FORUMULAS) $(LANG_FORMULAS)
+MAIN_XML_SOURCE := xml/$(PACKAGE).xml
+UNFOLDED_XML_SOURCE := $(PACKAGE).xml
+CLEAN_DIRS := xhtml pdf pngformulas
+
+IMAGES := $(shell $(XML_EXTRACT) imageinfo $(XML_SOURCES_ALL)) $(IMAGES_EXTRA)
+IMAGES_PNG_ALL := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
+IMAGES_PDF := $(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES)))
+IMAGES_PNG_PDF := $(patsubst %.pdf,%.png,$(IMAGES_PDF))
+IMAGES_PNG := $(filter-out $(IMAGES_PNG_PDF),$(filter-out images/eq-%,$(IMAGES_PNG_ALL)))
+
+all: $(ALL_TARGETS)
+
+$(UNFOLDED_XML_SOURCE): $(XML_SOURCES_ALL)
+	$(XML_UNFOLD) $(MAIN_XML_SOURCE) >$@
+
+xhtml: xhtml.stamp
+
+ifeq ($(XHTML_ENABLE),xhtml)
+xhtml.stamp: $(UNFOLDED_XML_SOURCE) $(IMAGES_PNG_ALL) $(COMMON)/xhtml.xsl
+	rm -rf xhtml
+	mkdir xhtml
+	@XSLTPROC@ --stringparam base.dir xhtml/ $(COMMON)/xhtml.xsl $<
+	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
+	@cp $(IMAGES_PNG_ALL) xhtml/
+	cp $(COMMON)/user-guide.css xhtml
+	touch $@
+endif
+
+pdf: $(PACKAGE).pdf
+
+ifeq ($(PDF_ENABLE),pdf)
+$(PACKAGE).pdf: $(UNFOLDED_XML_SOURCE) $(IMAGES_PNG) $(IMAGES_PDF) $(TEX_STYLES) $(COMMON)/dblatex.xsl
+	rm -rf pdf
+	mkdir pdf
+	$(DBLATEX_CMD) --tmpdir=pdf --pdf --xsl-user=$(COMMON)/dblatex.xsl --output=$@ $<
+endif
+
+Makefile: Makefile.in ../config.status
+	../config.status Makefile
+
+IMAGES_BUILT := $(foreach f,pdf png,$(patsubst %.svg,%.$(f),$(IMAGES_SVG)))
+IMAGES_DIST := $(IMAGES_SVG) $(IMAGES_PNG_SOURCE) $(IMAGES_PNG)
+
+images/eq-%.png: formulas/eq-%.png
+	@cp -f $< $@
+
+pngformulas/%.png: formulas/%.xml $(FORMULA_SUPPORT)
+	@test -d pngformulas || mkdir pngformulas
+	cd pngformulas && $(RENDER) "$*" $(abspath $<)
+
+pngformulas/%.png: $(COMMON)/formulas/%.xml $(FORMULA_SUPPORT)
+	@test -d pngformulas || mkdir pngformulas
+	cd pngformulas && $(RENDER) "$*" $(abspath $<)
+
+ifeq ($(SVG_ENABLE),svg)
+images/%.png: images/%.svg
+	cd images && \
+	    $(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$*.png" --file="$*.svg"
+
+images/%.pdf: images/%.svg
+	cd images && \
+	    $(INKSCAPE_CMD) --export-pdf="$*.pdf" --file="$*.svg"
+endif
+
+man: $(MAN_PAGES)
+
+ifeq ($(MAN_ENABLE),man)
+%.1: xml_en/%.xml
+	$(XSLTPROC_CMD) man.xsl $<
+endif
+
+ifeq ($(PNG_ENABLE),png)
+fixpngres: fixpngres.c
+	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o fixpngres fixpngres.c
+endif
+
+clean:
+	-@rm -f $(IMAGES_BUILT)
+	-rm -rf $(CLEAN_DIRS)
+	-rm -f *~ */*~
+	-rm -f $(UNFOLDED_XML_SOURCE) $(PACKAGE).pdf $(MAN_PAGES)
+
+dist:
+	-rm -rf $(DISTNAME)
+	mkdir $(DISTNAME) $(DISTNAME)/formulas $(DISTNAME)/images
+	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
+	cp $(IMAGES_DIST) $(DISTNAME)/images
+	cp formulas/pngsize.c formulas/render.sh.in $(DISTNAME)/formulas
+	cp $(patsubst %,formulas/%,$(FORMULA_TEMPLATES)) $(DISTNAME)/formulas
+	for x in $(LANGUAGES); do \
+	    mkdir $(DISTNAME)/xml_$$x; \
+	    cp xml_$$x/*.xml $(DISTNAME)/xml_$$x/; \
+	done
+	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
+	rm -rf $(DISTNAME)
+
+# FIXME: Distribute all langs
+dist-xhtml: xhtml
+	for x in $(LANGUAGES); do \
+	    d=$(BASENAME)-xhtml-$$x-$(VERSION); \
+	    rm -rf $$d; \
+	    mkdir $$d; \
+	    cp xhtml_$$x/* $$d; \
+	    ll=`echo $$x | $(GSED) 's/en/English/;s/fr/French/;s/ru/Russian/'`; \
+	    sed "s/@LANGUAGE@/$$ll/g" user-guide.iss >$$d/user-guide.iss; \
+	    chmod 755 $$d; \
+	    chmod 644 $$d/*; \
+	    tar -zcf $$d.tar.gz $$d; \
+	    rm -rf $$d; \
+	done
+
+dist-pdf: pdf
+	for x in $(LANGUAGES); do \
+	    cp -f user-guide-$$x.pdf $(BASENAME)-$$x-$(VERSION).pdf; \
+	done
+
+# FIXME: We need to figure out versioning of translations.
+version:
+	d=`date --iso`; \
+	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac; \
+	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml_en/user-guide.xml
+	autoconf && ./configure
+
+help:
+	@echo "all          Compile User guide to all available formats ($(ALL_TARGETS))"
+ifeq ($(XHTML_ENABLE),xhtml)
+	@echo "xhtml        Compile User guide to XHTML"
+else
+	@echo "xhtml        Compile User guide to XHTML (not available)"
+endif
+ifeq ($(PDF_ENABLE),pdf)
+	@echo "pdf          Compile User guide to PDF"
+else
+	@echo "pdf          Compile User guide to PDF (not available)"
+endif
+ifeq ($(MAN_ENABLE),man)
+	@echo "man          Compile Unix manual pages for commands"
+else
+	@echo "man          Compile Unix manual pages for commands (not available)"
+endif
+	@echo "dist         Create tarball with DocBook sources"
+	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
+ifeq ($(PNG_ENABLE),png)
+	@echo "fixpngres    Build fixpngres tool"
+else
+	@echo "fixpngres    Build fixpngres tool (not available)"
+endif
+	@echo "version      Update version number to current date"
+
+.PHONY: \
+	all help version clean distclean \
+	dist dist-xhtml dist-pdf \
+	xhtml pdf man
+
+.PRECIOUS: Makefile
+
+# vim: set ts=4 sw=4 noet :
