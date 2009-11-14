@@ -1,13 +1,18 @@
 set -e
+abs_top_srcdir="@abs_top_srcdir@"
+COMMON="$abs_top_srcdir/common"
+i="$2"
 t="TEMP-$1"
 convertopts="-type Grayscale -scale 38.2% -fx u^1.3"
-cat defs.tex header.tex "$1".tex footer.tex >"$t".tex
+cat "$COMMON/defs.tex" "$COMMON/header.tex" >"$t".tex
+@GSED@ '1,/<!\[CDATA\[/d;/\]\]>/,$d' "$i" >>"$t".tex
+cat "$COMMON/footer.tex" >>"$t".tex
 @TEX@ --interaction=batchmode "$t".tex
 @DVIPS@ -q -E -o "$t".ps "$t".dvi
 . ./"$t".bbox
 @GSED@ -i -e "s/^\(%%BoundingBox:\).*/\\1 $x0 $y0 $x1 $y1/" "$t".ps
 @GS@ -sPAPERSIZE=letter -dQUIET -dEPSCrop -r360 -sDEVICE=pnggray -dNOPAUSE -dBATCH -sOutputFile="$t".png "$t".ps
-eval $(./pngsize <"$t".png)
+eval $($COMMON/pngsize <"$t".png)
 if test $h -gt 1600; then
   echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2
   . "$t".bbox
