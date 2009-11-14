@@ -150,7 +150,10 @@ def extract_imageinfo(filenames):
     for filename in filenames:
         parser.parse_file(filename)
     for k, v in sorted(parser.imageinfo.items()):
-        print '%s:images/%s' % (v, k)
+        if k.startswith('eq-'):
+            print '%s:pngformulas/%s' % (v, k)
+        else:
+            print '%s:../common/images/%s' % (v, k)
 
 if len(sys.argv) < 2:
     print 'Usage: %s {formulas|formuladeps|imageinfo} FILES...' % sys.argv[0]
