@@ -493,6 +493,8 @@ parse(GwyUnit *unit,
             g_string_assign(buf, "deg");
         else if (gwy_stramong(buf->str, "Å", "AA", "Ang", NULL))
             g_string_assign(buf, "Å");
+        else if (gwy_stramong(buf->str, "a.u.", "a. u.", "counts", NULL))
+            g_string_assign(buf, "");
 
         /* get prefix, but be careful not to split mol to mili-ol */
         pfpower = 0;
