@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!-- @(#) $Id: table-grain-quantities.xml 9497 2009-07-18 17:51:51Z yeti-dn $ -->
+<!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <informaltable frame='none' id='table-grain-quantities'>
