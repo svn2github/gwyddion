@@ -9,7 +9,7 @@
     <para>С помощью основных модулей можно совершить следующие операции с двумерным полем данных:</para>
     <itemizedlist>
       <listitem id="scale"><indexterm><primary>масштабирование</primary></indexterm><indexterm><primary>передискретизация</primary></indexterm>Перемасштабировать данные к выбранным размерам или масштабу используя выбранный метод интерполяции можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Масштабировать</guimenuitem></menuchoice></listitem>
-      <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрировать данные можно с помощью <link linkend="tool-crop">инструмента <quote>Кадрирование</quote></link> как внутри существующего канала, так и перенося результат в новый канал (с помощью опции <guilabel>Создать новый канал</guilabel>). При включении опции <guilabel>Сохранять пространственные смещения</guilabel>, координаты левого верхнего угла получившегося изображения будут соответствовать координатам его же у выбранного, иначе они будут установлены в  <inlineequation><mathphrase>(0, 0)</mathphrase><alt>(0,0)</alt></inlineequation>.</listitem>
+      <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрировать данные можно с помощью <link linkend="tool-crop">инструмента <quote>Кадрирование</quote></link> как внутри существующего канала, так и перенося результат в новый канал (с помощью опции <guilabel>Создать новый канал</guilabel>). При включении опции <guilabel>Сохранять пространственные смещения</guilabel>, координаты левого верхнего угла получившегося изображения будут соответствовать координатам его же у выбранного, иначе они будут установлены в  <xi:include href="eqi-coords-0-0.xml"/>.</listitem>
       <listitem id="rotate"><indexterm><primary>поворот</primary><secondary>на угол. кратный прямому</secondary></indexterm><indexterm><primary>поворот</primary><secondary>на произвольный угол</secondary></indexterm> Повернуть данные на угол кратный прямому или на произвольно заданный можно с помощью одной из функций: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Повернуть по часовой</guimenuitem></menuchoice>, <guimenuitem>Повернуть против часовой</guimenuitem> или <guimenuitem>Повернуть на угол</guimenuitem>.</listitem>
       <listitem id="flip"><indexterm><primary>переворот</primary><secondary>горизонтально</secondary></indexterm><indexterm><primary>переворот</primary><secondary>вертикально</secondary></indexterm> Перевернуть данные горизонтально (т.е. относительно вертикальной оси) и вертикально (т.е. относительно горизонтальной) можно с помощью меню<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть горизонтально</guimenuitem></menuchoice> и <guimenuitem>Перевернуть вертикально</guimenuitem>, сответственно.</listitem>
       <listitem id="flip-both">Отразить данные относительно центра (т.е. относительно обеих осей) можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть обе оси</guimenuitem></menuchoice>.</listitem>
@@ -29,7 +29,7 @@
         <primary>наклон</primary>
         <secondary>чтение данных</secondary>
       </indexterm>
-      <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов чтения данных. Он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <inlineequation><mathphrase><phrase role="mathvar">z</phrase></mathphrase><alt>z</alt></inlineequation> новым нулевым уровнем.</para>
+      <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов чтения данных. Он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <xi:include href="eqi-z.xml"/> новым нулевым уровнем.</para>
       <para><guilabel>Считать значение</guilabel>также может показывать наклон локальной грани. <guilabel>Радиус усреднения</guilabel> снова определяет радиус области, используемой для аппроксимации плоскостью.</para>
     </sect3>
     <sect3 id="inclinations-coordinates">
@@ -38,9 +38,9 @@
         <primary>наклон</primary>
         <secondary>расчёт</secondary>
       </indexterm>
-      <para>Во всех инструментах Gwyddion, наклоны плоскости и грани показываются в сферических углах <inlineequation><mathphrase>(<phrase role="mathvar">ϑ</phrase>, <phrase role="mathvar">φ</phrase>)</mathphrase><alt>(\vartheta,\varphi)</alt></inlineequation> вектора нормали к плоскости.</para>
-      <para>Угол <inlineequation><mathphrase><phrase role="mathvar">ϑ</phrase></mathphrase><alt>\vartheta</alt></inlineequation> является углом между направлением вверх и нормалью, это означает, что <inlineequation><mathphrase><phrase role="mathvar">ϑ</phrase> = 0</mathphrase><alt>\vartheta=0</alt></inlineequation> для горизонтальных граней и увеличивается с наклоном. Угол всегда больше нуля.</para>
-      <para>Угол <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation> - отсчитываемый против часовой угол между осью inlineequation&gt;<mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></para>
+      <para>Во всех инструментах Gwyddion, наклоны плоскости и грани показываются в сферических углах <xi:include href="eqi-coords-theta-phi.xml"/> вектора нормали к плоскости.</para>
+      <para>Угол <xi:include href="eqi-theta.xml"/> является углом между направлением вверх и нормалью, это означает, что <xi:include href="eqi-theta-is-0.xml"/> для горизонтальных граней и увеличивается с наклоном. Угол всегда больше нуля.</para>
+      <para>Угол <xi:include href="eqi-phi.xml"/> - отсчитываемый против часовой угол между осью inlineequation&gt;<mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></para>
       <informalfigure id="fig-inclination-coordinates">
         <mediaobject>
           <imageobject>
@@ -52,7 +52,7 @@
           <textobject>
             <phrase>Измерение положения граней</phrase>
           </textobject>
-          <caption>Ориентация грани поверхности (показана синим) измеряется как угол против часовой от оси  <inlineequation><mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></inlineequation> до проекции вектора нормали к грани <inlineequation><mathphrase><phrase role="mathvar"><phrase role="vector">n</phrase></phrase></mathphrase><alt>\vec{n}</alt></inlineequation> на плоскость <inlineequation><mathphrase><phrase role="mathvar">xy</phrase></mathphrase><alt>xy</alt></inlineequation>.</caption>
+          <caption>Ориентация грани поверхности (показана синим) измеряется как угол против часовой от оси  <xi:include href="eqi-x.xml"/> до проекции вектора нормали к грани <xi:include href="eqi-vec-n.xml"/> на плоскость <xi:include href="eqi-xy.xml"/>.</caption>
         </mediaobject>
       </informalfigure>
     </sect3>
@@ -61,7 +61,7 @@
       <indexterm><primary>инструмент измерения Расстояний</primary></indexterm>
       <indexterm><primary>измерение расстояний </primary></indexterm>
       <indexterm><primary>измерение углов</primary></indexterm>
-      <para>Расстояния и разницы могут быть измерены с помощью инструмента <guilabel>Расстояние</guilabel>. Он показывает горизонтальные (<inlineequation><mathphrase>Δ<phrase role="mathvar">x</phrase></mathphrase><alt>\Delta x</alt></inlineequation>), вертикальные (<inlineequation><mathphrase>Δ<phrase role="mathvar">y</phrase></mathphrase><alt>\Delta y</alt></inlineequation>) и суммарные расстояния на плоскости(<inlineequation><mathphrase><phrase role="mathvar">R</phrase></mathphrase><alt>R</alt></inlineequation>); азимут <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation> (измеренный подобно наклону <inlineequation><mathphrase><phrase role="mathvar">φ</phrase></mathphrase><alt>\varphi</alt></inlineequation>) и разность значений конечных точек(<inlineequation><mathphrase>Δ<phrase role="mathvar">z</phrase></mathphrase><alt>\Delta z</alt></inlineequation>) для набора выбранных линий.</para>
+      <para>Расстояния и разницы могут быть измерены с помощью инструмента <guilabel>Расстояние</guilabel>. Он показывает горизонтальные (<xi:include href="eqi-Delta-x.xml"/>), вертикальные (<xi:include href="eqi-Delta-y.xml"/>) и суммарные расстояния на плоскости(<xi:include href="eqi-R.xml"/>); азимут <xi:include href="eqi-phi.xml"/> (измеренный подобно наклону <xi:include href="eqi-phi.xml"/>) и разность значений конечных точек(<xi:include href="eqi-Delta-z.xml"/>) для набора выбранных линий.</para>
       <para>Расстояния могут быть скопированы в буфер обмена или сохранены в текстовый файл с помощью кнопок под списком.</para>
       <informalfigure id="fig-distance-screenshot">
         <mediaobject>

@@ -8,7 +8,7 @@
   <para>Модуль <guilabel>2D FFT</guilabel> предоставляет несколько типов вывода: <itemizedlist><listitem> Абсолютное значение – одноимённая величина комплексного коэффициента Фурье, пропорциональная квадратному корню функции спектральной плотности мощности (ФСПМ, PSDF). </listitem><listitem> Фаза – фаза комплексного коэффициента (используется редко). </listitem><listitem> Действительная часть – действительная часть комплексного коэффициента. </listitem><listitem> Мнимая часть – мнимая часть комплексного коэффициента. </listitem></itemizedlist> и некоторые их комбинации для удобства.</para>
   <para id="psdf-section"><indexterm><primary>функция спектральной плотности мощности</primary><secondary>сечение</secondary></indexterm> Радиальные сечения двумерной ФСПМ могут быть с лёгкостью получены с помощью меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Статистика</guisubmenu><guimenuitem>Сечение ФСПМ</guimenuitem></menuchoice>. Некоторые другие функции, расчитывающие спектральные плотности, описаны в разделе <link linkend="power-spectral-density-1d">Статистический анализ</link>.  Также возможно фильтровать изображения в частотных интервалах используя <link linkend="fft-filter-1d">одномерную</link> или <link linkend="fft-filter-2d">двумерную</link> фильтрацию БПФ.</para>
   <para>Следует отметить, что преобразование Фурье считает данные бесконечно протяженными, и, следовательно. накладывает некоторые периодические граничные условия. Поскольку реальные данные не обладают этими свойствами, необходимо использовать некоторую оконную функцию для выравнивания данных на границах изображения. Если вы этого не сделаете, БПФ будет считать данные обработанными прямоугольной функцией окна, которая имеет действительно плохой Фурье-образ, что приводит к искажению Фурье-спектра.</para>
-  <para id="windowing">Gwyddion предлагает на выбор несколько функций окна. Большинство из них образовано набором синусов и косинусов, которые корректно приглушают данные на краях. В следующей таблице оконных формул независимая переменная <inlineequation><mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></inlineequation> лежит в диапазоне <inlineequation><mathphrase>(0, 1)</mathphrase><alt>(0,1)</alt></inlineequation>, что соответствует нормализации абсциссы; для простоты переменная <inlineequation><mathphrase><phrase role="mathvar">ξ</phrase> = 2π<phrase role="mathvar">x</phrase></mathphrase><alt>\xi=2\pi x</alt></inlineequation> используется в ряде формул. Доступные виды оконных функцию включают в себя:</para>
+  <para id="windowing">Gwyddion предлагает на выбор несколько функций окна. Большинство из них образовано набором синусов и косинусов, которые корректно приглушают данные на краях. В следующей таблице оконных формул независимая переменная <xi:include href="eqi-x.xml"/> лежит в диапазоне <xi:include href="eqi-interval-0-1.xml"/>, что соответствует нормализации абсциссы; для простоты переменная <xi:include href="eqi-xi-is-2pi-x.xml"/> используется в ряде формул. Доступные виды оконных функцию включают в себя:</para>
   <informaltable frame="none" id="table-windowing-types">
     <tgroup cols="2" align="left">
       <?dblatex lX?>
@@ -163,13 +163,13 @@ w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
           </entry>
         </row>
         <row>
-          <entry>Кайзер  <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation></entry>
+          <entry>Кайзер  <xi:include href="eqi-alpha.xml"/></entry>
           <entry><inlineequation id="eq-windowing-kaiser"><inlinemediaobject><imageobject><imagedata fileref="eq-windowing-kaiser.png" format="PNG"/></imageobject><textobject role="tex"><phrase><![CDATA[
 \displaystyle
 w_{\rm Kaiser,\alpha}(x) = 
 { \BesselI0\bigl(\pi\alpha\sqrt{4x(1-x)}\bigr)
                           \over\BesselI0(\pi\alpha)}
-]]></phrase></textobject></inlinemediaobject></inlineequation> where <inlineequation><mathphrase>I<subscript>0</subscript></mathphrase><alt>\BesselI0</alt></inlineequation> is the modified Bessel function of zeroth order and <inlineequation><mathphrase>α</mathphrase><alt>\alpha</alt></inlineequation> is a parameter</entry>
+]]></phrase></textobject></inlinemediaobject></inlineequation> where <xi:include href="eqi-BesselI0.xml"/> is the modified Bessel function of zeroth order and <xi:include href="eqi-alpha.xml"/> is a parameter</entry>
         </row>
       </tbody>
     </tgroup>

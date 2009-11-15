@@ -105,12 +105,12 @@
         <guimenuitem>Маска выпадающего</guimenuitem>
       </menuchoice>
     </para>
-    <para>Этот модуль создаёт маску областей данных, которые не соответствуют критерию <inlineequation><mathphrase>3σ</mathphrase><alt>3\sigma</alt></inlineequation>. Все данные выше и ниже доверительного интервала помечаются маской и могут впоследствии редактироваться или обрабатываться другими модулями.</para>
+    <para>Этот модуль создаёт маску областей данных, которые не соответствуют критерию <xi:include href="eqi-3sigma.xml"/>. Все данные выше и ниже доверительного интервала помечаются маской и могут впоследствии редактироваться или обрабатываться другими модулями.</para>
   </sect2>
   <sect2 id="line-correction">
     <title>Линейная коррекция <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_line_level-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
     <indexterm><primary>линейная коррекция</primary></indexterm>
-    <para>Профили, взятые вдоль оси быстрого сканирования (обычно ось <inlineequation><mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></inlineequation>), могут быть взаимно сдвинуты на некоторое значение или иметь несколько иной уклон. Основные функции линейной коррекции исправляют это несоответствие. Можно использовать несколько функций: инструменты <link linkend="line-polynomial">Полиномиальная</link> и <link linkend="path-level">Выравнивание доль линии</link> и некоторые процедуры из меню  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Исправить данные</guisubmenu></menuchoice>.</para>
+    <para>Профили, взятые вдоль оси быстрого сканирования (обычно ось <xi:include href="eqi-x.xml"/>), могут быть взаимно сдвинуты на некоторое значение или иметь несколько иной уклон. Основные функции линейной коррекции исправляют это несоответствие. Можно использовать несколько функций: инструменты <link linkend="line-polynomial">Полиномиальная</link> и <link linkend="path-level">Выравнивание доль линии</link> и некоторые процедуры из меню  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Исправить данные</guisubmenu></menuchoice>.</para>
     <para id="line-polynomial">Инструмент <quote>полиномиальная</quote></para>
     <para>Функции коррекции линий в меню <guisubmenu>Исправить данные</guisubmenu> производят коррекцию только горизонтальных линий, следовательно требуется поворот изображения для исправления столбцов. Они включают в себя:</para>
     <itemizedlist>
