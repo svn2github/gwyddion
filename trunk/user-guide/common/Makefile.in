@@ -22,31 +22,6 @@ XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
 XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
 RENDER = $(SHELL) $(COMMON)/render.sh
 
-#IMAGES_SVG = \
-#	$(COMMON)/images/boundary-length.svg \
-#	$(COMMON)/images/gaussian-acf.svg \
-#	$(COMMON)/images/gaussian-hhcf.svg \
-#	$(COMMON)/images/gaussian-psdf.svg \
-#	$(COMMON)/images/grain-bounding-dims.svg \
-#	$(COMMON)/images/inclination.svg \
-#	$(COMMON)/images/profile-interpolation.svg \
-#	$(COMMON)/images/step-edge.svg \
-#	$(COMMON)/images/surface-area-vertices.svg \
-#	$(COMMON)/images/triangulation.svg \
-#	$(COMMON)/images/unrotate-symmetries.svg \
-#	$(COMMON)/images/volume-pixel-weights.svg \
-#	$(COMMON)/images/wavelet-daubechies20.svg \
-#	$(COMMON)/images/wavelet-daubechies4.svg \
-#	$(COMMON)/images/wavelet-haar.svg \
-#	$(COMMON)/images/windowing-win.svg \
-#	$(COMMON)/images/windowing-fft.svg
-#
-#IMAGES_PNG_SOURCE = \
-#	$(COMMON)/images/profile-interpolation-image.png \
-#	$(COMMON)/images/triangulation-field.png \
-#	$(COMMON)/images/triangulation-linear.png \
-#	$(COMMON)/images/triangulation-round.png
-
 MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
