@@ -71,7 +71,7 @@
     <xi:include href="eqi-x.xml"/>
     is from interval <xi:include href="eqi-interval-0-1.xml"/>
     which corresponds to the normalized abscissa; for simplicity variable
-    <xi:include href="eqi-xi-is-2pix.xml"/>
+    <xi:include href="eqi-xi-is-2pi-x.xml"/>
     is used in some formulas.  The available windowing types include:
   </para>
   <informaltable frame='none' id='table-windowing-types'>
