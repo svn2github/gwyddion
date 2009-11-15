@@ -40,7 +40,7 @@ searchpath.append(os.path.abspath(os.path.join(inputdir, '..', '..', 'common', '
 subxinclude = re.compile(r'''(?s)<xi:include\s+href=(['"])(?P<file>[^'"]+)\1\s*/>''').sub
 subcruft = re.compile(r'(?s)<\?xml\s[^>]*\?>\s*'
                       r'|<!DOCTYPE\s[^>]*>\s*'
-                      r'|<!--\s[^>]*-->').sub
+                      r'|<!--\s.*?-->').sub
 
 currentfile = [filename]
 
