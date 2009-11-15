@@ -85,6 +85,7 @@ xhtml: xhtml.stamp
 
 ifeq ($(XHTML_ENABLE),xhtml)
 xhtml.stamp: $(UNFOLDED_XML_SOURCE) $(IMAGES_XHTML) $(COMMON)/xhtml.xsl
+	@echo $(IMAGES_XHTML)
 	rm -rf xhtml
 	mkdir xhtml
 	@XSLTPROC@ --stringparam base.dir xhtml/ $(COMMON)/xhtml.xsl $<
@@ -105,21 +106,13 @@ $(PACKAGE).pdf: $(UNFOLDED_XML_SOURCE) $(IMAGES_DBLATEX) $(COMMON)/dblatex.xsl $
 endif
 
 ##### Various methods to get images ########################################
-# From language-specific images in the same format
-images/%.png: srcimages/%.png images.stamp
-	cp $< $@
-
-# From common images in the same format
-images/%.png: $(COMMON)/srcimages/%.png images.stamp
-	cp $< $@
-
 # From language-specific formulas
-images/%.png: formulas/%.xml $(FORMULA_SUPPORT) images.stamp
-	cd images && $(RENDER) "$*" $(abspath $<)
+images/eq-%.png: formulas/eq-%.xml $(FORMULA_SUPPORT) images.stamp
+	cd images && $(RENDER) "eq-$*" $(abspath $<)
 
 # From common formulas
-images/%.png: $(COMMON)/formulas/%.xml $(FORMULA_SUPPORT) images.stamp
-	cd images && $(RENDER) "$*" $(abspath $<)
+images/eq-%.png: $(COMMON)/formulas/eq-%.xml $(FORMULA_SUPPORT) images.stamp
+	cd images && $(RENDER) "eq-$*" $(abspath $<)
 
 # From SVG
 ifeq ($(SVG_ENABLE),svg)
@@ -137,6 +130,14 @@ images/%.pdf: srcimages/%.svg images.stamp
 images/%.pdf: $(COMMON)/srcimages/%.svg images.stamp
 	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
 endif
+
+# From language-specific images in the same format
+images/%.png: srcimages/%.png images.stamp
+	cp $< $@
+
+# From common images in the same format
+images/%.png: $(COMMON)/srcimages/%.png images.stamp
+	cp $< $@
 
 ##### Manual pages #########################################################
 man: $(MAN_PAGES)
