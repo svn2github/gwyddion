@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
-<!-- @(#) $Id: eq-windowing-welch.xml 10419 2009-11-13 15:01:58Z yeti-dn $ -->
+<!-- @(#) $Id: eq-windowing-flat-top.xml 10419 2009-11-13 15:01:58Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
           'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
-<inlineequation id="eq-windowing-flat-top">
+<inlineequation id='eq-windowing-flat-top'>
   <inlinemediaobject>
     <imageobject>
-      <imagedata fileref="eq-windowing-flat-top.png" format="PNG"/>
+      <imagedata fileref='eq-windowing-flat-top.png' format='PNG'/>
     </imageobject>
-    <textobject role="tex">
+    <textobject role='tex'>
       <phrase>
 <![CDATA[
 w_{\rm flattop}(x) = 0.25 - 0.4825\cos\xi + 0.3225\cos2\xi
