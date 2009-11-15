@@ -47,16 +47,16 @@ Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
 xhtml: common/pngsize
-	@for x in $(LANGUAGES); do $(MAKE) -C xhtml; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x xhtml; done
 
 dist-xhtml:
-	@for x in $(LANGUAGES); do $(MAKE) -C dist-xhtml; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x dist-xhtml; done
 
 pdf:
-	@for x in $(LANGUAGES); do $(MAKE) -C pdf; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x pdf; done
 
 dist-pdf:
-	@for x in $(LANGUAGES); do $(MAKE) -C dist-pdf; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x dist-pdf; done
 
 fixpngres: common/fixpngres
 	ln -s common/fixpngres .
@@ -70,12 +70,12 @@ common/pngsize: common/pngsize.c
 	cd common && $(CC) -o pngsize pngsize.c
 
 clean:
-	@for x in $(LANGUAGES); do $(MAKE) -C clean; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x clean; done
 	rm -rf common/cache
 	rm -f common/pngsize common/fixpngres fixpngres
 
 distclean: clean
-	@for x in $(LANGUAGES); do $(MAKE) -C distclean; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x distclean; done
 	rm -f common/render.sh common/$(PACKAGE).iss common/Makefile
 	rm -fr autom4te.cache
 	rm -f Makefile config.status config.log
@@ -87,7 +87,7 @@ dist:
 	cp $(COMMONFILES) $(DISTNAME)/common
 	cp -r common/formulas/*.xml $(DISTNAME)/common/formulas
 	cp -r common/srcimages/*.svg common/srcimages/*.png $(DISTNAME)/common/srcimages
-	@for x in $(LANGUAGES); do $(MAKE) -C dist; done
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x dist; done
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
 
