@@ -2,6 +2,7 @@ AC_INIT([Gwyddion user guide], [2009-11-11], [klapetek@gwyddion.net])
 AC_CONFIG_SRCDIR(common/xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
+  common/Makefile \
   en/Makefile \
   user-guide.iss \
   common/render.sh \
