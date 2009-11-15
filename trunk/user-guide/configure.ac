@@ -10,8 +10,7 @@ AC_CONFIG_FILES(\
   ru/Makefile \
 )
 
-#LANGUAGES="en fr ru"
-LANGUAGES=en
+LANGUAGES="en fr ru"
 AC_SUBST(LANGUAGES)
 
 PACKAGE_SHORTNAME=user-guide
