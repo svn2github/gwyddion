@@ -37,10 +37,7 @@
       référence (qui peut être en principe choisi de manière arbitraire, en
       pratique la référence est déterminée de manière à minimiser la quantité de
       données sortant de l'image après compensation), avec la coordonnée
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>y</phrase></mathphrase>
-        <alt>y</alt>
-      </inlineequation>
+      <xi:include href="eqi-y.xml"/>
       de la ligne en abscisse.
     </para>
     <para>
@@ -160,34 +157,12 @@
       l'aide la distorsion polynômiale. Cet outil effectue des transformée
       pouvant être exprimées sous la forme
     </para>
-    <informalequation id='eq-polynomial-distortion'>
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref='eq-polynomial-distortion.png' format='PNG'/>
-        </imageobject>
-        <textobject role='tex'>
-          <phrase>
-<![CDATA[
-\eqnarray{
-x_{\rm old}&=&P_x(x_{\rm new}, y_{\rm new}),\cr
-y_{\rm old}&=&P_y(x_{\rm new}, y_{\rm new}),\cr
-}
-]]>
-          </phrase>
-        </textobject>
-      </mediaobject>
-    </informalequation>
+    <xi:include href="eq-polynomial-distortion.xml"/>
     <para>
       où
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>P<subscript>x</subscript></phrase></mathphrase>
-        <alt>P_x</alt>
-      </inlineequation>
+      <xi:include href="eqi-P_x.xml"/>
       et
-      <inlineequation>
-        <mathphrase><phrase role='mathvar'>P<subscript>y</subscript></phrase></mathphrase>
-        <alt>P_y</alt>
-      </inlineequation>
+      <xi:include href="eqi-P_y.xml"/>
       sont des polynômes pouvant atteindre le troisième ordre et utilisant des
       coefficients définis par l'utilisateur. Notez la direction de la
       transformation des coordonnées – la direction inverse ne garantirait pas

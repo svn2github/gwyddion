@@ -23,15 +23,9 @@
   <para>
     Le centre du visualisateur de facettes correspond toujours à une inclinaison
     nulle (facettes horizontales), la pente selon la direction
-    <inlineequation>
-      <mathphrase><phrase role='math'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
+    <xi:include href="eqi-x.xml"/>
     augmente vers la droite et la gauche, et la pente selon la direction 
-    <inlineequation>
-      <mathphrase><phrase role='math'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>
+    <xi:include href="eqi-y.xml"/>
     augmente vers les bords haut et bas. Le système de coordonnées exact est un
     peu complexe, il s'adapte à la plage de pentes présentes dans les données
     affichées.
@@ -41,15 +35,9 @@
     localement à chaque point pour déterminer l'inclinaison locale. La valeur 0
     signifie qu'aucun ajustement n'est réalisé, l'inclinaison locale est
     déterminée à partir des dérivées symétriques en
-    <inlineequation>
-      <mathphrase><phrase role='math'>x</phrase></mathphrase>
-      <alt>x</alt>
-    </inlineequation>
+    <xi:include href="eqi-x.xml"/>
     et
-    <inlineequation>
-      <mathphrase><phrase role='math'>y</phrase></mathphrase>
-      <alt>y</alt>
-    </inlineequation>
+    <xi:include href="eqi-y.xml"/>
     en chaque point. Le choix de la taille de voisinage est cruciale pour
     obtenir des résultats corects : elle doit être plus petite que les détails
     auxquels on s'intéresse pour éviter leur filtrage, tout en étant
@@ -75,15 +63,9 @@
     La vue des données et le visualisateur de facettes permettent de
     sélectionner un point avec la souris et lire l'inclinaison de la normale à
     la facette correspondante
-    <inlineequation>
-      <mathphrase><phrase role='math'>ϑ</phrase></mathphrase>
-      <alt>\vartheta</alt>
-    </inlineequation>
+    <xi:include href="eqi-theta.xml"/>
     et la direction
-     <inlineequation>
-      <mathphrase><phrase role='math'>φ</phrase></mathphrase>
-      <alt>\varphi</alt>
-    </inlineequation>
+     <xi:include href="eqi-phi.xml"/>
     sous <guilabel>Normale</guilabel>. Lorsque vous sélectionnez un point sur la
     vue des données, la sélection du visualisateur de facette est mise à jour
     pour afficher l'inclinaison sur ce point.

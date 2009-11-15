@@ -72,56 +72,16 @@
         Filtre de décarèlement – filtre de lissage spécialement conçu pour
         supprimer les motifs carrelés d'une image, tout en conservant les autres
         détails. Il s'agit d'un filtre de convolution utilisant un noyau
-        <informalequation id='eq-filters-dechecker'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-filters-dechecker.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>Matrice de coeffiecients 5 × 5 du filtre de décarèlement</phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-w_{\rm dechecker}
-  = \pmatrix{0&1/144&-1/72&1/144&0\cr
-             1/144&-1/18&1/9&-1/18&1/144\cr
-             -1/72&1/9&7/9&1/9&-1/72\cr
-             1/144&-1/18&1/9&-1/18&1/144\cr
-             0&1/144&-1/72&1/144&0\cr}
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
+        <xi:include href="eq-filters-dechecker.xml"/>
       </listitem>
       <listitem id='filter-gaussian'>
         <indexterm><primary>filtre gaussien</primary></indexterm>
         Filtre gaussien – filtre de lissage, le paramètre de la taille détermine
         la largeur à mi-hauteur de la gaussienne (FWHM, full width at half
         maximum) of the Gaussian. La relation entre la largeur à mi-hauteur et
-        <inlineequation>
-          <mathphrase>σ</mathphrase>
-          <alt>\sigma</alt>
-        </inlineequation>
+        <xi:include href="eqi-sigma.xml"/>
         est
-        <informalequation id='eq-gaussian-fwhm'>
-          <mediaobject>
-            <imageobject>
-              <imagedata fileref='eq-gaussian-fwhm.png' format='PNG'/>
-            </imageobject>
-            <textobject>
-              <phrase>relation largeur à mi-hauteur - sigma pour une gaussienne</phrase>
-            </textobject>
-            <textobject role='tex'>
-              <phrase>
-<![CDATA[
-{\rm FWHM} = 2\sqrt{2\ln 2}\,\sigma\approx2.35482\sigma
-]]>
-              </phrase>
-            </textobject>
-          </mediaobject>
-        </informalequation>
+        <xi:include href="eq-gaussian-fwhm.xml"/>
       </listitem>
     </itemizedlist>
     <tip>
@@ -173,10 +133,7 @@ w_{\rm dechecker}
     </para>
     <para>
       Des convolutions avec des noyaux allant jusqu'à
-      <inlineequation>
-        <mathphrase>9 × 9</mathphrase>
-        <alt>9\times9</alt>
-      </inlineequation>
+      <xi:include href="eqi-9x9.xml"/>
       peuvent être appliquées à l'aide du module
       <link linkend='convolution-filter'>Filtre de convolution</link>.
     </para>
