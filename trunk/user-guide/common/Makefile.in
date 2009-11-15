@@ -12,117 +12,133 @@ SVG_ENABLE = @SVG_ENABLE@
 GMAKE = @GMAKE@
 GSED = @GSED@
 PYTHON = @PYTHON@
-DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(COMMON)/images --xslt="@XSLTPROC@" --debug
+DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
 INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
 XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
 RENDER = $(SHELL) $(COMMON)/render.sh
 
-FORMULA_SUPPORT := $(patsubst %,$(COMMON)/%,header.tex footer.tex defs.tex pngsize render.sh)
-IMAGES_EXTRA = PNG:$(COMMON)/images/stacked3.png
-
-IMAGES_SVG = \
-	$(COMMON)/images/boundary-length.svg \
-	$(COMMON)/images/gaussian-acf.svg \
-	$(COMMON)/images/gaussian-hhcf.svg \
-	$(COMMON)/images/gaussian-psdf.svg \
-	$(COMMON)/images/grain-bounding-dims.svg \
-	$(COMMON)/images/inclination.svg \
-	$(COMMON)/images/profile-interpolation.svg \
-	$(COMMON)/images/step-edge.svg \
-	$(COMMON)/images/surface-area-vertices.svg \
-	$(COMMON)/images/triangulation.svg \
-	$(COMMON)/images/unrotate-symmetries.svg \
-	$(COMMON)/images/volume-pixel-weights.svg \
-	$(COMMON)/images/wavelet-daubechies20.svg \
-	$(COMMON)/images/wavelet-daubechies4.svg \
-	$(COMMON)/images/wavelet-haar.svg \
-	$(COMMON)/images/windowing-win.svg \
-	$(COMMON)/images/windowing-fft.svg
-
-IMAGES_PNG_SOURCE = \
-	$(COMMON)/images/profile-interpolation-image.png \
-	$(COMMON)/images/triangulation-field.png \
-	$(COMMON)/images/triangulation-linear.png \
-	$(COMMON)/images/triangulation-round.png
+#IMAGES_SVG = \
+#	$(COMMON)/images/boundary-length.svg \
+#	$(COMMON)/images/gaussian-acf.svg \
+#	$(COMMON)/images/gaussian-hhcf.svg \
+#	$(COMMON)/images/gaussian-psdf.svg \
+#	$(COMMON)/images/grain-bounding-dims.svg \
+#	$(COMMON)/images/inclination.svg \
+#	$(COMMON)/images/profile-interpolation.svg \
+#	$(COMMON)/images/step-edge.svg \
+#	$(COMMON)/images/surface-area-vertices.svg \
+#	$(COMMON)/images/triangulation.svg \
+#	$(COMMON)/images/unrotate-symmetries.svg \
+#	$(COMMON)/images/volume-pixel-weights.svg \
+#	$(COMMON)/images/wavelet-daubechies20.svg \
+#	$(COMMON)/images/wavelet-daubechies4.svg \
+#	$(COMMON)/images/wavelet-haar.svg \
+#	$(COMMON)/images/windowing-win.svg \
+#	$(COMMON)/images/windowing-fft.svg
+#
+#IMAGES_PNG_SOURCE = \
+#	$(COMMON)/images/profile-interpolation-image.png \
+#	$(COMMON)/images/triangulation-field.png \
+#	$(COMMON)/images/triangulation-linear.png \
+#	$(COMMON)/images/triangulation-round.png
 
 MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 
-XSL_STYLES = xhtml.xsl dblatex.xsl man.xsl \
-	version-greater-or-equal.xsl docbook-xsl-version.xsl
-CSS_STYLES = user-guide.css
-TEX_STYLES = user-guide.sty
-BUILD_FILES = README Makefile.in user-guide.iss.in \
-	aclocal.m4 configure configure.ac xml-extract.py
-
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 
-COMMON_FORUMULAS := $(wildcard $(COMMON)/formulas/*.xml)
-LANG_FORMULAS := $(wildcard formulas/*.xml)
+CLEAN_DIRS = xhtml pdf images
+
+XML_FORMULAS := $(wildcard $(COMMON)/formulas/*.xml) $(wildcard formulas/*.xml)
+FORMULA_SUPPORT := $(patsubst %,$(COMMON)/%,header.tex footer.tex defs.tex pngsize render.sh)
+
 XML_SOURCES := $(wildcard xml/*.xml)
-XML_SOURCES_ALL := $(XML_SOURCES) $(COMMON_FORUMULAS) $(LANG_FORMULAS)
+XML_SOURCES_ALL := $(XML_SOURCES) $(XML_FORMULAS)
 MAIN_XML_SOURCE := xml/$(PACKAGE).xml
 UNFOLDED_XML_SOURCE := $(PACKAGE).xml
-CLEAN_DIRS := xhtml pdf pngformulas
 
+IMAGES_EXTRA = PNG:images/stacked3.png
 IMAGES := $(shell $(XML_EXTRACT) imageinfo $(XML_SOURCES_ALL)) $(IMAGES_EXTRA)
-IMAGES_PNG_ALL := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
-IMAGES_PDF := $(patsubst PDF:%,%,$$(filter PDF:%,$$(IMAGES)))
+
+IMAGES_PNG := $(patsubst PNG:%,%,$(filter PNG:%,$(IMAGES)))
+IMAGES_XHTML := $(IMAGES_PNG)
+IMAGES_PDF := $(patsubst PDF:%,%,$(filter PDF:%,$(IMAGES)))
+IMAGES_PNG_NONEQ := $(filter-out images/eq-%,$(IMAGES_PNG))
 IMAGES_PNG_PDF := $(patsubst %.pdf,%.png,$(IMAGES_PDF))
-IMAGES_PNG := $(filter-out $(IMAGES_PNG_PDF),$(filter-out images/eq-%,$(IMAGES_PNG_ALL)))
+IMAGES_DBLATEX := $(IMAGES_PDF) $(filter-out $(IMAGES_PNG_PDF),$(IMAGES_PNG_NONEQ))
 
-IMAGES_BUILT := $(foreach f,pdf png,$(patsubst %.svg,%.$(f),$(IMAGES_SVG)))
-IMAGES_DIST := $(IMAGES_SVG) $(IMAGES_PNG_SOURCE) $(IMAGES_PNG)
-
+##### Base ##################################################################
 all: $(ALL_TARGETS)
+
+Makefile: Makefile.in ../config.status
+	../config.status Makefile
+
+images.stamp:
+	test -d images || mkdir images 2>/dev/null || test -d images
+	touch images.stamp
 
 $(UNFOLDED_XML_SOURCE): $(XML_SOURCES_ALL)
 	$(XML_UNFOLD) $(MAIN_XML_SOURCE) >$@
 
+##### HTML ##################################################################
 xhtml: xhtml.stamp
 
 ifeq ($(XHTML_ENABLE),xhtml)
-xhtml.stamp: $(UNFOLDED_XML_SOURCE) $(IMAGES_PNG_ALL) $(COMMON)/xhtml.xsl
+xhtml.stamp: $(UNFOLDED_XML_SOURCE) $(IMAGES_XHTML) $(COMMON)/xhtml.xsl
 	rm -rf xhtml
 	mkdir xhtml
 	@XSLTPROC@ --stringparam base.dir xhtml/ $(COMMON)/xhtml.xsl $<
 	$(GSED) -i -e 's#<html xmlns="[^"]*">#<html>#' xhtml/*.html
-	@cp $(IMAGES_PNG_ALL) xhtml/
+	@cp $(IMAGES_XHTML) xhtml/
 	cp $(COMMON)/user-guide.css xhtml
 	touch $@
 endif
 
+##### PDF ###################################################################
 pdf: $(PACKAGE).pdf
 
 ifeq ($(PDF_ENABLE),pdf)
-$(PACKAGE).pdf: $(UNFOLDED_XML_SOURCE) $(IMAGES_PNG) $(IMAGES_PDF) $(TEX_STYLES) $(COMMON)/dblatex.xsl
+$(PACKAGE).pdf: $(UNFOLDED_XML_SOURCE) $(IMAGES_DBLATEX) $(COMMON)/dblatex.xsl $(COMMON)/user-guide.sty
 	rm -rf pdf
 	mkdir pdf
 	$(DBLATEX_CMD) --tmpdir=pdf --pdf --xsl-user=$(COMMON)/dblatex.xsl --output=$@ $<
 endif
 
-Makefile: Makefile.in ../config.status
-	../config.status Makefile
+##### Various methods to get images ########################################
+# From language-specific images in the same format
+images/%.png: srcimages/%.png images.stamp
+	cp $< $@
 
-pngformulas/%.png: formulas/%.xml $(FORMULA_SUPPORT)
-	@test -d pngformulas || mkdir pngformulas 2>/dev/null || test -d pngformulas
-	cd pngformulas && $(RENDER) "$*" $(abspath $<)
+# From common images in the same format
+images/%.png: $(COMMON)/srcimages/%.png images.stamp
+	cp $< $@
 
-pngformulas/%.png: $(COMMON)/formulas/%.xml $(FORMULA_SUPPORT)
-	@test -d pngformulas || mkdir pngformulas 2>/dev/null || test -d pngformulas
-	cd pngformulas && $(RENDER) "$*" $(abspath $<)
+# From language-specific formulas
+images/%.png: formulas/%.xml $(FORMULA_SUPPORT) images.stamp
+	cd images && $(RENDER) "$*" $(abspath $<)
 
+# From common formulas
+images/%.png: $(COMMON)/formulas/%.xml $(FORMULA_SUPPORT) images.stamp
+	cd images && $(RENDER) "$*" $(abspath $<)
+
+# From SVG
 ifeq ($(SVG_ENABLE),svg)
-images/%.png: images/%.svg
-	cd images && \
-	    $(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$*.png" --file="$*.svg"
+images/%.png: srcimages/%.svg images.stamp
+	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$@" --file="$<"
 
-images/%.pdf: images/%.svg
-	cd images && \
-	    $(INKSCAPE_CMD) --export-pdf="$*.pdf" --file="$*.svg"
+images/%.png: $(COMMON)/srcimages/%.svg images.stamp
+	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$@" --file="$<"
+
+images/%.pdf: srcimages/%.svg images.stamp
+	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
+
+images/%.pdf: $(COMMON)/srcimages/%.svg images.stamp
+	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
 endif
 
+##### Manual pages #########################################################
 man: $(MAN_PAGES)
 
 ifeq ($(MAN_ENABLE),man)
@@ -130,6 +146,7 @@ ifeq ($(MAN_ENABLE),man)
 	@XSLTPROC@ --xinclude $(COMMON)/man.xsl $<
 endif
 
+##### Adminisrative ########################################################
 clean:
 	-@rm -f $(IMAGES_BUILT)
 	-rm -rf $(CLEAN_DIRS)
@@ -199,7 +216,7 @@ endif
 .PHONY: \
 	all help version clean distclean \
 	dist dist-xhtml dist-pdf \
-	xhtml pdf man
+	xhtml pdf man images
 
 .PRECIOUS: Makefile
 
