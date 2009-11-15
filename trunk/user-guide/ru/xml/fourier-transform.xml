@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: fourier-transform.xml 9491 2009-07-17 20:12:43Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="fourier-transform">
+<sect1 id="fourier-transform" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Преобразование Фурье</title>
   <indexterm><primary>преобразование Фурье</primary></indexterm>
   <para>Двумерное преобразование Фурье доступно через меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Интегральные преобразования</guisubmenu><guimenuitem>2D БПФ</guimenuitem></menuchoice>, где реализовано быстрое преобразование Фурье (БПФ, FFT). Преобразование Фурье раскладывает сигнал на его гармонические составляющие, и, таким образом, его можно использовать при изучении спектральных частот, присутствующих в данных СЗМ.</para>

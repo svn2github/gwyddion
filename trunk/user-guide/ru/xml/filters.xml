@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: filters.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="filters">
+<sect1 id="filters" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Фильтры</title>
   <sect2 id="basic-filters">
     <title>Инструмент <quote>Основные фильтры</quote> <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_filter-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>

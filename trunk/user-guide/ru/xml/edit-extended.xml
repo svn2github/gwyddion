@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: edit-extended.xml 10318 2009-10-29 13:57:58Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="edit-extended">
+<sect1 id="edit-extended" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Расширенное редактирование данных</title>
   <para>Этот раздел представляет модули, разработанные для расширенного редактирования (коррекции) данных СЗМ. Используя простые инструменты редактирования данных, представленные в разделе <link linkend="editing-correction" endterm="editing-correction.title"/>, возможна коррекция многих локальных дефектов сканирования, которые могут появляться на данных СЗМ. Но в то же время при использовании методов СЗМ есть много источников ошибок которые ведут к глобальным ошибкам, такие как модуляция данных с низкой частотой или дрейф данных в медленной оси сканирования.</para>
   <sect2 id="drift-compensation">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="basic-operations">
+<sect1 id="basic-operations" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Базовые действия</title>
   <para>Считывание значений и базовые геометрические операции представляют собой основу любой программы обработки данных. Gwyddion предлагает большой набор функций для </para>
   <sect2 id="modules-basic">

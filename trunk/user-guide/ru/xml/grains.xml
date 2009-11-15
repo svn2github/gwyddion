@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: grains.xml 9504 2009-07-18 21:54:33Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="grain-analysis">
+<sect1 id="grain-analysis" xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Анализ зёрен</title>
   <indexterm><primary>выделение зёрен</primary></indexterm>
   <para>В Gwyddion реализовано несколько алгоритмов для работы с зёрнами. Прежде всего, можно использовать простые пороговые алгоритмы (порог по высоте, наклону и кривизне). Эти процедуры могут быть очень эффективны для анализа частиц (чтобы пометить частицы лежащие на ровной поверхности).</para>
