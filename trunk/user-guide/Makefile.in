@@ -68,13 +68,13 @@ Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
 xhtml: common/pngsize
-	for x in $(LANGUAGES); do \
+	@for x in $(LANGUAGES); do \
 		cd $$x && $(MAKE) xhtml; \
 		cd ..; \
 	done
 
 pdf:
-	for x in $(LANGUAGES); do \
+	@for x in $(LANGUAGES); do \
 		cd $$x && $(MAKE) pdf; \
 		cd ..; \
 	done
@@ -88,12 +88,12 @@ common/pngsize: common/pngsize.c
 	cd common && $(CC) -o pngsize pngsize.c
 
 clean:
-	-@rm -f formulas/TEMP-* formulas/*.stamp formulas/eq-*.tex
-	-@rm -f formulas/eq-*.png images/eq-*.png
-	-@rm -f $(IMAGES_BUILT)
-	-rm -rf $(CLEAN_DIRS)
-	-rm -f *.stamp *.deps fixpngres formulas/pngsize *~ */*~
-	-rm -f $(call expand_langs,$(PACKAGE)-%.pdf) $(MAN_PAGES)
+	@rm -rf common/pngformulas common/cache
+	@rm -f common/pngsize common/fixpngres
+	@for x in $(LANGUAGES); do \
+		cd $$x && $(MAKE) clean; \
+		cd ..; \
+	done
 
 distclean: clean
 	-rm -f formulas/render.sh
