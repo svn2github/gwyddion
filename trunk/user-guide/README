@@ -4,11 +4,31 @@ Some random remarks:
   downloaded the wrong package.  This is the DocBook source code.  Get the
   ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
 
-* xml/      contains the XML DocBook sources
-  formulas/ contains rules for TeX formula rendering and will contain the
-            extracted and rendered formulas
-  images/   contains bitmap images
-  xhtml/    will contain the compiled XHTML
+* common/   - files common to all languages - images, formulas, build stuff
+              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
+              srcimages/ - source (non-generated) images
+              cache/     - files generated from common source files, languages
+                           do not know about the cache and simply behave as if
+                           each generated the files independently
+  en/, fr/,
+  ru/, ...  - individual languages, each has the same structure with language
+              specific files
+              xml/       - the XML DocBook sources
+              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
+              srcimages/ - source (non-generated) images
+              xhtml/     - the guide compiled into XHTML
+              pdf/       - working directory for PDF generation
+              images/    - all images (generated or just copies of srcimages/)
+
+* There are two ways to build a single language:
+
+  (b) make
+      in the corresponding language direcory.  This works only if (b) has been
+      run at least one since the common files changed.
+
+  (a) make LANGUAGES=en
+      in the top-level directory.  This works always but is less convenient
+      when working on a single language.
 
 * GNU make is required; configure detects whether you have it, but you may
   still have to type (for example)
