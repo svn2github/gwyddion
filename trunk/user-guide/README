@@ -4,32 +4,6 @@ Some random remarks:
   downloaded the wrong package.  This is the DocBook source code.  Get the
   ready-to-read HTML (e.g. gwyddion-user-guide-1789-07-11-xhtml.tar.gz).
 
-* common/   - files common to all languages - images, formulas, build stuff
-              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
-              srcimages/ - source (non-generated) images
-              cache/     - files generated from common source files, languages
-                           do not know about the cache and simply behave as if
-                           each generated the files independently
-  en/, fr/,
-  ru/, ...  - individual languages, each has the same structure with language
-              specific files
-              xml/       - the XML DocBook sources
-              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
-              srcimages/ - source (non-generated) images
-              xhtml/     - the guide compiled into XHTML
-              pdf/       - working directory for PDF generation
-              images/    - all images (generated or just copies of srcimages/)
-
-* There are two ways to build a single language:
-
-  (b) make
-      in the corresponding language direcory.  This works only if (b) has been
-      run at least one since the common files changed.
-
-  (a) make LANGUAGES=en
-      in the top-level directory.  This works always but is less convenient
-      when working on a single language.
-
 * GNU make is required; configure detects whether you have it, but you may
   still have to type (for example)
 
@@ -51,6 +25,40 @@ Some random remarks:
   configure is your friend, it does not abort when something is missing.
   Instead, it checks for all the tools and at the end it prints what you will
   be unable to build and why.
+
+* common/   - files common to all languages - images, formulas, build stuff
+              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
+              srcimages/ - source (non-generated) images
+              cache/     - files generated from common source files, languages
+                           do not know about the cache and simply behave as if
+                           each generated the files independently
+  en/, fr/,
+  ru/, ...  - individual languages, each has the same structure with language
+              specific files
+              xml/       - the XML DocBook sources
+              formulas/  - XIncluded (in fact xmlunfold.py-ed) math formulas
+              srcimages/ - source (non-generated) images
+              xhtml/     - the guide compiled into XHTML
+              pdf/       - working directory for PDF generation
+              images/    - all images (generated or just copies of srcimages/)
+
+* There are two ways to build a single language:
+
+  (b) make
+      in the corresponding language direcory.  This works only if (b) has been
+      run at least one since the common files changed.  When in doubt, use (b).
+
+  (a) make LANGUAGES=en
+      in the top-level directory.  This works always but is less convenient
+      when working on a single language.
+
+* If you put a file to <LANG>/formulas/ or <LANG>/srcimages/ it overrides the
+  corresponding file in common/formulas or common/srcimages.
+
+  To provide reasonable fallbacks the English images are all in common/.
+  However, formulas containing English words are in en/formulas, i.e. there is
+  no fallback.  You have to translate them by creating the translation in
+  <LANG>/formulas/.
 
 * Some of the images and graphs were generated.  The programs, gnuplot scripts
   and other tools are not distributed in the tarballs.  However, you can find

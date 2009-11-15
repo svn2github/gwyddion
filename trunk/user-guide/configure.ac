@@ -3,9 +3,11 @@ AC_CONFIG_SRCDIR(common/xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
   common/Makefile \
-  en/Makefile \
-  common/user-guide.iss \
   common/render.sh \
+  common/user-guide.iss \
+  en/Makefile \
+  fr/Makefile \
+  ru/Makefile \
 )
 
 #LANGUAGES="en fr ru"

@@ -1,0 +1,10 @@
+abs_top_builddir = @abs_top_builddir@
+abs_top_srcdir = @abs_top_srcdir@
+COMMON = $(abs_top_srcdir)/common
+
+LANGUAGE = ru
+LANGUAGE_LONG = Russian
+
+include $(COMMON)/Makefile
+
+# vim: set ts=4 sw=4 noet :
