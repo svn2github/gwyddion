@@ -20,5 +20,5 @@ Source: "*.png"; DestDir: "{app}"
 Source: "*.css"; DestDir: "{app}"
 
 [Icons]
-Name: "{group}\User Guide"; Filename: "{app}\index.html"
-Name: "{group}\Uninstall User Guide"; Filename: "{uninstallexe}"
+Name: "{group}\User Guide (@LANGUAGE@)"; Filename: "{app}\index.html"
+Name: "{group}\Uninstall User Guide (@LANGUAGE@)"; Filename: "{uninstallexe}"
