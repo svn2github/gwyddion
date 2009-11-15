@@ -10,55 +10,34 @@ BASENAME = @PACKAGE_TARNAME@
 PACKAGE = @PACKAGE_SHORTNAME@
 DISTNAME = $(BASENAME)-$(VERSION)
 
-expand_langs = $(patsubst %,$(1),$(LANGUAGES))
-gather_langs = $(sort $(foreach x,$(call expand_langs,$(1)_%),$($(x))))
-
 GMAKE = @GMAKE@
-GSED = @GSED@
-PYTHON = @PYTHON@
-XSLTPROC_CMD = @XSLTPROC@ --xinclude
-DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath .) --fig-path=images --xslt="@XSLTPROC@" --debug
-INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
-XML_EXTRACT = $(PYTHON) ./xml-extract.py
-RENDER = $(SHELL) ./render.sh
 
-FORMULA_TEMPLATES := header.tex footer.tex defs.tex
-FORMULA_SUPPORT := $(patsubst %,formulas/%,$(FORMULA_TEMPLATES) pngsize render.sh)
-IMAGES_EXTRA = PNG:images/stacked3.png
+DISTFILES = \
+	aclocal.m4 \
+	configure \
+	configure.ac \
+	docbook-xsl-version.xsl \
+	Makefile.in \
+	README \
+	TODO \
+	version-greater-or-equal.xsl
 
-IMAGES_SVG = \
-	images/boundary-length.svg \
-	images/gaussian-acf.svg \
-	images/gaussian-hhcf.svg \
-	images/gaussian-psdf.svg \
-	images/grain-bounding-dims.svg \
-	images/inclination.svg \
-	images/profile-interpolation.svg \
-	images/step-edge.svg \
-	images/surface-area-vertices.svg \
-	images/triangulation.svg \
-	images/unrotate-symmetries.svg \
-	images/volume-pixel-weights.svg \
-	images/wavelet-daubechies20.svg \
-	images/wavelet-daubechies4.svg \
-	images/wavelet-haar.svg \
-	images/windowing-win.svg \
-	images/windowing-fft.svg
-
-IMAGES_PNG_SOURCE = \
-	images/profile-interpolation-image.png \
-	images/triangulation-field.png \
-	images/triangulation-linear.png \
-	images/triangulation-round.png
-
-MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
-
-XSL_STYLES = xhtml.xsl dblatex.xsl man.xsl \
-	version-greater-or-equal.xsl docbook-xsl-version.xsl
-CSS_STYLES = user-guide.css
-TEX_STYLES = user-guide.sty
-BUILD_FILES = README Makefile.in user-guide.iss.in \
-	aclocal.m4 configure configure.ac xml-extract.py
+COMMONFILES =  \
+	common/dblatex.xsl \
+	common/defs.tex \
+	common/fixpngres.c \
+	common/footer.tex \
+	common/header.tex \
+	common/Makefile.in \
+	common/man.xsl \
+	common/pngsize.c \
+	common/render.sh.in \
+	common/user-guide.css \
+	common/user-guide.iss.in \
+	common/user-guide.sty \
+	common/xhtml.xsl \
+	common/xml-extract.py \
+	common/xmlunfold.py
 
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 
@@ -68,16 +47,19 @@ Makefile: Makefile.in ./config.status
 	./config.status Makefile
 
 xhtml: common/pngsize
-	@for x in $(LANGUAGES); do \
-		cd $$x && $(MAKE) xhtml; \
-		cd ..; \
-	done
+	@for x in $(LANGUAGES); do $(MAKE) -C xhtml; done
+
+dist-xhtml:
+	@for x in $(LANGUAGES); do $(MAKE) -C dist-xhtml; done
 
 pdf:
-	@for x in $(LANGUAGES); do \
-		cd $$x && $(MAKE) pdf; \
-		cd ..; \
-	done
+	@for x in $(LANGUAGES); do $(MAKE) -C pdf; done
+
+dist-pdf:
+	@for x in $(LANGUAGES); do $(MAKE) -C dist-pdf; done
+
+fixpngres: common/fixpngres
+	ln -s common/fixpngres .
 
 ifeq ($(PNG_ENABLE),png)
 common/fixpngres: common/fixpngres.c
@@ -88,56 +70,30 @@ common/pngsize: common/pngsize.c
 	cd common && $(CC) -o pngsize pngsize.c
 
 clean:
-	@rm -rf common/pngformulas common/cache
-	@rm -f common/pngsize common/fixpngres
-	@for x in $(LANGUAGES); do \
-		cd $$x && $(MAKE) clean; \
-		cd ..; \
-	done
+	@for x in $(LANGUAGES); do $(MAKE) -C clean; done
+	rm -rf common/cache
+	rm -f common/pngsize common/fixpngres fixpngres
 
 distclean: clean
-	-rm -f formulas/render.sh
-	-rm -fr Makefile config.status config.log autom4te.cache user-guide.iss
+	@for x in $(LANGUAGES); do $(MAKE) -C distclean; done
+	rm -f common/render.sh common/$(PACKAGE).iss common/Makefile
+	rm -fr autom4te.cache
+	rm -f Makefile config.status config.log
 
 dist:
-	-rm -rf $(DISTNAME)
-	mkdir $(DISTNAME) $(DISTNAME)/formulas $(DISTNAME)/images
-	cp $(BUILD_FILES) $(XSL_STYLES) $(CSS_STYLES) $(TEX_STYLES) $(DISTNAME)
-	cp $(IMAGES_DIST) $(DISTNAME)/images
-	cp common/pngsize.c common/render.sh.in $(DISTNAME)/common
-	cp $(patsubst %,formulas/%,$(FORMULA_TEMPLATES)) $(DISTNAME)/formulas
-	for x in $(LANGUAGES); do \
-	    mkdir $(DISTNAME)/xml_$$x; \
-	    cp xml_$$x/*.xml $(DISTNAME)/xml_$$x/; \
-	done
+	rm -rf $(DISTNAME)
+	mkdir $(DISTNAME) $(DISTNAME)/common $(DISTNAME)/common/formulas $(DISTNAME)/common/srcimages
+	cp $(DISTFILES) $(DISTNAME)/
+	cp $(COMMONFILES) $(DISTNAME)/common
+	cp -r common/formulas/*.xml $(DISTNAME)/common/formulas
+	cp -r common/srcimages/*.svg common/srcimages/*.png $(DISTNAME)/common/srcimages
+	@for x in $(LANGUAGES); do $(MAKE) -C dist; done
 	tar -zcf $(DISTNAME).tar.gz $(DISTNAME)
 	rm -rf $(DISTNAME)
 
-# FIXME: Distribute all langs
-dist-xhtml: xhtml
-	for x in $(LANGUAGES); do \
-	    d=$(BASENAME)-xhtml-$$x-$(VERSION); \
-	    rm -rf $$d; \
-	    mkdir $$d; \
-	    cp xhtml_$$x/* $$d; \
-	    ll=`echo $$x | $(GSED) 's/en/English/;s/fr/French/;s/ru/Russian/'`; \
-	    sed "s/@LANGUAGE@/$$ll/g" user-guide.iss >$$d/user-guide.iss; \
-	    chmod 755 $$d; \
-	    chmod 644 $$d/*; \
-	    tar -zcf $$d.tar.gz $$d; \
-	    rm -rf $$d; \
-	done
-
-dist-pdf: pdf
-	for x in $(LANGUAGES); do \
-	    cp -f user-guide-$$x.pdf $(BASENAME)-$$x-$(VERSION).pdf; \
-	done
-
-# FIXME: We need to figure out versioning of translations.
 version:
 	d=`date --iso`; \
-	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac; \
-	$(GSED) -i 's/\(^ *Version\) [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/\1 '"$$d/" xml_en/user-guide.xml
+	$(GSED) -i '/AC_INIT/s/[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/'"$$d/" configure.ac
 	autoconf && ./configure
 
 help:
@@ -158,7 +114,8 @@ else
 	@echo "man          Compile Unix manual pages for commands (not available)"
 endif
 	@echo "dist         Create tarball with DocBook sources"
-	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
+	@echo "dist-xhtml   Create tarballs with ready to read XHTML User guide"
+	@echo "dist-pdf     Create nicely named User guide PDFs"
 ifeq ($(PNG_ENABLE),png)
 	@echo "fixpngres    Build fixpngres tool"
 else
@@ -169,9 +126,7 @@ endif
 .PHONY: \
 	all help version clean distclean \
 	dist dist-xhtml dist-pdf \
-	xhtml xhtml_en xhtml_fr $(call expand_langs,xhtml_%) \
-	pdf pdf_en pdf_fr $(call expand_langs,pdf_%) \
-	man
+	xhtml pdf man
 
 .PRECIOUS: Makefile
 
