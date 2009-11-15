@@ -1,17 +1,16 @@
 #!/bin/bash
 # @(#) $Id$
-pkgname=gwyddion
 projectdir=$PWD
 logdir=$projectdir/../buildlog
 tmplog=tmplog
 
-languages=$(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in)
+eval $(grep "^LANGUAGES=" configure.ac)
 source $HOME/.bashrc
 cd $logdir
 
 cat >user_guide_xhtml.ignore <<':'
 ^$
-^Writing xhtml_../.*\.html .*
+^Writing xhtml/.*\.html .*
 ^(inkscape:[0-9]\+): Gdk-CRITICAL \*\*: gdk_display_list_devices: assertion `GDK_IS_DISPLAY (display)' failed
 ':'
 :
@@ -104,6 +103,6 @@ function printerr_lang() {
 printerr user_guide_autostuff
 printerr_lang user_guide_xhtml
 printerr_lang user_guide_pdf
-printerr user_guide_man
+printerr_lang user_guide_man
 
 rm *.ignore $tmplog

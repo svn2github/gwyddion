@@ -1,7 +1,6 @@
 #!/bin/bash
 # @(#) $Id$
 disabled=
-pkgname=user-guide
 projectdir=$PWD
 logdir=$projectdir/../buildlog
 
@@ -47,6 +46,8 @@ function user_guide_autostuff() {
   CONFIG_SHELL=/bin/sh ./configure
   # This runs configure again...
   make -k version
+  # Build common files deterministically here
+  make -k LANGUAGES=
 }
 
 
@@ -63,7 +64,7 @@ function user_guide_pdf() {
 
 
 function user_guide_man() {
-  make -k man
+  make -k man LANGUAGES=$lang
 }
 
 
@@ -77,7 +78,7 @@ function help() {
 cd $projectdir
 test -d $logdir || mkdir $logdir
 
-languages=$(sed -n '/^LANGUAGES\>/{s/.*=//;p}' Makefile.in)
+eval $(grep "^LANGUAGES=" configure.ac)
 if test -n "$1"; then
   if test "$1" == help; then
     help
@@ -95,15 +96,17 @@ else
   call user_guide_autostuff
   call_langs user_guide_xhtml
   call_langs user_guide_pdf
-  call user_guide_man
+  call_langs user_guide_man
   # LIST-END
-  touch .releaseme
   for lang in $languages; do
-    for x in user-guide-$lang.pdf xhtml_$lang/index.html; do
+    cd $lang
+    touch .releaseme
+    for x in user-guide.pdf xhtml/index.html; do
       if ! test -s $x; then
         rm -f .releaseme
         break
       fi
     done
+    cd ..
   done
 fi
