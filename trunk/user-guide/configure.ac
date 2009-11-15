@@ -4,7 +4,7 @@ AC_CONFIG_FILES(\
   Makefile \
   common/Makefile \
   en/Makefile \
-  user-guide.iss \
+  common/user-guide.iss \
   common/render.sh \
 )
 
