@@ -176,7 +176,7 @@
       </indexterm>
       <para>
         In all Gwyddion tools, facet and plane inclinations are displayed as
-        the spherical angles <xi:include href="eqi-theta-phi.xml"/>
+        the spherical angles <xi:include href="eqi-coords-theta-phi.xml"/>
         of the plane normal vector.
       </para>
       <para>
