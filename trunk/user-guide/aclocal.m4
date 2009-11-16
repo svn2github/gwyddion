@@ -227,3 +227,14 @@ AC_DEFUN([GWY_RUN_LOG],
    ac_status=$?
    echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
    (exit $ac_status); }])
+
+# 1 ... variable name to check
+# 2 ... list of variable stems to set
+# 3 ... message
+AC_DEFUN(GWY_MISSING,
+[m4_foreach_w([stem],[$2],[
+if test "$$1" = no; then
+  GWY_[]stem[]_MISSING="${GWY_[]stem[]_MISSING}  $3
+"
+fi
+])])
