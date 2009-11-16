@@ -585,7 +585,6 @@ gwy_interpolation_resample_block_1d(guint length,
 
     guint suplen = gwy_interpolation_get_support_size(interpolation);
     g_return_if_fail(suplen > 0);
-    gdouble *w = g_newa(gdouble, suplen);
     gint sf = -(((gint)suplen - 1)/2);
     gint st = suplen/2;
 
@@ -598,6 +597,7 @@ gwy_interpolation_resample_block_1d(guint length,
     gdouble q = (gdouble)length/newlength;
     gdouble x0 = (q - 1.0)/2.0;
     for (guint newi = 0; newi < newlength; newi++) {
+        gdouble w[suplen];
         gdouble x = q*newi + x0;
         guint oldi = (guint)floor(x);
         x -= oldi;
@@ -760,7 +760,6 @@ gwy_interpolation_shift_block_1d(guint length,
     g_return_if_fail(suplen > 0);
     gint sf = -(((gint)suplen - 1)/2);
     gint st = suplen/2;
-    gdouble *w = g_newa(gdouble, suplen);
 
     gdouble d0 = data[0];
     gdouble dn = data[length-1];
@@ -772,6 +771,7 @@ gwy_interpolation_shift_block_1d(guint length,
     }
 
     gint off = (gint)floor(offset);
+    gdouble w[suplen];
     gwy_interpolation_get_weights(offset - off, interpolation, w);
 
     for (guint newi = 0; newi < length; newi++) {

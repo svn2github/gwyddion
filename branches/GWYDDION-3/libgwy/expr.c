@@ -1600,7 +1600,7 @@ gwy_expr_resolve_variables(GwyExpr *expr,
     g_return_val_if_fail(priv->in, 0);
     g_return_val_if_fail(!n || (names && indices), 0);
 
-    gboolean *requested = g_newa(gboolean, priv->identifiers->len);
+    gboolean requested[priv->identifiers->len];
     gwy_memclear(requested, priv->identifiers->len);
     gwy_memclear(indices, n);
     for (i = 0; i < n; i++) {
