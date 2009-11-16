@@ -16,6 +16,7 @@ SVG_ENABLE = @SVG_ENABLE@
 GMAKE = @GMAKE@
 GSED = @GSED@
 PYTHON = @PYTHON@
+XML2PO = @XML2PO@
 DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
 INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
@@ -33,6 +34,12 @@ XML_SOURCES := $(wildcard xml/*.xml)
 XML_SOURCES_ALL := $(XML_SOURCES) $(XML_FORMULAS)
 MAIN_XML_SOURCE := xml/$(PACKAGE).xml
 UNFOLDED_XML_SOURCE := $(PACKAGE).xml
+
+TRANSLATABLE_SVGS = \
+	boundary-length \
+	profile-interpolation \
+	step-edge \
+	unrotate-symmetries
 
 IMAGES_EXTRA = PNG:images/stacked3.png
 IMAGES := $(shell $(XML_EXTRACT) imageinfo $(XML_SOURCES_ALL)) $(IMAGES_EXTRA)
@@ -65,6 +72,19 @@ images.stamp:
 $(PACKAGE).iss: $(COMMON)/$(PACKAGE).iss
 	sed 's/@LANGUAGE@/$(LANGUAGE_LONG)/' <$< >$@
 
+##### Translations ##########################################################
+# Only initial creation!
+po-create:
+	cd $(COMMON)/srcimages && $(XML2PO) --output=$(abs_top_builddir)/$(LANGUAGE)/svg.po $(patsubst %,%.svg,$(TRANSLATABLE_SVGS))
+	$(GSED) -i 's/PACKAGE VERSION/Gwyddion-user-guide/' svg.po
+
+# xml2po update mode is really idiotic, run msgmerge manually
+po-update:
+	cd $(COMMON)/srcimages && $(XML2PO) --output=$(abs_top_builddir)/$(LANGUAGE)/svg.pot.tmp $(patsubst %,%.svg,$(TRANSLATABLE_SVGS))
+	msgmerge svg.po svg.pot.tmp >svg.po.tmp
+	cat svg.po.tmp >svg.po
+	rm -f svg.pot.tmp svg.po.tmp
+
 ##### HTML ##################################################################
 xhtml: xhtml.stamp
 
@@ -90,6 +110,20 @@ $(PACKAGE).pdf: $(UNFOLDED_XML_SOURCE) $(IMAGES_DBLATEX) $(COMMON)/dblatex.xsl $
 endif
 
 ##### Various methods to get images ########################################
+# Translated SVG, use explicit build rules to override implicit
+define TRANSLATABLE_SVG_template
+images/$(1).svg: $(COMMON)/srcimages/$(1).svg svg.po
+	$(XML2PO) --output="$$@" --po-file="svg.po" "$$<"
+
+images/$(1).png: images/$(1).svg images.stamp
+	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$$@" --file="$$<"
+
+images/$(1).pdf: images/$(1).svg images.stamp
+	    $(INKSCAPE_CMD) --export-pdf="$$@" --file="$$<"
+
+endef
+
 # From language-specific formulas
 images/eq-%.png: formulas/eq-%.xml $(FORMULA_SUPPORT) images.stamp
 	cd images && $(RENDER) "eq-$*" $(abspath $<)
@@ -100,16 +134,20 @@ images/eq-%.png: $(COMMON)/formulas/eq-%.xml $(FORMULA_SUPPORT) images.stamp
 
 # From SVG
 ifeq ($(SVG_ENABLE),svg)
-images/%.png: srcimages/%.svg images.stamp
-	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$@" --file="$<"
+$(foreach img,$(TRANSLATABLE_SVGS),$(eval $(call TRANSLATABLE_SVG_template,$(img))))
 
-images/%.png: $(COMMON)/srcimages/%.svg images.stamp
+# Per-language SVG (unlikely)
+images/%.png: srcimages/%.svg images.stamp
 	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
 	        --export-png="$@" --file="$<"
 
 images/%.pdf: srcimages/%.svg images.stamp
 	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
+
+# Common SVG
+images/%.png: $(COMMON)/srcimages/%.svg images.stamp
+	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
+	        --export-png="$@" --file="$<"
 
 images/%.pdf: $(COMMON)/srcimages/%.svg images.stamp
 	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
@@ -134,16 +172,16 @@ endif
 ##### Administrative #######################################################
 clean:
 	-rm -rf xhtml pdf images
-	-rm -f $(UNFOLDED_XML_SOURCE) $(PACKAGE).pdf $(MAN_PAGES) *~ */*~ *.stamp config.log $(PACKAGE).iss
+	-rm -f $(UNFOLDED_XML_SOURCE) $(PACKAGE).pdf $(MAN_PAGES) *~ */*~ *.tmp *.stamp config.log $(PACKAGE).iss
 
 distclean: clean
 	-rm -rf Makefile
 
 # Cannot be run standalone, fail early if $(DISTDIR) does not exist
-dist:
+dist: po-update
 	test -d $(DISTDIR)
 	mkdir $(LANGDISTDIR) $(LANGDISTDIR)/formulas $(LANGDISTDIR)/srcimages $(LANGDISTDIR)/xml
-	cp Makefile.in $(LANGDISTDIR)/
+	cp Makefile.in svg.po $(LANGDISTDIR)/
 	cp xml/*.xml $(LANGDISTDIR)/xml/
 	cp formulas/*.xml $(LANGDISTDIR)/formulas/
 	cp srcimages/*.svg srcimages/*.png $(LANGDISTDIR)/srcimages/
@@ -165,24 +203,29 @@ version:
 	$(GSED) -i 's/\<[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\>/'"$$d/" $(MAIN_XML_SOURCE)
 
 help:
-	@echo "all          Compile User guide to all available formats ($(ALL_TARGETS))"
+	@echo "all           Compile User guide to all available formats ($(ALL_TARGETS))"
 ifeq ($(XHTML_ENABLE),xhtml)
-	@echo "xhtml        Compile User guide to XHTML"
+	@echo "xhtml         Compile User guide to XHTML"
 else
-	@echo "xhtml        Compile User guide to XHTML (not available)"
+	@echo "xhtml         Compile User guide to XHTML (not available)"
 endif
 ifeq ($(PDF_ENABLE),pdf)
-	@echo "pdf          Compile User guide to PDF"
+	@echo "pdf           Compile User guide to PDF"
 else
-	@echo "pdf          Compile User guide to PDF (not available)"
+	@echo "pdf           Compile User guide to PDF (not available)"
 endif
 ifeq ($(MAN_ENABLE),man)
-	@echo "man          Compile Unix manual pages for commands"
+	@echo "man           Compile Unix manual pages for commands"
 else
-	@echo "man          Compile Unix manual pages for commands (not available)"
+	@echo "man           Compile Unix manual pages for commands (not available)"
 endif
-	@echo "dist-xhtml   Create tarball with ready to read XHTML User guide"
-	@echo "dist-pdf     Create nicely named User guide PDF"
+	@echo "dist-xhtml    Create tarball with ready to read XHTML User guide"
+	@echo "dist-pdf      Create nicely named User guide PDF"
+ifeq ($(SVG_ENABLE),svg)
+	@echo "po-update     Merge changes in translatable SVGs into svg.po"
+else
+	@echo "po-update     Merge changes in translatable SVGs into svg.po (not available)"
+endif
 	@echo "version      Update version number to current date"
 
 .PHONY: \

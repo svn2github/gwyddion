@@ -59,6 +59,9 @@ pdf:
 dist-pdf:
 	@for x in $(LANGUAGES); do $(MAKE) -C $$x dist-pdf; done
 
+po-update:
+	@for x in $(LANGUAGES); do $(MAKE) -C $$x po-update; done
+
 fixpngres: common/fixpngres
 	ln -s common/fixpngres .
 

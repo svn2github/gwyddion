@@ -1,0 +1,203 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Gwyddion-user-guide\n"
+"POT-Creation-Date: 2009-11-16 15:45+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: unrotate-symmetries.svg:30(format) step-edge.svg:188(format)
+#: profile-interpolation.svg:338(format) boundary-length.svg:29(format)
+msgid "image/svg+xml"
+msgstr ""
+
+#: unrotate-symmetries.svg:261(text)
+#, no-wrap
+msgid "Parallel"
+msgstr ""
+
+#: unrotate-symmetries.svg:270(text)
+#, no-wrap
+msgid "Triangular"
+msgstr ""
+
+#: unrotate-symmetries.svg:279(text)
+#, no-wrap
+msgid "Square"
+msgstr ""
+
+#: unrotate-symmetries.svg:288(text)
+#, no-wrap
+msgid "Rhombic"
+msgstr ""
+
+#: unrotate-symmetries.svg:297(text)
+#, no-wrap
+msgid "Hexagonal"
+msgstr ""
+
+#: step-edge.svg:217(tspan)
+#, no-wrap
+msgid "Step"
+msgstr ""
+
+#: step-edge.svg:285(tspan) step-edge.svg:346(tspan)
+#, no-wrap
+msgid "Edge"
+msgstr ""
+
+#: profile-interpolation.svg:397(tspan)
+#, no-wrap
+msgid "Natural resolution profile"
+msgstr ""
+
+#: profile-interpolation.svg:407(tspan)
+#, no-wrap
+msgid "High resolution profile"
+msgstr ""
+
+#: profile-interpolation.svg:444(tspan) profile-interpolation.svg:1063(tspan)
+#: profile-interpolation.svg:2060(tspan)
+msgid "3"
+msgstr ""
+
+#: profile-interpolation.svg:475(tspan) profile-interpolation.svg:1094(tspan)
+#: profile-interpolation.svg:2091(tspan) profile-interpolation.svg:2339(tspan)
+msgid "4"
+msgstr ""
+
+#: profile-interpolation.svg:506(tspan) profile-interpolation.svg:1125(tspan)
+#: profile-interpolation.svg:2122(tspan)
+msgid "5"
+msgstr ""
+
+#: profile-interpolation.svg:537(tspan) profile-interpolation.svg:1156(tspan)
+#: profile-interpolation.svg:2153(tspan) profile-interpolation.svg:2370(tspan)
+msgid "6"
+msgstr ""
+
+#: profile-interpolation.svg:568(tspan) profile-interpolation.svg:1187(tspan)
+#: profile-interpolation.svg:2184(tspan)
+msgid "7"
+msgstr ""
+
+#: profile-interpolation.svg:599(tspan) profile-interpolation.svg:1218(tspan)
+#: profile-interpolation.svg:2215(tspan) profile-interpolation.svg:2401(tspan)
+msgid "8"
+msgstr ""
+
+#: profile-interpolation.svg:630(tspan) profile-interpolation.svg:1249(tspan)
+#: profile-interpolation.svg:2246(tspan)
+msgid "9"
+msgstr ""
+
+#: profile-interpolation.svg:951(tspan) profile-interpolation.svg:1570(tspan)
+#: profile-interpolation.svg:2600(tspan)
+msgid "z [nm]"
+msgstr ""
+
+#: profile-interpolation.svg:961(tspan)
+msgid "Round interpolation, natural resolution"
+msgstr ""
+
+#: profile-interpolation.svg:1580(tspan)
+msgid "Round interpolation, high resolution"
+msgstr ""
+
+#: profile-interpolation.svg:2277(tspan)
+msgid "0"
+msgstr ""
+
+#: profile-interpolation.svg:2308(tspan)
+msgid "2"
+msgstr ""
+
+#: profile-interpolation.svg:2432(tspan)
+msgid "10"
+msgstr ""
+
+#: profile-interpolation.svg:2463(tspan)
+msgid "12"
+msgstr ""
+
+#: profile-interpolation.svg:2494(tspan)
+msgid "14"
+msgstr ""
+
+#: profile-interpolation.svg:2525(tspan)
+msgid "16"
+msgstr ""
+
+#: profile-interpolation.svg:2556(tspan)
+msgid "18"
+msgstr ""
+
+#: profile-interpolation.svg:2587(tspan)
+msgid "20"
+msgstr ""
+
+#: profile-interpolation.svg:2610(tspan)
+msgid "x [nm]"
+msgstr ""
+
+#: profile-interpolation.svg:2620(tspan)
+msgid "Key interpolation, high resolution"
+msgstr ""
+
+#: boundary-length.svg:713(tspan)
+#, no-wrap
+msgid "(a)"
+msgstr ""
+
+#: boundary-length.svg:723(tspan)
+#, no-wrap
+msgid "(b1)"
+msgstr ""
+
+#: boundary-length.svg:733(tspan)
+#, no-wrap
+msgid "(b2)"
+msgstr ""
+
+#: boundary-length.svg:743(tspan)
+#, no-wrap
+msgid "(c)"
+msgstr ""
+
+#: boundary-length.svg:753(tspan)
+#, no-wrap
+msgid "(d)"
+msgstr ""
+
+#: boundary-length.svg:763(tspan)
+#, no-wrap
+msgid "(e)"
+msgstr ""
+
+#: boundary-length.svg:773(tspan)
+#, no-wrap
+msgid "grain"
+msgstr ""
+
+#: boundary-length.svg:783(tspan)
+#, no-wrap
+msgid "polygonal shape"
+msgstr ""
+
+#: boundary-length.svg:794(tspan)
+#, no-wrap
+msgid "L = 6 + 6√2"
+msgstr ""
+
+#: boundary-length.svg:814(tspan)
+#, no-wrap
+msgid "length"
+msgstr ""
+
+#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2.
+#: boundary-length.svg:0(None)
+msgid "translator-credits"
+msgstr ""
