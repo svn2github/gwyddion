@@ -48,6 +48,7 @@ if test "$GSED" != no; then
   fi
 fi
 
+# FIXME: Text processing probably does not actually work with Python3.
 AC_CHECK_PROGS([PYTHON],[python python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
 if test "$PYTHON" == no; then
   AC_MSG_ERROR([Python is required to build the user guide.
@@ -58,44 +59,31 @@ JH_CHECK_XML_CATALOG([-//OASIS//DTD DocBook XML V4.5//EN],
                      [DocBook XML DTD V4.5])
 
 AC_CHECK_PROGS([CONVERT],[convert],[no])
-if test "$CONVERT" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  convert, get ImageMagick from http://www.imagemagick.org/
-"
-fi
+GWY_MISSING(CONVERT,[HTML],[convert, get ImageMagick from http://www.imagemagick.org/])
 
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[no])
-if test "$XSLTPROC" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
-"
-  GWY_PDF_MISSING="${GWY_PDF_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
-"
-  GWY_MAN_MISSING="${GWY_MAN_MISSING}  xsltproc, get libxml2 from http://xmlsoft.org/
-"
-fi
+GWY_MISSING(XSLTPROC,[HTML PDF MAN],[xsltproc, get libxml2 from http://xmlsoft.org/])
 
 AC_CHECK_PROGS([TEX],[tex],[no])
-if test "$TEX" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  tex, get TeX from http://tug.org/
-"
-fi
+GWY_MISSING(TEX,[HTML],[tex, get TeX from http://tug.org/])
 
 AC_CHECK_PROGS([PDFLATEX],[pdflatex],[no])
-if test "$TEX" = no; then
-  GWY_PDF_MISSING="${GWY_HTML_MISSING}  pdflatex, get pdfLaTeX from http://tug.org/
-"
-fi
+GWY_MISSING(PDFLATEX,[PDF],[tex, get pdfLaTeX from http://tug.org/])
 
 AC_CHECK_PROGS([DVIPS],[dvips],[no])
-if test "$DVIPS" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  dvips, get dvips from http://tug.org/
-"
-fi
+GWY_MISSING(DVIPS,[HTML],[dvips, get TeX from http://tug.org/])
 
 AC_CHECK_PROGS([GS],[gs],[no])
-if test "$GS" = no; then
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  gs, get ghostscript from http://www.ghostscript.com/
-"
-fi
+GWY_MISSING(GS,[HTML],[gs, get ghostscript from http://www.ghostscript.com/])
+
+AC_CHECK_PROGS([DBLATEX],[dblatex],[no])
+GWY_MISSING(DBLATEX,[PDF],[dblatex, get DBLaTeX from http://dblatex.sourceforge.net/])
+
+AC_CHECK_PROGS([INKSCAPE],[inkscape],[no])
+GWY_MISSING(INKSCAPE,[HTML PDF SVG],[inkscape, get Inkscape from http://www.inkscape.org/])
+
+AC_CHECK_PROGS([XML2PO],[xml2po],[no])
+GWY_MISSING(INKSCAPE,[HTML PDF SVG],[xml2po, get gnome-doc-utils from http://www.gnome.org/])
 
 # Here we assume if someone has xhtml he has manpages too.
 JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl],
@@ -118,21 +106,6 @@ _ACEOF
 "
   fi
   rm -f conftest.xml
-fi
-
-AC_CHECK_PROGS([DBLATEX],[dblatex],[no])
-if test "$DBLATEX" = no; then
-  GWY_PDF_MISSING="${GWY_PDF_MISSING}  dblatex, get DBLaTeX from http://dblatex.sourceforge.net/
-"
-fi
-
-AC_CHECK_PROGS([INKSCAPE],[inkscape],[no])
-if test "$INKSCAPE" = no; then
-  GWY_SVG_MISSING="whatever"
-  GWY_HTML_MISSING="${GWY_HTML_MISSING}  inkscape, get Inkscape from http://www.inkscape.org/
-"
-  GWY_PDF_MISSING="${GWY_PDF_MISSING}  inkscape, get Inkscape from http://www.inkscape.org/
-"
 fi
 
 PKG_CHECK_MODULES([PNG],[libpng],,[
