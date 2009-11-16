@@ -52,6 +52,21 @@ Some random remarks:
       in the top-level directory.  This works always but is less convenient
       when working on a single language.
 
+* The following targets work in language directories (make help prints them):
+  help all xhtml pdf man dist-xhtml dist-pdf clean distclean
+
+* Formula file naming:
+  eq-foo.xml   - contains <informalequation> or <inlineequation> with
+                 alternative representation 'eq-foo.png' rendered by TeX
+               - it must have id='eq-foo' and hence be unique in the guide
+               - 'foo' describes the meaning, e.g. 'area-calculation'
+
+  eqi-bar.xml  - contains simple <inlineequation> that does not need to be
+                 rendered by TeX and hence has no PNG representation
+               - it can be included in more places, hence it must not have
+                 the id attribute
+               - 'bar' describes the symbols physically, e.g. 'P_x-is-0'
+
 * If you put a file to <LANG>/formulas/ or <LANG>/srcimages/ it overrides the
   corresponding file in common/formulas or common/srcimages.
 
