@@ -26,7 +26,7 @@ function call() {
 
 # execute a per-language function/command with logging and some setup
 function call_langs() {
-  for lang in $languages; do
+  for lang in $LANGUAGES; do
     exec >$logdir/$1-$lang.log
     exec 2>$logdir/$1-$lang.err
     cd $projectdir
@@ -98,7 +98,7 @@ else
   call_langs user_guide_pdf
   call_langs user_guide_man
   # LIST-END
-  for lang in $languages; do
+  for lang in $LANGUAGES; do
     cd $lang
     touch .releaseme
     for x in user-guide.pdf xhtml/index.html; do

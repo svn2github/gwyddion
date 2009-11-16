@@ -78,7 +78,7 @@ function printerr_lang() {
   f=$1
   shift
 
-  for lang in $languages; do
+  for lang in $LANGUAGES; do
     test -s $f-$lang.err || continue
     cat --squeeze-blank $f-$lang.err \
     | {
