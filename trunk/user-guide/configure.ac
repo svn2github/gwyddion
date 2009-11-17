@@ -3,6 +3,7 @@ AC_CONFIG_SRCDIR(common/xhtml.xsl)
 AC_CONFIG_FILES(\
   Makefile \
   common/Makefile \
+  common/inkscape-export.sh \
   common/render.sh \
   common/user-guide.iss \
   en/Makefile \

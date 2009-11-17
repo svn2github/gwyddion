@@ -34,3 +34,4 @@ fi
 test -d "$cache" || mkdir "$cache" 2>/dev/null || test -d "$cache"
 cp "$1".png "$c"
 rm "$t".*
+# vim: set ts=2 sw=2 et :

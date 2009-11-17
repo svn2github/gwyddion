@@ -23,22 +23,23 @@ DISTFILES = \
 	TODO \
 	version-greater-or-equal.xsl
 
-COMMONFILES =  \
-	common/dblatex.xsl \
-	common/defs.tex \
-	common/fixpngres.c \
-	common/footer.tex \
-	common/header.tex \
-	common/Makefile.in \
-	common/man.xsl \
-	common/pngsize.c \
-	common/render.sh.in \
-	common/user-guide.css \
-	common/user-guide.iss.in \
-	common/user-guide.sty \
-	common/xhtml.xsl \
-	common/xml-extract.py \
-	common/xmlunfold.py
+COMMONDISTFILES =  \
+	dblatex.xsl \
+	defs.tex \
+	fixpngres.c \
+	footer.tex \
+	header.tex \
+	inkscape-export.sh.in \
+	Makefile.in \
+	man.xsl \
+	pngsize.c \
+	render.sh.in \
+	user-guide.css \
+	user-guide.iss.in \
+	user-guide.sty \
+	xhtml.xsl \
+	xml-extract.py \
+	xmlunfold.py
 
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 
@@ -80,7 +81,7 @@ clean:
 
 distclean: clean
 	@for x in $(LANGUAGES); do $(MAKE) -C $$x distclean; done
-	rm -f common/render.sh common/$(PACKAGE).iss common/Makefile
+	rm -f common/render.sh common/inkscape-export.sh common/$(PACKAGE).iss common/Makefile
 	rm -fr autom4te.cache
 	rm -f Makefile config.status config.log
 
@@ -88,7 +89,7 @@ dist:
 	rm -rf $(DISTNAME)
 	mkdir $(DISTNAME) $(DISTNAME)/common $(DISTNAME)/common/formulas $(DISTNAME)/common/srcimages
 	cp $(DISTFILES) $(DISTNAME)/
-	cp $(COMMONFILES) $(DISTNAME)/common
+	cp $(patsubst %,common/%,$(COMMONDISTFILES)) $(DISTNAME)/common
 	cp -r common/formulas/*.xml $(DISTNAME)/common/formulas
 	cp -r common/srcimages/*.svg common/srcimages/*.png $(DISTNAME)/common/srcimages
 	@for x in $(LANGUAGES); do $(MAKE) -C $$x dist; done

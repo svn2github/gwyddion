@@ -18,7 +18,7 @@ GSED = @GSED@
 PYTHON = @PYTHON@
 XML2PO = @XML2PO@
 DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
-INKSCAPE_CMD = @INKSCAPE@ --without-gui --export-area-drawing
+INKSCAPE_EXPORT = $(SHELL) $(COMMON)/inkscape-export.sh
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
 XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
 RENDER = $(SHELL) $(COMMON)/render.sh
@@ -117,11 +117,10 @@ images/$(1).svg: $(COMMON)/srcimages/$(1).svg svg.po
 	$(GSED) -i 's+\(xlink:href="\)\([^#][^"]*\.png"\)+\1../../common/srcimages/\2+g' "$$@"
 
 images/$(1).png: images/$(1).svg images.stamp
-	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$$@" --file="$$<"
+	$(INKSCAPE_EXPORT) png "$$<" "$$@"
 
 images/$(1).pdf: images/$(1).svg images.stamp
-	    $(INKSCAPE_CMD) --export-pdf="$$@" --file="$$<"
+	$(INKSCAPE_EXPORT) pdf "$$<" "$$@"
 
 endef
 
@@ -139,19 +138,17 @@ $(foreach img,$(TRANSLATABLE_SVGS),$(eval $(call TRANSLATABLE_SVG_template,$(img
 
 # Per-language SVG (unlikely)
 images/%.png: srcimages/%.svg images.stamp
-	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$@" --file="$<"
+	$(INKSCAPE_EXPORT) png "$<" "$@"
 
 images/%.pdf: srcimages/%.svg images.stamp
-	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
+	$(INKSCAPE_EXPORT) pdf "$<" "$@"
 
 # Common SVG
 images/%.png: $(COMMON)/srcimages/%.svg images.stamp
-	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
-	        --export-png="$@" --file="$<"
+	$(INKSCAPE_EXPORT) png "$<" "$@"
 
 images/%.pdf: $(COMMON)/srcimages/%.svg images.stamp
-	    $(INKSCAPE_CMD) --export-pdf="$@" --file="$<"
+	$(INKSCAPE_EXPORT) pdf "$<" "$@"
 endif
 
 # From language-specific images in the same format

@@ -1,0 +1,31 @@
+# This wrapper exists primarily because many versions of Inkscape cannot handle
+# input and output files in different directories.
+set -e
+INKSCAPE="@INKSCAPE@"
+opts="--without-gui --export-area-drawing"
+if test ! -n "$3"; then
+  echo "$0 {png|pdf} INPUT.svg OUTPUT"
+  exit 0
+fi
+fmt="$1"; shift
+input="$1"; shift
+output="$1"; shift
+case "$fmt" in
+  png) fopts="--export-dpi=150 --export-background=white";;
+  pdf) fopts=;;
+  *) echo "Wrong format $fmt" 1>&2; exit 1;;
+esac
+idir=$(dirname "$input")
+ifile=$(basename "$input")
+odir=$(dirname "$output")
+ofile=$(basename "$output")
+if test "$idir" != "$odir"; then
+  cp -f "$input" "$odir/TEMP-$ifile"
+  cd "$odir"
+  inkscape $opts $fopts --export-$fmt="$ofile" --file="TEMP-$ifile" "$@"
+  rm -f "TEMP-$ifile"
+else
+  cd "$odir"
+  inkscape $opts $fopts --export-$fmt="$ofile" --file="$ifile" "$@"
+fi
+# vim: set ts=2 sw=2 et :
