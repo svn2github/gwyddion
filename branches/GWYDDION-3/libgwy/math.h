@@ -90,6 +90,17 @@ void    gwy_math_sort  (gdouble *array,
 gdouble gwy_math_median(gdouble *array,
                         gsize n);
 
+#define gwy_lower_triangular_matrix_index(a, i, j) \
+    ((a)[(i)*((i) + 1)/2 + (j)])
+
+gboolean gwy_choleski_decompose(gdouble *matrix,
+                                guint n);
+void     gwy_choleski_solve    (const gdouble *decomp,
+                                gdouble *rhs,
+                                guint n);
+gboolean gwy_choleski_invert   (gdouble *a,
+                                guint n);
+
 G_END_DECLS
 
 #endif

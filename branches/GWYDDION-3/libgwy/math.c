@@ -27,6 +27,7 @@
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
+#define SLi gwy_lower_triangular_matrix_index
 
 static void sort_plain(gdouble *array,
                        gsize n);
@@ -104,6 +105,125 @@ gwy_math_median(gdouble *array, gsize n)
         if (hh >= median)
             hi = hh - 1;
     }
+}
+
+/**
+ * gwy_choleski_decompose:
+ * @matrix: Lower triangular part of a symmetric matrix, see
+ *          gwy_lower_triangular_matrix_index() for storage details.
+ * @n: Dimension of @matrix.
+ *
+ * Decomposes a symmetric positive definite matrix in place.
+ *
+ * Regardless of the return value, the contents of @matrix is overwritten.
+ * In case of failure, it will not contain any meaningful values.
+ *
+ * Returns: %TRUE if the decomposition succeeded, %FALSE if the matrix was not
+ *          numerically positive definite.
+ **/
+gboolean
+gwy_choleski_decompose(gdouble *a, guint n)
+{
+    for (guint k = 0; k < n; k++) {
+        /* diagonal element */
+        gdouble s = SLi(a, k, k);
+        for (guint i = 0; i < k; i++)
+            s -= SLi(a, k, i) * SLi(a, k, i);
+        if (s <= 0.0)
+            return FALSE;
+        SLi(a, k, k) = s = sqrt(s);
+
+        /* nondiagonal elements */
+        for (guint j = k+1; j < n; j++) {
+            gdouble r = SLi(a, j, k);
+            for (guint i = 0; i < k; i++)
+                r -= SLi(a, k, i) * SLi(a, j, i);
+            SLi(a, j, k) = r/s;
+        }
+    }
+
+    return TRUE;
+}
+
+/**
+ * gwy_choleski_solve:
+ * @decomp: Lower triangular part of Choleski decomposition as computed
+ *          by gwy_math_choleski_decompose().
+ * @rhs: Right hand side vector.  It is modified in place, on return it
+ *       contains the solution.
+ * @n: Dimension of @decomp and length of @rhs.
+ *
+ * Solves a system of linear equations with predecomposed symmetric positive
+ * definite matrix.
+ *
+ * Once the matrix is decomposed, this function can be used repeatedly to
+ * calculate the solution of the system with different right-hand sides.
+ **/
+void
+gwy_choleski_solve(const gdouble *a, gdouble *b, guint n)
+{
+    guint i, j;
+
+    /* back-substitution with the lower triangular matrix */
+    for (j = 0; j < n; j++) {
+        for (i = 0; i < j; i++)
+            b[j] -= SLi(a, j, i)*b[i];
+        b[j] /= SLi(a, j, j);
+    }
+
+    /* back-substitution with the upper triangular matrix */
+    /*
+    for (j = n-1; j >= 0; j--) {
+        for (i = j+1; i < n; i++)
+            b[j] -= SLi(a, i, j)*b[i];
+        b[j] /= SLi(a, j, j);
+    }
+    */
+    for (j = n; j > 0; j--) {
+        for (i = j; i < n; i++)
+            b[j-1] -= SLi(a, i, j-1)*b[i];
+        b[j-1] /= SLi(a, j-1, j-1);
+    }
+}
+
+/**
+ * gwy_choleski_invert:
+ * @matrix: Lower triangular part of a symmetric matrix, see
+ *          gwy_lower_triangular_matrix_index() for storage details.
+ * @n: Dimension of @matrix.
+ *
+ * Inverts a positive definite matrix in place.
+ *
+ * Regardless of the return value, the contents of @matrix is overwritten.
+ * In case of failure, it will not contain any meaningful values.
+ *
+ * Returns: %TRUE if the inversion succeeded, %FALSE if the matrix was not
+ *          numerically positive definite.
+ **/
+gboolean
+gwy_choleski_invert(gdouble *a, guint n)
+{
+    gdouble x[n];
+    for (guint k = n; k > 0; k--) {
+        gdouble s = a[0];
+        if (s <= 0)
+            return FALSE;
+        guint m = 0, q = 0;
+        for (guint i = 0; i < n-1; i++) {
+            q = m+1;
+            m += i+2;
+            gdouble t = a[q];
+            x[i] = -t/s;      /* note use temporary x */
+            if (i > k)
+                x[i] = -x[i];
+            for (guint j = q; j < m; j++)
+                a[j - (i+1)] = a[j+1] + t * x[j - q];
+        }
+        a[m] = 1.0/s;
+        for (guint i = 0; i < n-1; i++)
+            a[q + i] = x[i];
+    }
+    return TRUE;
 }
 
 /**
@@ -652,6 +772,30 @@ jump_over:
  *
  * This macro evaluates its argument only once.
  * This macro is usable as a single statement.
+ **/
+
+/**
+ * gwy_lower_triangular_matrix_index:
+ * @a: Lower triangular matrix stored by rows.
+ * @i: Row index.
+ * @j: Column index, it must be at most equal to @i.
+ *
+ * Accesses an element of lower triangular matrix.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro expands to a left-hand side expression.
+ *
+ * The matrix is assumed to be stored as follows:
+ * [a_00 a_10 a_11 a_20 a_21 a_22 a_30 ...].
+ *
+ * For instance, to multiply rows and columns of @a by the corresponding
+ * elements of vector @v one can do:
+ * |[
+ * for (guint i = 0; i < n; i++) {
+ *     for (guint j = 0; j <= i; j++)
+ *         gwy_lower_triangular_matrix_index(a, i, j) *= v[i] * v[j];
+ * }
+ * ]|
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
