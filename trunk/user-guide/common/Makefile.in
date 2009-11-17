@@ -114,6 +114,7 @@ endif
 define TRANSLATABLE_SVG_template
 images/$(1).svg: $(COMMON)/srcimages/$(1).svg svg.po
 	$(XML2PO) --output="$$@" --po-file="svg.po" "$$<"
+	$(GSED) -i 's+\(xlink:href="\)\([^#][^"]*\.png"\)+\1../../common/srcimages/\2+g' "$$@"
 
 images/$(1).png: images/$(1).svg images.stamp
 	$(INKSCAPE_CMD) --export-dpi=150 --export-background=white \
