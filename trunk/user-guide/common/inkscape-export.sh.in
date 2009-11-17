@@ -1,7 +1,10 @@
 # This wrapper exists primarily because many versions of Inkscape cannot handle
 # input and output files in different directories.
 set -e
+abs_top_srcdir="@abs_top_srcdir@"
 INKSCAPE="@INKSCAPE@"
+COMMON="$abs_top_srcdir/common"
+cache="$COMMON/cache"
 opts="--without-gui --export-area-drawing"
 if test ! -n "$3"; then
   echo "$0 {png|pdf} INPUT.svg OUTPUT"
@@ -10,6 +13,12 @@ fi
 fmt="$1"; shift
 input="$1"; shift
 output="$1"; shift
+c=($(sha1sum "$input"))
+c="$cache/svg-${c[0]}.$fmt"
+if test -s "$c"; then
+  cp "$c" "$output"
+  exit 0
+fi
 case "$fmt" in
   png) fopts="--export-dpi=150 --export-background=white";;
   pdf) fopts=;;
@@ -28,4 +37,6 @@ else
   cd "$odir"
   inkscape $opts $fopts --export-$fmt="$ofile" --file="$ifile" "$@"
 fi
+test -d "$cache" || mkdir "$cache" 2>/dev/null || test -d "$cache"
+cp "$ofile" "$c"
 # vim: set ts=2 sw=2 et :
