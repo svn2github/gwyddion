@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gwyddion-user-guide\n"
 "POT-Creation-Date: 2009-11-16 15:45+0100\n"
-"PO-Revision-Date: 2009-11-17 09:06+0300\n"
+"PO-Revision-Date: 2009-11-17 09:28+0300\n"
 "Last-Translator: Daniil Bratashov <dn2010@gmail.com>\n"
 "Language-Team: ru <ru@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -212,7 +212,7 @@ msgstr "L = 6 + 6√2"
 #: boundary-length.svg:814(tspan)
 #, no-wrap
 msgid "length"
-msgstr "длина"
+msgstr "и её длина"
 
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2.
 #: boundary-length.svg:0(None)
