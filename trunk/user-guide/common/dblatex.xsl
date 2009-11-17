@@ -31,16 +31,18 @@
 <xsl:template name="encode.before.style">
   <xsl:text>\newif\ifxetex&#10;\xetexfalse&#10;</xsl:text>
   <!-- Standard latex font setup -->
-  <!-- The T1 fontenc removal for Russian works around a problem encountered by
-        Daniil Bratashov.  It has always worked for me even with T1. -->
+  <!--
   <xsl:choose>
     <xsl:when test='$gwy.latex.language="russian"'>
       <xsl:text>\usepackage[T2A,T2D]{fontenc}&#10;</xsl:text>
     </xsl:when>
     <xsl:otherwise>
+    -->
       <xsl:text>\usepackage[T2A,T2D,T1]{fontenc}&#10;</xsl:text>
+   <!--
     </xsl:otherwise>
   </xsl:choose>
+  -->
   <xsl:text>\usepackage{ucs}&#10;</xsl:text>
   <xsl:text>\usepackage[utf8x]{inputenc}&#10;</xsl:text>
   <xsl:text>\def\hyperparamadd{unicode=true}&#10;</xsl:text>
