@@ -25,8 +25,6 @@
 #include "libgwy/fitter.h"
 #include "libgwy/math.h"
 #include "libgwy/libgwy-aliases.h"
-/* This is in fact in-line implementation, taken from GSL */
-#include "nlfit/nlfit.h"
 
 #define GWY_FITTER_GET_PRIVATE(o)  \
    (G_TYPE_INSTANCE_GET_PRIVATE((o), GWY_TYPE_FITTER, GwyFitterPrivate))

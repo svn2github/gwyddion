@@ -4,7 +4,3 @@ Gwyddion 3 was written from scratch by Yeti <yeti@gwyddion.net>.
 The GNU C library (GLIBC)
     gwy_math_sort() is a direct specialization of glibc's quicksort(), written
     by Douglas C. Schmidt, for doubles, see libgwy/gwymath.c for more.
-
-The GNU Scientific Library (GSL)
-    Non-linear least-squares fitting in libgwy/nlfit was extracted from code
-    written by Gerard Jungman and Brian Gough, see libgwy/nlfit for more.
