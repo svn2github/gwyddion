@@ -25,14 +25,14 @@ cat >user_guide_pdf.ignore <<':'
 ^XSLT stylesheets DocBook -  LaTeX 2e (0\.2\.9)
 ^=\+$
 ^Build user-guide\.pdf
-^processing index [-a-zA-Z/]\+/pdf_../user-guide_tmp\.idx\.\.\.
+^processing index /[-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.
 ^This is makeindex, version .*
 ^Scanning style file /usr/share/dblatex/latex/scripts/doc\.ist\.\.\.\.done ([0-9]\+ attributes redefined, 0 ignored)\.
-^Scanning input file [-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.\.done ([0-9]\+ entries accepted, 0 rejected)\.
+^Scanning input file /[-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.\.done ([0-9]\+ entries accepted, 0 rejected)\.
 ^Sorting entries\.\.\.\.done ([0-9]\+ comparisons)\.
-^Generating output file [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ind\.\.\.\.done ([0-9]\+ lines written, 0 warnings)\.
-^Output written in [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ind\.
-^Transcript written in [-a-zA-Z/]\+/pdf_../user-guide_tmp\.ilg\.
+^Generating output file /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ind\.\.\.\.done ([0-9]\+ lines written, 0 warnings)\.
+^Output written in /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ind\.
+^Transcript written in /[-a-zA-Z/]\+/pdf/user-guide_tmp\.ilg\.
 ':'
 :
 
