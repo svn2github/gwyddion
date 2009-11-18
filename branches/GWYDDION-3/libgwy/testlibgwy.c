@@ -239,7 +239,7 @@ test_sort_is_ordered_with_index(const gdouble *array, const guint *index_array,
 }
 
 static void
-test_sort(void)
+test_math_sort(void)
 {
     gsize n, i, nmin = 0, nmax = 65536;
     gdouble *array, *orig_array;
@@ -270,6 +270,106 @@ test_sort(void)
     g_free(index_array);
     g_free(orig_array);
     g_free(array);
+}
+
+/***************************************************************************
+ *
+ * Choleski
+ *
+ ***************************************************************************/
+
+#define CHOLESKI_MATRIX_LEN(n) (((n) + 1)*(n)/2)
+#define SLi gwy_lower_triangular_matrix_index
+
+static void
+test_choleski_matmul(gdouble *a, const gdouble *d, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j <= i; j++) {
+            SLi(a, i, j) = SLi(d, i, 0) * SLi(d, j, 0);
+            for (guint k = 1; k <= MIN(i, j); k++)
+                SLi(a, i, j) += SLi(d, i, k) * SLi(d, j, k);
+        }
+    }
+}
+
+/* Generate the decomposition.  As long as it has positive numbers on the
+ * diagonal, the matrix is positive-definite.   Though maybe not numerically.
+ */
+static void
+test_choleski_make_matrix(gdouble *d,
+                          guint n,
+                          GRand *rng)
+{
+    for (guint j = 0; j < n; j++) {
+        SLi(d, j, j) = exp(g_rand_double_range(rng, -5.0, 5.0));
+        for (guint k = 0; k < j; k++) {
+            SLi(d, j, k) = (g_rand_double_range(rng, -1.0, 1.0)
+                            + g_rand_double_range(rng, -1.0, 1.0)
+                            + g_rand_double_range(rng, -1.0, 1.0));
+        }
+    }
+}
+
+static void
+dump_matrix(guint dim,
+            const gdouble *m)
+{
+    for (guint i = 0; i < dim; i++) {
+        for (guint j = 0; j < i; j++)
+            g_print("%-12g ", SLi(m, i, j));
+        g_print("%-12g\n", SLi(m, i, i));
+    }
+}
+
+/* Note the precision checks are very tolerant as the matrices we generate
+ * are not always well-conditioned. */
+static void
+test_math_choleski(void)
+{
+    guint nmax = 8, niter = 50;
+    GRand *rng = g_rand_new();
+
+    /* Make it realy reproducible. */
+    g_rand_set_seed(rng, 42);
+
+    for (guint n = 1; n < nmax; n++) {
+        guint matlen = CHOLESKI_MATRIX_LEN(n);
+        gdouble *a = g_new(gdouble, matlen);
+        gdouble *d = g_new(gdouble, matlen);
+        gdouble *p = g_new(gdouble, matlen);
+
+        for (guint iter = 0; iter < niter; iter++) {
+            test_choleski_make_matrix(d, n, rng);
+
+            /* Decomposition */
+            test_choleski_matmul(a, d, n);
+            g_assert(gwy_choleski_decompose(a, n));
+            for (guint j = 0; j < matlen; j++) {
+                g_assert(fabs(a[j] - d[j])
+                         <= exp10(j - 13.0) * (fabs(a[j]) + fabs(d[j])));
+            }
+
+            /* Inversion */
+            test_choleski_matmul(a, d, n);
+            memcpy(p, a, matlen*sizeof(gdouble));
+            g_printerr("[%u:%u] 1\n", n, iter);
+            dump_matrix(n, a);
+            g_assert(gwy_choleski_invert(a, n));
+            g_printerr("[%u:%u] 2\n", n, iter);
+            dump_matrix(n, a);
+            g_assert(gwy_choleski_invert(a, n));
+            dump_matrix(n, a);
+            for (guint j = 0; j < matlen; j++) {
+                g_assert(fabs(a[j] - p[j])
+                         <= exp10(n - 13.0) * (fabs(a[j]) + fabs(p[j])));
+            }
+        }
+
+        g_free(a);
+        g_free(d);
+        g_free(p);
+    }
 }
 
 /***************************************************************************
@@ -1781,7 +1881,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/memmem", test_memmem);
     g_test_add_func("/testlibgwy/next_line", test_next_line);
     g_test_add_func("/testlibgwy/pack", test_pack);
-    g_test_add_func("/testlibgwy/sort", test_sort);
+    g_test_add_func("/testlibgwy/math/sort", test_math_sort);
+    g_test_add_func("/testlibgwy/math/choleski", test_math_choleski);
     g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
     g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
