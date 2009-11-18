@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: eq-minkowski-functionals.xml 10419 2009-11-13 15:01:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-minkowski-functionals'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-minkowski-functionals.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+V = {N_{\rm white}\over N}\;,\quad
+S = {N_{\rm bound}\over N}\;,\quad
+\chi = {C_{\rm white} - C_{\rm black}\over N}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->
