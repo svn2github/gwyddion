@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: install.xml 10392 2009-11-10 10:48:30Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="installation">
+  <title>Установка</title>
+  <para>Исходные коды и двоичные файлы <application>Gwyddion</application> можно загрузить со страницы <ulink url="http://gwyddion.net/download.php">download</ulink> сайта проекта или напрямую со <ulink url="http://sourceforge.net/project/showfiles.php?group_id=121723">страницы загрузки SourceForge.net</ulink>. Порядок установки слегка меняется в зависимости от используемой операционной системы. Тем не менее, в основном он состоит из двух шагов: <itemizedlist><listitem><para> Установки библиотеки <ulink url="http://www.gtk.org/">Gtk+</ulink> (если она ещё не установлена). </para></listitem><listitem><para>Установки собственно Gwyddion</para></listitem></itemizedlist> Первый шаг нужен при первой установке <application>Gwyddion</application> на операционных системах, где Gtk+ не ставится по умолчанию. Версия Gtk+ требующаяся для вашей системы (и где её найти) описана в следующих разделах.</para>
+  <para>В общем, для работы <application>Gwyddion</application> нужны библиотеки времени исполнения Gtk+, а для сборки из исходного кода и разработки также нужны версии библиотек для разработчика (devel-версии).</para>
+  <para>Помимо Gtk+, Gwyddion опционально может использовать другие библиотеки компоненты, которые описаны в разделе <link linkend="installation-dependencies">зависимости при сборке</link>. Это в основном важно если Gwyddion собирается из исходных кодов и, следовательно, можно контролировать какие из опций будут в него включены.</para>
+  <para>Мы рекомендуем также скачать <ulink url="http://gwyddion.net/download.php#sample-files">образцы файлов <application>Gwyddion</application> </ulink>. Они сохранены в родном формате <application>Gwyddion</application> и представляют собой типичные данные АСМ.</para>
+
+  <sect1 id="installation-unix">
+    <title>Пакеты Linux/Unix</title>
+    <para>Некоторые из GNU/Linux- и Unix-систем могут предоставлять уже собранные двоичные сборки Gwyddion. Страница проекта <ulink url="http://gwyddion.net/download.php">download</ulink> отслеживает известные пакеты и попытки сборки. Например, Debian, Ubuntu, Gentoo, openSuSE или FreeBSD предлагают пакеты Gwyddion. Если ваша операционная система предоставляет подобные пакеты и они достаточно свежие, устанавливайте их стандартными средствами операционной системы. Если нет - тогда смотрите раздел о компиляции из исходного кода.</para>
+    <para>На дистрибутивах Linux, использующих <ulink url="http://www.rpm.org/">систему управления пакетами RPM</ulink>, таких, как Fedora, openSuSE или Mandriva, вы также можете собрать пакет сами из исходных кодов, как <link linkend="installation-unix-source-rpm">описано ниже</link>.</para>
+  </sect1>
+
+  <sect1 id="installation-ms-windows">
+    <title>Сборки для MS Windows</title>
+    <para>Если у вас никогда не было установлено основанных на Gtk+ программ (таких, как графический редактор <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>), вам понадобится установить Gtk+ run-time environment перед тем, как устанавливать <application>Gwyddion</application>. Gtk+ - это библиотека для создания переносимых графических интерфейсов пользователя (содержит описание таких элементов, как окна, кнопки и т.п.), которая доступна для многих операционных систем. Следовательно, приложения, написанные с помощью этой библиотеки, можно переносить на различные операционные системы, включая Microsoft Windows.</para>
+    <para>Следует отметить, что для операционных систем семейства MS Windows в сети Интернет доступно несколько вариантов пакетов Gtk+. Некоторые из них включают все необходимые компоненты (такие как GtkGLExt и LibXML2), некоторые нет. Мы рекомендуем пакеты <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">GladeWin32</ulink>, которые содержат все необходимые компоненты.Мы собираем исполняемые файлы Gwyddion для MS Windows с их использованием.</para>
+    <para>Для установки <application>Gwyddion</application> выполните следующие шаги:</para>
+    <itemizedlist>
+      <listitem>Загрузите пакет установки Gtk+ run-time environment с сайта <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">Gladewin32</ulink>, версии 2.8 или выше и установите его.</listitem>
+      <listitem>Загрузите <ulink url="http://gwyddion.net/download.php#stable-windows">Пакет установки <application>Gwyddion</application></ulink> и установите <application>Gwyddion</application>.</listitem>
+    </itemizedlist>
+    <para>Пакет установки предлагает выбор языка. который будет использован для интерфейса пользователя. После установки можно сменить язык путём редактирования ключей реестра в <command>regedit</command>. Для пользовательских настроек редактируйте <informalexample><literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> в то время, как <informalexample><literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> может быть установлено для общесистемной настройки. Список доступных языков включает в себя:</para>
+    <informaltable frame="none" id="table-locales">
+      <tgroup cols="2">
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry><envar>gwy_locale</envar></entry>
+            <entry>Язык</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>cs_CZ.UTF-8</literal></entry>
+            <entry>Чешский (Чехия)</entry>
+          </row>
+          <row>
+            <entry><literal>de_DE.UTF-8</literal></entry>
+            <entry>Немецкий (Германия)</entry>
+          </row>
+          <row>
+            <entry><literal>en_US.UTF-8</literal></entry>
+            <entry>Английский (США)</entry>
+          </row>
+          <row>
+            <entry><literal>fr_FR.UTF-8</literal></entry>
+            <entry>Французский (Франция)</entry>
+          </row>
+          <row>
+            <entry><literal>it_IT.UTF-8</literal></entry>
+            <entry>Итальянский (Италия)</entry>
+          </row>
+          <row>
+            <entry><literal>ru_RU.UTF-8</literal></entry>
+            <entry>Русский (Россия)</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+
+  <sect1 id="installation-dependencies">
+    <title>Зависимости при сборке</title>
+    <para>В следующей таблице перечислены пакеты, которые нужны для сборки <application>Gwyddion</application> из исходных кодов. Таблица не включает в себя обязательные вещи, необходимые для сборки, такие как компилятор C или <command>make</command>. Необходимое для сборки на определённой операционной системе описано в нижеследующих разделах, посвящённых сборке на определённой операционной системе.</para>
+    <variablelist>
+      <title>Зависимости при сборке</title>
+      <varlistentry id="dependency-gtk">
+        <term><ulink url="http://www.gtk.org/">Gtk+</ulink> ≥ 2.8.0</term>
+        <listitem>
+          <para>
+            <emphasis>Необходимо.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-pkg-config">
+        <term><ulink url="http://pkgconfig.freedesktop.org/">pkg-config</ulink> ≥ 0.16</term>
+        <listitem>
+          <para>
+            <emphasis>Необходимо.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-gtkglext">
+        <term><ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink> ≥ 1.0</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Разрешает трёхмерные виды данных OpenGL.</para>
+          <para>Система сборки под MS Windows настроена чтобы требовать GtkGLExt и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-libxml2">
+        <term><ulink url="http://xmlsoft.org/">LibXML2</ulink> ≥ 2.<varname>x</varname></term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Разрешает импорт файлов SPML.</para>
+          <para>Система сборки под MS Windows настроена чтобы требовать LibXML2 и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-fftw">
+        <term><ulink url="http://www.fftw.org/">FFTW3</ulink> ≥ 3.0 (32bit), ≥ 3.1 (64bit), только для Unix</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Ускоряет различные интегральные преобразования, операции расчёта спектра мощности и корреляции.</para>
+          <para>Сборка с FFTW3 в настоящее время не поддерживается на MS Windows, хотя вероятно это возможно с некоторыми усилиями и настройкой вручную.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-unique">
+        <term><ulink url="http://www.gnome.org/~ebassi/source/">LibUnique</ulink> ≥ 1.0</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Позволяет <link linkend="remote-control">удалённое управление</link>, основанное на D-BUS или то технологии, которая включена в настоящее время.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-libxmu">
+        <term><ulink url="http://www.x.org/">LibXmu</ulink>, только для X11</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Позволяет <link linkend="remote-control">удалённое управление</link> на системах X11. Это стандартная библиотека X Window System и при наличии в системе X, эта библиотека скорее всего также имеется. Тем не менее, после разделения X на модули начиная с Xorg 7.0 она распространяется отдельно и файлы для разработки с её помощью могут быть не установлены.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-pygtk2">
+        <term><ulink url="http://www.pygtk.org/">PyGTK2</ulink>, включая codegen</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Включает pygwy, скриптовый интерфейс на Python для Gwyddion</para>
+          <para>Следует отметить, что pygwy не работает в полную силу на MS Windows в настоящий момент.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-gtksourceview">
+        <term>
+          <ulink url="http://gtksourceview.sourceforge.net/">GtkSourceView</ulink>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Включает подсветку синтаксиса в командной строке оболочки Python.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-desktop-file-utils">
+        <term><ulink url="http://www.freedesktop.org/software/desktop-file-utils">desktop-file-utils</ulink>, только для Unix</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Включает основную интеграцию в окружение рабочего стола на соответствующих стандартам Freedesktop окружениях, такие как установка Gwyddion в меню и ассоциации типов файлов.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="dependency-gconf2">
+        <term><ulink url="http://projects.gnome.org/gconf/">GConf2</ulink>, только для Unix</term>
+        <listitem>
+          <para>
+            <emphasis>Опционально.</emphasis>
+          </para>
+          <para>Включает лучшую интеграцию с GNOME и XFce. например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect1>
+
+  <sect1 id="installation-unix-source">
+    <title>Linux/Unix из архива с исходным кодом</title>
+    <para>Система сборки <application>Gwyddion</application> на Unix основана на GNU autotools (<ulink url="http://www.gnu.org/software/autoconf/">autoconf</ulink>, <ulink url="http://www.gnu.org/software/automake/">automake</ulink>, <ulink url="http://www.gnu.org/software/libtool/">libtool</ulink>), так же, как и большинство современного свободного програмного обеспечения и программ с открытым исходным кодом под Unix. Если вы когда-либо собирали программы из исходников, вы, вероятно. уже встречались с autotools и знаете, что делать дальше. Этот раздел. тем не менее, будет описывать процесс сборки достаточно детально, чтобы быть понятным и тем. кто ещё этого не делал. Файл ulink url="http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL"&gt;<filename>INSTALL</filename></para>
+    <sect2 id="installation-unix-source-quick">
+      <title>Быстрые инструкции</title>
+      <para>Если вам знакома последовательность действий:</para>
+      <informalexample>
+        <literallayout><userinput>tar -jxvf gwyddion-2.19.tar.bz2
+cd gwyddion-2.19
+./configure
+make install</userinput></literallayout>
+      </informalexample>
+    </sect2>
+    <sect2 id="installation-unix-source-unpacking">
+      <title>Распаковка исходного кода</title>
+      <para>Распакуйте архив с исходным кодом командой <informalexample><literallayout><userinput>tar -jxvf gwyddion-2.19.tar.bz2</userinput></literallayout></informalexample>, заменяя 2.19 реальным номером версии. При этом будет создан каталог  <filename>gwyddion-2.19</filename> (снова замените 2.19 реальным номером версии 2.19), перейдите с помощью <command>cd</command> в этот каталог. Все остальные действия по сборке будут проходить там.</para>
+      <para>Если в операционной системе отсутствует bzip2, можно скачать <filename>gwyddion-2.19.tar.gz</filename> (сжатый с помощью gzip) вместо предыдущего архива и распаковать его с помощью <informalexample><literallayout><userinput>tar -zxvf gwyddion-2.19.tar.gz</userinput></literallayout></informalexample>. Однако, современные Unix- и подобные им системы поддерживают и gzip, и bzip2, и заметно меньший <filename>gwyddion-2.19.tar.bz2</filename> обычно будет лучшим вариантом.</para>
+    </sect2>
+    <sect2 id="installation-unix-source-configuration">
+      <title>Настройка</title>
+      <para>Запустите <informalexample><literallayout><userinput>./configure</userinput></literallayout></informalexample> чтобы сконфигурировать сборку <application>Gwyddion</application>.</para>
+      <para>Скрипт оболочки <command>configure</command> пытается угадать правильные значения для различных переменных. меняющихся от системы к системе и используемых в процессе компиляции. Он использует эти переменные чтобы создать <filename>Makefile</filename> в каждом каталоге пакета, набор заголовочных <filename>.h</filename>-файлов, содержащих зависящие от системы определения и некоторые другие зависящие от системы вспомогательные файлы. В конце своей работы он создаёт другой скрипт оболочки <command>config.status</command>, который можно затем использовать для повторения текущей конфигурации, и файл <filename>config.log</filename>, который содержит подробности процесса детектирования и который полезно включать в сообщения об ошибках компиляции.</para>
+      <para>Если <command>configure</command> сообщает об отсутствии необходимых пакетов, установите их и запустите <command>configure</command> снова. То же самое справедливо если <command>configure</command> завершается удачно, но вы внезапно обнаружили, что забыли установить один из необязательных пакетов, с которым хотели собрать <application>Gwyddion</application>. Возможно, что пакет не был найден или был найден неправильно если даже вы его установили, например, если вы установили его в нестандартный каталог. В этом случае необходимо установить некоторые переменные окружения, чтобы дать возможность <application>Gwyddion</application> найти эти пакеты: <variablelist><varlistentry><term><envar>PKG_CONFIG_PATH</envar></term><listitem><para> Большая часть пакетов идёт с так называемыми файлами <ulink url="http://pkgconfig.freedesktop.org/wiki/">pkg-config</ulink> (<filename>.pc</filename>), которые описывают, каким образом программы должны компилироваться и связываться с ними. <command>configure</command> использует информацию из этих фалов, следовательно переменная <envar>PKG_CONFIG_PATH</envar> должна быть установлена таким образом, чтобы указывать все нестандартные каталоги с соответствующими файлами pkg-config. Чтобы добавить, например, библиотеку Gtk+, установленную в <filename>/opt/gnome</filename> и FFTW3, установленную в <filename>$HOME/opt/fftw3</filename>, необходимо выполнить <userinput>PKG_CONFIG_PATH=/opt/gnome/lib/pkgconfig:$HOME/opt/fftw3/lib/pkgconfig; export PKG_CONFIG_PATH</userinput></para></listitem></varlistentry><varlistentry><term><envar>PATH</envar>, <envar>LD_LIBRARY_PATH</envar></term><listitem><para> Может быть необходимо изменить эти переменные, чтобы включить нестандартные каталоги с заголовочными файлами и библиотеками для пакетов, которые не используют pkg-config, например для libTIFF (уже не используемой, прим. переводчика), установленной в <filename>/usr/local</filename> можно выполнить <userinput>CPPFLAGS=-I/usr/local/include; export CPPFLAGS</userinput> и <userinput>LDFLAGS=-L/usr/local/lib; export LDFLAGS</userinput>. </para></listitem></varlistentry></variablelist></para>
+      <para>Каталог, куда <application>Gwyddion</application> будет установлен, а также отдельные опциональные варианты установки могут быть включены/выключены с помощью опций командной строки <command>configure</command>. Чтобы получить полный список возможных вариантов, выполните <informalexample><literallayout><userinput>./configure --help</userinput></literallayout></informalexample> Опция <option>--prefix</option> задаёт базавый каталог установки. Компоненты программы будут установлены в его подкаталоги <filename>bin</filename>, <filename>lib</filename>, <filename>share</filename>, и т.д. (они будут созданы, если их ещё не было). Более детальный контроль возможен с помощью опций, задающих отдельные подкаталоги <option>--bindir</option>, <option>--libdir</option>. По умолчанию используется префикс <filename>/usr/local/bin</filename>, чтобы установить <application>Gwyddion</application> в ваш домашний каталог, можно, например, использовать <informalexample><literallayout><userinput>./configure --prefix=$HOME/opt/gwyddion</userinput></literallayout></informalexample></para>
+    </sect2>
+    <sect2 id="installation-unix-source-configuration2">
+      <title>Настройки процесса конфигурирования</title>
+      <para>Необязательные возможности можно включить/выключить с помощью опций вроде <option>--with-fftw3</option>/<option>--without-fftw3</option> (для FFTW3): <informalexample><literallayout><userinput>./configure --with-fftw3</userinput></literallayout></informalexample> По умолчанию все опциональные возможности включены, если найдены все требуемые библиотеки. Краткая сводка включенных и отключенных опциональных возможностей печатается рядом с концом вывода команды <command>configure</command>.</para>
+      <para>Некоторые вспомогательные действия при установке могут быть отключены при запуске <command>configure</command>: Обновление файлов FreeDesktop может быть отключено с помощью <userinput>--disable-desktop-file-update</userinput>. Установка схем GConf2 может быть отключена с помощью <userinput>--disable-schemas-install</userinput>. Тем не менее, обычной причиной отключения этих действий является то. что Gwyddion устанавливается на временное место вместо финального каталога (что обычно происходит при сборке пакетов в Linux). В этом случае вспомогательные действия отключаются автоматически при непустой переменной <varname>DESTDIR</varname> (см. раздел <link linkend="installation-unix-source-installation">установка</link>) и, следовательно, нет нужды отключать их в <command>configure</command>.</para>
+    </sect2>
+    <sect2 id="installation-unix-source-compilation">
+      <title>Компиляция</title>
+      <para>Запустите <informalexample><literallayout><userinput>make</userinput></literallayout></informalexample> и подождите, пока  <application>Gwyddion</application> соберётся. Если команда <command>configure</command> завершилась без ошибок, компиляция тоже должна пройти успешно.</para>
+      <para>Если вам понадобилось сделать нечто необычное, чтобы собрать пакет, постарайтесь выяснить, как <command>configure</command> может обнаружить, когда и что делать, и пришлите патчи или инструкции на адрес электронной почты для сообщений об ошибках, чтобы можно было включить их в следующий релиз.</para>
+    </sect2>
+    <sect2 id="installation-unix-source-installation">
+      <title>Установка</title>
+      <para>Выполните <informalexample><literallayout><userinput>make install</userinput></literallayout></informalexample> для установки <application>Gwyddion</application> в целевой каталог . Если вы устанавливаете <application>Gwyddion</application> в системный каталог, вам необходимо стать суперпользователем чтобы выполнить эту команду , например, используя sudo <informalexample><literallayout><userinput>sudo make install</userinput></literallayout></informalexample> Следует заметить, что <application>Gwyddion</application> необходимо установить перед запуском, нельзя запустить его до установки.</para>
+      <para>Чтобы установить <application>Gwyddion</application> во временное место, например, для сборки пакета, установите переменную <command>make</command><varname>DESTDIR</varname> на префикс, который будет добавлен ко всем целевым каталогам: <informalexample><literallayout><userinput>make install DESTDIR=/var/tmp/gwyddion-buildroot</userinput></literallayout></informalexample> <emphasis>Не</emphasis> переопределяйте переменные отдельных каталогов такие, как <varname>bindir</varname>, <varname>libdir</varname>.</para>
+      <para>Если вы не устанавливаете в системный каталог, т.е. устанавливаете в подкаталог домашнего каталога, может потребоваться настройка следующих переменных окружения в процессе установки: <itemizedlist><listitem><varname>GCONF_SCHEMA_CONFIG_SOURCE</varname> – место схем GConf2 </listitem><listitem><varname>KDE4_MODULE_DIR</varname> – местоположение модулей KDE4 </listitem></itemizedlist> Также может потребоваться настройка переменной <varname>XDG_DATA_DIRS</varname> для полной интеграции с окружением рабочего стола.</para>
+    </sect2>
+    <sect2 id="installation-unix-source-deinstallation">
+      <title>Отмена установки</title>
+      <para>Запустите <informalexample><literallayout><userinput>make uninstall</userinput></literallayout></informalexample> в каталоге, где ранее собирался <application>Gwyddion</application> для его удаления. Если вы уже утратили содержимое этого каталога, можно попробовать распаковать, настроить и собрать его точно так же, как ранее и после этого выполнить <userinput>make uninstall</userinput>, хотя результат зависит от вашей способности точно повторить процесс сборки.</para>
+    </sect2>
+    <sect2 id="installation-unix-source-rpm">
+      <title>Пакеты RPM</title>
+      <para>В основанных на RPM дистрибутивах GNU/Linux можно собрать RPM-пакеты напрямую из архивов с исходным кодом выполнив команду <informalexample><literallayout><userinput>rpmbuild -tb gwyddion-2.19.tar.bz2</userinput></literallayout></informalexample>, где 2.19 - текущая версия, как упоминалось ранее. Этот метод тестировался в основном на Fedora, openSuSE и Mandriva и spec-файл RPM содержит некоторые специальные положения для этих систем. Специальная поддержка других основанных на RPM систем может быть добавлена по запросу.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="installation-osx">
+    <title>Mac OS X</title>
+    <para>Большая часть вышеупомянутых общих  <link linkend="installation-unix-source">инструкций по установке на  Unix/Linux</link> также применима для OS X. Следовательно, этот раздел посвящён в основном особенностям установки на OS X, часть шагов, приведённых здесь подробнее описана в разделе про Unix.</para>
+    <para>Помимо того, чтобы собирать всё самому (удачи :), в настоящее время есть два пути установить <application>Gwyddion</application>: <itemizedlist><listitem> используя <ulink url="http://www.macports.org/">MacPorts</ulink> (ранее Darwinports)</listitem><listitem> и собирая из файла порта. </listitem><listitem> используя <ulink url="http://fink.sourceforge.net/">Fink</ulink> и собирая <application>Gwyddion</application> обычным для Unix путём, </listitem></itemizedlist></para>
+    <sect2 id="installation-osx-preparation">
+      <title>Подготовка</title>
+      <para>Чтобы установить и запустить <application>Gwyddion</application> вам нужны установленные Xcode Tools и X (SDK и App). Они находятся на системных CD/DVD-дисках. Xcode Tools находились на первом DVD как XcodeTools.mpkg в подкаталоге Xcode Tools, X11SDK находится под именем  X11SDK.pkg в подкаталоге Packages внутри Xcode Tools. X11 находится под именем X11User.pkg внутри <filename>System/Installation/Packages</filename> также на первом диске. Если у вас был набор на CD, диски могут различаться. Участники проекта MacPorts рекомендуют использовать наиболее новую версию XCode. Дополнительная информация доступна на <ulink url="http://www.macports.org/install.php">странице установки MacPorts</ulink>. Также у вас должен быть некоторый опыт работы с <application>Terminal.app</application>. Все команды в продолжении этого раздела надо вводить и запускать в <application>Terminal.app</application>.</para>
+      <para>Требуемые и опциональные пакеты для установки перед установкой <application>Gwyddion</application> описаны в разделе <link linkend="installation-dependencies">зависимости при установке</link>. Следующая таблица содержит их названия в двух разных коллекциях программного обеспечения.</para>
+      <informaltable frame="none" id="table-osx-package-names">
+        <tgroup cols="3">
+          <?dblatex lll?>
+          <thead>
+            <row>
+              <entry>Пакет</entry>
+              <entry>Fink</entry>
+              <entry>MacPorts</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Gtk+</entry>
+              <entry>gtk+2</entry>
+              <entry>gtk2</entry>
+            </row>
+            <row>
+              <entry>GtkGLExt</entry>
+              <entry>gtkglext1</entry>
+              <entry>gtkglext</entry>
+            </row>
+            <row>
+              <entry>FFTW3</entry>
+              <entry>fftw3</entry>
+              <entry>fftw-3</entry>
+            </row>
+            <row>
+              <entry>LibXML2</entry>
+              <entry>libxml2</entry>
+              <entry>libxml2</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </sect2>
+    <sect2 id="installation-osx-macports">
+      <title>MacPorts</title>
+      <para>MacPorts - основанная на  <application>портах</application> система переноса и установки программного обеспечения с открытым исходным кодом/программного обеспечения проекта GNU на OS X. Она основана на использовании установочных файлов, т.н. <quote>Portfiles</quote> в которых описаны необходимые шаги по сборке и установке приложений. Таким образом, программное обеспечение легко переносится на OS X с использованием MacPorts но на каждом компьютере приложения приходится собирать заново. Получите и установите <ulink url="http://www.macports.org/">MacPorts</ulink>.  После установки запустите <informalexample><literallayout><userinput>sudo port selfupdate</userinput></literallayout></informalexample> чтобы обновить MacPorts до последней версии.</para>
+
+	  <para>Обычно установка портов с помощью MacPorts несложна. НО поскольку X11 не является родным окружением рабочего стола для OS X, дела становятся несколько хуже. Следовательно, рекомендуется поставить альтернативные X11 перед установкой <application>Gwyddion</application>. Рекомендуемые альтернативы - <ulink url="http://http://xquartz.macosforge.org/">XQuartz</ulink> на Leopard и <application>xorg-server</application> из системы портов на Tiger. После установки рекомендованной системы X11, <application>Gwyddion</application> может быть собран и установлен просто командой <informalexample><literallayout><userinput>sudo port install gwyddion</userinput></literallayout></informalexample> Чтобы установить <application>xorg-server</application> (на Tiger) просто наберите <informalexample><literallayout><userinput>sudo port install xorg-server</userinput></literallayout></informalexample>, это <emphasis>необходимо</emphasis> для работы трёхмерных видов на Tiger. После того, как все операции завершатся, иконку запуска можно найти в меню <filename>/Applications/MacPorts</filename>.</para>
+    </sect2>
+    <sect2 id="installation-osx-fink">
+      <title>Fink</title>
+      <para>Загрузите и установите <ulink url="http://fink.sourceforge.net/">Fink</ulink>. После установки запустите <informalexample><literallayout><userinput>apt-get update</userinput></literallayout></informalexample> чтобы обновить список доступных пакетов и установите Gwyddion командой <informalexample><literallayout><userinput>apt-get install gwyddion</userinput></literallayout></informalexample> Чтобы установить Gwyddion из исходных кодов, например, если вы хотите установить версию для разработчиков, вам необходимо установить требуемые пакеты, перечисленные в <link linkend="table-osx-package-names">вышеприведённой таблице</link> и затем следовать общим инструкциям из раздела об<link linkend="installation-unix-source">установке под Unix</link>.</para>
+    </sect2>
+    <sect2 id="installation-osx-running">
+      <title>Запуск</title>
+      <para>В системе с MacPorts вы просто нажимаете на иконку запуска и ждёте, пока <application>Gwyddion</application> запустится. Используя Fink или самосборную версию, необходимо следовать нижеприведённым инструкциям: запустите  <application>X11.app</application> и наберите в  <application>Terminal.app</application><informalexample><literallayout><userinput>export DISPLAY=":0"</userinput></literallayout></informalexample> После этого запустите <application>Gwyddion</application> из того каталога, куда он был установлен. Для Fink это обычно <filename>/usr/local/bin</filename> таким образом для Fink, например. запустите <informalexample><literallayout><userinput>/usr/local/bin/gwyddion</userinput></literallayout></informalexample> Также можно настроить <application>X11.app</application> чтобы запускать <application>Gwyddion</application>: найдите X11.app в доке, запустите меню, выберите  Applications, выберите Customize в следующем меню. Здесь можно выбрать Add и ввести имя (например, gwyddion) как <guilabel>Command</guilabel>. После этого можно будет выбрать gwyddion из меню X11.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="installation-ms-windows-source">
+    <title>MS Windows из архива с исходным кодом</title>
+    <para>Система сборки <application>Gwyddion</application> под MS Windows использует компилятор <application>Microsoft Visual C++</application> (MSVC)  (рекомендованная версия 6, хотя она уже несколько устарела). Она в основном состоит из набора файлов сборки <command>nmake</command>, следовательно, компиляция осуществляется из командной строки. Это подход имеет ряд преимуществ в плане воспроизводимости и автоматизации процесса. Более того, он позволяет легко синхронизировать сборочные системы под Unix и MS Windows. Необходимость использования командной строки может считаться недостатком, хотя вам процесс сборки должен показаться достаточно простым даже если вы не работали много с командной строкой.</para>
+    <para>В дополнение к MSVC вам потребуется установить среду разработки Gtk+. Снова мы рекомендуем использовать пакет <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-dev-2.12.9-win32-2.exe">GladeWin32</ulink>. Следует отметить, что он содержит полную среду времени исполнения, следовательно, вам не нужно устанавливать её, если вы установили версию для разработчика.</para>
+    <sect2 id="installation-ms-windows-source-unpacking">
+      <title>Распаковка</title>
+      <para>Распакуйте архив с исходным кодом своим любимым (раз)архиватором или файловым менеджером. Архивы, сжатые <ulink url="http://www.bzip.org/">bzip2</ulink> (<filename>.bz2</filename>) значительно меньше, чем архивы <ulink url="http://www.gzip.org/">gzip</ulink> (<filename>.gz</filename>),</para>
+      <para>При распаковке будет создан каталог <filename>gwyddion-2.19</filename> (2.19 заменяется номером текущей версии), где и будут происходить все остальные действия по компиляции.</para>
+    </sect2>
+    <sect2 id="installation-ms-windows-source-configuration">
+      <title>Настройка</title>
+      <para>Откройте файл <filename>make.msc</filename> в текстовом редакторе. Он начинается примерно так:</para>
+      <informalexample>
+        <programlisting><![CDATA[
+# @(#) $Id: make.msc 8812 2008-12-02 08:49:22Z xhorak $
+#
+# XXX: Set following to your Gtk+-Development and MSVC paths
+#
+# The uncommented paths should work for default MSVC 6 installation and for
+# default GladeWin32 installation.
+# If you have GtkGLext separate from Gtk+, define GTKGLEXT_TOP accordingly.
+# If you have LibXML2 separate from Gtk+, define LIBXML2_TOP accordingly.
+GTK_TOP = C:\Gtk
+GTKGLEXT_TOP = $(GTK_TOP)
+LIBXML2_TOP = $(GTK_TOP)
+#GTKGLEXT_TOP = C:\GtkGLExt\1.0
+#LIBXML2_TOP = C:\libxml2
+MSC_TOP = C:\Program Files\Microsoft Visual Studio\VC98
+]]></programlisting>
+      </informalexample>
+      <para>Проверьте и исправьте пути в соответствии с инструкциями. Часто изменения не требуются, поскольку пути в файле представляют собой пути установки по умолчанию для каждой из программ.</para>
+      <variablelist>
+        <varlistentry>
+          <term><envar>GTK_TOP</envar></term>
+          <listitem>Должен указывать на каталог верхнего уровня установки Gtk+, т.е. на каталог, содержащий подкаталоги <filename>bin</filename>, <filename>lib</filename>, <filename>share</filename>, и т.п. Ниже мы будем ссылаться на его значение как <envar>$(GTK_TOP)</envar>.</listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>GTKGLEXT_TOP</envar></term>
+          <listitem>Должен указывать на каталог верхнего уровня установки GtkGLExt. Он будет отличаться от <envar>$(GTK_TOP)</envar> только если вы не используете GladeWin32 и установили GtkGLExt отдельно.</listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>LIBXML2_TOP</envar></term>
+          <listitem>Должен указывать на каталог верхнего уровня установки LibXML2. Он будет отличаться от <envar>$(GTK_TOP)</envar> только если вы не используете GladeWin32 и установили LibXML2 отдельно.</listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><envar>MSC_TOP</envar></term>
+          <listitem>Должен указывать на каталог верхнего уровня установки MSVC.</listitem>
+        </varlistentry>
+      </variablelist>
+      <para>Запустите оболочку (коммандную строку, приглашение MS-DOS), перейдите в каталог с исходным кодом и запустите <command>vcvars32.bat</command> там. Этот пакетный исполняемый файл предоставлен MSVC и устанавливает определённые переменные окружения, которые нужны компилятору командной строки и компоновщику, также делает их исполняемыми напрямую устанавливая переменную <envar>PATH</envar>. Следует заметить, что <command>vcvars32.bat</command> может сама быть не в каталогах, включенных в <envar>PATH</envar>, но её должно быть легко найти. </para>
+    </sect2>
+    <sect2 id="installation-ms-windows-source-compilation">
+      <title>Компиляция</title>
+      <para>Запустите <informalexample><literallayout><userinput>nmake -f makefile.msc</userinput></literallayout></informalexample> чтобы собрать Gwyddion и <informalexample><literallayout><userinput>nmake -f makefile.msc install</userinput></literallayout></informalexample> чтобы установить его во временный каталог, а именно подкаталог <filename>inst</filename> (создаваемый этой командой). Если что-то пошло не так и вы хотите запустить всё заново, сначала удалите каталог <filename>inst</filename> и файл <filename>inst.stamp</filename> для старта с нуля.</para>
+    </sect2>
+    <sect2 id="installation-ms-windows-source-installation">
+      <title>Установка</title>
+      <para>Внутреннее расположение временной области в каталоге <filename>inst</filename> точно такое же, как в конечной установке. Следовательно, можно также запустить <application>Gwyddion</application> прямо из неё (<filename>gwyddion.exe</filename> находится прямо в <filename>inst</filename>). Исключение составляет случай. если вы никогда не запускали <application>Gwyddion</application> ранее, при этом он не найдёт требующиеся библиотеки Gtk+ (DLL). Запустите <command>regedit</command>, создайте в <informalexample><literal>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\Current Version\App Paths\Gwyddion.exe</literal></informalexample> строковый ключ <literal>Path</literal> и поместите туда <literal>$(GTK_TOP)\lib;$(GTK_TOP)\bin</literal> (здесь снова <envar>$(GTK_TOP)</envar> необходимо заменить соответствующим каталогом, установленным в <filename>make.msc</filename>, не надо писать туда <quote><literal>$(GTK_TOP)</literal></quote> буквально). Если вы отдельно устанавливали GtkGLExt и/или LibXML2, добавьте также их каталоги <filename>lib</filename> и <filename>bin</filename>, разделённые точками с запятой. Если вам нельзя редактировать глобальные ключи реестра в <literal>HKEY_LOCAL_MACHINE</literal>, установите пути в <literal>HKEY_CURRENT_USER</literal> только для текущего пользователя.</para>
+      <para>После этого можно как  запустить <application>Gwyddion</application> из <filename>inst</filename>, так и скопировать каталог куда-то ещё, возможно переименовав его.</para>
+    </sect2>
+    <sect2 id="installation-ms-windows-source-installers">
+      <title>Системы установки</title>
+      <para>Чтобы создать программу установки вам нужен <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink>, версии 4 или новее. Откройте <filename>inst/gwyddion.iss</filename> и соберите установщик, он создаст <filename>Gwyddion-2.19.exe</filename> (где 2.19 заменится текущим номером версии) снова в <filename>inst</filename>. Можно повторить процедуру с <filename>inst/gwyddion-devel.iss</filename> чтобы получить <filename>Gwyddion-Development-2.19.exe</filename>, если он вам зачем-то понадобится.</para>
+    </sect2>
+  </sect1>
+
+  <sect1 id="installation-devel">
+    <title>Снимок Subversion, Разработка</title>
+    <para><application>Gwyddion</application> использует систему контроля версий <ulink url="http://subversion.tigris.org/">Subversion</ulink> для управления ревизиями исходного кода. Организация репозитория описана на <ulink url="http://gwyddion.net/resources.php#subversion">страницах проекта</ulink>.  Например, последнюю ревизию самой программы можно получить из системы контроля версий командой <informalexample><literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout></informalexample></para>
+    <para>Репозиторий не содержит никаких генерируемых файлов, независимо от того, насколько экзотичные инструменты могут понадобиться для их генерации. Следовательно, требуется использование дополнительных пакетов, что накладывает определённые ограничения на выбор определённой платформы. Дополнительные инструменты и пакеты которые нужны для разработки те же. что нужны при сборке из снимка <application>Subversion</application>. Точнее, все инструменты нужны для сборки из свежего снимка, в то время, как разработка может требовать только их подмножество или вообще не требовать, в зависимости от типа и масштаба изменений.</para>
+    <itemizedlist>
+      <title>Дополнительные зависимости сборки версии для разработчиков</title>
+      <listitem><ulink url="http://www.gnu.org/software/autoconf/">GNU autoconf</ulink> ≥ 2.60</listitem>
+      <listitem><ulink url="http://www.gnu.org/software/automake/">GNU automake</ulink> ≥ 1.7</listitem>
+      <listitem><ulink url="http://www.gnu.org/software/libtool/">GNU libtool</ulink> ≥ 1.4</listitem>
+      <listitem><ulink url="http://www.python.org/">Python</ulink> ≥ 2.2</listitem>
+      <listitem>
+        <ulink url="http://www.perl.org/">Perl5</ulink>
+      </listitem>
+      <listitem><ulink url="http://www.gtk.org/gtk-doc/">gtk-doc</ulink> ≥ 1.8</listitem>
+      <listitem><ulink url="http://www.gnu.org/software/gettext/">GNU gettext</ulink> ≥ 0.12, включая всё для разработки</listitem>
+      <listitem>скорее всего версии GNU для большинства инструментов: компилятор, binutils, …</listitem>
+    </itemizedlist>
+    <sect2 id="installation-devel-unix">
+      <title>Linux/Unix</title>
+      <para>После загрузки свежего снимка, запустите <userinput>./autogen.sh</userinput> с теми же аргументами, которые вы хотели бы передать <command>configure</command>. Следует отметить. что автоматически добавляется опция <option>--enable-maintainer-mode</option>, которая включает правила <command>make</command> для создания и обновления файлов, которые распространяются внутри архива с исходным кодом (и, следовательно, не генерируются в ходе нормальной компиляции). В общем случае нужно использовать эту опцию <command>configure</command> каждый раз, когда вы собираетесь изменить программу нетривиальным путём.</para>
+      <para><command>autogen.sh</command> может закончиться с ошибкой даже если у вас установлены требуемые версии autotools. Некоторые операционные системы не устанавливают общие команды <command>autoconf</command> или <command>automake</command>, а делят их на версии, вроде <command>autoconf261</command> или <command>automake19</command>. Это делает особенно трудным обнаружить, например <quote><command>automake</command> 1.9 или новее </quote> и, следовательно, <command>autogen.sh</command> даже не пытается этого сделать. Можно или создать не содержащие версий символические ссылки на команды с версиями или запустить <command>autogen.sh</command> следующим образом: <informalexample><userinput>
+            AUTOCONF=autoconf261 AUTOHEADER=autoheader261 ./autogen.sh
+          </userinput></informalexample> Может потребоваться установка следующих переменных: <envar>ACLOCAL</envar>, <envar>AUTOCONF</envar>, <envar>AUTOHEADER</envar>, <envar>AUTOM4TE</envar>, <envar>AUTOMAKE</envar>, <envar>LIBTOOLIZE</envar>. Дополнительно, некоторые операционные системы могут засунуть макрос <command>autoconf</command> в такое место, где <command>aclocal</command> по умолчанию их не найдёт. Это может быть исправлено установкой переменной <envar>ACLOCAL_FLAGS</envar>, где будут указаны дополнительные пути поиска для <command>aclocal</command>: <informalexample><userinput>
+            ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh
+          </userinput></informalexample></para>
+      <para>Нередко требуется комбинировать эти настройки. Например, на FreeBSD, где все инструменты разделены по версиям, обычно требуется выполнить (разбито на строки для простоты чтения):<informalexample><literallayout><userinput>AUTOCONF=autoconf261 \
+AUTOHEADER=autoheader261 \
+AUTOM4TE=autom4te261 \
+AUTOMAKE=automake19 \
+ACLOCAL=aclocal19 \
+ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
+CPPFLAGS=-I/usr/local/include \
+LDFLAGS=-L/usr/local/lib \
+./autogen.sh --prefix=<replaceable>...</replaceable></userinput></literallayout></informalexample></para>
+      <para>Если <command>autogen.sh</command> заканчивается удачно, далее программу можно собирать как обычно. Тем не менее, ещё необходимо создать ряд вещей.</para>
+      <para>Документация разработчика генерируется командой <userinput>make docs</userinput>. Это тоже надо делать явным образом, документация никогда не (пере)создаётся автоматически, опция <option>--enable-gtk-doc</option> команды <command>configure</command> только добавляет цель <literal>docs</literal> (эта опция включена по умолчанию, следовательно цель <literal>docs</literal> становится доступна, если в системе обнаруживается <application>gtk-doc</application>).</para>
+      <para>Файлы MSVC генерируются командой <userinput>./utils/update-msvc.py</userinput>, которую нужно запускать из каталога верхнего уровня с исходным кодом (если интерпретатор Python установлен не в <filename>/usr/bin</filename>, запускайте командой  <userinput>python ./utils/update-msvc.py</userinput>). Этот инструмент занимается синхронизацией файлов сборки MSVC и других с файлами Unix, которые берутся за первичный источник. Точнее, <command>update-msvc.py</command> считывает <itemizedlist><listitem> список файлов с исходным кодом и заголовочных, модулей, библиотек и фалов данных из <filename>Makefile.am</filename></listitem><listitem> собранных библиотек в каталогах <filename>.libs</filename></listitem><listitem>генерируемых <command>gcc</command> зависимостей компиляции в каталогах <filename>.deps</filename></listitem><listitem>  файлов шаблонов, которые необходимо заполнить, они имеют расширение <filename>.gwt</filename>, например, <filename>makefile.msc.gwt</filename>является шаблоном для <filename>makefile.msc</filename></listitem></itemizedlist> и записывает <itemizedlist><listitem> заполненные фалы шаблонов (а именно файлы make) </listitem><listitem>файлы <filename>.def</filename> со списками экспортируемых символов из отдельных библиотек </listitem></itemizedlist> Очевидно, что нужно сначала провести полную сборку проекта (со всеми включенными опциональными возможностями) чтобы правильно сгенерировать эти файлы.</para>
+      <para>Можно считать <command>update-msvc.py</command> простым специализированным automake, поскольку его основной задачей является генерация файлов make из <filename>Makefile.am</filename>.</para>
+    </sect2>
+    <sect2 id="installation-devel-ms-windows">
+      <title>MS Windows</title>
+      <para>Как можно видеть из предыдущего раздела, прямая сборка из снимка <application>Subversion</application> невозможна под MS Windows, поскольку некоторые из фалов нельзя сгенерировать на этой платформе. Разработка в принципе возможна, хотя определённые изменения,а именно добавление новых фалов и переделки потребуют изменения файлов вручную там, где они автоматически генерируются в системах Unix.</para>
+      <para>К счастью, доступно большое число свободных unixоподобных систем, например, различные дистрибутивы GNU/Linux. В наиболее неудачном случае можно использовать такую систему для получения файлов, создать все необходимые файлы, сделать архив и перенести его на MS Windows. Это будет эквивалентно использованию ночных снимков репозитория, если не считать того, что архивы можно сгенерировать в любое время.</para>
+      <para>Тем не менее, также возможно и гораздо более удобно собирать на MS Windows в том же самом каталоге, что и на системе GNU/Linux. Для этого требуется только сделать каталог сборки (обычно в домашнем каталоге) общим с системой Windows используя Samba. Система GNU/Linux может запускаться или на другом физическом компьютере, или в виртуальной машине на том же самом, например внутри VMware player (или наоборот, с MS Windows внутри виртуальной машины, но это не является целью данного раздела). </para>
+      <para>При сборке под несколько разных операционных систем из одного каталога, некоторое внимание должно уделяться избежанию ошибок, связанных с использованием файлов для другой операционной системы. К счастью, единственными файлами. которые являются общими для систем сборки под Unix и MS Windows являются конфигурационные заголовочные файлы <filename>config.h</filename> и <filename>gwyconfig.h</filename>. Чтобы обновить после переключения на MS Windows, просто удалите их, они будут воссозданы в процессе сборки. Чтобы обновить их после переключения на GNU/Linux, запустите <userinput>./config.status</userinput>.</para>
+    </sect2>
+  </sect1>
+</chapter>
+<!-- vim: set ts=2 sw=2 et : -->
