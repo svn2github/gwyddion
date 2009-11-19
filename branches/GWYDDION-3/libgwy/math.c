@@ -172,13 +172,6 @@ gwy_choleski_solve(const gdouble *a, gdouble *b, guint n)
     }
 
     /* back-substitution with the upper triangular matrix */
-    /*
-    for (j = n-1; j >= 0; j--) {
-        for (i = j+1; i < n; i++)
-            b[j] -= SLi(a, i, j)*b[i];
-        b[j] /= SLi(a, j, j);
-    }
-    */
     for (j = n; j > 0; j--) {
         for (i = j; i < n; i++)
             b[j-1] -= SLi(a, i, j-1)*b[i];
