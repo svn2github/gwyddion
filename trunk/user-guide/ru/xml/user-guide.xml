@@ -25,9 +25,7 @@
       <para>Разрешается копировать, распространять и/или модифицировать этот документ на условиях: <itemizedlist><listitem><para> <link linkend="gfdl">GNU Free Documentation License</link>, версии 1.2 или любой более поздней выпущенной Free Software Foundation; без неизменяемых разделов, без текста на первой и последней страницах обложки. Копия лицензии доступна в разделе <link linkend="gfdl">GNU Free Documentation License</link>. </para></listitem><listitem><para> <link linkend="gpl">GNU General Public License</link>, версии 2 или любой более поздней выпущенной Free Software Foundation. Копия лицензии доступна в разделе <link linkend="gpl">GNU General Public License</link>. </para></listitem></itemizedlist></para>
     </legalnotice>
   </bookinfo>
-  <!--
   <xi:include href="introduction.xml"/>
-  -->
   <xi:include href="install.xml"/>
   <xi:include href="getting-started.xml"/>
   <xi:include href="data-analysis.xml"/>
