@@ -281,14 +281,33 @@ test_math_sort(void)
 #define CHOLESKI_MATRIX_LEN(n) (((n) + 1)*(n)/2)
 #define SLi gwy_lower_triangular_matrix_index
 
+/* Square a triangular matrix. */
 static void
-test_choleski_matmul(gdouble *a, const gdouble *d, guint n)
+test_choleski_matsquare(gdouble *a, const gdouble *d, guint n)
 {
     for (guint i = 0; i < n; i++) {
         for (guint j = 0; j <= i; j++) {
             SLi(a, i, j) = SLi(d, i, 0) * SLi(d, j, 0);
             for (guint k = 1; k <= MIN(i, j); k++)
                 SLi(a, i, j) += SLi(d, i, k) * SLi(d, j, k);
+        }
+    }
+}
+
+/* Multiply two symmetrical matrices (NOT triangular). */
+static void
+test_choleski_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        for (guint j = 0; j <= i; j++) {
+            SLi(a, i, j) = 0.0;
+            for (guint k = 0; k < n; k++) {
+                guint ik = MAX(i, k);
+                guint ki = MIN(i, k);
+                guint jk = MAX(j, k);
+                guint kj = MIN(j, k);
+                SLi(a, i, j) += SLi(d1, ik, ki) * SLi(d2, jk, kj);
+            }
         }
     }
 }
@@ -306,19 +325,8 @@ test_choleski_make_matrix(gdouble *d,
         for (guint k = 0; k < j; k++) {
             SLi(d, j, k) = (g_rand_double_range(rng, -1.0, 1.0)
                             + g_rand_double_range(rng, -1.0, 1.0)
-                            + g_rand_double_range(rng, -1.0, 1.0));
+                            + g_rand_double_range(rng, -1.0, 1.0))/4.0;
         }
-    }
-}
-
-static void
-dump_matrix(guint dim,
-            const gdouble *m)
-{
-    for (guint i = 0; i < dim; i++) {
-        for (guint j = 0; j < i; j++)
-            g_print("%-12g ", SLi(m, i, j));
-        g_print("%-12g\n", SLi(m, i, i));
     }
 }
 
@@ -335,40 +343,52 @@ test_math_choleski(void)
 
     for (guint n = 1; n < nmax; n++) {
         guint matlen = CHOLESKI_MATRIX_LEN(n);
-        gdouble *a = g_new(gdouble, matlen);
-        gdouble *d = g_new(gdouble, matlen);
-        gdouble *p = g_new(gdouble, matlen);
+        /* Use descriptive names for less cryptic g_assert() messages. */
+        gdouble *matrix = g_new(gdouble, matlen);
+        gdouble *decomp = g_new(gdouble, matlen);
+        gdouble *inverted = g_new(gdouble, matlen);
+        gdouble *unity = g_new(gdouble, matlen);
 
         for (guint iter = 0; iter < niter; iter++) {
-            test_choleski_make_matrix(d, n, rng);
+            test_choleski_make_matrix(decomp, n, rng);
+            gdouble eps;
 
             /* Decomposition */
-            test_choleski_matmul(a, d, n);
-            g_assert(gwy_choleski_decompose(a, n));
+            test_choleski_matsquare(matrix, decomp, n);
+            g_assert(gwy_choleski_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
-                g_assert(fabs(a[j] - d[j])
-                         <= exp10(j - 13.0) * (fabs(a[j]) + fabs(d[j])));
+                eps = exp10(j - 15.0);
+                g_assert(fabs(matrix[j] - decomp[j])
+                         <= eps * (fabs(matrix[j]) + fabs(decomp[j])));
             }
 
             /* Inversion */
-            test_choleski_matmul(a, d, n);
-            memcpy(p, a, matlen*sizeof(gdouble));
-            g_printerr("[%u:%u] 1\n", n, iter);
-            dump_matrix(n, a);
-            g_assert(gwy_choleski_invert(a, n));
-            g_printerr("[%u:%u] 2\n", n, iter);
-            dump_matrix(n, a);
-            g_assert(gwy_choleski_invert(a, n));
-            dump_matrix(n, a);
+            test_choleski_matsquare(matrix, decomp, n);
+            memcpy(inverted, matrix, matlen*sizeof(gdouble));
+            g_assert(gwy_choleski_invert(inverted, n));
+            /* Multiplication with inverted must give unity */
+            test_choleski_matmul(unity, matrix, inverted, n);
+            for (guint j = 0; j < n; j++) {
+                eps = exp10(n - 10.0);
+                for (guint k = 0; k < j; k++) {
+                    g_assert(fabs(SLi(unity, j, k)) <= eps);
+                }
+                eps = exp10(n - 11.0);
+                g_assert(fabs(SLi(unity, j, j) - 1.0) <= eps);
+            }
+            /* Double inversion must give the original */
+            eps = exp10(n - 12.0);
+            g_assert(gwy_choleski_invert(inverted, n));
             for (guint j = 0; j < matlen; j++) {
-                g_assert(fabs(a[j] - p[j])
-                         <= exp10(n - 13.0) * (fabs(a[j]) + fabs(p[j])));
+                g_assert(fabs(matrix[j] - inverted[j])
+                         <= eps * (fabs(matrix[j]) + fabs(inverted[j])));
             }
         }
 
-        g_free(a);
-        g_free(d);
-        g_free(p);
+        g_free(matrix);
+        g_free(decomp);
+        g_free(inverted);
+        g_free(unity);
     }
 }
 
