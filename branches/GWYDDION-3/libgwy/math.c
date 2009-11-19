@@ -214,7 +214,7 @@ gwy_choleski_invert(gdouble *a, guint n)
             m += i+2;
             gdouble t = a[q];
             x[i] = -t/s;      /* note use temporary x */
-            if (i > k)
+            if (i >= k-1)
                 x[i] = -x[i];
             for (guint j = q; j < m; j++)
                 a[j - (i+1)] = a[j+1] + t * x[j - q];
@@ -786,7 +786,11 @@ jump_over:
  * This macro expands to a left-hand side expression.
  *
  * The matrix is assumed to be stored as follows:
- * [a_00 a_10 a_11 a_20 a_21 a_22 a_30 ...].
+ * [a_00 a_10 a_11 a_20 a_21 a_22 a_30 ...] which is suitable also for
+ * symmetrical matrices as only half of the matrix needs to be stored.
+ * However, as triangular matrices are complemented with zeroes while
+ * symmetrical matrices with reflected values one has to be careful and not
+ * confuse them despite the same representation.
  *
  * For instance, to multiply rows and columns of @a by the corresponding
  * elements of vector @v one can do:
