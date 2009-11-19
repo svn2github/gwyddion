@@ -312,6 +312,20 @@ test_choleski_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
     }
 }
 
+/* Multiply a vector with a symmetrical matrix (NOT triangular) from left. */
+static void
+test_choleski_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
+{
+    for (guint i = 0; i < n; i++) {
+        a[i] = 0.0;
+        for (guint j = 0; j < n; j++) {
+            guint ij = MAX(i, j);
+            guint ji = MIN(i, j);
+            a[i] += SLi(m, ij, ji) * v[j];
+        }
+    }
+}
+
 /* Generate the decomposition.  As long as it has positive numbers on the
  * diagonal, the matrix is positive-definite.   Though maybe not numerically.
  */
@@ -325,9 +339,19 @@ test_choleski_make_matrix(gdouble *d,
         for (guint k = 0; k < j; k++) {
             SLi(d, j, k) = (g_rand_double_range(rng, -1.0, 1.0)
                             + g_rand_double_range(rng, -1.0, 1.0)
-                            + g_rand_double_range(rng, -1.0, 1.0))/4.0;
+                            + g_rand_double_range(rng, -1.0, 1.0))/5.0;
         }
     }
+}
+
+static void
+test_choleski_make_vector(gdouble *d,
+                          guint n,
+                          GRand *rng)
+{
+    for (guint j = 0; j < n; j++)
+        d[j] = g_rand_double_range(rng, -1.0, 1.0)
+               * exp(g_rand_double_range(rng, -5.0, 5.0));
 }
 
 /* Note the precision checks are very tolerant as the matrices we generate
@@ -348,18 +372,30 @@ test_math_choleski(void)
         gdouble *decomp = g_new(gdouble, matlen);
         gdouble *inverted = g_new(gdouble, matlen);
         gdouble *unity = g_new(gdouble, matlen);
+        gdouble *vector = g_new(gdouble, n);
+        gdouble *solution = g_new(gdouble, n);
 
         for (guint iter = 0; iter < niter; iter++) {
             test_choleski_make_matrix(decomp, n, rng);
+            test_choleski_make_vector(vector, n, rng);
             gdouble eps;
 
             /* Decomposition */
             test_choleski_matsquare(matrix, decomp, n);
+            test_choleski_matvec(solution, matrix, vector, n);
             g_assert(gwy_choleski_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
                 eps = exp10(j - 15.0);
                 g_assert(fabs(matrix[j] - decomp[j])
                          <= eps * (fabs(matrix[j]) + fabs(decomp[j])));
+            }
+
+            /* Solution */
+            eps = exp10(n - 11.0);
+            gwy_choleski_solve(matrix, solution, n);
+            for (guint j = 0; j < n; j++) {
+                g_assert(fabs(solution[j] - vector[j])
+                         <= eps * (fabs(solution[j]) + fabs(vector[j])));
             }
 
             /* Inversion */
@@ -385,6 +421,8 @@ test_math_choleski(void)
             }
         }
 
+        g_free(vector);
+        g_free(solution);
         g_free(matrix);
         g_free(decomp);
         g_free(inverted);
