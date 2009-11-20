@@ -84,7 +84,10 @@ AC_CHECK_PROGS([INKSCAPE],[inkscape],[no])
 GWY_MISSING(INKSCAPE,[HTML PDF SVG],[inkscape, get Inkscape from http://www.inkscape.org/])
 
 AC_CHECK_PROGS([XML2PO],[xml2po],[no])
-GWY_MISSING(INKSCAPE,[HTML PDF SVG],[xml2po, get gnome-doc-utils from http://www.gnome.org/])
+GWY_MISSING(XML2PO,[HTML PDF SVG],[xml2po, get gnome-doc-utils from http://www.gnome.org/])
+
+AC_CHECK_PROGS([MSGMERGE],[msgmerge],[no])
+GWY_MISSING(MSGMERGE,[HTML PDF SVG],[msgmerge, get gettext from http://www.gnu.org/software/gettext/])
 
 # Here we assume if someone has xhtml he has manpages too.
 JH_CHECK_XML_CATALOG([http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl],

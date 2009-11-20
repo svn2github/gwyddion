@@ -17,6 +17,7 @@ GMAKE = @GMAKE@
 GSED = @GSED@
 PYTHON = @PYTHON@
 XML2PO = @XML2PO@
+MSGMERGE = @MSGMERGE@
 DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
 INKSCAPE_EXPORT = $(SHELL) $(COMMON)/inkscape-export.sh
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
@@ -81,7 +82,7 @@ po-create:
 # xml2po update mode is really idiotic, run msgmerge manually
 po-update:
 	cd $(COMMON)/srcimages && $(XML2PO) --output=$(abs_top_builddir)/$(LANGUAGE)/svg.pot.tmp $(patsubst %,%.svg,$(TRANSLATABLE_SVGS))
-	msgmerge svg.po svg.pot.tmp >svg.po.tmp
+	$(MSGMERGE) svg.po svg.pot.tmp >svg.po.tmp
 	cat svg.po.tmp >svg.po
 	rm -f svg.pot.tmp svg.po.tmp
 
