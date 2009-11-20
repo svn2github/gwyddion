@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: interpolation.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="interpolation">
+  <title>Интерполяция</title>
+  <indexterm><primary>интерполяция</primary></indexterm>
+  <para>Большинство геометрических преобразований таких, как поворот, масштабирование или <link linkend="drift-compensation">компенсация дрейфа</link> используют или зависят от интерполяции данных. Также некоторые другие операции, например, <link linkend="profile">извлечение профилей</link>, могут работать со значениями между отдельными пикселями и, следовательно, использовать интерполяцию. Поскольку данные СЗМ снимаются в относительно редко расположенных точках по сравнению с измеряемыми деталями (полные изображения обычно содержат всего лишь сотни пикселей в высоту и ширину), используемые методы интерполяции могут стать критичными для правильного количественного анализа свойств данных. В Gwyddion реализовано несколько методов интерполяции [<link linkend="interpolation-ref-1">1</link>] и в большинстве модулей, где она требуется, можно выбрать используемый метод.</para>
+  <para>Здесь мы описываем принципы и свойства методов одномерной интерполяции. Все реализованные методы двумерной интерполяции поддерживают разделение переменных и, следовательно, сводятся к соответствующим методам одномерной интерполяции. В настоящий момент доступны следующие методы интерполяции:</para>
+  <variablelist>
+    <varlistentry id="interpolation-round">
+      <indexterm><primary>интерполяция округлением</primary></indexterm>
+      <indexterm><primary>интерполяция до ближайшего соседнего</primary></indexterm>
+      <term>Округление</term>
+      <listitem>
+        <para>Интерполяция округлением (также называемая интерполяцией до ближайшего соседнего) – простейший метод, значения текущего местоположения округляются до целых и, таким образом, определяется ближайшее значение в точке с целыми координатами. Её степень многочлена = 0, регулярность <xi:include href="eqi-C-to-minus-1.xml"/> и порядок 1.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-linear">
+      <indexterm><primary>линейная интерполяция</primary></indexterm>
+      <term>Линейная</term>
+      <listitem>
+        <para>Линейная интерполяция между двумя ближайшими значениями. Значение <xi:include href="eqi-z.xml"/> в точке с относительными координатами <xi:include href="eqi-x.xml"/> получается с помощью уравнения <xi:include href="eq-interpolation-linear.xml"/>, где <xi:include href="eqi-z_0.xml"/> и <xi:include href="eqi-z_1.xml"/> - значения в предыдущей и следующей точке, соответственно. Степень многочлена 1, регулярность <xi:include href="eqi-C-to-0.xml"/>, порядок 2. Идентично B-сплайну второго порядка.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-key">
+      <indexterm><primary>Кубическая интерполяция</primary></indexterm>
+      <term>Кубическая</term>
+      <listitem>
+        <para>Кубическая интерполяция (точнее интерполяция Кея (Key) с <xi:include href="eqi-a-is-minus-1-over-2.xml"/>, который имеет наиболее высокий порядок интерполяции) также использует значения в точках перед предыдущей и после следующей <xi:include href="eqi-z_minus-1.xml"/> и <xi:include href="eqi-z_2.xml"/>, соответственно. Другими словами оно имеет носитель длины 4. Значение затем получается по формуле <xi:include href="eq-interpolation-w1234.xml"/>, где <xi:include href="eq-interpolation-key.xml"/> - веса интерполяции.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-schaum">
+      <indexterm><primary>Интерполяция Шаума</primary></indexterm>
+      <term>Шаум</term>
+      <listitem>
+        <para>Интерполяция Шаума (точнее, интерполяция Шаума четвёртого порядка) также имеет носитель длины 4. Веса интерполяции - <xi:include href="eq-interpolation-schaum.xml"/>, степень полинома 3, регулярность <xi:include href="eqi-C-to-0.xml"/> и порядок 4.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-nna">
+      <indexterm><primary>Интерполяция аппроксимацией ближайшим соседом</primary></indexterm>
+      <term>АБС</term>
+      <listitem>
+        <para>Аппроксимация ближайшим соседом снова рассчитывается из ближайших четырёх значений данных, но, в отличие от остальных, не является кусочно полиномиальной. Веса интерполяции: <xi:include href="eq-interpolation-nna.xml"/> для <xi:include href="eqi-k-is-minus-1-to-2.xml"/>, где  <xi:include href="eqi-r_minus-1-is-1-plus-x.xml"/>, <xi:include href="eqi-r_0-is-x.xml"/>, <xi:include href="eqi-r_1-is-1-minus-x.xml"/>, <xi:include href="eqi-r_2-is-2-minus-x.xml"/>. Её порядок = 1.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-bspline">
+      <indexterm><primary>Интерполяция B-сплайном</primary></indexterm>
+      <term>B-сплайн</term>
+      <listitem>
+        <para>Веса -  <xi:include href="eq-interpolation-bspline.xml"/>. Однако, они применяются не напрямую к значениям функции, как выше, а к коэффициентам интерполяции, рассчитанным из начений функции [<link linkend="interpolation-ref-1">1</link>]. Степень полинома 3, регулярность <xi:include href="eqi-C-to-2.xml"/> и порядок 4.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="interpolation-omoms">
+      <indexterm><primary>интерполяция O-MOMS</primary></indexterm>
+      <term>O-MOMS</term>
+      <listitem>
+        <para>Веса интерполяции: <xi:include href="eq-interpolation-omoms.xml"/> Однако, они применяются не напрямую к значениям функции, как выше, а к коэффициентам интерполяции, рассчитанным из значений функции [<link linkend="interpolation-ref-1">1</link>]. Степень полинома 3, регулярность  <xi:include href="eqi-C-to-0.xml"/> и порядок 4.</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <informalfigure id="fig-interpolations">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="interpolation.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>Примеры двумерной интерполяции</phrase>
+      </textobject>
+      <caption>Иллюстрация доступных видов интерполяции (исходные пиксели очевидны на интерполяции округлением). Все изображения имеют идентичные диапазоны псевдоцвета.</caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id="interpolation-ref">
+    <title>Источники</title>
+    <para id="interpolation-ref-1">[1] P. Thévenaz, T. Blu, M. Unser: Interpolation revisited. IEEE Transactions on medical imaging, Volume 10, Number 7, July 2000, 739</para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
