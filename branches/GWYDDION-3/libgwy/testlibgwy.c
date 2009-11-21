@@ -278,7 +278,7 @@ test_math_sort(void)
  *
  ***************************************************************************/
 
-#define CHOLESKI_MATRIX_LEN(n) (((n) + 1)*(n)/2)
+#define CHOLESKY_MATRIX_LEN(n) (((n) + 1)*(n)/2)
 #define SLi gwy_lower_triangular_matrix_index
 
 /* Square a triangular matrix. */
@@ -366,7 +366,7 @@ test_math_cholesky(void)
     g_rand_set_seed(rng, 42);
 
     for (guint n = 1; n < nmax; n++) {
-        guint matlen = CHOLESKI_MATRIX_LEN(n);
+        guint matlen = CHOLESKY_MATRIX_LEN(n);
         /* Use descriptive names for less cryptic g_assert() messages. */
         gdouble *matrix = g_new(gdouble, matlen);
         gdouble *decomp = g_new(gdouble, matlen);
