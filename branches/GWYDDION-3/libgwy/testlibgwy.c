@@ -432,6 +432,80 @@ test_math_cholesky(void)
 
 /***************************************************************************
  *
+ * Interpolation
+ *
+ ***************************************************************************/
+
+static void
+test_interpolation_constant(GwyInterpolationType interpolation,
+                            gdouble value)
+{
+    guint support_len = gwy_interpolation_get_support_size(interpolation);
+    g_assert_cmpint(support_len, >, 0);
+
+    gdouble data[support_len];
+    for (guint i = 0; i < support_len; i++)
+        data[i] = value;
+
+    if (!gwy_interpolation_has_interpolating_basis(interpolation))
+        gwy_interpolation_resolve_coeffs_1d(support_len, data, interpolation);
+
+    for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
+        gdouble ivalue = gwy_interpolate_1d(x, data, interpolation);
+        g_assert(fabs(ivalue - value) <= 1e-15 * (fabs(ivalue) + fabs(value)));
+    }
+}
+
+static void
+test_interpolation_linear(GwyInterpolationType interpolation,
+                          gdouble a,
+                          gdouble b)
+{
+    guint support_len = gwy_interpolation_get_support_size(interpolation);
+    g_assert_cmpint(support_len, >, 0);
+    /* This is just an implementation assertion, not consistency check. */
+    g_assert_cmpint(support_len % 2, ==, 0);
+
+    gdouble data[support_len];
+    for (guint i = 0; i < support_len; i++) {
+        gdouble origin = support_len - support_len/2 - 1.0;
+        data[i] = (i - origin)*(b - a) + a;
+    }
+
+    for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
+        gdouble value = x*b + (1.0 - x)*a;
+        gdouble ivalue = gwy_interpolate_1d(x, data, interpolation);
+        g_assert(fabs(ivalue - value) <= 1e-14 * (fabs(ivalue) + fabs(value)));
+    }
+}
+
+static void
+test_interpolation(void)
+{
+    GwyInterpolationType first_const = GWY_INTERPOLATION_ROUND;
+    GwyInterpolationType last = GWY_INTERPOLATION_SCHAUM;
+
+    for (GwyInterpolationType interp = first_const; interp <= last; interp++) {
+        test_interpolation_constant(interp, 1.0);
+        test_interpolation_constant(interp, 0.0);
+        test_interpolation_constant(interp, -1.0);
+    }
+
+    /* FIXME: The interpolations with non-interpolating basis reproduce
+     * the linear function only on infinite interval.  How to check them? */
+    GwyInterpolationType reproducing_linear[] = {
+        GWY_INTERPOLATION_LINEAR,
+        GWY_INTERPOLATION_KEYS,
+        GWY_INTERPOLATION_SCHAUM,
+    };
+    for (guint i = 0; i < G_N_ELEMENTS(reproducing_linear); i++) {
+        test_interpolation_linear(reproducing_linear[i], 1.0, 2.0);
+        test_interpolation_linear(reproducing_linear[i], 1.0, -1.0);
+    }
+}
+
+/***************************************************************************
+ *
  * Error lists
  *
  ***************************************************************************/
@@ -1941,6 +2015,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/math/sort", test_math_sort);
     g_test_add_func("/testlibgwy/math/cholesky", test_math_cholesky);
+    g_test_add_func("/testlibgwy/interpolation", test_interpolation);
     g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
     g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
