@@ -90,6 +90,9 @@ void    gwy_math_sort  (gdouble *array,
 gdouble gwy_math_median(gdouble *array,
                         gsize n);
 
+#define gwy_triangular_matrix_length(n) \
+    (((n) + 1)*(n)/2)
+
 #define gwy_lower_triangular_matrix_index(a, i, j) \
     ((a)[(i)*((i) + 1)/2 + (j)])
 

@@ -764,7 +764,18 @@ jump_over:
  * Rounds a number to nearest integer.
  *
  * This macro evaluates its argument only once.
- * This macro is usable as a single statement.
+ **/
+
+/**
+ * gwy_triangular_matrix_length:
+ * @n: Matrix dimension.
+ *
+ * Evaluates to the length of an array necessary to store a triangular matrix.
+ *
+ * This macro may evaluate its arguments several times.
+ *
+ * The length is the same for triangular matrices of both kinds and also for
+ * symmetrical matrices although the element interpretation differs.
  **/
 
 /**
