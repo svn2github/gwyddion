@@ -24,11 +24,31 @@
 
 G_BEGIN_DECLS
 
-#define GWY_FITTER_ERROR gwy_fitter_error_quark()
-
 typedef enum {
-    GWY_FITTER_ERROR_DUMMY,
-} GwyFitterError;
+    GWY_FITTER_STATUS_NONE             = 0,
+    GWY_FITTER_STATUS_FUNCTION_FAILURE = 1,
+    GWY_FITTER_STATUS_GRADIENT_FAILURE = 2,
+    GWY_FITTER_STATUS_SILENT_FAILURE   = 3,
+    GWY_FITTER_STATUS_MAX_ITER         = 4,
+    GWY_FITTER_STATUS_LAMBDA_OVERFLOW  = 5,
+    GWY_FITTER_STATUS_PARAM_OFF_BOUNDS = 6,
+    GWY_FITTER_STATUS_TOO_SMALL_CHANGE = 7,
+    GWY_FITTER_STATUS_CANNOT_STEP      = 8,
+    GWY_FITTER_STATUS_NEGATIVE_HESSIAN = 9,
+} GwyFitterStatus;
+
+typedef gboolean (*GwyFitterResiduumFunc)(const gdouble *param,
+                                          gdouble *residuum,
+                                          gpointer user_data);
+
+typedef gboolean (*GwyFitterGradientFunc)(const gdouble *param,
+                                          gdouble *gradient,
+                                          gdouble *hessian,
+                                          gpointer user_data);
+
+typedef gboolean (*GwyFitterConstrainFunc)(const gdouble *param,
+                                           gboolean *ok,
+                                           gpointer user_data);
 
 #define GWY_TYPE_FITTER \
     (gwy_fitter_get_type())
@@ -54,7 +74,6 @@ struct _GwyFitterClass {
     GObjectClass g_object_class;
 };
 
-GQuark     gwy_fitter_error_quark(void) G_GNUC_CONST;
 GType      gwy_fitter_get_type   (void) G_GNUC_CONST;
 GwyFitter* gwy_fitter_new        (void) G_GNUC_MALLOC;
 
