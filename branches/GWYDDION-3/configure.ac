@@ -104,7 +104,7 @@ fi
 
 #############################################################################
 # Base libraries
-PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.18])
+PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.22])
 
 AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS"])
 AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS"])

@@ -8,7 +8,7 @@ Global:
   GCC or MSVC8 should suffice.
 
 Requirements:
-- GLib >= 2.18 is required.
+- GLib >= 2.22 is required.
 
 Libraries in general:
 - The mess of libraries was reorganized to:
