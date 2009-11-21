@@ -34,6 +34,8 @@ enum {
     N_SIGNALS
 };
 
+typedef void (*AppendPowerFunc)(GString *str, gint power);
+
 typedef struct {
     GQuark unit;
     gshort power;
@@ -47,6 +49,7 @@ typedef struct {
     const gchar *unit_times;
     const gchar *unit_division;
     const gchar *number_unit_glue;
+    AppendPowerFunc append_power;
 } GwyUnitStyleSpec;
 
 static void         gwy_unit_finalize         (GObject *object);
@@ -72,6 +75,10 @@ static GwyUnit*     power_impl                (GwyUnit *unit,
                                                gint power);
 static GwyUnit*     canonicalize              (GwyUnit *unit);
 static const gchar* get_prefix                (gint power);
+static void         append_power_plain        (GString *str,
+                                               gint power);
+static void         append_power_unicode      (GString *str,
+                                               gint power);
 static void         format_unit               (const GwyUnit *unit,
                                                const GwyUnitStyleSpec *fs,
                                                gint power10,
@@ -119,18 +126,29 @@ static const gchar *known_units[] = {
 
 /* Unit formats */
 static const GwyUnitStyleSpec format_style_plain = {
-    "*", "10^", "^", NULL, " ", "/", " "
+    "*", "10^", "^", NULL, " ", "/", " ",
+    &append_power_plain,
 };
+
+static const GwyUnitStyleSpec format_style_unicode = {
+    "×", "10", "", NULL, " ", "/", " ",
+    &append_power_unicode,
+};
+
 static const GwyUnitStyleSpec format_style_pango = {
-    "×", "10<sup>", "<sup>", "</sup>", " ", "/", " "
+    "×", "10<sup>", "<sup>", "</sup>", " ", "/", " ",
+    &append_power_plain,
 };
+
 static const GwyUnitStyleSpec format_style_TeX = {
-    "\\times", "10^{", "^{", "}", "\\,", "/", "\\,"
+    "\\times", "10^{", "^{", "}", "\\,", "/", "\\,",
+    &append_power_plain,
 };
 
 static const GwyUnitStyleSpec *format_styles[] = {
     NULL,
     &format_style_plain,
+    &format_style_unicode,
     &format_style_pango,
     &format_style_TeX,
 };
@@ -1099,6 +1117,38 @@ find_number_format(gdouble step,
     }
 
     return gwy_exp10(mag);
+}
+
+static void
+append_power_plain(GString *str,
+                   gint power)
+{
+    g_string_append_printf(str, "%d", power);
+}
+
+static void
+append_power_unicode(GString *str,
+                     gint power)
+{
+    gchar buf[32];
+
+    g_snprintf(buf, sizeof(buf), "%d", power);
+    for (guint i = 0; buf[i]; i++) {
+        if (buf[i] == '0' || (buf[i] >= '4' && buf[i] <= '9'))
+            g_string_append_unichar(str, 0x2070 + buf[i] - '0');
+        else if (buf[i] == '1')
+            g_string_append_len(str, "¹", sizeof("¹")-1);
+        else if (buf[i] == '2')
+            g_string_append_len(str, "²", sizeof("²")-1);
+        else if (buf[i] == '3')
+            g_string_append_len(str, "³", sizeof("³")-1);
+        else if (buf[i] == '-')
+            g_string_append_len(str, "⁻", sizeof("⁻")-1);
+        else {
+            g_warning("Weird digits in number %s\n", buf);
+            g_string_append_c(str, buf[i]);
+        }
+    }
 }
 
 static void

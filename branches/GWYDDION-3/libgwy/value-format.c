@@ -463,8 +463,11 @@ fix_utf8_minus(GString *str)
  * @GWY_VALUE_FORMAT_NONE: No units.  This value is unused by #GwyValueFormat
  *                         itself and must not be requested as a format
  *                         style.
- * @GWY_VALUE_FORMAT_PLAIN: Plain style, as one would use on a text terminal,
- *                          suitable for output to text files.
+ * @GWY_VALUE_FORMAT_PLAIN: Plain style using only ASCII characters, as one
+ *                          would use on a text terminal, suitable for output
+ *                          to text files.
+ * @GWY_VALUE_FORMAT_UNICODE: Plain style making use of Unicode characters,
+ *                            e.g. for superscripts.
  * @GWY_VALUE_FORMAT_PANGO: Pango markup, for use with Gtk+ functions such as
  *                          gtk_label_set_markup().
  * @GWY_VALUE_FORMAT_TEX: Representation that can be typeset by TeX.
