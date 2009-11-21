@@ -5,9 +5,9 @@ cache="$COMMON/cache"
 i="$2"
 t="TEMP-$1"
 convertopts="-type Grayscale -scale 38.2% -fx u^1.3"
-cat "$COMMON/defs.tex" "$COMMON/header.tex" >"$t".tex
+@GSED@ 's/^\\input gwydefs.tex$/%\0/;T;r /dev/stdin' "$COMMON/prologue.tex" <"$COMMON/gwydefs.tex" >"$t".tex
 @GSED@ '1,/<!\[CDATA\[/d;/\]\]>/,$d' "$i" >>"$t".tex
-cat "$COMMON/footer.tex" >>"$t".tex
+cat "$COMMON/epilogue.tex" >>"$t".tex
 c=($(sha1sum "$t".tex))
 c="$cache/eq-${c[0]}.png"
 if test -s "$c"; then
@@ -15,7 +15,7 @@ if test -s "$c"; then
   rm -f "$t".tex
   exit 0
 fi
-@TEX@ --interaction=batchmode "$t".tex
+@LATEX@ --interaction=batchmode "$t".tex
 @DVIPS@ -q -E -o "$t".ps "$t".dvi
 . ./"$t".bbox
 @GSED@ -i -e "s/^\(%%BoundingBox:\).*/\\1 $x0 $y0 $x1 $y1/" "$t".ps
@@ -24,7 +24,7 @@ eval $($COMMON/pngsize <"$t".png)
 if test $h -gt 1600; then
   echo "*** Warning: Your gs doesn't understand -dEPSCrop!" >&2
   . "$t".bbox
-  eval $(@GSED@ -n '/^\\.size=/{s/^\\//;s/pt$//;p}' header.tex)
+  eval $(@GSED@ -n '/^\\.size=/{s/^\\//;s/pt$//;p}' "$COMMON/prologue.tex")
   w=$((($w*($x1 - $x0) + $hsize/2)/$hsize))
   h=$((($h*($y1 - $y0) + $vsize/2)/$vsize))
   @CONVERT@ -crop ${w}x$h $convertopts "$t".png "$1".png

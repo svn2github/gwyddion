@@ -65,8 +65,8 @@ GWY_MISSING(CONVERT,[HTML],[convert, get ImageMagick from http://www.imagemagick
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[no])
 GWY_MISSING(XSLTPROC,[HTML PDF MAN],[xsltproc, get libxml2 from http://xmlsoft.org/])
 
-AC_CHECK_PROGS([TEX],[tex],[no])
-GWY_MISSING(TEX,[HTML],[tex, get TeX from http://tug.org/])
+AC_CHECK_PROGS([LATEX],[latex],[no])
+GWY_MISSING(LATEX,[HTML],[tex, get TeX from http://tug.org/])
 
 AC_CHECK_PROGS([PDFLATEX],[pdflatex],[no])
 GWY_MISSING(PDFLATEX,[PDF],[tex, get pdfLaTeX from http://tug.org/])

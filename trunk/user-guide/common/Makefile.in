@@ -29,7 +29,7 @@ MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 ALL_TARGETS = $(XHTML_ENABLE) $(PDF_ENABLE) $(MAN_ENABLE)
 
 XML_FORMULAS := $(wildcard $(COMMON)/formulas/*.xml) $(wildcard formulas/*.xml)
-FORMULA_SUPPORT := $(patsubst %,$(COMMON)/%,header.tex footer.tex defs.tex pngsize render.sh)
+FORMULA_SUPPORT := $(patsubst %,$(COMMON)/%,prologue.tex epilogue.tex gwydefs.tex pngsize render.sh)
 
 XML_SOURCES := $(wildcard xml/*.xml)
 XML_SOURCES_ALL := $(XML_SOURCES) $(XML_FORMULAS)

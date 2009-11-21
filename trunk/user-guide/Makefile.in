@@ -25,14 +25,14 @@ DISTFILES = \
 
 COMMONDISTFILES =  \
 	dblatex.xsl \
-	defs.tex \
+	epilogue.tex \
 	fixpngres.c \
-	footer.tex \
-	header.tex \
+	gwydefs.tex \
 	inkscape-export.sh.in \
 	Makefile.in \
 	man.xsl \
 	pngsize.c \
+	prologue.tex \
 	render.sh.in \
 	user-guide.css \
 	user-guide.iss.in \
