@@ -24,6 +24,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/fitter.h"
 #include "libgwy/math.h"
+#include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
 
 #define SLi gwy_lower_triangular_matrix_index
@@ -32,6 +33,13 @@
 
 #define GWY_FITTER_GET_PRIVATE(o)  \
    (G_TYPE_INSTANCE_GET_PRIVATE((o), GWY_TYPE_FITTER, GwyFitterPrivate))
+
+enum {
+    PROP_0,
+    PROP_N_PARAMS,
+    PROP_STATUS,
+    N_PROPS
+};
 
 typedef struct {
     guint iter_max;
@@ -75,9 +83,17 @@ typedef struct {
 
 typedef Fitter GwyFitterPrivate;
 
-static void     gwy_fitter_finalize      (GObject *object);
-static void     fitter_set_n_param(Fitter *fitter,
-                                   guint nparam);
+static void gwy_fitter_finalize    (GObject *object);
+static void gwy_fitter_set_property(GObject *object,
+                                    guint prop_id,
+                                    const GValue *value,
+                                    GParamSpec *pspec);
+static void gwy_fitter_get_property(GObject *object,
+                                    guint prop_id,
+                                    GValue *value,
+                                    GParamSpec *pspec);
+static void fitter_set_n_param     (Fitter *fitter,
+                                    guint nparam);
 
 static const GwyFitterSettings default_settings = {
     .iter_max               = 50,
@@ -100,6 +116,27 @@ gwy_fitter_class_init(GwyFitterClass *klass)
     g_type_class_add_private(klass, sizeof(GwyFitterPrivate));
 
     gobject_class->finalize = gwy_fitter_finalize;
+    gobject_class->get_property = gwy_fitter_get_property;
+    gobject_class->set_property = gwy_fitter_set_property;
+
+    g_object_class_install_property
+        (gobject_class,
+         PROP_N_PARAMS,
+         g_param_spec_uint("n-params",
+                           "Number of params",
+                           "Number of fitting parameters.",
+                           0, 1024, 0,
+                           G_PARAM_READWRITE));
+
+    g_object_class_install_property
+        (gobject_class,
+         PROP_STATUS,
+         g_param_spec_enum("status",
+                           "Fitter status",
+                           "Reason of termination of the last fitting process.",
+                           GWY_TYPE_FITTER_STATUS, GWY_FITTER_STATUS_NONE,
+                           G_PARAM_READABLE));
+
 }
 
 static void
@@ -119,6 +156,48 @@ gwy_fitter_finalize(GObject *object)
     fitter_set_n_param(fitter, 0);
 
     G_OBJECT_CLASS(gwy_fitter_parent_class)->finalize(object);
+}
+
+static void
+gwy_fitter_set_property(GObject *object,
+                        guint prop_id,
+                        const GValue *value,
+                        GParamSpec *pspec)
+{
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+
+    switch (prop_id) {
+        case PROP_N_PARAMS:
+        fitter_set_n_param(fitter, g_value_get_uint(value));
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
+    }
+}
+
+static void
+gwy_fitter_get_property(GObject *object,
+                        guint prop_id,
+                        GValue *value,
+                        GParamSpec *pspec)
+{
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+
+    switch (prop_id) {
+        case PROP_N_PARAMS:
+        g_value_set_uint(value, fitter->nparam);
+        break;
+
+        case PROP_STATUS:
+        g_value_set_enum(value, fitter->status);
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
+    }
 }
 
 static void
