@@ -274,7 +274,7 @@ test_math_sort(void)
 
 /***************************************************************************
  *
- * Choleski
+ * Cholesky
  *
  ***************************************************************************/
 
@@ -283,7 +283,7 @@ test_math_sort(void)
 
 /* Square a triangular matrix. */
 static void
-test_choleski_matsquare(gdouble *a, const gdouble *d, guint n)
+test_cholesky_matsquare(gdouble *a, const gdouble *d, guint n)
 {
     for (guint i = 0; i < n; i++) {
         for (guint j = 0; j <= i; j++) {
@@ -296,7 +296,7 @@ test_choleski_matsquare(gdouble *a, const gdouble *d, guint n)
 
 /* Multiply two symmetrical matrices (NOT triangular). */
 static void
-test_choleski_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
+test_cholesky_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
 {
     for (guint i = 0; i < n; i++) {
         for (guint j = 0; j <= i; j++) {
@@ -314,7 +314,7 @@ test_choleski_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
 
 /* Multiply a vector with a symmetrical matrix (NOT triangular) from left. */
 static void
-test_choleski_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
+test_cholesky_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
 {
     for (guint i = 0; i < n; i++) {
         a[i] = 0.0;
@@ -330,7 +330,7 @@ test_choleski_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
  * diagonal, the matrix is positive-definite.   Though maybe not numerically.
  */
 static void
-test_choleski_make_matrix(gdouble *d,
+test_cholesky_make_matrix(gdouble *d,
                           guint n,
                           GRand *rng)
 {
@@ -345,7 +345,7 @@ test_choleski_make_matrix(gdouble *d,
 }
 
 static void
-test_choleski_make_vector(gdouble *d,
+test_cholesky_make_vector(gdouble *d,
                           guint n,
                           GRand *rng)
 {
@@ -357,7 +357,7 @@ test_choleski_make_vector(gdouble *d,
 /* Note the precision checks are very tolerant as the matrices we generate
  * are not always well-conditioned. */
 static void
-test_math_choleski(void)
+test_math_cholesky(void)
 {
     guint nmax = 8, niter = 50;
     GRand *rng = g_rand_new();
@@ -376,14 +376,14 @@ test_math_choleski(void)
         gdouble *solution = g_new(gdouble, n);
 
         for (guint iter = 0; iter < niter; iter++) {
-            test_choleski_make_matrix(decomp, n, rng);
-            test_choleski_make_vector(vector, n, rng);
+            test_cholesky_make_matrix(decomp, n, rng);
+            test_cholesky_make_vector(vector, n, rng);
             gdouble eps;
 
             /* Decomposition */
-            test_choleski_matsquare(matrix, decomp, n);
-            test_choleski_matvec(solution, matrix, vector, n);
-            g_assert(gwy_choleski_decompose(matrix, n));
+            test_cholesky_matsquare(matrix, decomp, n);
+            test_cholesky_matvec(solution, matrix, vector, n);
+            g_assert(gwy_cholesky_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
                 eps = exp10(j - 15.0);
                 g_assert(fabs(matrix[j] - decomp[j])
@@ -392,18 +392,18 @@ test_math_choleski(void)
 
             /* Solution */
             eps = exp10(n - 11.0);
-            gwy_choleski_solve(matrix, solution, n);
+            gwy_cholesky_solve(matrix, solution, n);
             for (guint j = 0; j < n; j++) {
                 g_assert(fabs(solution[j] - vector[j])
                          <= eps * (fabs(solution[j]) + fabs(vector[j])));
             }
 
             /* Inversion */
-            test_choleski_matsquare(matrix, decomp, n);
+            test_cholesky_matsquare(matrix, decomp, n);
             memcpy(inverted, matrix, matlen*sizeof(gdouble));
-            g_assert(gwy_choleski_invert(inverted, n));
+            g_assert(gwy_cholesky_invert(inverted, n));
             /* Multiplication with inverted must give unity */
-            test_choleski_matmul(unity, matrix, inverted, n);
+            test_cholesky_matmul(unity, matrix, inverted, n);
             for (guint j = 0; j < n; j++) {
                 eps = exp10(n - 10.0);
                 for (guint k = 0; k < j; k++) {
@@ -414,7 +414,7 @@ test_math_choleski(void)
             }
             /* Double inversion must give the original */
             eps = exp10(n - 12.0);
-            g_assert(gwy_choleski_invert(inverted, n));
+            g_assert(gwy_cholesky_invert(inverted, n));
             for (guint j = 0; j < matlen; j++) {
                 g_assert(fabs(matrix[j] - inverted[j])
                          <= eps * (fabs(matrix[j]) + fabs(inverted[j])));
@@ -1940,7 +1940,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/next_line", test_next_line);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/math/sort", test_math_sort);
-    g_test_add_func("/testlibgwy/math/choleski", test_math_choleski);
+    g_test_add_func("/testlibgwy/math/cholesky", test_math_cholesky);
     g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
     g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);

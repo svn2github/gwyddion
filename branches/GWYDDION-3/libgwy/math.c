@@ -108,7 +108,7 @@ gwy_math_median(gdouble *array, gsize n)
 }
 
 /**
- * gwy_choleski_decompose:
+ * gwy_cholesky_decompose:
  * @matrix: Lower triangular part of a symmetric matrix, see
  *          gwy_lower_triangular_matrix_index() for storage details.
  * @n: Dimension of @matrix.
@@ -122,7 +122,7 @@ gwy_math_median(gdouble *array, gsize n)
  *          numerically positive definite.
  **/
 gboolean
-gwy_choleski_decompose(gdouble *a, guint n)
+gwy_cholesky_decompose(gdouble *a, guint n)
 {
     for (guint k = 0; k < n; k++) {
         /* diagonal element */
@@ -146,9 +146,9 @@ gwy_choleski_decompose(gdouble *a, guint n)
 }
 
 /**
- * gwy_choleski_solve:
- * @decomp: Lower triangular part of Choleski decomposition as computed
- *          by gwy_math_choleski_decompose().
+ * gwy_cholesky_solve:
+ * @decomp: Lower triangular part of Cholesky decomposition as computed
+ *          by gwy_math_cholesky_decompose().
  * @rhs: Right hand side vector.  It is modified in place, on return it
  *       contains the solution.
  * @n: Dimension of @decomp and length of @rhs.
@@ -160,7 +160,7 @@ gwy_choleski_decompose(gdouble *a, guint n)
  * calculate the solution of the system with different right-hand sides.
  **/
 void
-gwy_choleski_solve(const gdouble *a, gdouble *b, guint n)
+gwy_cholesky_solve(const gdouble *a, gdouble *b, guint n)
 {
     guint i, j;
 
@@ -180,7 +180,7 @@ gwy_choleski_solve(const gdouble *a, gdouble *b, guint n)
 }
 
 /**
- * gwy_choleski_invert:
+ * gwy_cholesky_invert:
  * @matrix: Lower triangular part of a symmetric matrix, see
  *          gwy_lower_triangular_matrix_index() for storage details.
  * @n: Dimension of @matrix.
@@ -194,7 +194,7 @@ gwy_choleski_solve(const gdouble *a, gdouble *b, guint n)
  *          numerically positive definite.
  **/
 gboolean
-gwy_choleski_invert(gdouble *a, guint n)
+gwy_cholesky_invert(gdouble *a, guint n)
 {
     gdouble x[n];
     for (guint k = n; k > 0; k--) {
