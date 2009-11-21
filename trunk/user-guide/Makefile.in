@@ -67,12 +67,18 @@ fixpngres: common/fixpngres
 	ln -s common/fixpngres .
 
 ifeq ($(PNG_ENABLE),png)
+FIXPNGRES = fixpngres
 common/fixpngres: common/fixpngres.c
 	$(CC) @PNG_CFLAGS@ @PNG_LIBS@ -o common/fixpngres common/fixpngres.c
 endif
 
 common/pngsize: common/pngsize.c
 	cd common && $(CC) -o pngsize pngsize.c
+
+common/%: common/%.in config.status
+	./config.status $@
+
+common: common/pngsize common/render.sh common/inkscape-export.sh $(FIXPNGRES)
 
 clean:
 	@for x in $(LANGUAGES); do $(MAKE) -C $$x clean; done
@@ -125,15 +131,11 @@ endif
 	@echo "dist         Create tarball with DocBook sources"
 	@echo "dist-xhtml   Create tarballs with ready to read XHTML User guide"
 	@echo "dist-pdf     Create nicely named User guide PDFs"
-ifeq ($(PNG_ENABLE),png)
-	@echo "fixpngres    Build fixpngres tool"
-else
-	@echo "fixpngres    Build fixpngres tool (not available)"
-endif
+	@echo "common       Build common language-independent tools"
 	@echo "version      Update version number to current date"
 
 .PHONY: \
-	all help version clean distclean \
+	all help version common clean distclean \
 	dist dist-xhtml dist-pdf undist \
 	xhtml pdf man
 
