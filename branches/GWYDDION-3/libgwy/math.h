@@ -26,6 +26,17 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    gdouble x;
+    gdouble y;
+} GwyPointXY;
+
+typedef struct {
+    gdouble x;
+    gdouble y;
+    gdouble z;
+} GwyPointXYZ;
+
 /* This is necessary to fool gtk-doc that ignores static inline functions */
 #define _GWY_STATIC_INLINE static inline
 

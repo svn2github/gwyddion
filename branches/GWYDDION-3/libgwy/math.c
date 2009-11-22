@@ -723,6 +723,23 @@ jump_over:
  **/
 
 /**
+ * GwyPointXY:
+ * @x: X-coordinate.
+ * @y: Y-coordinate.
+ *
+ * Representation of Cartesian coordinates in plane.
+ **/
+
+/**
+ * GwyPointXYZ:
+ * @x: X-coordinate.
+ * @y: Y-coordinate.
+ * @z: Z-coordinate.
+ *
+ * Representation of Cartesian coordinates in space.
+ **/
+
+/**
  * gwy_exp10:
  * @x: Exponent of 10.
  *
