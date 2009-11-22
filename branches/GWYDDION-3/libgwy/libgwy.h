@@ -23,6 +23,8 @@
 #include <libgwy/container.h>
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
+#include <libgwy/fitter.h>
+#include <libgwy/fitter-data.h>
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/macros.h>
