@@ -94,7 +94,7 @@ function printerr_lang() {
         cat
       fi
     } >$tmplog
-    test -s $tmplog || return
+    test -s $tmplog || continue
     echo "=====[ $f-$lang ]====="
     cat $tmplog
   done
