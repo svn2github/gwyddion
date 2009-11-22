@@ -55,6 +55,8 @@ typedef struct {
 typedef struct {
     GwyFitterSettings settings;
     GwyFitterStatus status;
+    gboolean has_params;
+    gboolean success;
     guint nparam;
     guint iter;
     guint nsuccesses;
@@ -204,6 +206,9 @@ static void
 fitter_set_n_param(Fitter *fitter,
                    guint nparam)
 {
+    fitter->has_params = FALSE;
+    fitter->status = GWY_FITTER_STATUS_NONE;
+
     if (fitter->nparam == nparam)
         return;
 
@@ -226,13 +231,6 @@ fitter_set_n_param(Fitter *fitter,
 
     g_free(fitter->bad_param);
     fitter->bad_param = nparam ? g_new(gboolean, nparam) : NULL;
-}
-
-static void
-fitter_set_param(Fitter *fitter,
-                 const gdouble *param)
-{
-    ASSIGN(fitter->param_best, param, fitter->nparam);
 }
 
 /* Paranoid evaluation of residuum and derivatives.
@@ -363,9 +361,6 @@ static gboolean
 minimize(Fitter *fitter,
          gpointer user_data)
 {
-    g_return_val_if_fail(fitter->eval_gradient && fitter->eval_residuum, FALSE);
-    g_return_val_if_fail(fitter->nparam, FALSE);
-
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
     ASSIGN(fitter->param, fitter->param_best, nparam);
@@ -461,6 +456,154 @@ gwy_fitter_new(void)
     return g_object_newv(GWY_TYPE_FITTER, 0, NULL);
 }
 
+/**
+ * gwy_fitter_get_status:
+ * @fitter: A non-linear least-squares fitter.
+ *
+ * Obtains the status of the last fitting performed with a fitter.
+ *
+ * The status is reset to %GWY_FITTER_STATUS_NONE if the fitter is 
+ * reconfigured.
+ *
+ * Returns: The fitting status.
+ **/
+guint
+gwy_fitter_get_status(GwyFitter *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), GWY_FITTER_STATUS_NONE);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    return fitter->status;
+}
+
+/**
+ * gwy_fitter_set_n_params:
+ * @fitter: A non-linear least-squares fitter.
+ * @nparams: New number of parameters.
+ *
+ * Sets the number of parameters in the model of a fitter.
+ *
+ * This method invalidates the parameters and sets the fitting status to
+ * %GWY_FITTER_STATUS_NONE.
+ **/
+void
+gwy_fitter_set_n_params(GwyFitter *object,
+                        guint nparams)
+{
+    g_return_if_fail(GWY_IS_FITTER(object));
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    fitter_set_n_param(fitter, nparams);
+}
+
+/**
+ * gwy_fitter_get_n_params:
+ * @fitter: A non-linear least-squares fitter.
+ *
+ * Sets the number of parameters in the model of a fitter.
+ *
+ * Returns: The number of model parameters.
+ **/
+guint
+gwy_fitter_get_n_params(GwyFitter *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), 0);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    return fitter->nparam;
+}
+
+/**
+ * gwy_fitter_set_params:
+ * @fitter: A non-linear least-squares fitter.
+ * @params: Array with new parameter values.
+ *
+ * Sets the values of parameters in the model of a fitter.
+ **/
+void
+gwy_fitter_set_params(GwyFitter *object,
+                      const gdouble *params)
+{
+    g_return_if_fail(GWY_IS_FITTER(object));
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_if_fail(params || !fitter->nparam);
+    ASSIGN(fitter->param_best, params, fitter->nparam);
+    fitter->has_params = TRUE;
+}
+
+/**
+ * gwy_fitter_get_params:
+ * @fitter: A non-linear least-squares fitter.
+ * @params: Array to store the parameter values to, it can be %NULL.
+ *
+ * Gets the values of parameters in the model of a fitter.
+ *
+ * Returns: %TRUE if the parameters were set, i.e. the fitter has a valid set
+ *          of parameters.
+ **/
+gboolean
+gwy_fitter_get_params(GwyFitter *object,
+                      gdouble *params)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    if (!fitter->has_params)
+        return FALSE;
+    if (params && fitter->nparam)
+        ASSIGN(params, fitter->param_best, fitter->nparam);
+    return TRUE;
+}
+
+/**
+ * gwy_fitter_set_functions:
+ * @fitter: A non-linear least-squares fitter.
+ * @eval_residuum: Function to calculate the sum of squares.
+ * @eval_gradient: Function to calculate the gradient and Hessian.
+ * @constrain: Function to check model parameters constraints, it can be %NULL
+ *             for no constraints.
+ *
+ * Sets the model functions of a fitter.
+ *
+ * This is the low-level interface.  In most cases you do not want to calculate
+ * Hessian yourself, instead, you want to provide just the function to fit and
+ * the data to fit.  See XXX XXX XXX.
+ **/
+void
+gwy_fitter_set_functions(GwyFitter *object,
+                         GwyFitterResiduumFunc eval_residuum,
+                         GwyFitterGradientFunc eval_gradient,
+                         GwyFitterConstrainFunc constrain)
+{
+    g_return_if_fail(GWY_IS_FITTER(object));
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    fitter->status = GWY_FITTER_STATUS_NONE;
+    fitter->eval_residuum = eval_residuum;
+    fitter->eval_gradient = eval_gradient;
+    fitter->constrain = constrain;
+}
+
+/**
+ * gwy_fitter_fit:
+ * @fitter: A non-linear least-squares fitter.
+ * @user_data: Data passed to functions defined in gwy_fitter_set_functions().
+ *
+ * Performs a non-linear least-squares fit with a fitter.
+ *
+ * Returns: %TRUE if the fit terminated normally.  This means after reaching a
+ *          limit (maximum of Marquardt parameter, number of iterations,
+ *          minimum change between iterations, ...).  If it terminated due
+ *          failure to calculate something, %FALSE is returned.
+ **/
+gboolean
+gwy_fitter_fit(GwyFitter *object,
+               gpointer user_data)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(fitter->has_params, FALSE);
+    g_return_val_if_fail(fitter->eval_gradient && fitter->eval_residuum, FALSE);
+    g_return_val_if_fail(fitter->nparam, FALSE);
+    fitter->success = minimize(fitter, user_data);
+    return fitter->success;
+}
+
 #define __LIBGWY_FITTER_C__
 #include "libgwy/libgwy-aliases.c"
 
@@ -472,8 +615,9 @@ gwy_fitter_new(void)
 
 /**
  * GwyFitterStatus:
- * @GWY_FITTER_STATUS_NONE: No termination reason.  This occurs only if the
- *                          fitter has not been used for fitting yet.
+ * @GWY_FITTER_STATUS_NONE: No termination reason.  This occurs if the
+ *                          fitter has not been used for fitting yet or its
+ *                          setup has changed.
  * @GWY_FITTER_STATUS_FUNCTION_FAILURE: Function evaluation failed in the
  *                                      calculation of the sum of squares.
  *                                      If the failure is due to out-of-bound
@@ -516,7 +660,7 @@ gwy_fitter_new(void)
  * GwyFitterResiduumFunc:
  * @param: Values of parameters.
  * @residuum: Location to store the residuum to.
- * @user_data: Data passed to gwy_fitter_minimize().
+ * @user_data: Data passed to gwy_fitter_fit().
  *
  * The type of function calculating the sum of squares for #GwyFitter.
  *
@@ -537,7 +681,7 @@ gwy_fitter_new(void)
  *            the residuum by individual parameters to.
  * @hessian: Array to store the Hessian to.  The elements are stored as
  *           described in gwy_lower_triangular_matrix_index().
- * @user_data: Data passed to gwy_fitter_minimize().
+ * @user_data: Data passed to gwy_fitter_fit().
  *
  * The type of function calculating the gradient and Hessian for #GwyFitter.
  *
@@ -556,7 +700,7 @@ gwy_fitter_new(void)
  *      constraints to.  This means %FALSE for out-of-bound parameters, %TRUE
  *      for good parameters.  It can be %NULL if the caller does not need this
  *      detailed information.
- * @user_data: Data passed to gwy_fitter_minimize().
+ * @user_data: Data passed to gwy_fitter_fit().
  *
  * The type of function checking parameter constraints for #GwyFitter.
  *
