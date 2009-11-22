@@ -20,7 +20,6 @@
 #include "config.h"
 #include <string.h>
 #include <glib.h>
-#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/fitter.h"
 #include "libgwy/math.h"
