@@ -41,6 +41,15 @@ enum {
     N_PROPS
 };
 
+/* This is ordered, higher value means all the lower are available too. */
+typedef enum {
+    VALID_NOTHING = 0,
+    VALID_PARAMS,
+    VALID_FUNCTION,
+    VALID_HESSIAN,
+    VALID_INV_HESSIAN,
+} GwyFitterValid;
+
 typedef struct {
     guint iter_max;
     guint successes_to_get_bored;
@@ -55,8 +64,7 @@ typedef struct {
 typedef struct {
     GwyFitterSettings settings;
     GwyFitterStatus status;
-    gboolean has_params;
-    gboolean success;
+    GwyFitterValid valid;
     guint nparam;
     guint iter;
     guint nsuccesses;
@@ -79,6 +87,7 @@ typedef struct {
     gdouble *hessian;
     gdouble *scaled_hessian;
     gdouble *normal_matrix;
+    gdouble *inv_hessian;
     /* Other memory */
     gboolean *bad_param;
 } Fitter;
@@ -206,7 +215,7 @@ static void
 fitter_set_n_param(Fitter *fitter,
                    guint nparam)
 {
-    fitter->has_params = FALSE;
+    fitter->valid = 0;
     fitter->status = GWY_FITTER_STATUS_NONE;
 
     if (fitter->nparam == nparam)
@@ -216,7 +225,7 @@ fitter_set_n_param(Fitter *fitter,
     fitter->nparam = nparam;
 
     g_free(fitter->workspace);
-    fitter->workspace = nparam ? g_new(gdouble, 6*nparam + 3*matrix_len) : NULL;
+    fitter->workspace = nparam ? g_new(gdouble, 6*nparam + 4*matrix_len) : NULL;
 
     fitter->param = fitter->workspace;
     fitter->param_best = fitter->param + nparam;
@@ -228,6 +237,7 @@ fitter_set_n_param(Fitter *fitter,
     fitter->hessian = fitter->step + nparam;
     fitter->scaled_hessian = fitter->hessian + matrix_len;
     fitter->normal_matrix = fitter->scaled_hessian + matrix_len;
+    fitter->inv_hessian = fitter->normal_matrix + matrix_len;
 
     g_free(fitter->bad_param);
     fitter->bad_param = nparam ? g_new(gboolean, nparam) : NULL;
@@ -252,10 +262,13 @@ eval_residuum_with_check(Fitter *fitter,
         fitter->status = GWY_FITTER_STATUS_SILENT_FAILURE;
         ok = FALSE;
     }
-    if (!ok
-        && fitter->constrain
-        && !fitter->constrain(fitter->param, fitter->bad_param, user_data))
+
+    if (ok)
+        fitter->valid = MAX(fitter->valid, VALID_FUNCTION);
+    else if (fitter->constrain
+             && !fitter->constrain(fitter->param, fitter->bad_param, user_data))
         fitter->status = GWY_FITTER_STATUS_PARAM_OFF_BOUNDS;
+
     return ok;
 }
 
@@ -287,10 +300,13 @@ eval_gradient_with_check(Fitter *fitter,
             }
         }
     }
-    if (!ok
-        && fitter->constrain
-        && !fitter->constrain(fitter->param, fitter->bad_param, user_data))
+
+    if (ok)
+        fitter->valid = MAX(fitter->valid, VALID_PARAMS);
+    else if (fitter->constrain
+             && !fitter->constrain(fitter->param, fitter->bad_param, user_data))
         fitter->status = GWY_FITTER_STATUS_PARAM_OFF_BOUNDS;
+
     return ok;
 }
 
@@ -363,6 +379,8 @@ minimize(Fitter *fitter,
 {
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
+
+    fitter->valid = MIN(fitter->valid, VALID_PARAMS);
     ASSIGN(fitter->param, fitter->param_best, nparam);
     gwy_memclear(fitter->bad_param, nparam);
 
@@ -422,8 +440,10 @@ step_fail:
             }
         }
         gwy_memclear(fitter->bad_param, nparam);
-        if (!eval_gradient_with_check(fitter, user_data))
+        if (!eval_gradient_with_check(fitter, user_data)) {
+            fitter->valid = MAX(fitter->valid, VALID_HESSIAN-1);
             return FALSE;
+        }
         fitter->status = GWY_FITTER_STATUS_NONE;
     }
     if (!fitter->status)
@@ -435,6 +455,32 @@ step_fail:
     */
 
     return TRUE;
+}
+
+static gboolean
+invert_hessian(Fitter *fitter)
+{
+    guint nparam = fitter->nparam;
+    guint matrix_len = MATRIX_LEN(nparam);
+    ASSIGN(fitter->inv_hessian, fitter->hessian, matrix_len);
+    /* Make possible inversion of fitter with naively fixed parameters. */
+    gboolean zero[nparam];
+    gwy_memclear(zero, nparam);
+    for (guint i = 0; i < nparam; i++) {
+        if (SLi(fitter->inv_hessian, i, i) == 0.0) {
+            SLi(fitter->inv_hessian, i, i) = 1.0;
+            zero[i] = TRUE;
+        }
+    }
+    if (gwy_cholesky_invert(fitter->inv_hessian, fitter->nparam)) {
+        fitter->valid = MAX(fitter->valid, VALID_INV_HESSIAN);
+        for (guint i = 0; i < nparam; i++) {
+            if (zero[i])
+                SLi(fitter->inv_hessian, i, i) = 0.0;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 
 /****************************************************************************
@@ -525,7 +571,7 @@ gwy_fitter_set_params(GwyFitter *object,
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     g_return_if_fail(params || !fitter->nparam);
     ASSIGN(fitter->param_best, params, fitter->nparam);
-    fitter->has_params = TRUE;
+    fitter->valid = VALID_PARAMS;
 }
 
 /**
@@ -544,7 +590,7 @@ gwy_fitter_get_params(GwyFitter *object,
 {
     g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-    if (!fitter->has_params)
+    if (fitter->valid < VALID_PARAMS)
         return FALSE;
     if (params && fitter->nparam)
         ASSIGN(params, fitter->param_best, fitter->nparam);
@@ -597,11 +643,92 @@ gwy_fitter_fit(GwyFitter *object,
 {
     g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-    g_return_val_if_fail(fitter->has_params, FALSE);
+    fitter->status = GWY_FITTER_STATUS_NONE;
+    g_return_val_if_fail(fitter->valid >= VALID_PARAMS, FALSE);
     g_return_val_if_fail(fitter->eval_gradient && fitter->eval_residuum, FALSE);
     g_return_val_if_fail(fitter->nparam, FALSE);
-    fitter->success = minimize(fitter, user_data);
-    return fitter->success;
+    return minimize(fitter, user_data);
+}
+
+/**
+ * gwy_fitter_get_residuum:
+ * @fitter: A non-linear least-squares fitter.
+ *
+ * Obtains the sum of squares of a fitter.
+ *
+ * This functions returns the value corresponding to the best fit.  Use
+ * gwy_fitter_eval_residuum() to explicitly calculate the sum of squares of
+ * differences.
+ *
+ * Returns: The sum of squares of differences.  Negative return value means
+ *          the sum of squares is not available.
+ **/
+gdouble
+gwy_fitter_get_residuum(GwyFitter *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), -1.0);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    return (fitter->valid >= VALID_FUNCTION) ? fitter->f_best : -1.0;
+}
+
+/**
+ * gwy_fitter_eval_residuum:
+ * @fitter: A non-linear least-squares fitter.
+ * @user_data: Data passed to functions defined in gwy_fitter_set_functions().
+ *
+ * Calculates the sum of squares of a fitter.
+ *
+ * This functions unconditionally recalculates the sum of squares for the
+ * current set of parameters.  Use gwy_fitter_get_residuum() to obtain the
+ * value corresponding to the best fit.
+ *
+ * Returns: The sum of squares of differences.  Negative return value means
+ *          it is not possible to calculate it, e.g. due to unset or
+ *          out-of-bound parameters.
+ **/
+gdouble
+gwy_fitter_eval_residuum(GwyFitter *object,
+                         gpointer user_data)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), -1.0);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(fitter->eval_residuum, -1.0);
+    if (fitter->valid < VALID_PARAMS)
+        return -1.0;
+    return eval_residuum_with_check(fitter, user_data) ? fitter->f : -1.0;
+}
+
+/**
+ * gwy_fitter_get_inverse_hessian:
+ * @fitter: A non-linear least-squares fitter.
+ * @ihessian: Array to store the inverse Hessian to.  The elements are stored
+ *            as described in gwy_lower_triangular_matrix_index().
+ *
+ * Obtains the inverse Hessian of a fitter.
+ *
+ * The inverse Hessian can be used to calculate the covariance matrix and
+ * parameter errors.  The inversion can fail due to numerical errors.  Of
+ * course, if the fitting failed it is not possible to calculate the inverse
+ * Hessian either.
+ *
+ * Returns: %TRUE if the inverse Hessian was filled, %FALSE if it was not.
+ **/
+gboolean
+gwy_fitter_get_inverse_hessian(GwyFitter *object,
+                               gdouble *ihessian)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    if (fitter->valid < VALID_HESSIAN)
+        return FALSE;
+    if (fitter->valid < VALID_INV_HESSIAN)
+        invert_hessian(fitter);
+    if (fitter->valid >= VALID_INV_HESSIAN) {
+        if (ihessian)
+            ASSIGN(ihessian, fitter->inv_hessian, MATRIX_LEN(fitter->nparam));
+        return TRUE;
+    }
+    return FALSE;
 }
 
 #define __LIBGWY_FITTER_C__
@@ -643,8 +770,7 @@ gwy_fitter_fit(GwyFitter *object,
  *                                      change in parameters and/or sum of
  *                                      squares smaller than given limit.
  * @GWY_FITTER_STATUS_CANNOT_STEP: It was not possible to calculate the
- *                                 parameter changes due to numerical
- *                                 instability.
+ *                                 parameter changes due to numerical errors.
  * @GWY_FITTER_STATUS_NEGATIVE_HESSIAN: Hessian is not numerically positive
  *                                      definite.  FIXME: unused.
  *
