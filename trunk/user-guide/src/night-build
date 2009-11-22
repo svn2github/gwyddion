@@ -47,7 +47,7 @@ function user_guide_autostuff() {
   # This runs configure again...
   make -k version
   # Build common files deterministically here
-  make -k LANGUAGES=
+  make -k common
 }
 
 
