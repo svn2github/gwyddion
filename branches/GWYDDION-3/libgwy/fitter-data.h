@@ -47,7 +47,7 @@ typedef gboolean (*GwyFitterVectorDFunc)(guint i,
                                          gpointer user_data,
                                          const gboolean *fixed,
                                          gdouble *diff,
-                                         const gdouble *params);
+                                         gdouble *params);
 
 #define GWY_TYPE_FITTER_DATA \
     (gwy_fitter_data_get_type())
@@ -73,26 +73,27 @@ struct _GwyFitterDataClass {
     GObjectClass g_object_class;
 };
 
-GType          gwy_fitter_data_get_type            (void)                             G_GNUC_CONST;
-GwyFitterData* gwy_fitter_data_new                 (void)                             G_GNUC_MALLOC;
-void           gwy_fitter_data_set_point_function  (GwyFitterData *fitterdata,
-                                                    guint nparams,
-                                                    GwyFitterPointFunc function);
-void           gwy_fitter_data_set_point_weight    (GwyFitterData *fitterdata,
-                                                    GwyFitterPointWeightFunc weight);
-void           gwy_fitter_data_set_point_data      (GwyFitterData *fitterdata,
-                                                    GwyPointXY *data,
-                                                    guint ndata);
-void           gwy_fitter_data_set_vector_function (GwyFitterData *fitterdata,
-                                                    guint nparams,
-                                                    GwyFitterVectorFunc function);
-void           gwy_fitter_data_set_vector_vfunction(GwyFitterData *fitterdata,
-                                                    guint nparams,
-                                                    GwyFitterVectorVFunc function,
-                                                    GwyFitterVectorDFunc derivative);
-void           gwy_fitter_data_set_vector_data     (GwyFitterData *fitterdata,
-                                                    guint ndata,
-                                                    gpointer user_data);
+guint          gwy_fitter_data_get_max_vararg_params(void);
+GType          gwy_fitter_data_get_type             (void)                             G_GNUC_CONST;
+GwyFitterData* gwy_fitter_data_new                  (void)                             G_GNUC_MALLOC;
+void           gwy_fitter_data_set_point_function   (GwyFitterData *fitterdata,
+                                                     guint nparams,
+                                                     GwyFitterPointFunc function);
+void           gwy_fitter_data_set_point_weight     (GwyFitterData *fitterdata,
+                                                     GwyFitterPointWeightFunc weight);
+void           gwy_fitter_data_set_point_data       (GwyFitterData *fitterdata,
+                                                     GwyPointXY *data,
+                                                     guint ndata);
+void           gwy_fitter_data_set_vector_function  (GwyFitterData *fitterdata,
+                                                     guint nparams,
+                                                     GwyFitterVectorFunc function);
+void           gwy_fitter_data_set_vector_vfunction (GwyFitterData *fitterdata,
+                                                     guint nparams,
+                                                     GwyFitterVectorVFunc function,
+                                                     GwyFitterVectorDFunc derivative);
+void           gwy_fitter_data_set_vector_data      (GwyFitterData *fitterdata,
+                                                     guint ndata,
+                                                     gpointer user_data);
 
 /*
 gboolean   gwy_fitter_data_get_param_errors(GwyFitterData *fitterdata,
