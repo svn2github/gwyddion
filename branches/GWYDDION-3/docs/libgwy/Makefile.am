@@ -9,7 +9,7 @@ IGNORE_SRC =
 
 # Extra options to pass to add-objects.py
 #ADDOBJECTS_OPTIONS = --standard-files=gwyddiontypes
-ADDOBJECTS_OPTIONS =
+ADDOBJECTS_OPTIONS = --standard-files=types
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html

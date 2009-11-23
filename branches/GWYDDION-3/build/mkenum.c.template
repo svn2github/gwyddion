@@ -1,5 +1,13 @@
 /*** BEGIN file-header ***/
-#include "@OWN_HEADER@"
+#include "@OWN_HEADER@.h"
+
+/**
+ * SECTION: @OWN_HEADER@
+ * @title: Enumerated types
+ * @short_description: GTypes for enumerated types
+ *
+ * Generated #GTypes for enumerated types.
+ **/
 
 /*** END file-header ***/
 

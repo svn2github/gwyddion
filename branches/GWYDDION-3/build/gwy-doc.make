@@ -80,7 +80,7 @@ scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB) $(ADD_OBJECTS)
 	gtkdoc-scan --module=$(DOC_MODULE) \
 	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
 	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	    --ignore-headers="$(DOC_MODULE)-aliases.h types.h $(IGNORE_SRC)" \
+	    --ignore-headers="$(DOC_MODULE)-aliases.h $(IGNORE_SRC)" \
 	    --rebuild-sections --rebuild-types \
 	    --deprecated-guards="GWY_DISABLE_DEPRECATED" \
 	    --ignore-decorators="_GWY_STATIC_INLINE"
@@ -107,7 +107,7 @@ sgml-build.stamp: $(CFILE_GLOB) $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MO
 	gtkdoc-mkdb --module=$(DOC_MODULE) \
 	    --source-dir=$(top_srcdir)/$(DOC_SOURCE_DIR) \
 	    --source-dir=$(top_builddir)/$(DOC_SOURCE_DIR) \
-	    --ignore-files="$(DOC_MODULE)-aliases.c types.c $(IGNORE_SRC)" \
+	    --ignore-files="$(DOC_MODULE)-aliases.c $(IGNORE_SRC)" \
 	    --sgml-mode --output-format=xml \
 	    --expand-content-files="$(expand_content_files)" \
 	    --main-sgml-file=$(DOC_MAIN_SGML_FILE) \

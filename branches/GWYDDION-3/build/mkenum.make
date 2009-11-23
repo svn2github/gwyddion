@@ -13,7 +13,7 @@ mkenum_h_template = $(top_srcdir)/build/mkenum.h.template
 # Keep the `GENERATED' string quoted to prevent match here
 mkenum_fix_output = \
 	| sed -e 's/@'ID'@/$(mkenum_id)/g' \
-	      -e 's/@'OWN_HEADER'@/$(mkenum_name).h/g' \
+	      -e 's/@'OWN_HEADER'@/$(mkenum_name)/g' \
 	      -e '1s:.*:/* This is a 'GENERATED' file. */:'
 
 CLEANFILES += $(mkenum_stamp_files)
