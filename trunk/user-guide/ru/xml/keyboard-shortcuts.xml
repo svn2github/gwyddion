@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: keyboard-shortcuts.xml 9469 2009-07-16 20:22:10Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="keyboard-shortcuts">
+  <title>Клавиатурные сокращения</title>
+  <informaltable frame="topbot" id="table-keyboard-shortcuts">
+    <tgroup cols="4" align="left">
+    <?dblatex llXX?>
+      <thead>
+        <row>
+          <entry>Сокращение</entry>
+          <entry>Эквивалент меню</entry>
+          <entry>Контекст</entry>
+          <entry>Действие</entry>
+        </row>
+      </thead>
+      <tbody valign="top">
+        <row>
+          <entry><keycap>Ctrl-Q</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guimenuitem>Выйти</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Выйти из <application>Gwyddion</application>.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-O</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guimenuitem>Открыть</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Открыть файл данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-S</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guimenuitem>Сохранить</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Сохранить текущие данные (будет предложено имя файла, если оно ещё не связано с данными).</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-S</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guimenuitem>Сохранить как</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Сохранить текущие данные под другим именем. Имя файла, связанного с данными будет изменено на другое.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-M</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Файл</guimenu>
+              <guimenuitem>Объединить</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Добавить данные из файла к текущему файлу.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Z</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Правка</guimenu>
+              <guimenuitem>Отменить</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Отменить последний шаг обработки, применённый к текущим данным.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Y</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Правка</guimenu>
+              <guimenuitem>Повторить</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Повторить последний шаг обработки, применённый к текущим данным.</entry>
+        </row>
+        <!-- FIXME: doesn't work after databrowserization
+        <row>
+          <entry><keycap>Ctrl-D</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Edit</guimenu>
+              <guimenuitem>Duplicate</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>toolbox, data window, 3D window, graph window, tool window</entry>
+          <entry>
+            Duplicate data in current data window, including all associated information
+            except file name.
+          </entry>
+        </row>
+        -->
+        <row>
+          <entry><keycap>Ctrl-K</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Правка</guimenu>
+              <guimenuitem>Удалить маску</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Удалить маску с текущего окна данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-K</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Правка</guimenu>
+              <guimenuitem>Удалить презентацию</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Удалить презентацию с текущего окна данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>+</keycap></entry>
+          <entry/>
+          <entry>окно данных</entry>
+          <entry>Приблизить изображение в текущем окне данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>=</keycap></entry>
+          <entry/>
+          <entry>окно данных</entry>
+          <entry>Приблизить изображение в текущем окне данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>-</keycap></entry>
+          <entry/>
+          <entry>окно данных</entry>
+          <entry>Отодвинуть изображение в текущем окне данных.</entry>
+        </row>
+        <row>
+          <entry><keycap>Z</keycap></entry>
+          <entry/>
+          <entry>окно данных</entry>
+          <entry>Масштабировать текущее окно данных до масштаба 1:1.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-F</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Обработка данных</guimenu>
+              <guimenuitem>Повторить последний</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Применить к текущим данным последнюю функцию обработки данных с использованными в последний раз параметрами. Обычно операция тихо и незаметно повторится, но если данный шаг обработки невозможен без участия человека, будет показано диалоговое окно.</entry>
+        </row>
+        <row>
+          <entry><keycap>Ctrl-Shift-F</keycap></entry>
+          <entry>
+            <menuchoice>
+              <guimenu>Обработка данных</guimenu>
+              <guimenuitem>Повторить с настройкой последний</guimenuitem>
+            </menuchoice>
+          </entry>
+          <entry>окно инструментов, окно данных, окно трёхмерного просмотра, окно графика, окно инструмента</entry>
+          <entry>Перепоказать диалог параметров последней функции обработки данных. Если операция не требует установки параметров, она будет проведена незамедлительно.</entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -6,9 +6,7 @@
   <para>Этот раздел предоставляет справочные данные о различных форматах, синтаксисе и опциях команд, которые могут оказаться полезными. Большая часть относится к  продвинутому использованию Gwyddion, кроме, возможно, <link linkend="keyboard-shortcuts">таблицы общих сочетаний клавиш</link> и <link linkend="file-formats">таблицы поддерживаемых файловых форматов</link>.</para>
   <xi:include href="gwyddion.xml"/>
   <xi:include href="gwyddion-thumbnailer.xml"/>
-  <!--
   <xi:include href="keyboard-shortcuts.xml"/>
-  -->
   <xi:include href="file-formats.xml"/>
   <xi:include href="expressions.xml"/>
   <!--
