@@ -280,7 +280,7 @@ gwy_expr_init(GwyExpr *expr)
     priv->expr = g_string_new(NULL);
 }
 
-void
+static void
 gwy_expr_finalize(GObject *object)
 {
     GwyExpr *expr = GWY_EXPR(object);

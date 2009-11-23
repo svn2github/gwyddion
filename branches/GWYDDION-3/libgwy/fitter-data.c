@@ -71,13 +71,19 @@ gwy_fitter_data_class_init(GwyFitterDataClass *klass)
     gobject_class->finalize = gwy_fitter_data_finalize;
 }
 
+GwyFitterData*
+gwy_fitter_data_new(void)
+{
+    return g_object_newv(GWY_TYPE_FITTER_DATA, 0, NULL);
+}
+
 static void
 gwy_fitter_data_init(GwyFitterData *object)
 {
     FitterData *fitter_data = GWY_FITTER_DATA_GET_PRIVATE(object);
 }
 
-void
+static void
 gwy_fitter_data_finalize(GObject *object)
 {
     FitterData *fitter_data = GWY_FITTER_DATA_GET_PRIVATE(object);

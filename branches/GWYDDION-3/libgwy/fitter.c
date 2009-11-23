@@ -158,7 +158,7 @@ gwy_fitter_init(GwyFitter *object)
     fitter->lambda = fitter->settings.lambda_start;
 }
 
-void
+static void
 gwy_fitter_finalize(GObject *object)
 {
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
