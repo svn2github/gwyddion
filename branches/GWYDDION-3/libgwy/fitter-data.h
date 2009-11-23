@@ -34,20 +34,20 @@ typedef gdouble (*GwyFitterPointWeightFunc)(gdouble x,
                                             ...);
 
 typedef gboolean (*GwyFitterVectorFunc)(guint i,
-                                      gpointer user_data,
-                                      gdouble *retval,
-                                      ...);
+                                        gpointer user_data,
+                                        gdouble *retval,
+                                        ...);
 
 typedef gboolean (*GwyFitterVectorVFunc)(guint i,
-                                       gpointer user_data,
-                                       gdouble *retval,
-                                       const gdouble *params);
+                                         gpointer user_data,
+                                         gdouble *retval,
+                                         const gdouble *params);
 
 typedef gboolean (*GwyFitterVectorDFunc)(guint i,
-                                       gpointer user_data,
-                                       const gboolean *fixed,
-                                       gdouble *diff,
-                                       const gdouble *params);
+                                         gpointer user_data,
+                                         const gboolean *fixed,
+                                         gdouble *diff,
+                                         const gdouble *params);
 
 #define GWY_TYPE_FITTER_DATA \
     (gwy_fitter_data_get_type())
@@ -75,32 +75,32 @@ struct _GwyFitterDataClass {
 
 GType          gwy_fitter_data_get_type            (void)                             G_GNUC_CONST;
 GwyFitterData* gwy_fitter_data_new                 (void)                             G_GNUC_MALLOC;
-void           gwy_fitter_data_set_point_function  (GwyFitterData *functionfitter,
+void           gwy_fitter_data_set_point_function  (GwyFitterData *fitterdata,
                                                     guint nparams,
                                                     GwyFitterPointFunc function);
-void           gwy_fitter_data_set_point_weight    (GwyFitterData *functionfitter,
+void           gwy_fitter_data_set_point_weight    (GwyFitterData *fitterdata,
                                                     GwyFitterPointWeightFunc weight);
-void           gwy_fitter_data_set_point_data      (GwyFitterData *functionfitter,
+void           gwy_fitter_data_set_point_data      (GwyFitterData *fitterdata,
                                                     GwyPointXY *data,
                                                     guint ndata);
-void           gwy_fitter_data_set_vector_function (GwyFitterData *datafitter,
+void           gwy_fitter_data_set_vector_function (GwyFitterData *fitterdata,
                                                     guint nparams,
                                                     GwyFitterVectorFunc function);
-void           gwy_fitter_data_set_vector_vfunction(GwyFitterData *datafitter,
+void           gwy_fitter_data_set_vector_vfunction(GwyFitterData *fitterdata,
                                                     guint nparams,
                                                     GwyFitterVectorVFunc function,
                                                     GwyFitterVectorDFunc derivative);
-void           gwy_fitter_data_set_vector_data     (GwyFitterData *datafitter,
+void           gwy_fitter_data_set_vector_data     (GwyFitterData *fitterdata,
                                                     guint ndata,
                                                     gpointer user_data);
 
 /*
-gboolean   gwy_fitter_data_get_param_errors(GwyFitterData *datafitter,
+gboolean   gwy_fitter_data_get_param_errors(GwyFitterData *fitterdata,
                                             gdouble *errors);
-gboolean   gwy_fitter_data_get_covariance_matrix(GwyFitterData *datafitter,
+gboolean   gwy_fitter_data_get_covariance_matrix(GwyFitterData *fitterdata,
                                                  gdouble *covar,
                                                  gboolean variance_covariance);
-gdouble    gwy_fitter_data_get_chi(GwyFitterData *datafitter);
+gdouble    gwy_fitter_data_get_chi(GwyFitterData *fitterdata);
 */
 
 G_END_DECLS
