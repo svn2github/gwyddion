@@ -147,6 +147,7 @@ typedef gboolean (*GwyFitterVectorFunc6)(guint i,
                                          gdouble p5);
 
 typedef struct {
+    GwyFitter *fitter;
     GwyFitterInterfaceType type;
     guint nparam;
     guint ndata;
@@ -167,9 +168,17 @@ typedef struct {
 
 typedef FitterData GwyFitterDataPrivate;
 
-static void gwy_fitter_data_finalize    (GObject *object);
-static void set_n_params(FitterData *fitterdata,
-                         guint nparam);
+static void     gwy_fitter_data_finalize(GObject *object);
+static void     gwy_fitter_data_dispose (GObject *object);
+static void     set_n_params            (FitterData *fitterdata,
+                                         guint nparam);
+static gboolean fitter_data_residuum    (const gdouble *param,
+                                         gdouble *residuum,
+                                         gpointer user_data);
+static gboolean fitter_data_gradient    (const gdouble *param,
+                                         gdouble *gradient,
+                                         gdouble *hessian,
+                                         gpointer user_data);
 
 G_DEFINE_TYPE(GwyFitterData, gwy_fitter_data, G_TYPE_OBJECT)
 
@@ -181,6 +190,7 @@ gwy_fitter_data_class_init(GwyFitterDataClass *klass)
     g_type_class_add_private(klass, sizeof(GwyFitterDataPrivate));
 
     gobject_class->finalize = gwy_fitter_data_finalize;
+    gobject_class->dispose = gwy_fitter_data_dispose;
 }
 
 GwyFitterData*
@@ -192,7 +202,7 @@ gwy_fitter_data_new(void)
 static void
 gwy_fitter_data_init(GwyFitterData *object)
 {
-    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    G_GNUC_UNUSED FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
 }
 
 static void
@@ -203,10 +213,29 @@ gwy_fitter_data_finalize(GObject *object)
     G_OBJECT_CLASS(gwy_fitter_data_parent_class)->finalize(object);
 }
 
+static void
+gwy_fitter_data_dispose(GObject *object)
+{
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    GWY_OBJECT_UNREF(fitterdata->fitter);
+    G_OBJECT_CLASS(gwy_fitter_data_parent_class)->dispose(object);
+}
+
 guint
 gwy_fitter_data_get_max_vararg_params(void)
 {
     return VARARG_PARAM_MAX;
+}
+
+static void
+ensure_fitter(FitterData *fitterdata)
+{
+    if (fitterdata->fitter)
+        return;
+
+    fitterdata->fitter = gwy_fitter_new();
+    gwy_fitter_set_functions(fitterdata->fitter,
+                             fitter_data_residuum, fitter_data_gradient);
 }
 
 /* The values would not confuse us when using the current interface but we
@@ -246,6 +275,9 @@ set_n_params(FitterData *fitterdata,
     if (nparam)
         gwy_memclear(fitterdata->fixed_param, nparam);
     fitterdata->nparam = nparam;
+
+    ensure_fitter(fitterdata);
+    gwy_fitter_set_n_params(fitterdata->fitter, nparam);
 }
 
 void
@@ -600,6 +632,24 @@ fitter_data_gradient(const gdouble *param,
         }
     }
     return TRUE;
+}
+
+gboolean
+gwy_fitter_data_fit(GwyFitterData *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER_DATA(object), FALSE);
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    ensure_fitter(fitterdata);
+    return gwy_fitter_fit(fitterdata->fitter, fitterdata);
+}
+
+GwyFitter*
+gwy_fitter_data_get_fitter(GwyFitterData *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER_DATA(object), NULL);
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    ensure_fitter(fitterdata);
+    return fitterdata->fitter;
 }
 
 #define __LIBGWY_FITTER_DATA_C__
