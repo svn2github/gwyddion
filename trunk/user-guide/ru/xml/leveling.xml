@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: leveling.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="leveling-and-background">
+  <title>Выравнивание данных и вычитание фона</title>
+  <sect2 id="leveling">
+    <title>Выравнивание</title>
+    <para>Данные, полученные со сканирующих зондовых микроскопов нередко вообще никак не выровнены; микроскоп напрямую выводит сырые данные, пересчитанные из напряжения на пьезосканере, измерения деформации, данных интерферометра или значений другой системы обнаружения. Такой способ экспорта данных позволяет выбрать пользователю его/её собственный метод выравнивания данных.</para>
+    <para>Выбор метода выравнивания должен быть основан на конфигурации вашего СЗМ. В основном, для систем с независимыми сканерами для каждой оси, обычно достаточно вычета плоскости. Для систем со сканером/сканерами, двигающимися по всем трём осям (сканер на пьезотрубке) нужно использовать выравнивание вычетом полинома второго порядка.</para>
+    <para>Разумеется, можно использовать выравнивание более высоких порядков для любых данных, однако, при этом могут быть утрачены реальные свойства поверхности (а именно её волнистость) и, следовательно, изменятся все статистические функции и величины, получаемые из анализа данной поверхности.</para>
+    <sect3 id="fix-zero">
+      <title>Исправить нуль и обнулить среднее значение.</title>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Исправить нуль</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Обнулить среднее значение</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Простейшие модули из связанных с выравниванием данных - <link linkend="fix-zero">исправить нуль</link> and <link linkend="fix-zero">обнулить среднее значение</link></para>
+    </sect3>
+    <sect3 id="plane-level">
+      <title>Выравнивание плоскости <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_level-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>выравнивание плоскости</primary></indexterm>
+      <indexterm>
+        <primary>выравнивание</primary>
+        <secondary>вычет средней плоскости</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Выровнять плоскость</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Выравнивание плоскости обычно является одной из первых функций, применяемых к необработанным данным СЗМ. Плоскость рассчитывается по всем точкам изображения и затем вычитается из данных.</para>
+      <para>Если на изображение наложена маска, выравнивание плоскости предлагает или использовать данные под маской для аппроксимации плоскостью, исключить данные под маской или игнорировать маску и использовать полный набор данных.</para>
+      <tip>Можно быстро применить выравнивание плоскости щелчком правой кнопкой мыши на окно изображения и выбором <guimenuitem>Вычесть плоскость</guimenuitem>.</tip>
+    </sect3>
+    <sect3 id="three-point-level">
+      <title>Инструмент выравнивания по трём точкам <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_level_triangle-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>выравнивание по трём точкам</primary></indexterm>
+      <indexterm>
+        <primary>выравнивание</primary>
+        <secondary>по трём точкам</secondary>
+      </indexterm>
+      <para>Инструмент <guilabel>Выравнивание по трём точкам</guilabel> может использоваться для выравнивания очень сложных структур поверхности. Пользователь просто выбирает три точки на изображении, которые должны быть на одном уровне, и затем нажимает <guibutton>Применить</guibutton>.  Плоскость рассчитывается по этим трём точкам и вычитается из данных.</para>
+    </sect3>
+    <sect3 id="facet-level">
+      <title>Выравнивание граней <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_facet_level-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>выравнивание граней</primary></indexterm>
+      <indexterm>
+        <primary>выравнивание</primary>
+        <secondary>выровнять грани горизонтально</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Выравнивание граней</guimenuitem>
+        </menuchoice>
+      </para>
+      <para><link linkend="facet-level">Выравнивание граней</link> выравнивает данные вычетом плоскости подобно обычной функции <link linkend="plane-level">Выравнивание плоскости</link>. Однако, плоскость определяется по другому: она пытается сделать грани на поверхности максимально горизонтальными. Таким образом, для поверхностей с большими горизонтальными областями, это ведёт к гораздо лучшим результатам, чем обычное выравнивание плоскостью, особенно если на поверхности присутствуют крупные объекты.</para>
+      <para>С другой стороны, оно не всегда подходит для некоторых типов поверхностей. Сюда входят случайные поверхности. данные с заметным тонким шумом и нетопографичекие изображения поскольку метод не работает нормально если характерные пространственные размеры и <quote>высоты</quote> различаются на много порядков.</para>
+      <para>Подобно <link linkend="plane-level">выравниванию плоскостью</link>, выравнивание граней может включать или исключать данные под маской. Этот выбор предоставляется только если маска есть. </para>
+      <para>Определение ориентации граней - это итерационный процесс, работающий следующим образом. Вначале определяется разброс значений локальных нормалей: <xi:include href="eq-facet-level-dispersion.xml"/>, где <xi:include href="eqi-vec-n_i.xml"/> - вектор нормали к локальной грани (см. link linkend="inclinations-coordinates"&gt;координаты наклонов</para>
+      <informalfigure id="fig-facet-level">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="level-plane-facet.png" format="PNG"/>
+          </imageobject>
+          <caption>Пример выравнивания граней: (a) нескорректированные данные с наклоном; (b) данные, выровненные стандартным вычетом плоскости (Выравнивание плоскости); (c) данные, выровненные выравниванием граней.</caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id="level-rotate">
+      <title>Выравнивание поворотом</title>
+      <indexterm><primary>выравнивание поворотом</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Выравнивание поворотом</guimenuitem>
+        </menuchoice>
+      </para>
+      <para><link linkend="level-rotate">Выравнивание поворотом</link> ведёт себя подобно <link linkend="plane-level">Выравниванию плоскостью</link>, однако, в данном случае аппроксимирующая плоскость не вычитается просто из данных. Вместо этого, этот модуль берёт параметры аппроксимирующей плоскости и поворачивает данные изображения на вычисленную величину таким образом, чтобы данные лежали в плоскости. Таким образом, в отличие от <link linkend="plane-level">выравнивания плоскостью</link>, этот модуль сохраняет данные об углах на изображении.</para>
+    </sect3>
+  </sect2>
+  <sect2 id="background-subtraction">
+    <title>Вычет фона</title>
+    <indexterm><primary>вычет фона</primary></indexterm>
+    <para>Gwyddion содержит несколько специальных модулей для вычета фона. Все они позволяют извлечь вычтенный фон в отдельное окно данных.</para>
+    <tip>Для более тонкого контроля можно использовать любой из <link linkend="basic-filters">инструментов фильтрации</link> Gwyddion на изображении и затем применить модуль <link linkend="data-arithmetic">арифметики над данными</link> чтобы вычесть результат из оригинального изображения.</tip>
+    <sect3 id="polynomial-level">
+      <title>Полиномиальный фон <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_polynom-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>полиномиальный фон</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Полиномиальный фон</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Аппроксимирует данные полиномом заданного порядка и вычитает этот полином. В режиме <guilabel>Независимые степени</guilabel> порядки для полиномов по горизонтали и вертикали могут быть в общем случае заданы различными, т.е. аппроксимирующий полином будет <xi:include href="eq-polynomial-independent-degree.xml"/>, где <xi:include href="eqi-m.xml"/> и <xi:include href="eqi-n.xml"/> - выбранные степени полиномов по горизонтали и вертикали, соответственно. В режиме <guilabel>Ограниченная общая степень</guilabel> аппроксимирующий полином будет <xi:include href="eq-polynomial-limited-total-degree.xml"/>, где <xi:include href="eqi-n.xml"/> - выбранная общая степень.</para>
+      <para>Подобно <link linkend="plane-level">выравниванию плоскостью</link>, вычитание полиномиального фона может включать или исключать данные под маской. Этот выбор предоставляется только если маска есть. </para>
+    </sect3>
+    <sect3 id="revolve-arc">
+      <title>Вращение дуги</title>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Вращение дуги</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Вращает виртуальную <quote>дугу</quote> заданного радиуса горизонтально или вертикально над (или под) данными. Огибающая этой дуги считается фоном, что ведёт к удалению деталей примерно больше, чем радиус дуги.</para>
+    </sect3>
+    <sect3 id="median-level">
+      <title>Выровнять по срединному</title>
+      <indexterm>
+        <primary>срединный</primary>
+        <secondary>удаление фона</secondary>
+      </indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Выровнять по срединному</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Фильтрует данные медианным фильтром с большим ядром и считает результат фоном. Только детали меньше, чем приблизительно размер ядра останутся на изображении.</para>
+      <note>Этот метод может быть очень медленным.</note>
+    </sect3>
+    <sect3 id="fit-sphere">
+      <title>Аппроксимировать сферой</title>
+      <indexterm><primary>аппроксимация сферой</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Аппроксимировать сферой</guimenuitem>
+        </menuchoice>
+      </para>
+      <para>Аппроксимирует данные частью поверхности сферы. Ориентация сферы (т.е. положение центра) и начальные параметры аппроксимации могут быть заданы до начала аппроксимации. Процедура аппроксимации Левенберга-Марквардта используется для расчёта результата.</para>
+    </sect3>
+  </sect2>
+  <sect2 id="curvature">
+    <title>Кривизна</title>
+    <indexterm><primary>кривизна</primary></indexterm>
+      <para>
+        <menuchoice>
+          <guimenu>Обработка данных</guimenu>
+          <guisubmenu>Выравнивание</guisubmenu>
+          <guimenuitem>Кривизна</guimenuitem>
+        </menuchoice>
+      </para>
+    <para>Глобальные параметры кривизны поверхности рассчитываются аппроксимацией квадратичным полиномом и определением его главных осей. Положительные знаки радиусов кривизны соответствуют вогнутой (чашеподобной) поверхности, отрицательные выпуклой (куполоподобной), смешанные знаки обозначают седловидную поверхность.</para>
+    <para>Помимо таблицы параметров, можно задать выбранные линии на данных вдоль осей аппроксимирующей квадратичной поверхности и/или напрямую считать профили вдоль них. Нулевое значение абсциссы момещается в пересечение осей.</para>
+    <para>Подобно функциям вычета фона, если на данных присутствует маска, модуль предлагает включить или исключить данные под маской.</para>
+    <informalfigure id="fig-curvature">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="curvature.png" format="PNG"/>
+        </imageobject>
+        <caption>Снимок экрана диалогового окна кривизны. показывающего сильное отклонение стеклянной пластинки с тонкой плёнкой с сжимающим внутренним напряжением.</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
