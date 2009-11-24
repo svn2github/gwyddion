@@ -709,6 +709,7 @@ gwy_fitter_eval_residuum(GwyFitter *object,
     g_return_val_if_fail(fitter->eval_residuum, -1.0);
     if (fitter->valid < VALID_PARAMS)
         return -1.0;
+    ASSIGN(fitter->param, fitter->param_best, fitter->nparam);
     return eval_residuum_with_check(fitter, user_data) ? fitter->f : -1.0;
 }
 
