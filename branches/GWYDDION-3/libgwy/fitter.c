@@ -601,8 +601,6 @@ gwy_fitter_get_params(GwyFitter *object,
  * @fitter: A non-linear least-squares fitter.
  * @eval_residuum: Function to calculate the sum of squares.
  * @eval_gradient: Function to calculate the gradient and Hessian.
- * @constrain: Function to check model parameters constraints, it can be %NULL
- *             for no constraints.
  *
  * Sets the model functions of a fitter.
  *
@@ -613,14 +611,31 @@ gwy_fitter_get_params(GwyFitter *object,
 void
 gwy_fitter_set_functions(GwyFitter *object,
                          GwyFitterResiduumFunc eval_residuum,
-                         GwyFitterGradientFunc eval_gradient,
-                         GwyFitterConstrainFunc constrain)
+                         GwyFitterGradientFunc eval_gradient)
+
 {
     g_return_if_fail(GWY_IS_FITTER(object));
+    g_return_if_fail(eval_residuum && eval_gradient);
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     fitter->status = GWY_FITTER_STATUS_NONE;
     fitter->eval_residuum = eval_residuum;
     fitter->eval_gradient = eval_gradient;
+}
+
+/**
+ * gwy_fitter_set_constraint:
+ * @fitter: A non-linear least-squares fitter.
+ * @constrain: Function to check model parameters constraints, it can be %NULL
+ *             for no constraints.
+ *
+ * Sets the constraint function of a fitter.
+ **/
+void
+gwy_fitter_set_constraint(GwyFitter *object,
+                          GwyFitterConstrainFunc constrain)
+{
+    g_return_if_fail(GWY_IS_FITTER(object));
+    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     fitter->constrain = constrain;
 }
 
