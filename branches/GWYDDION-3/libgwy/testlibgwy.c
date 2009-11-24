@@ -1995,6 +1995,74 @@ test_inventory_data(void)
 
 /***************************************************************************
  *
+ * Fit Task
+ *
+ ***************************************************************************/
+
+static gboolean
+test_fit_task_gaussian_point(gdouble x,
+                             gdouble *retval,
+                             gdouble xoff,
+                             gdouble yoff,
+                             gdouble b,
+                             gdouble a)
+{
+    x = (x - xoff)/b;
+    *retval = yoff + a*exp(-x*x);
+    return b != 0.0;
+}
+
+static GwyPointXY*
+test_fitter_make_gaussian_data(gdouble xoff,
+                               gdouble yoff,
+                               gdouble b,
+                               gdouble a,
+                               guint ndata,
+                               guint seed)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, seed);
+    GwyPointXY *data = g_new(GwyPointXY, ndata);
+    gdouble xmin = xoff - b*(2 + 3*g_rand_double(rng));
+    gdouble xmax = xoff + b*(2 + 3*g_rand_double(rng));
+    gdouble noise = 0.15*a;
+    for (guint i = 0; i < ndata; i++) {
+        data[i].x = g_rand_double_range(rng, xmin, xmax);
+        test_fit_task_gaussian_point(data[i].x, &data[i].y,
+                                     xoff, yoff, b, a);
+        data[i].y += g_rand_double_range(rng, -noise, noise);
+    }
+    g_rand_free(rng);
+    return data;
+}
+
+static void
+test_fit_task_point(void)
+{
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 1e5 };
+    const gdouble param_init[nparam] = { 2e-5, -1e6, 2e-4, 0.5e5 };
+    GwyFitterData *fitterdata = gwy_fitter_data_new();
+    GwyFitter *fitter = gwy_fitter_data_get_fitter(fitterdata);
+    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+                                                      param[2], param[3],
+                                                      ndata, 42);
+    gwy_fitter_data_set_point_function
+        (fitterdata, nparam, (GwyFitterPointFunc)test_fit_task_gaussian_point);
+    gwy_fitter_set_params(fitter, param_init);
+    gwy_fitter_data_set_point_data(fitterdata, data, ndata);
+    gdouble res_init = gwy_fitter_data_eval_residuum(fitterdata);
+    g_assert(res_init > 0.0);
+    g_assert(gwy_fitter_data_fit(fitterdata));
+    gdouble res = gwy_fitter_get_residuum(fitter);
+    g_assert(res > 0.0);
+    g_assert(res < 0.1*res_init);
+
+    g_object_unref(fitterdata);
+}
+
+/***************************************************************************
+ *
  * Main
  *
  ***************************************************************************/
@@ -2009,9 +2077,9 @@ main(int argc, char *argv[])
     g_type_init();
 
     g_test_add_func("/testlibgwy/version", test_version);
-    g_test_add_func("/testlibgwy/error_list", test_error_list);
+    g_test_add_func("/testlibgwy/error-list", test_error_list);
     g_test_add_func("/testlibgwy/memmem", test_memmem);
-    g_test_add_func("/testlibgwy/next_line", test_next_line);
+    g_test_add_func("/testlibgwy/next-line", test_next_line);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/math/sort", test_math_sort);
     g_test_add_func("/testlibgwy/math/cholesky", test_math_cholesky);
@@ -2019,6 +2087,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/expr/evaluate", test_expr_evaluate);
     g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
+    g_test_add_func("/testlibgwy/fit-task/point", test_fit_task_point);
     g_test_add_func("/testlibgwy/serialize/simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
@@ -2033,7 +2102,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit/arithmetic", test_unit_arithmetic);
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
     /* Requires unit */
-    g_test_add_func("/testlibgwy/value_format/simple", test_value_format_simple);
+    g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
     /* Requires serializable, unit */
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
