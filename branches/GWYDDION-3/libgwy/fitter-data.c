@@ -338,6 +338,47 @@ gwy_fitter_data_set_vector_data(GwyFitterData *object,
     fitterdata->vector_data = user_data;
 }
 
+void
+gwy_fitter_data_set_fixed_params(GwyFitterData *object,
+                                 const gboolean *fixed_params)
+{
+    g_return_if_fail(GWY_IS_FITTER_DATA(object));
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    memcpy(fitterdata->fixed_param, fixed_params,
+           fitterdata->nparam*sizeof(gboolean));
+}
+
+void
+gwy_fitter_data_get_fixed_params(GwyFitterData *object,
+                                 gboolean *fixed_params)
+{
+    g_return_if_fail(GWY_IS_FITTER_DATA(object));
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    memcpy(fixed_params, fitterdata->fixed_param,
+           fitterdata->nparam*sizeof(gboolean));
+}
+
+void
+gwy_fitter_data_set_fixed_param(GwyFitterData *object,
+                                guint i,
+                                gboolean fixed)
+{
+    g_return_if_fail(GWY_IS_FITTER_DATA(object));
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    g_return_if_fail(i < fitterdata->nparam);
+    fitterdata->fixed_param[i] = fixed;
+}
+
+gboolean
+gwy_fitter_data_get_fixed_param(GwyFitterData *object,
+                                guint i)
+{
+    g_return_val_if_fail(GWY_IS_FITTER_DATA(object), FALSE);
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    g_return_val_if_fail(i < fitterdata->nparam, FALSE);
+    return fitterdata->fixed_param[i];
+}
+
 static inline gboolean
 eval_point_vararg(gdouble x, const gdouble *param, guint nparam,
                   GwyFitterPointFunc func,

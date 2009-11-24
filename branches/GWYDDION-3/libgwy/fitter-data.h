@@ -94,6 +94,15 @@ void           gwy_fitter_data_set_vector_vfunction (GwyFitterData *fitterdata,
 void           gwy_fitter_data_set_vector_data      (GwyFitterData *fitterdata,
                                                      guint ndata,
                                                      gpointer user_data);
+void           gwy_fitter_data_set_fixed_params     (GwyFitterData *fitterdata,
+                                                     const gboolean *fixed_params);
+void           gwy_fitter_data_get_fixed_params     (GwyFitterData *fitterdata,
+                                                     gboolean *fixed_params);
+void           gwy_fitter_data_set_fixed_param      (GwyFitterData *fitterdata,
+                                                     guint i,
+                                                     gboolean fixed);
+gboolean       gwy_fitter_data_get_fixed_param      (GwyFitterData *fitterdata,
+                                                     guint i)                          G_GNUC_PURE;
 
 /*
 gboolean   gwy_fitter_data_get_param_errors(GwyFitterData *fitterdata,
