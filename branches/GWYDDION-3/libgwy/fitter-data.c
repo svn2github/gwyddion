@@ -271,7 +271,7 @@ set_n_params(FitterData *fitterdata,
                                       nparam);
     fitterdata->h = g_renew(gdouble, fitterdata->h, 3*nparam);
     fitterdata->mparam = fitterdata->h + nparam;
-    fitterdata->diff = fitterdata->diff + nparam;
+    fitterdata->diff = fitterdata->mparam + nparam;
     if (nparam)
         gwy_memclear(fitterdata->fixed_param, nparam);
     fitterdata->nparam = nparam;
@@ -286,7 +286,7 @@ gwy_fitter_data_set_point_function(GwyFitterData *object,
                                    GwyFitterPointFunc function)
 {
     g_return_if_fail(GWY_IS_FITTER_DATA(object));
-    g_return_if_fail(nparams > VARARG_PARAM_MAX);
+    g_return_if_fail(nparams <= VARARG_PARAM_MAX);
     FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
 
     invalidate_vector_interface(fitterdata);
@@ -327,7 +327,7 @@ gwy_fitter_data_set_vector_function(GwyFitterData *object,
                                     GwyFitterVectorFunc function)
 {
     g_return_if_fail(GWY_IS_FITTER_DATA(object));
-    g_return_if_fail(nparams > VARARG_PARAM_MAX);
+    g_return_if_fail(nparams <= VARARG_PARAM_MAX);
     FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
 
     invalidate_point_interface(fitterdata);
@@ -641,6 +641,15 @@ gwy_fitter_data_fit(GwyFitterData *object)
     FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
     ensure_fitter(fitterdata);
     return gwy_fitter_fit(fitterdata->fitter, fitterdata);
+}
+
+gdouble
+gwy_fitter_data_eval_residuum(GwyFitterData *object)
+{
+    g_return_val_if_fail(GWY_IS_FITTER_DATA(object), FALSE);
+    FitterData *fitterdata = GWY_FITTER_DATA_GET_PRIVATE(object);
+    ensure_fitter(fitterdata);
+    return gwy_fitter_eval_residuum(fitterdata->fitter, fitterdata);
 }
 
 GwyFitter*

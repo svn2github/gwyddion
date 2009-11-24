@@ -103,6 +103,9 @@ void           gwy_fitter_data_set_fixed_param      (GwyFitterData *fitterdata,
                                                      gboolean fixed);
 gboolean       gwy_fitter_data_get_fixed_param      (GwyFitterData *fitterdata,
                                                      guint i)                          G_GNUC_PURE;
+gboolean       gwy_fitter_data_fit                  (GwyFitterData *object);
+gdouble        gwy_fitter_data_eval_residuum        (GwyFitterData *object);
+GwyFitter*     gwy_fitter_data_get_fitter           (GwyFitterData *object)            G_GNUC_PURE;
 
 /*
 gboolean   gwy_fitter_data_get_param_errors(GwyFitterData *fitterdata,
