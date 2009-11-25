@@ -155,6 +155,7 @@ typedef struct {
     gdouble *h;
     gdouble *mparam;
     gdouble *diff;
+    gdouble *matrix;
     /* Point interface */
     GwyFitTaskPointFunc point_func;
     GwyFitTaskPointWeightFunc point_weight;
@@ -285,11 +286,13 @@ static void
 set_n_params(FitTask *fittask,
              guint nparam)
 {
+    guint matrix_len = MATRIX_LEN(nparam);
     fittask->fixed_param = g_renew(gboolean, fittask->fixed_param,
                                       nparam);
-    fittask->h = g_renew(gdouble, fittask->h, 3*nparam);
+    fittask->h = g_renew(gdouble, fittask->h, 3*nparam + matrix_len);
     fittask->mparam = fittask->h + nparam;
     fittask->diff = fittask->mparam + nparam;
+    fittask->matrix = fittask->diff + matrix_len;
     if (nparam)
         gwy_memclear(fittask->fixed_param, nparam);
     fittask->nparam = nparam;
@@ -810,6 +813,128 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
     ensure_fitter(fittask);
     return fittask->fitter;
+}
+
+/**
+ * gwy_fit_task_get_param_errors:
+ * @fittask: A fitting task.
+ * @variance_covariance: %TRUE for unweighted parameters, i.e. to estimate the
+ *                       data statistical errors from the final fit.  %FALSE
+ *                       if the differences between model and fitted data were
+ *                       weighted by inverse squared standard deviations.
+ * @errors: Array of length @nparams to store the parameter standard deviations
+ *          to.
+ *
+ * Evaluates standard deviations of fitting task model parameters after fit.
+ *
+ * Returns: %TRUE if the evaluation succeeded, %FALSE on failue, e.g. if it
+ *          is not possible to invert the Hessian.
+ **/
+gboolean
+gwy_fit_task_get_param_errors(GwyFitTask *object,
+                              gboolean variance_covariance,
+                              gdouble *errors)
+{
+    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
+    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    GwyFitter *fitter = fittask->fitter;
+    gdouble *matrix = fittask->matrix;
+    if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
+        return FALSE;
+    /* If we have valid inverse Hessian we must have residuum too. */
+    gdouble res = 1.0;
+    if (variance_covariance) {
+        res = gwy_fitter_get_residuum(fitter);
+        g_return_val_if_fail(res >= 0.0, FALSE);
+    }
+    guint nparam = fittask->nparam;
+    for (guint i = 0; i < nparam; i++)
+        errors[i] = sqrt(SLi(matrix, i, i)*res/(fittask->ndata - nparam));
+    return TRUE;
+}
+
+/**
+ * gwy_fit_task_get_param_error:
+ * @fittask: A fitting task.
+ * @i: Parameter number.
+ * @variance_covariance: %TRUE for unweighted parameters, i.e. to estimate the
+ *                       data statistical errors from the final fit.  %FALSE
+ *                       if the differences between model and fitted data were
+ *                       weighted by inverse squared standard deviations.
+ *
+ * Evaluates standard deviations of a fitting task model parameter after fit.
+ *
+ * Returns: The standard deviation of @i-th parameter, a negative value on
+ *          failure.
+ **/
+gdouble
+gwy_fit_task_get_param_error(GwyFitTask *object,
+                             guint i,
+                             gboolean variance_covariance)
+{
+    g_return_val_if_fail(GWY_IS_FIT_TASK(object), -1.0);
+    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(i < fittask->nparam, -1.0);
+    if (!gwy_fit_task_get_param_errors(object, variance_covariance, fittask->h))
+        return -1.0;
+    return fittask->h[i];
+}
+
+/**
+ * gwy_fit_task_get_correlations:
+ * @fittask: A fitting task.
+ * @covar: Array to store the correlation matrix to.  The elements are stored
+ *         as described in gwy_lower_triangular_matrix_index().
+ *
+ * Evaluates the parameter correlation matrix of a fitting task after fit.
+ *
+ * Returns: %TRUE if the evaluation succeeded, %FALSE on failue, e.g. if it
+ *          is not possible to invert the Hessian.
+ **/
+gboolean
+gwy_fit_task_get_correlations(GwyFitTask *object,
+                              gdouble *corr_matrix)
+{
+    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
+    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    GwyFitter *fitter = fittask->fitter;
+    gdouble *matrix = fittask->matrix;
+    if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
+        return FALSE;
+    guint nparam = fittask->nparam;
+    gdouble *h = fittask->h;
+    for (guint i = 0; i < nparam; i++)
+        h[i] = sqrt(SLi(matrix, i, i));
+    for (guint i = 0; i < nparam; i++) {
+        for (guint j = 0; j < i; i++)
+            SLi(corr_matrix, i, j) = SLi(matrix, i, j)/(h[i]*h[j]);
+        SLi(corr_matrix, i, i) = 1.0;
+    }
+    return TRUE;
+}
+
+/**
+ * gwy_fit_task_get_chi:
+ * @fittask: A fitting task.
+ *
+ * Evaluates the chi value of a fitting task after fit.
+ *
+ * Note the returned number is meaningful only if the differences between
+ * theoretical and fitted data were weighted using inverse squared standard
+ * deviations.
+ *
+ * Returns: The value of chi, a negative value on failure.
+ **/
+gdouble
+gwy_fit_task_get_chi(GwyFitTask *object)
+{
+    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
+    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    GwyFitter *fitter = fittask->fitter;
+    if (!fitter)
+        return -1.0;
+    gdouble res = gwy_fitter_get_residuum(fitter);
+    return (res < 0.0) ? res : sqrt(res/(fittask->ndata - fittask->nparam));
 }
 
 #define __LIBGWY_FIT_TASK_C__

@@ -73,8 +73,8 @@ struct _GwyFitTaskClass {
 };
 
 guint       gwy_fit_task_get_max_vararg_params(void);
-GType       gwy_fit_task_get_type             (void)                             G_GNUC_CONST;
-GwyFitTask* gwy_fit_task_new                  (void)                             G_GNUC_MALLOC;
+GType       gwy_fit_task_get_type             (void)                              G_GNUC_CONST;
+GwyFitTask* gwy_fit_task_new                  (void)                              G_GNUC_MALLOC;
 void        gwy_fit_task_set_point_function   (GwyFitTask *fittask,
                                                guint nparams,
                                                GwyFitTaskPointFunc function);
@@ -101,19 +101,19 @@ void        gwy_fit_task_set_fixed_param      (GwyFitTask *fittask,
                                                guint i,
                                                gboolean fixed);
 gboolean    gwy_fit_task_get_fixed_param      (GwyFitTask *fittask,
-                                               guint i)                          G_GNUC_PURE;
+                                               guint i)                           G_GNUC_PURE;
 gboolean    gwy_fit_task_fit                  (GwyFitTask *object);
 gdouble     gwy_fit_task_eval_residuum        (GwyFitTask *object);
-GwyFitter*  gwy_fit_task_get_fitter           (GwyFitTask *object)               G_GNUC_PURE;
-
-/*
-gboolean   gwy_fit_task_get_param_errors(GwyFitTask *fittask,
-                                            gdouble *errors);
-gboolean   gwy_fit_task_get_covariance_matrix(GwyFitTask *fittask,
-                                                 gdouble *covar,
-                                                 gboolean variance_covariance);
-gdouble    gwy_fit_task_get_chi(GwyFitTask *fittask);
-*/
+GwyFitter*  gwy_fit_task_get_fitter           (GwyFitTask *object)                G_GNUC_PURE;
+gboolean    gwy_fit_task_get_param_errors     (GwyFitTask *fittask,
+                                               gboolean variance_covariance,
+                                               gdouble *errors);
+gdouble     gwy_fit_task_get_param_error      (GwyFitTask *fittask,
+                                               guint i,
+                                               gboolean variance_covariance)      G_GNUC_PURE;
+gboolean    gwy_fit_task_get_correlations     (GwyFitTask *fittask,
+                                               gdouble *corr_matrix);
+gdouble     gwy_fit_task_get_chi              (GwyFitTask *fittask)               G_GNUC_PURE;
 
 G_END_DECLS
 
