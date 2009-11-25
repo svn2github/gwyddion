@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: main-window.xml 9366 2009-07-07 21:33:22Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="main-window">
+  <title>Главное окно</title>
+  <para>Главное окно, также называемое окном инструментов, является одним из двух окон, которые запускаются при старте Gwyddion (если не заданы файлы, которые нужно открыть), другое - это <link linkend="data-browser">просмотр данных</link>. Закрытие этого окна приводит к выходу из Gwyddion.</para>
+  <para>Окно инструментов содержит набор меню Gwyddion и несколько строк с кнопками, связанными с обычными функциями и инструментами. В меню функции сгруппированы следующим образом:</para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        <guimenu>Файл</guimenu>
+      </term>
+      <listitem>
+        <para>объединяет команды, которые используются для <link linkend="managing-files">загрузки и сохранения файлов</link>. Некоторые из глобальных команд (например, <guimenuitem>Выход</guimenuitem>) также расположены здесь. <link linkend="document-history">История недавно открытых файлов</link> может просматриваться командой <menuchoice><guimenu>Файл</guimenu><guisubmenu>Последние файлы</guisubmenu><guimenuitem>Предыдущие документы</guimenuitem></menuchoice>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Правка</guimenu>
+      </term>
+      <listitem>
+        <para>предоставляет команды управления историей команд (<guimenuitem>Отменить</guimenuitem>, <guimenuitem>Повторить</guimenuitem>) и редакторы для различных глобальных ресурсов, таких как градиенты и материалы для псевдоцветного и трёхмерного представления данных или цвета по умолчанию, используемого для <link linkend="presentations-masks">масок</link>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Обработка данных</guimenu>
+      </term>
+      <listitem>
+        <para>автоматически строится из всех модулей обработки данных, расположенных в каталоге module Gwyddion (зависит от операционной системы). Это меню вместе с панелью кнопок <guilabel>Инструменты</guilabel> содержит большую часть команд, которые могут понадобиться для анализа данных СЗМ. Подмножество этих функций также доступно на панели кнопок <guilabel>Обработка данных</guilabel>. Эти кнопки служат кнопками быстрого запуска часто используемых функций из одноимённого меню. Все функции. доступные на этой панели, также можно найти и в меню.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>График</guimenu>
+      </term>
+      <listitem>
+        <para>подобен <guimenu>Обработке данных</guimenu>, за исключением того. что состоит из функций для работы с графиками. <link linkend="graph-processing">Обработка графиков</link> включает в себя аппроксимацию функциями, экспорт данных графиков и т.п. Панель кнопок <guilabel>График</guilabel> снова содержит подмножество наиболее часто используемых функций меню <guimenu>График</guimenu>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        <guimenu>Мета</guimenu>
+      </term>
+      <listitem>
+        <para>содержит команды. которые предоставляют различную вспомогательную информацию. А именно <link linkend="metadata">метаданные</link> для полей высот (т.е. скорость сканирования, напряжение на зонде и т.п.) и информацию о самой программе <application>Gwyddion</application>.</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>И, наконец, можно найти в главном окне несколько рядов кнопок. Кнопки в панели <guilabel>Вид</guilabel> предоставляют различные функции масштабирования (которые чаще проще вызвать с помощью клавиатурного сокращения или просто изменением размера окна данных) и представления данных в <link linkend="opengl-3d-view">трёхмерном виде</link>. Панели <guilabel>Обработка данных</guilabel> и <guilabel>График</guilabel> содержат избранные функции из одноимённых меню, как описано выше.</para>
+  <para>Панель <guilabel>Инструменты</guilabel> содержит <link linkend="tools">инструменты</link>, т.е. функции, которые напрямую работают с выбранным в окне данных. Эти функции доступны только с этой панели кнопок.</para>
+  <informalfigure id="fig-main-window">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="main_window.png" format="PNG"/>
+      </imageobject>
+      <caption>Главное окно и окно данных, показывающее поверхность микросхемы (образец файла Gwyddion <filename>chip.gwy</filename>).</caption>
+    </mediaobject>
+  </informalfigure>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
