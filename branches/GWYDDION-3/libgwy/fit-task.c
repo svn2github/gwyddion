@@ -158,8 +158,8 @@ typedef struct {
     /* Point interface */
     GwyFitTaskPointFunc point_func;
     GwyFitTaskPointWeightFunc point_weight;
-    GwyPointXY *point_data;
-    /* Vector interface */
+    const GwyPointXY *point_data;
+    /* Indexed data interface */
     GwyFitTaskVectorFunc vector_func;
     GwyFitTaskVectorVFunc vector_vfunc;
     GwyFitTaskVectorDFunc vector_dfunc;
@@ -298,6 +298,14 @@ set_n_params(FitTask *fittask,
     gwy_fitter_set_n_params(fittask->fitter, nparam);
 }
 
+/**
+ * gwy_fit_task_set_point_function:
+ * @fittask: A fitting task.
+ * @nparam: Number of function parameters.
+ * @function: Function to fit.
+ *
+ * Sets the point model function for a fit task.
+ **/
 void
 gwy_fit_task_set_point_function(GwyFitTask *object,
                                 guint nparams,
@@ -325,9 +333,19 @@ gwy_fit_task_set_point_weight(GwyFitTask *object,
     fittask->point_weight = weight;
 }
 
+/**
+ * gwy_fit_task_set_point_data:
+ * @fittask: A fitting task.
+ * @data: Point data, x-values are abscissas y-values are the data to fit.
+ *        The data must exist during the lifetime of @fittask (or until another
+ *        data is set) as @fittask does not make a copy of them.
+ * @ndata: Number of data points.
+ *
+ * Sets the point data for a fit task.
+ **/
 void
 gwy_fit_task_set_point_data(GwyFitTask *object,
-                            GwyPointXY *data,
+                            const GwyPointXY *data,
                             guint ndata)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
@@ -339,6 +357,14 @@ gwy_fit_task_set_point_data(GwyFitTask *object,
     fittask->point_data = data;
 }
 
+/**
+ * gwy_fit_task_set_vector_function:
+ * @fittask: A fitting task.
+ * @nparam: Number of function parameters.
+ * @function: Function to fit.
+ *
+ * Sets the indexed-data model function for a fit task.
+ **/
 void
 gwy_fit_task_set_vector_function(GwyFitTask *object,
                                  guint nparams,
@@ -373,6 +399,14 @@ gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
     fittask->vector_dfunc = derivative;
 }
 
+/**
+ * gwy_fit_task_set_vector_data:
+ * @fittask: A fitting task.
+ * @data: Data passed to #GwyFitTaskVectorFunc.
+ * @ndata: Number of data points.
+ *
+ * Sets the indexed data for a fit task.
+ **/
 void
 gwy_fit_task_set_vector_data(GwyFitTask *object,
                              gpointer user_data,
@@ -388,26 +422,62 @@ gwy_fit_task_set_vector_data(GwyFitTask *object,
     fittask->vector_data = user_data;
 }
 
+/**
+ * gwy_fit_task_set_fixed_params:
+ * @fittask: A fitting task.
+ * @fixed_params: Array of length @nparams with %TRUE for fixed parameters,
+ *                %FALSE for free parameters.  It is also possible to pass
+ *                %NULL to make all parameters free.
+ *
+ * Sets the fixed/free state of fitting parameters of a fit task.
+ **/
 void
 gwy_fit_task_set_fixed_params(GwyFitTask *object,
                               const gboolean *fixed_params)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
-    memcpy(fittask->fixed_param, fixed_params,
-           fittask->nparam*sizeof(gboolean));
+    guint nparam = fittask->nparam;
+    if (fixed_params)
+        memcpy(fittask->fixed_param, fixed_params, nparam*sizeof(gboolean));
+    else
+        gwy_memclear(fittask->fixed_param, nparam);
 }
 
-void
+/**
+ * gwy_fit_task_get_fixed_params:
+ * @fittask: A fitting task.
+ * @fixed_params: Array of length @nparams to fill with %TRUE for fixed
+ *                parameters, %FALSE for free parameters.  It is possible to
+ *                pass %NULL if the caller only needs the return value.
+ *
+ * Gets the fixed/free state of fitting parameters of a fit task.
+ *
+ * Returns: The number of fixed parameters.
+ **/
+guint
 gwy_fit_task_get_fixed_params(GwyFitTask *object,
                               gboolean *fixed_params)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_val_if_fail(GWY_IS_FIT_TASK(object), 0);
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
-    memcpy(fixed_params, fittask->fixed_param,
-           fittask->nparam*sizeof(gboolean));
+    guint nparam = fittask->nparam;
+    guint count = 0;
+    for (guint i = 0; i < nparam; i++)
+        count += fittask->fixed_param[i] ? 1 : 0;
+    if (fixed_params)
+        memcpy(fixed_params, fittask->fixed_param, nparam*sizeof(gboolean));
+    return count;
 }
 
+/**
+ * gwy_fit_task_set_fixed_param:
+ * @fittask: A fitting task.
+ * @i: Parameter number.
+ * @fixed: %TRUE to make the @i-th parameter fixed, %FALSE to make it free.
+ *
+ * Sets the fixed/free state of a fitting parameter of a fit task.
+ **/
 void
 gwy_fit_task_set_fixed_param(GwyFitTask *object,
                              guint i,
@@ -419,6 +489,15 @@ gwy_fit_task_set_fixed_param(GwyFitTask *object,
     fittask->fixed_param[i] = fixed;
 }
 
+/**
+ * gwy_fit_task_get_fixed_param:
+ * @fittask: A fitting task.
+ * @i: Parameter number.
+ *
+ * Gets the fixed/free state of a fitting parameter of a fit task.
+ *
+ * Returns: %TRUE if the @i-th parameter is fixed, %FALSE if it is free.
+ **/
 gboolean
 gwy_fit_task_get_fixed_param(GwyFitTask *object,
                              guint i)
@@ -497,7 +576,7 @@ fit_task_residuum(const gdouble *param,
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(fittask->nparam <= VARARG_PARAM_MAX, FALSE);
         GwyFitTaskPointFunc func = fittask->point_func;
-        GwyPointXY *pts = fittask->point_data;
+        const GwyPointXY *pts = fittask->point_data;
 
         for (guint i = 0; i < fittask->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
@@ -572,7 +651,7 @@ fit_task_gradient(const gdouble *param,
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(nparam <= VARARG_PARAM_MAX, FALSE);
         GwyFitTaskPointFunc func = fittask->point_func;
-        GwyPointXY *pts = fittask->point_data;
+        const GwyPointXY *pts = fittask->point_data;
 
         for (guint i = 0; i < fittask->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
@@ -743,6 +822,46 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  * @g_object_class: Parent class.
  *
  * Class of non-linear least-squares fitter task.
+ **/
+
+/**
+ * GwyFitTaskPointFunc:
+ * @x: Abscissa value to calculate the function value in.
+ * @retval: Location to store the function value in @x to.
+ * @...: Function parameters.
+ *
+ * Type of point model function for fitting task.
+ *
+ * Although the formal function type has a variable number of arguments the
+ * particular functions are expected to take exactly @nparams parameter
+ * arguments (where @nparams is set in gwy_fit_task_set_point_function()).
+ *
+ * The maximum number of parameters for the point model functions is given
+ * by gwy_fit_task_get_max_vararg_params().
+ *
+ * Returns: %TRUE if the calculation succeeded and @reval was set, %FALSE on
+ *          failure.
+ **/
+
+/**
+ * GwyFitTaskVectorFunc:
+ * @i: Index of data point to calculate the function value in.
+ * @user_data: Data set in gwy_fit_task_set_vector_data().
+ * @retval: Location to store the difference between the function value in @x
+ *          and the @i-th data value to.
+ * @...: Function parameters.
+ *
+ * Type of indexed-data model function for fitting task.
+ *
+ * Although the formal function type has a variable number of arguments the
+ * particular functions are expected to take exactly @nparams parameter
+ * arguments (where @nparams is set in gwy_fit_task_set_point_function()).
+ *
+ * The maximum number of parameters for the point model functions is given
+ * by gwy_fit_task_get_max_vararg_params().
+ *
+ * Returns: %TRUE if the calculation succeeded and @reval was set, %FALSE on
+ *          failure.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

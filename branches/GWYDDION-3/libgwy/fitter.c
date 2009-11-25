@@ -764,6 +764,9 @@ gwy_fitter_get_inverse_hessian(GwyFitter *object,
  * to be implemented by the residuum, gradient and Hessian evaluators.
  * #GwyFitTask can supply them for many common cases although if you need
  * something special you can use the #GwyFitter's model-agnostic interface.
+ *
+ * The sign convention for gradients and generally differences between
+ * theoretical and fitted data is theoretical minus data.
  **/
 
 /**

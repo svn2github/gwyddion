@@ -82,7 +82,7 @@ void        gwy_fit_task_set_point_function   (GwyFitTask *fittask,
 void        gwy_fit_task_set_point_weight     (GwyFitTask *fittask,
                                                GwyFitTaskPointWeightFunc weight);
 void        gwy_fit_task_set_point_data       (GwyFitTask *fittask,
-                                               GwyPointXY *data,
+                                               const GwyPointXY *data,
                                                guint ndata);
 void        gwy_fit_task_set_vector_function  (GwyFitTask *fittask,
                                                guint nparams,
@@ -96,7 +96,7 @@ void        gwy_fit_task_set_vector_data      (GwyFitTask *fittask,
                                                guint ndata);
 void        gwy_fit_task_set_fixed_params     (GwyFitTask *fittask,
                                                const gboolean *fixed_params);
-void        gwy_fit_task_get_fixed_params     (GwyFitTask *fittask,
+guint       gwy_fit_task_get_fixed_params     (GwyFitTask *fittask,
                                                gboolean *fixed_params);
 void        gwy_fit_task_set_fixed_param      (GwyFitTask *fittask,
                                                guint i,
