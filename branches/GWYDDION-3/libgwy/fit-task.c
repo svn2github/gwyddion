@@ -22,7 +22,6 @@
 #include <glib.h>
 #include "libgwy/macros.h"
 #include "libgwy/fit-task.h"
-#include "libgwy/math.h"
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
 

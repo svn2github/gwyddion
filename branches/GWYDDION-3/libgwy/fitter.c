@@ -36,7 +36,6 @@
 enum {
     PROP_0,
     PROP_N_PARAMS,
-    PROP_STATUS,
     N_PROPS
 };
 
@@ -137,16 +136,6 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                            "Number of fitting parameters.",
                            0, 1024, 0,
                            G_PARAM_READWRITE));
-
-    g_object_class_install_property
-        (gobject_class,
-         PROP_STATUS,
-         g_param_spec_enum("status",
-                           "Fitter status",
-                           "Reason of termination of the last fitting process.",
-                           GWY_TYPE_FITTER_STATUS, GWY_FITTER_STATUS_NONE,
-                           G_PARAM_READABLE));
-
 }
 
 static void
@@ -200,10 +189,6 @@ gwy_fitter_get_property(GObject *object,
         g_value_set_uint(value, fitter->nparam);
         break;
 
-        case PROP_STATUS:
-        g_value_set_enum(value, fitter->status);
-        break;
-
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -240,6 +225,8 @@ fitter_set_n_param(Fitter *fitter,
 
     g_free(fitter->bad_param);
     fitter->bad_param = nparam ? g_new(gboolean, nparam) : NULL;
+
+    g_object_notify(G_OBJECT(fitter), "n-params");
 }
 
 /* Paranoid evaluation of residuum and derivatives.
