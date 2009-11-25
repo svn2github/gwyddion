@@ -357,8 +357,8 @@ gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
 
 void
 gwy_fit_task_set_vector_data(GwyFitTask *object,
-                             guint ndata,
-                             gpointer user_data)
+                             gpointer user_data,
+                             guint ndata)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);

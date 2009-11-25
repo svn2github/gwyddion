@@ -92,8 +92,8 @@ void        gwy_fit_task_set_vector_vfunction (GwyFitTask *fittask,
                                                GwyFitTaskVectorVFunc function,
                                                GwyFitTaskVectorDFunc derivative);
 void        gwy_fit_task_set_vector_data      (GwyFitTask *fittask,
-                                               guint ndata,
-                                               gpointer user_data);
+                                               gpointer user_data,
+                                               guint ndata);
 void        gwy_fit_task_set_fixed_params     (GwyFitTask *fittask,
                                                const gboolean *fixed_params);
 void        gwy_fit_task_get_fixed_params     (GwyFitTask *fittask,
