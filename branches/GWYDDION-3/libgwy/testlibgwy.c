@@ -2012,6 +2012,21 @@ test_fit_task_gaussian_point(gdouble x,
     return b != 0.0;
 }
 
+static gboolean
+test_fit_task_gaussian_vector(guint i,
+                              gpointer user_data,
+                              gdouble *retval,
+                              gdouble xoff,
+                              gdouble yoff,
+                              gdouble b,
+                              gdouble a)
+{
+    GwyPointXY *pts = (GwyPointXY*)user_data;
+    gdouble x = (pts[i].x - xoff)/b;
+    *retval = yoff + a*exp(-x*x) - pts[i].y;
+    return b != 0.0;
+}
+
 static GwyPointXY*
 test_fitter_make_gaussian_data(gdouble xoff,
                                gdouble yoff,
@@ -2061,6 +2076,31 @@ test_fit_task_point(void)
     g_object_unref(fittask);
 }
 
+static void
+test_fit_task_vector(void)
+{
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 1e5 };
+    const gdouble param_init[nparam] = { 2e-5, -1e6, 2e-4, 0.5e5 };
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+                                                      param[2], param[3],
+                                                      ndata, 42);
+    gwy_fit_task_set_vector_function
+        (fittask, nparam, (GwyFitTaskVectorFunc)test_fit_task_gaussian_vector);
+    gwy_fitter_set_params(fitter, param_init);
+    gwy_fit_task_set_vector_data(fittask, data, ndata);
+    gdouble res_init = gwy_fit_task_eval_residuum(fittask);
+    g_assert(res_init > 0.0);
+    g_assert(gwy_fit_task_fit(fittask));
+    gdouble res = gwy_fitter_get_residuum(fitter);
+    g_assert(res > 0.0);
+    g_assert(res < 0.1*res_init);
+
+    g_object_unref(fittask);
+}
+
 /***************************************************************************
  *
  * Main
@@ -2088,6 +2128,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/expr/vector", test_expr_vector);
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
     g_test_add_func("/testlibgwy/fit-task/point", test_fit_task_point);
+    g_test_add_func("/testlibgwy/fit-task/vector", test_fit_task_vector);
     g_test_add_func("/testlibgwy/serialize/simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
