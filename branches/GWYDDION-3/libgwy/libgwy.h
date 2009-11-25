@@ -24,7 +24,7 @@
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/fitter.h>
-#include <libgwy/fitter-data.h>
+#include <libgwy/fit-task.h>
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/macros.h>

@@ -15,7 +15,7 @@ mkenum_headers = \
 	error-list.h \
 	expr.h \
 	fitter.h \
-	fitter-data.h \
+	fit-task.h \
 	inventory.h \
 	interpolation.h \
 	libgwy.h \
@@ -46,7 +46,7 @@ libgwy3_la_SOURCES = \
 	error-list.c \
 	expr.c \
 	fitter.c \
-	fitter-data.c \
+	fit-task.c \
 	inventory.c \
 	interpolation.c \
 	libgwy.c \

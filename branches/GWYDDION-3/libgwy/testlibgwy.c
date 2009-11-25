@@ -2042,23 +2042,23 @@ test_fit_task_point(void)
     enum { nparam = 4, ndata = 100 };
     const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 1e5 };
     const gdouble param_init[nparam] = { 2e-5, -1e6, 2e-4, 0.5e5 };
-    GwyFitterData *fitterdata = gwy_fitter_data_new();
-    GwyFitter *fitter = gwy_fitter_data_get_fitter(fitterdata);
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
                                                       param[2], param[3],
                                                       ndata, 42);
-    gwy_fitter_data_set_point_function
-        (fitterdata, nparam, (GwyFitterPointFunc)test_fit_task_gaussian_point);
+    gwy_fit_task_set_point_function
+        (fittask, nparam, (GwyFitTaskPointFunc)test_fit_task_gaussian_point);
     gwy_fitter_set_params(fitter, param_init);
-    gwy_fitter_data_set_point_data(fitterdata, data, ndata);
-    gdouble res_init = gwy_fitter_data_eval_residuum(fitterdata);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+    gdouble res_init = gwy_fit_task_eval_residuum(fittask);
     g_assert(res_init > 0.0);
-    g_assert(gwy_fitter_data_fit(fitterdata));
+    g_assert(gwy_fit_task_fit(fittask));
     gdouble res = gwy_fitter_get_residuum(fitter);
     g_assert(res > 0.0);
     g_assert(res < 0.1*res_init);
 
-    g_object_unref(fitterdata);
+    g_object_unref(fittask);
 }
 
 /***************************************************************************
