@@ -1205,7 +1205,8 @@ invent_item_name(GwyInventory *inventory,
  * @type: Object type, if item is object or other type with registered GType.
  *        May be zero to indicate an unregistered item type.
  *        If items are objects inventory takes a reference on them.  Therefore
- *        it is usually unnecessary to set g_object_unref() as destroy().
+ *        it is usually unnecessary to set g_object_unref() as
+ *        #GwyInventoryItemType.destroy().
  * @watchable_signal: Item signal name to watch, used only for objects.
  *                    When item emits this signal, inventory emits
  *                    "item-updated" signal for it.
@@ -1233,8 +1234,9 @@ invent_item_name(GwyInventory *inventory,
  *          gwy_inventory_rename_item().  Note items must not be renamed by any
  *          other means than this method, because when an item is renamed and
  *          the inventory does not know it, very bad things will happen and you
- *          will lose all your good karma.  Also, get_name() must atually
- *          return the new name after renaming.
+ *          will lose all your good karma.  Also,
+ *          #GwyInventoryItemType.get_name() must return the new name after
+ *          renaming.
  * @destroy: Destructor/clean-up function called on item before it is removed
  *           from inventory.  May be %NULL.
  * @copy: Function to create the copy of an item.  If this function and @rename

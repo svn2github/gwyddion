@@ -180,8 +180,8 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * #GwySerializable is an abstract interface for data-like objects that can be
  * serialized and deserialized.  You can serialize any object implementing this
- * interface with gwy_serializable_serialize() and the restore (deserialize) it
- * with gwy_serializable_deserialize().
+ * interface with functions such as gwy_serializable_gio() and the restore
+ * (deserialize) it with gwy_deserialize_memory().
  *
  * Gwyddion implements a simple serialization model: only tree-like structures
  * of objects, formed by ownership, can be serialized and restored.  Any
@@ -427,9 +427,10 @@ gwy_serializable_assign(GwySerializable *destination,
  *           <para>The number of items corresponding to this object is
  *           returned, <emphasis>not including</emphasis> items of contained
  *           objects: every contained object counts only as one item.</para>
- * @done: <para>Frees all temporary data created by itemize().  This method
- *        is optional but if it is defined it is guaranteed to be called after
- *        each itemize().</para>
+ * @done: <para>Frees all temporary data created by
+ *        #GwySerializableInterface.itemize().  This method is optional but if
+ *        it is defined it is guaranteed to be called after each
+ *        #GwySerializableInterface.itemize().</para>
  * @construct: <para>Deserializes an object from array of flattened data
  *             items.</para>
  *             <para>All strings, objects and arrays in the item list are newly
@@ -457,7 +458,8 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * Interface implemented by serializable objects.
  *
- * The object class must implement all the methods, except request() and done()
+ * The object class must implement all the methods, except
+ * #GwySerializableInterface.request() and #GwySerializableInterface.done()
  * that are optional.
  **/
 

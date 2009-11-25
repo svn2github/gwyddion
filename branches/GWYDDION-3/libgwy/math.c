@@ -148,7 +148,7 @@ gwy_cholesky_decompose(gdouble *a, guint n)
 /**
  * gwy_cholesky_solve:
  * @decomp: Lower triangular part of Cholesky decomposition as computed
- *          by gwy_math_cholesky_decompose().
+ *          by gwy_cholesky_decompose().
  * @rhs: Right hand side vector.  It is modified in place, on return it
  *       contains the solution.
  * @n: Dimension of @decomp and length of @rhs.

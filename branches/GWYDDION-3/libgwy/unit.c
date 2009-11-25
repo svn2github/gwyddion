@@ -920,7 +920,7 @@ canonicalize(GwyUnit *unit)
  * gwy_unit_format_for_power10:
  * @unit: A physical unit.
  * @style: Output format style.
- * @power10: Power of 10, in the same sense as gwy_unit_new_parse()
+ * @power10: Power of 10, in the same sense as gwy_unit_new_from_string()
  *           returns it.
  * @format: Value format to update or %NULL to create a new format.
  *
@@ -1319,8 +1319,8 @@ get_prefix(gint power)
  *
  * It provides also methods for formatting of physical quantities.  There are
  * several methods available for constructing a value format with given
- * resolution -- gwy_unit_get_format_with_resolution(), or number of
- * significant digits -- gwy_unit_get_format_with_digits().  These methods
+ * resolution -- gwy_unit_format_with_resolution(), or number of
+ * significant digits -- gwy_unit_format_with_digits().  These methods
  * either create or update a #GwyValueFormat object that can be subsequently
  * used for the formatting.
  **/

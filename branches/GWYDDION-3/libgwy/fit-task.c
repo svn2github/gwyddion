@@ -951,7 +951,7 @@ gwy_fit_task_get_chi(GwyFitTask *object)
  *   <listitem>
  *     Scalar-valued one-dimensional function (called point function), i.e.
  *     function that takes the abscissa value and parameters and it calculates
- *     the theoretical value. The data must be represented by #GwyPointXY-s.
+ *     the theoretical value. The data must be represented by #GwyPointXYs.
  *     This is everything that needs to be supplied.  The calculation of
  *     differences between theoretical and fitted data, derivatives, gradients
  *     and Hessians is done by #GwyFitTask.  Fixed parameters are also handled

@@ -59,7 +59,7 @@ gwy_error_list_add(GwyErrorList **list,
  *
  * Does nothing if @error is %NULL, frees @error if @list is %NULL.  Otherwise,
  * moves the error from @error to @list, freeing @error.  See also
- * g_error_propagate().
+ * g_propagate_error().
  **/
 void
 gwy_error_list_propagate(GwyErrorList **list,

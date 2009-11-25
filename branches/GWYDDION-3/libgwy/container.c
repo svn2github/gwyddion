@@ -2259,8 +2259,8 @@ next:
  * interface, because the container itself is serializable.
  *
  * A new container can be created with gwy_container_new(), items can be stored
- * with functions gwy_container_set_int(), gwy_container_set_double(), etc.
- * read with gwy_container_set_get_int(), gwy_container_get_double(), etc. and
+ * with functions gwy_container_set_int32(), gwy_container_set_double(), etc.
+ * read with gwy_container_get_int32(), gwy_container_get_double(), etc. and
  * removed with gwy_container_remove() or gwy_container_remove_prefix(). A
  * presence of a value can be tested with gwy_container_contains(), convenience
  * functions for reading (updating) a value only if it is present such as

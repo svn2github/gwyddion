@@ -31,7 +31,7 @@
  * Several macros are wrappers of resource freeing functions.  They differ from
  * the original functions by setting the resource variable to an
  * unallocated/invalid state (typically %NULL).  This improves readability
- * of code such as #GObject dispose() methods that can simply do
+ * of code such as #GObjectClass.dispose() methods that can simply do
  * |[
  * GWY_SIGNAL_HANDLER_DISCONNECT(object, handler);
  * GWY_OBJECT_UNREF(object);
