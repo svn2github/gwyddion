@@ -321,6 +321,15 @@ gwy_fit_task_set_point_function(GwyFitTask *object,
     fittask->point_func = function;
 }
 
+/**
+ * gwy_fit_task_set_point_weight:
+ * @fittask: A fitting task.
+ * @weight: Weighting function.
+ *
+ * Sets the point model weight function for a fit task.
+ *
+ * FIXME: To be done.
+ **/
 void
 gwy_fit_task_set_point_weight(GwyFitTask *object,
                               GwyFitTaskPointWeightFunc weight)
@@ -361,7 +370,7 @@ gwy_fit_task_set_point_data(GwyFitTask *object,
  * gwy_fit_task_set_vector_function:
  * @fittask: A fitting task.
  * @nparam: Number of function parameters.
- * @function: Function to fit.
+ * @function: Function to calculate theoretical minus fitted data differences.
  *
  * Sets the indexed-data model function for a fit task.
  **/
@@ -382,6 +391,17 @@ gwy_fit_task_set_vector_function(GwyFitTask *object,
     fittask->vector_func = function;
 }
 
+/**
+ * gwy_fit_task_set_vector_vfunction:
+ * @fittask: A fitting task.
+ * @nparam: Number of function parameters.
+ * @function: Function to calculate theoretical minus fitted data differences.
+ * @derivative: Function to calculate derivatives of @function by parameters.
+ *              It can be %NULL to use the built-in function.
+ *              FIXME: To be done.
+ *
+ * Sets the indexed-data model functions with parameter arrays for a fit task.
+ **/
 void
 gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
                                   guint nparams,
@@ -800,12 +820,46 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  * @title: GwyFitTask
  * @short_description: Non-linear least-squares fitter model and data
  *
+ * A fitting task consists of the model function, the data to fit and the
+ * set of parameters.  The model function can be defined in three independent
+ * manners, listed by increasing abstractness, power and difficulty to use:
+ * <itemizedlist>
+ *   <listitem>
+ *     Scalar-valued one-dimensional function (called point function), i.e.
+ *     function that takes the abscissa value and parameters and it calculates
+ *     the theoretical value. The data must be represented by #GwyPointXY-s.
+ *     This is everything that needs to be supplied.  The calculation of
+ *     differences between theoretical and fitted data, derivatives, gradients
+ *     and Hessians is done by #GwyFitTask.  Fixed parameters are also handled
+ *     by #GwyFitTask.  Optionally, a weighting function can be set.
+ *   </listitem>
+ *   <listitem>
+ *     Scalar-valued function (called indexed-data function) that takes an
+ *     integer index and parameters and it calculates the weighted difference
+ *     between theoretical and fitted data.  The data is opaque for #GwyFitTask
+ *     and it is possible to simulate vector-valued functions by mapping
+ *     several indices to one actual data point.  The calculation of
+ *     derivatives, gradients and Hessians is done by #GwyFitTask.  Fixed
+ *     parameters are also handled by #GwyFitTask.
+ *   </listitem>
+ *   <listitem>
+ *     Scalar-valued function that takes an integer index and array of
+ *     parameters and it calculates the weighted difference between theoretical
+ *     and fitted data.  It can be coupled with a function calculating the
+ *     derivatives by parameters. The data is opaque for #GwyFitTask and it is
+ *     possible to simulate vector-valued functions by mapping several indices
+ *     to one actual data point.  The calculation of derivatives (optionally),
+ *     gradients and Hessians is done by #GwyFitTask.
+ *   </listitem>
+ * </itemizedlist>
+ *
  * Since #GwyFitTask supplies its own evaluation methods and controls the
- * number of parameters, the low-level setup methods gwy_fitter_set_functions()
- * and gwy_fitter_set_n_params() must not be used.  Neither can you use
- * gwy_fitter_fit() and gwy_fitter_eval_residuum() as you cannot pass the
- * correct @user_data; use gwy_fit_task_fit() and gwy_fit_task_eval_residuum()
- * instead of them.
+ * number of parameters, the low-level #GwyFitter setup methods
+ * gwy_fitter_set_functions() and gwy_fitter_set_n_params() must not be used
+ * on its fitter obtained with gwy_fit_task_get_fitter().
+ * Neither you can use gwy_fitter_fit() and gwy_fitter_eval_residuum() as you
+ * cannot pass the correct @user_data; use gwy_fit_task_fit() and
+ * gwy_fit_task_eval_residuum() instead of them.
  **/
 
 /**
@@ -830,7 +884,7 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  * @retval: Location to store the function value in @x to.
  * @...: Function parameters.
  *
- * Type of point model function for fitting task.
+ * Type of point model function for fitting tasks.
  *
  * Although the formal function type has a variable number of arguments the
  * particular functions are expected to take exactly @nparams parameter
@@ -844,14 +898,24 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  **/
 
 /**
+ * GwyFitTaskPointWeightFunc:
+ * @x: Abscissa value to calculate the weight value in.
+ *
+ * Type of point weight function for fitting tasks.
+ *
+ * Returns: The weight, usually the inverse square of the standard deviation
+ *          is used.
+ **/
+
+/**
  * GwyFitTaskVectorFunc:
  * @i: Index of data point to calculate the function value in.
  * @user_data: Data set in gwy_fit_task_set_vector_data().
- * @retval: Location to store the difference between the function value in @x
- *          and the @i-th data value to.
+ * @retval: Location to store the difference between the function value in the
+ *          @i-th point and the @i-th fitter data value to.
  * @...: Function parameters.
  *
- * Type of indexed-data model function for fitting task.
+ * Type of indexed-data model function for fitting tasks.
  *
  * Although the formal function type has a variable number of arguments the
  * particular functions are expected to take exactly @nparams parameter
@@ -859,6 +923,39 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  *
  * The maximum number of parameters for the point model functions is given
  * by gwy_fit_task_get_max_vararg_params().
+ *
+ * Returns: %TRUE if the calculation succeeded and @reval was set, %FALSE on
+ *          failure.
+ **/
+
+/**
+ * GwyFitTaskVectorVFunc:
+ * @i: Index of data point to calculate the function value in.
+ * @user_data: Data set in gwy_fit_task_set_vector_data().
+ * @retval: Location to store the difference between the function value in the
+ *          @i-th point and the @i-th fitter data value to.
+ * @params: Array of length @nparams holding the parameters.
+ *
+ * Type of indexed-data model function with parameter array for fitting tasks.
+ *
+ * Returns: %TRUE if the calculation succeeded and @reval was set, %FALSE on
+ *          failure.
+ **/
+
+/**
+ * GwyFitTaskVectorDFunc:
+ * @i: Index of data point to calculate the function value in.
+ * @user_data: Data set in gwy_fit_task_set_vector_data().
+ * @fixed_params: Array of length @nparams with %TRUE for fixed parameters,
+ *                %FALSE for free parameters.
+ * @diff: Array of length @nparam to fill with function derivatives (weighted
+ *        appropriately, if applicable) in the @i-th point.
+ * @params: Array of length @nparams holding the parameters.  It is writable
+ *          to avoid temporary allocations.  However, when the function returns
+ *          it must hold the same values as when it was called.
+ *
+ * Type of indexed-data model differentiation function with parameter array for
+ * fitting tasks.
  *
  * Returns: %TRUE if the calculation succeeded and @reval was set, %FALSE on
  *          failure.

@@ -30,8 +30,7 @@ typedef gboolean (*GwyFitTaskPointFunc)(gdouble x,
                                         gdouble *retval,
                                         ...);
 
-typedef gdouble (*GwyFitTaskPointWeightFunc)(gdouble x,
-                                             ...);
+typedef gdouble (*GwyFitTaskPointWeightFunc)(gdouble x);
 
 typedef gboolean (*GwyFitTaskVectorFunc)(guint i,
                                          gpointer user_data,
@@ -45,7 +44,7 @@ typedef gboolean (*GwyFitTaskVectorVFunc)(guint i,
 
 typedef gboolean (*GwyFitTaskVectorDFunc)(guint i,
                                           gpointer user_data,
-                                          const gboolean *fixed,
+                                          const gboolean *fixed_params,
                                           gdouble *diff,
                                           gdouble *params);
 
