@@ -193,6 +193,13 @@ gwy_fit_task_class_init(GwyFitTaskClass *klass)
     gobject_class->dispose = gwy_fit_task_dispose;
 }
 
+/**
+ * gwy_fit_task_new:
+ *
+ * Creates a new non-linear least-squares fitting task.
+ *
+ * Returns: A new non-linear least-squares fitting task.
+ **/
 GwyFitTask*
 gwy_fit_task_new(void)
 {
@@ -221,6 +228,17 @@ gwy_fit_task_dispose(GObject *object)
     G_OBJECT_CLASS(gwy_fit_task_parent_class)->dispose(object);
 }
 
+/**
+ * gwy_fit_task_get_max_vararg_params:
+ *
+ * Obtains the maximum supported number of parameters for the vararg
+ * interfaces.
+ *
+ * If you need more parameters than that you have to use the vector interface
+ * with parameters passed in arrays.
+ *
+ * Returns: The maximum number of vararg parameters.
+ **/
 guint
 gwy_fit_task_get_max_vararg_params(void)
 {
@@ -634,6 +652,17 @@ fit_task_gradient(const gdouble *param,
     return TRUE;
 }
 
+/**
+ * gwy_fit_task_fit:
+ * @fittask: A fitting task.
+ *
+ * Performs a non-linear least-squares fitting task.
+ *
+ * This is a wrapper for gwy_fitter_fit(), see its documentation for
+ * discussion.
+ *
+ * Returns: %TRUE if the fit terminated normally.
+ **/
 gboolean
 gwy_fit_task_fit(GwyFitTask *object)
 {
@@ -643,6 +672,17 @@ gwy_fit_task_fit(GwyFitTask *object)
     return gwy_fitter_fit(fittask->fitter, fittask);
 }
 
+/**
+ * gwy_fit_task_eval_residuum:
+ * @fittask: A fitting task.
+ *
+ * Calculates the sum of squares of a fitting task.
+ *
+ * This is a wrapper for gwy_fitter_eval_residuum(), see its documentation for
+ * discussion.
+ *
+ * Returns: The sum of squares of differences; a negative value on failure.
+ **/
 gdouble
 gwy_fit_task_eval_residuum(GwyFitTask *object)
 {
@@ -652,6 +692,18 @@ gwy_fit_task_eval_residuum(GwyFitTask *object)
     return gwy_fitter_eval_residuum(fittask->fitter, fittask);
 }
 
+/**
+ * gwy_fit_task_get_fitter:
+ * @fittask: A fitting task.
+ *
+ * Obtains the #GwyFitter associated with a fitting task.
+ *
+ * The fitter can be used for instance to modify parameter values or to set the
+ * fitting algorithm tunables.  However, certain low-level functions would
+ * break @fittask, see the introductory section for details.
+ *
+ * Returns: The associated fitter.
+ **/
 GwyFitter*
 gwy_fit_task_get_fitter(GwyFitTask *object)
 {
@@ -665,9 +717,16 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION: fitter-data
+ * SECTION: fit-task
  * @title: GwyFitTask
  * @short_description: Non-linear least-squares fitter model and data
+ *
+ * Since #GwyFitTask supplies its own evaluation methods and controls the
+ * number of parameters, the low-level setup methods gwy_fitter_set_functions()
+ * and gwy_fitter_set_n_params() must not be used.  Neither can you use
+ * gwy_fitter_fit() and gwy_fitter_eval_residuum() as you cannot pass the
+ * correct @user_data; use gwy_fit_task_fit() and gwy_fit_task_eval_residuum()
+ * instead of them.
  **/
 
 /**

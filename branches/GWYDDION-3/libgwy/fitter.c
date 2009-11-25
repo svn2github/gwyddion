@@ -753,6 +753,17 @@ gwy_fitter_get_inverse_hessian(GwyFitter *object,
  * SECTION: fitter
  * @title: GwyFitter
  * @short_description: Non-linear least-squares fitting
+ *
+ * #GwyFitter is a relatively abstract implementation of Marquardt-Levenberg
+ * non-linear least-squares fitting algorithm.  It only operates with concepts
+ * such as the sum of squares (often called residuum for short below), its
+ * gradient and Hessian.
+ *
+ * This means it does not know how your data look like of what is the fitted
+ * function.  Features such as weighting and fixed or linked parameters have
+ * to be implemented by the residuum, gradient and Hessian evaluators.
+ * #GwyFitTask can supply them for many common cases although if you need
+ * something special you can use the #GwyFitter's model-agnostic interface.
  **/
 
 /**
@@ -828,6 +839,10 @@ gwy_fitter_get_inverse_hessian(GwyFitter *object,
  *
  * This is a low-level function type; the function must do all weighting and
  * summing of the contributions of individual data points.
+ *
+ * The returned Hessian can be degenerated with certain rows and columns,
+ * corresponding to fixed parameters, filled with.  The corresponding elements
+ * of @gradient must be zero too then.
  *
  * Returns: %TRUE if the evaluation succeeded, %FALSE on failure, e.g. due to
  *          a parameter domain error.  If %FALSE is returned @gradient and
