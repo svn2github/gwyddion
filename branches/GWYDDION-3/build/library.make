@@ -21,19 +21,19 @@ check-symbols: $(library_la) $(library_decl)
 	    $(library_la) $(library_decl) $(srcdir)
 
 $(library_symbols): $(libgwyinclude_HEADERS)
-	$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
 	     $(library_symbols) $(libgwyinclude_HEADERS)
 
 $(library_def): $(library_symbols)
-	$(PYTHON) $(top_srcdir)/build/update-library-def.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-def.py \
 	     $(library_def) $(library_symbols)
 
 $(library_aliases).h: $(library_symbols)
-	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
 	    $(library_aliases).h $(library_symbols)
 
 $(library_aliases).c: $(library_symbols)
-	$(PYTHON) $(top_srcdir)/build/update-aliases.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
 	    $(library_aliases).c $(library_symbols)
 
 .PHONY: check-symbols

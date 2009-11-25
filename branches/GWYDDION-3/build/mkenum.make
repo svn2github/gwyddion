@@ -21,10 +21,11 @@ DISTCLEANFILES += $(mkenum_built_sources)
 BUILT_SOURCES += $(mkenum_built_sources)
 
 $(mkenum_name).h: $(mkenum_name).h.stamp
+	$(AM_V_GEN)
 	@true
 
 $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template)
-	$(GLIB_MKENUMS) --template $(mkenum_h_template) $(mkenum_headers) \
+	$(AM_V_at)$(GLIB_MKENUMS) --template $(mkenum_h_template) $(mkenum_headers) \
 		$(mkenum_fix_output) \
 		>$(mkenum_name).h.tmp \
 	&& ( cmp -s $(mkenum_name).h.tmp $(mkenum_name).h \
@@ -33,7 +34,7 @@ $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template)
 	&& echo timestamp >$(mkenum_name).h.stamp
 
 $(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template)
-	$(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
+	$(AM_V_GEN)$(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
 		$(mkenum_fix_output) \
 		>$(mkenum_name).c.tmp \
 	&& cp $(mkenum_name).c.tmp $(mkenum_name).c  \
