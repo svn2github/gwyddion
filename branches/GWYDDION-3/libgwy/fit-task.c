@@ -291,7 +291,7 @@ set_n_params(FitTask *fittask,
     fittask->h = g_renew(gdouble, fittask->h, 3*nparam + matrix_len);
     fittask->mparam = fittask->h + nparam;
     fittask->diff = fittask->mparam + nparam;
-    fittask->matrix = fittask->diff + matrix_len;
+    fittask->matrix = fittask->diff + nparam;
     if (nparam)
         gwy_memclear(fittask->fixed_param, nparam);
     fittask->nparam = nparam;
