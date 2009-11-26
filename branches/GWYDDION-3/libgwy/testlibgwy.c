@@ -386,16 +386,18 @@ test_math_cholesky(void)
             g_assert(gwy_cholesky_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
                 eps = exp10(j - 15.0);
-                g_assert(fabs(matrix[j] - decomp[j])
-                         <= eps * (fabs(matrix[j]) + fabs(decomp[j])));
+                g_assert_cmpfloat(fabs(matrix[j] - decomp[j]),
+                                  <=,
+                                  eps * (fabs(matrix[j]) + fabs(decomp[j])));
             }
 
             /* Solution */
             eps = exp10(n - 11.0);
             gwy_cholesky_solve(matrix, solution, n);
             for (guint j = 0; j < n; j++) {
-                g_assert(fabs(solution[j] - vector[j])
-                         <= eps * (fabs(solution[j]) + fabs(vector[j])));
+                g_assert_cmpfloat(fabs(solution[j] - vector[j]),
+                                  <=,
+                                  eps * (fabs(solution[j]) + fabs(vector[j])));
             }
 
             /* Inversion */
@@ -407,17 +409,18 @@ test_math_cholesky(void)
             for (guint j = 0; j < n; j++) {
                 eps = exp10(n - 10.0);
                 for (guint k = 0; k < j; k++) {
-                    g_assert(fabs(SLi(unity, j, k)) <= eps);
+                    g_assert_cmpfloat(fabs(SLi(unity, j, k)), <=, eps);
                 }
                 eps = exp10(n - 11.0);
-                g_assert(fabs(SLi(unity, j, j) - 1.0) <= eps);
+                g_assert_cmpfloat(fabs(SLi(unity, j, j) - 1.0), <=, eps);
             }
             /* Double inversion must give the original */
             eps = exp10(n - 12.0);
             g_assert(gwy_cholesky_invert(inverted, n));
             for (guint j = 0; j < matlen; j++) {
-                g_assert(fabs(matrix[j] - inverted[j])
-                         <= eps * (fabs(matrix[j]) + fabs(inverted[j])));
+                g_assert_cmpfloat(fabs(matrix[j] - inverted[j]),
+                                  <=,
+                                  eps * (fabs(matrix[j]) + fabs(inverted[j])));
             }
         }
 
@@ -452,7 +455,9 @@ test_interpolation_constant(GwyInterpolationType interpolation,
 
     for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
         gdouble ivalue = gwy_interpolate_1d(x, data, interpolation);
-        g_assert(fabs(ivalue - value) <= 1e-15 * (fabs(ivalue) + fabs(value)));
+        g_assert_cmpfloat(fabs(ivalue - value),
+                          <=,
+                          1e-15 * (fabs(ivalue) + fabs(value)));
     }
 }
 
@@ -475,7 +480,9 @@ test_interpolation_linear(GwyInterpolationType interpolation,
     for (gdouble x = 0.0; x < 1.0; x += 0.0618) {
         gdouble value = x*b + (1.0 - x)*a;
         gdouble ivalue = gwy_interpolate_1d(x, data, interpolation);
-        g_assert(fabs(ivalue - value) <= 1e-14 * (fabs(ivalue) + fabs(value)));
+        g_assert_cmpfloat(fabs(ivalue - value),
+                          <=,
+                          1e-14 * (fabs(ivalue) + fabs(value)));
     }
 }
 
@@ -885,8 +892,8 @@ test_serialize_simple(void)
     g_assert_cmpint(sertest->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
     g_assert_cmpuint(len, ==, sizeof(ser_test_simple));
-    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
-                    ser_test_simple, sizeof(ser_test_simple)) == 0);
+    g_assert_cmpuint(memcmp(g_memory_output_stream_get_data(memstream),
+                            ser_test_simple, sizeof(ser_test_simple)), ==, 0);
     g_object_unref(stream);
     g_object_unref(sertest);
     g_clear_error(&error);
@@ -909,7 +916,7 @@ test_deserialize_simple(void)
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_simple));
     g_assert_cmpuint(g_slist_length(error_list), ==, 0);
-    g_assert(sertest->flag == FALSE);
+    g_assert_cmpuint(sertest->flag, ==, FALSE);
     g_assert_cmpuint(sertest->len, ==, 0);
     g_assert(sertest->data == NULL);
     g_assert(sertest->s == NULL);
@@ -966,8 +973,8 @@ test_serialize_data(void)
     g_assert_cmpint(sertest->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
     g_assert_cmpuint(len, ==, sizeof(ser_test_data));
-    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
-                    ser_test_data, sizeof(ser_test_data)) == 0);
+    g_assert_cmpint(memcmp(g_memory_output_stream_get_data(memstream),
+                           ser_test_data, sizeof(ser_test_data)), ==, 0);
     g_object_unref(stream);
     g_object_unref(sertest);
     g_clear_error(&error);
@@ -992,9 +999,9 @@ test_deserialize_data(void)
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_data));
     g_assert_cmpuint(g_slist_length(error_list), ==, 0);
-    g_assert(sertest->flag == TRUE);
+    g_assert_cmpint(sertest->flag, ==, TRUE);
     g_assert_cmpuint(sertest->len, ==, G_N_ELEMENTS(data));
-    g_assert(memcmp(sertest->data, data, sizeof(data)) == 0);
+    g_assert_cmpint(memcmp(sertest->data, data, sizeof(data)), ==, 0);
     g_assert_cmpstr(sertest->s, ==, "Test Test");
     g_assert_cmpfloat(sertest->dbl, ==, sin(G_PI/5));
     g_assert_cmpint(sertest->i16, ==, 0x1234);
@@ -1047,8 +1054,8 @@ test_serialize_nested(void)
     g_assert_cmpint(grandchild->done_called, ==, 0);
     len = g_memory_output_stream_get_data_size(memstream);
     g_assert_cmpuint(len, ==, sizeof(ser_test_nested));
-    g_assert(memcmp(g_memory_output_stream_get_data(memstream),
-                    ser_test_nested, sizeof(ser_test_nested)) == 0);
+    g_assert_cmpint(memcmp(g_memory_output_stream_get_data(memstream),
+                           ser_test_nested, sizeof(ser_test_nested)), ==, 0);
     g_object_unref(stream);
     g_object_unref(sertest);
     g_clear_error(&error);
@@ -1071,7 +1078,7 @@ test_deserialize_nested(void)
     g_assert(GWY_IS_SER_TEST(sertest));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
     g_assert_cmpuint(g_slist_length(error_list), ==, 0);
-    g_assert(sertest->flag == FALSE);
+    g_assert_cmpint(sertest->flag, ==, FALSE);
     g_assert_cmpuint(sertest->len, ==, 0);
     g_assert(sertest->data == NULL);
     g_assert(sertest->s == NULL);
@@ -1081,7 +1088,7 @@ test_deserialize_nested(void)
     g_assert(GWY_IS_SER_TEST(child));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
     g_assert_cmpuint(g_slist_length(error_list), ==, 0);
-    g_assert(child->flag == FALSE);
+    g_assert_cmpint(child->flag, ==, FALSE);
     g_assert_cmpuint(child->len, ==, 0);
     g_assert(child->data == NULL);
     g_assert(child->s == NULL);
@@ -1091,7 +1098,7 @@ test_deserialize_nested(void)
     g_assert(GWY_IS_SER_TEST(child));
     g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_nested));
     g_assert_cmpuint(g_slist_length(error_list), ==, 0);
-    g_assert(child->flag == FALSE);
+    g_assert_cmpint(child->flag, ==, FALSE);
     g_assert_cmpuint(child->len, ==, 0);
     g_assert(child->data == NULL);
     g_assert(child->s == NULL);
@@ -1555,7 +1562,7 @@ test_expr_vector(void)
     // Execute ovewriting one of the input fields
     gwy_expr_vector_execute(expr, n, (const gdouble**)input, input[1]);
     // Compare.
-    g_assert(memcmp(input[1], result, n*sizeof(gdouble)) == 0);
+    g_assert_cmpint(memcmp(input[1], result, n*sizeof(gdouble)), ==, 0);
 
     for (gsize i = 1; i < nvars; i++)
         g_free(input[i]);
@@ -2058,27 +2065,43 @@ test_fit_task_check_fit(GwyFitTask *fittask,
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     guint nparam = gwy_fitter_get_n_params(fitter);
     gdouble res_init = gwy_fit_task_eval_residuum(fittask);
-    g_assert(res_init > 0.0);
+    g_assert_cmpfloat(res_init, >, 0.0);
     g_assert(gwy_fit_task_fit(fittask));
     gdouble res = gwy_fitter_get_residuum(fitter);
-    g_assert(res > 0.0);
-    g_assert(res < 0.01*res_init);
+    g_assert_cmpfloat(res, >, 0.0);
+    g_assert_cmpfloat(res, <, 0.01*res_init);
     gdouble param_final[nparam];
     g_assert(gwy_fitter_get_params(fitter, param_final));
     /* Conservative result check */
     gdouble eps = 0.2;
-    g_assert(fabs(param_final[0] - param_good[0]) < eps*fabs(param_good[0]));
-    g_assert(fabs(param_final[1] - param_good[1]) < eps*fabs(param_good[1]));
-    g_assert(fabs(param_final[2] - param_good[2]) < eps*fabs(param_good[2]));
-    g_assert(fabs(param_final[3] - param_good[3]) < eps*fabs(param_good[3]));
+    g_assert_cmpfloat(fabs(param_final[0] - param_good[0]),
+                      <=,
+                      eps*fabs(param_good[0]));
+    g_assert_cmpfloat(fabs(param_final[1] - param_good[1]),
+                      <=,
+                      eps*fabs(param_good[1]));
+    g_assert_cmpfloat(fabs(param_final[2] - param_good[2]),
+                      <=,
+                      eps*fabs(param_good[2]));
+    g_assert_cmpfloat(fabs(param_final[3] - param_good[3]),
+                      <=,
+                      eps*fabs(param_good[3]));
     /* Error estimate check */
     gdouble error[nparam];
     eps = 0.3;
     g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
-    g_assert(fabs((param_final[0] - param_good[0])/error[0]) < 1.0 + eps);
-    g_assert(fabs((param_final[1] - param_good[1])/error[1]) < 1.0 + eps);
-    g_assert(fabs((param_final[2] - param_good[2])/error[2]) < 1.0 + eps);
-    g_assert(fabs((param_final[3] - param_good[3])/error[3]) < 1.0 + eps);
+    g_assert_cmpfloat(fabs((param_final[0] - param_good[0])/error[0]),
+                      <=,
+                      1.0 + eps);
+    g_assert_cmpfloat(fabs((param_final[1] - param_good[1])/error[1]),
+                      <=,
+                      1.0 + eps);
+    g_assert_cmpfloat(fabs((param_final[2] - param_good[2])/error[2]),
+                      <=,
+                      1.0 + eps);
+    g_assert_cmpfloat(fabs((param_final[3] - param_good[3])/error[3]),
+                      <=,
+                      1.0 + eps);
 }
 
 static void
