@@ -286,7 +286,7 @@ eval_gradient_with_check(Fitter *fitter,
     }
 
     if (ok)
-        fitter->valid = MAX(fitter->valid, VALID_PARAMS);
+        fitter->valid = MAX(fitter->valid, VALID_HESSIAN);
     else if (fitter->constrain
              && !fitter->constrain(fitter->param, fitter->bad_param, user_data))
         fitter->status = GWY_FITTER_STATUS_PARAM_OFF_BOUNDS;
@@ -432,11 +432,6 @@ step_fail:
     }
     if (!fitter->status)
         fitter->status = GWY_FITTER_STATUS_MAX_ITER;
-
-    /* TODO: Calculate errors.  But probably elsewhere.
-    if (gwy_cholesky_invert(hessian, gradient, nparam)) {
-    }
-    */
 
     return TRUE;
 }
