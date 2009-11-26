@@ -8,9 +8,7 @@
   <tip>Команда <menuchoice><guimenu>Мета</guimenu><guimenuitem>Совет дня</guimenuitem></menuchoice> показывает советы по обработке данных и показывает полезные возможности. которые вы могли упустить.</tip>
   <xi:include href="main-window.xml"/>
   <xi:include href="data-browser.xml"/>
-  <!--
   <xi:include href="managing-files.xml"/>
-  -->
   <xi:include href="data-windows.xml"/>
   <xi:include href="graph-windows.xml"/>
   <!--
@@ -22,7 +20,9 @@
   <xi:include href="selections.xml"/>
   <xi:include href="opengl-3d-view.xml"/>
   <xi:include href="single-point-spectra.xml"/>
+  -->
   <xi:include href="metadata.xml"/>
+  <!--
   <xi:include href="raw-file-import.xml"/>
   <xi:include href="specific-data-import.xml"/>
   <xi:include href="plugins.xml"/>
