@@ -456,6 +456,14 @@ parse(GwyUnit *unit,
                                         NULL, NULL, NULL);
 
     /* may start with a multiplier, but it must be a power of 10 */
+    while (g_ascii_isspace(string[0]))
+        string++;
+
+    if (string[0] == '*')
+        string++;
+    else if (strncmp(string, "×", sizeof("×")-1) == 0)
+        string += sizeof("×")-1;
+
     q = g_ascii_strtod(string, (gchar**)&end);
     if (end != string) {
         string = end;
