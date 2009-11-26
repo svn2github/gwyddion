@@ -225,8 +225,6 @@ fitter_set_n_param(Fitter *fitter,
 
     g_free(fitter->bad_param);
     fitter->bad_param = nparam ? g_new(gboolean, nparam) : NULL;
-
-    g_object_notify(G_OBJECT(fitter), "n-params");
 }
 
 /* Paranoid evaluation of residuum and derivatives.
@@ -524,6 +522,7 @@ gwy_fitter_set_n_params(GwyFitter *object,
     g_return_if_fail(GWY_IS_FITTER(object));
     Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     fitter_set_n_param(fitter, nparams);
+    g_object_notify(G_OBJECT(object), "n-params");
 }
 
 /**
