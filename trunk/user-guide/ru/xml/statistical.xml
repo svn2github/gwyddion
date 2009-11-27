@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: statistical.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="statistical-analysis">
+  <title>Статистический анализ</title>
+  <para>При анализе случайно шероховатых поверхностей нередко требуется статистический подход для определения некоторого набора типичных величин. В Gwyddion есть несколько различных путей как это можно сделать. В этом разделе мы опишем различные статистические инструменты и модули, представленные в Gwyddion, а также представим основные формулы, которые использовались для разработки лежащих в их основе алгоритмов.</para>
+  <para>Данные сканирующей зондовой микроскопии обычно представляются как двумерное поле данных размера <xi:include href="eqi-NxM.xml"/>, где  <xi:include href="eqi-N.xml"/> и <xi:include href="eqi-M.xml"/> - число строк и столбцов поля данных, соответственно. Настоящая площадь этого поля обозначается как <xi:include href="eqi-L_x-times-L_y.xml"/>, где <xi:include href="eqi-L_x.xml"/> и <xi:include href="eqi-L_y.xml"/> - размеры вдоль соответствующих осей. Интервал дискретизации (расстояние между двумя соседними точками в скане) обозначается <xi:include href="eqi-Delta.xml"/>. Мы предполагаем, что интервал дискретизации одинаков как в <xi:include href="eqi-x.xml"/>, так и в <xi:include href="eqi-y.xml"/>-направлении и что высота поверхности в заданной точке <xi:include href="eqi-coords-x-y.xml"/> может быть описана случайной функцией <xi:include href="eqi-xi-x-y.xml"/> с заданными статистическими свойствами.</para>
+  <para>Следует заметить, что данные АСМ обычно собираются как линейные сканы вдоль оси <xi:include href="eqi-x.xml"/>, которые объединяются вместе, чтобы сформировать двумерное изображение. Следовательно, скорость сканирования в направлении <xi:include href="eqi-x.xml"/> значительно больше, чем скорость сканирования вдоль оси <xi:include href="eqi-y.xml"/>. В результате, статистические свойства данных АСМ обычно собираются вдоль  профилей, параллельных оси <xi:include href="eqi-x.xml"/>, поскольку на них меньше влияет низкочастотный шум и термический дрейф образца.</para>
+  <sect2 id="stat-quantities">
+    <title>Инструмент измерения статистических величин <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_stat_quantities-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <indexterm><primary>Инструмент измерения статистических величин</primary></indexterm>
+    <para>Статистические величины включают в себя основные свойства распределения значений высоты, включая его дисперсию, коэффициент асимметрии и эксцесс. Следующие величины доступны в меню инструмента <guilabel>Статистические величины</guilabel> программы Gwyddion: </para>
+    <itemizedlist>
+      <listitem><indexterm><primary>среднее значение</primary><secondary>области данных</secondary></indexterm><indexterm><primary>срединное значение</primary><secondary>области данных</secondary></indexterm><indexterm><primary>минимум</primary><secondary>области данных</secondary></indexterm><indexterm><primary>максимум</primary><secondary>области данных</secondary></indexterm> Среднее и срединное значение, минимум и максимум.</listitem>
+      <listitem><indexterm><primary>Среднеквадратичное</primary><secondary>области данных</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных.</listitem>
+      <listitem><xi:include href="eqi-R_a.xml"/> значение неровностей высоты: эта величина аналогична среднеквадратичному значению с единственной разницей в экспоненте (степени) в сумме отклонений данных. Поскольку для среднеквадратичного эта экспонента равна <xi:include href="eqi-q-is-2.xml"/>, значение <xi:include href="eqi-R_a.xml"/> рассчитывается с экспонентой <xi:include href="eqi-q-is-1.xml"/> и модулем значений данных (нулевым средним). </listitem>
+      <listitem>Коэффициент асимметрии распределения высот: вычисляется из третьего центрального момента значений данных.</listitem>
+      <listitem>Эксцесс распределения высот:  вычисляется из четвёртого центрального момента значений данных.</listitem>
+      <listitem>Площадь проекции и площадь поверхности: подсчитывается простой триангуляцией.</listitem>
+      <listitem>Средний уклон граней в области: вычисляется усреднением нормализованных векторов направления граней.</listitem>
+    </itemizedlist>
+    <tip>По умолчанию инструмент <quote>Статистические величины</quote> показывает значения для всего изображения. Если вам нужно исследовать определённую область внутри изображения, просто щёлкните мышью и обведите её прямоугольником. Окно инструмента обновится с новыми значениями основанными на новой области. Если вы снова хотите просмотреть статистику для всего изображения, щёлкните один раз на окне данных и инструмент сбросится в исходное состояние. </tip>
+    <para>Точнее, среднеквадратичное отклонение (<xi:include href="eqi-sigma.xml"/>), коэффициент асимметрии  (<xi:include href="eqi-gamma_1.xml"/>), и эксцесс (<xi:include href="eqi-gamma_2.xml"/>) вычисляются из центральных моментов <xi:include href="eqi-i.xml"/>-того порядка <xi:include href="eqi-mu_i.xml"/> в соответствии со следующими формулами: <xi:include href="eq-statistical-quantities.xml"/></para>
+    <para id="surface-area-calculation"><indexterm><primary>расчёт площади поверхности</primary></indexterm> Площадь поверхности оценивается следующим методом. Пусть <xi:include href="eqi-z_i.xml"/> для <xi:include href="eqi-i-is-1-to-4.xml"/> обозначает значения в четырёх соседних точках (центрах пикселей), а <xi:include href="eqi-h_x.xml"/> и <xi:include href="eqi-h_y.xml"/> - размеры пикселей вдоль соответствующих осей. Если дополнительная точка помещается в центр прямоугольника который соответствует общему углу четырёх пикселей (используя среднее значение четырёх пикселей), образуются четыре треугольника и площадь поверхности может быть приближенно оценена суммированием их площадей. Это приводит к следующим формулам для площади одного треугольника (верхняя) и площади поверхности для одного пикселя (нижняя): <xi:include href="eq-area-calculation.xml"/></para>
+    <para>Метод теперь хорошо определён для внутренних точек области. Каждое значение участвует в восьми треугольниках, по два с каждым из четырёх соседних значений. Половина из этих треугольников лежит внутри одного пикселя, другая половина в другом пикселе. Подсчётом площади, лежащей внутри каждого пикселя, общая площадь определяется также для зерён и областей под маской. Осталось определить её для граничных пикселей всего поля данных. Мы это делаем виртуально расширяя поле данных копией граничного ряда пикселей с каждой стороны для нужд расчёта площади поверхности, следовательно делая все интересующие нас пиксели внутренними.</para>
+    <informalfigure id="fig-surface-area-vertices">
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="surface-area-vertices.pdf" format="PDF"/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref="surface-area-vertices.png" format="PNG"/>
+        </imageobject>
+        <caption>Схема триангуляции при рассчёте площади поверхности (слева). Применение схемы триангуляции (справа) к области под маской из трёх пикселей, т.е. зерну. Малые круги обозначают вершины в центрах пикселей <xi:include href="eqi-z_i.xml"/>, тонкие пунктирные линии обозначают границы пикселей, толстыми показано разбиение на треугольники. Оценка площади поверхности равна области под маской (серой) на этой схеме.</caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id="sfunctions">
+    <title>Инструмент статистических функций <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_graph_halfgauss-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <indexterm><primary>Инструмент статистических функций</primary></indexterm>
+    <para>Одномерные статистические функции доступны при использовании инструмента <guilabel>Статистические функции</guilabel>. В окне инструмента можно выбрать, какую функцию нужно рассчитать используя выпадающий список слева, озаглавленный <guilabel>Тип вывода</guilabel>. Предпросмотр графика будет обновляться автоматически. Можно выбрать направление, в котором будут рассчитываться функции (горизонтальное или вертикальное), но, как уже говорилось выше, мы рекомендуем использовать направление быстрой оси сканирования. Также можно выбрать, какой из методов <link linkend="interpolation">интерполяции</link> использовать. После того, как выбор закончен, можно нажать кнопку <guibutton>Применить</guibutton> чтобы закрыть окно инструмента и вывести новое окно графика, которое содержит данные статистики.</para>
+    <tip>Подобно инструменту <link linkend="stat-quantities">Статистические величины</link>, этот инструмент оценивает по умолчанию всё изображение, но при желании можно выбрать область, на которой будет проводиться анализ.</tip>
+    <sect3 id="height-angle-distribution">
+      <title>Функции распределения высоты и углов</title>
+      <indexterm><primary>распределение высоты</primary></indexterm>
+      <indexterm>
+        <primary>распределение углов</primary>
+        <secondary>одномерные</secondary>
+      </indexterm>
+      <para>Простейшими статистическими функциями являются функции распределения высот и наклонов. Они могут быть рассчитаны как неинтегральные (т.е. плотности) и как интегральные. Эти функции рассчитываются как нормированные гистограммы значений высоты или наклона (полученного как производные в выбранном направлении – горизонтальном или вертикальном). Другими словами, величина по абсциссе в <quote>распределении углов</quote> – тангенс угла, а не сам угол.</para>
+      <para>Нормировка плотностей <xi:include href="eqi-rho-of-p.xml"/> (где <xi:include href="eqi-p.xml"/> – соответствующая величина, высота или наклон) такова, что <xi:include href="eq-distribution-density-normalization.xml"/></para>
+      <para>Очевидно, что масштаб значений при этом не зависит от числа точек данных и числа выборок в гистограмме. Интегральные распределения - интегралы плотностей и они принимают значения из интервала <xi:include href="eqi-interval-0-1.xml"/>.</para>
+    </sect3>
+    <sect3 id="first-order-vs-second-order-quantities">
+      <title>Величины первого порядка против величин второго порядка</title>
+      <para>Величины распределений высот и углов относятся к статистическим величинам первого порядка, описывающих только статистические свойства отдельных точек. Однако, для полного описания свойств поверхности необходимо изучать функции более высоких порядков. Обычно применяются статистические величины второго порядка, описывающие взаимные соотношения пар точек на поверхности. К этим функциям относятся функция автокорреляции, функция корреляции высота-высота и функция спектральной плотности мощности. Далее следует описание каждой из них:</para>
+    </sect3>
+    <sect3 id="autocorrelation-1d">
+      <title>Функция автокорреляции</title>
+      <indexterm><primary>одномерная функция автокорреляции</primary></indexterm>
+      <indexterm><primary>двумерная функция автокорреляции</primary></indexterm>
+      <para>Функция автокорреляции задаётся как <xi:include href="eq-autocorrelation-definition.xml"/>, где <xi:include href="eqi-z_1.xml"/> и <xi:include href="eqi-z_2.xml"/> - значения высоты в точках <xi:include href="eqi-coords-x_1-y_1.xml"/>, <xi:include href="eqi-coords-x_2-y_2.xml"/>; при этом <xi:include href="eqi-tau_x-is-x_1-minus-x_2.xml"/> и <xi:include href="eqi-tau_y-is-y_1-minus-y_2.xml"/>. Функция <xi:include href="eqi-w-z_1-z_2-tau_x-tau_y.xml"/> обозначает двумерную плотность вероятности случайной функции <xi:include href="eqi-xi-x-y.xml"/> соответствующей точкам <xi:include href="eqi-coords-x_1-y_1.xml"/>, <xi:include href="eqi-coords-x_2-y_2.xml"/>, и расстоянию между этими точками <xi:include href="eqi-tau.xml"/>.</para>
+      <para id="autocorrelation-2d">Из дискретных данных АСМ можно извлечь эту функцию в виде <xi:include href="eq-autocorrelation-discrete-2d.xml"/>, где <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>, <xi:include href="eqi-n-is-tau_y-over-Delta-y.xml"/>. Следовательно, эта функия может быть рассчитана для дискретного набора значений  <xi:include href="eqi-tau_x.xml"/> и <xi:include href="eqi-tau_y.xml"/>, разделённых интервалами дискретизации <xi:include href="eqi-Delta-x.xml"/> и <xi:include href="eqi-Delta-y.xml"/>, соответственно. Двумерная функция автокореляции может быть посчитана с помощью меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Статистика</guisubmenu><guimenuitem>Двумерная автокорреляция</guimenuitem></menuchoice>.</para>
+      <para>Для измерений АСМ мы обычно рассчитываем одномерную функцию автокорреляции основанную на профилях вдоль оси быстрого сканирования. Она может, следовательно, рассчитываться из дискретных данных АСМ как <xi:include href="eq-autocorrelation-discrete-1d.xml"/>.</para>
+      <para>Одномерная функция автокорреляции нередко считается имеющей форму гауссовой, т.е. заданной следующим соотношением: <xi:include href="eq-autocorrelation-gaussian.xml"/>, где <xi:include href="eqi-sigma.xml"/> обозначает среднеквадратичное отклонение высот и <xi:include href="eqi-T.xml"/> обозначает длину автокорреляции.</para>
+      <para>Для экспоненциальной функции автокорреляции у нас получается следующее соотношение <xi:include href="eq-autocorrelation-exponential.xml"/></para>
+      <informalfigure id="fig-gaussian-acf">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="gaussian-acf.pdf" format="PDF"/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref="gaussian-acf.png" format="PNG"/>
+          </imageobject>
+          <caption>Функция автокорреляции, полученная для модели гауссово случайной шероховатой поверхности (т.е. с гауссовой функцией автокорреляции) с <xi:include href="eqi-sigma-approx-20-nm.xml"/> и <xi:include href="eqi-T-approx-300-nm.xml"/>.</caption>
+        </mediaobject>
+      </informalfigure>
+      <note>Для оптических измерений (т.е. спектроскопической рефлектометрии, эллипсометрии) гауссова функция автокорреляции обычно ожидается достаточно хорошо совпадающей со свойствами поверхности. Однако, некоторые статьи связанные с ростом поверхности и оксидированием обычно предполагают, что экспоненциальная форма ближе к реальности.</note>
+    </sect3>
+    <sect3 id="height-height-correlation-1d">
+      <title>Функция корреляции высота-высота</title>
+      <indexterm><primary>функция корреляции высота-высота</primary></indexterm>
+      <para>Различие между функцией корреляции высота-высота и функцией автокорреляции очень мало. Как и в случае с функцией автокорреляции, мы суммируем произведение двух различных значений. Для функции автокорреляции эти значения представляют различные расстояния между точками. Для функции корреляции высота-высота мы вместо этого используем степень разности между точками.</para>
+      <para>Для измерений АСМ мы обычно рассчитываем одномерную функцию корреляции высота-высота, основанную только на профилях вдоль быстрой оси сканирования. Следовательно, она может быть рассчитана из дискретных значений данных АСМ как <xi:include href="eq-height-height-correlation-discrete.xml"/>, где <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>. Таким образом, функция может быть рассчитана на дискретном наборе значений <xi:include href="eqi-tau_x.xml"/>  разделённом интервалом дискретизации <xi:include href="eqi-Delta-x.xml"/>.</para>
+      <para>Одномерная функция корреляции высота-высота нередко считается имеющей форму гауссовой, т.е. заданной следующим соотношением: <xi:include href="eq-height-height-correlation-gaussian.xml"/>, где <xi:include href="eqi-sigma.xml"/> обозначает среднеквадратичное отклонение высот и <xi:include href="eqi-T.xml"/> обозначает длину автокорреляции.</para>
+      <para>Для экспоненциальной функции корреляции высота-высота у нас получается следующее соотношение <xi:include href="eq-height-height-correlation-exponential.xml"/></para>
+      <para>На следующем рисунке функция корреляции высота-высота построена для модели гауссовой поверхности. Она аппроксимирована формулой, приведённой выше. Результирующие значения <xi:include href="eqi-sigma.xml"/> и <xi:include href="eqi-T.xml"/> полученные аппроксимацией функцией корреляции высота-высота практически те же, что и для функции автокорреляции.</para>
+      <informalfigure id="fig-gaussian-hhcf">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="gaussian-hhcf.pdf" format="PDF"/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref="gaussian-hhcf.png" format="PNG"/>
+          </imageobject>
+          <caption>Функция корреляции высота-высота полученная для модели гауссовой случайно шероховатой поверхности с <xi:include href="eqi-sigma-approx-20-nm.xml"/> и <xi:include href="eqi-T-approx-300-nm.xml"/>.</caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id="power-spectral-density-1d">
+      <title>Функция спектральной плотности мощности</title>
+      <indexterm>
+        <primary>функция спектральной плотности мощности</primary>
+        <secondary>одномерная</secondary>
+      </indexterm>
+      <para>Двумерная функция спектральной плотности мощности может быть записана в терминах преобразования Фурье от функции автокорреляции <xi:include href="eq-power-spectral-density-fft.xml"/></para>
+      <para>Подобно функции автокорреляции, мы также обычно рассчитываем одномерную функцию спектральной плотности мощности, которая задана уравнением <xi:include href="eq-power-spectral-density-1d.xml"/></para>
+      <para>Эта функция может быть посчитана с помощью быстрого преобразования Фурье следующим образом: <xi:include href="eq-power-spectral-density-1d-fft.xml"/>, где <xi:include href="eqi-P_j-of-K_x.xml"/> - коэффициент Фурье для <xi:include href="eqi-j.xml"/>-той строки, т.е. <xi:include href="eq-power-spectral-density-Pj.xml"/></para>
+      <para>Если мы выберем гауссову функцию автокорреляции, соответствующее гауссово соотношение для функции спектральной плотности мощности будет </para>
+      <para>Для поверхности с экспоненциальной функцией автокорреляции мы имеем <xi:include href="eq-power-spectral-density-1d-exponential.xml"/></para>
+      <para>На следующем рисунке построены результирующая функция спектральной плотности мощности и её аппроксимация для той же самой поверхности, что использовалась для <link linkend="fig-gaussian-acf">функции автокорреляции</link> и <link linkend="fig-gaussian-hhcf">функции корреляции высота-высота</link>. Можно видеть, что функция может быть снова аппроксимирована гауссовой функцией спектральной плотности мощности. Результирующие значения <xi:include href="eqi-sigma.xml"/> и <xi:include href="eqi-T.xml"/> практически те же самые, что и для аппроксимации функции автокорреляции и функции корреляции высота-высота.</para>
+      <informalfigure id="fig-gaussian-psdf">
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="gaussian-psdf.pdf" format="PDF"/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref="gaussian-psdf.png" format="PNG"/>
+          </imageobject>
+          <caption>Функция спектральной плотности мощности полученная для данных, смоделированных с гауссовой функцией автокорреляции.</caption>
+        </mediaobject>
+      </informalfigure>
+      <para id="psdf-radial"><indexterm><primary>функция спектральной плотности мощности</primary><secondary>радиальная</secondary></indexterm> Мы можем также ввести радиальную функцию спектральной плотности мощности <xi:include href="eqi-W_r-of-K.xml"/>, которая, естественно, содержит ту же самую информацию, что и одномерная функция спектральной плотности мощности для изотропных шероховатых поверхностей: <xi:include href="eq-power-spectral-density-radial.xml"/></para>
+      <para>Для поверхности с гауссовой функцией автокорреляции эта функция может быть выражена как <xi:include href="eq-power-spectral-density-radial-gaussian.xml"/>, для поверхностей с экспоненциальной как <xi:include href="eq-power-spectral-density-radial-exponential.xml"/></para>
+      <tip>В Gwyddion можно аппроксимировать все представленные здесь статистические функции их гауссовыми и экспоненциальными формами. Чтобы это сделать, сначала нажмите <guibutton>Применить</guibutton> в окне инструмента <link linkend="sfunctions">Статистические функции</link>. При этом будет создано новое окно графика. При выбранном этом окне, нажмите на <menuchoice><guimenu>График</guimenu><guimenuitem><link linkend="graph-fit">Аппроксимировать функцией</link></guimenuitem></menuchoice>.</tip>
+    </sect3>
+    <sect3 id="minkowski-functionals">
+      <title>Функционалы Минковского</title>
+      <indexterm><primary>функционалы Минковского</primary></indexterm>
+      <para>Функционалы Минковского используются для описания глобальных геометрических характеристик структур. Двумерный дискретный вариант объема  <xi:include href="eqi-V.xml"/>, поверхности <xi:include href="eqi-S.xml"/> и связности (характеристики Эйлера - Пуанкаре) <xi:include href="eqi-chi.xml"/> рассчитываются в соответствии со следующими формулами: <xi:include href="eq-minkowski-functionals.xml"/>. Здесь <xi:include href="eqi-N.xml"/> обозначает общее число пикселей, <xi:include href="eqi-N_white.xml"/> обозначает число <quote>белых</quote> пикселей, пикселей выше порога. Пиксели. которые ниже порога называются <quote>чёрными</quote>. Символ <xi:include href="eqi-N_bound.xml"/> обозначает число границ между чёрными и белыми пикселями. И, наконец, <xi:include href="eqi-C_white.xml"/> и <xi:include href="eqi-C_black.xml"/> обозначают число непрерывных наборов белых и чёрных пикселей, соответственно.</para>
+      <para>Для изображений с непрерывным набором значений функционалы параметризованы по значению порога высоты <xi:include href="eqi-theta.xml"/>, который отделяет белые пиксели от чёрных,  т.е. они могут рассматриваться как функции этого параметра. И эти функции <xi:include href="eqi-V-of-theta.xml"/>, <xi:include href="eqi-S-of-theta.xml"/> и <xi:include href="eqi-chi-of-theta.xml"/> строятся.</para>
+    </sect3>
+  </sect2>
+  <sect2 id="line-stats">
+    <title>Инструмент статистики по строкам/столбцам <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_graph_vertical-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <indexterm><primary>Инструмент статистики по строкам/столбцам</primary></indexterm>
+    <para>Инструмент рассчитывает численные характеристики каждой строки или столбца и строит их как функции его/её положения. Это делает его в некоторой степени дополнительным к инструменту <link linkend="sfunctions">статистические функции</link>. Доступные величины включают в себя:</para>
+    <itemizedlist>
+      <listitem><indexterm><primary>среднее значение</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>срединное значение</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>минимум</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>максимум</primary><secondary>строки/столбца</secondary></indexterm> Среднее и срединное значение, минимум и максимум.</listitem>
+      <listitem><indexterm><primary>Среднеквадратичное</primary><secondary>строки/столбца</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных <xi:include href="eqi-R_q.xml"/>..</listitem>
+      <listitem>Коэффициент асимметрии и эксцесс распределения высот.</listitem>
+      <listitem>Длина линии поверхности. Эта величина оценивается как общая длина прямых сегментов, соединяющих значения данных в строке (столбце).</listitem>
+      <listitem>Общий уклон, т.е. тангенс средней линии, аппроксимирующей строку (столбец).</listitem>
+      <listitem>Тангенс <xi:include href="eqi-beta_0.xml"/>. Это характеристика крутизны локальных уклонов, близко связанная с поведением функций автокорреляции и корреляции высота-высота в нуле. Для дискретных значений она вычисляется следующим образом: <xi:include href="eq-tan-beta0.xml"/></listitem>
+      <listitem>Стандартные параметры шероховатости <link linkend="iso-Ra">Ra</link>, <link linkend="iso-Rz">Rz</link>, <link linkend="iso-Rt">Rt</link>.</listitem>
+    </itemizedlist>
+    <para>В дополнение к графику, показывающему значения для индивидуальных строк/столбцов, среднее значение и среднеквадратическое отклонение выбранной величины рассчитывается из набора отдельных значений для строк/столбцов.</para>
+  </sect2>
+  <sect2 id="slope-distribution">
+    <title>Двумерная статистика наклонов</title>
+    <indexterm><primary>распределение наклона (двумерное)</primary></indexterm>
+    <indexterm>
+      <primary>распределение углов</primary>
+      <secondary>двумерные</secondary>
+    </indexterm>
+    <para>Несколько функций в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Статистика</guisubmenu></menuchoice> оперируют статистикой двухмерных наклонов (производных).</para>
+    <para><guimenuitem>Распределение наклонов</guimenuitem> рассчитывает простое двухмерное распределение производных, то есть горизонтальные и вертикальные координаты поля данных это горизонтальные и вертикальные производные, соответственно. Наклоны могут быть посчитаны как центральные производные (одна сторона на границах изображения) или, если включена опция <guilabel>Использовать аппроксимацию локальной плоскостью</guilabel>, аппроксимацией локальной плоскостью окрестности каждой точки и используя её градиент. <guimenuitem>Распределение наклонов</guimenuitem> имеет также другой режим работы называемый <guilabel>График по углам</guilabel>, в котором он строит распределение <xi:include href="eqi-r-to-2.xml"/> от <xi:include href="eqi-phi.xml"/>, где мы вводим полярные координаты <xi:include href="eqi-coords-r-phi.xml"/> на плоскости производных. Соотношение между декартовыми координатами производных двумерного распределения наклонов и <link linkend="inclinations-coordinates">углами наклона граней</link> задаются следующей формулой: <xi:include href="eq-facet-theta-phi.xml"/></para>
+    <para id="angle-distribution">Функция <guimenuitem>Распределение углов</guimenuitem> - инструмент визуализации, который не рассчитывает распределение в строгом смысле. Для каждой производной <xi:include href="eqi-v.xml"/> строится круг точек. удовлетворяющих уравнению <xi:include href="eq-angle-distribution.xml"/>. Число точек на круге задаётся параметром <guilabel>Число шагов</guilabel>.</para>
+  </sect2>
+  <xi:include href="facet-analysis.xml"/>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
