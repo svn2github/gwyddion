@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: table-grain-quantities.xml 9497 2009-07-18 17:51:51Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<informaltable frame="none" id="table-grain-quantities">
+  <tgroup cols="3">
+    <?dblatex lll?>
+    <thead>
+      <row>
+        <entry>Символ</entry>
+        <entry>Группа</entry>
+        <entry>Название</entry>
+      </row>
+    </thead>
+    <tbody>
+      <row>
+        <entry><varname>x_c</varname></entry>
+        <entry>Положение</entry>
+        <entry>Положение центра x</entry>
+      </row>
+      <row>
+        <entry><varname>y_c</varname></entry>
+        <entry>Положение</entry>
+        <entry>Положение центра y</entry>
+      </row>
+      <row>
+        <entry><varname>z_min</varname></entry>
+        <entry>Value</entry>
+        <entry>Минимальное значение</entry>
+      </row>
+      <row>
+        <entry><varname>z_max</varname></entry>
+        <entry>Value</entry>
+        <entry>Максимальное значение</entry>
+      </row>
+      <row>
+        <entry><varname>z_m</varname></entry>
+        <entry>Value</entry>
+        <entry>Среднее значение</entry>
+      </row>
+      <row>
+        <entry><varname>z_med</varname></entry>
+        <entry>Value</entry>
+        <entry>Срединное значение</entry>
+      </row>
+      <row>
+        <entry><varname>b_min</varname></entry>
+        <entry>Value</entry>
+        <entry>Минимальное значение на границе</entry>
+      </row>
+      <row>
+        <entry><varname>b_max</varname></entry>
+        <entry>Value</entry>
+        <entry>Максимальное значение на границе</entry>
+      </row>
+      <row>
+        <entry><varname>A_0</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Площадь проекции</entry>
+      </row>
+      <row>
+        <entry><varname>A_s</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Площадь поверхности</entry>
+      </row>
+      <row>
+        <entry><varname>a_eq</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Сторона эквивалентного квадрата</entry>
+      </row>
+      <row>
+        <entry><varname>r_eq</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Радиус эквивалентного диска</entry>
+      </row>
+      <row>
+        <entry><varname>A_h</varname></entry>
+        <entry>Площадь</entry>
+        <entry>Площадь выше половинной высоты</entry>
+      </row>
+      <row>
+        <entry><varname>V_0</varname></entry>
+        <entry>Объём</entry>
+        <entry>Объём между нулевой плоскостью и поверхностью</entry>
+      </row>
+      <row>
+        <entry><varname>V_min</varname></entry>
+        <entry>Объём</entry>
+        <entry>Объём между поверхностью и плоскостью, проходящей через минимум зерна</entry>
+      </row>
+      <row>
+        <entry><varname>V_L</varname></entry>
+        <entry>Объём</entry>
+        <entry>Объём между поверхностью и фоном, вычисленным по Лапласу</entry>
+      </row>
+      <row>
+        <entry><varname>L_b0</varname></entry>
+        <entry>Граница</entry>
+        <entry>Длина границы проекции</entry>
+      </row>
+      <row>
+        <entry><varname>D_min</varname></entry>
+        <entry>Граница</entry>
+        <entry>Минимальный ограничивающий размер</entry>
+      </row>
+      <row>
+        <entry><varname>phi_min</varname></entry>
+        <entry>Граница</entry>
+        <entry>Направление минимального ограничивающего размера</entry>
+      </row>
+      <row>
+        <entry><varname>D_max</varname></entry>
+        <entry>Граница</entry>
+        <entry>Максимальный ограничивающий размер</entry>
+      </row>
+      <row>
+        <entry><varname>phi_max</varname></entry>
+        <entry>Граница</entry>
+        <entry>Направление максимального ограничивающего размера</entry>
+      </row>
+      <row>
+        <entry><varname>theta</varname></entry>
+        <entry>Уклон</entry>
+        <entry>Наклон θ</entry>
+      </row>
+      <row>
+        <entry><varname>phi</varname></entry>
+        <entry>Уклон</entry>
+        <entry>Наклон φ</entry>
+      </row>
+    </tbody>
+  </tgroup>
+</informaltable>
