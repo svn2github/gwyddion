@@ -146,7 +146,7 @@ Failed: /home/me/.thumbnails/fail/gnome-thumbnail-factory/<replaceable>MD5</repl
     <para>URI - канонический URI входного файла, <replaceable>MD5</replaceable> - шестнадцатиричное представление контрольной суммы MD5 URI, как предписывает TMS. Если не было кешированных ошибок, строки Failed не печатаются.</para>
     <para>Эта функция может использоваться для проверки миниатюр любого типа, не обязательно созданных gwyddion или gwyddion-thumbnailer. В будущем, однако, может выводится ошибка если миниатюра не содержит специфичной для Gwyddion информации.</para>
   </refsect1>
-  <refsect1 id="gwyddion-see-also">
+  <refsect1 id="gwyddion-thumbnailer-see-also">
     <title>См. также</title>
     <para><citerefentry><refentrytitle>gwyddion</refentrytitle><manvolnum>1</manvolnum></citerefentry>,</para>
   </refsect1>
