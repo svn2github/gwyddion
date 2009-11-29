@@ -268,8 +268,10 @@ set_n_params(FitTask *fittask,
         gwy_memclear(fittask->fixed_param, nparam);
     fittask->nparam = nparam;
 
-    ensure_fitter(fittask);
-    gwy_fitter_set_n_params(fittask->fitter, nparam);
+    if (nparam) {
+        ensure_fitter(fittask);
+        gwy_fitter_set_n_params(fittask->fitter, nparam);
+    }
 }
 
 /**
@@ -286,6 +288,7 @@ gwy_fit_task_set_point_function(GwyFitTask *object,
                                 GwyFitTaskPointFunc function)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(nparams > 0);
     g_return_if_fail(nparams <= VARARG_PARAM_MAX);
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
@@ -354,6 +357,7 @@ gwy_fit_task_set_vector_function(GwyFitTask *object,
                                  GwyFitTaskVectorFunc function)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(nparams > 0);
     g_return_if_fail(nparams <= VARARG_PARAM_MAX);
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
@@ -383,6 +387,7 @@ gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
                                   GwyFitTaskVectorDFunc derivative)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(nparams > 0);
     FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
     invalidate_point_interface(fittask);

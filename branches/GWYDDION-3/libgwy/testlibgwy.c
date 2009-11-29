@@ -431,6 +431,8 @@ test_math_cholesky(void)
         g_free(inverted);
         g_free(unity);
     }
+
+    g_rand_free(rng);
 }
 
 /***************************************************************************
@@ -2120,6 +2122,7 @@ test_fit_task_point(void)
     gwy_fitter_set_params(fitter, param_init);
     gwy_fit_task_set_point_data(fittask, data, ndata);
     test_fit_task_check_fit(fittask, param);
+    g_free(data);
     g_object_unref(fittask);
 }
 
@@ -2139,6 +2142,7 @@ test_fit_task_vector(void)
     gwy_fitter_set_params(fitter, param_init);
     gwy_fit_task_set_vector_data(fittask, data, ndata);
     test_fit_task_check_fit(fittask, param);
+    g_free(data);
     g_object_unref(fittask);
 }
 
