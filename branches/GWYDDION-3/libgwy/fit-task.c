@@ -77,34 +77,6 @@ typedef gboolean (*GwyFitTaskPointFunc6)(gdouble x,
                                          gdouble p4,
                                          gdouble p5);
 
-typedef gdouble (*GwyFitTaskPointWeightFunc1)(gdouble x,
-                                              gdouble p0);
-typedef gdouble (*GwyFitTaskPointWeightFunc2)(gdouble x,
-                                              gdouble p0,
-                                              gdouble p1);
-typedef gdouble (*GwyFitTaskPointWeightFunc3)(gdouble x,
-                                              gdouble p0,
-                                              gdouble p1,
-                                              gdouble p2);
-typedef gdouble (*GwyFitTaskPointWeightFunc4)(gdouble x,
-                                              gdouble p0,
-                                              gdouble p1,
-                                              gdouble p2,
-                                              gdouble p3);
-typedef gdouble (*GwyFitTaskPointWeightFunc5)(gdouble x,
-                                              gdouble p0,
-                                              gdouble p1,
-                                              gdouble p2,
-                                              gdouble p3,
-                                              gdouble p4);
-typedef gdouble (*GwyFitTaskPointWeightFunc6)(gdouble x,
-                                              gdouble p0,
-                                              gdouble p1,
-                                              gdouble p2,
-                                              gdouble p3,
-                                              gdouble p4,
-                                              gdouble p5);
-
 typedef gboolean (*GwyFitTaskVectorFunc1)(guint i,
                                           gpointer user_data,
                                           gdouble *retval,
@@ -330,7 +302,7 @@ gwy_fit_task_set_point_function(GwyFitTask *object,
  *
  * Sets the point model weight function for a fit task.
  *
- * FIXME: To be done.
+ * Note the weight is applied to the differences, not to their squares.
  **/
 void
 gwy_fit_task_set_point_weight(GwyFitTask *object,
@@ -593,7 +565,6 @@ fit_task_residuum(const gdouble *param,
     guint nparam = fittask->nparam;
     gdouble r = 0.0;
 
-    /* TODO: Weights */
     if (fittask->type == POINT_VARARG) {
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(fittask->nparam <= VARARG_PARAM_MAX, FALSE);
@@ -605,6 +576,8 @@ fit_task_residuum(const gdouble *param,
             if (!eval_point_vararg(x, param, nparam, func, &v))
                 return FALSE;
             v -= y;
+            if (fittask->point_weight)
+                v *= fittask->point_weight(x);
             r += v*v;
         }
     }
@@ -632,6 +605,9 @@ fit_task_residuum(const gdouble *param,
                 return FALSE;
             r += v*v;
         }
+    }
+    else {
+        g_return_val_if_reached(FALSE);
     }
 
     *residuum = r;
@@ -668,7 +644,6 @@ fit_task_gradient(const gdouble *param,
     for (guint j = 0; j < nparam; j++)
         h[j] = param[j] ? 1e-5*fabs(param[j]) : 1e-9;
 
-    /* TODO: Weights */
     if (fittask->type == POINT_VARARG) {
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(nparam <= VARARG_PARAM_MAX, FALSE);
@@ -680,6 +655,8 @@ fit_task_gradient(const gdouble *param,
             if (!eval_point_vararg(x, mparam, nparam, func, &v))
                 return FALSE;
             v -= y;
+            gdouble w = fittask->point_weight ? fittask->point_weight(x) : 1.0;
+            v *= w;
             for (guint j = 0; j < nparam; j++) {
                 if (fixed_param[j]) {
                     diff[j] = 0.0;
@@ -697,7 +674,7 @@ fit_task_gradient(const gdouble *param,
                     return FALSE;
 
                 mparam[j] = param[j];
-                diff[j] = (vplus - vminus)/(2.0*h[j]);
+                diff[j] = w*(vplus - vminus)/(2.0*h[j]);
             }
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
@@ -734,9 +711,8 @@ fit_task_gradient(const gdouble *param,
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
     }
-    else if (fittask->type == VECTOR_ARRAY) {
+    else if (fittask->type == VECTOR_ARRAY && fittask->vector_dfunc) {
         g_return_val_if_fail(fittask->vector_vfunc, FALSE);
-        g_return_val_if_fail(fittask->vector_dfunc, FALSE);
         GwyFitTaskVectorVFunc vfunc = fittask->vector_vfunc;
         GwyFitTaskVectorDFunc dfunc = fittask->vector_dfunc;
         gpointer data = fittask->vector_data;
@@ -750,6 +726,41 @@ fit_task_gradient(const gdouble *param,
             add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
         }
     }
+    else if (fittask->type == VECTOR_ARRAY) {
+        g_return_val_if_fail(fittask->vector_vfunc, FALSE);
+        GwyFitTaskVectorVFunc vfunc = fittask->vector_vfunc;
+        gpointer data = fittask->vector_data;
+
+        for (guint i = 0; i < fittask->ndata; i++) {
+            gdouble v;
+            if (!vfunc(i, data, &v, mparam))
+                return FALSE;
+            for (guint j = 0; j < nparam; j++) {
+                if (fixed_param[j]) {
+                    diff[j] = 0.0;
+                    continue;
+                }
+
+                gdouble vminus;
+                mparam[j] = param[j] - h[j];
+                if (!vfunc(i, data, &vminus, mparam))
+                    return FALSE;
+
+                gdouble vplus;
+                mparam[j] = param[j] + h[j];
+                if (!vfunc(i, data, &vplus, mparam))
+                    return FALSE;
+
+                mparam[j] = param[j];
+                diff[j] = (vplus - vminus)/(2.0*h[j]);
+            }
+            add_to_gradient_and_hessian(diff, v, gradient, hessian, nparam);
+        }
+    }
+    else {
+        g_return_val_if_reached(FALSE);
+    }
+
     return TRUE;
 }
 
@@ -977,6 +988,10 @@ gwy_fit_task_get_chi(GwyFitTask *object)
  *   </listitem>
  * </itemizedlist>
  *
+ * If weighting is used, note the differences is weighted, not their squares.
+ * Hence in the usual case weights are the inverse standard deviations of the
+ * fitted data points (unsquared).
+ *
  * Since #GwyFitTask supplies its own evaluation methods and controls the
  * number of parameters, the low-level #GwyFitter setup methods
  * gwy_fitter_set_functions() and gwy_fitter_set_n_params() must not be used
@@ -984,6 +999,37 @@ gwy_fit_task_get_chi(GwyFitTask *object)
  * Neither you can use gwy_fitter_fit() and gwy_fitter_eval_residuum() as you
  * cannot pass the correct @user_data; use gwy_fit_task_fit() and
  * gwy_fit_task_eval_residuum() instead of them.
+ *
+ * A simple example demonstrating how to fit a shifted Gaussian without
+ * weighting:
+ * |[
+ * // The function to fit: 4-parameter shifted Gaussian
+ * gboolean
+ * gaussian(gdouble x, gdouble *retval,
+ *          gdouble xoff, gdouble yoff, gdouble b, gdouble a)
+ * {
+ *     x = (x - xoff)/b;
+ *     *retval = yoff + a*exp(-x*x);
+ *     // Width b must not be 0
+ *     return b != 0.0;
+ * }
+ *
+ * // Fit data using provided initial parameter estimate
+ * gboolean
+ * fit_gaussian(const GwyPointXY *data, guint ndata, gdouble *param)
+ * {
+ *     GwyFitTask *fittask = gwy_fit_task_new();
+ *     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+ *
+ *     gwy_fit_task_set_point_function(fittask, 4, (GwyFitTaskPointFunc)gaussian);
+ *     gwy_fitter_set_params(fitter, param);
+ *     gwy_fit_task_set_point_data(fittask, data, ndata);
+ *     if (!gwy_fit_task_fit(fittask))
+ *         return FALSE;
+ *     gwy_fitter_get_params(fitter, param);
+ *     return TRUE;
+ * }
+ * ]|
  **/
 
 /**
@@ -1027,8 +1073,7 @@ gwy_fit_task_get_chi(GwyFitTask *object)
  *
  * Type of point weight function for fitting tasks.
  *
- * Returns: The weight, usually the inverse square of the standard deviation
- *          is used.
+ * Returns: The weight.  Usually the inverse of the standard deviation is used.
  **/
 
 /**
