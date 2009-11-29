@@ -33,7 +33,7 @@ mkenum_headers = \
 
 # Must init
 EXTRA_DIST = version.h.in
-CLEANFILES = $(library).supp
+CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES =
 MAINTAINERCLEANFILES =
 BUILT_SOURCES =
@@ -96,20 +96,20 @@ include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
 
 # Run the test program but do not execute any tests.  This produces a list of
-# ‘standard’ GLib error we want to filter out.
-$(library).supp: testlibgwy$(EXEEXT)
+# ‘standard’ GLib errors we then filter out.
+$(library)$(libsuffix).supp: testlibgwy$(EXEEXT)
 	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
 	    --tool=memcheck --leak-check=full --show-reachable=yes \
-	    ./testlibgwy -l >/dev/null 5>$(library).supp
+	    ./testlibgwy -l >/dev/null 5>$(library)$(libsuffix).supp
 	$(SED) -i -e '/^==/d' \
 	    -e 's/<insert a suppression name here>/Suppression/' \
-	    $(library).supp
+	    $(library)$(libsuffix).supp
 
 # Run the test program with all tests (unless TEST_FLAGS says otherwise) under
 # valgrind and report any problems.
-check-valgrind: $(library).supp
+check-valgrind: $(library)$(libsuffix).supp
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
-	    --show-reachable=yes --suppressions=$(library).supp \
+	    --show-reachable=yes --suppressions=$(library)$(libsuffix).supp \
 	    ./testlibgwy $(TEST_FLAGS)
 
 clean-local:
