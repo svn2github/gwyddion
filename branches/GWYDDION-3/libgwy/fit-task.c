@@ -376,7 +376,6 @@ gwy_fit_task_set_vector_function(GwyFitTask *object,
  * @function: Function to calculate theoretical minus fitted data differences.
  * @derivative: Function to calculate derivatives of @function by parameters.
  *              It can be %NULL to use the built-in function.
- *              FIXME: To be done.
  *
  * Sets the indexed-data model functions with parameter arrays for a fit task.
  **/

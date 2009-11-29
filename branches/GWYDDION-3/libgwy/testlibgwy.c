@@ -2036,6 +2036,18 @@ test_fit_task_gaussian_vector(guint i,
     return b != 0.0;
 }
 
+static gboolean
+test_fit_task_gaussian_vfunc(guint i,
+                             gpointer user_data,
+                             gdouble *retval,
+                             const gdouble *params)
+{
+    GwyPointXY *pts = (GwyPointXY*)user_data;
+    gdouble x = (pts[i].x - params[0])/params[2];
+    *retval = params[1] + params[3]*exp(-x*x) - pts[i].y;
+    return params[2] != 0.0;
+}
+
 static GwyPointXY*
 test_fitter_make_gaussian_data(gdouble xoff,
                                gdouble yoff,
@@ -2146,6 +2158,27 @@ test_fit_task_vector(void)
     g_object_unref(fittask);
 }
 
+static void
+test_fit_task_vfunc(void)
+{
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 2e5 };
+    const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+                                                      param[2], param[3],
+                                                      ndata, 42);
+    gwy_fit_task_set_vector_vfunction
+        (fittask, nparam,
+         (GwyFitTaskVectorVFunc)test_fit_task_gaussian_vfunc, NULL);
+    gwy_fitter_set_params(fitter, param_init);
+    gwy_fit_task_set_vector_data(fittask, data, ndata);
+    test_fit_task_check_fit(fittask, param);
+    g_free(data);
+    g_object_unref(fittask);
+}
+
 /***************************************************************************
  *
  * Main
@@ -2174,6 +2207,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/expr/garbage", test_expr_garbage);
     g_test_add_func("/testlibgwy/fit-task/point", test_fit_task_point);
     g_test_add_func("/testlibgwy/fit-task/vector", test_fit_task_vector);
+    g_test_add_func("/testlibgwy/fit-task/vfunc", test_fit_task_vfunc);
     g_test_add_func("/testlibgwy/serialize/simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
