@@ -66,7 +66,7 @@ gwy_stramong(const gchar *str,
  * Find a block of memory in another block of memory.
  *
  * This function is very similar to strstr(), except that it works with
- * arbitrary memory blocks instead of %NUL-terminated strings.
+ * arbitrary memory blocks instead of %NULL-terminated strings.
  *
  * If @needle_len is zero, @haystack is always returned.
  *
