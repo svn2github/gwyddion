@@ -26,7 +26,7 @@
  *
  * Gets the major version of libgwy.
  *
- * If the version is 2.99.7.20090604, this function returns 1.
+ * If the version is 2.99.7.20090604, this function returns 2.
  *
  * Returns: The major version.
  **/
@@ -95,7 +95,7 @@ gwy_version_string(void)
  *
  * Expands to the major version of libgwy as a number.
  *
- * If the version is 2.99.7.20090604, this macro is defined as 1.
+ * If the version is 2.99.7.20090604, this macro is defined as 2.
  **/
 
 /**
