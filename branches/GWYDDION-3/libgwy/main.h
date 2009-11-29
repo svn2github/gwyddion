@@ -17,26 +17,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_H__
-#define __LIBGWY_H__
+#ifndef __LIBGWY_MAIN_H__
+#define __LIBGWY_MAIN_H__
 
-#include <libgwy/container.h>
-#include <libgwy/error-list.h>
-#include <libgwy/expr.h>
-#include <libgwy/fitter.h>
-#include <libgwy/fit-task.h>
-#include <libgwy/inventory.h>
-#include <libgwy/interpolation.h>
-#include <libgwy/macros.h>
-#include <libgwy/main.h>
-#include <libgwy/math.h>
-#include <libgwy/pack.h>
-#include <libgwy/resource.h>
-#include <libgwy/serializable.h>
-#include <libgwy/serialize.h>
-#include <libgwy/strfuncs.h>
-#include <libgwy/unit.h>
-#include <libgwy/version.h>
+#include <glib.h>
+
+G_BEGIN_DECLS
+
+void    gwy_type_init          (void);
+gchar*  gwy_library_directory  (const gchar *subdir) G_GNUC_MALLOC;
+gchar*  gwy_data_directory     (const gchar *subdir) G_GNUC_MALLOC;
+gchar*  gwy_locale_directory   (const gchar *subdir) G_GNUC_MALLOC;
+gchar*  gwy_user_directory     (const gchar *subdir) G_GNUC_MALLOC;
+gchar** gwy_library_search_path(const gchar *subdir) G_GNUC_MALLOC;
+gchar** gwy_data_search_path   (const gchar *subdir) G_GNUC_MALLOC;
+
+G_END_DECLS
 
 #endif
 

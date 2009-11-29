@@ -48,7 +48,12 @@
 #define X_OK 1
 #endif
 
-#include "libgwy/libgwy.h"
+#include "libgwy/main.h"
+#include "libgwy/strfuncs.h"
+#include "libgwy/serializable.h"
+#include "libgwy/unit.h"
+#include "libgwy/resource.h"
+#include "libgwy/container.h"
 #include "libgwy/libgwy-aliases.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
@@ -74,14 +79,16 @@ typedef gchar* (*GetModuleDirectoryFunc)(void);
 /**
  * gwy_type_init:
  *
- * Forces registration of all serializable libgwy types.
+ * Forces the registration of all serializable libgwy types.
  *
- * It calls g_type_init() first to make sure GLib object system is initialized.
+ * It calls g_type_init() first to ensure the GLib object system is
+ * initialized.
  *
- * Calling this function is not necessary to use libgwy, except perhaps if you
- * implement custom deserializers.  It is safe to call this function more than
- * once, subsequent calls are no-op.  It is safe to call this function from
- * more threads if GLib thread support is initialized.
+ * Calling this function is not necessary to use object types defined in
+ * libgwy, except perhaps if you implement custom deserializers.  It is safe to
+ * call this function more than once, subsequent calls are no-op.  It is safe
+ * to call this function from more threads if GLib thread support is
+ * initialized.
  **/
 void
 gwy_type_init(void)
@@ -97,8 +104,8 @@ init_types(G_GNUC_UNUSED gpointer arg)
 
     g_type_class_peek(GWY_TYPE_SERIALIZABLE);
     g_type_class_peek(GWY_TYPE_UNIT);
+    g_type_class_peek(GWY_TYPE_RESOURCE);
     g_type_class_peek(GWY_TYPE_CONTAINER);
-    g_type_class_peek(GWY_TYPE_INVENTORY);
 
     return NULL;
 }
@@ -109,7 +116,8 @@ init_types(G_GNUC_UNUSED gpointer arg)
  * We deliberately ignore XDG which unfortunately means ignoring most GLib
  * provided functions.  Rationale:
  * - Doing things the Unix way has preference to some piece of PDF.
- * - The difference between configuration and data is artificial.
+ * - The difference between configuration and data is artificial.  Resources
+ *   are both.
  * - How do I get a search path for loadable modules from the Base Directory
  *   Specification?  And if I cannot, how am I supposed to be consistent then?
  * - It does not seem that openssh, bash or vim are going to follow some
@@ -164,8 +172,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
  *
  * 3. GATHERING ALL DIRECTORIES
  * The following can be tried:
- * - specific environment variables with modules, data, etc. paths -- not
- *   implemented (c)
+ * - specific environment variables with modules, data, etc. paths (c)
  * - user directory (b)
  * - our installation directory (a)
  * - default system directories (such as /usr) (c)
@@ -302,6 +309,8 @@ try_remove_trailing_directory(gchar *path, guint len,
     return FALSE;
 }
 
+/* FIXME: We must keep the suffix somewhere if it's lib64 or lib32 for
+ * module path reconstruction. */
 static void
 fix_module_directory(gchar *path)
 {
@@ -390,6 +399,8 @@ check_base_dir(const gchar *basedir,
                gchar **pdatadir,
                gchar **plocaledir)
 {
+    /* TODO: Multilib support: (1) from fix_module_directory()
+     * (2) from AC_LIB_PREPARE_MULTILIB result */
     if (plibdir) {
         gchar *path = g_build_filename(basedir, "lib", PACKAGE, NULL);
         if (libdir_seems_good(path))
@@ -741,19 +752,19 @@ gwy_data_search_path(const gchar *subdir)
     return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
-#define __LIBGWY_LIBGWY_C__
+#define __LIBGWY_MAIN_C__
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION: libgwy
- * @title: libgwy
- * @short_description: Library-level functions of libgwy
+ * SECTION: main
+ * @title: main
+ * @short_description: Library-level functions
  *
- * None of the directories returned by the path finding functions is guaranteed
- * to be writable, readable or exist at all.  Even though the existence and/or
- * properties of the directories are verified on certain occassions, the
- * directory might be deleted just between the check and your attempt to do
- * something with it.
+ * Note that none of the directories returned by the path finding functions is
+ * guaranteed to be writable, readable or exist at all.  Even though the
+ * existence and/or properties of the directories are verified on certain
+ * occassions, the directory might be deleted just between the check and your
+ * attempt to do something with it.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

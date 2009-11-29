@@ -20,6 +20,7 @@ mkenum_headers = \
 	interpolation.h \
 	libgwy.h \
 	macros.h \
+	main.c \
 	math.h \
 	pack.h \
 	resource.h \
@@ -49,8 +50,8 @@ libgwy3_la_SOURCES = \
 	fit-task.c \
 	inventory.c \
 	interpolation.c \
-	libgwy.c \
 	macros.c \
+	main.c \
 	math.c \
 	pack.c \
 	resource.c \

@@ -10,7 +10,8 @@
     This library contains basic classes and interfaces not directly related
     to GUI or data processing, and various utility functions.
   </para>
-  <xi:include href="xml/libgwy.xml"/>
+  <xi:include href="xml/main.xml"/>
+  <xi:include href="xml/version.xml"/>
   <xi:include href="xml/macros.xml"/>
   <xi:include href="xml/error-list.xml"/>
   <xi:include href="xml/strfuncs.xml"/>
