@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: roughness-iso.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="roughness-iso">
+  <title>Одномерные параметры шероховатости</title>
+  <indexterm>
+    <primary>шероховатость</primary>
+    <secondary>Параметры ISO</secondary>
+  </indexterm>
+  <para>Стандартизованные одномерные параметры шероховатости могут быть рассчитаны с помощью <link linkend="tool-roughness">инструмента измерения шероховатости</link>.</para>
+  <para>Одномерная текстура разбивается на волнистость (низкочастотные компоненты. определяющие общую форму) и шероховатость (высокочастотные компоненты) на частоте отсечения. Частота измеряется в единицах частоты Найквиста, то есть, значение 1.0 соответствует самой частоте Найквиста.</para>
+  <para>В следующих формулах мы считаем среднее значение <xi:include href="eqi-r_j.xml"/> равным нулю, т.е. оно содержит <xi:include href="eq-roughness-iso-rj.xml"/></para>
+  <sect2 id="roughness-iso-amplitude">
+    <title>Параметры амплитуды шероховатости</title>
+    <variablelist>
+      <varlistentry id="iso-Ra">
+        <term>Средняя шероховатость <xi:include href="eqi-R_a.xml"/></term>
+        <listitem>
+          <para>Стандарты:  ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997, ISO 4287/1-1997, ГОСТ 25142-82.</para>
+          <para>Среднее арифметическое отклонение профиля. Среднее отклонение всех точек профиля шероховатости от средней линии на длине оценки <xi:include href="eq-roughness-iso-Ra.xml"/></para>
+          <para>Старым способом указания диапазона для <xi:include href="eqi-R_a.xml"/> является RHR (roughness height rating, рейтинг высоты неровностей). Это символ на чертежах, указывающий минимальное и максимальное значения для <xi:include href="eqi-R_a.xml"/>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rq">
+        <term>Среднеквадратичная шероховатость <xi:include href="eqi-R_q.xml"/></term>
+        <listitem>
+          <para>Стандарты: ASME B46.1-1995, ISO 4287-1997, ISO 4287/1-1997, ГОСТ 25142-82.</para>
+          <para>Среднее значение измеренных отклонений от средней линии взятых на длине оценки <xi:include href="eq-roughness-iso-Rq.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rt">
+        <term>Максимальная высота профиля <xi:include href="eqi-R_t.xml"/></term>
+        <listitem>
+          <para>Стандарты:  ASME B46.1-1995, ISO 4287-1997, ГОСТ 25142-82.</para>
+          <para>Максимальная высота от пика до пика впадины. Абсолютное значение разности между самым высоким и самым низким пиком <xi:include href="eq-roughness-iso-Rt.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rm-Rv">
+        <term>Максимальная глубина впадины профиля <xi:include href="eqi-R_v.xml"/>, <xi:include href="eqi-R_m.xml"/></term>
+        <listitem>
+          <para>Стандарты:  ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997, ISO 4287/1-1997, ГОСТ 25142-82.</para>
+          <para>Самая глубокая впадина. Это глубина наиболее глубокой впадины на профиле шероховатости на длине оценки <xi:include href="eq-roughness-iso-Rv.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rp">
+        <term>Максимальная высота пика профиля <xi:include href="eqi-R_p.xml"/></term>
+        <listitem>
+          <para>Стандарты:  ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997, ISO 4287/1-1997, ГОСТ 25142-82.</para>
+          <para>Наиболее высокий пик. Это высота наиболее высокого пика на профиле шероховатости на длине оценки <xi:include href="eq-roughness-iso-Rp.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rtm">
+        <term>Средняя максимальная высота профиля <xi:include href="eqi-R_tm.xml"/></term>
+        <listitem>
+          <para>Стандарты:  ASME B46.1-1995, ISO 4287-1997, ГОСТ 25142-82.</para>
+          <para>Средняя шероховатость между пиком и впадиной. Определяется по разнице между самым высоким пиком и самой глубокой впадиной на кратной выборке на длине оценки <xi:include href="eq-roughness-iso-Rtm.xml"/> где <xi:include href="eqi-R_vm.xml"/> и <xi:include href="eqi-R_pm.xml"/> определены ниже.</para>
+          <para>Для данных профиля она основывается на пяти базовых длинах (<xi:include href="eqi-m-is-5.xml"/>). Число выборок соответствует стандарту ISO.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rvm">
+        <term>Средняя максимальная глубины впадины профиля <xi:include href="eqi-R_vm.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Средняя глубина впадины основывается на одном пике на базовую длину. Одна наиболее глубокая долина находится на пяти базовых длинах (<xi:include href="eqi-m-is-5.xml"/>) и затем усредняется <xi:include href="eq-roughness-iso-Rvm.xml"/> где <xi:include href="eq-roughness-iso-Rvi.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rpm">
+        <term>Средняя максимальная высота пика профиля <xi:include href="eqi-R_pm.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Средняя высота пика основывается на одном пике на базовую длину. По одному самому высокому пику находится на пяти базовых длинах (<xi:include href="eqi-m-is-5.xml"/>) и затем усредняется <xi:include href="eq-roughness-iso-Rpm.xml"/> где <xi:include href="eq-roughness-iso-Rpi.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-R3z">
+        <term>Базовая глубина шероховатости <xi:include href="eqi-R_3z.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Расстояние между третьим по высоте пиком и третьей по глубине впадиной. Пиком называется часть поверхности выше пересечения со средней линией.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-R3zISO">
+        <term>Базовая глубина профиля шероховатости <xi:include href="eqi-R_3zISO.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Высота третьего по высоте пика относительно третьей по глубине впадины на базовой длине. Базовая глубина шероховатости определяется по пяти базовым длинам и затем усредняется.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rz">
+        <term>Высота по десяти точкам <xi:include href="eqi-R_z.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997, ГОСТ 25142-82.</para>
+          <para>Среднее абсолютное значение пяти самых высоких пиков и пяти самых глубоких впадин на длине оценки.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-RzISO">
+        <term>Средняя шероховатость профиля от пика до впадины <xi:include href="eqi-R_zISO.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Средняя шероховатость от пика до впадины основана на одном пике и одной впадине на базовую длину. Одно наибольшее отклонение находится на пяти базовых длинах и затем усредняется. Она идентична <xi:include href="eqi-R_tm.xml"/>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-ADF">
+        <term>Функция распределения амплитуды ADF</term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Функция распределения амплитуды - функция вероятности, которая даёт вероятность того, что профиль поверхности будет иметь определённую высоту <xi:include href="eqi-z.xml"/> в любом его месте <xi:include href="eqi-x.xml"/>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-BRC">
+        <term>Относительная опорная кривая BRC</term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Относительная опорная кривая относится к функции распределения амплитуды, это соответствующее интегральное распределение вероятности и гораздо чаще применяется в обработке поверхностей. Относительная опорная кривая это интеграл (сверху вниз) от функции распределения амплитуды.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rsk">
+        <term>Асимметрия <xi:include href="eqi-R_sk.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Асимметрия - параметр, который описывает форму функции распределения амплитуды. Асимметрия - простая мера асимметрии функции распределения амплитуды или, что то же самое, она показывает симметрию изменения профиля относительно его средней линии <xi:include href="eq-roughness-iso-Rsk.xml"/></para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id="iso-Rku">
+        <term>Эксцесс <xi:include href="eqi-R_ku.xml"/></term>
+        <listitem>
+          <para>Стандарты: ISO 4287-1997.</para>
+          <para>Эксцесс - параметр, учитывающий форму функции распределения амплитуды. Эксцесс относится к равномерности функции распределения амплитуды или, что то же самое, к числу пиков профиля. <xi:include href="eq-roughness-iso-Rku.xml"/></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
