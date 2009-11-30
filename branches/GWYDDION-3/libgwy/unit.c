@@ -52,6 +52,16 @@ typedef struct {
     AppendPowerFunc append_power;
 } GwyUnitStyleSpec;
 
+struct _GwyUnit {
+    GObject g_object;
+    GArray *units;
+    gchar *serialize_str;
+};
+
+struct _GwyUnitClass {
+    GObjectClass g_object_class;
+};
+
 static void         gwy_unit_finalize         (GObject *object);
 static void         gwy_unit_serializable_init(GwySerializableInterface *iface);
 static gsize        gwy_unit_n_items          (GwySerializable *serializable);
