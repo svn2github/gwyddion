@@ -30,9 +30,6 @@
 #define MATRIX_LEN gwy_triangular_matrix_length
 #define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 
-#define GWY_FITTER_GET_PRIVATE(o)  \
-   (G_TYPE_INSTANCE_GET_PRIVATE((o), GWY_TYPE_FITTER, GwyFitterPrivate))
-
 enum {
     PROP_0,
     PROP_N_PARAMS,
@@ -66,7 +63,8 @@ typedef struct {
     gdouble residuum_change_min;
 } GwyFitterSettings;
 
-typedef struct {
+struct _GwyFitter {
+    GObject g_object;
     GwyFitterSettings settings;
     GwyFitterStatus status;
     GwyFitterValid valid;
@@ -94,9 +92,7 @@ typedef struct {
     gdouble *scaled_hessian;
     gdouble *normal_matrix;
     gdouble *inv_hessian;
-} Fitter;
-
-typedef Fitter GwyFitterPrivate;
+};
 
 static void     gwy_fitter_finalize    (GObject *object);
 static void     gwy_fitter_set_property(GObject *object,
@@ -107,9 +103,9 @@ static void     gwy_fitter_get_property(GObject *object,
                                         guint prop_id,
                                         GValue *value,
                                         GParamSpec *pspec);
-static void     fitter_set_n_param     (Fitter *fitter,
+static void     fitter_set_n_param     (GwyFitter *fitter,
                                         guint nparam);
-static gboolean fitter_invert_hessian  (Fitter *fitter);
+static gboolean fitter_invert_hessian  (GwyFitter *fitter);
 
 static const GwyFitterSettings default_settings = {
     .iter_max               = 50,
@@ -128,8 +124,6 @@ static void
 gwy_fitter_class_init(GwyFitterClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-
-    g_type_class_add_private(klass, sizeof(GwyFitterPrivate));
 
     gobject_class->finalize = gwy_fitter_finalize;
     gobject_class->get_property = gwy_fitter_get_property;
@@ -218,10 +212,8 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 }
 
 static void
-gwy_fitter_init(GwyFitter *object)
+gwy_fitter_init(GwyFitter *fitter)
 {
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-
     fitter->settings = default_settings;
     fitter->lambda = fitter->settings.lambda_start;
 }
@@ -229,10 +221,8 @@ gwy_fitter_init(GwyFitter *object)
 static void
 gwy_fitter_finalize(GObject *object)
 {
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-
+    GwyFitter *fitter = GWY_FITTER(object);
     fitter_set_n_param(fitter, 0);
-
     G_OBJECT_CLASS(gwy_fitter_parent_class)->finalize(object);
 }
 
@@ -242,8 +232,7 @@ gwy_fitter_set_property(GObject *object,
                         const GValue *value,
                         GParamSpec *pspec)
 {
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-
+    GwyFitter *fitter = GWY_FITTER(object);
     switch (prop_id) {
         case PROP_N_PARAMS:
         fitter_set_n_param(fitter, g_value_get_uint(value));
@@ -289,8 +278,7 @@ gwy_fitter_get_property(GObject *object,
                         GValue *value,
                         GParamSpec *pspec)
 {
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
-
+    GwyFitter *fitter = GWY_FITTER(object);
     switch (prop_id) {
         case PROP_N_PARAMS:
         g_value_set_uint(value, fitter->nparam);
@@ -331,7 +319,7 @@ gwy_fitter_get_property(GObject *object,
 }
 
 static void
-fitter_set_n_param(Fitter *fitter,
+fitter_set_n_param(GwyFitter *fitter,
                    guint nparam)
 {
     fitter->valid = 0;
@@ -368,7 +356,7 @@ fitter_set_n_param(Fitter *fitter,
  * Also if nothing seems wrong check if any calculated value is NaN anyway
  * because we do not trust the supplied functions. */
 static inline gboolean
-eval_residuum_with_check(Fitter *fitter,
+eval_residuum_with_check(GwyFitter *fitter,
                          gpointer user_data)
 {
     gboolean ok = TRUE;
@@ -392,7 +380,7 @@ eval_residuum_with_check(Fitter *fitter,
 }
 
 static inline gboolean
-eval_gradient_with_check(Fitter *fitter,
+eval_gradient_with_check(GwyFitter *fitter,
                          gpointer user_data)
 {
     gdouble *h = fitter->hessian, *g = fitter->gradient;
@@ -430,7 +418,7 @@ eval_gradient_with_check(Fitter *fitter,
 }
 
 static inline void
-scale(Fitter *fitter)
+scale(GwyFitter *fitter)
 {
     guint nparam = fitter->nparam;
     gdouble *h = fitter->hessian, *sh = fitter->scaled_hessian,
@@ -461,7 +449,7 @@ add_to_diagonal(guint nparam,
 }
 
 static inline gboolean
-too_small_param_change(Fitter *fitter)
+too_small_param_change(GwyFitter *fitter)
 {
     guint nparam = fitter->nparam;
     /* Not sure how fitter->f_best gets there but otherwise the condition does
@@ -480,7 +468,7 @@ too_small_param_change(Fitter *fitter)
 }
 
 static inline void
-update_param(Fitter *fitter)
+update_param(GwyFitter *fitter)
 {
     guint nparam = fitter->nparam;
     gdouble *p = fitter->param, *pb = fitter->param_best,
@@ -493,7 +481,7 @@ update_param(Fitter *fitter)
 }
 
 static gboolean
-fitter_minimize(Fitter *fitter,
+fitter_minimize(GwyFitter *fitter,
                 gpointer user_data)
 {
     guint nparam = fitter->nparam;
@@ -568,7 +556,7 @@ step_fail:
 }
 
 static gboolean
-fitter_invert_hessian(Fitter *fitter)
+fitter_invert_hessian(GwyFitter *fitter)
 {
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
@@ -624,10 +612,9 @@ gwy_fitter_new(void)
  * Returns: The fitting status.
  **/
 guint
-gwy_fitter_get_status(GwyFitter *object)
+gwy_fitter_get_status(GwyFitter *fitter)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), GWY_FITTER_STATUS_NONE);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), GWY_FITTER_STATUS_NONE);
     return fitter->status;
 }
 
@@ -642,13 +629,12 @@ gwy_fitter_get_status(GwyFitter *object)
  * %GWY_FITTER_STATUS_NONE.
  **/
 void
-gwy_fitter_set_n_params(GwyFitter *object,
+gwy_fitter_set_n_params(GwyFitter *fitter,
                         guint nparams)
 {
-    g_return_if_fail(GWY_IS_FITTER(object));
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FITTER(fitter));
     fitter_set_n_param(fitter, nparams);
-    g_object_notify(G_OBJECT(object), "n-params");
+    g_object_notify(G_OBJECT(fitter), "n-params");
 }
 
 /**
@@ -660,10 +646,9 @@ gwy_fitter_set_n_params(GwyFitter *object,
  * Returns: The number of model parameters.
  **/
 guint
-gwy_fitter_get_n_params(GwyFitter *object)
+gwy_fitter_get_n_params(GwyFitter *fitter)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), 0);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), 0);
     return fitter->nparam;
 }
 
@@ -675,11 +660,10 @@ gwy_fitter_get_n_params(GwyFitter *object)
  * Sets the values of parameters in the model of a fitter.
  **/
 void
-gwy_fitter_set_params(GwyFitter *object,
+gwy_fitter_set_params(GwyFitter *fitter,
                       const gdouble *params)
 {
-    g_return_if_fail(GWY_IS_FITTER(object));
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FITTER(fitter));
     g_return_if_fail(params || !fitter->nparam);
     ASSIGN(fitter->param_best, params, fitter->nparam);
     fitter->valid = VALID_PARAMS;
@@ -696,11 +680,10 @@ gwy_fitter_set_params(GwyFitter *object,
  *          of parameters.
  **/
 gboolean
-gwy_fitter_get_params(GwyFitter *object,
+gwy_fitter_get_params(GwyFitter *fitter,
                       gdouble *params)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
     if (fitter->valid < VALID_PARAMS)
         return FALSE;
     if (params && fitter->nparam)
@@ -716,12 +699,11 @@ gwy_fitter_get_params(GwyFitter *object,
  * Sets the value of Marquardt parameter lambda of a fitter.
  **/
 void
-gwy_fitter_set_lambda(GwyFitter *object,
+gwy_fitter_set_lambda(GwyFitter *fitter,
                       gdouble lambda)
 {
-    g_return_if_fail(GWY_IS_FITTER(object));
+    g_return_if_fail(GWY_IS_FITTER(fitter));
     g_return_if_fail(lambda > 0.0);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     fitter->lambda = lambda;
 }
 
@@ -734,10 +716,9 @@ gwy_fitter_set_lambda(GwyFitter *object,
  * Returns: The value of Marquardt parameter lambda.
  **/
 gdouble
-gwy_fitter_get_lambda(GwyFitter *object)
+gwy_fitter_get_lambda(GwyFitter *fitter)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), -1.0);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
     return fitter->lambda;
 }
 
@@ -754,14 +735,13 @@ gwy_fitter_get_lambda(GwyFitter *object)
  * the data to fit.  See #GwyFitTask for the high-level interface.
  **/
 void
-gwy_fitter_set_functions(GwyFitter *object,
+gwy_fitter_set_functions(GwyFitter *fitter,
                          GwyFitterResiduumFunc eval_residuum,
                          GwyFitterGradientFunc eval_gradient)
 
 {
-    g_return_if_fail(GWY_IS_FITTER(object));
+    g_return_if_fail(GWY_IS_FITTER(fitter));
     g_return_if_fail(eval_residuum && eval_gradient);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
     fitter->status = GWY_FITTER_STATUS_NONE;
     fitter->eval_residuum = eval_residuum;
     fitter->eval_gradient = eval_gradient;
@@ -776,11 +756,10 @@ gwy_fitter_set_functions(GwyFitter *object,
  * Sets the constraint function of a fitter.
  **/
 void
-gwy_fitter_set_constraint(GwyFitter *object,
+gwy_fitter_set_constraint(GwyFitter *fitter,
                           GwyFitterConstrainFunc constrain)
 {
-    g_return_if_fail(GWY_IS_FITTER(object));
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FITTER(fitter));
     fitter->constrain = constrain;
 }
 
@@ -797,11 +776,10 @@ gwy_fitter_set_constraint(GwyFitter *object,
  *          failure to calculate something, %FALSE is returned.
  **/
 gboolean
-gwy_fitter_fit(GwyFitter *object,
+gwy_fitter_fit(GwyFitter *fitter,
                gpointer user_data)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
     fitter->status = GWY_FITTER_STATUS_NONE;
     g_return_val_if_fail(fitter->valid >= VALID_PARAMS, FALSE);
     g_return_val_if_fail(fitter->eval_gradient && fitter->eval_residuum, FALSE);
@@ -826,10 +804,9 @@ gwy_fitter_fit(GwyFitter *object,
  *          the sum of squares is not available.
  **/
 gdouble
-gwy_fitter_get_residuum(GwyFitter *object)
+gwy_fitter_get_residuum(GwyFitter *fitter)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), -1.0);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
     return (fitter->valid >= VALID_FUNCTION) ? fitter->f_best : -1.0;
 }
 
@@ -849,11 +826,10 @@ gwy_fitter_get_residuum(GwyFitter *object)
  *          out-of-bound parameters.
  **/
 gdouble
-gwy_fitter_eval_residuum(GwyFitter *object,
+gwy_fitter_eval_residuum(GwyFitter *fitter,
                          gpointer user_data)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), -1.0);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
     g_return_val_if_fail(fitter->eval_residuum, -1.0);
     if (fitter->valid < VALID_PARAMS)
         return -1.0;
@@ -877,11 +853,10 @@ gwy_fitter_eval_residuum(GwyFitter *object,
  * Returns: %TRUE if the inverse Hessian was filled, %FALSE if it was not.
  **/
 gboolean
-gwy_fitter_get_inverse_hessian(GwyFitter *object,
+gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
                                gdouble *ihessian)
 {
-    g_return_val_if_fail(GWY_IS_FITTER(object), FALSE);
-    Fitter *fitter = GWY_FITTER_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
     if (fitter->valid < VALID_HESSIAN)
         return FALSE;
     if (fitter->valid < VALID_INV_HESSIAN)

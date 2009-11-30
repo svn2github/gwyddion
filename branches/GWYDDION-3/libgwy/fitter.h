@@ -65,10 +65,6 @@ typedef gboolean (*GwyFitterConstrainFunc)(const gdouble *param,
 typedef struct _GwyFitter      GwyFitter;
 typedef struct _GwyFitterClass GwyFitterClass;
 
-struct _GwyFitter {
-    GObject g_object;
-};
-
 struct _GwyFitterClass {
     GObjectClass g_object_class;
 };
