@@ -40,9 +40,6 @@
     "\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef" \
     "\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd"
 
-#define GWY_EXPR_GET_PRIVATE(o)  \
-   (G_TYPE_INSTANCE_GET_PRIVATE((o), GWY_TYPE_EXPR, GwyExprPrivate))
-
 /* things that can appear on code stack */
 typedef enum {
     /* negative values are reserved for variables */
@@ -117,7 +114,8 @@ struct _GwyExprToken {
     GwyExprToken *next;
 };
 
-typedef struct {
+struct _GwyExpr {
+    GObject g_object;
     /* Global context */
     GString *expr;
     GScanner *scanner;
@@ -135,7 +133,12 @@ typedef struct {
     gdouble *stack;    /* stack */
     gdouble *sp;    /* stack pointer */
     guint slen;    /* allocated size */
-} GwyExprPrivate;
+};
+
+struct _GwyExprClass {
+    GObjectClass g_object_class;
+};
+
 
 static void     gwy_expr_finalize      (GObject *object);
 static gpointer check_call_table_sanity(gpointer arg);
@@ -264,42 +267,37 @@ gwy_expr_class_init(GwyExprClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
-    g_type_class_add_private(klass, sizeof(GwyExprPrivate));
-
     gobject_class->finalize = gwy_expr_finalize;
 }
 
 static void
 gwy_expr_init(GwyExpr *expr)
 {
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-
     static GOnce table_sanity_checked = G_ONCE_INIT;
     g_once(&table_sanity_checked, check_call_table_sanity, NULL);
 
-    priv->expr = g_string_new(NULL);
+    expr->expr = g_string_new(NULL);
 }
 
 static void
 gwy_expr_finalize(GObject *object)
 {
     GwyExpr *expr = GWY_EXPR(object);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
 
-    token_list_delete(priv->tokens);
-    if (priv->identifiers) {
-        GPtrArray *pa = priv->identifiers;
+    token_list_delete(expr->tokens);
+    if (expr->identifiers) {
+        GPtrArray *pa = expr->identifiers;
         for (gsize i = 0; i < pa->len; i++)
             g_free(g_ptr_array_index(pa, i));
         g_ptr_array_free(pa, TRUE);
     }
-    if (priv->scanner)
-        g_scanner_destroy(priv->scanner);
-    if (priv->constants)
-        g_hash_table_destroy(priv->constants);
-    g_string_free(priv->expr, TRUE);
-    g_free(priv->input);
-    g_free(priv->stack);
+    if (expr->scanner)
+        g_scanner_destroy(expr->scanner);
+    if (expr->constants)
+        g_hash_table_destroy(expr->constants);
+    g_string_free(expr->expr, TRUE);
+    g_free(expr->input);
+    g_free(expr->stack);
     G_OBJECT_CLASS(gwy_expr_parent_class)->finalize(object);
 }
 
@@ -355,7 +353,7 @@ gwy_expr_error_quark(void)
  * No checking is done, use stack_is_executable() beforehand.
  **/
 static inline void
-interpret_stack(GwyExprPrivate *expr)
+interpret_stack(GwyExpr *expr)
 {
     guint i;
 
@@ -389,7 +387,7 @@ interpret_stack(GwyExprPrivate *expr)
  * No checking is done, use stack_is_executable() beforehand.
  **/
 static inline void
-interpret_stack_vectors(GwyExprPrivate *expr,
+interpret_stack_vectors(GwyExpr *expr,
                         guint n,
                         const gdouble **data,
                         gdouble *result)
@@ -422,7 +420,7 @@ interpret_stack_vectors(GwyExprPrivate *expr,
  * Returns: %TRUE if stack is executable, %FALSE if it isn't.
  **/
 static gboolean
-stack_is_executable(GwyExprPrivate *expr)
+stack_is_executable(GwyExpr *expr)
 {
     guint i;
     gint nval, max;
@@ -454,7 +452,7 @@ stack_is_executable(GwyExprPrivate *expr)
 }
 
 G_GNUC_UNUSED static void
-print_stack(GwyExprPrivate *expr)
+print_stack(GwyExpr *expr)
 {
     guint i;
     GwyExprCode *code;
@@ -493,7 +491,7 @@ print_stack(GwyExprPrivate *expr)
  * Better than nothing.
  **/
 static void
-fold_constants(GwyExprPrivate *expr)
+fold_constants(GwyExpr *expr)
 {
     guint from, to;
     gint last_constants = 0;
@@ -765,7 +763,7 @@ token_list_delete(GwyExprToken *tokens)
  * Returns: %TRUE on success, %FALSE if parsing failed.
  **/
 static gboolean
-scan_tokens(GwyExprPrivate *expr,
+scan_tokens(GwyExpr *expr,
             GError **err)
 {
     GScanner *scanner;
@@ -838,7 +836,7 @@ scan_tokens(GwyExprPrivate *expr,
  * multiplication operators between adjacent values, converts ~ to operator.
  **/
 static void
-rectify_token_list(GwyExprPrivate *expr)
+rectify_token_list(GwyExpr *expr)
 {
     GwyExprToken *t, *prev;
 
@@ -905,7 +903,7 @@ rectify_token_list(GwyExprPrivate *expr)
  * Initializes scanner, configuring it and setting up function symbol table.
  **/
 static void
-initialize_scanner(GwyExprPrivate *expr)
+initialize_scanner(GwyExpr *expr)
 {
     guint i;
 
@@ -934,7 +932,7 @@ initialize_scanner(GwyExprPrivate *expr)
  * Returns: A newly allocated token list, %NULL on failure.
  **/
 static gboolean
-parse_expr(GwyExprPrivate *expr,
+parse_expr(GwyExpr *expr,
            GError **err)
 {
     initialize_scanner(expr);
@@ -1003,7 +1001,7 @@ identifier_name_is_valid(const gchar *name)
  * Returns: %TRUE on success, %FALSE if transformation failed.
  **/
 static gboolean
-transform_values(GwyExprPrivate *expr,
+transform_values(GwyExpr *expr,
                  GError **err)
 {
     GwyExprToken *code, *t;
@@ -1208,7 +1206,7 @@ transform_functions(GwyExprToken *tokens,
  * Returns: Converted @tokens (it's changed in place), %NULL on failure.
  **/
 static GwyExprToken*
-transform_to_rpn_real(GwyExprPrivate *expr,
+transform_to_rpn_real(GwyExpr *expr,
                       GwyExprToken *tokens,
                       GError **err)
 {
@@ -1357,7 +1355,7 @@ FAIL:
  * Returns: A newly created RPN stack, %NULL on failure.
  **/
 static gboolean
-transform_to_rpn(GwyExprPrivate *expr,
+transform_to_rpn(GwyExpr *expr,
                  GError **err)
 {
     GwyExprToken *t;
@@ -1407,7 +1405,7 @@ transform_to_rpn(GwyExprPrivate *expr,
 }
 
 static void
-ensure_constants(GwyExprPrivate *expr)
+ensure_constants(GwyExpr *expr)
 {
     if (expr->constants)
         return;
@@ -1451,8 +1449,7 @@ const gchar*
 gwy_expr_get_expression(GwyExpr *expr)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), NULL);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    return priv->expr->str;
+    return expr->expr->str;
 }
 
 /**
@@ -1477,15 +1474,14 @@ gwy_expr_evaluate(GwyExpr *expr,
     if (!gwy_expr_compile(expr, text, err))
         return FALSE;
 
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    if (priv->identifiers->len > 1) {
+    if (expr->identifiers->len > 1) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_UNRESOLVED_IDENTIFIERS,
                     _("Not all identifiers were resolved."));
         return FALSE;
     }
 
-    interpret_stack(priv);
-    *result = *priv->stack;
+    interpret_stack(expr);
+    *result = *expr->stack;
 
     return TRUE;
 }
@@ -1512,23 +1508,22 @@ gwy_expr_compile(GwyExpr *expr,
     g_return_val_if_fail(GWY_IS_EXPR(expr), FALSE);
     g_return_val_if_fail(text, FALSE);
 
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
     if (!g_utf8_validate(text, -1, NULL)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_UTF8,
                     _("Expression is not valid UTF-8."));
-        priv->in = 0;
+        expr->in = 0;
         return FALSE;
     }
 
-    g_string_assign(priv->expr, text);
-    if (!parse_expr(priv, err)
-        || !transform_values(priv, err)
-        || !transform_to_rpn(priv, err)) {
+    g_string_assign(expr->expr, text);
+    if (!parse_expr(expr, err)
+        || !transform_values(expr, err)
+        || !transform_to_rpn(expr, err)) {
         g_assert(!err || *err);
-        priv->in = 0;
+        expr->in = 0;
         return FALSE;
     }
-    fold_constants(priv);
+    fold_constants(expr);
 
     return TRUE;
 }
@@ -1563,13 +1558,12 @@ gwy_expr_get_variables(GwyExpr *expr,
                        gchar ***names)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), 0);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    g_return_val_if_fail(priv->in, 0);
+    g_return_val_if_fail(expr->in, 0);
 
     if (names)
-        *names = (gchar**)priv->identifiers->pdata;
+        *names = (gchar**)expr->identifiers->pdata;
 
-    return priv->identifiers->len;
+    return expr->identifiers->len;
 }
 
 /**
@@ -1593,20 +1587,19 @@ gwy_expr_resolve_variables(GwyExpr *expr,
                            const gchar * const *names,
                            guint *indices)
 {
-    guint i, j;
-
     g_return_val_if_fail(GWY_IS_EXPR(expr), 0);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    g_return_val_if_fail(priv->in, 0);
+    g_return_val_if_fail(expr->in, 0);
     g_return_val_if_fail(!n || (names && indices), 0);
 
-    gboolean requested[priv->identifiers->len];
-    gwy_memclear(requested, priv->identifiers->len);
+    gboolean requested[expr->identifiers->len];
+    gwy_memclear(requested, expr->identifiers->len);
     gwy_memclear(indices, n);
+    guint i;
+
     for (i = 0; i < n; i++) {
-        for (j = 1; j < priv->identifiers->len; j++) {
+        for (guint j = 1; j < expr->identifiers->len; j++) {
             if (gwy_strequal(names[i],
-                             (gchar*)g_ptr_array_index(priv->identifiers, j))) {
+                             (gchar*)g_ptr_array_index(expr->identifiers, j))) {
                 indices[i] = j;
                 requested[j] = TRUE;
                 break;
@@ -1615,7 +1608,7 @@ gwy_expr_resolve_variables(GwyExpr *expr,
     }
 
     i = 0;
-    for (j = 1; j < priv->identifiers->len; j++)
+    for (guint j = 1; j < expr->identifiers->len; j++)
         i += !requested[j];
 
     return i;
@@ -1636,13 +1629,12 @@ gwy_expr_execute(GwyExpr *expr,
                  const gdouble *values)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), NAN);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    g_return_val_if_fail(priv->in, NAN);
-    g_return_val_if_fail(values || priv->identifiers->len <= 1, NAN);
+    g_return_val_if_fail(expr->in, NAN);
+    g_return_val_if_fail(values || expr->identifiers->len <= 1, NAN);
 
-    priv->variables = values;
-    interpret_stack(priv);
-    return priv->stack[0];
+    expr->variables = values;
+    interpret_stack(expr);
+    return expr->stack[0];
 }
 
 /**
@@ -1664,11 +1656,10 @@ gwy_expr_vector_execute(GwyExpr *expr,
 {
     g_return_if_fail(GWY_IS_EXPR(expr));
     g_return_if_fail(result);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    g_return_if_fail(priv->in);
-    g_return_if_fail(data || priv->identifiers->len <= 1);
+    g_return_if_fail(expr->in);
+    g_return_if_fail(data || expr->identifiers->len <= 1);
 
-    interpret_stack_vectors(priv, n, data, result);
+    interpret_stack_vectors(expr, n, data, result);
 }
 
 /**
@@ -1702,17 +1693,16 @@ gwy_expr_define_constant(GwyExpr *expr,
         return FALSE;
     }
 
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
-    initialize_scanner(priv);
-    if (g_scanner_lookup_symbol(priv->scanner, name)) {
+    initialize_scanner(expr);
+    if (g_scanner_lookup_symbol(expr->scanner, name)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NAME_CLASH,
                     _("Constant name clashes with function"));
         return FALSE;
     }
 
     GQuark quark = g_quark_from_string(name);
-    ensure_constants(priv);
-    g_hash_table_insert(priv->constants, GUINT_TO_POINTER(quark),
+    ensure_constants(expr);
+    g_hash_table_insert(expr->constants, GUINT_TO_POINTER(quark),
                         g_memdup(&value, sizeof(gdouble)));
 
     return TRUE;
@@ -1737,16 +1727,15 @@ gwy_expr_undefine_constant(GwyExpr *expr,
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), FALSE);
     g_return_val_if_fail(name, FALSE);
-    GwyExprPrivate *priv = GWY_EXPR_GET_PRIVATE(expr);
 
-    if (!priv->constants)
+    if (!expr->constants)
         return FALSE;
 
     GQuark quark = g_quark_from_string(name);
     if (!quark)
         return FALSE;
 
-    return g_hash_table_remove(priv->constants, GUINT_TO_POINTER(quark));
+    return g_hash_table_remove(expr->constants, GUINT_TO_POINTER(quark));
 }
 
 #define __LIBGWY_EXPR_C__
