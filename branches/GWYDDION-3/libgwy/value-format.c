@@ -416,7 +416,7 @@ fix_utf8_minus(GString *str)
  *
  * The formatting functions gwy_value_format_print() and
  * gwy_value_format_print_number() produce strings and hence provide convenient
- * method to format numbers one the value format has been constructed.
+ * method to format numbers once the value format has been constructed.
  *
  * |[
  * GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
