@@ -41,6 +41,10 @@ G_BEGIN_DECLS
 typedef struct _GwyUnit      GwyUnit;
 typedef struct _GwyUnitClass GwyUnitClass;
 
+struct _GwyUnitClass {
+    GObjectClass g_object_class;
+};
+
 #define gwy_unit_duplicate(unit) \
         (GWY_UNIT(gwy_serializable_duplicate(GWY_SERIALIZABLE(unit))))
 #define gwy_unit_assign(dest, src) \
