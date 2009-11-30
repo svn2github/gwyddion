@@ -135,11 +135,6 @@ struct _GwyExpr {
     guint slen;    /* allocated size */
 };
 
-struct _GwyExprClass {
-    GObjectClass g_object_class;
-};
-
-
 static void     gwy_expr_finalize      (GObject *object);
 static gpointer check_call_table_sanity(gpointer arg);
 static void     token_list_delete      (GwyExprToken *tokens);

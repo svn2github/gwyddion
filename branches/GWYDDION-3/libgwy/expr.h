@@ -59,6 +59,10 @@ typedef enum {
 typedef struct _GwyExpr      GwyExpr;
 typedef struct _GwyExprClass GwyExprClass;
 
+struct _GwyExprClass {
+    GObjectClass g_object_class;
+};
+
 GQuark       gwy_expr_error_quark      (void)                       G_GNUC_CONST;
 GType        gwy_expr_get_type         (void)                       G_GNUC_CONST;
 GwyExpr*     gwy_expr_new              (void)                       G_GNUC_MALLOC;
