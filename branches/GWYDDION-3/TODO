@@ -6,15 +6,11 @@ Packing: Is unfinished.  Might need a review and go with the code-generation
 
 Container: assign() does not emit signals.  Implement it via transfer()?
 
-Error list: Implement add() without copying, once the GLibc function is
-            available.
-
 Inventory: Make possible to change sort function, make possible to simply state
            that items are sorted by name (which requires GDataCompareFunc, not
            just GCompareFunc).
 
-Math: Review and add other functions such as the matrix solvers, considering
-      error reporting.
+Math: Review and add other functions.
 
 Resources: Convenience method for resource parsing (possibly dumping too).
            Make them really convenient, otherwise it does not make sense.
@@ -23,5 +19,9 @@ Resources: Convenience method for resource parsing (possibly dumping too).
 
 Interpolation: Calculate the coefficients for BSPLINE6 interpolation.
 
+Value Format: Fields are available as properties but the user cannot be
+              expected to call g_object_notify() when something changes.
+              Must make it more/less encapsulated for consistency.
+
 libgwy: Review directory tests once we install the standard directory structure
-        (data and modules).
+        (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
