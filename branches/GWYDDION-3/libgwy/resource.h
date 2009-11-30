@@ -54,24 +54,6 @@ GQuark gwy_resource_error_quark(void);
 typedef struct _GwyResource      GwyResource;
 typedef struct _GwyResourceClass GwyResourceClass;
 
-struct _GwyResource {
-    GObject g_object;
-
-    gint use_count;
-    gchar *name;
-    gchar *filename;
-
-    gboolean is_modifiable : 1;
-    gboolean is_modified : 1;
-    gboolean is_preferred : 1;
-    gboolean is_boolean1 : 1;
-    gboolean is_boolean2 : 1;
-    gint int1;
-
-    gpointer reserved1;
-    gpointer reserved2;
-};
-
 struct _GwyResourceClass {
     /*< private >*/
     GObjectClass g_object_class;

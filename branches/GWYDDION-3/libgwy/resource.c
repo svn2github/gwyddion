@@ -46,6 +46,18 @@ enum {
     N_PROPS
 };
 
+struct _GwyResource {
+    GObject g_object;
+
+    gint use_count;
+    gchar *name;
+    gchar *filename;
+
+    gboolean is_modifiable : 1;
+    gboolean is_modified : 1;
+    gboolean is_preferred : 1;
+};
+
 static void              gwy_resource_finalize          (GObject *object);
 static void              gwy_resource_set_property      (GObject *object,
                                                          guint prop_id,
