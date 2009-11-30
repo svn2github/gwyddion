@@ -44,6 +44,12 @@ typedef struct {
     gpointer user_data;
 } PrefixData;
 
+struct _GwyContainer {
+    GObject g_object;
+    GHashTable *values;
+    gboolean in_construction;
+};
+
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
 static gsize    gwy_container_itemize          (GwySerializable *serializable,
