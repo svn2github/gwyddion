@@ -29,8 +29,6 @@
 #define MATRIX_LEN gwy_triangular_matrix_length
 #define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 
-#define GWY_FIT_TASK_GET_PRIVATE(o)  \
-   (G_TYPE_INSTANCE_GET_PRIVATE((o), GWY_TYPE_FIT_TASK, GwyFitTaskPrivate))
 
 enum {
     VARARG_PARAM_MAX = 5
@@ -117,7 +115,8 @@ typedef gboolean (*GwyFitTaskVectorFunc6)(guint i,
                                           gdouble p4,
                                           gdouble p5);
 
-typedef struct {
+struct _GwyFitTask {
+    GObject g_object;
     GwyFitter *fitter;
     GwyFitTaskInterfaceType type;
     guint nparam;
@@ -136,13 +135,11 @@ typedef struct {
     GwyFitTaskVectorVFunc vector_vfunc;
     GwyFitTaskVectorDFunc vector_dfunc;
     gpointer vector_data;
-} FitTask;
-
-typedef FitTask GwyFitTaskPrivate;
+};
 
 static void     gwy_fit_task_finalize(GObject *object);
 static void     gwy_fit_task_dispose (GObject *object);
-static void     set_n_params         (FitTask *fittask,
+static void     set_n_params         (GwyFitTask *fittask,
                                       guint nparam);
 static gboolean fit_task_residuum    (const gdouble *param,
                                       gdouble *residuum,
@@ -158,8 +155,6 @@ static void
 gwy_fit_task_class_init(GwyFitTaskClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
-
-    g_type_class_add_private(klass, sizeof(GwyFitTaskPrivate));
 
     gobject_class->finalize = gwy_fit_task_finalize;
     gobject_class->dispose = gwy_fit_task_dispose;
@@ -179,15 +174,14 @@ gwy_fit_task_new(void)
 }
 
 static void
-gwy_fit_task_init(GwyFitTask *object)
+gwy_fit_task_init(G_GNUC_UNUSED GwyFitTask *fittask)
 {
-    G_GNUC_UNUSED FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 }
 
 static void
 gwy_fit_task_finalize(GObject *object)
 {
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    GwyFitTask *fittask = GWY_FIT_TASK(object);
     set_n_params(fittask, 0);
     G_OBJECT_CLASS(gwy_fit_task_parent_class)->finalize(object);
 }
@@ -195,7 +189,7 @@ gwy_fit_task_finalize(GObject *object)
 static void
 gwy_fit_task_dispose(GObject *object)
 {
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    GwyFitTask *fittask = GWY_FIT_TASK(object);
     GWY_OBJECT_UNREF(fittask->fitter);
     G_OBJECT_CLASS(gwy_fit_task_parent_class)->dispose(object);
 }
@@ -218,7 +212,7 @@ gwy_fit_task_get_max_vararg_params(void)
 }
 
 static void
-ensure_fitter(FitTask *fittask)
+ensure_fitter(GwyFitTask *fittask)
 {
     if (fittask->fitter)
         return;
@@ -231,7 +225,7 @@ ensure_fitter(FitTask *fittask)
 /* The values would not confuse us when using the current interface but we
  * do not want any leftovers if someone switches interfaces back and forth. */
 static void
-invalidate_point_interface(FitTask *fittask)
+invalidate_point_interface(GwyFitTask *fittask)
 {
     fittask->point_func = NULL;
     fittask->point_weight = NULL;
@@ -242,7 +236,7 @@ invalidate_point_interface(FitTask *fittask)
 }
 
 static void
-invalidate_vector_interface(FitTask *fittask)
+invalidate_vector_interface(GwyFitTask *fittask)
 {
     fittask->vector_func = NULL;
     fittask->vector_vfunc = NULL;
@@ -254,7 +248,7 @@ invalidate_vector_interface(FitTask *fittask)
 }
 
 static void
-set_n_params(FitTask *fittask,
+set_n_params(GwyFitTask *fittask,
              guint nparam)
 {
     guint matrix_len = MATRIX_LEN(nparam);
@@ -283,14 +277,13 @@ set_n_params(FitTask *fittask,
  * Sets the point model function for a fit task.
  **/
 void
-gwy_fit_task_set_point_function(GwyFitTask *object,
+gwy_fit_task_set_point_function(GwyFitTask *fittask,
                                 guint nparams,
                                 GwyFitTaskPointFunc function)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
     g_return_if_fail(nparams <= VARARG_PARAM_MAX);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
     invalidate_vector_interface(fittask);
     fittask->type = POINT_VARARG;
@@ -308,11 +301,10 @@ gwy_fit_task_set_point_function(GwyFitTask *object,
  * Note the weight is applied to the differences, not to their squares.
  **/
 void
-gwy_fit_task_set_point_weight(GwyFitTask *object,
+gwy_fit_task_set_point_weight(GwyFitTask *fittask,
                               GwyFitTaskPointWeightFunc weight)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
 
     invalidate_vector_interface(fittask);
     g_return_if_fail(fittask->type == POINT_VARARG);
@@ -330,12 +322,11 @@ gwy_fit_task_set_point_weight(GwyFitTask *object,
  * Sets the point data for a fit task.
  **/
 void
-gwy_fit_task_set_point_data(GwyFitTask *object,
+gwy_fit_task_set_point_data(GwyFitTask *fittask,
                             const GwyPointXY *data,
                             guint ndata)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
 
     invalidate_vector_interface(fittask);
     g_return_if_fail(fittask->type == POINT_VARARG);
@@ -352,14 +343,13 @@ gwy_fit_task_set_point_data(GwyFitTask *object,
  * Sets the indexed-data model function for a fit task.
  **/
 void
-gwy_fit_task_set_vector_function(GwyFitTask *object,
+gwy_fit_task_set_vector_function(GwyFitTask *fittask,
                                  guint nparams,
                                  GwyFitTaskVectorFunc function)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
     g_return_if_fail(nparams <= VARARG_PARAM_MAX);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
     invalidate_point_interface(fittask);
     fittask->vector_vfunc = NULL;
@@ -380,14 +370,13 @@ gwy_fit_task_set_vector_function(GwyFitTask *object,
  * Sets the indexed-data model functions with parameter arrays for a fit task.
  **/
 void
-gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
+gwy_fit_task_set_vector_vfunction(GwyFitTask *fittask,
                                   guint nparams,
                                   GwyFitTaskVectorVFunc function,
                                   GwyFitTaskVectorDFunc derivative)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(nparams > 0);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
 
     invalidate_point_interface(fittask);
     fittask->vector_func = NULL;
@@ -406,12 +395,11 @@ gwy_fit_task_set_vector_vfunction(GwyFitTask *object,
  * Sets the indexed data for a fit task.
  **/
 void
-gwy_fit_task_set_vector_data(GwyFitTask *object,
+gwy_fit_task_set_vector_data(GwyFitTask *fittask,
                              gpointer user_data,
                              guint ndata)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
 
     invalidate_point_interface(fittask);
     g_return_if_fail(fittask->type == VECTOR_VARARG
@@ -430,11 +418,10 @@ gwy_fit_task_set_vector_data(GwyFitTask *object,
  * Sets the fixed/free state of fitting parameters of a fit task.
  **/
 void
-gwy_fit_task_set_fixed_params(GwyFitTask *object,
+gwy_fit_task_set_fixed_params(GwyFitTask *fittask,
                               const gboolean *fixed_params)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     guint nparam = fittask->nparam;
     if (fixed_params)
         memcpy(fittask->fixed_param, fixed_params, nparam*sizeof(gboolean));
@@ -454,11 +441,10 @@ gwy_fit_task_set_fixed_params(GwyFitTask *object,
  * Returns: The number of fixed parameters.
  **/
 guint
-gwy_fit_task_get_fixed_params(GwyFitTask *object,
+gwy_fit_task_get_fixed_params(GwyFitTask *fittask,
                               gboolean *fixed_params)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), 0);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), 0);
     guint nparam = fittask->nparam;
     guint count = 0;
     for (guint i = 0; i < nparam; i++)
@@ -477,12 +463,11 @@ gwy_fit_task_get_fixed_params(GwyFitTask *object,
  * Sets the fixed/free state of a fitting parameter of a fit task.
  **/
 void
-gwy_fit_task_set_fixed_param(GwyFitTask *object,
+gwy_fit_task_set_fixed_param(GwyFitTask *fittask,
                              guint i,
                              gboolean fixed)
 {
-    g_return_if_fail(GWY_IS_FIT_TASK(object));
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_if_fail(GWY_IS_FIT_TASK(fittask));
     g_return_if_fail(i < fittask->nparam);
     fittask->fixed_param[i] = fixed;
 }
@@ -497,11 +482,10 @@ gwy_fit_task_set_fixed_param(GwyFitTask *object,
  * Returns: %TRUE if the @i-th parameter is fixed, %FALSE if it is free.
  **/
 gboolean
-gwy_fit_task_get_fixed_param(GwyFitTask *object,
+gwy_fit_task_get_fixed_param(GwyFitTask *fittask,
                              guint i)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     g_return_val_if_fail(i < fittask->nparam, FALSE);
     return fittask->fixed_param[i];
 }
@@ -565,7 +549,7 @@ fit_task_residuum(const gdouble *param,
                   gdouble *residuum,
                   gpointer user_data)
 {
-    FitTask *fittask = (FitTask*)user_data;
+    GwyFitTask *fittask = (GwyFitTask*)user_data;
     guint nparam = fittask->nparam;
     gdouble r = 0.0;
 
@@ -635,7 +619,7 @@ fit_task_gradient(const gdouble *param,
                   gdouble *hessian,
                   gpointer user_data)
 {
-    FitTask *fittask = (FitTask*)user_data;
+    GwyFitTask *fittask = (GwyFitTask*)user_data;
     guint nparam = fittask->nparam;
     const gboolean *fixed_param = fittask->fixed_param;
     gdouble *h = fittask->h;
@@ -780,10 +764,9 @@ fit_task_gradient(const gdouble *param,
  * Returns: %TRUE if the fit terminated normally.
  **/
 gboolean
-gwy_fit_task_fit(GwyFitTask *object)
+gwy_fit_task_fit(GwyFitTask *fittask)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     ensure_fitter(fittask);
     return gwy_fitter_fit(fittask->fitter, fittask);
 }
@@ -800,10 +783,9 @@ gwy_fit_task_fit(GwyFitTask *object)
  * Returns: The sum of squares of differences; a negative value on failure.
  **/
 gdouble
-gwy_fit_task_eval_residuum(GwyFitTask *object)
+gwy_fit_task_eval_residuum(GwyFitTask *fittask)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     ensure_fitter(fittask);
     return gwy_fitter_eval_residuum(fittask->fitter, fittask);
 }
@@ -821,10 +803,9 @@ gwy_fit_task_eval_residuum(GwyFitTask *object)
  * Returns: The associated fitter.
  **/
 GwyFitter*
-gwy_fit_task_get_fitter(GwyFitTask *object)
+gwy_fit_task_get_fitter(GwyFitTask *fittask)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), NULL);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), NULL);
     ensure_fitter(fittask);
     return fittask->fitter;
 }
@@ -845,12 +826,11 @@ gwy_fit_task_get_fitter(GwyFitTask *object)
  *          is not possible to invert the Hessian.
  **/
 gboolean
-gwy_fit_task_get_param_errors(GwyFitTask *object,
+gwy_fit_task_get_param_errors(GwyFitTask *fittask,
                               gboolean variance_covariance,
                               gdouble *errors)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     GwyFitter *fitter = fittask->fitter;
     gdouble *matrix = fittask->matrix;
     if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
@@ -882,14 +862,13 @@ gwy_fit_task_get_param_errors(GwyFitTask *object,
  *          failure.
  **/
 gdouble
-gwy_fit_task_get_param_error(GwyFitTask *object,
+gwy_fit_task_get_param_error(GwyFitTask *fittask,
                              guint i,
                              gboolean variance_covariance)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), -1.0);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), -1.0);
     g_return_val_if_fail(i < fittask->nparam, -1.0);
-    if (!gwy_fit_task_get_param_errors(object, variance_covariance, fittask->h))
+    if (!gwy_fit_task_get_param_errors(fittask, variance_covariance, fittask->h))
         return -1.0;
     return fittask->h[i];
 }
@@ -906,11 +885,10 @@ gwy_fit_task_get_param_error(GwyFitTask *object,
  *          is not possible to invert the Hessian.
  **/
 gboolean
-gwy_fit_task_get_correlations(GwyFitTask *object,
+gwy_fit_task_get_correlations(GwyFitTask *fittask,
                               gdouble *corr_matrix)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     GwyFitter *fitter = fittask->fitter;
     gdouble *matrix = fittask->matrix;
     if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
@@ -940,10 +918,9 @@ gwy_fit_task_get_correlations(GwyFitTask *object,
  * Returns: The value of chi, a negative value on failure.
  **/
 gdouble
-gwy_fit_task_get_chi(GwyFitTask *object)
+gwy_fit_task_get_chi(GwyFitTask *fittask)
 {
-    g_return_val_if_fail(GWY_IS_FIT_TASK(object), FALSE);
-    FitTask *fittask = GWY_FIT_TASK_GET_PRIVATE(object);
+    g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     GwyFitter *fitter = fittask->fitter;
     if (!fitter)
         return -1.0;

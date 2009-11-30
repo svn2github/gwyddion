@@ -64,10 +64,6 @@ typedef gboolean (*GwyFitTaskVectorDFunc)(guint i,
 typedef struct _GwyFitTask      GwyFitTask;
 typedef struct _GwyFitTaskClass GwyFitTaskClass;
 
-struct _GwyFitTask {
-    GObject g_object;
-};
-
 struct _GwyFitTaskClass {
     GObjectClass g_object_class;
 };
