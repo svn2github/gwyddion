@@ -70,26 +70,6 @@ struct _GwyInventoryItemType {
 typedef struct _GwyInventory GwyInventory;
 typedef struct _GwyInventoryClass GwyInventoryClass;
 
-struct _GwyInventory {
-    GObject g_object;
-
-    GSequence *items;
-    GHashTable *hash;
-
-    GwyInventoryItemType item_type;
-    gboolean has_item_type : 1;
-    gboolean is_sorted : 1;
-    gboolean is_object : 1;
-    gboolean is_watchable : 1;
-    gboolean can_make_copies : 1;
-    gchar *default_key;
-
-    gpointer reserved1;
-    gpointer reserved2;
-    gint int1;
-    gint int2;
-};
-
 struct _GwyInventoryClass {
     GObjectClass g_object_class;
 

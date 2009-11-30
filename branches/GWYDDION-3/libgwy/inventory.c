@@ -34,6 +34,21 @@ enum {
     N_SIGNALS
 };
 
+struct _GwyInventory {
+    GObject g_object;
+
+    GSequence *items;
+    GHashTable *hash;
+
+    GwyInventoryItemType item_type;
+    gboolean has_item_type : 1;
+    gboolean is_sorted : 1;
+    gboolean is_object : 1;
+    gboolean is_watchable : 1;
+    gboolean can_make_copies : 1;
+    gchar *default_key;
+};
+
 static void         gwy_inventory_finalize(GObject *object);
 static void         gwy_inventory_dispose (GObject *object);
 static void         make_hash             (GwyInventory *inventory);
