@@ -20,9 +20,7 @@
   <xi:include href="selections.xml"/>
   -->
   <xi:include href="opengl-3d-view.xml"/>
-  <!--
   <xi:include href="single-point-spectra.xml"/>
-  -->
   <xi:include href="metadata.xml"/>
   <xi:include href="raw-file-import.xml"/>
   <!--
