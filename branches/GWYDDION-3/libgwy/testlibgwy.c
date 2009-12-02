@@ -1210,6 +1210,191 @@ test_deserialize_garbage(void)
 
 /***************************************************************************
  *
+ * Serialization and deserialization of boxed types
+ *
+ ***************************************************************************/
+
+#define GWY_TYPE_SER_BOX_TEST \
+    (gwy_ser_box_test_get_type())
+#define GWY_SER_BOX_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_SER_BOX_TEST, GwySerBoxTest))
+#define GWY_IS_SER_BOX_TEST(obj) \
+    (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_SER_BOX_TEST))
+#define GWY_SER_BOX_TEST_GET_CLASS(obj) \
+    (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_SER_BOX_TEST, GwySerBoxTestClass))
+
+#define gwy_ser_box_test_duplicate(ser_test) \
+        (GWY_SER_BOX_TEST(gwy_serializable_duplicate(GWY_SERIALIZABLE(ser_test))))
+
+GType gwy_ser_box_test_get_type(void) G_GNUC_CONST;
+
+typedef struct _GwySerBoxTest      GwySerBoxTest;
+typedef struct _GwySerBoxTestClass GwySerBoxTestClass;
+
+struct _GwySerBoxTestClass {
+    GObjectClass g_object_class;
+};
+
+struct _GwySerBoxTest {
+    GObject g_object;
+    GwyRGBA color;
+};
+
+static gsize
+gwy_ser_box_test_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+{
+    return 1 + gwy_serializable_boxed_n_items(GWY_TYPE_RGBA);
+}
+
+// The remaining members get zero-initialized which saves us from doing it.
+static const GwySerializableItem default_items_box[] = {
+    /*0*/ { .name = "color", .ctype = GWY_SERIALIZABLE_BOXED, },
+};
+
+#define add_item(id) \
+    g_return_val_if_fail(items->len - items->n_items, 0); \
+    items->items[items->n_items++] = it[id]; \
+    n_items++
+
+static gsize
+gwy_ser_box_test_itemize(GwySerializable *serializable,
+                         GwySerializableItems *items)
+{
+    GwySerBoxTest *sertest = GWY_SER_BOX_TEST(serializable);
+    g_return_val_if_fail(items->len - items->n_items
+                         >= G_N_ELEMENTS(default_items_box), 0);
+
+    GwySerializableItem it = default_items_box[0];
+    it.value.v_boxed = &sertest->color;
+    items->items[items->n_items++] = it;
+
+    gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, &sertest->color, items);
+
+    return G_N_ELEMENTS(default_items_box);
+}
+
+static GObject*
+gwy_ser_box_test_construct(GwySerializableItems *items,
+                           GwyErrorList **error_list)
+{
+    GwySerializableItem it[G_N_ELEMENTS(default_items_box)];
+
+    memcpy(it, default_items_box, sizeof(default_items_box));
+    gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerBoxTest",
+                                 error_list);
+
+    GwySerBoxTest *sertest = g_object_newv(GWY_TYPE_SER_BOX_TEST, 0, NULL);
+
+    if (it[0].value.v_boxed) {
+        GwyRGBA *rgba = it[0].value.v_boxed;
+        sertest->color = *rgba;
+        gwy_rgba_free(rgba);
+        it[0].value.v_boxed = NULL;
+    }
+
+    return G_OBJECT(sertest);
+}
+
+static GObject*
+gwy_ser_box_test_duplicate_(GwySerializable *serializable)
+{
+    GwySerBoxTest *sertest = GWY_SER_BOX_TEST(serializable);
+    GwySerBoxTest *copy = g_object_newv(GWY_TYPE_SER_BOX_TEST, 0, NULL);
+    copy->color = sertest->color;
+    return G_OBJECT(copy);
+}
+
+static void
+gwy_ser_box_test_serializable_init(GwySerializableInterface *iface)
+{
+    iface->n_items   = gwy_ser_box_test_n_items;
+    iface->itemize   = gwy_ser_box_test_itemize;
+    iface->construct = gwy_ser_box_test_construct;
+    iface->duplicate = gwy_ser_box_test_duplicate_;
+    /*
+    iface->assign = gwy_ser_box_test_assign_;
+    */
+}
+
+G_DEFINE_TYPE_EXTENDED
+    (GwySerBoxTest, gwy_ser_box_test, G_TYPE_OBJECT, 0,
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_ser_box_test_serializable_init))
+
+static void
+gwy_ser_box_test_class_init(G_GNUC_UNUSED GwySerBoxTestClass *klass)
+{
+}
+
+static void
+gwy_ser_box_test_init(G_GNUC_UNUSED GwySerBoxTest *sertest)
+{
+}
+
+static const guchar ser_test_box[] = {
+    0x47, 0x77, 0x79, 0x53, 0x65, 0x72, 0x42, 0x6f, 0x78, 0x54, 0x65, 0x73,
+    0x74, 0x00, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63, 0x6f,
+    0x6c, 0x6f, 0x72, 0x00, 0x78, 0x47, 0x77, 0x79, 0x52, 0x47, 0x42, 0x41,
+    0x00, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x72, 0x00, 0x64,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x3f, 0x67, 0x00, 0x64, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x62, 0x00, 0x64, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x61, 0x00, 0x64, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0xe0, 0x3f
+};
+
+static void
+test_serialize_boxed(void)
+{
+    GwySerBoxTest *sertest;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    gboolean ok;
+    guint len;
+
+    sertest = g_object_newv(GWY_TYPE_SER_BOX_TEST, 0, NULL);
+    sertest->color.r = 1.0;
+    sertest->color.a = 0.5;
+    stream = g_memory_output_stream_new(malloc(200), 200, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
+    g_assert(ok);
+    len = g_memory_output_stream_get_data_size(memstream);
+    g_file_set_contents("ser.gwy", g_memory_output_stream_get_data(memstream),
+                        len, NULL);
+    g_assert_cmpuint(len, ==, sizeof(ser_test_box));
+    g_assert_cmpuint(memcmp(g_memory_output_stream_get_data(memstream),
+                            ser_test_box, sizeof(ser_test_box)), ==, 0);
+    g_object_unref(stream);
+    g_object_unref(sertest);
+    g_clear_error(&error);
+}
+
+static void
+test_deserialize_boxed(void)
+{
+    GwySerBoxTest *sertest;
+    GwyErrorList *error_list = NULL;
+    gsize bytes_consumed;
+
+    g_type_class_ref(GWY_TYPE_SER_BOX_TEST);
+    sertest = (GwySerBoxTest*)gwy_deserialize_memory(ser_test_box,
+                                                     sizeof(ser_test_box),
+                                                     &bytes_consumed,
+                                                     &error_list);
+    g_assert(sertest);
+    g_assert(GWY_IS_SER_BOX_TEST(sertest));
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_box));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert_cmpfloat(sertest->color.r, ==, 1.0);
+    g_assert_cmpfloat(sertest->color.g, ==, 0.0);
+    g_assert_cmpfloat(sertest->color.b, ==, 0.0);
+    g_assert_cmpfloat(sertest->color.a, ==, 0.5);
+
+    GWY_OBJECT_UNREF(sertest);
+}
+
+/***************************************************************************
+ *
  * Units
  *
  ***************************************************************************/
@@ -2249,10 +2434,12 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
     g_test_add_func("/testlibgwy/serialize/error", test_serialize_error);
+    g_test_add_func("/testlibgwy/serialize/boxed", test_serialize_boxed);
     /* Requires error_list */
     g_test_add_func("/testlibgwy/deserialize/simple", test_deserialize_simple);
     g_test_add_func("/testlibgwy/deserialize/data", test_deserialize_data);
     g_test_add_func("/testlibgwy/deserialize/nested", test_deserialize_nested);
+    g_test_add_func("/testlibgwy/deserialize/boxed", test_deserialize_boxed);
     g_test_add_func("/testlibgwy/deserialize/garbage", test_deserialize_garbage);
     /* Requires serializable, error_list */
     g_test_add_func("/testlibgwy/unit/parse", test_unit_parse);
