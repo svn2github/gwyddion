@@ -24,8 +24,6 @@
 #define serializable_boxed_index(a, i) \
     g_array_index((a), GwySerializableBoxedData, (i))
 
-#define GWY_SERIALIZABLE_BOXED_NO_DATA (GwySerializableBoxedData){ 0, NULL }
-
 typedef struct {
     GType type;
     const GwySerializableBoxedInfo *info;
@@ -189,11 +187,10 @@ init_serializable_boxed(G_GNUC_UNUSED gpointer arg)
     return NULL;
 }
 
-static GwySerializableBoxedData
-find_serializable_boxed(GType type)
+static const GwySerializableBoxedInfo*
+find_serializable_boxed_info(GType type)
 {
-    g_return_val_if_fail(serializable_boxed_data,
-                         GWY_SERIALIZABLE_BOXED_NO_DATA);
+    g_return_val_if_fail(serializable_boxed_data, NULL);
     g_static_mutex_lock(&serializable_boxed_mutex);
     GArray *data = serializable_boxed_data;
     for (guint i = 0; i < data->len; i++) {
@@ -207,17 +204,16 @@ find_serializable_boxed(GType type)
                 serializable_boxed_index(data, 0) = retval;
             }
             g_static_mutex_unlock(&serializable_boxed_mutex);
-            return retval;
+            return retval.info;
         }
     }
-    return GWY_SERIALIZABLE_BOXED_NO_DATA;
+    return NULL;
 }
 
 gboolean
 gwy_boxed_type_is_serializable(GType type)
 {
-    GwySerializableBoxedData data = find_serializable_boxed(type);
-    return data.type == type;
+    return find_serializable_boxed_info(type) != NULL;
 }
 
 void
@@ -255,17 +251,17 @@ gwy_serializable_boxed_assign(GType type,
                               gpointer destination,
                               gconstpointer source)
 {
-    GwySerializableBoxedData data = find_serializable_boxed(type);
-    g_return_if_fail(data.info);
-    data.info->assign(destination, source);
+    const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
+    g_return_if_fail(info);
+    info->assign(destination, source);
 }
 
 gsize
 gwy_serializable_boxed_n_items(GType type)
 {
-    GwySerializableBoxedData data = find_serializable_boxed(type);
-    g_return_val_if_fail(data.info, 0);
-    return data.info->n_items;
+    const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
+    g_return_val_if_fail(info, 0);
+    return info->n_items;
 }
 
 void
@@ -274,14 +270,14 @@ gwy_serializable_boxed_itemize(GType type,
                                GwySerializableItems *items)
 {
     g_return_if_fail(items->n_items >= items->len);
-    GwySerializableBoxedData data = find_serializable_boxed(type);
-    g_return_if_fail(data.info);
+    const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
+    g_return_if_fail(info);
     GwySerializableItem *item = items->items + items->n_items;
     items->n_items++;
     item->name = g_type_name(type);
     item->value.v_size = 0;
     item->ctype = GWY_SERIALIZABLE_HEADER;
-    item->array_size = data.info->itemize(boxed, items);
+    item->array_size = info->itemize(boxed, items);
 }
 
 gpointer
@@ -289,10 +285,10 @@ gwy_serializable_boxed_construct(GType type,
                                  GwySerializableItems *items,
                                  GwyErrorList **error_list)
 {
-    GwySerializableBoxedData data = find_serializable_boxed(type);
+    const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
     /* This is a hard error, the caller must check the type beforehand. */
-    g_return_val_if_fail(data.info, NULL);
-    return data.info->construct(items, error_list);
+    g_return_val_if_fail(info, NULL);
+    return info->construct(items, error_list);
 }
 
 #define __LIBGWY_SERIALIZABLE_C__
