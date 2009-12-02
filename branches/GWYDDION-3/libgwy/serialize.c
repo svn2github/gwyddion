@@ -19,7 +19,12 @@
 
 #include <string.h>
 #include <glib/gi18n-lib.h>
-#include "libgwy/libgwy.h"
+#include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
+#include "libgwy/main.h"
+#include "libgwy/serializable.h"
+#include "libgwy/serializable-boxed.h"
+#include "libgwy/serialize.h"
 #include "libgwy/libgwy-aliases.h"
 
 /*

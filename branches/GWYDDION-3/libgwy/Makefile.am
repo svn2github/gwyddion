@@ -26,6 +26,7 @@ mkenum_headers = \
 	resource.h \
 	rgba.h \
 	serializable.h \
+	serializable-boxed.h \
 	serialize.h \
 	strfuncs.h \
 	unit.h \
@@ -58,6 +59,7 @@ libgwy3_la_SOURCES = \
 	resource.c \
 	rgba.c \
 	serializable.c \
+	serializable-boxed.c \
 	serialize.c \
 	strfuncs.c \
 	types.c \

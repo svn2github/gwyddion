@@ -19,7 +19,7 @@
 
 #include <string.h>
 #include <glib-object.h>
-#include "libgwy/serializable.h"
+#include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
 #include "libgwy/rgba.h"
 #include "libgwy/libgwy-aliases.h"

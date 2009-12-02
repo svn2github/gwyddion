@@ -133,18 +133,6 @@ struct _GwySerializableInterface {
                                        GwySerializable *source);
 };
 
-typedef struct {
-    gsize                 n_items;
-    gsize                 (*itemize)  (gpointer boxed,
-                                       GwySerializableItems *items);
-
-    gpointer              (*construct)(GwySerializableItems *items,
-                                       GwyErrorList **error_list);
-
-    void                  (*assign)   (gpointer destination,
-                                       gconstpointer source);
-} GwySerializableBoxedInfo;
-
 GType    gwy_serializable_get_type (void)                           G_GNUC_CONST;
 GObject* gwy_serializable_duplicate(GwySerializable *serializable)  G_GNUC_MALLOC;
 void     gwy_serializable_assign   (GwySerializable *destination,
@@ -153,22 +141,6 @@ gsize    gwy_serializable_n_items  (GwySerializable *serializable);
 void     gwy_serializable_itemize  (GwySerializable *serializable,
                                     GwySerializableItems *items);
 void     gwy_serializable_done     (GwySerializable *serializable);
-
-gboolean gwy_boxed_type_is_serializable  (GType type);
-void     gwy_serializable_boxed_register_static(GType type,
-                                                const GwySerializableBoxedInfo *info);
-void     gwy_serializable_boxed_assign   (GType type,
-                                          gpointer destination,
-                                          gconstpointer source);
-gsize    gwy_serializable_boxed_n_items  (GType type);
-void     gwy_serializable_boxed_itemize  (GType type,
-                                          gpointer boxed,
-                                          GwySerializableItems *items);
-void     gwy_serializable_boxed_done     (GType type,
-                                          gpointer boxed);
-gpointer gwy_serializable_boxed_construct(GType type,
-                                          GwySerializableItems *items,
-                                          GwyErrorList **error_list);
 
 G_END_DECLS
 

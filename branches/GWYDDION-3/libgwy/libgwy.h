@@ -34,6 +34,7 @@
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
 #include <libgwy/serializable.h>
+#include <libgwy/serializable-boxed.h>
 #include <libgwy/serialize.h>
 #include <libgwy/strfuncs.h>
 #include <libgwy/unit.h>
