@@ -252,8 +252,7 @@ set_n_params(GwyFitTask *fittask,
              guint nparam)
 {
     guint matrix_len = MATRIX_LEN(nparam);
-    fittask->fixed_param = g_renew(gboolean, fittask->fixed_param,
-                                      nparam);
+    fittask->fixed_param = g_renew(gboolean, fittask->fixed_param, nparam);
     fittask->h = g_renew(gdouble, fittask->h, 3*nparam + matrix_len);
     fittask->mparam = fittask->h + nparam;
     fittask->diff = fittask->mparam + nparam;
