@@ -84,6 +84,7 @@ void       gwy_fitter_set_functions      (GwyFitter *fitter,
 void       gwy_fitter_set_constraint     (GwyFitter *fitter,
                                           GwyFitterConstrainFunc constrain);
 gdouble    gwy_fitter_get_lambda         (GwyFitter *fitter)                    G_GNUC_PURE;
+guint      gwy_fitter_get_iter           (GwyFitter *fitter)                    G_GNUC_PURE;
 gboolean   gwy_fitter_fit                (GwyFitter *fitter,
                                           gpointer user_data);
 guint      gwy_fitter_get_status         (GwyFitter *fitter)                    G_GNUC_PURE;

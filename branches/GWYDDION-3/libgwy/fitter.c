@@ -730,6 +730,21 @@ gwy_fitter_get_lambda(GwyFitter *fitter)
 }
 
 /**
+ * gwy_fitter_get_iter:
+ * @fitter: A non-linear least-squares fitter.
+ *
+ * Gets the number of iterations performed in the last fit.
+ *
+ * Returns: The number of iterations.
+ **/
+guint
+gwy_fitter_get_iter(GwyFitter *fitter)
+{
+    g_return_val_if_fail(GWY_IS_FITTER(fitter), 0);
+    return fitter->iter;
+}
+
+/**
  * gwy_fitter_set_functions:
  * @fitter: A non-linear least-squares fitter.
  * @eval_residuum: Function to calculate the sum of squares.
