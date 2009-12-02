@@ -1,0 +1,617 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: tools.xml 9498 2009-07-18 17:55:16Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='tools'>
+  <title>Outils</title>
+  <para>
+    Les fonctions du menu <guimenu>Traitement des Données</guimenu> et des
+    boutons de la fenêtre principale s'exécutent immédiatement ou après réglages
+    <emphasis>via</emphasis> une fenêtre de dialogue. Les outils, accessibles
+    depuis le panneau de boutons <guilabel>Outils</guilabel>, fonctionnent
+    différemment. Une fois sélectionnés, ceux-ci restent actifs et suivent la
+    fenêtre de données courante jusqu'à ce qu'un autre outil soit sélectionné.
+    On peut donc passer librement d'une fenêtre de données à une autre tout en
+    utilisant le même outil qui affichera des informations ou appliquera des
+    opérations sur la fenêtre courante. Les outils fonctionnent aussi avec des
+    <link linkend='selections'>sélections</link>, par exemple des points, des
+    lignes ou des rectangles, sur les fenêtres de données. Toutefois, du point
+    de vue fonctionnel ils réalisent les mêmes taches que les fonctions du menu
+    <guimenu>Traitement des Données</guimenu> – lecture de valeur, mise à
+    niveau, value, statistiques, corrections diverses, etc.
+  </para>
+  <informaltable frame='none' role='toolbox' id='table-toolbox'>
+    <tgroup cols='4'>
+      <tbody>
+        <row>
+          <entry>
+            <link linkend='tool-read-value'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-distance'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_distance-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-profile'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_profile-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-spectro'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-stats'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-sfunctions'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-line-stats'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-roughness'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_iso_roughness-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-level3'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-path-level'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-polynom'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-crop'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_crop-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-mask-editor'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_mask_editor-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-measure-grains'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-remove-grains'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-remove-spots'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <link linkend='tool-color-range'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-filters'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_filter-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+          <entry>
+            <link linkend='tool-selection-manager'>
+              <guiicon>
+                <inlinemediaobject>
+                  <imageobject>
+                    <imagedata fileref='gwy_selections-24.png' format='PNG'/>
+                  </imageobject>
+                </inlinemediaobject>
+              </guiicon>
+            </link>
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <para>
+    Les outils ne peuvent être lancés qu'à partir des boutons du panneau
+    <guilabel>Outils</guilabel> présent sur la fenêtre principale. Gwyddion
+    propose les outils suivants :
+  </para>
+  <variablelist>
+    <varlistentry id='tool-read-value'>
+      <term>
+        <link linkend='read-value'>Lire la Valeur</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Affiche la valeur de la position indiquée par le clic de souris.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-distance'>
+      <term>
+        <link linkend='distance'>Distance</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_distance-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Mesure la distance – de la même manière que l'outils Lire la Valeur,
+          il permet de mesurer les distances horizontale, verticale et
+          euclidienne, ainsi que l'angle entre les points d'un champ de données.
+          Cet outil affiche aussi la différence de valeur entre les points
+          sélectionnés.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-profile'>
+      <term>
+        <link linkend='profile'>Profil</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_profile-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Extrait des profils du champ de données et crée des graphes. Ceux-ci
+          peuvent ensuite être traités à l'aide des fonctions du menu
+          <guimenu>Graphe</guimenu>.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-spectro'>
+      <term>
+        <link linkend='point-spectroscopy'>Spectre</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_spectrum-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Affiche et extrait les données de spectroscopie ponctuelle.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-stats'>
+      <term>
+        <link linkend='stat-quantities'>Statistiques</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_stat_quantities-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Affiche les caractéristiques statistiques (RMS, Ra, minimum, maximum,
+          aire effective et projetée, etc.) d'une sélection ou de toutes les
+          données. Cet outil peut aussi calculer ces données pour la zone
+          masquée, ou combiner ces deux types de sélections de zones d'intérêt.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-sfunctions'>
+      <term>
+        <link linkend='sfunctions'>Fonctions Statistiques</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_graph_halfgauss-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Calcule les fonctions statistiques basiques (distribution des hauteurs
+          ou des pentes, fonction d'autocorrélation, densité spectrale de
+          puissance, etc.) d'une sélection ou de toutes les données.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-line-stats'>
+      <term>
+        <link linkend='line-stats'>Statistiques de Ligne/Colonne</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_graph_vertical-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Complémentaire des fonctions statistiques 1D, cet outils affiche les
+          caractéristiques telles ques moyenne, médiane, ou longueur pour
+          chaque ligne ou colonne.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-roughness'>
+      <term>
+        <link linkend='roughness-iso'>Rugosité</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_iso_roughness-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Evalue les paramètres standard de rugosité uni-dimensionnelle.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-level3'>
+      <term>
+        <link linkend='three-point-level'>Mise à Niveau par 3 Points</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_level_triangle-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Met les données à niveau selon un plan défini par trois points définis
+          à la souris sur la fenêtre de données. Les trois valeurs peuvent être
+          moyennées sur une petite zone autour du point sélectionnés.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-path-level'>
+      <term>
+        <link linkend='path-level'>Mise à Niveau par Chemin</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Outil de mise à niveau de ligne ajustant la hauteur selon un ensemble
+          des lignes droites arbitraires.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-polynom'>
+      <term>
+        <link linkend='line-polynomial'>Mise à Niveau Polynômiale</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_polynom-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Met à niveau des lignes ou des colonnes en ajustant puis en
+          soustrayant une fonction polynômiale.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-crop'>
+      <term>
+        <link linkend='crop'>Rogner</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_crop-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Coupe une partie des données.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-mask-editor'>
+      <term>
+        <link linkend='mask-editor'>Editeur de Masque</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_mask_editor-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Edition manuelle des masques : création, exclusion, intersection,
+          inversion, dilatation et érosion, …
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-measure-grains'>
+      <term>
+        <link linkend='grain-measure'>Mesure de Grain</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Mesure les paramètres de grains individuels.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-remove-grains'>
+      <term>
+        <link linkend='remove-grains'>Suppression de Grain</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Supprime des parties continues du masque en cliquant sur des points
+          du masque ou interpole (supprime) les données situées sous des parties
+          continues du masque.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-remove-spots'>
+      <term>
+        <link linkend='remove-spots'>Suppression de Points Chauds</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Outil de suppression manuelle de points chauds. Sélectionnez un point
+          sur la fenêtre de données, marquez une zone à interpoler sur la vue
+          zoomée puis supprimez le défaut après avoir choisi la méthode
+          d'interpolation.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-color-range'>
+      <term>
+        <link linkend='color-range'>Plage de Couleurs</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Etale la plage de couleurs ou change le type d'application des fausses
+          couleurs (linéaire ou non-linéaire adaptatif). Cet outil permet à
+          l'utilisateur de changer la représentation de la plage des fausses
+          couleurs (elle s'étale par défaut de la valeur minimale à la valeur
+          maximale).
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-filters'>
+      <term>
+        <link linkend='basic-filters'>Filtre</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_filter-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Filtres basiques – moyenne, médiane, débruitage conservatif,
+          dilatation, érosion ainsi que divers filtres similaires pour réduire
+          le bruit présent dans les données.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='tool-selection-manager'>
+      <term>
+        <link linkend='selection-manager'>Gestionnaire de Sélection</link>
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_selections-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </term>
+      <listitem>
+        <para>
+          Affiche les sélections présentes sur un canal et permet de les copier
+          vers d'autres canaux ou fichiers.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Les fenêtres de dialogue des outils peuvent être fermées (ou plus
+    précisément masquées, car l'outil courant reste actif même si sa fenêtre de
+    dialogue est fermée) en cliquant sur le bouton
+    <guibutton>Masquer</guibutton>, en pressant la touche <keycap>Esc</keycap>
+    ou en cliquant à nouveau sur le bouton de l'outil dans la fenêtre des
+    outils.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
