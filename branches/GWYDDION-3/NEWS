@@ -52,6 +52,8 @@ Serialization:
   not the assigned object.
 - The interface now follows the usual convention with function arguments being
   GwySerializable* instead of GObject*.
+- Boxed types can be serialized, although not standalone only as components
+  of objects.
 
 Math:
 - Namespace is no longer polluted with unprefixed names, unless explicitly
@@ -78,6 +80,11 @@ Unit:
   valid UTF-8.
 
 Container:
+- Functions taking and not taking ownership of stored non-atomic items were
+  differentiated to follow the GObject convention.  Functions with take in name
+  take the ownership, functions with set in name make copies.
+- The previous point means that gwy_container_set_string() now copies the
+  passed string and the Gwyddion-2 usage means a memory leak.
 - Some unused functions were removed, signatures of other made more consistent
   (strings are no longer guchar*, etc.).
 - gwy_container_transfer() can perform both shallow and deep copies.
@@ -112,3 +119,17 @@ Resource:
 Interpolation:
 - Inappropriate GWY_INTERPOLATION_NONE ‘interpolation’ type is gone.
 - New 6-point interpolation GWY_INTERPOLATION_BSPLINE6 was added.
+
+Fitting:
+- GwyNLFitter was split to two classes.
+- GwyFitter provides the Marquardt-Levenberg algorithm while being completely
+  model- and data-agnostic.  It works only with concepts such as paramters,
+  sums of squares, gradiens and Hessians.
+- GwyFitter implements the scaled Marquardt-Levenberg algorithm.
+- GwyFitTask can wrap several kinds of data and model and provide the abstract
+  evaluation function for GwyFitter.
+
+RGBA:
+- It can be serialized and directly put to containers.
+- Obsolete auxiliary functions connecting GwyRGBA with GdkColor and containers
+  are not present.
