@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: eq-polynomial-distortion.xml 10419 2009-11-13 15:01:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-polynomial-distortion'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-polynomial-distortion.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+\eqnarray{
+x_{\rm précédent}&=&P_x(x_{\rm nouveau}, y_{\rm nouveau}),\cr
+y_{\rm précédent}&=&P_y(x_{\rm nouveau}, y_{\rm nouveau}),\cr
+}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

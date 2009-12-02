@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: eq-filters-dechecker.xml 10419 2009-11-13 15:01:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-filters-dechecker'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-filters-dechecker.png' format='PNG'/>
+    </imageobject>
+    <textobject>
+      <phrase>Matrice de coefficients 5 × 5 d'un filtre de décarèlement</phrase>
+    </textobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+w_{\rm dechecker}
+  = \pmatrix{0&1/144&-1/72&1/144&0\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             -1/72&1/9&7/9&1/9&-1/72\cr
+             1/144&-1/18&1/9&-1/18&1/144\cr
+             0&1/144&-1/72&1/144&0\cr}
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->
