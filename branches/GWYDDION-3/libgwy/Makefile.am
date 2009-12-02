@@ -20,7 +20,7 @@ mkenum_headers = \
 	interpolation.h \
 	libgwy.h \
 	macros.h \
-	main.c \
+	main.h \
 	math.h \
 	pack.h \
 	resource.h \
