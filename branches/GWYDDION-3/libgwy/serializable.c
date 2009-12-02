@@ -261,7 +261,7 @@ gwy_serializable_boxed_n_items(GType type)
 {
     const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
     g_return_val_if_fail(info, 0);
-    return info->n_items;
+    return info->n_items + 1;
 }
 
 void
@@ -269,7 +269,7 @@ gwy_serializable_boxed_itemize(GType type,
                                gpointer boxed,
                                GwySerializableItems *items)
 {
-    g_return_if_fail(items->n_items >= items->len);
+    g_return_if_fail(items->n_items < items->len);
     const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
     g_return_if_fail(info);
     GwySerializableItem *item = items->items + items->n_items;
