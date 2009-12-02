@@ -17,8 +17,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include <glib-object.h>
+#include "libgwy/serializable.h"
+#include "libgwy/serialize.h"
 #include "libgwy/rgba.h"
+#include "libgwy/libgwy-aliases.h"
+
+enum { N_ITEMS = 4 };
+
+static gsize    gwy_rgba_itemize  (gpointer boxed,
+                                   GwySerializableItems *items);
+static gpointer gwy_rgba_construct(GwySerializableItems *items,
+                                   GwyErrorList **error_list);
+static void     gwy_rgba_assign   (gpointer destination,
+                                   gconstpointer source);
+
+static const GwySerializableItem default_items[N_ITEMS] = {
+    /*0*/ { .name = "r", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*1*/ { .name = "g", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*2*/ { .name = "b", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*3*/ { .name = "a", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+};
 
 GType
 gwy_rgba_get_type(void)
@@ -29,9 +49,64 @@ gwy_rgba_get_type(void)
         rgba_type = g_boxed_type_register_static("GwyRGBA",
                                                  (GBoxedCopyFunc)gwy_rgba_copy,
                                                  (GBoxedFreeFunc)gwy_rgba_free);
+        static const GwySerializableBoxedInfo boxed_info = {
+            N_ITEMS, gwy_rgba_itemize, gwy_rgba_construct, gwy_rgba_assign,
+        };
+        gwy_serializable_boxed_register_static(rgba_type, &boxed_info);
     }
 
     return rgba_type;
+}
+
+static gsize
+gwy_rgba_itemize(gpointer boxed,
+                 GwySerializableItems *items)
+{
+    GwyRGBA *rgba = (GwyRGBA*)boxed;
+    GwySerializableItem it;
+
+    g_return_val_if_fail(items->len - items->n_items >= N_ITEMS, 0);
+
+    it = default_items[0];
+    it.value.v_double = rgba->r;
+    items->items[items->n_items++] = it;
+
+    it = default_items[1];
+    it.value.v_double = rgba->g;
+    items->items[items->n_items++] = it;
+
+    it = default_items[2];
+    it.value.v_double = rgba->b;
+    items->items[items->n_items++] = it;
+
+    it = default_items[3];
+    it.value.v_double = rgba->a;
+    items->items[items->n_items++] = it;
+
+    return N_ITEMS;
+}
+
+static gpointer
+gwy_rgba_construct(GwySerializableItems *items,
+                   GwyErrorList **error_list)
+{
+    GwySerializableItem its[N_ITEMS];
+    memcpy(its, default_items, sizeof(default_items));
+    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", error_list);
+
+    GwyRGBA *rgba = g_slice_new(GwyRGBA);
+    rgba->r = its[0].value.v_double;
+    rgba->g = its[1].value.v_double;
+    rgba->b = its[2].value.v_double;
+    rgba->a = its[3].value.v_double;
+    return rgba;
+}
+
+static void
+gwy_rgba_assign(gpointer destination,
+                gconstpointer source)
+{
+    memcpy(destination, source, sizeof(GwyRGBA));
 }
 
 /**
@@ -112,6 +187,9 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
     rgba->g = (x*src2->a*src2->g + (1.0 - x)*src1->a*src1->g)/rgba->a;
     rgba->b = (x*src2->a*src2->b + (1.0 - x)*src1->a*src1->b)/rgba->a;
 }
+
+#define __LIBGWY_RGBA_C__
+#include "libgwy/libgwy-aliases.c"
 
 /************************** Documentation ****************************/
 

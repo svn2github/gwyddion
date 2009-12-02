@@ -54,6 +54,7 @@
 #include "libgwy/unit.h"
 #include "libgwy/resource.h"
 #include "libgwy/container.h"
+#include "libgwy/rgba.h"
 #include "libgwy/libgwy-aliases.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
@@ -106,6 +107,7 @@ init_types(G_GNUC_UNUSED gpointer arg)
     g_type_class_peek(GWY_TYPE_UNIT);
     g_type_class_peek(GWY_TYPE_RESOURCE);
     g_type_class_peek(GWY_TYPE_CONTAINER);
+    g_type_class_peek(GWY_TYPE_RGBA);
 
     return NULL;
 }
