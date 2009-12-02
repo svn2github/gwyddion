@@ -51,6 +51,7 @@ typedef struct {
 static void print_help      (void);
 static void process_options (int *argc, char ***argv);
 static void dump_object     (DumpState *state, gsize *size);
+static void dump_boxed      (DumpState *state, gsize *size);
 static void print           (DumpState *state,
                              const gchar *format,
                              ...);
@@ -505,7 +506,8 @@ gtype_to_ctype(guint32 gtype)
 static void
 dump_hash(DumpState *state,
           gsize size,
-          gboolean oldfile)
+          gboolean oldfile,
+          gboolean forbid_objects)
 {
     static struct {
         gchar ctype;
@@ -517,6 +519,7 @@ dump_hash(DumpState *state,
         { 'h', dump_int16,   },
         { 'i', dump_int32,   },
         { 'o', dump_object,  },
+        { 'x', dump_boxed,  },
         { 'q', dump_int64,   },
         { 's', dump_string,  },
     };
@@ -552,6 +555,8 @@ dump_hash(DumpState *state,
             ctype = *state->buffer;
             state->buffer += sizeof(gchar);
             size -= sizeof(gchar);
+            if (forbid_objects && g_ascii_tolower(ctype) == 'o')
+                fprintf(stderr, "Warning: object inside boxed type");
         }
 
         /* Data */
@@ -572,8 +577,9 @@ dump_hash(DumpState *state,
 }
 
 static void
-dump_object(DumpState *state,
-            gsize *size)
+dump_object_or_boxed(DumpState *state,
+                     gsize *size,
+                     gboolean is_boxed)
 {
     gboolean container;
     guint64 mysize;
@@ -582,11 +588,12 @@ dump_object(DumpState *state,
     /* Name */
     start = state->buffer;
     if (!(p = memchr(state->buffer, 0, *size)))
-        fail(state, "Runaway object name");
+        fail(state, "Runaway %s name", is_boxed ? "boxed" : "object");
     if (opt_value)
-        print(state, " %s%s", opt_type ? "object=" : "", state->buffer);
+        print(state, " %s%s",
+              opt_type ? (is_boxed ? "boxed=" : "object=") : "", state->buffer);
     else if (opt_type)
-        print(state, " object");
+        print(state, is_boxed ? " boxed" : " object");
     container = (strcmp(state->buffer, "GwyContainer") == 0);
     *size -= (p - state->buffer) + 1;
     state->buffer = p + 1;
@@ -594,7 +601,7 @@ dump_object(DumpState *state,
     /* Size */
     mysize = get_size(state, size);
     if (mysize > *size)
-        fail(state, "Truncated object data");
+        fail(state, "Truncated %s data", is_boxed ? "boxed" : "object");
     if (opt_object_size)
         print(state, " size=%" G_GSIZE_FORMAT, mysize);
     print(state, "\n");
@@ -608,14 +615,28 @@ dump_object(DumpState *state,
     /* Hash */
     *size -= mysize;
     p = state->buffer + mysize;
-    dump_hash(state, mysize, state->version == 1 && container);
+    dump_hash(state, mysize, state->version == 1 && container, is_boxed);
     if (state->buffer > p)
-        fail(state, "Internal error, object managed to escape jail");
+        fail(state, "Internal error, object/boxed managed to escape jail");
     if (state->buffer < p) {
         fprintf(stderr, "Warning: padding of length " U64F " found",
                 (guint64)(p - state->buffer));
         state->buffer = p;
     }
+}
+
+static void
+dump_object(DumpState *state,
+            gsize *size)
+{
+    dump_object_or_boxed(state, size, FALSE);
+}
+
+static void
+dump_boxed(DumpState *state,
+           gsize *size)
+{
+    dump_object_or_boxed(state, size, TRUE);
 }
 
 static void
