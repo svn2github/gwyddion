@@ -102,13 +102,15 @@
     </varlistentry>
   </variablelist>
   <para>
-    Finally, you can find some rows of buttons in the main window.  Buttons
-    in <guilabel>View</guilabel> panel offer zooming functions (that are
-    often more easily invoked by keyboard shortcuts or just rezising the data
-    window) and <link linkend='opengl-3d-view'>3D data display</link>.
-    Panels <guilabel>Data Process</guilabel> and <guilabel>Graph</guilabel>
-    contain selected functions from <guimenu>Data Process</guimenu> and
-    <guimenu>Graph</guimenu> menus as described above.
+    Pour finir, vous pouvez trouvez quelques groupes de boutons dans la
+    fenêtre principale. Les boutons du panneau <guilabel>Vue</guilabel> donnent
+    les fonctions de zoom (qui sont en général plus facilement accessibles par
+    raccourci clavier ou en modifiant la taille de la fenêtre de données) et
+    <link linkend='opengl-3d-view'>l'affichage des données en 3D</link>.
+    Les panneaux <guilabel>Traitement des Données</guilabel> et
+    <guilabel>Graphes</guilabel> contiennent une sélection des fonctions des
+    menus <guimenu>Traitement des Données</guimenu> et
+    <guimenu>Graphes</guimenu> décrits plus hauts.
   </para>
   <para>
     Le panneau <guilabel>Outils</guilabel> contient les 

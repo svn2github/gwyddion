@@ -20,7 +20,6 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
-    <!-- Module aistfile.c contains no magic. -->
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -66,20 +65,20 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
-    <!-- From module burleigh.c -->
-    <row>
-      <entry>Burleigh IMG v2.1</entry>
-      <entry>.img</entry>
-      <entry>burleigh</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
     <!-- From module burleigh_bii.c -->
     <row>
       <entry>Burleigh BII</entry>
       <entry>.bii</entry>
       <entry>burleigh_bii</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module burleigh.c -->
+    <row>
+      <entry>Burleigh IMG v2.1</entry>
+      <entry>.img</entry>
+      <entry>burleigh</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -273,20 +272,20 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
-    <!-- From module nanoscope-ii.c -->
-    <row>
-      <entry>Veeco Nanoscope II</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope-ii</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
     <!-- From module nanoscope.c -->
     <row>
       <entry>Veeco Nanoscope III</entry>
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module nanoscope-ii.c -->
+    <row>
+      <entry>Veeco Nanoscope II</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope-ii</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -373,6 +372,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       en niveaux de gris 16bit est possible vers les formats PNG, TIFF et PNM.</para></footnote></entry>
       <entry>Non</entry>
     </row>
+    <!-- From module pltfile.c -->
+    <row>
+      <entry>Nanosurf PLT</entry>
+      <entry>.plt</entry>
+      <entry>pltfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module pnifile.c -->
     <row>
       <entry>Pacific Nanotechnology PNI</entry>
@@ -424,6 +432,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>rawgraph</entry>
       <entry>Oui<footnote id="table-file-formats-fn4"><para>Pour l'instant, seules les données sous forme de deux colonnes, importées sous formes de courbes, sont
       supportées.</para></footnote></entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module rawxyz.c -->
+    <row>
+      <entry>XYZ data</entry>
+      <entry>.xyz, .dat</entry>
+      <entry>rawxyz</entry>
+      <entry>Oui<footnote id="table-file-formats-fn5"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
@@ -534,15 +551,6 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
     <!-- From module spmlab.c -->
     <row>
       <entry>Thermicroscopes SPMLab R4-R7</entry>
@@ -557,6 +565,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Thermicroscopes SPMLab virgule flottante</entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>

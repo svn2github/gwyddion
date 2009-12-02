@@ -127,6 +127,14 @@
             (<type>Window</type> sur X11, <type>HWND</type> sur Win32).  Elle
             échoue si aucune session ne tourne.
           </para>
+          <para>
+            L'identificateur de session dépend du gestionnaire de contrôle à
+            distance. Dans certains cas il est utile en tant qu'identifiant
+            global de fenêtre, et dans d'autres non. Avec libXmu, cette option
+            affiche la <type>fenêtre</type> X11, sous Win32 elle affiche le
+            numéro <type>HWND</type>, tandis que sous LibUnique elle affiche
+            l'identifiant de démarrage.
+          </para>
         </listitem>
       </varlistentry>
       <varlistentry>

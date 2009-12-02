@@ -179,7 +179,7 @@
           </row>
           <row>
             <entry><literal>log</literal></entry>
-            <entry>base-e logarithm function</entry>
+            <entry>logarithme en base 10</entry>
           </row>
           <row>
             <entry><literal>pow10</literal></entry>
