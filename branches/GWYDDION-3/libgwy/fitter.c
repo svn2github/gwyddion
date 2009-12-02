@@ -39,6 +39,7 @@ enum {
     PROP_ITER_MAX,
     PROP_SUCCESSES_TO_GET_BORED,
     PROP_LAMBDA_MAX,
+    PROP_LAMBDA_START,
     PROP_LAMBDA_INCREASE,
     PROP_LAMBDA_DECREASE,
     PROP_PARAM_CHANGE_MIN,
@@ -173,6 +174,17 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 
     g_object_class_install_property
         (gobject_class,
+         PROP_LAMBDA_START,
+         g_param_spec_double("lambda-start",
+                             "Lambda start",
+                             "Value to set the Marquardt parameter lambda "
+                             "to at the start of each fitting.",
+                             G_MINDOUBLE, G_MAXDOUBLE,
+                             default_settings.lambda_start,
+                             G_PARAM_READWRITE | STATIC));
+
+    g_object_class_install_property
+        (gobject_class,
          PROP_LAMBDA_INCREASE,
          g_param_spec_double("lambda-increase",
                              "Lambda increase",
@@ -218,7 +230,6 @@ static void
 gwy_fitter_init(GwyFitter *fitter)
 {
     fitter->settings = default_settings;
-    fitter->lambda = fitter->settings.lambda_start;
 }
 
 static void
@@ -251,6 +262,10 @@ gwy_fitter_set_property(GObject *object,
 
         case PROP_LAMBDA_MAX:
         fitter->settings.lambda_max = g_value_get_double(value);
+        break;
+
+        case PROP_LAMBDA_START:
+        fitter->settings.lambda_start = g_value_get_double(value);
         break;
 
         case PROP_LAMBDA_INCREASE:
@@ -297,6 +312,10 @@ gwy_fitter_get_property(GObject *object,
 
         case PROP_LAMBDA_MAX:
         g_value_set_double(value, fitter->settings.lambda_max);
+        break;
+
+        case PROP_LAMBDA_START:
+        g_value_set_double(value, fitter->settings.lambda_start);
         break;
 
         case PROP_LAMBDA_INCREASE:
@@ -490,6 +509,7 @@ fitter_minimize(GwyFitter *fitter,
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
 
+    fitter->lambda = fitter->settings.lambda_start;
     fitter->valid = MIN(fitter->valid, VALID_PARAMS);
     ASSIGN(fitter->param, fitter->param_best, nparam);
 
@@ -692,22 +712,6 @@ gwy_fitter_get_params(GwyFitter *fitter,
     if (params && fitter->nparam)
         ASSIGN(params, fitter->param_best, fitter->nparam);
     return TRUE;
-}
-
-/**
- * gwy_fitter_set_lambda:
- * @fitter: A non-linear least-squares fitter.
- * @lambda: Value of Marquardt parameter lambda.
- *
- * Sets the value of Marquardt parameter lambda of a fitter.
- **/
-void
-gwy_fitter_set_lambda(GwyFitter *fitter,
-                      gdouble lambda)
-{
-    g_return_if_fail(GWY_IS_FITTER(fitter));
-    g_return_if_fail(lambda > 0.0);
-    fitter->lambda = lambda;
 }
 
 /**

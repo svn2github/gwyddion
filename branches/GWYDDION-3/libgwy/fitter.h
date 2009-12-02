@@ -83,8 +83,6 @@ void       gwy_fitter_set_functions      (GwyFitter *fitter,
                                           GwyFitterGradientFunc eval_gradient);
 void       gwy_fitter_set_constraint     (GwyFitter *fitter,
                                           GwyFitterConstrainFunc constrain);
-void       gwy_fitter_set_lambda         (GwyFitter *fitter,
-                                          gdouble lambda);
 gdouble    gwy_fitter_get_lambda         (GwyFitter *fitter)                    G_GNUC_PURE;
 gboolean   gwy_fitter_fit                (GwyFitter *fitter,
                                           gpointer user_data);
@@ -100,4 +98,3 @@ G_END_DECLS
 #endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
-
