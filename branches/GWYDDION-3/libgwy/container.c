@@ -309,12 +309,11 @@ gwy_container_construct(GwySerializableItems *items,
             break;
 
             case GWY_SERIALIZABLE_STRING:
-            /* This takes the string which is exactly what we need. */
-            gwy_container_set_string(container, key, it->value.v_string);
+            gwy_container_take_string(container, key, it->value.v_string);
             it->value.v_string = NULL;
             break;
 
-            case 'o':
+            case GWY_SERIALIZABLE_OBJECT:
             if (it->value.v_object) {
                 gwy_container_set_object(container, key, it->value.v_object);
                 GWY_OBJECT_UNREF(it->value.v_object);
@@ -1725,10 +1724,10 @@ gwy_container_set_double(GwyContainer *container,
  * @n: String item key.
  * @v: A nul-terminated string.
  *
- * Stores a string identified by a string into a container.
+ * Copies a string identified by a string into a container.
  *
- * The container takes ownership of the string, so it cannot be used on
- * static strings, use g_strdup() to duplicate them first.
+ * The container makes a copy of the string so, this method can be used on
+ * static strings and strings that may be modified or freed.
  **/
 
 /**
@@ -1737,21 +1736,57 @@ gwy_container_set_double(GwyContainer *container,
  * @key: #GQuark item key.
  * @value: A nul-terminated string.
  *
- * Stores a string identified by a quark into a container.
+ * Copies a string identified by a quark into a container.
  *
- * The container takes ownership of the string, so it cannot be used on
- * static strings, use g_strdup() to duplicate them first.
+ * The container makes a copy of the string so, this method can be used on
+ * static strings and strings that may be modified or freed.
  **/
 void
 gwy_container_set_string(GwyContainer *container,
                          GQuark key,
-                         gchar *value)
+                         const gchar *value)
 {
     GValue gvalue;
 
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_STRING);
-    g_value_take_string(&gvalue, (gchar*)value);
+    g_value_set_string(&gvalue, value);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
+}
+
+/**
+ * gwy_container_take_string_by_name:
+ * @c: A container.
+ * @n: String item key.
+ * @v: A nul-terminated string.
+ *
+ * Stores a string identified by a string into a container.
+ *
+ * The container takes ownership of the string so, this method cannot be used
+ * with static strings, use g_strdup() to duplicate them first.
+ **/
+
+/**
+ * gwy_container_take_string:
+ * @container: A container.
+ * @key: #GQuark item key.
+ * @value: A nul-terminated string.
+ *
+ * Stores a string identified by a quark into a container.
+ *
+ * The container takes ownership of the string so, this method cannot be used
+ * with static strings, use g_strdup() to duplicate them first.
+ **/
+void
+gwy_container_take_string(GwyContainer *container,
+                          GQuark key,
+                          gchar *value)
+{
+    GValue gvalue;
+
+    gwy_memclear(&gvalue, 1);
+    g_value_init(&gvalue, G_TYPE_STRING);
+    g_value_take_string(&gvalue, value);
     try_set_value(container, key, &gvalue, TRUE, TRUE);
 }
 
@@ -1790,7 +1825,47 @@ gwy_container_set_object(GwyContainer *container,
     g_return_if_fail(G_IS_OBJECT(value));
     gwy_memclear(&gvalue, 1);
     g_value_init(&gvalue, G_TYPE_OBJECT);
-    g_value_set_object(&gvalue, value);  /* this increases refcount too */
+    g_value_set_object(&gvalue, value);
+    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    g_object_unref(value);
+}
+
+/**
+ * gwy_container_take_object_by_name:
+ * @c: A container.
+ * @n: String item key.
+ * @v: An object to store into container.
+ *
+ * Stores an object identified by a string into a container.
+ *
+ * See gwy_container_take_object() for details.
+ **/
+
+/**
+ * gwy_container_take_object:
+ * @container: A container.
+ * @key: #GQuark item key.
+ * @value: Object to store into the container.
+ *
+ * Stores an object identified by a quark into a container.
+ *
+ * The container takes the ownership on the object from the caler, i.e. its
+ * reference count is not incremented.
+ *
+ * The object must implement #GwySerializable interface to allow serialization
+ * of the container.
+ **/
+void
+gwy_container_take_object(GwyContainer *container,
+                          GQuark key,
+                          gpointer value)
+{
+    GValue gvalue;
+
+    g_return_if_fail(G_IS_OBJECT(value));
+    gwy_memclear(&gvalue, 1);
+    g_value_init(&gvalue, G_TYPE_OBJECT);
+    g_value_take_object(&gvalue, value);
     try_set_value(container, key, &gvalue, TRUE, TRUE);
     g_object_unref(value);
 }
@@ -1813,16 +1888,12 @@ set_copied_value(GwyContainer *container,
         }
         break;
 
-        case G_TYPE_STRING:
-        /* strings have to be handled separately since we take them */
-        gwy_container_set_string(container, key, g_value_dup_string(value));
-        break;
-
         case G_TYPE_BOOLEAN:
         case G_TYPE_CHAR:
         case G_TYPE_INT:
         case G_TYPE_INT64:
         case G_TYPE_DOUBLE:
+        case G_TYPE_STRING:
         gwy_container_set_value(container, key, value);
         break;
 
@@ -2232,7 +2303,7 @@ gwy_container_new_from_text(const gchar *text)
 
             vallen = len;
             s = dequote_token(tok, &vallen);
-            gwy_container_set_string(container, key, s);
+            gwy_container_take_string(container, key, s);
         }
         /* UFO */
         else {

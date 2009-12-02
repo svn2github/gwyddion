@@ -1893,11 +1893,27 @@ test_container_data(void)
     g_assert_cmpstr(item_key, ==, "/pfx/double");
 
     item_key = "";
-    gwy_container_set_string_by_name(container, "/pfx/string",
-                                     g_strdup("Test Test"));
+    gwy_container_take_string_by_name(container, "/pfx/string",
+                                      g_strdup("Test Test"));
     g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
     g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
                     ==, "Test Test");
+    g_assert_cmpstr(item_key, ==, "/pfx/string");
+
+    /* No value change */
+    item_key = "";
+    gwy_container_set_string_by_name(container, "/pfx/string", "Test Test");
+    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+                    ==, "Test Test");
+    g_assert_cmpstr(item_key, ==, "");
+
+    item_key = "";
+    gwy_container_set_string_by_name(container, "/pfx/string",
+                                     "Test Test Test");
+    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+                    ==, "Test Test Test");
     g_assert_cmpstr(item_key, ==, "/pfx/string");
 
     g_assert_cmpuint(gwy_container_n_items(container), ==, 5);
@@ -1998,7 +2014,7 @@ test_container_serialize(void)
     gwy_container_set_boolean_by_name(container, "bool", TRUE);
     gwy_container_set_int32_by_name(container, "int32", -123456);
     gwy_container_set_int64_by_name(container, "int64", -12345678);
-    gwy_container_set_string_by_name(container, "string", g_strdup("Mud"));
+    gwy_container_set_string_by_name(container, "string", "Mud");
     gwy_container_set_double_by_name(container, "double", G_E);
     GwyUnit *unit = gwy_unit_new_from_string("uPa", NULL);
     gwy_container_set_object_by_name(container, "unit", unit);

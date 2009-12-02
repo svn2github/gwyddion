@@ -136,6 +136,9 @@ gboolean      gwy_container_gis_double   (GwyContainer *container,
                                           gdouble *value);
 void          gwy_container_set_string   (GwyContainer *container,
                                           GQuark key,
+                                          const gchar *value);
+void          gwy_container_take_string  (GwyContainer *container,
+                                          GQuark key,
                                           gchar *value);
 const gchar*  gwy_container_get_string   (GwyContainer *container,
                                           GQuark key)                 G_GNUC_PURE;
@@ -143,6 +146,9 @@ gboolean      gwy_container_gis_string   (GwyContainer *container,
                                           GQuark key,
                                           const gchar **value);
 void          gwy_container_set_object   (GwyContainer *container,
+                                          GQuark key,
+                                          gpointer value);
+void          gwy_container_take_object  (GwyContainer *container,
                                           GQuark key,
                                           gpointer value);
 gpointer      gwy_container_get_object   (GwyContainer *container,
@@ -178,9 +184,11 @@ GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MAL
 #define gwy_container_get_double_by_name(c,n)    gwy_container_get_double(c,g_quark_try_string(n))
 #define gwy_container_gis_double_by_name(c,n,v)  gwy_container_gis_double(c,g_quark_from_string(n),v)
 #define gwy_container_set_string_by_name(c,n,v)  gwy_container_set_string(c,g_quark_from_string(n),v)
+#define gwy_container_take_string_by_name(c,n,v) gwy_container_take_string(c,g_quark_from_string(n),v)
 #define gwy_container_get_string_by_name(c,n)    gwy_container_get_string(c,g_quark_try_string(n))
 #define gwy_container_gis_string_by_name(c,n,v)  gwy_container_gis_string(c,g_quark_from_string(n),v)
 #define gwy_container_set_object_by_name(c,n,v)  gwy_container_set_object(c,g_quark_from_string(n),v)
+#define gwy_container_take_object_by_name(c,n,v) gwy_container_take_object(c,g_quark_from_string(n),v)
 #define gwy_container_get_object_by_name(c,n)    gwy_container_get_object(c,g_quark_try_string(n))
 #define gwy_container_gis_object_by_name(c,n,v)  gwy_container_gis_object(c,g_quark_from_string(n),v)
 
