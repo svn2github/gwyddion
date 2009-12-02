@@ -17,28 +17,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_H__
-#define __LIBGWY_H__
+#ifndef __LIBGWY_RGBA_H__
+#define __LIBGWY_RGBA_H__
 
-#include <libgwy/container.h>
-#include <libgwy/error-list.h>
-#include <libgwy/expr.h>
-#include <libgwy/fitter.h>
-#include <libgwy/fit-task.h>
-#include <libgwy/inventory.h>
-#include <libgwy/interpolation.h>
-#include <libgwy/macros.h>
-#include <libgwy/main.h>
-#include <libgwy/math.h>
-#include <libgwy/pack.h>
-#include <libgwy/resource.h>
-#include <libgwy/rgba.h>
-#include <libgwy/serializable.h>
-#include <libgwy/serialize.h>
-#include <libgwy/strfuncs.h>
-#include <libgwy/unit.h>
-#include <libgwy/version.h>
+#include <glib.h>
 
-#endif
+G_BEGIN_DECLS
+
+#define GWY_TYPE_RGBA                         (gwy_rgba_get_type())
+
+typedef struct {
+    gdouble r;
+    gdouble g;
+    gdouble b;
+    gdouble a;
+} GwyRGBA;
+
+GType    gwy_rgba_get_type   (void)                G_GNUC_CONST;
+GwyRGBA* gwy_rgba_copy       (const GwyRGBA *rgba) G_GNUC_MALLOC;
+void     gwy_rgba_free       (GwyRGBA *rgba);
+void     gwy_rgba_interpolate(const GwyRGBA *src1,
+                              const GwyRGBA *src2,
+                              gdouble x,
+                              GwyRGBA *rgba);
+
+G_END_DECLS
+
+#endif /* __GWY_RGBA_H__ */
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
