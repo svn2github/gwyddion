@@ -2131,9 +2131,45 @@ test_fit_task_point(void)
                                                       ndata, 42);
     gwy_fit_task_set_point_function
         (fittask, nparam, (GwyFitTaskPointFunc)test_fit_task_gaussian_point);
-    gwy_fitter_set_params(fitter, param_init);
     gwy_fit_task_set_point_data(fittask, data, ndata);
+    gwy_fitter_set_params(fitter, param_init);
     test_fit_task_check_fit(fittask, param);
+    g_free(data);
+    g_object_unref(fittask);
+}
+
+static void
+test_fit_task_fixed(void)
+{
+    enum { nparam = 4, ndata = 100 };
+    const gdouble param[nparam] = { 1e-5, 1e6, 1e-4, 2e5 };
+    const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
+    GwyFitTask *fittask = gwy_fit_task_new();
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+                                                      param[2], param[3],
+                                                      ndata, 42);
+    gwy_fit_task_set_point_function
+        (fittask, nparam, (GwyFitTaskPointFunc)test_fit_task_gaussian_point);
+    gwy_fit_task_set_point_data(fittask, data, ndata);
+    for (guint i = 0; i < nparam; i++) {
+        gwy_fitter_set_params(fitter, param_init);
+        gwy_fit_task_set_fixed_param(fittask, i, TRUE);
+        gdouble res_init = gwy_fit_task_eval_residuum(fittask);
+        g_assert_cmpfloat(res_init, >, 0.0);
+        g_assert(gwy_fit_task_fit(fittask));
+        gdouble res = gwy_fitter_get_residuum(fitter);
+        g_assert_cmpfloat(res, >, 0.0);
+        g_assert_cmpfloat(res, <, 0.1*res_init);
+        /* Fixed params are not touched. */
+        gdouble param_final[nparam];
+        g_assert(gwy_fitter_get_params(fitter, param_final));
+        g_assert_cmpfloat(param_final[i], ==, param_init[i]);
+        gdouble error[nparam];
+        g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
+        g_assert_cmpfloat(error[i], ==, 0);
+        gwy_fit_task_set_fixed_param(fittask, i, FALSE);
+    }
     g_free(data);
     g_object_unref(fittask);
 }
@@ -2151,8 +2187,8 @@ test_fit_task_vector(void)
                                                       ndata, 42);
     gwy_fit_task_set_vector_function
         (fittask, nparam, (GwyFitTaskVectorFunc)test_fit_task_gaussian_vector);
-    gwy_fitter_set_params(fitter, param_init);
     gwy_fit_task_set_vector_data(fittask, data, ndata);
+    gwy_fitter_set_params(fitter, param_init);
     test_fit_task_check_fit(fittask, param);
     g_free(data);
     g_object_unref(fittask);
@@ -2172,8 +2208,8 @@ test_fit_task_vfunc(void)
     gwy_fit_task_set_vector_vfunction
         (fittask, nparam,
          (GwyFitTaskVectorVFunc)test_fit_task_gaussian_vfunc, NULL);
-    gwy_fitter_set_params(fitter, param_init);
     gwy_fit_task_set_vector_data(fittask, data, ndata);
+    gwy_fitter_set_params(fitter, param_init);
     test_fit_task_check_fit(fittask, param);
     g_free(data);
     g_object_unref(fittask);
@@ -2208,6 +2244,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/fit-task/point", test_fit_task_point);
     g_test_add_func("/testlibgwy/fit-task/vector", test_fit_task_vector);
     g_test_add_func("/testlibgwy/fit-task/vfunc", test_fit_task_vfunc);
+    g_test_add_func("/testlibgwy/fit-task/fixed", test_fit_task_fixed);
     g_test_add_func("/testlibgwy/serialize/simple", test_serialize_simple);
     g_test_add_func("/testlibgwy/serialize/data", test_serialize_data);
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
