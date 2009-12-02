@@ -21,9 +21,18 @@
 #include "libgwy/serializable.h"
 #include "libgwy/libgwy-aliases.h"
 
+#define serializable_boxed_index(a, i) \
+    g_array_index((a), GwySerializableBoxedData, (i))
+
+#define GWY_SERIALIZABLE_BOXED_NO_DATA (GwySerializableBoxedData){ 0, NULL }
+
+typedef struct {
+    GType type;
+    const GwySerializableBoxedInfo *info;
+} GwySerializableBoxedData;
+
 static GStaticMutex serializable_boxed_mutex = G_STATIC_MUTEX_INIT;
-static GArray *serializable_boxed_types = NULL;
-static GArray *serializable_boxed_info = NULL;
+static GArray *serializable_boxed_data = NULL;
 
 GType
 gwy_serializable_get_type(void)
@@ -175,44 +184,40 @@ static gpointer
 init_serializable_boxed(G_GNUC_UNUSED gpointer arg)
 {
     g_type_init();
-    serializable_boxed_types = g_array_new(FALSE, FALSE, sizeof(GType));
-    serializable_boxed_info = g_array_new(FALSE, FALSE,
-                                          sizeof(GwySerializableBoxedInfo));
+    serializable_boxed_data = g_array_new(FALSE, FALSE,
+                                          sizeof(GwySerializableBoxedData));
     return NULL;
 }
 
-static GwySerializableBoxedInfo*
-find_serializable_boxed_info(GType type)
+static GwySerializableBoxedData
+find_serializable_boxed(GType type)
 {
-    g_return_val_if_fail(serializable_boxed_types, NULL);
-    GArray *types = serializable_boxed_types, *infos = serializable_boxed_info;
-    for (guint i = 0; i < types->len; i++) {
-        if (g_array_index(types, GType, i) == type) {
+    g_return_val_if_fail(serializable_boxed_data,
+                         GWY_SERIALIZABLE_BOXED_NO_DATA);
+    g_static_mutex_lock(&serializable_boxed_mutex);
+    GArray *data = serializable_boxed_data;
+    for (guint i = 0; i < data->len; i++) {
+        if (serializable_boxed_index(data, i).type == type) {
+            GwySerializableBoxedData retval = serializable_boxed_index(data, i);
             if (i) {
-                GwySerializableBoxedInfo info0
-                    = g_array_index(infos, GwySerializableBoxedInfo, 0);
-                g_array_index(infos, GwySerializableBoxedInfo, 0)
-                    = g_array_index(infos, GwySerializableBoxedInfo, i);
-                g_array_index(infos, GwySerializableBoxedInfo, 0) = info0;
-
-                g_array_index(types, GType, i) = g_array_index(types, GType, 0);
-                g_array_index(types, GType, 0) = type;
-
+                /* The just looked-up type is likely to be looked-up again
+                 * soon. */
+                serializable_boxed_index(data, i) 
+                    = serializable_boxed_index(data, 0);
+                serializable_boxed_index(data, 0) = retval;
             }
-            return &g_array_index(serializable_boxed_info,
-                                  GwySerializableBoxedInfo, i);
+            g_static_mutex_unlock(&serializable_boxed_mutex);
+            return retval;
         }
     }
-    return NULL;
+    return GWY_SERIALIZABLE_BOXED_NO_DATA;
 }
 
 gboolean
 gwy_boxed_type_is_serializable(GType type)
 {
-    g_static_mutex_lock(&serializable_boxed_mutex);
-    gboolean retval = find_serializable_boxed_info(type) != NULL;
-    g_static_mutex_unlock(&serializable_boxed_mutex);
-    return retval;
+    GwySerializableBoxedData data = find_serializable_boxed(type);
+    return data.type == type;
 }
 
 void
@@ -231,15 +236,17 @@ gwy_serializable_boxed_register_static(GType type,
     g_return_if_fail(info->assign);
 
     g_static_mutex_lock(&serializable_boxed_mutex);
-    if (find_serializable_boxed_info(type)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_warning("Type %s has been already registered as serializable boxed.",
-                  g_type_name(type));
-        return;
+    GArray *data = serializable_boxed_data;
+    for (guint i = 0; i < data->len; i++) {
+        if (G_UNLIKELY(serializable_boxed_index(data, i).type == type)) {
+            g_static_mutex_unlock(&serializable_boxed_mutex);
+            g_warning("Type %s has been already registered as serializable "
+                      "boxed.", g_type_name(type));
+            return;
+        }
     }
-
-    g_array_append_val(serializable_boxed_types, type);
-    g_array_append_vals(serializable_boxed_info, info, 1);
+    GwySerializableBoxedData newitem = { type, info };
+    g_array_append_val(serializable_boxed_data, newitem);
     g_static_mutex_unlock(&serializable_boxed_mutex);
 }
 
@@ -248,29 +255,17 @@ gwy_serializable_boxed_assign(GType type,
                               gpointer destination,
                               gconstpointer source)
 {
-    g_static_mutex_lock(&serializable_boxed_mutex);
-    GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
-    if (G_UNLIKELY(!info)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_return_if_fail(info);
-    }
-    void (*assign)(gpointer destination, gconstpointer source) = info->assign;
-    g_static_mutex_unlock(&serializable_boxed_mutex);
-    assign(destination, source);
+    GwySerializableBoxedData data = find_serializable_boxed(type);
+    g_return_if_fail(data.info);
+    data.info->assign(destination, source);
 }
 
 gsize
 gwy_serializable_boxed_n_items(GType type)
 {
-    g_static_mutex_lock(&serializable_boxed_mutex);
-    GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
-    if (G_UNLIKELY(!info)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_return_val_if_fail(info, 0);
-    }
-    gsize n_items = info->n_items;
-    g_static_mutex_unlock(&serializable_boxed_mutex);
-    return n_items;
+    GwySerializableBoxedData data = find_serializable_boxed(type);
+    g_return_val_if_fail(data.info, 0);
+    return data.info->n_items;
 }
 
 void
@@ -278,25 +273,15 @@ gwy_serializable_boxed_itemize(GType type,
                                gpointer boxed,
                                GwySerializableItems *items)
 {
-    g_static_mutex_lock(&serializable_boxed_mutex);
-    GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
-    if (G_UNLIKELY(!info)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_return_if_fail(info);
-    }
-    if (G_UNLIKELY(items->n_items >= items->len)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_return_if_fail(items->n_items < items->len);
-    }
-    gsize (*itemize)(gpointer boxed,
-                     GwySerializableItems *items) = info->itemize;
-    g_static_mutex_unlock(&serializable_boxed_mutex);
+    g_return_if_fail(items->n_items >= items->len);
+    GwySerializableBoxedData data = find_serializable_boxed(type);
+    g_return_if_fail(data.info);
     GwySerializableItem *item = items->items + items->n_items;
     items->n_items++;
     item->name = g_type_name(type);
     item->value.v_size = 0;
     item->ctype = GWY_SERIALIZABLE_HEADER;
-    item->array_size = itemize(boxed, items);
+    item->array_size = data.info->itemize(boxed, items);
 }
 
 gpointer
@@ -304,16 +289,10 @@ gwy_serializable_boxed_construct(GType type,
                                  GwySerializableItems *items,
                                  GwyErrorList **error_list)
 {
-    g_static_mutex_lock(&serializable_boxed_mutex);
-    GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
-    if (G_UNLIKELY(!info)) {
-        g_static_mutex_unlock(&serializable_boxed_mutex);
-        g_return_val_if_fail(info, NULL);
-    }
-    gpointer (*construct)(GwySerializableItems *items,
-                          GwyErrorList **error_list) = info->construct;
-    g_static_mutex_unlock(&serializable_boxed_mutex);
-    return construct(items, error_list);
+    GwySerializableBoxedData data = find_serializable_boxed(type);
+    /* This is a hard error, the caller must check the type beforehand. */
+    g_return_val_if_fail(data.info, NULL);
+    return data.info->construct(items, error_list);
 }
 
 #define __LIBGWY_SERIALIZABLE_C__
