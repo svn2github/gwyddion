@@ -2343,13 +2343,13 @@ next:
  * functions for reading (updating) a value only if it is present such as
  * gwy_container_gis_double(), are available too.
  *
- * #GwyContainer takes ownership of stored non-atomic items. For strings, this
- * means you cannot store static strings (use g_strdup() to duplicate them),
- * and you must not free stored dynamic strings, as the container will free
- * them when they are removed or when the container is finalized. For objects,
- * this means the container takes a reference on the object (released when the
- * object is removed or the container is finalized), so you usually want to
- * g_object_unref() objects after storing them to a container.
+ * When non-atomic items are stored, #GwyContainer can either takes ownership
+ * of them or make a copy. For strings, this means strings stored with
+ * gwy_container_take_string() must be freeable when the container no longer
+ * needs them and nothing else must modify or free them after storing them to
+ * the container. Objects are not duplicated whether taken or copied, in this
+ * case the difference is only whether the container takes the caller's
+ * reference or its adds its own.
  *
  * Items in a #GwyContainer can be identified by a #GQuark or the corresponding
  * string.  While #GQuark's are atomic values and allow faster access, they are
@@ -2357,7 +2357,7 @@ next:
  * gwy_container_set_double() thus has a string-key counterpart
  * gwy_container_set_double_by_name().
  *
- * An important different between #GwyContainer and ordinary #GHashTable is
+ * An important difference between #GwyContainer and ordinary #GHashTable is
  * that the container emits signal #GwyContainer::item-changed whenever an item
  * changes.
  **/
