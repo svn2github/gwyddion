@@ -1,11 +1,12 @@
 C99 features used:
 - variable-length automatic arrays
 - ISO vararg macros
-- proper support of 64bit integers
+- proper support for 64bit integers
 - named struct initializers
 - mixed declarations and code
 - math functions, NAN
 Exptected to be used:
+- compound literals
 - incomplete (AKA flexible) arrays
 - complex
 Checked by configure, but not used:
