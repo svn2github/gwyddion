@@ -22,7 +22,7 @@ cat >user_guide_pdf.ignore <<':'
 ^/usr/lib/python2\.6/site-packages/dbtexmf/dblatex/grubber/util\.py:8: DeprecationWarning: the md5 module is deprecated; use hashlib instead
 ^  import md5
 ^Build the listings\.\.\.
-^XSLT stylesheets DocBook -  LaTeX 2e (0\.2\.9)
+^XSLT stylesheets DocBook -  LaTeX 2e (0\.2\.10)
 ^=\+$
 ^Build user-guide\.pdf
 ^processing index /[-a-zA-Z/]\+/pdf/user-guide_tmp\.idx\.\.\.
