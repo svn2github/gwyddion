@@ -509,6 +509,7 @@ fitter_minimize(GwyFitter *fitter,
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
 
+    fitter->iter = 0;
     fitter->lambda = fitter->settings.lambda_start;
     fitter->valid = MIN(fitter->valid, VALID_PARAMS);
     ASSIGN(fitter->param, fitter->param_best, nparam);
@@ -532,8 +533,7 @@ fitter_minimize(GwyFitter *fitter,
                 goto step_fail;
             }
             ASSIGN(fitter->step, fitter->scaled_gradient, nparam);
-            gwy_cholesky_solve(fitter->normal_matrix, fitter->step,
-                                    nparam);
+            gwy_cholesky_solve(fitter->normal_matrix, fitter->step, nparam);
             update_param(fitter);
             if ((fitter->constrain
                  && !fitter->constrain(fitter->param, NULL, user_data))) {
