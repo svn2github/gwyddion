@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: presentations-masks.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="presentations-masks">
+  <title>Презентации и маски</title>
+  <sect2 id="presentations-introduction">
+    <indexterm><primary>презентация</primary></indexterm>
+    <title>Презентации</title>
+    <para>Презентации можно использовать чтобы показать поле высот в другом виде, отличном от карты псевдоцвета высот, например, с затенением или с выделенными углами. Также возможно наложить произвольное поле данных на другое в качестве презентации.</para>
+    <para>Следует отметить, что наложенная презентация действительно является только презентацией, она никогда не используется в расчётах. Во всех инструментах и функциях обработки данных результаты всегда рассчитываются исходя из оригинальных нижележащих данных. Поскольку расчёт презентаций может обладать большой вычислительной сложностью, презентации не обновляются при изменении лежащих в основе данных. Различные доступные презентации описаны в <link linkend="presentations">одноимённом разделе</link>.</para>
+    <para>Наличие презентации поверх данных показывается флагом <guilabel>P</guilabel> в окне <link linkend="data-browser-channels">просмотра данных</link>, а также пустой шкалой псевдоцвета с правой стороны <link linkend="data-windows">окна данных</link>, которая не показывает ни делений, ни значений максимума и минимума.</para>
+  </sect2>
+  <sect2 id="masks-introduction">
+    <indexterm><primary>маска</primary></indexterm>
+    <title>Маски</title>
+    <para>Маски нужны для выделения особых областей, таких как зёрна. дефекты или грани с определённой ориентацией. Маски могут иметь любую форму вписывающуюся в окно данных и они показываются цветом, наложенным на данные. Цвет и прозрачность маски можно изменить в контекстном меню окна данных, доступном по щелчку правой кнопкой мыши.</para>
+    <para>Поскольку выделение зёрен является наиболее частым использованием масок, некоторые функции для работы с помеченной областью называются функциями <quote>зёрен</quote>, например, статистика зёрен. Кроме того, непрерывная часть маски в этом руководстве иногда называется зерном. Однако, поскольку маски не несут никакой информации о способе их создания, все функции для работы с масками могут быть использованы с масками любой природы.</para>
+  </sect2>
+  <informalfigure id="fig-mask-presentation-scheme">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="data-show-mask.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>Маска (вверху), презентация (посередине), оригинальные данные (внизу)</phrase>
+      </textobject>
+      <caption>Показ масок и презентаций. Если вы посмотрите сверху, то можно вообразить, что они сложены как показано на рисунке.</caption>
+    </mediaobject>
+  </informalfigure>
+  <para>Как маски. так и презентации можно удалить с данных функциями в меню по правой кнопке мыши <link linkend="data-windows">окна данных</link>, или с помощью <link linkend="keyboard-shortcuts">клавиатурных сокращений</link>.</para>
+  <informalfigure id="fig-mask-presentation">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="mask.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>Поле данных, показанное с маской и с презентацией</phrase>
+      </textobject>
+      <caption>Данные в обычном представлении псевдоцветом (слева), с наложенной маской красного цвета (по центру) и с презентацией затенения (справа).</caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id="masks">
+    <title>Работа с масками</title>
+    <para>Функции, связанные с масками можно разделить на три основные группы:</para>
+    <variablelist>
+      <varlistentry>
+        <term>Создание</term>
+        <listitem>
+          <para>Маски создаются с помощью различных типов функций выделения, а именно функций выделения зёрен (<link linkend="grain-threshold">Пометить по порогу</link>, <link linkend="grain-watershed">Пометить по водоразделу</link>), функций выделения дефектов  (<link linkend="mask-of-outliers">Маска выпадающего</link>, <link linkend="mark-scars">Пометить царапины</link>) и функций выделения выдающихся частей  (<link linkend="mask-by-correlation">Маска по корреляции</link>, <link linkend="facet-analysis">Анализ граней</link>, <link linkend="tip-certainty-map">Карта достоверности</link>). Кроме того, некоторые общие функции редактирования маски позволяют создать их заново.</para>
+          <para>Маски также используются чтобы пометить неправильные пиксели в файлах, импортированных из форматов, которые делают различие между правильными и неправильными пикселями, поскольку Gwyddion не поддерживает концепцию неправильных пикселей.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Применение</term>
+        <listitem>
+          <para>В общем случае, область под маской считается интересующей областью, т.е. той областью, над которой будут производиться операции. Это применимо в частности к статистическим функциям, таким как <link linkend="stat-quantities">инструмент статистических величин</link>. Функция <link linkend="remove-data-under-mask">удалить данные под маской</link> заменяет данные под маской, в то время, как <link linkend="remove-grains">инструмент удаления зёрен</link> может производить подобную замену для отдельных зёрен. Доступен ряд функций для исследования функций зёрен, см. раздел <link linkend="grain-analysis-statistics">статистика зёрен</link>.</para>
+          <para>Некоторые функции спрашивают стоит ли рассматривать область под маской включенной или исключенной (или игнорировать маску), в частности, <link linkend="leveling">функции выравнивания</link>. Такой выбор показывается только если маска присутствует на данных.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Редактирование</term>
+        <listitem>
+          <para>Несколько основных операций с масками, таких как инверсия или полное удаление, доступно в меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Маска</guisubmenu></menuchoice>. Более сложные функции, включая предназначенные для работы с зёрнами <link linkend="remove-grains">инструмент удаления зёрен</link> и <link linkend="grain-remove-thresholding">удалить по порогу</link> которые предлагают различные способы удаления части маски, так же, как <link linkend="mask-editor">инструмент редактирования маски</link> и <link linkend="mark-with">пометить с помощью</link> ориентированы на общее редактирование маски.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id="mask-editor">
+    <title>Инструмент редактирования маски <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_editor-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+    <para>Редактор маски - простейший инструмент изменения маски. Он обеспечивает две группы функций: редактирование маски рисованием фигур непосредственно в окне данных и глобальные операции над маской, такие как инверсия, растягивание и сжатие маски. Операции рисования управляются кнопками в группе <guilabel>Редактор</guilabel>.</para>
+    <para>Кнопки в ряду <guilabel>Режим</guilabel>выбирают, как нарисованная фигура будет изменять маску:</para>
+    <variablelist>
+      <varlistentry>
+        <term>Установить <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Маска становится заданной формы, любая уже имеющаяся удаляется.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Добавить <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_add-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Маска расширяется нарисованной фигурой (если маски не было, она создаётся).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Вычесть <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_subtract-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Нарисованная фигура вырезается из маски. Функция ничего не делает если маски нет.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Пересечение <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_intersect-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Маска устанавливается в пересечение нарисованной фигуры и уже имеющейся маски. Функция ничего не делает если маски нет.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>Кнопки в ряду <guilabel>Форма</guilabel> контролируют форму изображаемой на маске фигуры. Можно выбрать прямоугольники, эллипсы и тонкие линии.</para>
+    <para>Основные глобальные операции с масками, т.е. инверсия, удаление и заполнение всей области данных маской доступны в ряду <guilabel>Действия</guilabel>. Дополнительные операции включают в себя:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guibutton>Увеличить</guibutton>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref="gwy_mask_grow-24.png" format="PNG"/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>Расширяет маску на <guilabel>Количество</guilabel> пикселей с каждой стороны. Точнее маска расширяется на один пиксель с каждой стороны и это повторяется <guilabel>Количество</guilabel> раз.</para>
+          <para>Обычно расширение не различает отдельные части маски. При этом части, которые выросли настолько, что соединились друг с другом, сливаются. Это можно предотвратить с помощью выбора <guilabel>Предотвращать слияние зёрен при растяжении</guilabel> которая прекращает рост отдельных частей маски когда между ними остаётся зазор в один пиксель.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guibutton>Уменьшить</guibutton>
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref="gwy_mask_shrink-24.png" format="PNG"/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>Уменьшает маску на <guilabel>Количество</guilabel> пикселей с каждой стороны. Точнее, маска уменьшается на один пиксель с каждой стороны и это повторяется <guilabel>Количество</guilabel> раз.</para>
+          <para>Уменьшение может происходить. а может не происходить со стороны границ поля данных. Это управляется с помощью флажка <guilabel>Ужать от границы</guilabel>.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id="mark-with">
+    <title>Пометить с помощью</title>
+    <para>
+      <menuchoice>
+        <guimenu>Обработка данных</guimenu>
+        <guisubmenu>Маска</guisubmenu>
+        <guimenuitem>Пометить с помощью</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>Пометить с помощью может создавать или изменять маски используя другие маски или данные того же разрешения. Операции, которые можно производить с текущей маской, те же самые, что и в <link linkend="mask-editor">инструменте редактирования маски</link>: создание, объединение, вычитание, пересечение. Источник другой маски может быть одним из следующих:</para>
+    <variablelist>
+      <varlistentry>
+        <term>Маска</term>
+        <listitem>
+          <para>Это наиболее простой случай, маска может комбинироваться с другой с использованием заданных логических операций.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Данные</term>
+        <listitem>
+          <para>В режиме данных, другое поле высот используется как источник другой маски. маска состоит из пикселей, попадающих в диапазон высот, заданный как относительные значения от полного диапазона. Для использования пикселей, не попадающих в определённый диапазон, для маски, установите верхнюю границу меньше, чем нижнюю.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Презентация</term>
+        <listitem>
+          <para>Режим презентации отличается от режима данных только тем, что используется презентация вместо данных.</para>
+          <para>Это является исключением из правила, что презентации никогда не используются для дальнейшей обработки. Иногда оказывается полезно пометить, например, края, обнаруженные на данных, даже если соответствующая презентация показывает дикую с физической точки зрения величину.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
