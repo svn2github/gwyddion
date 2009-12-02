@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: fourier-transform.xml 10447 2009-11-15 12:41:03Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='fourier-transform' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Transformée de Fourier</title>
+  <indexterm><primary>Transformée de Fourier</primary></indexterm>
+  <para>
+    La transformée de Fourier bi-dimensionnelle peut être utilisée à partir de
+    <menuchoice>
+      <guimenu>Traitement des Données</guimenu>
+      <guisubmenu>Transformées</guisubmenu>
+      <guimenuitem>FFT 2D</guimenuitem>
+    </menuchoice>
+    dans lequel est implémentée une transformée de Fourier rapide (FFT, Fast
+    Fourier Transform). La transformée de Fourier décompose un signal selon
+    ses composantes harmoniques, elle est ainsi très utile pour l'analyse
+    des fréquences spatiales présentes dans les données SPM.
+  </para>
+  <para>
+    Le module <guilabel>FFT 2D</guilabel> propose plusieurs types de sortie :
+    <itemizedlist>
+      <listitem>
+        Module – valeur absolue des coefficients de Fourier complexes,
+        propoportionnelle à la racine carrée de la densité spectrale de
+        puissance (PSD, Power Spectral Density).
+      </listitem>
+      <listitem>
+        Phase – phase des coefficients complexes (rarement utilisé).
+      </listitem>
+      <listitem>
+        Partie réelle – partie réelle des coefficients complexes.
+      </listitem>
+      <listitem>
+        Partie imaginaire – partie imaginaire des coefficients complexes.
+      </listitem>
+    </itemizedlist>
+    ainsi que certaines combinaisons pour des raisons pratiques.
+  </para>
+  <para id='psdf-section'>
+    <indexterm>
+      <primary>densité spectrale de puissance</primary>
+      <secondary>section</secondary>
+    </indexterm>
+    Des sections radiales de la PSD bi-dimensionnelle peuvent être aisément
+    obtenus avec
+    <menuchoice>
+      <guimenu>Traitement des Données</guimenu>
+      <guisubmenu>Statistiques</guisubmenu>
+      <guimenuitem>Section de PSD</guimenuitem>
+    </menuchoice>.
+    Plusieurs autres fonctions générant des densités spectrales sont décrites
+    dans la section
+    <link linkend='power-spectral-density-1d'>Analyse Statistique</link>.
+    Il est aussi possible de filtrer des images dans le domaine fréquentiel en
+    utilisant les filtres de FFT
+    <link linkend='fft-filter-1d'>uni-dimensionnels</link> ou
+    <link linkend='fft-filter-2d'>bi-dimensionnels</link>.
+  </para>
+  <para>
+    Notez que la transformée de Fourier traite les données comme si elles
+    s'étendaient à l'infini, ce qui implique des conditions aux limites
+    périodiques. Comme les données réelles ne possèdent pas ces propriétés, il
+    est nécessaire d'utiliser des fonctions de fenêtrage pour supprimer les
+    données sur les bords de l'image. Si vous n'en choisissez aucune, la FFT
+    traitera les données avec une fonction de fenêtrage rectangulaire qui
+    donne une mauvaise image de la transformée, donnant ainsi un spectre de
+    Fourier erroné.
+  </para>
+  <para id='windowing'>
+    Gwyddion propose plusieurs fonctions de fenêtrage. La plupart d'entre elles
+    sont basées sur des fonctions sinus ou cosinus qui atténuent correctement
+    les données sur les bords de l'image. Dans la table des formules de
+    fenêtrage qui suit, la variable indépendante <xi:include href="eqi-x.xml"/>
+    appartient à l'intervalle <xi:include href="eqi-interval-0-1.xml"/>
+    qui correspond à l'abscisse normalisée ; pour simplifier la notation
+    la variable <xi:include href="eqi-xi-is-2pi-x.xml"/> est utilisée dans
+    certaines formules. Les types de fenêtrage disponibles sont données dans la
+    table qui suit :
+  </para>
+  <informaltable frame='none' id='table-windowing-types'>
+    <tgroup cols='2' align='left'>
+      <?dblatex lX?>
+      <thead>
+        <row>
+          <entry>Nom</entry>
+          <entry>Formule</entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>Aucun</entry>
+          <entry>1</entry>
+        </row>
+        <row>
+          <entry>Rectangle</entry>
+          <entry>0.5 aux bords, 1 partout ailleurs</entry>
+        </row>
+        <row>
+          <entry>Hann</entry>
+          <entry><xi:include href="eq-windowing-hann.xml"/></entry>
+        </row>
+        <row>
+          <entry>Hamming</entry>
+          <entry><xi:include href="eq-windowing-hamming.xml"/></entry>
+        </row>
+        <row>
+          <entry>Blackmann</entry>
+          <entry><xi:include href="eq-windowing-blackmann.xml"/></entry>
+        </row>
+        <row>
+          <entry>Lanczos</entry>
+          <entry><xi:include href="eq-windowing-lanczos.xml"/></entry>
+        </row>
+        <row>
+          <entry>Welch</entry>
+          <entry><xi:include href="eq-windowing-welch.xml"/></entry>
+        </row>
+        <row>
+          <entry>Nutall</entry>
+          <entry><xi:include href="eq-windowing-nutall.xml"/></entry>
+        </row>
+        <row>
+          <entry>Plateau</entry>
+          <entry><xi:include href="eq-windowing-flat-top.xml"/></entry>
+        </row>
+        <row>
+          <entry>Kaiser<xi:include href="eqi-alpha.xml"/></entry>
+          <entry>
+            <xi:include href="eq-windowing-kaiser.xml"/>,
+            où <xi:include href="eqi-BesselI0.xml"/>
+            est la fonction de Bessel modifiée d'orde zéro et
+            <xi:include href="eqi-alpha.xml"/> est un paramètre
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <informalfigure id='fig-windowing-win'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='windowing-win.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-win.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fonctions de fenêtrage : Hann, Hamming, Blackmann, Lanczos, Welch,
+        Nutall, plateau, Kaiser 2,5.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <informalfigure id='fig-windowing-fft'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='windowing-fft.pdf' format='PDF'/>
+      </imageobject>
+      <imageobject>
+        <imagedata fileref='windowing-fft.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Enveloppes des réponses fréquentielles de fonctions de fenêtrage : Hann,
+        Hamming, Blackmann, Lanczos, Welch, Nutall, plateau, Kaiser 2,5.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    Les transformées de Fourier de données dont les dimensions ne sont pas
+    factorisables en petits facteurs premiers peuvent être longues à calculer –
+    et de nombreux programmes n'implémentent que la FFT de matrices de
+    dimensions égales à une puissance de deux.
+  </para>
+  <para>
+    Toutefois, dans <application>Gwyddion</application>, la transformée de
+    Fourier peut être appliquée à des champs de données de dimensions
+    quelconques, sans avoir à ré-échantillonner les données (depuis la version
+    2.8). Les transformées de Fourier sont calculées avec la fameuse
+    <link linkend='dependency-fftw'>librairie FFTW</link> ou, si celle-ci n'est
+    pas disponible, avec les fonctions internes de Gwyddion qui, bien que plus
+    lentes, peuvent aussi gérer les transformées de données de tailles
+    arbitraires.
+  </para>
+  <para>
+    Cependant, si la taille des données n'est pas factorisable en petits
+    facteurs premiers le calcul de la transformée sera considérablement plus
+    lent. Il est ainsi préférable de transformer des champs de données de
+    dimesions <quote>sympathiques</quote>.
+  </para>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
