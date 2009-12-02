@@ -95,10 +95,10 @@ gwy_rgba_construct(GwySerializableItems *items,
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", error_list);
 
     GwyRGBA *rgba = g_slice_new(GwyRGBA);
-    rgba->r = its[0].value.v_double;
-    rgba->g = its[1].value.v_double;
-    rgba->b = its[2].value.v_double;
-    rgba->a = its[3].value.v_double;
+    rgba->r = CLAMP(its[0].value.v_double, 0.0, 1.0);
+    rgba->g = CLAMP(its[1].value.v_double, 0.0, 1.0);
+    rgba->b = CLAMP(its[2].value.v_double, 0.0, 1.0);
+    rgba->a = CLAMP(its[3].value.v_double, 0.0, 1.0);
     return rgba;
 }
 
