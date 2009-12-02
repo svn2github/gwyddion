@@ -194,7 +194,7 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
 /************************** Documentation ****************************/
 
 /**
- * SECTION:gwyrgba
+ * SECTION: rgba
  * @title: GwyRGBA
  * @short_description: Bit depth independet RGBA colors
  *
