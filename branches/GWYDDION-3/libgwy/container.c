@@ -25,6 +25,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/container.h"
+#include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
 #include "libgwy/libgwy-aliases.h"
 
@@ -71,11 +72,6 @@ static GValue*  get_value_of_type              (GwyContainer *container,
 static GValue*  gis_value_of_type              (GwyContainer *container,
                                                 GQuark key,
                                                 GType type);
-static gboolean try_set_value                  (GwyContainer *container,
-                                                GQuark key,
-                                                const GValue *value,
-                                                gboolean do_replace,
-                                                gboolean do_create);
 static void     hash_count_items               (gpointer hkey,
                                                 gpointer hvalue,
                                                 gpointer hdata);
@@ -181,7 +177,7 @@ hash_object_dispose(G_GNUC_UNUSED gpointer hkey,
 {
     GValue *value = (GValue*)hvalue;
 
-    if (G_VALUE_TYPE(value) == G_TYPE_OBJECT)
+    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT))
         g_value_reset(value);
 }
 
@@ -203,9 +199,12 @@ hash_count_items(G_GNUC_UNUSED gpointer hkey,
     gsize *n_items = (gsize*)hdata;
 
     (*n_items)++;
-    if (G_VALUE_TYPE(value) == G_TYPE_OBJECT) {
+    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT)) {
         GObject *object = g_value_get_object(value);
         *n_items += gwy_serializable_n_items(GWY_SERIALIZABLE(object));
+    }
+    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_BOXED)) {
+        /* FIXME */
     }
 }
 
@@ -238,44 +237,50 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
         case G_TYPE_BOOLEAN:
         it->ctype = GWY_SERIALIZABLE_BOOLEAN;
         it->value.v_boolean = !!g_value_get_boolean(value);
-        break;
+        return;
 
         case G_TYPE_CHAR:
         it->ctype = GWY_SERIALIZABLE_INT8;
         it->value.v_int8 = g_value_get_char(value);
-        break;
+        return;
 
         case G_TYPE_INT:
         it->ctype = GWY_SERIALIZABLE_INT32;
         it->value.v_int32 = g_value_get_int(value);
-        break;
+        return;
 
         case G_TYPE_INT64:
         it->ctype = GWY_SERIALIZABLE_INT64;
         it->value.v_int64 = g_value_get_int64(value);
-        break;
+        return;
 
         case G_TYPE_DOUBLE:
         it->ctype = GWY_SERIALIZABLE_DOUBLE;
         it->value.v_double = g_value_get_double(value);
-        break;
+        return;
 
         case G_TYPE_STRING:
         it->ctype = GWY_SERIALIZABLE_STRING;
         it->value.v_string = (gchar*)g_value_get_string(value);
-        break;
+        return;
+    }
 
-        case G_TYPE_OBJECT:
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
         it->ctype = GWY_SERIALIZABLE_OBJECT;
         it->value.v_object = g_value_get_object(value);
         gwy_serializable_itemize(GWY_SERIALIZABLE(it->value.v_object), items);
-        break;
-
-        default:
-        g_warning("Cannot pack GValue holding %s", g_type_name(type));
         return;
-        break;
     }
+
+    if (g_type_is_a(type, G_TYPE_BOXED)) {
+        it->ctype = GWY_SERIALIZABLE_BOXED;
+        it->value.v_boxed = g_value_get_boxed(value);
+        gwy_serializable_boxed_itemize(type, it->value.v_boxed, items);
+        return;
+    }
+
+    g_warning("Cannot pack GValue holding %s", g_type_name(type));
+    return;
 }
 
 static GObject*
@@ -378,7 +383,7 @@ value_destroy(gpointer data)
 {
     GValue *val = (GValue*)data;
     g_value_unset(val);
-    g_free(val);
+    g_slice_free1(sizeof(GValue), val);
 }
 
 /**
@@ -1401,13 +1406,10 @@ static gboolean
 values_are_equal(const GValue *value1,
                  const GValue *value2)
 {
-    GType type;
-
-    g_return_val_if_fail(value1 || value2, TRUE);
     if (!value1 || !value2)
         return FALSE;
 
-    type = G_VALUE_TYPE(value1);
+    GType type = G_VALUE_TYPE(value1);
     if (type != G_VALUE_TYPE(value2))
         return FALSE;
 
@@ -1430,82 +1432,18 @@ values_are_equal(const GValue *value1,
         case G_TYPE_STRING:
         return gwy_strequal(g_value_get_string(value1),
                             g_value_get_string(value2));
+    }
 
-        /* objects must be identical, so compare addresses */
-        case G_TYPE_OBJECT:
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
+        // Objects must be identical, so compare addresses.
         return g_value_get_object(value1) == g_value_get_object(value2);
-        break;
+    }
+    if (g_type_is_a(type, G_TYPE_BOXED)) {
+        // Boxed values are never equal.
+        return FALSE;
     }
 
     g_return_val_if_reached(FALSE);
-}
-
-/*
- * Ownership handling:
- * Non-atomic values, i.e strings and objects, are taken, not duplicated.
- */
-static gboolean
-try_set_value(GwyContainer *container,
-              GQuark key,
-              const GValue *value,
-              gboolean do_replace,
-              gboolean do_create)
-{
-    gboolean changed;
-
-    g_return_val_if_fail(GWY_IS_CONTAINER(container), FALSE);
-    g_return_val_if_fail(key, FALSE);
-    g_return_val_if_fail(G_IS_VALUE(value), FALSE);
-
-    GType type = G_VALUE_TYPE(value);
-
-    /* Allow only some sane types to be stored, at least for now */
-    if (g_type_is_a(type, G_TYPE_OBJECT)) {
-        GObject *obj = g_value_peek_pointer(value);
-
-        g_return_val_if_fail(GWY_IS_SERIALIZABLE(obj), FALSE);
-        /* If someone sets a subclass of GObject, for instance a particular
-         * type, warn and change it to base object. */
-        if (type != G_TYPE_OBJECT) {
-            g_warning("Object values stored in GwyContainer should have the "
-                      "base type G_TYPE_OBJECT.");
-            type = G_TYPE_OBJECT;
-        }
-    }
-    else {
-        g_return_val_if_fail(type == G_TYPE_CHAR || type == G_TYPE_BOOLEAN
-                             || type == G_TYPE_INT || type == G_TYPE_INT64
-                             || type == G_TYPE_DOUBLE || type == G_TYPE_STRING,
-                             FALSE);
-    }
-
-    GValue *old = (GValue*)g_hash_table_lookup(container->values,
-                                               GINT_TO_POINTER(key));
-    if (old) {
-        if (!do_replace)
-            return FALSE;
-        g_assert(G_IS_VALUE(old));
-        changed = !values_are_equal(value, old);
-        g_value_unset(old);
-    }
-    else {
-        if (!do_create)
-            return FALSE;
-        /* old is actually new here, but who cares... */
-        old = g_new0(GValue, 1);
-        g_hash_table_insert(container->values, GINT_TO_POINTER(key), old);
-        changed = TRUE;
-    }
-    g_value_init(old, type);
-    if (G_VALUE_HOLDS_STRING(value))
-        g_value_take_string(old, g_value_peek_pointer(value));
-    else
-        g_value_copy(value, old);
-
-    if (changed && !container->in_construction)
-        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
-
-    return TRUE;
 }
 
 /**
@@ -1534,8 +1472,63 @@ gwy_container_set_value(GwyContainer *container,
                         GQuark key,
                         const GValue *value)
 {
-    try_set_value(container, key, value, TRUE, TRUE);
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    g_return_if_fail(value);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    GType newtype = G_VALUE_TYPE(gvalue);
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == newtype) {
+            if (values_are_equal(gvalue, value))
+                return;
+            g_value_copy(value, gvalue);
+        }
+        else {
+            // Be careful not to free something before using it.
+            GValue *newvalue = g_slice_new0(GValue);
+            g_value_init(newvalue, newtype);
+            g_value_copy(value, newvalue);
+            g_hash_table_insert(container->values, GUINT_TO_POINTER(key),
+                                newvalue);
+            // g_value_unset(gvalue); done by hash value destroy function
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, newtype);
+        g_value_copy(value, gvalue);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
+
+#define container_set_template(container,key,value,n,N) \
+    g_return_if_fail(GWY_IS_CONTAINER(container)); \
+    g_return_if_fail(key); \
+    GValue *gvalue = g_hash_table_lookup(container->values, \
+                                         GUINT_TO_POINTER(key)); \
+    if (gvalue) { \
+        GType type = G_VALUE_TYPE(gvalue); \
+        if (type == G_TYPE_##N) { \
+            if (g_value_get_##n(gvalue) == value) \
+                return; \
+        } \
+        else { \
+            g_value_unset(gvalue); \
+            g_value_init(gvalue, G_TYPE_##N); \
+        } \
+    } \
+    else { \
+        gvalue = g_slice_new0(GValue); \
+        g_value_init(gvalue, G_TYPE_##N); \
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue); \
+    } \
+    g_value_set_##n(gvalue, value); \
+    if (!container->in_construction) \
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key)
 
 /**
  * gwy_container_set_boolean_by_name:
@@ -1559,12 +1552,8 @@ gwy_container_set_boolean(GwyContainer *container,
                           GQuark key,
                           gboolean value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_BOOLEAN);
-    g_value_set_boolean(&gvalue, !!value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    value = !!value;
+    container_set_template(container, key, value, boolean, BOOLEAN);
 }
 
 /**
@@ -1589,12 +1578,7 @@ gwy_container_set_char(GwyContainer *container,
                        GQuark key,
                        gchar value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_CHAR);
-    g_value_set_char(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    container_set_template(container, key, value, char, CHAR);
 }
 
 /**
@@ -1619,12 +1603,7 @@ gwy_container_set_int32(GwyContainer *container,
                         GQuark key,
                         gint32 value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_INT);
-    g_value_set_int(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    container_set_template(container, key, value, int, INT);
 }
 
 /**
@@ -1654,8 +1633,7 @@ gwy_container_set_enum(GwyContainer *container,
                        guint value)
 {
     gint32 value32 = value;
-
-    gwy_container_set_int32(container, key, value32);
+    container_set_template(container, key, value32, int, INT);
 }
 
 /**
@@ -1680,12 +1658,7 @@ gwy_container_set_int64(GwyContainer *container,
                         GQuark key,
                         gint64 value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_INT64);
-    g_value_set_int64(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    container_set_template(container, key, value, int64, INT64);
 }
 
 /**
@@ -1710,12 +1683,7 @@ gwy_container_set_double(GwyContainer *container,
                          GQuark key,
                          gdouble value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_DOUBLE);
-    g_value_set_double(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    container_set_template(container, key, value, double, DOUBLE);
 }
 
 /**
@@ -1746,12 +1714,29 @@ gwy_container_set_string(GwyContainer *container,
                          GQuark key,
                          const gchar *value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_STRING);
-    g_value_set_string(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == G_TYPE_STRING) {
+            if (gwy_strequal(g_value_get_string(gvalue), value))
+                return;
+        }
+        else {
+            g_value_unset(gvalue);
+            g_value_init(gvalue, G_TYPE_STRING);
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, G_TYPE_STRING);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
+    g_value_set_string(gvalue, value);
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
 /**
@@ -1763,7 +1748,9 @@ gwy_container_set_string(GwyContainer *container,
  * Stores a string identified by a string into a container.
  *
  * The container takes ownership of the string so, this method cannot be used
- * with static strings, use g_strdup() to duplicate them first.
+ * with static strings, use g_strdup() to duplicate them first.  The string
+ * becomes fully owned by @container and you must not touch it any more.
+ * In fact, it may be already freed when this function returns.
  **/
 
 /**
@@ -1775,19 +1762,40 @@ gwy_container_set_string(GwyContainer *container,
  * Stores a string identified by a quark into a container.
  *
  * The container takes ownership of the string so, this method cannot be used
- * with static strings, use g_strdup() to duplicate them first.
+ * with static strings, use g_strdup() to duplicate them first.  The string
+ * becomes fully owned by @container and you must not touch it any more.
+ * In fact, it may be already freed when this function returns.
  **/
 void
 gwy_container_take_string(GwyContainer *container,
                           GQuark key,
                           gchar *value)
 {
-    GValue gvalue;
-
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_STRING);
-    g_value_take_string(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == G_TYPE_STRING) {
+            if (gwy_strequal(g_value_get_string(gvalue), value)) {
+                g_free(value);
+                return;
+            }
+        }
+        else {
+            g_value_unset(gvalue);
+            g_value_init(gvalue, G_TYPE_STRING);
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, G_TYPE_STRING);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
+    g_value_take_string(gvalue, value);
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
 /**
@@ -1820,14 +1828,37 @@ gwy_container_set_object(GwyContainer *container,
                          GQuark key,
                          gpointer value)
 {
-    GValue gvalue;
-
-    g_return_if_fail(G_IS_OBJECT(value));
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_OBJECT);
-    g_value_set_object(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    GType objtype = G_OBJECT_TYPE(value);
+    // Take a reference unconditionally.  The caller's reference may be the
+    // one released by g_value_unset() and very bad things would happen if
+    // it was the last one.
+    g_object_ref(value);
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == objtype) {
+            if (g_value_get_object(gvalue) == value) {
+                g_object_unref(value);
+                return;
+            }
+        }
+        else {
+            g_value_unset(gvalue);
+            g_value_init(gvalue, objtype);
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, objtype);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
+    g_value_set_object(gvalue, value);
     g_object_unref(value);
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
 /**
@@ -1860,14 +1891,36 @@ gwy_container_take_object(GwyContainer *container,
                           GQuark key,
                           gpointer value)
 {
-    GValue gvalue;
-
-    g_return_if_fail(G_IS_OBJECT(value));
-    gwy_memclear(&gvalue, 1);
-    g_value_init(&gvalue, G_TYPE_OBJECT);
-    g_value_take_object(&gvalue, value);
-    try_set_value(container, key, &gvalue, TRUE, TRUE);
-    g_object_unref(value);
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    GType objtype = G_OBJECT_TYPE(value);
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == objtype) {
+            if (g_value_get_object(gvalue) == value) {
+                // If the caller did not lie this is not our own reference.
+                g_object_unref(value);
+                return;
+            }
+        }
+        else {
+            // This should be OK because we already own the caller's reference
+            // to value so, whatever references may be released now, they are
+            // not last.
+            g_value_unset(gvalue);
+            g_value_init(gvalue, objtype);
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, objtype);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
+    g_value_take_object(gvalue, value);
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
 static void
@@ -1878,16 +1931,6 @@ set_copied_value(GwyContainer *container,
     GType type = G_VALUE_TYPE(value);
 
     switch (type) {
-        case G_TYPE_OBJECT:
-        /* objects have to be handled separately since we want a deep copy */
-        {
-            GObject *object = g_value_get_object(value);
-            object = gwy_serializable_duplicate(GWY_SERIALIZABLE(object));
-            gwy_container_set_object(container, key, object);
-            g_object_unref(object);
-        }
-        break;
-
         case G_TYPE_BOOLEAN:
         case G_TYPE_CHAR:
         case G_TYPE_INT:
@@ -1895,13 +1938,25 @@ set_copied_value(GwyContainer *container,
         case G_TYPE_DOUBLE:
         case G_TYPE_STRING:
         gwy_container_set_value(container, key, value);
-        break;
-
-        default:
-        g_warning("Cannot properly copy value of type %s", g_type_name(type));
-        gwy_container_set_value(container, key, value);
-        break;
+        return;
     }
+
+    // Objects have to be handled separately since we want a deep copy.
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
+        GObject *object = g_value_get_object(value);
+        object = gwy_serializable_duplicate(GWY_SERIALIZABLE(object));
+        gwy_container_take_object(container, key, object);
+        return;
+    }
+
+    // Boxed are set by value.
+    if (g_type_is_a(type, G_TYPE_BOXED)) {
+        gwy_container_set_value(container, key, value);
+        return;
+    }
+
+    g_warning("Cannot properly copy value of type %s", g_type_name(type));
+    gwy_container_set_value(container, key, value);
 }
 
 static void
@@ -1963,7 +2018,8 @@ hash_text_serialize(gpointer hkey, gpointer hvalue, gpointer hdata)
         break;
 
         default:
-        g_warning("Cannot dump GValue holding %s to text", g_type_name(type));
+        g_warning("Cannot dump item at \"%s\" holding %s to text",
+                  k, g_type_name(type));
         break;
     }
     if (v)
@@ -2040,7 +2096,7 @@ gwy_container_transfer(GwyContainer *source,
     for (GSList *l = pfdata.keylist; l; l = g_slist_next(l)) {
         GValue *val = (GValue*)g_hash_table_lookup(source->values, l->data);
         if (G_UNLIKELY(!val)) {
-            g_critical("Container contents changed during "
+            g_critical("Source container contents changed during "
                        "gwy_container_transfer().");
             break;
         }
@@ -2057,17 +2113,19 @@ gwy_container_transfer(GwyContainer *source,
         if (exists && (!force || values_are_equal(val, copy)))
             continue;
 
+        /* FIXME: Hopefully the rules for what can be copied where ensure that
+         * we do not free the very same value we are copying. */
         if (exists)
             g_value_unset(copy);
         else
-            copy = g_new0(GValue, 1);
+            copy = g_slice_new0(GValue);
         GType type = G_VALUE_TYPE(val);
         g_value_init(copy, type);
 
         /* This g_value_copy() makes a real copy of everything, including
          * strings, but it only references objects while deep copy requires
          * duplication. */
-        if (deep && type == G_TYPE_OBJECT) {
+        if (deep && g_type_is_a(type, G_TYPE_OBJECT)) {
             GwySerializable *serializable;
             serializable = GWY_SERIALIZABLE(g_value_get_object(val));
             if (G_UNLIKELY(!serializable)) {
