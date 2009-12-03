@@ -104,7 +104,7 @@ include $(top_srcdir)/build/mkenum.make
 # ‘standard’ GLib errors we then filter out.
 $(library)$(libsuffix).supp: testlibgwy$(EXEEXT)
 	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
-	    --tool=memcheck --leak-check=full --show-reachable=yes \
+	    --tool=memcheck --leak-check=full --show-reachable=no \
 	    ./testlibgwy -l >/dev/null 5>$(library)$(libsuffix).supp
 	$(SED) -i -e '/^==/d' \
 	    -e 's/<insert a suppression name here>/Suppression/' \
@@ -114,7 +114,7 @@ $(library)$(libsuffix).supp: testlibgwy$(EXEEXT)
 # valgrind and report any problems.
 check-valgrind: $(library)$(libsuffix).supp
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
-	    --show-reachable=yes --suppressions=$(library)$(libsuffix).supp \
+	    --show-reachable=no --suppressions=$(library)$(libsuffix).supp \
 	    ./testlibgwy $(TEST_FLAGS)
 
 clean-local:
