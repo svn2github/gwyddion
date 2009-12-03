@@ -26,7 +26,7 @@
       <indexterm><primary>Кубическая интерполяция</primary></indexterm>
       <term>Кубическая</term>
       <listitem>
-        <para>Кубическая интерполяция (точнее интерполяция Кея (Key) с <xi:include href="eqi-a-is-minus-1-over-2.xml"/> который имеет наиболее высокий порядок интерполяции) также использует значения в точках перед предыдущей и после следующей <xi:include href="eqi-z_minus-1.xml"/> и <xi:include href="eqi-z_2.xml"/>, соответственно. Другими словами оно имеет носитель длины 4. Значение затем получается по формуле <xi:include href="eq-interpolation-w1234.xml"/>, где <xi:include href="eq-interpolation-key.xml"/> - веса интерполяции.</para>
+        <para>Кубическая интерполяция (точнее интерполяция Кея (Key) с <xi:include href="eqi-a-is-minus-1-over-2.xml"/> который имеет наиболее высокий порядок интерполяции) также использует значения в точках перед предыдущей и после следующей <xi:include href="eqi-z_minus-1.xml"/> и <xi:include href="eqi-z_2.xml"/>, соответственно. Другими словами оно имеет носитель длины 4. Значение затем получается по формуле <xi:include href="eq-interpolation-w1234.xml"/> где <xi:include href="eq-interpolation-key.xml"/> - веса интерполяции.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="interpolation-schaum">
@@ -40,14 +40,14 @@
       <indexterm><primary>Интерполяция аппроксимацией ближайшим соседом</primary></indexterm>
       <term>АБС</term>
       <listitem>
-        <para>Аппроксимация ближайшим соседом снова рассчитывается из ближайших четырёх значений данных, но, в отличие от остальных, не является кусочно полиномиальной. Веса интерполяции: <xi:include href="eq-interpolation-nna.xml"/> для <xi:include href="eqi-k-is-minus-1-to-2.xml"/>, где  <xi:include href="eqi-r_minus-1-is-1-plus-x.xml"/>, <xi:include href="eqi-r_0-is-x.xml"/>, <xi:include href="eqi-r_1-is-1-minus-x.xml"/>, <xi:include href="eqi-r_2-is-2-minus-x.xml"/>. Её порядок = 1.</para>
+        <para>Аппроксимация ближайшим соседом снова рассчитывается из ближайших четырёх значений данных, но, в отличие от остальных, не является кусочно полиномиальной. Веса интерполяции: <xi:include href="eq-interpolation-nna.xml"/> для <xi:include href="eqi-k-is-minus-1-to-2.xml"/> где  <xi:include href="eqi-r_minus-1-is-1-plus-x.xml"/>, <xi:include href="eqi-r_0-is-x.xml"/>, <xi:include href="eqi-r_1-is-1-minus-x.xml"/>, <xi:include href="eqi-r_2-is-2-minus-x.xml"/>. Её порядок = 1.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="interpolation-bspline">
       <indexterm><primary>Интерполяция B-сплайном</primary></indexterm>
       <term>B-сплайн</term>
       <listitem>
-        <para>Веса -  <xi:include href="eq-interpolation-bspline.xml"/>. Однако, они применяются не напрямую к значениям функции, как выше, а к коэффициентам интерполяции, рассчитанным из начений функции [<link linkend="interpolation-ref-1">1</link>]. Степень полинома 3, регулярность <xi:include href="eqi-C-to-2.xml"/> и порядок 4.</para>
+        <para>Веса - <xi:include href="eq-interpolation-bspline.xml"/> Однако, они применяются не напрямую к значениям функции, как выше, а к коэффициентам интерполяции, рассчитанным из значений функции [<link linkend="interpolation-ref-1">1</link>]. Степень полинома 3, регулярность <xi:include href="eqi-C-to-2.xml"/> и порядок 4.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="interpolation-omoms">
