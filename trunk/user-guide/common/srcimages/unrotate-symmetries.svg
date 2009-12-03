@@ -6,293 +6,313 @@
 <!-- Magnification: 1.000 -->
 
 <svg
-     xmlns:dc="http://purl.org/dc/elements/1.1/"
-     xmlns:cc="http://creativecommons.org/ns#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:svg="http://www.w3.org/2000/svg"
-     xmlns="http://www.w3.org/2000/svg"
-     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-     width="4.3in"
-     height="0.8in"
-     viewBox="483 3288 5180 981"
-     id="svg2"
-     sodipodi:version="0.32"
-     inkscape:version="0.46+devel"
-     sodipodi:docname="unrotate-symmetries.svg"
-     inkscape:output_extension="org.inkscape.output.svg.inkscape"
-     version="1.1">
-    <metadata
-         id="metadata104">
-        <rdf:RDF>
-            <cc:Work
-                 rdf:about="">
-                <dc:format>image/svg+xml</dc:format>
-                <dc:type
-                     rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-                <dc:title />
-            </cc:Work>
-        </rdf:RDF>
-    </metadata>
-    <defs
-         id="defs102">
-        <inkscape:perspective
-             sodipodi:type="inkscape:persp3d"
-             inkscape:vp_x="0 : 36 : 1"
-             inkscape:vp_y="0 : 1000 : 0"
-             inkscape:vp_z="387.00003 : 36 : 1"
-             inkscape:persp3d-origin="193.50002 : 24 : 1"
-             id="perspective106" />
-    </defs>
-    <sodipodi:namedview
-         pagecolor="#ffffff"
-         bordercolor="#666666"
-         borderopacity="1"
-         objecttolerance="10"
-         gridtolerance="10"
-         guidetolerance="10"
-         inkscape:pageopacity="0"
-         inkscape:pageshadow="2"
-         inkscape:window-width="1280"
-         inkscape:window-height="753"
-         id="namedview100"
-         showgrid="false"
-         inkscape:zoom="2.8113692"
-         inkscape:cx="131.46673"
-         inkscape:cy="33.865809"
-         inkscape:window-x="0"
-         inkscape:window-y="24"
-         inkscape:current-layer="svg2"
-         inkscape:window-maximized="1" />
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="412.36523"
+   height="68.519493"
+   viewBox="483 3288 5519.5136 933.57809"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.46+devel"
+   sodipodi:docname="unrotate-symmetries.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
+  <metadata
+     id="metadata104">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs102">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 36 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="387.00003 : 36 : 1"
+       inkscape:persp3d-origin="193.50002 : 24 : 1"
+       id="perspective106" />
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1280"
+     inkscape:window-height="973"
+     id="namedview100"
+     showgrid="false"
+     inkscape:zoom="2.8113692"
+     inkscape:cx="205.15715"
+     inkscape:cy="31.082552"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:current-layer="svg2"
+     inkscape:window-maximized="1" />
+  <g
+     id="g2863"
+     transform="translate(-54.937708,-9.5)">
     <g
-         id="g2906"
-         transform="translate(-67.849502,0)">
-        <polyline
-             points="3045,3600 3405,3600 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline6" />
-        <polygon
-             points="3404,3630 3404,3630 3524,3600 3404,3570 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon8" />
-        <polygon
-             points="3046,3570 3046,3570 2926,3600 3046,3630 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon10" />
-        <polyline
-             points="3225,3781 3225,3419 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline12" />
-        <polygon
-             points="3255,3421 3255,3421 3225,3301 3195,3421 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon14" />
-        <polygon
-             points="3195,3779 3195,3779 3225,3899 3255,3779 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon16" />
-    </g>
-    <g
-         id="g2914">
-        <polyline
-             points="1875,3600 1875,3419 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline18" />
-        <polygon
-             points="1845,3421 1905,3421 1905,3421 1875,3301 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon20" />
-        <polyline
-             points="1875,3600 1694,3717 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline22" />
-        <polygon
-             points="1712,3741 1680,3691 1680,3691 1596,3782 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon24" />
-        <polyline
-             points="1875,3600 2055,3717 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline26" />
-        <polygon
-             points="2068,3691 2036,3741 2036,3741 2153,3782 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon28" />
-        <polyline
-             points="2250,3600 2250,3780 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline30" />
-        <polygon
-             points="2280,3779 2220,3779 2220,3779 2250,3899 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon32" />
-        <polyline
-             points="2250,3600 2069,3482 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline34" />
-        <polygon
-             points="2054,3507 2087,3457 2087,3457 1971,3417 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon36" />
-        <polyline
-             points="2250,3600 2430,3482 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline38" />
-        <polygon
-             points="2411,3457 2444,3507 2444,3507 2528,3417 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon40" />
-    </g>
-    <g
-         id="g2944"
-         transform="translate(67.633278,0)">
-        <polyline
-             points="5100,3600 5100,3419 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline42" />
-        <polygon
-             points="5130,3421 5100,3301 5070,3421 5130,3421 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon44" />
-        <polyline
-             points="5100,3600 4919,3717 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline46" />
-        <polygon
-             points="4905,3691 4821,3782 4937,3741 4905,3691 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon48" />
-        <polyline
-             points="5100,3600 5280,3717 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline50" />
-        <polygon
-             points="5261,3741 5378,3782 5293,3691 5261,3741 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon52" />
-        <polyline
-             points="5100,3600 5100,3780 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline54" />
-        <polygon
-             points="5070,3779 5100,3899 5130,3779 5070,3779 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon56" />
-        <polyline
-             points="5100,3600 4919,3482 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline58" />
-        <polygon
-             points="4937,3457 4821,3417 4904,3507 4937,3457 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon60" />
-        <polyline
-             points="5100,3600 5280,3482 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline62" />
-        <polygon
-             points="5294,3507 5378,3417 5261,3457 5294,3507 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon64" />
-    </g>
-    <g
-         id="g2928">
-        <polyline
-             points="795,3600 1155,3600 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline66" />
-        <polygon
-             points="1154,3570 1154,3630 1154,3630 1274,3600 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon68" />
-        <polygon
-             points="796,3630 796,3570 796,3570 676,3600 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon70" />
-        <polyline
-             points="525,3781 525,3419 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline72" />
-        <polygon
-             points="495,3421 555,3421 555,3421 525,3301 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon74" />
-        <polygon
-             points="555,3779 495,3779 495,3779 525,3899 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon76" />
-    </g>
-    <g
-         id="g2936"
-         transform="translate(18.171875,0)">
-        <polyline
-             points="3985,3460 4265,3740 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline78" />
-        <polygon
-             points="4242,3760 4242,3760 4349,3824 4285,3717 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon80" />
-        <polygon
-             points="4007,3439 4007,3439 3901,3376 3964,3482 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon82" />
-        <polyline
-             points="4266,3460 3984,3740 "
-             style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
-             id="polyline84" />
-        <polygon
-             points="3963,3718 3963,3718 3900,3824 4006,3760 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon86" />
-        <polygon
-             points="4285,3482 4285,3482 4349,3376 4242,3439 "
-             style="fill:#000000;stroke:#000000;stroke-width:7"
-             id="polygon88" />
+       id="g2928">
+      <polyline
+         id="polyline66"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="795,3600 1155,3600 " />
+      <polygon
+         id="polygon68"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="1274,3600 1154,3570 1154,3630 1154,3630 " />
+      <polygon
+         id="polygon70"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="676,3600 796,3630 796,3570 796,3570 " />
+      <polyline
+         id="polyline72"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="525,3781 525,3419 " />
+      <polygon
+         id="polygon74"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="525,3301 495,3421 555,3421 555,3421 " />
+      <polygon
+         id="polygon76"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="525,3899 555,3779 495,3779 495,3779 " />
     </g>
     <text
-         style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
-         id="text90"
-         font-size="144"
-         font-weight="normal"
-         font-style="normal"
-         y="4200"
-         x="884.14844"
-         xml:space="preserve">Parallel</text>
+       xml:space="preserve"
+       x="884.14844"
+       y="4200"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       id="text90"
+       style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans">Parallel</text>
+  </g>
+  <g
+     id="g2873"
+     transform="translate(-18.810855,-9.5)">
+    <g
+       id="g2914">
+      <polyline
+         id="polyline18"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="1875,3600 1875,3419 " />
+      <polygon
+         id="polygon20"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="1845,3421 1905,3421 1905,3421 1875,3301 " />
+      <polyline
+         id="polyline22"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="1875,3600 1694,3717 " />
+      <polygon
+         id="polygon24"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="1712,3741 1680,3691 1680,3691 1596,3782 " />
+      <polyline
+         id="polyline26"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="1875,3600 2055,3717 " />
+      <polygon
+         id="polygon28"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="2068,3691 2036,3741 2036,3741 2153,3782 " />
+      <polyline
+         id="polyline30"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="2250,3600 2250,3780 " />
+      <polygon
+         id="polygon32"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="2280,3779 2220,3779 2220,3779 2250,3899 " />
+      <polyline
+         id="polyline34"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="2250,3600 2069,3482 " />
+      <polygon
+         id="polygon36"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="2054,3507 2087,3457 2087,3457 1971,3417 " />
+      <polyline
+         id="polyline38"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="2250,3600 2430,3482 " />
+      <polygon
+         id="polygon40"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="2411,3457 2444,3507 2444,3507 2528,3417 " />
+    </g>
     <text
-         style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
-         id="text92"
-         font-size="144"
-         font-weight="normal"
-         font-style="normal"
-         y="4200"
-         x="2062.2812"
-         xml:space="preserve">Triangular</text>
+       xml:space="preserve"
+       x="2062.2812"
+       y="4200"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       id="text92"
+       style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans">Triangular</text>
+  </g>
+  <g
+     id="g2889"
+     transform="translate(99.665582,-9.5)">
+    <g
+       transform="translate(-67.849502,0)"
+       id="g2906">
+      <polyline
+         id="polyline6"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="3045,3600 3405,3600 " />
+      <polygon
+         id="polygon8"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="3404,3630 3404,3630 3524,3600 3404,3570 " />
+      <polygon
+         id="polygon10"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="3046,3570 3046,3570 2926,3600 3046,3630 " />
+      <polyline
+         id="polyline12"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="3225,3781 3225,3419 " />
+      <polygon
+         id="polygon14"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="3255,3421 3255,3421 3225,3301 3195,3421 " />
+      <polygon
+         id="polygon16"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="3195,3779 3195,3779 3225,3899 3255,3779 " />
+    </g>
     <text
-         style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
-         id="text94"
-         font-size="144"
-         font-weight="normal"
-         font-style="normal"
-         y="4200"
-         x="3156.0957"
-         xml:space="preserve">Square</text>
+       xml:space="preserve"
+       x="3156.0957"
+       y="4200"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       id="text94"
+       style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans">Square</text>
+  </g>
+  <g
+     id="g2899"
+     transform="translate(327.77061,-9.5)">
+    <g
+       transform="translate(18.171875,0)"
+       id="g2936">
+      <polyline
+         id="polyline78"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="3985,3460 4265,3740 " />
+      <polygon
+         id="polygon80"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="4242,3760 4242,3760 4349,3824 4285,3717 " />
+      <polygon
+         id="polygon82"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="4007,3439 4007,3439 3901,3376 3964,3482 " />
+      <polyline
+         id="polyline84"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="4266,3460 3984,3740 " />
+      <polygon
+         id="polygon86"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="3963,3718 3963,3718 3900,3824 4006,3760 " />
+      <polygon
+         id="polygon88"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="4285,3482 4285,3482 4349,3376 4242,3439 " />
+    </g>
     <text
-         style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
-         id="text96"
-         font-size="144"
-         font-weight="normal"
-         font-style="normal"
-         y="4200"
-         x="4140"
-         xml:space="preserve">Rhombic</text>
+       xml:space="preserve"
+       x="4140"
+       y="4200"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       id="text96"
+       style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans">Rhombic</text>
+  </g>
+  <g
+     id="g2909"
+     transform="translate(516.93666,-9.5)">
+    <g
+       transform="translate(67.633278,0)"
+       id="g2944">
+      <polyline
+         id="polyline42"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 5100,3419 " />
+      <polygon
+         id="polygon44"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="5130,3421 5100,3301 5070,3421 5130,3421 " />
+      <polyline
+         id="polyline46"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 4919,3717 " />
+      <polygon
+         id="polygon48"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="4905,3691 4821,3782 4937,3741 4905,3691 " />
+      <polyline
+         id="polyline50"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 5280,3717 " />
+      <polygon
+         id="polygon52"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="5261,3741 5378,3782 5293,3691 5261,3741 " />
+      <polyline
+         id="polyline54"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 5100,3780 " />
+      <polygon
+         id="polygon56"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="5070,3779 5100,3899 5130,3779 5070,3779 " />
+      <polyline
+         id="polyline58"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 4919,3482 " />
+      <polygon
+         id="polygon60"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="4937,3457 4821,3417 4904,3507 4937,3457 " />
+      <polyline
+         id="polyline62"
+         style="fill:none;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter"
+         points="5100,3600 5280,3482 " />
+      <polygon
+         id="polygon64"
+         style="fill:#000000;stroke:#000000;stroke-width:7"
+         points="5294,3507 5378,3417 5261,3457 5294,3507 " />
+    </g>
     <text
-         style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans"
-         id="text98"
-         font-size="144"
-         font-weight="normal"
-         font-style="normal"
-         y="4200"
-         x="5166.7817"
-         xml:space="preserve">Hexagonal</text>
+       xml:space="preserve"
+       x="5166.7817"
+       y="4200"
+       font-style="normal"
+       font-weight="normal"
+       font-size="144"
+       id="text98"
+       style="font-size:144px;font-style:normal;font-weight:normal;text-align:center;text-anchor:middle;fill:#000000;stroke:#000000;stroke-width:0.025in;font-family:DejaVu Sans">Hexagonal</text>
+  </g>
 </svg>
