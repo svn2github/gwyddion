@@ -28,8 +28,10 @@ idir=$(dirname "$input")
 ifile=$(basename "$input")
 odir=$(dirname "$output")
 ofile=$(basename "$output")
+echo idir=$idir
+echo odir=$odir
 if test "$idir" != "$odir"; then
-  cp -f "$input" "$odir/TEMP-$ifile"
+  @GSED@ 's+\(xlink:href="\)\([^#][^"]*\.png"\)+\1'"$idir"'/\2+g' "$input" >"$odir/TEMP-$ifile"
   cd "$odir"
   inkscape $opts $fopts --export-$fmt="$ofile" --file="TEMP-$ifile" "$@"
   rm -f "TEMP-$ifile"
