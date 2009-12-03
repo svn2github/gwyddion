@@ -19,9 +19,7 @@
   <xi:include href="single-point-spectra.xml"/>
   <xi:include href="metadata.xml"/>
   <xi:include href="raw-file-import.xml"/>
-  <!--
   <xi:include href="specific-data-import.xml"/>
-  -->
   <xi:include href="plugins.xml"/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
