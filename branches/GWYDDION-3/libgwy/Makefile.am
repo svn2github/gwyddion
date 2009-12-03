@@ -10,6 +10,7 @@ libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
+main_header = libgwy.h
 mkenum_headers = \
 	container.h \
 	error-list.h \
@@ -18,7 +19,6 @@ mkenum_headers = \
 	fit-task.h \
 	inventory.h \
 	interpolation.h \
-	libgwy.h \
 	macros.h \
 	main.h \
 	math.h \
@@ -43,6 +43,7 @@ BUILT_SOURCES =
 lib_LTLIBRARIES = libgwy3.la
 noinst_PROGRAMS = $(test_programs)
 libgwyinclude_HEADERS = $(mkenum_headers) $(mkenum_name).h
+pkginclude_HEADERS = $(main_header)
 
 libgwy3_la_SOURCES = \
 	container.c \
