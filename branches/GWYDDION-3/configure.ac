@@ -20,12 +20,12 @@ AC_CONFIG_FILES([
   build/Makefile
   libgwy/Makefile
   libgwy/version.h
+  libgwy/libgwy3.pc
   po/Makefile.in
   po-libgwy/Makefile.in
   docs/Makefile
   docs/libgwy/Makefile
   data/Makefile
-  data/libgwy3.pc
 ])
 
 AM_INIT_AUTOMAKE([1.11 gnu -Wall check-news dist-xz no-dist-gzip std-options nostdinc silent-rules])
