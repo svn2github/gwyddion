@@ -22,8 +22,6 @@
   <xi:include href="tip.xml"/>
   <xi:include href="multidata.xml"/>
   <xi:include href="graph.xml"/>
-  <!--
   <xi:include href="synthetic.xml"/>
-  -->
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
