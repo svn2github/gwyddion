@@ -12,4 +12,4 @@ Description: Gwyddion3 core library
 Version: @VERSION@
 Requires: gio-2.0 >= 2.22.0
 Libs: -L${libdir} -lgwy3
-Cflags: -I${includedir}/gwyddion -I${libdir}/gwyddion/include
+Cflags: -I${includedir}/gwyddion3 -I${libdir}/gwyddion3/include
