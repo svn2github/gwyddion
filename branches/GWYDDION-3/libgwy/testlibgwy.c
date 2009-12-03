@@ -1359,8 +1359,6 @@ test_serialize_boxed(void)
     ok = gwy_serialize_gio(GWY_SERIALIZABLE(sertest), stream, &error);
     g_assert(ok);
     len = g_memory_output_stream_get_data_size(memstream);
-    g_file_set_contents("ser.gwy", g_memory_output_stream_get_data(memstream),
-                        len, NULL);
     g_assert_cmpuint(len, ==, sizeof(ser_test_box));
     g_assert_cmpuint(memcmp(g_memory_output_stream_get_data(memstream),
                             ser_test_box, sizeof(ser_test_box)), ==, 0);
