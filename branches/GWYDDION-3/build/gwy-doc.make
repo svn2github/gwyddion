@@ -156,7 +156,7 @@ install-data-local:
 	if test -n "$$d"; then \
 		$(mkdir_p) $(DESTDIR)$(TARGET_DIR); \
 		$(INSTALL_DATA) $$d/* $(DESTDIR)$(TARGET_DIR); \
-		$(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) \
+		gtkdoc-rebase --relative --dest-dir=$(DESTDIR) \
 		         --html-dir=$(DESTDIR)/$(TARGET_DIR); \
 	fi; \
 	test -n "$$d"
@@ -179,7 +179,7 @@ dist-hook: dist-check-gtkdoc
 	mkdir $(distdir)/html
 	if test -s html/index.sgml; then d=html; else d=$(srcdir)/html; fi; \
 	cp -f $$d/* $(distdir)/html
-	$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
+	gtkdoc-rebase --online --relative --html-dir=$(distdir)/html
 
 .PHONY: docs
 
