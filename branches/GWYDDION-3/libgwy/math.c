@@ -220,6 +220,81 @@ gwy_cholesky_invert(gdouble *a, guint n)
 }
 
 /**
+ * gwy_linalg_solve:
+ * @a: Matrix of the system (@n×@n), ordered by row, then column.
+ *     It will be overwritten during the solving with intermediate
+ *     results.
+ * @b: Right hand side of the sytem.  It will be overwritten during the
+ *     solving with intermediate results.
+ * @result: Array of length @n to store result to.
+ * @n: Size of the system.
+ *
+ * Solves a regular system of linear equations.
+ *
+ * The solution is calculated by simple Gauss elimination with partial
+ * pivoting.
+ *
+ * Returns: %TRUE if the calculation succeeded, %FALSE if the matrix was found
+ *          to be numerically singular.
+ **/
+gboolean
+gwy_linalg_solve(gdouble *a,
+                 gdouble *b,
+                 gdouble *result,
+                 guint n)
+{
+    g_return_val_if_fail(n > 0, FALSE);
+    g_return_val_if_fail(a && b && result, FALSE);
+
+    gint perm[n];
+
+    /* elimination */
+    for (guint i = 0; i < n; i++) {
+        gdouble *row = a + i*n;
+        gdouble piv = 0;
+        guint pivj = 0;
+
+        /* find pivot */
+        for (guint j = 0; j < n; j++) {
+            if (fabs(row[j]) > piv) {
+                pivj = j;
+                piv = fabs(row[j]);
+            }
+        }
+        if (!piv)
+            return FALSE;
+        piv = row[pivj];
+        perm[i] = pivj;
+
+        /* subtract */
+        for (guint j = i+1; j < n; j++) {
+            gdouble *jrow = a + j*n;
+            gdouble q = jrow[pivj]/piv;
+
+            for (guint jj = 0; jj < n; jj++)
+                jrow[jj] -= q*row[jj];
+
+            jrow[pivj] = 0.0;
+            b[j] -= q*b[i];
+        }
+    }
+
+    /* back substitute */
+    for (guint i = n; i > 0; ) {
+        i--;
+        gdouble *row = a + i*n;
+        gdouble x = b[i];
+
+        for (guint j = n-1; j > i; j--)
+            x -= result[perm[j]]*row[perm[j]];
+
+        result[perm[i]] = x/row[perm[i]];
+    }
+
+    return TRUE;
+}
+
+/**
  * gwy_math_sort:
  * @n: Number of items in @array.
  * @array: Array of doubles to sort in place.

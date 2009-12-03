@@ -114,6 +114,10 @@ void     gwy_cholesky_solve    (const gdouble *decomp,
                                 guint n);
 gboolean gwy_cholesky_invert   (gdouble *a,
                                 guint n);
+gboolean gwy_linalg_solve      (gdouble *a,
+                                gdouble *b,
+                                gdouble *result,
+                                guint n);
 
 G_END_DECLS
 
