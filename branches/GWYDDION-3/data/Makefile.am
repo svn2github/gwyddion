@@ -1,6 +1,8 @@
 # Process this file with automake to produce Makefile.in
 # $Id$
 
+pkgconfigdatadir = $(libdir)/pkgconfig
+
 MAINTAINERCLEANFILES = \
 	gwyddion.vim \
 	libgwy3.pc
@@ -9,6 +11,8 @@ EXTRA_DIST = \
 	gwyddion-vim-cfg.py \
 	gwyddion.vim \
 	libgwy3.pc.in
+
+pkgconfigdata_DATA = libgwy3.pc
 
 noinst_DATA = \
 	gwyddion.vim
