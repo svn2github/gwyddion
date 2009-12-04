@@ -199,12 +199,13 @@ hash_count_items(G_GNUC_UNUSED gpointer hkey,
     gsize *n_items = (gsize*)hdata;
 
     (*n_items)++;
-    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_OBJECT)) {
+    GType type = G_VALUE_TYPE(value);
+    if (g_type_is_a(type, G_TYPE_OBJECT)) {
         GObject *object = g_value_get_object(value);
         *n_items += gwy_serializable_n_items(GWY_SERIALIZABLE(object));
     }
-    if (g_type_is_a(G_VALUE_TYPE(value), G_TYPE_BOXED)) {
-        /* FIXME */
+    else if (g_type_is_a(type, G_TYPE_BOXED)) {
+        *n_items += gwy_serializable_boxed_n_items(type);
     }
 }
 
