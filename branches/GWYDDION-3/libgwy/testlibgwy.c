@@ -2075,9 +2075,17 @@ test_container_refcount(void)
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
     g_object_unref(st1);
 
+    GwySerTest *st3 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    g_assert_cmpuint(G_OBJECT(st3)->ref_count, ==, 1);
+    g_object_ref(st3);
+    gwy_container_take_object_by_name(container, "/pfx/taken", st3);
+    g_assert_cmpuint(G_OBJECT(st3)->ref_count, ==, 2);
+
     g_object_unref(container);
     g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
     g_object_unref(st2);
+    g_assert_cmpuint(G_OBJECT(st3)->ref_count, ==, 1);
+    g_object_unref(st3);
 
     container = gwy_container_new();
     st1 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
@@ -2111,12 +2119,12 @@ test_container_serialize(void)
     gwy_container_set_char_by_name(container, "char", '\xfe');
     gwy_container_set_boolean_by_name(container, "bool", TRUE);
     gwy_container_set_int32_by_name(container, "int32", -123456);
-    gwy_container_set_int64_by_name(container, "int64", -12345678);
+    gwy_container_set_int64_by_name(container, "int64",
+                                    G_GINT64_CONSTANT(-1234567890));
     gwy_container_set_string_by_name(container, "string", "Mud");
     gwy_container_set_double_by_name(container, "double", G_E);
     GwyUnit *unit = gwy_unit_new_from_string("uPa", NULL);
-    gwy_container_set_object_by_name(container, "unit", unit);
-    g_object_unref(unit);
+    gwy_container_take_object_by_name(container, "unit", unit);
 
     GOutputStream *stream;
     GMemoryOutputStream *memstream;
@@ -2157,6 +2165,38 @@ test_container_serialize(void)
     gwy_container_transfer(copy, container, "", "", FALSE, TRUE);
     /* Unit must change, but others should be detected as same-value. */
     gwy_container_transfer(copy, container, "", "", TRUE, TRUE);
+
+    g_object_unref(copy);
+    g_object_unref(container);
+}
+
+static void
+test_container_text(void)
+{
+    GwyContainer *container = gwy_container_new();
+    gwy_container_set_char_by_name(container, "char", '\xfe');
+    gwy_container_set_boolean_by_name(container, "bool", TRUE);
+    gwy_container_set_int32_by_name(container, "int32", -123456);
+    gwy_container_set_int64_by_name(container, "int64",
+                                    G_GINT64_CONSTANT(-1234567890));
+    gwy_container_set_string_by_name(container, "string", "Mud");
+    gwy_container_set_double_by_name(container, "double", G_E);
+
+    gchar **lines = gwy_container_dump_to_text(container);
+    g_assert(lines);
+    gchar *text = g_strjoinv("\n", lines);
+    g_strfreev(lines);
+    GwyContainer *copy = gwy_container_new_from_text(text);
+    g_free(text);
+    g_assert(GWY_IS_CONTAINER(copy));
+    g_assert_cmpuint(gwy_container_n_items(container), ==, 6);
+
+    guint change_count = 0;
+    g_signal_connect(container, "item-changed",
+                     G_CALLBACK(container_item_changed_count), &change_count);
+    gwy_container_transfer(copy, container, "", "", FALSE, TRUE);
+    /* Atomic types must be detected as same-value. */
+    g_assert_cmpuint(change_count, ==, 0);
 
     g_object_unref(copy);
     g_object_unref(container);
@@ -2566,6 +2606,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
     g_test_add_func("/testlibgwy/container/serialize", test_container_serialize);
+    g_test_add_func("/testlibgwy/container/text", test_container_text);
     g_test_add_func("/testlibgwy/inventory/data", test_inventory_data);
 
     return g_test_run();
