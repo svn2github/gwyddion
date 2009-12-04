@@ -1,5 +1,5 @@
 /*
- *  $Id: container.c 240 2009-01-26 21:36:35Z yeti $
+ *  $Id$
  *  Copyright (C) 2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GWY_VERSION_H__
-#define __GWY_VERSION_H__
+#ifndef __LIBGWY_VERSION_H__
+#define __LIBGWY_VERSION_H__
 
 #include <glib.h>
 
