@@ -2410,8 +2410,8 @@ next:
  * reference or its adds its own.
  *
  * Items in a #GwyContainer can be identified by a #GQuark or the corresponding
- * string.  While #GQuark's are atomic values and allow faster access, they are
- * less convenient for casual usage -- each #GQuark-key function such as
+ * string.  While #GQuarks are atomic values and allow faster access, they are
+ * less convenient for casual usage -- each quark-key function such as
  * gwy_container_set_double() thus has a string-key counterpart
  * gwy_container_set_double_by_name().
  *
