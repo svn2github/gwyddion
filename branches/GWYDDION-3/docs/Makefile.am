@@ -1,5 +1,4 @@
-# Process this file with automake to produce Makefile.in
 # $Id$
 
 SUBDIRS = libgwy
-EXTRA_DIST = add-objects.py
+EXTRA_DIST = style.css
