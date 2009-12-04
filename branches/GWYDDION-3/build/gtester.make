@@ -63,9 +63,7 @@ $(library)$(libsuffix).supp: testlibgwy$(EXEEXT)
 	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
 	    --tool=memcheck --leak-check=full --show-reachable=no \
 	    $(test_program) -l >/dev/null 5>$(library)$(libsuffix).supp
-	$(SED) -i -e '/^==/d' \
-	    -e 's/<insert a suppression name here>/Suppression/' \
-	    $(library)$(libsuffix).supp
+	$(SED) -i -e '/^==/d' $(library)$(libsuffix).supp
 
 # Run the test program with all tests (unless TEST_FLAGS says otherwise) under
 # valgrind and report any problems.

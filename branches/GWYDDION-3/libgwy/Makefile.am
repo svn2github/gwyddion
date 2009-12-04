@@ -1,4 +1,3 @@
-# Process this file with automake to produce Makefile.in
 # $Id$
 
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
