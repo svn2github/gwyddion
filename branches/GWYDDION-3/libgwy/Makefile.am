@@ -6,7 +6,7 @@ WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declarati
 
 library = libgwy
 libsuffix = $(PACKAGE_SUFFIX)
-libgwyincludedir = $(pkgincludedir)/$(library)
+libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 test_programs = testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
