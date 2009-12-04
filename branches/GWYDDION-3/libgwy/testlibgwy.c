@@ -1386,6 +1386,7 @@ gwy_ser_box_test_construct(GwySerializableItems *items,
     GwySerBoxTest *sertest = g_object_newv(GWY_TYPE_SER_BOX_TEST, 0, NULL);
 
     if (it[0].value.v_boxed) {
+        g_assert(it[0].array_size == GWY_TYPE_RGBA);
         GwyRGBA *rgba = it[0].value.v_boxed;
         sertest->color = *rgba;
         gwy_rgba_free(rgba);
@@ -1472,8 +1473,11 @@ test_deserialize_boxed(void)
 {
     GwySerBoxTest *sertest;
     GwyErrorList *error_list = NULL;
+    GError *err;
     gsize bytes_consumed;
+    guchar *bad_ser_test_box, *t;
 
+    /* Good */
     g_type_class_ref(GWY_TYPE_SER_BOX_TEST);
     sertest = (GwySerBoxTest*)gwy_deserialize_memory(ser_test_box,
                                                      sizeof(ser_test_box),
@@ -1487,8 +1491,51 @@ test_deserialize_boxed(void)
     g_assert_cmpfloat(sertest->color.g, ==, 0.0);
     g_assert_cmpfloat(sertest->color.b, ==, 0.0);
     g_assert_cmpfloat(sertest->color.a, ==, 0.5);
-
     GWY_OBJECT_UNREF(sertest);
+
+    /* Soft error (deserialization has to dispose the boxed type itself) */
+    bad_ser_test_box = g_memdup(ser_test_box, sizeof(ser_test_box));
+    t = gwy_memmem(bad_ser_test_box, sizeof(ser_test_box),
+                   "color", strlen("color"));
+    g_assert(t);
+    g_assert(strlen("color") == strlen("skunk"));
+    memcpy(t, "skunk", strlen("skunk"));
+
+    sertest = (GwySerBoxTest*)gwy_deserialize_memory(bad_ser_test_box,
+                                                     sizeof(ser_test_box),
+                                                     &bytes_consumed,
+                                                     &error_list);
+    g_assert_cmpuint(g_slist_length(error_list), ==, 1);
+    err = error_list->data;
+    g_assert_cmpuint(err->domain, ==, GWY_DESERIALIZE_ERROR);
+    g_assert_cmpuint(err->code, ==, GWY_DESERIALIZE_ERROR_ITEM);
+    g_assert(sertest);
+    g_assert(GWY_IS_SER_BOX_TEST(sertest));
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_box));
+    GWY_OBJECT_UNREF(sertest);
+    gwy_error_list_clear(&error_list);
+    g_free(bad_ser_test_box);
+
+    /* Hard error */
+    bad_ser_test_box = g_memdup(ser_test_box, sizeof(ser_test_box));
+    t = gwy_memmem(bad_ser_test_box, sizeof(ser_test_box),
+                   "GwyRGBA", strlen("GwyRGBA"));
+    g_assert(t);
+    g_assert(strlen("GwyRGBA") == strlen("BREAKME"));
+    memcpy(t, "BREAKME", strlen("BREAKME"));
+
+    sertest = (GwySerBoxTest*)gwy_deserialize_memory(bad_ser_test_box,
+                                                     sizeof(ser_test_box),
+                                                     &bytes_consumed,
+                                                     &error_list);
+    g_assert_cmpuint(g_slist_length(error_list), ==, 1);
+    err = error_list->data;
+    g_assert_cmpuint(err->domain, ==, GWY_DESERIALIZE_ERROR);
+    g_assert_cmpuint(err->code, ==, GWY_DESERIALIZE_ERROR_OBJECT);
+    g_assert(!sertest);
+    g_assert_cmpuint(bytes_consumed, ==, sizeof(ser_test_box));
+    gwy_error_list_clear(&error_list);
+    g_free(bad_ser_test_box);
 }
 
 /***************************************************************************
