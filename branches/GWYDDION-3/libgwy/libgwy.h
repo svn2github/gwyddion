@@ -37,6 +37,7 @@
 #include <libgwy/serializable-boxed.h>
 #include <libgwy/serialize.h>
 #include <libgwy/strfuncs.h>
+#include <libgwy/types.h>
 #include <libgwy/unit.h>
 #include <libgwy/version.h>
 
