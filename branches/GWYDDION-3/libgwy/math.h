@@ -118,6 +118,9 @@ gboolean gwy_linalg_solve      (gdouble *a,
                                 gdouble *b,
                                 gdouble *result,
                                 guint n);
+gboolean gwy_linalg_invert     (gdouble *a,
+                                gdouble *inv,
+                                guint n);
 
 G_END_DECLS
 

@@ -219,6 +219,71 @@ gwy_cholesky_invert(gdouble *a, guint n)
     return TRUE;
 }
 
+/* Solve an arbitrary number (i.e. @k) of linear systems with the same matrix
+ * simultaneously.  @b and @k are arrays of size @k×@n.  This interface is too
+ * silly to make it public... */
+static gboolean
+gwy_linalg_multisolve(gdouble *a,
+                      gdouble *b,
+                      gdouble *result,
+                      guint n,
+                      guint k)
+{
+    g_return_val_if_fail(n > 0, FALSE);
+    g_return_val_if_fail(k > 0, FALSE);
+    g_return_val_if_fail(a && b && result, FALSE);
+
+    gint perm[n];
+
+    // Elimination.
+    for (guint i = 0; i < n; i++) {
+        gdouble *row = a + i*n;
+        gdouble piv = 0;
+        guint pivj = 0;
+
+        // Find pivot.
+        for (guint j = 0; j < n; j++) {
+            if (fabs(row[j]) > piv) {
+                pivj = j;
+                piv = fabs(row[j]);
+            }
+        }
+        if (!piv)
+            return FALSE;
+        piv = row[pivj];
+        perm[i] = pivj;
+
+        // Subtract rows.
+        for (guint j = i+1; j < n; j++) {
+            gdouble *jrow = a + j*n;
+            gdouble q = jrow[pivj]/piv;
+
+            for (guint jj = 0; jj < n; jj++)
+                jrow[jj] -= q*row[jj];
+
+            jrow[pivj] = 0.0;
+            for (guint m = 0; m < k; m++)
+                b[m*n + j] -= q*b[m*n + i];
+        }
+    }
+
+    // Back substitute.
+    for (guint m = 0; m < k; m++) {
+        for (guint i = n; i > 0; ) {
+            i--;
+            gdouble *row = a + i*n;
+            gdouble x = b[m*n + i];
+
+            for (guint j = n-1; j > i; j--)
+                x -= result[m*n + perm[j]]*row[perm[j]];
+
+            result[m*n + perm[i]] = x/row[perm[i]];
+        }
+    }
+
+    return TRUE;
+}
+
 /**
  * gwy_linalg_solve:
  * @a: Matrix of the system (@n×@n), ordered by row, then column.
@@ -226,7 +291,7 @@ gwy_cholesky_invert(gdouble *a, guint n)
  *     results.
  * @b: Right hand side of the sytem.  It will be overwritten during the
  *     solving with intermediate results.
- * @result: Array of length @n to store result to.
+ * @result: Array of length @n to store solution to.
  * @n: Size of the system.
  *
  * Solves a regular system of linear equations.
@@ -243,55 +308,40 @@ gwy_linalg_solve(gdouble *a,
                  gdouble *result,
                  guint n)
 {
+    return gwy_linalg_multisolve(a, b, result, n, 1);
+}
+
+/**
+ * gwy_linalg_invert:
+ * @a: Matrix @n×@n, ordered by row, then column.  It will be overwritten
+ *     during the inversion with intermediate results.
+ * @inv: Matrix @n×@n to store the inverted @a to.
+ * @n: Size of the system.
+ *
+ * Inverts a regular square matrix.
+ *
+ * The inversion is calculated by simple Gauss elimination with partial
+ * pivoting.
+ *
+ * Returns: %TRUE if the calculation succeeded, %FALSE if the matrix was found
+ *          to be numerically singular.
+ **/
+gboolean
+gwy_linalg_invert(gdouble *a,
+                  gdouble *inv,
+                  guint n)
+{
     g_return_val_if_fail(n > 0, FALSE);
-    g_return_val_if_fail(a && b && result, FALSE);
-
-    gint perm[n];
-
-    /* elimination */
+    gdouble *unity = g_slice_alloc0(n*n*sizeof(gdouble));
+    for (guint i = 0; i < n; i++)
+        unity[i*n + i] = 1.0;
+    gboolean ok = gwy_linalg_multisolve(a, unity, inv, n, n);
     for (guint i = 0; i < n; i++) {
-        gdouble *row = a + i*n;
-        gdouble piv = 0;
-        guint pivj = 0;
-
-        /* find pivot */
-        for (guint j = 0; j < n; j++) {
-            if (fabs(row[j]) > piv) {
-                pivj = j;
-                piv = fabs(row[j]);
-            }
-        }
-        if (!piv)
-            return FALSE;
-        piv = row[pivj];
-        perm[i] = pivj;
-
-        /* subtract */
-        for (guint j = i+1; j < n; j++) {
-            gdouble *jrow = a + j*n;
-            gdouble q = jrow[pivj]/piv;
-
-            for (guint jj = 0; jj < n; jj++)
-                jrow[jj] -= q*row[jj];
-
-            jrow[pivj] = 0.0;
-            b[j] -= q*b[i];
-        }
+        for (guint j = 0; j < i; j++)
+            DSWAP(inv[i*n + j], inv[j*n + i]);
     }
-
-    /* back substitute */
-    for (guint i = n; i > 0; ) {
-        i--;
-        gdouble *row = a + i*n;
-        gdouble x = b[i];
-
-        for (guint j = n-1; j > i; j--)
-            x -= result[perm[j]]*row[perm[j]];
-
-        result[perm[i]] = x/row[perm[i]];
-    }
-
-    return TRUE;
+    g_slice_free1(n*n*sizeof(gdouble), unity);
+    return ok;
 }
 
 /**
