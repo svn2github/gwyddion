@@ -44,5 +44,7 @@ $(library_aliases).c: $(library_symbols)
 	    $(library_aliases).c $(library_symbols)
 
 .PHONY: check-symbols
+# run make check-symbols as part of make check
+check-local: check-symbols
 
 # vim: set ft=make ts=4 sw=4 noet :

@@ -7,7 +7,7 @@ WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declarati
 library = libgwy
 libsuffix = $(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
-test_programs = testlibgwy
+test_program = testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
 main_header = libgwy.h
@@ -43,7 +43,7 @@ MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 lib_LTLIBRARIES = libgwy3.la
-noinst_PROGRAMS = $(test_programs)
+noinst_PROGRAMS = $(test_program)
 libgwyinclude_HEADERS = $(library_headers)
 pkginclude_HEADERS = $(main_header)
 
@@ -102,23 +102,6 @@ testlibgwy_LDADD = libgwy3.la
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
-
-# Run the test program but do not execute any tests.  This produces a list of
-# ‘standard’ GLib errors we then filter out.
-$(library)$(libsuffix).supp: testlibgwy$(EXEEXT)
-	$(LIBTOOL) --mode=execute valgrind --log-fd=5 --gen-suppressions=all \
-	    --tool=memcheck --leak-check=full --show-reachable=no \
-	    ./testlibgwy -l >/dev/null 5>$(library)$(libsuffix).supp
-	$(SED) -i -e '/^==/d' \
-	    -e 's/<insert a suppression name here>/Suppression/' \
-	    $(library)$(libsuffix).supp
-
-# Run the test program with all tests (unless TEST_FLAGS says otherwise) under
-# valgrind and report any problems.
-check-valgrind: $(library)$(libsuffix).supp
-	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
-	    --show-reachable=no --suppressions=$(library)$(libsuffix).supp \
-	    ./testlibgwy $(TEST_FLAGS)
 
 clean-local:
 	rm -f core.* *~
