@@ -1,8 +1,9 @@
 /*** BEGIN file-header ***/
-#include "@OWN_HEADER@.h"
+#include "@LIBRARY@/@LIBRARY@.h"
+#include "@LIBRARY@/@LIBRARY@-aliases.h"
 
 /**
- * SECTION: @OWN_HEADER@
+ * SECTION: @SELF@
  * @title: Enumerated types
  * @short_description: GTypes for enumerated types
  *
@@ -10,11 +11,6 @@
  **/
 
 /*** END file-header ***/
-
-/*** BEGIN file-production ***/
-#include "@filename@"
-
-/*** END file-production ***/
 
 /*** BEGIN value-header ***/
 GType
@@ -39,5 +35,11 @@ GType
 }
 
 /*** END value-tail ***/
+
+/*** BEGIN file-tail ***/
+
+#define __@ID@_C__
+#include "@LIBRARY@/@LIBRARY@-aliases.c"
+/*** END file-tail ***/
 
 /* vim: set ft=cpp : */

@@ -27,9 +27,9 @@ check-symbols: $(library_la) $(library_decl)
 	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
 	    $(library_la) $(library_decl) $(srcdir)
 
-$(library_symbols): $(libgwyinclude_HEADERS)
+$(library_symbols): $(library_headers)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
-	     $(library_symbols) $(libgwyinclude_HEADERS)
+	     $(library_symbols) $(library_headers)
 
 $(library_def): $(library_symbols)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-def.py \

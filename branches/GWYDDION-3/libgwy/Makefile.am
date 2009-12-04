@@ -5,7 +5,7 @@ PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=implicit-int -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 library = libgwy
-libsuffix = 3
+libsuffix = $(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)/$(library)
 test_programs = testlibgwy
 mkenum_name = types
@@ -33,6 +33,8 @@ mkenum_headers = \
 	value-format.h \
 	version.h
 
+library_headers = $(mkenum_headers) $(mkenum_name).h
+
 # Must init
 EXTRA_DIST = version.h.in
 CLEANFILES = $(library)$(libsuffix).supp
@@ -42,7 +44,7 @@ BUILT_SOURCES =
 
 lib_LTLIBRARIES = libgwy3.la
 noinst_PROGRAMS = $(test_programs)
-libgwyinclude_HEADERS = $(mkenum_headers) $(mkenum_name).h
+libgwyinclude_HEADERS = $(library_headers)
 pkginclude_HEADERS = $(main_header)
 
 libgwy3_la_SOURCES = \
