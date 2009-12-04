@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # vim: set ts=4 sw=4 et :
+# $Id$
 import sys, re, difflib
 
 fre = re.compile(r'(?P<define>^# *(ifn?def|if|else|elif|endif).*?$)'
-                 r'|^[A-Za-z][A-Za-z0-9 *]+\b(?P<function>\w+) *\([^;]*?\)'
+                 r'|(?P<type>^[A-Za-z][A-Za-z0-9 *]+)'
+                 r'\b(?P<function>\w+) *\([^;]*?\)'
                  r'\s*(?P<gnu>(?:G_GNUC[^;]*)?)\s*;', re.M | re.S)
 makeseen = re.compile(r'^#ifndef (?P<name>__\w+)_H__$')
 
@@ -24,6 +26,9 @@ for filename in sys.argv[1:]:
     # stable output.  Gather a group of such symbols in outputgroup.
     outputgroup = []
     for match in fre.finditer(file(filename).read()):
+        rtype = match.group('type')
+        if rtype and rtype.split()[0] == 'typedef':
+            continue
         define = match.group('define')
         function = match.group('function')
         gnu = match.group('gnu')
