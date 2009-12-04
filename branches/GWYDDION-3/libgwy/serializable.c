@@ -68,7 +68,7 @@ gwy_serializable_n_items(GwySerializable *serializable)
  * @items: List of flattened object tree items to append the representation of
  *         @serializable to.
  *
- * Creates a flattened representation of a serializable object.
+ * Creates the flattened representation of a serializable object.
  *
  * This function wraps the virtual table method itemize().  It deals with
  * recording of the object header item.  Method itemize() then only serializes
