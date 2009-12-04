@@ -402,7 +402,7 @@ gwy_container_n_items(GwyContainer *container)
 }
 
 /**
- * gwy_container_value_type_by_name:
+ * gwy_container_item_type_by_name:
  * @c: A container.
  * @n: String item key.
  *
@@ -410,7 +410,7 @@ gwy_container_n_items(GwyContainer *container)
  **/
 
 /**
- * gwy_container_value_type:
+ * gwy_container_item_type:
  * @container: A container.
  * @key: Quark item key.
  *
@@ -419,7 +419,7 @@ gwy_container_n_items(GwyContainer *container)
  * Returns: The value type as #GType; 0 if there is no such value.
  **/
 GType
-gwy_container_value_type(GwyContainer *container, GQuark key)
+gwy_container_item_type(GwyContainer *container, GQuark key)
 {
     GValue *p;
 

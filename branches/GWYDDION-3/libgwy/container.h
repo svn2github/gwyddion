@@ -58,7 +58,7 @@ GwyContainer* gwy_container_new          (void)                       G_GNUC_MAL
 guint         gwy_container_n_items      (GwyContainer *container)    G_GNUC_PURE;
 GQuark*       gwy_container_keys         (GwyContainer *container)    G_GNUC_MALLOC;
 const gchar** gwy_container_keys_by_name (GwyContainer *container)    G_GNUC_MALLOC;
-GType         gwy_container_value_type   (GwyContainer *container,
+GType         gwy_container_item_type    (GwyContainer *container,
                                           GQuark key)                 G_GNUC_PURE;
 gboolean      gwy_container_contains     (GwyContainer *container,
                                           GQuark key)                 G_GNUC_PURE;
@@ -168,7 +168,7 @@ gboolean      gwy_container_gis_boxed    (GwyContainer *container,
 gchar**       gwy_container_dump_to_text (GwyContainer *container)    G_GNUC_MALLOC;
 GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MALLOC;
 
-#define gwy_container_value_type_by_name(c,n)    gwy_container_value_type(c,g_quark_try_string(n))
+#define gwy_container_item_type_by_name(c,n)     gwy_container_item_type(c,g_quark_try_string(n))
 #define gwy_container_contains_by_name(c,n)      gwy_container_contains(c,g_quark_try_string(n))
 #define gwy_container_set_value_by_name(c,n,v)   gwy_container_set_value(c,g_quark_from_string(n),v)
 #define gwy_container_get_value_by_name(c,n)     gwy_container_get_value(c,g_quark_try_string(n))
