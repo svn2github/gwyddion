@@ -1989,7 +1989,7 @@ hash_text_serialize(gpointer hkey, gpointer hvalue, gpointer hdata)
         break;
 
         case G_TYPE_CHAR:
-        c = g_value_get_uchar(value);
+        c = (guchar)g_value_get_char(value);
         if (g_ascii_isprint(c) && !g_ascii_isspace(c))
             v = g_strdup_printf("\"%s\" char %c", k, c);
         else
