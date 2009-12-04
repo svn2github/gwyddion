@@ -404,7 +404,7 @@ check_base_dir(const gchar *basedir,
     /* TODO: Multilib support: (1) from fix_module_directory()
      * (2) from AC_LIB_PREPARE_MULTILIB result */
     if (plibdir) {
-        gchar *path = g_build_filename(basedir, "lib", PACKAGE, NULL);
+        gchar *path = g_build_filename(basedir, "lib", PACKAGEDIR, NULL);
         if (libdir_seems_good(path))
             *plibdir = path;
         else
@@ -412,7 +412,7 @@ check_base_dir(const gchar *basedir,
     }
 
     if (pdatadir) {
-        gchar *path = g_build_filename(basedir, "share", PACKAGE, NULL);
+        gchar *path = g_build_filename(basedir, "share", PACKAGEDIR, NULL);
         if (datadir_seems_good(path))
             *pdatadir = path;
         else
