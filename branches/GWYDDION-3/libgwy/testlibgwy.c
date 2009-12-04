@@ -2202,6 +2202,23 @@ test_container_text(void)
     g_object_unref(container);
 }
 
+static void
+test_container_boxed(void)
+{
+    GwyContainer *container = gwy_container_new();
+    GwyRGBA color = { 0.9, 0.6, 0.3, 1.0 };
+    gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color);
+    GwyRGBA color2 = { 0.0, 0.5, 0.5, 1.0 };
+    gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color2);
+    const GwyRGBA *color3 = gwy_container_get_boxed_by_name(container, "color");
+    g_assert(color3);
+    g_assert_cmpint(memcmp(&color2, color3, sizeof(GwyRGBA)), ==, 0);
+    GwyRGBA color4;
+    g_assert(gwy_container_gis_boxed_by_name(container, "color", &color4));
+    g_assert_cmpint(memcmp(&color2, &color4, sizeof(GwyRGBA)), ==, 0);
+    g_object_unref(container);
+}
+
 /***************************************************************************
  *
  * Inventory
@@ -2590,23 +2607,20 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/serialize/nested", test_serialize_nested);
     g_test_add_func("/testlibgwy/serialize/error", test_serialize_error);
     g_test_add_func("/testlibgwy/serialize/boxed", test_serialize_boxed);
-    /* Requires error_list */
     g_test_add_func("/testlibgwy/deserialize/simple", test_deserialize_simple);
     g_test_add_func("/testlibgwy/deserialize/data", test_deserialize_data);
     g_test_add_func("/testlibgwy/deserialize/nested", test_deserialize_nested);
     g_test_add_func("/testlibgwy/deserialize/boxed", test_deserialize_boxed);
     g_test_add_func("/testlibgwy/deserialize/garbage", test_deserialize_garbage);
-    /* Requires serializable, error_list */
     g_test_add_func("/testlibgwy/unit/parse", test_unit_parse);
     g_test_add_func("/testlibgwy/unit/arithmetic", test_unit_arithmetic);
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
-    /* Requires unit */
     g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
-    /* Requires serializable, unit */
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
     g_test_add_func("/testlibgwy/container/serialize", test_container_serialize);
     g_test_add_func("/testlibgwy/container/text", test_container_text);
+    g_test_add_func("/testlibgwy/container/boxed", test_container_boxed);
     g_test_add_func("/testlibgwy/inventory/data", test_inventory_data);
 
     return g_test_run();
