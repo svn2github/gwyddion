@@ -156,6 +156,15 @@ gpointer      gwy_container_get_object   (GwyContainer *container,
 gboolean      gwy_container_gis_object   (GwyContainer *container,
                                           GQuark key,
                                           gpointer value);
+void          gwy_container_set_boxed    (GwyContainer *container,
+                                          GQuark key,
+                                          GType type,
+                                          gpointer value);
+gconstpointer gwy_container_get_boxed    (GwyContainer *container,
+                                          GQuark key)                 G_GNUC_PURE;
+gboolean      gwy_container_gis_boxed    (GwyContainer *container,
+                                          GQuark key,
+                                          gpointer value);
 gchar**       gwy_container_dump_to_text (GwyContainer *container)    G_GNUC_MALLOC;
 GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MALLOC;
 
@@ -191,6 +200,7 @@ GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MAL
 #define gwy_container_take_object_by_name(c,n,v) gwy_container_take_object(c,g_quark_from_string(n),v)
 #define gwy_container_get_object_by_name(c,n)    gwy_container_get_object(c,g_quark_try_string(n))
 #define gwy_container_gis_object_by_name(c,n,v)  gwy_container_gis_object(c,g_quark_from_string(n),v)
+#define gwy_container_set_boxed_by_name(c,n,t,v) gwy_container_set_boxed(c,g_quark_from_string(n),t,v)
 
 G_END_DECLS
 

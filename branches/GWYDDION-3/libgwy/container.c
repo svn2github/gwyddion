@@ -412,7 +412,7 @@ gwy_container_n_items(GwyContainer *container)
 /**
  * gwy_container_value_type:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Returns the type of value in @container identified by @key.
  *
@@ -444,7 +444,7 @@ gwy_container_value_type(GwyContainer *container, GQuark key)
 /**
  * gwy_container_contains:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Returns %TRUE if @container contains a value identified by @key.
  *
@@ -472,7 +472,7 @@ gwy_container_contains(GwyContainer *container, GQuark key)
 /**
  * gwy_container_remove:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Removes a value identified by @key from a container.
  *
@@ -752,7 +752,7 @@ gwy_container_rename(GwyContainer *container,
 /**
  * get_value_of_type:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @type: Value type to get.  Can be %NULL to not check value type.
  *
  * Low level function to get a value from a container.
@@ -789,7 +789,7 @@ get_value_of_type(GwyContainer *container,
 /**
  * gis_value_of_type:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @type: Value type to get.  Can be %NULL to not check value type.
  *
  * Low level function to get a value from a container.
@@ -838,7 +838,7 @@ gis_value_of_type(GwyContainer *container,
 /**
  * gwy_container_get_value:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: #GValue to update, it can be either zero-initialized or containing
  *         a value. If item does not exist, it is left untouched.
  *
@@ -876,7 +876,7 @@ gwy_container_get_value(GwyContainer *container,
 /**
  * gwy_container_get_boolean:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a boolean from a container using a quark identifier.
  *
@@ -906,7 +906,7 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_boolean:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the boolean to update.
  *
  * Updates a boolean from a container using a quark identifier.
@@ -939,7 +939,7 @@ gwy_container_gis_boolean(GwyContainer *container,
 /**
  * gwy_container_get_char:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a character from a container using a quark identifier.
  *
@@ -969,7 +969,7 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_char:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the character to update.
  *
  * Updates a character from a container using a quark identifier.
@@ -1002,7 +1002,7 @@ gwy_container_gis_char(GwyContainer *container,
 /**
  * gwy_container_get_int32:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a 32bit integer from a container using a quark identifier.
  *
@@ -1032,7 +1032,7 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_int32:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the 32bit integer to update.
  *
  * Updates a 32bit integer from a container using a quark identifier.
@@ -1067,7 +1067,7 @@ gwy_container_gis_int32(GwyContainer *container,
 /**
  * gwy_container_get_enum:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets an enum value from a container using a quark identifier.
  *
@@ -1098,7 +1098,7 @@ gwy_container_get_enum(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_enum:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the enum to update.
  *
  * Updates an enum from a container using a quark identifier.
@@ -1135,7 +1135,7 @@ gwy_container_gis_enum(GwyContainer *container,
 /**
  * gwy_container_get_int64:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a 64bit integer from a container using a quark identifier.
  *
@@ -1165,7 +1165,7 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_int64:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the 64bit integer to update.
  *
  * Updates a 64bit integer from a container using a quark identifier.
@@ -1198,7 +1198,7 @@ gwy_container_gis_int64(GwyContainer *container,
 /**
  * gwy_container_get_double:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a double from a container using a quark identifier.
  *
@@ -1228,7 +1228,7 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_double:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the double to update.
  *
  * Updates a double from a container using a quark identifier.
@@ -1263,7 +1263,7 @@ gwy_container_gis_double(GwyContainer *container,
 /**
  * gwy_container_get_string:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets a string from a container using a quark identifier.
  *
@@ -1298,7 +1298,7 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_string:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the string pointer to update.
  *
  * Updates a string from a container using a quark identifier.
@@ -1338,7 +1338,7 @@ gwy_container_gis_string(GwyContainer *container,
 /**
  * gwy_container_get_object:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  *
  * Gets an object from a container using a quark identifier.
  *
@@ -1376,7 +1376,7 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
 /**
  * gwy_container_gis_object:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Pointer to the object pointer to update.
  *
  * Updates an object from a container using a quark identifier.
@@ -1384,6 +1384,14 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
  * The object stored in @value if this function succeeds does not have its
  * reference count increased, use g_object_ref() if you want to access it even
  * when @container may cease to exist.
+ * |[
+ * GwyUnit *unit = NULL;
+ * if (gwy_container_gis_object(container, key, &unit)) {
+ *     // Add our own reference.
+ *     g_object_ref(unit);
+ *     ...
+ * }
+ * ]|
  *
  * Returns: %TRUE if @value was actually updated, %FALSE when there is no
  *          such object in the container.
@@ -1397,6 +1405,92 @@ gwy_container_gis_object(GwyContainer *container,
 
     if ((p = gis_value_of_type(container, key, G_TYPE_OBJECT))) {
         *(GObject**)value = g_value_get_object(p);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/**
+ * gwy_container_get_boxed_by_name:
+ * @c: A container.
+ * @n: String item key.
+ *
+ * Gets a boxed type from a container using a string identifier.
+ *
+ * The returned boxed type is owned by @container.  Use g_boxed_copy() to
+ * create a private copy if you need a modifiable/long-lasting data.
+ **/
+
+/**
+ * gwy_container_get_boxed:
+ * @container: A container.
+ * @key: Quark item key.
+ *
+ * Gets a boxed type from a container using a quark identifier.
+ *
+ * The returned boxed type is owned by @container.  Use g_boxed_copy() to
+ * create a private copy if you need a modifiable/long-lasting data.
+ * |[
+ * GwyRGBA *color;
+ * color = gwy_container_get_boxed(container, key);
+ * ]|
+ *
+ * Returns: Boxed type pointer.
+ **/
+gconstpointer
+gwy_container_get_boxed(GwyContainer *container, GQuark key)
+{
+    GValue *p;
+
+    p = get_value_of_type(container, key, G_TYPE_BOXED);
+    return G_LIKELY(p) ? (gpointer)g_value_get_boxed(p) : NULL;
+}
+
+/**
+ * gwy_container_gis_boxed_by_name:
+ * @c: A container.
+ * @n: String item key.
+ * @v: Pointer to the boxed type to update.
+ *
+ * Updates a boxed type from a container using a string identifier.
+ *
+ * The value is transferred using gwy_serializable_boxed_assign(), i.e. it is
+ * assigned by value.
+ *
+ * Expands to %TRUE if @v was actually updated, %FALSE when there is no
+ * such boxed in the container.
+ **/
+
+/**
+ * gwy_container_gis_boxed:
+ * @container: A container.
+ * @key: Quark item key.
+ * @value: Pointer to the boxed type to update.
+ *
+ * Updates a boxed type from a container using a quark identifier.
+ *
+ * The value is transferred using gwy_serializable_boxed_assign(), i.e. it is
+ * assigned by value.
+ * |[
+ * GwyRGBA color = { 0, 0, 0, 0 };
+ * if (gwy_container_gis_boxed(container, key, &color)) {
+ *     ...
+ * }
+ * ]|
+ *
+ * Returns: %TRUE if @value was actually updated, %FALSE when there is no
+ *          such boxed in the container.
+ **/
+gboolean
+gwy_container_gis_boxed(GwyContainer *container,
+                        GQuark key,
+                        gpointer value)
+{
+    GValue *p;
+
+    if ((p = gis_value_of_type(container, key, G_TYPE_BOXED))) {
+        gwy_serializable_boxed_assign(G_VALUE_TYPE(p),
+                                      value, g_value_get_boxed(p));
         return TRUE;
     }
     return FALSE;
@@ -1460,7 +1554,7 @@ values_are_equal(const GValue *value1,
 /**
  * gwy_container_set_value:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: #GValue with the value to set.
  *
  * Inserts or updates a value identified by quark in a data container.
@@ -1542,7 +1636,7 @@ gwy_container_set_value(GwyContainer *container,
 /**
  * gwy_container_set_boolean:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A boolean.
  *
  * Stores a boolean identified by a quark into a container.
@@ -1568,7 +1662,7 @@ gwy_container_set_boolean(GwyContainer *container,
 /**
  * gwy_container_set_char:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A character.
  *
  * Stores a character identified by a quark into a container.
@@ -1593,7 +1687,7 @@ gwy_container_set_char(GwyContainer *container,
 /**
  * gwy_container_set_int32:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A 32bit integer.
  *
  * Stores a 32bit integer identified by a quark into a container.
@@ -1620,7 +1714,7 @@ gwy_container_set_int32(GwyContainer *container,
 /**
  * gwy_container_set_enum:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: An enum integer.
  *
  * Stores an enum value identified by a quark into a container.
@@ -1648,7 +1742,7 @@ gwy_container_set_enum(GwyContainer *container,
 /**
  * gwy_container_set_int64:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A 64bit integer.
  *
  * Stores a 64bit integer identified by a quark into a container.
@@ -1673,7 +1767,7 @@ gwy_container_set_int64(GwyContainer *container,
 /**
  * gwy_container_set_double:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A double.
  *
  * Stores a double identified by a quark into a container.
@@ -1701,7 +1795,7 @@ gwy_container_set_double(GwyContainer *container,
 /**
  * gwy_container_set_string:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A nul-terminated string.
  *
  * Copies a string identified by a quark into a container.
@@ -1756,7 +1850,7 @@ gwy_container_set_string(GwyContainer *container,
 /**
  * gwy_container_take_string:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: A nul-terminated string.
  *
  * Stores a string identified by a quark into a container.
@@ -1812,16 +1906,21 @@ gwy_container_take_string(GwyContainer *container,
 /**
  * gwy_container_set_object:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
  *
- * The container claims ownership on the object, i.e. its reference count is
- * incremented.
+ * The container adds its own reference on the object.
  *
  * The object must implement #GwySerializable interface to allow serialization
- * of the container.
+ * and other operations with the container.
+ * |[
+ * GwyUnit *unit = gwy_si_unit_new_from_string("m");
+ * gwy_container_set_object(container, key, unit);
+ * // Release our own reference.
+ * g_object_unref(unit);
+ * ]|
  **/
 void
 gwy_container_set_object(GwyContainer *container,
@@ -1875,7 +1974,7 @@ gwy_container_set_object(GwyContainer *container,
 /**
  * gwy_container_take_object:
  * @container: A container.
- * @key: #GQuark item key.
+ * @key: Quark item key.
  * @value: Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
@@ -1884,7 +1983,12 @@ gwy_container_set_object(GwyContainer *container,
  * reference count is not incremented.
  *
  * The object must implement #GwySerializable interface to allow serialization
- * of the container.
+ * and other operations with the container.
+ * |[
+ * GwyUnit *unit = gwy_si_unit_new_from_string("m");
+ * // Pass our reference to container.
+ * gwy_container_take_object(container, key, unit);
+ * ]|
  **/
 void
 gwy_container_take_object(GwyContainer *container,
@@ -1919,6 +2023,75 @@ gwy_container_take_object(GwyContainer *container,
         g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
     }
     g_value_take_object(gvalue, value);
+    if (!container->in_construction)
+        g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
+}
+
+/**
+ * gwy_container_set_boxed_by_name:
+ * @c: A container.
+ * @n: String item key.
+ * @t: Serializable boxed type.
+ * @v: Pointer to boxed struct of type @t to store into container.
+ *
+ * Stores a boxed type identified by a string into a container.
+ *
+ * See gwy_container_set_boxed() for details.
+ **/
+
+/**
+ * gwy_container_set_boxed:
+ * @container: A container.
+ * @key: Quark item key.
+ * @type: Serializable boxed type.
+ * @value: Pointer to boxed struct of type @type to store into container.
+ *
+ * Stores a boxed type identified by a quark into a container.
+ *
+ * The container stored the boxed type by value, i.e. a copy is made.
+ *
+ * The boxed type must implement the
+ * <link linkend="libgwy-serializable-boxed">serializable boxed</link>.
+ * to allow serialization and other operations with the container.
+ * |[
+ * GwyRGBA color = { 0, 0, 0, 0 };
+ * gwy_container_set_boxed(container, key, GWY_TYPE_RGBA, &color);
+ * ]|
+ **/
+void
+gwy_container_set_boxed(GwyContainer *container,
+                        GQuark key,
+                        GType boxtype,
+                        gpointer value)
+{
+    g_return_if_fail(GWY_IS_CONTAINER(container));
+    g_return_if_fail(key);
+    GValue *gvalue = g_hash_table_lookup(container->values,
+                                         GUINT_TO_POINTER(key));
+    if (gvalue) {
+        GType type = G_VALUE_TYPE(gvalue);
+        if (type == boxtype) {
+            gwy_serializable_boxed_assign(type,
+                                          g_value_get_boxed(gvalue), value);
+            // Unlike for other types, we always emit item-changed.
+            // FIXME: Extend serializable boxed with comparison operator?
+        }
+        else {
+            // Be careful not to free something before using it.
+            GValue *newvalue = g_slice_new0(GValue);
+            g_value_init(newvalue, boxtype);
+            g_value_copy(value, newvalue);
+            g_hash_table_insert(container->values, GUINT_TO_POINTER(key),
+                                newvalue);
+            // g_value_unset(gvalue); done by hash value destroy function
+        }
+    }
+    else {
+        gvalue = g_slice_new0(GValue);
+        g_value_init(gvalue, boxtype);
+        g_value_set_boxed(gvalue, value);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+    }
     if (!container->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
