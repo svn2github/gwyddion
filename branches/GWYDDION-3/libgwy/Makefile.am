@@ -75,6 +75,7 @@ AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
 	-DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\" \
+	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES \
 	-DG_LOG_DOMAIN=\"Gwy\" \
 	-DGWY_LIBDIR=\"$(pkglibdir)\" \
 	-DGWY_DATADIR=\"$(pkgdatadir)\" \
