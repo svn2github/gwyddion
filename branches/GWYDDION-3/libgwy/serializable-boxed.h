@@ -47,8 +47,6 @@ gsize    gwy_serializable_boxed_n_items  (GType type);
 void     gwy_serializable_boxed_itemize  (GType type,
                                           gpointer boxed,
                                           GwySerializableItems *items);
-void     gwy_serializable_boxed_done     (GType type,
-                                          gpointer boxed);
 gpointer gwy_serializable_boxed_construct(GType type,
                                           GwySerializableItems *items,
                                           GwyErrorList **error_list);
