@@ -78,7 +78,6 @@ union _GwySerializableValue {
     gchar **v_string_array;
     guchar **v_ustring_array;
     GObject **v_object_array;
-    gpointer *v_boxed_array;
 };
 
 struct _GwySerializableItem {

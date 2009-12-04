@@ -348,6 +348,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * @GWY_SERIALIZABLE_STRING_ARRAY: Denotes an array of C strings.
  * @GWY_SERIALIZABLE_OBJECT: Denotes an object.
  * @GWY_SERIALIZABLE_OBJECT_ARRAY: Denotes an array of objects.
+ * @GWY_SERIALIZABLE_BOXED: Denotes a serializable boxed type.
  *
  * Type of serializable value.
  *
@@ -373,8 +374,9 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GwySerializableItem:
  * @name: Component name.
- * @array_size: Array size of the component if of an array type.  Unused
- *              otherwise.
+ * @array_size: Array size of the component if of an array type.  For boxed
+ *              types that do not carry type information, deserialization sets
+ *              is to the #GType of the boxed type.  Unused otherwise.
  * @value: Item value, the interpreration depends on the @ctype member.
  * @ctype: Item type, one of the #GwySerializableCType enum.
  *

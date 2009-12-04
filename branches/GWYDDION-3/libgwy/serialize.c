@@ -426,8 +426,7 @@ calculate_sizes(GwySerializableItems *items,
             for (gsize j = 0; j < alen; j++)
                 size += strlen((const gchar*)item->value.v_string_array[j])+1;
         }
-        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY
-                 || ctype == GWY_SERIALIZABLE_BOXED_ARRAY) {
+        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
             size += sizeof(guint64);
             gsize alen = item->array_size;
             for (gsize j = 0; j < alen; j++)
@@ -479,7 +478,7 @@ dump_to_stream(const GwySerializableItems *items,
         if (!buffer_write(buffer, &ctype, sizeof(guint8)))
             return FALSE;
 
-        /* Serializable object follows... */
+        /* Serializable object/boxed follows... */
         if (ctype == GWY_SERIALIZABLE_OBJECT
             || ctype == GWY_SERIALIZABLE_BOXED)
             continue;
@@ -548,12 +547,11 @@ dump_to_stream(const GwySerializableItems *items,
                     return FALSE;
             }
         }
-        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY
-                 || ctype == GWY_SERIALIZABLE_BOXED_ARRAY) {
+        else if (ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
             guint64 v = GUINT64_TO_LE(item->array_size);
             if (!buffer_write(buffer, &v, sizeof(guint64)))
                 return FALSE;
-            /* Serialized objects follow... */
+            /* Serialized objects/boxed follow... */
         }
         else {
             g_return_val_if_reached(FALSE);
@@ -982,6 +980,7 @@ static GObject*
 deserialize_boxed(const guchar *buffer,
                   gsize size,
                   gsize *bytes_consumed,
+                  gsize *gtype,                // GType, in fact
                   GwyErrorList **error_list)
 {
     GwySerializableItems *items = NULL;
@@ -998,7 +997,7 @@ deserialize_boxed(const guchar *buffer,
 
     /* Object size */
     if (!(rbytes = unpack_size(buffer + pos, size - pos, 1,
-                               &boxed_size, "object", error_list)))
+                               &boxed_size, "boxed", error_list)))
         goto fail;
     pos += rbytes;
 
@@ -1011,7 +1010,7 @@ deserialize_boxed(const guchar *buffer,
     if (G_UNLIKELY(size - pos != boxed_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_PADDING,
-                           _("Object ‘%s’ data is smaller than the space "
+                           _("Boxed type ‘%s’ data is smaller than the space "
                              "alloted for it.  The padding was ignored."),
                            typename);
     }
@@ -1025,6 +1024,8 @@ deserialize_boxed(const guchar *buffer,
 
     /* Finally, construct the boxed type. */
     boxed = gwy_serializable_boxed_construct(type, items, error_list);
+    if (boxed)
+        *gtype = type;
 
 fail:
     free_items(items);
@@ -1037,25 +1038,15 @@ static inline gsize
 unpack_boxed(const guchar *buffer,
              gsize size,
              gpointer *value,
+             gsize *gtype,                // GType, in fact
              GwyErrorList **error_list)
 {
     gsize rbytes;
 
-    if (!(*value = deserialize_boxed(buffer, size, &rbytes, error_list)))
+    if (!(*value = deserialize_boxed(buffer, size, &rbytes, gtype, error_list)))
         return 0;
 
     return rbytes;
-}
-
-static inline gsize
-unpack_boxed_array(const guchar *buffer,
-                   gsize size,
-                   gsize *array_size,
-                   gpointer **value,
-                   GwyErrorList **error_list)
-{
-    g_critical("Deserialization of boxed arrays is not implemented.");
-    return 0;
 }
 
 /**
@@ -1204,7 +1195,7 @@ get_serializable_boxed(const gchar *typename,
     if (G_UNLIKELY(!type)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
-                           _("Object type ‘%s’ is not known. "
+                           _("Boxed type ‘%s’ is not known. "
                              "It was ignored."),
                            typename);
         return 0;
@@ -1213,7 +1204,7 @@ get_serializable_boxed(const gchar *typename,
     if (G_UNLIKELY(!gwy_boxed_type_is_serializable(type))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_OBJECT,
-                           _("Object type ‘%s’ is not serializable. "
+                           _("Boxed type ‘%s’ is not serializable. "
                              "It was ignored."),
                            typename);
         return 0;
@@ -1305,7 +1296,7 @@ unpack_items(const guchar *buffer,
         }
         else if (ctype == GWY_SERIALIZABLE_BOXED) {
             if (!(rbytes = unpack_boxed(buffer, size, &item->value.v_boxed,
-                                        error_list)))
+                                        &item->array_size, error_list)))
                 goto fail;
         }
         else if (ctype == GWY_SERIALIZABLE_INT8_ARRAY) {
@@ -1355,13 +1346,6 @@ unpack_items(const guchar *buffer,
                                                &item->array_size,
                                                &item->value.v_object_array,
                                                error_list)))
-                goto fail;
-        }
-        else if (ctype == GWY_SERIALIZABLE_BOXED_ARRAY) {
-            if (!(rbytes = unpack_boxed_array(buffer, size,
-                                              &item->array_size,
-                                              &item->value.v_boxed_array,
-                                              error_list)))
                 goto fail;
         }
         else {
@@ -1429,6 +1413,14 @@ free_items(GwySerializableItems *items)
 
             case GWY_SERIALIZABLE_STRING:
             GWY_FREE(item->value.v_string);
+            break;
+
+            case GWY_SERIALIZABLE_BOXED:
+            if (item->value.v_boxed) {
+                g_boxed_free(item->array_size, item->value.v_boxed);
+                item->value.v_boxed = NULL;
+                item->array_size = 0;
+            }
             break;
 
             case GWY_SERIALIZABLE_STRING_ARRAY:
