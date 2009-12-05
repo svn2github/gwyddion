@@ -321,8 +321,18 @@ gwy_container_construct(GwySerializableItems *items,
 
             case GWY_SERIALIZABLE_OBJECT:
             if (it->value.v_object) {
-                gwy_container_set_object(container, key, it->value.v_object);
-                GWY_OBJECT_UNREF(it->value.v_object);
+                gwy_container_take_object(container, key, it->value.v_object);
+                it->value.v_object = NULL;
+            }
+            break;
+
+            case GWY_SERIALIZABLE_BOXED:
+            if (it->value.v_boxed) {
+                /* array_size means boxed type */
+                gwy_container_set_boxed(container, key, it->array_size,
+                                        it->value.v_object);
+                g_boxed_free(it->array_size, it->value.v_object);
+                it->value.v_boxed = NULL;
             }
             break;
 
