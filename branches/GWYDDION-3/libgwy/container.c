@@ -1415,6 +1415,9 @@ gwy_container_gis_object(GwyContainer *container,
  * gwy_container_get_boxed_by_name:
  * @c: A container.
  * @n: String item key.
+ * @t: Serializable boxed type.  You can pass the concrete type
+ *     (recommended) or %G_TYPE_BOXED to get any boxed type (if you know
+ *     what you are doing).
  *
  * Gets a boxed type from a container using a string identifier.
  *
@@ -1426,6 +1429,9 @@ gwy_container_gis_object(GwyContainer *container,
  * gwy_container_get_boxed:
  * @container: A container.
  * @key: Quark item key.
+ * @type: Serializable boxed type.  You can pass the concrete type
+ *        (recommended) or %G_TYPE_BOXED to get any boxed type (if you know
+ *        what you are doing).
  *
  * Gets a boxed type from a container using a quark identifier.
  *
@@ -1439,11 +1445,11 @@ gwy_container_gis_object(GwyContainer *container,
  * Returns: Boxed type pointer.
  **/
 gconstpointer
-gwy_container_get_boxed(GwyContainer *container, GQuark key)
+gwy_container_get_boxed(GwyContainer *container, GQuark key, GType type)
 {
     GValue *p;
 
-    p = get_value_of_type(container, key, G_TYPE_BOXED);
+    p = get_value_of_type(container, key, type);
     return G_LIKELY(p) ? (gpointer)g_value_get_boxed(p) : NULL;
 }
 
@@ -1451,6 +1457,9 @@ gwy_container_get_boxed(GwyContainer *container, GQuark key)
  * gwy_container_gis_boxed_by_name:
  * @c: A container.
  * @n: String item key.
+ * @t: Serializable boxed type.  You can pass the concrete type
+ *     (recommended) or %G_TYPE_BOXED to get any boxed type (if you know
+ *     what you are doing).
  * @v: Pointer to the boxed type to update.
  *
  * Updates a boxed type from a container using a string identifier.
@@ -1466,6 +1475,9 @@ gwy_container_get_boxed(GwyContainer *container, GQuark key)
  * gwy_container_gis_boxed:
  * @container: A container.
  * @key: Quark item key.
+ * @type: Serializable boxed type.  You can pass the concrete type
+ *        (recommended) or %G_TYPE_BOXED to get any boxed type (if you know
+ *        what you are doing).
  * @value: Pointer to the boxed type to update.
  *
  * Updates a boxed type from a container using a quark identifier.
@@ -1485,11 +1497,12 @@ gwy_container_get_boxed(GwyContainer *container, GQuark key)
 gboolean
 gwy_container_gis_boxed(GwyContainer *container,
                         GQuark key,
+                        GType type,
                         gpointer value)
 {
     GValue *p;
 
-    if ((p = gis_value_of_type(container, key, G_TYPE_BOXED))) {
+    if ((p = gis_value_of_type(container, key, type))) {
         gwy_serializable_boxed_assign(G_VALUE_TYPE(p),
                                       value, g_value_get_boxed(p));
         return TRUE;

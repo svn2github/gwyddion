@@ -2257,11 +2257,16 @@ test_container_boxed(void)
     gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color);
     GwyRGBA color2 = { 0.0, 0.5, 0.5, 1.0 };
     gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color2);
-    const GwyRGBA *color3 = gwy_container_get_boxed_by_name(container, "color");
+    const GwyRGBA *color3 = gwy_container_get_boxed_by_name(container, "color",
+                                                            GWY_TYPE_RGBA);
     g_assert(color3);
     g_assert_cmpint(memcmp(&color2, color3, sizeof(GwyRGBA)), ==, 0);
     GwyRGBA color4;
-    g_assert(gwy_container_gis_boxed_by_name(container, "color", &color4));
+    g_assert(gwy_container_gis_boxed_by_name(container, "color", GWY_TYPE_RGBA,
+                                             &color4));
+    g_assert_cmpint(memcmp(&color2, &color4, sizeof(GwyRGBA)), ==, 0);
+    g_assert(gwy_container_gis_boxed_by_name(container, "color", G_TYPE_BOXED,
+                                             &color4));
     g_assert_cmpint(memcmp(&color2, &color4, sizeof(GwyRGBA)), ==, 0);
     g_object_unref(container);
 }
