@@ -1998,7 +1998,7 @@ test_container_data(void)
                      G_CALLBACK(container_item_changed_count), &int_changed);
 
     item_key = "";
-    gwy_container_set_int32_by_name(container, "/pfx/int", 42);
+    gwy_container_set_int32_n(container, "/pfx/int", 42);
     quark = g_quark_try_string("/pfx/int");
     g_assert(quark);
 
@@ -2009,55 +2009,52 @@ test_container_data(void)
 
     item_key = "";
     gwy_container_set_int32(container, quark, -3);
-    g_assert(gwy_container_contains_by_name(container, "/pfx/int"));
-    g_assert_cmpint(gwy_container_get_int32_by_name(container, "/pfx/int"),
-                    ==, -3);
+    g_assert(gwy_container_contains_n(container, "/pfx/int"));
+    g_assert_cmpint(gwy_container_get_int32_n(container, "/pfx/int"), ==, -3);
     g_assert_cmpstr(item_key, ==, "/pfx/int");
     g_assert_cmpuint(int_changed, ==, 2);
 
     item_key = "";
-    gwy_container_set_char_by_name(container, "/pfx/char", '@');
-    g_assert(gwy_container_contains_by_name(container, "/pfx/char"));
-    g_assert_cmpint(gwy_container_get_char_by_name(container, "/pfx/char"),
-                    ==, '@');
+    gwy_container_set_char_n(container, "/pfx/char", '@');
+    g_assert(gwy_container_contains_n(container, "/pfx/char"));
+    g_assert_cmpint(gwy_container_get_char_n(container, "/pfx/char"), ==, '@');
     g_assert_cmpstr(item_key, ==, "/pfx/char");
 
     item_key = "";
-    gwy_container_set_int64_by_name(container, "/pfx/int64",
-                                    G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
-    g_assert(gwy_container_contains_by_name(container, "/pfx/int64"));
-    g_assert((guint64)gwy_container_get_int64_by_name(container, "/pfx/int64")
+    gwy_container_set_int64_n(container, "/pfx/int64",
+                              G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
+    g_assert(gwy_container_contains_n(container, "/pfx/int64"));
+    g_assert((guint64)gwy_container_get_int64_n(container, "/pfx/int64")
              == G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
     g_assert_cmpstr(item_key, ==, "/pfx/int64");
 
     item_key = "";
-    gwy_container_set_double_by_name(container, "/pfx/double", G_LN2);
-    g_assert(gwy_container_contains_by_name(container, "/pfx/double"));
-    g_assert_cmpfloat(gwy_container_get_double_by_name(container, "/pfx/double"),
+    gwy_container_set_double_n(container, "/pfx/double", G_LN2);
+    g_assert(gwy_container_contains_n(container, "/pfx/double"));
+    g_assert_cmpfloat(gwy_container_get_double_n(container, "/pfx/double"),
                       ==, G_LN2);
     g_assert_cmpstr(item_key, ==, "/pfx/double");
 
     item_key = "";
-    gwy_container_take_string_by_name(container, "/pfx/string",
-                                      g_strdup("Test Test"));
-    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
-    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+    gwy_container_take_string_n(container, "/pfx/string",
+                                g_strdup("Test Test"));
+    g_assert(gwy_container_contains_n(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_n(container, "/pfx/string"),
                     ==, "Test Test");
     g_assert_cmpstr(item_key, ==, "/pfx/string");
 
     /* No value change */
     item_key = "";
-    gwy_container_set_string_by_name(container, "/pfx/string", "Test Test");
-    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
-    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+    gwy_container_set_string_n(container, "/pfx/string", "Test Test");
+    g_assert(gwy_container_contains_n(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_n(container, "/pfx/string"),
                     ==, "Test Test");
     g_assert_cmpstr(item_key, ==, "");
 
     item_key = "";
-    gwy_container_set_string_by_name(container, "/pfx/string",
-                                     "Test Test Test");
-    g_assert(gwy_container_contains_by_name(container, "/pfx/string"));
-    g_assert_cmpstr(gwy_container_get_string_by_name(container, "/pfx/string"),
+    gwy_container_set_string_n(container, "/pfx/string", "Test Test Test");
+    g_assert(gwy_container_contains_n(container, "/pfx/string"));
+    g_assert_cmpstr(gwy_container_get_string_n(container, "/pfx/string"),
                     ==, "Test Test Test");
     g_assert_cmpstr(item_key, ==, "/pfx/string");
 
@@ -2067,14 +2064,14 @@ test_container_data(void)
                            TRUE, TRUE);
     g_assert_cmpuint(gwy_container_n_items(container), ==, 10);
 
-    ok = gwy_container_remove_by_name(container, "/pfx/string/ble");
+    ok = gwy_container_remove_n(container, "/pfx/string/ble");
     g_assert(!ok);
 
     n = gwy_container_remove_prefix(container, "/pfx/string/ble");
     g_assert_cmpuint(n, ==, 0);
 
     item_key = "";
-    ok = gwy_container_remove_by_name(container, "/pfx/string");
+    ok = gwy_container_remove_n(container, "/pfx/string");
     g_assert(ok);
     g_assert_cmpuint(gwy_container_n_items(container), ==, 9);
     g_assert_cmpstr(item_key, ==, "/pfx/string");
@@ -2112,12 +2109,12 @@ test_container_refcount(void)
 
     GwySerTest *st1 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
-    gwy_container_set_object_by_name(container, "/pfx/object", st1);
+    gwy_container_set_object_n(container, "/pfx/object", st1);
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 2);
 
     GwySerTest *st2 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
     g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 1);
-    gwy_container_set_object_by_name(container, "/pfx/object", st2);
+    gwy_container_set_object_n(container, "/pfx/object", st2);
     g_assert_cmpuint(G_OBJECT(st2)->ref_count, ==, 2);
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 1);
     g_object_unref(st1);
@@ -2125,7 +2122,7 @@ test_container_refcount(void)
     GwySerTest *st3 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
     g_assert_cmpuint(G_OBJECT(st3)->ref_count, ==, 1);
     g_object_ref(st3);
-    gwy_container_take_object_by_name(container, "/pfx/taken", st3);
+    gwy_container_take_object_n(container, "/pfx/taken", st3);
     g_assert_cmpuint(G_OBJECT(st3)->ref_count, ==, 2);
 
     g_object_unref(container);
@@ -2136,16 +2133,16 @@ test_container_refcount(void)
 
     container = gwy_container_new();
     st1 = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
-    gwy_container_set_object_by_name(container, "/pfx/object", st1);
+    gwy_container_set_object_n(container, "/pfx/object", st1);
     gwy_container_transfer(container, container, "/pfx", "/elsewhere",
                            FALSE, TRUE);
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 3);
-    st2 = gwy_container_get_object_by_name(container, "/elsewhere/object");
+    st2 = gwy_container_get_object_n(container, "/elsewhere/object");
     g_assert(st2 == st1);
 
     gwy_container_transfer(container, container, "/pfx", "/faraway",
                            TRUE, TRUE);
-    st2 = gwy_container_get_object_by_name(container, "/faraway/object");
+    st2 = gwy_container_get_object_n(container, "/faraway/object");
     g_assert(GWY_IS_SER_TEST(st2));
     g_assert(st2 != st1);
     g_assert_cmpuint(G_OBJECT(st1)->ref_count, ==, 3);
@@ -2163,15 +2160,15 @@ static void
 test_container_serialize(void)
 {
     GwyContainer *container = gwy_container_new();
-    gwy_container_set_char_by_name(container, "char", '\xfe');
-    gwy_container_set_boolean_by_name(container, "bool", TRUE);
-    gwy_container_set_int32_by_name(container, "int32", -123456);
-    gwy_container_set_int64_by_name(container, "int64",
-                                    G_GINT64_CONSTANT(-1234567890));
-    gwy_container_set_string_by_name(container, "string", "Mud");
-    gwy_container_set_double_by_name(container, "double", G_E);
+    gwy_container_set_char_n(container, "char", '\xfe');
+    gwy_container_set_boolean_n(container, "bool", TRUE);
+    gwy_container_set_int32_n(container, "int32", -123456);
+    gwy_container_set_int64_n(container, "int64",
+                              G_GINT64_CONSTANT(-1234567890));
+    gwy_container_set_string_n(container, "string", "Mud");
+    gwy_container_set_double_n(container, "double", G_E);
     GwyUnit *unit = gwy_unit_new_from_string("uPa", NULL);
-    gwy_container_take_object_by_name(container, "unit", unit);
+    gwy_container_take_object_n(container, "unit", unit);
 
     GOutputStream *stream;
     GMemoryOutputStream *memstream;
@@ -2198,7 +2195,7 @@ test_container_serialize(void)
     gwy_error_list_clear(&error_list);
 
     GwyUnit *unitcopy = NULL;
-    g_assert(gwy_container_gis_object_by_name(container, "unit", &unitcopy));
+    g_assert(gwy_container_gis_object_n(container, "unit", &unitcopy));
     g_assert(GWY_IS_UNIT(unitcopy));
     g_assert(gwy_unit_equal(unitcopy, unit));
 
@@ -2221,13 +2218,13 @@ static void
 test_container_text(void)
 {
     GwyContainer *container = gwy_container_new();
-    gwy_container_set_char_by_name(container, "char", '\xfe');
-    gwy_container_set_boolean_by_name(container, "bool", TRUE);
-    gwy_container_set_int32_by_name(container, "int32", -123456);
-    gwy_container_set_int64_by_name(container, "int64",
-                                    G_GINT64_CONSTANT(-1234567890));
-    gwy_container_set_string_by_name(container, "string", "Mud");
-    gwy_container_set_double_by_name(container, "double", G_E);
+    gwy_container_set_char_n(container, "char", '\xfe');
+    gwy_container_set_boolean_n(container, "bool", TRUE);
+    gwy_container_set_int32_n(container, "int32", -123456);
+    gwy_container_set_int64_n(container, "int64",
+                              G_GINT64_CONSTANT(-1234567890));
+    gwy_container_set_string_n(container, "string", "Mud");
+    gwy_container_set_double_n(container, "double", G_E);
 
     gchar **lines = gwy_container_dump_to_text(container);
     g_assert(lines);
@@ -2254,19 +2251,19 @@ test_container_boxed(void)
 {
     GwyContainer *container = gwy_container_new();
     GwyRGBA color = { 0.9, 0.6, 0.3, 1.0 };
-    gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color);
+    gwy_container_set_boxed_n(container, "color", GWY_TYPE_RGBA, &color);
     GwyRGBA color2 = { 0.0, 0.5, 0.5, 1.0 };
-    gwy_container_set_boxed_by_name(container, "color", GWY_TYPE_RGBA, &color2);
-    const GwyRGBA *color3 = gwy_container_get_boxed_by_name(container, "color",
-                                                            GWY_TYPE_RGBA);
+    gwy_container_set_boxed_n(container, "color", GWY_TYPE_RGBA, &color2);
+    const GwyRGBA *color3 = gwy_container_get_boxed_n(container, "color",
+                                                      GWY_TYPE_RGBA);
     g_assert(color3);
     g_assert_cmpint(memcmp(&color2, color3, sizeof(GwyRGBA)), ==, 0);
     GwyRGBA color4;
-    g_assert(gwy_container_gis_boxed_by_name(container, "color", GWY_TYPE_RGBA,
-                                             &color4));
+    g_assert(gwy_container_gis_boxed_n(container, "color", GWY_TYPE_RGBA,
+                                       &color4));
     g_assert_cmpint(memcmp(&color2, &color4, sizeof(GwyRGBA)), ==, 0);
-    g_assert(gwy_container_gis_boxed_by_name(container, "color", G_TYPE_BOXED,
-                                             &color4));
+    g_assert(gwy_container_gis_boxed_n(container, "color", G_TYPE_BOXED,
+                                       &color4));
     g_assert_cmpint(memcmp(&color2, &color4, sizeof(GwyRGBA)), ==, 0);
     g_object_unref(container);
 }

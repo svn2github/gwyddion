@@ -413,7 +413,7 @@ gwy_container_n_items(GwyContainer *container)
 }
 
 /**
- * gwy_container_item_type_by_name:
+ * gwy_container_item_type_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -445,7 +445,7 @@ gwy_container_item_type(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_contains_by_name:
+ * gwy_container_contains_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -471,7 +471,7 @@ gwy_container_contains(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_remove_by_name:
+ * gwy_container_remove_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -665,7 +665,7 @@ keys_foreach(gpointer hkey,
 }
 
 /**
- * gwy_container_keys_by_name:
+ * gwy_container_keys_n:
  * @container: A container.
  *
  * Gets all string keys of a container.
@@ -677,7 +677,7 @@ keys_foreach(gpointer hkey,
  *          the strings are owned by GLib and must not be freed.
  **/
 const gchar**
-gwy_container_keys_by_name(GwyContainer *container)
+gwy_container_keys_n(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
     guint n = g_hash_table_size(container->values);
@@ -701,7 +701,7 @@ keys_by_name_foreach(gpointer hkey,
 }
 
 /**
- * gwy_container_rename_by_name:
+ * gwy_container_rename_n:
  * @c: A container.
  * @n: String item key.
  * @nn: String item key.
@@ -834,7 +834,7 @@ gis_value_of_type(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_value_by_name:
+ * gwy_container_get_value_n:
  * @c: A container.
  * @n: String item key.
  * @v: #GValue to update, it can be either zero-initialized or containing
@@ -877,7 +877,7 @@ gwy_container_get_value(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_boolean_by_name:
+ * gwy_container_get_boolean_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -903,7 +903,7 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_boolean_by_name:
+ * gwy_container_gis_boolean_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the boolean to update.
@@ -940,7 +940,7 @@ gwy_container_gis_boolean(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_char_by_name:
+ * gwy_container_get_char_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -966,7 +966,7 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_char_by_name:
+ * gwy_container_gis_char_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the character to update.
@@ -1003,7 +1003,7 @@ gwy_container_gis_char(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_int32_by_name:
+ * gwy_container_get_int32_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1029,7 +1029,7 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_int32_by_name:
+ * gwy_container_gis_int32_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the 32bit integer to update.
@@ -1066,7 +1066,7 @@ gwy_container_gis_int32(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_enum_by_name:
+ * gwy_container_get_enum_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1093,7 +1093,7 @@ gwy_container_get_enum(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_enum_by_name:
+ * gwy_container_gis_enum_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the enum to update.
@@ -1136,7 +1136,7 @@ gwy_container_gis_enum(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_int64_by_name:
+ * gwy_container_get_int64_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1162,7 +1162,7 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_int64_by_name:
+ * gwy_container_gis_int64_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the 64bit integer to update.
@@ -1199,7 +1199,7 @@ gwy_container_gis_int64(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_double_by_name:
+ * gwy_container_get_double_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1225,7 +1225,7 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_double_by_name:
+ * gwy_container_gis_double_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the double to update.
@@ -1262,7 +1262,7 @@ gwy_container_gis_double(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_string_by_name:
+ * gwy_container_get_string_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1292,7 +1292,7 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_string_by_name:
+ * gwy_container_gis_string_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the string pointer to update.
@@ -1335,7 +1335,7 @@ gwy_container_gis_string(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_object_by_name:
+ * gwy_container_get_object_n:
  * @c: A container.
  * @n: String item key.
  *
@@ -1369,7 +1369,7 @@ gwy_container_get_object(GwyContainer *container, GQuark key)
 }
 
 /**
- * gwy_container_gis_object_by_name:
+ * gwy_container_gis_object_n:
  * @c: A container.
  * @n: String item key.
  * @v: Pointer to the object pointer to update.
@@ -1422,7 +1422,7 @@ gwy_container_gis_object(GwyContainer *container,
 }
 
 /**
- * gwy_container_get_boxed_by_name:
+ * gwy_container_get_boxed_n:
  * @c: A container.
  * @n: String item key.
  * @t: Serializable boxed type.  You can pass the concrete type
@@ -1464,7 +1464,7 @@ gwy_container_get_boxed(GwyContainer *container, GQuark key, GType type)
 }
 
 /**
- * gwy_container_gis_boxed_by_name:
+ * gwy_container_gis_boxed_n:
  * @c: A container.
  * @n: String item key.
  * @t: Serializable boxed type.  You can pass the concrete type
@@ -1565,7 +1565,7 @@ values_are_equal(const GValue *value1,
 }
 
 /**
- * gwy_container_set_value_by_name:
+ * gwy_container_set_value_n:
  * @container: A container.
  * @n: String item key.
  * @value: #GValue with the value to set.
@@ -1649,7 +1649,7 @@ gwy_container_set_value(GwyContainer *container,
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key)
 
 /**
- * gwy_container_set_boolean_by_name:
+ * gwy_container_set_boolean_n:
  * @c: A container.
  * @n: String item key.
  * @v: A boolean.
@@ -1675,7 +1675,7 @@ gwy_container_set_boolean(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_char_by_name:
+ * gwy_container_set_char_n:
  * @c: A container.
  * @n: String item key.
  * @v: A character.
@@ -1700,7 +1700,7 @@ gwy_container_set_char(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_int32_by_name:
+ * gwy_container_set_int32_n:
  * @c: A container.
  * @n: String item key.
  * @v: A 32bit integer.
@@ -1725,7 +1725,7 @@ gwy_container_set_int32(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_enum_by_name:
+ * gwy_container_set_enum_n:
  * @c: A container.
  * @n: String item key.
  * @v: An enum.
@@ -1755,7 +1755,7 @@ gwy_container_set_enum(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_int64_by_name:
+ * gwy_container_set_int64_n:
  * @c: A container.
  * @n: String item key.
  * @v: A 64bit integer.
@@ -1780,7 +1780,7 @@ gwy_container_set_int64(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_double_by_name:
+ * gwy_container_set_double_n:
  * @c: A container.
  * @n: String item key.
  * @v: A double integer.
@@ -1805,7 +1805,7 @@ gwy_container_set_double(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_string_by_name:
+ * gwy_container_set_string_n:
  * @c: A container.
  * @n: String item key.
  * @v: A nul-terminated string.
@@ -1858,7 +1858,7 @@ gwy_container_set_string(GwyContainer *container,
 }
 
 /**
- * gwy_container_take_string_by_name:
+ * gwy_container_take_string_n:
  * @c: A container.
  * @n: String item key.
  * @v: A nul-terminated string.
@@ -1917,7 +1917,7 @@ gwy_container_take_string(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_object_by_name:
+ * gwy_container_set_object_n:
  * @c: A container.
  * @n: String item key.
  * @v: An object to store into container.
@@ -1985,7 +1985,7 @@ gwy_container_set_object(GwyContainer *container,
 }
 
 /**
- * gwy_container_take_object_by_name:
+ * gwy_container_take_object_n:
  * @c: A container.
  * @n: String item key.
  * @v: An object to store into container.
@@ -2052,7 +2052,7 @@ gwy_container_take_object(GwyContainer *container,
 }
 
 /**
- * gwy_container_set_boxed_by_name:
+ * gwy_container_set_boxed_n:
  * @c: A container.
  * @n: String item key.
  * @t: Serializable boxed type.
@@ -2610,7 +2610,7 @@ next:
  * string.  While #GQuarks are atomic values and allow faster access, they are
  * less convenient for casual usage -- each quark-key function such as
  * gwy_container_set_double() thus has a string-key counterpart
- * gwy_container_set_double_by_name().
+ * <literal>_n</literal> appended to the name: gwy_container_set_double_n().
  *
  * An important difference between #GwyContainer and ordinary #GHashTable is
  * that the container emits signal #GwyContainer::item-changed whenever an item
