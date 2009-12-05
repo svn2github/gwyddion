@@ -1518,6 +1518,22 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         }
         seen[j]++;
 
+        /* Boxed types can be also filtered using the type. */
+        if (ctype == GWY_SERIALIZABLE_BOXED && template_[j].array_size) {
+            if (G_UNLIKELY(item->array_size != template_[j].array_size)) {
+                gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                                   GWY_DESERIALIZE_ERROR_ITEM,
+                                   _("Item ‘%s’ in the representation of "
+                                     "object ‘%s’ has type ‘%s’ "
+                                     "instead of expected ‘%s’. "
+                                     "It was ignored."),
+                                   name, type_name,
+                                   g_type_name(item->array_size),
+                                   g_type_name(template_[j].array_size));
+                continue;
+            }
+        }
+
         /* Give ownership to template. */
         memcpy(&template_[j].value, &item->value, sizeof(GwySerializableValue));
         item->value.v_uint8_array = NULL;
