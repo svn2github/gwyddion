@@ -732,7 +732,7 @@ gwy_inventory_insert_nth(GwyInventory *inventory,
  * Ensures an inventory is sorted.
  *
  * If the inventory was not sorted it will be completely sorted.   This is
- * relatively expensive.
+ * a relatively expensive operation.
  **/
 void
 gwy_inventory_restore_order(GwyInventory *inventory)
@@ -742,21 +742,28 @@ gwy_inventory_restore_order(GwyInventory *inventory)
     if (inventory->is_sorted || !inventory->item_type.compare)
         return;
 
-    /* Remember old positions */
+    // Remember old positions if we have to.
     guint nitems = (guint)g_sequence_get_length(inventory->items);
-    GSequenceIter **positions = g_slice_alloc(sizeof(GSequenceIter*)*nitems);
-    GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
-    for (guint i = 0; i < nitems; i++) {
-        positions[i] = iter;
-        iter = g_sequence_iter_next(iter);
+    GSequenceIter **positions = NULL;
+    if (g_signal_has_handler_pending(inventory,
+                                     gwy_inventory_signals[ITEMS_REORDERED],
+                                     0, FALSE)) {
+        positions = g_slice_alloc(sizeof(GSequenceIter*)*nitems);
+        GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
+        for (guint i = 0; i < nitems; i++) {
+            positions[i] = iter;
+            iter = g_sequence_iter_next(iter);
+        }
     }
 
-    /* Sort. */
+    // Sort.
     g_sequence_sort(inventory->items,
                     (GCompareDataFunc)inventory->item_type.compare, NULL);
     inventory->is_sorted = TRUE;
+    if (!positions)
+        return;
 
-    /* Fill new_order with indices: new_order[new_position] = old_position */
+    // Fill new_order with indices: new_order[new_position] = old_position
     guint *new_order = g_slice_alloc(sizeof(guint)*nitems);
     for (guint i = 0; i < nitems; i++)
         new_order[g_sequence_iter_get_position(positions[i])] = i;
