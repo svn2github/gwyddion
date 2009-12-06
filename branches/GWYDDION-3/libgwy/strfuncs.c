@@ -111,7 +111,7 @@ gwy_memmem(gconstpointer haystack,
 
 /**
  * gwy_str_next_line:
- * @buffer: Text buffer.
+ * @buffer: Text buffer (writable).
  *
  * Extracts a next line from a character buffer, modifying it in place.
  *
