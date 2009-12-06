@@ -36,6 +36,7 @@ typedef struct {
 GType    gwy_rgba_get_type   (void)                G_GNUC_CONST;
 GwyRGBA* gwy_rgba_copy       (const GwyRGBA *rgba) G_GNUC_MALLOC;
 void     gwy_rgba_free       (GwyRGBA *rgba);
+gboolean gwy_rgba_fix        (GwyRGBA *rgba);
 void     gwy_rgba_interpolate(const GwyRGBA *src1,
                               const GwyRGBA *src2,
                               gdouble x,

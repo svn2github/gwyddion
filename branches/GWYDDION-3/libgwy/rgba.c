@@ -137,6 +137,38 @@ gwy_rgba_free(GwyRGBA *rgba)
     g_slice_free1(sizeof(GwyRGBA), rgba);
 }
 
+#define fix_component(rgba,x,ok) \
+    if (G_UNLIKELY(rgba->x < 0.0)) { \
+        ok = FALSE; \
+        rgba->x = 0.0; \
+    } \
+    else if (G_UNLIKELY(rgba->x > 1.0)) { \
+        ok = FALSE; \
+        rgba->x = 1.0; \
+    } \
+    else \
+        (void)0
+
+/**
+ * gwy_rgba_fix:
+ * @rgba: A RGBA color.
+ *
+ * Corrects components of a color to lie in the range [0,1].
+ *
+ * Returns: %TRUE if @rgba was all right, %FALSE if some components had to be
+ *          corrected.
+ **/
+gboolean
+gwy_rgba_fix(GwyRGBA *rgba)
+{
+    gboolean ok = TRUE;
+    fix_component(rgba, r, ok);
+    fix_component(rgba, g, ok);
+    fix_component(rgba, b, ok);
+    fix_component(rgba, a, ok);
+    return ok;
+}
+
 /**
  * gwy_rgba_interpolate:
  * @src1: Color at point @x = 0.0.
