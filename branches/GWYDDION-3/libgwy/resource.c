@@ -1077,6 +1077,115 @@ gwy_resource_classes_finalize(void)
     all_resources = NULL;
 }
 
+/**
+ * gwy_resource_next_param_line:
+ * @line: Text buffer containing a resource file line (writable).
+ * @key: Location to store the key to.
+ * @value: Location to store the value to.
+ *
+ * Extracts one key-value pair from a resource file.
+ *
+ * This is a helper function for resource file parsing.
+ *
+ * If it returns %GWY_RESOURCE_LINE_OK, @key and @value are pointed to
+ * locations in @line where the key and value on the next resource line
+ * starts.  The contents of @line is modified to make @key and @value stripped
+ * NUL-terminated strings.
+ *
+ * In all other cases @key and @value are not set and @line is left intact.
+ * Note a line containing no value is valid, @value will be set to the empty
+ * string.
+ *
+ * Returns: The line type, any type can be returned except
+ *          %GWY_RESOURCE_LINE_BAD_NUMBER.
+ **/
+GwyResourceLineType
+gwy_resource_next_param_line(gchar *line,
+                             gchar **key,
+                             gchar **value)
+{
+    // Empty?
+    while (g_ascii_isspace(*line))
+        line++;
+
+    if (!*line)
+        return GWY_RESOURCE_LINE_EMPTY;
+
+    // Key.
+    if (!g_ascii_isalpha(*line))
+        return GWY_RESOURCE_LINE_BAD_KEY;
+
+    gchar *s = line;
+    while (g_ascii_isalnum(*s) || *s == '_')
+        s++;
+
+    if (!*s) {
+        *key = line;
+        *value = s;
+        return GWY_RESOURCE_LINE_OK;
+    }
+
+    if (!g_ascii_isspace(*s))
+        return GWY_RESOURCE_LINE_BAD_KEY;
+
+    gchar *t = s;
+    do {
+        t++;
+    } while (g_ascii_isspace(*t));
+
+    // Value.
+    if (!g_utf8_validate(t, -1, NULL))
+        return GWY_RESOURCE_LINE_BAD_UTF8;
+
+    *s = '\0';
+    g_strchomp(t);
+    *key = line;
+    *value = t;
+    return GWY_RESOURCE_LINE_OK;
+}
+
+/**
+ * gwy_resource_next_data_line:
+ * @line: Text buffer containing a resource file line.
+ * @ncolumns: Expected number of columns.
+ * @data: Array of length @number to store the read values to.
+ *
+ * Extracts one row of floating point values from a resource file.
+ *
+ * This is a helper function for resource file parsing.
+ *
+ * If it returns %GWY_RESOURCE_LINE_OK, @data is filled with the parsed values.
+ * They are parsed using g_ascii_strtod(), i.e. the numbers are expected to
+ * be stored in POSIX format.
+ *
+ * In all other cases @key and @value are left untouched.
+ *
+ * Returns: The line type, it can be one of %GWY_RESOURCE_LINE_OK,
+ *          %GWY_RESOURCE_LINE_EMPTY and %GWY_RESOURCE_LINE_BAD_NUMBER.
+ **/
+GwyResourceLineType
+gwy_resource_next_data_line(const gchar *line,
+                            guint ncolumns,
+                            gdouble *data)
+{
+    // Empty?
+    while (g_ascii_isspace(*line))
+        line++;
+
+    if (!*line)
+        return GWY_RESOURCE_LINE_EMPTY;
+
+    // Read the data.
+    for (guint i = 0; i < ncolumns; i++) {
+        gchar *end;
+        data[i] = g_ascii_strtod(line, &end);
+        if (end == line)
+            return GWY_RESOURCE_LINE_BAD_NUMBER;
+        line = end;
+    }
+    return GWY_RESOURCE_LINE_OK;
+}
+
 #define __LIBGWY_RESOURCE_C__
 #include "libgwy/libgwy-aliases.c"
 
@@ -1141,6 +1250,21 @@ gwy_resource_classes_finalize(void)
  *                           resource implementations.
  *
  * Error codes returned by resource operations.
+ **/
+
+/**
+ * GwyResourceLineType:
+ * @GWY_RESOURCE_LINE_OK: Line is in the expected format.
+ * @GWY_RESOURCE_LINE_EMPTY: Line contains only whitespace.
+ * @GWY_RESOURCE_LINE_BAD_KEY: Line starts with characters that do not form
+ *                             an identifier.
+ * @GWY_RESOURCE_LINE_BAD_UTF8: The value part of line is not valid UTF-8 (the
+ *                              key part is always ASCII).
+ * @GWY_RESOURCE_LINE_BAD_NUMBER: It is not possible to parse the line into
+ *                                the specified number of floating point
+ *                                values.
+ *
+ * The type of resource file line parsing result.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

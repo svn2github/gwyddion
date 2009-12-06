@@ -36,6 +36,14 @@ typedef enum {
     GWY_RESOURCE_ERROR_DATA,
 } GwyResourceError;
 
+typedef enum {
+    GWY_RESOURCE_LINE_OK = 0,
+    GWY_RESOURCE_LINE_EMPTY,
+    GWY_RESOURCE_LINE_BAD_KEY,
+    GWY_RESOURCE_LINE_BAD_UTF8,
+    GWY_RESOURCE_LINE_BAD_NUMBER,
+} GwyResourceLineType;
+
 GQuark gwy_resource_error_quark(void);
 
 #define GWY_TYPE_RESOURCE \
@@ -105,6 +113,12 @@ void                        gwy_resource_class_load_directory(GwyResourceClass *
                                                               GwyErrorList **error_list);
 void                        gwy_resource_classes_finalize    (void);
 
+GwyResourceLineType         gwy_resource_next_param_line     (gchar *line,
+                                                              gchar **key,
+                                                              gchar **value);
+GwyResourceLineType         gwy_resource_next_data_line      (const gchar *line,
+                                                              guint ncolumns,
+                                                              gdouble *data);
 G_END_DECLS
 
 #endif
