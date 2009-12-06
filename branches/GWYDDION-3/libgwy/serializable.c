@@ -305,8 +305,9 @@ gwy_serializable_assign(GwySerializable *destination,
  * // present, in this case the default zero value is used.  Also, for more
  * // complicated objects the deserialization can fail or resources need to be
  * // released; see GwySerializableInterface for the clean-up rules.
- * static GObject*
- * my_object_construct(GwySerializableItems *items,
+ * static gboolean
+ * my_object_construct(GwySerializable *serializable,
+ *                     GwySerializableItems *items,
  *                     GwyErrorList **error_list)
  * {
  *     GwySerializableItem it[G_N_ELEMENTS(default_items)];
@@ -315,9 +316,10 @@ gwy_serializable_assign(GwySerializable *destination,
  *     gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "MyObject",
  *                                  error_list);
  *
+ *     MyObject *myobject = GWY_MY_OBJECT(serializable);
  *     myobject->data = it[0].value.v_int32;
  *
- *     return G_OBJECT(myobject);
+ *     return TRUE;
  * }
  * ]|
  * </refsect2>
@@ -432,7 +434,9 @@ gwy_serializable_assign(GwySerializable *destination,
  *        it is defined it is guaranteed to be called after each
  *        #GwySerializableInterface.itemize().</para>
  * @construct: <para>Deserializes an object from array of flattened data
- *             items.</para>
+ *             items.  The first argument is the object of the final class
+ *             (i.e. it may be a derived class), consructed with the default
+ *             parameterless constructor.</para>
  *             <para>All strings, objects and arrays in the item list are newly
  *             allocated.  The method can (and, generally, should) take
  *             ownership by filling corresponding item values with %NULL and
@@ -443,10 +447,9 @@ gwy_serializable_assign(GwySerializable *destination,
  *             predefined set are expected and then
  *             gwy_deserialize_filter_items() can be used to simplify the
  *             processing of the item list.</para>
- *             <para>This method is free to create an object of any type, not
- *             necessarily of the class implementing this method.  This is
- *             intentional, however, it should not be abused without
- *             a good reason.</para>
+ *             <para>It is possible to chain this method to the parent class
+ *             and pass it the the item list or a part of it, if you are
+ *             careful.</para>
  * @duplicate: <para>Creates a new object with all data identical to this
  *             object.  This method is expected to create a deep copy.
  *             Classes may provide other methods for shallow copies.</para>

@@ -47,7 +47,6 @@ typedef enum {
     GWY_SERIALIZABLE_OBJECT        = 'o',
     GWY_SERIALIZABLE_OBJECT_ARRAY  = 'O',
     GWY_SERIALIZABLE_BOXED         = 'x',
-    GWY_SERIALIZABLE_BOXED_ARRAY   = 'X',
 } GwySerializableCType;
 
 union _GwySerializableValue {
@@ -124,7 +123,8 @@ struct _GwySerializableInterface {
                                        GwySerializableItems *items);
     void                  (*done)     (GwySerializable *serializable);
 
-    GObject*              (*construct)(GwySerializableItems *items,
+    gboolean              (*construct)(GwySerializable *serializable,
+                                       GwySerializableItems *items,
                                        GwyErrorList **error_list);
 
     GObject*              (*duplicate)(GwySerializable *serializable);

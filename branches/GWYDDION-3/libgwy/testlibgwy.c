@@ -804,8 +804,9 @@ gwy_ser_test_itemize(GwySerializable *serializable,
     return n_items;
 }
 
-static GObject*
-gwy_ser_test_construct(GwySerializableItems *items,
+static gboolean
+gwy_ser_test_construct(GwySerializable *serializable,
+                       GwySerializableItems *items,
                        GwyErrorList **error_list)
 {
     GwySerializableItem it[G_N_ELEMENTS(default_items)];
@@ -831,7 +832,7 @@ gwy_ser_test_construct(GwySerializableItems *items,
         goto fail;
     }
 
-    GwySerTest *sertest = g_object_newv(GWY_TYPE_SER_TEST, 0, NULL);
+    GwySerTest *sertest = GWY_SER_TEST(serializable);
 
     sertest->flag = it[0].value.v_boolean;
     sertest->len  = it[1].array_size;
@@ -853,7 +854,7 @@ gwy_ser_test_construct(GwySerializableItems *items,
         it[9].array_size = 0;
     }
 
-    return G_OBJECT(sertest);
+    return TRUE;
 
 fail:
     GWY_FREE(it[1].value.v_double_array);
@@ -868,7 +869,7 @@ fail:
         it[9].array_size = 0;
     }
 
-    return NULL;
+    return FALSE;
 }
 
 static void
@@ -1373,8 +1374,9 @@ gwy_ser_box_test_itemize(GwySerializable *serializable,
     return G_N_ELEMENTS(default_items_box);
 }
 
-static GObject*
-gwy_ser_box_test_construct(GwySerializableItems *items,
+static gboolean
+gwy_ser_box_test_construct(GwySerializable *serializable,
+                           GwySerializableItems *items,
                            GwyErrorList **error_list)
 {
     GwySerializableItem it[G_N_ELEMENTS(default_items_box)];
@@ -1383,7 +1385,7 @@ gwy_ser_box_test_construct(GwySerializableItems *items,
     gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerBoxTest",
                                  error_list);
 
-    GwySerBoxTest *sertest = g_object_newv(GWY_TYPE_SER_BOX_TEST, 0, NULL);
+    GwySerBoxTest *sertest = GWY_SER_BOX_TEST(serializable);
 
     if (it[0].value.v_boxed) {
         g_assert(it[0].array_size == GWY_TYPE_RGBA);
@@ -1393,7 +1395,7 @@ gwy_ser_box_test_construct(GwySerializableItems *items,
         it[0].value.v_boxed = NULL;
     }
 
-    return G_OBJECT(sertest);
+    return TRUE;
 }
 
 static GObject*

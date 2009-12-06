@@ -57,7 +57,8 @@ static gsize    gwy_container_itemize          (GwySerializable *serializable,
                                                 GwySerializableItems *items);
 static void     gwy_container_finalize         (GObject *object);
 static void     gwy_container_dispose          (GObject *object);
-static GObject* gwy_container_construct        (GwySerializableItems *items,
+static gboolean gwy_container_construct        (GwySerializable *serializable,
+                                                GwySerializableItems *items,
                                                 GwyErrorList **error_list);
 static GObject* gwy_container_duplicate_impl   (GwySerializable *object);
 static void     gwy_container_assign_impl      (GwySerializable *destination,
@@ -284,11 +285,12 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
     return;
 }
 
-static GObject*
-gwy_container_construct(GwySerializableItems *items,
+static gboolean
+gwy_container_construct(GwySerializable *serializable,
+                        GwySerializableItems *items,
                         GwyErrorList **error_list)
 {
-    GwyContainer *container = gwy_container_new();
+    GwyContainer *container = GWY_CONTAINER(serializable);
 
     for (gsize i = 0; i < items->n_items; i++) {
         GwySerializableItem *it = items->items + i;
@@ -345,7 +347,7 @@ gwy_container_construct(GwySerializableItems *items,
         }
     }
 
-    return G_OBJECT(container);
+    return TRUE;
 }
 
 static GObject*

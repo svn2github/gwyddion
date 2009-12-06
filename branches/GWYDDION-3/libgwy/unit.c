@@ -64,7 +64,8 @@ static gsize        gwy_unit_n_items          (GwySerializable *serializable);
 static gsize        gwy_unit_itemize          (GwySerializable *serializable,
                                                GwySerializableItems *items);
 static void         gwy_unit_done             (GwySerializable *serializable);
-static GObject*     gwy_unit_construct        (GwySerializableItems *items,
+static gboolean     gwy_unit_construct        (GwySerializable *serializable,
+                                               GwySerializableItems *items,
                                                GwyErrorList **error_list);
 static GObject*     gwy_unit_duplicate_impl   (GwySerializable *serializable);
 static void         gwy_unit_assign_impl      (GwySerializable *destination,
@@ -248,18 +249,19 @@ gwy_unit_done(GwySerializable *serializable)
     GWY_FREE(unit->serialize_str);
 }
 
-static GObject*
-gwy_unit_construct(GwySerializableItems *items,
+static gboolean
+gwy_unit_construct(GwySerializable *serializable,
+                   GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
     GwySerializableItem item = serialize_items[0];
     gwy_deserialize_filter_items(&item, 1, items, "GwyUnit", error_list);
 
-    GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
+    GwyUnit *unit = GWY_UNIT(serializable);
     gwy_unit_set_from_string(unit, item.value.v_string, NULL);
     GWY_FREE(item.value.v_string);
 
-    return G_OBJECT(unit);
+    return TRUE;
 }
 
 static GObject*

@@ -1126,7 +1126,9 @@ deserialize_memory(const guchar *buffer,
         goto fail;
 
     /* Finally, construct the object. */
-    object = iface->construct(items, error_list);
+    object = g_object_newv(type, 0, NULL);
+    if (!iface->construct(GWY_SERIALIZABLE(object), items, error_list))
+        GWY_OBJECT_UNREF(object);
 
 fail:
     free_items(items);
