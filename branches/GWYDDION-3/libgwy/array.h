@@ -63,7 +63,7 @@ gpointer                gwy_array_get          (GwyArray *array,
 #define gwy_array_delete1(array,n) \
     gwy_array_delete((array),(n),1)
 #define gwy_array_replace1(array,n,item) \
-    gwy_array_insert((array),(n),(item),1)
+    gwy_array_replace((array),(n),(item),1)
 gpointer                gwy_array_insert       (GwyArray *array,
                                                 guint n,
                                                 gpointer items,
