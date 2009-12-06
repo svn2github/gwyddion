@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_H__
 #define __LIBGWY_H__
 
+#include <libgwy/array.h>
 #include <libgwy/container.h>
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>

@@ -11,6 +11,7 @@ mkenum_name = types
 mkenum_id = LIBGWY_TYPES
 main_header = libgwy.h
 mkenum_headers = \
+	array.h \
 	container.h \
 	error-list.h \
 	expr.h \
@@ -47,6 +48,7 @@ libgwyinclude_HEADERS = $(library_headers)
 pkginclude_HEADERS = $(main_header)
 
 libgwy3_la_SOURCES = \
+	array.c \
 	container.c \
 	error-list.c \
 	expr.c \
