@@ -29,6 +29,9 @@
     created manually Gwyddion needs to be restarted to notice them).  In most
     cases only characters of the ASCII can appear in the files.  If
     international text can appear there it must be in the UTF-8 encoding.
+    Numerical values are represented in the standard POSIX format, i.e. with
+    decimal point, independently on what decimal separator is usual in the
+    user's language.
   </para>
   <para>
     Resources are organized in subdirectories according to their kind, e.g.
