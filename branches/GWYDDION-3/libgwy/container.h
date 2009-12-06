@@ -48,6 +48,10 @@ struct _GwyContainerClass {
     GObjectClass g_object_class;
 };
 
+typedef void (*GwyContainerForeachFunc)(GQuark key,
+                                        const GValue *value,
+                                        gpointer user_data);
+
 #define gwy_container_duplicate(container) \
         (GWY_CONTAINER(gwy_serializable_duplicate(GWY_SERIALIZABLE(container))))
 #define gwy_container_assign(dest, src) \
@@ -84,7 +88,7 @@ guint         gwy_container_transfer     (GwyContainer *source,
                                           gboolean force);
 guint         gwy_container_foreach      (GwyContainer *container,
                                           const gchar *prefix,
-                                          GHFunc function,
+                                          GwyContainerForeachFunc function,
                                           gpointer user_data);
 void          gwy_container_set_boolean  (GwyContainer *container,
                                           GQuark key,

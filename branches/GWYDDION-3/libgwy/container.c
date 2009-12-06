@@ -41,7 +41,7 @@ typedef struct {
     guint count;
     GSList *keylist;
     gboolean closed_prefix;
-    GHFunc func;
+    GwyContainerForeachFunc func;
     gpointer user_data;
 } PrefixData;
 
@@ -576,19 +576,17 @@ hash_remove_prefix(gpointer hkey,
  * @container: A container.
  * @prefix: A nul-terminated id prefix.
  * @function: The function called on the items.
- * @user_data: The user data passed to @function.
+ * @user_data: User data passed to @function.
  *
  * Calls @function on each @container item whose identifier starts with
  * @prefix.
- *
- * The function is called @function(#GQuark key, #GValue *value, user_data).
  *
  * Returns: The number of items @function was called on.
  **/
 guint
 gwy_container_foreach(GwyContainer *container,
                       const gchar *prefix,
-                      GHFunc function,
+                      GwyContainerForeachFunc function,
                       gpointer user_data)
 {
     PrefixData pfdata;
@@ -627,7 +625,7 @@ hash_foreach(gpointer hkey, gpointer hvalue, gpointer hdata)
                 && name[pfdata->prefix_length] != GWY_CONTAINER_PATHSEP)))
         return;
 
-    pfdata->func(hkey, value, pfdata->user_data);
+    pfdata->func(key, value, pfdata->user_data);
     pfdata->count++;
 }
 
@@ -2666,6 +2664,15 @@ next:
  *
  * See also gwy_container_transfer() for a more powerful method of copying data
  * between containers.
+ **/
+
+/**
+ * GwyContainerForeachFunc:
+ * @key: Item key.
+ * @value: Item value.  It must not be modified.
+ * @user_data: Data passed to gwy_container_foreach().
+ *
+ * Type of function passed to gwy_container_foreach.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
