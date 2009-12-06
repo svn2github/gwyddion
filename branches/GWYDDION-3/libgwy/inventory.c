@@ -510,7 +510,7 @@ gwy_inventory_find(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_get_default_item:
+ * gwy_inventory_get_default:
  * @inventory: An inventory.
  *
  * Returns the default item of an inventory.
@@ -1192,6 +1192,22 @@ invent_item_name(GwyInventory *inventory,
  **/
 
 /**
+ * GwyInventory:
+ *
+ * Object representing an item inventory.
+ *
+ * The #GwyInventory struct contains private data only and should be accessed
+ * using the functions below.
+ **/
+
+/**
+ * GwyInventoryClass:
+ * @g_object_class: Parent class.
+ *
+ * Class of item inventories.
+ **/
+
+/**
  * GwyInventoryItemType:
  * @type: Object type, if item is object or other type with registered GType.
  *        May be zero to indicate an unregistered item type.
@@ -1255,6 +1271,31 @@ invent_item_name(GwyInventory *inventory,
  * directly map some or all #GObject properties to item traits.  If they are
  * plain C structs or something else, you can easily export their data members
  * as virtual #GtkTreeModel columns by defining traits for them.
+ **/
+
+/**
+ * GwyInventoryForeachFunc:
+ * @n: Position of @item.
+ * @item: Item value.
+ * @user_data: Data passed to gwy_inventory_foreach().
+ *
+ * Type of function passed to gwy_inventory_foreach().
+ *
+ * The function must not modify the inventory.
+ **/
+
+/**
+ * GwyInventoryFindFunc:
+ * @n: Position of @item.
+ * @item: Item value.
+ * @user_data: Data passed to gwy_inventory_find().
+ *
+ * Type of function passed to gwy_inventory_find().
+ *
+ * The function must not modify the inventory.
+ *
+ * Returns: %TRUE to stop searching; the current item is then returned as
+ *          found.  %FALSE to continue.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
