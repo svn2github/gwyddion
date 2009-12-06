@@ -1,6 +1,3 @@
-Build: Use -Bsymbolic instead of the alias craziness?  Or default to hidden
-       visibility since we have the symbol list anyway?
-
 Packing: Is unfinished.  Might need a review and go with the code-generation
          path instead.
 
@@ -22,6 +19,10 @@ Interpolation: Calculate the coefficients for BSPLINE6 interpolation.
 Value Format: Fields are available as properties but the user cannot be
               expected to call g_object_notify() when something changes.
               Must make it more/less encapsulated for consistency.
+
+Classes: Review class definitions that have class data (resources, selection,
+         ...) and move them to C files once private class data are made
+         possible by GObject.
 
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
