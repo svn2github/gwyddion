@@ -72,20 +72,6 @@ typedef struct _GwyInventoryClass GwyInventoryClass;
 
 struct _GwyInventoryClass {
     GObjectClass g_object_class;
-
-    /* Signals */
-    void (*item_inserted)(GwyInventory *inventory,
-                          guint position);
-    void (*item_deleted)(GwyInventory *inventory,
-                         guint position);
-    void (*item_updated)(GwyInventory *inventory,
-                         guint position);
-    void (*items_reordered)(GwyInventory *inventory,
-                            const gint *new_order);
-    void (*default_changed)(GwyInventory *inventory);
-
-    void (*reserved1)(void);
-    void (*reserved2)(void);
 };
 
 /* FIXME: GSequence can change internally when an item is looked up.

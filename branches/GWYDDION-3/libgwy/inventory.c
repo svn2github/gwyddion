@@ -88,13 +88,12 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * an inventory.
      **/
     gwy_inventory_signals[ITEM_INSERTED]
-        = g_signal_new("item-inserted",
-                       GWY_TYPE_INVENTORY,
-                       G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                       G_STRUCT_OFFSET(GwyInventoryClass, item_inserted),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__UINT,
-                       G_TYPE_NONE, 1, G_TYPE_UINT);
+        = g_signal_new_class_handler("item-inserted",
+                                     GWY_TYPE_INVENTORY,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__UINT,
+                                     G_TYPE_NONE, 1, G_TYPE_UINT);
 
     /**
      * GwyInventory::item-deleted:
@@ -105,13 +104,12 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * an inventory.
      **/
     gwy_inventory_signals[ITEM_DELETED]
-        = g_signal_new("item-deleted",
-                       GWY_TYPE_INVENTORY,
-                       G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                       G_STRUCT_OFFSET(GwyInventoryClass, item_deleted),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__UINT,
-                       G_TYPE_NONE, 1, G_TYPE_UINT);
+        = g_signal_new_class_handler("item-deleted",
+                                     GWY_TYPE_INVENTORY,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__UINT,
+                                     G_TYPE_NONE, 1, G_TYPE_UINT);
 
     /**
      * GwyInventory::item-updated:
@@ -122,13 +120,12 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * is updated.
      **/
     gwy_inventory_signals[ITEM_UPDATED]
-        = g_signal_new("item-updated",
-                       GWY_TYPE_INVENTORY,
-                       G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                       G_STRUCT_OFFSET(GwyInventoryClass, item_updated),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__UINT,
-                       G_TYPE_NONE, 1, G_TYPE_UINT);
+        = g_signal_new_class_handler("item-updated",
+                                     GWY_TYPE_INVENTORY,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__UINT,
+                                     G_TYPE_NONE, 1, G_TYPE_UINT);
 
     /**
      * GwyInventory::items-reordered:
@@ -140,13 +137,12 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * are reordered.
      **/
     gwy_inventory_signals[ITEMS_REORDERED]
-        = g_signal_new("items-reordered",
-                       GWY_TYPE_INVENTORY,
-                       G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                       G_STRUCT_OFFSET(GwyInventoryClass, items_reordered),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__POINTER,
-                       G_TYPE_NONE, 1, G_TYPE_POINTER);
+        = g_signal_new_class_handler("items-reordered",
+                                     GWY_TYPE_INVENTORY,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__POINTER,
+                                     G_TYPE_NONE, 1, G_TYPE_POINTER);
 
     /**
      * GwyInventory::default-changed:
@@ -157,17 +153,16 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * in the inventory changes.
      **/
     gwy_inventory_signals[DEFAULT_CHANGED]
-        = g_signal_new("default-changed",
-                       GWY_TYPE_INVENTORY,
-                       G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
-                       G_STRUCT_OFFSET(GwyInventoryClass, default_changed),
-                       NULL, NULL,
-                       g_cclosure_marshal_VOID__VOID,
-                       G_TYPE_NONE, 0);
+        = g_signal_new_class_handler("default-changed",
+                                     GWY_TYPE_INVENTORY,
+                                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                                     NULL, NULL, NULL,
+                                     g_cclosure_marshal_VOID__VOID,
+                                     G_TYPE_NONE, 0);
 }
 
 static void
-gwy_inventory_init(G_GNUC_UNUSED GwyInventory *inventory)
+gwy_inventory_init(GwyInventory *inventory)
 {
     inventory->items = g_sequence_new(NULL);
 }
@@ -1197,22 +1192,6 @@ invent_item_name(GwyInventory *inventory,
  * are similar to #GObject properties.  Actually, if items are objects, they
  * should simply map object properties to traits.  But it is possible to define
  * traits for simple structures too.
- **/
-
-/**
- * GwyInventory:
- *
- * Object representing an inventory of named objects.
- *
- * The #GwyInventory struct contains private data only and should be accessed
- * using the functions below.
- **/
-
-/**
- * GwyInventoryClass:
- * @g_object_class: Parent class.
- *
- * Class of item inventories.
  **/
 
 /**
