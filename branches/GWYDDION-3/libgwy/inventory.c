@@ -456,13 +456,10 @@ gwy_inventory_position(GwyInventory *inventory,
  * @user_data: Data passed to @function.
  *
  * Calls a function on each item of an inventory, in order.
- *
- * @function's first argument is the item position (transformed with
- * GUINT_TO_POINTER()), second is item pointer, and the last is @user_data.
  **/
 void
 gwy_inventory_foreach(GwyInventory *inventory,
-                      GHFunc function,
+                      GwyInventoryForeachFunc function,
                       gpointer user_data)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
@@ -473,7 +470,7 @@ gwy_inventory_foreach(GwyInventory *inventory,
     for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter), i++) {
-        function(GUINT_TO_POINTER(i), g_sequence_get(iter), user_data);
+        function(i, g_sequence_get(iter), user_data);
     }
 }
 
@@ -487,14 +484,14 @@ gwy_inventory_foreach(GwyInventory *inventory,
  * Finds an inventory item using user-specified predicate function.
  *
  * @predicate is called for each item in @inventory (in order) until it returns
- * %TRUE.  Its arguments are the same as in gwy_inventory_foreach().
+ * %TRUE.
  *
  * Returns: The item for which @predicate returned %TRUE.  If there is no
  *          such item in the inventory, %NULL is returned.
  **/
 gpointer
 gwy_inventory_find(GwyInventory *inventory,
-                   GHRFunc predicate,
+                   GwyInventoryFindFunc predicate,
                    gpointer user_data)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
@@ -505,7 +502,7 @@ gwy_inventory_find(GwyInventory *inventory,
     for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter), i++) {
-        if (predicate(GUINT_TO_POINTER(i), g_sequence_get(iter), user_data))
+        if (predicate(i, g_sequence_get(iter), user_data))
             return g_sequence_get(iter);
     }
 

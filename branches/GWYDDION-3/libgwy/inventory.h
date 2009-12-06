@@ -74,6 +74,13 @@ struct _GwyInventoryClass {
     GObjectClass g_object_class;
 };
 
+typedef void (*GwyInventoryForeachFunc)(guint n,
+                                        gpointer item,
+                                        gpointer user_data);
+typedef gboolean (*GwyInventoryFindFunc)(guint n,
+                                         gpointer item,
+                                         gpointer user_data);
+
 /* FIXME: GSequence can change internally when an item is looked up.
  * This should not be observable from outside though. */
 GType                       gwy_inventory_get_type        (void)                               G_GNUC_CONST;
@@ -96,10 +103,10 @@ gpointer                    gwy_inventory_get_nth         (GwyInventory *invento
 guint                       gwy_inventory_position        (GwyInventory *inventory,
                                                            const gchar *name)                  G_GNUC_PURE;
 void                        gwy_inventory_foreach         (GwyInventory *inventory,
-                                                           GHFunc function,
+                                                           GwyInventoryForeachFunc function,
                                                            gpointer user_data);
 gpointer                    gwy_inventory_find            (GwyInventory *inventory,
-                                                           GHRFunc predicate,
+                                                           GwyInventoryFindFunc predicate,
                                                            gpointer user_data);
 void                        gwy_inventory_set_default_name(GwyInventory *inventory,
                                                            const gchar *name);
