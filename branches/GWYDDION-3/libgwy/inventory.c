@@ -346,7 +346,7 @@ gwy_inventory_get_item_type(GwyInventory *inventory)
 }
 
 /**
- * gwy_inventory_get_item:
+ * gwy_inventory_get:
  * @inventory: An inventory.
  * @name: Item name.
  *
@@ -355,8 +355,8 @@ gwy_inventory_get_item_type(GwyInventory *inventory)
  * Returns: Item called @name, or %NULL if there is no such item.
  **/
 gpointer
-gwy_inventory_get_item(GwyInventory *inventory,
-                       const gchar *name)
+gwy_inventory_get(GwyInventory *inventory,
+                  const gchar *name)
 {
     GSequenceIter *iter;
 
@@ -369,7 +369,7 @@ gwy_inventory_get_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_get_item_or_default:
+ * gwy_inventory_get_or_default:
  * @inventory: An inventory.
  * @name: Item name.
  *
@@ -381,8 +381,8 @@ gwy_inventory_get_item(GwyInventory *inventory,
  * Returns: Item called @name, or default item.
  **/
 gpointer
-gwy_inventory_get_item_or_default(GwyInventory *inventory,
-                                  const gchar *name)
+gwy_inventory_get_or_default(GwyInventory *inventory,
+                             const gchar *name)
 {
     GSequenceIter *iter;
 
@@ -399,12 +399,12 @@ gwy_inventory_get_item_or_default(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_get_nth_item:
+ * gwy_inventory_get_nth:
  * @inventory: An inventory.
  * @n: Item position.  It must be between zero and the number of items in
  *     inventory, inclusive.  If it is equal to the number of items, %NULL
  *     is returned.  In other words, inventory behaves like a %NULL-terminated
- *     array, you can simply iterate over it until gwy_inventory_get_nth_item()
+ *     array, you can simply iterate over it until gwy_inventory_get_nth()
  *     returns %NULL.
  *
  * Returns item on given position in an inventory.
@@ -412,8 +412,8 @@ gwy_inventory_get_item_or_default(GwyInventory *inventory,
  * Returns: Item at given position.
  **/
 gpointer
-gwy_inventory_get_nth_item(GwyInventory *inventory,
-                           guint n)
+gwy_inventory_get_nth(GwyInventory *inventory,
+                      guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -426,25 +426,25 @@ gwy_inventory_get_nth_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_get_item_position:
+ * gwy_inventory_position:
  * @inventory: An inventory.
  * @name: Item name.
  *
  * Finds position of an item in an inventory.
  *
- * Returns: Item position, or <literal>(guint)-1</literal> if there is no such
+ * Returns: Item position, or %G_MAXUINT if there is no such
  * item.
  **/
 guint
-gwy_inventory_get_item_position(GwyInventory *inventory,
-                                const gchar *name)
+gwy_inventory_position(GwyInventory *inventory,
+                       const gchar *name)
 {
     GSequenceIter *iter;
 
-    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), (guint)-1);
-    g_return_val_if_fail(inventory->has_item_type, (guint)-1);
+    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), G_MAXUINT);
+    g_return_val_if_fail(inventory->has_item_type, G_MAXUINT);
     if (!(iter = lookup_item(inventory, name)))
-        return (guint)-1;
+        return G_MAXUINT;
 
     return g_sequence_iter_get_position(iter);
 }
@@ -521,7 +521,7 @@ gwy_inventory_find(GwyInventory *inventory,
  * Returns: The default item.  If there is no default item, %NULL is returned.
  **/
 gpointer
-gwy_inventory_get_default_item(GwyInventory *inventory)
+gwy_inventory_get_default(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -535,7 +535,7 @@ gwy_inventory_get_default_item(GwyInventory *inventory)
 }
 
 /**
- * gwy_inventory_get_default_item_name:
+ * gwy_inventory_get_default_name:
  * @inventory: An inventory.
  *
  * Returns the name of the default item of an inventory.
@@ -544,7 +544,7 @@ gwy_inventory_get_default_item(GwyInventory *inventory)
  *          Item of this name may or may not exist in the inventory.
  **/
 const gchar*
-gwy_inventory_get_default_item_name(GwyInventory *inventory)
+gwy_inventory_get_default_name(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -553,7 +553,7 @@ gwy_inventory_get_default_item_name(GwyInventory *inventory)
 }
 
 /**
- * gwy_inventory_set_default_item_name:
+ * gwy_inventory_set_default_name:
  * @inventory: An inventory.
  * @name: Item name, pass %NULL to unset default item.
  *
@@ -562,8 +562,8 @@ gwy_inventory_get_default_item_name(GwyInventory *inventory)
  * Item @name must already exist in the inventory.
  **/
 void
-gwy_inventory_set_default_item_name(GwyInventory *inventory,
-                                    const gchar *name)
+gwy_inventory_set_default_name(GwyInventory *inventory,
+                               const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     g_return_if_fail(inventory->has_item_type);
@@ -585,7 +585,7 @@ gwy_inventory_set_default_item_name(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_item_updated:
+ * gwy_inventory_updated:
  * @inventory: An inventory.
  * @name: Item name.
  *
@@ -595,8 +595,8 @@ gwy_inventory_set_default_item_name(GwyInventory *inventory,
  * can notify inventory via signals.
  **/
 void
-gwy_inventory_item_updated(GwyInventory *inventory,
-                           const gchar *name)
+gwy_inventory_updated(GwyInventory *inventory,
+                      const gchar *name)
 {
     GSequenceIter *iter;
 
@@ -609,7 +609,7 @@ gwy_inventory_item_updated(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_nth_item_updated:
+ * gwy_inventory_nth_updated:
  * @inventory: An inventory.
  * @n: Item position.
  *
@@ -619,8 +619,8 @@ gwy_inventory_item_updated(GwyInventory *inventory,
  * can notify inventory via signals.
  **/
 void
-gwy_inventory_nth_item_updated(GwyInventory *inventory,
-                               guint n)
+gwy_inventory_nth_updated(GwyInventory *inventory,
+                          guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     g_return_if_fail(inventory->has_item_type);
@@ -630,7 +630,7 @@ gwy_inventory_nth_item_updated(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_insert_item:
+ * gwy_inventory_insert:
  * @inventory: An inventory.
  * @item: An item to insert.
  *
@@ -644,8 +644,8 @@ gwy_inventory_nth_item_updated(GwyInventory *inventory,
  * Returns: @item, for convenience.
  **/
 gpointer
-gwy_inventory_insert_item(GwyInventory *inventory,
-                          gpointer item)
+gwy_inventory_insert(GwyInventory *inventory,
+                     gpointer item)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -678,7 +678,7 @@ gwy_inventory_insert_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_insert_nth_item:
+ * gwy_inventory_insert_nth:
  * @inventory: An inventory.
  * @item: An item to insert.
  * @n: Position to insert @item to.
@@ -693,9 +693,9 @@ gwy_inventory_insert_item(GwyInventory *inventory,
  * Returns: @item, for convenience.
  **/
 gpointer
-gwy_inventory_insert_nth_item(GwyInventory *inventory,
-                              gpointer item,
-                              guint n)
+gwy_inventory_insert_nth(GwyInventory *inventory,
+                         gpointer item,
+                         guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -820,15 +820,15 @@ delete_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_delete_item:
+ * gwy_inventory_delete:
  * @inventory: An inventory.
  * @name: Name of item to delete.
  *
  * Deletes an item from an inventory.
  **/
 void
-gwy_inventory_delete_item(GwyInventory *inventory,
-                          const gchar *name)
+gwy_inventory_delete(GwyInventory *inventory,
+                     const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     g_return_if_fail(inventory->has_item_type);
@@ -843,15 +843,15 @@ gwy_inventory_delete_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_delete_nth_item:
+ * gwy_inventory_delete_nth:
  * @inventory: An inventory.
  * @n: Position of @item to delete.
  *
  * Deletes an item on given position from an inventory.
  **/
 void
-gwy_inventory_delete_nth_item(GwyInventory *inventory,
-                              guint n)
+gwy_inventory_delete_nth(GwyInventory *inventory,
+                         guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     g_return_if_fail(inventory->has_item_type);
@@ -863,7 +863,7 @@ gwy_inventory_delete_nth_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_rename_item:
+ * gwy_inventory_rename:
  * @inventory: An inventory.
  * @name: Name of item to rename.
  * @newname: New name of item.
@@ -882,9 +882,9 @@ gwy_inventory_delete_nth_item(GwyInventory *inventory,
  * Returns: The item, for convenience.
  **/
 gpointer
-gwy_inventory_rename_item(GwyInventory *inventory,
-                          const gchar *name,
-                          const gchar *newname)
+gwy_inventory_rename(GwyInventory *inventory,
+                     const gchar *name,
+                     const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -951,7 +951,7 @@ gwy_inventory_rename_item(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_new_item:
+ * gwy_inventory_copy:
  * @inventory: An inventory.
  * @name: Name of item to duplicate, may be %NULL to use default item (the
  *        same happens when @name does not exist).
@@ -966,9 +966,9 @@ gwy_inventory_rename_item(GwyInventory *inventory,
  * Returns: The newly added item.
  **/
 gpointer
-gwy_inventory_new_item(GwyInventory *inventory,
-                       const gchar *name,
-                       const gchar *newname)
+gwy_inventory_copy(GwyInventory *inventory,
+                   const gchar *name,
+                   const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
     g_return_val_if_fail(inventory->has_item_type, NULL);
@@ -1006,7 +1006,7 @@ gwy_inventory_new_item(GwyInventory *inventory,
         g_warning("Item ‘%s’ was asked to rename to ‘%s’ but it renamed self "
                   "to ‘%s’.", name, newname, realnewname);
     }
-    gwy_inventory_insert_item(inventory, item);
+    gwy_inventory_insert(inventory, item);
 
     return item;
 }
@@ -1206,8 +1206,8 @@ invent_item_name(GwyInventory *inventory,
  *                    "item-updated" signal for it.
  *                    May be %NULL to indicate no signal should be watched.
  *                    you can still emit "item-updated" manually with
- *                    gwy_inventory_item_updated() or
- *                    gwy_inventory_nth_item_updated().
+ *                    gwy_inventory_updated() or
+ *                    gwy_inventory_nth_updated().
  * @get_name: Returns item name (the string is owned by item and it is assumed
  *            to exist until item ceases to exist or is renamed).  This
  *            function is obligatory.

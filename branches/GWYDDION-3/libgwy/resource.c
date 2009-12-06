@@ -1001,7 +1001,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             resource->is_modifiable = modifiable;
             resource->filename = filename_sys;
             resource->is_modified = FALSE;
-            gwy_inventory_insert_item(klass->inventory, resource);
+            gwy_inventory_insert(klass->inventory, resource);
             g_object_unref(resource);
         }
         else {
@@ -1019,8 +1019,7 @@ name_is_unique(GwyResource *resource,
                GwyResourceClass *klass,
                GError **error)
 {
-    GwyResource *obstacle = gwy_inventory_get_item(klass->inventory,
-                                                   resource->name);
+    GwyResource *obstacle = gwy_inventory_get(klass->inventory, resource->name);
     if (!obstacle)
         return TRUE;
 

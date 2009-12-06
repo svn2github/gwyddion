@@ -2363,46 +2363,46 @@ test_inventory_data(void)
     gwy_inventory_set_item_type(inventory, &item_type);
     item_destroy_count = 0;
 
-    gwy_inventory_insert_item(inventory, item_new("Fixme", -1));
-    gwy_inventory_insert_item(inventory, item_new("Second", 2));
-    gwy_inventory_insert_item(inventory, item_new("First", 1));
+    gwy_inventory_insert(inventory, item_new("Fixme", -1));
+    gwy_inventory_insert(inventory, item_new("Second", 2));
+    gwy_inventory_insert(inventory, item_new("First", 1));
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
 
     GwyItemTest *itemtest;
-    g_assert((itemtest = gwy_inventory_get_item(inventory, "Fixme")));
+    g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
     g_assert_cmpint(itemtest->value, ==, -1);
-    g_assert((itemtest = gwy_inventory_get_item(inventory, "Second")));
+    g_assert((itemtest = gwy_inventory_get(inventory, "Second")));
     g_assert_cmpint(itemtest->value, ==, 2);
-    g_assert((itemtest = gwy_inventory_get_item(inventory, "First")));
+    g_assert((itemtest = gwy_inventory_get(inventory, "First")));
     g_assert_cmpint(itemtest->value, ==, 1);
 
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 0)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 0)));
     g_assert_cmpstr(itemtest->name, ==, "First");
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 1)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 1)));
     g_assert_cmpstr(itemtest->name, ==, "Fixme");
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 2)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 2)));
     g_assert_cmpstr(itemtest->name, ==, "Second");
 
     gwy_inventory_forget_order(inventory);
-    gwy_inventory_insert_item(inventory, item_new("Abel", 0));
-    gwy_inventory_insert_item(inventory, item_new("Kain", 1));
+    gwy_inventory_insert(inventory, item_new("Abel", 0));
+    gwy_inventory_insert(inventory, item_new("Kain", 1));
     gwy_inventory_restore_order(inventory);
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 5);
 
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 0)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 0)));
     g_assert_cmpstr(itemtest->name, ==, "Abel");
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 3)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 3)));
     g_assert_cmpstr(itemtest->name, ==, "Kain");
 
-    g_assert((itemtest = gwy_inventory_get_item(inventory, "Fixme")));
+    g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
     itemtest->value = 3;
-    gwy_inventory_rename_item(inventory, "Fixme", "Third");
+    gwy_inventory_rename(inventory, "Fixme", "Third");
 
-    g_assert((itemtest = gwy_inventory_get_nth_item(inventory, 4)));
+    g_assert((itemtest = gwy_inventory_get_nth(inventory, 4)));
     g_assert_cmpstr(itemtest->name, ==, "Third");
 
-    gwy_inventory_delete_nth_item(inventory, 0);
-    gwy_inventory_delete_item(inventory, "Kain");
+    gwy_inventory_delete_nth(inventory, 0);
+    gwy_inventory_delete(inventory, "Kain");
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
 
     g_object_unref(inventory);
