@@ -289,6 +289,16 @@ gwy_array_updated(GwyArray *array,
 }
 
 /**
+ * gwy_array_insert1:
+ * @array: An array.
+ * @n: Position to insert @item at.
+ * @item: Item to insert.
+ *
+ * Inserts an item into an array.
+ *
+ * Returns: Pointer to the inserted item in the array, for convenience.
+ **/
+/**
  * gwy_array_insert:
  * @array: An array.
  * @n: Position to insert @items at.
@@ -326,6 +336,15 @@ gwy_array_insert(GwyArray *array,
 }
 
 /**
+ * gwy_array_append1:
+ * @array: An array.
+ * @item: Item to append.
+ *
+ * Appends an item to an array.
+ *
+ * Returns: Pointer to the appended item in the array, for convenience.
+ **/
+/**
  * gwy_array_append:
  * @array: An array.
  * @items: Items to append.
@@ -357,6 +376,13 @@ gwy_array_append(GwyArray *array,
 }
 
 /**
+ * gwy_array_delete1:
+ * @array: An array.
+ * @n: Position of the item to delete.
+ *
+ * Deletes an item from an array.
+ **/
+/**
  * gwy_array_delete:
  * @array: An array.
  * @n: Position of items to delete.
@@ -385,7 +411,16 @@ gwy_array_delete(GwyArray *array,
 }
 
 /**
+ * gwy_array_replace1:
+ * @array: An array.
+ * @n: Position of the item to replace.
+ * @item: Item to replace the existing item with.
+ *
+ * Replaces an item in an array.
+ **/
+/**
  * gwy_array_replace:
+ * @array: An array.
  * @n: Position of items to replace.
  * @items: Items to replace existing items with.
  * @nitems: Number of items to replace.
