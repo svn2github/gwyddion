@@ -2276,6 +2276,15 @@ test_container_boxed(void)
  *
  ***************************************************************************/
 
+static void
+record_item_change(G_GNUC_UNUSED GObject *object,
+                   guint pos,
+                   guint64 *counter)
+{
+    *counter <<= 4;
+    *counter |= pos + 1;
+}
+
 typedef struct {
     gchar *name;
     gint value;
@@ -2363,10 +2372,22 @@ test_inventory_data(void)
     gwy_inventory_set_item_type(inventory, &item_type);
     item_destroy_count = 0;
 
+    guint64 insert_log = 0, update_log = 0, delete_log = 0;
+    g_signal_connect(inventory, "item-inserted",
+                     G_CALLBACK(record_item_change), &insert_log);
+    g_signal_connect(inventory, "item-updated",
+                     G_CALLBACK(record_item_change), &update_log);
+    g_signal_connect(inventory, "item-deleted",
+                     G_CALLBACK(record_item_change), &delete_log);
+
     gwy_inventory_insert(inventory, item_new("Fixme", -1));
     gwy_inventory_insert(inventory, item_new("Second", 2));
     gwy_inventory_insert(inventory, item_new("First", 1));
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
+    g_assert_cmphex(insert_log, ==, 0x121);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
 
     GwyItemTest *itemtest;
     g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
@@ -2384,10 +2405,21 @@ test_inventory_data(void)
     g_assert_cmpstr(itemtest->name, ==, "Second");
 
     gwy_inventory_forget_order(inventory);
+    g_assert_cmphex(insert_log, ==, 0);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+
     gwy_inventory_insert(inventory, item_new("Abel", 0));
     gwy_inventory_insert(inventory, item_new("Kain", 1));
+    g_assert_cmphex(insert_log, ==, 0x45);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
+    insert_log = 0;
     gwy_inventory_restore_order(inventory);
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 5);
+    g_assert_cmphex(insert_log, ==, 0);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0);
 
     g_assert((itemtest = gwy_inventory_get_nth(inventory, 0)));
     g_assert_cmpstr(itemtest->name, ==, "Abel");
@@ -2397,6 +2429,10 @@ test_inventory_data(void)
     g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
     itemtest->value = 3;
     gwy_inventory_rename(inventory, "Fixme", "Third");
+    g_assert_cmphex(insert_log, ==, 0x5);
+    g_assert_cmphex(update_log, ==, 0x5);
+    g_assert_cmphex(delete_log, ==, 0x3);
+    insert_log = update_log = delete_log = 0;
 
     g_assert((itemtest = gwy_inventory_get_nth(inventory, 4)));
     g_assert_cmpstr(itemtest->name, ==, "Third");
@@ -2404,6 +2440,10 @@ test_inventory_data(void)
     gwy_inventory_delete_nth(inventory, 0);
     gwy_inventory_delete(inventory, "Kain");
     g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
+    g_assert_cmphex(insert_log, ==, 0);
+    g_assert_cmphex(update_log, ==, 0);
+    g_assert_cmphex(delete_log, ==, 0x12);
+    delete_log = 0;
 
     g_object_unref(inventory);
     g_assert_cmpuint(item_destroy_count, ==, 5);
