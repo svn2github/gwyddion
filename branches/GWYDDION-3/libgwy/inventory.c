@@ -82,10 +82,10 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
     /**
      * GwyInventory::item-inserted:
      * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: Position an item was inserted at.
+     * @arg1: Position the item was inserted at.
      *
      * The ::item-inserted signal is emitted when an item is inserted into
-     * an inventory.
+     * the inventory.
      **/
     gwy_inventory_signals[ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
@@ -98,10 +98,10 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
     /**
      * GwyInventory::item-deleted:
      * @gwyinventory: The #GwyInventory which received the signal.
-     * @arg1: Position an item was deleted from.
+     * @arg1: Position the item was deleted from.
      *
      * The ::item-deleted signal is emitted when an item is deleted from
-     * an inventory.
+     * the inventory.
      **/
     gwy_inventory_signals[ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
@@ -116,7 +116,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * @gwyinventory: The #GwyInventory which received the signal.
      * @arg1: Position of updated item.
      *
-     * The ::item-updated signal is emitted when an item in an inventory
+     * The ::item-updated signal is emitted when an item in the inventory
      * is updated.
      **/
     gwy_inventory_signals[ITEM_UPDATED]
@@ -133,7 +133,7 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
      * @arg1: New item order map as in #GtkTreeModel,
      *        @arg1[new_position] = old_position.
      *
-     * The ::items-reordered signal is emitted when item in an inventory
+     * The ::items-reordered signal is emitted when item in the inventory
      * are reordered.
      **/
     gwy_inventory_signals[ITEMS_REORDERED]
@@ -407,7 +407,7 @@ gwy_inventory_get_or_default(GwyInventory *inventory,
  *     array, you can simply iterate over it until gwy_inventory_get_nth()
  *     returns %NULL.
  *
- * Returns item on given position in an inventory.
+ * Returns item at given position in an inventory.
  *
  * Returns: Item at given position.
  **/
@@ -610,7 +610,7 @@ gwy_inventory_updated(GwyInventory *inventory,
  * @inventory: An inventory.
  * @n: Item position.
  *
- * Notifies inventory item on given position was updated.
+ * Notifies inventory item at given position was updated.
  *
  * This function makes sense primarily for non-object items, as object items
  * can notify inventory via signals.
@@ -844,7 +844,7 @@ gwy_inventory_delete(GwyInventory *inventory,
  * @inventory: An inventory.
  * @n: Position of @item to delete.
  *
- * Deletes an item on given position from an inventory.
+ * Deletes the item at given position from an inventory.
  **/
 void
 gwy_inventory_delete_nth(GwyInventory *inventory,
@@ -1026,7 +1026,7 @@ emit_item_updated(GwyInventory *inventory,
 /**
  * item_changed:
  * @inventory: An inventory.
- * @item: An item that has changed.
+ * @item: Item that has changed.
  *
  * Handles inventory item `changed' signal.
  **/
