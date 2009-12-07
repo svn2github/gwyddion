@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
@@ -25,7 +24,10 @@
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
-#include <libgwy/libgwy.h>
+#include "libgwy/macros.h"
+#include "libgwy/main.h"
+#include "libgwy/strfuncs.h"
+#include "libgwy/resource.h"
 #include "libgwy/libgwy-aliases.h"
 
 #define MAGIC_HEADER2 "Gwyddion resource "
