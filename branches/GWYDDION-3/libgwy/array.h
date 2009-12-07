@@ -44,18 +44,19 @@ struct _GwyArrayClass {
     GObjectClass g_object_class;
 };
 
-GType                   gwy_array_get_type     (void)                           G_GNUC_CONST;
-GwyArray*               gwy_array_new          (void)                           G_GNUC_MALLOC;
-GwyArray*               gwy_array_new_with_data(gsize size,
-                                                GDestroyNotify destroy,
-                                                gpointer items,
-                                                guint nitems)  G_GNUC_MALLOC;
-void                    gwy_array_set_item_type(GwyArray *array,
-                                                gsize size,
-                                                GDestroyNotify destroy);
-guint                   gwy_array_n_items      (GwyArray *array)                G_GNUC_PURE;
-gpointer                gwy_array_get          (GwyArray *array,
-                                                guint n)                        G_GNUC_PURE;
+GType     gwy_array_get_type     (void)                    G_GNUC_CONST;
+GwyArray* gwy_array_new          (void)                    G_GNUC_MALLOC;
+GwyArray* gwy_array_new_with_data(gsize size,
+                                  GDestroyNotify destroy,
+                                  gpointer items,
+                                  guint nitems)            G_GNUC_MALLOC;
+void      gwy_array_set_item_type(GwyArray *array,
+                                  gsize size,
+                                  GDestroyNotify destroy);
+guint     gwy_array_n_items      (GwyArray *array)         G_GNUC_PURE;
+gpointer  gwy_array_get          (GwyArray *array,
+                                  guint n)                 G_GNUC_PURE;
+
 #define gwy_array_insert1(array,n,item) \
     gwy_array_insert((array),(n),(item),1)
 #define gwy_array_append1(array,item) \
@@ -64,26 +65,27 @@ gpointer                gwy_array_get          (GwyArray *array,
     gwy_array_delete((array),(n),1)
 #define gwy_array_replace1(array,n,item) \
     gwy_array_replace((array),(n),(item),1)
-gpointer                gwy_array_insert       (GwyArray *array,
-                                                guint n,
-                                                gpointer items,
-                                                guint nitems);
-gpointer                gwy_array_append       (GwyArray *array,
-                                                gpointer items,
-                                                guint nitems);
-void                    gwy_array_delete       (GwyArray *array,
-                                                guint n,
-                                                guint nitems);
-void                    gwy_array_replace      (GwyArray *array,
-                                                guint n,
-                                                gpointer items,
-                                                guint nitems);
-void                    gwy_array_updated      (GwyArray *array,
-                                                guint n);
-gpointer                gwy_array_get_data     (GwyArray *array) G_GNUC_PURE;
-void                    gwy_array_set_data     (GwyArray *array,
-                                                gpointer items,
-                                                guint nitems);
+
+gpointer gwy_array_insert  (GwyArray *array,
+                            guint n,
+                            gpointer items,
+                            guint nitems);
+gpointer gwy_array_append  (GwyArray *array,
+                            gpointer items,
+                            guint nitems);
+void     gwy_array_delete  (GwyArray *array,
+                            guint n,
+                            guint nitems);
+void     gwy_array_replace (GwyArray *array,
+                            guint n,
+                            gpointer items,
+                            guint nitems);
+void     gwy_array_updated (GwyArray *array,
+                            guint n);
+gpointer gwy_array_get_data(GwyArray *array) G_GNUC_PURE;
+void     gwy_array_set_data(GwyArray *array,
+                            gpointer items,
+                            guint nitems);
 
 G_END_DECLS
 
