@@ -332,7 +332,7 @@ gwy_serialize_gio(GwySerializable *serializable,
 
     items.len = gwy_serializable_n_items(serializable);
     items.items = g_slice_alloc0(sizeof(GwySerializableItem)*items.len);
-    items.n_items = 0;
+    items.n = 0;
 
     gwy_serializable_itemize(serializable, &items);
     calculate_sizes(&items, &i);
@@ -456,7 +456,7 @@ static gboolean
 dump_to_stream(const GwySerializableItems *items,
                GwySerializableBuffer *buffer)
 {
-    for (gsize i = 0; i < items->n_items; i++) {
+    for (gsize i = 0; i < items->n; i++) {
         const GwySerializableItem *item = items->items + i;
         /* Use the single-byte type here to faciliate writing. */
         const guint8 ctype = item->ctype;
@@ -571,7 +571,7 @@ static void
 items_done(const GwySerializableItems *items)
 {
     /* The zeroth item is always an object header. */
-    for (gsize i = items->n_items-1; i > 0; i--) {
+    for (gsize i = items->n-1; i > 0; i--) {
         const GwySerializableItem *item = items->items + i;
         if (item->ctype == GWY_SERIALIZABLE_OBJECT)
             gwy_serializable_done(GWY_SERIALIZABLE(item->value.v_object));
@@ -1226,20 +1226,20 @@ unpack_items(const guchar *buffer,
     items = g_new(GwySerializableItems, 1);
     items->len = 8;
     items->items = g_new0(GwySerializableItem, items->len);
-    items->n_items = 0;
+    items->n = 0;
 
     while (size) {
         gsize rbytes;
 
         /* Grow items if necessary */
-        if (items->n_items == items->len) {
+        if (items->n == items->len) {
             items->len = 2*items->len;
             items->items = g_renew(GwySerializableItem, items->items,
                                    items->len);
-            gwy_memclear(items->items + items->n_items,
-                         items->len - items->n_items);
+            gwy_memclear(items->items + items->n,
+                         items->len - items->n);
         }
-        item = items->items + items->n_items;
+        item = items->items + items->n;
 
         /* Component name */
         if (!(rbytes = unpack_name(buffer, size, &item->name, error_list)))
@@ -1362,7 +1362,7 @@ unpack_items(const guchar *buffer,
 
         buffer += rbytes;
         size -= rbytes;
-        items->n_items++;
+        items->n++;
     }
 
     return items;
@@ -1389,7 +1389,7 @@ free_items(GwySerializableItems *items)
     if (!items)
         return;
 
-    for (gsize i = 0; i < items->n_items; i++) {
+    for (gsize i = 0; i < items->n; i++) {
         GwySerializableItem *item = items->items + i;
         GwySerializableCType ctype = item->ctype;
 
@@ -1488,7 +1488,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 {
     guint8 *seen = g_slice_alloc0(sizeof(guint8)*n_items);
 
-    for (gsize i = 0; i < items->n_items; i++) {
+    for (gsize i = 0; i < items->n; i++) {
         GwySerializableItem *item = items->items + i;
         const GwySerializableCType ctype = item->ctype;
         const gchar *name = item->name;
@@ -1635,6 +1635,12 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  *                              is non-fatal: such item is just ignored.
  * @GWY_DESERIALIZE_ERROR_DATA: Uknown data type (#GwySerializableCType) was
  *                              encountered.  This error is fatal.
+ * @GWY_DESERIALIZE_ERROR_INVALID: Object representation is logicaly
+ *                                 inconsistent or otherwise invalid.
+ *                                 Reserved for classes to indicate data errors
+ *                                 on levels higher than physical
+ *                                 representation.
+ *                                 This error is fatal.
  * @GWY_DESERIALIZE_ERROR_FATAL_MASK: Distinguishes fatal and non-fatal errors
  *                                    (fatal give non-zero value when masked
  *                                    with this mask).
