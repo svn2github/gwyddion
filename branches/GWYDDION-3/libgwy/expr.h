@@ -59,6 +59,11 @@ typedef enum {
 typedef struct _GwyExpr      GwyExpr;
 typedef struct _GwyExprClass GwyExprClass;
 
+struct _GwyExpr {
+    GObject g_object;
+    struct _GwyExprPrivate *priv;
+};
+
 struct _GwyExprClass {
     GObjectClass g_object_class;
 };
