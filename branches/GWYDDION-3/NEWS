@@ -81,13 +81,15 @@ Unit:
 
 Container:
 - Functions taking and not taking ownership of stored non-atomic items were
-  differentiated to follow the GObject convention.  Functions with take in name
-  take the ownership, functions with set in name make copies.
+  differentiated to follow the GObject convention.  Functions with ‘take’ in
+  their name take the ownership, functions with ‘set’ in the name make copies.
 - The previous point means that gwy_container_set_string() now copies the
   passed string and the Gwyddion-2 usage means a memory leak.
 - Some unused functions were removed, signatures of other made more consistent
   (strings are no longer guchar*, etc.).
+- Many function names were changed, usually shortended.
 - gwy_container_transfer() can perform both shallow and deep copies.
+- Serializable boxed types can be stored in containers.
 
 Expr:
 - GwyExpr is an object now.
@@ -99,12 +101,13 @@ Expr:
 Inventory:
 - It is internally based on GSequence, which permitted to get rid of some
   really ugly code.
-- It no longer supports constant inventories.  FIXME: There should be some
-  simpler object for wrapping of static arrays with the tree model interface.
+- It no longer supports constant inventories.  GwyArray might be usable for
+  that.
 - It has a proper default parameterless constructor, the item type can be set
   whenever the inventory is empty.
 - Fixed items are expressed with is_modifiable() method instead of is_fixed()
-  with the reverse meaning.
+  with the opposite meaning.
+- Many function names were changed, usually shortended.
 
 Resource:
 - Resource name is included in the file, allowing for resource names not
@@ -112,8 +115,14 @@ Resource:
 - Functions for saving and loading are available, low-level dump, restore and
   modification bookkeeping functions were removed (some may reappear in a
   different form the future, though).
-- Property is-const changed to is-modifiable with the inverse meaning (this
-  matches GwyInventory).
+- Helper functions for parsing/dumping resource files are available.
+- There is an explicit distinction between managed resources (present in the
+  class inventory) and free-standing resources (private), represented by
+  property "is-managed".  Free-standing resources can be freely renamed.
+- Property "is-const" changed to "is-modifiable" with the opposite meaning
+  (this matches GwyInventory).
+- The class interface has changed.  In particular, individual resources no
+  longer need to access any data members of GwyResourceClass.
 - Errors are properly reported.
 
 Interpolation:
@@ -121,11 +130,13 @@ Interpolation:
 - New 6-point interpolation GWY_INTERPOLATION_BSPLINE6 was added.
 
 Fitting:
-- GwyNLFitter was split to two classes.
+- Fitting was rewritten from scratch.  Instead of GwyNLFitter, there are two
+  classes.
 - GwyFitter provides the Marquardt-Levenberg algorithm while being completely
   model- and data-agnostic.  It works only with concepts such as paramters,
   sums of squares, gradiens and Hessians.
-- GwyFitter implements the scaled Marquardt-Levenberg algorithm.
+- GwyFitter implements the scaled Marquardt-Levenberg algorithm (as opposed to
+  the unscaled algorithm in GwyNLFitter that gave us so much trouble).
 - GwyFitTask can wrap several kinds of data and model and provide the abstract
   evaluation function for GwyFitter.
 
@@ -133,3 +144,7 @@ RGBA:
 - It can be serialized and directly put to containers.
 - Obsolete auxiliary functions connecting GwyRGBA with GdkColor and containers
   are not present.
+
+GwyArray:
+- New data type, a GArray wrapper that can emit signals when items are added
+  removed and otherwise changed.
