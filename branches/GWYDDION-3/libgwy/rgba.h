@@ -20,7 +20,7 @@
 #ifndef __LIBGWY_RGBA_H__
 #define __LIBGWY_RGBA_H__
 
-#include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
