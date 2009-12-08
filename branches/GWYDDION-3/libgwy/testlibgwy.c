@@ -733,8 +733,8 @@ static const GwySerializableItem default_items[] = {
 };
 
 #define add_item(id) \
-    g_return_val_if_fail(items->len - items->n_items, 0); \
-    items->items[items->n_items++] = it[id]; \
+    g_return_val_if_fail(items->len - items->n, 0); \
+    items->items[items->n++] = it[id]; \
     n_items++
 
 static gsize
@@ -1353,8 +1353,8 @@ static const GwySerializableItem default_items_box[] = {
 };
 
 #define add_item(id) \
-    g_return_val_if_fail(items->len - items->n_items, 0); \
-    items->items[items->n_items++] = it[id]; \
+    g_return_val_if_fail(items->len - items->n, 0); \
+    items->items[items->n++] = it[id]; \
     n_items++
 
 static gsize
@@ -1362,12 +1362,12 @@ gwy_ser_box_test_itemize(GwySerializable *serializable,
                          GwySerializableItems *items)
 {
     GwySerBoxTest *sertest = GWY_SER_BOX_TEST(serializable);
-    g_return_val_if_fail(items->len - items->n_items
+    g_return_val_if_fail(items->len - items->n
                          >= G_N_ELEMENTS(default_items_box), 0);
 
     GwySerializableItem it = default_items_box[0];
     it.value.v_boxed = &sertest->color;
-    items->items[items->n_items++] = it;
+    items->items[items->n++] = it;
 
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, &sertest->color, items);
 

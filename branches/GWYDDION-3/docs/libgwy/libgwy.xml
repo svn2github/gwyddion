@@ -31,5 +31,6 @@
   <xi:include href="xml/array.xml"/>
   <xi:include href="xml/inventory.xml"/>
   <xi:include href="xml/resource.xml"/>
+  <xi:include href="xml/gradient.xml"/>
   <xi:include href="xml/tree_index.sgml"/>
 </book>

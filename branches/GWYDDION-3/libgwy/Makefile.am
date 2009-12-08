@@ -17,6 +17,7 @@ mkenum_headers = \
 	expr.h \
 	fitter.h \
 	fit-task.h \
+	gradient.h \
 	inventory.h \
 	interpolation.h \
 	macros.h \
@@ -54,6 +55,7 @@ libgwy3_la_SOURCES = \
 	expr.c \
 	fitter.c \
 	fit-task.c \
+	gradient.c \
 	inventory.c \
 	interpolation.c \
 	macros.c \
@@ -78,7 +80,7 @@ AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
 	-DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\" \
-	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES \
+	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE \
 	-DG_LOG_DOMAIN=\"Gwy\" \
 	-DGWY_LIBDIR=\"$(pkglibdir)\" \
 	-DGWY_DATADIR=\"$(pkgdatadir)\" \

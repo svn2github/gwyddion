@@ -26,6 +26,7 @@
 #include <libgwy/expr.h>
 #include <libgwy/fitter.h>
 #include <libgwy/fit-task.h>
+#include <libgwy/gradient.h>
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/macros.h>
