@@ -54,11 +54,13 @@ typedef struct {
     AppendPowerFunc append_power;
 } GwyUnitStyleSpec;
 
-struct _GwyUnit {
+struct _GwyUnitPrivate {
     GObject g_object;
     GArray *units;
     gchar *serialize_str;
 };
+
+typedef struct _GwyUnitPrivate Unit;
 
 static void         gwy_unit_finalize         (GObject *object);
 static void         gwy_unit_serializable_init(GwySerializableInterface *iface);
@@ -76,19 +78,19 @@ static void         gwy_unit_assign_impl      (GwySerializable *destination,
 static gdouble      find_number_format        (gdouble step,
                                                gdouble maximum,
                                                guint *precision);
-static gboolean     parse                     (GwyUnit *unit,
+static gboolean     parse                     (Unit *unit,
                                                const gchar *string,
                                                gint *power10);
-static GwyUnit*     power_impl                (GwyUnit *unit,
-                                               GwyUnit *op,
+static Unit*        power_impl                (Unit *unit,
+                                               Unit *op,
                                                gint power);
-static GwyUnit*     canonicalize              (GwyUnit *unit);
+static Unit*        canonicalize              (Unit *unit);
 static const gchar* get_prefix                (gint power);
 static void         append_power_plain        (GString *str,
                                                gint power);
 static void         append_power_unicode      (GString *str,
                                                gint power);
-static void         format_unit               (const GwyUnit *unit,
+static void         format_unit               (const Unit *unit,
                                                const GwyUnitStyleSpec *fs,
                                                gint power10,
                                                gchar **glue_retval,
@@ -188,6 +190,8 @@ gwy_unit_class_init(GwyUnitClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
+    g_type_class_add_private(klass, sizeof(Unit));
+
     gobject_class->finalize = gwy_unit_finalize;
 
     /**
@@ -208,14 +212,15 @@ gwy_unit_class_init(GwyUnitClass *klass)
 static void
 gwy_unit_init(GwyUnit *unit)
 {
-    unit->units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
+    unit->priv = G_TYPE_INSTANCE_GET_PRIVATE(unit, GWY_TYPE_UNIT, Unit);
+    unit->priv->units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 }
 
 static void
 gwy_unit_finalize(GObject *object)
 {
     GwyUnit *unit = GWY_UNIT(object);
-    g_array_free(unit->units, TRUE);
+    g_array_free(unit->priv->units, TRUE);
     G_OBJECT_CLASS(gwy_unit_parent_class)->finalize(object);
 }
 
@@ -231,9 +236,10 @@ gwy_unit_itemize(GwySerializable *serializable,
 {
     GwyUnit *unit = GWY_UNIT(serializable);
 
-    unit->serialize_str = gwy_unit_to_string(unit, GWY_VALUE_FORMAT_PLAIN);
-    if (!*unit->serialize_str) {
-        GWY_FREE(unit->serialize_str);
+    unit->priv->serialize_str = gwy_unit_to_string(unit,
+                                                   GWY_VALUE_FORMAT_PLAIN);
+    if (!*unit->priv->serialize_str) {
+        GWY_FREE(unit->priv->serialize_str);
         return 0;
     }
 
@@ -242,7 +248,7 @@ gwy_unit_itemize(GwySerializable *serializable,
     GwySerializableItem *it = items->items + items->n;
 
     *it = serialize_items[0];
-    it->value.v_string = unit->serialize_str;
+    it->value.v_string = unit->priv->serialize_str;
     it++, items->n++;
 
     return N_ITEMS;
@@ -251,8 +257,7 @@ gwy_unit_itemize(GwySerializable *serializable,
 static void
 gwy_unit_done(GwySerializable *serializable)
 {
-    GwyUnit *unit = GWY_UNIT(serializable);
-
+    Unit *unit = GWY_UNIT(serializable)->priv;
     GWY_FREE(unit->serialize_str);
 }
 
@@ -274,10 +279,11 @@ gwy_unit_construct(GwySerializable *serializable,
 static GObject*
 gwy_unit_duplicate_impl(GwySerializable *serializable)
 {
-    GwyUnit *unit = GWY_UNIT(serializable);
+    Unit *unit = GWY_UNIT(serializable)->priv;
 
     GwyUnit *duplicate = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    g_array_append_vals(duplicate->units, unit->units->data, unit->units->len);
+    g_array_append_vals(duplicate->priv->units,
+                        unit->units->data, unit->units->len);
 
     return G_OBJECT(duplicate);
 }
@@ -292,8 +298,9 @@ gwy_unit_assign_impl(GwySerializable *destination,
     if (gwy_unit_equal(unit, src))
         return;
 
-    g_array_set_size(unit->units, 0);
-    g_array_append_vals(unit->units, src->units->data, src->units->len);
+    g_array_set_size(unit->priv->units, 0);
+    g_array_append_vals(unit->priv->units,
+                        src->priv->units->data, src->priv->units->len);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 }
 
@@ -337,7 +344,7 @@ gwy_unit_new_from_string(const char *unit_string,
                          gint *power10)
 {
     GwyUnit *unit = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    parse(unit, unit_string, power10);
+    parse(unit->priv, unit_string, power10);
 
     return unit;
 }
@@ -358,7 +365,7 @@ gwy_unit_set_from_string(GwyUnit *unit,
                          gint *power10)
 {
     g_return_if_fail(GWY_IS_UNIT(unit));
-    parse(unit, unit_string, power10);
+    parse(unit->priv, unit_string, power10);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 }
 
@@ -389,7 +396,7 @@ gwy_unit_to_string(GwyUnit *unit,
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
     gchar *units;
-    format_unit(unit, find_style_spec(style), 0, NULL, &units, TRUE);
+    format_unit(unit->priv, find_style_spec(style), 0, NULL, &units, TRUE);
     return units;
 }
 
@@ -411,21 +418,23 @@ gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
     if (op == unit)
         return TRUE;
 
-    if (op->units->len != unit->units->len)
+    Unit *u1 = unit->priv, *u2 = op->priv;
+
+    if (u2->units->len != u1->units->len)
         return FALSE;
 
-    for (guint i = 0; i < unit->units->len; i++) {
-        const GwySimpleUnit *u = &simple_unit_index(unit->units, i);
+    for (guint i = 0; i < u1->units->len; i++) {
+        const GwySimpleUnit *u = &simple_unit_index(u1->units, i);
         guint j;
 
-        for (j = 0; j < op->units->len; j++) {
-            if (simple_unit_index(op->units, j).unit == u->unit) {
-                if (simple_unit_index(op->units, j).power != u->power)
+        for (j = 0; j < u2->units->len; j++) {
+            if (simple_unit_index(u2->units, j).unit == u->unit) {
+                if (simple_unit_index(u2->units, j).power != u->power)
                     return FALSE;
                 break;
             }
         }
-        if (j == op->units->len)
+        if (j == u2->units->len)
             return FALSE;
     }
 
@@ -433,7 +442,7 @@ gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
 }
 
 static gboolean
-parse(GwyUnit *unit,
+parse(Unit *unit,
       const gchar *string,
       gint *ppower10)
 {
@@ -733,15 +742,15 @@ gwy_unit_power(GwyUnit *unit,
     if (!unit)
         unit = gwy_unit_new();
 
-    power_impl(unit, op, power);
+    power_impl(unit->priv, op->priv, power);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 
     return unit;
 }
 
-static GwyUnit*
-power_impl(GwyUnit *unit,
-           GwyUnit *op,
+static Unit*
+power_impl(Unit *unit,
+           Unit *op,
            gint power)
 {
     /* Perform power in place */
@@ -775,6 +784,29 @@ power_impl(GwyUnit *unit,
     return unit;
 }
 
+static void
+multiply_impl(Unit *unit, Unit *op, gint power)
+{
+    for (guint i = 0; i < op->units->len; i++) {
+        GwySimpleUnit *u2 = &simple_unit_index(op->units, i);
+
+        guint j;
+        for (j = 0; j < unit->units->len; j++) {
+            GwySimpleUnit *u = &simple_unit_index(unit->units, j);
+            if (u2->unit == u->unit) {
+                u->power += power*u2->power;
+                break;
+            }
+        }
+        if (j == unit->units->len) {
+            g_array_append_val(unit->units, *u2);
+            GwySimpleUnit *u = &simple_unit_index(unit->units,
+                                                  unit->units->len - 1);
+            u->power *= power;
+        }
+    }
+}
+
 /**
  * gwy_unit_nth_root:
  * @unit: A physical unit.
@@ -801,9 +833,11 @@ gwy_unit_nth_root(GwyUnit *unit,
     g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
     g_return_val_if_fail(ipower > 0, NULL);
 
+    Unit *u2 = op->priv;
+
     /* Check applicability */
-    for (guint j = 0; j < op->units->len; j++) {
-        GwySimpleUnit *u = &simple_unit_index(op->units, j);
+    for (guint j = 0; j < u2->units->len; j++) {
+        GwySimpleUnit *u = &simple_unit_index(u2->units, j);
         if (u->power % ipower != 0)
             return NULL;
     }
@@ -812,15 +846,16 @@ gwy_unit_nth_root(GwyUnit *unit,
 
     if (!unit)
         unit = gwy_unit_new();
+    Unit *u1 = unit->priv;
 
-    g_array_append_vals(units, op->units->data, op->units->len);
+    g_array_append_vals(units, u2->units->data, u2->units->len);
     for (guint j = 0; j < units->len; j++) {
         GwySimpleUnit *u = &simple_unit_index(units, j);
         u->power /= ipower;
     }
 
-    g_array_set_size(unit->units, 0);
-    g_array_append_vals(unit->units, units->data, units->len);
+    g_array_set_size(u1->units, 0);
+    g_array_append_vals(u1->units, units->data, units->len);
     g_array_free(units, TRUE);
 
     g_signal_emit(unit, unit_signals[CHANGED], 0);
@@ -869,45 +904,28 @@ gwy_unit_power_multiply(GwyUnit *unit,
         GWY_SWAP(GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
-    else if (op1 != unit && (op1->units->len < op2->units->len
+    else if (op1 != unit && (op1->priv->units->len < op2->priv->units->len
                              || (power2 && !power1))) {
         GWY_SWAP(GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
     g_assert(op2 != unit);
 
-    power_impl(unit, op1, power1);
+    power_impl(unit->priv, op1->priv, power1);
     if (!power2) {
-        canonicalize(unit);
+        canonicalize(unit->priv);
         return unit;
     }
 
-    for (guint i = 0; i < op2->units->len; i++) {
-        GwySimpleUnit *u2 = &simple_unit_index(op2->units, i);
-
-        guint j;
-        for (j = 0; j < unit->units->len; j++) {
-            GwySimpleUnit *u = &simple_unit_index(unit->units, j);
-            if (u2->unit == u->unit) {
-                u->power += power2*u2->power;
-                break;
-            }
-        }
-        if (j == unit->units->len) {
-            g_array_append_val(unit->units, *u2);
-            GwySimpleUnit *u = &simple_unit_index(unit->units,
-                                                  unit->units->len - 1);
-            u->power *= power2;
-        }
-    }
-    canonicalize(unit);
+    multiply_impl(unit->priv, op2->priv, power2);
+    canonicalize(unit->priv);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 
     return unit;
 }
 
-static GwyUnit*
-canonicalize(GwyUnit *unit)
+static Unit*
+canonicalize(Unit *unit)
 {
     guint i, j;
 
@@ -968,7 +986,8 @@ gwy_unit_format_for_power10(GwyUnit *unit,
         format = gwy_value_format_new();
 
     gchar *glue, *units;
-    format_unit(unit, find_style_spec(style), power10, &glue, &units, FALSE);
+    format_unit(unit->priv, find_style_spec(style), power10,
+                &glue, &units, FALSE);
     g_object_set(format,
                  "style", style,
                  "base", gwy_exp10(power10),
@@ -1017,7 +1036,7 @@ gwy_unit_format_with_resolution(GwyUnit *unit,
         base = find_number_format(resolution, maximum, &precision);
 
     gchar *glue, *units;
-    format_unit(unit, find_style_spec(style), gwy_round(log10(base)),
+    format_unit(unit->priv, find_style_spec(style), gwy_round(log10(base)),
                 &glue, &units, FALSE);
     g_object_set(format,
                  "style", style,
@@ -1067,7 +1086,7 @@ gwy_unit_format_with_digits(GwyUnit *unit,
                                   &precision);
 
     gchar *glue, *units;
-    format_unit(unit, find_style_spec(style), gwy_round(log10(base)),
+    format_unit(unit->priv, find_style_spec(style), gwy_round(log10(base)),
                 &glue, &units, FALSE);
     g_object_set(format,
                  "style", style,
@@ -1175,7 +1194,7 @@ append_power_unicode(GString *str,
 }
 
 static void
-format_unit(const GwyUnit *unit,
+format_unit(const Unit *unit,
             const GwyUnitStyleSpec *fs,
             gint power10,
             gchar **glue_retval,

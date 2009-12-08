@@ -41,6 +41,11 @@ G_BEGIN_DECLS
 typedef struct _GwyUnit      GwyUnit;
 typedef struct _GwyUnitClass GwyUnitClass;
 
+struct _GwyUnit {
+    GObject g_object;
+    struct _GwyUnitPrivate *priv;
+};
+
 struct _GwyUnitClass {
     GObjectClass g_object_class;
 };
