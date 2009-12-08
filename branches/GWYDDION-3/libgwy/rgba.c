@@ -33,7 +33,7 @@ static gpointer gwy_rgba_construct(GwySerializableItems *items,
 static void     gwy_rgba_assign   (gpointer destination,
                                    gconstpointer source);
 
-static const GwySerializableItem default_items[N_ITEMS] = {
+static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "r", .ctype = GWY_SERIALIZABLE_DOUBLE, },
     /*1*/ { .name = "g", .ctype = GWY_SERIALIZABLE_DOUBLE, },
     /*2*/ { .name = "b", .ctype = GWY_SERIALIZABLE_DOUBLE, },
@@ -63,25 +63,26 @@ gwy_rgba_itemize(gpointer boxed,
                  GwySerializableItems *items)
 {
     GwyRGBA *rgba = (GwyRGBA*)boxed;
-    GwySerializableItem it;
 
-    g_return_val_if_fail(items->len - items->n_items >= N_ITEMS, 0);
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    it = default_items[0];
-    it.value.v_double = rgba->r;
-    items->items[items->n_items++] = it;
+    GwySerializableItem *it = items->items + items->n;
 
-    it = default_items[1];
-    it.value.v_double = rgba->g;
-    items->items[items->n_items++] = it;
+    *it = serialize_items[0];
+    it->value.v_double = rgba->r;
+    it++, items->n++;
 
-    it = default_items[2];
-    it.value.v_double = rgba->b;
-    items->items[items->n_items++] = it;
+    *it = serialize_items[1];
+    it->value.v_double = rgba->g;
+    it++, items->n++;
 
-    it = default_items[3];
-    it.value.v_double = rgba->a;
-    items->items[items->n_items++] = it;
+    *it = serialize_items[2];
+    it->value.v_double = rgba->b;
+    it++, items->n++;
+
+    *it = serialize_items[3];
+    it->value.v_double = rgba->a;
+    it++, items->n++;
 
     return N_ITEMS;
 }
@@ -91,7 +92,7 @@ gwy_rgba_construct(GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
     GwySerializableItem its[N_ITEMS];
-    memcpy(its, default_items, sizeof(default_items));
+    memcpy(its, serialize_items, sizeof(serialize_items));
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", error_list);
 
     GwyRGBA *rgba = g_slice_new(GwyRGBA);
