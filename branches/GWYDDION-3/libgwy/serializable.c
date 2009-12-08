@@ -83,9 +83,9 @@ gwy_serializable_itemize(GwySerializable *serializable,
         = GWY_SERIALIZABLE_GET_INTERFACE(serializable);
     g_return_if_fail(iface && iface->itemize);
 
-    g_return_if_fail(items->n_items < items->len);
-    GwySerializableItem *item = items->items + items->n_items;
-    items->n_items++;
+    g_return_if_fail(items->n < items->len);
+    GwySerializableItem *item = items->items + items->n;
+    items->n++;
     item->name = G_OBJECT_TYPE_NAME(G_OBJECT(serializable));
     item->value.v_size = 0;
     item->ctype = GWY_SERIALIZABLE_HEADER;
@@ -276,8 +276,8 @@ gwy_serializable_assign(GwySerializable *destination,
  * }
  *
  * #define add_item(id) \
- *     g_return_val_if_fail(items->len - items->n_items, 0); \
- *     items->items[items->n_items++] = it[id]; \
+ *     g_return_val_if_fail(items->len - items->n, 0); \
+ *     items->items[items->n++] = it[id]; \
  *     n_items++
  *
  * // Fill the item list with actual object data.  This is a bit
@@ -389,8 +389,8 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GwySerializableItems:
  * @len: Allocated number of items.
- * @n_items: Number of items present.
- * @items: Array of items of total size @len with @n_items positions occupied.
+ * @n: Number of items present.
+ * @items: Array of items of total size @len with @n positions occupied.
  *
  * Flattened tree structure of object data used during serialization and
  * deserialization.

@@ -25,10 +25,6 @@
 
 G_BEGIN_DECLS
 
-typedef union  _GwySerializableValue GwySerializableValue;
-typedef struct _GwySerializableItem  GwySerializableItem;
-typedef struct _GwySerializableItems GwySerializableItems;
-
 typedef enum {
     GWY_SERIALIZABLE_HEADER        = 0,
     GWY_SERIALIZABLE_INT8          = 'c',
@@ -49,7 +45,7 @@ typedef enum {
     GWY_SERIALIZABLE_BOXED         = 'x',
 } GwySerializableCType;
 
-union _GwySerializableValue {
+typedef union {
     gboolean v_boolean;
     gint8 v_int8;
     guint8 v_uint8;
@@ -77,20 +73,20 @@ union _GwySerializableValue {
     gchar **v_string_array;
     guchar **v_ustring_array;
     GObject **v_object_array;
-};
+} GwySerializableValue;
 
-struct _GwySerializableItem {
+typedef struct {
     GwySerializableValue value;
     const gchar *name;
     gsize array_size;
     guchar ctype;
-};
+} GwySerializableItem;
 
-struct _GwySerializableItems {
+typedef struct {
     gsize len;
-    gsize n_items;
+    gsize n;
     GwySerializableItem *items;
-};
+} GwySerializableItems;
 
 typedef struct _GwySerializableInterface GwySerializableInterface;
 typedef struct _GwySerializable          GwySerializable;        /* dummy */

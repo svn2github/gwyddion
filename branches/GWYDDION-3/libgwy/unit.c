@@ -29,6 +29,8 @@
 
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
 
+enum { N_ITEMS = 1 };
+
 enum {
     CHANGED,
     N_SIGNALS
@@ -160,7 +162,7 @@ static const GwyUnitStyleSpec *format_styles[] = {
     &format_style_TeX,
 };
 
-static const GwySerializableItem serialize_items[] = {
+static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "unitstr", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
@@ -212,7 +214,7 @@ gwy_unit_init(GwyUnit *unit)
 static void
 gwy_unit_finalize(GObject *object)
 {
-    GwyUnit *unit = (GwyUnit*)object;
+    GwyUnit *unit = GWY_UNIT(object);
     g_array_free(unit->units, TRUE);
     G_OBJECT_CLASS(gwy_unit_parent_class)->finalize(object);
 }
@@ -230,15 +232,20 @@ gwy_unit_itemize(GwySerializable *serializable,
     GwyUnit *unit = GWY_UNIT(serializable);
 
     unit->serialize_str = gwy_unit_to_string(unit, GWY_VALUE_FORMAT_PLAIN);
-    if (!*unit->serialize_str)
+    if (!*unit->serialize_str) {
+        GWY_FREE(unit->serialize_str);
         return 0;
+    }
 
-    g_return_val_if_fail(items->len - items->n_items, 0);
-    items->items[items->n_items] = serialize_items[0];
-    items->items[items->n_items].value.v_string = unit->serialize_str;
-    items->n_items++;
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    return 1;
+    GwySerializableItem *it = items->items + items->n;
+
+    *it = serialize_items[0];
+    it->value.v_string = unit->serialize_str;
+    it++, items->n++;
+
+    return N_ITEMS;
 }
 
 static void

@@ -229,11 +229,11 @@ hash_itemize(gpointer hkey, gpointer hvalue, gpointer hdata)
     GwySerializableItem *it;
     GType type = G_VALUE_TYPE(value);
 
-    g_return_if_fail(items->len - items->n_items);
-    it = items->items + items->n_items;
+    g_return_if_fail(items->len - items->n);
+    it = items->items + items->n;
     it->name = g_quark_to_string(key);
     it->array_size = 0;
-    items->n_items++;
+    items->n++;
 
     switch (type) {
         case G_TYPE_BOOLEAN:
@@ -292,7 +292,7 @@ gwy_container_construct(GwySerializable *serializable,
 {
     GwyContainer *container = GWY_CONTAINER(serializable);
 
-    for (gsize i = 0; i < items->n_items; i++) {
+    for (gsize i = 0; i < items->n; i++) {
         GwySerializableItem *it = items->items + i;
         GQuark key = g_quark_from_string(it->name);
         switch (it->ctype) {
@@ -386,7 +386,7 @@ gwy_container_new(void)
 {
     GwyContainer *container;
 
-    container = g_object_new(GWY_TYPE_CONTAINER, NULL);
+    container = g_object_newv(GWY_TYPE_CONTAINER, 0, NULL);
 
     return container;
 }

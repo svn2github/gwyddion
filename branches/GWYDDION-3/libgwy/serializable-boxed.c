@@ -174,11 +174,11 @@ gwy_serializable_boxed_itemize(GType type,
                                gpointer boxed,
                                GwySerializableItems *items)
 {
-    g_return_if_fail(items->n_items < items->len);
+    g_return_if_fail(items->n < items->len);
     const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
     g_return_if_fail(info);
-    GwySerializableItem *item = items->items + items->n_items;
-    items->n_items++;
+    GwySerializableItem *item = items->items + items->n;
+    items->n++;
     item->name = g_type_name(type);
     item->value.v_size = 0;
     item->ctype = GWY_SERIALIZABLE_HEADER;
