@@ -51,18 +51,6 @@ enum {
     N_PROPS
 };
 
-struct _GwyResource {
-    GObject g_object;
-
-    gint use_count;
-    gchar *name;
-    gchar *filename;
-
-    gboolean is_modifiable : 1;
-    gboolean is_modified : 1;
-    gboolean is_preferred : 1;
-};
-
 static void              gwy_resource_finalize          (GObject *object);
 static void              gwy_resource_set_property      (GObject *object,
                                                          guint prop_id,
@@ -117,7 +105,7 @@ static const GwyInventoryItemType gwy_resource_item_type = {
     &gwy_resource_is_modifiable_impl,
     &gwy_resource_compare,
     &gwy_resource_rename,
-    NULL,
+    NULL,  /* FIXME: Should mark the resource as unmanaged. */
     NULL,  /* copy needs particular class */
     &gwy_resource_get_traits,
     &gwy_resource_get_trait_name,
@@ -728,7 +716,6 @@ parse(gchar *text,
       const gchar *filename_sys,
       GError **error)
 {
-    GwyResource *resource = NULL;
     gchar *line = gwy_str_next_line(&text);
 
     if (!line) {
@@ -826,7 +813,8 @@ parse(gchar *text,
         return NULL;
 
     /* Parse. */
-    if ((resource = klass->parse(text, error))) {
+    GwyResource *resource = g_object_newv(expected_type, 0, NULL);
+    if ((klass->parse(resource, text, error))) {
         if (name) {
             resource->name = g_strdup(name);
         }
@@ -835,6 +823,9 @@ parse(gchar *text,
             resource->name = g_filename_to_utf8(name, -1, NULL, NULL, NULL);
             g_free(name);
         }
+    }
+    else {
+        GWY_OBJECT_UNREF(resource);
     }
     g_type_class_unref(klass);
 
@@ -1079,7 +1070,7 @@ gwy_resource_classes_finalize(void)
 }
 
 /**
- * gwy_resource_next_param_line:
+ * gwy_resource_parse_param_line:
  * @line: Text buffer containing a resource file line (writable).
  * @key: Location to store the key to.
  * @value: Location to store the value to.
@@ -1101,9 +1092,9 @@ gwy_resource_classes_finalize(void)
  *          %GWY_RESOURCE_LINE_BAD_NUMBER.
  **/
 GwyResourceLineType
-gwy_resource_next_param_line(gchar *line,
-                             gchar **key,
-                             gchar **value)
+gwy_resource_parse_param_line(gchar *line,
+                              gchar **key,
+                              gchar **value)
 {
     // Empty?
     while (g_ascii_isspace(*line))
@@ -1146,7 +1137,7 @@ gwy_resource_next_param_line(gchar *line,
 }
 
 /**
- * gwy_resource_next_data_line:
+ * gwy_resource_parse_data_line:
  * @line: Text buffer containing a resource file line.
  * @ncolumns: Expected number of columns.
  * @data: Array of length @number to store the read values to.
@@ -1165,9 +1156,9 @@ gwy_resource_next_param_line(gchar *line,
  *          %GWY_RESOURCE_LINE_EMPTY and %GWY_RESOURCE_LINE_BAD_NUMBER.
  **/
 GwyResourceLineType
-gwy_resource_next_data_line(const gchar *line,
-                            guint ncolumns,
-                            gdouble *data)
+gwy_resource_parse_data_line(const gchar *line,
+                             guint ncolumns,
+                             gdouble *data)
 {
     // Empty?
     while (g_ascii_isspace(*line))
@@ -1185,6 +1176,34 @@ gwy_resource_next_data_line(const gchar *line,
         line = end;
     }
     return GWY_RESOURCE_LINE_OK;
+}
+
+/**
+ * gwy_resource_dump_data_line:
+ * @data: Array with @ncolumns double values to dump in text.
+ * @ncolumns: Number of items in @data.
+ *
+ * Dumps one row of floating point values to a resource file.
+ *
+ * Returns: A newly allocated string with @data dumped to text using decimal
+ *          point.
+ **/
+gchar*
+gwy_resource_dump_data_line(const gdouble *data,
+                            guint ncolumns)
+{
+    guint buflen = ncolumns*(G_ASCII_DTOSTR_BUF_SIZE + 1);
+    gchar *buffer = g_new0(gchar, buflen);
+    gchar *p = buffer;
+    for (guint i = 0; i < ncolumns; i++) {
+        g_ascii_dtostr(p, buflen - (p - buffer), data[i]);
+        if (i + 1 < ncolumns) {
+            p += strlen(p);
+            *p = ' ';
+            p++;
+        }
+    }
+    return buffer;
 }
 
 #define __LIBGWY_RESOURCE_C__

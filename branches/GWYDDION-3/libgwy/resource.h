@@ -62,6 +62,19 @@ GQuark gwy_resource_error_quark(void);
 typedef struct _GwyResource      GwyResource;
 typedef struct _GwyResourceClass GwyResourceClass;
 
+struct _GwyResource {
+    GObject g_object;
+
+    gint use_count;
+    gchar *name;
+    gchar *filename;
+
+    gboolean is_modifiable : 1;
+    gboolean is_modified : 1;
+    gboolean is_preferred : 1;
+    gboolean is_managed : 1;
+};
+
 struct _GwyResourceClass {
     /*< private >*/
     GObjectClass g_object_class;
@@ -80,7 +93,8 @@ struct _GwyResourceClass {
     void         (*use)    (GwyResource *resource);
     void         (*discard)(GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
-    GwyResource* (*parse)  (gchar *text,
+    gboolean     (*parse)  (GwyResource *resource,
+                            gchar *text,
                             GError **error);
 
     /*< private >*/
@@ -113,12 +127,15 @@ void                        gwy_resource_class_load_directory(GwyResourceClass *
                                                               GwyErrorList **error_list);
 void                        gwy_resource_classes_finalize    (void);
 
-GwyResourceLineType         gwy_resource_next_param_line     (gchar *line,
+GwyResourceLineType         gwy_resource_parse_param_line    (gchar *line,
                                                               gchar **key,
                                                               gchar **value);
-GwyResourceLineType         gwy_resource_next_data_line      (const gchar *line,
+GwyResourceLineType         gwy_resource_parse_data_line     (const gchar *line,
                                                               guint ncolumns,
                                                               gdouble *data);
+gchar*                      gwy_resource_dump_data_line      (const gdouble *data,
+                                                              guint ncolumns);
+
 G_END_DECLS
 
 #endif
