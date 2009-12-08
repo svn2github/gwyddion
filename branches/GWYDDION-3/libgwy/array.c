@@ -36,7 +36,7 @@ enum {
     N_SIGNALS
 };
 
-struct _GwyArray {
+struct _GwyArrayPrivate {
     GObject g_object;
 
     GArray *items;
@@ -45,6 +45,8 @@ struct _GwyArray {
     GDestroyNotify destroy;
     gboolean type_set : 1;
 };
+
+typedef struct _GwyArrayPrivate Array;
 
 static void         gwy_array_finalize(GObject *object);
 static void         gwy_array_dispose (GObject *object);
@@ -57,6 +59,8 @@ static void
 gwy_array_class_init(GwyArrayClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    g_type_class_add_private(klass, sizeof(Array));
 
     gobject_class->dispose = gwy_array_dispose;
     gobject_class->finalize = gwy_array_finalize;
@@ -129,14 +133,15 @@ gwy_array_class_init(GwyArrayClass *klass)
 }
 
 static void
-gwy_array_init(G_GNUC_UNUSED GwyArray *array)
+gwy_array_init(GwyArray *array)
 {
+    array->priv =  G_TYPE_INSTANCE_GET_PRIVATE(array, GWY_TYPE_ARRAY, Array);
 }
 
 static void
 gwy_array_finalize(GObject *object)
 {
-    GwyArray *array = GWY_ARRAY(object);
+    Array *array = GWY_ARRAY(object)->priv;
 
     if (array->items)
         g_array_free(array->items, TRUE);
@@ -147,7 +152,7 @@ gwy_array_finalize(GObject *object)
 static void
 gwy_array_dispose(GObject *object)
 {
-    GwyArray *array = GWY_ARRAY(object);
+    Array *array = GWY_ARRAY(object)->priv;
 
     // Destroy items in dispose() because they may contain pointers to objects.
     if (array->items && array->items->len && array->destroy) {
@@ -162,7 +167,7 @@ gwy_array_dispose(GObject *object)
 }
 
 static inline void
-ensure_items(GwyArray *array)
+ensure_items(Array *array)
 {
     if (G_UNLIKELY(!array->items))
         array->items = g_array_new(FALSE, FALSE, array->size);
@@ -204,9 +209,9 @@ gwy_array_new_with_data(gsize size,
 {
     GwyArray *array = g_object_newv(GWY_TYPE_ARRAY, 0, NULL);
     gwy_array_set_item_type(array, size, destroy);
-    ensure_items(array);
+    ensure_items(array->priv);
     if (items && nitems)
-        g_array_append_vals(array->items, items, nitems);
+        g_array_append_vals(array->priv->items, items, nitems);
     return array;
 }
 
@@ -227,12 +232,13 @@ gwy_array_set_item_type(GwyArray *array,
                         GDestroyNotify destroy)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
-    g_return_if_fail(!array->items);
+    Array *priv = array->priv;
+    g_return_if_fail(!priv->items);
     g_return_if_fail(size);
 
-    array->type_set = TRUE;
-    array->size = size;
-    array->destroy = destroy;
+    priv->type_set = TRUE;
+    priv->size = size;
+    priv->destroy = destroy;
 }
 
 /**
@@ -247,7 +253,8 @@ guint
 gwy_array_n_items(GwyArray *array)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), 0);
-    return array->items ? array->items->len : 0;
+    Array *priv = array->priv;
+    return priv->items ? priv->items->len : 0;
 }
 
 /**
@@ -264,8 +271,9 @@ gwy_array_get(GwyArray *array,
               guint n)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
-    g_return_val_if_fail(array->items, NULL);
-    return (n < array->items->len) ? gwy_array_index(array, n) : NULL;
+    Array *priv = array->priv;
+    g_return_val_if_fail(priv->items, NULL);
+    return (n < priv->items->len) ? gwy_array_index(priv, n) : NULL;
 }
 
 /**
@@ -282,8 +290,9 @@ gwy_array_updated(GwyArray *array,
                   guint n)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
-    g_return_if_fail(array->items);
-    g_return_if_fail(n < array->items->len);
+    Array *priv = array->priv;
+    g_return_if_fail(priv->items);
+    g_return_if_fail(n < priv->items->len);
 
     g_signal_emit(array, gwy_array_signals[ITEM_UPDATED], 0, n);
 }
@@ -316,23 +325,24 @@ gwy_array_insert(GwyArray *array,
                  guint nitems)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
-    g_return_val_if_fail(array->type_set, NULL);
+    Array *priv = array->priv;
+    g_return_val_if_fail(priv->type_set, NULL);
     if (G_UNLIKELY(!nitems)) {
-        if (array->items)
-            return array->items->data;
+        if (priv->items)
+            return priv->items->data;
         return NULL;
     }
     g_return_val_if_fail(items, NULL);
 
-    ensure_items(array);
-    g_return_val_if_fail(n <= array->items->len, NULL);
+    ensure_items(priv);
+    g_return_val_if_fail(n <= priv->items->len, NULL);
     for (guint i = 0; i < nitems; i++) {
-        g_array_insert_vals(array->items, n + i,
-                            gwy_data_index(array, items, i), 1);
+        g_array_insert_vals(priv->items, n + i,
+                            gwy_data_index(priv, items, i), 1);
         g_signal_emit(array, gwy_array_signals[ITEM_INSERTED], 0, n + i);
     }
 
-    return gwy_array_index(array, n);
+    return gwy_array_index(priv, n);
 }
 
 /**
@@ -360,19 +370,20 @@ gwy_array_append(GwyArray *array,
                  guint nitems)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
-    g_return_val_if_fail(array->type_set, NULL);
+    Array *priv = array->priv;
+    g_return_val_if_fail(priv->type_set, NULL);
     if (G_UNLIKELY(!nitems))
         return NULL;
     g_return_val_if_fail(items, NULL);
 
-    ensure_items(array);
+    ensure_items(priv);
     for (guint i = 0; i < nitems; i++) {
-        g_array_append_vals(array->items, gwy_data_index(array, items, i), 1);
+        g_array_append_vals(priv->items, gwy_data_index(priv, items, i), 1);
         g_signal_emit(array, gwy_array_signals[ITEM_INSERTED], 0,
-                      array->items->len - 1);
+                      priv->items->len - 1);
     }
 
-    return gwy_array_index(array, array->items->len - nitems);
+    return gwy_array_index(priv, priv->items->len - nitems);
 }
 
 /**
@@ -396,16 +407,17 @@ gwy_array_delete(GwyArray *array,
                  guint nitems)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
-    g_return_if_fail(array->type_set);
+    Array *priv = array->priv;
+    g_return_if_fail(priv->type_set);
     if (nitems == 0)
         return;
-    g_return_if_fail(array->items && n + nitems <= array->items->len);
+    g_return_if_fail(priv->items && n + nitems <= priv->items->len);
 
     for (guint i = 0; i < nitems; i++) {
         guint j = n + nitems-1 - i;
-        if (array->destroy)
-            array->destroy(gwy_array_index(array, j));
-        g_array_remove_index(array->items, j);
+        if (priv->destroy)
+            priv->destroy(gwy_array_index(priv, j));
+        g_array_remove_index(priv->items, j);
         g_signal_emit(array, gwy_array_signals[ITEM_DELETED], 0, j);
     }
 }
@@ -434,17 +446,18 @@ gwy_array_replace(GwyArray *array,
                   guint nitems)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
-    g_return_if_fail(array->type_set);
+    Array *priv = array->priv;
+    g_return_if_fail(priv->type_set);
     if (nitems == 0)
         return;
-    g_return_if_fail(array->items && n + nitems <= array->items->len);
+    g_return_if_fail(priv->items && n + nitems <= priv->items->len);
 
     for (guint i = 0; i < nitems; i++) {
         guint j = n + i;
-        if (array->destroy)
-            array->destroy(gwy_array_index(array, j));
-        memcpy(gwy_array_index(array, j), gwy_data_index(array, items, i),
-               array->size);
+        if (priv->destroy)
+            priv->destroy(gwy_array_index(priv, j));
+        memcpy(gwy_array_index(priv, j), gwy_data_index(priv, items, i),
+               priv->size);
         g_signal_emit(array, gwy_array_signals[ITEM_UPDATED], 0, j);
     }
 }
@@ -463,8 +476,9 @@ gpointer
 gwy_array_get_data(GwyArray *array)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
-    g_return_val_if_fail(array->type_set, NULL);
-    return (array->items && array->items->len) ? array->items->data : NULL;
+    Array *priv = array->priv;
+    g_return_val_if_fail(priv->type_set, NULL);
+    return (priv->items && priv->items->len) ? priv->items->data : NULL;
 }
 
 /**
@@ -487,17 +501,18 @@ gwy_array_set_data(GwyArray *array,
                    guint nitems)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
-    g_return_if_fail(array->type_set);
+    Array *priv = array->priv;
+    g_return_if_fail(priv->type_set);
 
-    ensure_items(array);
-    if (nitems < array->items->len)
-        gwy_array_delete(array, nitems, array->items->len - nitems);
+    ensure_items(priv);
+    if (nitems < priv->items->len)
+        gwy_array_delete(array, nitems, priv->items->len - nitems);
     if (nitems) {
-        gwy_array_replace(array, 0, items, array->items->len);
-        if (nitems > array->items->len)
-            gwy_array_append(array, gwy_data_index(array, items,
-                                                   array->items->len),
-                             nitems - array->items->len);
+        gwy_array_replace(array, 0, items, priv->items->len);
+        if (nitems > priv->items->len)
+            gwy_array_append(array, gwy_data_index(priv, items,
+                                                   priv->items->len),
+                             nitems - priv->items->len);
     }
 }
 

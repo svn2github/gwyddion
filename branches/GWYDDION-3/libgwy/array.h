@@ -40,6 +40,11 @@ G_BEGIN_DECLS
 typedef struct _GwyArray GwyArray;
 typedef struct _GwyArrayClass GwyArrayClass;
 
+struct _GwyArray {
+    GObject g_object;
+    struct _GwyArrayPrivate *priv;
+};
+
 struct _GwyArrayClass {
     GObjectClass g_object_class;
 };
