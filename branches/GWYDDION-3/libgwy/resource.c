@@ -48,6 +48,7 @@ enum {
     PROP_IS_PREFERRED,
     PROP_IS_MODIFIABLE,
     PROP_IS_MODIFIED,
+    PROP_IS_MANAGED,
     N_PROPS
 };
 
@@ -66,11 +67,16 @@ static gboolean          gwy_resource_compare           (gconstpointer item1,
                                                          gconstpointer item2);
 static void              gwy_resource_rename            (gpointer item,
                                                          const gchar *new_name);
+static gpointer          gwy_resource_copy              (gconstpointer item);
 static const GType*      gwy_resource_get_traits        (guint *ntraits);
 static const gchar*      gwy_resource_get_trait_name    (guint i);
 static void              gwy_resource_get_trait_value   (gconstpointer item,
                                                          guint i,
                                                          GValue *value);
+static void              gwy_resource_set_unmanaged     (gpointer item);
+static void              inventory_item_inserted        (GwyInventory *inventory,
+                                                         guint i,
+                                                         GwyResourceClass *klass);
 static GwyResourceClass* get_resource_class             (const gchar *typename,
                                                          GType expected_type,
                                                          const gchar *filename_sys,
@@ -105,8 +111,8 @@ static const GwyInventoryItemType gwy_resource_item_type = {
     &gwy_resource_is_modifiable_impl,
     &gwy_resource_compare,
     &gwy_resource_rename,
-    NULL,  /* FIXME: Should mark the resource as unmanaged. */
-    NULL,  /* copy needs particular class */
+    &gwy_resource_set_unmanaged,
+    &gwy_resource_copy,
     &gwy_resource_get_traits,
     &gwy_resource_get_trait_name,
     &gwy_resource_get_trait_value,
@@ -195,6 +201,15 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                  "Is modified",
                                  "Whether a resource was modified, this is "
                                  "set when data-changed signal is emitted",
+                                 FALSE,
+                                 G_PARAM_READABLE | STATIC);
+    g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
+
+    pspec = g_param_spec_boolean("is-managed",
+                                 "Is managed",
+                                 "Whether a resource is managed by the class "
+                                 "inventory.  False for free-standing "
+                                 "resources.",
                                  FALSE,
                                  G_PARAM_READABLE | STATIC);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
@@ -328,6 +343,14 @@ gwy_resource_rename(gpointer item,
     g_object_notify(G_OBJECT(item), "name");
 }
 
+static gpointer
+gwy_resource_copy(gconstpointer item)
+{
+    GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(item);
+    g_return_val_if_fail(klass && klass->copy, NULL);
+    return klass->copy(GWY_RESOURCE(item));
+}
+
 static const GType*
 gwy_resource_get_traits(guint *ntraits)
 {
@@ -354,11 +377,41 @@ gwy_resource_get_trait_value(gconstpointer item,
     g_object_get_property(G_OBJECT(item), gwy_resource_trait_names[i], value);
 }
 
+static void
+gwy_resource_set_unmanaged(gpointer item)
+{
+    GwyResource *resource = GWY_RESOURCE(item);
+    g_return_if_fail(resource->is_managed);
+    resource->is_managed = FALSE;
+    g_object_notify(G_OBJECT(item), "is-managed");
+}
+
+static void
+inventory_item_inserted(GwyInventory *inventory,
+                        guint i,
+                        GwyResourceClass *klass)
+{
+    g_return_if_fail(klass->inventory == inventory);
+    GwyResource *resource = gwy_inventory_get_nth(inventory, i);
+    if (!resource->is_managed) {
+        GObject *object = G_OBJECT(resource);
+        g_object_freeze_notify(object);
+        resource->is_managed = TRUE;
+        g_object_notify(object, "is-managed");
+        // We must be pesimistic.
+        if (!resource->is_modified && resource->is_modifiable) {
+            resource->is_modified = resource->is_modifiable;
+            g_object_notify(object, "is-modified");
+        }
+        g_object_thaw_notify(object);
+    }
+}
+
 /**
  * gwy_resource_get_name:
  * @resource: A resource.
  *
- * Returns the resource name.
+ * Gets the resource name.
  *
  * Returns: Name of @resource.  The string is owned by @resource and must not
  *          be modfied or freed.
@@ -371,12 +424,51 @@ gwy_resource_get_name(GwyResource *resource)
 }
 
 /**
+ * gwy_resource_set_name:
+ * @resource: A resource.
+ * @name: New name.
+ *
+ * Sets the resource name.
+ *
+ * Only free-standing resources can be renamed using this method.  Resources
+ * managed by the class inventory can be only renamed with
+ * gwy_inventory_rename().
+ **/
+void
+gwy_resource_set_name(GwyResource *resource,
+                      const gchar *name)
+{
+    g_return_if_fail(GWY_IS_RESOURCE(resource));
+    g_return_if_fail(!resource->is_managed);
+    gchar *oldname = resource->name;
+    resource->name = g_strdup(name);
+    GWY_FREE(oldname);
+    g_object_notify(G_OBJECT(resource), "name");
+}
+
+/**
  * gwy_resource_is_modifiable:
  * @resource: A resource.
  *
- * Returns whether a resource is modifiable.
+ * Determines whether a resource is managed.
  *
- * Returns: %TRUE if resource is modifiable, %FALSE if it's fixed (system)
+ * Returns: %TRUE if resource is managed by the class inventory, %FALSE if
+ *          it is a free-standing resource.
+ **/
+gboolean
+gwy_resource_is_managed(GwyResource *resource)
+{
+    g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
+    return resource->is_managed;
+}
+
+/**
+ * gwy_resource_is_modifiable:
+ * @resource: A resource.
+ *
+ * Determines whether a resource is modifiable.
+ *
+ * Returns: %TRUE if resource is modifiable, %FALSE if it is fixed (system)
  *          resource.
  **/
 gboolean
@@ -390,7 +482,7 @@ gwy_resource_is_modifiable(GwyResource *resource)
  * gwy_resource_get_is_preferred:
  * @resource: A resource.
  *
- * Returns whether a resource is preferred.
+ * Determines whether a resource is preferred.
  *
  * Returns: %TRUE if resource is preferred, %FALSE otherwise.
  **/
@@ -464,6 +556,36 @@ gwy_resource_class_get_item_type(GwyResourceClass *klass)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
     return &klass->item_type;
+}
+
+/**
+ * gwy_resource_class_register:
+ * @klass: A resource class.
+ * @name: Resource class name, usable as resource directory name for on-disk
+ *        resources.
+ *
+ * Registers a resource class.
+ *
+ * This is normally done in the class init function of a resource class.
+ *
+ * This method sets up the class inventory.
+ **/
+void
+gwy_resource_class_register(GwyResourceClass *klass,
+                            const gchar *name)
+{
+    klass->item_type.type = G_TYPE_FROM_CLASS(klass);
+    klass->name = name;
+    klass->inventory = gwy_inventory_new_with_type(&klass->item_type);
+
+    g_signal_connect(klass->inventory, "item-inserted",
+                     G_CALLBACK(inventory_item_inserted), klass);
+
+    gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
+    G_LOCK(all_resources);
+    if (!g_slist_find(all_resources, type))
+        all_resources = g_slist_prepend(all_resources, type);
+    G_UNLOCK(all_resources);
 }
 
 /**
@@ -690,8 +812,7 @@ construct_filename(const gchar *resource_name)
  *
  * Loads a resource from a file.
  *
- * The resource is not added to the inventory neither is its name checked
- * for uniqueness.
+ * The resource is created as free-standing.
  *
  * Returns: A newly created resource object.
  **/
@@ -923,12 +1044,6 @@ gwy_resource_class_load(GwyResourceClass *klass)
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
     g_return_if_fail(klass->inventory);
 
-    gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
-    G_LOCK(all_resources);
-    if (!g_slist_find(all_resources, type))
-        all_resources = g_slist_prepend(all_resources, type);
-    G_UNLOCK(all_resources);
-
     gchar *userdir = gwy_user_directory(klass->name);
     gchar **dirs = gwy_data_search_path(klass->name);
     for (gchar **d = dirs; *d; d++) {
@@ -955,6 +1070,8 @@ gwy_resource_class_load(GwyResourceClass *klass)
  * GIO %G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN and
  * %G_FILE_ATTRIBUTE_STANDARD_IS_BACKUP) are assumed to be resources of class
  * @klass.  Subdirectories are ignored.
+ *
+ * The loaded resources are created as managed.
  **/
 void
 gwy_resource_class_load_directory(GwyResourceClass *klass,
@@ -991,6 +1108,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
 
         if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
+            resource->is_managed = TRUE;
             resource->is_modifiable = modifiable;
             resource->filename = filename_sys;
             resource->is_modified = FALSE;
@@ -1043,13 +1161,10 @@ name_is_unique(GwyResource *resource,
  * Destroys the inventories of all resource classes.
  *
  * This function makes the affected resource classes unusable.  Its purpose is
- * to faciliate reference leak debugging by destroying a large number of
+ * to facilitate reference leak debugging by destroying a large number of
  * objects that normally live forever.
  *
- * Note static resource classes that never called gwy_resource_class_load()
- * are excluded.
- *
- * It quite quite defeat the purpose of this function if the program was busy
+ * It would quite defeat the purpose of this function if the program was busy
  * loading more resource classes in other threads when it is executed.  So, no
  * locking is used and just do not do this.
  **/
@@ -1062,6 +1177,9 @@ gwy_resource_classes_finalize(void)
         GwyResourceClass *klass;
 
         klass = g_type_class_ref((GType)GPOINTER_TO_SIZE(all_resources->data));
+        // Disconnect in case someone else holds a reference.
+        GWY_SIGNAL_HANDLER_DISCONNECT(klass->inventory,
+                                      klass->item_inserted_id);
         GWY_OBJECT_UNREF(klass->inventory);
     }
 
@@ -1219,6 +1337,24 @@ gwy_resource_dump_data_line(const gdouble *data,
  * common interface: questioning resource name using gwy_resource_get_name(),
  * modifiability using gwy_resource_is_modifiable(), expressing user's
  * favorites, loading resources from files and saving them.
+ *
+ * All resources of given kind are usually contained in the class inventory,
+ * available through gwy_resource_class_get_inventory(), although they may also
+ * exist as private objects the inventory knows nothing about.  In the first
+ * case they are called managed resources while in the second they are called
+ * free-standing.
+ *
+ * Managed resources come from gwy_resource_class_load() or they may be
+ * built-in.  They can also be created using the inventory methods such as
+ * gwy_inventory_copy().  They cannot be freely renamed, only renaming using
+ * gwy_inventory_rename() is possible.  If a resource is removed from the
+ * inventory but still referenced by other users, it becomes free-standing.
+ *
+ * Free-standing resources are created using gwy_resource_load(),
+ * g_object_new(), deserialization and other direct methods.  They do not have
+ * a resource file associated and they are not automatically saved.  If you
+ * insert a free-standing resource to the class inventory, it becomes managed.
+ * Before inserting, you must check whether its name its unique though.
  **/
 
 /**
@@ -1232,12 +1368,15 @@ gwy_resource_dump_data_line(const gdouble *data,
  * GwyResourceClass:
  * @inventory: Inventory with resources.
  * @name: Resource class name, usable as resource directory name for on-disk
- *        resources.
+ *        resources. FIXME: Should be private.
  * @item_type: Inventory item type.  Most fields are pre-filled, but namely
- *             @type and @copy must be filled by particular resource type.
+ *             @copy must be filled by particular resource type.
+ *             FIXME: Should be private.
  * @data_changed: "data-changed" class signal handler.
  * @use: gwy_resource_use() virtual method.
  * @discard: gwy_resource_discard() virtual method.
+ * @copy: Creates copy of a resource.  For serializable resources, this should
+ *        be the same as duplication.
  * @dump: Dumps resource data to text, the envelope is added by #GwyResource.
  * @parse: Parses back the text dump, in parses only the
  *         actual resource data, the envelope is handled by #GwyResource.

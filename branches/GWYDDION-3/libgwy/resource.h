@@ -92,19 +92,24 @@ struct _GwyResourceClass {
     /* Virtual table */
     void         (*use)    (GwyResource *resource);
     void         (*discard)(GwyResource *resource);
+    GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
     gboolean     (*parse)  (GwyResource *resource,
                             gchar *text,
                             GError **error);
 
     /*< private >*/
+    gulong item_inserted_id;
     void (*reserved1)(void);
     void (*reserved2)(void);
 };
 
 GType                       gwy_resource_get_type            (void)                       G_GNUC_CONST;
 const gchar*                gwy_resource_get_name            (GwyResource *resource)      G_GNUC_PURE;
+void                        gwy_resource_set_name            (GwyResource *resource,
+                                                              const gchar *name);
 gboolean                    gwy_resource_is_modifiable       (GwyResource *resource)      G_GNUC_PURE;
+gboolean                    gwy_resource_is_managed          (GwyResource *resource)      G_GNUC_PURE;
 gboolean                    gwy_resource_get_is_preferred    (GwyResource *resource)      G_GNUC_PURE;
 void                        gwy_resource_set_is_preferred    (GwyResource *resource,
                                                               gboolean is_preferred);
@@ -117,6 +122,8 @@ GwyResource*                gwy_resource_load                (const gchar *filen
                                                               GError **error)             G_GNUC_MALLOC;
 gboolean                    gwy_resource_save                (GwyResource *resource,
                                                               GError **error);
+void                        gwy_resource_class_register      (GwyResourceClass *klass,
+                                                              const gchar *name);
 const gchar*                gwy_resource_class_get_name      (GwyResourceClass *klass)    G_GNUC_PURE;
 const GwyInventoryItemType* gwy_resource_class_get_item_type (GwyResourceClass *klass)    G_GNUC_PURE;
 GwyInventory*               gwy_resource_class_get_inventory (GwyResourceClass *klass)    G_GNUC_PURE;

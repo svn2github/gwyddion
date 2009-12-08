@@ -51,30 +51,30 @@ struct _GwyGradient {
     gboolean samples_valid : 1;
 };
 
-static void     gwy_gradient_finalize         (GObject *object);
-static void     gwy_gradient_serializable_init(GwySerializableInterface *iface);
-static gsize    gwy_gradient_n_items          (GwySerializable *serializable);
-static gsize    gwy_gradient_itemize          (GwySerializable *serializable,
-                                               GwySerializableItems *items);
-static gboolean gwy_gradient_construct        (GwySerializable *serializable,
-                                               GwySerializableItems *items,
-                                               GwyErrorList **error_list);
-static GObject* gwy_gradient_duplicate_impl   (GwySerializable *serializable);
-static void     gwy_gradient_assign_impl      (GwySerializable *destination,
-                                               GwySerializable *source);
-static void     gwy_gradient_sanitize         (GwyGradient *gradient);
-static gpointer gwy_gradient_copy             (gconstpointer item);
-static void     gwy_gradient_use              (GwyResource *resource);
-static void     gwy_gradient_discard          (GwyResource *resource);
-static gchar*   gwy_gradient_dump             (GwyResource *resource);
-static gboolean gwy_gradient_parse            (GwyResource *resource,
-                                               gchar *text,
-                                               GError **error);
-static void     refine_interval               (GList *points,
-                                               gint n,
-                                               const GwyGradientPoint *samples,
-                                               gdouble threshold);
-static void     gwy_gradient_changed          (GwyGradient *gradient);
+static void         gwy_gradient_finalize         (GObject *object);
+static void         gwy_gradient_serializable_init(GwySerializableInterface *iface);
+static gsize        gwy_gradient_n_items          (GwySerializable *serializable);
+static gsize        gwy_gradient_itemize          (GwySerializable *serializable,
+                                                   GwySerializableItems *items);
+static gboolean     gwy_gradient_construct        (GwySerializable *serializable,
+                                                   GwySerializableItems *items,
+                                                   GwyErrorList **error_list);
+static GObject*     gwy_gradient_duplicate_impl   (GwySerializable *serializable);
+static void         gwy_gradient_assign_impl      (GwySerializable *destination,
+                                                   GwySerializable *source);
+static void         gwy_gradient_sanitize         (GwyGradient *gradient);
+static GwyResource* gwy_gradient_copy             (GwyResource *resource);
+static void         gwy_gradient_use              (GwyResource *resource);
+static void         gwy_gradient_discard          (GwyResource *resource);
+static gchar*       gwy_gradient_dump             (GwyResource *resource);
+static gboolean     gwy_gradient_parse            (GwyResource *resource,
+                                                   gchar *text,
+                                                   GError **error);
+static void         refine_interval               (GList *points,
+                                                   gint n,
+                                                   const GwyGradientPoint *samples,
+                                                   gdouble threshold);
+static void         gwy_gradient_changed          (GwyGradient *gradient);
 
 static const GwyGradientPoint null_point = { 0, { 0, 0, 0, 0 } };
 
@@ -105,24 +105,20 @@ gwy_gradient_serializable_init(GwySerializableInterface *iface)
 static void
 gwy_gradient_class_init(GwyGradientClass *klass)
 {
-    GwyResourceClass *parent_class, *res_class = GWY_RESOURCE_CLASS(klass);
+    GwyResourceClass *res_class = GWY_RESOURCE_CLASS(klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
     gobject_class->finalize = gwy_gradient_finalize;
 
-    parent_class = GWY_RESOURCE_CLASS(gwy_gradient_parent_class);
-    res_class->item_type = *gwy_resource_class_get_item_type(parent_class);
-
-    res_class->item_type.type = G_TYPE_FROM_CLASS(klass);
-    res_class->item_type.copy = gwy_gradient_copy;
-
-    res_class->name = "gradients";
-    res_class->inventory = gwy_inventory_new_with_type(&res_class->item_type);
-    gwy_inventory_set_default_name(res_class->inventory, GWY_GRADIENT_DEFAULT);
     res_class->use = gwy_gradient_use;
     res_class->discard = gwy_gradient_discard;
+    res_class->copy = gwy_gradient_copy;
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
+
+    gwy_resource_class_register(res_class, "gradients");
+    GwyInventory *inventory = gwy_resource_class_get_inventory(res_class);
+    gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
 }
 
 static void
@@ -179,9 +175,12 @@ gwy_gradient_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient",
                                  error_list);
 
-    /* FIXME: Cannot set the name.
-     * Must implement unmanaged resources first. */
     GwyGradient *gradient = GWY_GRADIENT(serializable);
+
+    if (its[0].value.v_string) {
+        gwy_resource_set_name(GWY_RESOURCE(gradient), its[0].value.v_string);
+        GWY_FREE(its[0].value.v_string);
+    }
 
     guint len = its[1].array_size;
     if (len && its[1].value.v_double_array) {
@@ -238,10 +237,10 @@ gwy_gradient_assign_impl(GwySerializable *destination,
     //g_signal_emit(gradient, gradient_signals[CHANGED], 0);
 }
 
-static gpointer
-gwy_gradient_copy(gconstpointer item)
+static GwyResource*
+gwy_gradient_copy(GwyResource *resource)
 {
-    return gwy_gradient_duplicate_impl(GWY_SERIALIZABLE(item));
+    return GWY_RESOURCE(gwy_gradient_duplicate_impl(GWY_SERIALIZABLE(resource)));
 }
 
 /* This is an internal function and does NOT call gwy_gradient_changed(). */

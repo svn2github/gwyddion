@@ -1245,7 +1245,7 @@ invent_item_name(GwyInventory *inventory,
  *           with gwy_inventory_new_with_items() and the initial array was
  *           not sorted according to @compare.
  * @rename: Function to rename an item.  If not %NULL, it is possible to use
- *          gwy_inventory_rename_item().  Note items must not be renamed by any
+ *          gwy_inventory_rename().  Note items must not be renamed by any
  *          other means than this method, because when an item is renamed and
  *          the inventory does not know it, very bad things will happen and you
  *          will lose all your good karma.  Also,
