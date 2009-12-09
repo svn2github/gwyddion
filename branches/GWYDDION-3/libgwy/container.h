@@ -44,6 +44,11 @@ typedef struct _GwyContainerClass GwyContainerClass;
 #define GWY_CONTAINER_GET_CLASS(obj) \
     (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_CONTAINER, GwyContainerClass))
 
+struct _GwyContainer {
+    GObject g_object;
+    struct _GwyContainerPrivate *priv;
+};
+
 struct _GwyContainerClass {
     GObjectClass g_object_class;
 };

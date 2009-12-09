@@ -45,11 +45,13 @@ typedef struct {
     gpointer user_data;
 } PrefixData;
 
-struct _GwyContainer {
+struct _GwyContainerPrivate {
     GObject g_object;
     GHashTable *values;
-    gboolean in_construction;
+    gboolean in_construction : 1;
 };
+
+typedef struct _GwyContainerPrivate Container;
 
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
@@ -126,6 +128,8 @@ gwy_container_class_init(GwyContainerClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
+    g_type_class_add_private(klass, sizeof(Container));
+
     gobject_class->dispose = gwy_container_dispose;
     gobject_class->finalize = gwy_container_finalize;
 
@@ -153,20 +157,23 @@ gwy_container_class_init(GwyContainerClass *klass)
 static void
 gwy_container_init(GwyContainer *container)
 {
-    container->values = g_hash_table_new_full(NULL, NULL, NULL, value_destroy);
+    container->priv = G_TYPE_INSTANCE_GET_PRIVATE(container, GWY_TYPE_CONTAINER,
+                                                  Container);
+    container->priv->values = g_hash_table_new_full(NULL, NULL, NULL,
+                                                    value_destroy);
 }
 
 static void
 gwy_container_finalize(GObject *object)
 {
-    g_hash_table_destroy(GWY_CONTAINER(object)->values);
+    g_hash_table_destroy(GWY_CONTAINER(object)->priv->values);
     G_OBJECT_CLASS(gwy_container_parent_class)->finalize(object);
 }
 
 static void
 gwy_container_dispose(GObject *object)
 {
-    g_hash_table_foreach(GWY_CONTAINER(object)->values,
+    g_hash_table_foreach(GWY_CONTAINER(object)->priv->values,
                          hash_object_dispose, NULL);
     G_OBJECT_CLASS(gwy_container_parent_class)->dispose(object);
 }
@@ -186,7 +193,7 @@ static gsize
 gwy_container_n_items_impl(GwySerializable *serializable)
 {
     gsize n_items = 0;
-    g_hash_table_foreach(GWY_CONTAINER(serializable)->values,
+    g_hash_table_foreach(GWY_CONTAINER(serializable)->priv->values,
                          hash_count_items, &n_items);
     return n_items;
 }
@@ -216,8 +223,8 @@ gwy_container_itemize(GwySerializable *serializable,
 {
     GwyContainer *container = GWY_CONTAINER(serializable);
 
-    g_hash_table_foreach(container->values, hash_itemize, items);
-    return g_hash_table_size(container->values);
+    g_hash_table_foreach(container->priv->values, hash_itemize, items);
+    return g_hash_table_size(container->priv->values);
 }
 
 static void
@@ -354,10 +361,10 @@ static GObject*
 gwy_container_duplicate_impl(GwySerializable *object)
 {
     GwyContainer *duplicate = gwy_container_new();
-    duplicate->in_construction = TRUE;
-    g_hash_table_foreach(GWY_CONTAINER(object)->values,
+    duplicate->priv->in_construction = TRUE;
+    g_hash_table_foreach(GWY_CONTAINER(object)->priv->values,
                          hash_duplicate, duplicate);
-    duplicate->in_construction = FALSE;
+    duplicate->priv->in_construction = FALSE;
 
     return (GObject*)duplicate;
 }
@@ -370,8 +377,8 @@ gwy_container_assign_impl(GwySerializable *destination,
     GwyContainer *src = GWY_CONTAINER(source);
 
     /* FIXME: Does not emit item-changed!? */
-    g_hash_table_remove_all(container->values);
-    g_hash_table_foreach(src->values, hash_duplicate, container);
+    g_hash_table_remove_all(container->priv->values);
+    g_hash_table_foreach(src->priv->values, hash_duplicate, container);
 }
 
 /**
@@ -411,7 +418,7 @@ guint
 gwy_container_n_items(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), 0);
-    return g_hash_table_size(container->values);
+    return g_hash_table_size(container->priv->values);
 }
 
 /**
@@ -440,7 +447,7 @@ gwy_container_item_type(GwyContainer *container, GQuark key)
     if (!key)
         return 0;
 
-    p = (GValue*)g_hash_table_lookup(container->values,
+    p = (GValue*)g_hash_table_lookup(container->priv->values,
                                      GUINT_TO_POINTER(key));
 
     return p ? G_VALUE_TYPE(p) : 0;
@@ -468,7 +475,7 @@ gwy_container_contains(GwyContainer *container, GQuark key)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), 0);
     return key
-           && g_hash_table_lookup(container->values,
+           && g_hash_table_lookup(container->priv->values,
                                   GUINT_TO_POINTER(key)) != NULL;
 }
 
@@ -500,11 +507,11 @@ gwy_container_remove(GwyContainer *container, GQuark key)
     if (!key)
         return FALSE;
 
-    value = g_hash_table_lookup(container->values, GUINT_TO_POINTER(key));
+    value = g_hash_table_lookup(container->priv->values, GUINT_TO_POINTER(key));
     if (!value)
         return FALSE;
 
-    g_hash_table_remove(container->values, GUINT_TO_POINTER(key));
+    g_hash_table_remove(container->priv->values, GUINT_TO_POINTER(key));
     g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 
     return TRUE;
@@ -537,7 +544,7 @@ gwy_container_remove_prefix(GwyContainer *container, const gchar *prefix)
     pfdata.closed_prefix = !pfdata.prefix_length
                            || (prefix[pfdata.prefix_length - 1]
                                == GWY_CONTAINER_PATHSEP);
-    g_hash_table_foreach_remove(container->values, hash_remove_prefix,
+    g_hash_table_foreach_remove(container->priv->values, hash_remove_prefix,
                                 &pfdata);
     pfdata.keylist = g_slist_reverse(pfdata.keylist);
     for (l = pfdata.keylist; l; l = g_slist_next(l))
@@ -604,7 +611,7 @@ gwy_container_foreach(GwyContainer *container,
     pfdata.keylist = NULL;
     pfdata.func = function;
     pfdata.user_data = user_data;
-    g_hash_table_foreach(container->values, hash_foreach, &pfdata);
+    g_hash_table_foreach(container->priv->values, hash_foreach, &pfdata);
 
     return pfdata.count;
 }
@@ -644,12 +651,12 @@ GQuark*
 gwy_container_keys(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    guint n = g_hash_table_size(container->values);
+    guint n = g_hash_table_size(container->priv->values);
     if (!n)
         return NULL;
 
     GArray *array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n);
-    g_hash_table_foreach(container->values, keys_foreach, array);
+    g_hash_table_foreach(container->priv->values, keys_foreach, array);
     return (GQuark*)g_array_free(array, FALSE);
 }
 
@@ -680,12 +687,12 @@ const gchar**
 gwy_container_keys_n(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
-    guint n = g_hash_table_size(container->values);
+    guint n = g_hash_table_size(container->priv->values);
     if (!n)
         return NULL;
 
     GPtrArray *array = g_ptr_array_sized_new(n);
-    g_hash_table_foreach(container->values, keys_by_name_foreach, array);
+    g_hash_table_foreach(container->priv->values, keys_by_name_foreach, array);
     return (const gchar**)g_ptr_array_free(array, FALSE);
 }
 
@@ -734,26 +741,26 @@ gwy_container_rename(GwyContainer *container,
                      GQuark newkey,
                      gboolean force)
 {
-    GValue *value;
-
     g_return_val_if_fail(GWY_IS_CONTAINER(container), FALSE);
     g_return_val_if_fail(key, FALSE);
     if (key == newkey)
         return TRUE;
 
-    value = g_hash_table_lookup(container->values, GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *value = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
+
     if (!value)
         return FALSE;
 
-    if (g_hash_table_lookup(container->values, GUINT_TO_POINTER(newkey))) {
+    if (g_hash_table_lookup(values, GUINT_TO_POINTER(newkey))) {
         if (!force)
             return FALSE;
 
-        g_hash_table_remove(container->values, GUINT_TO_POINTER(newkey));
+        g_hash_table_remove(values, GUINT_TO_POINTER(newkey));
     }
 
-    g_hash_table_insert(container->values, GUINT_TO_POINTER(newkey), value);
-    g_hash_table_steal(container->values, GUINT_TO_POINTER(key));
+    g_hash_table_insert(values, GUINT_TO_POINTER(newkey), value);
+    g_hash_table_steal(values, GUINT_TO_POINTER(key));
     g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
     g_signal_emit(container, container_signals[ITEM_CHANGED], newkey, newkey);
 
@@ -782,7 +789,8 @@ get_value_of_type(GwyContainer *container,
 
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
     g_return_val_if_fail(key, NULL);
-    p = (GValue*)g_hash_table_lookup(container->values, GUINT_TO_POINTER(key));
+    p = (GValue*)g_hash_table_lookup(container->priv->values,
+                                     GUINT_TO_POINTER(key));
     if (!p) {
         g_warning("No value for key %u (%s)", key, g_quark_to_string(key));
         return NULL;
@@ -818,7 +826,7 @@ gis_value_of_type(GwyContainer *container,
     if (!key)
         return NULL;
 
-    GValue *p = (GValue*)g_hash_table_lookup(container->values,
+    GValue *p = (GValue*)g_hash_table_lookup(container->priv->values,
                                              GUINT_TO_POINTER(key));
     if (!p)
         return NULL;
@@ -1592,8 +1600,9 @@ gwy_container_set_value(GwyContainer *container,
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
     g_return_if_fail(value);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     GType newtype = G_VALUE_TYPE(gvalue);
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
@@ -1607,8 +1616,7 @@ gwy_container_set_value(GwyContainer *container,
             GValue *newvalue = g_slice_new0(GValue);
             g_value_init(newvalue, newtype);
             g_value_copy(value, newvalue);
-            g_hash_table_insert(container->values, GUINT_TO_POINTER(key),
-                                newvalue);
+            g_hash_table_insert(values, GUINT_TO_POINTER(key), newvalue);
             // g_value_unset(gvalue); done by hash value destroy function
         }
     }
@@ -1616,17 +1624,17 @@ gwy_container_set_value(GwyContainer *container,
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, newtype);
         g_value_copy(value, gvalue);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
 #define container_set_template(container,key,value,n,N) \
     g_return_if_fail(GWY_IS_CONTAINER(container)); \
     g_return_if_fail(key); \
-    GValue *gvalue = g_hash_table_lookup(container->values, \
-                                         GUINT_TO_POINTER(key)); \
+    GHashTable *values = container->priv->values; \
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key)); \
     if (gvalue) { \
         GType type = G_VALUE_TYPE(gvalue); \
         if (type == G_TYPE_##N) { \
@@ -1641,10 +1649,10 @@ gwy_container_set_value(GwyContainer *container,
     else { \
         gvalue = g_slice_new0(GValue); \
         g_value_init(gvalue, G_TYPE_##N); \
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue); \
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue); \
     } \
     g_value_set_##n(gvalue, value); \
-    if (!container->in_construction) \
+    if (!container->priv->in_construction) \
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key)
 
 /**
@@ -1833,8 +1841,8 @@ gwy_container_set_string(GwyContainer *container,
 {
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
         if (type == G_TYPE_STRING) {
@@ -1849,10 +1857,10 @@ gwy_container_set_string(GwyContainer *container,
     else {
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, G_TYPE_STRING);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
     g_value_set_string(gvalue, value);
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
@@ -1890,8 +1898,8 @@ gwy_container_take_string(GwyContainer *container,
 {
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
         if (type == G_TYPE_STRING) {
@@ -1908,10 +1916,10 @@ gwy_container_take_string(GwyContainer *container,
     else {
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, G_TYPE_STRING);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
     g_value_take_string(gvalue, value);
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
@@ -1952,8 +1960,8 @@ gwy_container_set_object(GwyContainer *container,
 {
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     GType objtype = G_OBJECT_TYPE(value);
     // Take a reference unconditionally.  The caller's reference may be the
     // one released by g_value_unset() and very bad things would happen if
@@ -1975,11 +1983,11 @@ gwy_container_set_object(GwyContainer *container,
     else {
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, objtype);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
     g_value_set_object(gvalue, value);
     g_object_unref(value);
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
@@ -2020,8 +2028,8 @@ gwy_container_take_object(GwyContainer *container,
 {
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     GType objtype = G_OBJECT_TYPE(value);
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
@@ -2043,10 +2051,10 @@ gwy_container_take_object(GwyContainer *container,
     else {
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, objtype);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
     g_value_take_object(gvalue, value);
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
@@ -2089,8 +2097,8 @@ gwy_container_set_boxed(GwyContainer *container,
 {
     g_return_if_fail(GWY_IS_CONTAINER(container));
     g_return_if_fail(key);
-    GValue *gvalue = g_hash_table_lookup(container->values,
-                                         GUINT_TO_POINTER(key));
+    GHashTable *values = container->priv->values;
+    GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
         if (type == boxtype) {
@@ -2104,8 +2112,7 @@ gwy_container_set_boxed(GwyContainer *container,
             GValue *newvalue = g_slice_new0(GValue);
             g_value_init(newvalue, boxtype);
             g_value_copy(value, newvalue);
-            g_hash_table_insert(container->values, GUINT_TO_POINTER(key),
-                                newvalue);
+            g_hash_table_insert(values, GUINT_TO_POINTER(key), newvalue);
             // g_value_unset(gvalue); done by hash value destroy function
         }
     }
@@ -2113,9 +2120,9 @@ gwy_container_set_boxed(GwyContainer *container,
         gvalue = g_slice_new0(GValue);
         g_value_init(gvalue, boxtype);
         g_value_set_boxed(gvalue, value);
-        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), gvalue);
+        g_hash_table_insert(values, GUINT_TO_POINTER(key), gvalue);
     }
-    if (!container->in_construction)
+    if (!container->priv->in_construction)
         g_signal_emit(container, container_signals[ITEM_CHANGED], key, key);
 }
 
@@ -2275,7 +2282,7 @@ gwy_container_transfer(GwyContainer *source,
     pfdata.closed_prefix = !pfdata.prefix_length
                            || (source_prefix[pfdata.prefix_length - 1]
                                == GWY_CONTAINER_PATHSEP);
-    g_hash_table_foreach(source->values, hash_find_keys, &pfdata);
+    g_hash_table_foreach(source->priv->values, hash_find_keys, &pfdata);
     if (!pfdata.keylist)
         return 0;
 
@@ -2290,7 +2297,8 @@ gwy_container_transfer(GwyContainer *source,
     /* Transfer the items */
     pfdata.count = 0;
     for (GSList *l = pfdata.keylist; l; l = g_slist_next(l)) {
-        GValue *val = (GValue*)g_hash_table_lookup(source->values, l->data);
+        GValue *val = (GValue*)g_hash_table_lookup(source->priv->values,
+                                                   l->data);
         if (G_UNLIKELY(!val)) {
             g_critical("Source container contents changed during "
                        "gwy_container_transfer().");
@@ -2303,7 +2311,7 @@ gwy_container_transfer(GwyContainer *source,
                         + pfdata.prefix_length);
 
         GQuark quark = g_quark_from_string(key->str);
-        GValue *copy = (GValue*)g_hash_table_lookup(dest->values,
+        GValue *copy = (GValue*)g_hash_table_lookup(dest->priv->values,
                                                     GUINT_TO_POINTER(quark));
         gboolean exists = (copy != NULL);
         if (exists && (!force || values_are_equal(val, copy)))
@@ -2336,7 +2344,8 @@ gwy_container_transfer(GwyContainer *source,
             g_value_copy(val, copy);
 
         if (!exists)
-            g_hash_table_insert(dest->values, GUINT_TO_POINTER(quark), copy);
+            g_hash_table_insert(dest->priv->values,
+                                GUINT_TO_POINTER(quark), copy);
         g_signal_emit(dest, container_signals[ITEM_CHANGED], quark, quark);
         pfdata.count++;
     }
@@ -2391,7 +2400,7 @@ gwy_container_dump_to_text(GwyContainer *container)
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
 
     GPtrArray *pa = g_ptr_array_new();
-    g_hash_table_foreach(container->values, hash_text_serialize, pa);
+    g_hash_table_foreach(container->priv->values, hash_text_serialize, pa);
     g_ptr_array_sort(pa, pstring_compare);
     g_ptr_array_add(pa, NULL);
 
@@ -2459,7 +2468,7 @@ gwy_container_new_from_text(const gchar *text)
     GQuark key;
 
     container = gwy_container_new();
-    container->in_construction = TRUE;
+    container->priv->in_construction = TRUE;
 
     for (tok = text; g_ascii_isspace(*tok); tok++)
         ;
@@ -2571,7 +2580,7 @@ next:
         for (tok = tok + len; g_ascii_isspace(*tok); tok++)
             ;
     }
-    container->in_construction = FALSE;
+    container->priv->in_construction = FALSE;
 
     return container;
 }
