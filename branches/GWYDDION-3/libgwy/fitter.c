@@ -67,7 +67,7 @@ typedef struct {
     gdouble residuum_change_min;
 } GwyFitterSettings;
 
-struct _GwyFitter {
+struct _GwyFitterPrivate {
     GObject g_object;
     GwyFitterSettings settings;
     GwyFitterStatus status;
@@ -98,6 +98,8 @@ struct _GwyFitter {
     gdouble *inv_hessian;
 };
 
+typedef struct _GwyFitterPrivate Fitter;
+
 static void     gwy_fitter_finalize    (GObject *object);
 static void     gwy_fitter_set_property(GObject *object,
                                         guint prop_id,
@@ -107,9 +109,9 @@ static void     gwy_fitter_get_property(GObject *object,
                                         guint prop_id,
                                         GValue *value,
                                         GParamSpec *pspec);
-static void     fitter_set_n_param     (GwyFitter *fitter,
+static void     fitter_set_n_param     (Fitter *fitter,
                                         guint nparam);
-static gboolean fitter_invert_hessian  (GwyFitter *fitter);
+static gboolean fitter_invert_hessian  (Fitter *fitter);
 
 static const GwyFitterSettings default_settings = {
     .iter_max               = 50,
@@ -128,6 +130,8 @@ static void
 gwy_fitter_class_init(GwyFitterClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    g_type_class_add_private(klass, sizeof(Fitter));
 
     gobject_class->finalize = gwy_fitter_finalize;
     gobject_class->get_property = gwy_fitter_get_property;
@@ -229,14 +233,15 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 static void
 gwy_fitter_init(GwyFitter *fitter)
 {
-    fitter->settings = default_settings;
+    fitter->priv = G_TYPE_INSTANCE_GET_PRIVATE(fitter, GWY_TYPE_FITTER, Fitter);
+    fitter->priv->settings = default_settings;
 }
 
 static void
 gwy_fitter_finalize(GObject *object)
 {
     GwyFitter *fitter = GWY_FITTER(object);
-    fitter_set_n_param(fitter, 0);
+    fitter_set_n_param(fitter->priv, 0);
     G_OBJECT_CLASS(gwy_fitter_parent_class)->finalize(object);
 }
 
@@ -247,41 +252,42 @@ gwy_fitter_set_property(GObject *object,
                         GParamSpec *pspec)
 {
     GwyFitter *fitter = GWY_FITTER(object);
+    GwyFitterSettings *settings = &fitter->priv->settings;
     switch (prop_id) {
         case PROP_N_PARAMS:
-        fitter_set_n_param(fitter, g_value_get_uint(value));
+        fitter_set_n_param(fitter->priv, g_value_get_uint(value));
         break;
 
         case PROP_ITER_MAX:
-        fitter->settings.iter_max = g_value_get_uint(value);
+        settings->iter_max = g_value_get_uint(value);
         break;
 
         case PROP_SUCCESSES_TO_GET_BORED:
-        fitter->settings.iter_max = g_value_get_uint(value);
+        settings->iter_max = g_value_get_uint(value);
         break;
 
         case PROP_LAMBDA_MAX:
-        fitter->settings.lambda_max = g_value_get_double(value);
+        settings->lambda_max = g_value_get_double(value);
         break;
 
         case PROP_LAMBDA_START:
-        fitter->settings.lambda_start = g_value_get_double(value);
+        settings->lambda_start = g_value_get_double(value);
         break;
 
         case PROP_LAMBDA_INCREASE:
-        fitter->settings.lambda_increase = g_value_get_double(value);
+        settings->lambda_increase = g_value_get_double(value);
         break;
 
         case PROP_LAMBDA_DECREASE:
-        fitter->settings.lambda_decrease = g_value_get_double(value);
+        settings->lambda_decrease = g_value_get_double(value);
         break;
 
         case PROP_PARAM_CHANGE_MIN:
-        fitter->settings.param_change_min = g_value_get_double(value);
+        settings->param_change_min = g_value_get_double(value);
         break;
 
         case PROP_RESIDUUM_CHANGE_MIN:
-        fitter->settings.residuum_change_min = g_value_get_double(value);
+        settings->residuum_change_min = g_value_get_double(value);
         break;
 
         default:
@@ -297,41 +303,42 @@ gwy_fitter_get_property(GObject *object,
                         GParamSpec *pspec)
 {
     GwyFitter *fitter = GWY_FITTER(object);
+    GwyFitterSettings *settings = &fitter->priv->settings;
     switch (prop_id) {
         case PROP_N_PARAMS:
-        g_value_set_uint(value, fitter->nparam);
+        g_value_set_uint(value, fitter->priv->nparam);
         break;
 
         case PROP_ITER_MAX:
-        g_value_set_uint(value, fitter->settings.iter_max);
+        g_value_set_uint(value, settings->iter_max);
         break;
 
         case PROP_SUCCESSES_TO_GET_BORED:
-        g_value_set_uint(value, fitter->settings.iter_max);
+        g_value_set_uint(value, settings->iter_max);
         break;
 
         case PROP_LAMBDA_MAX:
-        g_value_set_double(value, fitter->settings.lambda_max);
+        g_value_set_double(value, settings->lambda_max);
         break;
 
         case PROP_LAMBDA_START:
-        g_value_set_double(value, fitter->settings.lambda_start);
+        g_value_set_double(value, settings->lambda_start);
         break;
 
         case PROP_LAMBDA_INCREASE:
-        g_value_set_double(value, fitter->settings.lambda_increase);
+        g_value_set_double(value, settings->lambda_increase);
         break;
 
         case PROP_LAMBDA_DECREASE:
-        g_value_set_double(value, fitter->settings.lambda_decrease);
+        g_value_set_double(value, settings->lambda_decrease);
         break;
 
         case PROP_PARAM_CHANGE_MIN:
-        g_value_set_double(value, fitter->settings.param_change_min);
+        g_value_set_double(value, settings->param_change_min);
         break;
 
         case PROP_RESIDUUM_CHANGE_MIN:
-        g_value_set_double(value, fitter->settings.residuum_change_min);
+        g_value_set_double(value, settings->residuum_change_min);
         break;
 
         default:
@@ -341,7 +348,7 @@ gwy_fitter_get_property(GObject *object,
 }
 
 static void
-fitter_set_n_param(GwyFitter *fitter,
+fitter_set_n_param(Fitter *fitter,
                    guint nparam)
 {
     fitter->valid = 0;
@@ -378,7 +385,7 @@ fitter_set_n_param(GwyFitter *fitter,
  * Also if nothing seems wrong check if any calculated value is NaN anyway
  * because we do not trust the supplied functions. */
 static inline gboolean
-eval_residuum_with_check(GwyFitter *fitter,
+eval_residuum_with_check(Fitter *fitter,
                          gpointer user_data)
 {
     gboolean ok = TRUE;
@@ -402,7 +409,7 @@ eval_residuum_with_check(GwyFitter *fitter,
 }
 
 static inline gboolean
-eval_gradient_with_check(GwyFitter *fitter,
+eval_gradient_with_check(Fitter *fitter,
                          gpointer user_data)
 {
     gdouble *h = fitter->hessian, *g = fitter->gradient;
@@ -440,7 +447,7 @@ eval_gradient_with_check(GwyFitter *fitter,
 }
 
 static inline void
-scale(GwyFitter *fitter)
+scale(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     gdouble *h = fitter->hessian, *sh = fitter->scaled_hessian,
@@ -471,7 +478,7 @@ add_to_diagonal(guint nparam,
 }
 
 static inline gboolean
-too_small_param_change(GwyFitter *fitter)
+too_small_param_change(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     /* Not sure how fitter->f_best gets there but otherwise the condition does
@@ -490,7 +497,7 @@ too_small_param_change(GwyFitter *fitter)
 }
 
 static inline void
-update_param(GwyFitter *fitter)
+update_param(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     gdouble *p = fitter->param, *pb = fitter->param_best,
@@ -503,7 +510,7 @@ update_param(GwyFitter *fitter)
 }
 
 static gboolean
-fitter_minimize(GwyFitter *fitter,
+fitter_minimize(Fitter *fitter,
                 gpointer user_data)
 {
     guint nparam = fitter->nparam;
@@ -579,7 +586,7 @@ step_fail:
 }
 
 static gboolean
-fitter_invert_hessian(GwyFitter *fitter)
+fitter_invert_hessian(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
@@ -638,7 +645,7 @@ guint
 gwy_fitter_get_status(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), GWY_FITTER_STATUS_NONE);
-    return fitter->status;
+    return fitter->priv->status;
 }
 
 /**
@@ -656,7 +663,7 @@ gwy_fitter_set_n_params(GwyFitter *fitter,
                         guint nparams)
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
-    fitter_set_n_param(fitter, nparams);
+    fitter_set_n_param(fitter->priv, nparams);
     g_object_notify(G_OBJECT(fitter), "n-params");
 }
 
@@ -672,7 +679,7 @@ guint
 gwy_fitter_get_n_params(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), 0);
-    return fitter->nparam;
+    return fitter->priv->nparam;
 }
 
 /**
@@ -687,9 +694,10 @@ gwy_fitter_set_params(GwyFitter *fitter,
                       const gdouble *params)
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
-    g_return_if_fail(params || !fitter->nparam);
-    ASSIGN(fitter->param_best, params, fitter->nparam);
-    fitter->valid = VALID_PARAMS;
+    Fitter *priv = fitter->priv;
+    g_return_if_fail(params || !priv->nparam);
+    ASSIGN(priv->param_best, params, priv->nparam);
+    priv->valid = VALID_PARAMS;
 }
 
 /**
@@ -707,10 +715,11 @@ gwy_fitter_get_params(GwyFitter *fitter,
                       gdouble *params)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
-    if (fitter->valid < VALID_PARAMS)
+    Fitter *priv = fitter->priv;
+    if (priv->valid < VALID_PARAMS)
         return FALSE;
-    if (params && fitter->nparam)
-        ASSIGN(params, fitter->param_best, fitter->nparam);
+    if (params && priv->nparam)
+        ASSIGN(params, priv->param_best, priv->nparam);
     return TRUE;
 }
 
@@ -726,7 +735,7 @@ gdouble
 gwy_fitter_get_lambda(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
-    return fitter->lambda;
+    return fitter->priv->lambda;
 }
 
 /**
@@ -741,7 +750,7 @@ guint
 gwy_fitter_get_iter(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), 0);
-    return fitter->iter;
+    return fitter->priv->iter;
 }
 
 /**
@@ -764,9 +773,10 @@ gwy_fitter_set_functions(GwyFitter *fitter,
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
     g_return_if_fail(eval_residuum && eval_gradient);
-    fitter->status = GWY_FITTER_STATUS_NONE;
-    fitter->eval_residuum = eval_residuum;
-    fitter->eval_gradient = eval_gradient;
+    Fitter *priv = fitter->priv;
+    priv->status = GWY_FITTER_STATUS_NONE;
+    priv->eval_residuum = eval_residuum;
+    priv->eval_gradient = eval_gradient;
 }
 
 /**
@@ -782,7 +792,7 @@ gwy_fitter_set_constraint(GwyFitter *fitter,
                           GwyFitterConstrainFunc constrain)
 {
     g_return_if_fail(GWY_IS_FITTER(fitter));
-    fitter->constrain = constrain;
+    fitter->priv->constrain = constrain;
 }
 
 /**
@@ -802,13 +812,14 @@ gwy_fitter_fit(GwyFitter *fitter,
                gpointer user_data)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
-    fitter->status = GWY_FITTER_STATUS_NONE;
-    g_return_val_if_fail(fitter->valid >= VALID_PARAMS, FALSE);
-    g_return_val_if_fail(fitter->eval_gradient && fitter->eval_residuum, FALSE);
-    g_return_val_if_fail(fitter->nparam, FALSE);
-    fitter->fitting = TRUE;
-    gboolean ok = fitter_minimize(fitter, user_data);
-    fitter->fitting = FALSE;
+    Fitter *priv = fitter->priv;
+    priv->status = GWY_FITTER_STATUS_NONE;
+    g_return_val_if_fail(priv->valid >= VALID_PARAMS, FALSE);
+    g_return_val_if_fail(priv->eval_gradient && priv->eval_residuum, FALSE);
+    g_return_val_if_fail(priv->nparam, FALSE);
+    priv->fitting = TRUE;
+    gboolean ok = fitter_minimize(fitter->priv, user_data);
+    priv->fitting = FALSE;
     return ok;
 }
 
@@ -829,7 +840,8 @@ gdouble
 gwy_fitter_get_residuum(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
-    return (fitter->valid >= VALID_FUNCTION) ? fitter->f_best : -1.0;
+    Fitter *priv = fitter->priv;
+    return (priv->valid >= VALID_FUNCTION) ? priv->f_best : -1.0;
 }
 
 /**
@@ -852,11 +864,12 @@ gwy_fitter_eval_residuum(GwyFitter *fitter,
                          gpointer user_data)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
-    g_return_val_if_fail(fitter->eval_residuum, -1.0);
-    if (fitter->valid < VALID_PARAMS)
+    Fitter *priv = fitter->priv;
+    g_return_val_if_fail(priv->eval_residuum, -1.0);
+    if (priv->valid < VALID_PARAMS)
         return -1.0;
-    ASSIGN(fitter->param, fitter->param_best, fitter->nparam);
-    return eval_residuum_with_check(fitter, user_data) ? fitter->f : -1.0;
+    ASSIGN(priv->param, priv->param_best, priv->nparam);
+    return eval_residuum_with_check(fitter->priv, user_data) ? priv->f : -1.0;
 }
 
 /**
@@ -879,13 +892,14 @@ gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
                                gdouble *ihessian)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
-    if (fitter->valid < VALID_HESSIAN)
+    Fitter *priv = fitter->priv;
+    if (priv->valid < VALID_HESSIAN)
         return FALSE;
-    if (fitter->valid < VALID_INV_HESSIAN)
-        fitter_invert_hessian(fitter);
-    if (fitter->valid >= VALID_INV_HESSIAN) {
+    if (priv->valid < VALID_INV_HESSIAN)
+        fitter_invert_hessian(fitter->priv);
+    if (priv->valid >= VALID_INV_HESSIAN) {
         if (ihessian)
-            ASSIGN(ihessian, fitter->inv_hessian, MATRIX_LEN(fitter->nparam));
+            ASSIGN(ihessian, priv->inv_hessian, MATRIX_LEN(priv->nparam));
         return TRUE;
     }
     return FALSE;
