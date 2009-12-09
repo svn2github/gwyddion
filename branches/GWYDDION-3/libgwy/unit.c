@@ -257,8 +257,8 @@ gwy_unit_itemize(GwySerializable *serializable,
 static void
 gwy_unit_done(GwySerializable *serializable)
 {
-    Unit *unit = GWY_UNIT(serializable)->priv;
-    GWY_FREE(unit->serialize_str);
+    GwyUnit *unit = GWY_UNIT(serializable);
+    GWY_FREE(unit->priv->serialize_str);
 }
 
 static gboolean
@@ -279,11 +279,11 @@ gwy_unit_construct(GwySerializable *serializable,
 static GObject*
 gwy_unit_duplicate_impl(GwySerializable *serializable)
 {
-    Unit *unit = GWY_UNIT(serializable)->priv;
+    GwyUnit *unit = GWY_UNIT(serializable);
+    GArray *units = unit->priv->units;
 
     GwyUnit *duplicate = g_object_newv(GWY_TYPE_UNIT, 0, NULL);
-    g_array_append_vals(duplicate->priv->units,
-                        unit->units->data, unit->units->len);
+    g_array_append_vals(duplicate->priv->units, units->data, units->len);
 
     return G_OBJECT(duplicate);
 }
@@ -418,23 +418,23 @@ gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
     if (op == unit)
         return TRUE;
 
-    Unit *u1 = unit->priv, *u2 = op->priv;
+    Unit *priv = unit->priv, *privop = op->priv;
 
-    if (u2->units->len != u1->units->len)
+    if (privop->units->len != priv->units->len)
         return FALSE;
 
-    for (guint i = 0; i < u1->units->len; i++) {
-        const GwySimpleUnit *u = &simple_unit_index(u1->units, i);
+    for (guint i = 0; i < priv->units->len; i++) {
+        const GwySimpleUnit *u = &simple_unit_index(priv->units, i);
         guint j;
 
-        for (j = 0; j < u2->units->len; j++) {
-            if (simple_unit_index(u2->units, j).unit == u->unit) {
-                if (simple_unit_index(u2->units, j).power != u->power)
+        for (j = 0; j < privop->units->len; j++) {
+            if (simple_unit_index(privop->units, j).unit == u->unit) {
+                if (simple_unit_index(privop->units, j).power != u->power)
                     return FALSE;
                 break;
             }
         }
-        if (j == u2->units->len)
+        if (j == privop->units->len)
             return FALSE;
     }
 
@@ -833,11 +833,11 @@ gwy_unit_nth_root(GwyUnit *unit,
     g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
     g_return_val_if_fail(ipower > 0, NULL);
 
-    Unit *u2 = op->priv;
+    Unit *privop = op->priv;
 
     /* Check applicability */
-    for (guint j = 0; j < u2->units->len; j++) {
-        GwySimpleUnit *u = &simple_unit_index(u2->units, j);
+    for (guint j = 0; j < privop->units->len; j++) {
+        GwySimpleUnit *u = &simple_unit_index(privop->units, j);
         if (u->power % ipower != 0)
             return NULL;
     }
@@ -846,16 +846,16 @@ gwy_unit_nth_root(GwyUnit *unit,
 
     if (!unit)
         unit = gwy_unit_new();
-    Unit *u1 = unit->priv;
+    Unit *priv = unit->priv;
 
-    g_array_append_vals(units, u2->units->data, u2->units->len);
+    g_array_append_vals(units, privop->units->data, privop->units->len);
     for (guint j = 0; j < units->len; j++) {
         GwySimpleUnit *u = &simple_unit_index(units, j);
         u->power /= ipower;
     }
 
-    g_array_set_size(u1->units, 0);
-    g_array_append_vals(u1->units, units->data, units->len);
+    g_array_set_size(priv->units, 0);
+    g_array_append_vals(priv->units, units->data, units->len);
     g_array_free(units, TRUE);
 
     g_signal_emit(unit, unit_signals[CHANGED], 0);
