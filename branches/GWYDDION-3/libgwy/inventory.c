@@ -34,7 +34,7 @@ enum {
     N_SIGNALS
 };
 
-struct _GwyInventory {
+struct _GwyInventoryPrivate {
     GObject g_object;
 
     GSequence *items;
@@ -49,22 +49,24 @@ struct _GwyInventory {
     gchar *default_key;
 };
 
+typedef struct _GwyInventoryPrivate Inventory;
+
 static void         gwy_inventory_finalize(GObject *object);
 static void         gwy_inventory_dispose (GObject *object);
-static void         make_hash             (GwyInventory *inventory);
+static void         make_hash             (Inventory *inventory);
 static void         emit_item_updated     (GwyInventory *inventory,
                                            GSequenceIter *iter);
-static void         discard_item          (GwyInventory *inventory,
+static void         discard_item          (Inventory *inventory,
                                            GSequenceIter *iter);
-static void         register_item         (GwyInventory *inventory,
+static void         register_item         (Inventory *inventory,
                                            GSequenceIter *iter,
                                            gpointer item);
 static void         item_changed          (GwyInventory *inventory,
                                            gpointer item);
-static gboolean     item_is_in_order      (GwyInventory *inventory,
+static gboolean     item_is_in_order      (Inventory *inventory,
                                            GSequenceIter *iter,
                                            gpointer item);
-static const gchar* invent_item_name      (GwyInventory *inventory,
+static const gchar* invent_item_name      (Inventory *inventory,
                                            const gchar *prefix);
 
 static guint gwy_inventory_signals[N_SIGNALS];
@@ -75,6 +77,8 @@ static void
 gwy_inventory_class_init(GwyInventoryClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    g_type_class_add_private(klass, sizeof(Inventory));
 
     gobject_class->dispose = gwy_inventory_dispose;
     gobject_class->finalize = gwy_inventory_finalize;
@@ -164,18 +168,21 @@ gwy_inventory_class_init(GwyInventoryClass *klass)
 static void
 gwy_inventory_init(GwyInventory *inventory)
 {
-    inventory->items = g_sequence_new(NULL);
+    inventory->priv = G_TYPE_INSTANCE_GET_PRIVATE(inventory, GWY_TYPE_INVENTORY,
+                                                  Inventory);
+    inventory->priv->items = g_sequence_new(NULL);
 }
 
 static void
 gwy_inventory_finalize(GObject *object)
 {
     GwyInventory *inventory = GWY_INVENTORY(object);
+    Inventory *priv = inventory->priv;
 
-    GWY_FREE(inventory->default_key);
-    g_sequence_free(inventory->items);
-    if (inventory->hash)
-        g_hash_table_destroy(inventory->hash);
+    GWY_FREE(priv->default_key);
+    g_sequence_free(priv->items);
+    if (priv->hash)
+        g_hash_table_destroy(priv->hash);
 
     G_OBJECT_CLASS(gwy_inventory_parent_class)->finalize(object);
 }
@@ -185,19 +192,20 @@ static void
 gwy_inventory_dispose(GObject *object)
 {
     GwyInventory *inventory = GWY_INVENTORY(object);
+    Inventory *priv = inventory->priv;
     GSequenceIter *iter, *next;
 
-    for (iter = g_sequence_get_begin_iter(inventory->items);
+    for (iter = g_sequence_get_begin_iter(priv->items);
          !g_sequence_iter_is_end(iter);
          iter = next) {
         next = g_sequence_iter_next(iter);
-        discard_item(inventory, iter);
+        discard_item(priv, iter);
     }
     G_OBJECT_CLASS(gwy_inventory_parent_class)->dispose(object);
 }
 
 static inline GSequenceIter*
-lookup_item(GwyInventory *inventory,
+lookup_item(Inventory *inventory,
             const gchar *name)
 {
     if (G_UNLIKELY(!inventory->hash))
@@ -251,14 +259,15 @@ gwy_inventory_new_with_items(const GwyInventoryItemType *itype,
                              gpointer pitems)
 {
     GwyInventory *inventory = gwy_inventory_new_with_type(itype);
+    Inventory *priv = inventory->priv;
     gpointer *items = pitems;
 
     for (guint i = 0; i < nitems; i++) {
         gpointer item = items[i];
-        GSequenceIter *iter = g_sequence_append(inventory->items, item);
-        if (inventory->is_sorted && i)
-            inventory->is_sorted = (itype->compare(items[i-1], item) < 0);
-        register_item(inventory, iter, item);
+        GSequenceIter *iter = g_sequence_append(priv->items, item);
+        if (priv->is_sorted && i)
+            priv->is_sorted = (itype->compare(items[i-1], item) < 0);
+        register_item(priv, iter, item);
     }
 
     return inventory;
@@ -280,20 +289,21 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
                             const GwyInventoryItemType *itype)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(g_sequence_get_length(inventory->items) == 0);
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(g_sequence_get_length(priv->items) == 0);
 
-    inventory->has_item_type = TRUE;
-    inventory->item_type = *itype;
+    priv->has_item_type = TRUE;
+    priv->item_type = *itype;
     if (itype->type) {
-        inventory->is_object = g_type_is_a(itype->type, G_TYPE_OBJECT);
-        inventory->is_watchable = (itype->watchable_signal != NULL);
+        priv->is_object = g_type_is_a(itype->type, G_TYPE_OBJECT);
+        priv->is_watchable = (itype->watchable_signal != NULL);
     }
     else {
-        inventory->is_object = inventory->is_watchable = FALSE;
+        priv->is_object = priv->is_watchable = FALSE;
     }
 
-    inventory->can_make_copies = itype->rename && itype->copy;
-    inventory->is_sorted = (itype->compare != NULL);
+    priv->can_make_copies = itype->rename && itype->copy;
+    priv->is_sorted = (itype->compare != NULL);
 }
 
 /**
@@ -308,8 +318,9 @@ guint
 gwy_inventory_n_items(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), 0);
-    g_return_val_if_fail(inventory->has_item_type, 0);
-    return (guint)g_sequence_get_length(inventory->items);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, 0);
+    return (guint)g_sequence_get_length(priv->items);
 }
 
 /**
@@ -324,8 +335,9 @@ gboolean
 gwy_inventory_can_make_copies(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), FALSE);
-    g_return_val_if_fail(inventory->has_item_type, FALSE);
-    return inventory->can_make_copies;
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, FALSE);
+    return priv->can_make_copies;
 }
 
 /**
@@ -341,8 +353,9 @@ const GwyInventoryItemType*
 gwy_inventory_get_item_type(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    return &inventory->item_type;
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
+    return &priv->item_type;
 }
 
 /**
@@ -358,11 +371,12 @@ gpointer
 gwy_inventory_get(GwyInventory *inventory,
                   const gchar *name)
 {
+    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     GSequenceIter *iter;
 
-    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    if ((iter = lookup_item(inventory, name)))
+    if ((iter = lookup_item(priv, name)))
         return g_sequence_get(iter);
     else
         return NULL;
@@ -384,14 +398,15 @@ gpointer
 gwy_inventory_get_or_default(GwyInventory *inventory,
                              const gchar *name)
 {
+    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     GSequenceIter *iter;
 
-    g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    if ((name && (iter = lookup_item(inventory, name)))
-        || (inventory->default_key
-            && (iter = lookup_item(inventory, inventory->default_key)))
-        || ((iter = g_sequence_get_begin_iter(inventory->items))
+    if ((name && (iter = lookup_item(priv, name)))
+        || (priv->default_key
+            && (iter = lookup_item(priv, priv->default_key)))
+        || ((iter = g_sequence_get_begin_iter(priv->items))
             && !g_sequence_iter_is_end(iter)))
         return g_sequence_get(iter);
 
@@ -416,13 +431,14 @@ gwy_inventory_get_nth(GwyInventory *inventory,
                       guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    guint nitems = (guint)g_sequence_get_length(inventory->items);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
+    guint nitems = (guint)g_sequence_get_length(priv->items);
     g_return_val_if_fail(n <= nitems, NULL);
     if (G_UNLIKELY(n == nitems))
         return NULL;
     else
-        return g_sequence_get(g_sequence_get_iter_at_pos(inventory->items, n));
+        return g_sequence_get(g_sequence_get_iter_at_pos(priv->items, n));
 }
 
 /**
@@ -442,8 +458,9 @@ gwy_inventory_position(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), G_MAXUINT);
-    g_return_val_if_fail(inventory->has_item_type, G_MAXUINT);
-    if (!(iter = lookup_item(inventory, name)))
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, G_MAXUINT);
+    if (!(iter = lookup_item(priv, name)))
         return G_MAXUINT;
 
     return g_sequence_iter_get_position(iter);
@@ -463,11 +480,12 @@ gwy_inventory_foreach(GwyInventory *inventory,
                       gpointer user_data)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
     g_return_if_fail(function);
 
     guint i = 0;
-    for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
+    for (GSequenceIter *iter = g_sequence_get_begin_iter(priv->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter), i++) {
         function(i, g_sequence_get(iter), user_data);
@@ -495,11 +513,12 @@ gwy_inventory_find(GwyInventory *inventory,
                    gpointer user_data)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     g_return_val_if_fail(predicate, NULL);
 
     guint i = 0;
-    for (GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
+    for (GSequenceIter *iter = g_sequence_get_begin_iter(priv->items);
          !g_sequence_iter_is_end(iter);
          iter = g_sequence_iter_next(iter), i++) {
         if (predicate(i, g_sequence_get(iter), user_data))
@@ -521,12 +540,13 @@ gpointer
 gwy_inventory_get_default(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    if (!inventory->default_key)
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
+    if (!priv->default_key)
         return NULL;
 
     GSequenceIter *iter;
-    if ((iter = lookup_item(inventory, inventory->default_key)))
+    if ((iter = lookup_item(priv, priv->default_key)))
         return g_sequence_get(iter);
     return NULL;
 }
@@ -544,9 +564,10 @@ const gchar*
 gwy_inventory_get_default_name(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
 
-    return inventory->default_key;
+    return priv->default_key;
 }
 
 /**
@@ -563,17 +584,18 @@ gwy_inventory_set_default_name(GwyInventory *inventory,
                                const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    if (!name && !inventory->default_key)
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    if (!name && !priv->default_key)
         return;
 
     if (!name)
-        GWY_FREE(inventory->default_key);
-    else if (!inventory->default_key)
-        inventory->default_key = g_strdup(name);
-    else if (!gwy_strequal(inventory->default_key, name)) {
-        g_free(inventory->default_key);
-        inventory->default_key = g_strdup(name);
+        GWY_FREE(priv->default_key);
+    else if (!priv->default_key)
+        priv->default_key = g_strdup(name);
+    else if (!gwy_strequal(priv->default_key, name)) {
+        g_free(priv->default_key);
+        priv->default_key = g_strdup(name);
     }
     else
         return;
@@ -598,8 +620,9 @@ gwy_inventory_updated(GwyInventory *inventory,
     GSequenceIter *iter;
 
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    if (!(iter = lookup_item(inventory, name)))
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    if (!(iter = lookup_item(priv, name)))
         g_warning("Item ‘%s’ does not exist", name);
     else
         emit_item_updated(inventory, iter);
@@ -620,8 +643,9 @@ gwy_inventory_nth_updated(GwyInventory *inventory,
                           guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    g_return_if_fail(n < (guint)g_sequence_get_length(inventory->items));
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    g_return_if_fail(n < (guint)g_sequence_get_length(priv->items));
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_UPDATED], 0, n);
 }
@@ -645,30 +669,31 @@ gwy_inventory_insert(GwyInventory *inventory,
                      gpointer item)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     g_return_val_if_fail(item, NULL);
 
-    const gchar *name = inventory->item_type.get_name(item);
-    if (lookup_item(inventory, name)) {
+    const gchar *name = priv->item_type.get_name(item);
+    if (lookup_item(priv, name)) {
         g_warning("Item ‘%s’ already exists", name);
         return NULL;
     }
 
     GSequenceIter *iter;
-    if (inventory->is_sorted) {
+    if (priv->is_sorted) {
         GCompareDataFunc compare
-            = (GCompareDataFunc)inventory->item_type.compare;
-        iter = g_sequence_insert_sorted(inventory->items, item, compare, NULL);
+            = (GCompareDataFunc)priv->item_type.compare;
+        iter = g_sequence_insert_sorted(priv->items, item, compare, NULL);
     }
     else
-        iter = g_sequence_append(inventory->items, item);
+        iter = g_sequence_append(priv->items, item);
 
-    register_item(inventory, iter, item);
+    register_item(priv, iter, item);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0,
                   g_sequence_iter_get_position(iter));
-    if (inventory->default_key
-        && gwy_strequal(name, inventory->default_key))
+    if (priv->default_key
+        && gwy_strequal(name, priv->default_key))
         g_signal_emit(inventory, gwy_inventory_signals[DEFAULT_CHANGED], 0);
 
     return item;
@@ -695,31 +720,32 @@ gwy_inventory_insert_nth(GwyInventory *inventory,
                          guint n)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     g_return_val_if_fail(item, NULL);
-    guint nitems = (guint)g_sequence_get_length(inventory->items);
+    guint nitems = (guint)g_sequence_get_length(priv->items);
     g_return_val_if_fail(n <= nitems, NULL);
 
-    const gchar *name = inventory->item_type.get_name(item);
-    if (lookup_item(inventory, name)) {
+    const gchar *name = priv->item_type.get_name(item);
+    if (lookup_item(priv, name)) {
         g_warning("Item ‘%s’ already exists", name);
         return NULL;
     }
 
     GSequenceIter *iter;
     if (n == nitems)
-        iter = g_sequence_append(inventory->items, item);
+        iter = g_sequence_append(priv->items, item);
     else {
-        iter = g_sequence_get_iter_at_pos(inventory->items, n);
+        iter = g_sequence_get_iter_at_pos(priv->items, n);
         iter = g_sequence_insert_before(iter, item);
     }
 
-    inventory->is_sorted = item_is_in_order(inventory, iter, item);
-    register_item(inventory, iter, item);
+    priv->is_sorted = item_is_in_order(priv, iter, item);
+    register_item(priv, iter, item);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0, n);
-    if (inventory->default_key
-        && gwy_strequal(name, inventory->default_key))
+    if (priv->default_key
+        && gwy_strequal(name, priv->default_key))
         g_signal_emit(inventory, gwy_inventory_signals[DEFAULT_CHANGED], 0);
 
     return item;
@@ -738,18 +764,19 @@ void
 gwy_inventory_restore_order(GwyInventory *inventory)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    if (inventory->is_sorted || !inventory->item_type.compare)
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    if (priv->is_sorted || !priv->item_type.compare)
         return;
 
     // Remember old positions if we have to.
-    guint nitems = (guint)g_sequence_get_length(inventory->items);
+    guint nitems = (guint)g_sequence_get_length(priv->items);
     GSequenceIter **positions = NULL;
     if (g_signal_has_handler_pending(inventory,
                                      gwy_inventory_signals[ITEMS_REORDERED],
                                      0, FALSE)) {
         positions = g_slice_alloc(sizeof(GSequenceIter*)*nitems);
-        GSequenceIter *iter = g_sequence_get_begin_iter(inventory->items);
+        GSequenceIter *iter = g_sequence_get_begin_iter(priv->items);
         for (guint i = 0; i < nitems; i++) {
             positions[i] = iter;
             iter = g_sequence_iter_next(iter);
@@ -757,9 +784,9 @@ gwy_inventory_restore_order(GwyInventory *inventory)
     }
 
     // Sort.
-    g_sequence_sort(inventory->items,
-                    (GCompareDataFunc)inventory->item_type.compare, NULL);
-    inventory->is_sorted = TRUE;
+    g_sequence_sort(priv->items,
+                    (GCompareDataFunc)priv->item_type.compare, NULL);
+    priv->is_sorted = TRUE;
     if (!positions)
         return;
 
@@ -787,8 +814,9 @@ void
 gwy_inventory_forget_order(GwyInventory *inventory)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    inventory->is_sorted = FALSE;
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    priv->is_sorted = FALSE;
 }
 
 /**
@@ -806,17 +834,18 @@ delete_item(GwyInventory *inventory,
             const gchar *name,
             guint n)
 {
-    if (inventory->item_type.is_modifiable) {
+    Inventory *priv = inventory->priv;
+    if (priv->item_type.is_modifiable) {
         gpointer item = g_sequence_get(iter);
-        if (!inventory->item_type.is_modifiable(item)) {
+        if (!priv->item_type.is_modifiable(item)) {
             g_warning("Cannot delete non-modifiable item ‘%s’", name);
             return;
         }
     }
 
-    gboolean emit_change = (inventory->default_key
-                            && gwy_strequal(name, inventory->default_key));
-    discard_item(inventory, iter);
+    gboolean emit_change = (priv->default_key
+                            && gwy_strequal(name, priv->default_key));
+    discard_item(priv, iter);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_DELETED], 0, n);
     if (emit_change)
@@ -835,10 +864,11 @@ gwy_inventory_delete(GwyInventory *inventory,
                      const gchar *name)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
 
     GSequenceIter *iter;
-    if (!(iter = lookup_item(inventory, name))) {
+    if (!(iter = lookup_item(priv, name))) {
         g_warning("Item ‘%s’ does not exist", name);
         return;
     }
@@ -858,11 +888,12 @@ gwy_inventory_delete_nth(GwyInventory *inventory,
                          guint n)
 {
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
-    g_return_if_fail(inventory->has_item_type);
-    g_return_if_fail(n < (guint)g_sequence_get_length(inventory->items));
+    Inventory *priv = inventory->priv;
+    g_return_if_fail(priv->has_item_type);
+    g_return_if_fail(n < (guint)g_sequence_get_length(priv->items));
 
-    GSequenceIter *iter = g_sequence_get_iter_at_pos(inventory->items, n);
-    const gchar *name = inventory->item_type.get_name(g_sequence_get(iter));
+    GSequenceIter *iter = g_sequence_get_iter_at_pos(priv->items, n);
+    const gchar *name = priv->item_type.get_name(g_sequence_get(iter));
     delete_item(inventory, iter, name, n);
 }
 
@@ -891,39 +922,40 @@ gwy_inventory_rename(GwyInventory *inventory,
                      const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
     g_return_val_if_fail(newname, NULL);
-    g_return_val_if_fail(inventory->item_type.rename, NULL);
+    g_return_val_if_fail(priv->item_type.rename, NULL);
 
     GSequenceIter *iter;
-    if (!(iter = lookup_item(inventory, name))) {
+    if (!(iter = lookup_item(priv, name))) {
         g_warning("Item ‘%s’ does not exist", name);
         return NULL;
     }
 
     gpointer item = g_sequence_get(iter);
-    if (inventory->item_type.is_modifiable
-        && !inventory->item_type.is_modifiable(item)) {
+    if (priv->item_type.is_modifiable
+        && !priv->item_type.is_modifiable(item)) {
         g_warning("Cannot rename non-modifiable item ‘%s’", name);
         return NULL;
     }
     if (gwy_strequal(name, newname))
         return item;
 
-    if (lookup_item(inventory, newname)) {
+    if (lookup_item(priv, newname)) {
         g_warning("Item ‘%s’ already exists", newname);
         return NULL;
     }
 
-    g_hash_table_remove(inventory->hash, name);
-    gboolean was_sorted = item_is_in_order(inventory, iter, item);
-    inventory->item_type.rename(item, newname);
-    gboolean is_sorted_now = item_is_in_order(inventory, iter, item);
-    const gchar *realnewname = inventory->item_type.get_name(item);
+    g_hash_table_remove(priv->hash, name);
+    gboolean was_sorted = item_is_in_order(priv, iter, item);
+    priv->item_type.rename(item, newname);
+    gboolean is_sorted_now = item_is_in_order(priv, iter, item);
+    const gchar *realnewname = priv->item_type.get_name(item);
     if (!gwy_strequal(realnewname, newname)) {
         g_warning("Item ‘%s’ was asked to rename to ‘%s’ but it renamed self "
                   "to ‘%s’.", name, newname, realnewname);
-        if (lookup_item(inventory, realnewname))
+        if (lookup_item(priv, realnewname))
             g_critical("Failed rename led to duplicite items ‘%s’.",
                        realnewname);
     }
@@ -935,20 +967,20 @@ gwy_inventory_rename(GwyInventory *inventory,
         g_signal_emit(inventory, gwy_inventory_signals[ITEM_DELETED], 0, n);
     }
     /* Use newname even if the item did not obey. */
-    g_hash_table_insert(inventory->hash, (gpointer)newname, iter);
+    g_hash_table_insert(priv->hash, (gpointer)newname, iter);
     /* Insert back if it was removed. */
     if (was_sorted && !is_sorted_now) {
         GCompareDataFunc compare
-            = (GCompareDataFunc)inventory->item_type.compare;
-        iter = g_sequence_insert_sorted(inventory->items, item, compare, NULL);
+            = (GCompareDataFunc)priv->item_type.compare;
+        iter = g_sequence_insert_sorted(priv->items, item, compare, NULL);
         n = (guint)g_sequence_iter_get_position(iter);
         g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0, n);
     }
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_UPDATED], 0, n);
-    if (inventory->default_key
-        && (gwy_strequal(name, inventory->default_key)
-            || gwy_strequal(newname, inventory->default_key)))
+    if (priv->default_key
+        && (gwy_strequal(name, priv->default_key)
+            || gwy_strequal(newname, priv->default_key)))
         g_signal_emit(inventory, gwy_inventory_signals[DEFAULT_CHANGED], 0);
 
     return iter;
@@ -975,17 +1007,18 @@ gwy_inventory_copy(GwyInventory *inventory,
                    const gchar *newname)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), NULL);
-    g_return_val_if_fail(inventory->has_item_type, NULL);
-    g_return_val_if_fail(inventory->can_make_copies, NULL);
+    Inventory *priv = inventory->priv;
+    g_return_val_if_fail(priv->has_item_type, NULL);
+    g_return_val_if_fail(priv->can_make_copies, NULL);
 
     /* Find which item we should base copy on */
-    if (!name && inventory->default_key)
-        name = inventory->default_key;
+    if (!name && priv->default_key)
+        name = priv->default_key;
 
     GSequenceIter *iter = NULL;
-    if ((!name || !(iter = lookup_item(inventory, name)))
-        && g_sequence_get_length(inventory->items))
-        iter = g_sequence_get_begin_iter(inventory->items);
+    if ((!name || !(iter = lookup_item(priv, name)))
+        && g_sequence_get_length(priv->items))
+        iter = g_sequence_get_begin_iter(priv->items);
 
     if (!iter) {
         g_warning("No default item to base new item on");
@@ -994,18 +1027,18 @@ gwy_inventory_copy(GwyInventory *inventory,
 
     gpointer item = g_sequence_get(iter);
     if (!name)
-        name = inventory->item_type.get_name(item);
+        name = priv->item_type.get_name(item);
 
     /* Find new name */
     if (!newname)
-        newname = invent_item_name(inventory, name);
-    else if (lookup_item(inventory, newname))
-        newname = invent_item_name(inventory, newname);
+        newname = invent_item_name(priv, name);
+    else if (lookup_item(priv, newname))
+        newname = invent_item_name(priv, newname);
 
     /* Create new item */
-    item = inventory->item_type.copy(item);
-    inventory->item_type.rename(item, newname);
-    const gchar *realnewname = inventory->item_type.get_name(item);
+    item = priv->item_type.copy(item);
+    priv->item_type.rename(item, newname);
+    const gchar *realnewname = priv->item_type.get_name(item);
     if (!gwy_strequal(realnewname, newname)) {
         g_warning("Item ‘%s’ was asked to rename to ‘%s’ but it renamed self "
                   "to ‘%s’.", name, newname, realnewname);
@@ -1041,8 +1074,8 @@ static void
 item_changed(GwyInventory *inventory,
              gpointer item)
 {
-    const gchar *name = inventory->item_type.get_name(item);
-    GSequenceIter *iter = lookup_item(inventory, name);
+    const gchar *name = inventory->priv->item_type.get_name(item);
+    GSequenceIter *iter = lookup_item(inventory->priv, name);
     g_assert(iter);
     emit_item_updated(inventory, iter);
 }
@@ -1050,7 +1083,7 @@ item_changed(GwyInventory *inventory,
 /* Not a complete inverse of register_item() because it also removes the
  * item physically from inventory->items. */
 static void
-discard_item(GwyInventory *inventory,
+discard_item(Inventory *inventory,
              GSequenceIter *iter)
 {
     gpointer item = g_sequence_get(iter);
@@ -1066,7 +1099,7 @@ discard_item(GwyInventory *inventory,
 }
 
 static void
-register_item(GwyInventory *inventory,
+register_item(Inventory *inventory,
               GSequenceIter *iter,
               gpointer item)
 {
@@ -1085,7 +1118,7 @@ register_item(GwyInventory *inventory,
 }
 
 static gboolean
-item_is_in_order(GwyInventory *inventory,
+item_is_in_order(Inventory *inventory,
                  GSequenceIter *iter,
                  gpointer item)
 {
@@ -1101,7 +1134,7 @@ item_is_in_order(GwyInventory *inventory,
 }
 
 static void
-make_hash(GwyInventory *inventory)
+make_hash(Inventory *inventory)
 {
     g_assert(!inventory->hash);
     inventory->hash = g_hash_table_new(g_str_hash, g_str_equal);
@@ -1127,7 +1160,7 @@ make_hash(GwyInventory *inventory)
  *          valid only until next call to it.
  **/
 static const gchar*
-invent_item_name(GwyInventory *inventory,
+invent_item_name(Inventory *inventory,
                  const gchar *prefix)
 {
     static GString *str = NULL;

@@ -70,6 +70,11 @@ struct _GwyInventoryItemType {
 typedef struct _GwyInventory GwyInventory;
 typedef struct _GwyInventoryClass GwyInventoryClass;
 
+struct _GwyInventory {
+    GObject g_object;
+    struct _GwyInventoryPrivate *priv;
+};
+
 struct _GwyInventoryClass {
     GObjectClass g_object_class;
 };
