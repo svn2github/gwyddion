@@ -1475,14 +1475,15 @@ gwy_expr_evaluate(GwyExpr *expr,
     if (!gwy_expr_compile(expr, text, err))
         return FALSE;
 
-    if (expr->priv->identifiers->len > 1) {
+    Expr *priv = expr->priv;
+    if (priv->identifiers->len > 1) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_UNRESOLVED_IDENTIFIERS,
                     _("Not all identifiers were resolved."));
         return FALSE;
     }
 
-    interpret_stack(expr->priv);
-    *result = *expr->priv->stack;
+    interpret_stack(priv);
+    *result = *priv->stack;
 
     return TRUE;
 }
@@ -1508,7 +1509,6 @@ gwy_expr_compile(GwyExpr *expr,
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), FALSE);
     g_return_val_if_fail(text, FALSE);
-
     Expr *priv = expr->priv;
 
     if (!g_utf8_validate(text, -1, NULL)) {
@@ -1591,11 +1591,11 @@ gwy_expr_resolve_variables(GwyExpr *expr,
                            guint *indices)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), 0);
-    g_return_val_if_fail(expr->priv->in, 0);
+    Expr *priv = expr->priv;
+    g_return_val_if_fail(priv->in, 0);
     g_return_val_if_fail(!n || (names && indices), 0);
 
-    GPtrArray *identifiers = expr->priv->identifiers;
-
+    GPtrArray *identifiers = priv->identifiers;
     gboolean requested[identifiers->len];
     gwy_memclear(requested, identifiers->len);
     gwy_memclear(indices, n);
@@ -1634,12 +1634,13 @@ gwy_expr_execute(GwyExpr *expr,
                  const gdouble *values)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), NAN);
-    g_return_val_if_fail(expr->priv->in, NAN);
-    g_return_val_if_fail(values || expr->priv->identifiers->len <= 1, NAN);
+    Expr *priv = expr->priv;
+    g_return_val_if_fail(priv->in, NAN);
+    g_return_val_if_fail(values || priv->identifiers->len <= 1, NAN);
 
-    expr->priv->variables = values;
-    interpret_stack(expr->priv);
-    return expr->priv->stack[0];
+    priv->variables = values;
+    interpret_stack(priv);
+    return priv->stack[0];
 }
 
 /**
@@ -1661,10 +1662,11 @@ gwy_expr_vector_execute(GwyExpr *expr,
 {
     g_return_if_fail(GWY_IS_EXPR(expr));
     g_return_if_fail(result);
-    g_return_if_fail(expr->priv->in);
-    g_return_if_fail(data || expr->priv->identifiers->len <= 1);
+    Expr *priv = expr->priv;
+    g_return_if_fail(priv->in);
+    g_return_if_fail(data || priv->identifiers->len <= 1);
 
-    interpret_stack_vectors(expr->priv, n, data, result);
+    interpret_stack_vectors(priv, n, data, result);
 }
 
 /**
@@ -1698,16 +1700,17 @@ gwy_expr_define_constant(GwyExpr *expr,
         return FALSE;
     }
 
-    initialize_scanner(expr->priv);
-    if (g_scanner_lookup_symbol(expr->priv->scanner, name)) {
+    Expr *priv = expr->priv;
+    initialize_scanner(priv);
+    if (g_scanner_lookup_symbol(priv->scanner, name)) {
         g_set_error(err, GWY_EXPR_ERROR, GWY_EXPR_ERROR_NAME_CLASH,
                     _("Constant name clashes with function"));
         return FALSE;
     }
 
     GQuark quark = g_quark_from_string(name);
-    ensure_constants(expr->priv);
-    g_hash_table_insert(expr->priv->constants, GUINT_TO_POINTER(quark),
+    ensure_constants(priv);
+    g_hash_table_insert(priv->constants, GUINT_TO_POINTER(quark),
                         g_memdup(&value, sizeof(gdouble)));
 
     return TRUE;
@@ -1733,14 +1736,13 @@ gwy_expr_undefine_constant(GwyExpr *expr,
     g_return_val_if_fail(GWY_IS_EXPR(expr), FALSE);
     g_return_val_if_fail(name, FALSE);
 
-    if (!expr->priv->constants)
+    Expr *priv = expr->priv;
+    if (!priv->constants)
         return FALSE;
 
     GQuark quark = g_quark_from_string(name);
-    if (!quark)
-        return FALSE;
+    return g_hash_table_remove(priv->constants, GUINT_TO_POINTER(quark));
 
-    return g_hash_table_remove(expr->priv->constants, GUINT_TO_POINTER(quark));
 }
 
 #define __LIBGWY_EXPR_C__
