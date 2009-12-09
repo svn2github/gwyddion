@@ -50,13 +50,7 @@ typedef struct _GwyValueFormatClass GwyValueFormatClass;
 
 struct _GwyValueFormat {
     GObject g_object;
-
-    guint precision;
-    gdouble base;
-    gchar *glue;
-    gchar *units;
-    GString *value;
-    GwyValueFormatStyle style;
+    struct _GwyValueFormatPrivate *priv;
 };
 
 struct _GwyValueFormatClass {

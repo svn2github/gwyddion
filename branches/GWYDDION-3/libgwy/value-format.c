@@ -37,6 +37,17 @@ enum {
     N_PROPS
 };
 
+struct _GwyValueFormatPrivate {
+    guint precision;
+    gdouble base;
+    gchar *glue;
+    gchar *units;
+    GString *value;
+    GwyValueFormatStyle style;
+};
+
+typedef struct _GwyValueFormatPrivate ValueFormat;
+
 static void gwy_value_format_finalize    (GObject *object);
 static void gwy_value_format_set_property(GObject *object,
                                           guint prop_id,
@@ -46,15 +57,17 @@ static void gwy_value_format_get_property(GObject *object,
                                           guint prop_id,
                                           GValue *value,
                                           GParamSpec *pspec);
-static void ensure_value                 (GwyValueFormat *format);
+static void ensure_value                 (ValueFormat *format);
 static void fix_utf8_minus               (GString *str);
 
 G_DEFINE_TYPE(GwyValueFormat, gwy_value_format, G_TYPE_OBJECT)
 
 static void
-gwy_value_format_class_init(GwyValueFormatClass * klass)
+gwy_value_format_class_init(GwyValueFormatClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    g_type_class_add_private(klass, sizeof(ValueFormat));
 
     gobject_class->finalize = gwy_value_format_finalize;
     gobject_class->get_property = gwy_value_format_get_property;
@@ -115,18 +128,21 @@ gwy_value_format_class_init(GwyValueFormatClass * klass)
 static void
 gwy_value_format_init(GwyValueFormat *format)
 {
-    format->style = GWY_VALUE_FORMAT_PLAIN;
-    format->base = 1.0;
-    format->precision = 3;
+    format->priv = G_TYPE_INSTANCE_GET_PRIVATE(format, GWY_TYPE_VALUE_FORMAT,
+                                               ValueFormat);
+    format->priv->style = GWY_VALUE_FORMAT_PLAIN;
+    format->priv->base = 1.0;
+    format->priv->precision = 3;
 }
 
 static void
 gwy_value_format_finalize(GObject *object)
 {
     GwyValueFormat *format = (GwyValueFormat*)object;
-    GWY_FREE(format->units);
-    GWY_FREE(format->glue);
-    GWY_STRING_FREE(format->value);
+    ValueFormat *priv = format->priv;
+    GWY_FREE(priv->units);
+    GWY_FREE(priv->glue);
+    GWY_STRING_FREE(priv->value);
     G_OBJECT_CLASS(gwy_value_format_parent_class)->finalize(object);
 }
 
@@ -137,18 +153,19 @@ gwy_value_format_set_property(GObject *object,
                               GParamSpec *pspec)
 {
     GwyValueFormat *format = GWY_VALUE_FORMAT(object);
+    ValueFormat *priv = format->priv;
 
     switch (prop_id) {
         case PROP_STYLE:
-        format->style = g_value_get_enum(value);
+        priv->style = g_value_get_enum(value);
         break;
 
         case PROP_BASE:
-        format->base = g_value_get_double(value);
+        priv->base = g_value_get_double(value);
         break;
 
         case PROP_PRECISION:
-        format->precision = g_value_get_uint(value);
+        priv->precision = g_value_get_uint(value);
         break;
 
         case PROP_GLUE:
@@ -172,26 +189,27 @@ gwy_value_format_get_property(GObject *object,
                               GParamSpec *pspec)
 {
     GwyValueFormat *format = GWY_VALUE_FORMAT(object);
+    ValueFormat *priv = format->priv;
 
     switch (prop_id) {
         case PROP_STYLE:
-        g_value_set_enum(value, format->style);
+        g_value_set_enum(value, priv->style);
         break;
 
         case PROP_BASE:
-        g_value_set_double(value, format->base);
+        g_value_set_double(value, priv->base);
         break;
 
         case PROP_PRECISION:
-        g_value_set_uint(value, format->precision);
+        g_value_set_uint(value, priv->precision);
         break;
 
         case PROP_GLUE:
-        g_value_set_string(value, format->glue);
+        g_value_set_string(value, priv->glue);
         break;
 
         case PROP_UNITS:
-        g_value_set_string(value, format->units);
+        g_value_set_string(value, priv->units);
         break;
 
         default:
@@ -233,12 +251,13 @@ gwy_value_format_new_set(GwyValueFormatStyle style,
                          const gchar *units)
 {
     GwyValueFormat *format = g_object_newv(GWY_TYPE_VALUE_FORMAT, 0, NULL);
+    ValueFormat *priv = format->priv;
 
-    format->style = style;
-    format->base = gwy_exp10(power10);
-    format->precision = precision;
-    format->glue = g_strdup(glue);
-    format->units = g_strdup(units);
+    priv->style = style;
+    priv->base = gwy_exp10(power10);
+    priv->precision = precision;
+    priv->glue = g_strdup(glue);
+    priv->units = g_strdup(units);
 
     return format;
 }
@@ -259,17 +278,18 @@ gwy_value_format_print(GwyValueFormat *format,
                        gdouble value)
 {
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
+    ValueFormat *priv = format->priv;
 
-    ensure_value(format);
-    g_string_printf(format->value, "%.*f%s%s",
-                    format->precision, value/format->base,
-                    format->glue ? format->glue : "",
-                    format->units ? format->units : "");
+    ensure_value(priv);
+    g_string_printf(priv->value, "%.*f%s%s",
+                    priv->precision, value/priv->base,
+                    priv->glue ? priv->glue : "",
+                    priv->units ? priv->units : "");
 
-    if (format->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(format->value);
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(priv->value);
 
-    return format->value->str;
+    return priv->value->str;
 }
 
 /**
@@ -291,15 +311,16 @@ gwy_value_format_print_number(GwyValueFormat *format,
                               gdouble value)
 {
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
+    ValueFormat *priv = format->priv;
 
-    ensure_value(format);
-    g_string_printf(format->value, "%.*f",
-                    format->precision, value/format->base);
+    ensure_value(priv);
+    g_string_printf(priv->value, "%.*f",
+                    priv->precision, value/priv->base);
 
-    if (format->style == GWY_VALUE_FORMAT_PANGO)
-        fix_utf8_minus(format->value);
+    if (priv->style == GWY_VALUE_FORMAT_PANGO)
+        fix_utf8_minus(priv->value);
 
-    return format->value->str;
+    return priv->value->str;
 }
 
 /**
@@ -314,7 +335,7 @@ const gchar*
 gwy_value_format_get_units(GwyValueFormat *format)
 {
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
-    return format->units;
+    return format->priv->units;
 }
 
 /**
@@ -330,13 +351,14 @@ gwy_value_format_set_units(GwyValueFormat *format,
                            const gchar *units)
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    ValueFormat *priv = format->priv;
 
-    if ((!units && !format->units)
-        || (units && format->units && gwy_strequal(units, format->units)))
+    if ((!units && !priv->units)
+        || (units && priv->units && gwy_strequal(units, priv->units)))
         return;
 
-    gchar *oldunits = format->units;
-    format->units = g_strdup(units);
+    gchar *oldunits = priv->units;
+    priv->units = g_strdup(units);
     g_free(oldunits);
 }
 
@@ -352,7 +374,7 @@ const gchar*
 gwy_value_format_get_glue(GwyValueFormat *format)
 {
     g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
-    return format->glue;
+    return format->priv->glue;
 }
 
 /**
@@ -368,18 +390,19 @@ gwy_value_format_set_glue(GwyValueFormat *format,
                           const gchar *glue)
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    ValueFormat *priv = format->priv;
 
-    if ((!glue && !format->glue)
-        || (glue && format->glue && gwy_strequal(glue, format->glue)))
+    if ((!glue && !priv->glue)
+        || (glue && priv->glue && gwy_strequal(glue, priv->glue)))
         return;
 
-    gchar *oldglue = format->glue;
-    format->glue = g_strdup(glue);
+    gchar *oldglue = priv->glue;
+    priv->glue = g_strdup(glue);
     g_free(oldglue);
 }
 
 static void
-ensure_value(GwyValueFormat *format)
+ensure_value(ValueFormat *format)
 {
     if (!format->value)
         format->value = g_string_new(NULL);
