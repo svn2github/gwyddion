@@ -1383,74 +1383,77 @@ warn_nonzero_array_size(const GwySerializableItem *item)
               item->name, item->ctype, item->array_size);
 }
 
+static inline void
+free_item_data(GwySerializableItem *item)
+{
+    GwySerializableCType ctype = item->ctype;
+
+    switch (ctype) {
+        case GWY_SERIALIZABLE_HEADER:
+        // More likely this means type not assigned yet.  Can happen.
+        break;
+
+        case GWY_SERIALIZABLE_OBJECT:
+        GWY_OBJECT_UNREF(item->value.v_object);
+        break;
+
+        case GWY_SERIALIZABLE_INT8_ARRAY:
+        case GWY_SERIALIZABLE_INT16_ARRAY:
+        case GWY_SERIALIZABLE_INT32_ARRAY:
+        case GWY_SERIALIZABLE_INT64_ARRAY:
+        case GWY_SERIALIZABLE_DOUBLE_ARRAY:
+        if (item->value.v_int8_array)
+            GWY_FREE(item->value.v_int8_array);
+        else if (G_UNLIKELY(item->array_size))
+            warn_nonzero_array_size(item);
+        break;
+
+        case GWY_SERIALIZABLE_STRING:
+        GWY_FREE(item->value.v_string);
+        break;
+
+        case GWY_SERIALIZABLE_BOXED:
+        if (item->value.v_boxed) {
+            g_boxed_free(item->array_size, item->value.v_boxed);
+            item->value.v_boxed = NULL;
+        }
+        break;
+
+        case GWY_SERIALIZABLE_STRING_ARRAY:
+        if (item->value.v_string_array) {
+            for (gsize j = 0; j < item->array_size; j++)
+                GWY_FREE(item->value.v_string_array[j]);
+            GWY_FREE(item->value.v_string_array);
+        }
+        else if (G_UNLIKELY(item->array_size))
+            warn_nonzero_array_size(item);
+        break;
+
+        case GWY_SERIALIZABLE_OBJECT_ARRAY:
+        if (item->value.v_object_array) {
+            for (gsize j = 0; j < item->array_size; j++)
+                GWY_OBJECT_UNREF(item->value.v_object_array[j]);
+            GWY_FREE(item->value.v_object_array);
+        }
+        else if (G_UNLIKELY(item->array_size))
+            warn_nonzero_array_size(item);
+        break;
+
+        default:
+        g_assert(g_ascii_islower(ctype));
+        break;
+    }
+    item->array_size = 0;
+}
+
 static void
 free_items(GwySerializableItems *items)
 {
     if (!items)
         return;
 
-    for (gsize i = 0; i < items->n; i++) {
-        GwySerializableItem *item = items->items + i;
-        GwySerializableCType ctype = item->ctype;
-
-        switch (ctype) {
-            case 0:
-            // Type not assigned yet.  Can happen.
-            break;
-
-            case GWY_SERIALIZABLE_OBJECT:
-            GWY_OBJECT_UNREF(item->value.v_object);
-            break;
-
-            case GWY_SERIALIZABLE_INT8_ARRAY:
-            case GWY_SERIALIZABLE_INT16_ARRAY:
-            case GWY_SERIALIZABLE_INT32_ARRAY:
-            case GWY_SERIALIZABLE_INT64_ARRAY:
-            case GWY_SERIALIZABLE_DOUBLE_ARRAY:
-            if (item->value.v_int8_array)
-                GWY_FREE(item->value.v_int8_array);
-            else if (G_UNLIKELY(item->array_size))
-                warn_nonzero_array_size(item);
-            break;
-
-            case GWY_SERIALIZABLE_STRING:
-            GWY_FREE(item->value.v_string);
-            break;
-
-            case GWY_SERIALIZABLE_BOXED:
-            if (item->value.v_boxed) {
-                g_boxed_free(item->array_size, item->value.v_boxed);
-                item->value.v_boxed = NULL;
-                item->array_size = 0;
-            }
-            break;
-
-            case GWY_SERIALIZABLE_STRING_ARRAY:
-            if (item->value.v_string_array) {
-                for (gsize j = 0; j < item->array_size; j++)
-                    GWY_FREE(item->value.v_string_array[j]);
-                GWY_FREE(item->value.v_string_array);
-            }
-            else if (G_UNLIKELY(item->array_size))
-                warn_nonzero_array_size(item);
-            break;
-
-            case GWY_SERIALIZABLE_OBJECT_ARRAY:
-            if (item->value.v_object_array) {
-                for (gsize j = 0; j < item->array_size; j++)
-                    GWY_OBJECT_UNREF(item->value.v_object_array[j]);
-                GWY_FREE(item->value.v_object_array);
-            }
-            else if (G_UNLIKELY(item->array_size))
-                warn_nonzero_array_size(item);
-            break;
-
-            default:
-            g_assert(g_ascii_islower(ctype));
-            break;
-        }
-        item->array_size = 0;
-    }
+    for (gsize i = 0; i < items->n; i++)
+        free_item_data(items->items + i);
 
     g_free(items->items);
     g_free(items);
@@ -1478,17 +1481,18 @@ free_items(GwySerializableItems *items)
  * Unexpected items are left in @items for the owner of @items to free them
  * which normally means you do not need to concern yourself with them.
  *
- * Unexpected items are moved to the start of @item and its lenght is reduced
- * to the number of these items to facilitate further processing in parent
- * classes.
+ * Unexpected items are gathered to a contiguous block at the start of @items.
+ * The length of @items is reduced to the number of these items to facilitate
+ * further processing in parent classes (which makes sense only if you pass
+ * @unexpected_ok).
  *
  * An item template is identified by its name and type.  Multiple items of the
  * same name are permitted in @template as long as they type differ (this can
  * be useful e.g. to accept old serialized representations for compatibility).
  *
- * Boxed type is not part of the identification, i.e. only one boxed item
- * of a specific name can be given in @template_ and the type, if specified
- * as @array_size, must match exactly.
+ * The concrete type of boxed types is not part of the identification, i.e.
+ * only one boxed item of a specific name can be given in @template_ and the
+ * type, if specified as @array_size, must match exactly.
  **/
 void
 gwy_deserialize_filter_items(GwySerializableItem *template_,
@@ -1529,18 +1533,13 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {
-            /* FIXME: We should free the item right now instead, so that
-             * futher users of @items won't see it. */
-            if (i != ii)
-                GWY_SWAP(GwySerializableItem,
-                         items->items[i], items->items[ii]);
-            ii++;
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_ITEM,
                                _("Item ‘%s’ of type 0x%02x is present multiple "
                                  "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
                                name, ctype, type_name);
+            free_item_data(items->items + i);
             seen[j]++;
             continue;
         }
@@ -1549,10 +1548,6 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         /* Boxed types can be also filtered using the type. */
         if (ctype == GWY_SERIALIZABLE_BOXED && template_[j].array_size) {
             if (G_UNLIKELY(item->array_size != template_[j].array_size)) {
-                if (i != ii)
-                    GWY_SWAP(GwySerializableItem,
-                             items->items[i], items->items[ii]);
-                ii++;
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_ITEM,
                                    _("Item ‘%s’ in the representation of "
@@ -1562,6 +1557,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                    name, type_name,
                                    g_type_name(item->array_size),
                                    g_type_name(template_[j].array_size));
+                free_item_data(items->items + i);
                 continue;
             }
         }
