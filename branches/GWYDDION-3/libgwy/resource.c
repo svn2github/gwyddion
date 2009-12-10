@@ -551,10 +551,10 @@ gwy_resource_set_is_preferred(GwyResource *resource,
 }
 
 /**
- * gwy_resource_class_get_name:
- * @klass: A resource class.
+ * gwy_resource_type_get_name:
+ * @type: A resource type.
  *
- * Gets the name of a resource class.
+ * Gets the name of a resource type.
  *
  * This is an simple identifier usable for example as directory name.
  *
@@ -562,39 +562,45 @@ gwy_resource_set_is_preferred(GwyResource *resource,
  *          nor freed.
  **/
 const gchar*
-gwy_resource_class_get_name(GwyResourceClass *klass)
+gwy_resource_type_get_name(GType type)
 {
-    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_assert(klass);
     return klass->priv->name;
 }
 
 /**
- * gwy_resource_class_get_inventory:
- * @klass: A resource class.
+ * gwy_resource_type_get_inventory:
+ * @type: A resource type.
  *
- * Gets the inventory which holds resources of a resource class.
+ * Gets the inventory which holds resources of a resource type.
  *
  * Returns: Resource class inventory.
  **/
 GwyInventory*
-gwy_resource_class_get_inventory(GwyResourceClass *klass)
+gwy_resource_type_get_inventory(GType type)
 {
-    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_assert(klass);
     return klass->priv->inventory;
 }
 
 /**
- * gwy_resource_class_get_item_type:
- * @klass: A resource class.
+ * gwy_resource_type_get_item_type:
+ * @type: A resource type.
  *
- * Gets the inventory item type for a resource class.
+ * Gets the inventory item type for a resource type.
  *
  * Returns: Inventory item type.
  **/
 const GwyInventoryItemType*
-gwy_resource_class_get_item_type(GwyResourceClass *klass)
+gwy_resource_type_get_item_type(GType type)
 {
-    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_assert(klass);
     return &klass->priv->item_type;
 }
 
@@ -612,9 +618,8 @@ gwy_resource_class_get_item_type(GwyResourceClass *klass)
  *
  * Registers a resource class.
  *
- * This is normally done in the class init function of a resource class.
- *
- * This method sets up the class inventory.
+ * Calling this class method is necessary to set up the class inventory.  This
+ * is normally done in the class init function of a resource class.
  **/
 void
 gwy_resource_class_register(GwyResourceClass *klass,
@@ -1095,18 +1100,20 @@ gwy_resource_data_changed_impl(GwyResource *resource)
 }
 
 /**
- * gwy_resource_class_load:
- * @klass: A resource class.
+ * gwy_resource_type_load:
+ * @type: A resource type.
  *
- * Loads resources of a resources class from disk.
+ * Loads resources of a given type from disk.
  *
  * Resources are loaded from system directory (and marked constant) and from
  * user directory (marked modifiable).
  **/
 void
-gwy_resource_class_load(GwyResourceClass *klass)
+gwy_resource_type_load(GType type)
 {
-    g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
+    g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_assert(klass);
     ResourceClass *priv = klass->priv;
     g_return_if_fail(priv->inventory);
 
@@ -1114,7 +1121,7 @@ gwy_resource_class_load(GwyResourceClass *klass)
     gchar **dirs = gwy_data_search_path(priv->name);
     for (gchar **d = dirs; *d; d++) {
         gboolean writable = userdir && gwy_strequal(*d, userdir);
-        gwy_resource_class_load_directory(klass, *d, writable, NULL);
+        gwy_resource_type_load_directory(type, *d, writable, NULL);
     }
     if (!g_file_test(userdir, G_FILE_TEST_IS_DIR))
         g_mkdir_with_parents(userdir, 0700);
@@ -1123,8 +1130,8 @@ gwy_resource_class_load(GwyResourceClass *klass)
 }
 
 /**
- * gwy_resource_class_load_directory:
- * @klass: Resource klass of the resources in the directory.
+ * gwy_resource_type_load_directory:
+ * @type: Resource type of the resources in the directory.
  * @dirname: Directory to load resources from.
  * @modifiable: %TRUE to create resources as modifiable, %FALSE to create them
  *              as fixed.
@@ -1140,11 +1147,15 @@ gwy_resource_class_load(GwyResourceClass *klass)
  * The loaded resources are created as managed.
  **/
 void
-gwy_resource_class_load_directory(GwyResourceClass *klass,
-                                  const gchar *dirname_sys,
-                                  gboolean modifiable,
-                                  GwyErrorList **error_list)
+gwy_resource_type_load_directory(GType type,
+                                 const gchar *dirname_sys,
+                                 gboolean modifiable,
+                                 GwyErrorList **error_list)
 {
+    g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
+    GwyResourceClass *klass = g_type_class_peek(type);
+    g_assert(klass);
+
     GFile *gfile = g_file_new_for_path(dirname_sys);
     GFileEnumerator *dir
         = g_file_enumerate_children(gfile,
@@ -1171,7 +1182,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
                                                NULL);
         GError *error = NULL;
         GwyResource *resource
-            = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
+            = gwy_resource_load(filename_sys, type, &error);
 
         if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
             Resource *priv = resource->priv;
@@ -1226,7 +1237,7 @@ name_is_unique(GwyResource *resource,
 }
 
 /**
- * gwy_resource_classes_finalize:
+ * gwy_resource_types_finalize:
  *
  * Destroys the inventories of all resource classes.
  *
@@ -1239,7 +1250,7 @@ name_is_unique(GwyResource *resource,
  * locking is used and just do not expect it to work in such case.
  **/
 void
-gwy_resource_classes_finalize(void)
+gwy_resource_types_finalize(void)
 {
     GSList *l;
 
@@ -1409,12 +1420,12 @@ gwy_resource_dump_data_line(const gdouble *data,
  * favorites, loading resources from files and saving them.
  *
  * All resources of given kind are usually contained in the class inventory,
- * available through gwy_resource_class_get_inventory(), although they may also
+ * available through gwy_resource_type_get_inventory(), although they may also
  * exist as private objects the inventory knows nothing about.  In the first
  * case they are called managed resources while in the second they are called
  * free-standing.
  *
- * Managed resources come from gwy_resource_class_load() or they may be
+ * Managed resources come from gwy_resource_type_load() or they may be
  * built-in.  They can also be created using the inventory methods such as
  * gwy_inventory_copy().  They cannot be freely renamed, only renaming using
  * gwy_inventory_rename() is possible.  If a resource is removed from the

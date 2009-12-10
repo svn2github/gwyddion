@@ -117,8 +117,10 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     res_class->parse = gwy_gradient_parse;
 
     gwy_resource_class_register(res_class, "gradients", NULL);
-    GwyInventory *inventory = gwy_resource_class_get_inventory(res_class);
+    /* Not necessary until setup-presets is called.
+    GwyInventory *inventory = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
     gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
+    */
 }
 
 static void
@@ -972,37 +974,6 @@ gwy_gradient_changed(GwyGradient *gradient)
     gwy_resource_data_changed(GWY_RESOURCE(gradient));
 }
 
-/**
- * gwy_gradients:
- *
- * Gets inventory with all the gradients.
- *
- * Returns: Gradient inventory.
- **/
-GwyInventory*
-gwy_gradients(void)
-{
-    return gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
-}
-
-/**
- * gwy_gradients_get_gradient:
- * @name: Gradient name.  May be %NULL to get the default gradient.
- *
- * Convenience function to get a gradient from gwy_gradients() by name.
- *
- * Returns: Gradient identified by @name or the default gradient if @name does
- *          not exist.
- **/
-GwyGradient*
-gwy_gradients_get_gradient(const gchar *name)
-{
-    GwyInventory *i;
-
-    i = gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
-    return (GwyGradient*)gwy_inventory_get_or_default(i, name);
-}
-
 /* FIXME: What to do with this? */
 static void
 gwy_gradient_class_setup_presets(void)
@@ -1017,7 +988,7 @@ gwy_gradient_class_setup_presets(void)
     gradient = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
     /* FIXME: Cannot set name. */
     GwyInventory *i;
-    i = gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
+    i = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
     gwy_inventory_insert(i, gradient);
     g_object_unref(gradient);
 
@@ -1099,6 +1070,24 @@ gwy_gradient_class_setup_presets(void)
  * Copies the value of a color gradient.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
+ **/
+
+/**
+ * gwy_gradients:
+ *
+ * Gets inventory with all the gradients.
+ *
+ * Returns: Gradient inventory.
+ **/
+
+/**
+ * gwy_gradients_get_gradient:
+ * @name: Gradient name.  May be %NULL to get the default gradient.
+ *
+ * Convenience function to get a gradient from gwy_gradients() by name.
+ *
+ * Returns: Gradient identified by @name or the default gradient if @name does
+ *          not exist.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

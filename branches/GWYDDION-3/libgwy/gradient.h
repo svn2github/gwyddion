@@ -88,8 +88,11 @@ void                    gwy_gradient_set_from_samples(GwyGradient *gradient,
                                                       guint nsamples,
                                                       const guchar *samples,
                                                       gdouble threshold);
-GwyInventory*           gwy_gradients                (void)                            G_GNUC_PURE;
-GwyGradient*            gwy_gradients_get_gradient   (const gchar *name)               G_GNUC_PURE;
+#define gwy_gradients() \
+    (gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT))
+#define gwy_gradients_get_gradient(name) \
+    ((GwyGradient*)gwy_inventory_get_or_default(gwy_gradients(), (name)))
+
 /* FIXME: The jury is still out on the pixel format.  Generally, we want to use
  * the Cairo format but avoiding GdkPixbuf althogether might not be possible
  * or wise. */
