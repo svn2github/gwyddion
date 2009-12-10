@@ -64,15 +64,7 @@ typedef struct _GwyResourceClass GwyResourceClass;
 
 struct _GwyResource {
     GObject g_object;
-
-    gint use_count;
-    gchar *name;
-    gchar *filename;
-
-    gboolean is_modifiable : 1;
-    gboolean is_modified : 1;
-    gboolean is_preferred : 1;
-    gboolean is_managed : 1;
+    struct _GwyResourcePrivate *priv;
 };
 
 struct _GwyResourceClass {

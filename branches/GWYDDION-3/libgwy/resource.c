@@ -52,6 +52,19 @@ enum {
     N_PROPS
 };
 
+struct _GwyResourcePrivate {
+    guint use_count;
+    gchar *name;
+    gchar *filename;
+
+    gboolean is_modifiable : 1;
+    gboolean is_modified : 1;
+    gboolean is_preferred : 1;
+    gboolean is_managed : 1;
+};
+
+typedef struct _GwyResourcePrivate Resource;
+
 static void              gwy_resource_finalize          (GObject *object);
 static void              gwy_resource_set_property      (GObject *object,
                                                          guint prop_id,
@@ -146,6 +159,8 @@ gwy_resource_class_init(GwyResourceClass *klass)
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GParamSpec *pspec;
 
+    g_type_class_add_private(klass, sizeof(Resource));
+
     gobject_class->finalize = gwy_resource_finalize;
     gobject_class->get_property = gwy_resource_get_property;
     gobject_class->set_property = gwy_resource_set_property;
@@ -231,19 +246,22 @@ gwy_resource_class_init(GwyResourceClass *klass)
 }
 
 static void
-gwy_resource_init(G_GNUC_UNUSED GwyResource *resource)
+gwy_resource_init(GwyResource *resource)
 {
+    resource->priv = G_TYPE_INSTANCE_GET_PRIVATE(resource, GWY_TYPE_RESOURCE,
+                                                 Resource);
 }
 
 static void
 gwy_resource_finalize(GObject *object)
 {
     GwyResource *resource = (GwyResource*)object;
+    Resource *priv = resource->priv;
 
-    if (resource->use_count)
+    if (priv->use_count)
         g_critical("Resource %p with nonzero use_count is finalized.", object);
-    GWY_FREE(resource->name);
-    GWY_FREE(resource->filename);
+    GWY_FREE(priv->name);
+    GWY_FREE(priv->filename);
 
     G_OBJECT_CLASS(gwy_resource_parent_class)->finalize(object);
 }
@@ -255,10 +273,11 @@ gwy_resource_set_property(GObject *object,
                           GParamSpec *pspec)
 {
     GwyResource *resource = GWY_RESOURCE(object);
+    Resource *priv = resource->priv;
 
     switch (prop_id) {
         case PROP_IS_MODIFIABLE:
-        resource->is_modifiable = g_value_get_boolean(value);
+        priv->is_modifiable = g_value_get_boolean(value);
         break;
 
         case PROP_IS_PREFERRED:
@@ -278,26 +297,31 @@ gwy_resource_get_property(GObject *object,
                           GParamSpec *pspec)
 {
     GwyResource *resource = GWY_RESOURCE(object);
+    Resource *priv = resource->priv;
 
     switch (prop_id) {
         case PROP_NAME:
-        g_value_set_string(value, resource->name);
+        g_value_set_string(value, priv->name);
         break;
 
         case PROP_FILE_NAME:
-        g_value_set_string(value, resource->filename);
+        g_value_set_string(value, priv->filename);
         break;
 
         case PROP_IS_PREFERRED:
-        g_value_set_boolean(value, resource->is_preferred);
+        g_value_set_boolean(value, priv->is_preferred);
         break;
 
         case PROP_IS_MODIFIABLE:
-        g_value_set_boolean(value, resource->is_modifiable);
+        g_value_set_boolean(value, priv->is_modifiable);
         break;
 
         case PROP_IS_MODIFIED:
-        g_value_set_boolean(value, resource->is_modified);
+        g_value_set_boolean(value, priv->is_modified);
+        break;
+
+        case PROP_IS_MANAGED:
+        g_value_set_boolean(value, priv->is_managed);
         break;
 
         default:
@@ -310,14 +334,14 @@ static const gchar*
 gwy_resource_get_item_name(gconstpointer item)
 {
     GwyResource *resource = (GwyResource*)item;
-    return resource->name;
+    return resource->priv->name;
 }
 
 static gboolean
 gwy_resource_is_modifiable_impl(gconstpointer item)
 {
     GwyResource *resource = (GwyResource*)item;
-    return resource->is_modifiable;
+    return resource->priv->is_modifiable;
 }
 
 static gboolean
@@ -327,7 +351,7 @@ gwy_resource_compare(gconstpointer item1,
     GwyResource *resource1 = (GwyResource*)item1;
     GwyResource *resource2 = (GwyResource*)item2;
 
-    return g_utf8_collate(resource1->name, resource2->name);
+    return g_utf8_collate(resource1->priv->name, resource2->priv->name);
 }
 
 static void
@@ -335,11 +359,16 @@ gwy_resource_rename(gpointer item,
                     const gchar *new_name)
 {
     GwyResource *resource = (GwyResource*)item;
+    Resource *priv = resource->priv;
 
-    g_return_if_fail(resource->is_modifiable);
+    g_return_if_fail(priv->is_modifiable);
 
-    GWY_FREE(resource->name);
-    resource->name = g_strdup(new_name);
+    gchar *oldname = priv->name;
+    if (gwy_strequal(oldname, new_name))
+        return;
+
+    priv->name = g_strdup(new_name);
+    GWY_FREE(oldname);
     g_object_notify(G_OBJECT(item), "name");
 }
 
@@ -381,8 +410,8 @@ static void
 gwy_resource_set_unmanaged(gpointer item)
 {
     GwyResource *resource = GWY_RESOURCE(item);
-    g_return_if_fail(resource->is_managed);
-    resource->is_managed = FALSE;
+    g_return_if_fail(resource->priv->is_managed);
+    resource->priv->is_managed = FALSE;
     g_object_notify(G_OBJECT(item), "is-managed");
 }
 
@@ -393,14 +422,15 @@ inventory_item_inserted(GwyInventory *inventory,
 {
     g_return_if_fail(klass->inventory == inventory);
     GwyResource *resource = gwy_inventory_get_nth(inventory, i);
-    if (!resource->is_managed) {
+    Resource *priv = resource->priv;
+    if (!priv->is_managed) {
         GObject *object = G_OBJECT(resource);
         g_object_freeze_notify(object);
-        resource->is_managed = TRUE;
+        priv->is_managed = TRUE;
         g_object_notify(object, "is-managed");
         // We must be pesimistic.
-        if (!resource->is_modified && resource->is_modifiable) {
-            resource->is_modified = resource->is_modifiable;
+        if (!priv->is_modified && priv->is_modifiable) {
+            priv->is_modified = priv->is_modifiable;
             g_object_notify(object, "is-modified");
         }
         g_object_thaw_notify(object);
@@ -420,7 +450,7 @@ const gchar*
 gwy_resource_get_name(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), NULL);
-    return resource->name;
+    return resource->priv->name;
 }
 
 /**
@@ -439,11 +469,7 @@ gwy_resource_set_name(GwyResource *resource,
                       const gchar *name)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    g_return_if_fail(!resource->is_managed);
-    gchar *oldname = resource->name;
-    resource->name = g_strdup(name);
-    GWY_FREE(oldname);
-    g_object_notify(G_OBJECT(resource), "name");
+    gwy_resource_rename(resource, name);
 }
 
 /**
@@ -459,7 +485,7 @@ gboolean
 gwy_resource_is_managed(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->is_managed;
+    return resource->priv->is_managed;
 }
 
 /**
@@ -475,7 +501,7 @@ gboolean
 gwy_resource_is_modifiable(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->is_modifiable;
+    return resource->priv->is_modifiable;
 }
 
 /**
@@ -490,7 +516,7 @@ gboolean
 gwy_resource_get_is_preferred(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->is_preferred;
+    return resource->priv->is_preferred;
 }
 
 /**
@@ -506,7 +532,10 @@ gwy_resource_set_is_preferred(GwyResource *resource,
                               gboolean is_preferred)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    resource->is_preferred = !!is_preferred;
+    is_preferred = !!is_preferred;
+    if (is_preferred == resource->priv->is_preferred)
+        return;
+    resource->priv->is_preferred = is_preferred;
     g_object_notify(G_OBJECT(resource), "is-preferred");
 }
 
@@ -595,7 +624,7 @@ gwy_resource_class_register(GwyResourceClass *klass,
  * Starts using a resource.
  *
  * Calling this function is necessary to use a resource properly.
- * It tells the resource to create any auxiliary structures that consume
+ * It tells the resource to create any auxiliary structures that may consume
  * considerable amount of memory and perform other initialization to
  * ready-to-use form.
  *
@@ -604,7 +633,7 @@ gwy_resource_class_register(GwyResourceClass *klass,
  * When a resource is no longer used, it should be discarded with
  * gwy_resource_discard() which releases the auxilary data.
  *
- * Although resources often exist through almost whole program lifetime from
+ * Although resources often exist through almost entire program lifetime from
  * #GObject perspective, from the viewpoint of their use this method plays the
  * role of constructor and gwy_resource_discard() is the destructor.
  **/
@@ -614,7 +643,7 @@ gwy_resource_use(GwyResource *resource)
     g_return_if_fail(GWY_IS_RESOURCE(resource));
 
     g_object_ref(resource);
-    if (!resource->use_count++) {
+    if (!resource->priv->use_count++) {
         void (*method)(GwyResource*);
 
         method = GWY_RESOURCE_GET_CLASS(resource)->use;
@@ -637,9 +666,9 @@ void
 gwy_resource_discard(GwyResource *resource)
 {
     g_return_if_fail(GWY_IS_RESOURCE(resource));
-    g_return_if_fail(resource->use_count);
+    g_return_if_fail(resource->priv->use_count);
 
-    if (!--resource->use_count) {
+    if (!--resource->priv->use_count) {
         void (*method)(GwyResource*);
 
         method = GWY_RESOURCE_GET_CLASS(resource)->discard;
@@ -663,7 +692,7 @@ gboolean
 gwy_resource_is_used(GwyResource *resource)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->use_count > 0;
+    return resource->priv->use_count > 0;
 }
 
 /**
@@ -674,11 +703,11 @@ gwy_resource_is_used(GwyResource *resource)
  *
  * Saves a resource.
  *
- * The resource is actually save only if the @is_modified flag it set.
- * If it fails to save self, the flag is kept set, otherwise it is cleared.
- * Only modifiable resources can be saved and the file name is determined
- * automatically (if the resources was loaded from a file originally, it will
- * be saved to the same file).
+ * The resource is actually saved only if it has been modified.  If it fails to
+ * save self, the flag is kept set, otherwise it is cleared.  Only modifiable
+ * resources can be saved and the file name is determined automatically (if the
+ * resources was loaded from a file originally, it will be saved to the same
+ * file).
  *
  * Returns: %TRUE if the operation succeeded, %FALSE if it failed.  Not saving
  *          the resource because it was not modified counts as success.
@@ -688,9 +717,10 @@ gwy_resource_save(GwyResource *resource,
                   GError **error)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    g_return_val_if_fail(resource->is_modifiable, FALSE);
+    Resource *priv = resource->priv;
+    g_return_val_if_fail(priv->is_modifiable, FALSE);
 
-    if (!resource->is_modified)
+    if (!priv->is_modified)
         return TRUE;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
@@ -701,15 +731,15 @@ gwy_resource_save(GwyResource *resource,
                                 G_OBJECT_TYPE_NAME(resource),
                                 "\n",
                                 "name ",
-                                resource->name,
+                                resource->priv->name,
                                 "\n",
                                 body,
                                 NULL);
     g_free(body);
 
-    if (!resource->filename) {
+    if (!priv->filename) {
         gchar *dirname = gwy_user_directory(klass->name);
-        gchar *basename_sys = construct_filename(resource->name);
+        gchar *basename_sys = construct_filename(priv->name);
         gchar *filename_sys = g_build_filename(dirname, basename_sys, NULL);
         g_free(dirname);
         g_free(basename_sys);
@@ -730,10 +760,10 @@ gwy_resource_save(GwyResource *resource,
             g_free(filename_sys);
             filename_sys = g_string_free(str, FALSE);
         }
-        resource->filename = filename_sys;
+        priv->filename = filename_sys;
     }
 
-    gboolean ok = g_file_set_contents(resource->filename, buffer, -1, error);
+    gboolean ok = g_file_set_contents(priv->filename, buffer, -1, error);
     g_free(buffer);
 
     return ok;
@@ -937,11 +967,12 @@ parse(gchar *text,
     GwyResource *resource = g_object_newv(expected_type, 0, NULL);
     if ((klass->parse(resource, text, error))) {
         if (name) {
-            resource->name = g_strdup(name);
+            resource->priv->name = g_strdup(name);
         }
         else {
             name = g_path_get_basename(filename_sys);
-            resource->name = g_filename_to_utf8(name, -1, NULL, NULL, NULL);
+            resource->priv->name = g_filename_to_utf8(name, -1,
+                                                      NULL, NULL, NULL);
             g_free(name);
         }
     }
@@ -1023,10 +1054,10 @@ gwy_resource_data_changed(GwyResource *resource)
 static void
 gwy_resource_data_changed_impl(GwyResource *resource)
 {
-    if (!resource->is_modifiable)
+    if (!resource->priv->is_modifiable)
         g_warning("Constant resource ‘%s’ of type %s was modified",
-                  resource->name, G_OBJECT_TYPE_NAME(resource));
-    resource->is_modified = TRUE;
+                  resource->priv->name, G_OBJECT_TYPE_NAME(resource));
+    resource->priv->is_modified = TRUE;
 }
 
 /**
@@ -1108,10 +1139,11 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             = gwy_resource_load(filename_sys, G_TYPE_FROM_CLASS(klass), &error);
 
         if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
-            resource->is_managed = TRUE;
-            resource->is_modifiable = modifiable;
-            resource->filename = filename_sys;
-            resource->is_modified = FALSE;
+            Resource *priv = resource->priv;
+            priv->is_managed = TRUE;
+            priv->is_modifiable = modifiable;
+            priv->filename = filename_sys;
+            priv->is_modified = FALSE;
             gwy_inventory_insert(klass->inventory, resource);
             g_object_unref(resource);
         }
@@ -1130,18 +1162,20 @@ name_is_unique(GwyResource *resource,
                GwyResourceClass *klass,
                GError **error)
 {
-    GwyResource *obstacle = gwy_inventory_get(klass->inventory, resource->name);
+    Resource *priv = resource->priv;
+    GwyResource *obstacle = gwy_inventory_get(klass->inventory, priv->name);
     if (!obstacle)
         return TRUE;
 
+    Resource *opriv = obstacle->priv;
     /* Do not bother with message formatting when errors are ingored. */
     if (!error)
         return FALSE;
 
-    gchar *filename_utf8 = g_filename_to_utf8(resource->filename, -1,
+    gchar *filename_utf8 = g_filename_to_utf8(priv->filename, -1,
                                               NULL, NULL, NULL);
-    gchar *ofilename_utf8 = (obstacle->filename
-                             ? g_filename_to_utf8(obstacle->filename, -1,
+    gchar *ofilename_utf8 = (opriv->filename
+                             ? g_filename_to_utf8(opriv->filename, -1,
                                                   NULL, NULL, NULL)
                              : "<internal>");
     g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_DUPLICIT,
@@ -1149,7 +1183,7 @@ name_is_unique(GwyResource *resource,
                   "conflicts with already loaded resource from ‘%s’."),
                 G_OBJECT_TYPE_NAME(resource), filename_utf8, ofilename_utf8);
     g_free(filename_utf8);
-    if (obstacle->filename)
+    if (opriv->filename)
         g_free(ofilename_utf8);
 
     return FALSE;
@@ -1164,9 +1198,9 @@ name_is_unique(GwyResource *resource,
  * to facilitate reference leak debugging by destroying a large number of
  * objects that normally live forever.
  *
- * It would quite defeat the purpose of this function if the program was busy
- * loading more resource classes in other threads when it is executed.  So, no
- * locking is used and just do not do this.
+ * It would quite defeat the purpose of this function if it was called while
+ * the program was busy loading more resource classes in other threads.  So, no
+ * locking is used and just do not expect it to work in such case.
  **/
 void
 gwy_resource_classes_finalize(void)
