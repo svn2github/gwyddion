@@ -63,7 +63,15 @@ struct _GwyResourcePrivate {
     gboolean is_managed : 1;
 };
 
-typedef struct _GwyResourcePrivate Resource;
+struct _GwyResourceClassPrivate {
+    GwyInventory *inventory;
+    const gchar *name;
+    GwyInventoryItemType item_type;
+    gulong item_inserted_id;
+};
+
+typedef struct _GwyResourcePrivate      Resource;
+typedef struct _GwyResourceClassPrivate ResourceClass;
 
 static void              gwy_resource_finalize          (GObject *object);
 static void              gwy_resource_set_property      (GObject *object,
@@ -160,13 +168,16 @@ gwy_resource_class_init(GwyResourceClass *klass)
     GParamSpec *pspec;
 
     g_type_class_add_private(klass, sizeof(Resource));
+    // FIXME: In future, they might be a function similar to
+    // g_type_class_add_private() for class data.
+    klass->priv = g_new0(ResourceClass, 1);
 
     gobject_class->finalize = gwy_resource_finalize;
     gobject_class->get_property = gwy_resource_get_property;
     gobject_class->set_property = gwy_resource_set_property;
 
-    klass->item_type = gwy_resource_item_type;
-    klass->item_type.type = G_TYPE_FROM_CLASS(klass);
+    klass->priv->item_type = gwy_resource_item_type;
+    klass->priv->item_type.type = G_TYPE_FROM_CLASS(klass);
     klass->data_changed = gwy_resource_data_changed_impl;
 
     pspec = g_param_spec_string("name",
@@ -420,7 +431,7 @@ inventory_item_inserted(GwyInventory *inventory,
                         guint i,
                         GwyResourceClass *klass)
 {
-    g_return_if_fail(klass->inventory == inventory);
+    g_return_if_fail(klass->priv->inventory == inventory);
     GwyResource *resource = gwy_inventory_get_nth(inventory, i);
     Resource *priv = resource->priv;
     if (!priv->is_managed) {
@@ -554,7 +565,7 @@ const gchar*
 gwy_resource_class_get_name(GwyResourceClass *klass)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    return klass->name;
+    return klass->priv->name;
 }
 
 /**
@@ -569,7 +580,7 @@ GwyInventory*
 gwy_resource_class_get_inventory(GwyResourceClass *klass)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    return klass->inventory;
+    return klass->priv->inventory;
 }
 
 /**
@@ -584,14 +595,20 @@ const GwyInventoryItemType*
 gwy_resource_class_get_item_type(GwyResourceClass *klass)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    return &klass->item_type;
+    return &klass->priv->item_type;
 }
 
 /**
  * gwy_resource_class_register:
  * @klass: A resource class.
  * @name: Resource class name, usable as resource directory name for on-disk
- *        resources.
+ *        resources.  It must be a valid identifier.
+ * @item_type: Inventory item type.  Usually pass %NULL, to use the parent's
+ *             item type.  Modification might be useful for instance if you
+ *             want to add traits, in this case acquire parent's item type with
+ *             gwy_resource_class_get_item_type() and modify it accordingly
+ *             with chaining.  It is not necessary to set the @type field, it
+ *             will be always set to the resource type.
  *
  * Registers a resource class.
  *
@@ -601,13 +618,22 @@ gwy_resource_class_get_item_type(GwyResourceClass *klass)
  **/
 void
 gwy_resource_class_register(GwyResourceClass *klass,
-                            const gchar *name)
+                            const gchar *name,
+                            const GwyInventoryItemType *item_type)
 {
-    klass->item_type.type = G_TYPE_FROM_CLASS(klass);
-    klass->name = name;
-    klass->inventory = gwy_inventory_new_with_type(&klass->item_type);
+    g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
+    g_return_if_fail(name);
 
-    g_signal_connect(klass->inventory, "item-inserted",
+    ResourceClass *priv = klass->priv;
+    if (item_type)
+        priv->item_type = *item_type;
+    priv->item_type.type = G_TYPE_FROM_CLASS(klass);
+    if (!gwy_strisident(name, "-_", NULL))
+        g_warning("Resource class name %s is not a valid identifier.", name);
+    priv->name = name;
+    priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
+
+    g_signal_connect(priv->inventory, "item-inserted",
                      G_CALLBACK(inventory_item_inserted), klass);
 
     gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
@@ -746,7 +772,7 @@ gwy_resource_save(GwyResource *resource,
     g_free(body);
 
     if (!priv->filename) {
-        gchar *dirname = gwy_user_directory(klass->name);
+        gchar *dirname = gwy_user_directory(klass->priv->name);
         gchar *basename_sys = construct_filename(priv->name);
         gchar *filename_sys = g_build_filename(dirname, basename_sys, NULL);
         g_free(dirname);
@@ -1081,10 +1107,11 @@ void
 gwy_resource_class_load(GwyResourceClass *klass)
 {
     g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
-    g_return_if_fail(klass->inventory);
+    ResourceClass *priv = klass->priv;
+    g_return_if_fail(priv->inventory);
 
-    gchar *userdir = gwy_user_directory(klass->name);
-    gchar **dirs = gwy_data_search_path(klass->name);
+    gchar *userdir = gwy_user_directory(priv->name);
+    gchar **dirs = gwy_data_search_path(priv->name);
     for (gchar **d = dirs; *d; d++) {
         gboolean writable = userdir && gwy_strequal(*d, userdir);
         gwy_resource_class_load_directory(klass, *d, writable, NULL);
@@ -1152,7 +1179,7 @@ gwy_resource_class_load_directory(GwyResourceClass *klass,
             priv->is_modifiable = modifiable;
             priv->filename = filename_sys;
             priv->is_modified = FALSE;
-            gwy_inventory_insert(klass->inventory, resource);
+            gwy_inventory_insert(klass->priv->inventory, resource);
             g_object_unref(resource);
         }
         else {
@@ -1171,7 +1198,8 @@ name_is_unique(GwyResource *resource,
                GError **error)
 {
     Resource *priv = resource->priv;
-    GwyResource *obstacle = gwy_inventory_get(klass->inventory, priv->name);
+    GwyResource *obstacle = gwy_inventory_get(klass->priv->inventory,
+                                              priv->name);
     if (!obstacle)
         return TRUE;
 
@@ -1216,13 +1244,13 @@ gwy_resource_classes_finalize(void)
     GSList *l;
 
     for (l = all_resources; l; l = g_slist_next(l)) {
-        GwyResourceClass *klass;
-
-        klass = g_type_class_ref((GType)GPOINTER_TO_SIZE(all_resources->data));
+        GwyResourceClass *klass = g_type_class_ref((GType)GPOINTER_TO_SIZE(all_resources->data));
+        ResourceClass *priv = klass->priv;
         // Disconnect in case someone else holds a reference.
-        GWY_SIGNAL_HANDLER_DISCONNECT(klass->inventory,
-                                      klass->item_inserted_id);
-        GWY_OBJECT_UNREF(klass->inventory);
+        GWY_SIGNAL_HANDLER_DISCONNECT(priv->inventory,
+                                      priv->item_inserted_id);
+        GWY_OBJECT_UNREF(priv->inventory);
+        g_type_class_unref(klass);
     }
 
     g_slist_free(all_resources);

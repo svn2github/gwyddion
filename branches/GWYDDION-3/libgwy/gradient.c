@@ -116,7 +116,7 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
 
-    gwy_resource_class_register(res_class, "gradients");
+    gwy_resource_class_register(res_class, "gradients", NULL);
     GwyInventory *inventory = gwy_resource_class_get_inventory(res_class);
     gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
 }
@@ -982,7 +982,7 @@ gwy_gradient_changed(GwyGradient *gradient)
 GwyInventory*
 gwy_gradients(void)
 {
-    return GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT))->inventory;
+    return gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
 }
 
 /**
@@ -999,7 +999,7 @@ gwy_gradients_get_gradient(const gchar *name)
 {
     GwyInventory *i;
 
-    i = GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT))->inventory;
+    i = gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
     return (GwyGradient*)gwy_inventory_get_or_default(i, name);
 }
 
@@ -1016,7 +1016,9 @@ gwy_gradient_class_setup_presets(void)
 
     gradient = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
     /* FIXME: Cannot set name. */
-    gwy_inventory_insert(klass->inventory, gradient);
+    GwyInventory *i;
+    i = gwy_resource_class_get_inventory(GWY_RESOURCE_CLASS(g_type_class_peek(GWY_TYPE_GRADIENT)));
+    gwy_inventory_insert(i, gradient);
     g_object_unref(gradient);
 
     /* The gradient added a reference so we can safely unref it again */

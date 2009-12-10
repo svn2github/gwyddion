@@ -70,13 +70,7 @@ struct _GwyResource {
 struct _GwyResourceClass {
     /*< private >*/
     GObjectClass g_object_class;
-
-    /*< public >*/
-    GwyInventory *inventory;
-    const gchar *name;
-
-    /* Traits */
-    GwyInventoryItemType item_type;
+    struct _GwyResourceClassPrivate *priv;
 
     /* Signals */
     void (*data_changed)(GwyResource *resource);
@@ -91,7 +85,6 @@ struct _GwyResourceClass {
                             GError **error);
 
     /*< private >*/
-    gulong item_inserted_id;
     void (*reserved1)(void);
     void (*reserved2)(void);
 };
@@ -115,7 +108,8 @@ GwyResource*                gwy_resource_load                (const gchar *filen
 gboolean                    gwy_resource_save                (GwyResource *resource,
                                                               GError **error);
 void                        gwy_resource_class_register      (GwyResourceClass *klass,
-                                                              const gchar *name);
+                                                              const gchar *name,
+                                                              const GwyInventoryItemType *item_type);
 const gchar*                gwy_resource_class_get_name      (GwyResourceClass *klass)    G_GNUC_PURE;
 const GwyInventoryItemType* gwy_resource_class_get_item_type (GwyResourceClass *klass)    G_GNUC_PURE;
 GwyInventory*               gwy_resource_class_get_inventory (GwyResourceClass *klass)    G_GNUC_PURE;
