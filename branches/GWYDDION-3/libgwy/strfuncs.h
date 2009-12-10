@@ -21,13 +21,16 @@
 #define __LIBGWY_STRFUNCS_H__
 
 #include <glib.h>
+#include <string.h>
 
 G_BEGIN_DECLS
 
 #define gwy_strequal(a, b) \
     (!strcmp((a), (b)))
 
-
+gboolean gwy_strisident   (const gchar *s,
+                           const gchar *more,
+                           const gchar *startmore) G_GNUC_PURE;
 guint    gwy_stramong     (const gchar *str,
                            ...)                    G_GNUC_NULL_TERMINATED G_GNUC_PURE;
 gchar*   gwy_str_next_line(gchar **buffer);
