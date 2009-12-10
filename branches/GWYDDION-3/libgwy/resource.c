@@ -567,6 +567,19 @@ gwy_resource_type_get_name(GType type)
     return klass->priv->name;
 }
 
+static void
+ensure_inventory(GwyResourceClass *klass)
+{
+    ResourceClass *priv = klass->priv;
+    if (G_UNLIKELY(!priv->inventory)) {
+        // Check whether gwy_resource_class_register() has been called.
+        g_return_if_fail(priv->name);
+        priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
+        g_signal_connect(priv->inventory, "item-inserted",
+                         G_CALLBACK(inventory_item_inserted), klass);
+    }
+}
+
 /**
  * gwy_resource_type_get_inventory:
  * @type: A resource type.
@@ -581,6 +594,7 @@ gwy_resource_type_get_inventory(GType type)
     g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
     GwyResourceClass *klass = g_type_class_peek(type);
     g_assert(klass);
+    ensure_inventory(klass);
     return klass->priv->inventory;
 }
 
@@ -633,10 +647,6 @@ gwy_resource_class_register(GwyResourceClass *klass,
     if (!gwy_strisident(name, "-_", NULL))
         g_warning("Resource class name %s is not a valid identifier.", name);
     priv->name = name;
-    priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
-
-    g_signal_connect(priv->inventory, "item-inserted",
-                     G_CALLBACK(inventory_item_inserted), klass);
 
     gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
     G_LOCK(all_resources);
@@ -1034,6 +1044,7 @@ gwy_resource_type_load(GType type)
     GwyResourceClass *klass = g_type_class_peek(type);
     g_assert(klass);
     ResourceClass *priv = klass->priv;
+    ensure_inventory(klass);
     g_return_if_fail(priv->inventory);
 
     gchar *userdir = gwy_user_directory(priv->name);
@@ -1074,6 +1085,8 @@ gwy_resource_type_load_directory(GType type,
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
     GwyResourceClass *klass = g_type_class_peek(type);
     g_assert(klass);
+    ensure_inventory(klass);
+    g_return_if_fail(klass->priv->inventory);
 
     GFile *gfile = g_file_new_for_path(dirname_sys);
     GFileEnumerator *dir
