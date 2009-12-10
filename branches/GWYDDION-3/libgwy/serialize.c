@@ -1463,6 +1463,9 @@ free_items(GwySerializableItems *items)
  * @n_items: The number of items in the template.
  * @items: Item list passed to construct().
  * @type_name: Name of the deserialized type for error messages.
+ * @unexpected_ok: Unexpected items do not cause errors, they are simply
+ *                 gathered at the start of @items for possible further
+ *                 processing.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
  *
@@ -1472,22 +1475,33 @@ free_items(GwySerializableItems *items)
  *
  * Expected values are moved from @items to @template.  This means the owner of
  * @template becomes the owner of dynamically allocated data in these items.
- * Unexpected values are left in @items for the owner of @items to free them
+ * Unexpected items are left in @items for the owner of @items to free them
  * which normally means you do not need to concern yourself with them.
  *
- * An item template is identified by its name and type.  Items of the same
- * name but different type are permitted in @template (e.g. to accept old
- * serialized representations for compatibility).
+ * Unexpected items are moved to the start of @item and its lenght is reduced
+ * to the number of these items to facilitate further processing in parent
+ * classes.
+ *
+ * An item template is identified by its name and type.  Multiple items of the
+ * same name are permitted in @template as long as they type differ (this can
+ * be useful e.g. to accept old serialized representations for compatibility).
+ *
+ * Boxed type is not part of the identification, i.e. only one boxed item
+ * of a specific name can be given in @template_ and the type, if specified
+ * as @array_size, must match exactly.
  **/
 void
 gwy_deserialize_filter_items(GwySerializableItem *template_,
                              gsize n_items,
                              GwySerializableItems *items,
                              const gchar *type_name,
+                             gboolean unexpected_ok,
                              GwyErrorList **error_list)
 {
     guint8 *seen = g_slice_alloc0(sizeof(guint8)*n_items);
 
+    // i is the reading head, ii is the writing head
+    gsize ii = 0;
     for (gsize i = 0; i < items->n; i++) {
         GwySerializableItem *item = items->items + i;
         const GwySerializableCType ctype = item->ctype;
@@ -1500,7 +1514,13 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                 break;
         }
 
-        if (G_UNLIKELY(j == n_items)) {
+        if (j == n_items) {
+            if (i != ii)
+                GWY_SWAP(GwySerializableItem,
+                         items->items[i], items->items[ii]);
+            ii++;
+            if (unexpected_ok)
+                continue;
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_ITEM,
                                _("Unexpected item ‘%s’ of type 0x%02x in the "
@@ -1509,6 +1529,12 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
             continue;
         }
         if (G_UNLIKELY(seen[j] == 1)) {
+            /* FIXME: We should free the item right now instead, so that
+             * futher users of @items won't see it. */
+            if (i != ii)
+                GWY_SWAP(GwySerializableItem,
+                         items->items[i], items->items[ii]);
+            ii++;
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_ITEM,
                                _("Item ‘%s’ of type 0x%02x is present multiple "
@@ -1523,6 +1549,10 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         /* Boxed types can be also filtered using the type. */
         if (ctype == GWY_SERIALIZABLE_BOXED && template_[j].array_size) {
             if (G_UNLIKELY(item->array_size != template_[j].array_size)) {
+                if (i != ii)
+                    GWY_SWAP(GwySerializableItem,
+                             items->items[i], items->items[ii]);
+                ii++;
                 gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                    GWY_DESERIALIZE_ERROR_ITEM,
                                    _("Item ‘%s’ in the representation of "
@@ -1543,6 +1573,8 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         template_[j].array_size = item->array_size;
         item->array_size = 0;
     }
+
+    items->n = ii;
 
     g_slice_free1(sizeof(guint8)*n_items, seen);
 }

@@ -93,7 +93,8 @@ gwy_rgba_construct(GwySerializableItems *items,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", FALSE,
+                                 error_list);
 
     GwyRGBA *rgba = g_slice_new(GwyRGBA);
     rgba->r = CLAMP(its[0].value.v_double, 0.0, 1.0);

@@ -166,7 +166,8 @@ gwy_gradient_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient",
+    // FIXME: Chain to Resource once possible
+    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient", TRUE,
                                  error_list);
 
     GwyGradient *gradient = GWY_GRADIENT(serializable);

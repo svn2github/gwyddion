@@ -814,7 +814,7 @@ gwy_ser_test_construct(GwySerializable *serializable,
 
     memcpy(it, default_items, sizeof(default_items));
     gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerTest",
-                                 error_list);
+                                 FALSE, error_list);
 
     if (it[3].array_size != 4) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
@@ -1383,7 +1383,7 @@ gwy_ser_box_test_construct(GwySerializable *serializable,
 
     memcpy(it, default_items_box, sizeof(default_items_box));
     gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerBoxTest",
-                                 error_list);
+                                 FALSE, error_list);
 
     GwySerBoxTest *sertest = GWY_SER_BOX_TEST(serializable);
 

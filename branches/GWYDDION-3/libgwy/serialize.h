@@ -51,6 +51,7 @@ void     gwy_deserialize_filter_items(GwySerializableItem *template_,
                                       gsize n_items,
                                       GwySerializableItems *items,
                                       const gchar *type_name,
+                                      gboolean unexpected_ok,
                                       GwyErrorList **error_list);
 
 G_END_DECLS
