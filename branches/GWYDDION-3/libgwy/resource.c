@@ -481,7 +481,7 @@ gwy_resource_set_name(GwyResource *resource,
 }
 
 /**
- * gwy_resource_is_modifiable:
+ * gwy_resource_is_managed:
  * @resource: A resource.
  *
  * Determines whether a resource is managed.
