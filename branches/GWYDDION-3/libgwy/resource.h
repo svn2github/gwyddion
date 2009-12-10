@@ -76,6 +76,7 @@ struct _GwyResourceClass {
     void (*data_changed)(GwyResource *resource);
 
     /* Virtual table */
+    void         (*setup_inventory)(GwyInventory *inventory);
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
     gboolean     (*parse)  (GwyResource *resource,

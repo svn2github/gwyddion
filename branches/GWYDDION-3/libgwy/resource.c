@@ -577,6 +577,8 @@ ensure_inventory(GwyResourceClass *klass)
         priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
         g_signal_connect(priv->inventory, "item-inserted",
                          G_CALLBACK(inventory_item_inserted), klass);
+        if (klass->setup_inventory)
+            klass->setup_inventory(priv->inventory);
     }
 }
 
@@ -1380,6 +1382,9 @@ gwy_resource_dump_data_line(const gdouble *data,
 /**
  * GwyResourceClass:
  * @data_changed: "data-changed" class signal handler.
+ * @setup_inventory: Sets up the class inventory after its creation.  This
+ *                   may involve for example setting the default item name and
+ *                   inserting the built-in system items to the inventory.
  * @copy: Creates copy of a resource.  For serializable resources, this should
  *        be the same as duplication.
  * @dump: Dumps resource data to text, the envelope is added by #GwyResource.
