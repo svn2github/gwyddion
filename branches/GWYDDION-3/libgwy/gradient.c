@@ -61,6 +61,7 @@ static GObject*     gwy_gradient_duplicate_impl   (GwySerializable *serializable
 static void         gwy_gradient_assign_impl      (GwySerializable *destination,
                                                    GwySerializable *source);
 static void         gwy_gradient_sanitize         (GwyGradient *gradient);
+static void         gwy_gradient_setup_inventory  (GwyInventory *inventory);
 static GwyResource* gwy_gradient_copy             (GwyResource *resource);
 static gchar*       gwy_gradient_dump             (GwyResource *resource);
 static gboolean     gwy_gradient_parse            (GwyResource *resource,
@@ -106,15 +107,12 @@ gwy_gradient_class_init(GwyGradientClass *klass)
 
     gobject_class->finalize = gwy_gradient_finalize;
 
+    res_class->setup_inventory = gwy_gradient_setup_inventory;
     res_class->copy = gwy_gradient_copy;
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
 
     gwy_resource_class_register(res_class, "gradients", NULL);
-    /* Not necessary until setup-presets is called.
-    GwyInventory *inventory = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
-    gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
-    */
 }
 
 static void
@@ -952,26 +950,14 @@ gwy_gradient_changed(GwyGradient *gradient)
     gwy_resource_data_changed(GWY_RESOURCE(gradient));
 }
 
-/* FIXME: What to do with this? */
 static void
-gwy_gradient_class_setup_presets(void)
+gwy_gradient_setup_inventory(GwyInventory *inventory)
 {
-    GwyResourceClass *klass;
-    GwyGradient *gradient;
-
-    /* Force class instantiation, this function is called before it's first
-     * referenced. */
-    klass = g_type_class_ref(GWY_TYPE_GRADIENT);
-
-    gradient = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
-    /* FIXME: Cannot set name. */
-    GwyInventory *i;
-    i = gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT);
-    gwy_inventory_insert(i, gradient);
+    gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
+    GwyGradient *gradient = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
+    gwy_resource_set_name(GWY_RESOURCE(gradient), GWY_GRADIENT_DEFAULT);
+    gwy_inventory_insert(inventory, gradient);
     g_object_unref(gradient);
-
-    /* The gradient added a reference so we can safely unref it again */
-    g_type_class_unref(klass);
 }
 
 #define __LIBGWY_GRADIENT_C__

@@ -1385,6 +1385,8 @@ gwy_resource_dump_data_line(const gdouble *data,
  * @setup_inventory: Sets up the class inventory after its creation.  This
  *                   may involve for example setting the default item name and
  *                   inserting the built-in system items to the inventory.
+ *                   The inventory passed to this function is always the class
+ *                   inventory, given for convenience.
  * @copy: Creates copy of a resource.  For serializable resources, this should
  *        be the same as duplication.
  * @dump: Dumps resource data to text, the envelope is added by #GwyResource.
