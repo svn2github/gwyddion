@@ -53,7 +53,6 @@ enum {
 };
 
 struct _GwyResourcePrivate {
-    guint use_count;
     gchar *name;
     gchar *filename;
 
@@ -269,8 +268,6 @@ gwy_resource_finalize(GObject *object)
     GwyResource *resource = (GwyResource*)object;
     Resource *priv = resource->priv;
 
-    if (priv->use_count)
-        g_critical("Resource %p with nonzero use_count is finalized.", object);
     GWY_FREE(priv->name);
     GWY_FREE(priv->filename);
 
