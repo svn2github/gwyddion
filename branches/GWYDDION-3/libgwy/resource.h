@@ -76,8 +76,6 @@ struct _GwyResourceClass {
     void (*data_changed)(GwyResource *resource);
 
     /* Virtual table */
-    void         (*use)    (GwyResource *resource);
-    void         (*discard)(GwyResource *resource);
     GwyResource* (*copy)   (GwyResource *resource);
     gchar*       (*dump)   (GwyResource *resource);
     gboolean     (*parse)  (GwyResource *resource,
@@ -98,9 +96,6 @@ gboolean                    gwy_resource_is_managed         (GwyResource *resour
 gboolean                    gwy_resource_get_is_preferred   (GwyResource *resource)                  G_GNUC_PURE;
 void                        gwy_resource_set_is_preferred   (GwyResource *resource,
                                                              gboolean is_preferred);
-void                        gwy_resource_use                (GwyResource *resource);
-void                        gwy_resource_discard            (GwyResource *resource);
-gboolean                    gwy_resource_is_used            (GwyResource *resource)                  G_GNUC_PURE;
 void                        gwy_resource_data_changed       (GwyResource *resource);
 GwyResource*                gwy_resource_load               (const gchar *filename_sys,
                                                              GType expected_type,

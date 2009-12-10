@@ -649,84 +649,6 @@ gwy_resource_class_register(GwyResourceClass *klass,
 }
 
 /**
- * gwy_resource_use:
- * @resource: A resource.
- *
- * Starts using a resource.
- *
- * Calling this function is necessary to use a resource properly.
- * It tells the resource to create any auxiliary structures that may consume
- * considerable amount of memory and perform other initialization to
- * ready-to-use form.
- *
- * In addition, it calls g_object_ref() on the resource.
- *
- * When a resource is no longer used, it should be discarded with
- * gwy_resource_discard() which releases the auxilary data.
- *
- * Although resources often exist through almost entire program lifetime from
- * #GObject perspective, from the viewpoint of their use this method plays the
- * role of constructor and gwy_resource_discard() is the destructor.
- **/
-void
-gwy_resource_use(GwyResource *resource)
-{
-    g_return_if_fail(GWY_IS_RESOURCE(resource));
-
-    g_object_ref(resource);
-    if (!resource->priv->use_count++) {
-        void (*method)(GwyResource*);
-
-        method = GWY_RESOURCE_GET_CLASS(resource)->use;
-        if (method)
-            method(resource);
-    }
-}
-
-/**
- * gwy_resource_discard:
- * @resource: A resource.
- *
- * Releases a resource.
- *
- * When the number of resource uses drops to zero, it frees all auxiliary data
- * and returns back to `latent' form.  In addition, it calls g_object_unref()
- * on it.  See gwy_resource_use() for more.
- **/
-void
-gwy_resource_discard(GwyResource *resource)
-{
-    g_return_if_fail(GWY_IS_RESOURCE(resource));
-    g_return_if_fail(resource->priv->use_count);
-
-    if (!--resource->priv->use_count) {
-        void (*method)(GwyResource*);
-
-        method = GWY_RESOURCE_GET_CLASS(resource)->discard;
-        if (method)
-            method(resource);
-    }
-    g_object_unref(resource);
-}
-
-/**
- * gwy_resource_is_used:
- * @resource: A resource.
- *
- * Tells whether a resource is currently in use.
- *
- * See gwy_resource_use() for details.
- *
- * Returns: %TRUE if resource is in use, %FALSE otherwise.
- **/
-gboolean
-gwy_resource_is_used(GwyResource *resource)
-{
-    g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
-    return resource->priv->use_count > 0;
-}
-
-/**
  * gwy_resource_save:
  * @resource: A resource.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
@@ -1447,15 +1369,7 @@ gwy_resource_dump_data_line(const gdouble *data,
 
 /**
  * GwyResourceClass:
- * @inventory: Inventory with resources.
- * @name: Resource class name, usable as resource directory name for on-disk
- *        resources. FIXME: Should be private.
- * @item_type: Inventory item type.  Most fields are pre-filled, but namely
- *             @copy must be filled by particular resource type.
- *             FIXME: Should be private.
  * @data_changed: "data-changed" class signal handler.
- * @use: gwy_resource_use() virtual method.
- * @discard: gwy_resource_discard() virtual method.
  * @copy: Creates copy of a resource.  For serializable resources, this should
  *        be the same as duplication.
  * @dump: Dumps resource data to text, the envelope is added by #GwyResource.

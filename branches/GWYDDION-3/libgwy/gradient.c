@@ -46,8 +46,6 @@ struct _GwyGradient {
     GwyResource parent_instance;
 
     GArray *points;
-    guchar *pixels;
-    guint *npixels;
     gboolean samples_valid : 1;
 };
 
@@ -64,8 +62,6 @@ static void         gwy_gradient_assign_impl      (GwySerializable *destination,
                                                    GwySerializable *source);
 static void         gwy_gradient_sanitize         (GwyGradient *gradient);
 static GwyResource* gwy_gradient_copy             (GwyResource *resource);
-static void         gwy_gradient_use              (GwyResource *resource);
-static void         gwy_gradient_discard          (GwyResource *resource);
 static gchar*       gwy_gradient_dump             (GwyResource *resource);
 static gboolean     gwy_gradient_parse            (GwyResource *resource,
                                                    gchar *text,
@@ -110,8 +106,6 @@ gwy_gradient_class_init(GwyGradientClass *klass)
 
     gobject_class->finalize = gwy_gradient_finalize;
 
-    res_class->use = gwy_gradient_use;
-    res_class->discard = gwy_gradient_discard;
     res_class->copy = gwy_gradient_copy;
     res_class->dump = gwy_gradient_dump;
     res_class->parse = gwy_gradient_parse;
@@ -275,22 +269,6 @@ gwy_gradient_sanitize(GwyGradient *gradient)
         }
     }
     gradient->points->len = j;
-}
-
-static void
-gwy_gradient_use(GwyResource *resource)
-{
-    GwyGradient *gradient = GWY_GRADIENT(resource);
-    g_assert(gradient->pixels == NULL);
-    //gradient->pixels = gwy_gradient_sample(gradient, GWY_GRADIENT_DEFAULT_SIZE,
-    //                                       NULL);
-}
-
-static void
-gwy_gradient_discard(GwyResource *resource)
-{
-    GwyGradient *gradient = GWY_GRADIENT(resource);
-    GWY_FREE(gradient->pixels);
 }
 
 static gchar*
