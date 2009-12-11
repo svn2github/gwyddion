@@ -961,7 +961,6 @@ parse(gchar *text,
     /* Resource type */
     line += strspn(line, " \t");
     const gchar *typename = line;
-    line = gwy_str_next_line(&text);
     if (G_UNLIKELY(!line)) {
         gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
                                                   NULL, NULL, NULL);
