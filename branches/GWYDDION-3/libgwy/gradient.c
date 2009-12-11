@@ -41,12 +41,14 @@ enum {
 /* FIXME: The editting functionality duplicated GwyArray a bit but it emits
  * too much signals to our taste... */
 
-struct _GwyGradient {
+struct _GwyGradientPrivate {
     GwyResource parent_instance;
 
     GArray *points;
     gboolean samples_valid : 1;
 };
+
+typedef struct _GwyGradientPrivate Gradient;
 
 static void         gwy_gradient_finalize         (GObject *object);
 static void         gwy_gradient_serializable_init(GwySerializableInterface *iface);
@@ -106,6 +108,8 @@ gwy_gradient_class_init(GwyGradientClass *klass)
     GwyResourceClass *res_class = GWY_RESOURCE_CLASS(klass);
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
+    g_type_class_add_private(klass, sizeof(Gradient));
+
     gobject_class->finalize = gwy_gradient_finalize;
 
     res_class->setup_inventory = gwy_gradient_setup_inventory;
@@ -119,22 +123,24 @@ gwy_gradient_class_init(GwyGradientClass *klass)
 static void
 gwy_gradient_init(GwyGradient *gradient)
 {
-    gradient->points = g_array_sized_new(FALSE, FALSE, sizeof(GwyGradientPoint),
+    gradient->priv = G_TYPE_INSTANCE_GET_PRIVATE(gradient, GWY_TYPE_GRADIENT,
+                                                 Gradient);
+    Gradient *priv = gradient->priv;
+    priv->points = g_array_sized_new(FALSE, FALSE, sizeof(GwyGradientPoint),
                                          G_N_ELEMENTS(default_gray));
-    g_array_append_vals(gradient->points,
-                        default_gray, G_N_ELEMENTS(default_gray));
+    g_array_append_vals(priv->points, default_gray, G_N_ELEMENTS(default_gray));
 }
 
 static void
 gwy_gradient_finalize(GObject *object)
 {
     GwyGradient *gradient = GWY_GRADIENT(object);
-    g_array_free(gradient->points, TRUE);
+    g_array_free(gradient->priv->points, TRUE);
     G_OBJECT_CLASS(gwy_gradient_parent_class)->finalize(object);
 }
 
 static gsize
-gwy_gradient_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+gwy_gradient_n_items(GwySerializable *serializable)
 {
     return N_ITEMS+1 + gwy_gradient_parent_serializable->n_items(serializable);
 }
@@ -146,12 +152,13 @@ gwy_gradient_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n >= N_ITEMS+1, 0);
 
     GwyGradient *gradient = GWY_GRADIENT(serializable);
+    GArray *points = gradient->priv->points;
     GwySerializableItem *it = items->items + items->n;
 
     // Our own data
     *it = serialize_items[0];
-    it->value.v_double_array = (gdouble*)gradient->points->data;
-    it->array_size = 5*gradient->points->len;
+    it->value.v_double_array = (gdouble*)points->data;
+    it->array_size = 5*points->len;
     it++, items->n++;
 
     // Chain to parent
@@ -188,6 +195,7 @@ gwy_gradient_construct(GwySerializable *serializable,
 
     // Our own data
     GwyGradient *gradient = GWY_GRADIENT(serializable);
+    GArray *points = gradient->priv->points;
 
     guint len = its[0].array_size;
     if (len && its[0].value.v_double_array) {
@@ -199,11 +207,10 @@ gwy_gradient_construct(GwySerializable *serializable,
                                (gulong)its[0].array_size);
             goto fail;
         }
-        g_array_set_size(gradient->points, 0);
-        g_array_append_vals(gradient->points,
-                            its[0].value.v_double_array, len/5);
+        g_array_set_size(points, 0);
+        g_array_append_vals(points, its[0].value.v_double_array, len/5);
         if (len == 5)
-            g_array_append_vals(gradient->points, default_gray + 1, 1);
+            g_array_append_vals(points, default_gray + 1, 1);
         gwy_gradient_sanitize(gradient);
 
         GWY_FREE(its[0].value.v_double_array);
@@ -221,13 +228,15 @@ static GObject*
 gwy_gradient_duplicate_impl(GwySerializable *serializable)
 {
     GwyGradient *gradient = GWY_GRADIENT(serializable);
+    GArray *points = gradient->priv->points;
 
     GwyGradient *duplicate = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
+    GArray *dpoints = gradient->priv->points;
+
     gwy_gradient_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
                                              serializable);
-    g_array_set_size(duplicate->points, 0);
-    g_array_append_vals(duplicate->points,
-                        gradient->points->data, gradient->points->len);
+    g_array_set_size(dpoints, 0);
+    g_array_append_vals(dpoints, points->data, points->len);
 
     return G_OBJECT(duplicate);
 }
@@ -237,17 +246,18 @@ gwy_gradient_assign_impl(GwySerializable *destination,
                          GwySerializable *source)
 {
     GwyGradient *gradient = GWY_GRADIENT(destination);
+    GArray *points = gradient->priv->points;
     GwyGradient *src = GWY_GRADIENT(source);
+    GArray *spoints = src->priv->points;
     gboolean emit_changed = FALSE;
 
     g_object_freeze_notify(G_OBJECT(gradient));
     gwy_gradient_parent_serializable->assign(destination, source);
-    if (gradient->points->len != src->points->len
-        || memcpy(gradient->points->data, src->points->data,
-                  5*gradient->points->len*sizeof(gdouble)) != 0) {
-        g_array_set_size(gradient->points, 0);
-        g_array_append_vals(gradient->points, src->points->data,
-                            src->points->len);
+    if (points->len != spoints->len
+        || memcpy(points->data, spoints->data,
+                  5*points->len*sizeof(gdouble)) != 0) {
+        g_array_set_size(points, 0);
+        g_array_append_vals(points, spoints->data, spoints->len);
         emit_changed = TRUE;
     }
     g_object_thaw_notify(G_OBJECT(gradient));
@@ -265,32 +275,33 @@ gwy_gradient_copy(GwyResource *resource)
 static void
 gwy_gradient_sanitize(GwyGradient *gradient)
 {
-    GwyGradientPoint *points = (GwyGradientPoint*)gradient->points->data;
-    guint n = gradient->points->len;
+    GArray *points = gradient->priv->points;
+    GwyGradientPoint *pts = (GwyGradientPoint*)points->data;
+    guint n = points->len;
 
     /* first make points ordered, in 0..1, starting with 0, ending with 1,
      * and fix colors */
     for (guint i = 0; i < n; i++) {
-        GwyGradientPoint *pt = points + i;
+        GwyGradientPoint *pt = pts + i;
         gwy_rgba_fix(&pt->color);
         pt->x = CLAMP(pt->x, 0.0, 1.0);
-        if (i && pt->x < points[i - 1].x)
-            pt->x = points[i - 1].x;
+        if (i && pt->x < pts[i - 1].x)
+            pt->x = pts[i - 1].x;
     }
-    GwyGradientPoint *pt = points + n-1;
+    GwyGradientPoint *pt = pts + n-1;
     if (pt->x != 1.0)
         pt->x = 1.0;
 
-    /* then remove redundant points */
+    /* then remove redundant pts */
     guint j = 0;
     for (guint i = 0; i < n; i++) {
-        if (!i || points[i].x > points[i-1].x) {
+        if (!i || pts[i].x > pts[i-1].x) {
             if (i != j)
-                points[j] = points[i];
+                pts[j] = pts[i];
             j++;
         }
     }
-    gradient->points->len = j;
+    points->len = j;
 }
 
 static gchar*
@@ -298,10 +309,11 @@ gwy_gradient_dump(GwyResource *resource)
 {
     GwyGradient *gradient = GWY_GRADIENT(resource);
     GString *dump = g_string_new(NULL);
-    const gdouble *points = (const gdouble*)gradient->points->data;
-    guint len = gradient->points->len;
+    GArray *points = gradient->priv->points;
+    const gdouble *pts = (const gdouble*)points->data;
+    guint len = points->len;
     for (guint i = 0; i < len; i++) {
-        gchar *row = gwy_resource_dump_data_line(points + 5*i, 5);
+        gchar *row = gwy_resource_dump_data_line(pts + 5*i, 5);
         g_string_append(dump, row);
         g_string_append_c(dump, '\n');
         g_free(row);
@@ -315,14 +327,15 @@ gwy_gradient_parse(GwyResource *resource,
                    G_GNUC_UNUSED GError **error)
 {
     GwyGradient *gradient = GWY_GRADIENT(resource);
-    g_array_set_size(gradient->points, 0);
+    GArray *points = gradient->priv->points;
+    g_array_set_size(points, 0);
     for (gchar *line = gwy_str_next_line(&text);
          line;
          line = gwy_str_next_line(&text)) {
         GwyGradientPoint pt;
         switch (gwy_resource_parse_data_line(line, 5, (gdouble*)&pt)) {
             case GWY_RESOURCE_LINE_OK:
-            g_array_append_vals(gradient->points, &pt, 1);
+            g_array_append_vals(points, &pt, 1);
             break;
 
             case GWY_RESOURCE_LINE_EMPTY:
@@ -368,14 +381,15 @@ gwy_gradient_get_color(GwyGradient *gradient,
     g_return_if_fail(color);
     g_return_if_fail(x >= 0.0 && x <= 1.0);
 
-    GwyGradientPoint *points = (GwyGradientPoint*)gradient->points->data;
-    guint len = gradient->points->len;
-    GwyGradientPoint *pt = points;
+    GArray *points = gradient->priv->points;
+    GwyGradientPoint *pts = (GwyGradientPoint*)points->data;
+    guint len = points->len;
+    GwyGradientPoint *pt = pts;
     guint i;
 
     /* find the right subinterval */
     for (i = 0; i < len; i++) {
-        pt = points + i;
+        pt = pts + i;
         if (pt->x == x) {
             *color = pt->color;
             return;
@@ -384,7 +398,7 @@ gwy_gradient_get_color(GwyGradient *gradient,
             break;
     }
     g_assert(i);
-    GwyGradientPoint *pt2 = points + i - 1;
+    GwyGradientPoint *pt2 = pts + i - 1;
 
     gwy_rgba_interpolate(&pt2->color, &pt->color, (x - pt2->x)/(pt->x - pt2->x),
                          color);
@@ -570,7 +584,7 @@ guint
 gwy_gradient_n_points(GwyGradient *gradient)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), 0);
-    return gradient->points->len;
+    return gradient->priv->points->len;
 }
 
 /**
@@ -587,8 +601,8 @@ gwy_gradient_get(GwyGradient *gradient,
                  guint n)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), null_point);
-    g_return_val_if_fail(n < gradient->points->len, null_point);
-    return g_array_index(gradient->points, GwyGradientPoint, n);
+    g_return_val_if_fail(n < gradient->priv->points->len, null_point);
+    return g_array_index(gradient->priv->points, GwyGradientPoint, n);
 }
 
 /**
@@ -643,13 +657,13 @@ gwy_gradient_set(GwyGradient *gradient,
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(gwy_resource_is_modifiable(GWY_RESOURCE(gradient)));
     g_return_if_fail(point);
-    g_return_if_fail(n < gradient->points->len);
+    GArray *points = gradient->priv->points;
+    g_return_if_fail(n < points->len);
 
     GwyGradientPoint pt = *point;
     gwy_rgba_fix(&pt.color);
-    pt.x = fix_position(gradient->points, n, pt.x);
-    GwyGradientPoint *gradpt = &g_array_index(gradient->points,
-                                              GwyGradientPoint, n);
+    pt.x = fix_position(points, n, pt.x);
+    GwyGradientPoint *gradpt = &g_array_index(points, GwyGradientPoint, n);
     if (memcmp(&pt, gradpt, sizeof(GwyGradientPoint)) != 0) {
         *gradpt = pt;
         gwy_gradient_changed(gradient);
@@ -672,12 +686,12 @@ gwy_gradient_set_color(GwyGradient *gradient,
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(gwy_resource_is_modifiable(GWY_RESOURCE(gradient)));
     g_return_if_fail(color);
-    g_return_if_fail(n < gradient->points->len);
+    GArray *points = gradient->priv->points;
+    g_return_if_fail(n < points->len);
 
     GwyRGBA rgba = *color;
     gwy_rgba_fix(&rgba);
-    GwyGradientPoint *gradpt = &g_array_index(gradient->points,
-                                              GwyGradientPoint, n);
+    GwyGradientPoint *gradpt = &g_array_index(points, GwyGradientPoint, n);
     if (memcmp(&rgba, &gradpt->color, sizeof(GwyRGBA)) != 0) {
         gradpt->color = rgba;
         gwy_gradient_changed(gradient);
@@ -704,13 +718,14 @@ gwy_gradient_insert(GwyGradient *gradient,
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(gwy_resource_is_modifiable(GWY_RESOURCE(gradient)));
     g_return_if_fail(point);
-    g_return_if_fail(n > 0 && n < gradient->points->len);
+    GArray *points = gradient->priv->points;
+    g_return_if_fail(n > 0 && n < points->len);
 
     GwyGradientPoint pt = *point;
     gwy_rgba_fix(&pt.color);
-    g_array_insert_val(gradient->points, n, pt);
-    g_array_index(gradient->points, GwyGradientPoint, n).x
-        = fix_position(gradient->points, n, pt.x);
+    g_array_insert_val(points, n, pt);
+    g_array_index(points, GwyGradientPoint, n).x
+        = fix_position(points, n, pt.x);
 
     gwy_gradient_changed(gradient);
 }
@@ -740,18 +755,19 @@ gwy_gradient_insert_sorted(GwyGradient *gradient,
     gwy_rgba_fix(&pt.color);
 
     /* find the right subinterval */
-    GwyGradientPoint *points = (GwyGradientPoint*)gradient->points->data;
-    guint len = gradient->points->len;
+    GArray *points = gradient->priv->points;
+    GwyGradientPoint *pts = (GwyGradientPoint*)points->data;
+    guint len = points->len;
     guint i;
     for (i = 0; i < len; i++) {
-        if (points[i].x <= pt.x)
+        if (pts[i].x <= pt.x)
             break;
     }
     g_assert(i < len);
 
-    g_array_insert_val(gradient->points, i, pt);
-    g_array_index(gradient->points, GwyGradientPoint, i).x
-        = fix_position(gradient->points, i, pt.x);
+    g_array_insert_val(points, i, pt);
+    g_array_index(points, GwyGradientPoint, i).x
+        = fix_position(points, i, pt.x);
 
     gwy_gradient_changed(gradient);
 
@@ -773,9 +789,10 @@ gwy_gradient_delete(GwyGradient *gradient,
 {
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(gwy_resource_is_modifiable(GWY_RESOURCE(gradient)));
-    g_return_if_fail(n > 0 && n+1 < gradient->points->len);
+    GArray *points = gradient->priv->points;
+    g_return_if_fail(n > 0 && n+1 < points->len);
 
-    g_array_remove_index(gradient->points, n);
+    g_array_remove_index(points, n);
     gwy_gradient_changed(gradient);
 }
 
@@ -794,10 +811,11 @@ gwy_gradient_get_data(GwyGradient *gradient,
                       guint *npoints)
 {
     g_return_val_if_fail(GWY_IS_GRADIENT(gradient), NULL);
+    GArray *points = gradient->priv->points;
 
     if (npoints)
-        *npoints = gradient->points->len;
-    return (const GwyGradientPoint*)gradient->points->data;
+        *npoints = points->len;
+    return (const GwyGradientPoint*)points->data;
 }
 
 /**
@@ -814,20 +832,21 @@ gwy_gradient_get_data(GwyGradient *gradient,
 void
 gwy_gradient_set_data(GwyGradient *gradient,
                       guint npoints,
-                      const GwyGradientPoint *points)
+                      const GwyGradientPoint *srcpoints)
 {
     g_return_if_fail(GWY_IS_GRADIENT(gradient));
     g_return_if_fail(gwy_resource_is_modifiable(GWY_RESOURCE(gradient)));
     g_return_if_fail(npoints >= 2);
-    g_return_if_fail(points);
+    g_return_if_fail(srcpoints);
 
-    if (npoints == gradient->points->len
-        && memcmp(points, gradient->points->data,
+    GArray *points = gradient->priv->points;
+    if (npoints == points->len
+        && memcmp(srcpoints, points->data,
                   npoints*sizeof(GwyGradientPoint)) == 0)
         return;
 
-    g_array_set_size(gradient->points, 0);
-    g_array_append_vals(gradient->points, points, npoints);
+    g_array_set_size(points, 0);
+    g_array_append_vals(points, srcpoints, npoints);
     gwy_gradient_sanitize(gradient);
     gwy_gradient_changed(gradient);
 }
@@ -860,39 +879,36 @@ gwy_gradient_set_from_samples(GwyGradient *gradient,
         threshold = 1.0/80.0;
 
     /* Preprocess guchar data to doubles */
-    GwyGradientPoint *spoints = g_new(GwyGradientPoint, MAX(nsamples, 2));
+    GwyGradientPoint *pts = g_new(GwyGradientPoint, MAX(nsamples, 2));
     for (guint k = 0, i = 0; i < nsamples; i++) {
-        spoints[i].x = i/(nsamples - 1.0);
-        spoints[i].color.r = samples[k++]/255.0;
-        spoints[i].color.g = samples[k++]/255.0;
-        spoints[i].color.b = samples[k++]/255.0;
-        spoints[i].color.a = samples[k++]/255.0;
+        pts[i].x = i/(nsamples - 1.0);
+        pts[i].color.r = samples[k++]/255.0;
+        pts[i].color.g = samples[k++]/255.0;
+        pts[i].color.b = samples[k++]/255.0;
+        pts[i].color.a = samples[k++]/255.0;
     }
 
     /* Handle special silly case */
     if (nsamples == 1) {
-        spoints[0].x = 0.0;
-        spoints[1].x = 1.0;
-        spoints[1].color = spoints[0].color;
+        pts[0].x = 0.0;
+        pts[1].x = 1.0;
+        pts[1].color = pts[0].color;
         nsamples = 2;
     }
 
     /* Start with first and last point and recurse */
     GList *list = NULL;
-    list = g_list_append(list, spoints + nsamples-1);
-    list = g_list_prepend(list, spoints);
-    refine_interval(list, nsamples, spoints, threshold);
+    list = g_list_append(list, pts + nsamples-1);
+    list = g_list_prepend(list, pts);
+    refine_interval(list, nsamples, pts, threshold);
 
     /* Set the new points */
-    g_array_set_size(gradient->points, 0);
-    for (GList *l = list; l; l = g_list_next(l)) {
-        GwyGradientPoint pt;
-
-        pt = *(GwyGradientPoint*)l->data;
-        g_array_append_val(gradient->points, pt);
-    }
+    GArray *points = gradient->priv->points;
+    g_array_set_size(points, 0);
+    for (GList *l = list; l; l = g_list_next(l))
+        g_array_append_vals(points, l->data, 1);
     g_list_free(list);
-    g_free(spoints);
+    g_free(pts);
     gwy_gradient_changed(gradient);
 }
 
@@ -969,8 +985,7 @@ refine_interval(GList *points,
 static void
 gwy_gradient_changed(GwyGradient *gradient)
 {
-    gwy_debug("%s", GWY_RESOURCE(gradient)->name->str);
-    gradient->samples_valid = FALSE;
+    gradient->priv->samples_valid = FALSE;
     gwy_resource_data_changed(GWY_RESOURCE(gradient));
 }
 

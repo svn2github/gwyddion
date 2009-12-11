@@ -49,6 +49,11 @@ typedef struct {
 typedef struct _GwyGradient      GwyGradient;
 typedef struct _GwyGradientClass GwyGradientClass;
 
+struct _GwyGradient {
+    GwyResource resource;
+    struct _GwyGradientPrivate *priv;
+};
+
 struct _GwyGradientClass {
     GwyResourceClass gwy_resource_class;
 };
