@@ -1007,16 +1007,18 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
  * @title: GwyGradient
  * @short_description: A map from numbers to RGBA colors
  *
- * Gradient is a map from interval [0,1] to RGB(A) color space. Each gradient
- * is defined by an ordered set of color points, the first of them is always at
- * 0.0, the last at 1.0 (thus each gradient must consist of at least two
- * points).  Between them, the color is interpolated.  Color points of
- * modifiable gradients (see #GwyResource) can be edited with functions like
- * gwy_gradient_insert_point(), gwy_gradient_set_point_color(), or
- * gwy_gradient_set_points().
+ * Gradient is a map from interval [0,1] to RGB(A) color space.  It is used
+ * for false color visualization of data.
+ *
+ * Each gradient is defined by an ordered set of color points, the first of
+ * them is always at 0.0, the last at 1.0.   Thus each gradient must consist of
+ * at least two points.  Between these points, the color is interpolated.
+ * Color points of modifiable gradients (see #GwyResource) can be edited with
+ * functions such as gwy_gradient_insert(), gwy_gradient_set_color(), or
+ * gwy_gradient_set_data().
  *
  * Gradient objects can be obtained from gwy_gradients_get_gradient(). New
- * gradients can be created with gwy_inventory_new_item() on the #GwyInventory
+ * gradients can be created with gwy_inventory_new_copy() on the #GwyInventory
  * returned by gwy_gradients().
  **/
 
