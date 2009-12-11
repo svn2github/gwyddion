@@ -103,6 +103,7 @@ GwyResource*                gwy_resource_load               (const gchar *filena
                                                              gboolean modifiable,
                                                              GError **error)                         G_GNUC_MALLOC;
 gboolean                    gwy_resource_save               (GwyResource *resource,
+                                                             const gchar *filename_sys,
                                                              GError **error);
 void                        gwy_resource_class_register     (GwyResourceClass *klass,
                                                              const gchar *name,

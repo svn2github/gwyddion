@@ -747,6 +747,10 @@ gwy_resource_class_register(GwyResourceClass *klass,
 /**
  * gwy_resource_save:
  * @resource: A resource.
+ * @filename_sys: Usually %NULL to save the resource to the file it was loaded
+ *                from or to the user resources directory.  If an explicit file
+ *                name is passed it becomes the new resource file name and the
+ *                resource is saved regardless it has been modified or not.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
  *         #GFileError domains can occur.
  *
@@ -763,13 +767,14 @@ gwy_resource_class_register(GwyResourceClass *klass,
  **/
 gboolean
 gwy_resource_save(GwyResource *resource,
+                  const gchar *filename_sys,
                   GError **error)
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
     Resource *priv = resource->priv;
     g_return_val_if_fail(priv->is_modifiable, FALSE);
 
-    if (!priv->is_modified)
+    if (!priv->is_modified && !filename_sys)
         return TRUE;
 
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
@@ -783,6 +788,7 @@ gwy_resource_save(GwyResource *resource,
     }
     g_strstrip(savename);
 
+    gboolean emit_filename_changed = FALSE;
     gchar *body = klass->dump(resource);
     gchar *buffer = g_strconcat(MAGIC_HEADER3,
                                 G_OBJECT_TYPE_NAME(resource),
@@ -794,34 +800,51 @@ gwy_resource_save(GwyResource *resource,
                                 NULL);
     g_free(body);
 
+    if (filename_sys) {
+        gchar *oldname = priv->filename;
+        if (oldname && !gwy_strequal(oldname, filename_sys)) {
+            priv->filename = g_strdup(filename_sys);
+            GWY_FREE(oldname);
+            emit_filename_changed = TRUE;
+        }
+    }
+
     if (!priv->filename) {
         gchar *dirname = gwy_user_directory(klass->priv->name);
         gchar *basename_sys = construct_filename(priv->name);
-        gchar *filename_sys = g_build_filename(dirname, basename_sys, NULL);
+        gchar *fname_sys = g_build_filename(dirname, basename_sys, NULL);
         g_free(dirname);
         g_free(basename_sys);
 
         /* Avoid the numbering loop in the simple case. */
-        if (g_file_test(filename_sys, G_FILE_TEST_EXISTS)) {
-            GString *str = g_string_new(filename_sys);
+        if (g_file_test(fname_sys, G_FILE_TEST_EXISTS)) {
+            GString *str = g_string_new(fname_sys);
             gsize len = str->len;
 
             for (guint i = 1; ; i++) {
                 g_string_truncate(str, len);
                 g_string_append_printf(str, "-%u", i);
 
-                if (!g_file_test(filename_sys, G_FILE_TEST_EXISTS))
+                if (!g_file_test(fname_sys, G_FILE_TEST_EXISTS))
                     break;
             }
 
-            g_free(filename_sys);
-            filename_sys = g_string_free(str, FALSE);
+            g_free(fname_sys);
+            fname_sys = g_string_free(str, FALSE);
         }
-        priv->filename = filename_sys;
+        priv->filename = fname_sys;
+        emit_filename_changed = TRUE;
     }
 
     gboolean ok = g_file_set_contents(priv->filename, buffer, -1, error);
     g_free(buffer);
+
+    if (priv->is_modified) {
+        priv->is_modified = FALSE;
+        g_object_notify(G_OBJECT(resource), "is-modified");
+    }
+    if (emit_filename_changed)
+        g_object_notify(G_OBJECT(resource), "file-name");
 
     return ok;
 }
@@ -1103,10 +1126,14 @@ gwy_resource_data_changed(GwyResource *resource)
 static void
 gwy_resource_data_changed_impl(GwyResource *resource)
 {
-    if (!resource->priv->is_modifiable)
+    Resource *priv = resource->priv;
+    if (!priv->is_modifiable)
         g_warning("Constant resource ‘%s’ of type %s was modified",
-                  resource->priv->name, G_OBJECT_TYPE_NAME(resource));
-    resource->priv->is_modified = TRUE;
+                  priv->name, G_OBJECT_TYPE_NAME(resource));
+    if (!priv->is_modified) {
+        priv->is_modified = TRUE;
+        g_object_notify(G_OBJECT(resource), "is-modified");
+    }
 }
 
 /**
