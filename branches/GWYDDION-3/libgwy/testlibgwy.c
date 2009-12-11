@@ -22,6 +22,8 @@
 #include <gwyconfig.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <glib/gstdio.h>
 #include "libgwy/libgwy.h"
 
 #ifdef HAVE_VALGRIND
@@ -2822,6 +2824,104 @@ test_fit_task_vfunc(void)
 
 /***************************************************************************
  *
+ * Resource
+ *
+ ***************************************************************************/
+
+static const GwyGradientPoint
+    gradient_point_black0 = { 0, { 0, 0, 0, 1 } },
+    gradient_point_white1 = { 1, { 1, 1, 1, 1 } };
+
+static void
+remove_gradients(void)
+{
+    g_unlink("Yellow Blue 2");
+    g_unlink("YBL2");
+    g_unlink("Ugly-Gray");
+}
+
+static void
+test_gradient_load_check(const gchar *filename,
+                         const gchar *expected_name,
+                         const guint expected_n_points,
+                         const GwyGradientPoint *expected_point0,
+                         const GwyGradientPoint *expected_pointn)
+{
+    GError *error = NULL;
+    GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_GRADIENT, TRUE,
+                                              &error);
+    g_assert(!error);
+    g_assert(GWY_IS_GRADIENT(resource));
+    GwyGradient *gradient = GWY_GRADIENT(resource);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
+    g_assert(!gwy_resource_is_managed(resource));
+    g_assert(gwy_resource_is_modifiable(resource));
+    gchar *res_filename = NULL;
+    g_object_get(resource, "file-name", &res_filename, NULL);
+    g_assert_cmpstr(res_filename, ==, filename);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, expected_n_points);
+    GwyGradientPoint pt;
+    pt = gwy_gradient_get(gradient, 0);
+    g_assert_cmpint(memcmp(&pt, expected_point0, sizeof(GwyGradientPoint)),
+                    ==, 0);
+    pt = gwy_gradient_get(gradient, expected_n_points-1);
+    g_assert_cmpint(memcmp(&pt, expected_pointn, sizeof(GwyGradientPoint)),
+                    ==, 0);
+    GWY_OBJECT_UNREF(gradient);
+}
+
+static void
+test_gradient_load(void)
+{
+    static const gchar gradient_v2[] =
+        "Gwyddion resource GwyGradient\n"
+        "0 0 0 0 1\n"
+        "0.33 0 0 1 1\n"
+        "0.5 0 0.919997 0 1\n"
+        "0.67 1 1 0 1\n"
+        "1 1 1 1 1\n";
+
+    static const gchar gradient_v3[] =
+        "Gwyddion3 resource GwyGradient\n"
+        "name Yellow Blue 2\n"
+        "0 0 0 0 1\n"
+        "0.33 0 0 1 1\n"
+        "0.5 0 0.919997 0 1\n"
+        "0.67 1 1 0 1\n"
+        "1 1 1 1 1\n";
+
+    static const gchar gradient_v3_ugly[] =
+        "Gwyddion3 resource   GwyGradient   \n"
+        "  name         Testing Gray²  \n"
+        "\n"
+        "  0   0 0 0 1\n"
+        "\n"
+        "1  1   1  1e0  1\n";
+
+    g_atexit(remove_gradients);
+    GError *error = NULL;
+
+    // Version2 resource
+    g_assert(g_file_set_contents("Yellow Blue 2", gradient_v2, -1, &error));
+    g_assert(!error);
+    test_gradient_load_check("Yellow Blue 2", "Yellow Blue 2", 5,
+                             &gradient_point_black0, &gradient_point_white1);
+
+    // Version3 resource
+    g_assert(g_file_set_contents("YBL2", gradient_v3, -1, &error));
+    g_assert(!error);
+    test_gradient_load_check("YBL2", "Yellow Blue 2", 5,
+                             &gradient_point_black0, &gradient_point_white1);
+
+    // Version3 ugly resource
+    g_assert(g_file_set_contents("Ugly-Gray", gradient_v3_ugly, -1, &error));
+    g_assert(!error);
+    test_gradient_load_check("Ugly-Gray", "Testing Gray²", 2,
+                             &gradient_point_black0, &gradient_point_white1);
+}
+
+/***************************************************************************
+ *
  * Main
  *
  ***************************************************************************/
@@ -2872,6 +2972,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/container/boxed", test_container_boxed);
     g_test_add_func("/testlibgwy/array/data", test_array_data);
     g_test_add_func("/testlibgwy/inventory/data", test_inventory_data);
+    g_test_add_func("/testlibgwy/gradient/load", test_gradient_load);
 
     return g_test_run();
 }
