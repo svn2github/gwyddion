@@ -979,43 +979,29 @@ parse(gchar *text,
     }
 
     /* Parse the name in v3 resources. */
-    gchar *name = NULL;
+    gchar *key, *name = NULL;
     if (version == 3) {
-        guint len = sizeof("name")-1;
         line = gwy_str_next_line(&text);
-        if (!line
-            || !g_strstrip(line)
-            || !strncmp(line, "name", len)
-            || !g_ascii_isspace(line[len])) {
+        if (gwy_resource_parse_param_line(line,
+                                          &key, &name) != GWY_RESOURCE_LINE_OK
+            || !gwy_strequal(key, "name")) {
             gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
                                                       NULL, NULL, NULL);
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is missing for "
+                        _("Malformed resource name line in "
                           "version 3 resource ‘%s’ in file ‘%s’."),
                         typename, filename_utf8);
+            g_free(filename_utf8);
             return NULL;
         }
-
-        line += len;
-        line += strspn(line, " \t");
-        name = line;
         if (!strlen(name)) {
             gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
                                                       NULL, NULL, NULL);
             g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is missing for "
+                        _("Resource name is empty in "
                           "version 3 resource ‘%s’ in file ‘%s’."),
                         typename, filename_utf8);
-            return NULL;
-        }
-
-        if (!g_utf8_validate(name, len, NULL)) {
-            gchar *filename_utf8 = g_filename_to_utf8(filename_sys, -1,
-                                                      NULL, NULL, NULL);
-            g_set_error(error, GWY_RESOURCE_ERROR, GWY_RESOURCE_ERROR_NAME,
-                        _("Resource name is not valid UTF-8 for "
-                          "version 3 resource ‘%s’ in file ‘%s’."),
-                        typename, filename_utf8);
+            g_free(filename_utf8);
             return NULL;
         }
     }
@@ -1103,7 +1089,7 @@ get_resource_class(const gchar *typename,
  * Emits signal "data-changed" on a resource.
  *
  * It can be called only on non-constant resources.  The default class handler
- * sets @is_modified flag on the resource.
+ * marks the resource as modified.
  *
  * This function is primarily intended for resource implementation.
  **/
@@ -1320,6 +1306,10 @@ gwy_resource_parse_param_line(gchar *line,
                               gchar **key,
                               gchar **value)
 {
+    // Permit sloppy use
+    if (!line)
+        return GWY_RESOURCE_LINE_EMPTY;
+
     // Empty?
     while (g_ascii_isspace(*line))
         line++;
