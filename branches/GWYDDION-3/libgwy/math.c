@@ -845,6 +845,12 @@ jump_over:
  * names are in no case exported.  If the system C library provides a specific
  * function, both kinds of symbols are defined so that the system
  * implementation is directly used.
+ *
+ * Note to actually get the functions defined from the system C library you
+ * need to define certain preprocessor symbols such as
+ * <literal>_GNU_SOURCE</literal>.  This can be done either in your source
+ * code or by ensuring that <filename>libgwy.h</filename> gets included before
+ * system the headers.
  **/
 
 /**

@@ -20,13 +20,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
-
 #include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include "libgwy/macros.h"
 #include "libgwy/main.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/serialize.h"
 #include "libgwy/resource.h"
 #include "libgwy/libgwy-aliases.h"
 
@@ -112,9 +112,9 @@ static gchar*            construct_filename             (const gchar *resource_n
 static void              gwy_resource_data_changed_impl (GwyResource *resource);
 
 /* Use a static propery -> trait map.  We could do it generically, too.
- * g_param_spec_pool_list() is ugly and slow is the minor problem, the major
- * is that it does g_hash_table_foreach() so we would get different orders
- * on different invocations and have to sort it. */
+ * That g_param_spec_pool_list() is ugly and slow is the minor problem, the
+ * major is that it does g_hash_table_foreach() so we would get different
+ * orders on different invocations and have to sort it. */
 static GType gwy_resource_trait_types[N_PROPS-1];
 static const gchar *gwy_resource_trait_names[N_PROPS-1];
 static guint gwy_resource_ntraits = 0;

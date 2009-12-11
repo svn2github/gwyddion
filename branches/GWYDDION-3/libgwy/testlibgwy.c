@@ -18,7 +18,8 @@
  */
 
 #undef G_DISABLE_ASSERT
-#include "config.h"
+#define GWY_MATH_POLLUTE_NAMESPACE 1
+#include <gwyconfig.h>
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/libgwy.h"
@@ -2829,7 +2830,7 @@ int
 main(int argc, char *argv[])
 {
     if (RUNNING_ON_VALGRIND)
-        g_setenv("G_SLICE", "always-malloc", TRUE);
+        setenv("G_SLICE", "always-malloc", TRUE);
 
     g_test_init(&argc, &argv, NULL);
     g_type_init();

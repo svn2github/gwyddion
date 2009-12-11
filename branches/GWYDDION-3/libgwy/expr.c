@@ -17,14 +17,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
+#define GWY_MATH_POLLUTE_NAMESPACE
+#include <gwyconfig.h>
 #include <string.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
-#define GWY_MATH_POLLUTE_NAMESPACE
 #include "libgwy/math.h"
 #include "libgwy/libgwy-aliases.h"
 

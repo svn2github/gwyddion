@@ -155,6 +155,16 @@ _______EOF
 
   cat >>$outfile <<_______EOF
 
+/* Request system extensions.  This is necessary for instance for exp10()
+ * to actually appear defined. */
+_______EOF
+
+  for x in _ALL_SOURCE _GNU_SOURCE _POSIX_SOURCE _POSIX_1_SOURCE _TANDEM_SOURCE __EXTENSIONS__ _POSIX_PTHREAD_SEMANTICS; do
+    grep "^# *define  *$x " config.h >>$outfile 2>/dev/null
+  done
+
+  cat >>$outfile <<_______EOF
+
 #endif
 _______EOF
 

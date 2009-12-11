@@ -22,7 +22,6 @@
 
 #include <math.h>
 #include <glib.h>
-#include <gwyconfig.h>
 
 G_BEGIN_DECLS
 
