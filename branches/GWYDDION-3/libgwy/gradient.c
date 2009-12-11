@@ -760,7 +760,7 @@ gwy_gradient_insert_sorted(GwyGradient *gradient,
     guint len = points->len;
     guint i;
     for (i = 0; i < len; i++) {
-        if (pts[i].x <= pt.x)
+        if (pts[i].x >= pt.x)
             break;
     }
     g_assert(i < len);
