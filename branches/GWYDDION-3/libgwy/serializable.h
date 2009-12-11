@@ -46,7 +46,7 @@ typedef enum {
     GWY_SERIALIZABLE_BOXED         = 'x',
 } GwySerializableCType;
 
-typedef union {
+union _GwySerializableValue {
     gboolean v_boolean;
     gint8 v_int8;
     guint8 v_uint8;
@@ -75,7 +75,9 @@ typedef union {
     gchar **v_string_array;
     guchar **v_ustring_array;
     GObject **v_object_array;
-} GwySerializableValue;
+};
+
+typedef union _GwySerializableValue GwySerializableValue;
 
 typedef struct {
     GwySerializableValue value;
