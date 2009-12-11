@@ -1563,23 +1563,23 @@ free_items(GwySerializableItems *items)
  *
  * Fills the template of expected items with values from received item list.
  *
- * This is a helper function for use in #GwySerializable construct() method.
+ * This is a helper function for use in #GwySerializable.construct() method.
  *
  * Expected values are moved from @items to @template.  This means the owner of
  * @template becomes the owner of dynamically allocated data in these items.
- * Unexpected items are left in @items for the owner of @items to free them
- * which normally means you do not need to concern yourself with them.
+ * Unexpected items are left in @items.  The the owner of @items has to free
+ * them which normally means you do not need to concern yourself with them.
  *
  * The processing stops when all @items are exhausted or when an item of type
  * %GWY_SERIALIZABLE_PARENT is encountered, whatever happens first.  This means
  * items belonging to parent objects are untouched.
  *
  * An item template is identified by its name and type.  Multiple items of the
- * same name are permitted in @template as long as they type differ (this can
+ * same name are permitted in @template as long as their types differ (this can
  * be useful e.g. to accept old serialized representations for compatibility).
  *
  * The concrete type of boxed types is not part of the identification, i.e.
- * only one boxed item of a specific name can be given in @template_ and the
+ * only one boxed item of a specific name can be given in @template and the
  * type, if specified as @array_size, must match exactly.
  *
  * Returns: The position of the %GWY_SERIALIZABLE_PARENT item encountered.
