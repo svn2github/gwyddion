@@ -2828,18 +2828,6 @@ test_fit_task_vfunc(void)
  *
  ***************************************************************************/
 
-static const GwyGradientPoint
-    gradient_point_black0 = { 0, { 0, 0, 0, 1 } },
-    gradient_point_white1 = { 1, { 1, 1, 1, 1 } };
-
-static void
-remove_gradients(void)
-{
-    g_unlink("Yellow Blue 2");
-    g_unlink("YBL2");
-    g_unlink("Ugly-Gray");
-}
-
 static void
 test_gradient_load_check(const gchar *filename,
                          const gchar *expected_name,
@@ -2868,11 +2856,15 @@ test_gradient_load_check(const gchar *filename,
     g_assert_cmpint(memcmp(&pt, expected_pointn, sizeof(GwyGradientPoint)),
                     ==, 0);
     GWY_OBJECT_UNREF(gradient);
+    g_unlink(filename);
 }
 
 static void
 test_gradient_load(void)
 {
+    static const GwyGradientPoint gradient_point_black0 = { 0, { 0, 0, 0, 1 } };
+    static const GwyGradientPoint gradient_point_white1 = { 1, { 1, 1, 1, 1 } };
+
     static const gchar gradient_v2[] =
         "Gwyddion resource GwyGradient\n"
         "0 0 0 0 1\n"
@@ -2898,7 +2890,6 @@ test_gradient_load(void)
         "\n"
         "1  1   1  1e0  1\n";
 
-    g_atexit(remove_gradients);
     GError *error = NULL;
 
     // Version2 resource
@@ -2918,6 +2909,40 @@ test_gradient_load(void)
     g_assert(!error);
     test_gradient_load_check("Ugly-Gray", "Testing Gray²", 2,
                              &gradient_point_black0, &gradient_point_white1);
+
+}
+
+static void
+test_gradient_save(void)
+{
+    static const GwyGradientPoint gradient_point_red0 = { 0, { 0.8, 0, 0, 1 } };
+    static const GwyGradientPoint gradient_point_hg = { 0.5, { 0, 0.6, 0, 1 } };
+    static const GwyGradientPoint gradient_point_blue1 = { 1, { 0, 0, 1, 1 } };
+
+    GwyGradient *gradient = gwy_gradient_new();
+    GwyResource *resource = GWY_RESOURCE(gradient);
+
+    gwy_resource_set_name(resource, "Tricolor");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Tricolor");
+
+    gwy_gradient_set_color(gradient, 0, &gradient_point_red0.color);
+    gwy_gradient_set_color(gradient, 1, &gradient_point_blue1.color);
+    gwy_gradient_insert_sorted(gradient, &gradient_point_hg);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 3);
+    GwyGradientPoint pt = gwy_gradient_get(gradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_hg, sizeof(GwyGradientPoint)),
+                    ==, 0);
+
+    GError *error = NULL;
+    g_assert(gwy_resource_save(resource, "Tricolor", &error));
+    g_assert(!error);
+    gchar *res_filename = NULL;
+    g_object_get(resource, "file-name", &res_filename, NULL);
+    g_assert_cmpstr(res_filename, ==, "Tricolor");
+    GWY_OBJECT_UNREF(gradient);
+
+    test_gradient_load_check("Tricolor", "Tricolor", 3,
+                             &gradient_point_red0, &gradient_point_blue1);
 }
 
 /***************************************************************************
@@ -2973,6 +2998,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/array/data", test_array_data);
     g_test_add_func("/testlibgwy/inventory/data", test_inventory_data);
     g_test_add_func("/testlibgwy/gradient/load", test_gradient_load);
+    g_test_add_func("/testlibgwy/gradient/save", test_gradient_save);
 
     return g_test_run();
 }
