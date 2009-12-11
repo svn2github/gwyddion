@@ -267,7 +267,7 @@ gwy_unit_construct(GwySerializable *serializable,
                    GwyErrorList **error_list)
 {
     GwySerializableItem item = serialize_items[0];
-    gwy_deserialize_filter_items(&item, 1, items, "GwyUnit", FALSE, error_list);
+    gwy_deserialize_filter_items(&item, 1, items, "GwyUnit", error_list);
 
     GwyUnit *unit = GWY_UNIT(serializable);
     gwy_unit_set_from_string(unit, item.value.v_string, NULL);

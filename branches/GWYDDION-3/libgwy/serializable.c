@@ -334,7 +334,20 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GwySerializableCType:
  * @GWY_SERIALIZABLE_HEADER: Denotes object header item.  This has no use in
- *                           interface impementation.
+ *                           interface impementation and does not actually
+ *                           appear in files (although this depends on the
+ *                           serializer/deserializer implementation).  The
+ *                           serializer/deserialized sets @size to the object
+ *                           data size and @array_size to the number of
+ *                           items.
+ * @GWY_SERIALIZABLE_PARENT: Denotes parent's data separator, used when
+ *                           subclasses want to chain serialization and
+ *                           deserialization to the parent class.  The items
+ *                           has no data and its name is the parent type name.
+ *                           For convenience, the value is set to the
+ *                           corresponding #GType in deserialization.  The most
+ *                           derived child data comes first, then the parents'
+ *                           in reverse order of deriving.
  * @GWY_SERIALIZABLE_INT8: Denotes a character (8bit integer).
  * @GWY_SERIALIZABLE_INT8_ARRAY: Denotes a character (8bit integer) array.
  * @GWY_SERIALIZABLE_BOOLEAN: Denotes a one-byte boolean.
@@ -354,8 +367,8 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * Type of serializable value.
  *
- * The type is a single byte, i.e. a value smaller than 256.  It is the
- * same as the character used in GWY files to denote the corresponding type.
+ * The type is a single byte, i.e. a value smaller than 256.  It is equal to
+ * the character used in GWY files to denote the corresponding type.
  **/
 
 /**

@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 
 typedef enum {
     GWY_SERIALIZABLE_HEADER        = 0,
+    GWY_SERIALIZABLE_PARENT        = '\x1d',
     GWY_SERIALIZABLE_INT8          = 'c',
     GWY_SERIALIZABLE_INT8_ARRAY    = 'C',
     GWY_SERIALIZABLE_BOOLEAN       = 'b',
@@ -61,6 +62,7 @@ typedef union {
     GObject *v_object;
     gpointer v_boxed;
     gsize v_size;
+    GType v_type;
     gint8 *v_int8_array;
     guint8 *v_uint8_array;
     gint16 *v_int16_array;

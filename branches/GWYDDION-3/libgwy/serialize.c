@@ -76,6 +76,7 @@ static GType                 get_serializable_boxed(const gchar *typename,
                                                     GwyErrorList **error_list);
 static GwySerializableItems* unpack_items          (const guchar *buffer,
                                                     gsize size,
+                                                    GType type,
                                                     GwyErrorList **error_list);
 static void                  free_items            (GwySerializableItems *items);
 
@@ -409,7 +410,7 @@ calculate_sizes(GwySerializableItems *items,
 
         size += strlen(item->name)+1 + 1 /* ctype */;
 
-        if ((typesize = ctype_size(ctype)))
+        if ((typesize = ctype_size(ctype)) || ctype == GWY_SERIALIZABLE_PARENT)
             size += typesize;
         else if ((typesize = ctype_size(g_ascii_tolower(ctype)))) {
             g_warn_if_fail(item->array_size != 0);
@@ -478,11 +479,13 @@ dump_to_stream(const GwySerializableItems *items,
         if (!buffer_write(buffer, &ctype, sizeof(guint8)))
             return FALSE;
 
-        /* Serializable object/boxed follows... */
+        /* Serializable object/child/boxed follows... */
         if (ctype == GWY_SERIALIZABLE_OBJECT
-            || ctype == GWY_SERIALIZABLE_BOXED)
+            || ctype == GWY_SERIALIZABLE_BOXED
+            || ctype == GWY_SERIALIZABLE_PARENT)
             continue;
-        else if (ctype == GWY_SERIALIZABLE_INT8) {
+
+        if (ctype == GWY_SERIALIZABLE_INT8) {
             if (!buffer_write(buffer, &item->value.v_uint8, sizeof(guint8)))
                 return FALSE;
         }
@@ -570,7 +573,7 @@ dump_to_stream(const GwySerializableItems *items,
 static void
 items_done(const GwySerializableItems *items)
 {
-    /* The zeroth item is always an object header. */
+    /* The zeroth item is always the object header. */
     for (gsize i = items->n-1; i > 0; i--) {
         const GwySerializableItem *item = items->items + i;
         if (item->ctype == GWY_SERIALIZABLE_OBJECT)
@@ -1017,8 +1020,10 @@ deserialize_boxed(const guchar *buffer,
     size = boxed_size + pos;
 
     /* Unpack everything, call request() only after that so that is its
-     * quaranteed construct() is called after request(). */
-    items = unpack_items(buffer + pos, boxed_size, error_list);
+     * quaranteed construct() is called after request().  Since boxed types
+     * are not deeply derivable, passing @type as the type does the right
+     * thing. */
+    items = unpack_items(buffer + pos, boxed_size, type, error_list);
     if (!items)
         goto fail;
 
@@ -1086,7 +1091,7 @@ deserialize_memory(const guchar *buffer,
     GwySerializableItems *items = NULL;
     const gchar *typename;
     gsize pos = 0, rbytes, object_size;
-    gpointer classref;
+    gpointer classref = NULL;
     GObject *object = NULL;
     GType type;
 
@@ -1121,7 +1126,7 @@ deserialize_memory(const guchar *buffer,
 
     /* Unpack everything, call request() only after that so that is its
      * quaranteed construct() is called after request(). */
-    items = unpack_items(buffer + pos, object_size, error_list);
+    items = unpack_items(buffer + pos, object_size, type, error_list);
     if (!items)
         goto fail;
 
@@ -1134,9 +1139,77 @@ fail:
     free_items(items);
     if (bytes_consumed)
         *bytes_consumed = size;
+    /* TODO: classref should be released somewhere! */
     return object;
 }
 
+/**
+ * get_parent:
+ * @typename: Name of the type.
+ * @child_type: Subclass of the type we are deserializing.  @typename must
+ *              refer to a parent type of @child_type.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *
+ * Finds and verifies the type of a parent object.
+ *
+ * This is used to verify the %GWY_SERIALIZABLE_PARENT items that denote
+ * that the child data ends here and the data of some parent continue.
+ *
+ * Returns: The type corresponding to @typename on success, %NULL on failure.
+ **/
+static GType
+get_parent(const gchar *typename,
+           GType child_type,
+           GwyErrorList **error_list)
+{
+    GType type;
+
+    type = g_type_from_name(typename);
+    if (G_UNLIKELY(!type)) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
+                           _("Object type ‘%s’ is not known. "
+                             "It was ignored."),
+                           typename);
+        return 0;
+    }
+
+    /* No classref necessary here, it's the parent class of something we have
+     * already classrefed. */
+    if (G_UNLIKELY(!g_type_is_a(type, GWY_TYPE_SERIALIZABLE))) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
+                           _("Object type ‘%s’ is not serializable. "
+                             "It was ignored."),
+                           typename);
+        return 0;
+    }
+    if (G_UNLIKELY(type == child_type || !g_type_is_a(child_type, type))) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_OBJECT,
+                           _("Object type ‘%s’ is not a parent type of ‘%s’. "
+                             "It was ignored."),
+                           typename, g_type_name(child_type));
+        return 0;
+    }
+
+    return type;
+}
+
+/**
+ * get_serializable:
+ * @typename: Name of the type.
+ * @classref: Location to store the reference to the object class on success.
+ * @iface: Location to store the serializable interface on success.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *
+ * Finds and verifies the type of a serializable object.
+ *
+ * This is used to verify the %GWY_SERIALIZABLE_HEADER items that denote
+ * a serialized object.
+ *
+ * Returns: The type corresponding to @typename on success, %NULL on failure.
+ **/
 static GType
 get_serializable(const gchar *typename,
                  gpointer *classref,
@@ -1187,6 +1260,18 @@ get_serializable(const gchar *typename,
     return type;
 }
 
+/**
+ * get_serializable_boxed:
+ * @typename: Name of the type.
+ * @error_list: Location to store the errors occuring, %NULL to ignore.
+ *
+ * Finds and verifies the type of a serializable boxed type.
+ *
+ * This is used to verify the %GWY_SERIALIZABLE_BOXED items that denote
+ * boxed types.
+ *
+ * Returns: The type corresponding to @typename on success, %NULL on failure.
+ **/
 static GType
 get_serializable_boxed(const gchar *typename,
                        GwyErrorList **error_list)
@@ -1218,6 +1303,7 @@ get_serializable_boxed(const gchar *typename,
 static GwySerializableItems*
 unpack_items(const guchar *buffer,
              gsize size,
+             GType type,
              GwyErrorList **error_list)
 {
     GwySerializableItems *items;
@@ -1241,13 +1327,13 @@ unpack_items(const guchar *buffer,
         }
         item = items->items + items->n;
 
-        /* Component name */
+        // Component name.
         if (!(rbytes = unpack_name(buffer, size, &item->name, error_list)))
             goto fail;
         buffer += rbytes;
         size -= rbytes;
 
-        /* Component type */
+        // Component type.
         if (!(rbytes = unpack_uint8(buffer, size, &item->ctype, error_list)))
             goto fail;
         buffer += rbytes;
@@ -1255,7 +1341,7 @@ unpack_items(const guchar *buffer,
 
         GwySerializableCType ctype = item->ctype;
 
-        /* The data */
+        // The data.
         if (ctype == GWY_SERIALIZABLE_BOOLEAN) {
             if (!(rbytes = unpack_boolean(buffer, size, &item->value.v_boolean,
                                           error_list)))
@@ -1294,6 +1380,12 @@ unpack_items(const guchar *buffer,
         else if (ctype == GWY_SERIALIZABLE_OBJECT) {
             if (!(rbytes = unpack_object(buffer, size, &item->value.v_object,
                                          error_list)))
+                goto fail;
+        }
+        else if (ctype == GWY_SERIALIZABLE_PARENT) {
+            // No real data here, but check the type and set @v_type.
+            if (!(item->value.v_type = get_parent(item->name, type,
+                                                  error_list)))
                 goto fail;
         }
         else if (ctype == GWY_SERIALIZABLE_BOXED) {
@@ -1462,13 +1554,10 @@ free_items(GwySerializableItems *items)
 /**
  * gwy_deserialize_filter_items:
  * @template_: List of expected items.  Generally, the values should be set to
- *             defaults.
+ *             defaults (%NULL for non-atomic types).
  * @n_items: The number of items in the template.
  * @items: Item list passed to construct().
  * @type_name: Name of the deserialized type for error messages.
- * @unexpected_ok: Unexpected items do not cause errors, they are simply
- *                 gathered at the start of @items for possible further
- *                 processing.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
  *
@@ -1481,10 +1570,9 @@ free_items(GwySerializableItems *items)
  * Unexpected items are left in @items for the owner of @items to free them
  * which normally means you do not need to concern yourself with them.
  *
- * Unexpected items are gathered to a contiguous block at the start of @items.
- * The length of @items is reduced to the number of these items to facilitate
- * further processing in parent classes (which makes sense only if you pass
- * @unexpected_ok).
+ * The processing stops when all @items are exhausted or when an item of type
+ * %GWY_SERIALIZABLE_PARENT is encountered, whatever happens first.  This means
+ * items belonging to parent objects are untouched.
  *
  * An item template is identified by its name and type.  Multiple items of the
  * same name are permitted in @template as long as they type differ (this can
@@ -1493,24 +1581,29 @@ free_items(GwySerializableItems *items)
  * The concrete type of boxed types is not part of the identification, i.e.
  * only one boxed item of a specific name can be given in @template_ and the
  * type, if specified as @array_size, must match exactly.
+ *
+ * Returns: The position of the %GWY_SERIALIZABLE_PARENT item encountered.
+ *          If @items are exhausted, a number larger than @items->n is
+ *          returned, specifically %G_MAXSIZE.
  **/
-void
+gsize
 gwy_deserialize_filter_items(GwySerializableItem *template_,
                              gsize n_items,
                              GwySerializableItems *items,
                              const gchar *type_name,
-                             gboolean unexpected_ok,
                              GwyErrorList **error_list)
 {
     guint8 *seen = g_slice_alloc0(sizeof(guint8)*n_items);
+    gsize i;
 
-    // i is the reading head, ii is the writing head
-    gsize ii = 0;
-    for (gsize i = 0; i < items->n; i++) {
+    for (i = 0; i < items->n; i++) {
         GwySerializableItem *item = items->items + i;
         const GwySerializableCType ctype = item->ctype;
         const gchar *name = item->name;
         gsize j;
+
+        if (ctype == GWY_SERIALIZABLE_PARENT)
+            break;
 
         for (j = 0; j < n_items; j++) {
             if (template_[j].ctype == ctype
@@ -1519,12 +1612,6 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         }
 
         if (j == n_items) {
-            if (i != ii)
-                GWY_SWAP(GwySerializableItem,
-                         items->items[i], items->items[ii]);
-            ii++;
-            if (unexpected_ok)
-                continue;
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_ITEM,
                                _("Unexpected item ‘%s’ of type 0x%02x in the "
@@ -1539,8 +1626,11 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                  "times in the representation of object ‘%s’.  "
                                  "Values other than the first were ignored."),
                                name, ctype, type_name);
-            free_item_data(items->items + i);
             seen[j]++;
+            continue;
+        }
+        if (G_UNLIKELY(seen[j])) {
+            // We've already reported the error, so ignore the rest silently.
             continue;
         }
         seen[j]++;
@@ -1570,9 +1660,8 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
         item->array_size = 0;
     }
 
-    items->n = ii;
-
     g_slice_free1(sizeof(guint8)*n_items, seen);
+    return (i < items->n) ? i : G_MAXSIZE;
 }
 
 #define __LIBGWY_SERIALIZE_C__
