@@ -240,7 +240,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
     pspec = g_param_spec_boolean("is-modifiable",
                                  "Is modifiable",
                                  "Whether a resource is modifiable",
-                                 FALSE,
+                                 TRUE,
                                  G_PARAM_READWRITE
                                  | G_PARAM_CONSTRUCT_ONLY | STATIC);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIABLE, pspec);
@@ -286,6 +286,7 @@ gwy_resource_init(GwyResource *resource)
 {
     resource->priv = G_TYPE_INSTANCE_GET_PRIVATE(resource, GWY_TYPE_RESOURCE,
                                                  Resource);
+    resource->priv->is_modifiable = TRUE;
 }
 
 static void
