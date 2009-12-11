@@ -95,7 +95,7 @@ void                    gwy_gradient_set_from_samples(GwyGradient *gradient,
                                                       gdouble threshold);
 #define gwy_gradients() \
     (gwy_resource_type_get_inventory(GWY_TYPE_GRADIENT))
-#define gwy_gradients_get_gradient(name) \
+#define gwy_gradients_get(name) \
     ((GwyGradient*)gwy_inventory_get_or_default(gwy_gradients(), (name)))
 
 /* FIXME: The jury is still out on the pixel format.  Generally, we want to use
