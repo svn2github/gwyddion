@@ -36,6 +36,8 @@
 #define STATIC \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
+enum { N_ITEMS = 1 };
+
 enum {
     DATA_CHANGED,
     N_SIGNALS
@@ -73,6 +75,15 @@ typedef struct _GwyResourcePrivate      Resource;
 typedef struct _GwyResourceClassPrivate ResourceClass;
 
 static void              gwy_resource_finalize          (GObject *object);
+static void              gwy_resource_serializable_init (GwySerializableInterface *iface);
+static gsize             gwy_resource_n_items           (GwySerializable *serializable);
+static gsize             gwy_resource_itemize           (GwySerializable *serializable,
+                                                         GwySerializableItems *items);
+static gboolean          gwy_resource_construct         (GwySerializable *serializable,
+                                                         GwySerializableItems *items,
+                                                         GwyErrorList **error_list);
+static void              gwy_resource_assign_impl       (GwySerializable *destination,
+                                                         GwySerializable *source);
 static void              gwy_resource_set_property      (GObject *object,
                                                          guint prop_id,
                                                          const GValue *value,
@@ -138,7 +149,13 @@ static const GwyInventoryItemType gwy_resource_item_type = {
     &gwy_resource_get_trait_value,
 };
 
-G_DEFINE_ABSTRACT_TYPE(GwyResource, gwy_resource, G_TYPE_OBJECT)
+static const GwySerializableItem serialize_items[N_ITEMS] = {
+    { .name = "name", .ctype = GWY_SERIALIZABLE_STRING, },
+};
+
+G_DEFINE_TYPE_EXTENDED
+    (GwyResource, gwy_resource, G_TYPE_OBJECT, G_TYPE_FLAG_ABSTRACT,
+     GWY_IMPLEMENT_SERIALIZABLE(gwy_resource_serializable_init))
 
 /**
  * gwy_resource_error_quark:
@@ -158,6 +175,15 @@ gwy_resource_error_quark(void)
         error_domain = g_quark_from_static_string("gwy-resource-error-quark");
 
     return error_domain;
+}
+
+static void
+gwy_resource_serializable_init(GwySerializableInterface *iface)
+{
+    iface->n_items   = gwy_resource_n_items;
+    iface->itemize   = gwy_resource_itemize;
+    iface->construct = gwy_resource_construct;
+    iface->assign    = gwy_resource_assign_impl;
 }
 
 static void
@@ -272,6 +298,67 @@ gwy_resource_finalize(GObject *object)
     GWY_FREE(priv->filename);
 
     G_OBJECT_CLASS(gwy_resource_parent_class)->finalize(object);
+}
+
+static gsize
+gwy_resource_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+{
+    return N_ITEMS;
+}
+
+static gsize
+gwy_resource_itemize(GwySerializable *serializable,
+                     GwySerializableItems *items)
+{
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
+
+    GwyResource *resource = GWY_RESOURCE(serializable);
+    Resource *priv = resource->priv;
+    GwySerializableItem *it = items->items + items->n;
+
+    *it = serialize_items[0];
+    it->value.v_string = priv->name;
+    it++, items->n++;
+
+    return N_ITEMS;
+}
+
+static gboolean
+gwy_resource_construct(GwySerializable *serializable,
+                       GwySerializableItems *items,
+                       GwyErrorList **error_list)
+{
+    GwySerializableItem its[N_ITEMS];
+    memcpy(its, serialize_items, sizeof(serialize_items));
+    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyResource",
+                                            error_list);
+    // There is no serializable parent class so use a hard assertion.
+    g_return_val_if_fail(np == G_MAXSIZE, FALSE);
+
+    GwyResource *resource = GWY_RESOURCE(serializable);
+    Resource *priv = resource->priv;
+
+    if (its[0].value.v_string) {
+        GWY_FREE(priv->name);
+        priv->name = its[0].value.v_string;
+        its[0].value.v_string = NULL;
+    }
+
+    return TRUE;
+}
+
+static void
+gwy_resource_assign_impl(GwySerializable *destination,
+                         GwySerializable *source)
+{
+    GwyResource *resource = GWY_RESOURCE(destination);
+    GwyResource *src = GWY_RESOURCE(source);
+
+    g_return_if_fail(resource->priv->is_modifiable);
+    if (!resource->priv->is_managed)
+        gwy_resource_rename(resource, src->priv->name);
+
+    // XXX: The rest are management properties, not value.  Do not assign them.
 }
 
 static void

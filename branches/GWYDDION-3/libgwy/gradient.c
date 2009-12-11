@@ -33,7 +33,7 @@
 #define MAX_CVAL (0.99999999*(1 << (BITS_PER_SAMPLE)))
 
 enum {
-    N_ITEMS = 2,
+    N_ITEMS = 1,
     BITS_PER_SAMPLE = 8,
     GWY_GRADIENT_DEFAULT_SIZE = 1024
 };
@@ -80,9 +80,10 @@ static const GwyGradientPoint default_gray[] = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "name", .ctype = GWY_SERIALIZABLE_STRING,       },
     { .name = "data", .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
+
+GwySerializableInterface *gwy_gradient_parent_serializable = NULL;
 
 G_DEFINE_TYPE_EXTENDED
     (GwyGradient, gwy_gradient, GWY_TYPE_RESOURCE, 0,
@@ -91,6 +92,7 @@ G_DEFINE_TYPE_EXTENDED
 static void
 gwy_gradient_serializable_init(GwySerializableInterface *iface)
 {
+    gwy_gradient_parent_serializable = g_type_interface_peek_parent(iface);
     iface->n_items   = gwy_gradient_n_items;
     iface->itemize   = gwy_gradient_itemize;
     iface->construct = gwy_gradient_construct;
@@ -134,28 +136,33 @@ gwy_gradient_finalize(GObject *object)
 static gsize
 gwy_gradient_n_items(G_GNUC_UNUSED GwySerializable *serializable)
 {
-    return G_N_ELEMENTS(serialize_items);
+    return N_ITEMS+1 + gwy_gradient_parent_serializable->n_items(serializable);
 }
 
 static gsize
 gwy_gradient_itemize(GwySerializable *serializable,
                      GwySerializableItems *items)
 {
-    g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS+1, 0);
 
     GwyGradient *gradient = GWY_GRADIENT(serializable);
     GwySerializableItem *it = items->items + items->n;
 
+    // Our own data
     *it = serialize_items[0];
-    it->value.v_string = (gchar*)gwy_resource_get_name(GWY_RESOURCE(gradient));
-    it++, items->n++;
-
-    *it = serialize_items[1];
     it->value.v_double_array = (gdouble*)gradient->points->data;
     it->array_size = 5*gradient->points->len;
     it++, items->n++;
 
-    return N_ITEMS;
+    // Chain to parent
+    it->ctype = GWY_SERIALIZABLE_PARENT;
+    it->name = g_type_name(GWY_TYPE_RESOURCE);
+    it->array_size = 0;
+    it->value.v_type = GWY_TYPE_RESOURCE;
+    it++, items->n++;
+
+    return N_ITEMS+1 + gwy_gradient_parent_serializable->itemize(serializable,
+                                                                 items);
 }
 
 static gboolean
@@ -165,41 +172,48 @@ gwy_gradient_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    // FIXME: Chain to Resource once possible
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient",
-                                 error_list);
-
-    GwyGradient *gradient = GWY_GRADIENT(serializable);
-
-    if (its[0].value.v_string) {
-        gwy_resource_set_name(GWY_RESOURCE(gradient), its[0].value.v_string);
-        GWY_FREE(its[0].value.v_string);
+    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient",
+                                            error_list);
+    // Chain to parent
+    if (np < items->n) {
+        np++;
+        GwySerializableItems parent_items = {
+            items->len - np, items->n - np, items->items + np
+        };
+        if (!gwy_gradient_parent_serializable->construct(serializable,
+                                                         &parent_items,
+                                                         error_list))
+            goto fail;
     }
 
-    guint len = its[1].array_size;
-    if (len && its[1].value.v_double_array) {
+    // Our own data
+    GwyGradient *gradient = GWY_GRADIENT(serializable);
+
+    guint len = its[0].array_size;
+    if (len && its[0].value.v_double_array) {
         if (len % 5 != 0) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                                GWY_DESERIALIZE_ERROR_INVALID,
                                _("Gradient data length is %lu which is not "
                                  "a multiple of 5."),
-                               (gulong)its[1].array_size);
+                               (gulong)its[0].array_size);
             goto fail;
         }
         g_array_set_size(gradient->points, 0);
         g_array_append_vals(gradient->points,
-                            its[1].value.v_double_array, len/5);
+                            its[0].value.v_double_array, len/5);
         if (len == 5)
             g_array_append_vals(gradient->points, default_gray + 1, 1);
         gwy_gradient_sanitize(gradient);
 
-        GWY_FREE(its[1].value.v_double_array);
-        its[1].array_size = 0;
+        GWY_FREE(its[0].value.v_double_array);
+        its[0].array_size = 0;
     }
 
     return TRUE;
 
 fail:
+    GWY_FREE(its[0].value.v_double_array);
     return FALSE;
 }
 
@@ -209,7 +223,8 @@ gwy_gradient_duplicate_impl(GwySerializable *serializable)
     GwyGradient *gradient = GWY_GRADIENT(serializable);
 
     GwyGradient *duplicate = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
-    // gwy_resource_assign(GWY_RESOURCE(duplicate), GWY_RESOURCE(serializable));
+    gwy_gradient_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
+                                             serializable);
     g_array_set_size(duplicate->points, 0);
     g_array_append_vals(duplicate->points,
                         gradient->points->data, gradient->points->len);
@@ -223,12 +238,21 @@ gwy_gradient_assign_impl(GwySerializable *destination,
 {
     GwyGradient *gradient = GWY_GRADIENT(destination);
     GwyGradient *src = GWY_GRADIENT(source);
+    gboolean emit_changed = FALSE;
 
-    // gwy_resource_assign(GWY_RESOURCE(destination), GWY_RESOURCE(source));
-    g_array_set_size(gradient->points, 0);
-    g_array_append_vals(gradient->points, src->points->data, src->points->len);
-    //FIXME: Do it in Resource?
-    //g_signal_emit(gradient, gradient_signals[CHANGED], 0);
+    g_object_freeze_notify(G_OBJECT(gradient));
+    gwy_gradient_parent_serializable->assign(destination, source);
+    if (gradient->points->len != src->points->len
+        || memcpy(gradient->points->data, src->points->data,
+                  5*gradient->points->len*sizeof(gdouble)) != 0) {
+        g_array_set_size(gradient->points, 0);
+        g_array_append_vals(gradient->points, src->points->data,
+                            src->points->len);
+        emit_changed = TRUE;
+    }
+    g_object_thaw_notify(G_OBJECT(gradient));
+    if (emit_changed)
+        gwy_resource_data_changed(GWY_RESOURCE(destination));
 }
 
 static GwyResource*
