@@ -894,6 +894,7 @@ construct_filename(const gchar *resource_name)
  * @expected_type: Expected resource type.  This must be a valid type, however,
  *                 it is possible to pass %GWY_TYPE_RESOURCE which effectively
  *                 accepts all possible resources.
+ * @modifiable: %TRUE to create the resource as modifiable.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
  *         #GwyResourceError and #GFileError domains can occur.
  *
@@ -906,13 +907,19 @@ construct_filename(const gchar *resource_name)
 GwyResource*
 gwy_resource_load(const gchar *filename_sys,
                   GType expected_type,
+                  gboolean modifiable,
                   GError **error)
 {
     GwyResource *resource = NULL;
     gchar *text = NULL;
 
-    if (g_file_get_contents(filename_sys, &text, NULL, error))
+    if (g_file_get_contents(filename_sys, &text, NULL, error)) {
         resource = parse(text, expected_type, filename_sys, error);
+        if (resource) {
+            resource->priv->filename = g_strdup(filename_sys);
+            resource->priv->is_modifiable = !!modifiable;
+        }
+    }
 
     GWY_FREE(text);
     return resource;
@@ -1202,21 +1209,19 @@ gwy_resource_type_load_directory(GType type,
                                                NULL);
         GError *error = NULL;
         GwyResource *resource
-            = gwy_resource_load(filename_sys, type, &error);
+            = gwy_resource_load(filename_sys, type, modifiable, &error);
 
         if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
             Resource *priv = resource->priv;
             priv->is_managed = TRUE;
-            priv->is_modifiable = modifiable;
-            priv->filename = filename_sys;
             priv->is_modified = FALSE;
             gwy_inventory_insert(klass->priv->inventory, resource);
             g_object_unref(resource);
         }
         else {
             gwy_error_list_propagate(error_list, error);
-            g_free(filename_sys);
         }
+        g_free(filename_sys);
         g_object_unref(fileinfo);
     }
     g_object_unref(dir);

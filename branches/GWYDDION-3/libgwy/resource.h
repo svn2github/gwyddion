@@ -100,6 +100,7 @@ void                        gwy_resource_set_is_preferred   (GwyResource *resour
 void                        gwy_resource_data_changed       (GwyResource *resource);
 GwyResource*                gwy_resource_load               (const gchar *filename_sys,
                                                              GType expected_type,
+                                                             gboolean modifiable,
                                                              GError **error)                         G_GNUC_MALLOC;
 gboolean                    gwy_resource_save               (GwyResource *resource,
                                                              GError **error);
