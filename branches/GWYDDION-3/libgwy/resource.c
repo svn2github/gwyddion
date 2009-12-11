@@ -286,7 +286,6 @@ gwy_resource_init(GwyResource *resource)
 {
     resource->priv = G_TYPE_INSTANCE_GET_PRIVATE(resource, GWY_TYPE_RESOURCE,
                                                  Resource);
-    resource->priv->is_modifiable = TRUE;
 }
 
 static void
@@ -460,7 +459,7 @@ gwy_resource_rename(gpointer item,
     g_return_if_fail(priv->is_modifiable);
 
     gchar *oldname = priv->name;
-    if (gwy_strequal(oldname, new_name))
+    if (oldname && gwy_strequal(oldname, new_name))
         return;
 
     priv->name = g_strdup(new_name);
@@ -773,6 +772,7 @@ gwy_resource_save(GwyResource *resource,
 {
     g_return_val_if_fail(GWY_IS_RESOURCE(resource), FALSE);
     Resource *priv = resource->priv;
+    g_return_val_if_fail(priv->name, FALSE);
     g_return_val_if_fail(priv->is_modifiable, FALSE);
 
     if (!priv->is_modified && !filename_sys)
@@ -803,7 +803,7 @@ gwy_resource_save(GwyResource *resource,
 
     if (filename_sys) {
         gchar *oldname = priv->filename;
-        if (oldname && !gwy_strequal(oldname, filename_sys)) {
+        if (!oldname || !gwy_strequal(oldname, filename_sys)) {
             priv->filename = g_strdup(filename_sys);
             GWY_FREE(oldname);
             emit_filename_changed = TRUE;
