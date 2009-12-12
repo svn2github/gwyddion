@@ -3022,22 +3022,39 @@ static void
 test_gradient_inventory(void)
 {
     static const GwyGradientPoint gradient_point_red = { 0.5, { 1, 0, 0, 1 } };
+    const GwyInventoryItemType *item_type;
     GwyGradient *gradient;
     GwyResource *resource;
 
     GwyInventory *gradients = gwy_gradients();
     g_assert(GWY_IS_INVENTORY(gradients));
-    const GwyInventoryItemType *item_type
-        = gwy_inventory_get_item_type(gradients);
+    item_type = gwy_inventory_get_item_type(gradients);
     g_assert(item_type);
     g_assert_cmpuint(item_type->type, ==, GWY_TYPE_GRADIENT);
+    g_assert(gwy_inventory_can_make_copies(gradients));
+    g_assert_cmpstr(gwy_inventory_get_default_name(gradients),
+                    ==, GWY_GRADIENT_DEFAULT);
 
+    item_type = gwy_resource_type_get_item_type(GWY_TYPE_GRADIENT);
+    g_assert(item_type);
+    g_assert_cmpuint(item_type->type, ==, GWY_TYPE_GRADIENT);
     gradient = gwy_gradients_get(NULL);
     g_assert(GWY_IS_GRADIENT(gradient));
     resource = GWY_RESOURCE(gradient);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GRADIENT_DEFAULT);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
+
+    gradient = gwy_inventory_get_default(gradients);
+    g_assert(GWY_IS_GRADIENT(gradient));
+    resource = GWY_RESOURCE(gradient);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GRADIENT_DEFAULT);
+    g_assert(gwy_resource_is_managed(resource));
+    g_assert(!gwy_resource_is_modifiable(resource));
+
+    g_assert(!gwy_resource_get_is_preferred(resource));
+    gwy_resource_set_is_preferred(resource, TRUE);
+    g_assert(gwy_resource_get_is_preferred(resource));
 
     gwy_inventory_copy(gradients, GWY_GRADIENT_DEFAULT, "Another");
     g_assert_cmpuint(gwy_inventory_n_items(gradients), ==, 2);
