@@ -1384,6 +1384,7 @@ unpack_items(const guchar *buffer,
         }
         else if (ctype == GWY_SERIALIZABLE_PARENT) {
             // No real data here, but check the type and set @v_type.
+            rbytes = 0;
             if (!(item->value.v_type = get_parent(item->name, type,
                                                   error_list)))
                 goto fail;
@@ -1481,8 +1482,9 @@ free_item_data(GwySerializableItem *item)
     GwySerializableCType ctype = item->ctype;
 
     switch (ctype) {
-        case GWY_SERIALIZABLE_HEADER:
         // More likely this means type not assigned yet.  Can happen.
+        case GWY_SERIALIZABLE_HEADER:
+        case GWY_SERIALIZABLE_PARENT:
         break;
 
         case GWY_SERIALIZABLE_OBJECT:
@@ -1647,7 +1649,6 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
                                    name, type_name,
                                    g_type_name(item->array_size),
                                    g_type_name(template_[j].array_size));
-                free_item_data(items->items + i);
                 continue;
             }
         }
