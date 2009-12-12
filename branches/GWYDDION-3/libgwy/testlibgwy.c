@@ -1312,6 +1312,33 @@ test_deserialize_garbage(void)
     g_rand_free(rng);
 }
 
+static GObject*
+serialize_and_back(GObject *object)
+{
+    enum { buffer_size = 0x10000 };
+
+    g_assert(GWY_IS_SERIALIZABLE(object));
+    GOutputStream *stream = g_memory_output_stream_new(malloc(buffer_size),
+                                                       buffer_size, NULL,
+                                                       &free);
+    GMemoryOutputStream *memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    GError *error = NULL;
+    gboolean ok = gwy_serialize_gio(GWY_SERIALIZABLE(object), stream, &error);
+    g_assert(ok);
+    g_assert(!error);
+    gsize datalen = g_memory_output_stream_get_data_size(memstream);
+    gpointer data = g_memory_output_stream_get_data(memstream);
+    gsize bytes_consumed = 0;
+    GwyErrorList *error_list = NULL;
+    GObject *retval = gwy_deserialize_memory(data, datalen,
+                                             &bytes_consumed, &error_list);
+    g_assert(retval);
+    g_assert_cmpuint(G_OBJECT_TYPE(retval), ==, G_OBJECT_TYPE(object));
+    g_assert_cmpuint(bytes_consumed, ==, datalen);
+    g_object_unref(stream);
+    return retval;
+}
+
 /***************************************************************************
  *
  * Serialization and deserialization of boxed types
@@ -2945,6 +2972,37 @@ test_gradient_save(void)
                              &gradient_point_red0, &gradient_point_blue1);
 }
 
+static void
+test_gradient_serialize(void)
+{
+    static const GwyGradientPoint gradient_point_red0 = { 0, { 0.8, 0, 0, 1 } };
+    static const GwyGradientPoint gradient_point_blue1 = { 1, { 0, 0, 1, 1 } };
+
+    GwyGradient *gradient = gwy_gradient_new();
+    GwyResource *resource = GWY_RESOURCE(gradient);
+
+    gwy_resource_set_name(resource, "Red-Blue");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Red-Blue");
+
+    GwyGradientPoint pt;
+    gwy_gradient_set(gradient, 0, &gradient_point_red0);
+    gwy_gradient_set(gradient, 1, &gradient_point_blue1);
+    pt = gwy_gradient_get(gradient, 0);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_red0,
+                           sizeof(GwyGradientPoint)), ==, 0);
+    pt = gwy_gradient_get(gradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_blue1,
+                           sizeof(GwyGradientPoint)), ==, 0);
+
+    GwyGradient *newgradient
+        = (GwyGradient*)serialize_and_back(G_OBJECT(gradient));
+    GwyResource *newresource = GWY_RESOURCE(newgradient);
+    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Red-Blue");
+
+    g_object_unref(gradient);
+    g_object_unref(newgradient);
+}
+
 /***************************************************************************
  *
  * Main
@@ -2999,6 +3057,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/inventory/data", test_inventory_data);
     g_test_add_func("/testlibgwy/gradient/load", test_gradient_load);
     g_test_add_func("/testlibgwy/gradient/save", test_gradient_save);
+    g_test_add_func("/testlibgwy/gradient/serialize", test_gradient_serialize);
 
     return g_test_run();
 }
