@@ -117,7 +117,7 @@ static GwyResource*      parse                          (gchar *text,
                                                          const gchar *filename,
                                                          GError **error);
 static gboolean          name_is_unique                 (GwyResource *resource,
-                                                         GwyResourceClass *klass,
+                                                         ResourceClass *klass,
                                                          GError **error);
 static gchar*            construct_filename             (const gchar *resource_name);
 static void              gwy_resource_data_changed_impl (GwyResource *resource);
@@ -209,7 +209,8 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                 "Name",
                                 "Resource name",
                                 NULL, /* What is the default value good for? */
-                                G_PARAM_READABLE | STATIC);
+                                G_PARAM_READWRITE
+                                | G_PARAM_CONSTRUCT_ONLY | STATIC);
     g_object_class_install_property(gobject_class, PROP_NAME, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
@@ -371,6 +372,12 @@ gwy_resource_set_property(GObject *object,
     Resource *priv = resource->priv;
 
     switch (prop_id) {
+        case PROP_NAME:
+        // This can be set as property only upon construction.
+        g_assert(!priv->name);
+        priv->name = g_value_dup_string(value);
+        break;
+
         case PROP_IS_MODIFIABLE:
         priv->is_modifiable = g_value_get_boolean(value);
         break;
@@ -654,19 +661,28 @@ gwy_resource_type_get_name(GType type)
     return klass->priv->name;
 }
 
-static void
-ensure_inventory(GwyResourceClass *klass)
+static ResourceClass*
+ensure_class_and_inventory(GType type)
 {
-    ResourceClass *priv = klass->priv;
-    if (G_UNLIKELY(!priv->inventory)) {
-        // Check whether gwy_resource_class_register() has been called.
-        g_return_if_fail(priv->name);
-        priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
-        g_signal_connect(priv->inventory, "item-inserted",
-                         G_CALLBACK(inventory_item_inserted), klass);
-        if (klass->setup_inventory)
-            klass->setup_inventory(priv->inventory);
+    GwyResourceClass *klass = g_type_class_peek(type);
+    if (G_LIKELY(klass && klass->priv->inventory))
+        return klass->priv;
+
+    /* This reference is never released.  You can imagine the inventory
+     * holds it... */
+    if (!klass) {
+        klass = g_type_class_ref(type);
+        g_assert(klass);
     }
+    ResourceClass *priv = klass->priv;
+    // Check whether gwy_resource_class_register() has been called.
+    g_return_val_if_fail(priv->name, NULL);
+    priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
+    g_signal_connect(priv->inventory, "item-inserted",
+                     G_CALLBACK(inventory_item_inserted), klass);
+    if (klass->setup_inventory)
+        klass->setup_inventory(priv->inventory);
+    return priv;
 }
 
 /**
@@ -681,10 +697,8 @@ GwyInventory*
 gwy_resource_type_get_inventory(GType type)
 {
     g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
-    GwyResourceClass *klass = g_type_class_peek(type);
-    g_assert(klass);
-    ensure_inventory(klass);
-    return klass->priv->inventory;
+    ResourceClass *priv = ensure_class_and_inventory(type);
+    return priv->inventory;
 }
 
 /**
@@ -1150,11 +1164,7 @@ void
 gwy_resource_type_load(GType type)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    GwyResourceClass *klass = g_type_class_peek(type);
-    g_assert(klass);
-    ResourceClass *priv = klass->priv;
-    ensure_inventory(klass);
-    g_return_if_fail(priv->inventory);
+    ResourceClass *priv = ensure_class_and_inventory(type);
 
     gchar *userdir = gwy_user_directory(priv->name);
     gchar **dirs = gwy_data_search_path(priv->name);
@@ -1192,10 +1202,7 @@ gwy_resource_type_load_directory(GType type,
                                  GwyErrorList **error_list)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    GwyResourceClass *klass = g_type_class_peek(type);
-    g_assert(klass);
-    ensure_inventory(klass);
-    g_return_if_fail(klass->priv->inventory);
+    ResourceClass *cpriv = ensure_class_and_inventory(type);
 
     GFile *gfile = g_file_new_for_path(dirname_sys);
     GFileEnumerator *dir
@@ -1222,14 +1229,14 @@ gwy_resource_type_load_directory(GType type,
                                                g_file_info_get_name(fileinfo),
                                                NULL);
         GError *error = NULL;
-        GwyResource *resource
-            = gwy_resource_load(filename_sys, type, modifiable, &error);
+        GwyResource *resource = gwy_resource_load(filename_sys, type,
+                                                  modifiable, &error);
 
-        if (G_LIKELY(resource) && name_is_unique(resource, klass, &error)) {
+        if (G_LIKELY(resource) && name_is_unique(resource, cpriv, &error)) {
             Resource *priv = resource->priv;
             priv->is_managed = TRUE;
             priv->is_modified = FALSE;
-            gwy_inventory_insert(klass->priv->inventory, resource);
+            gwy_inventory_insert(cpriv->inventory, resource);
             g_object_unref(resource);
         }
         else {
@@ -1244,12 +1251,11 @@ gwy_resource_type_load_directory(GType type,
 /* Check if the name does not conflict with an existing resource. */
 static gboolean
 name_is_unique(GwyResource *resource,
-               GwyResourceClass *klass,
+               ResourceClass *klass,
                GError **error)
 {
     Resource *priv = resource->priv;
-    GwyResource *obstacle = gwy_inventory_get(klass->priv->inventory,
-                                              priv->name);
+    GwyResource *obstacle = gwy_inventory_get(klass->inventory, priv->name);
     if (!obstacle)
         return TRUE;
 
