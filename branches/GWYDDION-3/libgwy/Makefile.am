@@ -106,6 +106,10 @@ include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
 
-clean-local:
-	rm -f core.* *~
+test-coverage:
+	$(SHELL) $(top_srcdir)/build/coverage-test.sh $(library) $(test_program) "$(PYTHON) $(top_srcdir)/build/coverage-plot.py"
 
+.PHONY: test-coverage
+
+clean-local:
+	rm -rf core.* *~ coverage *.gcda *.gcno gmon.out

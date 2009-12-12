@@ -3,6 +3,8 @@
 
 EXTRA_DIST = \
 	check-library-symbols.py \
+	coverage-plot.py \
+	coverage-test.sh \
 	gtester.make \
 	gtkdoc-add-objects.py \
 	gwy-doc.make \
