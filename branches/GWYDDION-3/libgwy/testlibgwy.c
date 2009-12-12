@@ -244,18 +244,16 @@ test_sort_is_ordered_with_index(const gdouble *array, const guint *index_array,
 static void
 test_math_sort(void)
 {
-    gsize n, i, nmin = 0, nmax = 65536;
-    gdouble *array, *orig_array;
-    guint *index_array;
+    gsize nmin = 0, nmax = 65536;
 
     if (g_test_quick())
         nmax = 8192;
 
-    array = g_new(gdouble, nmax);
-    orig_array = g_new(gdouble, nmax);
-    index_array = g_new(guint, nmax);
-    for (n = nmin; n < nmax; n = 7*n/6 + 1) {
-        for (i = 0; i < n; i++)
+    gdouble *array = g_new(gdouble, nmax);
+    gdouble *orig_array = g_new(gdouble, nmax);
+    guint *index_array = g_new(guint, nmax);
+    for (gsize n = nmin; n < nmax; n = 7*n/6 + 1) {
+        for (gsize i = 0; i < n; i++)
             orig_array[i] = sin(n/G_SQRT2 + 1.618*i);
 
         memcpy(array, orig_array, n*sizeof(gdouble));
@@ -263,7 +261,7 @@ test_math_sort(void)
         g_assert(test_sort_is_strictly_ordered(array, n));
 
         memcpy(array, orig_array, n*sizeof(gdouble));
-        for (i = 0; i < n; i++)
+        for (gsize i = 0; i < n; i++)
             index_array[i] = i;
         gwy_math_sort(array, index_array, n);
         g_assert(test_sort_is_strictly_ordered(array, n));
@@ -273,6 +271,29 @@ test_math_sort(void)
     g_free(index_array);
     g_free(orig_array);
     g_free(array);
+}
+
+static void
+test_math_median(void)
+{
+    guint nmax = 1000;
+    gdouble *data = g_new(gdouble, nmax);
+    GRand *rng = g_rand_new();
+
+    g_rand_set_seed(rng, 42);
+    for (guint n = 1; n < nmax; n++) {
+        for (guint i = 0; i < n; i++)
+            data[i] = i;
+        for (guint i = 0; i < n; i++) {
+            guint jj1 = g_rand_int_range(rng, 0, n);
+            guint jj2 = g_rand_int_range(rng, 0, n);
+            GWY_SWAP(gdouble, data[jj1], data[jj2]);
+        }
+        gdouble med = gwy_math_median(data, n);
+        g_assert_cmpfloat(med, ==, (n/2));
+    }
+    g_rand_free(rng);
+    g_free(data);
 }
 
 /***************************************************************************
@@ -3098,6 +3119,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/next-line", test_next_line);
     g_test_add_func("/testlibgwy/pack", test_pack);
     g_test_add_func("/testlibgwy/math/sort", test_math_sort);
+    g_test_add_func("/testlibgwy/math/median", test_math_median);
     g_test_add_func("/testlibgwy/math/cholesky", test_math_cholesky);
     g_test_add_func("/testlibgwy/math/linalg", test_math_linalg);
     g_test_add_func("/testlibgwy/interpolation", test_interpolation);
