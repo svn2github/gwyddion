@@ -2866,7 +2866,7 @@ test_fit_task_vfunc(void)
 
 /***************************************************************************
  *
- * Resource
+ * Gradient
  *
  ***************************************************************************/
 
@@ -3018,6 +3018,48 @@ test_gradient_serialize(void)
     g_object_unref(newgradient);
 }
 
+static void
+test_gradient_inventory(void)
+{
+    static const GwyGradientPoint gradient_point_red = { 0.5, { 1, 0, 0, 1 } };
+    GwyGradient *gradient;
+    GwyResource *resource;
+
+    GwyInventory *gradients = gwy_gradients();
+    g_assert(GWY_IS_INVENTORY(gradients));
+    const GwyInventoryItemType *item_type
+        = gwy_inventory_get_item_type(gradients);
+    g_assert(item_type);
+    g_assert_cmpuint(item_type->type, ==, GWY_TYPE_GRADIENT);
+
+    gradient = gwy_gradients_get(NULL);
+    g_assert(GWY_IS_GRADIENT(gradient));
+    resource = GWY_RESOURCE(gradient);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GRADIENT_DEFAULT);
+    g_assert(gwy_resource_is_managed(resource));
+    g_assert(!gwy_resource_is_modifiable(resource));
+
+    gwy_inventory_copy(gradients, GWY_GRADIENT_DEFAULT, "Another");
+    g_assert_cmpuint(gwy_inventory_n_items(gradients), ==, 2);
+    gradient = gwy_inventory_get(gradients, "Another");
+    resource = GWY_RESOURCE(gradient);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
+    gboolean is_modified;
+    g_object_get(gradient, "is-modified", &is_modified, NULL);
+    g_assert(gwy_resource_is_managed(resource));
+    g_assert(gwy_resource_is_modifiable(resource));
+    g_assert(is_modified);
+    gwy_gradient_insert_sorted(gradient, &gradient_point_red);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 3);
+
+    g_object_ref(gradient);
+    gwy_inventory_delete(gradients, "Another");
+    g_assert(GWY_IS_GRADIENT(gradient));
+    g_assert(!gwy_resource_is_managed(resource));
+    g_assert(gwy_resource_is_modifiable(resource));
+    g_object_unref(gradient);
+}
+
 /***************************************************************************
  *
  * Main
@@ -3073,6 +3115,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/gradient/load", test_gradient_load);
     g_test_add_func("/testlibgwy/gradient/save", test_gradient_save);
     g_test_add_func("/testlibgwy/gradient/serialize", test_gradient_serialize);
+    g_test_add_func("/testlibgwy/gradient/inventory", test_gradient_inventory);
 
     return g_test_run();
 }
