@@ -995,8 +995,8 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
     gwy_inventory_set_default_name(inventory, GWY_GRADIENT_DEFAULT);
     GwyGradient *gradient = g_object_new(GWY_TYPE_GRADIENT,
                                          "is-modifiable", FALSE,
+                                         "name", GWY_GRADIENT_DEFAULT,
                                          NULL);
-    gwy_resource_set_name(GWY_RESOURCE(gradient), GWY_GRADIENT_DEFAULT);
     gwy_inventory_insert(inventory, gradient);
     g_object_unref(gradient);
 }
