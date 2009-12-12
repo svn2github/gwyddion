@@ -56,9 +56,9 @@ static void         gwy_inventory_dispose (GObject *object);
 static void         make_hash             (Inventory *inventory);
 static void         emit_item_updated     (GwyInventory *inventory,
                                            GSequenceIter *iter);
-static void         discard_item          (Inventory *inventory,
+static void         discard_item          (GwyInventory *inventory,
                                            GSequenceIter *iter);
-static void         register_item         (Inventory *inventory,
+static void         register_item         (GwyInventory *inventory,
                                            GSequenceIter *iter,
                                            gpointer item);
 static void         item_changed          (GwyInventory *inventory,
@@ -199,7 +199,7 @@ gwy_inventory_dispose(GObject *object)
          !g_sequence_iter_is_end(iter);
          iter = next) {
         next = g_sequence_iter_next(iter);
-        discard_item(priv, iter);
+        discard_item(inventory, iter);
     }
     G_OBJECT_CLASS(gwy_inventory_parent_class)->dispose(object);
 }
@@ -267,7 +267,7 @@ gwy_inventory_new_with_items(const GwyInventoryItemType *itype,
         GSequenceIter *iter = g_sequence_append(priv->items, item);
         if (priv->is_sorted && i)
             priv->is_sorted = (itype->compare(items[i-1], item) < 0);
-        register_item(priv, iter, item);
+        register_item(inventory, iter, item);
     }
 
     return inventory;
@@ -688,7 +688,7 @@ gwy_inventory_insert(GwyInventory *inventory,
     else
         iter = g_sequence_append(priv->items, item);
 
-    register_item(priv, iter, item);
+    register_item(inventory, iter, item);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0,
                   g_sequence_iter_get_position(iter));
@@ -741,7 +741,7 @@ gwy_inventory_insert_nth(GwyInventory *inventory,
     }
 
     priv->is_sorted = item_is_in_order(priv, iter, item);
-    register_item(priv, iter, item);
+    register_item(inventory, iter, item);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0, n);
     if (priv->default_key
@@ -845,7 +845,7 @@ delete_item(GwyInventory *inventory,
 
     gboolean emit_change = (priv->default_key
                             && gwy_strequal(name, priv->default_key));
-    discard_item(priv, iter);
+    discard_item(inventory, iter);
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_DELETED], 0, n);
     if (emit_change)
@@ -1083,36 +1083,37 @@ item_changed(GwyInventory *inventory,
 /* Not a complete inverse of register_item() because it also removes the
  * item physically from inventory->items. */
 static void
-discard_item(Inventory *inventory,
+discard_item(GwyInventory *inventory,
              GSequenceIter *iter)
 {
+    Inventory *priv = inventory->priv;
     gpointer item = g_sequence_get(iter);
     g_return_if_fail(item);
-    if (inventory->is_watchable)
+    if (priv->is_watchable)
         g_signal_handlers_disconnect_by_func(item, item_changed, inventory);
     g_sequence_remove(iter);
-    g_hash_table_remove(inventory->hash, inventory->item_type.get_name(item));
-    if (inventory->item_type.destroy)
-        inventory->item_type.destroy(item);
-    if (inventory->is_object)
+    g_hash_table_remove(priv->hash, priv->item_type.get_name(item));
+    if (priv->item_type.destroy)
+        priv->item_type.destroy(item);
+    if (priv->is_object)
         g_object_unref(item);
 }
 
 static void
-register_item(Inventory *inventory,
+register_item(GwyInventory *inventory,
               GSequenceIter *iter,
               gpointer item)
 {
-    if (inventory->hash)
-        g_hash_table_insert(inventory->hash,
-                            (gpointer)inventory->item_type.get_name(item),
-                            iter);
+    Inventory *priv = inventory->priv;
+    if (priv->hash)
+        g_hash_table_insert(priv->hash,
+                            (gpointer)priv->item_type.get_name(item), iter);
 
-    if (inventory->is_object) {
+    if (priv->is_object) {
         g_object_ref(item);
-        if (inventory->is_watchable)
+        if (priv->is_watchable)
             g_signal_connect_swapped(item,
-                                     inventory->item_type.watchable_signal,
+                                     priv->item_type.watchable_signal,
                                      G_CALLBACK(item_changed), inventory);
     }
 }
