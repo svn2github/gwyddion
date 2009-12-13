@@ -554,6 +554,7 @@ fitter_minimize(Fitter *fitter,
             f_step = fitter->f_best ? 1.0 - fitter->f/fitter->f_best : 0.0;
             fitter->f_best = fitter->f;
             ASSIGN(fitter->param_best, fitter->param, nparam);
+            fitter->valid = MIN(fitter->valid, VALID_FUNCTION);
             break;
 step_fail:
             fitter->nsuccesses = 0;
@@ -572,12 +573,12 @@ step_fail:
                 break;
             }
         }
-        if (!eval_gradient_with_check(fitter, user_data)) {
-            fitter->valid = MAX(fitter->valid, VALID_HESSIAN-1);
+        if (!eval_gradient_with_check(fitter, user_data))
             return FALSE;
-        }
         fitter->status = GWY_FITTER_STATUS_NONE;
     }
+    if (fitter->valid < VALID_HESSIAN)
+        eval_gradient_with_check(fitter, user_data);
     if (!fitter->status)
         fitter->status = GWY_FITTER_STATUS_MAX_ITER;
 
