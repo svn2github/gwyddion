@@ -2919,7 +2919,6 @@ test_gradient_load_check(const gchar *filename,
     g_assert_cmpint(memcmp(&pt, expected_pointn, sizeof(GwyGradientPoint)),
                     ==, 0);
     GWY_OBJECT_UNREF(gradient);
-    g_unlink(filename);
 }
 
 static void
@@ -2957,18 +2956,21 @@ test_gradient_load(void)
 
     // Version2 resource
     g_assert(g_file_set_contents("Yellow Blue 2", gradient_v2, -1, &error));
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "Yellow Blue 2");
     g_assert(!error);
     test_gradient_load_check("Yellow Blue 2", "Yellow Blue 2", 5,
                              &gradient_point_black0, &gradient_point_white1);
 
     // Version3 resource
     g_assert(g_file_set_contents("YBL2", gradient_v3, -1, &error));
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "YBL2");
     g_assert(!error);
     test_gradient_load_check("YBL2", "Yellow Blue 2", 5,
                              &gradient_point_black0, &gradient_point_white1);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Gray", gradient_v3_ugly, -1, &error));
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Gray");
     g_assert(!error);
     test_gradient_load_check("Ugly-Gray", "Testing Gray²", 2,
                              &gradient_point_black0, &gradient_point_white1);
@@ -2999,6 +3001,7 @@ test_gradient_save(void)
     GError *error = NULL;
     g_assert(gwy_resource_save(resource, "Tricolor", &error));
     g_assert(!error);
+    g_test_queue_destroy((GDestroyNotify)g_unlink, "Tricolor");
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
     g_assert_cmpstr(res_filename, ==, "Tricolor");
@@ -3107,6 +3110,7 @@ test_gradient_inventory(void)
 int
 main(int argc, char *argv[])
 {
+    setenv("LC_ALL", "C", TRUE);
     if (RUNNING_ON_VALGRIND)
         setenv("G_SLICE", "always-malloc", TRUE);
 
