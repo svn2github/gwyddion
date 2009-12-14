@@ -352,11 +352,11 @@ static void
 gwy_resource_assign_impl(GwySerializable *destination,
                          GwySerializable *source)
 {
-    GwyResource *resource = GWY_RESOURCE(destination);
+    GwyResource *dest = GWY_RESOURCE(destination);
     GwyResource *src = GWY_RESOURCE(source);
 
-    g_return_if_fail(resource->priv->is_modifiable);
-    if (!resource->priv->is_managed)
+    g_return_if_fail(dest->priv->is_modifiable);
+    if (!dest->priv->is_managed)
         gwy_resource_rename(resource, src->priv->name);
 
     // XXX: The rest are management properties, not value.  Do not assign them.
