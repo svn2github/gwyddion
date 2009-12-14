@@ -722,7 +722,8 @@ gwy_resource_type_get_item_type(GType type)
  * gwy_resource_class_register:
  * @klass: A resource class.
  * @name: Resource class name, usable as resource directory name for on-disk
- *        resources.  It must be a valid identifier.
+ *        resources.  It must be a valid identifier.  Normally, a lower-case
+ *        plain name in plural is used, e.g. "gradients".
  * @item_type: Inventory item type.  Usually pass %NULL, to use the parent's
  *             item type.  Modification might be useful for instance if you
  *             want to add traits, in this case acquire parent's item type with
