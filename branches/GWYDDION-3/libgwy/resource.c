@@ -1301,12 +1301,14 @@ gwy_resource_types_finalize(void)
     GSList *l;
 
     for (l = all_resources; l; l = g_slist_next(l)) {
-        GwyResourceClass *klass = g_type_class_ref((GType)GPOINTER_TO_SIZE(all_resources->data));
+        GType type = (GType)GPOINTER_TO_SIZE(all_resources->data);
+        GwyResourceClass *klass = g_type_class_peek(type);
         ResourceClass *priv = klass->priv;
         // Disconnect in case someone else holds a reference.
         GWY_SIGNAL_HANDLER_DISCONNECT(priv->inventory,
                                       priv->item_inserted_id);
         GWY_OBJECT_UNREF(priv->inventory);
+        // The eternal reference goes poof too.
         g_type_class_unref(klass);
     }
 
