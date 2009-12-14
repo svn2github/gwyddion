@@ -357,7 +357,7 @@ gwy_resource_assign_impl(GwySerializable *destination,
 
     g_return_if_fail(dest->priv->is_modifiable);
     if (!dest->priv->is_managed)
-        gwy_resource_rename(resource, src->priv->name);
+        gwy_resource_rename(dest, src->priv->name);
 
     // XXX: The rest are management properties, not value.  Do not assign them.
 }
