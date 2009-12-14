@@ -127,7 +127,7 @@ gwy_gradient_init(GwyGradient *gradient)
                                                  Gradient);
     Gradient *priv = gradient->priv;
     priv->points = g_array_sized_new(FALSE, FALSE, sizeof(GwyGradientPoint),
-                                         G_N_ELEMENTS(default_gray));
+                                     G_N_ELEMENTS(default_gray));
     g_array_append_vals(priv->points, default_gray, G_N_ELEMENTS(default_gray));
 }
 
@@ -154,6 +154,7 @@ gwy_gradient_itemize(GwySerializable *serializable,
     GwyGradient *gradient = GWY_GRADIENT(serializable);
     GArray *points = gradient->priv->points;
     GwySerializableItem *it = items->items + items->n;
+    guint n;
 
     // Our own data
     *it = serialize_items[0];
@@ -168,8 +169,9 @@ gwy_gradient_itemize(GwySerializable *serializable,
     it->value.v_type = GWY_TYPE_RESOURCE;
     it++, items->n++;
 
-    return N_ITEMS+1 + gwy_gradient_parent_serializable->itemize(serializable,
-                                                                 items);
+    if ((n = gwy_gradient_parent_serializable->itemize(serializable, items)))
+        return N_ITEMS+1 + n;
+    return 0;
 }
 
 static gboolean
@@ -245,24 +247,24 @@ static void
 gwy_gradient_assign_impl(GwySerializable *destination,
                          GwySerializable *source)
 {
-    GwyGradient *gradient = GWY_GRADIENT(destination);
-    GArray *points = gradient->priv->points;
+    GwyGradient *dest = GWY_GRADIENT(destination);
+    GArray *dpoints = dest->priv->points;
     GwyGradient *src = GWY_GRADIENT(source);
     GArray *spoints = src->priv->points;
     gboolean emit_changed = FALSE;
 
-    g_object_freeze_notify(G_OBJECT(gradient));
+    g_object_freeze_notify(G_OBJECT(dest));
     gwy_gradient_parent_serializable->assign(destination, source);
-    if (points->len != spoints->len
-        || memcpy(points->data, spoints->data,
-                  5*points->len*sizeof(gdouble)) != 0) {
-        g_array_set_size(points, 0);
-        g_array_append_vals(points, spoints->data, spoints->len);
+    if (dpoints->len != spoints->len
+        || memcmp(dpoints->data, spoints->data,
+                  5*dpoints->len*sizeof(gdouble)) != 0) {
+        g_array_set_size(dpoints, 0);
+        g_array_append_vals(dpoints, spoints->data, spoints->len);
         emit_changed = TRUE;
     }
-    g_object_thaw_notify(G_OBJECT(gradient));
+    g_object_thaw_notify(G_OBJECT(dest));
     if (emit_changed)
-        gwy_resource_data_changed(GWY_RESOURCE(destination));
+        gwy_gradient_changed(dest);
 }
 
 static GwyResource*
@@ -356,7 +358,7 @@ gwy_gradient_parse(GwyResource *resource,
  *
  * Creates a new color gradient.
  *
- * Returns: A new color gradient.
+ * Returns: A new free-standing color gradient.
  **/
 GwyGradient*
 gwy_gradient_new(void)
