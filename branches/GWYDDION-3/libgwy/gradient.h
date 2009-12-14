@@ -55,7 +55,7 @@ struct _GwyGradient {
 };
 
 struct _GwyGradientClass {
-    GwyResourceClass gwy_resource_class;
+    GwyResourceClass resource_class;
 };
 
 #define gwy_gradient_duplicate(gradient) \
