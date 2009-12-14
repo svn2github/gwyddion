@@ -17,6 +17,7 @@ mkenum_headers = \
 	expr.h \
 	fitter.h \
 	fit-task.h \
+	gl-material.h \
 	gradient.h \
 	inventory.h \
 	interpolation.h \
@@ -55,6 +56,7 @@ libgwy3_la_SOURCES = \
 	expr.c \
 	fitter.c \
 	fit-task.c \
+	gl-material.c \
 	gradient.c \
 	inventory.c \
 	interpolation.c \
