@@ -1564,8 +1564,9 @@ values_are_equal(const GValue *value1,
         return g_value_get_object(value1) == g_value_get_object(value2);
     }
     if (g_type_is_a(type, G_TYPE_BOXED)) {
-        // Boxed values are never equal.
-        return FALSE;
+        return gwy_serializable_boxed_equal(type,
+                                            g_value_get_boxed(value1),
+                                            g_value_get_boxed(value2));
     }
 
     g_return_val_if_reached(FALSE);
@@ -2102,10 +2103,10 @@ gwy_container_set_boxed(GwyContainer *container,
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
         if (type == boxtype) {
-            gwy_serializable_boxed_assign(type,
-                                          g_value_get_boxed(gvalue), value);
-            // Unlike for other types, we always emit item-changed.
-            // FIXME: Extend serializable boxed with comparison operator?
+            gpointer boxed = g_value_get_boxed(gvalue);
+            if (gwy_serializable_boxed_equal(type, boxed, value))
+                return;
+            gwy_serializable_boxed_assign(type, boxed, value);
         }
         else {
             // Be careful not to free something before using it.
