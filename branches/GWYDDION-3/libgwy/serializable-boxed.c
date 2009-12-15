@@ -110,7 +110,7 @@ gwy_serializable_boxed_register_static(GType type,
     g_return_if_fail(info->n_items);
     g_return_if_fail(info->itemize);
     g_return_if_fail(info->construct);
-    g_return_if_fail(info->assign);
+    g_return_if_fail(info->size || (info->assign && info->equal));
 
     g_static_mutex_lock(&serializable_boxed_mutex);
     GArray *data = serializable_boxed_data;
@@ -143,7 +143,34 @@ gwy_serializable_boxed_assign(GType type,
 {
     const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
     g_return_if_fail(info);
-    info->assign(destination, source);
+    g_return_if_fail(destination);
+    g_return_if_fail(source);
+    if (info->size)
+        memcpy(destination, source, info->size);
+    return
+        info->assign(destination, source);
+}
+
+/**
+ * gwy_serializable_boxed_assign:
+ * @type: Type of @a and @b.  It must be a serializable boxed type.
+ * @a: Pointer to one boxed struct of type @type.
+ * @b: Pointer to another boxed struct of type @type.
+ *
+ * Compares the values of two boxed structs for equality.
+ *
+ * Returns: %TRUE if @a and @b are equal, %FALSE if they differ.
+ **/
+gboolean
+gwy_serializable_boxed_equal(GType type,
+                             gconstpointer a,
+                             gconstpointer b)
+{
+    const GwySerializableBoxedInfo *info = find_serializable_boxed_info(type);
+    g_return_val_if_fail(info, FALSE);
+    g_return_val_if_fail(a, FALSE);
+    g_return_val_if_fail(b, FALSE);
+    return info->size ? memcmp(a, b, info->size) : info->equal(a, b);
 }
 
 /**
@@ -229,6 +256,11 @@ gwy_serializable_boxed_construct(GType type,
 
 /**
  * GwySerializableBoxedInfo:
+ * @size: Size of the boxed data for bit-wise operable plain old data.  If it
+ *        is non-zero @assign and @equal must be %NULL; assignment and
+ *        comparison is performed by direct memory copying and comparing.
+ *        If it is zero these operation are performed usinng @assign and @equal
+ *        that must be defined.
  * @n_items: Number of items the boxed struct serializes to.
  * @itemize: Appends flattened representation of the boxed struct to the
  *           @items list.
@@ -237,6 +269,8 @@ gwy_serializable_boxed_construct(GType type,
  *             freeable with g_boxed_free().
  * @assign: Makes the content of a boxed struct identical to the content of
  *          another boxed struct of the same type.
+ * @equal: Compares two boxed data for equality, returns %TRUE if they are
+ *         equal, %FALSE if they differ.
  *
  * Interface implemented by serializable boxed types.
  *

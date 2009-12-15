@@ -26,6 +26,7 @@
 G_BEGIN_DECLS
 
 typedef struct {
+    gsize                 size;
     gsize                 n_items;
     gsize                 (*itemize)  (gpointer boxed,
                                        GwySerializableItems *items);
@@ -35,6 +36,8 @@ typedef struct {
 
     void                  (*assign)   (gpointer destination,
                                        gconstpointer source);
+    gboolean              (*equal)    (gconstpointer a,
+                                       gconstpointer b);
 } GwySerializableBoxedInfo;
 
 gboolean gwy_boxed_type_is_serializable  (GType type);
@@ -43,6 +46,9 @@ void     gwy_serializable_boxed_register_static(GType type,
 void     gwy_serializable_boxed_assign   (GType type,
                                           gpointer destination,
                                           gconstpointer source);
+gboolean gwy_serializable_boxed_equal    (GType type,
+                                          gconstpointer a,
+                                          gconstpointer b);
 gsize    gwy_serializable_boxed_n_items  (GType type);
 void     gwy_serializable_boxed_itemize  (GType type,
                                           gpointer boxed,

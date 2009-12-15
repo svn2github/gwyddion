@@ -30,8 +30,6 @@ static gsize    gwy_rgba_itemize  (gpointer boxed,
                                    GwySerializableItems *items);
 static gpointer gwy_rgba_construct(GwySerializableItems *items,
                                    GwyErrorList **error_list);
-static void     gwy_rgba_assign   (gpointer destination,
-                                   gconstpointer source);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "r", .ctype = GWY_SERIALIZABLE_DOUBLE, },
@@ -50,7 +48,8 @@ gwy_rgba_get_type(void)
                                                  (GBoxedCopyFunc)gwy_rgba_copy,
                                                  (GBoxedFreeFunc)gwy_rgba_free);
         static const GwySerializableBoxedInfo boxed_info = {
-            N_ITEMS, gwy_rgba_itemize, gwy_rgba_construct, gwy_rgba_assign,
+            sizeof(GwyRGBA), N_ITEMS, gwy_rgba_itemize, gwy_rgba_construct,
+            NULL, NULL,
         };
         gwy_serializable_boxed_register_static(rgba_type, &boxed_info);
     }
@@ -101,13 +100,6 @@ gwy_rgba_construct(GwySerializableItems *items,
     rgba->b = CLAMP(its[2].value.v_double, 0.0, 1.0);
     rgba->a = CLAMP(its[3].value.v_double, 0.0, 1.0);
     return rgba;
-}
-
-static void
-gwy_rgba_assign(gpointer destination,
-                gconstpointer source)
-{
-    memcpy(destination, source, sizeof(GwyRGBA));
 }
 
 /**
