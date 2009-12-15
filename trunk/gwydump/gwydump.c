@@ -29,13 +29,13 @@
 #define G_TYPE_FUNDAMENTAL_SHIFT (2)
 #define G_TYPE_MAKE_FUNDAMENTAL(x) (((x) << G_TYPE_FUNDAMENTAL_SHIFT))
 
-#define G_TYPE_UCHAR G_TYPE_MAKE_FUNDAMENTAL (4)
+#define G_TYPE_UCHAR   G_TYPE_MAKE_FUNDAMENTAL (4)
 #define G_TYPE_BOOLEAN G_TYPE_MAKE_FUNDAMENTAL (5)
-#define G_TYPE_INT G_TYPE_MAKE_FUNDAMENTAL (6)
-#define G_TYPE_INT64 G_TYPE_MAKE_FUNDAMENTAL (10)
-#define G_TYPE_DOUBLE G_TYPE_MAKE_FUNDAMENTAL (15)
-#define G_TYPE_STRING G_TYPE_MAKE_FUNDAMENTAL (16)
-#define G_TYPE_OBJECT G_TYPE_MAKE_FUNDAMENTAL (20)
+#define G_TYPE_INT     G_TYPE_MAKE_FUNDAMENTAL (6)
+#define G_TYPE_INT64   G_TYPE_MAKE_FUNDAMENTAL (10)
+#define G_TYPE_DOUBLE  G_TYPE_MAKE_FUNDAMENTAL (15)
+#define G_TYPE_STRING  G_TYPE_MAKE_FUNDAMENTAL (16)
+#define G_TYPE_OBJECT  G_TYPE_MAKE_FUNDAMENTAL (20)
 
 #define U64F "%" G_GUINT64_FORMAT
 
@@ -231,6 +231,20 @@ print_offset(DumpState *state)
     print_indent(state);
 }
 
+static const gchar*
+format_char(guchar c)
+{
+    static gchar buf[6];
+
+    if (g_ascii_isprint(c)) {
+        buf[0] = c;
+        buf[1] = '\0';
+    }
+    else
+        g_snprintf(buf, sizeof(buf), "\\x%02x", c);
+    return buf;
+}
+
 static void
 print_value(DumpState *state,
             const gchar *type,
@@ -318,6 +332,20 @@ get_size(DumpState *state,
 };
 
 static void
+dump_parent(DumpState *state,
+            gsize *size)
+{
+    if (opt_extract
+        || state->stack->len > opt_depth)
+        return;
+
+    if (opt_type)
+        fputs(" parent", stdout);
+
+    putchar('\n');
+}
+
+static void
 dump_boolean(DumpState *state,
              gsize *size)
 {
@@ -328,8 +356,7 @@ static void
 dump_char(DumpState *state,
           gsize *size)
 {
-    dump_value(state, size, gchar, "char",
-               g_ascii_isprint(value) ? "%c" : "\\%03o", value);
+    dump_value(state, size, gchar, "char", format_char(value), value);
 }
 
 static void
@@ -513,15 +540,16 @@ dump_hash(DumpState *state,
         gchar ctype;
         void (*func)(DumpState*, gsize*);
     } atomic[] = {
+        { '^', dump_parent,  },
         { 'b', dump_boolean, },
         { 'c', dump_char,    },
         { 'd', dump_double,  },
         { 'h', dump_int16,   },
         { 'i', dump_int32,   },
         { 'o', dump_object,  },
-        { 'x', dump_boxed,  },
         { 'q', dump_int64,   },
         { 's', dump_string,  },
+        { 'x', dump_boxed,   },
     };
     gboolean handled;
     guint i;
@@ -571,7 +599,7 @@ dump_hash(DumpState *state,
         if (!handled)
             handled = dump_array(state, &size, ctype);
         if (!handled)
-            fail(state, "Unknown type `%c'", ctype);
+            fail(state, "Unknown type ‘%s’", format_char(ctype));
         pop(state);
     }
 }
