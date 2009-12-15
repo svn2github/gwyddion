@@ -32,15 +32,6 @@ typedef struct {
 static GStaticMutex serializable_boxed_mutex = G_STATIC_MUTEX_INIT;
 static GArray *serializable_boxed_data = NULL;
 
-static gpointer
-init_serializable_boxed(G_GNUC_UNUSED gpointer arg)
-{
-    g_type_init();
-    serializable_boxed_data = g_array_new(FALSE, FALSE,
-                                          sizeof(GwySerializableBoxedData));
-    return NULL;
-}
-
 static const GwySerializableBoxedInfo*
 find_serializable_boxed_info(GType type)
 {
@@ -101,8 +92,13 @@ void
 gwy_serializable_boxed_register_static(GType type,
                                        const GwySerializableBoxedInfo *info)
 {
-    static GOnce serializable_boxed_initialized = G_ONCE_INIT;
-    g_once(&serializable_boxed_initialized, init_serializable_boxed, NULL);
+    static gsize data_initialized = 0;
+    if (G_UNLIKELY(g_once_init_enter(&data_initialized))) {
+        g_type_init();
+        serializable_boxed_data = g_array_new(FALSE, FALSE,
+                                              sizeof(GwySerializableBoxedData));
+        g_once_init_leave(&data_initialized, 1);
+    }
 
     g_return_if_fail(G_TYPE_IS_BOXED(type));
     g_return_if_fail(!G_TYPE_IS_ABSTRACT(type));    // That's GBoxed for you
