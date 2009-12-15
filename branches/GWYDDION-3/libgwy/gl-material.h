@@ -54,22 +54,23 @@ struct _GwyGLMaterialClass {
     GwyResourceClass resource_class;
 };
 
-GType   gwy_gl_material_get_type     (void)                       G_GNUC_CONST;
-GwyRGBA gwy_gl_material_get_ambient  (GwyGLMaterial *gl_material) G_GNUC_PURE;
-void    gwy_gl_material_set_ambient  (GwyGLMaterial *gl_material,
-                                      const GwyRGBA *ambient);
-GwyRGBA gwy_gl_material_get_diffuse  (GwyGLMaterial *gl_material) G_GNUC_PURE;
-void    gwy_gl_material_set_diffuse  (GwyGLMaterial *gl_material,
-                                      const GwyRGBA *diffuse);
-GwyRGBA gwy_gl_material_get_specular (GwyGLMaterial *gl_material) G_GNUC_PURE;
-void    gwy_gl_material_set_specular (GwyGLMaterial *gl_material,
-                                      const GwyRGBA *specular);
-GwyRGBA gwy_gl_material_get_emission (GwyGLMaterial *gl_material) G_GNUC_PURE;
-void    gwy_gl_material_set_emission (GwyGLMaterial *gl_material,
-                                      const GwyRGBA *emission);
-gdouble gwy_gl_material_get_shininess(GwyGLMaterial *gl_material) G_GNUC_PURE;
-void    gwy_gl_material_set_shininess(GwyGLMaterial *gl_material,
-                                      gdouble shininess);
+GType          gwy_gl_material_get_type     (void)                       G_GNUC_CONST;
+GwyGLMaterial* gwy_gl_material_new          (void)                       G_GNUC_MALLOC;
+GwyRGBA        gwy_gl_material_get_ambient  (GwyGLMaterial *gl_material) G_GNUC_PURE;
+void           gwy_gl_material_set_ambient  (GwyGLMaterial *gl_material,
+                                             const GwyRGBA *ambient);
+GwyRGBA        gwy_gl_material_get_diffuse  (GwyGLMaterial *gl_material) G_GNUC_PURE;
+void           gwy_gl_material_set_diffuse  (GwyGLMaterial *gl_material,
+                                             const GwyRGBA *diffuse);
+GwyRGBA        gwy_gl_material_get_specular (GwyGLMaterial *gl_material) G_GNUC_PURE;
+void           gwy_gl_material_set_specular (GwyGLMaterial *gl_material,
+                                             const GwyRGBA *specular);
+GwyRGBA        gwy_gl_material_get_emission (GwyGLMaterial *gl_material) G_GNUC_PURE;
+void           gwy_gl_material_set_emission (GwyGLMaterial *gl_material,
+                                             const GwyRGBA *emission);
+gdouble        gwy_gl_material_get_shininess(GwyGLMaterial *gl_material) G_GNUC_PURE;
+void           gwy_gl_material_set_shininess(GwyGLMaterial *gl_material,
+                                             gdouble shininess);
 
 #define gwy_gl_materials() \
     (gwy_resource_type_get_inventory(GWY_TYPE_GL_MATERIAL))
