@@ -19,6 +19,7 @@
 
 #undef G_DISABLE_ASSERT
 #define GWY_MATH_POLLUTE_NAMESPACE 1
+#include "config.h"
 #include <gwyconfig.h>
 #include <string.h>
 #include <stdlib.h>
