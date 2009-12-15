@@ -634,24 +634,23 @@ gwy_gl_material_parse(GwyResource *resource,
 /************************** Documentation ****************************/
 
 /**
- * SECTION:gwyglmaterial
+ * SECTION: gl-material
  * @title: GwyGLMaterial
  * @short_description: OpenGL material representation
- * @see_also: #Gwy3DView -- 3D data display widget,
- *            #GwyRGBA -- representation of color components,
- *            #GwyInventory -- the container holding all GL materials
  *
  * #GwyGLMaterial represents an OpenGL material.  Its properties directly map
- * to corresponding OpenGL material characteristics, all are in the range
- * [0,1].
+ * to corresponding OpenGL material characteristics.  Note however that all
+ * are #GwyGLMaterial properties are normalized to the range [0,1].
  *
- * Gradient objects can be obtained from gwy_gl_materials_get_gl_material().
- * New GL materials can be created with gwy_inventory_new_item() on the
- * #GwyInventory returned by gwy_gl_materials().
+ * GL material objects can be obtained from gwy_gl_materials_get(). New GL
+ * materials can be created with gwy_inventory_copy() on the #GwyInventory
+ * returned by gwy_gl_materials().
  **/
 
 /**
  * GwyGLMaterial:
+ *
+ * Object represnting an OpenGL material.
  *
  * The #GwyGLMaterial struct contains private data only and should be accessed
  * using the functions below.
@@ -660,13 +659,15 @@ gwy_gl_material_parse(GwyResource *resource,
 /**
  * GwyGLMaterialClass:
  *
+ * Class of OpenGL materials.
+ *
  * #GwyGLMaterialClass does not contain any public members.
  **/
 
 /**
  * GWY_GL_MATERIAL_DEFAULT:
  *
- * The name of the default OpenGL material.
+ * Name of the default OpenGL material.
  *
  * It is guaranteed to always exist.
  *
@@ -677,7 +678,7 @@ gwy_gl_material_parse(GwyResource *resource,
 /**
  * GWY_GL_MATERIAL_NONE:
  *
- * The name of special void material with all characteristics zero.
+ * Name of the special void material with all characteristics zero.
  *
  * It is guaranteed to exist, but you should rarely actually need it.
  **/
