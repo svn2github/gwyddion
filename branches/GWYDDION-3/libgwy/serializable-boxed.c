@@ -152,7 +152,7 @@ gwy_serializable_boxed_assign(GType type,
 }
 
 /**
- * gwy_serializable_boxed_assign:
+ * gwy_serializable_boxed_equal:
  * @type: Type of @a and @b.  It must be a serializable boxed type.
  * @a: Pointer to one boxed struct of type @type.
  * @b: Pointer to another boxed struct of type @type.
