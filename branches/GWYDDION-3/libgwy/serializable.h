@@ -27,7 +27,7 @@ G_BEGIN_DECLS
 
 typedef enum {
     GWY_SERIALIZABLE_HEADER        = 0,
-    GWY_SERIALIZABLE_PARENT        = '\x1d',
+    GWY_SERIALIZABLE_PARENT        = '^',
     GWY_SERIALIZABLE_INT8          = 'c',
     GWY_SERIALIZABLE_INT8_ARRAY    = 'C',
     GWY_SERIALIZABLE_BOOLEAN       = 'b',
