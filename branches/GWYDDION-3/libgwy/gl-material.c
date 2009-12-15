@@ -44,24 +44,24 @@ struct _GwyGLMaterialPrivate {
 
 typedef struct _GwyGLMaterialPrivate Material;
 
-static void gwy_gl_material_serializable_init(GwySerializableInterface *iface);
-static gsize gwy_gl_material_n_items(GwySerializable *serializable);
-static gsize gwy_gl_material_itemize(GwySerializable *serializable,
-                     GwySerializableItems *items);
-static gboolean gwy_gl_material_construct(GwySerializable *serializable,
-                          GwySerializableItems *items,
-                          GwyErrorList **error_list);
-static GObject* gwy_gl_material_duplicate_impl(GwySerializable *serializable);
-static void gwy_gl_material_assign_impl(GwySerializable *destination,
-                            GwySerializable *source);
-static GwyResource* gwy_gl_material_copy(GwyResource *resource);
-static void gwy_gl_material_sanitize(GwyGLMaterial *gl_material);
-static void           gwy_gl_material_changed    (GwyGLMaterial *gl_material);
-static void gwy_gl_material_setup_inventory(GwyInventory *inventory);
-static gchar* gwy_gl_material_dump(GwyResource *resource);
-static gboolean gwy_gl_material_parse(GwyResource *resource,
-                      gchar *text,
-                      GError **error);
+static void         gwy_gl_material_serializable_init(GwySerializableInterface *iface);
+static gsize        gwy_gl_material_n_items          (GwySerializable *serializable);
+static gsize        gwy_gl_material_itemize          (GwySerializable *serializable,
+                                                      GwySerializableItems *items);
+static gboolean     gwy_gl_material_construct        (GwySerializable *serializable,
+                                                      GwySerializableItems *items,
+                                                      GwyErrorList **error_list);
+static GObject*     gwy_gl_material_duplicate_impl   (GwySerializable *serializable);
+static void         gwy_gl_material_assign_impl      (GwySerializable *destination,
+                                                      GwySerializable *source);
+static GwyResource* gwy_gl_material_copy             (GwyResource *resource);
+static void         gwy_gl_material_sanitize         (GwyGLMaterial *gl_material);
+static void         gwy_gl_material_changed          (GwyGLMaterial *gl_material);
+static void         gwy_gl_material_setup_inventory  (GwyInventory *inventory);
+static gchar*       gwy_gl_material_dump             (GwyResource *resource);
+static gboolean     gwy_gl_material_parse            (GwyResource *resource,
+                                                      gchar *text,
+                                                      GError **error);
 
 static const GwyRGBA black = { 0, 0, 0, 0 };
 
