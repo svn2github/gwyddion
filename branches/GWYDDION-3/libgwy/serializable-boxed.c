@@ -147,7 +147,7 @@ gwy_serializable_boxed_assign(GType type,
     g_return_if_fail(source);
     if (info->size)
         memcpy(destination, source, info->size);
-    return
+    else
         info->assign(destination, source);
 }
 
@@ -170,7 +170,7 @@ gwy_serializable_boxed_equal(GType type,
     g_return_val_if_fail(info, FALSE);
     g_return_val_if_fail(a, FALSE);
     g_return_val_if_fail(b, FALSE);
-    return info->size ? memcmp(a, b, info->size) : info->equal(a, b);
+    return info->size ? !memcmp(a, b, info->size) : info->equal(a, b);
 }
 
 /**
