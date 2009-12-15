@@ -27,6 +27,12 @@
 #include "libgwy/unit.h"
 #include "libgwy/libgwy-aliases.h"
 
+#ifdef ENABLE_PARSE_WARNINGS
+#define gwy_unit_warning g_warning
+#else
+#define gwy_unit_warning(...) /* */
+#endif
+
 #define simple_unit_index(a, i) g_array_index((a), GwySimpleUnit, (i))
 
 enum { N_ITEMS = 1 };
@@ -469,7 +475,7 @@ parse(Unit *unit,
                   "\030\031\032\033\034\035\036\037"
                   "!#$&()*,:;=?@\\[]_`|{}");
     if (end) {
-        g_warning("Invalid character 0x%02x", *end);
+        gwy_unit_warning("Invalid character 0x%02x", *end);
         return FALSE;
     }
 
@@ -493,16 +499,16 @@ parse(Unit *unit,
         string = end;
         power10 = gwy_round(log10(q));
         if (q <= 0 || fabs(log(q/gwy_exp10(power10))) > 1e-13) {
-            g_warning("Bad multiplier %g", q);
+            gwy_unit_warning("Bad multiplier %g", q);
             power10 = 0;
         }
         else if (g_str_has_prefix(string, "<sup>")) {
             string += strlen("<sup>");
             n = strtol(string, (gchar**)&end, 10);
             if (end == string)
-                g_warning("Bad exponent %s", string);
+                gwy_unit_warning("Bad exponent %s", string);
             else if (!g_str_has_prefix(end, "</sup>"))
-                g_warning("Expected </sup> after exponent");
+                gwy_unit_warning("Expected </sup> after exponent");
             else
                 power10 *= n;
             string = end;
@@ -511,7 +517,7 @@ parse(Unit *unit,
             string++;
             n = strtol(string, (gchar**)&end, 10);
             if (end == string)
-                g_warning("Bad exponent %s", string);
+                gwy_unit_warning("Bad exponent %s", string);
             else
                 power10 *= n;
             string = end;
@@ -577,11 +583,11 @@ parse(Unit *unit,
             u.power = strtol(p + strlen("<sup>"), &e, 10);
             if (e == p + strlen("<sup>")
                 || !g_str_has_prefix(e, "</sup>")) {
-                g_warning("Bad power %s", p);
+                gwy_unit_warning("Bad power %s", p);
                 u.power = 1;
             }
             else if (!u.power || abs(u.power) > 12) {
-                g_warning("Bad power %d", u.power);
+                gwy_unit_warning("Bad power %d", u.power);
                 u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
@@ -589,11 +595,11 @@ parse(Unit *unit,
         else if ((p = strchr(buf->str + 1, '^'))) {
             u.power = strtol(p + 1, &e, 10);
             if (e == p + 1 || *e) {
-                g_warning("Bad power %s", p);
+                gwy_unit_warning("Bad power %s", p);
                 u.power = 1;
             }
             else if (!u.power || abs(u.power) > 12) {
-                g_warning("Bad power %d", u.power);
+                gwy_unit_warning("Bad power %d", u.power);
                 u.power = 1;
             }
             g_string_truncate(buf, p - buf->str);
@@ -607,7 +613,7 @@ parse(Unit *unit,
             if (i != buf->len) {
                 u.power = strtol(buf->str + i, NULL, 10);
                 if (!u.power || abs(u.power) > 12) {
-                    g_warning("Bad power %d", u.power);
+                    gwy_unit_warning("Bad power %d", u.power);
                     u.power = 1;
                 }
                 g_string_truncate(buf, i);
@@ -630,7 +636,7 @@ parse(Unit *unit,
 
         /* elementary sanity */
         if (!g_utf8_validate(buf->str, -1, (const gchar**)&p)) {
-            g_warning("Unit string is not valid UTF-8");
+            gwy_unit_warning("Unit string is not valid UTF-8");
             g_string_truncate(buf, p - buf->str);
         }
         if (!buf->len) {
@@ -640,7 +646,7 @@ parse(Unit *unit,
             power10 += u.power * pfpower;
         }
         else if (!g_ascii_isalpha(buf->str[0]) && (guchar)buf->str[0] < 128)
-            g_warning("Invalid base unit: %s", buf->str);
+            gwy_unit_warning("Invalid base unit: %s", buf->str);
         else {
             /* append it */
             u.unit = g_quark_from_string(buf->str);
@@ -656,8 +662,9 @@ parse(Unit *unit,
         while (g_ascii_isspace(*end))
             end++;
         if (*end == '/') {
-            if (dividing)
-                g_warning("Cannot group multiple divisions");
+            if (dividing) {
+                gwy_unit_warning("Cannot group multiple divisions");
+            }
             dividing = TRUE;
             end++;
             while (g_ascii_isspace(*end))
