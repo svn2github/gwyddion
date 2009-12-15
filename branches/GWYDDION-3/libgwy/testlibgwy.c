@@ -1781,6 +1781,49 @@ test_unit_serialize(void)
     g_object_unref(unit);
 }
 
+static void
+test_unit_garbage(void)
+{
+    static const gchar *tokens[] = {
+        "^", "+", "-", "/", "*", "<sup>", "</sup>", "10",
+    };
+    static const gchar characters[] = G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS;
+    GwyUnit *unit = gwy_unit_new();
+
+    gsize n = 10000;
+    GString *garbage = g_string_new(NULL);
+    GRand *rng = g_rand_new();
+
+    g_rand_set_seed(rng, 42);
+
+    /* No checks.  The goal is not to crash... */
+    for (gsize i = 0; i < n; i++) {
+        gsize ntoks = g_rand_int_range(rng, 0, 5) + g_rand_int_range(rng, 0, 7);
+
+        g_string_truncate(garbage, 0);
+        for (gsize j = 0; j < ntoks; j++) {
+            gsize what = g_rand_int_range(rng, 0, G_N_ELEMENTS(tokens) + 10);
+
+            if (g_rand_int_range(rng, 0, 10))
+                g_string_append_c(garbage, ' ');
+
+            if (what == G_N_ELEMENTS(tokens))
+                g_string_append_c(garbage, g_rand_int_range(rng, 1, 0x100));
+            else if (what < G_N_ELEMENTS(tokens))
+                g_string_append(garbage, tokens[what]);
+            else {
+                what = g_rand_int_range(rng, 0, sizeof(characters));
+                g_string_append_printf(garbage, "%c", characters[what]);
+            }
+        }
+        gwy_unit_set_from_string(unit, garbage->str, NULL);
+    }
+
+    g_string_free(garbage, TRUE);
+    g_rand_free(rng);
+    g_object_unref(unit);
+}
+
 /***************************************************************************
  *
  * Value formatting
@@ -3396,6 +3439,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit/parse", test_unit_parse);
     g_test_add_func("/testlibgwy/unit/arithmetic", test_unit_arithmetic);
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
+    g_test_add_func("/testlibgwy/unit/garbage", test_unit_garbage);
     g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
