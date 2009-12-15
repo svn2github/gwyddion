@@ -27,9 +27,10 @@ function extract_files() {
 
 function print_header() {
 cat <<EOF
-<tr>
+<tr class='head'>
   <th>$1</th>
   <th>Lines</th>
+  <th>Missing</th>
   <th>Coverage</th>
   <th>Graph</th>
 </tr>
@@ -50,6 +51,7 @@ report=$outdir/coverage.html
 make clean
 make CFLAGS="-O0 --coverage -pg" LDFLAGS="--coverage" $testprog
 ./$testprog
+rm -rf $outdir
 mkdir $outdir
 for x in *.c; do
   b=${x%.c}
@@ -71,8 +73,14 @@ cat >$report <<EOF
 <style type="text/css"><!--
   .good { background-color: #f7d48e; }
   .bad { background-color: #5b1508; }
+  table.stats { border-collapse: collapse; }
+  table.stats tr.head { background-color: #ab2e12; }
+  table.stats tr.head th { color: white; }
+  table.stats tr.odd { background-color: #fcedcf; }
   table.stats td { text-align: right; }
-  table.stats td, table.stats th { padding: 0px 6px; }
+  table.stats td.left { text-align: left; }
+  table.stats td { padding: 0px 6px; }
+  table.stats th { padding: 2px 6px; }
 --></style>
 </head>
 <body>
@@ -94,4 +102,4 @@ cat >>$report <<EOF
 </html>
 EOF
 
-rm -vf *.gcov gmon.out *.gcda *.gcno
+make clean

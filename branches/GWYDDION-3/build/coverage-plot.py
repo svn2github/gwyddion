@@ -6,7 +6,6 @@ stat_types = {
     'incomplete': 'fuzzy',
     'not documented': 'bad'
 }
-total_width = 200
 
 def parse(fh):
     stats = []
@@ -16,23 +15,38 @@ def parse(fh):
         stats.append(stat)
     return stats
 
-def format_row(stat):
-    rowfmt = """<tr>
-<td>%s</td>
+def xround(x):
+    return int(math.floor(x + 0.5))
+
+def format_row(stat, counter=[False]):
+    rowfmt = """<tr%s>
+<td class='left'>%s</td>
+<td>%d</td>
 <td>%d</td>
 <td>%.2f</td>
-<td>%s</td>
+<td class='left'>%s</td>
 </tr>"""
 
     boxfmt = u"""<span class="stat %s" style="padding-right: %dpx;">\ufeff</span>"""
 
-    coverage = stat['r']/100.0
-    goodw = int(math.floor(total_width * coverage + 0.5))
-    badw = total_width - goodw
-    goodbox = boxfmt % ('good', goodw)
+    cvg = stat['r']
+    coverage = cvg/100.0
+    lines = stat['lines']
+    name = stat['name']
+    factor = 3.0;
+    if name.endswith('.c'):
+        factor /= 8
+    badlines = xround(lines * (1.0 - coverage))
+    badw = xround(factor * badlines)
+    goodw = xround(factor*(lines - badlines))
     badbox = boxfmt % ('bad', badw)
+    goodbox = boxfmt % ('good', goodw)
+    cls = ''
+    if counter[0]:
+        cls = " class='odd'"
+    counter[0] = not counter[0]
 
-    return rowfmt % (stat['name'], stat['lines'], 100*coverage, goodbox + badbox)
+    return rowfmt % (cls, name, lines, badlines, 100*coverage, goodbox + badbox)
 
 stats = parse(sys.stdin)
 

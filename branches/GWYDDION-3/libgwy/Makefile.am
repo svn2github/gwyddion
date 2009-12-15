@@ -114,4 +114,7 @@ test-coverage:
 .PHONY: test-coverage
 
 clean-local:
-	rm -rf core.* *~ coverage *.gcda *.gcno gmon.out
+	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out
+
+distclean-local:
+	rm -rf coverage
