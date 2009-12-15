@@ -1009,7 +1009,7 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 /**
  * SECTION: gradient
  * @title: GwyGradient
- * @short_description: A map from numbers to RGBA colors
+ * @short_description: Map from numbers to RGBA colors
  *
  * Gradient is a map from interval [0,1] to RGB(A) color space.  It is used
  * for false color visualization of data.

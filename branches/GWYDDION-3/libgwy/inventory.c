@@ -1206,7 +1206,7 @@ invent_item_name(Inventory *inventory,
  * SECTION: inventory
  * @title: GwyInventory
  * @short_description: Ordered item inventory, indexed by both name and
- *                     position.
+ *                     position
  * @see_also: #GwyContainer, #GwyInventoryModel
  *
  * #GwyInventory is a uniform container that offers both hash table and array
