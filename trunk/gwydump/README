@@ -9,7 +9,7 @@ File versions 1, 2 and 3 are supported, and also raw serialized objects (only
 new 2 and 3 styles).  It can print offsets, component names, types, and even
 values of atomic components.
 
-Web: http://gwyddion.net/download.php#tools-toys
+Web: http://gwyddion.net/gwydump.php
 
 
 == Installation (Unix) ======
