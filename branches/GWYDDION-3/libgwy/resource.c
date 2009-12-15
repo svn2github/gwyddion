@@ -74,53 +74,60 @@ struct _GwyResourceClassPrivate {
 typedef struct _GwyResourcePrivate      Resource;
 typedef struct _GwyResourceClassPrivate ResourceClass;
 
-static void              gwy_resource_finalize          (GObject *object);
-static void              gwy_resource_serializable_init (GwySerializableInterface *iface);
-static gsize             gwy_resource_n_items           (GwySerializable *serializable);
-static gsize             gwy_resource_itemize           (GwySerializable *serializable,
-                                                         GwySerializableItems *items);
-static gboolean          gwy_resource_construct         (GwySerializable *serializable,
-                                                         GwySerializableItems *items,
-                                                         GwyErrorList **error_list);
-static void              gwy_resource_assign_impl       (GwySerializable *destination,
-                                                         GwySerializable *source);
-static void              gwy_resource_set_property      (GObject *object,
-                                                         guint prop_id,
-                                                         const GValue *value,
-                                                         GParamSpec *pspec);
-static void              gwy_resource_get_property      (GObject *object,
-                                                         guint prop_id,
-                                                         GValue *value,
-                                                         GParamSpec *pspec);
-static gboolean          gwy_resource_is_modifiable_impl(gconstpointer item);
-static const gchar*      gwy_resource_get_item_name     (gconstpointer item);
-static gboolean          gwy_resource_compare           (gconstpointer item1,
-                                                         gconstpointer item2);
-static void              gwy_resource_rename            (gpointer item,
-                                                         const gchar *new_name);
-static gpointer          gwy_resource_copy              (gconstpointer item);
-static const GType*      gwy_resource_get_traits        (guint *ntraits);
-static const gchar*      gwy_resource_get_trait_name    (guint i);
-static void              gwy_resource_get_trait_value   (gconstpointer item,
-                                                         guint i,
-                                                         GValue *value);
-static void              gwy_resource_set_unmanaged     (gpointer item);
-static void              inventory_item_inserted        (GwyInventory *inventory,
-                                                         guint i,
-                                                         GwyResourceClass *klass);
-static GwyResourceClass* get_resource_class             (const gchar *typename,
-                                                         GType expected_type,
-                                                         const gchar *filename_sys,
-                                                         GError **error);
-static GwyResource*      parse                          (gchar *text,
-                                                         GType expected_type,
-                                                         const gchar *filename,
-                                                         GError **error);
-static gboolean          name_is_unique                 (GwyResource *resource,
-                                                         ResourceClass *klass,
-                                                         GError **error);
-static gchar*            construct_filename             (const gchar *resource_name);
-static void              gwy_resource_data_changed_impl (GwyResource *resource);
+static void              gwy_resource_class_init         (GwyResourceClass *klass);
+static void              gwy_resource_class_intern_init  (gpointer klass);
+static void              gwy_resource_class_base_init    (GwyResourceClass *klass);
+static void              gwy_resource_class_base_finalize(GwyResourceClass *klass);
+static void              gwy_resource_init               (GwyResource *resource);
+static void              gwy_resource_finalize           (GObject *object);
+static void              gwy_resource_serializable_init  (GwySerializableInterface *iface);
+static gsize             gwy_resource_n_items            (GwySerializable *serializable);
+static gsize             gwy_resource_itemize            (GwySerializable *serializable,
+                                                          GwySerializableItems *items);
+static gboolean          gwy_resource_construct          (GwySerializable *serializable,
+                                                          GwySerializableItems *items,
+                                                          GwyErrorList **error_list);
+static void              gwy_resource_assign_impl        (GwySerializable *destination,
+                                                          GwySerializable *source);
+static void              gwy_resource_set_property       (GObject *object,
+                                                          guint prop_id,
+                                                          const GValue *value,
+                                                          GParamSpec *pspec);
+static void              gwy_resource_get_property       (GObject *object,
+                                                          guint prop_id,
+                                                          GValue *value,
+                                                          GParamSpec *pspec);
+static gboolean          gwy_resource_is_modifiable_impl (gconstpointer item);
+static const gchar*      gwy_resource_get_item_name      (gconstpointer item);
+static gboolean          gwy_resource_compare            (gconstpointer item1,
+                                                          gconstpointer item2);
+static void              gwy_resource_rename             (gpointer item,
+                                                          const gchar *new_name);
+static gpointer          gwy_resource_copy               (gconstpointer item);
+static const GType*      gwy_resource_get_traits         (guint *ntraits);
+static const gchar*      gwy_resource_get_trait_name     (guint i);
+static void              gwy_resource_get_trait_value    (gconstpointer item,
+                                                          guint i,
+                                                          GValue *value);
+static void              gwy_resource_set_unmanaged      (gpointer item);
+static void              inventory_item_inserted         (GwyInventory *inventory,
+                                                          guint i,
+                                                          GwyResourceClass *klass);
+static GwyResourceClass* get_resource_class              (const gchar *typename,
+                                                          GType expected_type,
+                                                          const gchar *filename_sys,
+                                                          GError **error);
+static GwyResource*      parse                           (gchar *text,
+                                                          GType expected_type,
+                                                          const gchar *filename,
+                                                          GError **error);
+static gboolean          name_is_unique                  (GwyResource *resource,
+                                                          ResourceClass *klass,
+                                                          GError **error);
+static gchar*            construct_filename              (const gchar *resource_name);
+static void              gwy_resource_data_changed_impl  (GwyResource *resource);
+
+static gpointer gwy_resource_parent_class = NULL;
 
 /* Use a static propery -> trait map.  We could do it generically, too.
  * That g_param_spec_pool_list() is ugly and slow is the minor problem, the
@@ -135,7 +142,7 @@ static guint resource_signals[N_SIGNALS];
 static GSList *all_resources = NULL;
 G_LOCK_DEFINE(all_resources);
 
-static const GwyInventoryItemType gwy_resource_item_type = {
+static const GwyInventoryItemType resource_item_type = {
     0,
     "data-changed",
     &gwy_resource_get_item_name,
@@ -153,9 +160,36 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     { .name = "name", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
-G_DEFINE_TYPE_EXTENDED
-    (GwyResource, gwy_resource, G_TYPE_OBJECT, G_TYPE_FLAG_ABSTRACT,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_resource_serializable_init))
+GType
+gwy_resource_get_type(void)
+{
+    static volatile gsize type = 0;
+    if (G_UNLIKELY(g_once_init_enter(&type))) {
+        GTypeInfo info = {
+            .class_size = sizeof(GwyResourceClass),
+            .base_init = (GBaseInitFunc)&gwy_resource_class_base_init,
+            .base_finalize = (GBaseFinalizeFunc)&gwy_resource_class_base_finalize,
+            .class_init = (GClassInitFunc)gwy_resource_class_intern_init,
+            .class_finalize = NULL,
+            .class_data = NULL,
+            .instance_size = sizeof(GwyResource),
+            .n_preallocs = 0,
+            .instance_init = (GInstanceInitFunc)gwy_resource_init,
+            .value_table = NULL,
+        };
+        GType newtype = g_type_register_static(G_TYPE_OBJECT, "GwyResource",
+                                               &info, G_TYPE_FLAG_ABSTRACT);
+        GInterfaceInfo iface_info = {
+            .interface_init = (GInterfaceInitFunc)gwy_resource_serializable_init,
+            .interface_finalize = NULL,
+            .interface_data = NULL,
+        };
+        g_type_add_interface_static(newtype, GWY_TYPE_SERIALIZABLE,
+                                    &iface_info);
+        g_once_init_leave(&type, newtype);
+    }
+    return type;
+}
 
 /**
  * gwy_resource_error_quark:
@@ -187,22 +221,41 @@ gwy_resource_serializable_init(GwySerializableInterface *iface)
 }
 
 static void
+gwy_resource_class_intern_init(gpointer klass)
+{
+    gwy_resource_parent_class = g_type_class_peek_parent(klass);
+    gwy_resource_class_init((GwyResourceClass*)klass);
+}
+
+static void
+gwy_resource_class_base_init(GwyResourceClass *klass)
+{
+    // FIXME: In future, they might be a function similar to
+    // g_type_class_add_private() for class data.
+    klass->priv = g_new0(ResourceClass, 1);
+    klass->priv->item_type = resource_item_type;
+    klass->priv->item_type.type = G_TYPE_FROM_CLASS(klass);
+}
+
+static void
+gwy_resource_class_base_finalize(GwyResourceClass *klass)
+{
+    GWY_OBJECT_UNREF(klass->priv->inventory);
+    g_free(klass->priv);
+}
+
+static void
 gwy_resource_class_init(GwyResourceClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GParamSpec *pspec;
 
     g_type_class_add_private(klass, sizeof(Resource));
-    // FIXME: In future, they might be a function similar to
-    // g_type_class_add_private() for class data.
-    klass->priv = g_new0(ResourceClass, 1);
 
     gobject_class->finalize = gwy_resource_finalize;
     gobject_class->get_property = gwy_resource_get_property;
     gobject_class->set_property = gwy_resource_set_property;
 
-    klass->priv->item_type = gwy_resource_item_type;
-    klass->priv->item_type.type = G_TYPE_FROM_CLASS(klass);
     klass->data_changed = gwy_resource_data_changed_impl;
 
     pspec = g_param_spec_string("name",
@@ -668,8 +721,8 @@ ensure_class_and_inventory(GType type)
     if (G_LIKELY(klass && klass->priv->inventory))
         return klass->priv;
 
-    /* This reference is never released.  You can imagine the inventory
-     * holds it... */
+    /* This reference is released only in gwy_resource_types_finalize().
+     * You can imagine the class inventory holds it... */
     if (!klass) {
         klass = g_type_class_ref(type);
         g_assert(klass);
@@ -728,8 +781,7 @@ gwy_resource_type_get_item_type(GType type)
  *             item type.  Modification might be useful for instance if you
  *             want to add traits, in this case acquire parent's item type with
  *             gwy_resource_class_get_item_type() and modify it accordingly
- *             with chaining.  It is not necessary to set the @type field, it
- *             will be always set to the resource type.
+ *             with chaining.
  *
  * Registers a resource class.
  *
@@ -745,9 +797,11 @@ gwy_resource_class_register(GwyResourceClass *klass,
     g_return_if_fail(name);
 
     ResourceClass *priv = klass->priv;
-    if (item_type)
-        priv->item_type = *item_type;
-    priv->item_type.type = G_TYPE_FROM_CLASS(klass);
+    g_return_if_fail(!priv->name);    // Do not permit repeated registration
+    if (item_type) {
+        g_return_if_fail(item_type->type == G_TYPE_FROM_CLASS(klass));
+        klass->priv->item_type = *item_type;
+    }
     if (!gwy_strisident(name, "-_", NULL))
         g_warning("Resource class name %s is not a valid identifier.", name);
     priv->name = name;
