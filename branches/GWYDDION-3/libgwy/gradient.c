@@ -1021,9 +1021,9 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
  * functions such as gwy_gradient_insert(), gwy_gradient_set_color(), or
  * gwy_gradient_set_data().
  *
- * Gradient objects can be obtained from gwy_gradients_get(). New
- * gradients can be created with gwy_inventory_new_copy() on the #GwyInventory
- * returned by gwy_gradients().
+ * Gradient objects can be obtained from gwy_gradients_get(). New gradients can
+ * be created with gwy_inventory_copy() on the #GwyInventory returned by
+ * gwy_gradients().
  **/
 
 /**
