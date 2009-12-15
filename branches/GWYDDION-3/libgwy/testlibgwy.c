@@ -3038,6 +3038,13 @@ test_gradient_serialize(void)
     GwyResource *newresource = GWY_RESOURCE(newgradient);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Red-Blue");
 
+    pt = gwy_gradient_get(newgradient, 0);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_red0,
+                           sizeof(GwyGradientPoint)), ==, 0);
+    pt = gwy_gradient_get(newgradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_blue1,
+                           sizeof(GwyGradientPoint)), ==, 0);
+
     g_object_unref(gradient);
     g_object_unref(newgradient);
 }
@@ -3245,33 +3252,41 @@ test_gl_material_save(void)
                                 &blue, &green, &red, &black, 0.1);
 }
 
-#if 0
 static void
 test_gl_material_serialize(void)
 {
-    static const GwyGLMaterialPoint gl_material_point_red0 = { 0, { 0.8, 0, 0, 1 } };
-    static const GwyGLMaterialPoint gl_material_point_blue1 = { 1, { 0, 0, 1, 1 } };
+    static const GwyRGBA white = { 1,   1,   1,   1 };
+    static const GwyRGBA red   = { 0.8, 0,   0,   1 };
+    static const GwyRGBA green = { 0,   0.6, 0,   1 };
+    static const GwyRGBA blue  = { 0,   0,   0.9, 1 };
 
     GwyGLMaterial *gl_material = gwy_gl_material_new();
     GwyResource *resource = GWY_RESOURCE(gl_material);
 
-    gwy_resource_set_name(resource, "Red-Blue");
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Red-Blue");
+    gwy_resource_set_name(resource, "WRBG");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "WRBG");
 
-    GwyGLMaterialPoint pt;
-    gwy_gl_material_set(gl_material, 0, &gl_material_point_red0);
-    gwy_gl_material_set(gl_material, 1, &gl_material_point_blue1);
-    pt = gwy_gl_material_get(gl_material, 0);
-    g_assert_cmpint(memcmp(&pt, &gl_material_point_red0,
-                           sizeof(GwyGLMaterialPoint)), ==, 0);
-    pt = gwy_gl_material_get(gl_material, 1);
-    g_assert_cmpint(memcmp(&pt, &gl_material_point_blue1,
-                           sizeof(GwyGLMaterialPoint)), ==, 0);
+    gwy_gl_material_set_ambient(gl_material, &white);
+    gwy_gl_material_set_diffuse(gl_material, &red);
+    gwy_gl_material_set_specular(gl_material, &blue);
+    gwy_gl_material_set_emission(gl_material, &green);
+    gwy_gl_material_set_shininess(gl_material, 0.67);
 
     GwyGLMaterial *newgl_material
         = (GwyGLMaterial*)serialize_and_back(G_OBJECT(gl_material));
     GwyResource *newresource = GWY_RESOURCE(newgl_material);
-    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Red-Blue");
+    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "WRBG");
+
+    GwyRGBA color;
+    color = gwy_gl_material_get_ambient(gl_material);
+    g_assert(gwy_serializable_boxed_equal(GWY_TYPE_RGBA, &color, &white));
+    color = gwy_gl_material_get_diffuse(gl_material);
+    g_assert(gwy_serializable_boxed_equal(GWY_TYPE_RGBA, &color, &red));
+    color = gwy_gl_material_get_specular(gl_material);
+    g_assert(gwy_serializable_boxed_equal(GWY_TYPE_RGBA, &color, &blue));
+    color = gwy_gl_material_get_emission(gl_material);
+    g_assert(gwy_serializable_boxed_equal(GWY_TYPE_RGBA, &color, &green));
+    g_assert_cmpfloat(gwy_gl_material_get_shininess(gl_material), ==, 0.67);
 
     g_object_unref(gl_material);
     g_object_unref(newgl_material);
@@ -3280,7 +3295,6 @@ test_gl_material_serialize(void)
 static void
 test_gl_material_inventory(void)
 {
-    static const GwyGLMaterialPoint gl_material_point_red = { 0.5, { 1, 0, 0, 1 } };
     const GwyInventoryItemType *item_type;
     GwyGLMaterial *gl_material;
     GwyResource *resource;
@@ -3300,14 +3314,16 @@ test_gl_material_inventory(void)
     gl_material = gwy_gl_materials_get(NULL);
     g_assert(GWY_IS_GL_MATERIAL(gl_material));
     resource = GWY_RESOURCE(gl_material);
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GL_MATERIAL_DEFAULT);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==,
+                    GWY_GL_MATERIAL_DEFAULT);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
     gl_material = gwy_inventory_get_default(gl_materials);
     g_assert(GWY_IS_GL_MATERIAL(gl_material));
     resource = GWY_RESOURCE(gl_material);
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_GL_MATERIAL_DEFAULT);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==,
+                    GWY_GL_MATERIAL_DEFAULT);
     g_assert(gwy_resource_is_managed(resource));
     g_assert(!gwy_resource_is_modifiable(resource));
 
@@ -3316,7 +3332,7 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_get_is_preferred(resource));
 
     gwy_inventory_copy(gl_materials, GWY_GL_MATERIAL_DEFAULT, "Another");
-    g_assert_cmpuint(gwy_inventory_n_items(gl_materials), ==, 2);
+    g_assert_cmpuint(gwy_inventory_n_items(gl_materials), ==, 3);
     gl_material = gwy_inventory_get(gl_materials, "Another");
     resource = GWY_RESOURCE(gl_material);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");
@@ -3325,8 +3341,6 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
     g_assert(is_modified);
-    gwy_gl_material_insert_sorted(gl_material, &gl_material_point_red);
-    g_assert_cmpuint(gwy_gl_material_n_points(gl_material), ==, 3);
 
     g_object_ref(gl_material);
     gwy_inventory_delete(gl_materials, "Another");
@@ -3335,7 +3349,6 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_is_modifiable(resource));
     g_object_unref(gl_material);
 }
-#endif
 
 /***************************************************************************
  *
@@ -3397,10 +3410,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/gradient/inventory", test_gradient_inventory);
     g_test_add_func("/testlibgwy/gl-material/load", test_gl_material_load);
     g_test_add_func("/testlibgwy/gl-material/save", test_gl_material_save);
-    /*
     g_test_add_func("/testlibgwy/gl-material/serialize", test_gl_material_serialize);
     g_test_add_func("/testlibgwy/gl-material/inventory", test_gl_material_inventory);
-    */
 
     return g_test_run();
 }
