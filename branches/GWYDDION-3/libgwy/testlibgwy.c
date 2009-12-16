@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <locale.h>
 #include <glib/gstdio.h>
 #include "libgwy/libgwy.h"
 
@@ -3403,7 +3404,8 @@ test_gl_material_inventory(void)
 int
 main(int argc, char *argv[])
 {
-    setenv("LC_ALL", "C", TRUE);
+    setenv("LC_NUMERIC", "C", TRUE);
+    setlocale(LC_NUMERIC, "C");
     if (RUNNING_ON_VALGRIND)
         setenv("G_SLICE", "always-malloc", TRUE);
 
