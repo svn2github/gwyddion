@@ -1806,7 +1806,7 @@ test_unit_garbage(void)
         for (gsize j = 0; j < ntoks; j++) {
             gsize what = g_rand_int_range(rng, 0, G_N_ELEMENTS(tokens) + 10);
 
-            if (g_rand_int_range(rng, 0, 10))
+            if (g_rand_int_range(rng, 0, 3))
                 g_string_append_c(garbage, ' ');
 
             if (what == G_N_ELEMENTS(tokens))
