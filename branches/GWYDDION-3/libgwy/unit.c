@@ -541,6 +541,9 @@ parse(Unit *unit,
         if (!end)
             end = string + strlen(string);
 
+        if (end == string)
+            break;
+
         g_string_set_size(buf, 0);
         g_string_append_len(buf, string, end - string);
 
