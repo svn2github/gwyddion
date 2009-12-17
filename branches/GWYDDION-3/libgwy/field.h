@@ -81,10 +81,10 @@ GwyField* gwy_field_new_resampled(GwyField *field,
                                   guint yres,
                                   GwyInterpolationType interpolation) G_GNUC_MALLOC;
 void      gwy_field_data_changed (GwyField *field);
-void      gwy_field_copy         (GwyField *src,
-                                  GwyField *dest);
-void      gwy_field_part_copy    (GwyField *src,
-                                  GwyField *dest,
+void      gwy_field_copy         (GwyField *dest,
+                                  GwyField *src);
+void      gwy_field_part_copy    (GwyField *dest,
+                                  GwyField *src,
                                   guint col,
                                   guint row,
                                   guint width,
@@ -92,6 +92,7 @@ void      gwy_field_part_copy    (GwyField *src,
                                   guint destcol,
                                   guint destrow);
 gdouble*  gwy_field_get_data     (GwyField *field);
+void      gwy_field_invalidate   (GwyField *field);
 void      gwy_field_set_xreal    (GwyField *field,
                                   gdouble xreal);
 void      gwy_field_set_yreal    (GwyField *field,

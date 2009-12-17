@@ -366,6 +366,10 @@ gwy_field_assign_impl(GwySerializable *destination,
  *
  * Creates a new two-dimensional data field.
  *
+ * The field dimensions will be 1×1 and it will be zero-filled.  This
+ * paremterless constructor exists mainly for language bindings,
+ * gwy_field_new_sized() and gwy_field_new_alike() are usually more useful.
+ *
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
@@ -431,13 +435,38 @@ gwy_field_data_changed(GwyField *field)
 }
 
 void
-gwy_field_copy(GwyField *src,
-               GwyField *dest)
+gwy_field_copy(GwyField *dest,
+               GwyField *src)
 {
     g_return_if_fail(GWY_IS_FIELD(src));
     g_return_if_fail(GWY_IS_FIELD(dest));
+    g_return_if_fail(dest->xres == src->xres && dest->yres == src->yres);
+    ASSIGN(dest->data, src->data, src->xres * src->yres);
+    gwy_field_data_changed(dest);
 }
 
+/**
+ * gwy_field_part_copy:
+ * @dest: Destination two-dimensional data field.
+ * @src: Source two-dimensional data data field.
+ * @col: Rectangle upper-left column coordinate in @src.
+ * @row: Rectangle upper-left row coordinate @src.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Copies a rectangular part from one field to another.
+ *
+ * The rectangle starts at (@col, @row) in @src and its dimension is
+ * @width×@height. It is copied to @dest starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the coordinates and dimensions.  Only the part
+ * of the rectangle that actually corresponds to some data in @src and @dest
+ * is copied.  This can also be no data at all.
+ *
+ * If @src is equal to @dest, the areas may not overlap.
+ **/
 void
 gwy_field_part_copy(GwyField *src,
                     GwyField *dest,
@@ -450,14 +479,45 @@ gwy_field_part_copy(GwyField *src,
 {
     g_return_if_fail(GWY_IS_FIELD(src));
     g_return_if_fail(GWY_IS_FIELD(dest));
+
+    if (col >= src->xres || destcol >= dest->xres
+        || row >= src->yres || destrow >= dest->yres)
+        return;
+
+    width = MIN(width, src->xres - col);
+    height = MIN(height, src->yres - row);
+    width = MIN(width, dest->xres - destcol);
+    height = MIN(height, dest->yres - destrow);
+    if (!width || !height)
+        return;
+
+    if (width == src->xres && width == dest->xres) {
+        /* make it as fast as gwy_data_field_copy() if possible */
+        g_assert(col == 0 && destcol == 0);
+        ASSIGN(dest->data + width*destrow, src->data + width*row, width*height);
+    }
+    else {
+        const gdouble *src0 = dest->data + dest->xres*destrow + destcol;
+        gdouble *dest0 = src->data + src->xres*row + col;
+        for (guint i = 0; i < height; i++)
+            ASSIGN(dest0 + dest->xres*i, src0 + src->xres*i, width);
+    }
+    gwy_field_invalidate(dest);
 }
 
 gdouble*
 gwy_field_get_data(GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    // FIXME: gwy_data_field_invalidate(field);
+    gwy_field_invalidate(field);
     return field->data;
+}
+
+void
+gwy_field_invalidate(GwyField *field)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    field->priv->cached = 0;
 }
 
 void
@@ -573,7 +633,7 @@ gwy_field_part_fill(GwyField *field,
  * GwyFieldClass:
  * @g_object_class: Parent class.
  *
- * Class of physical fields objects.
+ * Class of two-dimensional data fields.
  **/
 
 /**
