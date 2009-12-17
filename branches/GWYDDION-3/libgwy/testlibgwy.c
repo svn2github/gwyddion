@@ -1621,7 +1621,7 @@ test_unit_parse(void)
     g_object_unref(u2);
     g_object_unref(u3);
 
-    /* Powers and comparision */
+    /* Powers and comparison */
     GwyUnit *u4 = gwy_unit_new_from_string("um s^-1", &pw4);
     GwyUnit *u5 = gwy_unit_new_from_string("mm/ps", &pw5);
     GwyUnit *u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
