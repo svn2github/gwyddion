@@ -54,6 +54,11 @@ struct _GwyGLMaterialClass {
     GwyResourceClass resource_class;
 };
 
+#define gwy_gl_material_duplicate(gl_material) \
+        (GWY_GL_MATERIAL(gwy_serializable_duplicate(GWY_SERIALIZABLE(gl_material))))
+#define gwy_gl_material_assign(dest, src) \
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
+
 GType          gwy_gl_material_get_type     (void)                       G_GNUC_CONST;
 GwyGLMaterial* gwy_gl_material_new          (void)                       G_GNUC_MALLOC;
 GwyRGBA        gwy_gl_material_get_ambient  (GwyGLMaterial *gl_material) G_GNUC_PURE;

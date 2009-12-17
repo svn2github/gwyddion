@@ -61,7 +61,7 @@ struct _GwyGradientClass {
 #define gwy_gradient_duplicate(gradient) \
         (GWY_GRADIENT(gwy_serializable_duplicate(GWY_SERIALIZABLE(gradient))))
 #define gwy_gradient_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src))
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType                   gwy_gradient_get_type        (void)                            G_GNUC_CONST;
 GwyGradient*            gwy_gradient_new             (void)                            G_GNUC_MALLOC;

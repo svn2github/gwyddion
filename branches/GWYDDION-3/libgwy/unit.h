@@ -53,7 +53,7 @@ struct _GwyUnitClass {
 #define gwy_unit_duplicate(unit) \
         (GWY_UNIT(gwy_serializable_duplicate(GWY_SERIALIZABLE(unit))))
 #define gwy_unit_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src))
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType           gwy_unit_get_type              (void)                      G_GNUC_CONST;
 GwyUnit*        gwy_unit_new                   (void)                      G_GNUC_MALLOC;

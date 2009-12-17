@@ -60,7 +60,7 @@ typedef void (*GwyContainerForeachFunc)(GQuark key,
 #define gwy_container_duplicate(container) \
         (GWY_CONTAINER(gwy_serializable_duplicate(GWY_SERIALIZABLE(container))))
 #define gwy_container_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src))
+        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
 GType         gwy_container_get_type     (void)                       G_GNUC_CONST;
 GwyContainer* gwy_container_new          (void)                       G_GNUC_MALLOC;
