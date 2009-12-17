@@ -83,11 +83,11 @@ static const Material null_material = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "ambient",   .ctype = GWY_SERIALIZABLE_BOXED,  },
-    { .name = "diffuse",   .ctype = GWY_SERIALIZABLE_BOXED,  },
-    { .name = "specular",  .ctype = GWY_SERIALIZABLE_BOXED,  },
-    { .name = "emission",  .ctype = GWY_SERIALIZABLE_BOXED,  },
-    { .name = "shininess", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*0*/ { .name = "ambient",   .ctype = GWY_SERIALIZABLE_BOXED,  },
+    /*1*/ { .name = "diffuse",   .ctype = GWY_SERIALIZABLE_BOXED,  },
+    /*2*/ { .name = "specular",  .ctype = GWY_SERIALIZABLE_BOXED,  },
+    /*3*/ { .name = "emission",  .ctype = GWY_SERIALIZABLE_BOXED,  },
+    /*4*/ { .name = "shininess", .ctype = GWY_SERIALIZABLE_DOUBLE, },
 };
 
 G_DEFINE_TYPE_EXTENDED
@@ -148,37 +148,37 @@ gwy_gl_material_itemize(GwySerializable *serializable,
     GwySerializableItem it;
 
     // Our own data
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[0];
     it.value.v_boxed = &material->ambient;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[1];
     it.value.v_boxed = &material->diffuse;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[2];
     it.value.v_boxed = &material->specular;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[3];
     it.value.v_boxed = &material->emission;
     items->items[items->n++] = it;
     gwy_serializable_boxed_itemize(GWY_TYPE_RGBA, it.value.v_boxed, items);
 
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[4];
     it.value.v_double = material->shininess;
     items->items[items->n++] = it;
 
     // Chain to parent
-    g_return_val_if_fail(items->len - items->n >= 1, 0);
+    g_return_val_if_fail(items->len - items->n, 0);
     it.ctype = GWY_SERIALIZABLE_PARENT;
     it.name = g_type_name(GWY_TYPE_RESOURCE);
     it.array_size = 0;

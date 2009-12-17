@@ -82,7 +82,7 @@ static const GwyGradientPoint default_gray[] = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "data", .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    /*0*/ { .name = "data", .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
 };
 
 GwySerializableInterface *gwy_gradient_parent_serializable = NULL;

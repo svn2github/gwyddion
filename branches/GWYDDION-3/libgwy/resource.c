@@ -157,7 +157,7 @@ static const GwyInventoryItemType resource_item_type = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "name", .ctype = GWY_SERIALIZABLE_STRING, },
+    /*0*/ { .name = "name", .ctype = GWY_SERIALIZABLE_STRING, },
 };
 
 GType
