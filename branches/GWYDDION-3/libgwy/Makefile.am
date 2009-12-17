@@ -15,6 +15,7 @@ mkenum_headers = \
 	container.h \
 	error-list.h \
 	expr.h \
+	field.h \
 	fitter.h \
 	fit-task.h \
 	gl-material.h \
@@ -54,6 +55,7 @@ libgwy3_la_SOURCES = \
 	container.c \
 	error-list.c \
 	expr.c \
+	field.c \
 	fitter.c \
 	fit-task.c \
 	gl-material.c \
