@@ -61,7 +61,6 @@ typedef struct {
 } GwyUnitStyleSpec;
 
 struct _GwyUnitPrivate {
-    GObject g_object;
     GArray *units;
     gchar *serialize_str;
 };
@@ -202,7 +201,7 @@ gwy_unit_class_init(GwyUnitClass *klass)
 
     /**
      * GwyUnit::changed:
-     * @gwysiunit: The #GwyUnit which received the signal.
+     * @gwyunit: The #GwyUnit which received the signal.
      *
      * The ::changed signal is emitted whenever unit changes.
      **/
@@ -233,7 +232,7 @@ gwy_unit_finalize(GObject *object)
 static gsize
 gwy_unit_n_items(G_GNUC_UNUSED GwySerializable *serializable)
 {
-    return G_N_ELEMENTS(serialize_items);
+    return N_ITEMS;
 }
 
 static gsize
@@ -298,16 +297,16 @@ static void
 gwy_unit_assign_impl(GwySerializable *destination,
                      GwySerializable *source)
 {
-    GwyUnit *unit = GWY_UNIT(destination);
+    GwyUnit *dest = GWY_UNIT(destination);
     GwyUnit *src = GWY_UNIT(source);
 
-    if (gwy_unit_equal(unit, src))
+    if (gwy_unit_equal(dest, src))
         return;
 
-    g_array_set_size(unit->priv->units, 0);
-    g_array_append_vals(unit->priv->units,
+    g_array_set_size(dest->priv->units, 0);
+    g_array_append_vals(dest->priv->units,
                         src->priv->units->data, src->priv->units->len);
-    g_signal_emit(unit, unit_signals[CHANGED], 0);
+    g_signal_emit(dest, unit_signals[CHANGED], 0);
 }
 
 
