@@ -244,4 +244,10 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
  * All values are from the range [0,1].  Alpha is not premultiplied.
  **/
 
+/**
+ * GWY_TYPE_RGBA:
+ *
+ * The #GType for a boxed type holding a #GwyRGBA.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
