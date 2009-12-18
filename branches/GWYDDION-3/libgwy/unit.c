@@ -1374,6 +1374,31 @@ get_prefix(gint power)
  * significant digits -- gwy_unit_format_with_digits().  These methods
  * either create or update a #GwyValueFormat object that can be subsequently
  * used for the formatting.
+ *
+ * <refsect2 id='GwyUnit-ownership'>
+ * <title>Units and Ownership</title>
+ * <para>#GwyUnit is an object.  Beside the type of units it represents, it has
+ * an identity: it is possible to connect to its signals or attach data to the
+ * specific instance with g_object_set_data().</para>
+ * <para>On the other hand, one often thinks about it and attempts to use it as
+ * a mere value.  Hence it is almost never a good idea to make one unit object
+ * owned by several other objects (the motivation for that could be keeping
+ * their units synchronized).  In addition, this relation would be lost in the
+ * serialized representation.  To prevent multiple ownership, objects that
+ * typically own #GwyUnits, such as #GwyField or #GwyLine, do not provide
+ * methods to set the units objects.  Instead of</para>
+ * |[
+ * gwy_field_set_unit_z(field, unit);
+ * ]|
+ * <para>you can modify the unit object with assignment:</para>
+ * |[
+ * gwy_unit_assign(gwy_field_get_unit_z(field), unit);
+ * ]|
+ * <para>or other operations, e.g. if you have a string, using:</para>
+ * |[
+ * gwy_unit_set_from_string(gwy_field_get_unit_z(field), "nm", NULL);
+ * ]|
+ * </refsect2>
  **/
 
 /**
