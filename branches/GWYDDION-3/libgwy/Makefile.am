@@ -35,6 +35,8 @@ mkenum_headers = \
 	unit.h \
 	value-format.h \
 	version.h
+private_headers = \
+	processing-internal.h
 
 library_headers = $(mkenum_headers) $(mkenum_name).h
 
@@ -49,6 +51,7 @@ lib_LTLIBRARIES = libgwy3.la
 noinst_PROGRAMS = $(test_program)
 libgwyinclude_HEADERS = $(library_headers)
 pkginclude_HEADERS = $(main_header)
+noinst_HEADERS = $(private_headers)
 
 libgwy3_la_SOURCES = \
 	array.c \

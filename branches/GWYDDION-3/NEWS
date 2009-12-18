@@ -17,8 +17,8 @@ Libraries in general:
   - libgwyui: user interface, i.e. new widgets and UI helper functions
   - libgwyapp: modules, application-level functions
 - Libraries are thread-aware, similarly to GLib and Gtk+.  This means that they
-  protect their static data by locks, but individual objects do not use any
-  internal locking.
+  protect their internal static data by locks, but individual objects do not
+  use any internal locking.
 - Libraries have a test suite (well, libgwy does), run `make check', if it
   passes run also `make check-valgrind'.
 - Intralibrary symbol resolution does not go through PLT, the technique was
@@ -112,6 +112,7 @@ Inventory:
 Resource:
 - Resource name is included in the file, allowing for resource names not
   representable in the file system (file name is used for 2.x resources).
+- There is no longer gwy_resource_use()/gwy_resource_release().
 - Functions for saving and loading are available, low-level dump, restore and
   modification bookkeeping functions were removed (some may reappear in a
   different form the future, though).
@@ -123,6 +124,9 @@ Resource:
   (this matches GwyInventory).
 - The class interface has changed.  In particular, individual resources no
   longer need to access any data members of GwyResourceClass.
+- There is a class method to set up builtins and/or default item name when the
+  class inventory is created, replacing the hardcoded hidden function called in
+  gwy_type_init().
 - Errors are properly reported.
 
 Interpolation:
@@ -131,10 +135,10 @@ Interpolation:
 
 Fitting:
 - Fitting was rewritten from scratch.  Instead of GwyNLFitter, there are two
-  classes.
+  classes: GwyFitter and GwyFitTask.
 - GwyFitter provides the Marquardt-Levenberg algorithm while being completely
-  model- and data-agnostic.  It works only with concepts such as paramters,
-  sums of squares, gradiens and Hessians.
+  model- and data-agnostic.  It works only with concepts such as parameters,
+  sums of squares, gradients and Hessians.
 - GwyFitter implements the scaled Marquardt-Levenberg algorithm (as opposed to
   the unscaled algorithm in GwyNLFitter that gave us so much trouble).
 - GwyFitTask can wrap several kinds of data and model and provide the abstract
