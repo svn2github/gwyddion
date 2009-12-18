@@ -684,6 +684,25 @@ gwy_gl_material_parse(GwyResource *resource,
  **/
 
 /**
+ * gwy_gl_material_duplicate:
+ * @gl_material: A GL material.
+ *
+ * Duplicates a GL material.
+ *
+ * This is a convenience wrapper of gwy_serializable_duplicate().
+ **/
+
+/**
+ * gwy_gl_material_assign:
+ * @dest: Destination GL material.
+ * @src: Source GL material.
+ *
+ * Copies the value of a GL material.
+ *
+ * This is a convenience wrapper of gwy_serializable_assign().
+ **/
+
+/**
  * gwy_gl_materials:
  *
  * Gets inventory with all the GL materials.
