@@ -19,8 +19,9 @@
  */
 
 #include <string.h>
-#include <libgwy/math.h>
-#include <libgwy/interpolation.h>
+#include "libgwy/math.h"
+#include "libgwy/interpolation.h"
+#include "libgwy/libgwy-aliases.h"
 
 enum { SUPPORT_LENGTH_MAX = 4 };
 
@@ -825,6 +826,9 @@ gwy_interpolation_shift_block_1d(guint length,
         g_slice_free1(sizeof(gdouble)*length, coeffs);
 }
 
+#define __LIBGWY_INTERPOLATION_C__
+#include "libgwy/libgwy-aliases.c"
+
 /**
  * SECTION: interpolation
  * @title: interpolation
@@ -836,7 +840,7 @@ gwy_interpolation_shift_block_1d(guint length,
  * it is not reduced to half for edge pixels.
  *
  * Most of the functions listed here are quite low-level.  Usually,
- * #GwyDataField and #GwyDataLine methods offer the same functionality with a
+ * #GwyField and #GwyLine methods offer the same functionality with a
  * more convenient interface.
  *
  * At present, Gwyddion implements two-point and four-point interpolations.
