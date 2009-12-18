@@ -828,7 +828,7 @@ gwy_field_part_copy(GwyField *src,
  * Do not use it if you only want to read data because it invalidates cached
  * values.
  *
- * Returns: #GwyField.data, but it invalidates the field for you.
+ * Returns: #GwyField-struct.data, but it invalidates the field for you.
  **/
 gdouble*
 gwy_field_get_data(GwyField *field)
@@ -1120,21 +1120,21 @@ gwy_field_part_fill(GwyField *field,
  *
  * #GwyField represents two dimensional data in a regular grid.
  *
- * Data are stored in a flat array #GwyField.data of #gdouble values, stored by
- * rows.  This means the column index is the fast index, row index is the slow
- * one.  The array is contiguous, i.e. there is no padding at the end of each
- * row (and neither beween pixels).  No methods to get and set individual
- * values or rows and columns are provided except gwy_field_index().  The usual
- * mode of operation is to access the data directly, bearing a few things in
- * mind:
+ * Data are stored in a flat array #GwyField-struct.data of #gdouble values,
+ * stored by rows.  This means the column index is the fast index, row index is
+ * the slow one.  The array is contiguous, i.e. there is no padding at the end
+ * of each row (and neither beween pixels).  No methods to get and set
+ * individual values or rows and columns are provided except gwy_field_index().
+ * The usual mode of operation is to access the data directly, bearing a few
+ * things in mind:
  * <itemizedlist>
  *   <listitem>All #GwyField struct fields must be considered read-only. You
- *   may write to #GwyField.data <emphasis>content</emphasis> but you must not
- *   change the field itself.  Use methods such as gwy_field_set_xreal() to
- *   change the field properties.</listitem>
+ *   may write to #GwyField-struct.data <emphasis>content</emphasis> but you
+ *   must not change the field itself.  Use methods such as
+ *   gwy_field_set_xreal() to change the field properties.</listitem>
  *   <listitem>For writing, obtain the data with gwy_field_get_data().  This
  *   tells the field that you are going to change the data and invalidates any
- *   caches.  For reading, just access #GwyField.data.</listitem>
+ *   caches.  For reading, just access #GwyField-struct.data.</listitem>
  *   <listitem>If you mix direct changes of data with functions that obtain
  *   overall field statistics, you may have to use gwy_field_invalidate() to
  *   induce recalculation of the statistics.</listitem>
@@ -1239,7 +1239,7 @@ gwy_field_part_fill(GwyField *field,
  * This macro expands to a left-hand side expression.
  *
  * No argument validation is performed.  If you process the data in a loop,
- * you are encouraged to access #GwyField.data directly.
+ * you are encouraged to access #GwyField-struct.data directly.
  **/
 
 /**
