@@ -807,7 +807,7 @@ gwy_inventory_restore_order(GwyInventory *inventory)
  *
  * Forces an inventory to be unsorted.
  *
- * Item positions do not change, but future gwy_inventory_insert_item() will
+ * Item positions do not change, but future gwy_inventory_insert() will
  * not try to insert items in order.
  **/
 void
@@ -1218,7 +1218,7 @@ invent_item_name(Inventory *inventory,
  * upon inventory creation with #GwyInventoryItemType structure.  Not all
  * fields are mandatory, with items allowing more operations the inventory is
  * more capable too.  For example, if items offer a method to make copies,
- * gwy_inventory_new_item() can be used to directly create new items in the
+ * gwy_inventory_copy() can be used to directly create new items in the
  * inventory (this capability can be tested with
  * gwy_inventory_can_make_copies()).
  *
@@ -1288,7 +1288,7 @@ invent_item_name(Inventory *inventory,
  * @destroy: Destructor/clean-up function called on item before it is removed
  *           from inventory.  May be %NULL.
  * @copy: Function to create the copy of an item.  If this function and @rename
- *        are defined it is possible to use gwy_inventory_new_item().
+ *        are defined it is possible to use gwy_inventory_copy().
  *        Inventory sets the copy's name immediately after creation, so it
  *        normally does not matter which name @copy gives it.
  * @get_traits: Function to get item traits.  It returns array of item trait

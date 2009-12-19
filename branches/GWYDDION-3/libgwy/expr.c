@@ -1537,8 +1537,8 @@ gwy_expr_compile(GwyExpr *expr,
  * @names: Location to store pointer to array of variable names to (may be
  *         %NULL to get just number of variables).  The string array returned
  *         in this argument in owned by @expr and is valid only until next
- *         gwy_expr_compile(), gwy_expr_evaluate(), or gwy_expr_free()
- *         call.
+ *         gwy_expr_compile() or gwy_expr_evaluate() call or until you release
+ *         your reference to @expr.
  *
  * Get the number, names, and indices of unresolved identifiers in @expr.
  *

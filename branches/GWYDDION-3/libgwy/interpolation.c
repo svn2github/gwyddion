@@ -572,7 +572,7 @@ gwy_interpolation_resolve_coeffs_2d(guint width,
  * Resamples a one-dimensional data array.
  *
  * This is a primitive operation, in most cases methods such as
- * gwy_data_line_new_resampled() provide more convenient interface.
+ * gwy_line_new_resampled() provide more convenient interface.
  **/
 void
 gwy_interpolation_resample_block_1d(guint length,
@@ -653,7 +653,7 @@ calculate_weights_for_rescale(guint oldn,
  * Resamples a two-dimensional data array.
  *
  * This is a primitive operation, in most cases methods such as
- * gwy_data_field_new_resampled() provide more convenient interface.
+ * gwy_field_new_resampled() provide more convenient interface.
  **/
 void
 gwy_interpolation_resample_block_2d(guint width,

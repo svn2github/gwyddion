@@ -780,7 +780,7 @@ gwy_resource_type_get_item_type(GType type)
  * @item_type: Inventory item type.  Usually pass %NULL, to use the parent's
  *             item type.  Modification might be useful for instance if you
  *             want to add traits, in this case acquire parent's item type with
- *             gwy_resource_class_get_item_type() and modify it accordingly
+ *             gwy_resource_type_get_item_type() and modify it accordingly
  *             with chaining.
  *
  * Registers a resource class.

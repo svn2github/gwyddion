@@ -178,7 +178,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * #GwySerializable is an abstract interface for data-like objects that can be
  * serialized and deserialized.  You can serialize any object implementing this
- * interface with functions such as gwy_serializable_gio() and the restore
+ * interface with functions such as gwy_serialize_gio() and the restore
  * (deserialize) it with gwy_deserialize_memory().
  *
  * Gwyddion implements a simple serialization model: only tree-like structures
