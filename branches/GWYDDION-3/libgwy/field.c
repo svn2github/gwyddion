@@ -325,7 +325,7 @@ gwy_field_construct(GwySerializable *serializable,
     GwyField *field = GWY_FIELD(serializable);
     Field *priv = field->priv;
 
-    if (!its[0].value.v_uint32 || !its[1].value.v_uint32) {
+    if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Field dimensions %u×%u are invalid."),
@@ -333,8 +333,8 @@ gwy_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    if (its[0].value.v_uint32 * its[1].value.v_uint32
-        != its[8].array_size) {
+    if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
+                   != its[8].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Field dimensions %u×%u do not match data size "
@@ -344,7 +344,8 @@ gwy_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    if (its[6].value.v_object && !GWY_IS_UNIT(its[6].value.v_object)) {
+    if (G_UNLIKELY(its[6].value.v_object
+                   && !GWY_IS_UNIT(its[6].value.v_object))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Field xy units are of type %s "
@@ -353,7 +354,8 @@ gwy_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    if (its[7].value.v_object && !GWY_IS_UNIT(its[7].value.v_object)) {
+    if (G_UNLIKELY(its[7].value.v_object
+                   && !GWY_IS_UNIT(its[7].value.v_object))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Field z units are of type %s "
@@ -362,7 +364,6 @@ gwy_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    g_free(field->data);
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
     // FIXME: Catch near-zero and near-infinity values.
@@ -374,6 +375,7 @@ gwy_field_construct(GwySerializable *serializable,
     its[6].value.v_object = NULL;
     priv->unit_z = (GwyUnit*)its[7].value.v_object;
     its[7].value.v_object = NULL;
+    g_free(field->data);
     field->data = its[8].value.v_double_array;
     its[8].value.v_double_array = NULL;
     its[8].array_size = 0;
@@ -611,7 +613,7 @@ gwy_field_new_sized(guint xres,
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
-gwy_field_new_alike(GwyField *model,
+gwy_field_new_alike(const GwyField *model,
                     gboolean clear)
 {
     g_return_val_if_fail(GWY_IS_FIELD(model), NULL);
@@ -647,7 +649,7 @@ gwy_field_new_alike(GwyField *model,
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
-gwy_field_new_part(GwyField *field,
+gwy_field_new_part(const GwyField *field,
                    guint col,
                    guint row,
                    guint width,
@@ -693,7 +695,7 @@ gwy_field_new_part(GwyField *field,
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
-gwy_field_new_resampled(GwyField *field,
+gwy_field_new_resampled(const GwyField *field,
                         guint xres,
                         guint yres,
                         GwyInterpolationType interpolation)
@@ -745,7 +747,7 @@ gwy_field_data_changed(GwyField *field)
  * gwy_field_assign().
  **/
 void
-gwy_field_copy(GwyField *src,
+gwy_field_copy(const GwyField *src,
                GwyField *dest)
 {
     g_return_if_fail(GWY_IS_FIELD(src));
@@ -779,7 +781,7 @@ gwy_field_copy(GwyField *src,
  * If @src is equal to @dest, the areas may not overlap.
  **/
 void
-gwy_field_part_copy(GwyField *src,
+gwy_field_part_copy(const GwyField *src,
                     guint col,
                     guint row,
                     guint width,
@@ -844,8 +846,9 @@ gwy_field_get_data(GwyField *field)
  *
  * Invalidates cached field statistics.
  *
- * User code should seldom need this method since all #GwyField methods perform
- * proper invalidation when they change data, also gwy_field_get_data() does.
+ * User code should seldom need this method since all #GwyField methods
+ * correctly invalidate cached values when they change data, also
+ * gwy_field_get_data() does.
  *
  * However, if you mix writing to the field data with calls to methods
  * providing overall field characteristics (minimum, maximum, mean value, etc.)
