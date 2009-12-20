@@ -737,8 +737,8 @@ gwy_field_data_changed(GwyField *field)
 
 /**
  * gwy_field_copy:
- * @dest: Destination two-dimensional data field.
  * @src: Source two-dimensional data field.
+ * @dest: Destination two-dimensional data field.
  *
  * Copies the data of a field to another field of the same dimensions.
  *
