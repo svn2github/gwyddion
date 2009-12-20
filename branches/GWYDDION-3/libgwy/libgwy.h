@@ -35,6 +35,7 @@
 #include <libgwy/interpolation.h>
 #include <libgwy/macros.h>
 #include <libgwy/main.h>
+#include <libgwy/mask-field.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
 #include <libgwy/resource.h>

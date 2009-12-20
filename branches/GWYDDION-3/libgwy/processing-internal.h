@@ -22,6 +22,8 @@
 #ifndef __LIBGWY_PROCESSING_INTERNAL_H__
 #define __LIBGWY_PROCESSING_INTERNAL_H__
 
+#include "libgwy/unit.h"
+
 /* Cache operations */
 #define CVAL(arg, bit)  ((arg)->cache[GWY_FIELD_CACHE_##bit])
 #define CBIT(bit)       (1 << GWY_FIELD_CACHE_##bit)
@@ -50,6 +52,26 @@ struct _GwyFieldPrivate {
 };
 
 typedef struct _GwyFieldPrivate Field;
+
+typedef struct {
+    guint row;
+    guint col;
+    guint len;
+} GwyGrainSegment;
+
+typedef struct {
+    guint id;
+    guint len;
+    GwyGrainSegment segments[];
+} GwyGrain;
+
+struct _GwyMaskFieldPrivate {
+    guint *grains;
+    guint *graindata;
+    guint32 *serialized_swapped;
+};
+
+typedef struct _GwyMaskFieldPrivate MaskField;
 
 G_END_DECLS
 

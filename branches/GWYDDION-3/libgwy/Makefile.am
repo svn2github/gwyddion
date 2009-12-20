@@ -24,6 +24,7 @@ mkenum_headers = \
 	interpolation.h \
 	macros.h \
 	main.h \
+	mask-field.h \
 	math.h \
 	pack.h \
 	resource.h \
@@ -67,6 +68,7 @@ libgwy3_la_SOURCES = \
 	interpolation.c \
 	macros.c \
 	main.c \
+	mask-field.c \
 	math.c \
 	pack.c \
 	resource.c \
