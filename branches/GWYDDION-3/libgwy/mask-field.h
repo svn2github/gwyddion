@@ -97,25 +97,25 @@ void          gwy_mask_field_part_fill    (GwyMaskField *maskfield,
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)1 << ((col & 0x1f))))
+    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)1 << (((col) & 0x1f))))
 #define gwy_mask_field_set(maskfield, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)1 << ((col & 0x1f))) \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)1 << (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)1 << ((col & 0x1f))) \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)1 << (((col) & 0x1f))); \
     } while (0)
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)0x80000000u >> ((col & 0x1f))))
+    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)0x80000000u >> (((col) & 0x1f))))
 #define gwy_mask_field_set(maskfield, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)0x80000000u >> ((col & 0x1f))) \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)0x80000000u >> (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)0x80000000u >> ((col & 0x1f))) \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)0x80000000u >> (((col) & 0x1f))); \
     } while (0)
 #endif
 
