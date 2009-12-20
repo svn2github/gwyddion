@@ -802,7 +802,7 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
 #include "libgwy/libgwy-aliases.c"
 
 /**
- * SECTION: maskfield
+ * SECTION: mask-field
  * @title: GwyMaskField
  * @short_description: Two-dimensional bit mask
  *
