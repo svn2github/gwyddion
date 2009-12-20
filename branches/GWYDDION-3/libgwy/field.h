@@ -69,22 +69,22 @@ GwyField* gwy_field_new          (void)                               G_GNUC_MAL
 GwyField* gwy_field_new_sized    (guint xres,
                                   guint yres,
                                   gboolean clear)                     G_GNUC_MALLOC;
-GwyField* gwy_field_new_alike    (GwyField *model,
+GwyField* gwy_field_new_alike    (const GwyField *model,
                                   gboolean clear)                     G_GNUC_MALLOC;
-GwyField* gwy_field_new_part     (GwyField *field,
+GwyField* gwy_field_new_part     (const GwyField *field,
                                   guint col,
                                   guint row,
                                   guint width,
                                   guint height,
                                   gboolean keep_offsets)              G_GNUC_MALLOC;
-GwyField* gwy_field_new_resampled(GwyField *field,
+GwyField* gwy_field_new_resampled(const GwyField *field,
                                   guint xres,
                                   guint yres,
                                   GwyInterpolationType interpolation) G_GNUC_MALLOC;
 void      gwy_field_data_changed (GwyField *field);
-void      gwy_field_copy         (GwyField *src,
+void      gwy_field_copy         (const GwyField *src,
                                   GwyField *dest);
-void      gwy_field_part_copy    (GwyField *src,
+void      gwy_field_part_copy    (const GwyField *src,
                                   guint col,
                                   guint row,
                                   guint width,
@@ -92,7 +92,7 @@ void      gwy_field_part_copy    (GwyField *src,
                                   GwyField *dest,
                                   guint destcol,
                                   guint destrow);
-gdouble*  gwy_field_get_data     (GwyField *field);
+gdouble*  gwy_field_get_data     (GwyField *field)                    G_GNUC_PURE;
 void      gwy_field_invalidate   (GwyField *field);
 void      gwy_field_set_xreal    (GwyField *field,
                                   gdouble xreal);
@@ -102,8 +102,8 @@ void      gwy_field_set_xoffset  (GwyField *field,
                                   gdouble xoffset);
 void      gwy_field_set_yoffset  (GwyField *field,
                                   gdouble yoffset);
-GwyUnit*  gwy_field_get_unit_xy  (GwyField *field);
-GwyUnit*  gwy_field_get_unit_z   (GwyField *field);
+GwyUnit*  gwy_field_get_unit_xy  (GwyField *field)                    G_GNUC_PURE;
+GwyUnit*  gwy_field_get_unit_z   (GwyField *field)                    G_GNUC_PURE;
 void      gwy_field_clear        (GwyField *field);
 void      gwy_field_fill         (GwyField *field,
                                   gdouble value);
@@ -120,7 +120,7 @@ void      gwy_field_part_fill    (GwyField *field,
                                   gdouble value);
 
 #define gwy_field_index(field, col, row) \
-    ((field)->data[(field)->xres*(row) + col])
+    ((field)->data[(field)->xres*(row) + (col)])
 #define gwy_field_get_dx(field) \
     ((field)->xreal/(field)->xres)
 #define gwy_field_get_dy(field) \
