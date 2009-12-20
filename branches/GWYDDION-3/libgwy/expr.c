@@ -1754,12 +1754,11 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  * @short_description: Arithmetic expression parser and evaluator
  *
  * #GwyExpr is an expression evaluator, more precisely parser, compiler, and
- * evaluator. A new #GwyExpr can be created with gwy_expr_new(), then it can be
- * used to evaluate any number of expressions; when it's no longer needed, it
- * should be destroyed with gwy_expr_free().
+ * evaluator. A new #GwyExpr can be created with gwy_expr_new() and can be
+ * used to evaluate any number of expressions then.
  *
  * Expression syntax is described in
- * <ulink url="http://gwyddion.net/documentation/user-guide/expression-syntax.html">Gwyddion user guide</ulink>.
+ * <ulink url="http://gwyddion.net/documentation/user-guide-en/expression-syntax.html">Gwyddion user guide</ulink>.
  *
  * Simple arithmetic expressions without variables can be directly evaluated
  * with gwy_expr_evaluate().
