@@ -129,7 +129,8 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
          PROP_STRIDE,
          g_param_spec_uint("stride",
                            "Stride",
-                           "Row stride of the mask field in #guint32.",
+                           "Row stride of the mask field in items, i.e. "
+                           "guint32s.",
                            1, G_MAXUINT, 2,
                            G_PARAM_READABLE | STATIC));
 
@@ -504,8 +505,8 @@ gwy_mask_field_data_changed(GwyMaskField *maskfield)
 
 /**
  * gwy_mask_field_copy:
- * @dest: Destination two-dimensional mask field.
  * @src: Source two-dimensional mask field.
+ * @dest: Destination two-dimensional mask field.
  *
  * Copies the data of a mask field to another mask field of the same
  * dimensions.
@@ -524,6 +525,11 @@ gwy_mask_field_copy(const GwyMaskField *src,
     gsize n = src->stride * src->yres;
     memcpy(dest->data, src->data, n*sizeof(guint32));
 }
+
+/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
+ * lowest bit is 0, the highest 0x1f. */
+#define MAKE_MASK(firstbit, nbits) \
+    ((0xffffffffu >> (0x20 - (nbits))) << (firstbit))
 
 /**
  * gwy_mask_field_part_copy:
@@ -580,125 +586,79 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
                src->data + src->stride*row, src->stride*height);
     }
     else {
-        // How many bits we shift right from src to dest
         const guint32 *sbase = src->data + src->stride*row + (col >> 5);
         guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
-        guint soff = col & 0x1f, doff = destcol & 0x1f;
-        guint k = (doff + 0x20 - soff) & 0x1f;
-        guint kk = 0x20 - k;
-        guint32 v;
-        if (doff == soff) {
-            const guint32 m0 = ((0xffffffff >> (0x20 - doff - width))
-                                & (~((1 << doff) - 1)));
-            const guint32 m1 = 0xffffffff & ~((1 << doff) - 1);
-            const guint32 m2 = (1 << ((width & 0x1f) - 0x20 + doff)) - 1;
+        const guint soff = col & 0x1f;
+        const guint doff = destcol & 0x1f;
+        const guint send = (col + width) & 0x1f;
+        const guint dend = (destcol + width) & 0x1f;
+        const guint k = (doff + 0x20 - soff) & 0x1f;
+        const guint kk = 0x20 - k;
+        if (width <= 0x20 - doff) {
+            const guint32 m0d = MAKE_MASK(doff, width);
             for (guint i = 0; i < height; i++) {
                 const guint32 *p = sbase + i*src->stride;
                 guint32 *q = dbase + i*dest->stride;
-                guint j = width;
-                if (doff + width <= 0x20) {
-                    // All within one word, mask possibly incomplete from both
-                    // sides
-                    *q = (*q & ~m0) | (*p & m0);
+                guint32 v0 = *p;
+                if (send && send <= soff) {
+                    guint32 v1 = *(++p);
+                    *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
                 }
-                else {
-                    // Incomplete leftmost word
-                    *q = (*q & ~m1) | (*p & m1);
-                    j -= 0x20 - doff, p++, q++;
-                    // Complete words
-                    while (j >= 0x20) {
-                        *q = *p;
-                        j -= 0x20 - doff, p++, q++;
-                    }
-                    // Incomplete rightmost word
-                    if (j)
-                        *q = (*q & ~m2) | (*p & m2);
-                }
+                else if (doff > soff)
+                    *q = (*q & ~m0d) | ((v0 << k) & m0d);
+                else
+                    *q = (*q & ~m0d) | ((v0 >> kk) & m0d);
             }
         }
-        else if (doff < soff) {
-            const guint32 m0 = ~((1 << soff) - 1) >> kk;
-            const guint32 m1 = ((1 << kk) - 1) << k;
-            const guint32 m2 = (1 << k) - 1;
+        else if (doff == soff) {
+            const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+            const guint32 m1d = MAKE_MASK(0, dend);
             for (guint i = 0; i < height; i++) {
                 const guint32 *p = sbase + i*src->stride;
                 guint32 *q = dbase + i*dest->stride;
                 guint j = width;
-                // Incomplete leftmost word in the source
-                // XXX: Fails if (width < 0x20 - soff) because the soruce has
-                // even less bits than we copy here
-                v = *p >> kk;
-                *q = (*q & ~m0) | (*p & m0);
-                j -= (0x20 - soff), p++;
-                // Complete words in the source
+                *q = (*q & ~m0d) | (*p & m0d);
+                j -= 0x20 - doff, p++, q++;
                 while (j >= 0x20) {
-                    v = *p << k;
-                    *q = (*q & ~m1) | (*p & m1);
-                    j -= kk, q++;
-                    v = *p >> kk;
-                    *q = (*q & ~m2) | (*p & m2);
-                    j -= k, p++;
+                    *q = *p;
+                    j -= 0x20, p++, q++;
                 }
-                // Incomplete rightmost word in the source
-                if (j < kk) {
-                    if (j) {
-                        guint32 m = ((1 << j) - 1) << k;
-                        v = *p << k;
-                        *q = (*q & ~m) | (*p & m);
-                    }
-                }
-                else {
-                    v = *p << k;
-                    *q = (*q & ~m1) | (*p & m1);
-                    j -= kk, q++;
-                    if (j) {
-                        guint32 m = (1 << j) - 1;
-                        v = *p >> kk;
-                        *q = (*q & ~m) | (*p & m);
-                    }
-                }
+                if (!dend)
+                    continue;
+                *q = (*q & ~m1d) | (*p & m1d);
             }
         }
         else {
-            const guint32 m0 = 0xffffffff & ~((1 << (0x20 - doff)) - 1);
-            const guint32 m1 = (1 << k) - 1;
-            const guint32 m2 = ((1 << kk) - 1) << k;
+            const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+            const guint32 m1d = MAKE_MASK(0, dend);
             for (guint i = 0; i < height; i++) {
                 const guint32 *p = sbase + i*src->stride;
                 guint32 *q = dbase + i*dest->stride;
                 guint j = width;
-                // Incomplete leftmost word in the destination
-                // XXX: Fails if (width < 0x20 - doff) because the destination
-                // has even less bits than we copy here
-                v = *p << k;
-                *q = (*q & ~m0) | (*p & m0);
-                j -= (0x20 - doff), q++;
-                // Complete words in the destination
-                while (j >= 0x20) {
-                    v = *p >> kk;
-                    *q = (*q & ~m1) | (*p & m1);
-                    j -= k, p++;
-                    v = *p << k;
-                    *q = (*q & ~m2) | (*p & m2);
-                    j -= kk, q++;
-                }
-                // Incomplete rightmost word in the source
-                if (j < k) {
-                    if (j) {
-                        guint32 m = (1 << j) - 1;
-                        v = *p >> kk;
-                        *q = (*q & ~m) | (*p & m);
-                    }
+                guint32 v0 = *p;
+                if (doff > soff) {
+                    *q = (*q & ~m0d) | ((v0 << k) & m0d);
                 }
                 else {
-                    v = *p >> kk;
-                    *q = (*q & ~m1) | (*p & m1);
-                    j -= k, p++;
-                    if (j) {
-                        guint32 m = ((1 << j) - 1) << k;
-                        v = *p << k;
-                        *q = (*q & ~m) | (*p & m);
-                    }
+                    guint32 v1 = *(++p);
+                    *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
+                    v0 = v1;
+                }
+                j -= (0x20 - doff), q++;
+                while (j >= 0x20) {
+                    guint32 v1 = *(++p);
+                    *q = (v0 >> kk) | (v1 << k);
+                    j -= 0x20, q++;
+                    v0 = v1;
+                }
+                if (!dend)
+                    continue;
+                if (dend > send) {
+                    guint32 v1 = *(++p);
+                    *q = (*q & ~m1d) | (((v0 >> kk) | (v1 << k)) & m1d);
+                }
+                else {
+                    *q = (*q & ~m1d) | ((v0 >> kk) & m1d);
                 }
             }
         }
