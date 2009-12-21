@@ -1893,6 +1893,127 @@ test_value_format_simple(void)
 
 /***************************************************************************
  *
+ * Mask Field
+ *
+ ***************************************************************************/
+
+/*
+static void
+mask_field_dump(const GwyMaskField *maskfield)
+{
+    for (guint i = 0; i < maskfield->yres; i++) {
+        for (guint j = 0; j < maskfield->xres; j++)
+            putchar(gwy_mask_field_get(maskfield, j, i) ? '1' : '0');
+        putchar('\n');
+    }
+}
+*/
+
+static void
+mask_field_part_copy_dumb(const GwyMaskField *src,
+                          guint col,
+                          guint row,
+                          guint width,
+                          guint height,
+                          GwyMaskField *dest,
+                          guint destcol,
+                          guint destrow)
+{
+    for (guint i = 0; i < height; i++) {
+        if (row + i >= src->yres || destrow + i >= dest->yres)
+            continue;
+        for (guint j = 0; j < width; j++) {
+            if (col + j >= src->xres || destcol + j >= dest->xres)
+                continue;
+
+            gboolean val = gwy_mask_field_get(src, col + j, row + i);
+            gwy_mask_field_set(dest, destcol + j, destrow + i, val);
+        }
+    }
+}
+
+static guint32*
+mask_field_random_pool_new(GRand *rng,
+                           guint max_size)
+{
+    guint n = max_size*(max_size + 31)/32 * 8;
+    guint32 *pool = g_new(guint32, n);
+    for (guint i = 0; i < n; i++)
+        pool[i] = g_rand_int(rng);
+    return pool;
+}
+
+static void
+mask_field_random_pool_free(guint32 *pool)
+{
+    g_free(pool);
+}
+
+static void
+mask_field_randomize(GwyMaskField *maskfield,
+                     const guint32 *pool,
+                     guint max_size,
+                     GRand *rng)
+{
+    guint required = maskfield->stride * maskfield->yres;
+    guint n = max_size*(max_size + 31)/32 * 8;
+    guint offset = g_rand_int_range(rng, 0, n - required);
+    guint32 *data = gwy_mask_field_get_data(maskfield);
+    memcpy(data, pool + offset, required*sizeof(guint32));
+}
+
+static void
+test_mask_field_copy(void)
+{
+    enum { max_size = 600 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 50000 : 5000;
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint sxres = g_rand_int_range(rng, 1, max_size);
+        guint syres = g_rand_int_range(rng, 1, max_size);
+        guint dxres = g_rand_int_range(rng, 1, max_size);
+        guint dyres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *source = gwy_mask_field_new_sized(sxres, syres, FALSE);
+        GwyMaskField *dest = gwy_mask_field_new_sized(dxres, dyres, FALSE);
+        GwyMaskField *reference = gwy_mask_field_new_sized(dxres, dyres, FALSE);
+        mask_field_randomize(source, pool, max_size, rng);
+        mask_field_randomize(reference, pool, max_size, rng);
+        gwy_mask_field_copy(reference, dest);
+        guint n = reference->stride * reference->yres;
+        guint width = g_rand_int_range(rng, 0, MAX(sxres, dxres));
+        guint height = g_rand_int_range(rng, 0, MAX(syres, dyres));
+        guint row = g_rand_int_range(rng, 0, sxres);
+        guint col = g_rand_int_range(rng, 0, syres);
+        guint destrow = g_rand_int_range(rng, 0, dxres);
+        guint destcol = g_rand_int_range(rng, 0, dyres);
+        gwy_mask_field_part_copy(source, col, row, width, height,
+                                 dest, destcol, destrow);
+        mask_field_part_copy_dumb(source, col, row, width, height,
+                                  reference, destcol, destrow);
+        /*
+        if (memcmp(dest->data, reference->data, n*sizeof(guint32))) {
+            g_print("(%u,%u) %ux%u -> (%u,%u)\n", col, row, width, height, destcol, destrow);
+            g_print("source\n"); mask_field_dump(source);
+            g_print("dest\n"); mask_field_dump(dest);
+            g_print("reference\n"); mask_field_dump(reference);
+        }
+        */
+        g_assert_cmpint(memcmp(dest->data, reference->data, n*sizeof(guint32)),
+                        ==, 0);
+        g_object_unref(source);
+        g_object_unref(dest);
+        g_object_unref(reference);
+    }
+    mask_field_random_pool_free(pool);
+
+    g_rand_free(rng);
+}
+
+/***************************************************************************
+ *
  * Expr
  *
  ***************************************************************************/
@@ -3444,6 +3565,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
     g_test_add_func("/testlibgwy/unit/garbage", test_unit_garbage);
     g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
+    g_test_add_func("/testlibgwy/mask-field/copy", test_mask_field_copy);
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
     g_test_add_func("/testlibgwy/container/serialize", test_container_serialize);
