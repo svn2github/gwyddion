@@ -141,6 +141,9 @@ void          gwy_mask_field_lsubtract     (GwyMaskField *maskfield,
     } while (0)
 #endif
 
+const guint* gwy_mask_field_number_grains(GwyMaskField *maskfield,
+                                          guint *ngrains);
+
 G_END_DECLS
 
 #endif

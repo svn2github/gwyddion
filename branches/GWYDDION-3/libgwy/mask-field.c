@@ -39,20 +39,26 @@
 #define ALL_SET ((guint32)0xffffffffu)
 #define ALL_CLEAR ((guint32)0x00000000u)
 
-/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
- * lowest bit is 0, the highest 0x1f for little endian and the reverse for
- * big endian. */
+/* SHR moves the bits right in the mask field, which means towards the higher
+ * bits on little-endian and towards the lower bits on big endian. */
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define NTH_BIT(n) ((guint32)0x1u << (n))
-#define MAKE_MASK(firstbit, nbits) \
-    ((ALL_SET >> (0x20 - (nbits))) << (firstbit))
+#define FIRST_BIT ((guint32)0x1u)
+#define SHR <<
+#define SHL >>
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define NTH_BIT(n) ((guint32)0x80000000u >> (n))
-#define MAKE_MASK(firstbit, nbits) \
-    ((ALL_SET << (0x20 - (nbits))) >> (firstbit))
+#define FIRST_BIT ((guint32)0x80000000u)
+#define SHR >>
+#define SHL <<
 #endif
+
+/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
+ * lowest bit is 0, the highest 0x1f for little endian and the reverse for
+ * big endian. */
+#define NTH_BIT(n) (FIRST_BIT SHR (n))
+#define MAKE_MASK(firstbit, nbits) \
+    ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit))
 
 enum { N_ITEMS = 3 };
 
@@ -68,6 +74,15 @@ enum {
     PROP_STRIDE,
     N_PROPS
 };
+
+struct _GwyMaskFieldPrivate {
+    guint *grains;
+    guint *graindata;
+    guint ngrains;
+    guint32 *serialized_swapped;
+};
+
+typedef struct _GwyMaskFieldPrivate MaskField;
 
 static void     gwy_mask_field_finalize         (GObject *object);
 static void     gwy_mask_field_serializable_init(GwySerializableInterface *iface);
@@ -309,12 +324,12 @@ static GObject*
 gwy_mask_field_duplicate_impl(GwySerializable *serializable)
 {
     GwyMaskField *maskfield = GWY_MASK_FIELD(serializable);
-    MaskField *priv = maskfield->priv;
+    //MaskField *priv = maskfield->priv;
 
     GwyMaskField *duplicate = gwy_mask_field_new_sized(maskfield->xres,
                                                        maskfield->yres,
                                                        FALSE);
-    MaskField *dpriv = duplicate->priv;
+    //MaskField *dpriv = duplicate->priv;
 
     gsize n = maskfield->stride * maskfield->yres;
     memcpy(duplicate->data, maskfield->data, n*sizeof(guint32));
@@ -329,7 +344,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
 {
     GwyMaskField *dest = GWY_MASK_FIELD(destination);
     GwyMaskField *src = GWY_MASK_FIELD(source);
-    MaskField *spriv = src->priv, *dpriv = dest->priv;
+    //MaskField *spriv = src->priv, *dpriv = dest->priv;
 
     const gchar *notify[N_PROPS];
     guint nn = 0;
@@ -554,7 +569,7 @@ gwy_mask_field_new_from_field(const GwyField *field,
     for (guint i = 0; i < height; i++) {
         const gdouble *p = fbase + i*field->xres;
         guint32 *q = maskfield->data + i*maskfield->stride;
-        for (guint j = 0; j < width >> 5; j++, q++) {
+        for (guint j = 0; j < (width >> 5); j++, q++) {
             guint32 v = 0;
             if (lower <= upper) {
                 for (guint k = 0; k < 0x20; k++, p++) {
@@ -626,16 +641,15 @@ gwy_mask_field_copy(const GwyMaskField *src,
     memcpy(dest->data, src->data, n*sizeof(guint32));
 }
 
-G_GNUC_UNUSED
 static void
-copy_part_le(const GwyMaskField *src,
-             guint col,
-             guint row,
-             guint width,
-             guint height,
-             GwyMaskField *dest,
-             guint destcol,
-             guint destrow)
+copy_part(const GwyMaskField *src,
+          guint col,
+          guint row,
+          guint width,
+          guint height,
+          GwyMaskField *dest,
+          guint destcol,
+          guint destrow)
 {
     const guint32 *sbase = src->data + src->stride*row + (col >> 5);
     guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
@@ -653,12 +667,12 @@ copy_part_le(const GwyMaskField *src,
             guint32 v0 = *p;
             if (send && send <= soff) {
                 guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
+                *q = (*q & ~m0d) | (((v0 SHL kk) | (v1 SHR k)) & m0d);
             }
             else if (doff > soff)
-                *q = (*q & ~m0d) | ((v0 << k) & m0d);
+                *q = (*q & ~m0d) | ((v0 SHR k) & m0d);
             else
-                *q = (*q & ~m0d) | ((v0 >> kk) & m0d);
+                *q = (*q & ~m0d) | ((v0 SHL kk) & m0d);
         }
     }
     else if (doff == soff) {
@@ -688,17 +702,17 @@ copy_part_le(const GwyMaskField *src,
             guint j = width;
             guint32 v0 = *p;
             if (doff > soff) {
-                *q = (*q & ~m0d) | ((v0 << k) & m0d);
+                *q = (*q & ~m0d) | ((v0 SHR k) & m0d);
             }
             else {
                 guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
+                *q = (*q & ~m0d) | (((v0 SHL kk) | (v1 SHR k)) & m0d);
                 v0 = v1;
             }
             j -= (0x20 - doff), q++;
             while (j >= 0x20) {
                 guint32 v1 = *(++p);
-                *q = (v0 >> kk) | (v1 << k);
+                *q = (v0 SHL kk) | (v1 SHR k);
                 j -= 0x20, q++;
                 v0 = v1;
             }
@@ -706,99 +720,10 @@ copy_part_le(const GwyMaskField *src,
                 continue;
             if (dend > send) {
                 guint32 v1 = *(++p);
-                *q = (*q & ~m1d) | (((v0 >> kk) | (v1 << k)) & m1d);
+                *q = (*q & ~m1d) | (((v0 SHL kk) | (v1 SHR k)) & m1d);
             }
             else {
-                *q = (*q & ~m1d) | ((v0 >> kk) & m1d);
-            }
-        }
-    }
-}
-
-G_GNUC_UNUSED
-static void
-copy_part_be(const GwyMaskField *src,
-             guint col,
-             guint row,
-             guint width,
-             guint height,
-             GwyMaskField *dest,
-             guint destcol,
-             guint destrow)
-{
-    const guint32 *sbase = src->data + src->stride*row + (col >> 5);
-    guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
-    const guint soff = col & 0x1f;
-    const guint doff = destcol & 0x1f;
-    const guint send = (col + width) & 0x1f;
-    const guint dend = (destcol + width) & 0x1f;
-    const guint k = (doff + 0x20 - soff) & 0x1f;
-    const guint kk = 0x20 - k;
-    if (width <= 0x20 - doff) {
-        const guint32 m0d = MAKE_MASK(doff, width);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint32 v0 = *p;
-            if (send && send <= soff) {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 << kk) | (v1 >> k)) & m0d);
-            }
-            else if (doff > soff)
-                *q = (*q & ~m0d) | ((v0 >> k) & m0d);
-            else
-                *q = (*q & ~m0d) | ((v0 << kk) & m0d);
-        }
-    }
-    else if (doff == soff) {
-        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-        const guint32 m1d = MAKE_MASK(0, dend);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint j = width;
-            *q = (*q & ~m0d) | (*p & m0d);
-            j -= 0x20 - doff, p++, q++;
-            while (j >= 0x20) {
-                *q = *p;
-                j -= 0x20, p++, q++;
-            }
-            if (!dend)
-                continue;
-            *q = (*q & ~m1d) | (*p & m1d);
-        }
-    }
-    else {
-        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-        const guint32 m1d = MAKE_MASK(0, dend);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint j = width;
-            guint32 v0 = *p;
-            if (doff > soff) {
-                *q = (*q & ~m0d) | ((v0 >> k) & m0d);
-            }
-            else {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 << kk) | (v1 >> k)) & m0d);
-                v0 = v1;
-            }
-            j -= (0x20 - doff), q++;
-            while (j >= 0x20) {
-                guint32 v1 = *(++p);
-                *q = (v0 << kk) | (v1 >> k);
-                j -= 0x20, q++;
-                v0 = v1;
-            }
-            if (!dend)
-                continue;
-            if (dend > send) {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m1d) | (((v0 << kk) | (v1 >> k)) & m1d);
-            }
-            else {
-                *q = (*q & ~m1d) | ((v0 << kk) & m1d);
+                *q = (*q & ~m1d) | ((v0 SHL kk) & m1d);
             }
         }
     }
@@ -858,12 +783,8 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
         memcpy(dest->data + dest->stride*destrow,
                src->data + src->stride*row, src->stride*height);
     }
-    else {
-        if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-            copy_part_le(src, col, row, width, height, dest, destcol, destrow);
-        if (G_BYTE_ORDER == G_BIG_ENDIAN)
-            copy_part_be(src, col, row, width, height, dest, destcol, destrow);
-    }
+    else
+        copy_part(src, col, row, width, height, dest, destcol, destrow);
     gwy_mask_field_invalidate(dest);
 }
 
@@ -1272,6 +1193,173 @@ gwy_mask_field_lsubtract(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+/* Merge grains i and j in map with full resolution */
+static inline void
+resolve_grain_map(guint *m, guint i, guint j)
+{
+    guint ii, jj, k;
+
+    /* Find what i and j fully resolve to */
+    for (ii = i; m[ii] != ii; ii = m[ii])
+        ;
+    for (jj = j; m[jj] != jj; jj = m[jj])
+        ;
+    k = MIN(ii, jj);
+
+    /* Fix partial resultions to full */
+    for (ii = m[i]; m[ii] != ii; ii = m[ii]) {
+        m[i] = k;
+        i = ii;
+    }
+    m[ii] = k;
+    for (jj = m[j]; m[jj] != jj; jj = m[jj]) {
+        m[j] = k;
+        j = jj;
+    }
+    m[jj] = k;
+}
+
+static inline guint32*
+ensure_map(guint max_no, guint *map, guint *mapsize)
+{
+    if (G_UNLIKELY(max_no == *mapsize)) {
+        *mapsize *= 2;
+        return g_renew(guint, map, *mapsize);
+    }
+    return map;
+}
+
+/**
+ * gwy_mask_field_number_grains:
+ * @maskfield: Data field containing positive values in grains, nonpositive
+ *             in free space.
+ * @ngrains: Location to store the number of the last grain, or %NULL.
+ *
+ * Numbers grains in a mask field.
+ *
+ * Returns: Array of integers of the same number of items as @maskfield
+ *          (without padding) filled with grain numbers of each pixel.  Empty
+ *          space is set to 0, pixels inside a grain are set to the grain
+ *          number.  Grains are numbered sequentially 1, 2, 3, ...
+ *          The returned array is owned by @maskfield and become invalid when
+ *          the data change, gwy_mask_field_invalidate() is called or the
+ *          mask field is finalized.
+ **/
+const guint*
+gwy_mask_field_number_grains(GwyMaskField *maskfield,
+                             guint *ngrains)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
+    MaskField *priv = maskfield->priv;
+    if (priv->grains) {
+        if (ngrains)
+            *ngrains = priv->ngrains;
+        return priv->grains;
+    }
+
+    guint xres = maskfield->xres, yres = maskfield->yres;
+    priv->grains = g_new(guint, xres*yres);
+
+    // A reasonable initial size of the grain map.
+    guint msize = 4*(maskfield->xres + maskfield->yres);
+    guint *m = g_new0(guint, msize);
+
+    /* Number grains with simple unidirectional grain number propagation,
+     * updating map m for later full grain join */
+    guint max_id = 0;
+    guint end = xres & 0x1f;
+    for (guint i = 0; i < yres; i++) {
+        const guint32 *p = maskfield->data + i*maskfield->stride;
+        guint *g = priv->grains + i*xres;
+        guint *gprev = g - xres;
+        guint grain_id = 0;
+        for (guint j = 0; j < (xres >> 5); j++) {
+            guint32 v = *(p++);
+            for (guint k = 0; k < 0x20; k++) {
+                if (v & FIRST_BIT) {
+                    /* Grain number is kept from the top or left neighbour
+                     * unless it does not exist (a new number is assigned) or a
+                     * join with top neighbour occurs (m is updated) */
+                    guint id;
+                    if (i && (id = gprev[j])) {
+                        if (!grain_id)
+                            grain_id = id;
+                        else if (id != grain_id) {
+                            resolve_grain_map(m, id, grain_id);
+                            grain_id = m[id];
+                        }
+                    }
+                    if (!grain_id) {
+                        grain_id = ++max_id;
+                        m = ensure_map(grain_id, m, &msize);
+                        m[grain_id] = grain_id;
+                    }
+                }
+                else
+                    grain_id = 0;
+                g[j] = grain_id;
+                v = v SHL 1;
+            }
+        }
+        if (end) {
+            guint j = (xres >> 5) + 1;
+            guint32 v = *p;
+            for (guint k = 0; k < end; k++) {
+                if (v & FIRST_BIT) {
+                    /* Grain number is kept from the top or left neighbour
+                     * unless it does not exist (a new number is assigned) or a
+                     * join with top neighbour occurs (m is updated) */
+                    guint id;
+                    if (i && (id = gprev[j])) {
+                        if (!grain_id)
+                            grain_id = id;
+                        else if (id != grain_id) {
+                            resolve_grain_map(m, id, grain_id);
+                            grain_id = m[id];
+                        }
+                    }
+                    if (!grain_id) {
+                        grain_id = ++max_id;
+                        m = ensure_map(grain_id, m, &msize);
+                        m[grain_id] = grain_id;
+                    }
+                }
+                else
+                    grain_id = 0;
+                g[j] = grain_id;
+                v = v SHL 1;
+            }
+        }
+    }
+
+    /* Resolve remianing grain number links in map */
+    for (guint i = 1; i <= max_id; i++)
+        m[i] = m[m[i]];
+
+    /* Compactify grain numbers */
+    guint *mm = g_new0(guint, max_id + 1);
+    for (guint i = 1, id = 0; i <= max_id; i++) {
+        if (!mm[m[i]]) {
+            id++;
+            mm[m[i]] = id;
+        }
+        m[i] = mm[m[i]];
+    }
+    g_free(mm);
+
+    /* Renumber grains (we make use of the fact m[0] = 0) */
+    guint *g = priv->grains;
+    for (guint i = 0; i < xres*yres; i++)
+        g[i] = m[g[i]];
+
+    g_free(m);
+
+    priv->ngrains = max_id;
+    if (ngrains)
+        *ngrains = priv->ngrains;
+    return priv->grains;
+}
+
 #define __LIBGWY_MASK_FIELD_C__
 #include "libgwy/libgwy-aliases.c"
 
@@ -1306,6 +1394,14 @@ gwy_mask_field_lsubtract(GwyMaskField *maskfield,
  *
  * FIXME: Here should be something about invalidation, but let's get the grain
  * data implemented first.
+ *
+ * <refsect2 id='GwyMaskField-grains'>
+ * <title>Grains</title>
+ * <para>Several mask field methods deal with grains.  In this context, grain
+ * simply means a contiguous part of the mask, not touching other parts of the
+ * mask (two pixels with just a common corner are considered separate).  The
+ * term grain has the origin in the common use of these methods on the result
+ * of a grain marking function.</para>
  **/
 
 /**

@@ -65,14 +65,6 @@ typedef struct {
     GwyGrainSegment segments[];
 } GwyGrain;
 
-struct _GwyMaskFieldPrivate {
-    guint *grains;
-    guint *graindata;
-    guint32 *serialized_swapped;
-};
-
-typedef struct _GwyMaskFieldPrivate MaskField;
-
 G_END_DECLS
 
 #endif
