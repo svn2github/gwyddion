@@ -37,16 +37,23 @@ cat <<EOF
 EOF
 }
 
-if test $# != 3; then
-  echo Usage: coverage-test.sh LIBNAME PROGNAME PLOT-SCRIPT
-  exit 0
-fi
-
 set -e
 outdir=coverage
-libname="$1"
-testprog="$2"
-plot="$3"
+libname=$(sed -e 's/^library *= *//;t;d' Makefile)
+if test -z "$libname"; then
+  echo "Cannot determine library name from Makefile!"
+  exit 1
+fi
+testprog=$(sed -e 's/^test_program *= *//;t;d' Makefile)
+if test -z "$testprog"; then
+  echo "Cannot determine test program name from Makefile!"
+  exit 1
+fi
+plot=$(dirname $(readlink -f "$0"))/coverage-plot.py
+if test ! -x "$plot"; then
+  echo "Cannot find coverage-plot.py!"
+  exit 1
+fi
 report=$outdir/coverage.html
 make clean
 make CFLAGS="-O0 --coverage -pg" LDFLAGS="--coverage" $testprog
@@ -87,14 +94,17 @@ cat >$report <<EOF
 <h1>Test Coverage Statistics for $libname</h2>
 <table summary="Coverage statistics" class="stats">
 EOF
+echo -n "FILES "
 print_header File >>$report
-$plot <$outdir/files.dat | sed 's/\([-a-z0-9]*\)\.c/<a href="#\1">\0\<\/a>/'>>$report
+python $plot <$outdir/files.dat | sed 's/\([-a-z0-9]*\)\.c/<a href="#\1">\0\<\/a>/'>>$report
 for x in $outdir/*.c.dat; do
   b=${x%.c.dat}
   b=${b#*/}
+  echo -n "$b "
   print_header Function | sed 's/<tr/<tr id="'$b'"/' >>$report
-  $plot <$x >>$report
+  python $plot <$x >>$report
 done
+echo
 print_header Function >>$report
 cat >>$report <<EOF
 </table>
