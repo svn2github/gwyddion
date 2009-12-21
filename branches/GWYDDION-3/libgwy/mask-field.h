@@ -25,6 +25,25 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_LOGICAL_ZERO,
+    GWY_LOGICAL_AND,
+    GWY_LOGICAL_NIMPL,
+    GWY_LOGICAL_A,
+    GWY_LOGICAL_NCIMPL,
+    GWY_LOGICAL_B,
+    GWY_LOGICAL_XOR,
+    GWY_LOGICAL_OR,
+    GWY_LOGICAL_NOR,
+    GWY_LOGICAL_NXOR,
+    GWY_LOGICAL_NB,
+    GWY_LOGICAL_CIMPL,
+    GWY_LOGICAL_NA,
+    GWY_LOGICAL_IMPL,
+    GWY_LOGICAL_NAND,
+    GWY_LOGICAL_ONE,
+} GwyLogicalOperator;
+
 #define GWY_TYPE_MASK_FIELD \
     (gwy_mask_field_get_type())
 #define GWY_MASK_FIELD(obj) \
@@ -102,20 +121,10 @@ void          gwy_mask_field_part_fill     (GwyMaskField *maskfield,
                                             guint width,
                                             guint height,
                                             gboolean value);
-void          gwy_mask_field_lnot          (GwyMaskField *maskfield,
-                                            const GwyMaskField *mask);
-void          gwy_mask_field_land          (GwyMaskField *maskfield,
+void          gwy_mask_field_logical       (GwyMaskField *maskfield,
                                             const GwyMaskField *operand,
-                                            const GwyMaskField *mask);
-void          gwy_mask_field_lor           (GwyMaskField *maskfield,
-                                            const GwyMaskField *operand,
-                                            const GwyMaskField *mask);
-void          gwy_mask_field_lcopy         (GwyMaskField *maskfield,
-                                            const GwyMaskField *operand,
-                                            const GwyMaskField *mask);
-void          gwy_mask_field_lsubtract     (GwyMaskField *maskfield,
-                                            const GwyMaskField *operand,
-                                            const GwyMaskField *mask);
+                                            const GwyMaskField *mask,
+                                            GwyLogicalOperator op);
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \

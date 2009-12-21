@@ -58,7 +58,7 @@
  * big endian. */
 #define NTH_BIT(n) (FIRST_BIT SHR (n))
 #define MAKE_MASK(firstbit, nbits) \
-    ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit))
+    (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
 
 enum { N_ITEMS = 3 };
 
@@ -959,236 +959,117 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+#define LOGICAL_OP_LOOP(simple, masked) \
+    do { \
+        if (mask) {  \
+            const guint32 *m = mask->data;  \
+            for (guint i = n; i; i--, p++, q++, m++)  \
+                masked; \
+        }  \
+        else {  \
+            for (guint i = n; i; i--, p++, q++)  \
+                simple;  \
+        }  \
+    } while (0)
+
 /**
- * gwy_mask_field_lnot:
- * @maskfield: A two-dimensional mask field to modify.
+ * gwy_mask_field_logical:
+ * @maskfield: A two-dimensional mask field to modify and the first operand of
+ *             the logical operation.
+ * @operand: A two-dimensional mask field representing second operand of the
+ *           logical operation.  It can be %NULL for degenerate operations that
+ *           do not depend on the second operand.
  * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If %NULL then it is
- *        applied to all bits.
+ *        @maskfield to apply the logical operation to.  If it is %NULL the
+ *        opperation is applied to all bits (as if all bits in @mask were set).
+ * @op: Logical operation to perform.
  *
- * Modifies a mask field by logical NOT.
- *
- * Pixels in @maskfield are changed from 0 to 1 and vice versa.
- * If @mask is non-%NULL only pixels where @mask is 1 are affected.
- *
- * For non-%NULL @mask this method performs logical XOR of @maskfield and
- * @mask.
+ * Modifies a mask field by logical operation with another mask field.
  **/
 void
-gwy_mask_field_lnot(GwyMaskField *maskfield,
-                    const GwyMaskField *mask)
+gwy_mask_field_logical(GwyMaskField *maskfield,
+                       const GwyMaskField *operand,
+                       const GwyMaskField *mask,
+                       GwyLogicalOperator op)
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(op <= GWY_LOGICAL_ONE);
+    if (op == GWY_LOGICAL_A)
+        return;
     if (mask) {
         g_return_if_fail(GWY_IS_MASK_FIELD(mask));
         g_return_if_fail(maskfield->xres == mask->xres);
         g_return_if_fail(maskfield->yres == mask->yres);
         g_return_if_fail(maskfield->stride == mask->stride);
     }
-
-    guint n = maskfield->stride * maskfield->yres;
-    guint32 *q = maskfield->data;
-    if (mask) {
-        const guint32 *m = mask->data;
-        for (guint i = n; i; i--, q++, m++)
-            *q ^= *m;
+    if (op == GWY_LOGICAL_ZERO) {
+        if (mask) {
+            op = GWY_LOGICAL_NIMPL;
+            operand = mask;
+            mask = NULL;
+        }
+    }
+    else if (op == GWY_LOGICAL_ONE) {
+        if (mask) {
+            op = GWY_LOGICAL_OR;
+            operand = mask;
+            mask = NULL;
+        }
+    }
+    else if (op == GWY_LOGICAL_NA) {
+        if (mask) {
+            op = GWY_LOGICAL_XOR;
+            operand = mask;
+            mask = NULL;
+        }
     }
     else {
-        for (guint i = n; i; i--, q++)
-            *q = ~*q;
+        g_return_if_fail(GWY_IS_MASK_FIELD(operand));
+        g_return_if_fail(maskfield->xres == operand->xres);
+        g_return_if_fail(maskfield->yres == operand->yres);
+        g_return_if_fail(maskfield->stride == operand->stride);
     }
-    gwy_mask_field_invalidate(maskfield);
-}
-
-/**
- * gwy_mask_field_land:
- * @maskfield: A two-dimensional mask field to modify.
- * @operand: A two-dimensional mask field representing operand of the logical
- *           operation.
- * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If %NULL then it is
- *        applied to all bits.
- *
- * Modifies a mask field by logical AND with another mask field.
- *
- * Pixels in @maskfield are cleared if the corresponding bits in @operand are
- * unset.
- * If @mask is non-%NULL only pixels where @mask is 1 are affected.
- **/
-void
-gwy_mask_field_land(GwyMaskField *maskfield,
-                    const GwyMaskField *operand,
-                    const GwyMaskField *mask)
-{
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
-    g_return_if_fail(maskfield->xres == operand->xres);
-    g_return_if_fail(maskfield->yres == operand->yres);
-    g_return_if_fail(maskfield->stride == operand->stride);
-    if (mask) {
-        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-        g_return_if_fail(maskfield->xres == mask->xres);
-        g_return_if_fail(maskfield->yres == mask->yres);
-        g_return_if_fail(maskfield->stride == mask->stride);
-    }
-    if (maskfield == operand)
-        return;
 
     guint n = maskfield->stride * maskfield->yres;
     const guint32 *p = operand->data;
     guint32 *q = maskfield->data;
-    if (mask) {
-        const guint32 *m = mask->data;
-        for (guint i = n; i; i--, p++, q++, m++)
-            *q &= ~*m | (*p & *m);
-    }
+
+    // GWY_LOGICAL_ZERO cannot have mask.
+    if (op == GWY_LOGICAL_ZERO)
+        gwy_mask_field_fill(maskfield, FALSE);
+    else if (op == GWY_LOGICAL_AND)
+        LOGICAL_OP_LOOP(*q &= *p, *q &= ~*m | (*p & *m));
+    else if (op == GWY_LOGICAL_NIMPL)
+        LOGICAL_OP_LOOP(*q &= ~*p, *q &= ~*m | (~*p & *m));
+    // GWY_LOGICAL_A cannot get here.
+    else if (op == GWY_LOGICAL_NCIMPL)
+        LOGICAL_OP_LOOP(*q = ~*q & *p, *q = (*q & ~*m) | (~*q & *p & *m));
+    else if (op == GWY_LOGICAL_B)
+        LOGICAL_OP_LOOP(*q = *p, *q = (*q & ~*m) | (*p & *m));
+    else if (op == GWY_LOGICAL_XOR)
+        LOGICAL_OP_LOOP(*q ^= *p, *q ^= *m & *p);
+    else if (op == GWY_LOGICAL_OR)
+        LOGICAL_OP_LOOP(*q |= *p, *q |= *m & *p);
+    else if (op == GWY_LOGICAL_NOR)
+        LOGICAL_OP_LOOP(*q = ~(*q | *p), *q = (*q & ~*m) | (~(*q | *p) & *m));
+    else if (op == GWY_LOGICAL_NXOR)
+        LOGICAL_OP_LOOP(*q = ~(*q ^ *p), *q = (*q & ~*m) | (~(*q ^ *p) & *m));
+    else if (op == GWY_LOGICAL_NB)
+        LOGICAL_OP_LOOP(*q = ~*p, *q = (*q & ~*m) | (~*p & *m));
+    else if (op == GWY_LOGICAL_CIMPL)
+        LOGICAL_OP_LOOP(*q |= ~*p, *q |= ~*p & *m);
+    // GWY_LOGICAL_NA cannot have mask.
+    else if (op == GWY_LOGICAL_NA)
+        LOGICAL_OP_LOOP(*q = ~*q, g_assert_not_reached());
+    else if (op == GWY_LOGICAL_IMPL)
+        LOGICAL_OP_LOOP(*q = ~*q | *p, *q = (*q & ~*m) | ((~*q | *p) & *m));
+    else if (op == GWY_LOGICAL_NAND)
+        LOGICAL_OP_LOOP(*q = ~(*q & *p),  *q = (*q & ~*m) | (~(*q & *p) & *m));
+    // GWY_LOGICAL_ONE cannot have mask.
+    else if (op == GWY_LOGICAL_ONE)
+        gwy_mask_field_fill(maskfield, TRUE);
     else {
-        for (guint i = n; i; i--, p++, q++)
-            *q &= *p;
-    }
-    gwy_mask_field_invalidate(maskfield);
-}
-
-/**
- * gwy_mask_field_lor:
- * @maskfield: A two-dimensional mask field to modify.
- * @operand: A two-dimensional mask field representing operand of the logical
- *           operation.
- * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If %NULL then it is
- *        applied to all bits.
- *
- * Modifies a mask field by logical OR with another mask field.
- *
- * Pixels in @maskfield are set if the corresponding bits in @operand are set.
- * If @mask is non-%NULL only pixels where @mask is 1 are affected.
- **/
-void
-gwy_mask_field_lor(GwyMaskField *maskfield,
-                   const GwyMaskField *operand,
-                   const GwyMaskField *mask)
-{
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
-    g_return_if_fail(maskfield->xres == operand->xres);
-    g_return_if_fail(maskfield->yres == operand->yres);
-    g_return_if_fail(maskfield->stride == operand->stride);
-    if (mask) {
-        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-        g_return_if_fail(maskfield->xres == mask->xres);
-        g_return_if_fail(maskfield->yres == mask->yres);
-        g_return_if_fail(maskfield->stride == mask->stride);
-    }
-    if (maskfield == operand)
-        return;
-
-    guint n = maskfield->stride * maskfield->yres;
-    const guint32 *p = operand->data;
-    guint32 *q = maskfield->data;
-    if (mask) {
-        const guint32 *m = mask->data;
-        for (guint i = n; i; i--, p++, q++, m++)
-            *q = (*q & ~(*m)) | ((*q | *p) & *m);
-    }
-    else {
-        for (guint i = n; i; i--, p++, q++)
-            *q |= *p;
-    }
-    gwy_mask_field_invalidate(maskfield);
-}
-
-/**
- * gwy_mask_field_lcopy:
- * @maskfield: A two-dimensional mask field to modify.
- * @operand: A two-dimensional mask field representing operand of the logical
- *           operation.
- * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If %NULL then it is
- *        applied to all bits.
- *
- * Modifies a mask field by logical COPY with another mask field.
- *
- * Pixels in @maskfield are set or cleared according to the corresponding bits
- * in @operand.
- * If @mask is non-%NULL only pixels where @mask is 1 are affected.
- * With %NULL mask this function is equivalent to gwy_mask_field_copy() with
- * arguments echanged.
- **/
-void
-gwy_mask_field_lcopy(GwyMaskField *maskfield,
-                     const GwyMaskField *operand,
-                     const GwyMaskField *mask)
-{
-    if (!mask) {
-        gwy_mask_field_copy(operand, maskfield);
-        return;
-    }
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
-    g_return_if_fail(maskfield->xres == operand->xres);
-    g_return_if_fail(maskfield->yres == operand->yres);
-    g_return_if_fail(maskfield->stride == operand->stride);
-    g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-    g_return_if_fail(maskfield->xres == mask->xres);
-    g_return_if_fail(maskfield->yres == mask->yres);
-    g_return_if_fail(maskfield->stride == mask->stride);
-    if (maskfield == operand)
-        return;
-
-    guint n = maskfield->stride * maskfield->yres;
-    const guint32 *p = operand->data;
-    guint32 *q = maskfield->data;
-    const guint32 *m = mask->data;
-    for (guint i = n; i; i--, p++, q++, m++)
-        *q = (*q & ~(*m)) | (*p & *m);
-    gwy_mask_field_invalidate(maskfield);
-}
-
-/**
- * gwy_mask_field_lsubtract:
- * @maskfield: A two-dimensional mask field to modify.
- * @operand: A two-dimensional mask field representing operand of the logical
- *           operation.
- * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If %NULL then it is
- *        applied to all bits.
- *
- * Modifies a mask field by logical SUBTRACT with another mask field.
- *
- * Pixels in @maskfield are cleared if the corresponding bits in @operand are
- * set.
- * If @mask is non-%NULL only pixels where @mask is 1 are affected.
- **/
-void
-gwy_mask_field_lsubtract(GwyMaskField *maskfield,
-                         const GwyMaskField *operand,
-                         const GwyMaskField *mask)
-{
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
-    g_return_if_fail(maskfield->xres == operand->xres);
-    g_return_if_fail(maskfield->yres == operand->yres);
-    g_return_if_fail(maskfield->stride == operand->stride);
-    if (mask) {
-        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-        g_return_if_fail(maskfield->xres == mask->xres);
-        g_return_if_fail(maskfield->yres == mask->yres);
-        g_return_if_fail(maskfield->stride == mask->stride);
-    }
-    if (maskfield == operand)
-        return;
-
-    guint n = maskfield->stride * maskfield->yres;
-    const guint32 *p = operand->data;
-    guint32 *q = maskfield->data;
-    if (mask) {
-        const guint32 *m = mask->data;
-        for (guint i = n; i; i--, p++, q++, m++)
-            *q &= ~(*p & *m);
-    }
-    else {
-        for (guint i = n; i; i--, p++, q++)
-            *q &= ~*p;
+        g_assert_not_reached();
     }
     gwy_mask_field_invalidate(maskfield);
 }
@@ -1302,7 +1183,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
             }
         }
         if (end) {
-            guint j = (xres >> 5) + 1;
+            guint j = xres >> 5;
             guint32 v = *p;
             for (guint k = 0; k < end; k++) {
                 if (v & FIRST_BIT) {
@@ -1402,6 +1283,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  * mask (two pixels with just a common corner are considered separate).  The
  * term grain has the origin in the common use of these methods on the result
  * of a grain marking function.</para>
+ * </refsect2>
  **/
 
 /**
@@ -1424,6 +1306,34 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  * @g_object_class: Parent class.
  *
  * Class of two-dimensional bit masks.
+ **/
+
+/**
+ * GwyLogicalOperator:
+ * @GWY_LOGICAL_ZERO: Always zero, mask clearing.
+ * @GWY_LOGICAL_AND: Logical conjuction @A ∧ @B, mask intersection.
+ * @GWY_LOGICAL_NIMPL: Negated implication @A ⇏ @B, ¬@A ∧ @B.
+ * @GWY_LOGICAL_A: First operand @A, no change to the mask.
+ * @GWY_LOGICAL_NCIMPL: Negated converse implication @A ⇍ @B, @A ∧ ¬@B, mask
+ *                      subtraction.
+ * @GWY_LOGICAL_B: Second operand @B, mask copying.
+ * @GWY_LOGICAL_XOR: Exclusive disjunction @A ⊻ @B, symmetrical mask
+ *                   subtraction.
+ * @GWY_LOGICAL_OR: Disjunction @A ∨ @B, mask union.
+ * @GWY_LOGICAL_NOR: Negated disjunction @A ⊽ @B.
+ * @GWY_LOGICAL_NXOR: Negated exclusive disjunction ¬(@A ⊻ @B).
+ * @GWY_LOGICAL_NB: Negated second operand ¬@B, copying of inverted mask.
+ * @GWY_LOGICAL_CIMPL: Converse implication @A ⇐ @B, @A ∨ ¬@B.
+ * @GWY_LOGICAL_NA: Negated first operand ¬@A, mask inversion.
+ * @GWY_LOGICAL_IMPL: Implication @A ⇒ @B, ¬@A ∨ @B.
+ * @GWY_LOGICAL_NAND: Negated conjuction @A ⊼ @B.
+ * @GWY_LOGICAL_ONE: Always one, mask filling.
+ *
+ * Logical operators applicable to masks.
+ *
+ * All possible 16 logical operators are available although some are not as
+ * useful as others.  If a common mask operation corresponds to the logical
+ * operator it is mentioned in the list.
  **/
 
 /**
