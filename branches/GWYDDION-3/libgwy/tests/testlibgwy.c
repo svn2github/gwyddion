@@ -27,6 +27,61 @@
 #define RUNNING_ON_VALGRIND 0
 #endif
 
+// Put the declarations here instead of testlibgwy.h to avoid recompilation
+// of everything when a new test is added.
+void test_version              (void);
+void test_error_list           (void);
+void test_memmem               (void);
+void test_next_line            (void);
+void test_pack                 (void);
+void test_math_sort            (void);
+void test_math_median          (void);
+void test_math_cholesky        (void);
+void test_math_linalg          (void);
+void test_interpolation        (void);
+void test_expr_evaluate        (void);
+void test_expr_vector          (void);
+void test_expr_garbage         (void);
+void test_fit_task_point       (void);
+void test_fit_task_vector      (void);
+void test_fit_task_vfunc       (void);
+void test_fit_task_fixed       (void);
+void test_serialize_simple     (void);
+void test_serialize_data       (void);
+void test_serialize_nested     (void);
+void test_serialize_error      (void);
+void test_serialize_boxed      (void);
+void test_deserialize_simple   (void);
+void test_deserialize_data     (void);
+void test_deserialize_nested   (void);
+void test_deserialize_boxed    (void);
+void test_deserialize_garbage  (void);
+void test_unit_parse           (void);
+void test_unit_arithmetic      (void);
+void test_unit_serialize       (void);
+void test_unit_garbage         (void);
+void test_value_format_simple  (void);
+void test_mask_field_copy      (void);
+void test_mask_field_logical   (void);
+void test_mask_field_serialize (void);
+void test_mask_field_fill      (void);
+void test_mask_field_grain_no  (void);
+void test_container_data       (void);
+void test_container_refcount   (void);
+void test_container_serialize  (void);
+void test_container_text       (void);
+void test_container_boxed      (void);
+void test_array_data           (void);
+void test_inventory_data       (void);
+void test_gradient_load        (void);
+void test_gradient_save        (void);
+void test_gradient_serialize   (void);
+void test_gradient_inventory   (void);
+void test_gl_material_load     (void);
+void test_gl_material_save     (void);
+void test_gl_material_serialize(void);
+void test_gl_material_inventory(void);
+
 /***************************************************************************
  *
  * Main
@@ -78,6 +133,9 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
     g_test_add_func("/testlibgwy/mask-field/copy", test_mask_field_copy);
     g_test_add_func("/testlibgwy/mask-field/logical", test_mask_field_logical);
+    g_test_add_func("/testlibgwy/mask-field/serialize", test_mask_field_serialize);
+    g_test_add_func("/testlibgwy/mask-field/fill", test_mask_field_fill);
+    g_test_add_func("/testlibgwy/mask-field/grain-no", test_mask_field_grain_no);
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
     g_test_add_func("/testlibgwy/container/serialize", test_container_serialize);

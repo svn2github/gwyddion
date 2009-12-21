@@ -67,7 +67,7 @@ static guint32*
 mask_field_random_pool_new(GRand *rng,
                            guint max_size)
 {
-    guint n = max_size*(max_size + 31)/32 * 8;
+    guint n = max_size*(max_size + 31)/32 * 4;
     guint32 *pool = g_new(guint32, n);
     for (guint i = 0; i < n; i++)
         pool[i] = g_rand_int(rng);
@@ -87,7 +87,7 @@ mask_field_randomize(GwyMaskField *maskfield,
                      GRand *rng)
 {
     guint required = maskfield->stride * maskfield->yres;
-    guint n = max_size*(max_size + 31)/32 * 8;
+    guint n = max_size*(max_size + 31)/32 * 4;
     guint offset = g_rand_int_range(rng, 0, n - required);
     guint32 *data = gwy_mask_field_get_data(maskfield);
     memcpy(data, pool + offset, required*sizeof(guint32));
@@ -116,10 +116,10 @@ test_mask_field_copy(void)
         guint n = reference->stride * reference->yres;
         guint width = g_rand_int_range(rng, 0, MAX(sxres, dxres));
         guint height = g_rand_int_range(rng, 0, MAX(syres, dyres));
-        guint row = g_rand_int_range(rng, 0, sxres);
-        guint col = g_rand_int_range(rng, 0, syres);
-        guint destrow = g_rand_int_range(rng, 0, dxres);
-        guint destcol = g_rand_int_range(rng, 0, dyres);
+        guint col = g_rand_int_range(rng, 0, sxres);
+        guint row = g_rand_int_range(rng, 0, syres);
+        guint destcol = g_rand_int_range(rng, 0, dxres);
+        guint destrow = g_rand_int_range(rng, 0, dyres);
         gwy_mask_field_part_copy(source, col, row, width, height,
                                  dest, destcol, destrow);
         mask_field_part_copy_dumb(source, col, row, width, height,
@@ -236,6 +236,60 @@ test_mask_field_logical(void)
     g_rand_free(rng);
 }
 
+static void
+mask_field_part_fill_dumb(GwyMaskField *maskfield,
+                          guint col,
+                          guint row,
+                          guint width,
+                          guint height,
+                          gboolean value)
+{
+    for (guint i = row; i < row + height; i++) {
+        for (guint j = col; j < col + width; j++)
+            gwy_mask_field_set(maskfield, j, i, value);
+    }
+}
+
+void
+test_mask_field_fill(void)
+{
+    enum { max_size = 333 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 100 : 20;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/4);
+        GwyMaskField *dest = gwy_mask_field_new_sized(xres, yres, FALSE);
+        GwyMaskField *reference = gwy_mask_field_new_sized(xres, yres, FALSE);
+        guint width = g_rand_int_range(rng, 0, xres+1);
+        guint height = g_rand_int_range(rng, 0, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+
+        mask_field_randomize(reference, pool, max_size, rng);
+        gwy_mask_field_copy(reference, dest);
+
+        gwy_mask_field_part_fill(dest, col, row, width, height, FALSE);
+        mask_field_part_fill_dumb(reference,  col, row, width, height, FALSE);
+        test_mask_field_assert_equal(dest, reference);
+
+        mask_field_randomize(reference, pool, max_size, rng);
+        gwy_mask_field_copy(reference, dest);
+
+        gwy_mask_field_part_fill(dest, col, row, width, height, TRUE);
+        mask_field_part_fill_dumb(reference,  col, row, width, height, TRUE);
+        test_mask_field_assert_equal(dest, reference);
+
+        g_object_unref(dest);
+        g_object_unref(reference);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
 void
 test_mask_field_serialize(void)
 {
@@ -247,7 +301,7 @@ test_mask_field_serialize(void)
 
     for (guint iter = 0; iter < niter; iter++) {
         guint width = g_rand_int_range(rng, 1, max_size);
-        guint height = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size/4);
         GwyMaskField *original = gwy_mask_field_new_sized(width, height, FALSE);
         mask_field_randomize(original, pool, max_size, rng);
         GwyMaskField *copy;
@@ -266,6 +320,57 @@ test_mask_field_serialize(void)
         g_object_unref(copy);
 
         g_object_unref(original);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+void
+test_mask_field_grain_no(void)
+{
+    enum { max_size = 83 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 50 : 10;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *maskfield = gwy_mask_field_new_sized(width, height,
+                                                           FALSE);
+        mask_field_randomize(maskfield, pool, max_size, rng);
+
+        guint ngrains;
+        const guint32 *grains = gwy_mask_field_number_grains(maskfield,
+                                                             &ngrains);
+        guint *counts = g_new0(guint, ngrains+1);
+        for (guint i = 0; i < height; i++) {
+            for (guint j = 0; j < width; j++) {
+                guint id_up = i ? grains[(i - 1)*width + j] : 0;
+                guint id_left = j ? grains[i*width + j - 1] : 0;
+                guint id = grains[i*width + j];
+                guint id_right = j+1 < width ? grains[i*width + j + 1] : 0;
+                guint id_down = i+1 < height ? grains[(i + 1)*width + j] : 0;
+
+                g_assert(id_up <= ngrains);
+                g_assert(id_left <= ngrains);
+                g_assert(id <= ngrains);
+                g_assert(id_right <= ngrains);
+                g_assert(id_down <= ngrains);
+                g_assert(id == id_up || !id || !id_up);
+                g_assert(id == id_left || !id || !id_left);
+                g_assert(id == id_right || !id || !id_right);
+                g_assert(id == id_down || !id || !id_down);
+                counts[id]++;
+            }
+        }
+
+        for (guint id = 1; id <= ngrains; id++)
+            g_assert(counts[id]);
+        g_free(counts);
+        // XXX: The hard part is to reliably check grain are also contiguous.
+        g_object_unref(maskfield);
     }
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
