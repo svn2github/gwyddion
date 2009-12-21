@@ -236,4 +236,39 @@ test_mask_field_logical(void)
     g_rand_free(rng);
 }
 
+void
+test_mask_field_serialize(void)
+{
+    enum { max_size = 333 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 50 : 10;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint width = g_rand_int_range(rng, 1, max_size);
+        guint height = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *original = gwy_mask_field_new_sized(width, height, FALSE);
+        mask_field_randomize(original, pool, max_size, rng);
+        GwyMaskField *copy;
+
+        copy = gwy_mask_field_duplicate(original);
+        test_mask_field_assert_equal(copy, original);
+        g_object_unref(copy);
+
+        copy = gwy_mask_field_new();
+        gwy_mask_field_assign(copy, original);
+        test_mask_field_assert_equal(copy, original);
+        g_object_unref(copy);
+
+        copy = GWY_MASK_FIELD(serialize_and_back(G_OBJECT(original)));
+        test_mask_field_assert_equal(copy, original);
+        g_object_unref(copy);
+
+        g_object_unref(original);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
