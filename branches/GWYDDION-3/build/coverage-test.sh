@@ -56,7 +56,7 @@ if test ! -x "$plot"; then
 fi
 report=$outdir/coverage.html
 make clean
-make CFLAGS="-O0 --coverage -pg" LDFLAGS="--coverage" $testprog
+make CFLAGS="-O0 --coverage -pg" LDFLAGS="--coverage"
 ./$testprog
 rm -rf $outdir
 mkdir $outdir

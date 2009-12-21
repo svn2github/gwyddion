@@ -1,12 +1,14 @@
 # $Id$
 
+SUBDIRS = . tests
+
 PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=implicit-int -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 library = libgwy
 libsuffix = $(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
-test_program = testlibgwy
+test_program = ./tests/testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
 main_header = libgwy.h
@@ -49,7 +51,6 @@ MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 lib_LTLIBRARIES = libgwy3.la
-noinst_PROGRAMS = $(test_program)
 libgwyinclude_HEADERS = $(library_headers)
 pkginclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
@@ -82,8 +83,6 @@ libgwy3_la_SOURCES = \
 	value-format.c \
 	version.c
 
-testlibgwy_SOURCES = testlibgwy.c
-
 AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
@@ -107,9 +106,6 @@ version_info = -version-info 0:0:0
 endif
 
 libgwy3_la_LDFLAGS = @LIBGWY_DEPS_LIBS@ $(version_info)
-
-testlibgwy_CFLAGS = $(AM_CFLAGS) @VALGRIND_CFLAGS@
-testlibgwy_LDADD = libgwy3.la
 
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make

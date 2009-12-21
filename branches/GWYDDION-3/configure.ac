@@ -21,6 +21,7 @@ AC_CONFIG_FILES([
   libgwy/Makefile
   libgwy/version.h
   libgwy/libgwy3.pc
+  libgwy/tests/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
   docs/Makefile
