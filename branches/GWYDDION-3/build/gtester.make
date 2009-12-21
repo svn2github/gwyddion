@@ -1,6 +1,6 @@
 # Generic gtester rules.
 # $Id$
-# Variables: test_program
+# Variables: test_program library libsuffix
 # Adds to: CLEANFILES
 
 GTESTER = gtester
@@ -14,7 +14,7 @@ CLEANFILES += \
 ### testing rules
 
 # test: run all tests in cwd and subdirs
-test: $(test_program)$(EXEEXT)
+test: all $(test_program)$(EXEEXT)
 	@$(GTESTER) --verbose $(test_program)$(EXEEXT)
 	@ for subdir in $(SUBDIRS) . ; do \
 	    test "$$subdir" = "." -o "$$subdir" = "po" || \
