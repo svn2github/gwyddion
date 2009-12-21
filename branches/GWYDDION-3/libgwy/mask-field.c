@@ -88,22 +88,22 @@ static void     gwy_mask_field_finalize         (GObject *object);
 static void     gwy_mask_field_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_mask_field_n_items          (GwySerializable *serializable);
 static gsize    gwy_mask_field_itemize          (GwySerializable *serializable,
-                                            GwySerializableItems *items);
-static void         gwy_mask_field_done             (GwySerializable *serializable);
+                                                 GwySerializableItems *items);
+static void     gwy_mask_field_done             (GwySerializable *serializable);
 static gboolean gwy_mask_field_construct        (GwySerializable *serializable,
-                                            GwySerializableItems *items,
-                                            GwyErrorList **error_list);
+                                                 GwySerializableItems *items,
+                                                 GwyErrorList **error_list);
 static GObject* gwy_mask_field_duplicate_impl   (GwySerializable *serializable);
 static void     gwy_mask_field_assign_impl      (GwySerializable *destination,
-                                            GwySerializable *source);
+                                                 GwySerializable *source);
 static void     gwy_mask_field_set_property     (GObject *object,
-                                            guint prop_id,
-                                            const GValue *value,
-                                            GParamSpec *pspec);
+                                                 guint prop_id,
+                                                 const GValue *value,
+                                                 GParamSpec *pspec);
 static void     gwy_mask_field_get_property     (GObject *object,
-                                            guint prop_id,
-                                            GValue *value,
-                                            GParamSpec *pspec);
+                                                 guint prop_id,
+                                                 GValue *value,
+                                                 GParamSpec *pspec);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*0*/ { .name = "xres", .ctype = GWY_SERIALIZABLE_INT32,       },
@@ -361,6 +361,9 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
         dest->data = g_new(guint32, n);
     }
     memcpy(dest->data, src->data, n*sizeof(guint32));
+    dest->xres = src->xres;
+    dest->yres = src->yres;
+    dest->stride = src->stride;
     // TODO: Duplicate precalculated grain data too.
 
     GObject *object = G_OBJECT(dest);
@@ -1156,13 +1159,13 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
         guint grain_id = 0;
         for (guint j = 0; j < (xres >> 5); j++) {
             guint32 v = *(p++);
-            for (guint k = 0; k < 0x20; k++) {
+            for (guint k = 0; k < 0x20; k++, g++, gprev++) {
                 if (v & FIRST_BIT) {
                     /* Grain number is kept from the top or left neighbour
                      * unless it does not exist (a new number is assigned) or a
                      * join with top neighbour occurs (m is updated) */
                     guint id;
-                    if (i && (id = gprev[j])) {
+                    if (i && (id = *gprev)) {
                         if (!grain_id)
                             grain_id = id;
                         else if (id != grain_id) {
@@ -1178,20 +1181,19 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
                 }
                 else
                     grain_id = 0;
-                g[j] = grain_id;
+                *g = grain_id;
                 v = v SHL 1;
             }
         }
         if (end) {
-            guint j = xres >> 5;
             guint32 v = *p;
-            for (guint k = 0; k < end; k++) {
+            for (guint k = 0; k < end; k++, g++, gprev++) {
                 if (v & FIRST_BIT) {
                     /* Grain number is kept from the top or left neighbour
                      * unless it does not exist (a new number is assigned) or a
                      * join with top neighbour occurs (m is updated) */
                     guint id;
-                    if (i && (id = gprev[j])) {
+                    if (i && (id = *gprev)) {
                         if (!grain_id)
                             grain_id = id;
                         else if (id != grain_id) {
@@ -1207,7 +1209,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
                 }
                 else
                     grain_id = 0;
-                g[j] = grain_id;
+                *g = grain_id;
                 v = v SHL 1;
             }
         }
@@ -1219,7 +1221,8 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
     /* Compactify grain numbers */
     guint *mm = g_new0(guint, max_id + 1);
-    for (guint i = 1, id = 0; i <= max_id; i++) {
+    guint id = 0;
+    for (guint i = 1; i <= max_id; i++) {
         if (!mm[m[i]]) {
             id++;
             mm[m[i]] = id;
@@ -1235,7 +1238,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
     g_free(m);
 
-    priv->ngrains = max_id;
+    priv->ngrains = id;
     if (ngrains)
         *ngrains = priv->ngrains;
     return priv->grains;
