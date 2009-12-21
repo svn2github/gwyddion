@@ -1,0 +1,256 @@
+/*
+ *  $Id$
+ *  Copyright (C) 2009 David Necas (Yeti).
+ *  E-mail: yeti@gwyddion.net.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "testlibgwy.h"
+#include <stdlib.h>
+
+/***************************************************************************
+ *
+ * Units
+ *
+ ***************************************************************************/
+
+void
+test_unit_parse(void)
+{
+    gint pw1, pw2, pw3, pw4, pw5, pw6, pw7, pw8, pw9;
+    gint pw11, pw12, pw13, pw14, pw15, pw16, pw17, pw18;
+
+    /* Simple notations */
+    GwyUnit *u1 = gwy_unit_new_from_string("m", &pw1);
+    GwyUnit *u2 = gwy_unit_new_from_string("km", &pw2);
+    GwyUnit *u3 = gwy_unit_new_from_string("Å", &pw3);
+
+    g_assert(gwy_unit_equal(u1, u2));
+    g_assert(gwy_unit_equal(u2, u3));
+    g_assert(gwy_unit_equal(u3, u1));
+    g_assert_cmpint(pw1, ==, 0);
+    g_assert_cmpint(pw2, ==, 3);
+    g_assert_cmpint(pw3, ==, -10);
+
+    g_object_unref(u1);
+    g_object_unref(u2);
+    g_object_unref(u3);
+
+    /* Powers and comparison */
+    GwyUnit *u4 = gwy_unit_new_from_string("um s^-1", &pw4);
+    GwyUnit *u5 = gwy_unit_new_from_string("mm/ps", &pw5);
+    GwyUnit *u6 = gwy_unit_new_from_string("μs<sup>-1</sup> cm", &pw6);
+
+    g_assert(gwy_unit_equal(u4, u5));
+    g_assert(gwy_unit_equal(u5, u6));
+    g_assert(gwy_unit_equal(u6, u4));
+    g_assert_cmpint(pw4, ==, -6);
+    g_assert_cmpint(pw5, ==, 9);
+    g_assert_cmpint(pw6, ==, 4);
+
+    g_object_unref(u4);
+    g_object_unref(u5);
+    g_object_unref(u6);
+
+    /* Cancellation */
+    GwyUnit *u7 = gwy_unit_new_from_string(NULL, &pw7);
+    GwyUnit *u8 = gwy_unit_new_from_string("10%", &pw8);
+    GwyUnit *u9 = gwy_unit_new_from_string("m^3 cm^-2/km", &pw9);
+
+    g_assert(gwy_unit_equal(u7, u8));
+    g_assert(gwy_unit_equal(u8, u9));
+    g_assert(gwy_unit_equal(u9, u7));
+    g_assert_cmpint(pw7, ==, 0);
+    g_assert_cmpint(pw8, ==, -1);
+    g_assert_cmpint(pw9, ==, 1);
+
+    g_object_unref(u7);
+    g_object_unref(u8);
+    g_object_unref(u9);
+
+    /* Silly notations: micron */
+    GwyUnit *u11 = gwy_unit_new_from_string("μs", &pw11);
+    GwyUnit *u12 = gwy_unit_new_from_string("µs", &pw12);
+    GwyUnit *u13 = gwy_unit_new_from_string("us", &pw13);
+    GwyUnit *u14 = gwy_unit_new_from_string("~s", &pw14);
+    GwyUnit *u15 = gwy_unit_new_from_string("\265s", &pw15);
+
+    g_assert(gwy_unit_equal(u11, u12));
+    g_assert(gwy_unit_equal(u12, u13));
+    g_assert(gwy_unit_equal(u13, u14));
+    g_assert(gwy_unit_equal(u14, u15));
+    g_assert(gwy_unit_equal(u15, u11));
+    g_assert_cmpint(pw11, ==, -6);
+    g_assert_cmpint(pw12, ==, -6);
+    g_assert_cmpint(pw13, ==, -6);
+    g_assert_cmpint(pw14, ==, -6);
+    g_assert_cmpint(pw15, ==, -6);
+
+    g_object_unref(u11);
+    g_object_unref(u12);
+    g_object_unref(u13);
+    g_object_unref(u14);
+    g_object_unref(u15);
+
+    /* Silly notations: squares */
+    GwyUnit *u16 = gwy_unit_new_from_string("m²", &pw16);
+    GwyUnit *u17 = gwy_unit_new_from_string("m m", &pw17);
+    GwyUnit *u18 = gwy_unit_new_from_string("m\262", &pw18);
+
+    g_assert(gwy_unit_equal(u16, u17));
+    g_assert(gwy_unit_equal(u17, u18));
+    g_assert(gwy_unit_equal(u18, u16));
+    g_assert_cmpint(pw16, ==, 0);
+    g_assert_cmpint(pw17, ==, 0);
+    g_assert_cmpint(pw18, ==, 0);
+
+    g_object_unref(u16);
+    g_object_unref(u17);
+    g_object_unref(u18);
+}
+
+void
+test_unit_arithmetic(void)
+{
+    GwyUnit *u1, *u2, *u3, *u4, *u5, *u6, *u7, *u8, *u9, *u0;
+
+    u1 = gwy_unit_new_from_string("kg m s^-2", NULL);
+    u2 = gwy_unit_new_from_string("s/kg", NULL);
+    u3 = gwy_unit_new_from_string("m/s", NULL);
+
+    u4 = gwy_unit_multiply(NULL, u1, u2);
+    g_assert(gwy_unit_equal(u3, u4));
+
+    u5 = gwy_unit_power(NULL, u1, -1);
+    u6 = gwy_unit_power_multiply(NULL, u5, 2, u2, -2);
+    u7 = gwy_unit_power(NULL, u3, -2);
+    g_assert(gwy_unit_equal(u6, u7));
+
+    u8 = gwy_unit_nth_root(NULL, u6, 2);
+    gwy_unit_power(u8, u8, -1);
+    g_assert(gwy_unit_equal(u8, u3));
+
+    gwy_unit_divide(u8, u8, u3);
+    u0 = gwy_unit_new();
+    g_assert(gwy_unit_equal(u8, u0));
+
+    u9 = gwy_unit_power(NULL, u3, 4);
+    gwy_unit_power_multiply(u9, u9, 1, u1, -3);
+    gwy_unit_power_multiply(u9, u2, 3, u9, -1);
+    gwy_unit_multiply(u9, u9, u3);
+    g_assert(gwy_unit_equal(u9, u0));
+
+    g_object_unref(u1);
+    g_object_unref(u2);
+    g_object_unref(u3);
+    g_object_unref(u4);
+    g_object_unref(u5);
+    g_object_unref(u6);
+    g_object_unref(u7);
+    g_object_unref(u8);
+    g_object_unref(u9);
+    g_object_unref(u0);
+}
+
+static void
+test_unit_serialize_one(GwyUnit *unit1)
+{
+    GwyUnit *unit2;
+    GOutputStream *stream;
+    GMemoryOutputStream *memstream;
+    GError *error = NULL;
+    GwyErrorList *error_list = NULL;
+    gsize len;
+    gboolean ok;
+
+    stream = g_memory_output_stream_new(malloc(100), 100, NULL, &free);
+    memstream = G_MEMORY_OUTPUT_STREAM(stream);
+    ok = gwy_serialize_gio(GWY_SERIALIZABLE(unit1), stream, &error);
+    g_assert(ok);
+    g_assert(error == NULL);
+    len = g_memory_output_stream_get_data_size(memstream);
+    unit2 = (GwyUnit*)(gwy_deserialize_memory
+                       (g_memory_output_stream_get_data(memstream),
+                        g_memory_output_stream_get_data_size(memstream),
+                        &len, &error_list));
+    g_assert_cmpuint(len, ==, g_memory_output_stream_get_data_size(memstream));
+    g_assert_cmpuint(g_slist_length(error_list), ==, 0);
+    g_assert(GWY_IS_UNIT(unit2));
+    g_assert(gwy_unit_equal(unit2, unit1));
+
+    g_object_unref(stream);
+    g_object_unref(unit2);
+}
+
+void
+test_unit_serialize(void)
+{
+    GwyUnit *unit;
+
+    /* Trivial unit */
+    unit = gwy_unit_new();
+    test_unit_serialize_one(unit);
+    g_object_unref(unit);
+
+    /* Less trivial unit */
+    unit = gwy_unit_new_from_string("kg m s^-2/nA", NULL);
+    test_unit_serialize_one(unit);
+    g_object_unref(unit);
+}
+
+void
+test_unit_garbage(void)
+{
+    static const gchar *tokens[] = {
+        "^", "+", "-", "/", "*", "<sup>", "</sup>", "10",
+    };
+    static const gchar characters[] = G_CSET_a_2_z G_CSET_A_2_Z G_CSET_DIGITS;
+    GwyUnit *unit = gwy_unit_new();
+
+    gsize n = 10000;
+    GString *garbage = g_string_new(NULL);
+    GRand *rng = g_rand_new();
+
+    g_rand_set_seed(rng, 42);
+
+    /* No checks.  The goal is not to crash... */
+    for (gsize i = 0; i < n; i++) {
+        gsize ntoks = g_rand_int_range(rng, 0, 5) + g_rand_int_range(rng, 0, 7);
+
+        g_string_truncate(garbage, 0);
+        for (gsize j = 0; j < ntoks; j++) {
+            gsize what = g_rand_int_range(rng, 0, G_N_ELEMENTS(tokens) + 10);
+
+            if (g_rand_int_range(rng, 0, 3))
+                g_string_append_c(garbage, ' ');
+
+            if (what == G_N_ELEMENTS(tokens))
+                g_string_append_c(garbage, g_rand_int_range(rng, 1, 0x100));
+            else if (what < G_N_ELEMENTS(tokens))
+                g_string_append(garbage, tokens[what]);
+            else {
+                what = g_rand_int_range(rng, 0, sizeof(characters));
+                g_string_append_printf(garbage, "%c", characters[what]);
+            }
+        }
+        gwy_unit_set_from_string(unit, garbage->str, NULL);
+    }
+
+    g_string_free(garbage, TRUE);
+    g_rand_free(rng);
+    g_object_unref(unit);
+}
+
+/* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -1,0 +1,87 @@
+/*
+ *  $Id$
+ *  Copyright (C) 2009 David Necas (Yeti).
+ *  E-mail: yeti@gwyddion.net.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "testlibgwy.h"
+
+/***************************************************************************
+ *
+ * Value formatting
+ *
+ ***************************************************************************/
+
+void
+test_value_format_simple(void)
+{
+    GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
+    GwyValueFormat *format;
+
+    /* Base cases */
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-6, 1e-9, NULL);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
+                    ==, "0.123 µm");
+    g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7),
+                    ==, "0.123");
+
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                    1e-7, 1e-10, format);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
+                    ==, "123.5 nm");
+    g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7),
+                    ==, "123.5");
+
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                    1e-7, 1e-9, format);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
+                    ==, "123 nm");
+
+    /* Near-base cases, ensure values differing by step are distinguishable */
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                    1e-7, 1.01e-10, format);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
+                    ==, "123.5 nm");
+
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                    1e-7, 0.99e-10, format);
+    g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
+                    ==, "123.46 nm");
+
+    /* Fancy formatting with base not a power of 10 */
+    g_object_set(format,
+                 "style", GWY_VALUE_FORMAT_PLAIN,
+                 "base", G_PI/180.0,
+                 "precision", 1,
+                 "glue", " ",
+                 "units", "deg",
+                 NULL);
+    g_assert_cmpstr(gwy_value_format_print(format, G_PI/6.0), ==, "30.0 deg");
+
+    g_object_unref(format);
+    g_object_unref(unit);
+
+    format = gwy_value_format_new_set(GWY_VALUE_FORMAT_PANGO,
+                                      -3, 3, " ", "ms");
+    g_assert_cmpstr(gwy_value_format_get_glue(format), ==, " ");
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "ms");
+    g_assert_cmpstr(gwy_value_format_print(format, -1.2e-3),
+                    ==, "−1.200 ms");
+    g_object_unref(format);
+}
+
+/* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
