@@ -36,6 +36,24 @@
 #define STATIC \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
+#define ALL_SET ((guint32)0xffffffffu)
+#define ALL_CLEAR ((guint32)0x00000000u)
+
+/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
+ * lowest bit is 0, the highest 0x1f for little endian and the reverse for
+ * big endian. */
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define NTH_BIT(n) ((guint32)0x1u << (n))
+#define MAKE_MASK(firstbit, nbits) \
+    ((ALL_SET >> (0x20 - (nbits))) << (firstbit))
+#endif
+
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define NTH_BIT(n) ((guint32)0x80000000u >> (n))
+#define MAKE_MASK(firstbit, nbits) \
+    ((ALL_SET << (0x20 - (nbits))) >> (firstbit))
+#endif
+
 enum { N_ITEMS = 3 };
 
 enum {
@@ -165,7 +183,7 @@ swap_bits_uint32(guint32 *data,
         guint32 v = *data;
         v = ((v >> 1) & 0x55555555u) | ((v & 0x55555555u) << 1);
         v = ((v >> 2) & 0x33333333u) | ((v & 0x33333333u) << 2);
-        v = ((v >> 4) & 0x0F0F0F0Fu) | ((v & 0x0F0F0F0Fu) << 4);
+        v = ((v >> 4) & 0x0f0f0f0fu) | ((v & 0x0f0f0f0fu) << 4);
         *(data++) = GUINT32_SWAP_LE_BE(v);
     }
 }
@@ -491,6 +509,88 @@ gwy_mask_field_new_resampled(const GwyMaskField *maskfield,
 }
 
 /**
+ * gwy_mask_field_new_from_field:
+ * @field: A two-dimensional data field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @upper: Upper bound to compare the field values to.
+ * @lower: Lower bound to compare the field values to.
+ * @complement: %TRUE to negate the result of the comparison, i.e. create the
+ *              mask of pixels with values in the complementary interval.
+ *
+ * Creates a new two-dimensional mask field by thresholding a rectangular part
+ * of a data field.
+ *
+ * If @complement is %FALSE and @lower ≤ @upper the mask is created of pixels
+ * of the rectangle with values in the closed interval [@lower,@upper].  If
+ * @lower is larger than @upper the mask is instead created of pixels with
+ * values in [-∞,@upper] ∪ [@lower,∞].
+ *
+ * If @complement is %TRUE the mask is created of pixels in the complementary
+ * open or semi-open intervals, namely [-∞,@lower) ∪ (@upper,∞] and
+ * (@lower,@upper).
+ *
+ * Returns: A new two-dimensional mask field.
+ **/
+GwyMaskField*
+gwy_mask_field_new_from_field(const GwyField *field,
+                              guint col,
+                              guint row,
+                              guint width,
+                              guint height,
+                              gdouble lower,
+                              gdouble upper,
+                              gboolean complement)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_val_if_fail(width && height, NULL);
+    g_return_val_if_fail(col + width <= field->xres, NULL);
+    g_return_val_if_fail(row + height <= field->yres, NULL);
+
+    GwyMaskField *maskfield = gwy_mask_field_new_sized(width, height, FALSE);
+    const gdouble *fbase = field->data + field->xres*row + col;
+    for (guint i = 0; i < height; i++) {
+        const gdouble *p = fbase + i*field->xres;
+        guint32 *q = maskfield->data + i*maskfield->stride;
+        for (guint j = 0; j < width >> 5; j++, q++) {
+            guint32 v = 0;
+            if (lower <= upper) {
+                for (guint k = 0; k < 0x20; k++, p++) {
+                    if (*p >= lower && *p <= upper)
+                        v |= NTH_BIT(k);
+                }
+            }
+            else {
+                for (guint k = 0; k < 0x20; k++, p++) {
+                    if (*p >= lower || *p <= upper)
+                        v |= NTH_BIT(k);
+                }
+            }
+            *q = complement ? ~v : v;
+        }
+        if (width % 0x20) {
+            guint32 v = 0;
+            if (lower <= upper) {
+                for (guint k = 0; k < width % 0x20; k++, p++) {
+                    if (*p >= lower && *p <= upper)
+                        v |= NTH_BIT(k);
+                }
+            }
+            else {
+                for (guint k = 0; k < width % 0x20; k++, p++) {
+                    if (*p >= lower || *p <= upper)
+                        v |= NTH_BIT(k);
+                }
+            }
+            *q = complement ? ~v : v;
+        }
+    }
+    return maskfield;
+}
+
+/**
  * gwy_mask_field_data_changed:
  * @maskfield: A two-dimensional mask field.
  *
@@ -526,10 +626,183 @@ gwy_mask_field_copy(const GwyMaskField *src,
     memcpy(dest->data, src->data, n*sizeof(guint32));
 }
 
-/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
- * lowest bit is 0, the highest 0x1f. */
-#define MAKE_MASK(firstbit, nbits) \
-    ((0xffffffffu >> (0x20 - (nbits))) << (firstbit))
+G_GNUC_UNUSED
+static void
+copy_part_le(const GwyMaskField *src,
+             guint col,
+             guint row,
+             guint width,
+             guint height,
+             GwyMaskField *dest,
+             guint destcol,
+             guint destrow)
+{
+    const guint32 *sbase = src->data + src->stride*row + (col >> 5);
+    guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
+    const guint soff = col & 0x1f;
+    const guint doff = destcol & 0x1f;
+    const guint send = (col + width) & 0x1f;
+    const guint dend = (destcol + width) & 0x1f;
+    const guint k = (doff + 0x20 - soff) & 0x1f;
+    const guint kk = 0x20 - k;
+    if (width <= 0x20 - doff) {
+        const guint32 m0d = MAKE_MASK(doff, width);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint32 v0 = *p;
+            if (send && send <= soff) {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
+            }
+            else if (doff > soff)
+                *q = (*q & ~m0d) | ((v0 << k) & m0d);
+            else
+                *q = (*q & ~m0d) | ((v0 >> kk) & m0d);
+        }
+    }
+    else if (doff == soff) {
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+        const guint32 m1d = MAKE_MASK(0, dend);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint j = width;
+            *q = (*q & ~m0d) | (*p & m0d);
+            j -= 0x20 - doff, p++, q++;
+            while (j >= 0x20) {
+                *q = *p;
+                j -= 0x20, p++, q++;
+            }
+            if (!dend)
+                continue;
+            *q = (*q & ~m1d) | (*p & m1d);
+        }
+    }
+    else {
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+        const guint32 m1d = MAKE_MASK(0, dend);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint j = width;
+            guint32 v0 = *p;
+            if (doff > soff) {
+                *q = (*q & ~m0d) | ((v0 << k) & m0d);
+            }
+            else {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
+                v0 = v1;
+            }
+            j -= (0x20 - doff), q++;
+            while (j >= 0x20) {
+                guint32 v1 = *(++p);
+                *q = (v0 >> kk) | (v1 << k);
+                j -= 0x20, q++;
+                v0 = v1;
+            }
+            if (!dend)
+                continue;
+            if (dend > send) {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m1d) | (((v0 >> kk) | (v1 << k)) & m1d);
+            }
+            else {
+                *q = (*q & ~m1d) | ((v0 >> kk) & m1d);
+            }
+        }
+    }
+}
+
+G_GNUC_UNUSED
+static void
+copy_part_be(const GwyMaskField *src,
+             guint col,
+             guint row,
+             guint width,
+             guint height,
+             GwyMaskField *dest,
+             guint destcol,
+             guint destrow)
+{
+    const guint32 *sbase = src->data + src->stride*row + (col >> 5);
+    guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
+    const guint soff = col & 0x1f;
+    const guint doff = destcol & 0x1f;
+    const guint send = (col + width) & 0x1f;
+    const guint dend = (destcol + width) & 0x1f;
+    const guint k = (doff + 0x20 - soff) & 0x1f;
+    const guint kk = 0x20 - k;
+    if (width <= 0x20 - doff) {
+        const guint32 m0d = MAKE_MASK(doff, width);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint32 v0 = *p;
+            if (send && send <= soff) {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m0d) | (((v0 << kk) | (v1 >> k)) & m0d);
+            }
+            else if (doff > soff)
+                *q = (*q & ~m0d) | ((v0 >> k) & m0d);
+            else
+                *q = (*q & ~m0d) | ((v0 << kk) & m0d);
+        }
+    }
+    else if (doff == soff) {
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+        const guint32 m1d = MAKE_MASK(0, dend);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint j = width;
+            *q = (*q & ~m0d) | (*p & m0d);
+            j -= 0x20 - doff, p++, q++;
+            while (j >= 0x20) {
+                *q = *p;
+                j -= 0x20, p++, q++;
+            }
+            if (!dend)
+                continue;
+            *q = (*q & ~m1d) | (*p & m1d);
+        }
+    }
+    else {
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+        const guint32 m1d = MAKE_MASK(0, dend);
+        for (guint i = 0; i < height; i++) {
+            const guint32 *p = sbase + i*src->stride;
+            guint32 *q = dbase + i*dest->stride;
+            guint j = width;
+            guint32 v0 = *p;
+            if (doff > soff) {
+                *q = (*q & ~m0d) | ((v0 >> k) & m0d);
+            }
+            else {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m0d) | (((v0 << kk) | (v1 >> k)) & m0d);
+                v0 = v1;
+            }
+            j -= (0x20 - doff), q++;
+            while (j >= 0x20) {
+                guint32 v1 = *(++p);
+                *q = (v0 << kk) | (v1 >> k);
+                j -= 0x20, q++;
+                v0 = v1;
+            }
+            if (!dend)
+                continue;
+            if (dend > send) {
+                guint32 v1 = *(++p);
+                *q = (*q & ~m1d) | (((v0 << kk) | (v1 >> k)) & m1d);
+            }
+            else {
+                *q = (*q & ~m1d) | ((v0 << kk) & m1d);
+            }
+        }
+    }
+}
 
 /**
  * gwy_mask_field_part_copy:
@@ -548,7 +821,7 @@ gwy_mask_field_copy(const GwyMaskField *src,
  * @width×@height. It is copied to @dest starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * the part of the rectangle that is corresponds to data inside @src and @dest
  * is copied.  This can also mean nothing is copied at all.
  *
  * If @src is equal to @dest, the areas may not overlap.
@@ -586,82 +859,10 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
                src->data + src->stride*row, src->stride*height);
     }
     else {
-        const guint32 *sbase = src->data + src->stride*row + (col >> 5);
-        guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
-        const guint soff = col & 0x1f;
-        const guint doff = destcol & 0x1f;
-        const guint send = (col + width) & 0x1f;
-        const guint dend = (destcol + width) & 0x1f;
-        const guint k = (doff + 0x20 - soff) & 0x1f;
-        const guint kk = 0x20 - k;
-        if (width <= 0x20 - doff) {
-            const guint32 m0d = MAKE_MASK(doff, width);
-            for (guint i = 0; i < height; i++) {
-                const guint32 *p = sbase + i*src->stride;
-                guint32 *q = dbase + i*dest->stride;
-                guint32 v0 = *p;
-                if (send && send <= soff) {
-                    guint32 v1 = *(++p);
-                    *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
-                }
-                else if (doff > soff)
-                    *q = (*q & ~m0d) | ((v0 << k) & m0d);
-                else
-                    *q = (*q & ~m0d) | ((v0 >> kk) & m0d);
-            }
-        }
-        else if (doff == soff) {
-            const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-            const guint32 m1d = MAKE_MASK(0, dend);
-            for (guint i = 0; i < height; i++) {
-                const guint32 *p = sbase + i*src->stride;
-                guint32 *q = dbase + i*dest->stride;
-                guint j = width;
-                *q = (*q & ~m0d) | (*p & m0d);
-                j -= 0x20 - doff, p++, q++;
-                while (j >= 0x20) {
-                    *q = *p;
-                    j -= 0x20, p++, q++;
-                }
-                if (!dend)
-                    continue;
-                *q = (*q & ~m1d) | (*p & m1d);
-            }
-        }
-        else {
-            const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-            const guint32 m1d = MAKE_MASK(0, dend);
-            for (guint i = 0; i < height; i++) {
-                const guint32 *p = sbase + i*src->stride;
-                guint32 *q = dbase + i*dest->stride;
-                guint j = width;
-                guint32 v0 = *p;
-                if (doff > soff) {
-                    *q = (*q & ~m0d) | ((v0 << k) & m0d);
-                }
-                else {
-                    guint32 v1 = *(++p);
-                    *q = (*q & ~m0d) | (((v0 >> kk) | (v1 << k)) & m0d);
-                    v0 = v1;
-                }
-                j -= (0x20 - doff), q++;
-                while (j >= 0x20) {
-                    guint32 v1 = *(++p);
-                    *q = (v0 >> kk) | (v1 << k);
-                    j -= 0x20, q++;
-                    v0 = v1;
-                }
-                if (!dend)
-                    continue;
-                if (dend > send) {
-                    guint32 v1 = *(++p);
-                    *q = (*q & ~m1d) | (((v0 >> kk) | (v1 << k)) & m1d);
-                }
-                else {
-                    *q = (*q & ~m1d) | ((v0 >> kk) & m1d);
-                }
-            }
-        }
+        if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+            copy_part_le(src, col, row, width, height, dest, destcol, destrow);
+        if (G_BYTE_ORDER == G_BIG_ENDIAN)
+            copy_part_be(src, col, row, width, height, dest, destcol, destrow);
     }
     gwy_mask_field_invalidate(dest);
 }
@@ -724,6 +925,78 @@ gwy_mask_field_fill(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+static void
+set_part(GwyMaskField *maskfield,
+         guint col,
+         guint row,
+         guint width,
+         guint height)
+{
+    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    if (width <= 0x20 - off) {
+        const guint32 m = MAKE_MASK(off, width);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            *p |= m;
+        }
+    }
+    else {
+        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            guint j = width;
+            *p |= m0;
+            j -= 0x20 - off, p++;
+            while (j >= 0x20) {
+                *p = ALL_SET;
+                j -= 0x20, p++;
+            }
+            if (!end)
+                continue;
+            *p |= m1;
+        }
+    }
+}
+
+static void
+clear_part(GwyMaskField *maskfield,
+           guint col,
+           guint row,
+           guint width,
+           guint height)
+{
+    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    if (width <= 0x20 - off) {
+        const guint32 m = ~MAKE_MASK(off, width);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            *p &= m;
+        }
+    }
+    else {
+        const guint32 m0 = ~MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = ~MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            guint j = width;
+            *p &= m0;
+            j -= 0x20 - off, p++;
+            while (j >= 0x20) {
+                *p = ALL_CLEAR;
+                j -= 0x20, p++;
+            }
+            if (!end)
+                continue;
+            *p &= m1;
+        }
+    }
+}
+
 /**
  * gwy_mask_field_part_fill:
  * @maskfield: A two-dimensional mask field.
@@ -749,13 +1022,254 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
 
     if (!width || !height)
         return;
-    // This is much faster.
-    if (width == maskfield->xres && height == maskfield->yres) {
-        gwy_mask_field_fill(maskfield, value);
-        return;
+
+    if (width == maskfield->xres) {
+        g_assert(col == 0);
+        memset(maskfield->data + row*maskfield->stride,
+               value ? 0xff : 0x00,
+               height*maskfield->stride*sizeof(guint32));
+    }
+    else {
+        if (value)
+            set_part(maskfield, col, row, width, height);
+        else
+            clear_part(maskfield, col, row, width, height);
+    }
+    gwy_mask_field_invalidate(maskfield);
+}
+
+/**
+ * gwy_mask_field_lnot:
+ * @maskfield: A two-dimensional mask field to modify.
+ * @mask: A two-dimensional mask field determining to which bits of
+ *        @maskfield to apply the logical operation to.  If %NULL then it is
+ *        applied to all bits.
+ *
+ * Modifies a mask field by logical NOT.
+ *
+ * Pixels in @maskfield are changed from 0 to 1 and vice versa.
+ * If @mask is non-%NULL only pixels where @mask is 1 are affected.
+ *
+ * For non-%NULL @mask this method performs logical XOR of @maskfield and
+ * @mask.
+ **/
+void
+gwy_mask_field_lnot(GwyMaskField *maskfield,
+                    const GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    if (mask) {
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_if_fail(maskfield->xres == mask->xres);
+        g_return_if_fail(maskfield->yres == mask->yres);
+        g_return_if_fail(maskfield->stride == mask->stride);
     }
 
-    // TODO:
+    guint n = maskfield->stride * maskfield->yres;
+    guint32 *q = maskfield->data;
+    if (mask) {
+        const guint32 *m = mask->data;
+        for (guint i = n; i; i--, q++, m++)
+            *q ^= *m;
+    }
+    else {
+        for (guint i = n; i; i--, q++)
+            *q = ~*q;
+    }
+    gwy_mask_field_invalidate(maskfield);
+}
+
+/**
+ * gwy_mask_field_land:
+ * @maskfield: A two-dimensional mask field to modify.
+ * @operand: A two-dimensional mask field representing operand of the logical
+ *           operation.
+ * @mask: A two-dimensional mask field determining to which bits of
+ *        @maskfield to apply the logical operation to.  If %NULL then it is
+ *        applied to all bits.
+ *
+ * Modifies a mask field by logical AND with another mask field.
+ *
+ * Pixels in @maskfield are cleared if the corresponding bits in @operand are
+ * unset.
+ * If @mask is non-%NULL only pixels where @mask is 1 are affected.
+ **/
+void
+gwy_mask_field_land(GwyMaskField *maskfield,
+                    const GwyMaskField *operand,
+                    const GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
+    g_return_if_fail(maskfield->xres == operand->xres);
+    g_return_if_fail(maskfield->yres == operand->yres);
+    g_return_if_fail(maskfield->stride == operand->stride);
+    if (mask) {
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_if_fail(maskfield->xres == mask->xres);
+        g_return_if_fail(maskfield->yres == mask->yres);
+        g_return_if_fail(maskfield->stride == mask->stride);
+    }
+    if (maskfield == operand)
+        return;
+
+    guint n = maskfield->stride * maskfield->yres;
+    const guint32 *p = operand->data;
+    guint32 *q = maskfield->data;
+    if (mask) {
+        const guint32 *m = mask->data;
+        for (guint i = n; i; i--, p++, q++, m++)
+            *q &= ~*m | (*p & *m);
+    }
+    else {
+        for (guint i = n; i; i--, p++, q++)
+            *q &= *p;
+    }
+    gwy_mask_field_invalidate(maskfield);
+}
+
+/**
+ * gwy_mask_field_lor:
+ * @maskfield: A two-dimensional mask field to modify.
+ * @operand: A two-dimensional mask field representing operand of the logical
+ *           operation.
+ * @mask: A two-dimensional mask field determining to which bits of
+ *        @maskfield to apply the logical operation to.  If %NULL then it is
+ *        applied to all bits.
+ *
+ * Modifies a mask field by logical OR with another mask field.
+ *
+ * Pixels in @maskfield are set if the corresponding bits in @operand are set.
+ * If @mask is non-%NULL only pixels where @mask is 1 are affected.
+ **/
+void
+gwy_mask_field_lor(GwyMaskField *maskfield,
+                   const GwyMaskField *operand,
+                   const GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
+    g_return_if_fail(maskfield->xres == operand->xres);
+    g_return_if_fail(maskfield->yres == operand->yres);
+    g_return_if_fail(maskfield->stride == operand->stride);
+    if (mask) {
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_if_fail(maskfield->xres == mask->xres);
+        g_return_if_fail(maskfield->yres == mask->yres);
+        g_return_if_fail(maskfield->stride == mask->stride);
+    }
+    if (maskfield == operand)
+        return;
+
+    guint n = maskfield->stride * maskfield->yres;
+    const guint32 *p = operand->data;
+    guint32 *q = maskfield->data;
+    if (mask) {
+        const guint32 *m = mask->data;
+        for (guint i = n; i; i--, p++, q++, m++)
+            *q = (*q & ~(*m)) | ((*q | *p) & *m);
+    }
+    else {
+        for (guint i = n; i; i--, p++, q++)
+            *q |= *p;
+    }
+    gwy_mask_field_invalidate(maskfield);
+}
+
+/**
+ * gwy_mask_field_lcopy:
+ * @maskfield: A two-dimensional mask field to modify.
+ * @operand: A two-dimensional mask field representing operand of the logical
+ *           operation.
+ * @mask: A two-dimensional mask field determining to which bits of
+ *        @maskfield to apply the logical operation to.  If %NULL then it is
+ *        applied to all bits.
+ *
+ * Modifies a mask field by logical COPY with another mask field.
+ *
+ * Pixels in @maskfield are set or cleared according to the corresponding bits
+ * in @operand.
+ * If @mask is non-%NULL only pixels where @mask is 1 are affected.
+ * With %NULL mask this function is equivalent to gwy_mask_field_copy() with
+ * arguments echanged.
+ **/
+void
+gwy_mask_field_lcopy(GwyMaskField *maskfield,
+                     const GwyMaskField *operand,
+                     const GwyMaskField *mask)
+{
+    if (!mask) {
+        gwy_mask_field_copy(operand, maskfield);
+        return;
+    }
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
+    g_return_if_fail(maskfield->xres == operand->xres);
+    g_return_if_fail(maskfield->yres == operand->yres);
+    g_return_if_fail(maskfield->stride == operand->stride);
+    g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+    g_return_if_fail(maskfield->xres == mask->xres);
+    g_return_if_fail(maskfield->yres == mask->yres);
+    g_return_if_fail(maskfield->stride == mask->stride);
+    if (maskfield == operand)
+        return;
+
+    guint n = maskfield->stride * maskfield->yres;
+    const guint32 *p = operand->data;
+    guint32 *q = maskfield->data;
+    const guint32 *m = mask->data;
+    for (guint i = n; i; i--, p++, q++, m++)
+        *q = (*q & ~(*m)) | (*p & *m);
+    gwy_mask_field_invalidate(maskfield);
+}
+
+/**
+ * gwy_mask_field_lsubtract:
+ * @maskfield: A two-dimensional mask field to modify.
+ * @operand: A two-dimensional mask field representing operand of the logical
+ *           operation.
+ * @mask: A two-dimensional mask field determining to which bits of
+ *        @maskfield to apply the logical operation to.  If %NULL then it is
+ *        applied to all bits.
+ *
+ * Modifies a mask field by logical SUBTRACT with another mask field.
+ *
+ * Pixels in @maskfield are cleared if the corresponding bits in @operand are
+ * set.
+ * If @mask is non-%NULL only pixels where @mask is 1 are affected.
+ **/
+void
+gwy_mask_field_lsubtract(GwyMaskField *maskfield,
+                         const GwyMaskField *operand,
+                         const GwyMaskField *mask)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
+    g_return_if_fail(maskfield->xres == operand->xres);
+    g_return_if_fail(maskfield->yres == operand->yres);
+    g_return_if_fail(maskfield->stride == operand->stride);
+    if (mask) {
+        g_return_if_fail(GWY_IS_MASK_FIELD(mask));
+        g_return_if_fail(maskfield->xres == mask->xres);
+        g_return_if_fail(maskfield->yres == mask->yres);
+        g_return_if_fail(maskfield->stride == mask->stride);
+    }
+    if (maskfield == operand)
+        return;
+
+    guint n = maskfield->stride * maskfield->yres;
+    const guint32 *p = operand->data;
+    guint32 *q = maskfield->data;
+    if (mask) {
+        const guint32 *m = mask->data;
+        for (guint i = n; i; i--, p++, q++, m++)
+            *q &= ~(*p & *m);
+    }
+    else {
+        for (guint i = n; i; i--, p++, q++)
+            *q &= ~*p;
+    }
+    gwy_mask_field_invalidate(maskfield);
 }
 
 #define __LIBGWY_MASK_FIELD_C__
@@ -780,11 +1294,15 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
  *
  * Each row starts on a #guint32 boundary so, padding may be present at the
  * ends of rows.  The row stride is available as #GwyMaskField-struct.stride.
+ * If padding is present, the unused bits have undefined value and mask field
+ * methods may change them arbitrarily.
  *
  * It is possible to get and set individual bits with macros
- * gwy_mask_field_get() and gwy_mask_field_set().  However, in
- * performance-sensitive calculations it is preferable to directly obtain
- * the packed values and iterate over bits.
+ * gwy_mask_field_get() and gwy_mask_field_set().  In performance-sensitive
+ * code it might be preferable to directly obtain the packed values and iterate
+ * over bits.  However, if you perform any non-trivial floating-point operation
+ * in each pixel, the cost of the gwy_mask_field_get() bit extraction will
+ * unlikely matter.
  *
  * FIXME: Here should be something about invalidation, but let's get the grain
  * data implemented first.

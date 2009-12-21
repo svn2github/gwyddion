@@ -21,7 +21,7 @@
 #define __LIBGWY_MASK_FIELD_H__
 
 #include <libgwy/serializable.h>
-#include <libgwy/interpolation.h>
+#include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
@@ -60,40 +60,62 @@ struct _GwyMaskFieldClass {
 #define gwy_mask_field_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType         gwy_mask_field_get_type     (void)                      G_GNUC_CONST;
-GwyMaskField* gwy_mask_field_new          (void)                      G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_sized    (guint xres,
-                                           guint yres,
-                                           gboolean clear)            G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_part     (const GwyMaskField *maskfield,
-                                           guint col,
-                                           guint row,
-                                           guint width,
-                                           guint height)              G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_resampled(const GwyMaskField *maskfield,
-                                           guint xres,
-                                           guint yres)                G_GNUC_MALLOC;
-void          gwy_mask_field_data_changed (GwyMaskField *maskfield);
-void          gwy_mask_field_copy         (const GwyMaskField *src,
-                                           GwyMaskField *dest);
-void          gwy_mask_field_part_copy    (const GwyMaskField *src,
-                                           guint col,
-                                           guint row,
-                                           guint width,
-                                           guint height,
-                                           GwyMaskField *dest,
-                                           guint destcol,
-                                           guint destrow);
-guint32*      gwy_mask_field_get_data     (GwyMaskField *maskfield)  G_GNUC_PURE;
-void          gwy_mask_field_invalidate   (GwyMaskField *maskfield);
-void          gwy_mask_field_fill         (GwyMaskField *maskfield,
-                                           gboolean value);
-void          gwy_mask_field_part_fill    (GwyMaskField *maskfield,
-                                           guint col,
-                                           guint row,
-                                           guint width,
-                                           guint height,
-                                           gboolean value);
+GType         gwy_mask_field_get_type      (void)                          G_GNUC_CONST;
+GwyMaskField* gwy_mask_field_new           (void)                          G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_sized     (guint xres,
+                                            guint yres,
+                                            gboolean clear)                G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_part      (const GwyMaskField *maskfield,
+                                            guint col,
+                                            guint row,
+                                            guint width,
+                                            guint height)                  G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_resampled (const GwyMaskField *maskfield,
+                                            guint xres,
+                                            guint yres)                    G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
+                                            guint col,
+                                            guint row,
+                                            guint width,
+                                            guint height,
+                                            gdouble lower,
+                                            gdouble upper,
+                                            gboolean complement)           G_GNUC_MALLOC;
+void          gwy_mask_field_data_changed  (GwyMaskField *maskfield);
+void          gwy_mask_field_copy          (const GwyMaskField *src,
+                                            GwyMaskField *dest);
+void          gwy_mask_field_part_copy     (const GwyMaskField *src,
+                                            guint col,
+                                            guint row,
+                                            guint width,
+                                            guint height,
+                                            GwyMaskField *dest,
+                                            guint destcol,
+                                            guint destrow);
+guint32*      gwy_mask_field_get_data      (GwyMaskField *maskfield)       G_GNUC_PURE;
+void          gwy_mask_field_invalidate    (GwyMaskField *maskfield);
+void          gwy_mask_field_fill          (GwyMaskField *maskfield,
+                                            gboolean value);
+void          gwy_mask_field_part_fill     (GwyMaskField *maskfield,
+                                            guint col,
+                                            guint row,
+                                            guint width,
+                                            guint height,
+                                            gboolean value);
+void          gwy_mask_field_lnot          (GwyMaskField *maskfield,
+                                            const GwyMaskField *mask);
+void          gwy_mask_field_land          (GwyMaskField *maskfield,
+                                            const GwyMaskField *operand,
+                                            const GwyMaskField *mask);
+void          gwy_mask_field_lor           (GwyMaskField *maskfield,
+                                            const GwyMaskField *operand,
+                                            const GwyMaskField *mask);
+void          gwy_mask_field_lcopy         (GwyMaskField *maskfield,
+                                            const GwyMaskField *operand,
+                                            const GwyMaskField *mask);
+void          gwy_mask_field_lsubtract     (GwyMaskField *maskfield,
+                                            const GwyMaskField *operand,
+                                            const GwyMaskField *mask);
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
