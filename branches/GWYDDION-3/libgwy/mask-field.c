@@ -1001,6 +1001,71 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+static void
+invert_part(GwyMaskField *maskfield,
+            guint col,
+            guint row,
+            guint width,
+            guint height)
+{
+    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    if (width <= 0x20 - off) {
+        const guint32 m = ~MAKE_MASK(off, width);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            *p ^= m;
+        }
+    }
+    else {
+        const guint32 m0 = ~MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = ~MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            guint j = width;
+            *p ^= m0;
+            j -= 0x20 - off, p++;
+            while (j >= 0x20) {
+                *p ^= ALL_SET;
+                j -= 0x20, p++;
+            }
+            if (!end)
+                continue;
+            *p ^= m1;
+        }
+    }
+}
+
+// FIXME: Does it worth publishing?  One usually inverts the complete mask.
+/**
+ * gwy_mask_field_part_invert:
+ * @maskfield: A two-dimensional mask field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ *
+ * Inverts values in a rectangular part of a mask field.
+ **/
+static void
+gwy_mask_field_part_invert(GwyMaskField *maskfield,
+                           guint col,
+                           guint row,
+                           guint width,
+                           guint height)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(col + width <= maskfield->xres);
+    g_return_if_fail(row + height <= maskfield->yres);
+
+    if (!width || !height)
+        return;
+
+    invert_part(maskfield, col, row, width, height);
+    gwy_mask_field_invalidate(maskfield);
+}
+
 #define LOGICAL_OP_LOOP(simple, masked) \
     do { \
         if (mask) { \
@@ -1113,6 +1178,135 @@ gwy_mask_field_logical(GwyMaskField *maskfield,
     else {
         g_assert_not_reached();
     }
+    gwy_mask_field_invalidate(maskfield);
+}
+
+static void
+logical_part(const GwyMaskField *src,
+             guint col,
+             guint row,
+             guint width,
+             guint height,
+             GwyMaskField *dest,
+             guint destcol,
+             guint destrow,
+             GwyLogicalOperator op)
+{
+    const guint32 *sbase = src->data + src->stride*row + (col >> 5);
+    guint32 *dbase = dest->data + dest->stride*destrow + (destcol >> 5);
+    const guint soff = col & 0x1f;
+    const guint doff = destcol & 0x1f;
+    const guint send = (col + width) & 0x1f;
+    const guint dend = (destcol + width) & 0x1f;
+    const guint k = (doff + 0x20 - soff) & 0x1f;
+    const guint kk = 0x20 - k;
+    // GWY_LOGICAL_ZERO cannot get here.
+    if (op == GWY_LOGICAL_AND)
+        LOGICAL_OP_PART(*q &= vp, *q &= ~*m | (vp & *m));
+    else if (op == GWY_LOGICAL_NIMPL)
+        LOGICAL_OP_PART(*q &= ~vp, *q &= ~*m | (~vp & *m));
+    // GWY_LOGICAL_A cannot get here.
+    else if (op == GWY_LOGICAL_NCIMPL)
+        LOGICAL_OP_PART(*q = ~*q & vp, *q = (*q & ~*m) | (~*q & vp & *m));
+    // GWY_LOGICAL_B cannot get here.
+    else if (op == GWY_LOGICAL_XOR)
+        LOGICAL_OP_PART(*q ^= vp, *q ^= *m & vp);
+    else if (op == GWY_LOGICAL_OR)
+        LOGICAL_OP_PART(*q |= vp, *q |= *m & vp);
+    else if (op == GWY_LOGICAL_NOR)
+        LOGICAL_OP_PART(*q = ~(*q | vp), *q = (*q & ~*m) | (~(*q | vp) & *m));
+    else if (op == GWY_LOGICAL_NXOR)
+        LOGICAL_OP_PART(*q = ~(*q ^ vp), *q = (*q & ~*m) | (~(*q ^ vp) & *m));
+    else if (op == GWY_LOGICAL_NB)
+        LOGICAL_OP_PART(*q = ~vp, *q = (*q & ~*m) | (~vp & *m));
+    else if (op == GWY_LOGICAL_CIMPL)
+        LOGICAL_OP_PART(*q |= ~vp, *q |= ~vp & *m);
+    // GWY_LOGICAL_NA cannot get here.
+    else if (op == GWY_LOGICAL_IMPL)
+        LOGICAL_OP_PART(*q = ~*q | vp, *q = (*q & ~*m) | ((~*q | vp) & *m));
+    else if (op == GWY_LOGICAL_NAND)
+        LOGICAL_OP_PART(*q = ~(*q & vp),  *q = (*q & ~*m) | (~(*q & vp) & *m));
+    // GWY_LOGICAL_ONE cannot get here.
+    else {
+        g_assert_not_reached();
+    }
+}
+
+/**
+ * gwy_mask_field_logical:
+ * @maskfield: A two-dimensional mask field to modify and the first operand of
+ *             the logical operation.
+ * @col: Column index of the upper-left corner of the rectangle in @maskfield.
+ * @row: Row index of the upper-left corner of the rectangle in @maskfield.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @operand: A two-dimensional mask field representing second operand of the
+ *           logical operation.  It can be %NULL for degenerate operations that
+ *           do not depend on the second operand.
+ * @opcol: Operand column in @dest.
+ * @oprow: Operand row in @dest.
+ * @op: Logical operation to perform.
+ *
+ * Modifies a rectangular part of a mask field by logical operation with
+ * another mask field.
+ *
+ * The rectangle starts at (@col, @row) in @maskfield and its dimensions are
+ * @width×@height.  It is modified using data in @operand starting from
+ * (@opcol, @oprow).  Note that although this method resembles
+ * gwy_mask_field_copy() the arguments convention is different: the destination
+ * comes first then the operand, similarly to in gwy_mask_field_logical().
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corresponds to data inside @maskfield and
+ * @operand is copied.  This can also mean nothing is copied at all.
+ *
+ * If @operand is equal to @maskfield, the areas may not overlap.
+ **/
+void
+gwy_mask_field_part_logical(GwyMaskField *maskfield,
+                            guint col,
+                            guint row,
+                            guint width,
+                            guint height,
+                            const GwyMaskField *operand,
+                            guint opcol,
+                            guint oprow,
+                            GwyLogicalOperator op)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(op <= GWY_LOGICAL_ONE);
+    if (op == GWY_LOGICAL_A)
+        return;
+    if (op == GWY_LOGICAL_ZERO) {
+        gwy_mask_field_part_fill(maskfield, col, row, height, width, FALSE);
+        return;
+    }
+    if (op == GWY_LOGICAL_B) {
+        gwy_mask_field_part_copy(operand, opcol, oprow, width, height,
+                                 maskfield, col, row);
+        return;
+    }
+    if (op == GWY_LOGICAL_NA) {
+        gwy_mask_field_part_invert(maskfield, col, row, width, height);
+        return;
+    }
+    if (op == GWY_LOGICAL_ONE) {
+        gwy_mask_field_part_fill(maskfield, col, row, height, width, TRUE);
+        return;
+    }
+
+    if (opcol >= operand->xres || col >= maskfield->xres
+        || oprow >= operand->yres || row >= maskfield->yres)
+        return;
+
+    width = MIN(width, operand->xres - opcol);
+    height = MIN(height, operand->yres - oprow);
+    width = MIN(width, maskfield->xres - col);
+    height = MIN(height, maskfield->yres - row);
+    if (!width || !height)
+        return;
+
+    logical_part(operand, opcol, oprow, width, height, maskfield, col, row, op);
     gwy_mask_field_invalidate(maskfield);
 }
 

@@ -125,6 +125,15 @@ void          gwy_mask_field_logical       (GwyMaskField *maskfield,
                                             const GwyMaskField *operand,
                                             const GwyMaskField *mask,
                                             GwyLogicalOperator op);
+void          gwy_mask_field_part_logical  (GwyMaskField *maskfield,
+                                            guint col,
+                                            guint row,
+                                            guint width,
+                                            guint height,
+                                            const GwyMaskField *operand,
+                                            guint opcol,
+                                            guint oprow,
+                                            GwyLogicalOperator op);
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
