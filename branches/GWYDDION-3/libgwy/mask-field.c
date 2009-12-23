@@ -644,6 +644,112 @@ gwy_mask_field_copy(const GwyMaskField *src,
     memcpy(dest->data, src->data, n*sizeof(guint32));
 }
 
+// Only one item is modified per row but the mask may need bits cut off from
+// both sides (unlike in all other cases).
+#define LOGICAL_OP_PART_SINGLE(masked) \
+    do { \
+        const guint32 m = MAKE_MASK(doff, width); \
+        for (guint i = 0; i < height; i++) { \
+            const guint32 *p = sbase + i*src->stride; \
+            guint32 *q = dbase + i*dest->stride; \
+            guint32 v0 = *p; \
+            if (send && send <= soff) { \
+                guint32 v1 = *(++p); \
+                guint32 vp = (v0 SHL kk) | (v1 SHR k); \
+                masked; \
+            } \
+            else if (doff > soff) { \
+                guint32 vp = v0 SHR k; \
+                masked; \
+            } \
+            else { \
+                guint32 vp = v0 SHL kk; \
+                masked; \
+            } \
+        } \
+    } while (0)
+
+// Multiple items are modified per row but the offsets match so no shifts are
+// necessary, just masking at the ends.
+#define LOGICAL_OP_PART_ALIGNED(simple, masked) \
+    do { \
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff); \
+        const guint32 m1d = MAKE_MASK(0, dend); \
+        for (guint i = 0; i < height; i++) { \
+            const guint32 *p = sbase + i*src->stride; \
+            guint32 *q = dbase + i*dest->stride; \
+            guint j = width; \
+            guint32 vp = *p; \
+            guint32 m = m0d; \
+            masked; \
+            j -= 0x20 - doff, p++, q++; \
+            while (j >= 0x20) { \
+                vp = *p; \
+                simple; \
+                j -= 0x20, p++, q++; \
+            } \
+            if (!dend) \
+                continue; \
+            vp = *p; \
+            m = m1d; \
+            masked; \
+        } \
+    } while (0)
+
+// The general case, multi-item transfer and different offsets.
+#define LOGICAL_OP_PART_GENERAL(simple, masked) \
+    do { \
+        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff); \
+        const guint32 m1d = MAKE_MASK(0, dend); \
+        for (guint i = 0; i < height; i++) { \
+            const guint32 *p = sbase + i*src->stride; \
+            guint32 *q = dbase + i*dest->stride; \
+            guint j = width; \
+            guint32 v0 = *p; \
+            if (doff > soff) { \
+                guint32 vp = v0 SHR k; \
+                guint32 m = m0d; \
+                masked; \
+            } \
+            else { \
+                guint32 v1 = *(++p); \
+                guint32 vp = (v0 SHL kk) | (v1 SHR k); \
+                guint32 m = m0d; \
+                masked; \
+                v0 = v1; \
+            } \
+            j -= (0x20 - doff), q++; \
+            while (j >= 0x20) { \
+                guint32 v1 = *(++p); \
+                guint32 vp = (v0 SHL kk) | (v1 SHR k); \
+                simple; \
+                j -= 0x20, q++; \
+                v0 = v1; \
+            } \
+            if (!dend) \
+                continue; \
+            if (dend > send) { \
+                guint32 v1 = *(++p); \
+                guint32 vp = (v0 SHL kk) | (v1 SHR k); \
+                guint32 m = m1d; \
+                masked; \
+            } \
+            else { \
+                guint32 vp = (v0 SHL kk); \
+                guint32 m = m1d; \
+                masked; \
+            } \
+        } \
+    } while (0)
+
+#define LOGICAL_OP_PART(simple, masked) \
+    if (width <= 0x20 - doff) \
+        LOGICAL_OP_PART_SINGLE(*q = (*q & ~m) | (vp & m)); \
+    else if (doff == soff) \
+        LOGICAL_OP_PART_ALIGNED(*q = vp, *q = (*q & ~m) | (vp & m)); \
+    else \
+        LOGICAL_OP_PART_GENERAL(*q = vp, *q = (*q & ~m) | (vp & m)) \
+
 static void
 copy_part(const GwyMaskField *src,
           guint col,
@@ -662,74 +768,7 @@ copy_part(const GwyMaskField *src,
     const guint dend = (destcol + width) & 0x1f;
     const guint k = (doff + 0x20 - soff) & 0x1f;
     const guint kk = 0x20 - k;
-    if (width <= 0x20 - doff) {
-        const guint32 m0d = MAKE_MASK(doff, width);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint32 v0 = *p;
-            if (send && send <= soff) {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 SHL kk) | (v1 SHR k)) & m0d);
-            }
-            else if (doff > soff)
-                *q = (*q & ~m0d) | ((v0 SHR k) & m0d);
-            else
-                *q = (*q & ~m0d) | ((v0 SHL kk) & m0d);
-        }
-    }
-    else if (doff == soff) {
-        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-        const guint32 m1d = MAKE_MASK(0, dend);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint j = width;
-            *q = (*q & ~m0d) | (*p & m0d);
-            j -= 0x20 - doff, p++, q++;
-            while (j >= 0x20) {
-                *q = *p;
-                j -= 0x20, p++, q++;
-            }
-            if (!dend)
-                continue;
-            *q = (*q & ~m1d) | (*p & m1d);
-        }
-    }
-    else {
-        const guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
-        const guint32 m1d = MAKE_MASK(0, dend);
-        for (guint i = 0; i < height; i++) {
-            const guint32 *p = sbase + i*src->stride;
-            guint32 *q = dbase + i*dest->stride;
-            guint j = width;
-            guint32 v0 = *p;
-            if (doff > soff) {
-                *q = (*q & ~m0d) | ((v0 SHR k) & m0d);
-            }
-            else {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m0d) | (((v0 SHL kk) | (v1 SHR k)) & m0d);
-                v0 = v1;
-            }
-            j -= (0x20 - doff), q++;
-            while (j >= 0x20) {
-                guint32 v1 = *(++p);
-                *q = (v0 SHL kk) | (v1 SHR k);
-                j -= 0x20, q++;
-                v0 = v1;
-            }
-            if (!dend)
-                continue;
-            if (dend > send) {
-                guint32 v1 = *(++p);
-                *q = (*q & ~m1d) | (((v0 SHL kk) | (v1 SHR k)) & m1d);
-            }
-            else {
-                *q = (*q & ~m1d) | ((v0 SHL kk) & m1d);
-            }
-        }
-    }
+    LOGICAL_OP_PART(*q = vp, *q = (*q & ~m) | (vp & m));
 }
 
 /**
@@ -964,15 +1003,15 @@ gwy_mask_field_part_fill(GwyMaskField *maskfield,
 
 #define LOGICAL_OP_LOOP(simple, masked) \
     do { \
-        if (mask) {  \
-            const guint32 *m = mask->data;  \
-            for (guint i = n; i; i--, p++, q++, m++)  \
+        if (mask) { \
+            const guint32 *m = mask->data; \
+            for (guint i = n; i; i--, p++, q++, m++) \
                 masked; \
-        }  \
-        else {  \
-            for (guint i = n; i; i--, p++, q++)  \
-                simple;  \
-        }  \
+        } \
+        else { \
+            for (guint i = n; i; i--, p++, q++) \
+                simple; \
+        } \
     } while (0)
 
 /**
