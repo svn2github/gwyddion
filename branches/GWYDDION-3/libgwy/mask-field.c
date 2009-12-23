@@ -1369,15 +1369,14 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  *
- * No argument validation is performed.  If you process the data in a loop,
- * you are encouraged to access #GwyMaskField-struct.data directly.
+ * No argument validation is performed.
  *
  * Returns: Nonzero value (not necessarily 1) if the bit is set, zero it it's
  *          unset.
  **/
 
 /**
- * gwy_mask_field_get:
+ * gwy_mask_field_set:
  * @maskfield: A two-dimensional mask field.
  * @col: Column index in @maskfield.
  * @row: Row index in @maskfield.
@@ -1388,8 +1387,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  *
- * No argument validation is performed.  If you process the data in a loop,
- * you are encouraged to access #GwyMaskField-struct.data directly.
+ * No argument validation is performed.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

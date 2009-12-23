@@ -1125,11 +1125,11 @@ gwy_field_part_fill(GwyField *field,
  *
  * Data are stored in a flat array #GwyField-struct.data of #gdouble values,
  * stored by rows.  This means the column index is the fast index, row index is
- * the slow one.  The array is contiguous, i.e. there is no padding at the end
- * of each row (and neither beween pixels).  No methods to get and set
- * individual values or rows and columns are provided except gwy_field_index().
- * The usual mode of operation is to access the data directly, bearing a few
- * things in mind:
+ * the slow one, the top left corner indices are (0,0).  The array is
+ * contiguous, i.e. there is no padding at the end of each row (and neither
+ * beween pixels).  No methods to get and set individual values or rows and
+ * columns are provided except gwy_field_index().  The usual mode of operation
+ * is to access the data directly, bearing a few things in mind:
  * <itemizedlist>
  *   <listitem>All #GwyField struct fields must be considered read-only. You
  *   may write to #GwyField-struct.data <emphasis>content</emphasis> but you
