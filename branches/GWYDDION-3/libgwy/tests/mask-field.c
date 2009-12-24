@@ -40,6 +40,22 @@ mask_field_dump(const GwyMaskField *maskfield, const gchar *name)
     }
 }
 
+void
+test_mask_field_props(void)
+{
+    GwyMaskField *maskfield = gwy_mask_field_new_sized(41, 37, FALSE);
+    guint xres, yres, stride;
+    g_object_get(maskfield,
+                 "x-res", &xres,
+                 "y-res", &yres,
+                 "stride", &stride,
+                 NULL);
+    g_assert_cmpuint(xres, ==, maskfield->xres);
+    g_assert_cmpuint(yres, ==, maskfield->yres);
+    g_assert_cmpuint(stride, ==, maskfield->stride);
+    g_object_unref(maskfield);
+}
+
 static void
 mask_field_part_copy_dumb(const GwyMaskField *src,
                           guint col,
