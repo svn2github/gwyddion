@@ -57,7 +57,7 @@ gwy_math_median(gdouble *array, gsize n)
     gsize median;
     gsize middle, ll, hh;
 
-    g_return_val_if_fail(n, nan(""));
+    g_return_val_if_fail(n, NAN);
 
     lo = 0;
     hi = n - 1;
