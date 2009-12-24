@@ -27,6 +27,7 @@
   <xi:include href="xml/unit.xml"/>
   <xi:include href="xml/value-format.xml"/>
   <xi:include href="xml/field.xml"/>
+  <xi:include href="xml/field-statistics.xml"/>
   <xi:include href="xml/mask-field.xml"/>
   <xi:include href="xml/rgba.xml"/>
   <xi:include href="xml/container.xml"/>
