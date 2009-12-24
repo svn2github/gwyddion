@@ -129,6 +129,22 @@
  **/
 
 /**
+ * GWY_MAYBE_SET:
+ * @pointer: Pointer to a value to update, or %NULL.  This argument may be
+ *           evaluated multiple times.
+ * @value: Value to assign.  This argument is evaluated only once.
+ *
+ * Sets a value to which a pointer points, but only if the pointer is not
+ * %NULL.
+ *
+ * This macro is a shorthand for the common idiom
+ * |[
+ * if (pointer)
+ *     *pointer = value;
+ * ]|
+ **/
+
+/**
  * gwy_memclear:
  * @array: Pointer to an array of values to clear.
  *         This argument may be evaluated several times.
