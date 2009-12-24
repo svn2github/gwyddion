@@ -104,7 +104,7 @@ gwy_rgba_construct(GwySerializableItems *items,
 
 /**
  * gwy_rgba_copy:
- * @rgba: A RGBA color.
+ * @rgba: A RGBA colour.
  *
  * Makes a copy of a rgba structure. The result must be freed using
  * gwy_rgba_free().
@@ -120,7 +120,7 @@ gwy_rgba_copy(const GwyRGBA *rgba)
 
 /**
  * gwy_rgba_free:
- * @rgba: A RGBA color.
+ * @rgba: A RGBA colour.
  *
  * Frees an rgba structure created with gwy_rgba_copy().
  **/
@@ -144,9 +144,9 @@ gwy_rgba_free(GwyRGBA *rgba)
 
 /**
  * gwy_rgba_fix:
- * @rgba: A RGBA color.
+ * @rgba: A RGBA colour.
  *
- * Corrects components of a color to lie in the range [0,1].
+ * Corrects components of a colour to lie in the range [0,1].
  *
  * Returns: %TRUE if @rgba was all right, %FALSE if some components had to be
  *          corrected.
@@ -164,14 +164,14 @@ gwy_rgba_fix(GwyRGBA *rgba)
 
 /**
  * gwy_rgba_interpolate:
- * @src1: Color at point @x = 0.0.
- * @src2: Color at point @x = 1.0.
- * @x: Point in interval 0..1 to take color from.
+ * @src1: Colour at point @x = 0.0.
+ * @src2: Colour at point @x = 1.0.
+ * @x: Point in interval 0..1 to take colour from.
  * @rgba: A #GwyRGBA to store result to.
  *
- * Linearly interpolates two colors, including alpha blending.
+ * Linearly interpolates two colours, including alpha blending.
  *
- * Correct blending of two not fully opaque colors is tricky.  Always use
+ * Correct blending of two not fully opaque colours is tricky.  Always use
  * this function, not simple independent interpolation of r, g, b, and a.
  **/
 void
@@ -221,9 +221,9 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
 /**
  * SECTION: rgba
  * @title: GwyRGBA
- * @short_description: Bit depth independet RGBA colors
+ * @short_description: Bit depth independet RGBA colours
  *
- * #GwyRGBA is a bit depth independent representation of an RGB or RGBA color,
+ * #GwyRGBA is a bit depth independent representation of an RGB or RGBA colour,
  * using floating point values from the [0,1] interval.
  *
  * #GwyRGBA is not an object, but a simple struct that can be allocated on
@@ -239,7 +239,7 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
  * @b: The blue component.
  * @a: The alpha (opacity) value.
  *
- * RGBA color specification type.
+ * RGBA colour specification type.
  *
  * All values are from the range [0,1].  Alpha is not premultiplied.
  **/

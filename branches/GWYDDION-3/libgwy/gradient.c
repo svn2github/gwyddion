@@ -282,7 +282,7 @@ gwy_gradient_sanitize(GwyGradient *gradient)
     guint n = points->len;
 
     /* first make points ordered, in 0..1, starting with 0, ending with 1,
-     * and fix colors */
+     * and fix colours */
     for (guint i = 0; i < n; i++) {
         GwyGradientPoint *pt = pts + i;
         gwy_rgba_fix(&pt->color);
@@ -356,9 +356,9 @@ gwy_gradient_parse(GwyResource *resource,
 /**
  * gwy_gradient_new:
  *
- * Creates a new color gradient.
+ * Creates a new colour gradient.
  *
- * Returns: A new free-standing color gradient.
+ * Returns: A new free-standing colour gradient.
  **/
 GwyGradient*
 gwy_gradient_new(void)
@@ -368,11 +368,11 @@ gwy_gradient_new(void)
 
 /**
  * gwy_gradient_get_color:
- * @gradient: A color gradient.
+ * @gradient: A colour gradient.
  * @x: Position in gradient, in interval [0,1].
- * @color: Color to fill with interpolated color at position @x.
+ * @color: Colour to fill with interpolated colour at position @x.
  *
- * Computes the color at a given position of a color gradient.
+ * Computes the colour at a given position of a colour gradient.
  **/
 void
 gwy_gradient_get_color(GwyGradient *gradient,
@@ -410,10 +410,10 @@ gwy_gradient_get_color(GwyGradient *gradient,
 #if 0
 /**
  * gwy_gradient_get_samples:
- * @gradient: A color gradient to get samples of.
+ * @gradient: A colour gradient to get samples of.
  * @nsamples: A location to store the number of samples (or %NULL).
  *
- * Returns color gradient sampled to integers in #GdkPixbuf-like scheme.
+ * Returns colour gradient sampled to integers in #GdkPixbuf-like scheme.
  *
  * The returned samples are owned by @gradient and must not be modified or
  * freed.  They are automatically updated when the gradient changes, although
@@ -441,7 +441,7 @@ gwy_gradient_get_samples(GwyGradient *gradient,
 
 /**
  * gwy_gradient_sample:
- * @gradient: A color gradient to sample.
+ * @gradient: A colour gradient to sample.
  * @nsamples: Required number of samples.
  * @samples: Pointer to array to be filled.
  *
@@ -507,10 +507,10 @@ gwy_gradient_sample_real(GwyGradient *gradient,
 
 /**
  * gwy_gradient_sample_to_pixbuf:
- * @gradient: A color gradient to sample.
+ * @gradient: A colour gradient to sample.
  * @pixbuf: A pixbuf to sample gradient to (in horizontal direction).
  *
- * Samples a color gradient to a provided pixbuf.
+ * Samples a colour gradient to a provided pixbuf.
  *
  * Unlike gwy_gradient_sample() which simply takes samples at equidistant
  * points this method uses supersampling and thus it gives a bit better
@@ -576,9 +576,9 @@ gwy_gradient_sample_to_pixbuf(GwyGradient *gradient,
 
 /**
  * gwy_gradient_n_points:
- * @gradient: A color gradient.
+ * @gradient: A colour gradient.
  *
- * Returns the number of points in a color gradient.
+ * Returns the number of points in a colour gradient.
  *
  * Returns: The number of points in @gradient.
  **/
@@ -591,12 +591,12 @@ gwy_gradient_n_points(GwyGradient *gradient)
 
 /**
  * gwy_gradient_get:
- * @gradient: A color gradient.
- * @n: Color point index in @gradient.
+ * @gradient: A colour gradient.
+ * @n: Colour point index in @gradient.
  *
- * Returns the point at given index of a color gradient.
+ * Returns the point at given index of a colour gradient.
  *
- * Returns: Color point at @n.
+ * Returns: Colour point at @n.
  **/
 GwyGradientPoint
 gwy_gradient_get(GwyGradient *gradient,
@@ -609,11 +609,11 @@ gwy_gradient_get(GwyGradient *gradient,
 
 /**
  * fix_position:
- * @points: Array of color points (gradient definition).
+ * @points: Array of colour points (gradient definition).
  * @i: Index a point should be inserted.
  * @pos: Position the point should be inserted to.
  *
- * Fixes the position of a color point between neighbours and to range 0..1.
+ * Fixes the position of a colour point between neighbours and to range [0,1].
  *
  * Returns: Fixed position.
  **/
@@ -642,11 +642,11 @@ fix_position(GArray *points,
 
 /**
  * gwy_gradient_set:
- * @gradient: A color gradient.
- * @n: Color point index in @gradient.
- * @point: Color point to replace current point at @n with.
+ * @gradient: A colour gradient.
+ * @n: Colour point index in @gradient.
+ * @point: Colour point to replace current point at @n with.
  *
- * Sets a single color point in a color gradient.
+ * Sets a single colour point in a colour gradient.
  *
  * It is an error to try to place a point beyond its neighbours, or to move the
  * first or last point from 0 or 1, respectively.
@@ -674,11 +674,11 @@ gwy_gradient_set(GwyGradient *gradient,
 
 /**
  * gwy_gradient_set_color:
- * @gradient: A color gradient.
- * @n: Color point index in @gradient.
- * @color: Color to set the point to.
+ * @gradient: A colour gradient.
+ * @n: Colour point index in @gradient.
+ * @color: Colour to set the point to.
  *
- * Sets the color of a color gradient point without moving it.
+ * Sets the colour of a colour gradient point without moving it.
  **/
 void
 gwy_gradient_set_color(GwyGradient *gradient,
@@ -702,11 +702,11 @@ gwy_gradient_set_color(GwyGradient *gradient,
 
 /**
  * gwy_gradient_insert:
- * @gradient: A color gradient.
- * @n: Color point index in @gradient.
- * @point: Color point to insert at @n.
+ * @gradient: A colour gradient.
+ * @n: Colour point index in @gradient.
+ * @point: Colour point to insert at @n.
  *
- * Inserts a point to a color gradient.
+ * Inserts a point to a colour gradient.
  *
  * It is an error to try to insert a point beyond its neighbours, or at the
  * first and last position that are always occupied by the point at 0.0 and
@@ -734,10 +734,10 @@ gwy_gradient_insert(GwyGradient *gradient,
 
 /**
  * gwy_gradient_insert_sorted:
- * @gradient: A color gradient.
- * @point: Color point to insert.
+ * @gradient: A colour gradient.
+ * @point: Colour point to insert.
  *
- * Inserts a point into a color gradient based on its x position.
+ * Inserts a point into a colour gradient based on its x position.
  *
  * It is an error to try to insert a point at the position 0.0 or 1.0.
  *
@@ -778,10 +778,10 @@ gwy_gradient_insert_sorted(GwyGradient *gradient,
 
 /**
  * gwy_gradient_delete:
- * @gradient: A color gradient.
- * @n: Color point index in @gradient.
+ * @gradient: A colour gradient.
+ * @n: Colour point index in @gradient.
  *
- * Deletes a point at given index in a color gradient.
+ * Deletes a point at given index in a colour gradient.
  *
  * It is an error to try to delete the first and last point.
  **/
@@ -800,12 +800,12 @@ gwy_gradient_delete(GwyGradient *gradient,
 
 /**
  * gwy_gradient_get_data:
- * @gradient: A color gradient.
- * @npoints: A location to store the number of color points (or %NULL).
+ * @gradient: A colour gradient.
+ * @npoints: A location to store the number of colour points (or %NULL).
  *
- * Returns the complete set of color points of a gradient.
+ * Returns the complete set of colour points of a gradient.
  *
- * Returns: Complete set @gradient's color points.  The returned array is
+ * Returns: Complete set @gradient's colour points.  The returned array is
  *          owned by @gradient and must not be modified or freed.
  **/
 const GwyGradientPoint*
@@ -822,11 +822,11 @@ gwy_gradient_get_data(GwyGradient *gradient,
 
 /**
  * gwy_gradient_set_data:
- * @gradient: A color gradient.
+ * @gradient: A colour gradient.
  * @npoints: The length of @points, it must be at least 2.
- * @points: Color points to set as new gradient definition.
+ * @points: Colour points to set as new gradient definition.
  *
- * Sets the complete color gradient definition to a given set of points.
+ * Sets the complete colour gradient definition to a given set of points.
  *
  * The point positions must be ordered, and first point should start at 0.0,
  * last end at 1.0.  There should be no redundant points.
@@ -855,14 +855,14 @@ gwy_gradient_set_data(GwyGradient *gradient,
 
 /**
  * gwy_gradient_set_from_samples:
- * @gradient: A color gradient.
+ * @gradient: A colour gradient.
  * @nsamples: Number of samples, it must be at least one.
- * @samples: Sampled color gradient in #GdkPixbuf-like RRGGBBAA form.
- * @threshold: Maximum allowed difference (for color components in range 0..1).
+ * @samples: Sampled colour gradient in #GdkPixbuf-like RRGGBBAA form.
+ * @threshold: Maximum allowed difference (for colour components in range 0..1).
  *             When negative, default value 1/80 suitable for most purposes
  *             is used.
  *
- * Reconstructs a color gradient definition from sampled colors.
+ * Reconstructs a colour gradient definition from sampled colours.
  *
  * The result is usually approximate.
  **/
@@ -1009,15 +1009,15 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 /**
  * SECTION: gradient
  * @title: GwyGradient
- * @short_description: Map from numbers to RGBA colors
+ * @short_description: Map from numbers to RGBA colours
  *
- * Gradient is a map from interval [0,1] to RGB(A) color space.  It is used
- * for false color visualization of data.
+ * Gradient is a map from interval [0,1] to RGB(A) colour space.  It is used
+ * for false colour visualization of data.
  *
- * Each gradient is defined by an ordered set of color points, the first of
+ * Each gradient is defined by an ordered set of colour points, the first of
  * them is always at 0.0, the last at 1.0.   Thus each gradient must consist of
- * at least two points.  Between these points, the color is interpolated.
- * Color points of modifiable gradients (see #GwyResource) can be edited with
+ * at least two points.  Between these points, the colour is interpolated.
+ * Colour points of modifiable gradients (see #GwyResource) can be edited with
  * functions such as gwy_gradient_insert(), gwy_gradient_set_color(), or
  * gwy_gradient_set_data().
  *
@@ -1029,7 +1029,7 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 /**
  * GwyGradient:
  *
- * Object represnting a color gradient.
+ * Object represnting a colour gradient.
  *
  * #GwyGradient struct contains private data only and should be accessed
  * using the functions below.
@@ -1038,23 +1038,23 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 /**
  * GwyGradientClass:
  *
- * Class of color gradients.
+ * Class of colour gradients.
  *
  * #GwyGradientClass does not contain any public members.
  **/
 
 /**
  * GwyGradientPoint:
- * @x: Color point position (in interval [0,1]).
- * @color: The color at position @x.
+ * @x: Colour point position (in interval [0,1]).
+ * @color: The colour at position @x.
  *
- * Type of gradient color point.
+ * Type of gradient colour point.
  **/
 
 /**
  * GWY_GRADIENT_DEFAULT:
  *
- * The name of the default gray color gradient.
+ * The name of the default gray colour gradient.
  *
  * It is guaranteed to always exist.
  *
@@ -1064,19 +1064,19 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
 
 /**
  * gwy_gradient_duplicate:
- * @gradient: A color gradient.
+ * @gradient: A colour gradient.
  *
- * Duplicates a color gradient.
+ * Duplicates a colour gradient.
  *
  * This is a convenience wrapper of gwy_serializable_duplicate().
  **/
 
 /**
  * gwy_gradient_assign:
- * @dest: Destination color gradient.
- * @src: Source color gradient.
+ * @dest: Destination colour gradient.
+ * @src: Source colour gradient.
  *
- * Copies the value of a color gradient.
+ * Copies the value of a colour gradient.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
  **/
