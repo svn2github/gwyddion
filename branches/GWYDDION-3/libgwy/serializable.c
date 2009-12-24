@@ -26,12 +26,14 @@ gwy_serializable_get_type(void)
 {
     static GType serializable_type = 0;
 
-    if (G_UNLIKELY(!serializable_type))
+    if (G_UNLIKELY(!serializable_type)) {
         serializable_type
             = g_type_register_static_simple(G_TYPE_INTERFACE,
                                             "GwySerializable",
                                             sizeof(GwySerializableInterface),
                                             NULL, 0, NULL, 0);
+        g_type_interface_add_prerequisite(GWY_TYPE_SERIALIZABLE, G_TYPE_OBJECT);
+    }
 
     return serializable_type;
 }
