@@ -1008,15 +1008,6 @@ deserialize_boxed(const guchar *buffer,
     if (!(type = get_serializable_boxed(typename, error_list)))
         goto fail;
 
-    /* We should no only fit, but the boxed size should be exactly size.
-     * If there is extra stuff, add an error, but do not fail. */
-    if (G_UNLIKELY(size - pos != boxed_size)) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_PADDING,
-                           _("Boxed type ‘%s’ data is smaller than the space "
-                             "alloted for it.  The padding was ignored."),
-                           typename);
-    }
     size = boxed_size + pos;
 
     /* Unpack everything, call request() only after that so that is its
@@ -1112,7 +1103,7 @@ deserialize_memory(const guchar *buffer,
         goto fail;
 
     if (exact_size) {
-        /* We should no only fit, but the object size should be exactly size.
+        /* We should not only fit, but the object size should be exactly size.
          * If there is extra stuff, add an error, but do not fail. */
         if (G_UNLIKELY(size - pos != object_size)) {
             gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
