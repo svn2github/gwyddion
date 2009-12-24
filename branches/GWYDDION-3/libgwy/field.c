@@ -593,7 +593,7 @@ gwy_field_new_sized(guint xres,
     field->yres = yres;
     if (clear) {
         field->data = g_new0(gdouble, field->xres * field->yres);
-        field->priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(SUM) | CBIT(RMS)
+        field->priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                                | CBIT(MED) | CBIT(ARF) | CBIT(ART));
     }
     else
@@ -1003,7 +1003,7 @@ gwy_field_clear(GwyField *field)
     g_return_if_fail(GWY_IS_FIELD(field));
     gwy_memclear(field->data, field->xres * field->yres * sizeof(gdouble));
     Field *priv = field->priv;
-    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(SUM) | CBIT(RMS)
+    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                     | CBIT(MED) | CBIT(ARF) | CBIT(ART));
     gwy_memclear(priv->cache, GWY_FIELD_CACHE_SIZE * sizeof(gdouble));
 }
@@ -1028,11 +1028,11 @@ gwy_field_fill(GwyField *field,
     for (guint i = field->xres * field->yres; i; i--)
         *(p++) = value;
     Field *priv = field->priv;
-    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(SUM) | CBIT(RMS)
+    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                     | CBIT(MED) | CBIT(ARF) | CBIT(ART));
     CVAL(priv, MIN) = value;
     CVAL(priv, MAX) = value;
-    CVAL(priv, SUM) = field->xres * field->yres * value;
+    CVAL(priv, AVG) = value;
     CVAL(priv, RMS) = 0.0;
     CVAL(priv, MED) = value;
     CVAL(priv, ARF) = value;

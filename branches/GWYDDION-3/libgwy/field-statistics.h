@@ -25,18 +25,34 @@
 
 G_BEGIN_DECLS
 
-void gwy_field_min_max     (GwyField *field,
-                            gdouble *min,
-                            gdouble *max);
-void gwy_field_part_min_max(GwyField *field,
-                            GwyMaskField *mask,
-                            GwyMaskingType masking,
-                            guint col,
-                            guint row,
-                            guint width,
-                            guint height,
-                            gdouble *min,
-                            gdouble *max);
+void    gwy_field_min_max     (GwyField *field,
+                               gdouble *min,
+                               gdouble *max);
+void    gwy_field_part_min_max(GwyField *field,
+                               GwyMaskField *mask,
+                               GwyMaskingType masking,
+                               guint col,
+                               guint row,
+                               guint width,
+                               guint height,
+                               gdouble *min,
+                               gdouble *max);
+gdouble gwy_field_mean        (GwyField *field);
+gdouble gwy_field_part_mean   (GwyField *field,
+                               GwyMaskField *mask,
+                               GwyMaskingType masking,
+                               guint col,
+                               guint row,
+                               guint width,
+                               guint height);
+gdouble gwy_field_median      (GwyField *field);
+gdouble gwy_field_part_median (GwyField *field,
+                               GwyMaskField *mask,
+                               GwyMaskingType masking,
+                               guint col,
+                               guint row,
+                               guint width,
+                               guint height);
 
 G_END_DECLS
 
