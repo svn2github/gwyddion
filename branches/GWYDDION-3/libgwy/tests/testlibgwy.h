@@ -27,6 +27,7 @@
 #include "libgwy/libgwy.h"
 
 // Helpers
+void     dump_error_list   (GwyErrorList *error_list);
 GObject* serialize_and_back(GObject *object);
 void     record_item_change(GObject *object,
                             guint pos,

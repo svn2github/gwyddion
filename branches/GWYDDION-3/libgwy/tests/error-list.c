@@ -68,4 +68,13 @@ test_error_list(void)
     gwy_error_list_clear(NULL);
 }
 
+void
+dump_error_list(GwyErrorList *error_list)
+{
+    guint i = 0;
+    for (GSList *l = error_list; l; l = g_slist_next(l), i++) {
+        g_printerr("error%u: %s\n", i, ((GError*)l->data)->message);
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
