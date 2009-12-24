@@ -27,6 +27,9 @@
  * gwy_field_part_min_max:
  * @field: A two-dimensional data field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match either the dimensions of @field or the
+ *        rectangular part.  In the first case the mask is placed over the
+ *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @col: Column index of the upper-left corner of the rectangle in @field.
  * @row: Row index of the upper-left corner of the rectangle in @field.
@@ -49,10 +52,18 @@ gwy_field_part_min_max(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(col + width <= field->xres);
     g_return_if_fail(row + height <= field->yres);
+    gboolean part_mask = FALSE;
     if (mask && masking != GWY_MASK_IGNORE) {
         g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-        g_return_if_fail(mask->xres == field->xres);
-        g_return_if_fail(mask->yres == field->yres);
+        if (mask->xres == field->xres && mask->yres == field->yres)
+            part_mask = FALSE;
+        else if (mask->xres == width && mask->yres == height)
+            part_mask = TRUE;
+        else {
+            g_critical("Mask dimensions match neither the entire field "
+                       "nor the rectangle.");
+            return;
+        }
     }
     else
         masking = GWY_MASK_IGNORE;
@@ -96,11 +107,13 @@ gwy_field_part_min_max(GwyField *field,
     }
 
     // Masking is in use.
+    guint maskcol = part_mask ? 0 : col;
+    guint maskrow = part_mask ? 0 : row;
     if (masking == GWY_MASK_INCLUDE) {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             GwyMaskFieldIter iter;
-            gwy_mask_field_iter_init(mask, iter, col, row + i);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (gwy_mask_field_iter_get(iter)) {
                     if (min1 > *d)
@@ -116,7 +129,7 @@ gwy_field_part_min_max(GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             GwyMaskFieldIter iter;
-            gwy_mask_field_iter_init(mask, iter, col, row + i);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_field_iter_get(iter)) {
                     if (min1 > *d)
