@@ -106,9 +106,10 @@ fi
 #############################################################################
 # Base libraries
 PKG_CHECK_MODULES([GIO],[gio-2.0 >= 2.22])
+PKG_CHECK_MODULES([FFTW3],[fftw3 >= 3.1])
 
-AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS"])
-AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS"])
+AC_SUBST([LIBGWY_DEPS_CFLAGS],["$GIO_CFLAGS $FFTW3_CFLAGS"])
+AC_SUBST([LIBGWY_DEPS_LIBS],["$GIO_LIBS $FFTW3_LIBS"])
 
 #############################################################################
 # GLib tools
