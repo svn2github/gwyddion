@@ -20,8 +20,10 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
+#include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/field.h"
+#include "libgwy/field-statistics.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
@@ -257,7 +259,7 @@ gwy_field_itemize(GwySerializable *serializable,
     n++;
 
     it = serialize_items[1];
-    it.value.v_uint32 = field->xres;
+    it.value.v_uint32 = field->yres;
     items->items[items->n++] = it;
     n++;
 
@@ -306,6 +308,7 @@ gwy_field_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[8];
     it.value.v_double_array = field->data;
+    it.array_size = field->xres * field->yres;
     items->items[items->n++] = it;
     n++;
 
@@ -1113,6 +1116,62 @@ gwy_field_part_fill(GwyField *field,
     }
 }
 
+/**
+ * gwy_field_get_format_xy:
+ * @field: A two-dimensional data field.
+ * @style: Output format style.
+ * @format: Value format to update or %NULL to create a new format.
+ *
+ * Finds a suitable format for displaying coordinates in a data field.
+ *
+ * The returned format will have sufficient precision to represent coordinates
+ * of neighbour pixels as different values.
+ *
+ * Returns: Either @format (with reference count unchanged) or, if it was
+ *          %NULL, a newly created #GwyValueFormat.
+ **/
+GwyValueFormat*
+gwy_field_get_format_xy(GwyField *field,
+                        GwyValueFormatStyle style,
+                        GwyValueFormat *format)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    gdouble max0 = MAX(field->xreal, field->yreal);
+    gdouble maxoff = MAX(fabs(field->xreal + field->xoff),
+                         fabs(field->yreal + field->yoff));
+    gdouble max = MAX(max0, maxoff);
+    gdouble unit = MIN(gwy_field_dx(field), gwy_field_dy(field));
+    return gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
+                                           style, max, unit, format);
+}
+
+/**
+ * gwy_field_get_format_z:
+ * @field: A two-dimensional data field.
+ * @style: Output format style.
+ * @format: Value format to update or %NULL to create a new format.
+ *
+ * Finds a suitable format for displaying values in a data field.
+ *
+ * Returns: Either @format (with reference count unchanged) or, if it was
+ *          %NULL, a newly created #GwyValueFormat.
+ **/
+GwyValueFormat*
+gwy_field_get_format_z(GwyField *field,
+                       GwyValueFormatStyle style,
+                       GwyValueFormat *format)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    gdouble min, max;
+    gwy_field_min_max(field, &min, &max);
+    if (max == min) {
+        max = ABS(max);
+        min = 0.0;
+    }
+    return gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
+                                       style, max - min, 3, format);
+}
+
 #define __LIBGWY_FIELD_C__
 #include "libgwy/libgwy-aliases.c"
 
@@ -1246,7 +1305,7 @@ gwy_field_part_fill(GwyField *field,
  **/
 
 /**
- * gwy_field_get_dx:
+ * gwy_field_dx:
  * @field: A two-dimensional data field.
  *
  * Calculates the horizontal pixel size in physical units.
@@ -1255,7 +1314,7 @@ gwy_field_part_fill(GwyField *field,
  **/
 
 /**
- * gwy_field_get_dy:
+ * gwy_field_dy:
  * @field: A two-dimensional data field.
  *
  * Calculates the vertical pixel size in physical units.
