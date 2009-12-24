@@ -27,6 +27,7 @@
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/field.h>
+#include <libgwy/field-statistics.h>
 #include <libgwy/fitter.h>
 #include <libgwy/fit-task.h>
 #include <libgwy/gl-material.h>
