@@ -13,6 +13,7 @@ testlibgwy_SOURCES = \
 	container.c \
 	error-list.c \
 	expr.c \
+	field.c \
 	fitting.c \
 	gl-material.c \
 	gradient.c \
