@@ -1233,7 +1233,7 @@ logical_part(const GwyMaskField *src,
 }
 
 /**
- * gwy_mask_field_logical:
+ * gwy_mask_field_part_logical:
  * @maskfield: A two-dimensional mask field to modify and the first operand of
  *             the logical operation.
  * @col: Column index of the upper-left corner of the rectangle in @maskfield.
@@ -1369,8 +1369,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
     g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
     MaskField *priv = maskfield->priv;
     if (priv->grains) {
-        if (ngrains)
-            *ngrains = priv->ngrains;
+        GWY_MAYBE_SET(ngrains, priv->ngrains);
         return priv->grains;
     }
 
@@ -1472,8 +1471,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
     g_free(m);
 
     priv->ngrains = id;
-    if (ngrains)
-        *ngrains = priv->ngrains;
+    GWY_MAYBE_SET(ngrains, priv->ngrains);
     return priv->grains;
 }
 
@@ -1545,6 +1543,16 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  **/
 
 /**
+ * GwyMaskingType:
+ * @GWY_MASK_EXCLUDE: Exclude data under mask, i.e. take into account only
+ *                    data not covered by the mask.
+ * @GWY_MASK_INCLUDE: Take into account only data under the mask.
+ * @GWY_MASK_IGNORE: Ignore mask, if present, and use all data.
+ *
+ * Mask interpretation in procedures that can apply masks.
+ **/
+
+/**
  * GwyLogicalOperator:
  * @GWY_LOGICAL_ZERO: Always zero, mask clearing.
  * @GWY_LOGICAL_AND: Logical conjuction @A ∧ @B, mask intersection.
@@ -1604,7 +1612,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  *
  * No argument validation is performed.
  *
- * Returns: Nonzero value (not necessarily 1) if the bit is set, zero it it's
+ * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
  *          unset.
  **/
 
@@ -1617,10 +1625,108 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  *
  * Sets one bit value in a two-dimensional mask field.
  *
+ * This is a low-level macro and it does not invalidate the mask field.
+ *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.
+ **/
+
+/**
+ * GwyMaskFieldIter:
+ * @p: Pointer to the current mask data item.
+ * @bit: The current bit, i.e. value with always exactly one bit set.
+ *
+ * Mask field iterator.
+ *
+ * The mask field iterator is another method of accessing individual mask
+ * field pixels suitable especially for sequential processing.  The following
+ * example demonstrates the typical use on finding the minimum of data under
+ * the mask.
+ * |[
+ * gdouble min = G_MAXDOUBLE;
+ * for (guint i = 0; i < field->height; i++) {
+ *     const gdouble *d = field->data + i*field->xres;
+ *     GwyMaskFieldIter iter;
+ *     gwy_mask_field_iter_init(maskfield, iter, 0, i);
+ *     for (guint j = 0; j < field->xres; j++) {
+ *         if (gwy_mask_field_iter_get(iter)) {
+ *             if (min > d[j])
+ *                 min = d[j];
+ *         }
+ *         gwy_mask_field_iter_next(iter);
+ *     }
+ * }
+ * ]|
+ *
+ * The iterator is a very simple structure that is supposed to be allocated on
+ * the stack.
+ **/
+
+/**
+ * gwy_mask_field_iter_init:
+ * @maskfield: A two-dimensional mask field.
+ * @iter: Mask field iterator.  It must be an identifier.
+ * @col: Column index in @maskfield.
+ * @row: Row index in @maskfield.
+ *
+ * Initializes a mask field iterator to point to given pixel.
+ *
+ * This macro may evaluate its arguments several times.
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ **/
+
+/**
+ * gwy_mask_field_iter_next:
+ * @iter: Mask field iterator.  It must be an identifier.
+ *
+ * Moves a mask field iterator one pixel right within a row.
+ *
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ * The caller must ensure the position does not leave the row.
+ **/
+
+/**
+ * gwy_mask_field_iter_prev:
+ * @iter: Mask field iterator.  It must be an identifier.
+ *
+ * Moves a mask field iterator one pixel left within a row.
+ *
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ * The caller must ensure the position does not leave the row.
+ **/
+
+/**
+ * gwy_mask_field_iter_get:
+ * @iter: Mask field iterator.  It must be an identifier.
+ *
+ * Obtains the mask field value a mask field iterator points to.
+ *
+ * No argument validation is performed.
+ *
+ * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
+ *          unset.
+ **/
+
+/**
+ * gwy_mask_field_iter_set:
+ * @iter: Mask field iterator.  It must be an identifier.
+ * @value: Nonzero value to set the bit, zero to clear it.
+ *
+ * Sets the mask field value a mask field iterator points to.
+ *
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ *
+ * This is a low-level macro and it does not invalidate the mask field.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

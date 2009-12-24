@@ -26,6 +26,12 @@
 G_BEGIN_DECLS
 
 typedef enum {
+    GWY_MASK_EXCLUDE = 0,
+    GWY_MASK_INCLUDE = 1,
+    GWY_MASK_IGNORE  = 2,
+} GwyMaskingType;
+
+typedef enum {
     GWY_LOGICAL_ZERO,
     GWY_LOGICAL_AND,
     GWY_LOGICAL_NIMPL,
@@ -137,27 +143,74 @@ void          gwy_mask_field_part_logical  (GwyMaskField *maskfield,
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)1 << (((col) & 0x1f))))
+    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+     & ((guint32)1 << (((col) & 0x1f))))
+
 #define gwy_mask_field_set(maskfield, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)1 << (((col) & 0x1f))); \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+                |= ((guint32)1 << (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)1 << (((col) & 0x1f))); \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+                &= ~((guint32)1 << (((col) & 0x1f))); \
     } while (0)
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] & ((guint32)0x80000000u >> (((col) & 0x1f))))
+    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+     & ((guint32)0x80000000u >> (((col) & 0x1f))))
+
 #define gwy_mask_field_set(maskfield, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] |= ((guint32)0x80000000u >> (((col) & 0x1f))); \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+                |= ((guint32)0x80000000u >> (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] &= ~((guint32)0x80000000u >> (((col) & 0x1f))); \
+            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+                &= ~((guint32)0x80000000u >> (((col) & 0x1f))); \
     } while (0)
 #endif
+
+typedef struct {
+    guint32 *p;
+    guint32 bit;
+} GwyMaskFieldIter;
+
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define gwy_mask_field_iter_init(maskfield, iter, col, row) \
+    do { \
+        iter.p = (maskfield)->data + (maskfield)->stride*(row) + ((col) >> 5); \
+        iter.bit = 1u << ((col) & 0x1f); \
+    } while (0)
+
+#define gwy_mask_field_iter_next(iter) \
+    do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p++; } } while (0)
+
+#define gwy_mask_field_iter_prev(iter) \
+    do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p--; } } while (0)
+#endif
+
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define gwy_mask_field_iter_init(maskfield, iter, col, row) \
+    do { \
+        iter.p = (maskfield)->data + (maskfield)->stride*(row) + ((col) >> 5); \
+        iter.bit = 0x80000000u >> ((col) & 0x1f); \
+    } while (0)
+
+#define gwy_mask_field_iter_next(iter) \
+    do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p++; } } while (0)
+
+#define gwy_mask_field_iter_prev(iter) \
+    do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p--; } } while (0)
+#endif
+
+#define gwy_mask_field_iter_get(iter) \
+    (*(iter.p) & iter.bit)
+
+#define gwy_mask_field_iter_set(iter, value) \
+    do { if (value) iter.p |= iter.bit; else iter.p &= ~iter.bit; } while (0)
 
 const guint* gwy_mask_field_number_grains(GwyMaskField *maskfield,
                                           guint *ngrains);
