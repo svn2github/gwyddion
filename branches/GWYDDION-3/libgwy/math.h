@@ -121,6 +121,17 @@ gboolean gwy_linalg_invert     (gdouble *a,
                                 gdouble *inv,
                                 guint n);
 
+typedef gdouble (*GwyLinearFitFunc)(guint i,
+                                    gdouble *fvalues,
+                                    gpointer user_data);
+
+gboolean gwy_linear_fit        (GwyLinearFitFunc function,
+                                guint npoints,
+                                gdouble *params,
+                                guint nparams,
+                                gdouble *residuum,
+                                gpointer user_data);
+
 G_END_DECLS
 
 #endif

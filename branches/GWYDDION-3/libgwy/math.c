@@ -21,6 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/libgwy-aliases.h"
@@ -28,6 +29,8 @@
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
 #define SLi gwy_lower_triangular_matrix_index
+#define MATRIX_LEN gwy_triangular_matrix_length
+#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 
 static void sort_plain(gdouble *array,
                        gsize n);
@@ -344,6 +347,86 @@ gwy_linalg_invert(gdouble *a,
     }
     g_slice_free1(n*n*sizeof(gdouble), unity);
     return ok;
+}
+
+/**
+ * gwy_linear_fit:
+ * @function: Function to fit.
+ * @npoints: Number of fitted points, it must be larger than the number of
+ *           parameters.
+ * @params: Array of lenght @nparams to store the parameters (coefficients)
+ *          corresponding to the minimum on success.  It will be overwritten
+ *          also on failure but not with anything useful.
+ * @nparams: The number of parameters.
+ * @residuum: Location to store the residual sum of squares to, or %NULL if
+ *            you are not interested.
+ * @user_data: User data to pass to @function.
+ *
+ * Performs a linear least-squares fit.
+ *
+ * An example demonstrating the fitting of one-dimensional data with a
+ * quadratic polynomial:
+ * |[
+ * gdouble
+ * *poly2(guint i, gdouble *fvalues, GwyPointXY *data)
+ * {
+ *     gdouble x = data[i].x;
+ *     fvalues[0] = 1.0;
+ *     fvalues[1] = x;
+ *     fvalues[2] = x*x;
+ *     return data[i].y;
+ * }
+ *
+ * gboolean
+ * fit_poly2(GwyPointXY *data, guint ndata, gdouble *coefficients)
+ * {
+ *     return gwy_linear_fit((GwyLinearFitFunc)poly2, ndata, coefficients, 3,
+ *                           NULL, data);
+ * }
+ * ]|
+ *
+ * Returns: %TRUE on success, %FALSE on failure namely when the matrix is not
+ *          found to be positive definite.
+ **/
+gboolean
+gwy_linear_fit(GwyLinearFitFunc function,
+               guint npoints,
+               gdouble *params,
+               guint nparams,
+               gdouble *residuum,
+               gpointer user_data)
+{
+    g_return_val_if_fail(npoints > nparams, FALSE);
+    g_return_val_if_fail(nparams > 0, FALSE);
+    g_return_val_if_fail(function && params, FALSE);
+
+    guint matrix_len = MATRIX_LEN(npoints);
+    gdouble hessian[matrix_len];
+    gdouble fval[nparams];
+    gwy_memclear(hessian, matrix_len);
+    gwy_memclear(params, nparams);
+    gdouble sumy2 = 0.0;
+
+    for (guint i = 0; i < npoints; i++) {
+        gdouble y = function(i, fval, user_data);
+        sumy2 += y*y;
+        for (guint j = 0; j < nparams; j++) {
+            params[j] += y*fval[j];
+            for (guint k = 0; k <= j; j++)
+                SLi(hessian, j, k) += fval[j]*fval[k];
+        }
+    }
+    if (!gwy_cholesky_decompose(hessian, nparams))
+        return FALSE;
+    if (residuum)
+        ASSIGN(fval, params, nparams);
+    gwy_cholesky_solve(hessian, params, nparams);
+    if (residuum) {
+        for (guint j = 0; j < nparams; j++)
+            sumy2 -= params[j]*fval[j];
+        *residuum = MAX(sumy2, 0.0);
+    }
+    return TRUE;
 }
 
 /**
@@ -954,6 +1037,29 @@ jump_over:
  *         gwy_lower_triangular_matrix_index(a, i, j) *= v[i] * v[j];
  * }
  * ]|
+ **/
+
+/**
+ * GwyLinearFitFunc:
+ * @i: Index of data point to calculate the function value in.
+ * @fvalues: Array of length @nparams (as passed to gwy_linear_fit()) to store
+ *           the function values to.
+ * @user_data: User data passed to gwy_linear_fit().
+ *
+ * Type of linear least-squares fitting function.
+ *
+ * The function takes a point index argument, not the abscissa value.  This
+ * enables easy fitting of not only one-dimensional data but also
+ * multidimensional data using a simple index decomposition.
+ *
+ * To fit vector-valued data, the caller can multiply the real number of points
+ * by the number of vector components and return successively individual
+ * components.  It is guaranteed the points will be processed sequentially.
+ * Hence if the evaluation of the vector-valued function components requires
+ * a non-trivial calculation, the result can be cached in @user_data for the
+ * subsequent calls.
+ *
+ * Returns: Value of the @i-th fitted data point.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
