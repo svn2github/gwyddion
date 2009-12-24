@@ -669,10 +669,14 @@ serialize_and_back(GObject *object)
     g_assert(!error);
     gsize datalen = g_memory_output_stream_get_data_size(memstream);
     gpointer data = g_memory_output_stream_get_data(memstream);
+    //g_file_set_contents("ser.gwy", data, datalen, NULL);
     gsize bytes_consumed = 0;
     GwyErrorList *error_list = NULL;
     GObject *retval = gwy_deserialize_memory(data, datalen,
                                              &bytes_consumed, &error_list);
+    if (error_list)
+        dump_error_list(error_list);
+    g_assert(!error_list);
     g_assert(retval);
     g_assert_cmpuint(G_OBJECT_TYPE(retval), ==, G_OBJECT_TYPE(object));
     g_assert_cmpuint(bytes_consumed, ==, datalen);
