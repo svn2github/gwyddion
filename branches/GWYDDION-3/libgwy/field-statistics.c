@@ -75,7 +75,8 @@ stats_check_args(GwyField *field,
  *
  * Finds the minimum and maximum value in a rectangular part of a field.
  *
- * The maximum value of no data is -G_MAXDOUBLE, the minimum is G_MAXDOUBLE.
+ * The maximum value of no data is <constant>-HUGE_VAL</constant>, the
+ * minimum is <constant>HUGE_VAL</constant>.
  **/
 void
 gwy_field_part_min_max(GwyField *field,
@@ -93,7 +94,7 @@ gwy_field_part_min_max(GwyField *field,
     if (!min && !max)
         return;
 
-    gdouble min1 = G_MAXDOUBLE, max1 = -G_MAXDOUBLE;
+    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
     if (!width || !height) {
         GWY_MAYBE_SET(min, min1);
         GWY_MAYBE_SET(max, max1);
@@ -213,10 +214,10 @@ gwy_field_part_mean(GwyField *field,
     guint maskcol, maskrow;
     if (!stats_check_args(field, mask, &masking,
                           col, row, width, height, &maskcol, &maskrow))
-        return nan("");
+        return NAN;
 
     if (!width || !height)
-        return nan("");
+        return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
     gdouble mean = 0.0;
@@ -267,7 +268,7 @@ gwy_field_part_mean(GwyField *field,
             }
         }
     }
-    return n ? mean/n : nan("");
+    return n ? mean/n : NAN;
 }
 
 /**
@@ -283,7 +284,7 @@ gwy_field_part_mean(GwyField *field,
 gdouble
 gwy_field_mean(GwyField *field)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), nan(""));
+    g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
     return gwy_field_part_mean(field, NULL, GWY_MASK_IGNORE,
                                0, 0, field->xres, field->yres);
 }
@@ -315,10 +316,10 @@ gwy_field_part_median(GwyField *field,
     guint maskcol, maskrow;
     if (!stats_check_args(field, mask, &masking,
                           col, row, width, height, &maskcol, &maskrow))
-        return nan("");
+        return NAN;
 
     if (!width || !height)
-        return nan("");
+        return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
     gsize bufsize = width*height*sizeof(gdouble);
@@ -365,7 +366,7 @@ gwy_field_part_median(GwyField *field,
         }
     }
 
-    gdouble median = (p != buffer) ? gwy_math_median(buffer, p - buffer) : nan("");
+    gdouble median = (p != buffer) ? gwy_math_median(buffer, p - buffer) : NAN;
     g_slice_free1(bufsize, buffer);
     return median;
 }
@@ -383,9 +384,125 @@ gwy_field_part_median(GwyField *field,
 gdouble
 gwy_field_median(GwyField *field)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), nan(""));
+    g_return_val_if_fail(GWY_IS_FIELD(field), NAN);
     return gwy_field_part_median(field, NULL, GWY_MASK_IGNORE,
                                  0, 0, field->xres, field->yres);
+}
+
+/**
+ * gwy_field_part_rms:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match either the dimensions of @field or the
+ *        rectangular part.  In the first case the mask is placed over the
+ *        entire field, in the second case over the rectangle.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle in @field.
+ * @row: Row index of the upper-left corner of the rectangle in @field.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ *
+ * Calculates the rms value of a rectangular part of a data field.
+ *
+ * Returns: The rms value.  The rms value of no data is zero.
+ **/
+gdouble
+gwy_field_part_rms(GwyField *field,
+                   GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   guint col, guint row,
+                   guint width, guint height)
+{
+    guint maskcol, maskrow;
+    if (!stats_check_args(field, mask, &masking,
+                          col, row, width, height, &maskcol, &maskrow))
+        return 0.0;
+
+    if (!width || !height)
+        return 0.0;
+
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble rms = 0.0, avg = 0.0;
+
+    // No mask.  If full field is processed we must use the cache.
+    if (masking == GWY_MASK_IGNORE) {
+        gboolean full_field = (width == field->xres && height == field->yres);
+        if (full_field && CTEST(field->priv, RMS))
+            return CVAL(field->priv, RMS);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            for (guint j = width; j; j--, d++) {
+                avg += *d;
+                rms += (*d)*(*d);
+            }
+        }
+        rms /= width*height;
+        avg /= width*height;
+        rms -= avg*avg;
+        rms = sqrt(MAX(rms, 0.0));
+        if (full_field)
+            CVAL(field->priv, RMS) = rms;
+        return rms;
+    }
+
+    // Masking is in use.
+    guint n = 0;
+    if (masking == GWY_MASK_INCLUDE) {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskFieldIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (gwy_mask_field_iter_get(iter)) {
+                    avg += *d;
+                    rms += (*d)*(*d);
+                    n++;
+                }
+                gwy_mask_field_iter_next(iter);
+            }
+        }
+    }
+    else {
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskFieldIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_field_iter_get(iter)) {
+                    avg += *d;
+                    rms += (*d)*(*d);
+                    n++;
+                }
+                gwy_mask_field_iter_next(iter);
+            }
+        }
+    }
+
+    if (!n)
+        return 0.0;
+
+    rms /= n;
+    avg /= n;
+    rms -= avg*avg;
+    return sqrt(MAX(rms, 0.0));
+}
+
+/**
+ * gwy_field_rms:
+ * @field: A two-dimensional data field.
+ *
+ * Calculates the rms value of a data field.
+ *
+ * The rms value is cached, see gwy_field_invalidate().
+ *
+ * Returns: The rms value.
+ **/
+gdouble
+gwy_field_rms(GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+    return gwy_field_part_rms(field, NULL, GWY_MASK_IGNORE,
+                              0, 0, field->xres, field->yres);
 }
 
 #define __LIBGWY_FIELD_STATISTICS_C__

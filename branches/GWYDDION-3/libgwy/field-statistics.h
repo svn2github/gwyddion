@@ -53,6 +53,14 @@ gdouble gwy_field_part_median (GwyField *field,
                                guint row,
                                guint width,
                                guint height);
+gdouble gwy_field_rms         (GwyField *field);
+gdouble gwy_field_part_rms    (GwyField *field,
+                               GwyMaskField *mask,
+                               GwyMaskingType masking,
+                               guint col,
+                               guint row,
+                               guint width,
+                               guint height);
 
 G_END_DECLS
 
