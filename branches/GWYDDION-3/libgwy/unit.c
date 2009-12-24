@@ -460,8 +460,7 @@ parse(Unit *unit,
 
     g_array_set_size(unit->units, 0);
     power10 = 0;
-    if (ppower10)
-        *ppower10 = 0;
+    GWY_MAYBE_SET(ppower10, power10);
 
     if (!string || !*string)
         return TRUE;
@@ -678,8 +677,7 @@ parse(Unit *unit,
     canonicalize(unit);
     g_string_free(buf, TRUE);
     g_free(utf8string);
-    if (ppower10)
-        *ppower10 = power10;
+    GWY_MAYBE_SET(ppower10, power10);
 
     return TRUE;
 }
