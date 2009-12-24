@@ -32,7 +32,7 @@ gwy_serializable_get_type(void)
                                             "GwySerializable",
                                             sizeof(GwySerializableInterface),
                                             NULL, 0, NULL, 0);
-        g_type_interface_add_prerequisite(GWY_TYPE_SERIALIZABLE, G_TYPE_OBJECT);
+        g_type_interface_add_prerequisite(serializable_type, G_TYPE_OBJECT);
     }
 
     return serializable_type;
