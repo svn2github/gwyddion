@@ -392,4 +392,318 @@ test_mask_field_grain_no(void)
     g_rand_free(rng);
 }
 
+static inline guint
+count_set_bits_l1(guint32 x)
+{
+    guint count = 0;
+    while (x) {
+        if (x & 1)
+            count++;
+        x >>= 1;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l1c(guint32 x)
+{
+    guint count = 0;
+    while (x) {
+        count += x & 1;
+        x >>= 1;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l2c(guint32 x)
+{
+    static const guint8 table[4] = { 0, 1, 1, 2 };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0x3];
+        x >>= 2;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l4c(guint32 x)
+{
+    static const guint8 table[16] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xf];
+        x >>= 4;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l8c(guint32 x)
+{
+    static const guint8 table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xff];
+        x >>= 8;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l2h(guint32 x)
+{
+    static const guint16 table[4] = { 0, 1, 1, 2 };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0x3];
+        x >>= 2;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l4h(guint32 x)
+{
+    static const guint16 table[16] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xf];
+        x >>= 4;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l8h(guint32 x)
+{
+    static const guint16 table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xff];
+        x >>= 8;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_lu8h(guint32 x)
+{
+    static const guint16 table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    if (!x)
+        return count;
+    count += table[x & 0xff];
+    x >>= 8;
+    if (!x)
+        return count;
+    count += table[x & 0xff];
+    x >>= 8;
+    if (!x)
+        return count;
+    count += table[x & 0xff];
+    x >>= 8;
+    if (!x)
+        return count;
+    count += table[x & 0xff];
+    return count;
+}
+
+static inline guint
+count_set_bits_u8h(guint32 x)
+{
+    static const guint16 table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    return count;
+}
+
+
+static inline guint
+count_set_bits_l2w(guint32 x)
+{
+    static const guint table[4] = { 0, 1, 1, 2 };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0x3];
+        x >>= 2;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l4w(guint32 x)
+{
+    static const guint table[16] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xf];
+        x >>= 4;
+    }
+    return count;
+}
+
+static inline guint
+count_set_bits_l8w(guint32 x)
+{
+    static const guint table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    while (x) {
+        count += table[x & 0xff];
+        x >>= 8;
+    }
+    return count;
+}
+
+#ifdef __GNUC__
+#define count_set_bits_gcc __builtin_popcount
+#endif
+
+#define COUNT_BITS_LOOP(name) \
+    do { \
+        g_timer_start(timer); \
+        guint count = 0; \
+        for (guint iter = 0; iter < niter; iter++) { \
+            guint32 *p = pool; \
+            for (guint i = n; i; i--) \
+                count += count_set_bits_##name(*(p++)); \
+        } \
+        gdouble t = g_timer_elapsed(timer, NULL); \
+        g_printerr("@@ %s: time=%g, count=%u\n", #name, t, count); \
+    } while (0)
+
+// XXX: This is a benchmark, not a regular test.  Not sure how to apply
+// g_test_minimized_result() to it.
+void
+test_mask_field_count_benchmark(void)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint n = 65536, niter = 2000;
+    guint32 *pool = g_new(guint32, n);
+    for (guint i = 0; i < n; i++)
+        pool[i] = g_rand_int(rng);
+    GTimer *timer = g_timer_new();
+
+    g_printerr("\n");
+    COUNT_BITS_LOOP(l1);
+    COUNT_BITS_LOOP(l1c);
+    COUNT_BITS_LOOP(l2c);
+    COUNT_BITS_LOOP(l2h);
+    COUNT_BITS_LOOP(l2w);
+    COUNT_BITS_LOOP(l4c);
+    COUNT_BITS_LOOP(l4h);
+    COUNT_BITS_LOOP(l4w);
+    COUNT_BITS_LOOP(l8c);
+    COUNT_BITS_LOOP(l8h);
+    COUNT_BITS_LOOP(lu8h);
+    COUNT_BITS_LOOP(u8h);
+    COUNT_BITS_LOOP(l8w);
+#ifdef __GNUC__
+    COUNT_BITS_LOOP(gcc);
+#endif
+
+    g_timer_destroy(timer);
+    g_free(pool);
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
