@@ -80,8 +80,8 @@ struct _GwyMaskFieldClass {
     GObjectClass g_object_class;
 };
 
-#define gwy_mask_field_duplicate(maskfield) \
-        (GWY_MASK_FIELD(gwy_serializable_duplicate(GWY_SERIALIZABLE(maskfield))))
+#define gwy_mask_field_duplicate(field) \
+        (GWY_MASK_FIELD(gwy_serializable_duplicate(GWY_SERIALIZABLE(field))))
 #define gwy_mask_field_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
@@ -90,12 +90,12 @@ GwyMaskField* gwy_mask_field_new           (void)                          G_GNU
 GwyMaskField* gwy_mask_field_new_sized     (guint xres,
                                             guint yres,
                                             gboolean clear)                G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_part      (const GwyMaskField *maskfield,
+GwyMaskField* gwy_mask_field_new_part      (const GwyMaskField *field,
                                             guint col,
                                             guint row,
                                             guint width,
                                             guint height)                  G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_resampled (const GwyMaskField *maskfield,
+GwyMaskField* gwy_mask_field_new_resampled (const GwyMaskField *field,
                                             guint xres,
                                             guint yres)                    G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
@@ -108,33 +108,33 @@ GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
                                             gboolean complement)           G_GNUC_MALLOC;
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+#define gwy_mask_field_get(field, col, row) \
+    ((field)->data[(field)->stride*(row) + ((col) >> 5)] \
      & ((guint32)1 << (((col) & 0x1f))))
 
-#define gwy_mask_field_set(maskfield, col, row, value) \
+#define gwy_mask_field_set(field, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+            (field)->data[(field)->stride*(row) + ((col) >> 5)] \
                 |= ((guint32)1 << (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+            (field)->data[(field)->stride*(row) + ((col) >> 5)] \
                 &= ~((guint32)1 << (((col) & 0x1f))); \
     } while (0)
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define gwy_mask_field_get(maskfield, col, row) \
-    ((maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+#define gwy_mask_field_get(field, col, row) \
+    ((field)->data[(field)->stride*(row) + ((col) >> 5)] \
      & ((guint32)0x80000000u >> (((col) & 0x1f))))
 
-#define gwy_mask_field_set(maskfield, col, row, value) \
+#define gwy_mask_field_set(field, col, row, value) \
     do { \
         if (value) \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+            (field)->data[(field)->stride*(row) + ((col) >> 5)] \
                 |= ((guint32)0x80000000u >> (((col) & 0x1f))); \
         else \
-            (maskfield)->data[(maskfield)->stride*(row) + ((col) >> 5)] \
+            (field)->data[(field)->stride*(row) + ((col) >> 5)] \
                 &= ~((guint32)0x80000000u >> (((col) & 0x1f))); \
     } while (0)
 #endif
@@ -145,9 +145,9 @@ typedef struct {
 } GwyMaskFieldIter;
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define gwy_mask_field_iter_init(maskfield, iter, col, row) \
+#define gwy_mask_field_iter_init(field, iter, col, row) \
     do { \
-        iter.p = (maskfield)->data + (maskfield)->stride*(row) + ((col) >> 5); \
+        iter.p = (field)->data + (field)->stride*(row) + ((col) >> 5); \
         iter.bit = 1u << ((col) & 0x1f); \
     } while (0)
 
@@ -159,9 +159,9 @@ typedef struct {
 #endif
 
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define gwy_mask_field_iter_init(maskfield, iter, col, row) \
+#define gwy_mask_field_iter_init(field, iter, col, row) \
     do { \
-        iter.p = (maskfield)->data + (maskfield)->stride*(row) + ((col) >> 5); \
+        iter.p = (field)->data + (field)->stride*(row) + ((col) >> 5); \
         iter.bit = 0x80000000u >> ((col) & 0x1f); \
     } while (0)
 
@@ -178,7 +178,7 @@ typedef struct {
 #define gwy_mask_field_iter_set(iter, value) \
     do { if (value) iter.p |= iter.bit; else iter.p &= ~iter.bit; } while (0)
 
-void         gwy_mask_field_data_changed (GwyMaskField *maskfield);
+void         gwy_mask_field_data_changed (GwyMaskField *field);
 void         gwy_mask_field_copy         (const GwyMaskField *src,
                                           GwyMaskField *dest);
 void         gwy_mask_field_part_copy    (const GwyMaskField *src,
@@ -189,21 +189,21 @@ void         gwy_mask_field_part_copy    (const GwyMaskField *src,
                                           GwyMaskField *dest,
                                           guint destcol,
                                           guint destrow);
-guint32*     gwy_mask_field_get_data     (GwyMaskField *maskfield);
-void         gwy_mask_field_invalidate   (GwyMaskField *maskfield);
-void         gwy_mask_field_fill         (GwyMaskField *maskfield,
+guint32*     gwy_mask_field_get_data     (GwyMaskField *field);
+void         gwy_mask_field_invalidate   (GwyMaskField *field);
+void         gwy_mask_field_fill         (GwyMaskField *field,
                                           gboolean value);
-void         gwy_mask_field_part_fill    (GwyMaskField *maskfield,
+void         gwy_mask_field_part_fill    (GwyMaskField *field,
                                           guint col,
                                           guint row,
                                           guint width,
                                           guint height,
                                           gboolean value);
-void         gwy_mask_field_logical      (GwyMaskField *maskfield,
+void         gwy_mask_field_logical      (GwyMaskField *field,
                                           const GwyMaskField *operand,
                                           const GwyMaskField *mask,
                                           GwyLogicalOperator op);
-void         gwy_mask_field_part_logical (GwyMaskField *maskfield,
+void         gwy_mask_field_part_logical (GwyMaskField *field,
                                           guint col,
                                           guint row,
                                           guint width,
@@ -212,18 +212,18 @@ void         gwy_mask_field_part_logical (GwyMaskField *maskfield,
                                           guint opcol,
                                           guint oprow,
                                           GwyLogicalOperator op);
-void         gwy_mask_field_shrink       (GwyMaskField *maskfield,
+void         gwy_mask_field_shrink       (GwyMaskField *field,
                                           gboolean from_borders);
-guint        gwy_mask_field_count        (const GwyMaskField *maskfield,
+guint        gwy_mask_field_count        (const GwyMaskField *field,
                                           const GwyMaskField *mask,
                                           gboolean value);
-guint        gwy_mask_field_part_count   (const GwyMaskField *maskfield,
+guint        gwy_mask_field_part_count   (const GwyMaskField *field,
                                           guint col,
                                           guint row,
                                           guint width,
                                           guint height,
                                           gboolean value);
-const guint* gwy_mask_field_number_grains(GwyMaskField *maskfield,
+const guint* gwy_mask_field_number_grains(GwyMaskField *field,
                                           guint *ngrains);
 
 G_END_DECLS

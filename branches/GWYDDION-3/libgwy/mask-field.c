@@ -204,23 +204,23 @@ swap_bits_uint32(guint32 *data,
 }
 
 static void
-gwy_mask_field_init(GwyMaskField *maskfield)
+gwy_mask_field_init(GwyMaskField *field)
 {
-    maskfield->priv = G_TYPE_INSTANCE_GET_PRIVATE(maskfield,
+    field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field,
                                                   GWY_TYPE_MASK_FIELD,
                                                   MaskField);
-    maskfield->xres = maskfield->yres = 1;
-    maskfield->stride = stride_for_width(maskfield->xres);
-    maskfield->data = g_new0(guint32, maskfield->stride * maskfield->yres);
+    field->xres = field->yres = 1;
+    field->stride = stride_for_width(field->xres);
+    field->data = g_new0(guint32, field->stride * field->yres);
 }
 
 static void
 gwy_mask_field_finalize(GObject *object)
 {
-    GwyMaskField *maskfield = GWY_MASK_FIELD(object);
-    GWY_FREE(maskfield->data);
-    GWY_FREE(maskfield->priv->grains);
-    GWY_FREE(maskfield->priv->graindata);
+    GwyMaskField *field = GWY_MASK_FIELD(object);
+    GWY_FREE(field->data);
+    GWY_FREE(field->priv->grains);
+    GWY_FREE(field->priv->graindata);
     G_OBJECT_CLASS(gwy_mask_field_parent_class)->finalize(object);
 }
 
@@ -236,24 +236,24 @@ gwy_mask_field_itemize(GwySerializable *serializable,
 {
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
-    GwyMaskField *maskfield = GWY_MASK_FIELD(serializable);
+    GwyMaskField *field = GWY_MASK_FIELD(serializable);
     GwySerializableItem *it = items->items + items->n;
-    gsize n = maskfield->stride * maskfield->yres;
+    gsize n = field->stride * field->yres;
 
     *it = serialize_items[0];
-    it->value.v_uint32 = maskfield->xres;
+    it->value.v_uint32 = field->xres;
     it++, items->n++;
 
     *it = serialize_items[1];
-    it->value.v_uint32 = maskfield->yres;
+    it->value.v_uint32 = field->yres;
     it++, items->n++;
 
     *it = serialize_items[2];
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        it->value.v_uint32_array = maskfield->data;
+        it->value.v_uint32_array = field->data;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        MaskField *priv = maskfield->priv;
+        MaskField *priv = field->priv;
         priv->serialized_swapped = g_new(guint32, n);
         swap_bits_uint32(priv->serialized_swapped, n);
         it->value.v_uint32_array = priv->serialized_swapped;
@@ -267,8 +267,8 @@ gwy_mask_field_itemize(GwySerializable *serializable,
 static void
 gwy_mask_field_done(GwySerializable *serializable)
 {
-    GwyMaskField *maskfield = GWY_MASK_FIELD(serializable);
-    GWY_FREE(maskfield->priv->serialized_swapped);
+    GwyMaskField *field = GWY_MASK_FIELD(serializable);
+    GWY_FREE(field->priv->serialized_swapped);
 }
 
 static gboolean
@@ -281,7 +281,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyMaskField",
                                  error_list);
 
-    GwyMaskField *maskfield = GWY_MASK_FIELD(serializable);
+    GwyMaskField *field = GWY_MASK_FIELD(serializable);
 
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
@@ -302,19 +302,19 @@ gwy_mask_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    maskfield->xres = its[0].value.v_uint32;
-    maskfield->yres = its[1].value.v_uint32;
-    maskfield->stride = stride_for_width(maskfield->xres);
-    g_free(maskfield->data);
+    field->xres = its[0].value.v_uint32;
+    field->yres = its[1].value.v_uint32;
+    field->stride = stride_for_width(field->xres);
+    g_free(field->data);
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
-        maskfield->data = its[2].value.v_uint32_array;
+        field->data = its[2].value.v_uint32_array;
         its[2].value.v_uint32_array = NULL;
         its[2].array_size = 0;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        maskfield->data = g_memdup(its[2].value.v_uint32_array,
+        field->data = g_memdup(its[2].value.v_uint32_array,
                                    n*sizeof(guint32));
-        swap_bits_uint32(maskfield->data, n);
+        swap_bits_uint32(field->data, n);
     }
 
     return TRUE;
@@ -323,16 +323,16 @@ gwy_mask_field_construct(GwySerializable *serializable,
 static GObject*
 gwy_mask_field_duplicate_impl(GwySerializable *serializable)
 {
-    GwyMaskField *maskfield = GWY_MASK_FIELD(serializable);
-    //MaskField *priv = maskfield->priv;
+    GwyMaskField *field = GWY_MASK_FIELD(serializable);
+    //MaskField *priv = field->priv;
 
-    GwyMaskField *duplicate = gwy_mask_field_new_sized(maskfield->xres,
-                                                       maskfield->yres,
+    GwyMaskField *duplicate = gwy_mask_field_new_sized(field->xres,
+                                                       field->yres,
                                                        FALSE);
     //MaskField *dpriv = duplicate->priv;
 
-    gsize n = maskfield->stride * maskfield->yres;
-    memcpy(duplicate->data, maskfield->data, n*sizeof(guint32));
+    gsize n = field->stride * field->yres;
+    memcpy(duplicate->data, field->data, n*sizeof(guint32));
     // TODO: Duplicate precalculated grain data too.
 
     return G_OBJECT(duplicate);
@@ -392,19 +392,19 @@ gwy_mask_field_get_property(GObject *object,
                             GValue *value,
                             GParamSpec *pspec)
 {
-    GwyMaskField *maskfield = GWY_MASK_FIELD(object);
+    GwyMaskField *field = GWY_MASK_FIELD(object);
 
     switch (prop_id) {
         case PROP_XRES:
-        g_value_set_uint(value, maskfield->xres);
+        g_value_set_uint(value, field->xres);
         break;
 
         case PROP_YRES:
-        g_value_set_uint(value, maskfield->yres);
+        g_value_set_uint(value, field->yres);
         break;
 
         case PROP_STRIDE:
-        g_value_set_uint(value, maskfield->stride);
+        g_value_set_uint(value, field->stride);
         break;
 
         default:
@@ -448,21 +448,21 @@ gwy_mask_field_new_sized(guint xres,
 {
     g_return_val_if_fail(xres && yres, NULL);
 
-    GwyMaskField *maskfield = g_object_newv(GWY_TYPE_MASK_FIELD, 0, NULL);
-    g_free(maskfield->data);
-    maskfield->xres = xres;
-    maskfield->yres = yres;
-    maskfield->stride = stride_for_width(maskfield->xres);
+    GwyMaskField *field = g_object_newv(GWY_TYPE_MASK_FIELD, 0, NULL);
+    g_free(field->data);
+    field->xres = xres;
+    field->yres = yres;
+    field->stride = stride_for_width(field->xres);
     if (clear)
-        maskfield->data = g_new0(guint32, maskfield->stride * maskfield->yres);
+        field->data = g_new0(guint32, field->stride * field->yres);
     else
-        maskfield->data = g_new(guint32, maskfield->stride * maskfield->yres);
-    return maskfield;
+        field->data = g_new(guint32, field->stride * field->yres);
+    return field;
 }
 
 /**
  * gwy_mask_field_new_part:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
@@ -472,36 +472,36 @@ gwy_mask_field_new_sized(guint xres,
  * mask field.
  *
  * The rectangle of size @width×@height starting at (@col,@row) must be
- * entirely contained in @maskfield.  Both dimensions must be non-zero.
+ * entirely contained in @field.  Both dimensions must be non-zero.
  *
  * Data are physically copied, i.e. changing the new mask field data does not
- * change @maskfield's data and vice versa.
+ * change @field's data and vice versa.
  *
  * Returns: A new two-dimensional mask field.
  **/
 GwyMaskField*
-gwy_mask_field_new_part(const GwyMaskField *maskfield,
+gwy_mask_field_new_part(const GwyMaskField *field,
                         guint col,
                         guint row,
                         guint width,
                         guint height)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     g_return_val_if_fail(width && height, NULL);
-    g_return_val_if_fail(col + width <= maskfield->xres, NULL);
-    g_return_val_if_fail(row + height <= maskfield->yres, NULL);
+    g_return_val_if_fail(col + width <= field->xres, NULL);
+    g_return_val_if_fail(row + height <= field->yres, NULL);
 
-    if (width == maskfield->xres && height == maskfield->yres)
-        return gwy_mask_field_duplicate(maskfield);
+    if (width == field->xres && height == field->yres)
+        return gwy_mask_field_duplicate(field);
 
     GwyMaskField *part = gwy_mask_field_new_sized(width, height, FALSE);
-    gwy_mask_field_part_copy(maskfield, col, row, width, height, part, 0, 0);
+    gwy_mask_field_part_copy(field, col, row, width, height, part, 0, 0);
     return part;
 }
 
 /**
  * gwy_mask_field_new_resampled:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
  *
@@ -510,14 +510,14 @@ gwy_mask_field_new_part(const GwyMaskField *maskfield,
  * Returns: A new two-dimensional mask field.
  **/
 GwyMaskField*
-gwy_mask_field_new_resampled(const GwyMaskField *maskfield,
+gwy_mask_field_new_resampled(const GwyMaskField *field,
                              guint xres,
                              guint yres)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     g_return_val_if_fail(xres && yres, NULL);
-    if (xres == maskfield->xres && yres == maskfield->yres)
-        return gwy_mask_field_duplicate(maskfield);
+    if (xres == field->xres && yres == field->yres)
+        return gwy_mask_field_duplicate(field);
 
     GwyMaskField *dest;
     dest = gwy_mask_field_new_sized(xres, yres, FALSE);
@@ -567,11 +567,11 @@ gwy_mask_field_new_from_field(const GwyField *field,
     g_return_val_if_fail(col + width <= field->xres, NULL);
     g_return_val_if_fail(row + height <= field->yres, NULL);
 
-    GwyMaskField *maskfield = gwy_mask_field_new_sized(width, height, FALSE);
+    GwyMaskField *mfield = gwy_mask_field_new_sized(width, height, FALSE);
     const gdouble *fbase = field->data + field->xres*row + col;
     for (guint i = 0; i < height; i++) {
         const gdouble *p = fbase + i*field->xres;
-        guint32 *q = maskfield->data + i*maskfield->stride;
+        guint32 *q = mfield->data + i*mfield->stride;
         for (guint j = 0; j < (width >> 5); j++, q++) {
             guint32 v = 0;
             if (lower <= upper) {
@@ -605,20 +605,20 @@ gwy_mask_field_new_from_field(const GwyField *field,
             *q = complement ? ~v : v;
         }
     }
-    return maskfield;
+    return mfield;
 }
 
 /**
  * gwy_mask_field_data_changed:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  *
  * Emits signal GwyMaskField::data-changed on a mask field.
  **/
 void
-gwy_mask_field_data_changed(GwyMaskField *maskfield)
+gwy_mask_field_data_changed(GwyMaskField *field)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_signal_emit(maskfield, mask_field_signals[DATA_CHANGED], 0);
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_signal_emit(field, mask_field_signals[DATA_CHANGED], 0);
 }
 
 /**
@@ -773,7 +773,7 @@ copy_part(const GwyMaskField *src,
 
 /**
  * gwy_mask_field_part_copy:
- * @src: Source two-dimensional data mask field.
+ * @src: Source two-dimensional mask field.
  * @col: Column index of the upper-left corner of the rectangle in @src.
  * @row: Row index of the upper-left corner of the rectangle in @src.
  * @width: Rectangle width (number of columns).
@@ -832,7 +832,7 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
 
 /**
  * gwy_mask_field_get_data:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  *
  * Obtains the data of a two-dimensional mask field.
  *
@@ -846,16 +846,16 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
  * you.
  **/
 guint32*
-gwy_mask_field_get_data(GwyMaskField *maskfield)
+gwy_mask_field_get_data(GwyMaskField *field)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
-    gwy_mask_field_invalidate(maskfield);
-    return maskfield->data;
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    gwy_mask_field_invalidate(field);
+    return field->data;
 }
 
 /**
  * gwy_mask_field_invalidate:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  *
  * Invalidates mask field grain data.
  *
@@ -864,44 +864,44 @@ gwy_mask_field_get_data(GwyMaskField *maskfield)
  * gwy_mask_field_get_data() does.
  **/
 void
-gwy_mask_field_invalidate(GwyMaskField *maskfield)
+gwy_mask_field_invalidate(GwyMaskField *field)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    GWY_FREE(maskfield->priv->grains);
-    GWY_FREE(maskfield->priv->graindata);
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    GWY_FREE(field->priv->grains);
+    GWY_FREE(field->priv->graindata);
 }
 
 /**
  * gwy_mask_field_fill:
- * @maskfield: A two-dimensional mask field.
- * @value: Value to fill @maskfield with.
+ * @field: A two-dimensional mask field.
+ * @value: Value to fill @field with.
  *
  * Fills a mask field with the specified value.
  **/
 void
-gwy_mask_field_fill(GwyMaskField *maskfield,
+gwy_mask_field_fill(GwyMaskField *field,
                     gboolean value)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    gsize n = maskfield->stride * maskfield->yres;
-    memset(maskfield->data, value ? 0xff : 0x00, n*sizeof(guint32));
-    gwy_mask_field_invalidate(maskfield);
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    gsize n = field->stride * field->yres;
+    memset(field->data, value ? 0xff : 0x00, n*sizeof(guint32));
+    gwy_mask_field_invalidate(field);
 }
 
 static void
-set_part(GwyMaskField *maskfield,
+set_part(GwyMaskField *field,
          guint col,
          guint row,
          guint width,
          guint height)
 {
-    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    guint32 *base = field->data + field->stride*row + (col >> 5);
     const guint off = col & 0x1f;
     const guint end = (col + width) & 0x1f;
     if (width <= 0x20 - off) {
         const guint32 m = MAKE_MASK(off, width);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             *p |= m;
         }
     }
@@ -909,7 +909,7 @@ set_part(GwyMaskField *maskfield,
         const guint32 m0 = MAKE_MASK(off, 0x20 - off);
         const guint32 m1 = MAKE_MASK(0, end);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             guint j = width;
             *p |= m0;
             j -= 0x20 - off, p++;
@@ -925,19 +925,19 @@ set_part(GwyMaskField *maskfield,
 }
 
 static void
-clear_part(GwyMaskField *maskfield,
+clear_part(GwyMaskField *field,
            guint col,
            guint row,
            guint width,
            guint height)
 {
-    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    guint32 *base = field->data + field->stride*row + (col >> 5);
     const guint off = col & 0x1f;
     const guint end = (col + width) & 0x1f;
     if (width <= 0x20 - off) {
         const guint32 m = ~MAKE_MASK(off, width);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             *p &= m;
         }
     }
@@ -945,7 +945,7 @@ clear_part(GwyMaskField *maskfield,
         const guint32 m0 = ~MAKE_MASK(off, 0x20 - off);
         const guint32 m1 = ~MAKE_MASK(0, end);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             guint j = width;
             *p &= m0;
             j -= 0x20 - off, p++;
@@ -962,7 +962,7 @@ clear_part(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_part_fill:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
@@ -972,49 +972,49 @@ clear_part(GwyMaskField *maskfield,
  * Fills a rectangular part of a mask field with the specified value.
  **/
 void
-gwy_mask_field_part_fill(GwyMaskField *maskfield,
+gwy_mask_field_part_fill(GwyMaskField *field,
                          guint col,
                          guint row,
                          guint width,
                          guint height,
                          gboolean value)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(col + width <= maskfield->xres);
-    g_return_if_fail(row + height <= maskfield->yres);
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(col + width <= field->xres);
+    g_return_if_fail(row + height <= field->yres);
 
     if (!width || !height)
         return;
 
-    if (width == maskfield->xres) {
+    if (width == field->xres) {
         g_assert(col == 0);
-        memset(maskfield->data + row*maskfield->stride,
+        memset(field->data + row*field->stride,
                value ? 0xff : 0x00,
-               height*maskfield->stride*sizeof(guint32));
+               height*field->stride*sizeof(guint32));
     }
     else {
         if (value)
-            set_part(maskfield, col, row, width, height);
+            set_part(field, col, row, width, height);
         else
-            clear_part(maskfield, col, row, width, height);
+            clear_part(field, col, row, width, height);
     }
-    gwy_mask_field_invalidate(maskfield);
+    gwy_mask_field_invalidate(field);
 }
 
 static void
-invert_part(GwyMaskField *maskfield,
+invert_part(GwyMaskField *field,
             guint col,
             guint row,
             guint width,
             guint height)
 {
-    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    guint32 *base = field->data + field->stride*row + (col >> 5);
     const guint off = col & 0x1f;
     const guint end = (col + width) & 0x1f;
     if (width <= 0x20 - off) {
         const guint32 m = ~MAKE_MASK(off, width);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             *p ^= m;
         }
     }
@@ -1022,7 +1022,7 @@ invert_part(GwyMaskField *maskfield,
         const guint32 m0 = ~MAKE_MASK(off, 0x20 - off);
         const guint32 m1 = ~MAKE_MASK(0, end);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             guint j = width;
             *p ^= m0;
             j -= 0x20 - off, p++;
@@ -1040,7 +1040,7 @@ invert_part(GwyMaskField *maskfield,
 // FIXME: Does it worth publishing?  One usually inverts the complete mask.
 /**
  * gwy_mask_field_part_invert:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
@@ -1049,21 +1049,21 @@ invert_part(GwyMaskField *maskfield,
  * Inverts values in a rectangular part of a mask field.
  **/
 static void
-gwy_mask_field_part_invert(GwyMaskField *maskfield,
+gwy_mask_field_part_invert(GwyMaskField *field,
                            guint col,
                            guint row,
                            guint width,
                            guint height)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
-    g_return_if_fail(col + width <= maskfield->xres);
-    g_return_if_fail(row + height <= maskfield->yres);
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    g_return_if_fail(col + width <= field->xres);
+    g_return_if_fail(row + height <= field->yres);
 
     if (!width || !height)
         return;
 
-    invert_part(maskfield, col, row, width, height);
-    gwy_mask_field_invalidate(maskfield);
+    invert_part(field, col, row, width, height);
+    gwy_mask_field_invalidate(field);
 }
 
 #define LOGICAL_OP_LOOP(simple, masked) \
@@ -1081,33 +1081,33 @@ gwy_mask_field_part_invert(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_logical:
- * @maskfield: A two-dimensional mask field to modify and the first operand of
- *             the logical operation.
+ * @field: A two-dimensional mask field to modify and the first operand of
+ *         the logical operation.
  * @operand: A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.
  * @mask: A two-dimensional mask field determining to which bits of
- *        @maskfield to apply the logical operation to.  If it is %NULL the
+ *        @field to apply the logical operation to.  If it is %NULL the
  *        opperation is applied to all bits (as if all bits in @mask were set).
  * @op: Logical operation to perform.
  *
  * Modifies a mask field by logical operation with another mask field.
  **/
 void
-gwy_mask_field_logical(GwyMaskField *maskfield,
+gwy_mask_field_logical(GwyMaskField *field,
                        const GwyMaskField *operand,
                        const GwyMaskField *mask,
                        GwyLogicalOperator op)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(op <= GWY_LOGICAL_ONE);
     if (op == GWY_LOGICAL_A)
         return;
     if (mask) {
         g_return_if_fail(GWY_IS_MASK_FIELD(mask));
-        g_return_if_fail(maskfield->xres == mask->xres);
-        g_return_if_fail(maskfield->yres == mask->yres);
-        g_return_if_fail(maskfield->stride == mask->stride);
+        g_return_if_fail(field->xres == mask->xres);
+        g_return_if_fail(field->yres == mask->yres);
+        g_return_if_fail(field->stride == mask->stride);
     }
     if (op == GWY_LOGICAL_ZERO) {
         if (mask) {
@@ -1132,18 +1132,18 @@ gwy_mask_field_logical(GwyMaskField *maskfield,
     }
     else {
         g_return_if_fail(GWY_IS_MASK_FIELD(operand));
-        g_return_if_fail(maskfield->xres == operand->xres);
-        g_return_if_fail(maskfield->yres == operand->yres);
-        g_return_if_fail(maskfield->stride == operand->stride);
+        g_return_if_fail(field->xres == operand->xres);
+        g_return_if_fail(field->yres == operand->yres);
+        g_return_if_fail(field->stride == operand->stride);
     }
 
-    guint n = maskfield->stride * maskfield->yres;
+    guint n = field->stride * field->yres;
     const guint32 *p = operand->data;
-    guint32 *q = maskfield->data;
+    guint32 *q = field->data;
 
     // GWY_LOGICAL_ZERO cannot have mask.
     if (op == GWY_LOGICAL_ZERO)
-        gwy_mask_field_fill(maskfield, FALSE);
+        gwy_mask_field_fill(field, FALSE);
     else if (op == GWY_LOGICAL_AND)
         LOGICAL_OP_LOOP(*q &= *p, *q &= ~*m | (*p & *m));
     else if (op == GWY_LOGICAL_NIMPL)
@@ -1174,11 +1174,11 @@ gwy_mask_field_logical(GwyMaskField *maskfield,
         LOGICAL_OP_LOOP(*q = ~(*q & *p),  *q = (*q & ~*m) | (~(*q & *p) & *m));
     // GWY_LOGICAL_ONE cannot have mask.
     else if (op == GWY_LOGICAL_ONE)
-        gwy_mask_field_fill(maskfield, TRUE);
+        gwy_mask_field_fill(field, TRUE);
     else {
         g_assert_not_reached();
     }
-    gwy_mask_field_invalidate(maskfield);
+    gwy_mask_field_invalidate(field);
 }
 
 static void
@@ -1234,10 +1234,10 @@ logical_part(const GwyMaskField *src,
 
 /**
  * gwy_mask_field_part_logical:
- * @maskfield: A two-dimensional mask field to modify and the first operand of
- *             the logical operation.
- * @col: Column index of the upper-left corner of the rectangle in @maskfield.
- * @row: Row index of the upper-left corner of the rectangle in @maskfield.
+ * @field: A two-dimensional mask field to modify and the first operand of
+ *         the logical operation.
+ * @col: Column index of the upper-left corner of the rectangle in @field.
+ * @row: Row index of the upper-left corner of the rectangle in @field.
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
  * @operand: A two-dimensional mask field representing second operand of the
@@ -1250,20 +1250,20 @@ logical_part(const GwyMaskField *src,
  * Modifies a rectangular part of a mask field by logical operation with
  * another mask field.
  *
- * The rectangle starts at (@col, @row) in @maskfield and its dimensions are
+ * The rectangle starts at (@col, @row) in @field and its dimensions are
  * @width×@height.  It is modified using data in @operand starting from
  * (@opcol, @oprow).  Note that although this method resembles
  * gwy_mask_field_copy() the arguments convention is different: the destination
  * comes first then the operand, similarly to in gwy_mask_field_logical().
  *
  * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corresponds to data inside @maskfield and
+ * the part of the rectangle that is corresponds to data inside @field and
  * @operand is copied.  This can also mean nothing is copied at all.
  *
- * If @operand is equal to @maskfield, the areas may not overlap.
+ * If @operand is equal to @field, the areas may not overlap.
  **/
 void
-gwy_mask_field_part_logical(GwyMaskField *maskfield,
+gwy_mask_field_part_logical(GwyMaskField *field,
                             guint col,
                             guint row,
                             guint width,
@@ -1273,41 +1273,41 @@ gwy_mask_field_part_logical(GwyMaskField *maskfield,
                             guint oprow,
                             GwyLogicalOperator op)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(op <= GWY_LOGICAL_ONE);
     if (op == GWY_LOGICAL_A)
         return;
     if (op == GWY_LOGICAL_ZERO) {
-        gwy_mask_field_part_fill(maskfield, col, row, height, width, FALSE);
+        gwy_mask_field_part_fill(field, col, row, height, width, FALSE);
         return;
     }
     if (op == GWY_LOGICAL_B) {
         gwy_mask_field_part_copy(operand, opcol, oprow, width, height,
-                                 maskfield, col, row);
+                                 field, col, row);
         return;
     }
     if (op == GWY_LOGICAL_NA) {
-        gwy_mask_field_part_invert(maskfield, col, row, width, height);
+        gwy_mask_field_part_invert(field, col, row, width, height);
         return;
     }
     if (op == GWY_LOGICAL_ONE) {
-        gwy_mask_field_part_fill(maskfield, col, row, height, width, TRUE);
+        gwy_mask_field_part_fill(field, col, row, height, width, TRUE);
         return;
     }
 
-    if (opcol >= operand->xres || col >= maskfield->xres
-        || oprow >= operand->yres || row >= maskfield->yres)
+    if (opcol >= operand->xres || col >= field->xres
+        || oprow >= operand->yres || row >= field->yres)
         return;
 
     width = MIN(width, operand->xres - opcol);
     height = MIN(height, operand->yres - oprow);
-    width = MIN(width, maskfield->xres - col);
-    height = MIN(height, maskfield->yres - row);
+    width = MIN(width, field->xres - col);
+    height = MIN(height, field->yres - row);
     if (!width || !height)
         return;
 
-    logical_part(operand, opcol, oprow, width, height, maskfield, col, row, op);
-    gwy_mask_field_invalidate(maskfield);
+    logical_part(operand, opcol, oprow, width, height, field, col, row, op);
+    gwy_mask_field_invalidate(field);
 }
 
 static void
@@ -1351,52 +1351,52 @@ shrink_row(const guint32 *u,
 
 /**
  * gwy_mask_field_shrink:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @from_borders: %TRUE to shrink grains from field borders.
  *
  * Shrinks grains in a mask field by one pixel from all four directions.
  **/
 void
-gwy_mask_field_shrink(GwyMaskField *maskfield,
+gwy_mask_field_shrink(GwyMaskField *field,
                       gboolean from_borders)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
 
-    guint stride = maskfield->stride;
+    guint stride = field->stride;
     guint rowsize = stride * sizeof(guint32);
-    if (from_borders && maskfield->yres <= 2) {
-        memset(maskfield->data, 0x00, rowsize * maskfield->yres);
-        gwy_mask_field_invalidate(maskfield);
+    if (from_borders && field->yres <= 2) {
+        memset(field->data, 0x00, rowsize * field->yres);
+        gwy_mask_field_invalidate(field);
         return;
     }
 
-    const guint end = (maskfield->xres & 0x1f) ? maskfield->xres & 0x1f : 0x20;
+    const guint end = (field->xres & 0x1f) ? field->xres & 0x1f : 0x20;
     const guint32 m0 = MAKE_MASK(0, end);
-    const guint len = (maskfield->xres >> 5) - (end == 0x20 ? 1 : 0);
+    const guint len = (field->xres >> 5) - (end == 0x20 ? 1 : 0);
 
-    if (maskfield->yres == 1) {
+    if (field->yres == 1) {
         guint32 *row = g_slice_alloc(rowsize);
-        memcpy(row, maskfield->data, rowsize);
-        shrink_row(row, row, row, m0, len, end, from_borders, maskfield->data);
+        memcpy(row, field->data, rowsize);
+        shrink_row(row, row, row, m0, len, end, from_borders, field->data);
         g_slice_free1(rowsize, row);
-        gwy_mask_field_invalidate(maskfield);
+        gwy_mask_field_invalidate(field);
         return;
     }
 
     guint32 *prev = g_slice_alloc(rowsize);
     guint32 *row = g_slice_alloc(rowsize);
 
-    memcpy(prev, maskfield->data, rowsize);
+    memcpy(prev, field->data, rowsize);
     if (from_borders)
-        memset(maskfield->data, 0x00, rowsize);
+        memset(field->data, 0x00, rowsize);
     else {
-        guint32 *q = maskfield->data;
+        guint32 *q = field->data;
         guint32 *next = q + stride;
         shrink_row(prev, prev, next, m0, len, end, from_borders, q);
     }
 
-    for (guint i = 1; i+1 < maskfield->yres; i++) {
-        guint32 *q = maskfield->data + i*stride;
+    for (guint i = 1; i+1 < field->yres; i++) {
+        guint32 *q = field->data + i*stride;
         guint32 *next = q + stride;
         memcpy(row, q, rowsize);
         shrink_row(prev, row, next, m0, len, end, from_borders, q);
@@ -1404,16 +1404,16 @@ gwy_mask_field_shrink(GwyMaskField *maskfield,
     }
 
     if (from_borders)
-        memset(maskfield->data + (maskfield->yres - 1)*stride, 0x00, rowsize);
+        memset(field->data + (field->yres - 1)*stride, 0x00, rowsize);
     else {
-        guint32 *q = maskfield->data + (maskfield->yres - 1)*stride;
+        guint32 *q = field->data + (field->yres - 1)*stride;
         memcpy(row, q, rowsize);
         shrink_row(prev, row, row, m0, len, end, from_borders, q);
     }
 
     g_slice_free1(rowsize, row);
     g_slice_free1(rowsize, prev);
-    gwy_mask_field_invalidate(maskfield);
+    gwy_mask_field_invalidate(field);
 }
 
 // GCC has a built-in __builtin_popcount() but for some reason it does not
@@ -1455,9 +1455,9 @@ count_set_bits(guint32 x)
 
 /**
  * gwy_mask_field_count:
- * @maskfield: A two-dimensional mask field.
- * @mask: A two-dimensional mask field determining to which bits of @maskfield
- *        consider.  If it is %NULL entire @maskfield is evaluated (as if
+ * @field: A two-dimensional mask field.
+ * @mask: A two-dimensional mask field determining to which bits of @field
+ *        consider.  If it is %NULL entire @field is evaluated (as if
  *        all bits in @mask were set).
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  *
@@ -1466,16 +1466,16 @@ count_set_bits(guint32 x)
  * Returns: The number of bits equal to @value.
  **/
 guint
-gwy_mask_field_count(const GwyMaskField *maskfield,
+gwy_mask_field_count(const GwyMaskField *field,
                      const GwyMaskField *mask,
                      gboolean value)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), 0);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
     if (mask) {
         g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
-        g_return_val_if_fail(maskfield->xres == mask->xres, 0);
-        g_return_val_if_fail(maskfield->yres == mask->yres, 0);
-        g_return_val_if_fail(maskfield->stride == mask->stride, 0);
+        g_return_val_if_fail(field->xres == mask->xres, 0);
+        g_return_val_if_fail(field->yres == mask->yres, 0);
+        g_return_val_if_fail(field->stride == mask->stride, 0);
     }
 
     const guint end = mask->xres & 0x1f;
@@ -1483,17 +1483,17 @@ gwy_mask_field_count(const GwyMaskField *maskfield,
     guint count = 0;
 
     if (mask) {
-        for (guint i = 0; i < maskfield->yres; i++) {
+        for (guint i = 0; i < field->yres; i++) {
             const guint32 *m = mask->data + i*mask->stride;
-            const guint32 *p = maskfield->data + i*maskfield->stride;
+            const guint32 *p = field->data + i*field->stride;
             if (value) {
-                for (guint j = maskfield->xres >> 5; j; j--, p++, m++)
+                for (guint j = field->xres >> 5; j; j--, p++, m++)
                     count += count_set_bits(*p & *m);
                 if (end)
                     count += count_set_bits(*p & *m & m0);
             }
             else {
-                for (guint j = maskfield->xres >> 5; j; j--, p++, m++)
+                for (guint j = field->xres >> 5; j; j--, p++, m++)
                     count += count_set_bits(~*p & *m);
                 if (end)
                     count += count_set_bits(~*p & *m & m0);
@@ -1501,16 +1501,16 @@ gwy_mask_field_count(const GwyMaskField *maskfield,
         }
     }
     else {
-        for (guint i = 0; i < maskfield->yres; i++) {
-            const guint32 *p = maskfield->data + i*maskfield->stride;
+        for (guint i = 0; i < field->yres; i++) {
+            const guint32 *p = field->data + i*field->stride;
             if (value) {
-                for (guint j = maskfield->xres >> 5; j; j--, p++)
+                for (guint j = field->xres >> 5; j; j--, p++)
                     count += count_set_bits(*p);
                 if (end)
                     count += count_set_bits(*p & m0);
             }
             else {
-                for (guint j = maskfield->xres >> 5; j; j--, p++)
+                for (guint j = field->xres >> 5; j; j--, p++)
                     count += count_set_bits(~*p);
                 if (end)
                     count += count_set_bits(~*p & m0);
@@ -1522,14 +1522,14 @@ gwy_mask_field_count(const GwyMaskField *maskfield,
 }
 
 static guint
-count_part(const GwyMaskField *maskfield,
+count_part(const GwyMaskField *field,
            guint col,
            guint row,
            guint width,
            guint height,
            gboolean value)
 {
-    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    guint32 *base = field->data + field->stride*row + (col >> 5);
     const guint off = col & 0x1f;
     const guint end = (col + width) & 0x1f;
     guint count = 0;
@@ -1537,13 +1537,13 @@ count_part(const GwyMaskField *maskfield,
         const guint32 m = MAKE_MASK(off, width);
         if (value) {
             for (guint i = 0; i < height; i++) {
-                guint32 *p = base + i*maskfield->stride;
+                guint32 *p = base + i*field->stride;
                 count += count_set_bits(*p & m);
             }
         }
         else {
             for (guint i = 0; i < height; i++) {
-                guint32 *p = base + i*maskfield->stride;
+                guint32 *p = base + i*field->stride;
                 count += count_set_bits(~*p & m);
             }
         }
@@ -1552,7 +1552,7 @@ count_part(const GwyMaskField *maskfield,
         const guint32 m0 = MAKE_MASK(off, 0x20 - off);
         const guint32 m1 = MAKE_MASK(0, end);
         for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*maskfield->stride;
+            guint32 *p = base + i*field->stride;
             guint j = width;
             if (value) {
                 count += count_set_bits(*p & m0);
@@ -1583,7 +1583,7 @@ count_part(const GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_part_count:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
@@ -1595,21 +1595,21 @@ count_part(const GwyMaskField *maskfield,
  * Returns: The number of bits equal to @value.
  **/
 guint
-gwy_mask_field_part_count(const GwyMaskField *maskfield,
+gwy_mask_field_part_count(const GwyMaskField *field,
                           guint col,
                           guint row,
                           guint width,
                           guint height,
                           gboolean value)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), 0);
-    g_return_val_if_fail(col + width <= maskfield->xres, 0);
-    g_return_val_if_fail(row + height <= maskfield->yres, 0);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
+    g_return_val_if_fail(col + width <= field->xres, 0);
+    g_return_val_if_fail(row + height <= field->yres, 0);
 
     if (!width || !height)
         return 0;
 
-    return count_part(maskfield, col, row, width, height, value);
+    return count_part(field, col, row, width, height, value);
 }
 
 /* Merge grains i and j in map with full resolution */
@@ -1650,36 +1650,36 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 
 /**
  * gwy_mask_field_number_grains:
- * @maskfield: Data field containing positive values in grains, nonpositive
- *             in free space.
+ * @field: Data field containing positive values in grains, nonpositive
+ *         in free space.
  * @ngrains: Location to store the number of the last grain, or %NULL.
  *
  * Numbers grains in a mask field.
  *
- * Returns: Array of integers of the same number of items as @maskfield
+ * Returns: Array of integers of the same number of items as @field
  *          (without padding) filled with grain numbers of each pixel.  Empty
  *          space is set to 0, pixels inside a grain are set to the grain
  *          number.  Grains are numbered sequentially 1, 2, 3, ...
- *          The returned array is owned by @maskfield and become invalid when
+ *          The returned array is owned by @field and become invalid when
  *          the data change, gwy_mask_field_invalidate() is called or the
  *          mask field is finalized.
  **/
 const guint*
-gwy_mask_field_number_grains(GwyMaskField *maskfield,
+gwy_mask_field_number_grains(GwyMaskField *field,
                              guint *ngrains)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), NULL);
-    MaskField *priv = maskfield->priv;
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    MaskField *priv = field->priv;
     if (priv->grains) {
         GWY_MAYBE_SET(ngrains, priv->ngrains);
         return priv->grains;
     }
 
-    guint xres = maskfield->xres, yres = maskfield->yres;
+    guint xres = field->xres, yres = field->yres;
     priv->grains = g_new(guint, xres*yres);
 
     // A reasonable initial size of the grain map.
-    guint msize = 4*(maskfield->xres + maskfield->yres);
+    guint msize = 4*(field->xres + field->yres);
     guint *m = g_new0(guint, msize);
 
     /* Number grains with simple unidirectional grain number propagation,
@@ -1687,7 +1687,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
     guint max_id = 0;
     guint end = xres & 0x1f;
     for (guint i = 0; i < yres; i++) {
-        const guint32 *p = maskfield->data + i*maskfield->stride;
+        const guint32 *p = field->data + i*field->stride;
         guint *g = priv->grains + i*xres;
         guint *gprev = g - xres;
         guint grain_id = 0;
@@ -1884,7 +1884,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_duplicate:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  *
  * Duplicates a two-dimensional mask field.
  *
@@ -1903,9 +1903,9 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_get:
- * @maskfield: A two-dimensional mask field.
- * @col: Column index in @maskfield.
- * @row: Row index in @maskfield.
+ * @field: A two-dimensional mask field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
  *
  * Obtains one bit value from a two-dimensional mask field.
  *
@@ -1920,9 +1920,9 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_set:
- * @maskfield: A two-dimensional mask field.
- * @col: Column index in @maskfield.
- * @row: Row index in @maskfield.
+ * @field: A two-dimensional mask field.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
  * @value: Nonzero value to set the bit, zero to clear it.
  *
  * Sets one bit value in a two-dimensional mask field.
@@ -1951,7 +1951,7 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
  * for (guint i = 0; i < field->height; i++) {
  *     const gdouble *d = field->data + i*field->xres;
  *     GwyMaskFieldIter iter;
- *     gwy_mask_field_iter_init(maskfield, iter, 0, i);
+ *     gwy_mask_field_iter_init(field, iter, 0, i);
  *     for (guint j = 0; j < field->xres; j++) {
  *         if (gwy_mask_field_iter_get(iter)) {
  *             if (min > d[j])
@@ -1968,10 +1968,10 @@ gwy_mask_field_number_grains(GwyMaskField *maskfield,
 
 /**
  * gwy_mask_field_iter_init:
- * @maskfield: A two-dimensional mask field.
+ * @field: A two-dimensional mask field.
  * @iter: Mask field iterator.  It must be an identifier.
- * @col: Column index in @maskfield.
- * @row: Row index in @maskfield.
+ * @col: Column index in @field.
+ * @row: Row index in @field.
  *
  * Initializes a mask field iterator to point to given pixel.
  *
