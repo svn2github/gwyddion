@@ -25,42 +25,72 @@
 
 G_BEGIN_DECLS
 
-void    gwy_field_min_max     (GwyField *field,
-                               gdouble *min,
-                               gdouble *max);
-void    gwy_field_part_min_max(GwyField *field,
-                               GwyMaskField *mask,
-                               GwyMaskingType masking,
-                               guint col,
-                               guint row,
-                               guint width,
-                               guint height,
-                               gdouble *min,
-                               gdouble *max);
-gdouble gwy_field_mean        (GwyField *field);
-gdouble gwy_field_part_mean   (GwyField *field,
-                               GwyMaskField *mask,
-                               GwyMaskingType masking,
-                               guint col,
-                               guint row,
-                               guint width,
-                               guint height);
-gdouble gwy_field_median      (GwyField *field);
-gdouble gwy_field_part_median (GwyField *field,
-                               GwyMaskField *mask,
-                               GwyMaskingType masking,
-                               guint col,
-                               guint row,
-                               guint width,
-                               guint height);
-gdouble gwy_field_rms         (GwyField *field);
-gdouble gwy_field_part_rms    (GwyField *field,
-                               GwyMaskField *mask,
-                               GwyMaskingType masking,
-                               guint col,
-                               guint row,
-                               guint width,
-                               guint height);
+void    gwy_field_min_max            (GwyField *field,
+                                      gdouble *min,
+                                      gdouble *max);
+void    gwy_field_part_min_max       (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height,
+                                      gdouble *min,
+                                      gdouble *max);
+gdouble gwy_field_mean               (GwyField *field);
+gdouble gwy_field_part_mean          (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height);
+gdouble gwy_field_median             (GwyField *field);
+gdouble gwy_field_part_median        (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height);
+gdouble gwy_field_rms                (GwyField *field);
+gdouble gwy_field_part_rms           (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height);
+void    gwy_field_part_statistics    (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height,
+                                      gdouble *mean,
+                                      gdouble *ra,
+                                      gdouble *rms,
+                                      gdouble *skew,
+                                      gdouble *kurtosis);
+void    gwy_field_statistics         (GwyField *field,
+                                      gdouble *mean,
+                                      gdouble *ra,
+                                      gdouble *rms,
+                                      gdouble *skew,
+                                      gdouble *kurtosis);
+guint   gwy_field_part_count_in_range(const GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height,
+                                      gdouble lower,
+                                      gdouble upper,
+                                      gboolean strict,
+                                      gdouble *nabove,
+                                      gdouble *nbelow);
 
 G_END_DECLS
 
