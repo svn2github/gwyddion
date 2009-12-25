@@ -189,7 +189,7 @@ void         gwy_mask_field_part_copy    (const GwyMaskField *src,
                                           GwyMaskField *dest,
                                           guint destcol,
                                           guint destrow);
-guint32*     gwy_mask_field_get_data     (GwyMaskField *maskfield)       G_GNUC_PURE;
+guint32*     gwy_mask_field_get_data     (GwyMaskField *maskfield);
 void         gwy_mask_field_invalidate   (GwyMaskField *maskfield);
 void         gwy_mask_field_fill         (GwyMaskField *maskfield,
                                           gboolean value);
@@ -212,6 +212,8 @@ void         gwy_mask_field_part_logical (GwyMaskField *maskfield,
                                           guint opcol,
                                           guint oprow,
                                           GwyLogicalOperator op);
+void         gwy_mask_field_shrink       (GwyMaskField *maskfield,
+                                          gboolean from_borders);
 guint        gwy_mask_field_count        (const GwyMaskField *maskfield,
                                           const GwyMaskField *mask,
                                           gboolean value);

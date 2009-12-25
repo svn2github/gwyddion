@@ -1310,6 +1310,112 @@ gwy_mask_field_part_logical(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+static void
+shrink_row(const guint32 *u,
+           const guint32 *p,
+           const guint32 *d,
+           guint32 m0,
+           guint len,
+           guint end,
+           gboolean from_borders,
+           guint32 *q)
+{
+    guint32 v, vl, vr;
+
+    if (!len) {
+        v = *p & m0;
+        vl = (v SHR 1) | (from_borders ? 0 : (v & NTH_BIT(0)));
+        vr = (v SHL 1) | (from_borders ? 0 : (v & NTH_BIT(end-1)));
+        *q = vl & vr & *u & *d;
+        return;
+    }
+
+    v = *p;
+    vl = (v SHR 1) | (from_borders ? 0 : (v & NTH_BIT(0)));
+    vr = (v SHL 1) | (*(p+1) SHR 0x1f);
+    *q = vl & vr & *u & *d;
+    q++, d++, p++, u++;
+
+    for (guint j = 1; j < len; j++, p++, q++, u++, d++) {
+        v = *p;
+        vl = (v SHR 1) | (*(p-1) SHL 0x1f);
+        vr = (v SHL 1) | (*(p+1) SHR 0x1f);
+        *q = vl & vr & *u & *d;
+    }
+
+    v = *p & m0;
+    vl = (v SHR 1) | (*(p-1) SHL 0x1f);
+    vr = (v SHL 1) | (from_borders ? 0 : (v & NTH_BIT(end-1)));
+    *q = vl & vr & *u & *d;
+}
+
+/**
+ * gwy_mask_field_shrink:
+ * @maskfield: A two-dimensional mask field.
+ * @from_borders: %TRUE to shrink grains from field borders.
+ *
+ * Shrinks grains in a mask field by one pixel from all four directions.
+ **/
+void
+gwy_mask_field_shrink(GwyMaskField *maskfield,
+                      gboolean from_borders)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(maskfield));
+
+    guint stride = maskfield->stride;
+    guint rowsize = stride * sizeof(guint32);
+    if (from_borders && maskfield->yres <= 2) {
+        memset(maskfield->data, 0x00, rowsize * maskfield->yres);
+        gwy_mask_field_invalidate(maskfield);
+        return;
+    }
+
+    const guint end = (maskfield->xres & 0x1f) ? maskfield->xres & 0x1f : 0x20;
+    const guint32 m0 = MAKE_MASK(0, end);
+    const guint len = (maskfield->xres >> 5) - (end == 0x20 ? 1 : 0);
+
+    if (maskfield->yres == 1) {
+        guint32 *row = g_slice_alloc(rowsize);
+        memcpy(row, maskfield->data, rowsize);
+        shrink_row(row, row, row, m0, len, end, from_borders, maskfield->data);
+        g_slice_free1(rowsize, row);
+        gwy_mask_field_invalidate(maskfield);
+        return;
+    }
+
+    guint32 *prev = g_slice_alloc(rowsize);
+    guint32 *row = g_slice_alloc(rowsize);
+
+    memcpy(prev, maskfield->data, rowsize);
+    if (from_borders)
+        memset(maskfield->data, 0x00, rowsize);
+    else {
+        guint32 *q = maskfield->data;
+        guint32 *next = q + stride;
+        shrink_row(prev, prev, next, m0, len, end, from_borders, q);
+    }
+
+    for (guint i = 1; i+1 < maskfield->yres; i++) {
+        guint32 *q = maskfield->data + i*stride;
+        guint32 *next = q + stride;
+        memcpy(row, q, rowsize);
+        shrink_row(prev, row, next, m0, len, end, from_borders, q);
+        GWY_SWAP(guint32*, prev, row);
+    }
+
+    if (from_borders)
+        memset(maskfield->data + (maskfield->yres - 1)*stride, 0x00, rowsize);
+    else {
+        guint32 *q = maskfield->data + (maskfield->yres - 1)*stride;
+        memcpy(row, q, rowsize);
+        shrink_row(prev, row, row, m0, len, end, from_borders, q);
+    }
+
+    g_slice_free1(rowsize, row);
+    g_slice_free1(rowsize, prev);
+    gwy_mask_field_invalidate(maskfield);
+}
+
 // GCC has a built-in __builtin_popcount() but for some reason it does not
 // inline the code.  So whatever clever it does, this makes the built-in to be
 // more than three times slower than this expanded implementation.  See
