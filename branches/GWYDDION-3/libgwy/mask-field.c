@@ -1310,6 +1310,202 @@ gwy_mask_field_part_logical(GwyMaskField *maskfield,
     gwy_mask_field_invalidate(maskfield);
 }
 
+// GCC has a built-in __builtin_popcount() but for some reason it does not
+// inline the code.  So whatever clever it does, this makes the built-in to be
+// more than three times slower than this expanded implementation.  See
+// tests/mask-field.c if you want to play with the table size and/or table item
+// size.
+static inline guint
+count_set_bits(guint32 x)
+{
+    static const guint16 table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
+    };
+    guint count = 0;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    x >>= 8;
+    count += table[x & 0xff];
+    return count;
+}
+
+/**
+ * gwy_mask_field_count:
+ * @maskfield: A two-dimensional mask field.
+ * @mask: A two-dimensional mask field determining to which bits of @maskfield
+ *        consider.  If it is %NULL entire @maskfield is evaluated (as if
+ *        all bits in @mask were set).
+ * @value: %TRUE to count ones, %FALSE to count zeroes.
+ *
+ * Counts set or unset bits in a mask field.
+ *
+ * Returns: The number of bits equal to @value.
+ **/
+guint
+gwy_mask_field_count(const GwyMaskField *maskfield,
+                     const GwyMaskField *mask,
+                     gboolean value)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), 0);
+    if (mask) {
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
+        g_return_val_if_fail(maskfield->xres == mask->xres, 0);
+        g_return_val_if_fail(maskfield->yres == mask->yres, 0);
+        g_return_val_if_fail(maskfield->stride == mask->stride, 0);
+    }
+
+    const guint end = mask->xres & 0x1f;
+    const guint32 m0 = MAKE_MASK(0, end);
+    guint count = 0;
+
+    if (mask) {
+        for (guint i = 0; i < maskfield->yres; i++) {
+            const guint32 *m = mask->data + i*mask->stride;
+            const guint32 *p = maskfield->data + i*maskfield->stride;
+            if (value) {
+                for (guint j = maskfield->xres >> 5; j; j--, p++, m++)
+                    count += count_set_bits(*p & *m);
+                if (end)
+                    count += count_set_bits(*p & *m & m0);
+            }
+            else {
+                for (guint j = maskfield->xres >> 5; j; j--, p++, m++)
+                    count += count_set_bits(~*p & *m);
+                if (end)
+                    count += count_set_bits(~*p & *m & m0);
+            }
+        }
+    }
+    else {
+        for (guint i = 0; i < maskfield->yres; i++) {
+            const guint32 *p = maskfield->data + i*maskfield->stride;
+            if (value) {
+                for (guint j = maskfield->xres >> 5; j; j--, p++)
+                    count += count_set_bits(*p);
+                if (end)
+                    count += count_set_bits(*p & m0);
+            }
+            else {
+                for (guint j = maskfield->xres >> 5; j; j--, p++)
+                    count += count_set_bits(~*p);
+                if (end)
+                    count += count_set_bits(~*p & m0);
+            }
+        }
+    }
+
+    return count;
+}
+
+static guint
+count_part(const GwyMaskField *maskfield,
+           guint col,
+           guint row,
+           guint width,
+           guint height,
+           gboolean value)
+{
+    guint32 *base = maskfield->data + maskfield->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    guint count = 0;
+    if (width <= 0x20 - off) {
+        const guint32 m = MAKE_MASK(off, width);
+        if (value) {
+            for (guint i = 0; i < height; i++) {
+                guint32 *p = base + i*maskfield->stride;
+                count += count_set_bits(*p & m);
+            }
+        }
+        else {
+            for (guint i = 0; i < height; i++) {
+                guint32 *p = base + i*maskfield->stride;
+                count += count_set_bits(~*p & m);
+            }
+        }
+    }
+    else {
+        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++) {
+            guint32 *p = base + i*maskfield->stride;
+            guint j = width;
+            if (value) {
+                count += count_set_bits(*p & m0);
+                j -= 0x20 - off, p++;
+                while (j >= 0x20) {
+                    count += count_set_bits(*p);
+                    j -= 0x20, p++;
+                }
+                if (!end)
+                    continue;
+                count += count_set_bits(*p & m1);
+            }
+            else {
+                count += count_set_bits(~*p & m0);
+                j -= 0x20 - off, p++;
+                while (j >= 0x20) {
+                    count += count_set_bits(~*p);
+                    j -= 0x20, p++;
+                }
+                if (!end)
+                    continue;
+                count += count_set_bits(~*p & m1);
+            }
+        }
+    }
+    return count;
+}
+
+/**
+ * gwy_mask_field_part_count:
+ * @maskfield: A two-dimensional mask field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @value: %TRUE to count ones, %FALSE to count zeroes.
+ *
+ * Counts set or unset bits in a rectangular part of a mask field.
+ *
+ * Returns: The number of bits equal to @value.
+ **/
+guint
+gwy_mask_field_part_count(const GwyMaskField *maskfield,
+                          guint col,
+                          guint row,
+                          guint width,
+                          guint height,
+                          gboolean value)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(maskfield), 0);
+    g_return_val_if_fail(col + width <= maskfield->xres, 0);
+    g_return_val_if_fail(row + height <= maskfield->yres, 0);
+
+    if (!width || !height)
+        return 0;
+
+    return count_part(maskfield, col, row, width, height, value);
+}
+
 /* Merge grains i and j in map with full resolution */
 static inline void
 resolve_grain_map(guint *m, guint i, guint j)

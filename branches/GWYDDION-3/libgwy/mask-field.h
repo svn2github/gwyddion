@@ -106,40 +106,6 @@ GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
                                             gdouble lower,
                                             gdouble upper,
                                             gboolean complement)           G_GNUC_MALLOC;
-void          gwy_mask_field_data_changed  (GwyMaskField *maskfield);
-void          gwy_mask_field_copy          (const GwyMaskField *src,
-                                            GwyMaskField *dest);
-void          gwy_mask_field_part_copy     (const GwyMaskField *src,
-                                            guint col,
-                                            guint row,
-                                            guint width,
-                                            guint height,
-                                            GwyMaskField *dest,
-                                            guint destcol,
-                                            guint destrow);
-guint32*      gwy_mask_field_get_data      (GwyMaskField *maskfield)       G_GNUC_PURE;
-void          gwy_mask_field_invalidate    (GwyMaskField *maskfield);
-void          gwy_mask_field_fill          (GwyMaskField *maskfield,
-                                            gboolean value);
-void          gwy_mask_field_part_fill     (GwyMaskField *maskfield,
-                                            guint col,
-                                            guint row,
-                                            guint width,
-                                            guint height,
-                                            gboolean value);
-void          gwy_mask_field_logical       (GwyMaskField *maskfield,
-                                            const GwyMaskField *operand,
-                                            const GwyMaskField *mask,
-                                            GwyLogicalOperator op);
-void          gwy_mask_field_part_logical  (GwyMaskField *maskfield,
-                                            guint col,
-                                            guint row,
-                                            guint width,
-                                            guint height,
-                                            const GwyMaskField *operand,
-                                            guint opcol,
-                                            guint oprow,
-                                            GwyLogicalOperator op);
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(maskfield, col, row) \
@@ -212,6 +178,49 @@ typedef struct {
 #define gwy_mask_field_iter_set(iter, value) \
     do { if (value) iter.p |= iter.bit; else iter.p &= ~iter.bit; } while (0)
 
+void         gwy_mask_field_data_changed (GwyMaskField *maskfield);
+void         gwy_mask_field_copy         (const GwyMaskField *src,
+                                          GwyMaskField *dest);
+void         gwy_mask_field_part_copy    (const GwyMaskField *src,
+                                          guint col,
+                                          guint row,
+                                          guint width,
+                                          guint height,
+                                          GwyMaskField *dest,
+                                          guint destcol,
+                                          guint destrow);
+guint32*     gwy_mask_field_get_data     (GwyMaskField *maskfield)       G_GNUC_PURE;
+void         gwy_mask_field_invalidate   (GwyMaskField *maskfield);
+void         gwy_mask_field_fill         (GwyMaskField *maskfield,
+                                          gboolean value);
+void         gwy_mask_field_part_fill    (GwyMaskField *maskfield,
+                                          guint col,
+                                          guint row,
+                                          guint width,
+                                          guint height,
+                                          gboolean value);
+void         gwy_mask_field_logical      (GwyMaskField *maskfield,
+                                          const GwyMaskField *operand,
+                                          const GwyMaskField *mask,
+                                          GwyLogicalOperator op);
+void         gwy_mask_field_part_logical (GwyMaskField *maskfield,
+                                          guint col,
+                                          guint row,
+                                          guint width,
+                                          guint height,
+                                          const GwyMaskField *operand,
+                                          guint opcol,
+                                          guint oprow,
+                                          GwyLogicalOperator op);
+guint        gwy_mask_field_count        (const GwyMaskField *maskfield,
+                                          const GwyMaskField *mask,
+                                          gboolean value);
+guint        gwy_mask_field_part_count   (const GwyMaskField *maskfield,
+                                          guint col,
+                                          guint row,
+                                          guint width,
+                                          guint height,
+                                          gboolean value);
 const guint* gwy_mask_field_number_grains(GwyMaskField *maskfield,
                                           guint *ngrains);
 
