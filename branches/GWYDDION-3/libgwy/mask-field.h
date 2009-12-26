@@ -173,10 +173,10 @@ typedef struct {
 #endif
 
 #define gwy_mask_field_iter_get(iter) \
-    (*(iter.p) & iter.bit)
+    (*(iter).p & (iter).bit)
 
 #define gwy_mask_field_iter_set(iter, value) \
-    do { if (value) iter.p |= iter.bit; else iter.p &= ~iter.bit; } while (0)
+    do { if (value) *(iter).p |= (iter).bit; else *(iter).p &= ~(iter).bit; } while (0)
 
 void         gwy_mask_field_data_changed (GwyMaskField *field);
 void         gwy_mask_field_copy         (const GwyMaskField *src,

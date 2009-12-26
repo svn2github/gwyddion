@@ -75,11 +75,14 @@ enum {
     N_PROPS
 };
 
+// XXX: gwy_mask_field_grow() needs to invalidate the mask *except* @grains and
+// @ngrains which it correctly updates.  It must be revised when fields are
+// added here to invalidate them too.
 struct _GwyMaskFieldPrivate {
     guint *grains;
     guint *graindata;
     guint ngrains;
-    guint32 *serialized_swapped;
+    guint32 *serialized_swapped;    // serialization-only
 };
 
 typedef struct _GwyMaskFieldPrivate MaskField;
@@ -1416,6 +1419,154 @@ gwy_mask_field_shrink(GwyMaskField *field,
     gwy_mask_field_invalidate(field);
 }
 
+static void
+grow_row(const guint32 *u,
+         const guint32 *p,
+         const guint32 *d,
+         guint32 m0,
+         guint len,
+         guint end,
+         guint32 *q)
+{
+    guint32 v, vl, vr;
+
+    if (!len) {
+        v = *p & m0;
+        vl = v SHR 1;
+        vr = v SHL 1;
+        *q = vl | vr | *u | *d;
+        return;
+    }
+
+    v = *p;
+    vl = v SHR 1;
+    vr = (v SHL 1) | (*(p+1) SHR 0x1f);
+    *q = vl | vr | *u | *d;
+    q++, d++, p++, u++;
+
+    for (guint j = 1; j < len; j++, p++, q++, u++, d++) {
+        v = *p;
+        vl = (v SHR 1) | (*(p-1) SHL 0x1f);
+        vr = (v SHL 1) | (*(p+1) SHR 0x1f);
+        *q = vl | vr | *u | *d;
+    }
+
+    if (!end)
+        return;
+
+    v = *p & m0;
+    vl = (v SHR 1) | (*(p-1) SHL 0x1f);
+    vr = v SHL 1;
+    *q = vl | vr | *u | *d;
+}
+
+static void
+grow_field(GwyMaskField *field)
+{
+    guint stride = field->stride;
+    guint rowsize = stride * sizeof(guint32);
+
+    const guint end = field->xres & 0x1f;
+    const guint32 m0 = MAKE_MASK(0, end);
+    const guint len = field->xres >> 5;
+
+    if (field->yres == 1) {
+        guint32 *row = g_slice_alloc(rowsize);
+        memcpy(row, field->data, rowsize);
+        grow_row(row, row, row, m0, len, end, field->data);
+        g_slice_free1(rowsize, row);
+        return;
+    }
+
+    guint32 *prev = g_slice_alloc(rowsize);
+    guint32 *row = g_slice_alloc(rowsize);
+    guint32 *q, *next;
+
+    q = field->data;
+    memcpy(prev, q, rowsize);
+    next = q + stride;
+    grow_row(prev, prev, next, m0, len, end, q);
+
+    for (guint i = 1; i+1 < field->yres; i++) {
+        q = field->data + i*stride;
+        next = q + stride;
+        memcpy(row, q, rowsize);
+        grow_row(prev, row, next, m0, len, end, q);
+        GWY_SWAP(guint32*, prev, row);
+    }
+
+    q = field->data + (field->yres - 1)*stride;
+    memcpy(row, q, rowsize);
+    grow_row(prev, row, row, m0, len, end, q);
+
+    g_slice_free1(rowsize, row);
+    g_slice_free1(rowsize, prev);
+}
+
+static void
+prevent_grain_merging(GwyMaskField *field)
+{
+    /* We know in the grains did not touch before the growth step.
+     * Therefore, we examine pixels that are in the mask now but were not
+     * in the last iteration, i.e. grains[k] == 0 but data[k] is set */
+    guint xres = field->xres;
+    guint yres = field->yres;
+    guint *grains = field->priv->grains;
+    for (guint i = 0; i < yres; i++) {
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(field, iter, 0, i);
+        for (guint j = 0; j < xres; j++) {
+            guint k = i*xres + j;
+            if (!grains[k] && gwy_mask_field_iter_get(iter)) {
+                guint g1 = i          ? grains[k-xres] : 0;
+                guint g2 = j          ? grains[k-1]    : 0;
+                guint g3 = j+1 < xres ? grains[k+1]    : 0;
+                guint g4 = i+1 < yres ? grains[k+xres] : 0;
+                /* If all nonzero grain numbers are equal they are also equal
+                 * to this value. */
+                guint gno = g1 | g2 | g3 | g4;
+                if ((!g1 || g1 == gno)
+                    && (!g2 || g2 == gno)
+                    && (!g3 || g3 == gno)
+                    && (!g4 || g4 == gno))
+                    grains[k] = gno;
+                else {
+                    /* Now we have a conflict and it has to be resolved.
+                     * We just get rid of this pixel. */
+                    gwy_mask_field_iter_set(iter, FALSE);
+                }
+            }
+            gwy_mask_field_iter_next(iter);
+        }
+    }
+}
+
+/**
+ * gwy_mask_field_grow:
+ * @field: A two-dimensional mask field.
+ * @separate_grains: %TRUE to prevent merging of grains, their growth stops
+ *                   if they should touch another grain.
+ *
+ * Grows grains in a mask field by one pixel from all four directions.
+ **/
+void
+gwy_mask_field_grow(GwyMaskField *field,
+                    gboolean separate_grains)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
+    // Separated grain growth needs numbered grains but it also updates the
+    // numbers to the valid state again.
+    if (separate_grains)
+        gwy_mask_field_number_grains(field, NULL);
+    grow_field(field);
+    if (separate_grains) {
+        prevent_grain_merging(field);
+        GWY_FREE(field->priv->graindata);
+    }
+    else
+        gwy_mask_field_invalidate(field);
+}
+
 // GCC has a built-in __builtin_popcount() but for some reason it does not
 // inline the code.  So whatever clever it does, this makes the built-in to be
 // more than three times slower than this expanded implementation.  See
@@ -1664,6 +1815,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
  *          the data change, gwy_mask_field_invalidate() is called or the
  *          mask field is finalized.
  **/
+// FIXME: Write this using GwyMaskFieldIter to make it readable.
 const guint*
 gwy_mask_field_number_grains(GwyMaskField *field,
                              guint *ngrains)
@@ -1802,12 +1954,14 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * If padding is present, the unused bits have undefined value and mask field
  * methods may change them arbitrarily.
  *
- * It is possible to get and set individual bits with macros
- * gwy_mask_field_get() and gwy_mask_field_set().  In performance-sensitive
- * code it might be preferable to directly obtain the packed values and iterate
- * over bits.  However, if you perform any non-trivial floating-point operation
- * in each pixel, the cost of the gwy_mask_field_get() bit extraction will
- * unlikely matter.
+ * Individual bits in the mask can be get and set with macros
+ * gwy_mask_field_get() and gwy_mask_field_set().  These macros are relatively
+ * slow and they are suitable for casual use or when the amount of work
+ * otherwise done per pixel makes their cost negligible.  For the common
+ * sequential access, the mask iterator #GwyMaskFieldIter macros offers a good
+ * compromise between complexity and efficiency.  In a really
+ * performance-sensitive code, you also might wish to access the bits in
+ * #GwyMaskField.data directly.
  *
  * FIXME: Here should be something about invalidation, but let's get the grain
  * data implemented first.
@@ -1951,7 +2105,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * for (guint i = 0; i < field->height; i++) {
  *     const gdouble *d = field->data + i*field->xres;
  *     GwyMaskFieldIter iter;
- *     gwy_mask_field_iter_init(field, iter, 0, i);
+ *     gwy_mask_field_iter_init(mask, iter, 0, i);
  *     for (guint j = 0; j < field->xres; j++) {
  *         if (gwy_mask_field_iter_get(iter)) {
  *             if (min > d[j])
