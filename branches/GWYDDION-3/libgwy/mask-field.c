@@ -1509,8 +1509,7 @@ prevent_grain_merging(GwyMaskField *field)
     /* We know in the grains did not touch before the growth step.
      * Therefore, we examine pixels that are in the mask now but were not
      * in the last iteration, i.e. grains[k] == 0 but data[k] is set */
-    guint xres = field->xres;
-    guint yres = field->yres;
+    guint xres = field->xres, yres = field->yres;
     guint *grains = field->priv->grains;
     for (guint i = 0; i < yres; i++) {
         GwyMaskFieldIter iter;
@@ -1815,7 +1814,6 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
  *          the data change, gwy_mask_field_invalidate() is called or the
  *          mask field is finalized.
  **/
-// FIXME: Write this using GwyMaskFieldIter to make it readable.
 const guint*
 gwy_mask_field_number_grains(GwyMaskField *field,
                              guint *ngrains)
@@ -1837,67 +1835,36 @@ gwy_mask_field_number_grains(GwyMaskField *field,
     /* Number grains with simple unidirectional grain number propagation,
      * updating map m for later full grain join */
     guint max_id = 0;
-    guint end = xres & 0x1f;
     for (guint i = 0; i < yres; i++) {
-        const guint32 *p = field->data + i*field->stride;
         guint *g = priv->grains + i*xres;
         guint *gprev = g - xres;
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(field, iter, 0, i);
         guint grain_id = 0;
-        for (guint j = 0; j < (xres >> 5); j++) {
-            guint32 v = *(p++);
-            for (guint k = 0; k < 0x20; k++, g++, gprev++) {
-                if (v & FIRST_BIT) {
-                    /* Grain number is kept from the top or left neighbour
-                     * unless it does not exist (a new number is assigned) or a
-                     * join with top neighbour occurs (m is updated) */
-                    guint id;
-                    if (i && (id = *gprev)) {
-                        if (!grain_id)
-                            grain_id = id;
-                        else if (id != grain_id) {
-                            resolve_grain_map(m, id, grain_id);
-                            grain_id = m[id];
-                        }
-                    }
-                    if (!grain_id) {
-                        grain_id = ++max_id;
-                        m = ensure_map(grain_id, m, &msize);
-                        m[grain_id] = grain_id;
+        for (guint j = xres; j; j--, g++, gprev++) {
+            if (gwy_mask_field_iter_get(iter)) {
+                /* Grain number is kept from the top or left neighbour
+                 * unless it does not exist (a new number is assigned) or a
+                 * join with top neighbour occurs (m is updated) */
+                guint id;
+                if (i && (id = *gprev)) {
+                    if (!grain_id)
+                        grain_id = id;
+                    else if (id != grain_id) {
+                        resolve_grain_map(m, id, grain_id);
+                        grain_id = m[id];
                     }
                 }
-                else
-                    grain_id = 0;
-                *g = grain_id;
-                v = v SHL 1;
-            }
-        }
-        if (end) {
-            guint32 v = *p;
-            for (guint k = 0; k < end; k++, g++, gprev++) {
-                if (v & FIRST_BIT) {
-                    /* Grain number is kept from the top or left neighbour
-                     * unless it does not exist (a new number is assigned) or a
-                     * join with top neighbour occurs (m is updated) */
-                    guint id;
-                    if (i && (id = *gprev)) {
-                        if (!grain_id)
-                            grain_id = id;
-                        else if (id != grain_id) {
-                            resolve_grain_map(m, id, grain_id);
-                            grain_id = m[id];
-                        }
-                    }
-                    if (!grain_id) {
-                        grain_id = ++max_id;
-                        m = ensure_map(grain_id, m, &msize);
-                        m[grain_id] = grain_id;
-                    }
+                if (!grain_id) {
+                    grain_id = ++max_id;
+                    m = ensure_map(grain_id, m, &msize);
+                    m[grain_id] = grain_id;
                 }
-                else
-                    grain_id = 0;
-                *g = grain_id;
-                v = v SHL 1;
             }
+            else
+                grain_id = 0;
+            *g = grain_id;
+            gwy_mask_field_iter_next(iter);
         }
     }
 
