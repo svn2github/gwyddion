@@ -35,13 +35,13 @@ $(library_def): $(library_symbols)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-def.py \
 	     $(library_def) $(library_symbols)
 
-$(library_aliases).h: $(library_symbols)
+$(library_aliases).h: $(library_symbols) $(CONFIG_HEADER)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library_aliases).h $(library_symbols)
+	    $(library_aliases).h $(library_symbols) $(CONFIG_HEADER)
 
-$(library_aliases).c: $(library_symbols)
+$(library_aliases).c: $(library_symbols) $(CONFIG_HEADER)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library_aliases).c $(library_symbols)
+	    $(library_aliases).c $(library_symbols) $(CONFIG_HEADER)
 
 .PHONY: check-symbols
 # run make check-symbols as part of make check
