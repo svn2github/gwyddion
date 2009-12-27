@@ -695,6 +695,23 @@ gwy_field_statistics(GwyField *field,
  * Counts the values within or outside certain range in a rectangular part of
  * a field.
  *
+ * Although the function name suggests counting values that lie in a specific
+ * range the counts stored in @nabove and @nbelow are independent.
+ *
+ * Counting values <emphasis>outside</emphasis> the interval [@a,@b] is then
+ * straightfoward by passing @upper = @b and @lower = @a and summing
+ * @nabove + @nbelow.
+ *
+ * To actually count values <emphasis>inside</emphasis> the interval [@a,@b]
+ * you can use the return value:
+ * |[
+ * guint ntotal, nabove, nbelow, count;
+ * ntotal = gwy_data_field_area_count_in_range(field, mask, masking,
+ *                                             col, row, width, height,
+ *                                             a, b, TRUE, &nabove, &nbelow);
+ * count = ntotal - (nabove + nbelow);
+ * ]|
+ *
  * Returns: The total number of values considered.  This is namely useful with
  *          masking, otherwise the returned value always equals to
  *          @width×@height.
@@ -710,8 +727,8 @@ gwy_field_part_count_in_range(const GwyField *field,
                               gdouble lower,
                               gdouble upper,
                               gboolean strict,
-                              gdouble *nabove,
-                              gdouble *nbelow)
+                              guint *nabove,
+                              guint *nbelow)
 {
     guint maskcol, maskrow;
     if (!stats_check_args(field, mask, &masking,
@@ -834,7 +851,7 @@ gwy_field_part_count_in_range(const GwyField *field,
  * @z2: Z-value in second corner.
  * @z3: Z-value in third corner.
  * @z4: Z-value in fourth corner.
- * @q: One fourth of rectangle projected area (x-size * y-size).
+ * @q: Projected area of the pixel.
  *
  * Calculates approximate area of a one square pixel.
  *
@@ -868,7 +885,7 @@ square_area1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @w2: Weight of second corner (0 or 1).
  * @w3: Weight of third corner (0 or 1).
  * @w4: Weight of fourth corner (0 or 1).
- * @q: One fourth of rectangle projected area (x-size * y-size).
+ * @q: Projected area of the pixel.
  *
  * Calculates approximate area of a one square pixel with some corners possibly
  * missing.
@@ -900,8 +917,8 @@ square_area1w(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @z2: Z-value in second corner.
  * @z3: Z-value in third corner.
  * @z4: Z-value in fourth corner.
- * @dx2: One fourth of square of rectangle width (x-size).
- * @dy2: One fourth of square of rectangle height (y-size).
+ * @dx2: Square of rectangle width (x-size).
+ * @dy2: Square of rectangle height (y-size).
  *
  * Calculates approximate area of a one general rectangular pixel.
  *
@@ -935,8 +952,8 @@ square_area2(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
  * @w2: Weight of second corner (0 or 1).
  * @w3: Weight of third corner (0 or 1).
  * @w4: Weight of fourth corner (0 or 1).
- * @dx2: One fourth of square of rectangle width (x-size).
- * @dy2: One fourth of square of rectangle height (y-size).
+ * @dx2: Square of rectangle width (x-size).
+ * @dy2: Square of rectangle height (y-size).
  *
  * Calculates approximate area of a one general rectangular pixel with some
  * corners possibly missing.
@@ -970,7 +987,7 @@ surface_area1(const GwyField *field,
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *base = field->data + xres*row + col;
-    gdouble q = 0.25 * gwy_field_dx(field) * gwy_field_dy(field);
+    gdouble q = gwy_field_dx(field) * gwy_field_dy(field);
     gdouble sum = 0.0;   // Counted in quarter-pixel areas
 
     const guint F = (col == 0) ? 1 : 0;
@@ -1017,8 +1034,8 @@ surface_area2(const GwyField *field,
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *base = field->data + xres*row + col;
-    gdouble dx2 = 0.5*gwy_field_dx(field);
-    gdouble dy2 = 0.5*gwy_field_dy(field);
+    gdouble dx2 = gwy_field_dx(field);
+    gdouble dy2 = gwy_field_dy(field);
     dx2 *= dx2;
     dy2 *= dy2;
     gdouble sum = 0.0;   // Counted in quarter-pixel areas
@@ -1070,7 +1087,7 @@ surface_area_mask1(const GwyField *field,
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *base = field->data + xres*row + col;
-    gdouble q = 0.25 * gwy_field_dx(field) * gwy_field_dy(field);
+    gdouble q = gwy_field_dx(field) * gwy_field_dy(field);
     gdouble sum = 0.0;   // Counted in quarter-pixel areas
 
     const guint F = (col == 0) ? 1 : 0;
@@ -1150,8 +1167,8 @@ surface_area_mask2(const GwyField *field,
     guint xres = field->xres;
     guint yres = field->yres;
     const gdouble *base = field->data + xres*row + col;
-    gdouble dx2 = 0.5*gwy_field_dx(field);
-    gdouble dy2 = 0.5*gwy_field_dy(field);
+    gdouble dx2 = gwy_field_dx(field);
+    gdouble dy2 = gwy_field_dy(field);
     dx2 *= dx2;
     dy2 *= dy2;
     gdouble sum = 0.0;   // Counted in quarter-pixel areas
@@ -1303,8 +1320,8 @@ gdouble
 gwy_field_surface_area(GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
-    return gwy_field_part_rms(field, NULL, GWY_MASK_IGNORE,
-                              0, 0, field->xres, field->yres);
+    return gwy_field_part_surface_area(field, NULL, GWY_MASK_IGNORE,
+                                       0, 0, field->xres, field->yres);
 }
 
 #define __LIBGWY_FIELD_STATISTICS_C__
