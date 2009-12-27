@@ -122,6 +122,7 @@ gwy_field_part_min_max(GwyField *field,
         if (full_field) {
             CVAL(field->priv, MIN) = min1;
             CVAL(field->priv, MAX) = max1;
+            field->priv->cached |= CBIT(MIN) | CBIT(MAX);
         }
     }
     else if (masking == GWY_MASK_INCLUDE) {
@@ -262,8 +263,10 @@ gwy_field_part_mean(GwyField *field,
     if (!n)
         return NAN;
     mean = mean/n;
-    if (full_field)
+    if (full_field) {
         CVAL(field->priv, AVG) = mean;
+        field->priv->cached |= CBIT(AVG);
+    }
     return mean;
 }
 
@@ -327,8 +330,10 @@ gwy_field_part_median(GwyField *field,
             ASSIGN(buffer + i*width, base + i*field->xres, width);
         gdouble median = gwy_math_median(buffer, width*height);
         g_slice_free1(bufsize, buffer);
-        if (full_field)
+        if (full_field) {
             CVAL(field->priv, MED) = median;
+            field->priv->cached |= CBIT(MED);
+        }
         return median;
     }
 
@@ -472,8 +477,10 @@ gwy_field_part_rms(GwyField *field,
     avg /= n;
     rms -= avg*avg;
     rms = sqrt(MAX(rms, 0.0));
-    if (full_field)
+    if (full_field) {
         CVAL(field->priv, RMS) = rms;
+        field->priv->cached |= CBIT(RMS);
+    }
     return rms;
 }
 
@@ -620,8 +627,10 @@ gwy_field_part_statistics(GwyField *field,
     gdouble rms1 = sqrt(sum2);
     sum3 /= sum2*rms1;
     sum4 = sum4/(sum2*sum2) - 3;
-    if (full_field)
+    if (full_field) {
         CVAL(field->priv, RMS) = rms1;
+        field->priv->cached |= CBIT(RMS);
+    }
 
     GWY_MAYBE_SET(mean, avg);
     GWY_MAYBE_SET(ra, sumabs);
@@ -817,6 +826,485 @@ gwy_field_part_count_in_range(const GwyField *field,
     GWY_MAYBE_SET(nabove, na);
     GWY_MAYBE_SET(nbelow, nb);
     return n;
+}
+
+/**
+ * square_area1:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @q: One fourth of rectangle projected area (x-size * y-size).
+ *
+ * Calculates approximate area of a one square pixel.
+ *
+ * Returns: The area.
+ **/
+static inline gdouble
+square_area1(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+             gdouble q)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/4.0;
+    z1 -= c;
+    z2 -= c;
+    z3 -= c;
+    z4 -= c;
+
+    return (sqrt(1.0 + 2.0*(z1*z1 + z2*z2)/q)
+            + sqrt(1.0 + 2.0*(z2*z2 + z3*z3)/q)
+            + sqrt(1.0 + 2.0*(z3*z3 + z4*z4)/q)
+            + sqrt(1.0 + 2.0*(z4*z4 + z1*z1)/q));
+}
+
+/**
+ * square_area1w:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @w1: Weight of first corner (0 or 1).
+ * @w2: Weight of second corner (0 or 1).
+ * @w3: Weight of third corner (0 or 1).
+ * @w4: Weight of fourth corner (0 or 1).
+ * @q: One fourth of rectangle projected area (x-size * y-size).
+ *
+ * Calculates approximate area of a one square pixel with some corners possibly
+ * missing.
+ *
+ * Returns: The area.
+ **/
+static inline gdouble
+square_area1w(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+              guint w1, guint w2, guint w3, guint w4,
+              gdouble q)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/4.0;
+    z1 -= c;
+    z2 -= c;
+    z3 -= c;
+    z4 -= c;
+
+    return ((w1 + w2)*sqrt(1.0 + 2.0*(z1*z1 + z2*z2)/q)
+            + (w2 + w3)*sqrt(1.0 + 2.0*(z2*z2 + z3*z3)/q)
+            + (w3 + w4)*sqrt(1.0 + 2.0*(z3*z3 + z4*z4)/q)
+            + (w4 + w1)*sqrt(1.0 + 2.0*(z4*z4 + z1*z1)/q))/2.0;
+}
+
+/**
+ * square_area2:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @dx2: One fourth of square of rectangle width (x-size).
+ * @dy2: One fourth of square of rectangle height (y-size).
+ *
+ * Calculates approximate area of a one general rectangular pixel.
+ *
+ * Returns: The area.
+ **/
+static inline gdouble
+square_area2(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+             gdouble dx2, gdouble dy2)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/2.0;
+
+    return (sqrt(1.0 + (z1 - z2)*(z1 - z2)/dx2
+                 + (z1 + z2 - c)*(z1 + z2 - c)/dy2)
+            + sqrt(1.0 + (z2 - z3)*(z2 - z3)/dy2
+                   + (z2 + z3 - c)*(z2 + z3 - c)/dx2)
+            + sqrt(1.0 + (z3 - z4)*(z3 - z4)/dx2
+                   + (z3 + z4 - c)*(z3 + z4 - c)/dy2)
+            + sqrt(1.0 + (z1 - z4)*(z1 - z4)/dy2
+                   + (z1 + z4 - c)*(z1 + z4 - c)/dx2));
+}
+
+/**
+ * square_area2w:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @w1: Weight of first corner (0 or 1).
+ * @w2: Weight of second corner (0 or 1).
+ * @w3: Weight of third corner (0 or 1).
+ * @w4: Weight of fourth corner (0 or 1).
+ * @dx2: One fourth of square of rectangle width (x-size).
+ * @dy2: One fourth of square of rectangle height (y-size).
+ *
+ * Calculates approximate area of a one general rectangular pixel with some
+ * corners possibly missing.
+ *
+ * Returns: The area.
+ **/
+static inline gdouble
+square_area2w(gdouble z1, gdouble z2, gdouble z3, gdouble z4,
+              guint w1, guint w2, guint w3, guint w4,
+              gdouble dx2, gdouble dy2)
+{
+    gdouble c;
+
+    c = (z1 + z2 + z3 + z4)/2.0;
+
+    return ((w1 + w2)*sqrt(1.0 + (z1 - z2)*(z1 - z2)/dx2
+                           + (z1 + z2 - c)*(z1 + z2 - c)/dy2)
+            + (w2 + w3)*sqrt(1.0 + (z2 - z3)*(z2 - z3)/dy2
+                             + (z2 + z3 - c)*(z2 + z3 - c)/dx2)
+            + (w3 + w4)*sqrt(1.0 + (z3 - z4)*(z3 - z4)/dx2
+                             + (z3 + z4 - c)*(z3 + z4 - c)/dy2)
+            + (w4 + w1)*sqrt(1.0 + (z1 - z4)*(z1 - z4)/dy2
+                             + (z1 + z4 - c)*(z1 + z4 - c)/dx2))/2.0;
+}
+
+static gdouble
+surface_area1(const GwyField *field,
+              guint col, guint row,
+              guint width, guint height)
+{
+    guint xres = field->xres;
+    guint yres = field->yres;
+    const gdouble *base = field->data + xres*row + col;
+    gdouble q = 0.25 * gwy_field_dx(field) * gwy_field_dy(field);
+    gdouble sum = 0.0;   // Counted in quarter-pixel areas
+
+    const guint F = (col == 0) ? 1 : 0;
+    const guint L = (col + width == xres) ? 0 : 1;
+    const gdouble *d1, *d2;
+
+    // Top row.
+    d1 = (row == 0) ? base-1 : base-1 - xres;
+    d2 = base-1;
+    sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 0, 1, 0, q);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++)
+        sum += square_area1w(d1[0], d1[1], d2[1], d2[0], 0, 0, 1, 1, q);
+    sum += square_area1w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, 1, q);
+
+    // Middle part
+    for (guint i = 0; i+1 < height; i++) {
+        d1 = base-1 + i*xres;
+        d2 = d1 + xres;
+        sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 1, 1, 0, q);
+        d1++, d2++;
+        for (guint j = width-1; j; j--, d1++, d2++)
+            sum += square_area1(d1[0], d1[1], d2[1], d2[0], q);
+        sum += square_area1w(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 1, q);
+    }
+
+    // Bottom row.
+    d1 = base-1 + (height - 1)*xres;
+    d2 = (row + height == yres) ? d1 : d1 + xres;
+    sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 1, 0, 0, q);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++)
+        sum += square_area1w(d1[0], d1[1], d2[1], d2[0], 1, 1, 0, 0, q);
+    sum += square_area1w(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 0, q);
+
+    return sum;
+}
+
+static gdouble
+surface_area2(const GwyField *field,
+              guint col, guint row,
+              guint width, guint height)
+{
+    guint xres = field->xres;
+    guint yres = field->yres;
+    const gdouble *base = field->data + xres*row + col;
+    gdouble dx2 = 0.5*gwy_field_dx(field);
+    gdouble dy2 = 0.5*gwy_field_dy(field);
+    dx2 *= dx2;
+    dy2 *= dy2;
+    gdouble sum = 0.0;   // Counted in quarter-pixel areas
+
+    const guint F = (col == 0) ? 1 : 0;
+    const guint L = (col + width == xres) ? 0 : 1;
+    const gdouble *d1, *d2;
+
+    // Top row.
+    d1 = (row == 0) ? base-1 : base-1 - xres;
+    d2 = base-1;
+    sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 0, 1, 0, dx2, dy2);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++)
+        sum += square_area2w(d1[0], d1[1], d2[1], d2[0], 0, 0, 1, 1, dx2, dy2);
+    sum += square_area2w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, 1, dx2, dy2);
+
+    // Middle part
+    for (guint i = 0; i+1 < height; i++) {
+        d1 = base-1 + i*xres;
+        d2 = d1 + xres;
+        sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 1, 1, 0, dx2, dy2);
+        d1++, d2++;
+        for (guint j = width-1; j; j--, d1++, d2++)
+            sum += square_area2(d1[0], d1[1], d2[1], d2[0], dx2, dy2);
+        sum += square_area2w(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 1, dx2, dy2);
+    }
+
+    // Bottom row.
+    d1 = base-1 + (height - 1)*xres;
+    d2 = (row + height == yres) ? d1 : d1 + xres;
+    sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 1, 0, 0, dx2, dy2);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++)
+        sum += square_area2w(d1[0], d1[1], d2[1], d2[0], 1, 1, 0, 0, dx2, dy2);
+    sum += square_area2w(d1[0], d1[L], d2[L], d2[0], 1, 0, 0, 0, dx2, dy2);
+
+    return sum;
+}
+
+static gdouble
+surface_area_mask1(const GwyField *field,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   guint col, guint row,
+                   guint width, guint height,
+                   guint maskcol, guint maskrow)
+{
+    guint xres = field->xres;
+    guint yres = field->yres;
+    const gdouble *base = field->data + xres*row + col;
+    gdouble q = 0.25 * gwy_field_dx(field) * gwy_field_dy(field);
+    gdouble sum = 0.0;   // Counted in quarter-pixel areas
+
+    const guint F = (col == 0) ? 1 : 0;
+    const guint L = (col + width == xres) ? 0 : 1;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    GwyMaskFieldIter iter1, iter2;
+    const gdouble *d1, *d2;
+    guint w1, w2, w3, w4;
+
+    // Top row.
+    d1 = (row == 0) ? base-1 : base-1 - xres;
+    d2 = base-1;
+    gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
+    w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+    sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, q);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++) {
+        w4 = w3;
+        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        sum += square_area1w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4, q);
+        gwy_mask_field_iter_next(iter2);
+    }
+    w4 = w3;
+    sum += square_area1w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, w3, q);
+
+    // Middle part
+    for (guint i = 0; i+1 < height; i++) {
+        d1 = base-1 + i*xres;
+        d2 = d1 + xres;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
+        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0, q);
+        d1++, d2++;
+        for (guint j = width-1; j; j--, d1++, d2++) {
+            w1 = w2;
+            w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+            w4 = w3;
+            w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4, q);
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+        w1 = w2;
+        w4 = w3;
+        sum += square_area1w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, w4, q);
+    }
+
+    // Bottom row.
+    d1 = base-1 + (height - 1)*xres;
+    d2 = (row + height == yres) ? d1 : d1 + xres;
+    gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
+    w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+    sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, q);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++) {
+        w1 = w2;
+        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0, q);
+        gwy_mask_field_iter_next(iter1);
+    }
+    w1 = w2;
+    sum += square_area1w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, 0, q);
+
+    return sum;
+}
+
+static gdouble
+surface_area_mask2(const GwyField *field,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   guint col, guint row,
+                   guint width, guint height,
+                   guint maskcol, guint maskrow)
+{
+    guint xres = field->xres;
+    guint yres = field->yres;
+    const gdouble *base = field->data + xres*row + col;
+    gdouble dx2 = 0.5*gwy_field_dx(field);
+    gdouble dy2 = 0.5*gwy_field_dy(field);
+    dx2 *= dx2;
+    dy2 *= dy2;
+    gdouble sum = 0.0;   // Counted in quarter-pixel areas
+
+    const guint F = (col == 0) ? 1 : 0;
+    const guint L = (col + width == xres) ? 0 : 1;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    GwyMaskFieldIter iter1, iter2;
+    const gdouble *d1, *d2;
+    guint w1, w2, w3, w4;
+
+    // Top row.
+    d1 = (row == 0) ? base-1 : base-1 - xres;
+    d2 = base-1;
+    gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
+    w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+    sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, dx2, dy2);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++) {
+        w4 = w3;
+        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        sum += square_area2w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4,
+                             dx2, dy2);
+        gwy_mask_field_iter_next(iter2);
+    }
+    w4 = w3;
+    sum += square_area2w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, w3, dx2, dy2);
+
+    // Middle part
+    for (guint i = 0; i+1 < height; i++) {
+        d1 = base-1 + i*xres;
+        d2 = d1 + xres;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
+        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0,
+                             dx2, dy2);
+        d1++, d2++;
+        for (guint j = width-1; j; j--, d1++, d2++) {
+            w1 = w2;
+            w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+            w4 = w3;
+            w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4,
+                                 dx2, dy2);
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+        w1 = w2;
+        w4 = w3;
+        sum += square_area2w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, w4,
+                             dx2, dy2);
+    }
+
+    // Bottom row.
+    d1 = base-1 + (height - 1)*xres;
+    d2 = (row + height == yres) ? d1 : d1 + xres;
+    gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
+    w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+    sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, dx2, dy2);
+    d1++, d2++;
+    for (guint j = width-1; j; j--, d1++, d2++) {
+        w1 = w2;
+        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0,
+                             dx2, dy2);
+        gwy_mask_field_iter_next(iter1);
+    }
+    w1 = w2;
+    sum += square_area2w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, 0, dx2, dy2);
+
+    return sum;
+}
+
+/**
+ * gwy_field_part_surface_area:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ *
+ * Calculates the surface area of a rectangular part of a field.
+ *
+ * Returns: The surface area.  The surface area value is meaningless if lateral
+ *          and value (height) are different physical quantities.
+ **/
+gdouble
+gwy_field_part_surface_area(GwyField *field,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            guint col, guint row,
+                            guint width, guint height)
+{
+    guint maskcol, maskrow;
+    if (!stats_check_args(field, mask, &masking,
+                          col, row, width, height, &maskcol, &maskrow))
+        return 0.0;
+
+    gdouble dx = gwy_field_dx(field);
+    gdouble dy = gwy_field_dy(field);
+    gboolean square_pixels = fabs(log(dx/dy)) < 1e-6;
+    gboolean full_field = FALSE;
+    gdouble area = 0.0;
+    if (masking == GWY_MASK_INCLUDE || masking == GWY_MASK_EXCLUDE) {
+        if (square_pixels)
+            area = surface_area_mask1(field, mask, masking,
+                                      col, row, width, height,
+                                      maskcol, maskrow);
+        else
+            area = surface_area_mask2(field, mask, masking,
+                                      col, row, width, height,
+                                      maskcol, maskrow);
+    }
+    else {
+        full_field = (width == field->xres && height == field->yres);
+        if (full_field && CTEST(field->priv, ARE))
+            return CVAL(field->priv, ARE);
+
+        if (square_pixels)
+            area = surface_area1(field, col, row, width, height);
+        else
+            area = surface_area2(field, col, row, width, height);
+
+    }
+    area *= dx*dy/4.0;
+    if (full_field) {
+        CVAL(field->priv, ARE) = area;
+        field->priv->cached |= CBIT(ARE);
+    }
+    return area;
+}
+
+/**
+ * gwy_field_surface_area:
+ * @field: A two-dimensional data field.
+ *
+ * Calculates the surface area of a field.
+ *
+ * The surface area value is cached, see gwy_field_invalidate().
+ *
+ * Returns: The surface area.  The surface area value is meaningless if lateral
+ *          and value (height) are different physical quantities.
+ **/
+gdouble
+gwy_field_surface_area(GwyField *field)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), 0.0);
+    return gwy_field_part_rms(field, NULL, GWY_MASK_IGNORE,
+                              0, 0, field->xres, field->yres);
 }
 
 #define __LIBGWY_FIELD_STATISTICS_C__

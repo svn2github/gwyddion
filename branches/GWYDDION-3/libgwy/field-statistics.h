@@ -79,6 +79,14 @@ void    gwy_field_statistics         (GwyField *field,
                                       gdouble *rms,
                                       gdouble *skew,
                                       gdouble *kurtosis);
+gdouble gwy_field_surface_area       (GwyField *field);
+gdouble gwy_field_part_surface_area  (GwyField *field,
+                                      const GwyMaskField *mask,
+                                      GwyMaskingType masking,
+                                      guint col,
+                                      guint row,
+                                      guint width,
+                                      guint height);
 guint   gwy_field_part_count_in_range(const GwyField *field,
                                       const GwyMaskField *mask,
                                       GwyMaskingType masking,
