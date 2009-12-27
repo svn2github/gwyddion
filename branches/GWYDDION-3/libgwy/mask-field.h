@@ -214,6 +214,8 @@ void         gwy_mask_field_part_logical (GwyMaskField *field,
                                           GwyLogicalOperator op);
 void         gwy_mask_field_shrink       (GwyMaskField *field,
                                           gboolean from_borders);
+void         gwy_mask_field_grow         (GwyMaskField *field,
+                                          gboolean separate_grains);
 guint        gwy_mask_field_count        (const GwyMaskField *field,
                                           const GwyMaskField *mask,
                                           gboolean value);
