@@ -27,11 +27,14 @@
 #include "libgwy/libgwy.h"
 
 // Helpers
-void     dump_error_list   (GwyErrorList *error_list);
-GObject* serialize_and_back(GObject *object);
-void     record_item_change(GObject *object,
-                            guint pos,
-                            guint64 *counter);
+void          dump_error_list   (GwyErrorList *error_list);
+GObject*      serialize_and_back(GObject *object);
+void          record_item_change(GObject *object,
+                                 guint pos,
+                                 guint64 *counter);
+GwyMaskField* random_mask_field (guint xres,
+                                 guint yres,
+                                 GRand *rng);
 
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 

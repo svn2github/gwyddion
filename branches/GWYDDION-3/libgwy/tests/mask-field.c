@@ -785,7 +785,7 @@ test_mask_field_count(void)
     g_rand_free(rng);
 }
 
-GwyMaskField*
+static GwyMaskField*
 mask_field_from_string(const gchar *str)
 {
     guint width = 0, height = 0;
@@ -977,6 +977,15 @@ test_mask_field_shrink(void)
         " ###                                                              \n"
         "                                                                  \n";
     test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
+}
+
+GwyMaskField*
+random_mask_field(guint xres, guint yres, GRand *rng)
+{
+    GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+    for (guint i = 0; i < yres*field->stride; i++)
+        field->data[i] = g_rand_int(rng);
+    return field;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
