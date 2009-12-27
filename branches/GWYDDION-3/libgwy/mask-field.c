@@ -1329,27 +1329,27 @@ shrink_row(const guint32 *u,
         v = *p & m0;
         vl = (v SHR 1) | (from_borders ? 0 : (v & NTH_BIT(0)));
         vr = (v SHL 1) | (from_borders ? 0 : (v & NTH_BIT(end-1)));
-        *q = vl & vr & *u & *d;
+        *q = v & vl & vr & *u & *d;
         return;
     }
 
     v = *p;
     vl = (v SHR 1) | (from_borders ? 0 : (v & NTH_BIT(0)));
     vr = (v SHL 1) | (*(p+1) SHR 0x1f);
-    *q = vl & vr & *u & *d;
+    *q = v & vl & vr & *u & *d;
     q++, d++, p++, u++;
 
     for (guint j = 1; j < len; j++, p++, q++, u++, d++) {
         v = *p;
         vl = (v SHR 1) | (*(p-1) SHL 0x1f);
         vr = (v SHL 1) | (*(p+1) SHR 0x1f);
-        *q = vl & vr & *u & *d;
+        *q = v & vl & vr & *u & *d;
     }
 
     v = *p & m0;
     vl = (v SHR 1) | (*(p-1) SHL 0x1f);
     vr = (v SHL 1) | (from_borders ? 0 : (v & NTH_BIT(end-1)));
-    *q = vl & vr & *u & *d;
+    *q = v & vl & vr & *u & *d;
 }
 
 /**
@@ -1434,21 +1434,21 @@ grow_row(const guint32 *u,
         v = *p & m0;
         vl = v SHR 1;
         vr = v SHL 1;
-        *q = vl | vr | *u | *d;
+        *q = v | vl | vr | *u | *d;
         return;
     }
 
     v = *p;
     vl = v SHR 1;
     vr = (v SHL 1) | (*(p+1) SHR 0x1f);
-    *q = vl | vr | *u | *d;
+    *q = v | vl | vr | *u | *d;
     q++, d++, p++, u++;
 
     for (guint j = 1; j < len; j++, p++, q++, u++, d++) {
         v = *p;
         vl = (v SHR 1) | (*(p-1) SHL 0x1f);
         vr = (v SHL 1) | (*(p+1) SHR 0x1f);
-        *q = vl | vr | *u | *d;
+        *q = v | vl | vr | *u | *d;
     }
 
     if (!end)
@@ -1457,7 +1457,7 @@ grow_row(const guint32 *u,
     v = *p & m0;
     vl = (v SHR 1) | (*(p-1) SHL 0x1f);
     vr = v SHL 1;
-    *q = vl | vr | *u | *d;
+    *q = v | vl | vr | *u | *d;
 }
 
 static void
@@ -1628,7 +1628,7 @@ gwy_mask_field_count(const GwyMaskField *field,
         g_return_val_if_fail(field->stride == mask->stride, 0);
     }
 
-    const guint end = mask->xres & 0x1f;
+    const guint end = field->xres & 0x1f;
     const guint32 m0 = MAKE_MASK(0, end);
     guint count = 0;
 
