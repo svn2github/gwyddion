@@ -35,7 +35,7 @@ mask_field_dump(const GwyMaskField *maskfield, const gchar *name)
            maskfield->xres, maskfield->yres, maskfield->stride);
     for (guint i = 0; i < maskfield->yres; i++) {
         for (guint j = 0; j < maskfield->xres; j++)
-            putchar(gwy_mask_field_get(maskfield, j, i) ? '1' : '0');
+            putchar(gwy_mask_field_get(maskfield, j, i) ? '#' : '.');
         putchar('\n');
     }
 }
@@ -704,6 +704,279 @@ test_mask_field_count_benchmark(void)
     g_timer_destroy(timer);
     g_free(pool);
     g_rand_free(rng);
+}
+
+static guint
+mask_field_count_dumb(GwyMaskField *field,
+                      const GwyMaskField *mask,
+                      guint col, guint row,
+                      guint width, guint height,
+                      gboolean value)
+{
+    guint count = 0;
+    for (guint i = 0; i < field->yres; i++) {
+        if (i < row || i >= row + height)
+            continue;
+        for (guint j = 0; j < field->xres; j++) {
+            if (j < col || j >= col + width)
+                continue;
+            if (!mask || gwy_mask_field_get(mask, j, i)) {
+                if (!!gwy_mask_field_get(field, j, i) == value)
+                    count++;
+            }
+        }
+    }
+    return count;
+}
+
+void
+test_mask_field_count(void)
+{
+    enum { max_size = 333 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 500 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/4);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+
+        mask_field_randomize(field, pool, max_size, rng);
+        mask_field_randomize(mask, pool, max_size, rng);
+
+        g_assert_cmpuint(gwy_mask_field_count(field, NULL, FALSE),
+                         ==, mask_field_count_dumb(field, NULL,
+                                                   0, 0, xres, yres, FALSE));
+        g_assert_cmpuint(gwy_mask_field_count(field, NULL, TRUE),
+                         ==, mask_field_count_dumb(field, NULL,
+                                                   0, 0, xres, yres, TRUE));
+        g_assert_cmpuint(gwy_mask_field_count(field, mask, FALSE),
+                         ==, mask_field_count_dumb(field, mask,
+                                                   0, 0, xres, yres, FALSE));
+        g_assert_cmpuint(gwy_mask_field_count(field, mask, TRUE),
+                         ==, mask_field_count_dumb(field, mask,
+                                                   0, 0, xres, yres, TRUE));
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+
+        g_assert_cmpuint(gwy_mask_field_part_count(field,
+                                                   col, row, width, height,
+                                                   FALSE),
+                         ==, mask_field_count_dumb(field, NULL,
+                                                   col, row, width, height,
+                                                   FALSE));
+        g_assert_cmpuint(gwy_mask_field_part_count(field,
+                                                   col, row, width, height,
+                                                   TRUE),
+                         ==, mask_field_count_dumb(field, NULL,
+                                                   col, row, width, height,
+                                                   TRUE));
+
+        g_object_unref(field);
+        g_object_unref(mask);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+GwyMaskField*
+mask_field_from_string(const gchar *str)
+{
+    guint width = 0, height = 0;
+    const gchar *prev = str, *s = str;
+    while (*s) {
+        if (*s == '\n') {
+            height++;
+            if (!width)
+                width = s - str;
+            else
+                g_assert(s - prev == width);
+            prev = s+1;
+        }
+        else {
+            g_assert(*s == '0' || *s == '1'
+                     || *s == ' ' || *s == '@'
+                     || *s == '.' || *s == '#');
+        }
+        s++;
+    }
+    if (s != prev) {
+        if (!width)
+            width = s - str;
+        else
+            g_assert(s - prev == width);
+    }
+    GwyMaskField *field = gwy_mask_field_new_sized(width, height, FALSE);
+    GwyMaskFieldIter iter;
+    s = str;
+    for (guint i = 0; i < height; i++, s++) {
+        gwy_mask_field_iter_init(field, iter, 0, i);
+        for (guint j = 0; j < width; j++, s++) {
+            gboolean one = (*s == '1' || *s == '@' || *s == '#');
+            gwy_mask_field_iter_set(iter, one);
+            gwy_mask_field_iter_next(iter);
+        }
+        g_assert(*s == '\n' || *s == '\0');
+    }
+    return field;
+}
+
+void
+test_mask_field_grow_one(const gchar *orig_str,
+                         const gchar *grow_str,
+                         const gchar *keep_str)
+{
+    GwyMaskField *grow = mask_field_from_string(grow_str);
+    GwyMaskField *keep = mask_field_from_string(keep_str);
+    GwyMaskField *orig;
+
+    orig = mask_field_from_string(orig_str);
+    gwy_mask_field_grow(orig, FALSE);
+    test_mask_field_assert_equal(orig, grow);
+    g_object_unref(orig);
+
+    orig = mask_field_from_string(orig_str);
+    gwy_mask_field_grow(orig, TRUE);
+    test_mask_field_assert_equal(orig, keep);
+    g_object_unref(orig);
+
+    g_object_unref(keep);
+    g_object_unref(grow);
+}
+
+void
+test_mask_field_grow(void)
+{
+    const gchar *orig1_str =
+        "##   #   #\n"
+        " ##   ##  \n"
+        "   ###  # \n"
+        "#    #   #\n";
+    const gchar *grow1_str =
+        "### ######\n"
+        "##########\n"
+        "##########\n"
+        "## #### ##\n";
+    const gchar *keep1_str =
+        "### ## # #\n"
+        "###   ## #\n"
+        " # ###  # \n"
+        "#  ####  #\n";
+    test_mask_field_grow_one(orig1_str, grow1_str, keep1_str);
+
+    const gchar *orig2_str =
+        "                                          ######                  \n"
+        "        ######    #        #     #        #    #                  \n"
+        "                  #         #   #         ## # ##                #\n"
+        "                  #          # #             #                   #\n"
+        "              #####           #         ######                   #\n"
+        " ###                         # #                                  \n"
+        " # # #                      #   #         ######                 #\n"
+        " ###                                                              \n"
+        "                  #####                                           \n";
+    const gchar *grow2_str =
+        "        ######    #        #     #       ########                 \n"
+        "       ########  ###      ###   ###      ########                #\n"
+        "        ######   ###       ### ###       #########              ##\n"
+        "              ######        #####       #########               ##\n"
+        " ###         #######         ###       ########                 ##\n"
+        "######        #####         #####       ########                 #\n"
+        "#######                    ### ###       ########               ##\n"
+        "######            #####     #   #         ######                 #\n"
+        " ###             #######                                          \n";
+    const gchar *keep2_str =
+        "        ######    #        #     #       ########                 \n"
+        "       ########  ###      ##     ##      #### ###                #\n"
+        "        ######   ###        #   #        ### # ###              ##\n"
+        "              ######         # #        #   ### #               ##\n"
+        " ###         #######          #        ########                 ##\n"
+        "#####         #####          # #        ##     #                  \n"
+        "#### ##                    ##   ##        #######               ##\n"
+        "#####             #####     #   #         ######                 #\n"
+        " ###             #######                                          \n";
+    test_mask_field_grow_one(orig2_str, grow2_str, keep2_str);
+}
+
+void
+test_mask_field_shrink_one(const gchar *orig_str,
+                           const gchar *shrink_str,
+                           const gchar *bord_str)
+{
+    GwyMaskField *shrink = mask_field_from_string(shrink_str);
+    GwyMaskField *bord = mask_field_from_string(bord_str);
+    GwyMaskField *orig;
+
+    orig = mask_field_from_string(orig_str);
+    gwy_mask_field_shrink(orig, FALSE);
+    test_mask_field_assert_equal(orig, shrink);
+    g_object_unref(orig);
+
+    orig = mask_field_from_string(orig_str);
+    gwy_mask_field_shrink(orig, TRUE);
+    test_mask_field_assert_equal(orig, bord);
+    g_object_unref(orig);
+
+    g_object_unref(bord);
+    g_object_unref(shrink);
+}
+
+void
+test_mask_field_shrink(void)
+{
+    const gchar *orig1_str =
+        "### ######\n"
+        "##########\n"
+        "##########\n"
+        "## #### ##\n";
+    const gchar *shrink1_str =
+        "##   #####\n"
+        "### ######\n"
+        "## #### ##\n"
+        "#   ##   #\n";
+    const gchar *bord1_str =
+        "          \n"
+        " ## ##### \n"
+        " # #### # \n"
+        "          \n";
+    test_mask_field_shrink_one(orig1_str, shrink1_str, bord1_str);
+
+    const gchar *orig2_str =
+        "        ######    #        #     #       ########                 \n"
+        "       ########  ###      ###   ###      ########                #\n"
+        "        ######   ###       ### ###       #########              ##\n"
+        "              ######        #####       #########               ##\n"
+        " ###         #######         ###       ########                 ##\n"
+        "######        #####         #####       ########                 #\n"
+        "#######                    ### ###       ########               ##\n"
+        "######            #####     #   #         ######                 #\n"
+        " ###             #######                                          \n";
+    const gchar *shrink2_str =
+        "         ####                             ######                  \n"
+        "        ######    #        #     #        ######                  \n"
+        "                  #         #   #         #######                #\n"
+        "                 ##          # #         ######                  #\n"
+        "              #####           #         ######                   #\n"
+        " ###                         # #         ######                   \n"
+        "######                      #   #         ######                 #\n"
+        " ###                                                              \n"
+        "  #               #####                                           \n";
+    const gchar *bord2_str =
+        "                                                                  \n"
+        "        ######    #        #     #        ######                  \n"
+        "                  #         #   #         #######                 \n"
+        "                 ##          # #         ######                   \n"
+        "              #####           #         ######                    \n"
+        " ###                         # #         ######                   \n"
+        " #####                      #   #         ######                  \n"
+        " ###                                                              \n"
+        "                                                                  \n";
+    test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
