@@ -97,8 +97,8 @@ guint   gwy_field_part_count_in_range(const GwyField *field,
                                       gdouble lower,
                                       gdouble upper,
                                       gboolean strict,
-                                      gdouble *nabove,
-                                      gdouble *nbelow);
+                                      guint *nabove,
+                                      guint *nbelow);
 
 G_END_DECLS
 
