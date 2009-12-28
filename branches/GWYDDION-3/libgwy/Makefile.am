@@ -18,6 +18,7 @@ mkenum_headers = \
 	error-list.h \
 	expr.h \
 	field.h \
+	field-level.h \
 	field-statistics.h \
 	fitter.h \
 	fit-task.h \
@@ -62,6 +63,7 @@ libgwy3_la_SOURCES = \
 	error-list.c \
 	expr.c \
 	field.c \
+	field-level.c \
 	field-statistics.c \
 	fitter.c \
 	fit-task.c \

@@ -26,13 +26,13 @@
 
 #define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 
-static gboolean
-stats_check_args(const GwyField *field,
-                 const GwyMaskField *mask,
-                 GwyMaskingType *masking,
-                 guint col, guint row,
-                 guint width, guint height,
-                 guint *maskcol, guint *maskrow)
+gboolean
+_gwy_field_check_mask(const GwyField *field,
+                      const GwyMaskField *mask,
+                      GwyMaskingType *masking,
+                      guint col, guint row,
+                      guint width, guint height,
+                      guint *maskcol, guint *maskrow)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
     if (!width || !height)
@@ -90,8 +90,8 @@ gwy_field_part_min_max(GwyField *field,
                        gdouble *max)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow)) {
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow)) {
         GWY_MAYBE_SET(min, HUGE_VAL);
         GWY_MAYBE_SET(max, -HUGE_VAL);
         return;
@@ -208,8 +208,8 @@ gwy_field_part_mean(GwyField *field,
                     guint width, guint height)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow))
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
         return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -313,8 +313,8 @@ gwy_field_part_median(GwyField *field,
                       guint width, guint height)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow))
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
         return NAN;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -413,8 +413,8 @@ gwy_field_part_rms(GwyField *field,
                    guint width, guint height)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow))
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
         return 0.0;
 
     const gdouble *base = field->data + row*field->xres + col;
@@ -540,8 +540,8 @@ gwy_field_part_statistics(GwyField *field,
                           gdouble *skew, gdouble *kurtosis)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow))
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
         goto fail;
     if (!mean && !ra && !rms && !skew && !kurtosis)
         return;
@@ -731,8 +731,8 @@ gwy_field_part_count_in_range(const GwyField *field,
                               guint *nbelow)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow)) {
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow)) {
         GWY_MAYBE_SET(nabove, 0);
         GWY_MAYBE_SET(nbelow, 0);
         return 0;
@@ -1267,8 +1267,8 @@ gwy_field_part_surface_area(GwyField *field,
                             guint width, guint height)
 {
     guint maskcol, maskrow;
-    if (!stats_check_args(field, mask, &masking,
-                          col, row, width, height, &maskcol, &maskrow))
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
         return 0.0;
 
     gdouble dx = gwy_field_dx(field);

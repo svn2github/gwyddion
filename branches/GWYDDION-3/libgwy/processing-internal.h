@@ -65,6 +65,14 @@ typedef struct {
     GwyGrainSegment segments[];
 } GwyGrain;
 
+G_GNUC_INTERNAL
+gboolean _gwy_field_check_mask(const GwyField *field,
+                               const GwyMaskField *mask,
+                               GwyMaskingType *masking,
+                               guint col, guint row,
+                               guint width, guint height,
+                               guint *maskcol, guint *maskrow);
+
 G_END_DECLS
 
 #endif
