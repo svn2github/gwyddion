@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-level.h"
@@ -36,7 +37,13 @@ typedef struct {
     guint maskcol;
     guint maskrow;
     gboolean mode;
-} PlaneFitData;
+    // Only with general polynomial
+    guint nterms;
+    const guint *xpowers;
+    const guint *ypowers;
+    const gdouble *xp;
+    const gdouble *yp;
+} PolyFitData;
 
 static gboolean
 plane_fit(guint id,
@@ -44,13 +51,13 @@ plane_fit(guint id,
           gdouble *value,
           gpointer user_data)
 {
-    PlaneFitData *data = (PlaneFitData*)user_data;
+    PolyFitData *data = (PolyFitData*)user_data;
     guint i = id/data->width;
     guint j = id % data->width;
     if (j == 0)
         data->p = data->base + i*data->xres;
-    gdouble x = 2*j/(data->width - 1.0) - 1.0;
-    gdouble y = 2*i/(data->height - 1.0) - 1.0;
+    gdouble x = 2*j/(data->xres - 1.0) - 1.0;
+    gdouble y = 2*i/(data->yres - 1.0) - 1.0;
     fvalues[0] = 1.0;
     fvalues[1] = x;
     fvalues[2] = y;
@@ -65,7 +72,7 @@ plane_fit_mask(guint id,
                gdouble *value,
                gpointer user_data)
 {
-    PlaneFitData *data = (PlaneFitData*)user_data;
+    PolyFitData *data = (PolyFitData*)user_data;
     guint i = id/data->width;
     guint j = id % data->width;
     if (j == 0) {
@@ -75,8 +82,8 @@ plane_fit_mask(guint id,
     }
     gboolean ok = (!!gwy_mask_field_iter_get(data->iter) == data->mode);
     if (ok) {
-        gdouble x = 2*j/(data->width - 1.0) - 1.0;
-        gdouble y = 2*i/(data->height - 1.0) - 1.0;
+        gdouble x = 2*j/(data->xres - 1.0) - 1.0;
+        gdouble y = 2*i/(data->yres - 1.0) - 1.0;
         fvalues[0] = 1.0;
         fvalues[1] = x;
         fvalues[2] = y;
@@ -102,17 +109,8 @@ plane_fit_mask(guint id,
  *
  * Fits a plane through a rectangular part of a field.
  *
- * The coefficients follow the same convention as in gwy_field_area_fit_poly(),
- * i.e. they correspond the lateral coordinate ranges of the entire field
- * normalized to interval [-1,1].  If you want them expressed for integer row
- * and column, you can use the following transformation:
- * |[
- * apix = a - bx - by;
- * bcol = 2*bx/(field->xres - 1);
- * brow = 2*by/(field->yres - 1);
- * ]|
- * If you wish to simply use the coefficients for levelling, note that
- * gwy_field_subtract_plane() also uses the same coordinate convention.
+ * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * introduction for details.
  *
  * Returns: %TRUE if the plane was fitted, %FALSE if the there were too few
  *          points to fit a plane or there were no points with at least two
@@ -132,7 +130,7 @@ gwy_field_part_fit_plane(const GwyField *field,
         || width < 2 || height < 2)
         goto fail;
 
-    PlaneFitData data = {
+    PolyFitData data = {
         .width = width,
         .height = height,
         .base = field->data + row*field->xres + col,
@@ -186,11 +184,13 @@ fail:
  * Fits a plane through a rectangular part of a field by straighenting up
  * facets.
  *
- * The coefficients follow the same convention as in
- * gwy_field_area_fit_plane() and gwy_field_area_fit_poly() though they are
- * calculated differently.  Instead of fitting a plane throguh the points,
- * local factes are determined from 2×2 areas and averaged, leading to a mean
- * normal to the surface.
+ * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * introduction for details.
+ *
+ * Although @bx and @by have the same meaning as in gwy_field_area_fit_plane()
+ * they are calculated differently.  Instead of fitting a plane through the
+ * points, local factes are determined from 2×2 areas and averaged, leading to
+ * a mean normal to the surface.
  *
  * If @damping was zero (which is not permitted), the normal would correspond
  * to the mean normal to the mean plane and the coefficients found by this
@@ -330,6 +330,172 @@ fail:
     return FALSE;
 }
 
+static gboolean
+poly_fit(guint id,
+         gdouble *fvalues,
+         gdouble *value,
+         gpointer user_data)
+{
+    PolyFitData *data = (PolyFitData*)user_data;
+    guint i = id/data->width;
+    guint j = id % data->width;
+    if (j == 0)
+        data->p = data->base + i*data->xres;
+    const gdouble *xp = data->xp + j;
+    const gdouble *yp = data->yp + i;
+    for (guint k = 0; k < data->nterms; k++)
+        fvalues[k] = xp[data->xpowers[k]] * yp[data->ypowers[k]];
+    *value = *data->p;
+    data->p++;
+    return TRUE;
+}
+
+static gboolean
+poly_fit_mask(guint id,
+              gdouble *fvalues,
+              gdouble *value,
+              gpointer user_data)
+{
+    PolyFitData *data = (PolyFitData*)user_data;
+    guint i = id/data->width;
+    guint j = id % data->width;
+    if (j == 0) {
+        data->p = data->base + i*data->xres;
+        gwy_mask_field_iter_init(data->mask, data->iter,
+                                 data->maskcol, data->maskrow+i);
+    }
+    gboolean ok = (!!gwy_mask_field_iter_get(data->iter) == data->mode);
+    if (ok) {
+        const gdouble *xp = data->xp + j;
+        const gdouble *yp = data->yp + i;
+        for (guint k = 0; k < data->nterms; k++)
+            fvalues[k] = xp[data->xpowers[k]] * yp[data->ypowers[k]];
+        *value = *data->p;
+    }
+    gwy_mask_field_iter_next(data->iter);
+    data->p++;
+    return ok;
+}
+
+static gdouble*
+enumerate_powers(guint maxpower, guint first, guint len, guint dim,
+                 gsize *size)
+{
+    *size = (maxpower + 1)*len*sizeof(gdouble);
+    gdouble *powers = g_slice_alloc(*size);
+    gdouble *p = powers;
+    for (guint i = 0; i < len; i++) {
+        gdouble t = 2*(i + first)/(dim - 1.0) - 1.0;
+        gdouble tp = 1.0;
+        for (guint j = 0; j < maxpower; j++, p++) {
+            *p = tp;
+            tp *= t;
+        }
+        *p = tp;
+        p++;
+    }
+    return powers;
+}
+
+/**
+ * gwy_field_part_fit_poly:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).  It should be at least 2.
+ * @height: Rectangle height (number of rows).  It should be at least 2.
+ * @xpowers: Array of length @nterms containing the powers of @x to fit.
+ * @ypowers: Array of length @nterms containing the powers of @y to fit.
+ * @nterms: Number of polynomial terms, i.e. the length of @xpowers,
+ *          @ypowers and @coeffs.
+ * @coeffs: Array of length @nterms to store the individual term coefficients
+ *          to.
+ *
+ * Fits a polynomial through a rectangular part of a field.
+ *
+ * The arrays @xpowers and @ypowers define the individual terms to fit.  For
+ * instance the polynomial
+ * @a + @b<subscript>x</subscript>@x + @b<subscript>y</subscript>@y + @c @x²
+ * contains terms with the following (@x,@y) powers: (0,0), (1,0), (0,1) and
+ * (2,0).  Therefore, to fit this polynomial and obtain
+ * [@a, @b<subscript>x</subscript>, @b<subscript>y</subscript>, @c] in @coeffs,
+ * the arrays should be set to
+ * @xpowers = [0, 1, 0, 2] and @ypowers = [0, 0, 1, 0].
+ *
+ * Returns: %TRUE if the polynomial was fitted, %FALSE in degenerate cases,
+ *          i.e. when points do not uniquely determine the polynomial with the
+ *          requested terms.  For high polynomial degrees %FALSE can also be
+ *          returned because the terms are no longer numerically independent.
+ **/
+gboolean
+gwy_field_part_fit_poly(const GwyField *field,
+                        const GwyMaskField *mask,
+                        GwyMaskingType masking,
+                        guint col, guint row, guint width, guint height,
+                        const guint *xpowers, const guint *ypowers,
+                        guint nterms,
+                        gdouble *coeffs)
+{
+    if (!nterms || !coeffs)
+        return TRUE;
+
+    guint maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
+        goto fail;
+
+    g_return_val_if_fail(xpowers && ypowers, FALSE);
+
+    guint maxxpower = xpowers[0], maxypower = ypowers[0];
+    for (guint k = 1; k < nterms; k++) {
+        maxxpower = MAX(maxxpower, xpowers[k]);
+        maxypower = MAX(maxypower, ypowers[k]);
+    }
+
+    gsize xpsize, ypsize;
+    gdouble *xp = enumerate_powers(maxxpower, col, width, field->xres,
+                                   &xpsize);
+    gdouble *yp = enumerate_powers(maxypower, row, height, field->yres,
+                                   &ypsize);
+
+    PolyFitData data = {
+        .width = width,
+        .height = height,
+        .base = field->data + row*field->xres + col,
+        .xres = field->xres,
+        .yres = field->yres,
+        .mask = mask,
+        .maskcol = maskcol,
+        .maskrow = maskrow,
+        .nterms = nterms,
+        .xpowers = xpowers,
+        .ypowers = ypowers,
+        .xp = xp,
+        .yp = yp,
+    };
+    gboolean ok;
+    if (masking == GWY_MASK_IGNORE) {
+        ok = gwy_linear_fit(poly_fit, width*height, coeffs, nterms, NULL,
+                            &data);
+    }
+    else {
+        data.mode = (masking == GWY_MASK_INCLUDE);
+        ok = gwy_linear_fit(poly_fit_mask, width*height, coeffs, nterms, NULL,
+                            &data);
+    }
+    g_slice_free1(xpsize, xp);
+    g_slice_free1(ypsize, yp);
+    if (!ok)
+        goto fail;
+
+    return TRUE;
+
+fail:
+    gwy_memclear(coeffs, nterms);
+    return FALSE;
+}
 
 #define __LIBGWY_FIELD_LEVEL_C__
 #include "libgwy/libgwy-aliases.c"
@@ -338,6 +504,26 @@ fail:
  * SECTION: field-level
  * @title: GwyField levelling
  * @short_description: Field levelling and background subtraction
+ *
+ * All plane and polynomial fitting and subtracting methods use the following
+ * convention for @x and @y coordinates (abscissas of the polynoms):  The
+ * entire field range in either coordinate is transformed to interval [-1,1].
+ * More precisely, the zeroth column/row corresponds to abscissa value of -1,
+ * whereas the last column/row to 1.
+ *
+ * This permits to easily apply the same polynomial levelling to resampled
+ * fields, however, the primary reason is improving the orthogonality of the
+ * polynomial terms (which is rather poor) in the common case.
+ *
+ * Knowing the exact interpretation of the coefficients is not necessary to
+ * just subtract the background as the fitting and subtracting functions follow
+ * the same convention.  To obtain plane coefficients for pixel coordinates
+ * (i.e. row and column) the following transformation can be used:
+ * |[
+ * ap = a - bx - by;
+ * bcol = 2*bx/(field->xres - 1);
+ * brow = 2*by/(field->yres - 1);
+ * ]|
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

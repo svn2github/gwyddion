@@ -45,6 +45,17 @@ gboolean gwy_field_part_inclination(const GwyField *field,
                                     gdouble damping,
                                     gdouble *bx,
                                     gdouble *by);
+gboolean gwy_field_part_fit_poly   (const GwyField *field,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    guint col,
+                                    guint row,
+                                    guint width,
+                                    guint height,
+                                    const guint *xpowers,
+                                    const guint *ypowers,
+                                    guint nterms,
+                                    gdouble *coeffs);
 
 G_END_DECLS
 
