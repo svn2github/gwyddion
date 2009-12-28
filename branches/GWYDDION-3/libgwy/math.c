@@ -408,12 +408,14 @@ gwy_linear_fit(GwyLinearFitFunc function,
     gdouble sumy2 = 0.0;
 
     for (guint i = 0; i < npoints; i++) {
-        gdouble y = function(i, fval, user_data);
-        sumy2 += y*y;
-        for (guint j = 0; j < nparams; j++) {
-            params[j] += y*fval[j];
-            for (guint k = 0; k <= j; j++)
-                SLi(hessian, j, k) += fval[j]*fval[k];
+        gdouble y;
+        if (function(i, fval, &y, user_data)) {
+            sumy2 += y*y;
+            for (guint j = 0; j < nparams; j++) {
+                params[j] += y*fval[j];
+                for (guint k = 0; k <= j; j++)
+                    SLi(hessian, j, k) += fval[j]*fval[k];
+            }
         }
     }
     if (!gwy_cholesky_decompose(hessian, nparams))
@@ -1044,6 +1046,7 @@ jump_over:
  * @i: Index of data point to calculate the function value in.
  * @fvalues: Array of length @nparams (as passed to gwy_linear_fit()) to store
  *           the function values to.
+ * @value: Location to store the value of the @i-th fitted data point.
  * @user_data: User data passed to gwy_linear_fit().
  *
  * Type of linear least-squares fitting function.
@@ -1059,7 +1062,7 @@ jump_over:
  * a non-trivial calculation, the result can be cached in @user_data for the
  * subsequent calls.
  *
- * Returns: Value of the @i-th fitted data point.
+ * Returns: %TRUE to include the point in fitting, %FALSE to skip it.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
