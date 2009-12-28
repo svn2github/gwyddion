@@ -82,7 +82,7 @@ void        gwy_fit_task_set_point_function   (GwyFitTask *fittask,
 void        gwy_fit_task_set_point_weight     (GwyFitTask *fittask,
                                                GwyFitTaskPointWeightFunc weight);
 void        gwy_fit_task_set_point_data       (GwyFitTask *fittask,
-                                               const GwyPointXY *data,
+                                               const GwyXY *data,
                                                guint ndata);
 void        gwy_fit_task_set_vector_function  (GwyFitTask *fittask,
                                                guint nparams,

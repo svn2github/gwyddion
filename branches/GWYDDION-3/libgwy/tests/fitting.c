@@ -47,7 +47,7 @@ test_fit_task_gaussian_vector(guint i,
                               gdouble b,
                               gdouble a)
 {
-    GwyPointXY *pts = (GwyPointXY*)user_data;
+    GwyXY *pts = (GwyXY*)user_data;
     gdouble x = (pts[i].x - xoff)/b;
     *retval = yoff + a*exp(-x*x) - pts[i].y;
     return b != 0.0;
@@ -59,13 +59,13 @@ test_fit_task_gaussian_vfunc(guint i,
                              gdouble *retval,
                              const gdouble *params)
 {
-    GwyPointXY *pts = (GwyPointXY*)user_data;
+    GwyXY *pts = (GwyXY*)user_data;
     gdouble x = (pts[i].x - params[0])/params[2];
     *retval = params[1] + params[3]*exp(-x*x) - pts[i].y;
     return params[2] != 0.0;
 }
 
-static GwyPointXY*
+static GwyXY*
 test_fitter_make_gaussian_data(gdouble xoff,
                                gdouble yoff,
                                gdouble b,
@@ -75,7 +75,7 @@ test_fitter_make_gaussian_data(gdouble xoff,
 {
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, seed);
-    GwyPointXY *data = g_new(GwyPointXY, ndata);
+    GwyXY *data = g_new(GwyXY, ndata);
     gdouble xmin = xoff - b*(2 + 3*g_rand_double(rng));
     gdouble xmax = xoff + b*(2 + 3*g_rand_double(rng));
     gdouble noise = 0.15*a;
@@ -143,7 +143,7 @@ test_fit_task_point(void)
     const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
     GwyFitTask *fittask = gwy_fit_task_new();
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
-    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+    GwyXY *data = test_fitter_make_gaussian_data(param[0], param[1],
                                                       param[2], param[3],
                                                       ndata, 42);
     gwy_fit_task_set_point_function
@@ -163,7 +163,7 @@ test_fit_task_fixed(void)
     const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
     GwyFitTask *fittask = gwy_fit_task_new();
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
-    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+    GwyXY *data = test_fitter_make_gaussian_data(param[0], param[1],
                                                       param[2], param[3],
                                                       ndata, 42);
     gwy_fit_task_set_point_function
@@ -199,7 +199,7 @@ test_fit_task_vector(void)
     const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
     GwyFitTask *fittask = gwy_fit_task_new();
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
-    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+    GwyXY *data = test_fitter_make_gaussian_data(param[0], param[1],
                                                       param[2], param[3],
                                                       ndata, 42);
     gwy_fit_task_set_vector_function
@@ -219,7 +219,7 @@ test_fit_task_vfunc(void)
     const gdouble param_init[nparam] = { 4e-5, -1e6, 2e-4, 4e5 };
     GwyFitTask *fittask = gwy_fit_task_new();
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
-    GwyPointXY *data = test_fitter_make_gaussian_data(param[0], param[1],
+    GwyXY *data = test_fitter_make_gaussian_data(param[0], param[1],
                                                       param[2], param[3],
                                                       ndata, 42);
     gwy_fit_task_set_vector_vfunction

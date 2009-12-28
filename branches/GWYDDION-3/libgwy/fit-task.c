@@ -125,7 +125,7 @@ struct _GwyFitTaskPrivate {
     /* Point interface */
     GwyFitTaskPointFunc point_func;
     GwyFitTaskPointWeightFunc point_weight;
-    const GwyPointXY *point_data;
+    const GwyXY *point_data;
     /* Indexed data interface */
     GwyFitTaskVectorFunc vector_func;
     GwyFitTaskVectorVFunc vector_vfunc;
@@ -326,7 +326,7 @@ gwy_fit_task_set_point_weight(GwyFitTask *fittask,
  **/
 void
 gwy_fit_task_set_point_data(GwyFitTask *fittask,
-                            const GwyPointXY *data,
+                            const GwyXY *data,
                             guint ndata)
 {
     g_return_if_fail(GWY_IS_FIT_TASK(fittask));
@@ -568,7 +568,7 @@ fit_task_residuum(const gdouble *param,
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(fittask->nparam <= VARARG_PARAM_MAX, FALSE);
         GwyFitTaskPointFunc func = fittask->point_func;
-        const GwyPointXY *pts = fittask->point_data;
+        const GwyXY *pts = fittask->point_data;
 
         for (guint i = 0; i < fittask->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
@@ -647,7 +647,7 @@ fit_task_gradient(const gdouble *param,
         g_return_val_if_fail(fittask->point_func, FALSE);
         g_return_val_if_fail(nparam <= VARARG_PARAM_MAX, FALSE);
         GwyFitTaskPointFunc func = fittask->point_func;
-        const GwyPointXY *pts = fittask->point_data;
+        const GwyXY *pts = fittask->point_data;
 
         for (guint i = 0; i < fittask->ndata; i++) {
             gdouble x = pts[i].x, y = pts[i].y, v;
@@ -961,7 +961,7 @@ gwy_fit_task_get_chi(GwyFitTask *fittask)
  *   <listitem>
  *     Scalar-valued one-dimensional function (called point function), i.e.
  *     function that takes the abscissa value and parameters and it calculates
- *     the theoretical value. The data must be represented by #GwyPointXYs.
+ *     the theoretical value. The data must be represented by #GwyXYs.
  *     This is everything that needs to be supplied.  The calculation of
  *     differences between theoretical and fitted data, derivatives, gradients
  *     and Hessians is done by #GwyFitTask.  Fixed parameters are also handled
@@ -1015,7 +1015,7 @@ gwy_fit_task_get_chi(GwyFitTask *fittask)
  *
  * // Fit data using provided initial parameter estimate
  * gboolean
- * fit_gaussian(const GwyPointXY *data, guint ndata, gdouble *param)
+ * fit_gaussian(const GwyXY *data, guint ndata, gdouble *param)
  * {
  *     GwyFitTask *fittask = gwy_fit_task_new();
  *     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);

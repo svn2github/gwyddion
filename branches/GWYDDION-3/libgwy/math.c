@@ -368,7 +368,7 @@ gwy_linalg_invert(gdouble *a,
  * quadratic polynomial:
  * |[
  * gdouble
- * *poly2(guint i, gdouble *fvalues, GwyPointXY *data)
+ * *poly2(guint i, gdouble *fvalues, GwyXY *data)
  * {
  *     gdouble x = data[i].x;
  *     fvalues[0] = 1.0;
@@ -378,7 +378,7 @@ gwy_linalg_invert(gdouble *a,
  * }
  *
  * gboolean
- * fit_poly2(GwyPointXY *data, guint ndata, gdouble *coefficients)
+ * fit_poly2(GwyXY *data, guint ndata, gdouble *coefficients)
  * {
  *     return gwy_linear_fit((GwyLinearFitFunc)poly2, ndata, coefficients, 3,
  *                           NULL, data);
@@ -941,7 +941,7 @@ jump_over:
  **/
 
 /**
- * GwyPointXY:
+ * GwyXY:
  * @x: X-coordinate.
  * @y: Y-coordinate.
  *
@@ -949,7 +949,7 @@ jump_over:
  **/
 
 /**
- * GwyPointXYZ:
+ * GwyXYZ:
  * @x: X-coordinate.
  * @y: Y-coordinate.
  * @z: Z-coordinate.
