@@ -35,6 +35,10 @@ gboolean gwy_field_part_fit_plane  (const GwyField *field,
                                     gdouble *a,
                                     gdouble *bx,
                                     gdouble *by);
+void     gwy_field_subtract_plane  (GwyField *field,
+                                    gdouble a,
+                                    gdouble bx,
+                                    gdouble by);
 gboolean gwy_field_part_inclination(const GwyField *field,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking,
@@ -56,6 +60,11 @@ gboolean gwy_field_part_fit_poly   (const GwyField *field,
                                     const guint *ypowers,
                                     guint nterms,
                                     gdouble *coeffs);
+void     gwy_field_subtract_poly   (GwyField *field,
+                                    const guint *xpowers,
+                                    const guint *ypowers,
+                                    guint nterms,
+                                    const gdouble *coeffs);
 
 G_END_DECLS
 
