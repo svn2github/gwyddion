@@ -23,7 +23,7 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/line.h"
-//#include "libgwy/line-statistics.h"
+#include "libgwy/line-statistics.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
@@ -854,7 +854,7 @@ gwy_line_get_format_y(GwyLine *line,
 {
     g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble min, max;
-    //gwy_line_min_max(line, &min, &max);
+    gwy_line_min_max(line, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;

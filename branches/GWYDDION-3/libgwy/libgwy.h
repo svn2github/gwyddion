@@ -37,6 +37,7 @@
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
+#include <libgwy/line-statistics.h>
 #include <libgwy/macros.h>
 #include <libgwy/main.h>
 #include <libgwy/mask-field.h>
