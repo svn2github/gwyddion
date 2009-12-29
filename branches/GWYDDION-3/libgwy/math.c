@@ -25,12 +25,10 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/processing-internal.h"
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 
 static void sort_plain(gdouble *array,
                        gsize n);

@@ -24,8 +24,6 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-
 gboolean
 _gwy_field_check_mask(const GwyField *field,
                       const GwyMaskField *mask,

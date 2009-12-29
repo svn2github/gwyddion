@@ -33,7 +33,7 @@
 #define MAGIC_HEADER2 "Gwyddion resource "
 #define MAGIC_HEADER3 "Gwyddion3 resource "
 
-#define STATIC \
+#define STATICP \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
 enum { N_ITEMS = 1 };
@@ -263,7 +263,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                 "Resource name",
                                 NULL, /* What is the default value good for? */
                                 G_PARAM_READWRITE
-                                | G_PARAM_CONSTRUCT_ONLY | STATIC);
+                                | G_PARAM_CONSTRUCT_ONLY | STATICP);
     g_object_class_install_property(gobject_class, PROP_NAME, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
@@ -275,7 +275,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                 "in GLib encoding, it may be NULL for "
                                 "built-in or newly created resourced.",
                                 NULL, /* What is the default value good for? */
-                                G_PARAM_READABLE | STATIC);
+                                G_PARAM_READABLE | STATICP);
     g_object_class_install_property(gobject_class, PROP_FILE_NAME, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
@@ -285,7 +285,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                  "Is preferred",
                                  "Whether a resource is preferred",
                                  FALSE,
-                                 G_PARAM_READWRITE | STATIC);
+                                 G_PARAM_READWRITE | STATICP);
     g_object_class_install_property(gobject_class, PROP_IS_PREFERRED, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
@@ -296,7 +296,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                  "Whether a resource is modifiable",
                                  TRUE,
                                  G_PARAM_READWRITE
-                                 | G_PARAM_CONSTRUCT_ONLY | STATIC);
+                                 | G_PARAM_CONSTRUCT_ONLY | STATICP);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIABLE, pspec);
     gwy_resource_trait_types[gwy_resource_ntraits] = pspec->value_type;
     gwy_resource_trait_names[gwy_resource_ntraits] = pspec->name;
@@ -307,7 +307,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                  "Whether a resource was modified, this is "
                                  "set when data-changed signal is emitted",
                                  FALSE,
-                                 G_PARAM_READABLE | STATIC);
+                                 G_PARAM_READABLE | STATICP);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
 
     pspec = g_param_spec_boolean("is-managed",
@@ -316,7 +316,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
                                  "inventory.  False for free-standing "
                                  "resources.",
                                  FALSE,
-                                 G_PARAM_READABLE | STATIC);
+                                 G_PARAM_READABLE | STATICP);
     g_object_class_install_property(gobject_class, PROP_IS_MODIFIED, pspec);
 
     /**

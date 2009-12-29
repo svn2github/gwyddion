@@ -27,11 +27,6 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
-#define STATIC \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-
 enum { N_ITEMS = 5 };
 
 enum {
@@ -113,7 +108,7 @@ gwy_line_class_init(GwyLineClass *klass)
                            "Resolution",
                            "Pixel length of the line.",
                            1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -122,7 +117,7 @@ gwy_line_class_init(GwyLineClass *klass)
                              "Real size",
                              "Length of the line in physical units.",
                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -131,7 +126,7 @@ gwy_line_class_init(GwyLineClass *klass)
                              "Offset",
                              "Offset of the line start in physical units.",
                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -141,7 +136,7 @@ gwy_line_class_init(GwyLineClass *klass)
                              "Physical units of lateral dimension of the "
                              "line.",
                              GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATIC));
+                             G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -150,7 +145,7 @@ gwy_line_class_init(GwyLineClass *klass)
                              "Y unit",
                              "Physical units of line values.",
                              GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATIC));
+                             G_PARAM_READABLE | STATICP));
 
     /**
      * GwyLine::data-changed:

@@ -24,8 +24,6 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-
 /**
  * gwy_line_min_max:
  * @line: A one-dimensional data line.

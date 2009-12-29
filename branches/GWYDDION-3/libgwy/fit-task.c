@@ -23,10 +23,7 @@
 #include "libgwy/fit-task.h"
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
-
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
+#include "libgwy/processing-internal.h"
 
 enum { VARARG_PARAM_MAX = 5 };
 

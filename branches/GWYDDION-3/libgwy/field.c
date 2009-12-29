@@ -27,11 +27,6 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
-#define STATIC \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-
 enum { N_ITEMS = 9 };
 
 enum {
@@ -120,7 +115,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                            "X resolution",
                            "Pixel width of the field.",
                            1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -129,7 +124,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                            "Y resolution",
                            "Pixel height of the field.",
                            1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -138,7 +133,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "X real size",
                              "Width of the field in physical units.",
                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -147,7 +142,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "Y real size",
                              "Height of the field in physical units.",
                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -157,7 +152,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "Horizontal offset of the field top left corner "
                              "in physical units.",
                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -167,7 +162,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "Vertical offset of the field top left corner "
                              "in physical units.",
                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -177,7 +172,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "Physical units of lateral dimensions of the "
                              "field.",
                              GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATIC));
+                             G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -186,7 +181,7 @@ gwy_field_class_init(GwyFieldClass *klass)
                              "Z unit",
                              "Physical units of field values.",
                              GWY_TYPE_UNIT,
-                             G_PARAM_READABLE | STATIC));
+                             G_PARAM_READABLE | STATICP));
 
     /**
      * GwyField::data-changed:

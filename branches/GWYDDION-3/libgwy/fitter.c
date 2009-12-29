@@ -24,13 +24,7 @@
 #include "libgwy/math.h"
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
-
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-
-#define STATIC \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
+#include "libgwy/processing-internal.h"
 
 enum {
     PROP_0,
@@ -143,7 +137,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                            "Number of params",
                            "Number of fitting parameters.",
                            0, 1024, 0,
-                           G_PARAM_READWRITE | STATIC));
+                           G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -152,7 +146,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                            "Maximum iters",
                            "Maximum number of iterations.",
                            1, G_MAXUINT, default_settings.iter_max,
-                           G_PARAM_READWRITE | STATIC));
+                           G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -164,7 +158,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                            "change of lambda and residuum.",
                            1, G_MAXUINT,
                            default_settings.successes_to_get_bored,
-                           G_PARAM_READWRITE | STATIC));
+                           G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -173,7 +167,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "Maximum lambda",
                              "Maximum value of Marquardt parameter lambda.",
                              0.0, G_MAXDOUBLE, default_settings.lambda_max,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -184,7 +178,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "to at the start of each fitting.",
                              G_MINDOUBLE, G_MAXDOUBLE,
                              default_settings.lambda_start,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -194,7 +188,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "Factor to multiply Marquardt parameter lambda "
                              "with after an unsuccessful step.",
                              1.0, G_MAXDOUBLE, default_settings.lambda_increase,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -204,7 +198,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "Factor to divide Marquardt parameter lambda "
                              "with after a successful step.",
                              1.0, G_MAXDOUBLE, default_settings.lambda_decrease,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -215,7 +209,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "parameter in a successful step.",
                              0.0, G_MAXDOUBLE,
                              default_settings.param_change_min,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -226,7 +220,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
                              "in a successful step.",
                              0.0, G_MAXDOUBLE,
                              default_settings.residuum_change_min,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 }
 
 static void

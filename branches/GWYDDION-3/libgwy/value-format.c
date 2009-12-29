@@ -27,7 +27,7 @@
 #include "libgwy/value-format.h"
 #include "libgwy/libgwy-aliases.h"
 
-#define STATIC \
+#define STATICP \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
 enum {
@@ -84,7 +84,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                            "What output style is this format intended to be "
                            "used with.",
                            GWY_TYPE_VALUE_FORMAT_STYLE, GWY_VALUE_FORMAT_PLAIN,
-                           G_PARAM_READWRITE | STATIC));
+                           G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -94,7 +94,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                              "Factor to divide the formatted number with, "
                              "usualy a power of 1000.",
                              G_MINDOUBLE, G_MAXDOUBLE, 1.0,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -103,7 +103,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                            "Precision",
                            "Number of digits after the decimal point.",
                            0, 1024, 3,
-                           G_PARAM_READWRITE | STATIC));
+                           G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -114,7 +114,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                              "including the corresponding prefix.  May also be "
                              "just a power of 10 or nothing.",
                              NULL,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -125,7 +125,7 @@ gwy_value_format_class_init(GwyValueFormatClass *klass)
                              "a value is formatted.  Usually a kind of "
                              "multiplication symbol, space, may also be empty.",
                              NULL,
-                             G_PARAM_READWRITE | STATIC));
+                             G_PARAM_READWRITE | STATICP));
 }
 
 static void

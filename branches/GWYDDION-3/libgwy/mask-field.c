@@ -33,9 +33,6 @@
 #error Byte order used on this system is not supported.
 #endif
 
-#define STATIC \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-
 #define ALL_SET ((guint32)0xffffffffu)
 #define ALL_CLEAR ((guint32)0x00000000u)
 
@@ -149,7 +146,7 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                            "X resolution",
                            "Pixel width of the mask field.",
                            1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -158,7 +155,7 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                            "Y resolution",
                            "Pixel height of the mask field.",
                            1, G_MAXUINT, 1,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     g_object_class_install_property
         (gobject_class,
@@ -168,7 +165,7 @@ gwy_mask_field_class_init(GwyMaskFieldClass *klass)
                            "Row stride of the mask field in items, i.e. "
                            "guint32s.",
                            1, G_MAXUINT, 2,
-                           G_PARAM_READABLE | STATIC));
+                           G_PARAM_READABLE | STATICP));
 
     /**
      * GwyMaskField::data-changed:
