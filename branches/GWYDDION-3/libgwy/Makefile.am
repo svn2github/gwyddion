@@ -27,6 +27,7 @@ mkenum_headers = \
 	gradient.h \
 	inventory.h \
 	interpolation.h \
+	line.h \
 	macros.h \
 	main.h \
 	mask-field.h \
@@ -73,6 +74,7 @@ libgwy3_la_SOURCES = \
 	gradient.c \
 	inventory.c \
 	interpolation.c \
+	line.c \
 	macros.c \
 	main.c \
 	mask-field.c \

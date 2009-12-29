@@ -42,6 +42,13 @@ G_BEGIN_DECLS
             dest = gwy_unit_duplicate(src); \
     } while (0)
 
+struct _GwyLinePrivate {
+    GwyUnit *unit_x;
+    GwyUnit *unit_y;
+};
+
+typedef struct _GwyLinePrivate Line;
+
 typedef enum {
     GWY_FIELD_CACHE_MIN = 0,
     GWY_FIELD_CACHE_MAX,
