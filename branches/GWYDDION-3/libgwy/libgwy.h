@@ -27,6 +27,7 @@
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/field.h>
+#include <libgwy/field-arithmetic.h>
 #include <libgwy/field-level.h>
 #include <libgwy/field-statistics.h>
 #include <libgwy/fitter.h>
