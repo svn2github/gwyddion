@@ -65,6 +65,10 @@ void     gwy_field_subtract_poly   (GwyField *field,
                                     const guint *ypowers,
                                     guint nterms,
                                     const gdouble *coeffs);
+void     gwy_field_shift_rows      (GwyField *field,
+                                    guint row,
+                                    guint height,
+                                    const gdouble *shifts);
 
 G_END_DECLS
 
