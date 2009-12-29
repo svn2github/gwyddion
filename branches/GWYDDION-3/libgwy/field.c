@@ -154,7 +154,7 @@ gwy_field_class_init(GwyFieldClass *klass)
          PROP_XOFFSET,
          g_param_spec_double("x-offset",
                              "X offset",
-                             "Horizontal offset of the field top left cornet "
+                             "Horizontal offset of the field top left corner "
                              "in physical units.",
                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                              G_PARAM_READWRITE | STATIC));
@@ -164,7 +164,7 @@ gwy_field_class_init(GwyFieldClass *klass)
          PROP_YOFFSET,
          g_param_spec_double("y-offset",
                              "Y offset",
-                             "Vertical offset of the field top left cornet "
+                             "Vertical offset of the field top left corner "
                              "in physical units.",
                              -G_MAXDOUBLE, G_MAXDOUBLE, 0.0,
                              G_PARAM_READWRITE | STATIC));
@@ -244,7 +244,7 @@ gwy_field_n_items(GwySerializable *serializable)
 
 static gsize
 gwy_field_itemize(GwySerializable *serializable,
-                 GwySerializableItems *items)
+                  GwySerializableItems *items)
 {
     GwyField *field = GWY_FIELD(serializable);
     Field *priv = field->priv;
@@ -371,7 +371,7 @@ gwy_field_construct(GwySerializable *serializable,
     field->yres = its[1].value.v_uint32;
     // FIXME: Catch near-zero and near-infinity values.
     field->xreal = CLAMP(its[2].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
-    field->xreal = CLAMP(its[3].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
+    field->yreal = CLAMP(its[3].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
     field->xoff = CLAMP(its[4].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     field->yoff = CLAMP(its[5].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     priv->unit_xy = (GwyUnit*)its[6].value.v_object;
@@ -412,17 +412,10 @@ copy_info(GwyField *dest,
     dest->yreal = src->yreal;
     dest->xoff = src->xoff;
     dest->yoff = src->yoff;
+    Field *dpriv = dest->priv, *spriv = src->priv;
+    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
+    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
 }
-
-#define ASSIGN_UNITS(dest, src) \
-    do { \
-        if (src && dest) \
-            gwy_unit_assign(dest, src); \
-        else if (dest) \
-            GWY_OBJECT_UNREF(dest); \
-        else if (src) \
-            dest = gwy_unit_duplicate(src); \
-    } while (0)
 
 static void
 gwy_field_assign_impl(GwySerializable *destination,
@@ -455,8 +448,6 @@ gwy_field_assign_impl(GwySerializable *destination,
     copy_info(dest, src);
     ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
     dpriv->cached = spriv->cached;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
 
     GObject *object = G_OBJECT(dest);
     g_object_freeze_notify(object);
@@ -623,9 +614,6 @@ gwy_field_new_alike(const GwyField *model,
 
     GwyField *field = gwy_field_new_sized(model->xres, model->yres, clear);
     copy_info(field, model);
-    Field *mpriv = model->priv, *priv = field->priv;
-    ASSIGN_UNITS(priv->unit_xy, mpriv->unit_xy);
-    ASSIGN_UNITS(priv->unit_z, mpriv->unit_z);
     return field;
 }
 
@@ -637,7 +625,7 @@ gwy_field_new_alike(const GwyField *model,
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
  * @keep_offsets: %TRUE to set the X and Y offsets of the new field
- *                using @col, @row and @field offets.  %FALSE to set offsets
+ *                using @col, @row and @field offsets.  %FALSE to set offsets
  *                of the new field to zeroes.
  *
  * Creates a new two-dimensional field as a rectangular part of another field.
@@ -710,12 +698,9 @@ gwy_field_new_resampled(const GwyField *field,
 
     GwyField *dest;
     dest = gwy_field_new_sized(xres, yres, FALSE);
-    dest->xreal = field->xreal;
-    dest->yreal = field->yreal;
-    dest->xoff = field->xoff;
-    dest->yoff = field->yoff;
-    ASSIGN_UNITS(dest->priv->unit_xy, field->priv->unit_xy);
-    ASSIGN_UNITS(dest->priv->unit_z, field->priv->unit_z);
+    copy_info(dest, field);
+    dest->xres = xres;  // Undo
+    dest->yres = yres;  // Undo
     gwy_interpolation_resample_block_2d(field->xres, field->yres, field->xres,
                                         field->data,
                                         dest->xres, dest->yres, dest->xres,
@@ -1001,11 +986,11 @@ void
 gwy_field_clear(GwyField *field)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    gwy_memclear(field->data, field->xres * field->yres * sizeof(gdouble));
+    gwy_memclear(field->data, field->xres * field->yres);
     Field *priv = field->priv;
     priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                     | CBIT(MED) | CBIT(ARF) | CBIT(ART));
-    gwy_memclear(priv->cache, GWY_FIELD_CACHE_SIZE * sizeof(gdouble));
+    gwy_memclear(priv->cache, GWY_FIELD_CACHE_SIZE);
 }
 
 /**

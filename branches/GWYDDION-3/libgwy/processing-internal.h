@@ -22,14 +22,25 @@
 #ifndef __LIBGWY_PROCESSING_INTERNAL_H__
 #define __LIBGWY_PROCESSING_INTERNAL_H__
 
-#include "libgwy/unit.h"
+#include "libgwy/field.h"
+#include "libgwy/mask-field.h"
+
+G_BEGIN_DECLS
 
 /* Cache operations */
 #define CVAL(arg, bit)  ((arg)->cache[GWY_FIELD_CACHE_##bit])
 #define CBIT(bit)       (1 << GWY_FIELD_CACHE_##bit)
 #define CTEST(arg, bit) ((arg)->cached & CBIT(bit))
 
-G_BEGIN_DECLS
+#define ASSIGN_UNITS(dest, src) \
+    do { \
+        if (src && dest) \
+            gwy_unit_assign(dest, src); \
+        else if (dest) \
+            GWY_OBJECT_UNREF(dest); \
+        else if (src) \
+            dest = gwy_unit_duplicate(src); \
+    } while (0)
 
 typedef enum {
     GWY_FIELD_CACHE_MIN = 0,
