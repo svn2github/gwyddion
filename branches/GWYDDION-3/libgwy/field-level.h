@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_FIELD_LEVEL_H__
 #define __LIBGWY_FIELD_LEVEL_H__
 
+#include <libgwy/line.h>
 #include <libgwy/field.h>
 #include <libgwy/mask-field.h>
 
@@ -68,7 +69,7 @@ void     gwy_field_subtract_poly   (GwyField *field,
 void     gwy_field_shift_rows      (GwyField *field,
                                     guint row,
                                     guint height,
-                                    const gdouble *shifts);
+                                    const GwyLine *shifts);
 
 G_END_DECLS
 

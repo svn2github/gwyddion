@@ -581,36 +581,46 @@ gwy_field_subtract_poly(GwyField *field,
     gwy_field_invalidate(field);
 }
 
-// TODO: We might want to use GwyLine once we have it.
 /**
  * gwy_field_shift_rows:
  * @field: A two-dimensional data field.
  * @row: First row.
  * @height: Number of rows.
- * @shifts: Array of length @height with row value shifts.
+ * @shifts: Line with the shifts.  Its length can match either @height or the
+ *          y-resolution of the field.
  *
  * Shifts values in rows of a field by specified values.
  *
  * The shifts are absolute, i.e. values in each row is simply shifted by
  * the corresponding number in @shifts.  If you have relative shifts, i.e.
- * always with respect to the previous row, you can use gwy_line_cumulate()
+ * always with respect to the previous row, you can use gwy_line_accumulate()
  * to transform them to absolute shifts first.
  **/
 void
 gwy_field_shift_rows(GwyField *field,
                      guint row,
                      guint height,
-                     const gdouble *shifts)
+                     const GwyLine *shifts)
 {
     if (!height)
         return;
 
     g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_LINE(shifts));
     g_return_if_fail(row + height <= field->yres);
-    g_return_if_fail(shifts);
+    const gdouble *sbase;
+    if (shifts->res == field->yres)
+        sbase = shifts->data + row;
+    else if (shifts->res == height)
+        sbase = shifts->data;
+    else {
+        g_critical("Line length matches neither the entire field "
+                   "nor the row range.");
+        return;
+    }
 
     for (guint i = 0; i < height; i++) {
-        gdouble s = shifts[i];
+        gdouble s = sbase[i];
         if (s) {
             gdouble *d = field->data + (row + i)*field->xres;
             for (guint j = field->xres; j; j--, d++)
