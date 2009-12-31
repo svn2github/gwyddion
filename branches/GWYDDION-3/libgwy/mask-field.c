@@ -1618,53 +1618,35 @@ gwy_mask_field_count(const GwyMaskField *field,
                      gboolean value)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
-    if (mask) {
-        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
-        g_return_val_if_fail(field->xres == mask->xres, 0);
-        g_return_val_if_fail(field->yres == mask->yres, 0);
-        g_return_val_if_fail(field->stride == mask->stride, 0);
-    }
+    if (!mask)
+        return gwy_mask_field_part_count(field, 0, 0, field->xres, field->yres,
+                                         value);
+
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), 0);
+    g_return_val_if_fail(field->xres == mask->xres, 0);
+    g_return_val_if_fail(field->yres == mask->yres, 0);
+    g_return_val_if_fail(field->stride == mask->stride, 0);
 
     const guint end = field->xres & 0x1f;
     const guint32 m0 = MAKE_MASK(0, end);
     guint count = 0;
 
-    if (mask) {
-        for (guint i = 0; i < field->yres; i++) {
-            const guint32 *m = mask->data + i*mask->stride;
-            const guint32 *p = field->data + i*field->stride;
-            if (value) {
-                for (guint j = field->xres >> 5; j; j--, p++, m++)
-                    count += count_set_bits(*p & *m);
-                if (end)
-                    count += count_set_bits(*p & *m & m0);
-            }
-            else {
-                for (guint j = field->xres >> 5; j; j--, p++, m++)
-                    count += count_set_bits(~*p & *m);
-                if (end)
-                    count += count_set_bits(~*p & *m & m0);
-            }
+    for (guint i = 0; i < field->yres; i++) {
+        const guint32 *m = mask->data + i*mask->stride;
+        const guint32 *p = field->data + i*field->stride;
+        if (value) {
+            for (guint j = field->xres >> 5; j; j--, p++, m++)
+                count += count_set_bits(*p & *m);
+            if (end)
+                count += count_set_bits(*p & *m & m0);
+        }
+        else {
+            for (guint j = field->xres >> 5; j; j--, p++, m++)
+                count += count_set_bits(~*p & *m);
+            if (end)
+                count += count_set_bits(~*p & *m & m0);
         }
     }
-    else {
-        for (guint i = 0; i < field->yres; i++) {
-            const guint32 *p = field->data + i*field->stride;
-            if (value) {
-                for (guint j = field->xres >> 5; j; j--, p++)
-                    count += count_set_bits(*p);
-                if (end)
-                    count += count_set_bits(*p & m0);
-            }
-            else {
-                for (guint j = field->xres >> 5; j; j--, p++)
-                    count += count_set_bits(~*p);
-                if (end)
-                    count += count_set_bits(~*p & m0);
-            }
-        }
-    }
-
     return count;
 }
 
@@ -1684,28 +1666,15 @@ count_row(const guint32 *row,
           gboolean value)
 {
     guint j = width;
-    guint count;
-    if (value) {
-        count = count_set_bits(*row & m0);
-        j -= 0x20 - off, row++;
-        while (j >= 0x20) {
-            count += count_set_bits(*row);
-            j -= 0x20, row++;
-        }
-        if (end)
-            count += count_set_bits(*row & m1);
+    guint count = count_set_bits(*row & m0);
+    j -= 0x20 - off, row++;
+    while (j >= 0x20) {
+        count += count_set_bits(*row);
+        j -= 0x20, row++;
     }
-    else {
-        count = count_set_bits(~*row & m0);
-        j -= 0x20 - off, row++;
-        while (j >= 0x20) {
-            count += count_set_bits(~*row);
-            j -= 0x20, row++;
-        }
-        if (end)
-            count += count_set_bits(~*row & m1);
-    }
-    return count;
+    if (end)
+        count += count_set_bits(*row & m1);
+    return value ? count : width - count;
 }
 
 /**
