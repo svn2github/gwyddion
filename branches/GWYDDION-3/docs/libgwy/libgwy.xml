@@ -10,35 +10,58 @@
     This library contains basic classes and interfaces not directly related
     to GUI or data processing, and various utility functions.
   </para>
-  <xi:include href="xml/main.xml"/>
-  <xi:include href="xml/version.xml"/>
-  <xi:include href="xml/macros.xml"/>
-  <xi:include href="xml/error-list.xml"/>
-  <xi:include href="xml/strfuncs.xml"/>
-  <xi:include href="xml/math.xml"/>
-  <xi:include href="xml/interpolation.xml"/>
-  <xi:include href="xml/expr.xml"/>
-  <xi:include href="xml/fitter.xml"/>
-  <xi:include href="xml/fit-task.xml"/>
-  <xi:include href="xml/pack.xml"/>
-  <xi:include href="xml/serializable.xml"/>
-  <xi:include href="xml/serializable-boxed.xml"/>
-  <xi:include href="xml/serialize.xml"/>
-  <xi:include href="xml/unit.xml"/>
-  <xi:include href="xml/value-format.xml"/>
-  <xi:include href="xml/line.xml"/>
-  <xi:include href="xml/line-statistics.xml"/>
-  <xi:include href="xml/field.xml"/>
-  <xi:include href="xml/field-arithmetic.xml"/>
-  <xi:include href="xml/field-statistics.xml"/>
-  <xi:include href="xml/field-level.xml"/>
-  <xi:include href="xml/mask-field.xml"/>
-  <xi:include href="xml/rgba.xml"/>
-  <xi:include href="xml/container.xml"/>
-  <xi:include href="xml/array.xml"/>
-  <xi:include href="xml/inventory.xml"/>
-  <xi:include href="xml/resource.xml"/>
-  <xi:include href="xml/gradient.xml"/>
-  <xi:include href="xml/gl-material.xml"/>
+  <chapter id='libgwy-fundamentals'>
+    <title>Fundamentals</title>
+    <xi:include href="xml/main.xml"/>
+    <xi:include href="xml/version.xml"/>
+    <xi:include href="xml/serializable.xml"/>
+    <xi:include href="xml/serializable-boxed.xml"/>
+    <xi:include href="xml/serialize.xml"/>
+  </chapter>
+  <chapter id='libgwy-mathematical-tools'>
+    <title>Mathematical Tools</title>
+    <xi:include href="xml/math.xml"/>
+    <xi:include href="xml/interpolation.xml"/>
+    <xi:include href="xml/fitter.xml"/>
+    <xi:include href="xml/fit-task.xml"/>
+  </chapter>
+  <chapter id='libgwy-one-dimensional-data'>
+    <title>One-Dimensional Data</title>
+    <xi:include href="xml/line.xml"/>
+    <xi:include href="xml/line-statistics.xml"/>
+  </chapter>
+  <chapter id='libgwy-two-dimensional-data'>
+    <title>Two-Dimensional Data</title>
+    <xi:include href="xml/field.xml"/>
+    <xi:include href="xml/field-arithmetic.xml"/>
+    <xi:include href="xml/field-level.xml"/>
+    <xi:include href="xml/field-statistics.xml"/>
+    <xi:include href="xml/field-transform.xml"/>
+    <xi:include href="xml/mask-field.xml"/>
+    <xi:include href="xml/mask-field-transform.xml"/>
+  </chapter>
+  <chapter id='libgwy-data-containers'>
+    <title>Data Containers</title>
+    <xi:include href="xml/array.xml"/>
+    <xi:include href="xml/container.xml"/>
+    <xi:include href="xml/inventory.xml"/>
+  </chapter>
+  <chapter id='libgwy-resources'>
+    <title>Resources</title>
+    <xi:include href="xml/rgba.xml"/>
+    <xi:include href="xml/resource.xml"/>
+    <xi:include href="xml/gradient.xml"/>
+    <xi:include href="xml/gl-material.xml"/>
+  </chapter>
+  <chapter id='libgwy-utilities'>
+    <title>Utilities</title>
+    <xi:include href="xml/macros.xml"/>
+    <xi:include href="xml/error-list.xml"/>
+    <xi:include href="xml/strfuncs.xml"/>
+    <xi:include href="xml/expr.xml"/>
+    <xi:include href="xml/pack.xml"/>
+    <xi:include href="xml/unit.xml"/>
+    <xi:include href="xml/value-format.xml"/>
+  </chapter>
   <xi:include href="xml/tree_index.sgml"/>
 </book>
