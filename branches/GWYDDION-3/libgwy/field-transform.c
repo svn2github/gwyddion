@@ -75,6 +75,18 @@ flip_vertically(GwyField *field, gboolean transform_offsets)
         gwy_field_set_yoffset(field, -(field->yreal + field->yoff));
 }
 
+/**
+ * @field: A two-dimensional data field.
+ * @horizontally: %TRUE to flip the field horizontally, i.e. about the vertical
+ *                axis.
+ * @vertically: %TRUE to flip the field vertically, i.e. about the horizontal
+ *              axis.
+ * @transform_offsets: %TRUE to transform the field origin offset as if the
+ *                     reflections occured around the Cartesian coordinate
+ *                     system axes, %FALSE to keep them intact.
+ *
+ * Flips a two-dimensional data field about either axis.
+ **/
 void
 gwy_field_flip(GwyField *field,
                gboolean horizontally,
@@ -171,13 +183,26 @@ rotate_270(const GwyField *source,
         dest->xoff = -(dest->xoff + dest->xreal);
 }
 
+/**
+ * @field: A two-dimensional data field.
+ * @rotation: Rotation amount (it can also be any positive multiple of 90).
+ * @transform_offsets: %TRUE to transform the field origin offset as if the
+ *                     rotation occured around the Cartesian coordinate system
+ *                     origin, %FALSE to keep them intact (except for swapping
+ *                     x and y for odd multiples of 90 degrees).
+ *
+ * Rotates a two-dimensional data field by a multiple by 90 degrees.
+ *
+ * The real dimensions, and depending on @transform the offsets, are
+ * transformed accordingly.
+ **/
 GwyField*
 gwy_field_rotate_simple(const GwyField *field,
                         GwySimpleRotation rotation,
                         gboolean transform_offsets)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    g_return_val_if_fail(rotation <= GWY_SIMPLE_ROTATE_CLOCKWISE, NULL);
+    rotation %= 360;
 
     if (rotation == GWY_SIMPLE_ROTATE_NONE)
         return gwy_field_duplicate(field);
@@ -188,7 +213,14 @@ gwy_field_rotate_simple(const GwyField *field,
         return newfield;
     }
 
+    if (rotation != GWY_SIMPLE_ROTATE_CLOCKWISE
+        && rotation != GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE) {
+        g_critical("Invalid simple rotation amount %u.", rotation);
+        return NULL;
+    }
+
     GwyField *newfield = gwy_field_new_alike(field, FALSE);
+    // The field is new, no need to emit signals.
     GWY_SWAP(guint, newfield->xres, newfield->yres);
     DSWAP(newfield->xreal, newfield->yreal);
     DSWAP(newfield->xoff, newfield->yoff);
@@ -214,6 +246,44 @@ gwy_field_rotate_simple(const GwyField *field,
  * SECTION: field-transform
  * @title: GwyField transformations
  * @short_description: Geometrical transformations of fields
+ *
+ * Some field transformations are performed in place while others create new
+ * fields.  This simply follows which transformations <emphasis>can</emphasis>
+ * be performed in place.
+ *
+ * If the transformation can be performed in place, such as flipping, it is
+ * performed in place.  Doing
+ * |[
+ * GwyField *newfield = gwy_field_duplicate(field);
+ * gwy_field_flip(newfield, FALSE, TRUE, FALSE);
+ * ]|
+ * if you need a copy is reasonably efficient requiring one extra memcpy().
+ *
+ * On the other hand if the transformation cannot be performed in place and it
+ * requires allocation of a data buffer then a new field is created and
+ * returned.  You can replace the old field with the new one or, if the object
+ * identity is important, use
+ * |[
+ * GwyField *newfield = gwy_field_rotate(field, 90, FALSE);
+ * gwy_field_assign(field, newfield);
+ * g_object_unref(newfield);
+ * ]|
+ * which again costs one extra memcpy().
+ **/
+
+/**
+ * GwySimpleRotation:
+ * @GWY_SIMPLE_ROTATE_NONE: No rotation.
+ * @GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE: Rotate by 90 degrees counterclockwise.
+ * @GWY_SIMPLE_ROTATE_UPSIDEDOWN: Rotate by 180 degrees (the same as flipping
+ *                                in both directions).
+ * @GWY_SIMPLE_ROTATE_CLOCKWISE: Rotate by 90 degrees clockwise.
+ *
+ * Rotations by multiples of 90 degrees, i.e. not requiring interpolation.
+ *
+ * They are used for instance in gwy_field_rotate_simple() and
+ * gwy_mask_field_rotate_simple().  The numerical values are equal to the
+ * rotation angle in degrees.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
