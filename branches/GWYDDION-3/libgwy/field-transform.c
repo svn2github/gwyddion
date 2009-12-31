@@ -76,6 +76,7 @@ flip_vertically(GwyField *field, gboolean transform_offsets)
 }
 
 /**
+ * gwy_field_flip:
  * @field: A two-dimensional data field.
  * @horizontally: %TRUE to flip the field horizontally, i.e. about the vertical
  *                axis.
@@ -184,6 +185,7 @@ rotate_270(const GwyField *source,
 }
 
 /**
+ * gwy_field_rotate_simple:
  * @field: A two-dimensional data field.
  * @rotation: Rotation amount (it can also be any positive multiple of 90).
  * @transform_offsets: %TRUE to transform the field origin offset as if the
