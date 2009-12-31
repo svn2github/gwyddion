@@ -21,6 +21,7 @@ mkenum_headers = \
 	field-arithmetic.h \
 	field-level.h \
 	field-statistics.h \
+	field-transform.h \
 	fitter.h \
 	fit-task.h \
 	gl-material.h \
@@ -69,6 +70,7 @@ libgwy3_la_SOURCES = \
 	field-arithmetic.c \
 	field-level.c \
 	field-statistics.c \
+	field-transform.c \
 	fitter.c \
 	fit-task.c \
 	gl-material.c \

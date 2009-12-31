@@ -30,6 +30,7 @@
 #include <libgwy/field-arithmetic.h>
 #include <libgwy/field-level.h>
 #include <libgwy/field-statistics.h>
+#include <libgwy/field-transform.h>
 #include <libgwy/fitter.h>
 #include <libgwy/fit-task.h>
 #include <libgwy/gl-material.h>
