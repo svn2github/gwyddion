@@ -117,6 +117,14 @@ gwy_line_rms(const GwyLine *line)
     return rms;
 }
 
+/**
+ * gwy_line_length:
+ * @line: A one-dimensional data line.
+ *
+ * Calculates the non-projected length of a line.
+ *
+ * Returns: The line length.
+ **/
 gdouble
 gwy_line_length(const GwyLine *line)
 {
