@@ -25,38 +25,6 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/processing-internal.h"
 
-/* Note we use run-time conditions for endianess-branching even though it is
- * known at compile time.  This is to get the big-endian branch at least
- * syntax-checked.  A good optimizing compiler then eliminates the unused
- * branch entirely so we do not need to care. */
-#if (G_BYTE_ORDER != G_LITTLE_ENDIAN && G_BYTE_ORDER != G_BIG_ENDIAN)
-#error Byte order used on this system is not supported.
-#endif
-
-#define ALL_SET ((guint32)0xffffffffu)
-#define ALL_CLEAR ((guint32)0x00000000u)
-
-/* SHR moves the bits right in the mask field, which means towards the higher
- * bits on little-endian and towards the lower bits on big endian. */
-#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-#define FIRST_BIT ((guint32)0x1u)
-#define SHR <<
-#define SHL >>
-#endif
-
-#if (G_BYTE_ORDER == G_BIG_ENDIAN)
-#define FIRST_BIT ((guint32)0x80000000u)
-#define SHR >>
-#define SHL <<
-#endif
-
-/* Make a 32bit bit mask with nbits set, starting from bit firstbit.  The
- * lowest bit is 0, the highest 0x1f for little endian and the reverse for
- * big endian. */
-#define NTH_BIT(n) (FIRST_BIT SHR (n))
-#define MAKE_MASK(firstbit, nbits) \
-    (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
-
 enum { N_ITEMS = 3 };
 
 enum {
@@ -1816,8 +1784,7 @@ ensure_map(guint max_no, guint *map, guint *mapsize)
 
 /**
  * gwy_mask_field_number_grains:
- * @field: Data field containing positive values in grains, nonpositive
- *         in free space.
+ * @field: A two-dimensional mask field.
  * @ngrains: Location to store the number of the last grain, or %NULL.
  *
  * Numbers grains in a mask field.
