@@ -1708,33 +1708,6 @@ count_row(const guint32 *row,
     return count;
 }
 
-static guint
-count_part(const GwyMaskField *field,
-           guint col,
-           guint row,
-           guint width,
-           guint height,
-           gboolean value)
-{
-    guint32 *base = field->data + field->stride*row + (col >> 5);
-    const guint off = col & 0x1f;
-    const guint end = (col + width) & 0x1f;
-    guint count = 0;
-    if (width <= 0x20 - off) {
-        const guint32 m = MAKE_MASK(off, width);
-        for (guint i = 0; i < height; i++)
-            count += count_row_single(base + i*field->stride, m, value);
-    }
-    else {
-        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
-        const guint32 m1 = MAKE_MASK(0, end);
-        for (guint i = 0; i < height; i++)
-            count += count_row(base + i*field->stride, width, off, end, m0, m1,
-                               value);
-    }
-    return count;
-}
-
 /**
  * gwy_mask_field_part_count:
  * @field: A two-dimensional mask field.
@@ -1763,7 +1736,77 @@ gwy_mask_field_part_count(const GwyMaskField *field,
     if (!width || !height)
         return 0;
 
-    return count_part(field, col, row, width, height, value);
+    guint32 *base = field->data + field->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    guint count = 0;
+    if (width <= 0x20 - off) {
+        const guint32 m = MAKE_MASK(off, width);
+        for (guint i = 0; i < height; i++)
+            count += count_row_single(base + i*field->stride, m, value);
+    }
+    else {
+        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++)
+            count += count_row(base + i*field->stride, width,
+                               off, end, m0, m1, value);
+    }
+    return count;
+}
+
+/**
+ * gwy_mask_field_part_count_rows:
+ * @field: A two-dimensional mask field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @value: %TRUE to count ones, %FALSE to count zeroes.
+ * @counts: Array of length @height to store the counts in individual rows to.
+ *
+ * Counts set or unset bits in each row of a rectangular part of a mask field.
+ *
+ * Returns: The number of bits equal to @value in the entire mask field part,
+ *          i.e. the same value as gwy_mask_field_part_count() returns.
+ **/
+guint
+gwy_mask_field_part_count_rows(const GwyMaskField *field,
+                               guint col,
+                               guint row,
+                               guint width,
+                               guint height,
+                               gboolean value,
+                               guint *counts)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), 0);
+    g_return_val_if_fail(col + width <= field->xres, 0);
+    g_return_val_if_fail(row + height <= field->yres, 0);
+    if (!width || !height)
+        return 0;
+    g_return_val_if_fail(counts, 0);
+
+    guint32 *base = field->data + field->stride*row + (col >> 5);
+    const guint off = col & 0x1f;
+    const guint end = (col + width) & 0x1f;
+    guint count = 0;
+    if (width <= 0x20 - off) {
+        const guint32 m = MAKE_MASK(off, width);
+        for (guint i = 0; i < height; i++) {
+            counts[i] = count_row_single(base + i*field->stride, m, value);
+            count += counts[i];
+        }
+    }
+    else {
+        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = MAKE_MASK(0, end);
+        for (guint i = 0; i < height; i++) {
+            counts[i] = count_row(base + i*field->stride, width,
+                                  off, end, m0, m1, value);
+            count += counts[i];
+        }
+    }
+    return count;
 }
 
 /* Merge grains i and j in map with full resolution */
