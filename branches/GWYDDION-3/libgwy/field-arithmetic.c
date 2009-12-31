@@ -118,4 +118,22 @@ gwy_field_is_incompatible(GwyField *field1,
  * @short_description: Arithmetic operations with fields
  **/
 
+/**
+ * GwyFieldCompatibilityFlags:
+ * @GWY_FIELD_COMPATIBLE_XRES: X-resolution (width).
+ * @GWY_FIELD_COMPATIBLE_YRES: Y-resolution (height)
+ * @GWY_FIELD_COMPATIBLE_RES: Both resolutions.
+ * @GWY_FIELD_COMPATIBLE_XREAL: Physical x-dimension.
+ * @GWY_FIELD_COMPATIBLE_YREAL: Physical y-dimension.
+ * @GWY_FIELD_COMPATIBLE_REAL: Both physical dimensions.
+ * @GWY_FIELD_COMPATIBLE_DX: Pixel size in x-direction.
+ * @GWY_FIELD_COMPATIBLE_DY: Pixel size in y-direction.
+ * @GWY_FIELD_COMPATIBLE_DXDY: Pixel dimensions.
+ * @GWY_FIELD_COMPATIBLE_LATERAL: Lateral units.
+ * @GWY_FIELD_COMPATIBLE_VALUE: Value units.
+ * @GWY_FIELD_COMPATIBLE_ALL: All defined properties.
+ *
+ * Field properties that can be checked for compatibility.
+ **/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
