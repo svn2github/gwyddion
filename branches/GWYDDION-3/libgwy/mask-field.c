@@ -1668,6 +1668,46 @@ gwy_mask_field_count(const GwyMaskField *field,
     return count;
 }
 
+static inline guint
+count_row_single(const guint32 *row,
+                 guint32 m,
+                 gboolean value)
+{
+    return count_set_bits((value ? *row : ~*row) & m);
+}
+
+static guint
+count_row(const guint32 *row,
+          guint width,
+          guint off, guint end,
+          guint32 m0, guint32 m1,
+          gboolean value)
+{
+    guint j = width;
+    guint count;
+    if (value) {
+        count = count_set_bits(*row & m0);
+        j -= 0x20 - off, row++;
+        while (j >= 0x20) {
+            count += count_set_bits(*row);
+            j -= 0x20, row++;
+        }
+        if (end)
+            count += count_set_bits(*row & m1);
+    }
+    else {
+        count = count_set_bits(~*row & m0);
+        j -= 0x20 - off, row++;
+        while (j >= 0x20) {
+            count += count_set_bits(~*row);
+            j -= 0x20, row++;
+        }
+        if (end)
+            count += count_set_bits(~*row & m1);
+    }
+    return count;
+}
+
 static guint
 count_part(const GwyMaskField *field,
            guint col,
@@ -1682,48 +1722,15 @@ count_part(const GwyMaskField *field,
     guint count = 0;
     if (width <= 0x20 - off) {
         const guint32 m = MAKE_MASK(off, width);
-        if (value) {
-            for (guint i = 0; i < height; i++) {
-                guint32 *p = base + i*field->stride;
-                count += count_set_bits(*p & m);
-            }
-        }
-        else {
-            for (guint i = 0; i < height; i++) {
-                guint32 *p = base + i*field->stride;
-                count += count_set_bits(~*p & m);
-            }
-        }
+        for (guint i = 0; i < height; i++)
+            count += count_row_single(base + i*field->stride, m, value);
     }
     else {
         const guint32 m0 = MAKE_MASK(off, 0x20 - off);
         const guint32 m1 = MAKE_MASK(0, end);
-        for (guint i = 0; i < height; i++) {
-            guint32 *p = base + i*field->stride;
-            guint j = width;
-            if (value) {
-                count += count_set_bits(*p & m0);
-                j -= 0x20 - off, p++;
-                while (j >= 0x20) {
-                    count += count_set_bits(*p);
-                    j -= 0x20, p++;
-                }
-                if (!end)
-                    continue;
-                count += count_set_bits(*p & m1);
-            }
-            else {
-                count += count_set_bits(~*p & m0);
-                j -= 0x20 - off, p++;
-                while (j >= 0x20) {
-                    count += count_set_bits(~*p);
-                    j -= 0x20, p++;
-                }
-                if (!end)
-                    continue;
-                count += count_set_bits(~*p & m1);
-            }
-        }
+        for (guint i = 0; i < height; i++)
+            count += count_row(base + i*field->stride, width, off, end, m0, m1,
+                               value);
     }
     return count;
 }
