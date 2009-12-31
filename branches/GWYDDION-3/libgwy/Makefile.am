@@ -33,6 +33,7 @@ mkenum_headers = \
 	macros.h \
 	main.h \
 	mask-field.h \
+	mask-field-transform.h \
 	math.h \
 	pack.h \
 	resource.h \
@@ -82,6 +83,7 @@ libgwy3_la_SOURCES = \
 	macros.c \
 	main.c \
 	mask-field.c \
+	mask-field-transform.c \
 	math.c \
 	pack.c \
 	resource.c \
