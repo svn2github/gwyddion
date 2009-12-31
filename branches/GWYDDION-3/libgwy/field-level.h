@@ -26,6 +26,11 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+    GWY_ROW_SHIFT_MEAN,
+    GWY_ROW_SHIFT_MEDIAN,
+} GwyRowShiftMethod;
+
 gboolean gwy_field_part_fit_plane  (const GwyField *field,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking,
@@ -67,9 +72,13 @@ void     gwy_field_subtract_poly   (GwyField *field,
                                     guint nterms,
                                     const gdouble *coeffs);
 void     gwy_field_shift_rows      (GwyField *field,
-                                    guint row,
-                                    guint height,
                                     const GwyLine *shifts);
+void     gwy_field_find_row_shifts (const GwyField *field,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking,
+                                    GwyRowShiftMethod method,
+                                    guint min_freedom,
+                                    GwyLine *shifts);
 
 G_END_DECLS
 

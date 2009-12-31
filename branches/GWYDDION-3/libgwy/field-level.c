@@ -45,6 +45,15 @@ typedef struct {
     const gdouble *yp;
 } PolyFitData;
 
+typedef struct {
+    const gdouble *p;
+    // Only with masking
+    GwyMaskFieldIter iter;
+    gboolean mode;
+    guint count;
+    guint degree;
+} RowFitData;
+
 static gboolean
 plane_fit(guint id,
           gdouble *fvalues,
@@ -584,10 +593,9 @@ gwy_field_subtract_poly(GwyField *field,
 /**
  * gwy_field_shift_rows:
  * @field: A two-dimensional data field.
- * @row: First row.
- * @height: Number of rows.
- * @shifts: Line with the shifts.  Its length can match either @height or the
- *          y-resolution of the field.
+ * @shifts: Line with the shifts.  Its resolution must match either the
+ *          y-resolution of @field.  Physical properties of @shifts,
+ *          such as length, offset and units, are ignored.
  *
  * Shifts values in rows of a field by specified values.
  *
@@ -598,37 +606,146 @@ gwy_field_subtract_poly(GwyField *field,
  **/
 void
 gwy_field_shift_rows(GwyField *field,
-                     guint row,
-                     guint height,
                      const GwyLine *shifts)
 {
-    if (!height)
-        return;
-
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(GWY_IS_LINE(shifts));
-    g_return_if_fail(row + height <= field->yres);
-    const gdouble *sbase;
-    if (shifts->res == field->yres)
-        sbase = shifts->data + row;
-    else if (shifts->res == height)
-        sbase = shifts->data;
-    else {
-        g_critical("Line length matches neither the entire field "
-                   "nor the row range.");
-        return;
-    }
-
-    for (guint i = 0; i < height; i++) {
-        gdouble s = sbase[i];
+    g_return_if_fail(shifts->res == field->yres);
+    for (guint i = 0; i < field->yres; i++) {
+        gdouble s = shifts->data[i];
         if (s) {
-            gdouble *d = field->data + (row + i)*field->xres;
+            gdouble *d = field->data + i*field->xres;
             for (guint j = field->xres; j; j--, d++)
                 *d -= s;
         }
     }
-
     gwy_field_invalidate(field);
+}
+
+// These functions already calculate *corrective* shifts, not direct ones.
+static void
+fit_row_mean(const GwyField *field,
+             guint row,
+             const GwyMaskField *mask,
+             GwyMaskingType masking,
+             guint maskrow,
+             guint min_freedom,
+             gdouble *shift)
+{
+    const gdouble *d1 = field->data + row*field->xres;
+    const gdouble *d2 = d1 + field->xres;
+    gdouble sum = 0.0;
+    guint count = 0;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = field->xres; j; j--, d1++, d2++)
+            sum += *d1 - *d2;
+        count = field->xres;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskFieldIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
+        gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
+        for (guint j = field->xres; j; j--, d1++, d2++) {
+            if (!!gwy_mask_field_iter_get(iter1) ^ invert
+                && !!gwy_mask_field_iter_get(iter2) ^ invert) {
+                sum += *d1 - *d2;
+                count++;
+            }
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+    }
+    *shift = (count >= 1 + min_freedom) ? sum/count : 0.0;
+}
+
+static void
+fit_row_median(const GwyField *field,
+               guint row,
+               const GwyMaskField *mask,
+               GwyMaskingType masking,
+               guint maskrow,
+               guint min_freedom,
+               gdouble *buffer,
+               gdouble *shift)
+{
+    const gdouble *d1 = field->data + row*field->xres;
+    const gdouble *d2 = d1 + field->xres;
+    gdouble *p = buffer;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = field->xres; j; j--, d1++, d2++)
+            *(p++) = *d1 - *d2;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskFieldIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
+        gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
+        for (guint j = field->xres; j; j--, d1++, d2++) {
+            if (!!gwy_mask_field_iter_get(iter1) ^ invert
+                && !!gwy_mask_field_iter_get(iter2) ^ invert)
+                *(p++) = *d1 - *d2;
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+    }
+    guint count = p - buffer;
+    *shift = (count >= 1 + min_freedom) ? gwy_math_median(buffer, count) : 0.0;
+}
+
+/**
+ * gwy_field_find_row_shifts:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @method: Row shift finding method.
+ * @min_freedom: Minimum number of points in a row, above the number required
+ *               by the specific method, required to shift it.  Rows that do
+ *               not contain at least this number of free points due to masking
+ *               are not shifted relatively to their neighbours.
+ * @shifts: Line of the same dimension as @field's y-resolution to store the
+ *          calculated relative shifts to.
+ *
+ * Finds shifts of field rows relative to their neighbour rows.
+ *
+ * Note this method calculates relative shifts, although gwy_field_shift_rows()
+ * takes absolute shifts.
+ **/
+void
+gwy_field_find_row_shifts(const GwyField *field,
+                          const GwyMaskField *mask,
+                          GwyMaskingType masking,
+                          GwyRowShiftMethod method,
+                          guint min_freedom,
+                          GwyLine *shifts)
+{
+    guint maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               0, 0, field->xres, field->yres,
+                               &maskcol, &maskrow))
+        return;
+    g_return_if_fail(GWY_IS_LINE(shifts));
+    g_return_if_fail(shifts->res == field->yres);
+
+    gsize bufsize = field->xres * sizeof(gdouble);
+
+    if (method == GWY_ROW_SHIFT_MEAN) {
+        for (guint i = 0; i < field->yres; i++)
+            fit_row_mean(field, i, mask, masking, maskrow, min_freedom,
+                         shifts->data + i);
+    }
+    else if (method == GWY_ROW_SHIFT_MEDIAN) {
+        gdouble *buffer = g_slice_alloc(bufsize);
+        for (guint i = 0; i < field->yres; i++)
+            fit_row_median(field, i, mask, masking, maskrow, min_freedom,
+                           buffer, shifts->data + i);
+        g_slice_free1(bufsize, buffer);
+    }
+    else {
+        g_critical("Unknown row shift method %u", method);
+        gwy_line_clear(shifts);
+        return;
+    }
 }
 
 #define __LIBGWY_FIELD_LEVEL_C__
@@ -658,6 +775,17 @@ gwy_field_shift_rows(GwyField *field,
  * bcol = 2*bx/(field->xres - 1);
  * brow = 2*by/(field->yres - 1);
  * ]|
+ **/
+
+/**
+ * GwyRowShiftMethod:
+ * @GWY_ROW_SHIFT_MEAN: The mean value of row differences.
+ * @GWY_ROW_SHIFT_MEDIAN: The median value of row differences.
+ *
+ * Row shift finding methods.
+ *
+ * All methods are based on finding the shift necesary to align consecutive
+ * rows.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
