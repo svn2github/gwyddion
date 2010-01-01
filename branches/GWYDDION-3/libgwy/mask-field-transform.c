@@ -132,86 +132,87 @@ gwy_mask_field_flip(GwyMaskField *field,
     gwy_mask_field_invalidate(field);
 }
 
-#if 0
+static inline void
+swap_xy_32x32(const guint32 *src,
+              guint32 *dest)
+{
+    gwy_memclear(dest, 0x20);
+    guint32 bit = FIRST_BIT;
+    for (guint i = 0; i < 0x20; i++) {
+        guint32 v = src[i];
+        for (guint32 *d = dest; v; d++, v = v SHL 1) {
+            if (v & FIRST_BIT)
+                *d |= bit;
+        }
+        bit = bit SHR 1;
+    }
+}
+
+// Block sizes are measured in destination, in source, the dims are swapped.
+static inline void
+swap_block(const guint32 *sb, guint32 *db,
+           guint xblocksize, guint yblocksize,
+           guint dstride, guint sstride)
+{
+    guint32 sbuff[0x20], dbuff[0x20];
+    const guint32 *s = sb;
+    for (guint i = 0; i < xblocksize; i++, s += sstride)
+        sbuff[i] = *s;
+    swap_xy_32x32(sbuff, dbuff);
+    guint32 *d = db;
+    for (guint i = 0; i < yblocksize; i++, d += dstride)
+        *d = dbuff[i];
+}
+
 static void
 swap_xy(const GwyMaskField *source,
         GwyMaskField *dest)
 {
     guint dxres = dest->xres, dyres = dest->yres;
-    guint dxmax = dxres/BLOCK_SIZE * BLOCK_SIZE;
-    guint dymax = dyres/BLOCK_SIZE * BLOCK_SIZE;
+    guint sstride = source->stride, dstride = dest->stride;
+    guint dxmax = dxres >> 5, jend = dxres & 0x1f;
+    guint dymax = dyres >> 5, iend = dyres & 0x1f;
 
-    for (guint ib = 0; ib < dymax; ib += BLOCK_SIZE) {
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE) {
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < BLOCK_SIZE; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = BLOCK_SIZE; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
-        if (dxmax != dxres) {
-            guint jb = dxmax;
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < BLOCK_SIZE; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = dxres - dxmax; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
+    for (guint ib = 0; ib < dymax; ib++) {
+        for (guint jb = 0; jb < dxmax; jb++)
+            swap_block(source->data + ((jb << 5)*sstride + ib),
+                       dest->data + ((ib << 5)*dstride + jb),
+                       0x20, 0x20, dstride, sstride);
+        if (jend)
+            swap_block(source->data + ((dxmax << 5)*sstride + ib),
+                       dest->data + ((ib << 5)*dstride + dxmax),
+                       jend, 0x20, dstride, sstride);
     }
-    if (dymax != dyres) {
-        guint ib = dymax;
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE) {
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < dyres - dymax; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = BLOCK_SIZE; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
-        if (dxmax != dxres) {
-            guint jb = dxmax;
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < dyres - dymax; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = dxres - dxmax; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
+    if (iend) {
+        for (guint jb = 0; jb < dxmax; jb++)
+            swap_block(source->data + (jb*dyres + dymax),
+                       dest->data + (dymax*dxres + jb),
+                       0x20, iend, dstride, sstride);
+        if (jend)
+            swap_block(source->data + (dxmax*dyres + dymax),
+                       dest->data + (dymax*dxres + dxmax),
+                       jend, iend, dstride, sstride);
     }
 }
 
-static void
-rotate_90(const GwyMaskField *source,
-          GwyMaskField *dest,
-          gboolean transform_offsets)
+/**
+ * gwy_mask_field_transpose:
+ * @field: A two-dimensional mask field.
+ *
+ * Transposes a mask field, i.e. field rows become columns and vice versa.
+ *
+ * Returns: A new two-dimensional mask field.
+ **/
+GwyMaskField*
+gwy_mask_field_transpose(const GwyMaskField *field)
 {
-    swap_xy(source, dest);
-    flip_vertically(dest, FALSE);
-    if (transform_offsets)
-        dest->yoff = -(dest->yoff + dest->yreal);
-}
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
 
-static void
-rotate_270(const GwyMaskField *source,
-           GwyMaskField *dest,
-           gboolean transform_offsets)
-{
-    swap_xy(source, dest);
-    flip_horizontally(dest, FALSE);
-    if (transform_offsets)
-        dest->xoff = -(dest->xoff + dest->xreal);
+    GwyMaskField *newfield = gwy_mask_field_new_sized(field->yres, field->xres,
+                                                      FALSE);
+    swap_xy(field, newfield);
+    return newfield;
 }
-#endif
 
 /**
  * gwy_mask_field_rotate_simple:
@@ -220,8 +221,7 @@ rotate_270(const GwyMaskField *source,
  *
  * Rotates a two-dimensional mask field by a multiple by 90 degrees.
  *
- * The real dimensions, and depending on @transform the offsets, are
- * transformed accordingly.
+ * Returns: A new two-dimensional mask field.
  **/
 GwyMaskField*
 gwy_mask_field_rotate_simple(const GwyMaskField *field,
@@ -245,15 +245,17 @@ gwy_mask_field_rotate_simple(const GwyMaskField *field,
         return NULL;
     }
 
-    GwyMaskField *newfield = gwy_mask_field_new_sized(field->yres, field->xres,
-                                                      FALSE);
+    GwyMaskField *newfield = gwy_mask_field_transpose(field);
 
-    /*
+    gsize rowsize = field->stride * sizeof(guint32);
+    guint32 *buffer = g_slice_alloc(rowsize);
+
     if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
-        rotate_90(field, newfield, transform_offsets);
+        flip_vertically(newfield, buffer);
     if (rotation == GWY_SIMPLE_ROTATE_CLOCKWISE)
-        rotate_270(field, newfield, transform_offsets);
-        */
+        flip_horizontally(newfield, buffer);
+
+    g_slice_free1(rowsize, buffer);
 
     return newfield;
 }
