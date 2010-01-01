@@ -117,6 +117,20 @@ gwy_field_flip(GwyField *field,
     }
 }
 
+// Block sizes are measured in destination, in source, the dims are swapped.
+static inline void
+swap_block(const gdouble *sb, gdouble *db,
+           guint xblocksize, guint yblocksize,
+           guint dxres, guint sxres)
+{
+    for (guint i = 0; i < yblocksize; i++) {
+        const gdouble *s = sb + i;
+        gdouble *d = db + i*dxres;
+        for (guint j = xblocksize; j; j--, d++, s += sxres)
+            *d = *s;
+    }
+}
+
 static void
 swap_xy(const GwyField *source,
         GwyField *dest)
@@ -126,51 +140,24 @@ swap_xy(const GwyField *source,
     guint dymax = dyres/BLOCK_SIZE * BLOCK_SIZE;
 
     for (guint ib = 0; ib < dymax; ib += BLOCK_SIZE) {
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE) {
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < BLOCK_SIZE; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = BLOCK_SIZE; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
-        if (dxmax != dxres) {
-            guint jb = dxmax;
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < BLOCK_SIZE; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = dxres - dxmax; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
+        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
+            swap_block(source->data + (jb*dyres + ib),
+                       dest->data + (ib*dxres + jb),
+                       BLOCK_SIZE, BLOCK_SIZE, dxres, dyres);
+        if (dxmax != dxres)
+            swap_block(source->data + (dxmax*dyres + ib),
+                       dest->data + (ib*dxres + dxmax),
+                       dxres - dxmax, BLOCK_SIZE, dxres, dyres);
     }
     if (dymax != dyres) {
-        guint ib = dymax;
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE) {
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < dyres - dymax; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = BLOCK_SIZE; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
-        if (dxmax != dxres) {
-            guint jb = dxmax;
-            const gdouble *sb = source->data + (jb*dyres + ib);
-            gdouble *db = dest->data + (ib*dxres + jb);
-            for (guint i = 0; i < dyres - dymax; i++) {
-                const gdouble *s = sb + i;
-                gdouble *d = db + i*dxres;
-                for (guint j = dxres - dxmax; j; j--, d++, s += dyres)
-                    *d = *s;
-            }
-        }
+        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
+            swap_block(source->data + (jb*dyres + dymax),
+                       dest->data + (dymax*dxres + jb),
+                       BLOCK_SIZE, dyres - dymax, dxres, dyres);
+        if (dxmax != dxres)
+            swap_block(source->data + (dxmax*dyres + dymax),
+                       dest->data + (dymax*dxres + dxmax),
+                       dxres - dxmax, dyres - dymax, dxres, dyres);
     }
 }
 
