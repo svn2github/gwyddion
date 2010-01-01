@@ -26,10 +26,12 @@
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 
-// For rotations. The largest value before the performance starts deteriorate
-// on Phenom II.
+// For rotations. The largest value before the performance starts to
+// deteriorate on Phenom II; probably after that threshold on older hardware.
 enum { BLOCK_SIZE = 64 };
 
+// XXX: The primitives do not emit signals, it's up to the API-level function
+// to do that.
 static void
 flip_both(GwyField *field, gboolean transform_offsets)
 {
@@ -39,10 +41,8 @@ flip_both(GwyField *field, gboolean transform_offsets)
         DSWAP(*d, *e);
 
     if (transform_offsets) {
-        g_object_freeze_notify(G_OBJECT(field));
-        gwy_field_set_xoffset(field, -(field->xreal + field->xoff));
-        gwy_field_set_yoffset(field, -(field->yreal + field->yoff));
-        g_object_thaw_notify(G_OBJECT(field));
+        field->xoff = -(field->xreal + field->xoff);
+        field->yoff = -(field->yreal + field->yoff);
     }
 }
 
@@ -57,7 +57,7 @@ flip_horizontally(GwyField *field, gboolean transform_offsets)
     }
 
     if (transform_offsets)
-        gwy_field_set_xoffset(field, -(field->xreal + field->xoff));
+        field->xoff = -(field->xreal + field->xoff);
 }
 
 static void
@@ -72,7 +72,7 @@ flip_vertically(GwyField *field, gboolean transform_offsets)
     }
 
     if (transform_offsets)
-        gwy_field_set_yoffset(field, -(field->yreal + field->yoff));
+        field->yoff = -(field->yreal + field->yoff);
 }
 
 /**
@@ -103,6 +103,13 @@ gwy_field_flip(GwyField *field,
     else if (vertically)
         flip_vertically(field, transform_offsets);
     // Cached values do not change
+
+    if (transform_offsets) {
+        if (horizontally)
+            g_object_notify(G_OBJECT(field), "x-offset");
+        if (vertically)
+            g_object_notify(G_OBJECT(field), "y-offset");
+    }
 }
 
 static void
@@ -162,26 +169,41 @@ swap_xy(const GwyField *source,
     }
 }
 
-static void
-rotate_90(const GwyField *source,
-          GwyField *dest,
-          gboolean transform_offsets)
+/**
+ * gwy_field_transpose:
+ * @field: A two-dimensional data field.
+ *
+ * Transposes a field, i.e. field rows become columns and vice versa.
+ *
+ * The transposition is performed by a low cache-miss algorithm.  It may be
+ * used to change column-wise operations to row-wise at a relatively low cost
+ * and then benefit from the improved memory locality and simplicity of
+ * row-wise processing.
+ *
+ * The real dimensions and offsets are also transposed.
+ *
+ * Returns: A new two-dimensional data field.
+ **/
+GwyField*
+gwy_field_transpose(const GwyField *field)
 {
-    swap_xy(source, dest);
-    flip_vertically(dest, FALSE);
-    if (transform_offsets)
-        dest->yoff = -(dest->yoff + dest->yreal);
-}
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
 
-static void
-rotate_270(const GwyField *source,
-           GwyField *dest,
-           gboolean transform_offsets)
-{
-    swap_xy(source, dest);
-    flip_horizontally(dest, FALSE);
-    if (transform_offsets)
-        dest->xoff = -(dest->xoff + dest->xreal);
+    GwyField *newfield = gwy_field_new_alike(field, FALSE);
+    // The field is new, no need to emit signals.
+    GWY_SWAP(guint, newfield->xres, newfield->yres);
+    DSWAP(newfield->xreal, newfield->yreal);
+    DSWAP(newfield->xoff, newfield->yoff);
+
+    swap_xy(field, newfield);
+
+    Field *spriv = field->priv, *dpriv = newfield->priv;
+    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
+    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+    ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
+    dpriv->cached = spriv->cached;
+
+    return newfield;
 }
 
 /**
@@ -195,8 +217,10 @@ rotate_270(const GwyField *source,
  *
  * Rotates a two-dimensional data field by a multiple by 90 degrees.
  *
- * The real dimensions, and depending on @transform the offsets, are
+ * The real dimensions and, depending on @transform, the offsets are
  * transformed accordingly.
+ *
+ * Returns: A new two-dimensional data field.
  **/
 GwyField*
 gwy_field_rotate_simple(const GwyField *field,
@@ -221,22 +245,12 @@ gwy_field_rotate_simple(const GwyField *field,
         return NULL;
     }
 
-    GwyField *newfield = gwy_field_new_alike(field, FALSE);
+    GwyField *newfield = gwy_field_transpose(field);
     // The field is new, no need to emit signals.
-    GWY_SWAP(guint, newfield->xres, newfield->yres);
-    DSWAP(newfield->xreal, newfield->yreal);
-    DSWAP(newfield->xoff, newfield->yoff);
-
     if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
-        rotate_90(field, newfield, transform_offsets);
+        flip_vertically(newfield, transform_offsets);
     if (rotation == GWY_SIMPLE_ROTATE_CLOCKWISE)
-        rotate_270(field, newfield, transform_offsets);
-
-    Field *spriv = field->priv, *dpriv = newfield->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
-    ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
-    dpriv->cached = spriv->cached;
+        flip_horizontally(newfield, transform_offsets);
 
     return newfield;
 }

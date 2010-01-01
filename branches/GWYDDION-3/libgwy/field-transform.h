@@ -38,6 +38,7 @@ void      gwy_field_flip         (GwyField *field,
 GwyField* gwy_field_rotate_simple(const GwyField *field,
                                   GwySimpleRotation rotation,
                                   gboolean transform_offsets);
+GwyField *gwy_field_transpose    (const GwyField *field);
 
 G_END_DECLS
 
