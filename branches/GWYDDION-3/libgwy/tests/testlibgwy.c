@@ -102,8 +102,10 @@ main(int argc, char *argv[])
 {
     setenv("LC_NUMERIC", "C", TRUE);
     setlocale(LC_NUMERIC, "C");
-    if (RUNNING_ON_VALGRIND)
+    if (RUNNING_ON_VALGRIND) {
         setenv("G_SLICE", "always-malloc", TRUE);
+        g_mem_gc_friendly = TRUE;
+    }
 
     g_test_init(&argc, &argv, NULL);
     g_type_init();
