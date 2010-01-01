@@ -28,6 +28,11 @@
 
 // For rotations. The largest value before the performance starts to
 // deteriorate on Phenom II; probably after that threshold on older hardware.
+//
+// The run-time of transpose is 40 to 120% higher compared to duplicate (the
+// worst performance occurs for `nicely' sized fields due to cache line
+// contention).  A cache-oblivious algorithm stopping at size 8x8 would be
+// nice.
 enum { BLOCK_SIZE = 64 };
 
 // XXX: The primitives do not emit signals, it's up to the API-level function
