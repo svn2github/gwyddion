@@ -858,48 +858,6 @@ gwy_line_get_format_y(GwyLine *line,
                                        style, max - min, 3, format);
 }
 
-// FIXME: These two may not belong here, but they do not worth a separate
-// header.
-/**
- * gwy_line_accumulate:
- * @line: A one-dimensional data line.
- *
- * Transforms a distribution in a line to cummulative distribution.
- *
- * Each element becomes the sum of all previous elements in the line, including
- * self.
- **/
-void
-gwy_line_accumulate(GwyLine *line)
-{
-    g_return_if_fail(GWY_IS_LINE(line));
-    gdouble *p = line->data;
-    for (guint i = line->res-1; i; i--, p++)
-        p[1] += p[0];
-}
-
-/**
- * gwy_line_distribute:
- * @line: A one-dimensional data line.
- *
- * Transforms a cummulative distribution in a line to distribution.
- *
- * Each element except the first is set to the difference beteen self and the
- * previous element.
- *
- * The first element is kept intact to make this method the exact inverse of
- * gwy_line_accumulate().  However, you might also wish to set it to zero
- * afterwards.
- **/
-void
-gwy_line_distribute(GwyLine *line)
-{
-    g_return_if_fail(GWY_IS_LINE(line));
-    gdouble *p = line->data + line->res-1;
-    for (guint i = line->res-1; i; i--, p--)
-        p[1] -= p[0];
-}
-
 #define __LIBGWY_LINE_C__
 #include "libgwy/libgwy-aliases.c"
 

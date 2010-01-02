@@ -110,9 +110,6 @@ GwyValueFormat* gwy_line_get_format_y (GwyLine *line,
 #define gwy_line_dx(line) \
     ((line)->real/(line)->res)
 
-void gwy_line_accumulate(GwyLine *line);
-void gwy_line_distribute(GwyLine *line);
-
 G_END_DECLS
 
 #endif

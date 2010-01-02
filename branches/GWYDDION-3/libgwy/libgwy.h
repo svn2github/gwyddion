@@ -28,6 +28,7 @@
 #include <libgwy/expr.h>
 #include <libgwy/field.h>
 #include <libgwy/field-arithmetic.h>
+#include <libgwy/field-distributions.h>
 #include <libgwy/field-level.h>
 #include <libgwy/field-statistics.h>
 #include <libgwy/field-transform.h>
@@ -38,6 +39,7 @@
 #include <libgwy/inventory.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/line.h>
+#include <libgwy/line-arithmetic.h>
 #include <libgwy/line-statistics.h>
 #include <libgwy/macros.h>
 #include <libgwy/main.h>

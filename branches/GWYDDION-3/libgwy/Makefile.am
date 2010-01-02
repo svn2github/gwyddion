@@ -19,6 +19,7 @@ mkenum_headers = \
 	expr.h \
 	field.h \
 	field-arithmetic.h \
+	field-distributions.h \
 	field-level.h \
 	field-statistics.h \
 	field-transform.h \
@@ -29,6 +30,7 @@ mkenum_headers = \
 	inventory.h \
 	interpolation.h \
 	line.h \
+	line-arithmetic.h \
 	line-statistics.h \
 	macros.h \
 	main.h \
@@ -69,6 +71,7 @@ libgwy3_la_SOURCES = \
 	expr.c \
 	field.c \
 	field-arithmetic.c \
+	field-distributions.c \
 	field-level.c \
 	field-statistics.c \
 	field-transform.c \
@@ -79,6 +82,7 @@ libgwy3_la_SOURCES = \
 	inventory.c \
 	interpolation.c \
 	line.c \
+	line-arithmetic.c \
 	line-statistics.c \
 	macros.c \
 	main.c \
