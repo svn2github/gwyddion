@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
                "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!-- vim: set ts=2 sw=2 et: -->
 <book id="index" xmlns:xi="http://www.w3.org/2001/XInclude">
   <bookinfo>
     <title>Gwyddion Library Reference Manual</title>
   </bookinfo>
-
   <para>
-    This library contains basic classes and interfaces not directly related
-    to GUI or data processing, and various utility functions.
+    This library contains fundamental classes and interfaces, data processing
+    functions for one- and two-dimensional data and various utilities.
   </para>
   <chapter id='libgwy-fundamentals'>
     <title>Fundamentals</title>
@@ -28,12 +28,14 @@
   <chapter id='libgwy-one-dimensional-data'>
     <title>One-Dimensional Data</title>
     <xi:include href="xml/line.xml"/>
+    <xi:include href="xml/line-arithmetic.xml"/>
     <xi:include href="xml/line-statistics.xml"/>
   </chapter>
   <chapter id='libgwy-two-dimensional-data'>
     <title>Two-Dimensional Data</title>
     <xi:include href="xml/field.xml"/>
     <xi:include href="xml/field-arithmetic.xml"/>
+    <xi:include href="xml/field-distributions.xml"/>
     <xi:include href="xml/field-level.xml"/>
     <xi:include href="xml/field-statistics.xml"/>
     <xi:include href="xml/field-transform.xml"/>
