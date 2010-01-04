@@ -704,7 +704,7 @@ gwy_field_statistics(GwyField *field,
  * you can use the return value:
  * |[
  * guint ntotal, nabove, nbelow, count;
- * ntotal = gwy_data_field_area_count_in_range(field, mask, masking,
+ * ntotal = gwy_data_field_part_count_in_range(field, mask, masking,
  *                                             col, row, width, height,
  *                                             a, b, TRUE, &nabove, &nbelow);
  * count = ntotal - (nabove + nbelow);

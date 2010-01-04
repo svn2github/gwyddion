@@ -224,14 +224,14 @@ gwy_field_subtract_plane(GwyField *field,
  * The coefficients correspond to coordinates normalized to [-1,1], see the
  * introduction for details.
  *
- * Although @bx and @by have the same meaning as in gwy_field_area_fit_plane()
+ * Although @bx and @by have the same meaning as in gwy_field_part_fit_plane()
  * they are calculated differently.  Instead of fitting a plane through the
  * points, local factes are determined from 2×2 areas and averaged, leading to
  * a mean normal to the surface.
  *
  * If @damping was zero (which is not permitted), the normal would correspond
  * to the mean normal to the mean plane and the coefficients found by this
- * method would be equal to those calculated by gwy_field_area_fit_plane().
+ * method would be equal to those calculated by gwy_field_part_fit_plane().
  *
  * Positive values of @damping suppress large slopes by weighting the normals
  * by a Gaussian function of the slope magnitude.  This means edges and noise
