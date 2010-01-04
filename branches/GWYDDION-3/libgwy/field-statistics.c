@@ -1099,12 +1099,12 @@ surface_area_mask1(const GwyField *field,
     d1 = (row == 0) ? base-1 : base-1 - xres;
     d2 = base-1;
     gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
-    w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+    w3 = !gwy_mask_field_iter_get(iter2) == invert;
     sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, q);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w4 = w3;
-        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        w3 = !gwy_mask_field_iter_get(iter2) == invert;
         sum += square_area1w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4, q);
         gwy_mask_field_iter_next(iter2);
     }
@@ -1116,16 +1116,16 @@ surface_area_mask1(const GwyField *field,
         d1 = base-1 + i*xres;
         d2 = d1 + xres;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
-        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        w2 = !gwy_mask_field_iter_get(iter1) == invert;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        w3 = !gwy_mask_field_iter_get(iter2) == invert;
         sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0, q);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
-            w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+            w2 = !gwy_mask_field_iter_get(iter1) == invert;
             w4 = w3;
-            w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            w3 = !gwy_mask_field_iter_get(iter2) == invert;
             sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4, q);
             gwy_mask_field_iter_next(iter1);
             gwy_mask_field_iter_next(iter2);
@@ -1139,12 +1139,12 @@ surface_area_mask1(const GwyField *field,
     d1 = base-1 + (height - 1)*xres;
     d2 = (row + height == yres) ? d1 : d1 + xres;
     gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
-    w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+    w2 = !gwy_mask_field_iter_get(iter1) == invert;
     sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, q);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w1 = w2;
-        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        w2 = !gwy_mask_field_iter_get(iter1) == invert;
         sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0, q);
         gwy_mask_field_iter_next(iter1);
     }
@@ -1182,12 +1182,12 @@ surface_area_mask2(const GwyField *field,
     d1 = (row == 0) ? base-1 : base-1 - xres;
     d2 = base-1;
     gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
-    w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+    w3 = !gwy_mask_field_iter_get(iter2) == invert;
     sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, dx2, dy2);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w4 = w3;
-        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        w3 = !gwy_mask_field_iter_get(iter2) == invert;
         sum += square_area2w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4,
                              dx2, dy2);
         gwy_mask_field_iter_next(iter2);
@@ -1200,17 +1200,17 @@ surface_area_mask2(const GwyField *field,
         d1 = base-1 + i*xres;
         d2 = d1 + xres;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
-        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        w2 = !gwy_mask_field_iter_get(iter1) == invert;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+        w3 = !gwy_mask_field_iter_get(iter2) == invert;
         sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0,
                              dx2, dy2);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
-            w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+            w2 = !gwy_mask_field_iter_get(iter1) == invert;
             w4 = w3;
-            w3 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            w3 = !gwy_mask_field_iter_get(iter2) == invert;
             sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4,
                                  dx2, dy2);
             gwy_mask_field_iter_next(iter1);
@@ -1226,12 +1226,12 @@ surface_area_mask2(const GwyField *field,
     d1 = base-1 + (height - 1)*xres;
     d2 = (row + height == yres) ? d1 : d1 + xres;
     gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
-    w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+    w2 = !gwy_mask_field_iter_get(iter1) == invert;
     sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, dx2, dy2);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w1 = w2;
-        w2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+        w2 = !gwy_mask_field_iter_get(iter1) == invert;
         sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0,
                              dx2, dy2);
         gwy_mask_field_iter_next(iter1);

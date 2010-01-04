@@ -294,14 +294,14 @@ gwy_field_part_inclination(const GwyField *field,
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
-            gboolean m2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
-            gboolean m4 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            gboolean m2 = !gwy_mask_field_iter_get(iter1) == invert;
+            gboolean m4 = !gwy_mask_field_iter_get(iter2) == invert;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gboolean m1 = m2, m3 = m4;
                 gwy_mask_field_iter_next(iter1);
-                m2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+                m2 = !gwy_mask_field_iter_get(iter1) == invert;
                 gwy_mask_field_iter_next(iter2);
-                m4 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+                m4 = !gwy_mask_field_iter_get(iter2) == invert;
                 if (m1 & m2 & m3 & m4) {
                     gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
                     gdouble vy = 0.5*(d2[0] + d2[1] - d1[0] - d1[1])/dy;
@@ -338,14 +338,14 @@ gwy_field_part_inclination(const GwyField *field,
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
-            gboolean m2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
-            gboolean m4 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+            gboolean m2 = !gwy_mask_field_iter_get(iter1) == invert;
+            gboolean m4 = !gwy_mask_field_iter_get(iter2) == invert;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gboolean m1 = m2, m3 = m4;
                 gwy_mask_field_iter_next(iter1);
-                m2 = !!gwy_mask_field_iter_get(iter1) ^ invert;
+                m2 = !gwy_mask_field_iter_get(iter1) == invert;
                 gwy_mask_field_iter_next(iter2);
-                m4 = !!gwy_mask_field_iter_get(iter2) ^ invert;
+                m4 = !gwy_mask_field_iter_get(iter2) == invert;
                 if (m1 & m2 & m3 & m4) {
                     gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
                     gdouble vy = 0.5*(d2[0] + d2[1] - d1[0] - d1[1])/dy;
@@ -647,8 +647,8 @@ fit_row_mean(const GwyField *field,
         gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
         gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
         for (guint j = field->xres; j; j--, d1++, d2++) {
-            if (!!gwy_mask_field_iter_get(iter1) ^ invert
-                && !!gwy_mask_field_iter_get(iter2) ^ invert) {
+            if (!gwy_mask_field_iter_get(iter1) == invert
+                && !gwy_mask_field_iter_get(iter2) == invert) {
                 sum += *d1 - *d2;
                 count++;
             }
@@ -682,8 +682,8 @@ fit_row_median(const GwyField *field,
         gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
         gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
         for (guint j = field->xres; j; j--, d1++, d2++) {
-            if (!!gwy_mask_field_iter_get(iter1) ^ invert
-                && !!gwy_mask_field_iter_get(iter2) ^ invert)
+            if (!gwy_mask_field_iter_get(iter1) == invert
+                && !gwy_mask_field_iter_get(iter2) == invert)
                 *(p++) = *d1 - *d2;
             gwy_mask_field_iter_next(iter1);
             gwy_mask_field_iter_next(iter2);
