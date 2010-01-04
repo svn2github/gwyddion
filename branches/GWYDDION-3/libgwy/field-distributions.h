@@ -26,15 +26,30 @@
 
 G_BEGIN_DECLS
 
-GwyLine* gwy_field_part_zdist(GwyField *field,
-                              const GwyMaskField *mask,
-                              GwyMaskingType masking,
-                              guint col,
-                              guint row,
-                              guint width,
-                              guint height,
-                              gboolean cumulative,
-                              guint npoints)            G_GNUC_MALLOC;
+typedef enum {
+    GWY_ORIENTATION_HORIZONTAL,
+    GWY_ORIENTATION_VERTICAL,
+} GwyOrientation;
+
+GwyLine* gwy_field_part_value_dist(GwyField *field,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   guint col,
+                                   guint row,
+                                   guint width,
+                                   guint height,
+                                   gboolean cumulative,
+                                   guint npoints)              G_GNUC_MALLOC;
+GwyLine* gwy_field_part_slope_dist(GwyField *field,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   guint col,
+                                   guint row,
+                                   guint width,
+                                   guint height,
+                                   GwyOrientation orientation,
+                                   gboolean cumulative,
+                                   guint npoints)              G_GNUC_MALLOC;
 
 G_END_DECLS
 

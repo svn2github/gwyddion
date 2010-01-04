@@ -66,7 +66,7 @@ sanitize_range(gdouble *min,
 }
 
 /**
- * gwy_field_part_surface_area:
+ * gwy_field_part_value_dist:
  * @field: A two-dimensional data field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
@@ -74,31 +74,32 @@ sanitize_range(gdouble *min,
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
+ * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
+ *              density.
+ * @npoints: Distribution resolution, i.e. the number of histogram bins.
+ *           Pass zero to choose a suitable resolution automatically.
  *
- * Calculates the surface area of a rectangular part of a field.
+ * Calculates the distribution of values in a rectangular part of a field.
  *
- * Returns: The surface area.  The surface area value is meaningless if lateral
- *          and value (height) are different physical quantities.
+ * Returns: A new one-dimensional data line with the value distribution.
  **/
 GwyLine*
-gwy_field_part_zdist(GwyField *field,
-                     const GwyMaskField *mask,
-                     GwyMaskingType masking,
-                     guint col, guint row,
-                     guint width, guint height,
-                     gboolean cumulative,
-                     guint npoints)
+gwy_field_part_value_dist(GwyField *field,
+                          const GwyMaskField *mask,
+                          GwyMaskingType masking,
+                          guint col, guint row,
+                          guint width, guint height,
+                          gboolean cumulative,
+                          guint npoints)
 {
     guint maskcol, maskrow;
+    GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow))
-        return NULL;
-
-    GwyLine *line = create_line_for_dist(mask, masking,
+                               col, row, width, height, &maskcol, &maskrow)
+        || !(line = create_line_for_dist(mask, masking,
                                          maskcol, maskrow, width, height,
-                                         &npoints);
-    if (!line)
-        return NULL;
+                                         &npoints)))
+        goto fail;
 
     gdouble min, max;
     gwy_field_part_min_max(field, mask, masking, col, row, width, height,
@@ -147,17 +148,391 @@ gwy_field_part_zdist(GwyField *field,
 
     line->off = min;
     line->real = max - min;
-    gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
     if (cumulative) {
         gwy_line_accumulate(line);
         gwy_line_multiply(line, 1.0/line->data[npoints-1]);
-        // Y is unitless
     }
-    else {
+    else
         gwy_line_multiply(line, npoints/(max - min)/ndata);
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_assign(gwy_line_get_unit_x(line), gwy_field_get_unit_z(field));
+    if (!cumulative)
         gwy_unit_power(gwy_line_get_unit_y(line),
                        gwy_field_get_unit_z(field), -1);
+
+    return line;
+}
+
+static guint
+slope_dist_horiz_analyse(const GwyField *field,
+                         guint col, guint row,
+                         guint width, guint height,
+                         gdouble *min, gdouble *max)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        for (guint j = width-1; j; j--, d++) {
+            gdouble v = d[1] - d[0];
+            if (v < min1)
+                min1 = v;
+            if (v > max1)
+                max1 = v;
+        }
     }
+    *min = min1;
+    *max = max1;
+    return width*(height - 1);
+}
+
+static guint
+slope_dist_horiz_analyse_mask(const GwyField *field,
+                              const GwyMaskField *mask,
+                              GwyMaskingType masking,
+                              guint col, guint row,
+                              guint width, guint height,
+                              guint maskcol, guint maskrow,
+                              gdouble *min, gdouble *max)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
+    guint ndata = 0;
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+        gboolean prev = !!gwy_mask_field_iter_get(iter) ^ invert;
+        for (guint j = width-1; j; j--, d++) {
+            gboolean curr = !!gwy_mask_field_iter_get(iter) ^ invert;
+            if (prev && curr) {
+                gdouble v = d[1] - d[0];
+                if (v < min1)
+                    min1 = v;
+                if (v > max1)
+                    max1 = v;
+                ndata++;
+            }
+            gwy_mask_field_iter_next(iter);
+            prev = curr;
+        }
+    }
+    *min = min1;
+    *max = max1;
+    return ndata;
+}
+
+static guint
+slope_dist_vert_analyse(const GwyField *field,
+                        guint col, guint row,
+                        guint width, guint height,
+                        gdouble *min, gdouble *max)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
+
+    for (guint i = 0; i < height-1; i++) {
+        const gdouble *d1 = base + i*field->xres;
+        const gdouble *d2 = d1 + field->xres;
+        for (guint j = width; j; j--, d1++, d2++) {
+            gdouble v = *d2 - *d1;
+            if (v < min1)
+                min1 = v;
+            if (v > max1)
+                max1 = v;
+        }
+    }
+    *min = min1;
+    *max = max1;
+    return width*(height - 1);
+}
+
+static guint
+slope_dist_vert_analyse_mask(const GwyField *field,
+                             const GwyMaskField *mask,
+                             GwyMaskingType masking,
+                             guint col, guint row,
+                             guint width, guint height,
+                             guint maskcol, guint maskrow,
+                             gdouble *min, gdouble *max)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble min1 = HUGE_VAL, max1 = -HUGE_VAL;
+    guint ndata = 0;
+
+    for (guint i = 0; i < height-1; i++) {
+        const gdouble *d1 = base + i*field->xres;
+        const gdouble *d2 = d1 + field->xres;
+        GwyMaskFieldIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+        for (guint j = width; j; j--, d1++, d2++) {
+            if ((!!gwy_mask_field_iter_get(iter1) ^ invert)
+                && (!!gwy_mask_field_iter_get(iter2) ^ invert)) {
+                gdouble v = *d2 - *d1;
+                if (v < min1)
+                    min1 = v;
+                if (v > max1)
+                    max1 = v;
+                ndata++;
+            }
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+    }
+    *min = min1;
+    *max = max1;
+    return ndata;
+}
+
+static void
+slope_dist_horiz_gather(const GwyField *field,
+                        guint col, guint row,
+                        guint width, guint height,
+                        GwyLine *line)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    guint npoints = line->res;
+    gdouble q = line->real*npoints*gwy_field_dx(field);
+    gdouble min = line->off;
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        for (guint j = width-1; j; j--, d++) {
+            gdouble v = d[1] - d[0];
+            guint k = (guint)((v - min)/q);
+            // Fix rounding errors.
+            if (G_UNLIKELY(k >= npoints))
+                line->data[npoints-1] += 1;
+            else
+                line->data[k] += 1;
+        }
+    }
+}
+
+static void
+slope_dist_horiz_gather_mask(const GwyField *field,
+                             const GwyMaskField *mask,
+                             GwyMaskingType masking,
+                             guint col, guint row,
+                             guint width, guint height,
+                             guint maskcol, guint maskrow,
+                             GwyLine *line)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint npoints = line->res;
+    gdouble q = line->real*npoints*gwy_field_dx(field);
+    gdouble min = line->off;
+
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+        gboolean prev = !!gwy_mask_field_iter_get(iter) ^ invert;
+        for (guint j = width-1; j; j--, d++) {
+            gboolean curr = !!gwy_mask_field_iter_get(iter) ^ invert;
+            if (prev && curr) {
+                gdouble v = d[1] - d[0];
+                guint k = (guint)((v - min)/q);
+                // Fix rounding errors.
+                if (G_UNLIKELY(k >= npoints))
+                    line->data[npoints-1] += 1;
+                else
+                    line->data[k] += 1;
+            }
+            gwy_mask_field_iter_next(iter);
+            prev = curr;
+        }
+    }
+}
+
+static void
+slope_dist_vert_gather(const GwyField *field,
+                       guint col, guint row,
+                       guint width, guint height,
+                       GwyLine *line)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    guint npoints = line->res;
+    gdouble q = line->real*npoints*gwy_field_dy(field);
+    gdouble min = line->off;
+
+    for (guint i = 0; i < height-1; i++) {
+        const gdouble *d1 = base + i*field->xres;
+        const gdouble *d2 = d1 + field->xres;
+        for (guint j = width; j; j--, d1++, d2++) {
+            gdouble v = *d2 - *d1;
+            guint k = (guint)((v - min)/q);
+            // Fix rounding errors.
+            if (G_UNLIKELY(k >= npoints))
+                line->data[npoints-1] += 1;
+            else
+                line->data[k] += 1;
+        }
+    }
+}
+
+static void
+slope_dist_vert_gather_mask(const GwyField *field,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            guint col, guint row,
+                            guint width, guint height,
+                            guint maskcol, guint maskrow,
+                            GwyLine *line)
+{
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint npoints = line->res;
+    gdouble q = line->real*npoints*gwy_field_dy(field);
+    gdouble min = line->off;
+
+    for (guint i = 0; i < height-1; i++) {
+        const gdouble *d1 = base + i*field->xres;
+        const gdouble *d2 = d1 + field->xres;
+        GwyMaskFieldIter iter1, iter2;
+        gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
+        gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
+        for (guint j = width; j; j--, d1++, d2++) {
+            if ((!!gwy_mask_field_iter_get(iter1) ^ invert)
+                && (!!gwy_mask_field_iter_get(iter2) ^ invert)) {
+                gdouble v = *d2 - *d1;
+                guint k = (guint)((v - min)/q);
+                // Fix rounding errors.
+                if (G_UNLIKELY(k >= npoints))
+                    line->data[npoints-1] += 1;
+                else
+                    line->data[k] += 1;
+            }
+            gwy_mask_field_iter_next(iter1);
+            gwy_mask_field_iter_next(iter2);
+        }
+    }
+}
+
+/**
+ * gwy_field_part_slope_dist:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @orientation: Orientation in which to compute the derivatives.
+ * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
+ *              density.
+ * @npoints: Distribution resolution, i.e. the number of histogram bins.
+ *           Pass zero to choose a suitable resolution automatically.
+ *
+ * Calculates the distribution of slopes in a rectangular part of a field.
+ *
+ * Slopes are calculated as horizontal or vertical derivatives of the value,
+ * i.e. dz/dx or dz/dy.
+ *
+ * Returns: A new one-dimensional data line with the slope distribution.
+ **/
+GwyLine*
+gwy_field_part_slope_dist(GwyField *field,
+                          const GwyMaskField *mask,
+                          GwyMaskingType masking,
+                          guint col, guint row,
+                          guint width, guint height,
+                          GwyOrientation orientation,
+                          gboolean cumulative,
+                          guint npoints)
+{
+    guint maskcol, maskrow;
+    GwyLine *line = NULL;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
+        goto fail;
+
+    guint ndata;
+    gdouble min, max;
+    if (orientation == GWY_ORIENTATION_HORIZONTAL) {
+        if (masking == GWY_MASK_IGNORE)
+            ndata = slope_dist_horiz_analyse(field, col, row, width, height,
+                                             &min, &max);
+        else
+            ndata = slope_dist_horiz_analyse_mask(field, mask, masking,
+                                                  col, row, width, height,
+                                                  maskcol, maskrow,
+                                                  &min, &max);
+        min /= gwy_field_dx(field);
+        max /= gwy_field_dx(field);
+    }
+    else if (orientation == GWY_ORIENTATION_VERTICAL) {
+        if (masking == GWY_MASK_IGNORE)
+            ndata = slope_dist_vert_analyse(field, col, row, width, height,
+                                            &min, &max);
+        else
+            ndata = slope_dist_vert_analyse_mask(field, mask, masking,
+                                                 col, row, width, height,
+                                                 maskcol, maskrow,
+                                                 &min, &max);
+        min /= gwy_field_dy(field);
+        max /= gwy_field_dy(field);
+    }
+    else {
+        g_critical("Invalid orientation %d", orientation);
+        goto fail;
+    }
+
+    if (!ndata)
+        goto fail;
+    if (!npoints)
+        npoints = gwy_round(3.49*cbrt(ndata));
+
+    line = gwy_line_new_sized(npoints, TRUE);
+    sanitize_range(&min, &max);
+    line->off = min;
+    line->real = max - min;
+
+    if (orientation == GWY_ORIENTATION_HORIZONTAL) {
+        if (masking == GWY_MASK_IGNORE)
+            slope_dist_horiz_gather(field, col, row, width, height, line);
+        else
+            slope_dist_horiz_gather_mask(field, mask, masking,
+                                         col, row, width, height,
+                                         maskcol, maskrow,
+                                         line);
+    }
+    else {
+        if (masking == GWY_MASK_IGNORE)
+            slope_dist_vert_gather(field, col, row, width, height, line);
+        else
+            slope_dist_vert_gather_mask(field, mask, masking,
+                                        col, row, width, height,
+                                        maskcol, maskrow,
+                                        line);
+    }
+
+    if (cumulative) {
+        gwy_line_accumulate(line);
+        gwy_line_multiply(line, 1.0/line->data[npoints-1]);
+    }
+    else
+        gwy_line_multiply(line, npoints/(max - min)/ndata);
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_divide(gwy_line_get_unit_x(line),
+                    gwy_field_get_unit_z(field), gwy_field_get_unit_xy(field));
+    if (!cumulative)
+        gwy_unit_power(gwy_line_get_unit_y(line),
+                       gwy_field_get_unit_z(field), -1);
 
     return line;
 }
@@ -169,6 +544,10 @@ gwy_field_part_zdist(GwyField *field,
  * SECTION: field-distributions
  * @title: GwyField distributions
  * @short_description: One-dimensional distributions and functionals of fields
+ *
+ * Statistical distribution densities are normalized so that their integral,
+ * that can also be calculated as gwy_line_mean(line)*line->real, is unity.
+ * Cumulative distribution values then always line in the interval [0,1].
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
