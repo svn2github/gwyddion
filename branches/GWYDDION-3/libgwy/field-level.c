@@ -623,14 +623,85 @@ gwy_field_shift_rows(GwyField *field,
 }
 
 // These functions already calculate *corrective* shifts, not direct ones.
-static void
+static gboolean
 fit_row_mean(const GwyField *field,
              guint row,
              const GwyMaskField *mask,
              GwyMaskingType masking,
              guint maskrow,
              guint min_freedom,
-             gdouble *shift)
+             gdouble *value)
+{
+    const gdouble *d = field->data + row*field->xres;
+    gdouble sum = 0.0;
+    guint count = 0;
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = field->xres; j; j--, d++)
+            sum += *d;
+        count = field->xres;
+    }
+    else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(mask, iter, 0, maskrow);
+        for (guint j = field->xres; j; j--, d++) {
+            if (!gwy_mask_field_iter_get(iter) == invert) {
+                sum += *d;
+                count++;
+            }
+            gwy_mask_field_iter_next(iter);
+        }
+    }
+    if (count >= 1 + min_freedom) {
+        *value = sum/count;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static guint
+fit_row_median(const GwyField *field,
+               guint row,
+               const GwyMaskField *mask,
+               GwyMaskingType masking,
+               guint maskrow,
+               guint min_freedom,
+               gdouble *buffer,
+               gdouble *value)
+{
+    const gdouble *d = field->data + row*field->xres;
+    guint count;
+    if (masking == GWY_MASK_IGNORE) {
+        ASSIGN(buffer, d, field->xres);
+        count = field->xres;
+    }
+    else {
+        gdouble *p = buffer;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        GwyMaskFieldIter iter;
+        gwy_mask_field_iter_init(mask, iter, 0, maskrow);
+        for (guint j = field->xres; j; j--, d++) {
+            if (!gwy_mask_field_iter_get(iter) == invert)
+                *(p++) = *d;
+            gwy_mask_field_iter_next(iter);
+        }
+        count = p - buffer;
+    }
+    if (count >= 1 + min_freedom) {
+        *value = gwy_math_median(buffer, count);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static void
+fit_row_mean_diff(const GwyField *field,
+                  guint row,
+                  const GwyMaskField *mask,
+                  GwyMaskingType masking,
+                  guint maskrow,
+                  guint min_freedom,
+                  gdouble *shift)
 {
     const gdouble *d1 = field->data + row*field->xres;
     const gdouble *d2 = d1 + field->xres;
@@ -660,14 +731,14 @@ fit_row_mean(const GwyField *field,
 }
 
 static void
-fit_row_median(const GwyField *field,
-               guint row,
-               const GwyMaskField *mask,
-               GwyMaskingType masking,
-               guint maskrow,
-               guint min_freedom,
-               gdouble *buffer,
-               gdouble *shift)
+fit_row_median_diff(const GwyField *field,
+                    guint row,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
+                    guint maskrow,
+                    guint min_freedom,
+                    gdouble *buffer,
+                    gdouble *shift)
 {
     const gdouble *d1 = field->data + row*field->xres;
     const gdouble *d2 = d1 + field->xres;
@@ -691,6 +762,31 @@ fit_row_median(const GwyField *field,
     }
     guint count = p - buffer;
     *shift = (count >= 1 + min_freedom) ? gwy_math_median(buffer, count) : 0.0;
+}
+
+// Transform a line containing absolute values for row to line containing
+// corrective differences where both rows are good and 0s where we cannot
+// calculate the difference because either row is bad.
+static void
+find_shifts_of_good_rows(GwyLine *shifts,
+                         GwyMaskFieldIter iter)
+{
+    gboolean curr = gwy_mask_field_iter_get(iter);
+    gdouble *d = shifts->data;
+    for (guint i = shifts->res-1; i; i--, d++) {
+        gboolean prev = curr;
+        gwy_mask_field_iter_next(iter);
+        curr = gwy_mask_field_iter_get(iter);
+        if (curr && prev)
+            *d -= *(d+1);
+        else
+            *d = 0.0;
+        gwy_mask_field_iter_next(iter);
+    }
+    d = shifts->data + shifts->res-2;
+    for (guint i = shifts->res-1; i; i--, d--)
+        *(d+1) = *d;
+    shifts->data[0] = 0.0;
 }
 
 /**
@@ -727,18 +823,56 @@ gwy_field_find_row_shifts(const GwyField *field,
     g_return_if_fail(GWY_IS_LINE(shifts));
     g_return_if_fail(shifts->res == field->yres);
 
+    if (field->yres < 2) {
+        gwy_line_clear(shifts);
+        return;
+    }
+
     gsize bufsize = field->xres * sizeof(gdouble);
+    gsize masksize = ((field->yres + 0x1f) >> 5) * sizeof(guint32);
 
     if (method == GWY_ROW_SHIFT_MEAN) {
-        for (guint i = 0; i < field->yres; i++)
-            fit_row_mean(field, i, mask, masking, maskrow, min_freedom,
-                         shifts->data + i);
+        // XXX: This is a fake one-dimensional mask
+        guint32 *goodrows = g_slice_alloc0(masksize);
+        GwyMaskFieldIter iter = { goodrows, FIRST_BIT };
+        for (guint i = 0; i < field->yres; i++) {
+            if (fit_row_mean(field, i, mask, masking, maskrow, min_freedom,
+                             shifts->data + i))
+                gwy_mask_field_iter_set(iter, TRUE);
+            gwy_mask_field_iter_next(iter);
+        }
+        iter = (GwyMaskFieldIter){ goodrows, FIRST_BIT };
+        find_shifts_of_good_rows(shifts, iter);
+        g_slice_free1(masksize, goodrows);
     }
     else if (method == GWY_ROW_SHIFT_MEDIAN) {
+        // XXX: This is a fake one-dimensional mask
+        guint32 *goodrows = g_slice_alloc0(masksize);
         gdouble *buffer = g_slice_alloc(bufsize);
-        for (guint i = 0; i < field->yres; i++)
-            fit_row_median(field, i, mask, masking, maskrow, min_freedom,
-                           buffer, shifts->data + i);
+        GwyMaskFieldIter iter = { goodrows, FIRST_BIT };
+        for (guint i = 0; i < field->yres; i++) {
+            if (fit_row_median(field, i, mask, masking, maskrow, min_freedom,
+                               buffer, shifts->data + i))
+                gwy_mask_field_iter_set(iter, TRUE);
+            gwy_mask_field_iter_next(iter);
+        }
+        iter = (GwyMaskFieldIter){ goodrows, FIRST_BIT };
+        find_shifts_of_good_rows(shifts, iter);
+        g_slice_free1(masksize, goodrows);
+        g_slice_free1(bufsize, buffer);
+    }
+    if (method == GWY_ROW_SHIFT_MEAN_DIFF) {
+        shifts->data[0] = 0.0;
+        for (guint i = 0; i < field->yres-1; i++)
+            fit_row_mean_diff(field, i, mask, masking, maskrow, min_freedom,
+                              shifts->data + i+1);
+    }
+    else if (method == GWY_ROW_SHIFT_MEDIAN_DIFF) {
+        shifts->data[0] = 0.0;
+        gdouble *buffer = g_slice_alloc(bufsize);
+        for (guint i = 0; i < field->yres-1; i++)
+            fit_row_median_diff(field, i, mask, masking, maskrow, min_freedom,
+                                buffer, shifts->data + i+1);
         g_slice_free1(bufsize, buffer);
     }
     else {
@@ -779,8 +913,10 @@ gwy_field_find_row_shifts(const GwyField *field,
 
 /**
  * GwyRowShiftMethod:
- * @GWY_ROW_SHIFT_MEAN: The mean value of row differences.
- * @GWY_ROW_SHIFT_MEDIAN: The median value of row differences.
+ * @GWY_ROW_SHIFT_MEAN: The difference of row mean values.
+ * @GWY_ROW_SHIFT_MEDIAN: The difference of row median values.
+ * @GWY_ROW_SHIFT_MEAN_DIFF: The mean value of row differences.
+ * @GWY_ROW_SHIFT_MEDIAN_DIFF: The median value of row differences.
  *
  * Row shift finding methods.
  *

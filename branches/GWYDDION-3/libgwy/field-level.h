@@ -29,6 +29,8 @@ G_BEGIN_DECLS
 typedef enum {
     GWY_ROW_SHIFT_MEAN,
     GWY_ROW_SHIFT_MEDIAN,
+    GWY_ROW_SHIFT_MEAN_DIFF,
+    GWY_ROW_SHIFT_MEDIAN_DIFF,
 } GwyRowShiftMethod;
 
 gboolean gwy_field_part_fit_plane  (const GwyField *field,
