@@ -658,13 +658,13 @@ gwy_field_new_part(const GwyField *field,
 
     part = gwy_field_new_sized(width, height, FALSE);
     gwy_field_part_copy(field, col, row, width, height, part, 0, 0);
-    part->xreal = field->xreal*width/field->xres;
-    part->yreal = field->yreal*height/field->yres;
+    part->xreal = width*gwy_field_dx(field);
+    part->yreal = height*gwy_field_dy(field);
     ASSIGN_UNITS(part->priv->unit_xy, field->priv->unit_xy);
     ASSIGN_UNITS(part->priv->unit_z, field->priv->unit_z);
     if (keep_offsets) {
-        part->xoff = field->xoff + field->xreal*col/field->xres;
-        part->yoff = field->yoff + field->yreal*row/field->yres;
+        part->xoff = field->xoff + col*gwy_field_dx(field);
+        part->yoff = field->yoff + row*gwy_field_dy(field);
     }
     return part;
 }
