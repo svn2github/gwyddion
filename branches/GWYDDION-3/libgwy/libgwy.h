@@ -26,6 +26,7 @@
 #include <libgwy/container.h>
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
+#include <libgwy/fft.h>
 #include <libgwy/field.h>
 #include <libgwy/field-arithmetic.h>
 #include <libgwy/field-distributions.h>

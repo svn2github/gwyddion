@@ -17,6 +17,7 @@ mkenum_headers = \
 	container.h \
 	error-list.h \
 	expr.h \
+	fft.h \
 	field.h \
 	field-arithmetic.h \
 	field-distributions.h \
@@ -69,6 +70,7 @@ libgwy3_la_SOURCES = \
 	container.c \
 	error-list.c \
 	expr.c \
+	fft.c \
 	field.c \
 	field-arithmetic.c \
 	field-distributions.c \
