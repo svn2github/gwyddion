@@ -30,6 +30,8 @@ G_BEGIN_DECLS
 #define STATICP \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
+#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
+
 #define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 #define SLi gwy_lower_triangular_matrix_index
 #define MATRIX_LEN gwy_triangular_matrix_length
