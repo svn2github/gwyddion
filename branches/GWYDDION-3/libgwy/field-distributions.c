@@ -537,6 +537,246 @@ fail:
     return line;
 }
 
+/* Level a row of data, keeping polynomial terms of degree equal to or higher
+ * than @degree, which can be at most 0, 1, or 2.  This means @degree=2 is
+ * linear levelling. */
+static void
+row_level(gdouble *data,
+          guint n,
+          guint degree)
+{
+    gdouble sumxi, sumxixi, sumsi, sumsixi, a, b;
+
+    degree = MIN(degree, n);
+    if (!degree)
+        return;
+
+    if (degree == 1) {
+        gdouble sumsi = 0.0;
+        gdouble *pdata = data;
+        for (guint i = n; i; i--, pdata++)
+            sumsi += *pdata;
+
+        gdouble a = sumsi/n;
+        pdata = data;
+        for (guint i = n; i; i--, pdata++)
+            *pdata -= a;
+
+        return;
+    }
+
+    g_return_if_fail(degree == 2);
+
+    /* These are already averages, not sums */
+    gdouble sumxi = (n + 1.0)/2.0;
+    gdouble sumxixi = (2.0*n + 1.0)*(n + 1.0)/6.0;
+    gdouble sumsi = 0.0, sumsixi = 0.0;
+    gdouble *pdata = data;
+    for (guint i = n; i; i--, pdata++) {
+        sumsi += *pdata;
+        sumsixi += *pdata * i;
+    }
+    sumsi /= n;
+    sumsixi /= n;
+
+    gdouble b = (sumsixi - sumsi*sumxi)/(sumxixi - sumxi*sumxi);
+    gdouble a = (sumsi*sumxixi - sumxi*sumsixi)/(sumxixi - sumxi*sumxi);
+
+    pdata = data;
+    sumsi = 0;
+    for (guint i = n; i; i--, pdata++) {
+        *pdata -= a + b*i;
+        sumsi += *pdata;
+    }
+}
+
+static void
+row_window(gdouble *data, const gdouble *window, guint n)
+{
+    for (guint i = n; i; i--, data++, window++)
+        *data *= *window;
+}
+
+/*
+ * Calculate the RMS value of possibly complex source data rows @re, @im.
+ *
+ * @im can be %NULL if it was a R2C transform (the RMS is then calculated
+ * from @re only).
+ */
+static gdouble
+row_rms(const gdouble *re, const gdouble *im, guint n)
+{
+    /* Calculate original RMS */
+    gdouble sum0 = 0.0, sum02 = 0.0;
+    for (guint i = n; i; i--, re++) {
+        sum0 += *re;
+        sum02 += *re * *re;
+    }
+    gdouble a = sum02 - sum0*sum0/n;
+    if (im) {
+        sum0 = sum02 = 0.0;
+        for (guint i = n; i; i--, re++) {
+            sum0 += *im;
+            sum02 += *im * *im;
+        }
+        a += sum02 - sum0*sum0/n;
+    }
+    return (a > 0.0) ? sqrt(a/n) : 0.0;
+}
+
+/* Make the RMS of Fourier coefficients @re, @im the same as the RMS
+ * of source  @rms.
+ *
+ * The zeroth element of @{re,im} is ignored, assumed to be the constant
+ * coefficient.
+ */
+static void
+row_preserve_rms(gdouble *re, gdouble *im, guint n,
+                 gdouble rms)
+{
+    // FIXME: Do something more smart such as clearing the data?
+    if (rms == 0.0)
+        return;
+
+    /* Calculare new RMS ignoring 0th elements that correspond to constants */
+    gdouble *p;
+    gdouble sum2 = 0.0;
+    for (guint i = n-1, p = re + 1; i; i--, p++)
+        sum2 += *p * *p;
+    for (guint i = n-1, p = im + 1; i; i--, p++)
+        sum2 += *p * *p;
+    if (sum2 == 0.0)
+        return;
+
+    /* Multiply output to get the same RMS */
+    gdouble q = rms/sqrt(sum2/n);
+    for (guint i = n, p = re; i; i--, p++)
+        *p *= q;
+    for (guint i = n, p = im; i; i--, p++)
+        *p *= q;
+}
+
+static void
+row_psdf(gdouble *buffer,
+         gdouble *psdf,
+         guint n)
+{
+    fftw_execute(plan);
+
+    for (guint i = 0; i < n; i++) {
+    }
+    /* Complete the missing half of transform.  */
+    for (k = 0; k < rin->yres; k++) {
+        gdouble *re, *im;
+
+        re = rout->data + k*rin->xres;
+        im = iout->data + k*rin->xres;
+        for (j = rin->xres/2 + 1; j < rin->xres; j++) {
+            re[j] = re[rin->xres - j];
+            im[j] = -im[rin->xres - j];
+        }
+    }
+
+    gwy_data_field_multiply(rout, 1.0/sqrt(rin->xres));
+    if (direction == GWY_TRANSFORM_DIRECTION_BACKWARD)
+        gwy_data_field_multiply(iout, 1.0/sqrt(rin->xres));
+    else
+        gwy_data_field_multiply(iout, -1.0/sqrt(rin->xres));
+}
+
+/**
+ * gwy_field_part_psdf:
+ * @field: A data field.
+ * @line: A data line to store the distribution to.  It will be
+ *               resampled to requested width.
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ * @interpolation: Interpolation to use when @nstats is given and requires
+ *                 resampling (and possibly in FFT too).
+ * @windowing: Windowing type to use.
+ * @nstats: The number of samples to take on the distribution function.  If
+ *          nonpositive, data field width (height) is used.
+ *
+ * Calculates one-dimensional power spectrum density function of a rectangular
+ * part of a data field.
+ **/
+void
+gwy_field_part_row_psdf(GwyDataField *field,
+                        GwyDataLine *line,
+                        gint col, gint row,
+                        gint width, gint height,
+                        GwyWindowingType windowing)
+{
+    GwyDataField *re_field, *im_field;
+    GwySIUnit *xyunit, *zunit, *lineunit;
+    gdouble *re, *im, *target;
+    guint i, j, xres, yres;
+
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_LINE(line));
+    xres = field->xres;
+    yres = field->yres;
+    g_return_if_fail(col >= 0 && row >= 0
+                     && height >= 1 && width >= 4
+                     && col + width <= xres
+                     && row + height <= yres);
+
+    //gwy_line_resample(line, width/2, GWY_INTERPOLATION_NONE);
+    gwy_line_clear(line);
+    gwy_line_set_offset(line, 0.0);
+
+    target = line->data;
+
+    // Use one size good for everything, fftw requires floor(n/2)+1 complex
+    // elements in the output.  In addition we require an even size due to
+    // alignment constraints.
+    gsize size = (width + 3)/2*2;
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble *buffer = ffftw_malloc(3*size*sizeof(gdouble));
+    gdouble *window = buffer + size;
+    gdouble *psdf = window + size;
+    // XXX: We perform the transform from @psdf to @buffer because then we
+    // actually calculate the PSDF from @buffer and store it to @psdf
+    fftw_plan plan = fftw_plan_dft_r2c_1d(width, psdf, (fftw_complex*)buffer,
+                                          _GWY_FFTW_PATIENCE);
+
+    gwy_fft_window_sample(window, width);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        ASSING(buffer, d, width);
+        row_level(buffer, width, 1);
+        gdouble rms = row_rms(buffer, width);
+        row_window(buffer, window, width);
+        row_psdf(buffer, psdf, plan, rms);
+    }
+    fftw_destroy_plan(plan);
+
+    re = re_field->data;
+    im = im_field->data;
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width/2; j++)
+            target[j] += re[i*width + j]*re[i*width + j]
+                + im[i*width + j]*im[i*width + j];
+    }
+    gwy_line_multiply(line,
+                      field->xreal/xres/(2*G_PI*height));
+    gwy_line_set_real(line, G_PI*xres/field->xreal);
+
+    g_object_unref(re_field);
+    g_object_unref(im_field);
+
+    /* Set proper units */
+    xyunit = gwy_field_get_si_unit_xy(field);
+    zunit = gwy_field_get_si_unit_z(field);
+    lineunit = gwy_line_get_si_unit_x(line);
+    gwy_si_unit_power(xyunit, -1, lineunit);
+    lineunit = gwy_line_get_si_unit_y(line);
+    gwy_si_unit_power(zunit, 2, lineunit);
+    gwy_si_unit_multiply(lineunit, xyunit, lineunit);
+}
+
 #define __LIBGWY_FIELD_DISTRIBUTIONS_C__
 #include "libgwy/libgwy-aliases.c"
 
