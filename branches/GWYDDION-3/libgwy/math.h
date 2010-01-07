@@ -69,7 +69,7 @@ _GWY_STATIC_INLINE double gwy_powi (double x, int i);
 static inline double
 gwy_powi(double x, int i)
 {
-    double r = 1.0;;
+    double r = 1.0;
     if (!i)
         return 1.0;
     if (i < 0) {
