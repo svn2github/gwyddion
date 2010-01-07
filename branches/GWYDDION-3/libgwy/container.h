@@ -185,8 +185,8 @@ GwyContainer* gwy_container_new_from_text(const gchar *text)          G_GNUC_MAL
     gwy_container_contains(container,g_quark_try_string(name))
 #define gwy_container_set_value_n(container,name,value) \
     gwy_container_set_value(container,g_quark_from_string(name),value)
-#define gwy_container_get_value_n(container,name) \
-    gwy_container_get_value(container,g_quark_try_string(name))
+#define gwy_container_get_value_n(container,name,value) \
+    gwy_container_get_value(container,g_quark_try_string(name),value)
 #define gwy_container_remove_n(container,name) \
     gwy_container_remove(container,g_quark_try_string(name))
 #define gwy_container_rename_n(container,name,newname,force) \

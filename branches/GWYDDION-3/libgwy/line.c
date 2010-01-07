@@ -669,7 +669,7 @@ gwy_line_set_real(GwyLine *line,
 /**
  * gwy_line_set_offset:
  * @line: A one-dimensional data line.
- * @off: Offset of the line start from 0 in physical units.
+ * @offset: Offset of the line start from 0 in physical units.
  *
  * Sets the offset of a one-dimensional data line.
  **/

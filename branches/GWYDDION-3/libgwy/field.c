@@ -900,8 +900,8 @@ gwy_field_set_yreal(GwyField *field,
 /**
  * gwy_field_set_xoffset:
  * @field: A two-dimensional data field.
- * @xoff: Horizontal offset of the top-left corner from [0,0] in physical
- *        units.
+ * @xoffset: Horizontal offset of the top-left corner from [0,0] in physical
+ *           units.
  *
  * Sets the horizontal offset of a two-dimensional data field.
  **/
@@ -919,8 +919,8 @@ gwy_field_set_xoffset(GwyField *field,
 /**
  * gwy_field_set_yoffset:
  * @field: A two-dimensional data field.
- * @yoff: Vertical offset of the top-left corner from [0,0] in physical
- *        units.
+ * @yoffset: Vertical offset of the top-left corner from [0,0] in physical
+ *           units.
  *
  * Sets the vertical offset of a two-dimensional data field.
  **/

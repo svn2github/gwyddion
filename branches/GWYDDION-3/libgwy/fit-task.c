@@ -269,7 +269,7 @@ set_n_params(FitTask *fittask,
 /**
  * gwy_fit_task_set_point_function:
  * @fittask: A fitting task.
- * @nparam: Number of function parameters.
+ * @nparams: Number of function parameters.
  * @function: Function to fit.
  *
  * Sets the point model function for a fit task.
@@ -338,7 +338,7 @@ gwy_fit_task_set_point_data(GwyFitTask *fittask,
 /**
  * gwy_fit_task_set_vector_function:
  * @fittask: A fitting task.
- * @nparam: Number of function parameters.
+ * @nparams: Number of function parameters.
  * @function: Function to calculate theoretical minus fitted data differences.
  *
  * Sets the indexed-data model function for a fit task.
@@ -364,7 +364,7 @@ gwy_fit_task_set_vector_function(GwyFitTask *fittask,
 /**
  * gwy_fit_task_set_vector_vfunction:
  * @fittask: A fitting task.
- * @nparam: Number of function parameters.
+ * @nparams: Number of function parameters.
  * @function: Function to calculate theoretical minus fitted data differences.
  * @derivative: Function to calculate derivatives of @function by parameters.
  *              It can be %NULL to use the built-in function.

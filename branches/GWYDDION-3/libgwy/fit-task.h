@@ -103,9 +103,9 @@ void        gwy_fit_task_set_fixed_param      (GwyFitTask *fittask,
                                                gboolean fixed);
 gboolean    gwy_fit_task_get_fixed_param      (GwyFitTask *fittask,
                                                guint i)                           G_GNUC_PURE;
-gboolean    gwy_fit_task_fit                  (GwyFitTask *object);
-gdouble     gwy_fit_task_eval_residuum        (GwyFitTask *object);
-GwyFitter*  gwy_fit_task_get_fitter           (GwyFitTask *object)                G_GNUC_PURE;
+gboolean    gwy_fit_task_fit                  (GwyFitTask *fittask);
+gdouble     gwy_fit_task_eval_residuum        (GwyFitTask *fittask);
+GwyFitter*  gwy_fit_task_get_fitter           (GwyFitTask *fittask)               G_GNUC_PURE;
 gboolean    gwy_fit_task_get_param_errors     (GwyFitTask *fittask,
                                                gboolean variance_covariance,
                                                gdouble *errors);

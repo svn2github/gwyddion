@@ -218,7 +218,9 @@ gwy_array_new_with_data(gsize size,
 /**
  * gwy_array_set_item_type:
  * @array: An array.
- * @itype: Type of items the array will contain.
+ * @size: Item size in bytes.
+ * @destroy: Destroy notification function called immediately before an item
+ *           is removed from the array.
  *
  * Sets the item type information of an array.
  *
