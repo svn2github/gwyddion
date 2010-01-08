@@ -204,14 +204,17 @@ gwy_field_init(GwyField *field)
     field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field, GWY_TYPE_FIELD, Field);
     field->xres = field->yres = 1;
     field->xreal = field->yreal = 1.0;
-    field->data = g_new0(gdouble, 1);
+    field->data = g_slice_new(gdouble);
 }
 
 static void
 gwy_field_finalize(GObject *object)
 {
     GwyField *field = GWY_FIELD(object);
-    GWY_FREE(field->data);
+    if (field->priv->allocated)
+        GWY_FREE(field->data);
+    else
+        GWY_SLICE_FREE(gdouble, field->data);
     G_OBJECT_CLASS(gwy_field_parent_class)->finalize(object);
 }
 
@@ -373,7 +376,8 @@ gwy_field_construct(GwySerializable *serializable,
     its[6].value.v_object = NULL;
     priv->unit_z = (GwyUnit*)its[7].value.v_object;
     its[7].value.v_object = NULL;
-    g_free(field->data);
+    g_assert(!priv->allocated);
+    g_slice_free(gdouble, field->data);
     field->data = its[8].value.v_double_array;
     its[8].value.v_double_array = NULL;
     its[8].array_size = 0;
@@ -436,8 +440,12 @@ gwy_field_assign_impl(GwySerializable *destination,
         notify[nn++] = "y-offset";
 
     if (dest->xres * dest->yres != src->xres * src->yres) {
-        g_free(dest->data);
+        if (dpriv->allocated)
+            g_free(dest->data);
+        else
+            g_slice_free(gdouble, dest->data);
         dest->data = g_new(gdouble, src->xres * src->yres);
+        dpriv->allocated = TRUE;
     }
     ASSIGN(dest->data, src->data, src->xres * src->yres);
     copy_info(dest, src);
@@ -574,7 +582,8 @@ gwy_field_new_sized(guint xres,
     g_return_val_if_fail(xres && yres, NULL);
 
     GwyField *field = g_object_newv(GWY_TYPE_FIELD, 0, NULL);
-    g_free(field->data);
+    g_assert(!field->priv->allocated);
+    g_slice_free(gdouble, field->data);
     field->xres = xres;
     field->yres = yres;
     if (clear) {
@@ -584,6 +593,7 @@ gwy_field_new_sized(guint xres,
     }
     else
         field->data = g_new(gdouble, field->xres * field->yres);
+    field->priv->allocated = TRUE;
     return field;
 }
 

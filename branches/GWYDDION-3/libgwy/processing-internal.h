@@ -49,6 +49,7 @@ G_BEGIN_DECLS
 struct _GwyLinePrivate {
     GwyUnit *unit_x;
     GwyUnit *unit_y;
+    gboolean allocated;
 };
 
 typedef struct _GwyLinePrivate Line;
@@ -82,6 +83,7 @@ struct _GwyFieldPrivate {
     GwyUnit *unit_xy;
     GwyUnit *unit_z;
     guint32 cached;
+    gboolean allocated;
     gdouble cache[GWY_FIELD_CACHE_SIZE];
 };
 

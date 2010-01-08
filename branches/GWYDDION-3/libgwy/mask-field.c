@@ -47,6 +47,7 @@ struct _GwyMaskFieldPrivate {
     guint *grains;
     guint *graindata;
     guint ngrains;
+    gboolean allocated;
     guint32 *serialized_swapped;    // serialization-only
 };
 
@@ -175,18 +176,22 @@ static void
 gwy_mask_field_init(GwyMaskField *field)
 {
     field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field,
-                                                  GWY_TYPE_MASK_FIELD,
-                                                  MaskField);
+                                              GWY_TYPE_MASK_FIELD,
+                                              MaskField);
     field->xres = field->yres = 1;
     field->stride = stride_for_width(field->xres);
-    field->data = g_new0(guint32, field->stride * field->yres);
+    field->data = g_slice_alloc(field->stride * field->yres * sizeof(guint32));
 }
 
 static void
 gwy_mask_field_finalize(GObject *object)
 {
     GwyMaskField *field = GWY_MASK_FIELD(object);
-    GWY_FREE(field->data);
+    if (field->priv->allocated)
+        GWY_FREE(field->data);
+    else
+        g_slice_free1(field->stride * field->yres * sizeof(guint32),
+                      field->data);
     GWY_FREE(field->priv->grains);
     GWY_FREE(field->priv->graindata);
     G_OBJECT_CLASS(gwy_mask_field_parent_class)->finalize(object);
@@ -270,18 +275,18 @@ gwy_mask_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
+    g_assert(!field->priv->allocated);
+    g_slice_free1(field->stride * field->yres * sizeof(guint32), field->data);
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
     field->stride = stride_for_width(field->xres);
-    g_free(field->data);
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN) {
         field->data = its[2].value.v_uint32_array;
         its[2].value.v_uint32_array = NULL;
         its[2].array_size = 0;
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
-        field->data = g_memdup(its[2].value.v_uint32_array,
-                                   n*sizeof(guint32));
+        field->data = g_memdup(its[2].value.v_uint32_array, n*sizeof(guint32));
         swap_bits_uint32(field->data, n);
     }
 
@@ -325,8 +330,13 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
 
     gsize n = src->stride * src->yres;
     if (dest->stride * dest->yres != n) {
-        g_free(dest->data);
+        if (dest->priv->allocated)
+            g_free(dest->data);
+        else
+            g_slice_free1(dest->stride * dest->yres * sizeof(guint32),
+                          dest->data);
         dest->data = g_new(guint32, n);
+        dest->priv->allocated = TRUE;
     }
     memcpy(dest->data, src->data, n*sizeof(guint32));
     dest->xres = src->xres;
@@ -417,7 +427,8 @@ gwy_mask_field_new_sized(guint xres,
     g_return_val_if_fail(xres && yres, NULL);
 
     GwyMaskField *field = g_object_newv(GWY_TYPE_MASK_FIELD, 0, NULL);
-    g_free(field->data);
+    g_assert(!field->priv->allocated);
+    g_slice_free1(field->stride * field->yres * sizeof(guint32), field->data);
     field->xres = xres;
     field->yres = yres;
     field->stride = stride_for_width(field->xres);
@@ -425,6 +436,7 @@ gwy_mask_field_new_sized(guint xres,
         field->data = g_new0(guint32, field->stride * field->yres);
     else
         field->data = g_new(guint32, field->stride * field->yres);
+    field->priv->allocated = TRUE;
     return field;
 }
 

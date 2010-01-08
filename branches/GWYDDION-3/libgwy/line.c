@@ -168,14 +168,17 @@ gwy_line_init(GwyLine *line)
     line->priv = G_TYPE_INSTANCE_GET_PRIVATE(line, GWY_TYPE_LINE, Line);
     line->res = 1;
     line->real = 1.0;
-    line->data = g_new0(gdouble, 1);
+    line->data = g_slice_new(gdouble);
 }
 
 static void
 gwy_line_finalize(GObject *object)
 {
     GwyLine *line = GWY_LINE(object);
-    GWY_FREE(line->data);
+    if (line->priv->allocated)
+        GWY_FREE(line->data);
+    else
+        GWY_SLICE_FREE(gdouble, line->data);
     G_OBJECT_CLASS(gwy_line_parent_class)->finalize(object);
 }
 
@@ -300,7 +303,8 @@ gwy_line_construct(GwySerializable *serializable,
     its[2].value.v_object = NULL;
     priv->unit_y = (GwyUnit*)its[3].value.v_object;
     its[3].value.v_object = NULL;
-    g_free(line->data);
+    g_assert(!priv->allocated);
+    g_slice_free(gdouble, line->data);
     line->data = its[4].value.v_double_array;
     its[4].value.v_double_array = NULL;
     its[4].array_size = 0;
@@ -346,8 +350,12 @@ gwy_line_assign_impl(GwySerializable *destination,
         notify[nn++] = "offset";
 
     if (dest->res != src->res) {
-        g_free(dest->data);
+        if (dest->priv->allocated)
+            g_free(dest->data);
+        else
+            g_slice_free(gdouble, dest->data);
         dest->data = g_new(gdouble, src->res);
+        dest->priv->allocated = TRUE;
     }
     ASSIGN(dest->data, src->data, src->res);
     copy_info(dest, src);
@@ -460,12 +468,14 @@ gwy_line_new_sized(guint res,
     g_return_val_if_fail(res, NULL);
 
     GwyLine *line = g_object_newv(GWY_TYPE_LINE, 0, NULL);
-    g_free(line->data);
+    g_assert(!line->priv->allocated);
+    g_slice_free(gdouble, line->data);
     line->res = res;
     if (clear)
         line->data = g_new0(gdouble, line->res);
     else
         line->data = g_new(gdouble, line->res);
+    line->priv->allocated = TRUE;
     return line;
 }
 
