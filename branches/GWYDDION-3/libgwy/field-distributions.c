@@ -540,7 +540,38 @@ fail:
     return line;
 }
 
-/* Level a row of data by subtracting the mean value. */
+/*
+ * PSDF of incomplete data.
+ *
+ * Apart from normalization, the discrete Fourier coefficients are
+ *
+ *       1 N-1      -2πijk/N
+ * Z_k = –  ∑  z_j e                    (1)
+ *       N j=0
+ *
+ * and the PSDF is then
+ *
+ * P_k = |Z_k|²                         (2)
+ *
+ * To extend these definitions to incomplete data, we sum only over the
+ * available data in (1) and instead of dividing by N we divide by the number
+ * of available data p.
+ *
+ *       1        -2πijk/N
+ * Z_k = – ∑ z_j e                      (3)
+ *       p j
+ *
+ * Notice that by putting z_j ≡ 0 for unavailable data we obtain
+ *
+ *       1 N-1      -2πijk/N
+ * Z_k = – ∑  z_j e                     (4)
+ *       p j=0
+ *
+ * that can be calculated by standard DFT means because only the normalization
+ * factor differs.  Formula (2) remains unchanged.  For p = 0 we put Z_k ≡ 0.
+ */
+
+// Level a row of data by subtracting the mean value.
 static void
 row_level(gdouble *data,
           guint n)
@@ -554,6 +585,41 @@ row_level(gdouble *data,
     pdata = data;
     for (guint i = n; i; i--, pdata++)
         *pdata -= a;
+}
+
+// Level a row of data by subtracting the mean value of data under mask and
+// clear (set to zero) all data not under mask.  Note how the zeroes nicely
+// ensure that the subsequent functions Just Work(TM) and don't need to know we
+// use masking at all.
+static guint
+row_level_mask(gdouble *data,
+               guint n,
+               GwyMaskIter iter0,
+               gboolean invert)
+{
+    GwyMaskIter iter = iter0;
+    gdouble sumsi = 0.0;
+    gdouble *pdata = data;
+    guint nd = 0;
+    for (guint i = n; i; i--, pdata++) {
+        if (!gwy_mask_iter_get(iter) == invert) {
+            sumsi += *pdata;
+            nd++;
+        }
+        gwy_mask_iter_next(iter);
+    }
+
+    // This can be division by zero but in that case we never use the value.
+    gdouble a = sumsi/nd;
+    pdata = data;
+    iter = iter0;
+    for (guint i = n; i; i--, pdata++) {
+        if (!gwy_mask_iter_get(iter) == invert)
+            *pdata -= a;
+        else
+            *pdata = 0.0;
+    }
+    return nd;
 }
 
 /* Window a row using a sampled windowing function. */
@@ -601,7 +667,7 @@ row_psdf(const gdouble *ffthc,
     if (n % 2 == 0)
         s += psdf[n/2] = (ffthc[n/2]*ffthc[n/2])/n;
 
-    if (s == 0.0 || sum_norm == 0.0)
+    if (s == 0.0)
         return;
 
     // Normalize the sum of squares (total energy)
@@ -637,8 +703,7 @@ gwy_field_part_row_psdf(GwyField *field,
     guint maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow)
-        || width < 2)
+                               col, row, width, height, &maskcol, &maskrow))
         goto fail;
 
     // An even size is necessary due to alignment constraints in FFTW.
@@ -656,8 +721,20 @@ gwy_field_part_row_psdf(GwyField *field,
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
-        row_level(buffer, width);
+        guint ndata = width;
+        if (masking == GWY_MASK_IGNORE)
+            row_level(buffer, width);
+        else {
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+            ndata = row_level_mask(buffer, width, iter,
+                                   masking == GWY_MASK_EXCLUDE);
+            if (!ndata)
+                continue;
+        }
         gdouble sum2 = row_sum_squares(buffer, width);
+        if (!sum2)
+            continue;
         row_window(buffer, window, width);
         fftw_execute(plan);
         row_psdf(ffthc, buffer, width, sum2);
