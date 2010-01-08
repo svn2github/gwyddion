@@ -691,6 +691,9 @@ row_psdf(const gdouble *ffthc,
  * Calculates the row-wise power spectrum density function of a rectangular
  * part of a field.
  *
+ * The calculated PSDF has the natural number of points that follows from DFT,
+ * i.e. @width/2+1.
+ *
  * Returns: A new one-dimensional data line with the PSDF.
  **/
 GwyLine*
@@ -709,8 +712,8 @@ gwy_field_part_row_psdf(GwyField *field,
 
     // An even size is necessary due to alignment constraints in FFTW.
     // Using this size for all buffers is a bit excessive but safe.
-    line = gwy_line_new_sized((width + 1)/2, TRUE);
-    gsize size = 2*line->res;
+    line = gwy_line_new_sized(width/2 + 1, TRUE);
+    gsize size = (width + 1)/2*2;
     const gdouble *base = field->data + row*field->xres + col;
     gdouble *buffer = fftw_malloc(3*size*sizeof(gdouble));
     gdouble *window = buffer + size;
@@ -798,6 +801,107 @@ fail:
  * G_k can be calculated using DFT, and so can be p_k (with the additional
  * knowledge that it is integer-valued).
  */
+
+static inline void
+row_acf(fftw_plan plan,
+        gdouble *in,
+        gdouble *out,
+        guint width,
+        guint size)
+{
+    gwy_memclear(in + width, size - width);
+    fftw_execute(plan);   // R2C transform in -> out
+    in[0] = out[0]*out[0];
+    for (guint j = 1; j < (size + 1)/2; j++)
+        in[j] = in[size-j] = out[j]*out[j] + out[size-j]*out[size-j];
+    if (size % 2 == 0)
+        in[size/2] = out[size/2]*out[size/2];
+    fftw_execute(plan);   // R2C transform in -> out
+}
+
+/**
+ * gwy_field_part_row_acf:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ *
+ * Calculates the row-wise autocorrelation function of a rectangular part of a
+ * field.
+ *
+ * The calculated ACF has the natural number of points, i.e. @width-1.
+ *
+ * Returns: A new one-dimensional data line with the ACF.
+ **/
+GwyLine*
+gwy_field_part_row_acf(GwyField *field,
+                       const GwyMaskField *mask,
+                       GwyMaskingType masking,
+                       guint col, guint row,
+                       guint width, guint height)
+{
+    guint maskcol, maskrow;
+    GwyLine *line = NULL;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
+        goto fail;
+
+    // An even size is necessary due to alignment constraints in FFTW.
+    // Using this size for all buffers is a bit excessive but safe.
+    line = gwy_line_new_sized((width + 1)/2, TRUE);
+    gsize size = 2*line->res;
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble *buffer = fftw_malloc(3*size*sizeof(gdouble));
+    gdouble *window = buffer + size;
+    gdouble *ffthc = window + size;
+
+    gwy_fft_window_sample(window, width, windowing);
+    fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
+                                          _GWY_FFTW_PATIENCE);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        ASSIGN(buffer, d, width);
+        guint ndata = width;
+        if (masking == GWY_MASK_IGNORE)
+            row_level(buffer, width);
+        else {
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+            ndata = row_level_mask(buffer, width, iter,
+                                   masking == GWY_MASK_EXCLUDE);
+            if (!ndata)
+                continue;
+        }
+        gdouble sum2 = row_sum_squares(buffer, width);
+        if (!sum2)
+            continue;
+        row_window(buffer, window, width);
+        fftw_execute(plan);
+        row_psdf(ffthc, buffer, width, sum2);
+        gdouble *p = line->data;
+        const gdouble *q = buffer;
+        for (guint j = line->res; j; j--, p++, q++)
+            *p += *q;
+    }
+    fftw_destroy_plan(plan);
+    fftw_free(buffer);
+
+    gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*height));
+    gwy_line_set_real(line, G_PI/gwy_field_dx(field));
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
+                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_z(field), 2);
+    return line;
+}
 
 #define __LIBGWY_FIELD_DISTRIBUTIONS_C__
 #include "libgwy/libgwy-aliases.c"
