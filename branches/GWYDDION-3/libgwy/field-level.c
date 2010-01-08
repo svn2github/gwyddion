@@ -36,7 +36,7 @@ typedef struct {
     GwyMaskIter iter;
     guint maskcol;
     guint maskrow;
-    gboolean mode;
+    gboolean invert;
     // Only with general polynomial
     guint nterms;
     const guint *xpowers;
@@ -49,7 +49,7 @@ typedef struct {
     const gdouble *p;
     // Only with masking
     GwyMaskIter iter;
-    gboolean mode;
+    gboolean invert;
     guint count;
     guint degree;
 } RowFitData;
@@ -89,7 +89,7 @@ plane_fit_mask(guint id,
         gwy_mask_field_iter_init(data->mask, data->iter,
                                  data->maskcol, data->maskrow+i);
     }
-    gboolean ok = (!!gwy_mask_iter_get(data->iter) == data->mode);
+    gboolean ok = (!gwy_mask_iter_get(data->iter) == data->invert);
     if (ok) {
         gdouble x = 2*j/(data->xres - 1.0) - 1.0;
         gdouble y = 2*i/(data->yres - 1.0) - 1.0;
@@ -156,7 +156,7 @@ gwy_field_part_fit_plane(const GwyField *field,
                             &data);
     }
     else {
-        data.mode = (masking == GWY_MASK_INCLUDE);
+        data.invert = (masking == GWY_MASK_EXCLUDE);
         ok = gwy_linear_fit(plane_fit_mask, width*height, params, 3, NULL,
                             &data);
     }
@@ -401,7 +401,7 @@ poly_fit_mask(guint id,
         gwy_mask_field_iter_init(data->mask, data->iter,
                                  data->maskcol, data->maskrow+i);
     }
-    gboolean ok = (!!gwy_mask_iter_get(data->iter) == data->mode);
+    gboolean ok = (!gwy_mask_iter_get(data->iter) == data->invert);
     if (ok) {
         const gdouble *xp = data->xp + j;
         const gdouble *yp = data->yp + i;
@@ -526,7 +526,7 @@ gwy_field_part_fit_poly(const GwyField *field,
                             &data);
     }
     else {
-        data.mode = (masking == GWY_MASK_INCLUDE);
+        data.invert = (masking == GWY_MASK_EXCLUDE);
         ok = gwy_linear_fit(poly_fit_mask, width*height, coeffs, nterms, NULL,
                             &data);
     }
