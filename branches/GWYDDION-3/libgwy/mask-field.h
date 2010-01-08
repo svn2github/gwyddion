@@ -85,19 +85,19 @@ struct _GwyMaskFieldClass {
 #define gwy_mask_field_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType         gwy_mask_field_get_type      (void)                          G_GNUC_CONST;
-GwyMaskField* gwy_mask_field_new           (void)                          G_GNUC_MALLOC;
+GType         gwy_mask_field_get_type      (void)                      G_GNUC_CONST;
+GwyMaskField* gwy_mask_field_new           (void)                      G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_sized     (guint xres,
                                             guint yres,
-                                            gboolean clear)                G_GNUC_MALLOC;
+                                            gboolean clear)            G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_part      (const GwyMaskField *field,
                                             guint col,
                                             guint row,
                                             guint width,
-                                            guint height)                  G_GNUC_MALLOC;
+                                            guint height)              G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_resampled (const GwyMaskField *field,
                                             guint xres,
-                                            guint yres)                    G_GNUC_MALLOC;
+                                            guint yres)                G_GNUC_MALLOC;
 GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
                                             guint col,
                                             guint row,
@@ -105,7 +105,11 @@ GwyMaskField* gwy_mask_field_new_from_field(const GwyField *field,
                                             guint height,
                                             gdouble lower,
                                             gdouble upper,
-                                            gboolean complement)           G_GNUC_MALLOC;
+                                            gboolean complement)       G_GNUC_MALLOC;
+void          gwy_mask_field_set_size      (GwyMaskField *field,
+                                            guint xres,
+                                            guint yres,
+                                            gboolean clear);
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_get(field, col, row) \

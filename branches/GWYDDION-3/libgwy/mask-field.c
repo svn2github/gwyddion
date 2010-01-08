@@ -173,6 +173,30 @@ swap_bits_uint32(guint32 *data,
 }
 
 static void
+alloc_data(GwyMaskField *field,
+           gboolean clear)
+{
+    field->stride = stride_for_width(field->xres);
+    if (clear)
+        field->data = g_new0(guint32, field->stride * field->yres);
+    else
+        field->data = g_new(guint32, field->stride * field->yres);
+    field->priv->allocated = TRUE;
+}
+
+static void
+free_data(GwyMaskField *field)
+{
+    if (field->priv->allocated)
+        GWY_FREE(field->data);
+    else if (field->data) {
+        g_slice_free1(field->stride * field->yres * sizeof(guint32),
+                      field->data);
+        field->data = NULL;
+    }
+}
+
+static void
 gwy_mask_field_init(GwyMaskField *field)
 {
     field->priv = G_TYPE_INSTANCE_GET_PRIVATE(field,
@@ -187,11 +211,7 @@ static void
 gwy_mask_field_finalize(GObject *object)
 {
     GwyMaskField *field = GWY_MASK_FIELD(object);
-    if (field->priv->allocated)
-        GWY_FREE(field->data);
-    else
-        g_slice_free1(field->stride * field->yres * sizeof(guint32),
-                      field->data);
+    free_data(field);
     GWY_FREE(field->priv->grains);
     GWY_FREE(field->priv->graindata);
     G_OBJECT_CLASS(gwy_mask_field_parent_class)->finalize(object);
@@ -275,8 +295,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
         return FALSE;
     }
 
-    g_assert(!field->priv->allocated);
-    g_slice_free1(field->stride * field->yres * sizeof(guint32), field->data);
+    free_data(field);
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
     field->stride = stride_for_width(field->xres);
@@ -289,6 +308,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
         field->data = g_memdup(its[2].value.v_uint32_array, n*sizeof(guint32));
         swap_bits_uint32(field->data, n);
     }
+    field->priv->allocated = TRUE;
 
     return TRUE;
 }
@@ -330,11 +350,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
 
     gsize n = src->stride * src->yres;
     if (dest->stride * dest->yres != n) {
-        if (dest->priv->allocated)
-            g_free(dest->data);
-        else
-            g_slice_free1(dest->stride * dest->yres * sizeof(guint32),
-                          dest->data);
+        free_data(dest);
         dest->data = g_new(guint32, n);
         dest->priv->allocated = TRUE;
     }
@@ -343,12 +359,7 @@ gwy_mask_field_assign_impl(GwySerializable *destination,
     dest->yres = src->yres;
     dest->stride = src->stride;
     // TODO: Duplicate precalculated grain data too.
-
-    GObject *object = G_OBJECT(dest);
-    g_object_freeze_notify(object);
-    for (guint i = 0; i < nn; i++)
-        g_object_notify(object, notify[i]);
-    g_object_thaw_notify(object);
+    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -427,16 +438,10 @@ gwy_mask_field_new_sized(guint xres,
     g_return_val_if_fail(xres && yres, NULL);
 
     GwyMaskField *field = g_object_newv(GWY_TYPE_MASK_FIELD, 0, NULL);
-    g_assert(!field->priv->allocated);
-    g_slice_free1(field->stride * field->yres * sizeof(guint32), field->data);
+    free_data(field);
     field->xres = xres;
     field->yres = yres;
-    field->stride = stride_for_width(field->xres);
-    if (clear)
-        field->data = g_new0(guint32, field->stride * field->yres);
-    else
-        field->data = g_new(guint32, field->stride * field->yres);
-    field->priv->allocated = TRUE;
+    alloc_data(field, clear);
     return field;
 }
 
@@ -501,6 +506,7 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
 
     GwyMaskField *dest;
     dest = gwy_mask_field_new_sized(xres, yres, FALSE);
+    g_warning("Implement me!");
     // TODO
 
     return dest;
@@ -586,6 +592,55 @@ gwy_mask_field_new_from_field(const GwyField *field,
         }
     }
     return mfield;
+}
+
+/**
+ * gwy_mask_field_set_size:
+ * @field: A two-dimensional mask field.
+ * @xres: Desired X resolution.
+ * @yres: Desired Y resolution.
+ * @clear: %TRUE to clear the new field, %FALSE to leave it unitialized.
+ *
+ * Resizes a two-dimensional mask field.
+ *
+ * If the new data size differs from the old data size this method is only
+ * marginally more efficient than destroying the old field and creating a new
+ * one.
+ *
+ * In no case the original data are preserved, not even if @xres and @yres are
+ * equal to the current field dimensions.  Use gwy_mask_field_new_part() to
+ * extract a part of a field into a new field.
+ **/
+void
+gwy_mask_field_set_size(GwyMaskField *field,
+                        guint xres,
+                        guint yres,
+                        gboolean clear)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(xres && yres);
+
+    const gchar *notify[2];
+    guint nn = 0;
+    if (field->xres != xres)
+        notify[nn++] = "x-res";
+    if (field->yres != yres)
+        notify[nn++] = "y-res";
+
+    if (field->xres*field->yres != xres*yres) {
+        free_data(field);
+        field->xres = xres;
+        field->yres = yres;
+        alloc_data(field, clear);
+    }
+    else {
+        field->xres = xres;
+        field->yres = yres;
+        if (clear)
+            gwy_mask_field_fill(field, FALSE);
+    }
+    gwy_mask_field_invalidate(field);
+    _gwy_notify_properties(G_OBJECT(field), notify, nn);
 }
 
 /**
