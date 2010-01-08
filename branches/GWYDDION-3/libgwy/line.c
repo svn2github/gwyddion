@@ -172,13 +172,30 @@ gwy_line_init(GwyLine *line)
 }
 
 static void
-gwy_line_finalize(GObject *object)
+alloc_data(GwyLine *line,
+           gboolean clear)
 {
-    GwyLine *line = GWY_LINE(object);
+    if (clear)
+        line->data = g_new0(gdouble, line->res);
+    else
+        line->data = g_new(gdouble, line->res);
+    line->priv->allocated = TRUE;
+}
+
+static void
+free_data(GwyLine *line)
+{
     if (line->priv->allocated)
         GWY_FREE(line->data);
     else
         GWY_SLICE_FREE(gdouble, line->data);
+}
+
+static void
+gwy_line_finalize(GObject *object)
+{
+    GwyLine *line = GWY_LINE(object);
+    free_data(line);
     G_OBJECT_CLASS(gwy_line_parent_class)->finalize(object);
 }
 
@@ -303,9 +320,9 @@ gwy_line_construct(GwySerializable *serializable,
     its[2].value.v_object = NULL;
     priv->unit_y = (GwyUnit*)its[3].value.v_object;
     its[3].value.v_object = NULL;
-    g_assert(!priv->allocated);
-    g_slice_free(gdouble, line->data);
+    free_data(line);
     line->data = its[4].value.v_double_array;
+    priv->allocated = TRUE;
     its[4].value.v_double_array = NULL;
     its[4].array_size = 0;
 
@@ -350,21 +367,13 @@ gwy_line_assign_impl(GwySerializable *destination,
         notify[nn++] = "offset";
 
     if (dest->res != src->res) {
-        if (dest->priv->allocated)
-            g_free(dest->data);
-        else
-            g_slice_free(gdouble, dest->data);
+        free_data(dest);
         dest->data = g_new(gdouble, src->res);
         dest->priv->allocated = TRUE;
     }
     ASSIGN(dest->data, src->data, src->res);
     copy_info(dest, src);
-
-    GObject *object = G_OBJECT(dest);
-    g_object_freeze_notify(object);
-    for (guint i = 0; i < nn; i++)
-        g_object_notify(object, notify[i]);
-    g_object_thaw_notify(object);
+    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -468,14 +477,9 @@ gwy_line_new_sized(guint res,
     g_return_val_if_fail(res, NULL);
 
     GwyLine *line = g_object_newv(GWY_TYPE_LINE, 0, NULL);
-    g_assert(!line->priv->allocated);
-    g_slice_free(gdouble, line->data);
+    free_data(line);
     line->res = res;
-    if (clear)
-        line->data = g_new0(gdouble, line->res);
-    else
-        line->data = g_new(gdouble, line->res);
-    line->priv->allocated = TRUE;
+    alloc_data(line, clear);
     return line;
 }
 
@@ -581,6 +585,42 @@ gwy_line_new_resampled(const GwyLine *line,
                                         interpolation, TRUE);
 
     return dest;
+}
+
+/**
+ * gwy_line_set_size:
+ * @line: A one-dimensional data line.
+ * @res: Desired resolution.
+ * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
+ *         unitialized.
+ *
+ * Resizes a one-dimensional data line.
+ *
+ * If the new data size differs from the old data size this method is only
+ * marginally more efficient than destroying the old line and creating a new
+ * one.
+ *
+ * In no case the original data are preserved, not even if @res is equal to the
+ * current line resolution.  Use gwy_line_new_part() to extract a part of a
+ * line into a new line.  Only the dimensions are changed; all other properies,
+ * such as physical dimensions, offsets and units, are kept.
+ **/
+void
+gwy_line_set_size(GwyLine *line,
+                  guint res,
+                  gboolean clear)
+{
+    g_return_if_fail(GWY_IS_FIELD(line));
+    g_return_if_fail(res);
+
+    if (line->res != res) {
+        free_data(line);
+        line->res = res;
+        alloc_data(line, clear);
+        g_object_notify(G_OBJECT(line), "res");
+    }
+    else if (clear)
+        gwy_line_clear(line);
 }
 
 /**
