@@ -74,6 +74,9 @@ GwyLine*        gwy_line_new_part     (const GwyLine *line,
 GwyLine*        gwy_line_new_resampled(const GwyLine *line,
                                        guint res,
                                        GwyInterpolationType interpolation) G_GNUC_MALLOC;
+void            gwy_line_set_size     (GwyLine *line,
+                                       guint res,
+                                       gboolean clear);
 void            gwy_line_data_changed (GwyLine *line);
 void            gwy_line_copy         (const GwyLine *src,
                                        GwyLine *dest);
