@@ -141,6 +141,10 @@ gboolean _gwy_field_check_mask(const GwyField *field,
                                guint width, guint height,
                                guint *maskcol, guint *maskrow);
 
+void _gwy_notify_properties(GObject *object,
+                            const gchar **properties,
+                            guint nproperties);
+
 G_END_DECLS
 
 #endif

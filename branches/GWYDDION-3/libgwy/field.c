@@ -208,13 +208,35 @@ gwy_field_init(GwyField *field)
 }
 
 static void
-gwy_field_finalize(GObject *object)
+free_data(GwyField *field)
 {
-    GwyField *field = GWY_FIELD(object);
     if (field->priv->allocated)
         GWY_FREE(field->data);
     else
         GWY_SLICE_FREE(gdouble, field->data);
+}
+
+static void
+alloc_data(GwyField *field,
+           gboolean clear)
+{
+    if (clear) {
+        field->data = g_new0(gdouble, field->xres * field->yres);
+        field->priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
+                               | CBIT(MED) | CBIT(ARF) | CBIT(ART));
+    }
+    else {
+        field->data = g_new(gdouble, field->xres * field->yres);
+        gwy_field_invalidate(field);
+    }
+    field->priv->allocated = TRUE;
+}
+
+static void
+gwy_field_finalize(GObject *object)
+{
+    GwyField *field = GWY_FIELD(object);
+    free_data(field);
     G_OBJECT_CLASS(gwy_field_parent_class)->finalize(object);
 }
 
@@ -376,8 +398,7 @@ gwy_field_construct(GwySerializable *serializable,
     its[6].value.v_object = NULL;
     priv->unit_z = (GwyUnit*)its[7].value.v_object;
     its[7].value.v_object = NULL;
-    g_assert(!priv->allocated);
-    g_slice_free(gdouble, field->data);
+    free_data(field);
     field->data = its[8].value.v_double_array;
     its[8].value.v_double_array = NULL;
     its[8].array_size = 0;
@@ -399,6 +420,23 @@ gwy_field_duplicate_impl(GwySerializable *serializable)
     dpriv->cached = priv->cached;
 
     return G_OBJECT(duplicate);
+}
+
+void
+_gwy_notify_properties(GObject *object,
+                       const gchar **properties,
+                       guint nproperties)
+{
+    if (!nproperties || !properties[0])
+        return;
+    if (nproperties == 1) {
+        g_object_notify(object, properties[0]);
+        return;
+    }
+    g_object_freeze_notify(object);
+    for (guint i = 0; i < nproperties && properties[i]; i++)
+        g_object_notify(object, properties[i]);
+    g_object_thaw_notify(object);
 }
 
 static void
@@ -440,10 +478,7 @@ gwy_field_assign_impl(GwySerializable *destination,
         notify[nn++] = "y-offset";
 
     if (dest->xres * dest->yres != src->xres * src->yres) {
-        if (dpriv->allocated)
-            g_free(dest->data);
-        else
-            g_slice_free(gdouble, dest->data);
+        free_data(dest);
         dest->data = g_new(gdouble, src->xres * src->yres);
         dpriv->allocated = TRUE;
     }
@@ -451,12 +486,7 @@ gwy_field_assign_impl(GwySerializable *destination,
     copy_info(dest, src);
     ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
     dpriv->cached = spriv->cached;
-
-    GObject *object = G_OBJECT(dest);
-    g_object_freeze_notify(object);
-    for (guint i = 0; i < nn; i++)
-        g_object_notify(object, notify[i]);
-    g_object_thaw_notify(object);
+    _gwy_notify_properties(G_OBJECT(dest), notify, nn);
 }
 
 static void
@@ -582,18 +612,10 @@ gwy_field_new_sized(guint xres,
     g_return_val_if_fail(xres && yres, NULL);
 
     GwyField *field = g_object_newv(GWY_TYPE_FIELD, 0, NULL);
-    g_assert(!field->priv->allocated);
-    g_slice_free(gdouble, field->data);
+    free_data(field);
     field->xres = xres;
     field->yres = yres;
-    if (clear) {
-        field->data = g_new0(gdouble, field->xres * field->yres);
-        field->priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                               | CBIT(MED) | CBIT(ARF) | CBIT(ART));
-    }
-    else
-        field->data = g_new(gdouble, field->xres * field->yres);
-    field->priv->allocated = TRUE;
+    alloc_data(field, clear);
     return field;
 }
 
@@ -713,6 +735,58 @@ gwy_field_new_resampled(const GwyField *field,
                                         interpolation, TRUE);
 
     return dest;
+}
+
+/**
+ * gwy_field_set_size:
+ * @field: A two-dimensional data field.
+ * @xres: Desired X resolution.
+ * @yres: Desired Y resolution.
+ * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
+ *         unitialized.
+ *
+ * Resizes a two-dimensional data field.
+ *
+ * If the new data size differs from the old data size this method is only
+ * marginally more efficient than destroying the old field and creating a new
+ * one.
+ *
+ * In no case the original data are preserved, not even if @xres and @yres are
+ * equal to the current field dimensions.  Use gwy_field_new_part() to extract
+ * a part of a field into a new field.  Only the dimensions are changed; all
+ * other properies, such as physical dimensions, offsets and units, are kept.
+ **/
+void
+gwy_field_set_size(GwyField *field,
+                   guint xres,
+                   guint yres,
+                   gboolean clear)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(xres && yres);
+
+    const gchar *notify[2];
+    guint nn = 0;
+    if (field->xres != xres)
+        notify[nn++] = "x-res";
+    if (field->yres != yres)
+        notify[nn++] = "y-res";
+
+    if (field->xres*field->yres != xres*yres) {
+        free_data(field);
+        field->xres = xres;
+        field->yres = yres;
+        alloc_data(field, clear);
+    }
+    else {
+        field->xres = xres;
+        field->yres = yres;
+        if (clear)
+            gwy_field_clear(field);
+        else
+            gwy_field_invalidate(field);
+    }
+    _gwy_notify_properties(G_OBJECT(field), notify, nn);
 }
 
 /**

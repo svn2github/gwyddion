@@ -81,6 +81,10 @@ GwyField*       gwy_field_new_resampled(const GwyField *field,
                                         guint xres,
                                         guint yres,
                                         GwyInterpolationType interpolation) G_GNUC_MALLOC;
+void            gwy_field_set_size     (GwyField *field,
+                                        guint xres,
+                                        guint yres,
+                                        gboolean clear);
 void            gwy_field_data_changed (GwyField *field);
 void            gwy_field_copy         (const GwyField *src,
                                         GwyField *dest);
