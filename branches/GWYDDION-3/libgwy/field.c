@@ -208,15 +208,6 @@ gwy_field_init(GwyField *field)
 }
 
 static void
-free_data(GwyField *field)
-{
-    if (field->priv->allocated)
-        GWY_FREE(field->data);
-    else
-        GWY_SLICE_FREE(gdouble, field->data);
-}
-
-static void
 alloc_data(GwyField *field,
            gboolean clear)
 {
@@ -230,6 +221,15 @@ alloc_data(GwyField *field,
         gwy_field_invalidate(field);
     }
     field->priv->allocated = TRUE;
+}
+
+static void
+free_data(GwyField *field)
+{
+    if (field->priv->allocated)
+        GWY_FREE(field->data);
+    else
+        GWY_SLICE_FREE(gdouble, field->data);
 }
 
 static void
@@ -400,6 +400,7 @@ gwy_field_construct(GwySerializable *serializable,
     its[7].value.v_object = NULL;
     free_data(field);
     field->data = its[8].value.v_double_array;
+    priv->allocated = TRUE;
     its[8].value.v_double_array = NULL;
     its[8].array_size = 0;
 
