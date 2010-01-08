@@ -132,10 +132,10 @@ gwy_field_part_value_dist(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
-            GwyMaskFieldIter iter;
+            GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_field_iter_get(iter) == invert) {
+                if (!gwy_mask_iter_get(iter) == invert) {
                     guint k = (guint)((*d - min)/q);
                     // Fix rounding errors.
                     if (G_UNLIKELY(k >= npoints))
@@ -144,7 +144,7 @@ gwy_field_part_value_dist(GwyField *field,
                         line->data[k] += 1;
                     ndata++;
                 }
-                gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_next(iter);
             }
         }
     }
@@ -210,11 +210,11 @@ slope_dist_horiz_analyse_mask(const GwyField *field,
 
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-        gboolean prev = !gwy_mask_field_iter_get(iter) == invert;
+        gboolean prev = !gwy_mask_iter_get(iter) == invert;
         for (guint j = width-1; j; j--, d++) {
-            gboolean curr = !gwy_mask_field_iter_get(iter) == invert;
+            gboolean curr = !gwy_mask_iter_get(iter) == invert;
             if (prev && curr) {
                 gdouble v = d[1] - d[0];
                 if (v < min1)
@@ -223,7 +223,7 @@ slope_dist_horiz_analyse_mask(const GwyField *field,
                     max1 = v;
                 ndata++;
             }
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
             prev = curr;
         }
     }
@@ -274,12 +274,12 @@ slope_dist_vert_analyse_mask(const GwyField *field,
     for (guint i = 0; i < height-1; i++) {
         const gdouble *d1 = base + i*field->xres;
         const gdouble *d2 = d1 + field->xres;
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
         for (guint j = width; j; j--, d1++, d2++) {
-            if ((!gwy_mask_field_iter_get(iter1) == invert)
-                && (!gwy_mask_field_iter_get(iter2) == invert)) {
+            if ((!gwy_mask_iter_get(iter1) == invert)
+                && (!gwy_mask_iter_get(iter2) == invert)) {
                 gdouble v = *d2 - *d1;
                 if (v < min1)
                     min1 = v;
@@ -287,8 +287,8 @@ slope_dist_vert_analyse_mask(const GwyField *field,
                     max1 = v;
                 ndata++;
             }
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
     }
     *min = min1;
@@ -338,11 +338,11 @@ slope_dist_horiz_gather_mask(const GwyField *field,
 
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-        gboolean prev = !gwy_mask_field_iter_get(iter) == invert;
+        gboolean prev = !gwy_mask_iter_get(iter) == invert;
         for (guint j = width-1; j; j--, d++) {
-            gboolean curr = !gwy_mask_field_iter_get(iter) == invert;
+            gboolean curr = !gwy_mask_iter_get(iter) == invert;
             if (prev && curr) {
                 gdouble v = d[1] - d[0];
                 guint k = (guint)((v - min)/q);
@@ -352,7 +352,7 @@ slope_dist_horiz_gather_mask(const GwyField *field,
                 else
                     line->data[k] += 1;
             }
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
             prev = curr;
         }
     }
@@ -402,12 +402,12 @@ slope_dist_vert_gather_mask(const GwyField *field,
     for (guint i = 0; i < height-1; i++) {
         const gdouble *d1 = base + i*field->xres;
         const gdouble *d2 = d1 + field->xres;
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i);
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
         for (guint j = width; j; j--, d1++, d2++) {
-            if ((!gwy_mask_field_iter_get(iter1) == invert)
-                && (!gwy_mask_field_iter_get(iter2) == invert)) {
+            if ((!gwy_mask_iter_get(iter1) == invert)
+                && (!gwy_mask_iter_get(iter2) == invert)) {
                 gdouble v = *d2 - *d1;
                 guint k = (guint)((v - min)/q);
                 // Fix rounding errors.
@@ -416,8 +416,8 @@ slope_dist_vert_gather_mask(const GwyField *field,
                 else
                     line->data[k] += 1;
             }
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
     }
 }

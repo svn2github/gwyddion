@@ -1544,11 +1544,11 @@ prevent_grain_merging(GwyMaskField *field)
     guint xres = field->xres, yres = field->yres;
     guint *grains = field->priv->grains;
     for (guint i = 0; i < yres; i++) {
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, 0, i);
         for (guint j = 0; j < xres; j++) {
             guint k = i*xres + j;
-            if (!grains[k] && gwy_mask_field_iter_get(iter)) {
+            if (!grains[k] && gwy_mask_iter_get(iter)) {
                 guint g1 = i          ? grains[k-xres] : 0;
                 guint g2 = j          ? grains[k-1]    : 0;
                 guint g3 = j+1 < xres ? grains[k+1]    : 0;
@@ -1564,10 +1564,10 @@ prevent_grain_merging(GwyMaskField *field)
                 else {
                     /* Now we have a conflict and it has to be resolved.
                      * We just get rid of this pixel. */
-                    gwy_mask_field_iter_set(iter, FALSE);
+                    gwy_mask_iter_set(iter, FALSE);
                 }
             }
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
         }
     }
 }
@@ -1888,11 +1888,11 @@ gwy_mask_field_number_grains(GwyMaskField *field,
     for (guint i = 0; i < yres; i++) {
         guint *g = priv->grains + i*xres;
         guint *gprev = g - xres;
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, 0, i);
         guint grain_id = 0;
         for (guint j = xres; j; j--, g++, gprev++) {
-            if (gwy_mask_field_iter_get(iter)) {
+            if (gwy_mask_iter_get(iter)) {
                 /* Grain number is kept from the top or left neighbour
                  * unless it does not exist (a new number is assigned) or a
                  * join with top neighbour occurs (m is updated) */
@@ -1914,7 +1914,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
             else
                 grain_id = 0;
             *g = grain_id;
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
         }
     }
 
@@ -1975,7 +1975,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * gwy_mask_field_get() and gwy_mask_field_set().  These macros are relatively
  * slow and they are suitable for casual use or when the amount of work
  * otherwise done per pixel makes their cost negligible.  For the common
- * sequential access, the mask iterator #GwyMaskFieldIter macros offers a good
+ * sequential access, the mask iterator #GwyMaskIter macros offers a good
  * compromise between complexity and efficiency.  In a really
  * performance-sensitive code, you also might wish to access the bits in
  * #GwyMaskField.data directly.
@@ -2107,44 +2107,55 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  **/
 
 /**
- * GwyMaskFieldIter:
+ * GwyMaskIter:
  * @p: Pointer to the current mask data item.
  * @bit: The current bit, i.e. value with always exactly one bit set.
  *
- * Mask field iterator.
+ * Mask iterator.
  *
- * The mask field iterator is another method of accessing individual mask
- * field pixels suitable especially for sequential processing.  The following
- * example demonstrates the typical use on finding the minimum of data under
- * the mask.
+ * The mask iterator is another method of accessing individual mask pixels
+ * within a contiguous block, suitable especially for sequential processing.
+ * It can be used for reading and writing bits and it is possible to move it
+ * one pixel forward or backward within the block with gwy_mask_iter_next() or
+ * gwy_mask_iter_prev(), respectively.
+ *
+ * The following example demonstrates the typical use on finding the minimum of
+ * masked two-dimensional data.  Notice how the iterator is initialized for
+ * each row because the mask field rows do not form one contiguous block
+ * although each individual row is contiguous.
  * |[
  * gdouble min = G_MAXDOUBLE;
  * for (guint i = 0; i < field->height; i++) {
  *     const gdouble *d = field->data + i*field->xres;
- *     GwyMaskFieldIter iter;
+ *     GwyMaskIter iter;
  *     gwy_mask_field_iter_init(mask, iter, 0, i);
  *     for (guint j = 0; j < field->xres; j++) {
- *         if (gwy_mask_field_iter_get(iter)) {
+ *         if (gwy_mask_iter_get(iter)) {
  *             if (min > d[j])
  *                 min = d[j];
  *         }
- *         gwy_mask_field_iter_next(iter);
+ *         gwy_mask_iter_next(iter);
  *     }
  * }
  * ]|
- *
- * The iterator is a very simple structure that is supposed to be allocated on
- * the stack.
+ * The iterator is represented by a very simple structure that is supposed to
+ * be allocated as an automatic variable and passed/copied by value.  It can be
+ * re-initialized any number of times, even to iterate in completely different
+ * mask objects.  It can be simply forgotten when no longer useful (i.e. there
+ * is no teardown function).
  **/
 
 /**
  * gwy_mask_field_iter_init:
  * @field: A two-dimensional mask field.
- * @iter: Mask field iterator.  It must be an identifier.
+ * @iter: Mask iterator to initialize.  It must be an identifier.
  * @col: Column index in @field.
  * @row: Row index in @field.
  *
- * Initializes a mask field iterator to point to given pixel.
+ * Initializes a mask iterator to point to given pixel in a mask field.
+ *
+ * The iterator can be subsequently used to move back and forward within the
+ * row @row (but not outside).
  *
  * This macro may evaluate its arguments several times.
  * This macro is usable as a single statement.
@@ -2153,53 +2164,55 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  **/
 
 /**
- * gwy_mask_field_iter_next:
- * @iter: Mask field iterator.  It must be an identifier.
+ * gwy_mask_iter_next:
+ * @iter: Mask iterator.  It must be an identifier.
  *
- * Moves a mask field iterator one pixel right within a row.
- *
- * This macro is usable as a single statement.
- *
- * No argument validation is performed.
- * The caller must ensure the position does not leave the row.
- **/
-
-/**
- * gwy_mask_field_iter_prev:
- * @iter: Mask field iterator.  It must be an identifier.
- *
- * Moves a mask field iterator one pixel left within a row.
+ * Moves a mask iterator one pixel right.
  *
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.
- * The caller must ensure the position does not leave the row.
+ * The caller must ensure the position does not leave the contiguous mask
+ * block.
  **/
 
 /**
- * gwy_mask_field_iter_get:
- * @iter: Mask field iterator.  It must be an identifier.
+ * gwy_mask_iter_prev:
+ * @iter: Mask iterator.  It must be an identifier.
  *
- * Obtains the mask field value a mask field iterator points to.
+ * Moves a mask iterator one pixel left.
+ *
+ * This macro is usable as a single statement.
+ *
+ * No argument validation is performed.
+ * The caller must ensure the position does not leave the contiguous mask
+ * block.
+ **/
+
+/**
+ * gwy_mask_iter_get:
+ * @iter: Mask iterator.  It must be an identifier.
+ *
+ * Obtains the value a mask iterator points to.
  *
  * No argument validation is performed.
  *
- * Returns: Nonzero value (not necessarily 1) if the bit is set, zero if it's
- *          unset.
+ * Returns: Nonzero value (not necessarily 1) if the mask bit is set, zero if
+ *          it is unset.
  **/
 
 /**
- * gwy_mask_field_iter_set:
- * @iter: Mask field iterator.  It must be an identifier.
+ * gwy_mask_iter_set:
+ * @iter: Mask iterator.  It must be an identifier.
  * @value: Nonzero value to set the bit, zero to clear it.
  *
- * Sets the mask field value a mask field iterator points to.
+ * Sets the value a mask iterator points to.
  *
  * This macro is usable as a single statement.
  *
  * No argument validation is performed.
  *
- * This is a low-level macro and it does not invalidate the mask field.
+ * This is a low-level macro and it does not invalidate the mask object.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -33,7 +33,7 @@ typedef struct {
     guint yres;
     // Only with masking
     const GwyMaskField *mask;
-    GwyMaskFieldIter iter;
+    GwyMaskIter iter;
     guint maskcol;
     guint maskrow;
     gboolean mode;
@@ -48,7 +48,7 @@ typedef struct {
 typedef struct {
     const gdouble *p;
     // Only with masking
-    GwyMaskFieldIter iter;
+    GwyMaskIter iter;
     gboolean mode;
     guint count;
     guint degree;
@@ -89,7 +89,7 @@ plane_fit_mask(guint id,
         gwy_mask_field_iter_init(data->mask, data->iter,
                                  data->maskcol, data->maskrow+i);
     }
-    gboolean ok = (!!gwy_mask_field_iter_get(data->iter) == data->mode);
+    gboolean ok = (!!gwy_mask_iter_get(data->iter) == data->mode);
     if (ok) {
         gdouble x = 2*j/(data->xres - 1.0) - 1.0;
         gdouble y = 2*i/(data->yres - 1.0) - 1.0;
@@ -98,7 +98,7 @@ plane_fit_mask(guint id,
         fvalues[2] = y;
         *value = *data->p;
     }
-    gwy_mask_field_iter_next(data->iter);
+    gwy_mask_iter_next(data->iter);
     data->p++;
     return ok;
 }
@@ -288,20 +288,20 @@ gwy_field_part_inclination(const GwyField *field,
         n = width*height;
     }
     else {
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i+1 < height; i++) {
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
-            gboolean m2 = !gwy_mask_field_iter_get(iter1) == invert;
-            gboolean m4 = !gwy_mask_field_iter_get(iter2) == invert;
+            gboolean m2 = !gwy_mask_iter_get(iter1) == invert;
+            gboolean m4 = !gwy_mask_iter_get(iter2) == invert;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gboolean m1 = m2, m3 = m4;
-                gwy_mask_field_iter_next(iter1);
-                m2 = !gwy_mask_field_iter_get(iter1) == invert;
-                gwy_mask_field_iter_next(iter2);
-                m4 = !gwy_mask_field_iter_get(iter2) == invert;
+                gwy_mask_iter_next(iter1);
+                m2 = !gwy_mask_iter_get(iter1) == invert;
+                gwy_mask_iter_next(iter2);
+                m4 = !gwy_mask_iter_get(iter2) == invert;
                 if (m1 & m2 & m3 & m4) {
                     gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
                     gdouble vy = 0.5*(d2[0] + d2[1] - d1[0] - d1[1])/dy;
@@ -332,20 +332,20 @@ gwy_field_part_inclination(const GwyField *field,
         }
     }
     else {
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i+1 < height; i++) {
             const gdouble *d1 = base + i*xres, *d2 = d1 + xres;
             gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow);
             gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow+1);
-            gboolean m2 = !gwy_mask_field_iter_get(iter1) == invert;
-            gboolean m4 = !gwy_mask_field_iter_get(iter2) == invert;
+            gboolean m2 = !gwy_mask_iter_get(iter1) == invert;
+            gboolean m4 = !gwy_mask_iter_get(iter2) == invert;
             for (guint j = width-1; j; j--, d1++, d2++) {
                 gboolean m1 = m2, m3 = m4;
-                gwy_mask_field_iter_next(iter1);
-                m2 = !gwy_mask_field_iter_get(iter1) == invert;
-                gwy_mask_field_iter_next(iter2);
-                m4 = !gwy_mask_field_iter_get(iter2) == invert;
+                gwy_mask_iter_next(iter1);
+                m2 = !gwy_mask_iter_get(iter1) == invert;
+                gwy_mask_iter_next(iter2);
+                m4 = !gwy_mask_iter_get(iter2) == invert;
                 if (m1 & m2 & m3 & m4) {
                     gdouble vx = 0.5*(d1[1] + d2[1] - d1[0] - d2[0])/dx;
                     gdouble vy = 0.5*(d2[0] + d2[1] - d1[0] - d1[1])/dy;
@@ -401,7 +401,7 @@ poly_fit_mask(guint id,
         gwy_mask_field_iter_init(data->mask, data->iter,
                                  data->maskcol, data->maskrow+i);
     }
-    gboolean ok = (!!gwy_mask_field_iter_get(data->iter) == data->mode);
+    gboolean ok = (!!gwy_mask_iter_get(data->iter) == data->mode);
     if (ok) {
         const gdouble *xp = data->xp + j;
         const gdouble *yp = data->yp + i;
@@ -409,7 +409,7 @@ poly_fit_mask(guint id,
             fvalues[k] = xp[data->xpowers[k]] * yp[data->ypowers[k]];
         *value = *data->p;
     }
-    gwy_mask_field_iter_next(data->iter);
+    gwy_mask_iter_next(data->iter);
     data->p++;
     return ok;
 }
@@ -642,14 +642,14 @@ fit_row_mean(const GwyField *field,
     }
     else {
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(mask, iter, 0, maskrow);
         for (guint j = field->xres; j; j--, d++) {
-            if (!gwy_mask_field_iter_get(iter) == invert) {
+            if (!gwy_mask_iter_get(iter) == invert) {
                 sum += *d;
                 count++;
             }
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
         }
     }
     if (count >= 1 + min_freedom) {
@@ -678,12 +678,12 @@ fit_row_median(const GwyField *field,
     else {
         gdouble *p = buffer;
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(mask, iter, 0, maskrow);
         for (guint j = field->xres; j; j--, d++) {
-            if (!gwy_mask_field_iter_get(iter) == invert)
+            if (!gwy_mask_iter_get(iter) == invert)
                 *(p++) = *d;
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_next(iter);
         }
         count = p - buffer;
     }
@@ -714,17 +714,17 @@ fit_row_mean_diff(const GwyField *field,
     }
     else {
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
         gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
         for (guint j = field->xres; j; j--, d1++, d2++) {
-            if (!gwy_mask_field_iter_get(iter1) == invert
-                && !gwy_mask_field_iter_get(iter2) == invert) {
+            if (!gwy_mask_iter_get(iter1) == invert
+                && !gwy_mask_iter_get(iter2) == invert) {
                 sum += *d1 - *d2;
                 count++;
             }
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
     }
     *shift = (count >= 1 + min_freedom) ? sum/count : 0.0;
@@ -749,15 +749,15 @@ fit_row_median_diff(const GwyField *field,
     }
     else {
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        GwyMaskFieldIter iter1, iter2;
+        GwyMaskIter iter1, iter2;
         gwy_mask_field_iter_init(mask, iter1, 0, maskrow);
         gwy_mask_field_iter_init(mask, iter2, 0, maskrow+1);
         for (guint j = field->xres; j; j--, d1++, d2++) {
-            if (!gwy_mask_field_iter_get(iter1) == invert
-                && !gwy_mask_field_iter_get(iter2) == invert)
+            if (!gwy_mask_iter_get(iter1) == invert
+                && !gwy_mask_iter_get(iter2) == invert)
                 *(p++) = *d1 - *d2;
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
     }
     guint count = p - buffer;
@@ -769,19 +769,19 @@ fit_row_median_diff(const GwyField *field,
 // calculate the difference because either row is bad.
 static void
 find_shifts_of_good_rows(GwyLine *shifts,
-                         GwyMaskFieldIter iter)
+                         GwyMaskIter iter)
 {
-    gboolean curr = gwy_mask_field_iter_get(iter);
+    gboolean curr = gwy_mask_iter_get(iter);
     gdouble *d = shifts->data;
     for (guint i = shifts->res-1; i; i--, d++) {
         gboolean prev = curr;
-        gwy_mask_field_iter_next(iter);
-        curr = gwy_mask_field_iter_get(iter);
+        gwy_mask_iter_next(iter);
+        curr = gwy_mask_iter_get(iter);
         if (curr && prev)
             *d -= *(d+1);
         else
             *d = 0.0;
-        gwy_mask_field_iter_next(iter);
+        gwy_mask_iter_next(iter);
     }
     d = shifts->data + shifts->res-2;
     for (guint i = shifts->res-1; i; i--, d--)
@@ -834,14 +834,14 @@ gwy_field_find_row_shifts(const GwyField *field,
     if (method == GWY_ROW_SHIFT_MEAN) {
         // XXX: This is a fake one-dimensional mask
         guint32 *goodrows = g_slice_alloc0(masksize);
-        GwyMaskFieldIter iter = { goodrows, FIRST_BIT };
+        GwyMaskIter iter = { goodrows, FIRST_BIT };
         for (guint i = 0; i < field->yres; i++) {
             if (fit_row_mean(field, i, mask, masking, maskrow, min_freedom,
                              shifts->data + i))
-                gwy_mask_field_iter_set(iter, TRUE);
-            gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_set(iter, TRUE);
+            gwy_mask_iter_next(iter);
         }
-        iter = (GwyMaskFieldIter){ goodrows, FIRST_BIT };
+        iter = (GwyMaskIter){ goodrows, FIRST_BIT };
         find_shifts_of_good_rows(shifts, iter);
         g_slice_free1(masksize, goodrows);
     }
@@ -849,14 +849,14 @@ gwy_field_find_row_shifts(const GwyField *field,
         // XXX: This is a fake one-dimensional mask
         guint32 *goodrows = g_slice_alloc0(masksize);
         gdouble *buffer = g_slice_alloc(bufsize);
-        GwyMaskFieldIter iter = { goodrows, FIRST_BIT };
+        GwyMaskIter iter = { goodrows, FIRST_BIT };
         for (guint i = 0; i < field->yres; i++) {
             if (fit_row_median(field, i, mask, masking, maskrow, min_freedom,
                                buffer, shifts->data + i))
-                gwy_mask_field_iter_set(iter, TRUE);
-            gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_set(iter, TRUE);
+            gwy_mask_iter_next(iter);
         }
-        iter = (GwyMaskFieldIter){ goodrows, FIRST_BIT };
+        iter = (GwyMaskIter){ goodrows, FIRST_BIT };
         find_shifts_of_good_rows(shifts, iter);
         g_slice_free1(masksize, goodrows);
         g_slice_free1(bufsize, buffer);

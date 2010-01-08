@@ -126,32 +126,32 @@ gwy_field_part_min_max(GwyField *field,
     else if (masking == GWY_MASK_INCLUDE) {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
-            GwyMaskFieldIter iter;
+            GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (gwy_mask_field_iter_get(iter)) {
+                if (gwy_mask_iter_get(iter)) {
                     if (min1 > *d)
                         min1 = *d;
                     if (max1 < *d)
                         max1 = *d;
                 }
-                gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_next(iter);
             }
         }
     }
     else {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
-            GwyMaskFieldIter iter;
+            GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_field_iter_get(iter)) {
+                if (!gwy_mask_iter_get(iter)) {
                     if (min1 > *d)
                         min1 = *d;
                     if (max1 < *d)
                         max1 = *d;
                 }
-                gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_next(iter);
             }
         }
     }
@@ -232,28 +232,28 @@ gwy_field_part_mean(GwyField *field,
         if (masking == GWY_MASK_INCLUDE) {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_field_iter_get(iter)) {
+                    if (gwy_mask_iter_get(iter)) {
                         mean += *d;
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
         else {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_field_iter_get(iter)) {
+                    if (!gwy_mask_iter_get(iter)) {
                         mean += *d;
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
@@ -340,24 +340,24 @@ gwy_field_part_median(GwyField *field,
     if (masking == GWY_MASK_INCLUDE) {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
-            GwyMaskFieldIter iter;
+            GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (gwy_mask_field_iter_get(iter))
+                if (gwy_mask_iter_get(iter))
                     *(p++) = *d;
-                gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_next(iter);
             }
         }
     }
     else {
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
-            GwyMaskFieldIter iter;
+            GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_field_iter_get(iter))
+                if (!gwy_mask_iter_get(iter))
                     *(p++) = *d;
-                gwy_mask_field_iter_next(iter);
+                gwy_mask_iter_next(iter);
             }
         }
     }
@@ -439,30 +439,30 @@ gwy_field_part_rms(GwyField *field,
         if (masking == GWY_MASK_INCLUDE) {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_field_iter_get(iter)) {
+                    if (gwy_mask_iter_get(iter)) {
                         avg += *d;
                         rms += (*d)*(*d);
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
         else {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_field_iter_get(iter)) {
+                    if (!gwy_mask_iter_get(iter)) {
                         avg += *d;
                         rms += (*d)*(*d);
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
@@ -577,10 +577,10 @@ gwy_field_part_statistics(GwyField *field,
         if (masking == GWY_MASK_INCLUDE) {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_field_iter_get(iter)) {
+                    if (gwy_mask_iter_get(iter)) {
                         gdouble v = *d - avg;
                         sumabs += fabs(v);
                         v *= v;
@@ -591,17 +591,17 @@ gwy_field_part_statistics(GwyField *field,
                         sum4 += v;
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
         else {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_field_iter_get(iter)) {
+                    if (!gwy_mask_iter_get(iter)) {
                         gdouble v = *d - avg;
                         sumabs += fabs(v);
                         v *= v;
@@ -612,7 +612,7 @@ gwy_field_part_statistics(GwyField *field,
                         sum4 += v;
                         n++;
                     }
-                    gwy_mask_field_iter_next(iter);
+                    gwy_mask_iter_next(iter);
                 }
             }
         }
@@ -777,30 +777,30 @@ gwy_field_part_count_in_range(const GwyField *field,
         if (masking == GWY_MASK_INCLUDE) {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 if (strict) {
                     for (guint j = width; j; j--, d++) {
-                        if (gwy_mask_field_iter_get(iter)) {
+                        if (gwy_mask_iter_get(iter)) {
                             if (*d > lower)
                                 na++;
                             if (*d < upper)
                                 nb++;
                             n++;
                         }
-                        gwy_mask_field_iter_next(iter);
+                        gwy_mask_iter_next(iter);
                     }
                 }
                 else {
                     for (guint j = width; j; j--, d++) {
-                        if (gwy_mask_field_iter_get(iter)) {
+                        if (gwy_mask_iter_get(iter)) {
                             if (*d >= lower)
                                 na++;
                             if (*d <= upper)
                                 nb++;
                             n++;
                         }
-                        gwy_mask_field_iter_next(iter);
+                        gwy_mask_iter_next(iter);
                     }
                 }
             }
@@ -808,30 +808,30 @@ gwy_field_part_count_in_range(const GwyField *field,
         else {
             for (guint i = 0; i < height; i++) {
                 const gdouble *d = base + i*field->xres;
-                GwyMaskFieldIter iter;
+                GwyMaskIter iter;
                 gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
                 if (strict) {
                     for (guint j = width; j; j--, d++) {
-                        if (!gwy_mask_field_iter_get(iter)) {
+                        if (!gwy_mask_iter_get(iter)) {
                             if (*d > lower)
                                 na++;
                             if (*d < upper)
                                 nb++;
                             n++;
                         }
-                        gwy_mask_field_iter_next(iter);
+                        gwy_mask_iter_next(iter);
                     }
                 }
                 else {
                     for (guint j = width; j; j--, d++) {
-                        if (!gwy_mask_field_iter_get(iter)) {
+                        if (!gwy_mask_iter_get(iter)) {
                             if (*d >= lower)
                                 na++;
                             if (*d <= upper)
                                 nb++;
                             n++;
                         }
-                        gwy_mask_field_iter_next(iter);
+                        gwy_mask_iter_next(iter);
                     }
                 }
             }
@@ -1091,7 +1091,7 @@ surface_area_mask1(const GwyField *field,
     const guint F = (col == 0) ? 1 : 0;
     const guint L = (col + width == xres) ? 0 : 1;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    GwyMaskFieldIter iter1, iter2;
+    GwyMaskIter iter1, iter2;
     const gdouble *d1, *d2;
     guint w1, w2, w3, w4;
 
@@ -1099,14 +1099,14 @@ surface_area_mask1(const GwyField *field,
     d1 = (row == 0) ? base-1 : base-1 - xres;
     d2 = base-1;
     gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
-    w3 = !gwy_mask_field_iter_get(iter2) == invert;
+    w3 = !gwy_mask_iter_get(iter2) == invert;
     sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, q);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w4 = w3;
-        w3 = !gwy_mask_field_iter_get(iter2) == invert;
+        w3 = !gwy_mask_iter_get(iter2) == invert;
         sum += square_area1w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4, q);
-        gwy_mask_field_iter_next(iter2);
+        gwy_mask_iter_next(iter2);
     }
     w4 = w3;
     sum += square_area1w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, w3, q);
@@ -1116,19 +1116,19 @@ surface_area_mask1(const GwyField *field,
         d1 = base-1 + i*xres;
         d2 = d1 + xres;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
-        w2 = !gwy_mask_field_iter_get(iter1) == invert;
+        w2 = !gwy_mask_iter_get(iter1) == invert;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        w3 = !gwy_mask_field_iter_get(iter2) == invert;
+        w3 = !gwy_mask_iter_get(iter2) == invert;
         sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0, q);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
-            w2 = !gwy_mask_field_iter_get(iter1) == invert;
+            w2 = !gwy_mask_iter_get(iter1) == invert;
             w4 = w3;
-            w3 = !gwy_mask_field_iter_get(iter2) == invert;
+            w3 = !gwy_mask_iter_get(iter2) == invert;
             sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4, q);
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
         w1 = w2;
         w4 = w3;
@@ -1139,14 +1139,14 @@ surface_area_mask1(const GwyField *field,
     d1 = base-1 + (height - 1)*xres;
     d2 = (row + height == yres) ? d1 : d1 + xres;
     gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
-    w2 = !gwy_mask_field_iter_get(iter1) == invert;
+    w2 = !gwy_mask_iter_get(iter1) == invert;
     sum += square_area1w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, q);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w1 = w2;
-        w2 = !gwy_mask_field_iter_get(iter1) == invert;
+        w2 = !gwy_mask_iter_get(iter1) == invert;
         sum += square_area1w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0, q);
-        gwy_mask_field_iter_next(iter1);
+        gwy_mask_iter_next(iter1);
     }
     w1 = w2;
     sum += square_area1w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, 0, q);
@@ -1174,7 +1174,7 @@ surface_area_mask2(const GwyField *field,
     const guint F = (col == 0) ? 1 : 0;
     const guint L = (col + width == xres) ? 0 : 1;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    GwyMaskFieldIter iter1, iter2;
+    GwyMaskIter iter1, iter2;
     const gdouble *d1, *d2;
     guint w1, w2, w3, w4;
 
@@ -1182,15 +1182,15 @@ surface_area_mask2(const GwyField *field,
     d1 = (row == 0) ? base-1 : base-1 - xres;
     d2 = base-1;
     gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow);
-    w3 = !gwy_mask_field_iter_get(iter2) == invert;
+    w3 = !gwy_mask_iter_get(iter2) == invert;
     sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, 0, w3, 0, dx2, dy2);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w4 = w3;
-        w3 = !gwy_mask_field_iter_get(iter2) == invert;
+        w3 = !gwy_mask_iter_get(iter2) == invert;
         sum += square_area2w(d1[0], d1[1], d2[1], d2[0], 0, 0, w3, w4,
                              dx2, dy2);
-        gwy_mask_field_iter_next(iter2);
+        gwy_mask_iter_next(iter2);
     }
     w4 = w3;
     sum += square_area2w(d1[0], d1[L], d2[L], d2[0], 0, 0, 0, w3, dx2, dy2);
@@ -1200,21 +1200,21 @@ surface_area_mask2(const GwyField *field,
         d1 = base-1 + i*xres;
         d2 = d1 + xres;
         gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + i+1);
-        w2 = !gwy_mask_field_iter_get(iter1) == invert;
+        w2 = !gwy_mask_iter_get(iter1) == invert;
         gwy_mask_field_iter_init(mask, iter2, maskcol, maskrow + i+1);
-        w3 = !gwy_mask_field_iter_get(iter2) == invert;
+        w3 = !gwy_mask_iter_get(iter2) == invert;
         sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, w3, 0,
                              dx2, dy2);
         d1++, d2++;
         for (guint j = width-1; j; j--, d1++, d2++) {
             w1 = w2;
-            w2 = !gwy_mask_field_iter_get(iter1) == invert;
+            w2 = !gwy_mask_iter_get(iter1) == invert;
             w4 = w3;
-            w3 = !gwy_mask_field_iter_get(iter2) == invert;
+            w3 = !gwy_mask_iter_get(iter2) == invert;
             sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, w3, w4,
                                  dx2, dy2);
-            gwy_mask_field_iter_next(iter1);
-            gwy_mask_field_iter_next(iter2);
+            gwy_mask_iter_next(iter1);
+            gwy_mask_iter_next(iter2);
         }
         w1 = w2;
         w4 = w3;
@@ -1226,15 +1226,15 @@ surface_area_mask2(const GwyField *field,
     d1 = base-1 + (height - 1)*xres;
     d2 = (row + height == yres) ? d1 : d1 + xres;
     gwy_mask_field_iter_init(mask, iter1, maskcol, maskrow + height-1);
-    w2 = !gwy_mask_field_iter_get(iter1) == invert;
+    w2 = !gwy_mask_iter_get(iter1) == invert;
     sum += square_area2w(d1[F], d1[1], d2[1], d2[F], 0, w2, 0, 0, dx2, dy2);
     d1++, d2++;
     for (guint j = width-1; j; j--, d1++, d2++) {
         w1 = w2;
-        w2 = !gwy_mask_field_iter_get(iter1) == invert;
+        w2 = !gwy_mask_iter_get(iter1) == invert;
         sum += square_area2w(d1[0], d1[1], d2[1], d2[0], w1, w2, 0, 0,
                              dx2, dy2);
-        gwy_mask_field_iter_next(iter1);
+        gwy_mask_iter_next(iter1);
     }
     w1 = w2;
     sum += square_area2w(d1[0], d1[L], d2[L], d2[0], w1, 0, 0, 0, dx2, dy2);

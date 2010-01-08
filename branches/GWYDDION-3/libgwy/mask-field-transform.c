@@ -26,25 +26,25 @@
 
 // XXX: Not very efficient, but probably sufficiently efficient.
 static void
-flip_row(GwyMaskFieldIter iter,  // Initialized to the *end* of the row!
+flip_row(GwyMaskIter iter,  // Initialized to the *end* of the row!
          guint32 *dest,
          guint width)
 {
     for (guint j = 0; j < width >> 5; j++) {
         guint32 v = 0;
         for (guint k = 0; k < 0x20; k++) {
-            if (gwy_mask_field_iter_get(iter))
+            if (gwy_mask_iter_get(iter))
                 v |= NTH_BIT(k);
-            gwy_mask_field_iter_prev(iter);
+            gwy_mask_iter_prev(iter);
         }
         *(dest++) = v;
     }
     if (width & 0x1f) {
         guint32 v = 0;
         for (guint k = 0; k < (width & 0x1f); k++) {
-            if (gwy_mask_field_iter_get(iter))
+            if (gwy_mask_iter_get(iter))
                 v |= NTH_BIT(k);
-            gwy_mask_field_iter_prev(iter);
+            gwy_mask_iter_prev(iter);
         }
         *dest = v;
     }
@@ -57,7 +57,7 @@ flip_both(GwyMaskField *field,
     guint xres = field->xres, yres = field->yres;
     gsize rowsize = field->stride * sizeof(guint32);
     for (guint i = 0; i < yres/2; i++) {
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, yres-1 - i);
         flip_row(iter, buffer, xres);
         gwy_mask_field_iter_init(field, iter, xres-1, i);
@@ -65,7 +65,7 @@ flip_both(GwyMaskField *field,
         memcpy(field->data + i*xres, buffer, rowsize);
     }
     if (yres % 2) {
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, yres/2);
         flip_row(iter, buffer, xres);
         memcpy(field->data + yres/2*xres, buffer, rowsize);
@@ -79,7 +79,7 @@ flip_horizontally(GwyMaskField *field,
     guint xres = field->xres, yres = field->yres;
     gsize rowsize = field->stride * sizeof(guint32);
     for (guint i = 0; i < yres; i++) {
-        GwyMaskFieldIter iter;
+        GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, i);
         flip_row(iter, buffer, xres);
         memcpy(field->data + i*xres, buffer, rowsize);

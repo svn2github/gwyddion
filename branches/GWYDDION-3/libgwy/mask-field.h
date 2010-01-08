@@ -146,7 +146,7 @@ void          gwy_mask_field_set_size      (GwyMaskField *field,
 typedef struct {
     guint32 *p;
     guint32 bit;
-} GwyMaskFieldIter;
+} GwyMaskIter;
 
 #if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 #define gwy_mask_field_iter_init(field, iter, col, row) \
@@ -155,10 +155,10 @@ typedef struct {
         iter.bit = 1u << ((col) & 0x1f); \
     } while (0)
 
-#define gwy_mask_field_iter_next(iter) \
+#define gwy_mask_iter_next(iter) \
     do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p++; } } while (0)
 
-#define gwy_mask_field_iter_prev(iter) \
+#define gwy_mask_iter_prev(iter) \
     do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p--; } } while (0)
 #endif
 
@@ -169,17 +169,17 @@ typedef struct {
         iter.bit = 0x80000000u >> ((col) & 0x1f); \
     } while (0)
 
-#define gwy_mask_field_iter_next(iter) \
+#define gwy_mask_iter_next(iter) \
     do { if (!(iter.bit >>= 1)) { iter.bit = 0x80000000u; iter.p++; } } while (0)
 
-#define gwy_mask_field_iter_prev(iter) \
+#define gwy_mask_iter_prev(iter) \
     do { if (!(iter.bit <<= 1)) { iter.bit = 1u; iter.p--; } } while (0)
 #endif
 
-#define gwy_mask_field_iter_get(iter) \
+#define gwy_mask_iter_get(iter) \
     (*(iter).p & (iter).bit)
 
-#define gwy_mask_field_iter_set(iter, value) \
+#define gwy_mask_iter_set(iter, value) \
     do { if (value) *(iter).p |= (iter).bit; else *(iter).p &= ~(iter).bit; } while (0)
 
 void         gwy_mask_field_data_changed   (GwyMaskField *field);

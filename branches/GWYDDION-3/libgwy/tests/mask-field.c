@@ -813,14 +813,14 @@ mask_field_from_string(const gchar *str)
             g_assert(s - prev == width);
     }
     GwyMaskField *field = gwy_mask_field_new_sized(width, height, FALSE);
-    GwyMaskFieldIter iter;
+    GwyMaskIter iter;
     s = str;
     for (guint i = 0; i < height; i++, s++) {
         gwy_mask_field_iter_init(field, iter, 0, i);
         for (guint j = 0; j < width; j++, s++) {
             gboolean one = (*s == '1' || *s == '@' || *s == '#');
-            gwy_mask_field_iter_set(iter, one);
-            gwy_mask_field_iter_next(iter);
+            gwy_mask_iter_set(iter, one);
+            gwy_mask_iter_next(iter);
         }
         g_assert(*s == '\n' || *s == '\0');
     }
