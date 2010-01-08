@@ -545,27 +545,28 @@ fail:
  *
  * Apart from normalization, the discrete Fourier coefficients are
  *
- *       1 N-1      -2πijk/N
- * Z_k = –  ∑  z_j e                    (1)
- *       N j=0
+ *      1 N-1     -2πijk/N
+ * Z  = –  ∑  z  e                      (1)
+ *  k   N j=0  j
  *
  * and the PSDF is then
  *
- * P_k = |Z_k|²                         (2)
+ * P  = |Z_k|²                          (2)
+ *  k
  *
  * To extend these definitions to incomplete data, we sum only over the
  * available data in (1) and instead of dividing by N we divide by the number
  * of available data p.
  *
- *       1        -2πijk/N
- * Z_k = – ∑ z_j e                      (3)
- *       p j
+ *      1       -2πijk/N
+ * Z  = – ∑ z  e                        (3)
+ *  k   p j  j
  *
  * Notice that by putting z_j ≡ 0 for unavailable data we obtain
  *
- *       1 N-1      -2πijk/N
- * Z_k = – ∑  z_j e                     (4)
- *       p j=0
+ *      1 N-1     -2πijk/N
+ * Z  = – ∑   z  e                      (4)
+ *  k   p j=0  j
  *
  * that can be calculated by standard DFT means because only the normalization
  * factor differs.  Formula (2) remains unchanged.  For p = 0 we put Z_k ≡ 0.
@@ -759,6 +760,44 @@ fail:
                             gwy_field_get_unit_z(field), 2);
     return line;
 }
+
+/*
+ * ACF of incomplete data.
+ *
+ * Apart from normalization, the ACF is
+ *
+ *       1  N-1-k
+ * G  = –––   ∑   z  z                  (1)
+ *  k   N-k  j=0   j  j+k
+ *
+ * To extend this definition to incomplete data, we sum only over the
+ * available data in (1) and instead of dividing by N-k we divide by the number
+ * of terms containing the products of available data, we denote this number
+ * p_k.
+ *
+ *       1   N-1-k
+ * G  = –––    ∑    z  z                (2)
+ *  k    p    j=0    j  j+k
+ *        k
+ * where, again, we put z_j ≡ 0 for unavailable data. So only the normalization
+ * factor differs.  For p_k = 0 we put G_k ≡ 0.  The number of available terms
+ * for all values of k can be calculated if we define
+ *
+ *      ⎧ 1,  if z_k is available
+ * m  = ⎨                               (3)
+ *  k   ⎩ 0,  if z_k is unavailable
+ *
+ * i.e. m_k is the available data mask.  Then obviously
+ *
+ *      N-1-k
+ * p  =   ∑    m  m                     (4)
+ *  k    j=0    j  j+k
+ *
+ * since there are as many 1-terms in (4) as there are valid terms in (2).
+ *
+ * G_k can be calculated using DFT, and so can be p_k (with the additional
+ * knowledge that it is integer-valued).
+ */
 
 #define __LIBGWY_FIELD_DISTRIBUTIONS_C__
 #include "libgwy/libgwy-aliases.c"
