@@ -131,34 +131,82 @@ swap_block(const gdouble *sb, gdouble *db,
     }
 }
 
+// The source is assumed to be large enough to contain all the data we copy
+// to the destination.
 static void
-swap_xy(const GwyField *source,
+swap_xy(const GwyField *source, guint col, guint row,
         GwyField *dest)
 {
-    guint dxres = dest->xres, dyres = dest->yres;
+    guint dxres = dest->xres, dyres = dest->yres, sxres = source->xres;
     guint dxmax = dxres/BLOCK_SIZE * BLOCK_SIZE;
     guint dymax = dyres/BLOCK_SIZE * BLOCK_SIZE;
+    const gdouble *sbase = source->data + sxres*row + col;
+    gdouble *dbase = dest->data;
 
     for (guint ib = 0; ib < dymax; ib += BLOCK_SIZE) {
         for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
-            swap_block(source->data + (jb*dyres + ib),
-                       dest->data + (ib*dxres + jb),
-                       BLOCK_SIZE, BLOCK_SIZE, dxres, dyres);
+            swap_block(sbase + (jb*sxres + ib), dbase + (ib*dxres + jb),
+                       BLOCK_SIZE, BLOCK_SIZE, dxres, sxres);
         if (dxmax != dxres)
-            swap_block(source->data + (dxmax*dyres + ib),
-                       dest->data + (ib*dxres + dxmax),
-                       dxres - dxmax, BLOCK_SIZE, dxres, dyres);
+            swap_block(sbase + (dxmax*sxres + ib), dbase + (ib*dxres + dxmax),
+                       dxres - dxmax, BLOCK_SIZE, dxres, sxres);
     }
     if (dymax != dyres) {
         for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
-            swap_block(source->data + (jb*dyres + dymax),
-                       dest->data + (dymax*dxres + jb),
-                       BLOCK_SIZE, dyres - dymax, dxres, dyres);
+            swap_block(sbase + (jb*sxres + dymax), dbase + (dymax*dxres + jb),
+                       BLOCK_SIZE, dyres - dymax, dxres, sxres);
         if (dxmax != dxres)
-            swap_block(source->data + (dxmax*dyres + dymax),
-                       dest->data + (dymax*dxres + dxmax),
-                       dxres - dxmax, dyres - dymax, dxres, dyres);
+            swap_block(sbase + (dxmax*sxres + dymax),
+                       dbase + (dymax*dxres + dxmax),
+                       dxres - dxmax, dyres - dymax, dxres, sxres);
     }
+}
+
+/**
+ * gwy_field_transpose:
+ * @field: A two-dimensional data field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @keep_offsets: %TRUE to set the X and Y offsets of the new field
+ *                using @col, @row and @field offsets.  %FALSE to set offsets
+ *                of the new field to zeroes.
+ *
+ * Transposes a rectangular part of a field, making rows columns and vice
+ * versa.
+ *
+ * The real dimensions and offsets are also transposed (offsets only if
+ * requested with @keep_offsets).
+ *
+ * Returns: A new two-dimensional data field containing the transposed part
+ *          of @field.
+ **/
+GwyField*
+gwy_field_part_transpose(const GwyField *field,
+                         guint col, guint row,
+                         guint width, guint height,
+                         gboolean transform_offsets)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_val_if_fail(col + width <= field->xres, NULL);
+    g_return_val_if_fail(row + height <= field->yres, NULL);
+
+    GwyField *newfield = gwy_field_new_sized(height, width, FALSE);
+    newfield->xreal = height*gwy_field_dy(field);
+    newfield->yreal = width*gwy_field_dx(field);
+    if (transform_offsets) {
+        newfield->xoff = field->yoff + row*gwy_field_dy(field);
+        newfield->yoff = field->xoff + col*gwy_field_dx(field);
+    }
+
+    swap_xy(field, col, row, newfield);
+
+    Field *spriv = field->priv, *dpriv = newfield->priv;
+    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
+    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
+
+    return newfield;
 }
 
 /**
@@ -187,7 +235,7 @@ gwy_field_transpose(const GwyField *field)
     DSWAP(newfield->xreal, newfield->yreal);
     DSWAP(newfield->xoff, newfield->yoff);
 
-    swap_xy(field, newfield);
+    swap_xy(field, 0, 0, newfield);
 
     Field *spriv = field->priv, *dpriv = newfield->priv;
     ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
