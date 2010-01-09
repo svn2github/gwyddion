@@ -545,31 +545,31 @@ fail:
  *
  * Apart from normalization, the discrete Fourier coefficients are
  *
- *      1 N-1     -2πijk/N
- * Z  = –  ∑  z  e                      (1)
- *  k   N j=0  j
+ *       1   N-1     -2πijν/N
+ * Z  = –––   ∑  z  e                   (1)
+ *  ν   √N   j=0  j
  *
  * and the PSDF is then
  *
- * P  = |Z_k|²                          (2)
- *  k
+ * W  = |Z |²                           (2)
+ *  ν     ν
  *
  * To extend these definitions to incomplete data, we sum only over the
  * available data in (1) and instead of dividing by N we divide by the number
- * of available data p.
+ * of available data P.
  *
- *      1       -2πijk/N
- * Z  = – ∑ z  e                        (3)
- *  k   p j  j
+ *       1        -2πijν/N
+ * Z  = ––– ∑ z  e                      (3)
+ *  ν   √P  j  j
  *
  * Notice that by putting z_j ≡ 0 for unavailable data we obtain
  *
- *      1 N-1     -2πijk/N
- * Z  = – ∑   z  e                      (4)
- *  k   p j=0  j
+ *       1   N-1      -2πijν/N
+ * Z  = –––   ∑   z  e                  (4)
+ *  ν   √P   j=0   j
  *
  * that can be calculated by standard DFT means because only the normalization
- * factor differs.  Formula (2) remains unchanged.  For p = 0 we put Z_k ≡ 0.
+ * factor differs.  Formula (2) remains unchanged.  For P = 0 we put Z_ν ≡ 0.
  */
 
 // Level a row of data by subtracting the mean value.
@@ -643,9 +643,9 @@ row_sum_squares(const gdouble *re, guint n)
 
 /*
  * Calculate PSDF, normalizing the sum of squares to the previously calculated
- * value.  The 0th real element of PSDF is not excluded from the norm as
- * (a) it should be 0 anyway (b) we do not want the constant coefficient
- * to contribute.
+ * value.  The 0th real element of PSDF is excluded from the norm as (a) it
+ * should be 0 anyway (b) we do not want the constant coefficient to
+ * contribute.
  */
 static void
 row_psdf(const gdouble *ffthc,
@@ -770,36 +770,97 @@ fail:
  * Apart from normalization, the ACF is
  *
  *       1  N-1-k
- * G  = –––   ∑   z  z                  (1)
+ * G  = –––   ∑   z  z                              (1)
  *  k   N-k  j=0   j  j+k
  *
  * To extend this definition to incomplete data, we sum only over the
  * available data in (1) and instead of dividing by N-k we divide by the number
  * of terms containing the products of available data, we denote this number
- * p_k.
+ * P_k.
  *
  *       1   N-1-k
- * G  = –––    ∑    z  z                (2)
- *  k    p    j=0    j  j+k
+ * G  = –––    ∑    z  z                            (2)
+ *  k    P    j=0    j  j+k
  *        k
  * where, again, we put z_j ≡ 0 for unavailable data. So only the normalization
- * factor differs.  For p_k = 0 we put G_k ≡ 0.  The number of available terms
+ * factor differs.  For P_k = 0 we put G_k ≡ 0.  The number of available terms
  * for all values of k can be calculated if we define
  *
  *      ⎧ 1,  if z_k is available
- * m  = ⎨                               (3)
+ * m  = ⎨                                           (3)
  *  k   ⎩ 0,  if z_k is unavailable
  *
  * i.e. m_k is the available data mask.  Then obviously
  *
  *      N-1-k
- * p  =   ∑    m  m                     (4)
+ * P  =   ∑    m  m                                 (4)
  *  k    j=0    j  j+k
  *
  * since there are as many 1-terms in (4) as there are valid terms in (2).
  *
- * G_k can be calculated using DFT, and so can be p_k (with the additional
- * knowledge that it is integer-valued).
+ * G_k can be calculated using DFT, and so can be P_k (with the additional
+ * knowledge that it is integer-valued).  This well-known trick is described
+ * below.
+ *
+ * Denoting the unnormalized correlation
+ *
+ *      N-1-k
+ * g  =   ∑   z  z                                  (5)
+ *  k    j=0   j  j+k
+ *
+ * we first extend the data with zeroes to length M ≥ 2N, i.e. z_k ≡ 0 for
+ * N ≤ k < M.  And then consider them to be periodic, i.e. let
+ *
+ * z     = z                                        (6)
+ *  k+M     k
+ *
+ * It can be easily seen that for 0 ≤ k < N it holds (values for other k depend
+ * on the precise choice of M but they are permitted to be abtirary)
+ *
+ *      M-1
+ * g  =  ∑   z  z                                   (7)
+ *  k   j=0   j  j+k
+ *
+ * Now we express the values using the DFT coefficients (on the entire M-sized
+ * data)
+ *
+ *       1   M-1     2πijν/M
+ * z  = –––   ∑  Z  e                               (8)
+ *  j   √M   ν=0  ν
+ *
+ * and substitute to (5):
+ *
+ *      1 M-1  M-1  M-1         2πijν  2πi(j+k)μ
+ * g  = –  ∑    ∑    ∑   Z  Z  e      e             (9)
+ *  k   M j=0  ν=0  μ=0   ν  μ
+ *
+ * Performing first the summation over j, we obtain
+ *
+ *      1 M-1  M-1         2πikμ
+ * g  = –  ∑    ∑   Z  Z  e      M δ'               (10)
+ *  k   M ν=0  μ=0   ν  μ           ν+μ
+ *
+ * where δ'_{ν+μ} is 1 if ν+μ is an integer multiple of M and zero otherwise.
+ * Hence only the terms with μ=M-ν are nonzero, i.e.
+ *
+ *       M-1          -2πikν
+ * g  =   ∑  Z  Z    e                              (11)
+ *  k    ν=0  ν  M-ν
+ *
+ * Considering, finally, thah the input data are real and so
+ *
+ *          *
+ * Z     = Z                                        (12)
+ *  M-ν     ν
+ *
+ * we obtain
+ *
+ *      M-1        -2πikν
+ * g  =  ∑  |Z |² e                                 (13)
+ *  k   ν=0   ν
+ *
+ * The transform from z_j to Z_ν and from |Z_ν|² to g_k are both in the same
+ * direction (forward).
  */
 
 static inline void
