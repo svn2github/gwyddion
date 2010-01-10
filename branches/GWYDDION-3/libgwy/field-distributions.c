@@ -643,9 +643,7 @@ row_sum_squares(const gdouble *re, guint n)
 
 /*
  * Calculate PSDF, normalizing the sum of squares to the previously calculated
- * value.  The 0th real element of PSDF is excluded from the norm as (a) it
- * should be 0 anyway (b) we do not want the constant coefficient to
- * contribute.
+ * value.
  */
 static void
 row_psdf(const gdouble *ffthc,
@@ -653,7 +651,6 @@ row_psdf(const gdouble *ffthc,
          guint n,
          gdouble sum_norm)
 {
-    gdouble s = 0.0;
     /*
      * The halfcomplex format is as follows:
      * r0, r1, r2, ..., r(n/2), i((n+1)/2-1), ..., i2, i1
@@ -662,7 +659,7 @@ row_psdf(const gdouble *ffthc,
      * while for odd n = 2k+1:
      * r0, r1, r2, ..., rk, ik, i(k-1), ..., i1
      */
-    psdf[0] = ffthc[0]*ffthc[0]/n;
+    gdouble s = psdf[0] = ffthc[0]*ffthc[0]/n;
     for (guint i = 1; i < (n + 1)/2; i++)
         s += psdf[i] = (ffthc[i]*ffthc[i] + ffthc[n-i]*ffthc[n-i])/n;
     if (n % 2 == 0)
@@ -672,10 +669,6 @@ row_psdf(const gdouble *ffthc,
         return;
 
     // Normalize the sum of squares (total energy)
-    // FIXME: This is not good.  We want to estimate the *full* PSDF from
-    // the incomplete data.  So for incomplete rows we want to renormalize to
-    // the extrapolated sum of squares of the full data, not just to the sum
-    // of squares of available data.
     gdouble q = sum_norm/s;
     for (guint i = 0; i <= n/2; i++)
         psdf[i] *= q;
@@ -724,6 +717,7 @@ gwy_field_part_row_psdf(GwyField *field,
     gdouble *buffer = fftw_malloc(3*size*sizeof(gdouble));
     gdouble *window = buffer + size;
     gdouble *ffthc = window + size;
+    guint ngoodrows = 0;
 
     gwy_fft_window_sample(window, width, windowing);
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
@@ -742,7 +736,14 @@ gwy_field_part_row_psdf(GwyField *field,
             if (!ndata)
                 continue;
         }
-        gdouble sum2 = row_sum_squares(buffer, width);
+        // If there is any data point the row contributes to the extrapolated
+        // PSDF.
+        ngoodrows++;
+        // We want to estimate the full PSDF from the incomplete data.  So for
+        // incomplete rows extrapolate the sum to the value expected for the
+        // complete data.  FIXME: depending on levelling, we might need to
+        // use factor (width-1)/(ndata-1) instead.
+        gdouble sum2 = row_sum_squares(buffer, width)*width/ndata;
         if (!sum2)
             continue;
         row_window(buffer, window, width);
@@ -756,7 +757,8 @@ gwy_field_part_row_psdf(GwyField *field,
     fftw_destroy_plan(plan);
     fftw_free(buffer);
 
-    gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*height));
+    if (ngoodrows)
+        gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*ngoodrows));
     gwy_line_set_real(line, G_PI/gwy_field_dx(field));
 
 fail:
@@ -939,6 +941,7 @@ gwy_field_part_row_acf(GwyField *field,
     gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
     gdouble *ffthc = buffer + size;
     //gdouble *fftmaskhc = ffthc + size;
+    guint ngoodrows = 0;
 
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
@@ -956,6 +959,9 @@ gwy_field_part_row_acf(GwyField *field,
             if (!ndata)
                 continue;
         }
+        // If there is any data point the row contributes to the extrapolated
+        // ACF.
+        ngoodrows++;
         fftw_execute(plan);
         row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
@@ -966,7 +972,8 @@ gwy_field_part_row_acf(GwyField *field,
     fftw_destroy_plan(plan);
     fftw_free(buffer);
 
-    gwy_line_multiply(line, 1.0/height);
+    if (ngoodrows)
+        gwy_line_multiply(line, 1.0/ngoodrows);
     gwy_line_set_real(line, gwy_field_dx(field)*line->res);
 
 fail:
