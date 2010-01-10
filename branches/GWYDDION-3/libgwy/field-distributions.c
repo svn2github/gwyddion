@@ -664,7 +664,7 @@ row_psdf(const gdouble *ffthc,
      */
     psdf[0] = ffthc[0]*ffthc[0]/n;
     for (guint i = 1; i < (n + 1)/2; i++)
-        s += psdf[i] = (ffthc[i]*ffthc[i] + ffthc[n-1]*ffthc[n-i])/n;
+        s += psdf[i] = (ffthc[i]*ffthc[i] + ffthc[n-i]*ffthc[n-i])/n;
     if (n % 2 == 0)
         s += psdf[n/2] = (ffthc[n/2]*ffthc[n/2])/n;
 
@@ -672,6 +672,10 @@ row_psdf(const gdouble *ffthc,
         return;
 
     // Normalize the sum of squares (total energy)
+    // FIXME: This is not good.  We want to estimate the *full* PSDF from
+    // the incomplete data.  So for incomplete rows we want to renormalize to
+    // the extrapolated sum of squares of the full data, not just to the sum
+    // of squares of available data.
     gdouble q = sum_norm/s;
     for (guint i = 0; i <= n/2; i++)
         psdf[i] *= q;
@@ -696,6 +700,8 @@ row_psdf(const gdouble *ffthc,
  *
  * Returns: A new one-dimensional data line with the PSDF.
  **/
+// TODO: Add a levelling argument, we may want to pass data with correct zero
+// level (but different from mean=0).
 GwyLine*
 gwy_field_part_row_psdf(GwyField *field,
                         const GwyMaskField *mask,
@@ -860,9 +866,19 @@ fail:
  *  k   ν=0   ν
  *
  * The transform from z_j to Z_ν and from |Z_ν|² to g_k are both in the same
- * direction (forward).
+ * direction (forward).  In addition, while the first is of R2C type the second
+ * is a discrete cosine transform as |Z_ν|² = |Z_{M-ν}|² and both are real.
  */
 
+// FFTW calculates unnormalized DFT so we divide the result of the first
+// transformation with (1/√size)² = 1/size and keep the second transfrom as-is
+// to obtain exactly g_k.
+
+// FIXME: As the second transform input is real and even we could use DCT here
+// instead of R2C. However, this requires even @size as for even size the data
+// layout is 01234321 which is even and supported by FFTW, whereas for an odd
+// size the layout is 0123321 which is odd and unsupported by FFTW.  Since we
+// obtain @size by multiplication by 4 this should not be a problem to ensure.
 static inline void
 row_acf(fftw_plan plan,
         gdouble *in,
@@ -872,11 +888,11 @@ row_acf(fftw_plan plan,
 {
     gwy_memclear(in + width, size - width);
     fftw_execute(plan);   // R2C transform in -> out
-    in[0] = out[0]*out[0];
+    in[0] = out[0]*out[0]/size;
     for (guint j = 1; j < (size + 1)/2; j++)
-        in[j] = in[size-j] = out[j]*out[j] + out[size-j]*out[size-j];
+        in[j] = in[size-j] = (out[j]*out[j] + out[size-j]*out[size-j])/size;
     if (size % 2 == 0)
-        in[size/2] = out[size/2]*out[size/2];
+        in[size/2] = (out[size/2]*out[size/2])/size;
     fftw_execute(plan);   // R2C transform in -> out
 }
 
@@ -897,6 +913,8 @@ row_acf(fftw_plan plan,
  *
  * Returns: A new one-dimensional data line with the ACF.
  **/
+// TODO: Add a levelling argument, we may want to pass data with correct zero
+// level (but different from mean=0).
 GwyLine*
 gwy_field_part_row_acf(GwyField *field,
                        const GwyMaskField *mask,
@@ -907,19 +925,21 @@ gwy_field_part_row_acf(GwyField *field,
     guint maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow))
+                               col, row, width, height, &maskcol, &maskrow)
+        || width < 2)
         goto fail;
 
+    // Transform size must be at least twice the data size for zero padding.
     // An even size is necessary due to alignment constraints in FFTW.
     // Using this size for all buffers is a bit excessive but safe.
-    line = gwy_line_new_sized((width + 1)/2, TRUE);
-    gsize size = 2*line->res;
+    line = gwy_line_new_sized(width, TRUE);
+    gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
     const gdouble *base = field->data + row*field->xres + col;
-    gdouble *buffer = fftw_malloc(3*size*sizeof(gdouble));
-    gdouble *window = buffer + size;
-    gdouble *ffthc = window + size;
+    guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 3;
+    gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
+    gdouble *ffthc = buffer + size;
+    //gdouble *fftmaskhc = ffthc + size;
 
-    gwy_fft_window_sample(window, width, windowing);
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
     for (guint i = 0; i < height; i++) {
@@ -936,12 +956,8 @@ gwy_field_part_row_acf(GwyField *field,
             if (!ndata)
                 continue;
         }
-        gdouble sum2 = row_sum_squares(buffer, width);
-        if (!sum2)
-            continue;
-        row_window(buffer, window, width);
         fftw_execute(plan);
-        row_psdf(ffthc, buffer, width, sum2);
+        row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
         const gdouble *q = buffer;
         for (guint j = line->res; j; j--, p++, q++)
@@ -950,8 +966,8 @@ gwy_field_part_row_acf(GwyField *field,
     fftw_destroy_plan(plan);
     fftw_free(buffer);
 
-    gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*height));
-    gwy_line_set_real(line, G_PI/gwy_field_dx(field));
+    gwy_line_multiply(line, 1.0/height);
+    gwy_line_set_real(line, gwy_field_dx(field)*line->res);
 
 fail:
     if (!line)
