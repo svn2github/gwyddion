@@ -57,7 +57,16 @@ GwyLine* gwy_field_part_row_psdf  (GwyField *field,
                                    guint row,
                                    guint width,
                                    guint height,
-                                   GwyWindowingType windowing) G_GNUC_MALLOC;
+                                   GwyWindowingType windowing,
+                                   guint level)                G_GNUC_MALLOC;
+GwyLine* gwy_field_part_row_acf   (GwyField *field,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   guint col,
+                                   guint row,
+                                   guint width,
+                                   guint height,
+                                   guint level)                G_GNUC_MALLOC;
 
 G_END_DECLS
 

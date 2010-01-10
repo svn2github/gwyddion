@@ -660,6 +660,31 @@ row_sum_squares(const gdouble *re, guint n)
     return sum2;
 }
 
+/* Level and count the number of valid data in a row */
+static guint
+row_level_and_count(gdouble *buffer,
+                    guint width,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
+                    guint maskcol,
+                    guint maskrow,
+                    guint level)
+{
+    if (masking == GWY_MASK_IGNORE) {
+        if (level)
+            row_level(buffer, width);
+        return width;
+    }
+
+    if (level) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+        return row_level_mask(buffer, width, iter, masking == GWY_MASK_EXCLUDE);
+    }
+    return gwy_mask_field_part_count(mask, maskcol, maskrow, width, 1,
+                                     masking == GWY_MASK_INCLUDE);
+}
+
 /* Calculate PSDF from Fourier coefficients, normalizing the sum of squares to
  * the previously calculated value.
  */
@@ -702,6 +727,10 @@ row_psdf(const gdouble *ffthc,
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
  * @windowing: Windowing type to use.
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.  For
+ *         SPM data, you usually wish to pass 1.
  *
  * Calculates the row-wise power spectrum density function of a rectangular
  * part of a field.
@@ -709,23 +738,37 @@ row_psdf(const gdouble *ffthc,
  * The calculated PSDF has the natural number of points that follows from DFT,
  * i.e. @width/2+1.
  *
+ * The reduction of the total energy by windowing is compensated by multiplying
+ * the PSDF to make its sum of squares equal to the input data sum of squares.
+ *
+ * Masking is performed by omitting all terms that contain excluded pixels.
+ * Since different rows contain different numbers of pixels, the resulting
+ * PSDF is calculated as a weighted sum where each row's weight is proportional
+ * to the number of contributing pixels.  In other words, the weighting is
+ * fair: each contributing pixel has the same influence on the result.
+ *
  * Returns: A new one-dimensional data line with the PSDF.
  **/
-// TODO: Add a levelling argument, we may want to pass data with correct zero
-// level (but different from mean=0).
 GwyLine*
 gwy_field_part_row_psdf(GwyField *field,
                         const GwyMaskField *mask,
                         GwyMaskingType masking,
                         guint col, guint row,
                         guint width, guint height,
-                        GwyWindowingType windowing)
+                        GwyWindowingType windowing,
+                        guint level)
 {
     guint maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, mask, &masking,
                                col, row, width, height, &maskcol, &maskrow))
         goto fail;
+
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
 
     // An even size is necessary due to alignment constraints in FFTW.
     // Using this size for all buffers is a bit excessive but safe.
@@ -743,17 +786,11 @@ gwy_field_part_row_psdf(GwyField *field,
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
-        guint ndata = width;
-        if (masking == GWY_MASK_IGNORE)
-            row_level(buffer, width);
-        else {
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-            ndata = row_level_mask(buffer, width, iter,
-                                   masking == GWY_MASK_EXCLUDE);
-            if (!ndata)
-                continue;
-        }
+        guint ndata = row_level_and_count(buffer, width,
+                                          mask, masking, maskcol, maskrow + i,
+                                          level);
+        if (!ndata)
+            continue;
         weight += ndata;
         // We want to estimate the full PSDF from the incomplete data which
         // would involve multiplying it by @width/@ndata.  On the other hand,
@@ -938,22 +975,32 @@ row_acf(fftw_plan plan,
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.  For
+ *         SPM data, you usually wish to pass 1.
  *
  * Calculates the row-wise autocorrelation function of a rectangular part of a
  * field.
  *
- * The calculated ACF has the natural number of points, i.e. @width-1.
+ * The calculated ACF has the natural number of points, i.e. @width.
+ *
+ * Masking is performed by omitting all terms that contain excluded pixels.
+ * Since different rows contain different numbers of pixels, the resulting
+ * ACF values are calculated as a weighted sums where weight of each row's
+ * contribution is proportional to the number of contributing terms.  In other
+ * words, the weighting is fair: each contributing pixel has the same influence
+ * on the result.
  *
  * Returns: A new one-dimensional data line with the ACF.
  **/
-// TODO: Add a levelling argument, we may want to pass data with correct zero
-// level (but different from mean=0).
 GwyLine*
 gwy_field_part_row_acf(GwyField *field,
                        const GwyMaskField *mask,
                        GwyMaskingType masking,
                        guint col, guint row,
-                       guint width, guint height)
+                       guint width, guint height,
+                       guint level)
 {
     guint maskcol, maskrow;
     GwyLine *line = NULL;
@@ -981,14 +1028,10 @@ gwy_field_part_row_acf(GwyField *field,
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
-        if (masking == GWY_MASK_IGNORE)
-            row_level(buffer, width);
-        else {
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-            if (!row_level_mask(buffer, width, iter, invert))
-                continue;
-        }
+        if (!row_level_and_count(buffer, width,
+                                 mask, masking, maskcol, maskrow + i,
+                                 level))
+            continue;
         row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
         const gdouble *q = buffer;
