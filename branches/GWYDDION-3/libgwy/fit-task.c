@@ -392,7 +392,7 @@ gwy_fit_task_set_vector_vfunction(GwyFitTask *fittask,
 /**
  * gwy_fit_task_set_vector_data:
  * @fittask: A fitting task.
- * @data: Data passed to #GwyFitTaskVectorFunc.
+ * @user_data: Data passed to #GwyFitTaskVectorFunc.
  * @ndata: Number of data points.
  *
  * Sets the indexed data for a fit task.
@@ -889,8 +889,8 @@ gwy_fit_task_get_param_error(GwyFitTask *fittask,
 /**
  * gwy_fit_task_get_correlations:
  * @fittask: A fitting task.
- * @covar: Array to store the correlation matrix to.  The elements are stored
- *         as described in gwy_lower_triangular_matrix_index().
+ * @corr_matrix: Array to store the correlation matrix to.  The elements are
+ *               stored as described in gwy_lower_triangular_matrix_index().
  *
  * Evaluates the parameter correlation matrix of a fitting task after fit.
  *

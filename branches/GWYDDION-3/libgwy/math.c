@@ -184,8 +184,8 @@ gwy_cholesky_solve(const gdouble *a, gdouble *b, guint n)
 
 /**
  * gwy_cholesky_invert:
- * @matrix: Lower triangular part of a symmetric matrix, see
- *          gwy_lower_triangular_matrix_index() for storage details.
+ * @a: Lower triangular part of a symmetric matrix, see
+ *     gwy_lower_triangular_matrix_index() for storage details.
  * @n: Dimension of @matrix.
  *
  * Inverts a positive definite matrix in place.

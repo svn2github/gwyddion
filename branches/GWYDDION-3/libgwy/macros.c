@@ -86,6 +86,7 @@
 
 /**
  * GWY_SLICE_FREE:
+ * @type: Type of the data to free, typically a structure name.
  * @ptr: Pointer (must be an l-value).
  *
  * Frees #GSlice-allocated memory if it is allocated.

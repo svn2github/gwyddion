@@ -383,8 +383,8 @@ gwy_value_format_get_glue(GwyValueFormat *format)
 /**
  * gwy_value_format_set_glue:
  * @format: Value format.
- * @units: New glue.  Empty glue can be represented as %NULL, in fact, this
- *         is preferable to empty string.
+ * @glue: New glue.  Empty glue can be represented as %NULL, in fact, this
+ *        is preferable to empty string.
  *
  * Sets the string between number and units of a value format.
  **/
