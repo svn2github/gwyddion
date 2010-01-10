@@ -806,6 +806,19 @@ fail:
  *
  * since there are as many 1-terms in (4) as there are valid terms in (2).
  *
+ * The formula G_k = g_k/P_k is sufficient for a single row, however, as we
+ * usually average over multiple rows, is seems more fair to give each input
+ * data value equal weight in the result.  So, instead of calculating G_k for
+ * each row, we gather g_k and P_k separately and calculate G_k as follows:
+ *
+ *        ∑ g
+ *        r  k,r
+ * G_k = ––––––––                                   (5)
+ *        ∑ P
+ *        r  k,r
+ *
+ * where r indexes the rows.
+ *
  * G_k can be calculated using DFT, and so can be P_k (with the additional
  * knowledge that it is integer-valued).  This well-known trick is described
  * below.
@@ -813,58 +826,58 @@ fail:
  * Denoting the unnormalized correlation
  *
  *      N-1-k
- * g  =   ∑   z  z                                  (5)
+ * g  =   ∑   z  z                                  (6)
  *  k    j=0   j  j+k
  *
  * we first extend the data with zeroes to length M ≥ 2N, i.e. z_k ≡ 0 for
  * N ≤ k < M.  And then consider them to be periodic, i.e. let
  *
- * z     = z                                        (6)
+ * z     = z                                        (7)
  *  k+M     k
  *
  * It can be easily seen that for 0 ≤ k < N it holds (values for other k depend
  * on the precise choice of M but they are permitted to be abtirary)
  *
  *      M-1
- * g  =  ∑   z  z                                   (7)
+ * g  =  ∑   z  z                                   (8)
  *  k   j=0   j  j+k
  *
  * Now we express the values using the DFT coefficients (on the entire M-sized
  * data)
  *
  *       1   M-1     2πijν/M
- * z  = –––   ∑  Z  e                               (8)
+ * z  = –––   ∑  Z  e                               (9)
  *  j   √M   ν=0  ν
  *
  * and substitute to (5):
  *
  *      1 M-1  M-1  M-1         2πijν  2πi(j+k)μ
- * g  = –  ∑    ∑    ∑   Z  Z  e      e             (9)
+ * g  = –  ∑    ∑    ∑   Z  Z  e      e             (10)
  *  k   M j=0  ν=0  μ=0   ν  μ
  *
  * Performing first the summation over j, we obtain
  *
  *      1 M-1  M-1         2πikμ
- * g  = –  ∑    ∑   Z  Z  e      M δ'               (10)
+ * g  = –  ∑    ∑   Z  Z  e      M δ'               (11)
  *  k   M ν=0  μ=0   ν  μ           ν+μ
  *
  * where δ'_{ν+μ} is 1 if ν+μ is an integer multiple of M and zero otherwise.
  * Hence only the terms with μ=M-ν are nonzero, i.e.
  *
  *       M-1          -2πikν
- * g  =   ∑  Z  Z    e                              (11)
+ * g  =   ∑  Z  Z    e                              (12)
  *  k    ν=0  ν  M-ν
  *
  * Considering, finally, thah the input data are real and so
  *
  *          *
- * Z     = Z                                        (12)
+ * Z     = Z                                        (13)
  *  M-ν     ν
  *
  * we obtain
  *
  *      M-1        -2πikν
- * g  =  ∑  |Z |² e                                 (13)
+ * g  =  ∑  |Z |² e                                 (14)
  *  k   ν=0   ν
  *
  * The transform from z_j to Z_ν and from |Z_ν|² to g_k are both in the same
@@ -937,43 +950,67 @@ gwy_field_part_row_acf(GwyField *field,
     line = gwy_line_new_sized(width, TRUE);
     gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
     const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
     guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 3;
     gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
     gdouble *ffthc = buffer + size;
-    //gdouble *fftmaskhc = ffthc + size;
-    guint ngoodrows = 0;
+    gdouble *weights = ffthc + size;    // used only with mask
 
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
+    if (masking != GWY_MASK_IGNORE)
+        gwy_memclear(weights, size);
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
-        guint ndata = width;
         if (masking == GWY_MASK_IGNORE)
             row_level(buffer, width);
         else {
             GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-            ndata = row_level_mask(buffer, width, iter,
-                                   masking == GWY_MASK_EXCLUDE);
-            if (!ndata)
+            if (!row_level_mask(buffer, width, iter, invert))
                 continue;
         }
-        // If there is any data point the row contributes to the extrapolated
-        // ACF.
-        ngoodrows++;
-        fftw_execute(plan);
         row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
         const gdouble *q = buffer;
         for (guint j = line->res; j; j--, p++, q++)
             *p += *q;
+
+        // If there is a mask we have to keep track of weights for each g_k
+        // pixel separately.
+        if (masking != GWY_MASK_IGNORE) {
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+            p = buffer;
+            for (guint j = width; j; j--, p++) {
+                *p = !gwy_mask_iter_get(iter) == invert;
+                gwy_mask_iter_next(iter);
+            }
+            row_acf(plan, buffer, ffthc, size, width);
+            p = weights;
+            q = ffthc;
+            // Round to integers, this is most important for correct
+            // preservation of zeroes as we need to treat g_k with no
+            // contributions specially
+            for (guint j = width; j; j--, p++, q++)
+                *p = gwy_round(*q);
+        }
     }
     fftw_destroy_plan(plan);
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = 0; j < line->res; j++)
+            line->data[j] /= height*(line->res - j);
+    }
+    else {
+        for (guint j = 0; j < line->res; j++) {
+            if (weights[j])
+                line->data[j] /= weights[j];
+            else
+                line->data[j] = 0.0;
+        }
+    }
     fftw_free(buffer);
-
-    if (ngoodrows)
-        gwy_line_multiply(line, 1.0/ngoodrows);
     gwy_line_set_real(line, gwy_field_dx(field)*line->res);
 
 fail:
