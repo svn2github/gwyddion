@@ -570,6 +570,25 @@ fail:
  *
  * that can be calculated by standard DFT means because only the normalization
  * factor differs.  Formula (2) remains unchanged.  For P = 0 we put Z_ν ≡ 0.
+ *
+ * This approach is sufficient for a single row, however, as we usually average
+ * over multiple rows, is seems more fair to give each input data value equal
+ * weight in the result.  So, instead of calculating Z_ν for each row, we
+ * gather unnormalized f_ν
+ *
+ *      N-1      -2πijν/N
+ * f  =  ∑   z  e                       (5)
+ *  ν   j=0   j
+ *
+ * and P separately and calculate Z_ν as follows:
+ *
+ *       ∑ f
+ *       r  ν,r
+ * Z  = ––––––––                        (6)
+ *  ν    ∑ P
+ *       r  r
+ *
+ * where r indexes the rows.
  */
 
 // Level a row of data by subtracting the mean value.
@@ -641,9 +660,8 @@ row_sum_squares(const gdouble *re, guint n)
     return sum2;
 }
 
-/*
- * Calculate PSDF, normalizing the sum of squares to the previously calculated
- * value.
+/* Calculate PSDF from Fourier coefficients, normalizing the sum of squares to
+ * the previously calculated value.
  */
 static void
 row_psdf(const gdouble *ffthc,
@@ -659,11 +677,11 @@ row_psdf(const gdouble *ffthc,
      * while for odd n = 2k+1:
      * r0, r1, r2, ..., rk, ik, i(k-1), ..., i1
      */
-    gdouble s = psdf[0] = ffthc[0]*ffthc[0]/n;
+    gdouble s = psdf[0] = ffthc[0]*ffthc[0];
     for (guint i = 1; i < (n + 1)/2; i++)
-        s += psdf[i] = (ffthc[i]*ffthc[i] + ffthc[n-i]*ffthc[n-i])/n;
+        s += psdf[i] = ffthc[i]*ffthc[i] + ffthc[n-i]*ffthc[n-i];
     if (n % 2 == 0)
-        s += psdf[n/2] = (ffthc[n/2]*ffthc[n/2])/n;
+        s += psdf[n/2] = ffthc[n/2]*ffthc[n/2];
 
     if (s == 0.0)
         return;
@@ -717,7 +735,7 @@ gwy_field_part_row_psdf(GwyField *field,
     gdouble *buffer = fftw_malloc(3*size*sizeof(gdouble));
     gdouble *window = buffer + size;
     gdouble *ffthc = window + size;
-    guint ngoodrows = 0;
+    gdouble weight = 0.0;
 
     gwy_fft_window_sample(window, width, windowing);
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
@@ -736,14 +754,13 @@ gwy_field_part_row_psdf(GwyField *field,
             if (!ndata)
                 continue;
         }
-        // If there is any data point the row contributes to the extrapolated
-        // PSDF.
-        ngoodrows++;
-        // We want to estimate the full PSDF from the incomplete data.  So for
-        // incomplete rows extrapolate the sum to the value expected for the
-        // complete data.  FIXME: depending on levelling, we might need to
-        // use factor (width-1)/(ndata-1) instead.
-        gdouble sum2 = row_sum_squares(buffer, width)*width/ndata;
+        weight += ndata;
+        // We want to estimate the full PSDF from the incomplete data which
+        // would involve multiplying it by @width/@ndata.  On the other hand,
+        // we want to weight the input data fairly which would mean dividing it
+        // by the same factor again.  So, keep @sum2 as-is and divive
+        // everything with @weight at the end instead.
+        gdouble sum2 = row_sum_squares(buffer, width);
         if (!sum2)
             continue;
         row_window(buffer, window, width);
@@ -757,8 +774,8 @@ gwy_field_part_row_psdf(GwyField *field,
     fftw_destroy_plan(plan);
     fftw_free(buffer);
 
-    if (ngoodrows)
-        gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*ngoodrows));
+    if (weight)
+        gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*weight));
     gwy_line_set_real(line, G_PI/gwy_field_dx(field));
 
 fail:
@@ -811,11 +828,11 @@ fail:
  * data value equal weight in the result.  So, instead of calculating G_k for
  * each row, we gather g_k and P_k separately and calculate G_k as follows:
  *
- *        ∑ g
- *        r  k,r
- * G_k = ––––––––                                   (5)
- *        ∑ P
- *        r  k,r
+ *       ∑ g
+ *       r  k,r
+ * G  = ––––––––                                   (5)
+ *  k    ∑ P
+ *       r  k,r
  *
  * where r indexes the rows.
  *
@@ -894,6 +911,7 @@ fail:
 // layout is 01234321 which is even and supported by FFTW, whereas for an odd
 // size the layout is 0123321 which is odd and unsupported by FFTW.  Since we
 // obtain @size by multiplication by 4 this should not be a problem to ensure.
+// FFTW docs contain a note about R00 transforms being slow though.
 static inline void
 row_acf(fftw_plan plan,
         gdouble *in,
