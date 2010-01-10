@@ -48,8 +48,12 @@ mkenum_headers = \
 	unit.h \
 	value-format.h \
 	version.h
+
 private_headers = \
-	processing-internal.h
+	field-internal.h \
+	line-internal.h \
+	mask-field-internal.h \
+	math-internal.h
 
 library_headers = $(mkenum_headers) $(mkenum_name).h
 

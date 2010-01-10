@@ -22,7 +22,8 @@
 #include "libgwy/math.h"
 #include "libgwy/line-statistics.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/line-internal.h"
 
 /**
  * gwy_line_min_max:

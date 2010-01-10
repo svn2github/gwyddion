@@ -22,7 +22,7 @@
 #include "libgwy/math.h"
 #include "libgwy/mask-field-transform.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/mask-field-internal.h"
 
 // XXX: Not very efficient, but probably sufficiently efficient.
 static void

@@ -21,7 +21,7 @@
 #include "libgwy/math.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/line-internal.h"
 
 // FIXME: These two may not belong here, but they do not worth a separate
 // header.

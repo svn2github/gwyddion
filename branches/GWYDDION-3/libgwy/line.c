@@ -25,7 +25,8 @@
 #include "libgwy/line.h"
 #include "libgwy/line-statistics.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/line-internal.h"
 
 enum { N_ITEMS = 5 };
 
@@ -610,7 +611,7 @@ gwy_line_set_size(GwyLine *line,
                   guint res,
                   gboolean clear)
 {
-    g_return_if_fail(GWY_IS_FIELD(line));
+    g_return_if_fail(GWY_IS_LINE(line));
     g_return_if_fail(res);
 
     if (line->res != res) {

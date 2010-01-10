@@ -19,75 +19,12 @@
 
 /*< private_header >*/
 
-#ifndef __LIBGWY_PROCESSING_INTERNAL_H__
-#define __LIBGWY_PROCESSING_INTERNAL_H__
+#ifndef __LIBGWY_MASK_FIELD_INTERNAL_H__
+#define __LIBGWY_MASK_FIELD_INTERNAL_H__
 
-#include "libgwy/field.h"
 #include "libgwy/mask-field.h"
 
 G_BEGIN_DECLS
-
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
-
-#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
-
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-
-#define ASSIGN_UNITS(dest, src) \
-    do { \
-        if (src && dest) \
-            gwy_unit_assign(dest, src); \
-        else if (dest) \
-            GWY_OBJECT_UNREF(dest); \
-        else if (src) \
-            dest = gwy_unit_duplicate(src); \
-    } while (0)
-
-struct _GwyLinePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
-    gboolean allocated;
-};
-
-typedef struct _GwyLinePrivate Line;
-
-struct _GwyCurvePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
-};
-
-typedef struct _GwyCurvePrivate Curve;
-
-/* Cache operations */
-#define CVAL(arg, bit)  ((arg)->cache[GWY_FIELD_CACHE_##bit])
-#define CBIT(bit)       (1 << GWY_FIELD_CACHE_##bit)
-#define CTEST(arg, bit) ((arg)->cached & CBIT(bit))
-
-typedef enum {
-    GWY_FIELD_CACHE_MIN = 0,
-    GWY_FIELD_CACHE_MAX,
-    GWY_FIELD_CACHE_AVG,
-    GWY_FIELD_CACHE_RMS,
-    GWY_FIELD_CACHE_MED,
-    GWY_FIELD_CACHE_ARF,
-    GWY_FIELD_CACHE_ART,
-    GWY_FIELD_CACHE_ARE,
-    GWY_FIELD_CACHE_SIZE
-} GwyFieldCached;
-
-struct _GwyFieldPrivate {
-    /* FIXME: Consider permitting x-units != y-units. */
-    GwyUnit *unit_xy;
-    GwyUnit *unit_z;
-    guint32 cached;
-    gboolean allocated;
-    gdouble cache[GWY_FIELD_CACHE_SIZE];
-};
-
-typedef struct _GwyFieldPrivate Field;
 
 typedef struct {
     guint row;
@@ -132,18 +69,6 @@ typedef struct {
 #define NTH_BIT(n) (FIRST_BIT SHR (n))
 #define MAKE_MASK(firstbit, nbits) \
     (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
-
-G_GNUC_INTERNAL
-gboolean _gwy_field_check_mask(const GwyField *field,
-                               const GwyMaskField *mask,
-                               GwyMaskingType *masking,
-                               guint col, guint row,
-                               guint width, guint height,
-                               guint *maskcol, guint *maskrow);
-
-void _gwy_notify_properties(GObject *object,
-                            const gchar **properties,
-                            guint nproperties);
 
 G_END_DECLS
 

@@ -22,7 +22,8 @@
 #include "libgwy/math.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/field-internal.h"
 
 gboolean
 _gwy_field_check_mask(const GwyField *field,

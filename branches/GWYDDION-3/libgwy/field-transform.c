@@ -22,7 +22,8 @@
 #include "libgwy/math.h"
 #include "libgwy/field-transform.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/field-internal.h"
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 

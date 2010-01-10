@@ -23,7 +23,9 @@
 #include "libgwy/serialize.h"
 #include "libgwy/mask-field.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/line-internal.h"
+#include "libgwy/mask-field-internal.h"
 
 enum { N_ITEMS = 3 };
 

@@ -29,12 +29,10 @@
 #include "libgwy/serialize.h"
 #include "libgwy/resource.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/math-internal.h"
 
 #define MAGIC_HEADER2 "Gwyddion resource "
 #define MAGIC_HEADER3 "Gwyddion3 resource "
-
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
 enum { N_ITEMS = 1 };
 

@@ -25,7 +25,8 @@
 #include "libgwy/field.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/field-internal.h"
 
 enum { N_ITEMS = 9 };
 

@@ -26,9 +26,7 @@
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"
 #include "libgwy/libgwy-aliases.h"
-
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
+#include "libgwy/math-internal.h"
 
 enum {
     PROP_0,

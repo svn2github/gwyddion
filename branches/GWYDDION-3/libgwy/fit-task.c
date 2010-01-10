@@ -23,7 +23,7 @@
 #include "libgwy/fit-task.h"
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
 
 enum { VARARG_PARAM_MAX = 5 };
 

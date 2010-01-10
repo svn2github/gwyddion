@@ -22,7 +22,9 @@
 #include "libgwy/math.h"
 #include "libgwy/field-level.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/field-internal.h"
+#include "libgwy/mask-field-internal.h"
 
 typedef struct {
     const gdouble *p;

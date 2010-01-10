@@ -26,7 +26,8 @@
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-distributions.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/processing-internal.h"
+#include "libgwy/math-internal.h"
+#include "libgwy/field-internal.h"
 
 static GwyLine*
 create_line_for_dist(const GwyMaskField *mask,
