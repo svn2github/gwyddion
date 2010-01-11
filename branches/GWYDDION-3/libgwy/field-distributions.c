@@ -547,12 +547,12 @@ fail:
  * Apart from normalization, the discrete Fourier coefficients are
  *
  *       1   N-1     -2πijν/N
- * Z  = –––   ∑  z  e                   (1)
+ * Z  = –––   ∑  z  e                                     (1)
  *  ν   √N   j=0  j
  *
  * and the PSDF is then
  *
- * W  = |Z |²                           (2)
+ * W  = |Z |²                                             (2)
  *  ν     ν
  *
  * To extend these definitions to incomplete data, we sum only over the
@@ -560,13 +560,13 @@ fail:
  * of available data P.
  *
  *       1        -2πijν/N
- * Z  = ––– ∑ z  e                      (3)
+ * Z  = ––– ∑ z  e                                        (3)
  *  ν   √P  j  j
  *
  * Notice that by putting z_j ≡ 0 for unavailable data we obtain
  *
  *       1   N-1      -2πijν/N
- * Z  = –––   ∑   z  e                  (4)
+ * Z  = –––   ∑   z  e                                    (4)
  *  ν   √P   j=0   j
  *
  * that can be calculated by standard DFT means because only the normalization
@@ -578,14 +578,14 @@ fail:
  * gather unnormalized f_ν
  *
  *      N-1      -2πijν/N
- * f  =  ∑   z  e                       (5)
+ * f  =  ∑   z  e                                         (5)
  *  ν   j=0   j
  *
  * and P separately and calculate Z_ν as follows:
  *
  *       ∑ f
  *       r  ν,r
- * Z  = ––––––––                        (6)
+ * Z  = ––––––––                                          (6)
  *  ν    ∑ P
  *       r  r
  *
@@ -830,19 +830,18 @@ fail:
 /*
  * ACF of incomplete data.
  *
- * Apart from normalization, the ACF is
+ * The ACF is defined as follows
  *
  *       1  N-1-k
- * G  = –––   ∑   z  z                              (1)
+ * G  = –––   ∑   z  z                                    (1)
  *  k   N-k  j=0   j  j+k
  *
- * To extend this definition to incomplete data, we sum only over the
- * available data in (1) and instead of dividing by N-k we divide by the number
- * of terms containing the products of available data, we denote this number
- * P_k.
+ * To extend this definition to incomplete data, we sum only over the available
+ * data in (1) and instead of dividing by N-k we divide by the number of terms
+ * containing the products of available data, we denote this number P_k.
  *
  *       1   N-1-k
- * G  = –––    ∑    z  z                            (2)
+ * G  = –––    ∑    z  z                                  (2)
  *  k    P    j=0    j  j+k
  *        k
  * where, again, we put z_j ≡ 0 for unavailable data. So only the normalization
@@ -850,13 +849,13 @@ fail:
  * for all values of k can be calculated if we define
  *
  *      ⎧ 1,  if z_k is available
- * m  = ⎨                                           (3)
+ * m  = ⎨                                                 (3)
  *  k   ⎩ 0,  if z_k is unavailable
  *
  * i.e. m_k is the available data mask.  Then obviously
  *
  *      N-1-k
- * P  =   ∑    m  m                                 (4)
+ * P  =   ∑    m  m                                       (4)
  *  k    j=0    j  j+k
  *
  * since there are as many 1-terms in (4) as there are valid terms in (2).
@@ -868,7 +867,7 @@ fail:
  *
  *       ∑ g
  *       r  k,r
- * G  = ––––––––                                   (5)
+ * G  = ––––––––                                          (5)
  *  k    ∑ P
  *       r  k,r
  *
@@ -881,63 +880,74 @@ fail:
  * Denoting the unnormalized correlation
  *
  *      N-1-k
- * g  =   ∑   z  z                                  (6)
+ * g  =   ∑   z  z                                        (6)
  *  k    j=0   j  j+k
  *
- * we first extend the data with zeroes to length M ≥ 2N, i.e. z_k ≡ 0 for
- * N ≤ k < M.  And then consider them to be periodic, i.e. let
+ * we first extend the data with zeroes to length S ≥ 2N, i.e. z_k ≡ 0 for
+ * N ≤ k < S.  And then consider them to be periodic, i.e. let
  *
- * z     = z                                        (7)
- *  k+M     k
+ * z     = z                                              (7)
+ *  k+S     k
  *
  * It can be easily seen that for 0 ≤ k < N it holds (values for other k depend
- * on the precise choice of M but they are permitted to be abtirary)
+ * on the precise choice of S but they are permitted to be abtirary)
  *
- *      M-1
- * g  =  ∑   z  z                                   (8)
+ *      S-1
+ * g  =  ∑   z  z                                         (8)
  *  k   j=0   j  j+k
  *
- * Now we express the values using the DFT coefficients (on the entire M-sized
+ * Now we express the values using the DFT coefficients (on the entire S-sized
  * data)
  *
- *       1   M-1     2πijν/M
- * z  = –––   ∑  Z  e                               (9)
- *  j   √M   ν=0  ν
+ *       1   S-1     2πijν/S
+ * z  = –––   ∑  Z  e                                     (9)
+ *  j   √S   ν=0  ν
  *
  * and substitute to (5):
  *
- *      1 M-1  M-1  M-1         2πijν  2πi(j+k)μ
- * g  = –  ∑    ∑    ∑   Z  Z  e      e             (10)
- *  k   M j=0  ν=0  μ=0   ν  μ
+ *      1 S-1  S-1  S-1         2πijν/S  2πi(j+k)μ/S
+ * g  = –  ∑    ∑    ∑   Z  Z  e        e                 (10)
+ *  k   S j=0  ν=0  μ=0   ν  μ
  *
  * Performing first the summation over j, we obtain
  *
- *      1 M-1  M-1         2πikμ
- * g  = –  ∑    ∑   Z  Z  e      M δ'               (11)
- *  k   M ν=0  μ=0   ν  μ           ν+μ
+ *      1 S-1  S-1         2πikμ/S
+ * g  = –  ∑    ∑   Z  Z  e        S δ'                   (11)
+ *  k   S ν=0  μ=0   ν  μ             ν+μ
  *
- * where δ'_{ν+μ} is 1 if ν+μ is an integer multiple of M and zero otherwise.
- * Hence only the terms with μ=M-ν are nonzero, i.e.
+ * where δ'_{ν+μ} is 1 if ν+μ is an integer multiple of S and zero otherwise.
+ * Hence only the terms with μ=S-ν are nonzero, i.e.
  *
- *       M-1          -2πikν
- * g  =   ∑  Z  Z    e                              (12)
- *  k    ν=0  ν  M-ν
+ *       S-1          -2πikν/S
+ * g  =   ∑  Z  Z    e                                    (12)
+ *  k    ν=0  ν  S-ν
  *
- * Considering, finally, thah the input data are real and so
+ * Considering, finally, that the input data are real and so
  *
  *          *
- * Z     = Z                                        (13)
- *  M-ν     ν
+ * Z     = Z                                              (13)
+ *  S-ν     ν
  *
  * we obtain
  *
- *      M-1        -2πikν
- * g  =  ∑  |Z |² e                                 (14)
+ *      S-1        -2πikν/S
+ * g  =  ∑  |Z |² e                                       (14)
  *  k   ν=0   ν
  *
  * The transform from z_j to Z_ν and from |Z_ν|² to g_k are both in the same
  * direction (forward).  In addition, while the first is of R2C type the second
- * is a discrete cosine transform as |Z_ν|² = |Z_{M-ν}|² and both are real.
+ * is a discrete cosine transform as |Z_ν|² = |Z_{S-ν}|² and both are real.
+ *
+ * Analogously, P_k is calculated from the Fourier coefficients M_ν of the mask
+ * m_k
+ *
+ *      S-1        -2πikν/S
+ * P  =  ∑  |M |² e                                       (15)
+ *  k   ν=0   ν
+ *
+ * To summarize, the evaluation of ACF of partial data requires two R2C
+ * transforms (to calculate Z_ν and M_ν) and two DCT transforms (to calculate
+ * g_k and P_k). For full data, only one R2C and one DCT is sufficient.
  */
 
 // FFTW calculates unnormalized DFT so we divide the result of the first
@@ -1085,6 +1095,79 @@ fail:
                             gwy_field_get_unit_z(field), 2);
     return line;
 }
+
+/*
+ * HHCF of incomplete data.
+ *
+ * The HHCF is defined as follows
+ *
+ *       1  N-1-k
+ * H  = –––   ∑  (z  - z   )²                             (1)
+ *  k   N-k  j=0   j    j+k
+ *
+ * To extend this definition to incomplete data, we sum only over the available
+ * data in (1) and instead of dividing by N-k we divide by P_k that has been
+ * already derived for ACF.  So, again, we focus on the unnormalized
+ * height-height correlation function
+ *
+ *      N-1-k
+ * h  =   ∑  (z  - z   )² m  m                            (2)
+ *  k    j=0   j    j+k    j  j+k
+ *
+ * Note the data mask has to be explicitly included to ensure vanishing of the
+ * terms where at least one of z_j and z_{j+k} is unavailable.  Note that if
+ * we put z_k ≡ 0 for unavailable and padding data as usual, it holds
+ *
+ * m  z  = z                                              (3)
+ *  k  k    k
+ *
+ * Using this identity, we expand the square in (2) to three terms that can be
+ * each summed separately and obtain
+ *
+ *      N-1-k          N-1-k           N-1-k
+ * h  =   ∑  z² m    +   ∑  z²   m  - 2  ∑   z  z         (4)
+ *  k    j=0  j  j+k    j=0  j+k  j     j=0   j  j+k
+ *
+ * Unlike (1), each of these sums can be extended to S terms and made periodic.
+ * The last sum is g_k and the first two terms are convolutions of mask m_j
+ * with u_j = (z_j)².  They are equal to
+ *
+ * S-1     *  -2πikν/S    S-1  *     -2πikν/S
+ *  ∑  U  M  e        ,    ∑  U  M  e                     (5)
+ * ν=0  ν  ν              ν=0  ν  ν
+ *
+ * respectively.  Since
+ *
+ *     *    *
+ * U  M  + U  M  = 2V                                     (6)
+ *  ν  ν    ν  ν     ν
+ * 
+ * is again real and even even, we can write
+ *
+ *      S-1     -2πikν/S
+ * h  =  ∑  V  e          - 2g  = v  - 2g                 (7)
+ *  k   j=0  ν                k    k     k
+ *
+ * which is a DCT transfrom.
+ *
+ * The weighting should be done as in the case of ACF.
+ *
+ * To summarize, the evaluation of ACF of partial data requires three R2C
+ * transforms (to calculate Z_ν, M_ν and U_ν) and three DCT transforms (to
+ * calculate g_k, P_k and v_k). For full data, only one R2C and one DCT is
+ * sufficient, the same as for ACF because in this case v_k can be expressed
+ * directly.  Defining the partial sum of squares
+ *
+ *       k
+ * s  =  ∑  z²                                           (8)
+ *  k   j=0  j
+ *
+ * it is obvious that
+ *
+ *       N-1-k      N-1-k
+ * v  =    ∑  z²  +   ∑  z²   = s      + s    - s        (9)
+ *  k     j=0  j     j=0  j+k    N-1-k    N-1    k
+ */
 
 #define __LIBGWY_FIELD_DISTRIBUTIONS_C__
 #include "libgwy/libgwy-aliases.c"
