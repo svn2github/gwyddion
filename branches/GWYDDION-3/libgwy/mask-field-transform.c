@@ -161,37 +161,54 @@ swap_block(const guint32 *sb, guint32 *db,
         sbuff[i] = *s;
     swap_xy_32x32(sbuff, dbuff);
     guint32 *d = db;
-    for (guint i = 0; i < yblocksize; i++, d += dstride)
-        *d = dbuff[i];
+    // Must not overwrite destination data outside the target area.
+    if (xblocksize < 0x20) {
+        guint32 m = MAKE_MASK(0, xblocksize);
+        for (guint i = 0; i < yblocksize; i++, d += dstride)
+            *d = (*d & ~m) | (dbuff[i] & m);
+    }
+    else {
+        for (guint i = 0; i < yblocksize; i++, d += dstride)
+            *d = dbuff[i];
+    }
 }
 
+// No argument checking.  Columns must be aligned, i.e. multiples of 0x20.
+// The source is assumed to be large enough to contain all the data we copy to
+// the destination.
 static void
-swap_xy(const GwyMaskField *source,
-        GwyMaskField *dest)
+swap_xy_aligned(const GwyMaskField *source,
+                guint col, guint row,
+                guint width, guint height,
+                GwyMaskField *dest,
+                guint destcol, guint destrow)
 {
     guint dxres = dest->xres, dyres = dest->yres;
     guint sstride = source->stride, dstride = dest->stride;
-    guint dxmax = dxres >> 5, jend = dxres & 0x1f;
-    guint dymax = dyres >> 5, iend = dyres & 0x1f;
+    guint jmax = width >> 5, jend = width & 0x1f;
+    guint imax = height >> 5, iend = height & 0x1f;
+    const guint32 *sbase = source->data + sstride*row + (col >> 5);
+    guint32 *dbase = dest->data + dstride*destrow + (destcol >> 5);
 
-    for (guint ib = 0; ib < dymax; ib++) {
-        for (guint jb = 0; jb < dxmax; jb++)
-            swap_block(source->data + ((jb << 5)*sstride + ib),
-                       dest->data + ((ib << 5)*dstride + jb),
+    g_assert(((col | row) & 0x1f) == 0);
+    for (guint ib = 0; ib < imax; ib++) {
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block(sbase + ((jb << 5)*sstride + ib),
+                       dbase + ((ib << 5)*dstride + jb),
                        0x20, 0x20, dstride, sstride);
         if (jend)
-            swap_block(source->data + ((dxmax << 5)*sstride + ib),
-                       dest->data + ((ib << 5)*dstride + dxmax),
+            swap_block(sbase + ((jmax << 5)*sstride + ib),
+                       dbase + ((ib << 5)*dstride + jmax),
                        jend, 0x20, dstride, sstride);
     }
     if (iend) {
-        for (guint jb = 0; jb < dxmax; jb++)
-            swap_block(source->data + (jb*dyres + dymax),
-                       dest->data + (dymax*dxres + jb),
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block(sbase + (jb*dyres + imax),
+                       dbase + (imax*dxres + jb),
                        0x20, iend, dstride, sstride);
         if (jend)
-            swap_block(source->data + (dxmax*dyres + dymax),
-                       dest->data + (dymax*dxres + dxmax),
+            swap_block(sbase + (jmax*dyres + imax),
+                       dbase + (imax*dxres + jmax),
                        jend, iend, dstride, sstride);
     }
 }
@@ -211,7 +228,7 @@ gwy_mask_field_new_transposed(const GwyMaskField *field)
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(field->yres, field->xres,
                                                       FALSE);
-    swap_xy(field, newfield);
+    swap_xy_aligned(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
     return newfield;
 }
 
