@@ -171,8 +171,10 @@ swap_xy(const GwyField *source,
  * @field: A two-dimensional data field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).
- * @height: Rectangle height (number of rows).
+ * @width: Rectangle width (number of columns) in @field, the height of
+ *         the newly created field.
+ * @height: Rectangle height (number of rows) in @field, the width of
+ *          the newly created field.
  * @transform_offsets: %TRUE to set the X and Y offsets of the new field
  *                     using @col, @row and @field offsets.  %FALSE to set
  *                     offsets of the new field to zeroes.
@@ -216,7 +218,7 @@ gwy_field_new_part_transposed(const GwyField *field,
 
 /**
  * gwy_field_part_transpose:
- * @src: Source two-dimensional data data field.
+ * @src: Source two-dimensional data field.
  * @col: Column index of the upper-left corner of the rectangle in @src.
  * @row: Row index of the upper-left corner of the rectangle in @src.
  * @width: Rectangle width (number of columns) in the source, height in the

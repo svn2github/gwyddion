@@ -233,6 +233,131 @@ gwy_mask_field_new_transposed(const GwyMaskField *field)
 }
 
 /**
+ * gwy_mask_field_new_part_transposed:
+ * @field: A two-dimensional mask field.
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns) in @field, the height of
+ *         the newly created mask field.
+ * @height: Rectangle height (number of rows) in @field, the width of
+ *          the newly created mask field.
+ *
+ * Transposes a rectangular part of a mask field, making rows columns and vice
+ * versa.
+ *
+ * Returns: A new two-dimensional mask field containing the transposed part
+ *          of @field.
+ **/
+GwyMaskField*
+gwy_mask_field_new_part_transposed(const GwyMaskField *field,
+                                   guint col, guint row,
+                                   guint width, guint height)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
+    g_return_val_if_fail(width && height, NULL);
+    g_return_val_if_fail(col + width <= field->xres, NULL);
+    g_return_val_if_fail(row + height <= field->yres, NULL);
+
+    GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
+
+    // FIXME: Direct transposition of unaligned data would be nice.  Can it be
+    // written without going insane?
+    if (col & 0x1f) {
+        GwyMaskField *buffer = gwy_mask_field_new_part(field,
+                                                       col, row, width, height);
+        swap_xy_aligned(buffer, 0, 0, width, height, newfield, 0, 0);
+        g_object_unref(buffer);
+    }
+    else
+        swap_xy_aligned(field, col, row, width, height, newfield, 0, 0);
+
+    return newfield;
+}
+
+/**
+ * gwy_mask_field_part_transpose:
+ * @src: Source two-dimensional mask field.
+ * @col: Column index of the upper-left corner of the rectangle in @src.
+ * @row: Row index of the upper-left corner of the rectangle in @src.
+ * @width: Rectangle width (number of columns) in the source, height in the
+ *         destination.
+ * @height: Rectangle height (number of rows) in the source, width in the
+ *          destination.
+ * @dest: Destination two-dimensional mask field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Copies a rectangular part from one mask field to another, transposing it.
+ *
+ * The rectangle starts at (@col, @row) in @src and its dimensions are
+ * @width×@height. It is transposed to the rectangle @height×@width in @dest
+ * starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * is copied.  This can also mean nothing is copied at all.
+ *
+ * If @src is equal to @dest, the areas may not overlap.
+ **/
+void
+gwy_mask_field_part_transpose(const GwyMaskField *src,
+                              guint col, guint row,
+                              guint width, guint height,
+                              GwyMaskField *dest,
+                              guint destcol, guint destrow)
+{
+    g_return_if_fail(GWY_IS_MASK_FIELD(src));
+    g_return_if_fail(GWY_IS_MASK_FIELD(dest));
+
+    if (col >= src->xres || destcol >= dest->xres
+        || row >= src->yres || destrow >= dest->yres)
+        return;
+
+    width = MIN(width, src->xres - col);
+    height = MIN(height, src->yres - row);
+    width = MIN(width, dest->yres - destrow);
+    height = MIN(height, dest->xres - destcol);
+    if (!width || !height)
+        return;
+
+    if (src == dest
+        && OVERLAPPING(col, width, destcol, height)
+        && OVERLAPPING(row, height, destrow, width)) {
+        g_warning("Source and destination blocks overlap.  "
+                  "Data corruption is imminent.");
+    }
+
+    // FIXME: Direct transposition of unaligned data would be nice.  Can it be
+    // written without going insane?
+    if ((col & 0x1f) && (destcol & 0x1f)) {
+        GwyMaskField *buffer = gwy_mask_field_new_part(src,
+                                                       col, row, width, height);
+        GwyMaskField *cuffer = gwy_mask_field_new_transposed(buffer);
+        g_object_unref(buffer);
+        gwy_mask_field_part_copy(cuffer, 0, 0, height, width,
+                                 dest, destcol, destrow);
+        g_object_unref(cuffer);
+    }
+    else if (col & 0x1f) {
+        GwyMaskField *buffer = gwy_mask_field_new_part(src,
+                                                       col, row, width, height);
+        swap_xy_aligned(buffer, 0, 0, width, height, dest, destcol, destrow);
+        g_object_unref(buffer);
+    }
+    else if (destcol & 0x1f) {
+        GwyMaskField *buffer = gwy_mask_field_new_part_transposed
+                                                 (src, col, row, width, height);
+        gwy_mask_field_part_copy(buffer, 0, 0, height, width,
+                                 dest, destcol, destrow);
+        g_object_unref(buffer);
+    }
+    else
+        swap_xy_aligned(src, col, row, width, height, dest, destcol, destrow);
+
+    gwy_mask_field_invalidate(dest);
+}
+
+/**
  * gwy_mask_field_new_rotated_simple:
  * @field: A two-dimensional mask field.
  * @rotation: Rotation amount (it can also be any positive multiple of 90).

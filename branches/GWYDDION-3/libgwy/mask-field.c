@@ -854,6 +854,13 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
     if (!width || !height)
         return;
 
+    if (src == dest
+        && OVERLAPPING(col, width, destcol, height)
+        && OVERLAPPING(row, height, destrow, width)) {
+        g_warning("Source and destination blocks overlap.  "
+                  "Data corruption is imminent.");
+    }
+
     if (width == src->xres
         && width == dest->xres
         && dest->stride == src->stride) {

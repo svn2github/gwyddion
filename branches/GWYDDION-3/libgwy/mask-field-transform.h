@@ -25,12 +25,25 @@
 
 G_BEGIN_DECLS
 
-void          gwy_mask_field_flip              (GwyMaskField *field,
-                                                gboolean horizontally,
-                                                gboolean vertically);
-GwyMaskField* gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
-                                                GwySimpleRotation rotation) G_GNUC_MALLOC;
-GwyMaskField* gwy_mask_field_new_transposed    (const GwyMaskField *field)  G_GNUC_MALLOC;
+void          gwy_mask_field_flip               (GwyMaskField *field,
+                                                 gboolean horizontally,
+                                                 gboolean vertically);
+GwyMaskField* gwy_mask_field_new_rotated_simple (const GwyMaskField *field,
+                                                 GwySimpleRotation rotation) G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_transposed     (const GwyMaskField *field)  G_GNUC_MALLOC;
+GwyMaskField* gwy_mask_field_new_part_transposed(const GwyMaskField *field,
+                                                 guint col,
+                                                 guint row,
+                                                 guint width,
+                                                 guint height)               G_GNUC_MALLOC;
+void          gwy_mask_field_part_transpose     (const GwyMaskField *src,
+                                                 guint col,
+                                                 guint row,
+                                                 guint width,
+                                                 guint height,
+                                                 GwyMaskField *dest,
+                                                 guint destcol,
+                                                 guint destrow);
 
 G_END_DECLS
 
