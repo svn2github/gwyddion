@@ -1133,10 +1133,10 @@ fail:
  *
  * Note the data mask has to be explicitly included to ensure vanishing of the
  * terms where at least one of z_j and z_{j+k} is unavailable.  Note that if
- * we put z_k ≡ 0 for unavailable and padding data as usual, it holds
+ * we put z_j ≡ 0 for unavailable and padding data as usual, it holds
  *
  * m  z  = z                                              (3)
- *  k  k    k
+ *  j  j    j
  *
  * Using this identity, we expand the square in (2) to three terms that can be
  * each summed separately and obtain
@@ -1145,31 +1145,31 @@ fail:
  * h  =   ∑  z² m    +   ∑  z²   m  - 2  ∑   z  z         (4)
  *  k    j=0  j  j+k    j=0  j+k  j     j=0   j  j+k
  *
- * Unlike (1), each of these sums can be extended to S terms and made periodic.
- * The last sum is g_k and the first two terms are convolutions of mask m_j
- * with u_j = (z_j)².  They are equal to
+ * Unlike the sum in (1), each of these sums can be extended to S ≥ 2N terms
+ * and made periodic without changing its value.  The last sum is g_k and the
+ * first two are convolutions of mask m_j with u_j = (z_j)².  They are equal to
  *
- * S-1     *  -2πikν/S    S-1  *     -2πikν/S
- *  ∑  U  M  e        ,    ∑  U  M  e                     (5)
- * ν=0  ν  ν              ν=0  ν  ν
+ * S-1     *  -2πikν/S        S-1  *     -2πikν/S
+ *  ∑  U  M  e          and    ∑  U  M  e                 (5)
+ * ν=0  ν  ν                  ν=0  ν  ν
  *
  * respectively.  Since
  *
  *     *    *
  * U  M  + U  M  = 2V                                     (6)
  *  ν  ν    ν  ν     ν
- * 
+ *
  * is again real and even even, we can write
  *
  *      S-1     -2πikν/S
  * h  =  ∑  V  e          - 2g  = v  - 2g                 (7)
  *  k   j=0  ν                k    k     k
  *
- * which is a DCT transfrom.
+ * which is a DCT-type transfrom.
  *
  * The weighting should be done as in the case of ACF.
  *
- * To summarize, the evaluation of ACF of partial data requires three R2C
+ * To summarize, the evaluation of HHCF of partial data requires three R2C
  * transforms (to calculate Z_ν, M_ν and U_ν) and three DCT transforms (to
  * calculate g_k, P_k and v_k). For full data, only one R2C and one DCT is
  * sufficient -- the same as for ACF because in this case v_k can be expressed
