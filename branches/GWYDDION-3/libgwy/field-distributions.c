@@ -1167,7 +1167,156 @@ fail:
  *       N-1-k      N-1-k
  * v  =    ∑  z²  +   ∑  z²   = s      + s    - s        (9)
  *  k     j=0  j     j=0  j+k    N-1-k    N-1    k
+ *
+ * Calculation scheme for complete data:
+ *
+ *      ┌────→ Z_ν ──────→ g_k ─────┐
+ *      │ R2C        DCT            │
+ * z_j ─┤                           ├─→ h_k
+ *      │                           │
+ *      └────→ s_k ──────→ v_k ─────┘
+ *         ∑
+ *
+ * Calculation scheme for incomplete data:
+ *
+ *      ┌────→ Z_ν ──────→ g_k ──────────────────────┐
+ *      │ R2C        DCT                             │
+ * z_j ─┤                                            │
+ *      │                                            ├─→ h_k
+ *      └────→ u_j ──────→ U_ν ─┐                    │
+ *                   R2C        │                    │
+ *                              ├─→ V_ν ──────→ v_k ─┘
+ *                              │         DCT
+ *                  ┌───────────┘
+ *                  │
+ * m_j ──────→ M_ν ─┤
+ *       R2C        │
+ *                  └────→ P_k
+ *                    DCT
+ *
+ * Arrows with symbols R2C, DCT and ∑ represent the corresponding transforms,
+ * arrows without a symbol correspond to simple item-wise arithmetic
+ * operations.
  */
+
+/**
+ * gwy_field_part_row_hhcf:
+ * @field: A two-dimensional data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @col: Column index of the upper-left corner of the rectangle.
+ * @row: Row index of the upper-left corner of the rectangle.
+ * @width: Rectangle width (number of columns).
+ * @height: Rectangle height (number of rows).
+ * @level: The first polynomial degree to keep in the rows, lower degrees than
+ *         @level are subtracted.  Note only values 0 (no levelling) and 1
+ *         (subtract the mean value of each row) are available at present.
+ *         There is no difference for HHCF.
+ *
+ * Calculates the row-wise height-height correlation function of a rectangular
+ * part of a field.
+ *
+ * The calculated HHCF has the natural number of points, i.e. @width.
+ *
+ * Masking is performed by omitting all terms that contain excluded pixels.
+ * Since different rows contain different numbers of pixels, the resulting
+ * HHCF values are calculated as a weighted sums where weight of each row's
+ * contribution is proportional to the number of contributing terms.  In other
+ * words, the weighting is fair: each contributing pixel has the same influence
+ * on the result.
+ *
+ * Returns: A new one-dimensional data line with the HHCF.
+ **/
+GwyLine*
+gwy_field_part_row_hhcf(GwyField *field,
+                        const GwyMaskField *mask,
+                        GwyMaskingType masking,
+                        guint col, guint row,
+                        guint width, guint height,
+                        guint level)
+{
+    guint maskcol, maskrow;
+    GwyLine *line = NULL;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow)
+        || width < 2)
+        goto fail;
+
+    // Transform size must be at least twice the data size for zero padding.
+    // An even size is necessary due to alignment constraints in FFTW.
+    // Using this size for all buffers is a bit excessive but safe.
+    line = gwy_line_new_sized(width, TRUE);
+    gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 3;
+    gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
+    gdouble *ffthc = buffer + size;
+    gdouble *weights = ffthc + size;    // used only with mask
+
+    fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
+                                          _GWY_FFTW_PATIENCE);
+    if (masking != GWY_MASK_IGNORE)
+        gwy_memclear(weights, size);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        ASSIGN(buffer, d, width);
+        if (!row_level_and_count(buffer, width,
+                                 mask, masking, maskcol, maskrow + i,
+                                 level))
+            continue;
+        row_acf(plan, buffer, ffthc, size, width);
+        gdouble *p = line->data;
+        const gdouble *q = buffer;
+        for (guint j = line->res; j; j--, p++, q++)
+            *p += *q;
+
+        // If there is a mask we have to keep track of weights for each g_k
+        // pixel separately.
+        if (masking != GWY_MASK_IGNORE) {
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+            p = buffer;
+            for (guint j = width; j; j--, p++) {
+                *p = !gwy_mask_iter_get(iter) == invert;
+                gwy_mask_iter_next(iter);
+            }
+            row_acf(plan, buffer, ffthc, size, width);
+            p = weights;
+            q = ffthc;
+            // Round to integers, this is most important for correct
+            // preservation of zeroes as we need to treat g_k with no
+            // contributions specially
+            for (guint j = width; j; j--, p++, q++)
+                *p = gwy_round(*q);
+        }
+    }
+    fftw_destroy_plan(plan);
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint j = 0; j < line->res; j++)
+            line->data[j] /= height*(line->res - j);
+    }
+    else {
+        for (guint j = 0; j < line->res; j++) {
+            if (weights[j])
+                line->data[j] /= weights[j];
+            else
+                line->data[j] = 0.0;
+        }
+    }
+    fftw_free(buffer);
+    gwy_line_set_real(line, gwy_field_dx(field)*line->res);
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
+                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_z(field), 2);
+    return line;
+}
 
 #define __LIBGWY_FIELD_DISTRIBUTIONS_C__
 #include "libgwy/libgwy-aliases.c"
