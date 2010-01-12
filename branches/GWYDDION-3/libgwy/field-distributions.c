@@ -1159,14 +1159,10 @@ fail:
  * directly.  Defining the partial sum of squares
  *
  *       k
- * s  =  ∑  z²                                           (8)
- *  k   j=0  j
+ * s  =  ∑  z² + z²                                      (8)
+ *  k   j=0  j    N-1-j
  *
- * it is obvious that
- *
- *       N-1-k      N-1-k
- * v  =    ∑  z²  +   ∑  z²   = s      + s    - s        (9)
- *  k     j=0  j     j=0  j+k    N-1-k    N-1    k
+ * that can be calculated incrementally, it is obvious that v_k = s_{N-1-k}.
  *
  * Calculation scheme for complete data:
  *
