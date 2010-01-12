@@ -170,15 +170,15 @@ swap_xy(const GwyField *source, guint col, guint row,
  * @row: Row index of the upper-left corner of the rectangle.
  * @width: Rectangle width (number of columns).
  * @height: Rectangle height (number of rows).
- * @keep_offsets: %TRUE to set the X and Y offsets of the new field
- *                using @col, @row and @field offsets.  %FALSE to set offsets
- *                of the new field to zeroes.
+ * @transform_offsets: %TRUE to set the X and Y offsets of the new field
+ *                     using @col, @row and @field offsets.  %FALSE to set
+ *                     offsets of the new field to zeroes.
  *
  * Transposes a rectangular part of a field, making rows columns and vice
  * versa.
  *
  * The real dimensions and offsets are also transposed (offsets only if
- * requested with @keep_offsets).
+ * requested with @transform_offsets).
  *
  * Returns: A new two-dimensional data field containing the transposed part
  *          of @field.
