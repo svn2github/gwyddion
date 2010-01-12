@@ -236,7 +236,7 @@ gwy_field_new_part_transposed(const GwyField *field,
  * Copies a rectangular part from one field to another, transposing it.
  *
  * The rectangle starts at (@col, @row) in @src and its dimensions are
- * @width×@height. It is transposed a rectangle @height×@width× in @dest
+ * @width×@height. It is transposed to the rectangle @height×@width in @dest
  * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
