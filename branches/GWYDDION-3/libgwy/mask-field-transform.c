@@ -196,7 +196,7 @@ swap_xy(const GwyMaskField *source,
 }
 
 /**
- * gwy_mask_field_transpose:
+ * gwy_mask_field_new_transposed:
  * @field: A two-dimensional mask field.
  *
  * Transposes a mask field, i.e. field rows become columns and vice versa.
@@ -204,7 +204,7 @@ swap_xy(const GwyMaskField *source,
  * Returns: A new two-dimensional mask field.
  **/
 GwyMaskField*
-gwy_mask_field_transpose(const GwyMaskField *field)
+gwy_mask_field_new_transposed(const GwyMaskField *field)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
 
@@ -215,7 +215,7 @@ gwy_mask_field_transpose(const GwyMaskField *field)
 }
 
 /**
- * gwy_mask_field_rotate_simple:
+ * gwy_mask_field_new_rotated_simple:
  * @field: A two-dimensional mask field.
  * @rotation: Rotation amount (it can also be any positive multiple of 90).
  *
@@ -224,8 +224,8 @@ gwy_mask_field_transpose(const GwyMaskField *field)
  * Returns: A new two-dimensional mask field.
  **/
 GwyMaskField*
-gwy_mask_field_rotate_simple(const GwyMaskField *field,
-                             GwySimpleRotation rotation)
+gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
+                                  GwySimpleRotation rotation)
 {
     g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
     rotation %= 360;
@@ -245,7 +245,7 @@ gwy_mask_field_rotate_simple(const GwyMaskField *field,
         return NULL;
     }
 
-    GwyMaskField *newfield = gwy_mask_field_transpose(field);
+    GwyMaskField *newfield = gwy_mask_field_new_transposed(field);
 
     gsize rowsize = field->stride * sizeof(guint32);
     guint32 *buffer = g_slice_alloc(rowsize);

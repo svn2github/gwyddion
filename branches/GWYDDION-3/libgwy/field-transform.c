@@ -164,7 +164,7 @@ swap_xy(const GwyField *source, guint col, guint row,
 }
 
 /**
- * gwy_field_transpose:
+ * gwy_field_new_part_transposed:
  * @field: A two-dimensional data field.
  * @col: Column index of the upper-left corner of the rectangle.
  * @row: Row index of the upper-left corner of the rectangle.
@@ -184,10 +184,10 @@ swap_xy(const GwyField *source, guint col, guint row,
  *          of @field.
  **/
 GwyField*
-gwy_field_part_transpose(const GwyField *field,
-                         guint col, guint row,
-                         guint width, guint height,
-                         gboolean transform_offsets)
+gwy_field_new_part_transposed(const GwyField *field,
+                              guint col, guint row,
+                              guint width, guint height,
+                              gboolean transform_offsets)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     g_return_val_if_fail(col + width <= field->xres, NULL);
@@ -211,7 +211,7 @@ gwy_field_part_transpose(const GwyField *field,
 }
 
 /**
- * gwy_field_transpose:
+ * gwy_field_new_transposed:
  * @field: A two-dimensional data field.
  *
  * Transposes a field, i.e. field rows become columns and vice versa.
@@ -226,7 +226,7 @@ gwy_field_part_transpose(const GwyField *field,
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
-gwy_field_transpose(const GwyField *field)
+gwy_field_new_transposed(const GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
 
@@ -248,7 +248,7 @@ gwy_field_transpose(const GwyField *field)
 }
 
 /**
- * gwy_field_rotate_simple:
+ * gwy_field_new_rotated_simple:
  * @field: A two-dimensional data field.
  * @rotation: Rotation amount (it can also be any positive multiple of 90).
  * @transform_offsets: %TRUE to transform the field origin offset as if the
@@ -264,9 +264,9 @@ gwy_field_transpose(const GwyField *field)
  * Returns: A new two-dimensional data field.
  **/
 GwyField*
-gwy_field_rotate_simple(const GwyField *field,
-                        GwySimpleRotation rotation,
-                        gboolean transform_offsets)
+gwy_field_new_rotated_simple(const GwyField *field,
+                             GwySimpleRotation rotation,
+                             gboolean transform_offsets)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     rotation %= 360;
@@ -286,7 +286,7 @@ gwy_field_rotate_simple(const GwyField *field,
         return NULL;
     }
 
-    GwyField *newfield = gwy_field_transpose(field);
+    GwyField *newfield = gwy_field_new_transposed(field);
     // The field is new, no need to emit signals.
     if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
         flip_vertically(newfield, transform_offsets);
@@ -321,7 +321,7 @@ gwy_field_rotate_simple(const GwyField *field,
  * returned.  You can replace the old field with the new one or, if the object
  * identity is important, use
  * |[
- * GwyField *newfield = gwy_field_rotate(field, 90, FALSE);
+ * GwyField *newfield = gwy_field_new_rotated_simple(field, 90, FALSE);
  * gwy_field_assign(field, newfield);
  * g_object_unref(newfield);
  * ]|
@@ -338,8 +338,8 @@ gwy_field_rotate_simple(const GwyField *field,
  *
  * Rotations by multiples of 90 degrees, i.e. not requiring interpolation.
  *
- * They are used for instance in gwy_field_rotate_simple() and
- * gwy_mask_field_rotate_simple().  The numerical values are equal to the
+ * They are used for instance in gwy_field_new_rotated_simple() and
+ * gwy_mask_field_new_rotated_simple().  The numerical values are equal to the
  * rotation angle in degrees.
  **/
 
