@@ -27,12 +27,6 @@
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 
-// Evaluates to TRUE if intervals [pos1, pos1+len1-1] and [pos2, pos2+len2-1]
-// are overlapping.  Arguments are evaluated many times.
-#define OVERLAPPING(pos1, len1, pos2, len2) \
-    (MAX((pos1) + (len1), (pos2) + (len2)) - MIN((pos1), (pos2)) \
-     < (len1) + (len2))
-
 // For rotations. The largest value before the performance starts to
 // deteriorate on Phenom II; probably after that threshold on older hardware.
 //

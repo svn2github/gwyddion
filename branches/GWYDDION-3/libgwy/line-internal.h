@@ -39,6 +39,12 @@ G_BEGIN_DECLS
             dest = gwy_unit_duplicate(src); \
     } while (0)
 
+// Evaluates to TRUE if intervals [pos1, pos1+len1-1] and [pos2, pos2+len2-1]
+// are overlapping.  Arguments are evaluated many times.
+#define OVERLAPPING(pos1, len1, pos2, len2) \
+    (MAX((pos1) + (len1), (pos2) + (len2)) - MIN((pos1), (pos2)) \
+     < (len1) + (len2))
+
 struct _GwyLinePrivate {
     GwyUnit *unit_x;
     GwyUnit *unit_y;
