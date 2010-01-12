@@ -45,6 +45,14 @@ GwyField* gwy_field_new_part_transposed(const GwyField *field,
                                         guint width,
                                         guint height,
                                         gboolean transform_offsets)  G_GNUC_MALLOC;
+void      gwy_field_part_transpose     (const GwyField *src,
+                                        guint col,
+                                        guint row,
+                                        guint width,
+                                        guint height,
+                                        GwyField *dest,
+                                        guint destcol,
+                                        guint destrow);
 
 G_END_DECLS
 

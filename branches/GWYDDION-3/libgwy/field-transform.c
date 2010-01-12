@@ -27,6 +27,12 @@
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 
+// Evaluates to TRUE if intervals [pos1, pos1+len1-1] and [pos2, pos2+len2-1]
+// are overlapping.  Arguments are evaluated many times.
+#define OVERLAPPING(pos1, len1, pos2, len2) \
+    (MAX((pos1) + (len1), (pos2) + (len2)) - MIN((pos1), (pos2)) \
+     < (len1) + (len2))
+
 // For rotations. The largest value before the performance starts to
 // deteriorate on Phenom II; probably after that threshold on older hardware.
 //
@@ -132,34 +138,37 @@ swap_block(const gdouble *sb, gdouble *db,
     }
 }
 
-// The source is assumed to be large enough to contain all the data we copy
-// to the destination.
+// No argument checking.  The source is assumed to be large enough to contain
+// all the data we copy to the destination.
 static void
-swap_xy(const GwyField *source, guint col, guint row,
-        GwyField *dest)
+swap_xy(const GwyField *source,
+        guint col, guint row,
+        guint width, guint height,
+        GwyField *dest,
+        guint destcol, guint destrow)
 {
     guint dxres = dest->xres, dyres = dest->yres, sxres = source->xres;
-    guint dxmax = dxres/BLOCK_SIZE * BLOCK_SIZE;
-    guint dymax = dyres/BLOCK_SIZE * BLOCK_SIZE;
+    guint jmax = height/BLOCK_SIZE * BLOCK_SIZE;
+    guint imax = width/BLOCK_SIZE * BLOCK_SIZE;
     const gdouble *sbase = source->data + sxres*row + col;
-    gdouble *dbase = dest->data;
+    gdouble *dbase = dest->data + dxres*destrow + destcol;
 
-    for (guint ib = 0; ib < dymax; ib += BLOCK_SIZE) {
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
+    for (guint ib = 0; ib < imax; ib += BLOCK_SIZE) {
+        for (guint jb = 0; jb < jmax; jb += BLOCK_SIZE)
             swap_block(sbase + (jb*sxres + ib), dbase + (ib*dxres + jb),
                        BLOCK_SIZE, BLOCK_SIZE, dxres, sxres);
-        if (dxmax != dxres)
-            swap_block(sbase + (dxmax*sxres + ib), dbase + (ib*dxres + dxmax),
-                       dxres - dxmax, BLOCK_SIZE, dxres, sxres);
+        if (jmax != dxres)
+            swap_block(sbase + (jmax*sxres + ib), dbase + (ib*dxres + jmax),
+                       dxres - jmax, BLOCK_SIZE, dxres, sxres);
     }
-    if (dymax != dyres) {
-        for (guint jb = 0; jb < dxmax; jb += BLOCK_SIZE)
-            swap_block(sbase + (jb*sxres + dymax), dbase + (dymax*dxres + jb),
-                       BLOCK_SIZE, dyres - dymax, dxres, sxres);
-        if (dxmax != dxres)
-            swap_block(sbase + (dxmax*sxres + dymax),
-                       dbase + (dymax*dxres + dxmax),
-                       dxres - dxmax, dyres - dymax, dxres, sxres);
+    if (imax != dyres) {
+        for (guint jb = 0; jb < jmax; jb += BLOCK_SIZE)
+            swap_block(sbase + (jb*sxres + imax), dbase + (imax*dxres + jb),
+                       BLOCK_SIZE, dyres - imax, dxres, sxres);
+        if (jmax != dxres)
+            swap_block(sbase + (jmax*sxres + imax),
+                       dbase + (imax*dxres + jmax),
+                       dxres - jmax, dyres - imax, dxres, sxres);
     }
 }
 
@@ -190,6 +199,7 @@ gwy_field_new_part_transposed(const GwyField *field,
                               gboolean transform_offsets)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_val_if_fail(width && height, NULL);
     g_return_val_if_fail(col + width <= field->xres, NULL);
     g_return_val_if_fail(row + height <= field->yres, NULL);
 
@@ -201,13 +211,70 @@ gwy_field_new_part_transposed(const GwyField *field,
         newfield->yoff = field->xoff + col*gwy_field_dx(field);
     }
 
-    swap_xy(field, col, row, newfield);
+    swap_xy(field, col, row, width, height, newfield, 0, 0);
 
     Field *spriv = field->priv, *dpriv = newfield->priv;
     ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
     ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
 
     return newfield;
+}
+
+/**
+ * gwy_field_part_transpose:
+ * @src: Source two-dimensional data data field.
+ * @col: Column index of the upper-left corner of the rectangle in @src.
+ * @row: Row index of the upper-left corner of the rectangle in @src.
+ * @width: Rectangle width (number of columns) in the source, height in the
+ *         destination.
+ * @height: Rectangle height (number of rows) in the source, width in the
+ *          destination.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Copies a rectangular part from one field to another, transposing it.
+ *
+ * The rectangle starts at (@col, @row) in @src and its dimensions are
+ * @width×@height. It is transposed a rectangle @height×@width× in @dest
+ * starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * is copied.  This can also mean nothing is copied at all.
+ *
+ * If @src is equal to @dest, the areas may not overlap.
+ **/
+void
+gwy_field_part_transpose(const GwyField *src,
+                         guint col, guint row,
+                         guint width, guint height,
+                         GwyField *dest,
+                         guint destcol, guint destrow)
+{
+    g_return_if_fail(GWY_IS_FIELD(src));
+    g_return_if_fail(GWY_IS_FIELD(dest));
+
+    if (col >= src->xres || destcol >= dest->xres
+        || row >= src->yres || destrow >= dest->yres)
+        return;
+
+    width = MIN(width, src->xres - col);
+    height = MIN(height, src->yres - row);
+    width = MIN(width, dest->yres - destrow);
+    height = MIN(height, dest->xres - destcol);
+    if (!width || !height)
+        return;
+
+    if (src == dest
+        && OVERLAPPING(col, width, destcol, height)
+        && OVERLAPPING(row, height, destrow, width)) {
+        g_warning("Source and destination blocks overlap.  "
+                  "Data corruption is imminent.");
+    }
+
+    swap_xy(src, col, row, width, height, dest, destcol, destrow);
+    gwy_field_invalidate(dest);
 }
 
 /**
@@ -236,7 +303,7 @@ gwy_field_new_transposed(const GwyField *field)
     DSWAP(newfield->xreal, newfield->yreal);
     DSWAP(newfield->xoff, newfield->yoff);
 
-    swap_xy(field, 0, 0, newfield);
+    swap_xy(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
 
     Field *spriv = field->priv, *dpriv = newfield->priv;
     ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
@@ -326,6 +393,46 @@ gwy_field_new_rotated_simple(const GwyField *field,
  * g_object_unref(newfield);
  * ]|
  * which again costs one extra memcpy().
+ *
+ * The most low-level and performance-critical operation is transposition as it
+ * does not permit a strictly linear memory access (rotations by odd multiples
+ * of 90 degrees are essentially transpositions of combined with flipping).
+ * An efficient implementation (which the Gwyddion's is) can be used to convert
+ * otherwise slow column-wise operations on fields to row-wise operations.
+ *
+ * Several transposition functions are available, the simplest are
+ * gwy_field_new_transposed() and gwy_field_new_part_transposed() that create
+ * a new field as the transposition of another field or its rectangular part.
+ *
+ * If the columns can be processed separately or their interrelation is simple
+ * you can avoid allocating entire transposed rectangular part and work by
+ * blocks using gwy_field_part_transpose():
+ * |[
+ * enum { block_size = 64 };
+ * GwyField *workspace = gwy_field_sized_new(height, block_size, FALSE);
+ * guint i, remainder;
+ *
+ * for (i = 0; i < width/block_size; i++) {
+ *     gwy_field_part_transpose(field,
+ *                              col + i*block_size, row,
+ *                              block_size, height,
+ *                              workspace,
+ *                              0, 0);
+ *     // Process block_size rows in workspace row-wise fashion, possibly put
+ *     // back the processed data with another gwy_field_part_transpose.
+ * }
+ * remainder = width % block_size;
+ * if (remainder) {
+ *     gwy_field_part_transpose(field,
+ *                              col + width/block_size*block_size, row,
+ *                              remainder, height,
+ *                              workspace,
+ *                              0, 0);
+ *     // Process block_size rows in workspace row-wise fashion, possibly put
+ *     // back the processed data with another gwy_field_part_transpose.
+ * }
+ * g_object_unref(workspace);
+ * ]|
  **/
 
 /**
