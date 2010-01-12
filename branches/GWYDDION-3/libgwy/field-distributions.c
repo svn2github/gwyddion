@@ -583,13 +583,15 @@ fail:
  *
  * and P separately and calculate Z_ν as follows:
  *
- *       ∑ f
- *       r  ν,r
- * Z  = ––––––––                                          (6)
- *  ν    ∑ P
- *       r  r
+ *       ∑ |f   |²
+ *       r   ν,r
+ * Z  = ––––––––––                                        (6)
+ *  ν     ∑ P
+ *        r  r
  *
- * where r indexes the rows.
+ * where r indexes the rows.  The index r is omitted in (1-5) as they are all
+ * single-row formulas; a similar simplification is used below for ACF and
+ * HHCF.
  */
 
 // Level a row of data by subtracting the mean value.
@@ -954,12 +956,30 @@ fail:
 // transformation with (1/√size)² = 1/size and keep the second transfrom as-is
 // to obtain exactly g_k.
 
+// Calculate the complex norm of R2HC output items (the result is stored in
+// @out including the redundant even terms).
+static inline void
+row_hc_cnorm(const gdouble *in,
+             gdouble *out,
+             gsize size)
+{
+    const gdouble *in2 = in + size-1;
+    gdouble *out2 = out + size-1;
+
+    *out = (*in)*(*in)/size;
+    out++, in++;
+    for (guint j = (size + 1)/2 - 1; j; j--, out++, in++, out2--, in2--)
+        *out = *out2 = ((*in)*(*in) + (*in2)*(*in2))/size;
+    if (size % 2 == 0)
+        *out = (*in)*(*in)/size;
+}
+
 // FIXME: As the second transform input is real and even we could use DCT here
 // instead of R2C. However, this requires even @size as for even size the data
 // layout is 01234321 which is even and supported by FFTW, whereas for an odd
 // size the layout is 0123321 which is odd and unsupported by FFTW.  Since we
 // obtain @size by multiplication by 4 this should not be a problem to ensure.
-// FFTW docs contain a note about R00 transforms being slow though.
+// FFTW docs contain a note about R00 DCT transforms being slow though.
 static inline void
 row_acf(fftw_plan plan,
         gdouble *in,
@@ -969,11 +989,7 @@ row_acf(fftw_plan plan,
 {
     gwy_memclear(in + width, size - width);
     fftw_execute(plan);   // R2C transform in -> out
-    in[0] = out[0]*out[0]/size;
-    for (guint j = 1; j < (size + 1)/2; j++)
-        in[j] = in[size-j] = (out[j]*out[j] + out[size-j]*out[size-j])/size;
-    if (size % 2 == 0)
-        in[size/2] = (out[size/2]*out[size/2])/size;
+    row_hc_cnorm(out, in, size);
     fftw_execute(plan);   // R2C transform in -> out
 }
 
@@ -1045,29 +1061,30 @@ gwy_field_part_row_acf(GwyField *field,
             continue;
         row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
-        const gdouble *q = buffer;
+        const gdouble *q = ffthc;
         for (guint j = line->res; j; j--, p++, q++)
             *p += *q;
 
+        if (masking == GWY_MASK_IGNORE)
+            continue;
+
         // If there is a mask we have to keep track of weights for each g_k
         // pixel separately.
-        if (masking != GWY_MASK_IGNORE) {
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-            p = buffer;
-            for (guint j = width; j; j--, p++) {
-                *p = !gwy_mask_iter_get(iter) == invert;
-                gwy_mask_iter_next(iter);
-            }
-            row_acf(plan, buffer, ffthc, size, width);
-            p = weights;
-            q = ffthc;
-            // Round to integers, this is most important for correct
-            // preservation of zeroes as we need to treat g_k with no
-            // contributions specially
-            for (guint j = width; j; j--, p++, q++)
-                *p = gwy_round(*q);
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+        p = buffer;
+        for (guint j = width; j; j--, p++) {
+            *p = !gwy_mask_iter_get(iter) == invert;
+            gwy_mask_iter_next(iter);
         }
+        row_acf(plan, buffer, ffthc, size, width);
+        p = weights;
+        q = ffthc;
+        // Round to integers, this is most important for correct
+        // preservation of zeroes as we need to treat g_k with no
+        // contributions specially
+        for (guint j = width; j; j--, p++, q++)
+            *p = gwy_round(*q);
     }
     fftw_destroy_plan(plan);
     if (masking == GWY_MASK_IGNORE) {
@@ -1155,7 +1172,7 @@ fail:
  * To summarize, the evaluation of ACF of partial data requires three R2C
  * transforms (to calculate Z_ν, M_ν and U_ν) and three DCT transforms (to
  * calculate g_k, P_k and v_k). For full data, only one R2C and one DCT is
- * sufficient, the same as for ACF because in this case v_k can be expressed
+ * sufficient -- the same as for ACF because in this case v_k can be expressed
  * directly.  Defining the partial sum of squares
  *
  *       k
@@ -1194,6 +1211,29 @@ fail:
  * arrows without a symbol correspond to simple item-wise arithmetic
  * operations.
  */
+
+// Calculate the product (A*B+AB*)/2, equal to (Re A Re B + Im A Im B), of two
+// R2HC outputs (the result is stored in @out including the redundant even
+// terms).
+static inline void
+row_hc_cprod(const gdouble *ina,
+             const gdouble *inb,
+             gdouble *out,
+             gsize size)
+{
+    const gdouble *ina2 = ina + size-1;
+    const gdouble *inb2 = inb + size-1;
+    gdouble *out2 = out + size-1;
+
+    *out = (*ina)*(*inb)/size;
+    out++, ina++, inb++;
+    for (guint j = (size + 1)/2 - 1;
+         j;
+         j--, out++, ina++, inb++, out2--, ina2--, inb2--)
+        *out = *out2 = ((*ina)*(*inb) + (*ina2)*(*inb2))/size;
+    if (size % 2 == 0)
+        *out = (*ina)*(*inb)/size;
+}
 
 /**
  * gwy_field_part_row_hhcf:
@@ -1245,10 +1285,11 @@ gwy_field_part_row_hhcf(GwyField *field,
     gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 3;
+    guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 4;
     gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
     gdouble *ffthc = buffer + size;
-    gdouble *weights = ffthc + size;    // used only with mask
+    gdouble *cached = buffer + size;    // used only with mask
+    gdouble *weights = cached + size;    // used only with mask
 
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
@@ -1261,31 +1302,72 @@ gwy_field_part_row_hhcf(GwyField *field,
                                  mask, masking, maskcol, maskrow + i,
                                  level))
             continue;
+        if (masking == GWY_MASK_IGNORE) {
+            // Calculate v_k before FFT destroys the input levelled/filtered
+            // data. There is no need to keep it as an array, added the values
+            // directly to the output line.
+            gdouble sum = 0.0;
+            const gdouble *q = buffer;
+            const gdouble *qq = buffer + (width-1);
+            gdouble *p = line->data + (width-1);
+            for (guint j = 0; j < width; j++, q++, qq--, p--)
+                *p = sum += (*q)*(*q) + (*qq)*(*qq);
+        }
+        else {
+            // With masking, we will need the levelled/filtered data later.
+            ASSIGN(cached, buffer, width);
+        }
+
         row_acf(plan, buffer, ffthc, size, width);
         gdouble *p = line->data;
-        const gdouble *q = buffer;
+        const gdouble *q = ffthc;
         for (guint j = line->res; j; j--, p++, q++)
-            *p += *q;
+            *p -= 2*(*q);
 
-        // If there is a mask we have to keep track of weights for each g_k
-        // pixel separately.
-        if (masking != GWY_MASK_IGNORE) {
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-            p = buffer;
-            for (guint j = width; j; j--, p++) {
-                *p = !gwy_mask_iter_get(iter) == invert;
-                gwy_mask_iter_next(iter);
-            }
-            row_acf(plan, buffer, ffthc, size, width);
-            p = weights;
-            q = ffthc;
-            // Round to integers, this is most important for correct
-            // preservation of zeroes as we need to treat g_k with no
-            // contributions specially
-            for (guint j = width; j; j--, p++, q++)
-                *p = gwy_round(*q);
+        if (masking == GWY_MASK_IGNORE)
+            continue;
+
+        // If there is a mask the hairy part begins here.  First calculate U_ν,
+        // save the result to @cached again.
+        q = cached;
+        p = buffer;
+        for (guint j = line->res; j; j--, p++, q++)
+            *p = (*q)*(*q);
+        gwy_memclear(buffer + width, size - width);
+        fftw_execute(plan);
+        ASSIGN(cached, buffer, size);
+        // Then mask.  We need the intermediate result M_ν to combine it with
+        // U_ν so don't use row_acf().
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+        p = buffer;
+        for (guint j = width; j; j--, p++) {
+            *p = !gwy_mask_iter_get(iter) == invert;
+            gwy_mask_iter_next(iter);
         }
+        fftw_execute(plan);
+        // Save V_ν/2 (calculated from M_ν and U_ν) to @cached and finish P_k
+        // calculation.
+        row_hc_cprod(cached, ffthc, buffer, size);
+        ASSIGN(cached, buffer, size);
+        row_hc_cnorm(ffthc, buffer, size);
+        fftw_execute(plan);
+        p = weights;
+        q = ffthc;
+        // Round to integers, this is most important for correct
+        // preservation of zeroes as we need to treat g_k with no
+        // contributions specially
+        for (guint j = width; j; j--, p++, q++)
+            *p = gwy_round(*q);
+        // The only remaining step is to take V_ν/2 from @cached, transform
+        // to v_k/2 and add v_k to the output line.
+        ASSIGN(buffer, cached, size);
+        fftw_execute(plan);
+        p = line->data;
+        q = ffthc;
+        for (guint j = line->res; j; j--, p++, q++)
+            *p += 2*(*q);
+
     }
     fftw_destroy_plan(plan);
     if (masking == GWY_MASK_IGNORE) {
