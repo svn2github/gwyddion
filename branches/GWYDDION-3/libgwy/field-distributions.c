@@ -816,7 +816,8 @@ gwy_field_part_row_psdf(GwyField *field,
 
     if (weight)
         gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI*weight));
-    gwy_line_set_real(line, G_PI/gwy_field_dx(field));
+    line->real = G_PI/gwy_field_dx(field);
+    line->off = -0.5*gwy_line_dx(line);
 
 fail:
     if (!line)
@@ -1106,7 +1107,8 @@ gwy_field_part_row_acf(GwyField *field,
         }
     }
     fftw_free(buffer);
-    gwy_line_set_real(line, gwy_field_dx(field)*line->res);
+    line->real = gwy_field_dx(field)*line->res;
+    line->off = -0.5*gwy_line_dx(line);
 
 fail:
     if (!line)
@@ -1395,7 +1397,8 @@ gwy_field_part_row_hhcf(GwyField *field,
         }
     }
     fftw_free(buffer);
-    gwy_line_set_real(line, gwy_field_dx(field)*line->res);
+    line->real = gwy_field_dx(field)*line->res;
+    line->off = -0.5*gwy_line_dx(line);
 
 fail:
     if (!line)
