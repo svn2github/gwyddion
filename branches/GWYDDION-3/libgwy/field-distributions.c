@@ -1036,6 +1036,12 @@ gwy_field_part_row_acf(GwyField *field,
         || width < 2)
         goto fail;
 
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
+
     // Transform size must be at least twice the data size for zero padding.
     // An even size is necessary due to alignment constraints in FFTW.
     // Using this size for all buffers is a bit excessive but safe.
@@ -1277,6 +1283,12 @@ gwy_field_part_row_hhcf(GwyField *field,
                                col, row, width, height, &maskcol, &maskrow)
         || width < 2)
         goto fail;
+
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
 
     // Transform size must be at least twice the data size for zero padding.
     // An even size is necessary due to alignment constraints in FFTW.
