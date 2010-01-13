@@ -19,19 +19,19 @@
 
 /*< private_header >*/
 
-#ifndef __LIBGWY_MATH_INTERNAL_H__
-#define __LIBGWY_MATH_INTERNAL_H__
+#ifndef __LIBGWY_CURVE_INTERNAL_H__
+#define __LIBGWY_CURVE_INTERNAL_H__
+
+#include "libgwy/curve.h"
 
 G_BEGIN_DECLS
 
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
+struct _GwyCurvePrivate {
+    GwyUnit *unit_x;
+    GwyUnit *unit_y;
+};
 
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-
-#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
+typedef struct _GwyCurvePrivate Curve;
 
 G_END_DECLS
 

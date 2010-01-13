@@ -26,9 +26,6 @@
 
 G_BEGIN_DECLS
 
-// FIXME: Where these two belong?
-#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
-
 #define ASSIGN_UNITS(dest, src) \
     do { \
         if (src && dest) \
@@ -52,19 +49,6 @@ struct _GwyLinePrivate {
 };
 
 typedef struct _GwyLinePrivate Line;
-
-struct _GwyCurvePrivate {
-    GwyUnit *unit_x;
-    GwyUnit *unit_y;
-};
-
-typedef struct _GwyCurvePrivate Curve;
-
-// FIXME: Where this one belong?
-G_GNUC_INTERNAL
-void _gwy_notify_properties(GObject *object,
-                            const gchar **properties,
-                            guint nproperties);
 
 G_END_DECLS
 

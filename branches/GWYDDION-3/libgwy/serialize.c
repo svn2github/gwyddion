@@ -1563,6 +1563,11 @@ free_items(GwySerializableItems *items)
  * Unexpected items are left in @items.  The the owner of @items has to free
  * them which normally means you do not need to concern yourself with them.
  *
+ * The owner of @template is, however, responsible for freeing data there.
+ * Often this means it just takes over the arrays/objects and uses them in
+ * its own data structures.  Do not forget freeing the data also in the case of
+ * failure though.
+ *
  * The processing stops when all @items are exhausted or when an item of type
  * %GWY_SERIALIZABLE_PARENT is encountered, whatever happens first.  This means
  * items belonging to parent objects are untouched.

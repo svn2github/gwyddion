@@ -15,6 +15,7 @@ main_header = libgwy.h
 mkenum_headers = \
 	array.h \
 	container.h \
+	curve.h \
 	error-list.h \
 	expr.h \
 	fft.h \
@@ -53,7 +54,8 @@ private_headers = \
 	field-internal.h \
 	line-internal.h \
 	mask-field-internal.h \
-	math-internal.h
+	math-internal.h \
+	object-internal.h
 
 library_headers = $(mkenum_headers) $(mkenum_name).h
 
@@ -72,6 +74,7 @@ noinst_HEADERS = $(private_headers)
 libgwy3_la_SOURCES = \
 	array.c \
 	container.c \
+	curve.c \
 	error-list.c \
 	expr.c \
 	fft.c \
@@ -95,6 +98,7 @@ libgwy3_la_SOURCES = \
 	mask-field.c \
 	mask-field-transform.c \
 	math.c \
+	object-internal.c \
 	pack.c \
 	resource.c \
 	rgba.c \

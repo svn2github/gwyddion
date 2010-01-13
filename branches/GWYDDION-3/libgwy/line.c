@@ -26,6 +26,7 @@
 #include "libgwy/line-statistics.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 
 enum { N_ITEMS = 5 };
@@ -278,39 +279,25 @@ gwy_line_construct(GwySerializable *serializable,
                    GwySerializableItems *items,
                    GwyErrorList **error_list)
 {
-    GwySerializableItem its[N_ITEMS];
-    memcpy(its, serialize_items, sizeof(serialize_items));
-    its[0].value.v_double = 1.0;
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyLine", error_list);
-
     GwyLine *line = GWY_LINE(serializable);
     Line *priv = line->priv;
+
+    GwySerializableItem its[N_ITEMS];
+    memcpy(its, serialize_items, sizeof(serialize_items));
+    its[0].value.v_double = line->real;
+    its[1].value.v_double = line->off;
+    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyLine", error_list);
+
+    if (!_gwy_check_object_component(its + 2, line, GWY_TYPE_UNIT, error_list))
+        goto fail;
+    if (!_gwy_check_object_component(its + 3, line, GWY_TYPE_UNIT, error_list))
+        goto fail;
 
     if (G_UNLIKELY(!its[4].array_size)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Line contains no data."));
-        return FALSE;
-    }
-
-    if (G_UNLIKELY(its[2].value.v_object
-                   && !GWY_IS_UNIT(its[2].value.v_object))) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Line x units are of type %s "
-                             "instead of GwyUnit."),
-                           G_OBJECT_TYPE_NAME(its[2].value.v_object));
-        return FALSE;
-    }
-
-    if (G_UNLIKELY(its[3].value.v_object
-                   && !GWY_IS_UNIT(its[3].value.v_object))) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Line y units are of type %s "
-                             "instead of GwyUnit."),
-                           G_OBJECT_TYPE_NAME(its[3].value.v_object));
-        return FALSE;
+        goto fail;
     }
 
     line->res = its[4].array_size;
@@ -318,16 +305,18 @@ gwy_line_construct(GwySerializable *serializable,
     line->real = CLAMP(its[0].value.v_double, G_MINDOUBLE, G_MAXDOUBLE);
     line->off = CLAMP(its[1].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     priv->unit_x = (GwyUnit*)its[2].value.v_object;
-    its[2].value.v_object = NULL;
     priv->unit_y = (GwyUnit*)its[3].value.v_object;
-    its[3].value.v_object = NULL;
     free_data(line);
     line->data = its[4].value.v_double_array;
     priv->allocated = TRUE;
-    its[4].value.v_double_array = NULL;
-    its[4].array_size = 0;
 
     return TRUE;
+
+fail:
+    GWY_OBJECT_UNREF(its[2].value.v_object);
+    GWY_OBJECT_UNREF(its[3].value.v_object);
+    GWY_FREE(its[4].value.v_double_array);
+    return FALSE;
 }
 
 static GObject*
@@ -924,9 +913,9 @@ gwy_line_get_format_y(GwyLine *line,
 
 /**
  * GwyLine:
- * @res: X-resolution, i.e. width in pixels.
- * @real: Width in physical units.
- * @off: X-offset of the line start from 0 in physical units.
+ * @res: Resolution, i.e. length in pixels.
+ * @real: Length in physical units.
+ * @off: Offset of the line start from 0 in physical units.
  * @data: Line data.  See the introductory section for details.
  *
  * Object representing one-dimensional data in a regular grid.

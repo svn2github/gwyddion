@@ -25,6 +25,7 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/mask-field-internal.h"
 
 enum { N_ITEMS = 3 };
@@ -271,19 +272,19 @@ gwy_mask_field_construct(GwySerializable *serializable,
                          GwySerializableItems *items,
                          GwyErrorList **error_list)
 {
+    GwyMaskField *field = GWY_MASK_FIELD(serializable);
+
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyMaskField",
                                  error_list);
-
-    GwyMaskField *field = GWY_MASK_FIELD(serializable);
 
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Mask field dimensions %u×%u are invalid."),
                            its[0].value.v_uint32, its[1].value.v_uint32);
-        return FALSE;
+        goto fail;
     }
 
     gsize n = stride_for_width(its[0].value.v_uint32) * its[1].value.v_uint32;
@@ -294,7 +295,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
                              "data size %lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
                            (gulong)its[2].array_size);
-        return FALSE;
+        goto fail;
     }
 
     free_data(field);
@@ -313,6 +314,10 @@ gwy_mask_field_construct(GwySerializable *serializable,
     field->priv->allocated = TRUE;
 
     return TRUE;
+
+fail:
+    GWY_FREE(its[2].value.v_uint32_array);
+    return FALSE;
 }
 
 static GObject*

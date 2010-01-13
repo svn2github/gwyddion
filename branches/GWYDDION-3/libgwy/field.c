@@ -26,6 +26,8 @@
 #include "libgwy/field-statistics.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 
 enum { N_ITEMS = 9 };
@@ -341,20 +343,23 @@ gwy_field_construct(GwySerializable *serializable,
                     GwySerializableItems *items,
                     GwyErrorList **error_list)
 {
-    GwySerializableItem its[N_ITEMS];
-    memcpy(its, serialize_items, sizeof(serialize_items));
-    its[2].value.v_double = its[3].value.v_double = 1.0;
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyField", error_list);
-
     GwyField *field = GWY_FIELD(serializable);
     Field *priv = field->priv;
+
+    GwySerializableItem its[N_ITEMS];
+    memcpy(its, serialize_items, sizeof(serialize_items));
+    its[2].value.v_double = field->xreal;
+    its[3].value.v_double = field->yreal;
+    its[4].value.v_double = field->xoff;
+    its[5].value.v_double = field->yoff;
+    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyField", error_list);
 
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Field dimensions %u×%u are invalid."),
                            its[0].value.v_uint32, its[1].value.v_uint32);
-        return FALSE;
+        goto fail;
     }
 
     if (G_UNLIKELY(its[0].value.v_uint32 * its[1].value.v_uint32
@@ -365,28 +370,13 @@ gwy_field_construct(GwySerializable *serializable,
                              "%lu."),
                            its[0].value.v_uint32, its[1].value.v_uint32,
                            (gulong)its[8].array_size);
-        return FALSE;
+        goto fail;
     }
 
-    if (G_UNLIKELY(its[6].value.v_object
-                   && !GWY_IS_UNIT(its[6].value.v_object))) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Field xy units are of type %s "
-                             "instead of GwyUnit."),
-                           G_OBJECT_TYPE_NAME(its[6].value.v_object));
-        return FALSE;
-    }
-
-    if (G_UNLIKELY(its[7].value.v_object
-                   && !GWY_IS_UNIT(its[7].value.v_object))) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Field z units are of type %s "
-                             "instead of GwyUnit."),
-                           G_OBJECT_TYPE_NAME(its[7].value.v_object));
-        return FALSE;
-    }
+    if (!_gwy_check_object_component(its + 6, field, GWY_TYPE_UNIT, error_list))
+        goto fail;
+    if (!_gwy_check_object_component(its + 7, field, GWY_TYPE_UNIT, error_list))
+        goto fail;
 
     field->xres = its[0].value.v_uint32;
     field->yres = its[1].value.v_uint32;
@@ -396,16 +386,18 @@ gwy_field_construct(GwySerializable *serializable,
     field->xoff = CLAMP(its[4].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     field->yoff = CLAMP(its[5].value.v_double, -G_MAXDOUBLE, G_MAXDOUBLE);
     priv->unit_xy = (GwyUnit*)its[6].value.v_object;
-    its[6].value.v_object = NULL;
     priv->unit_z = (GwyUnit*)its[7].value.v_object;
-    its[7].value.v_object = NULL;
     free_data(field);
     field->data = its[8].value.v_double_array;
     priv->allocated = TRUE;
-    its[8].value.v_double_array = NULL;
-    its[8].array_size = 0;
 
     return TRUE;
+
+fail:
+    GWY_OBJECT_UNREF(its[6].value.v_object);
+    GWY_OBJECT_UNREF(its[7].value.v_object);
+    GWY_FREE(its[8].value.v_double_array);
+    return FALSE;
 }
 
 static GObject*
@@ -422,23 +414,6 @@ gwy_field_duplicate_impl(GwySerializable *serializable)
     dpriv->cached = priv->cached;
 
     return G_OBJECT(duplicate);
-}
-
-void
-_gwy_notify_properties(GObject *object,
-                       const gchar **properties,
-                       guint nproperties)
-{
-    if (!nproperties || !properties[0])
-        return;
-    if (nproperties == 1) {
-        g_object_notify(object, properties[0]);
-        return;
-    }
-    g_object_freeze_notify(object);
-    for (guint i = 0; i < nproperties && properties[i]; i++)
-        g_object_notify(object, properties[i]);
-    g_object_thaw_notify(object);
 }
 
 static void

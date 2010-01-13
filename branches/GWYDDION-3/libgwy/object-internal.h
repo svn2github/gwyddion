@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,19 +19,24 @@
 
 /*< private_header >*/
 
-#ifndef __LIBGWY_MATH_INTERNAL_H__
-#define __LIBGWY_MATH_INTERNAL_H__
+#ifndef __LIBGWY_OBJECT_INTERNAL_H__
+#define __LIBGWY_OBJECT_INTERNAL_H__
+
+#include "libgwy/error-list.h"
+#include "libgwy/serialize.h"
 
 G_BEGIN_DECLS
 
-#define STATICP \
-    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
+G_GNUC_INTERNAL
+void _gwy_notify_properties(GObject *object,
+                            const gchar **properties,
+                            guint nproperties);
 
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
-#define SLi gwy_lower_triangular_matrix_index
-#define MATRIX_LEN gwy_triangular_matrix_length
-
-#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
+G_GNUC_INTERNAL
+gboolean _gwy_check_object_component(const GwySerializableItem *item,
+                                     gpointer object,
+                                     GType component_type,
+                                     GwyErrorList **error_list);
 
 G_END_DECLS
 

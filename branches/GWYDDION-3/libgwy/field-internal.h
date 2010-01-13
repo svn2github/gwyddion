@@ -22,7 +22,6 @@
 #ifndef __LIBGWY_FIELD_INTERNAL_H__
 #define __LIBGWY_FIELD_INTERNAL_H__
 
-#include "libgwy/line-internal.h"
 #include "libgwy/field.h"
 #include "libgwy/mask-field.h"
 

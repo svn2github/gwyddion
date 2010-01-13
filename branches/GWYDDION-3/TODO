@@ -33,3 +33,7 @@ Serializable boxed: Review type lookup locking once GAtomicArray is available,
 
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
+
+Internal headers: Some utility functions and macros do not really belong
+                  anywhere.  Their implementations are also placed in quite
+                  arbitrary source files.  Review.
