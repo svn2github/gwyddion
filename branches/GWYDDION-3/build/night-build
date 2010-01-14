@@ -1,0 +1,156 @@
+#!/bin/bash
+# @(#) $Id: gwyddion-night-build 10806 2009-12-15 10:31:30Z yeti-dn $
+pkgname=gwyddion
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+installprefix=$projectdir/../inst-gwy3
+gtkdocdir="/share/gtk-doc/html/*"
+gtkdocdirs=(/usr /usr/local /opt/gnome $installprefix $HOME)
+libdirs="libgwy"
+podirs="po po-libgwy"
+oks="build documentation install dists"
+
+source $HOME/.bashrc
+export LC_ALL=C
+export CFLAGS="-ggdb -O2"
+PATH="$HOME/bin:$PATH"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  cd $projectdir >/dev/null
+  $@
+  #>$logdir/$1.log 2>$logdir/$1.err
+}
+
+function set_extra_version() {
+  test -n "$disable_set_extra_version" && return
+  xver=$(date +%Y%m%d)
+  cp -fv configure.ac configure.ac~
+  sed -ri -e 's/^(m4_define\(\[gwy_version_extra\]), *\[.*\]/\1,[.'"$xver"']/' \
+          -e '/AM_INIT_AUTOMAKE/s/ +check-news\>//' \
+          configure.ac
+}
+
+function autogen() {
+  CONFIG_SHELL=/bin/sh ./autogen.sh \
+    --config-cache \
+    --enable-gtk-doc \
+    --prefix=$installprefix
+}
+
+function build() {
+  # Exclude documentation to get a separate log
+  sed -ri '/^SUBDIRS *=/s/^/###NIGHT-BUILD###/' docs/Makefile
+  make -k all && touch .ok-build
+  sed -ri 's/^###NIGHT-BUILD###//' docs/Makefile
+}
+
+function update_translations() {
+  for dir in $podirs; do
+    pushd $dir >/dev/null
+    gettext_package=$(sed -r 's/^GETTEXT_PACKAGE *= *//;t;d' Makefile)
+    if test -z $(ls *.po 2>/dev/null); then
+      echo "No translations for $gettext_package" 1>&2
+      popd >/dev/null
+      continue
+    fi
+    make -k update-gmo
+    for lang in *.po; do
+      x=${lang%.po}
+      echo -n "TRANSLATION $gettext_package $x: " 1>&2
+      msgfmt --statistics $x.po -o /dev/null
+    done
+    echo -n "TRANSLATION $gettext_package total: " 1>&2
+    grep -c ^msgstr $gettext_package.pot 1>&2
+    popd >/dev/null
+  done
+}
+
+function build_documentation() {
+  make -C docs -k docs && touch .ok-documentation
+}
+
+function unit_test() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    make test-report
+    popd >/dev/null
+  done
+}
+
+function check_debug() {
+  grep -r --include '*.c' '^ *# *define \+DEBUG\>' . \
+    | sed -e 's/^/Debugging is on in: /' 1>&2
+}
+
+function check_symbols() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    make check-symbols
+    popd >/dev/null
+  done
+}
+
+function install() {
+  make -k install && touch .ok-install
+}
+
+function make_dists() {
+  version=$(sed -r 's/^GWY_VERSION_STRING *= *//;t;d' Makefile)
+  rm -f .releaseme
+  make dist && touch .ok-dists
+}
+
+function coverage() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    ../build/coverage-test.sh
+    popd >/dev/null
+  done
+}
+
+function build_rpm() {
+  TAR_OPTIONS=--wildcards rpmbuild -ta --clean $pkgname-$version.tar.xz
+}
+
+function help() {
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call *//'
+}
+
+# =====[ main ]==============================================================
+test -d $logdir || mkdir $logdir
+
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  rm -f .ok-* .releaseme
+  disable_set_extra_version=yes
+  # LIST-BEGIN
+  call set_extra_version
+  call autogen
+  call build
+  call build_documentation
+  call update_translations
+  call unit_test
+  call check_debug
+  call check_symbols
+  call install
+  call make_dists
+  call coverage
+  call build_rpm
+  # LIST-END
+  for x in $oks; do
+    test -f .ok-$x || rm -f .releaseme
+  done
+  rm -f .ok-*
+fi
+

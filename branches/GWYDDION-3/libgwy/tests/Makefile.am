@@ -39,5 +39,7 @@ AM_LDFLAGS = ../libgwy3.la
 
 test:
 
+test-report:
+
 clean-local:
 	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out

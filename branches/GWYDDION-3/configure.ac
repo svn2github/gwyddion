@@ -2,8 +2,9 @@ dnl Process this file with autoconf to produce a configure script.
 m4_define([gwy_version_major],[2])
 m4_define([gwy_version_minor],[99])
 m4_define([gwy_version_micro],[0])
+m4_define([gwy_version_extra],[])
 m4_define([gwy_version_string],
-          [gwy_version_major.gwy_version_minor.gwy_version_micro])
+          [gwy_version_major.gwy_version_minor.gwy_version_micro[]gwy_version_extra])
 m4_define([gwy_url],[http://gwyddion.net/])
 
 AC_INIT([Gwyddion], [gwy_version_string], [yeti@gwyddion.net])
@@ -29,7 +30,7 @@ AC_CONFIG_FILES([
   data/Makefile
 ])
 
-AM_INIT_AUTOMAKE([1.11 gnu -Wall check-news dist-xz no-dist-gzip std-options nostdinc silent-rules])
+AM_INIT_AUTOMAKE([1.11 gnu -Wall dist-xz no-dist-gzip std-options nostdinc silent-rules])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
@@ -123,10 +124,17 @@ GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_MSG_RESULT([$GLIB_MKENUMS])
 AC_SUBST(GLIB_MKENUMS)
 
+AC_CHECK_PROGS([GTESTER],[gtester],[false])
+
 #AC_MSG_CHECKING([for gobject-query])
 #GOBJECT_QUERY=`$PKG_CONFIG --variable=gobject_query glib-2.0`
 #AC_MSG_RESULT([$GOBJECT_QUERY])
 #AC_SUBST(GOBJECT_QUERY)
+
+#############################################################################
+# Other tools
+
+AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 
 #############################################################################
 # Valgrind

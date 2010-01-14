@@ -3,10 +3,11 @@
                 version="1.0">
 
 <xsl:output omit-xml-declaration='yes'/>
+<xsl:param name='program' select='"unknown"'/>
 <xsl:param name='prefix' select='""'/>
 <xsl:template match='/'>
     <p>
-    Test base: <code><xsl:value-of select='$prefix'/></code>,
+    Test program: <code><xsl:value-of select='$program'/></code>,
     Successes: <span class='success'><xsl:value-of select='count(//status[@result="success"])'/></span>,
     Failures: <span class='failed'><xsl:value-of select='count(//status[@result="failed"])'/></span>,
     <!-- FIXME: Must sum the times over runs.
