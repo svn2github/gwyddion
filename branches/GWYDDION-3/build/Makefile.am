@@ -13,6 +13,7 @@ EXTRA_DIST = \
 	mkenum.h.template \
 	mkenum.make \
 	Makevars.in \
+	test-report.xsl \
 	update-aliases.py \
 	update-library-def.py \
 	update-library-symbols.py \
