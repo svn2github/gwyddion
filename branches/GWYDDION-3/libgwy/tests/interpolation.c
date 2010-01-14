@@ -76,7 +76,7 @@ void
 test_interpolation(void)
 {
     GwyInterpolationType first_const = GWY_INTERPOLATION_ROUND;
-    GwyInterpolationType last = GWY_INTERPOLATION_SCHAUM;
+    GwyInterpolationType last = GWY_INTERPOLATION_BSPLINE6;
 
     for (GwyInterpolationType interp = first_const; interp <= last; interp++) {
         test_interpolation_constant(interp, 1.0);

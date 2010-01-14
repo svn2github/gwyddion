@@ -18,8 +18,6 @@ Resources: Convenience method for resource parsing (possibly dumping too).
            disk operations.  Needs the main loop running, perhaps add an
            explicite flush function as fallback.
 
-Interpolation: Calculate the coefficients for BSPLINE6 interpolation.
-
 Value Format: Fields are available as properties but the user cannot be
               expected to call g_object_notify() when something changes.
               Must make it more/less encapsulated for consistency.

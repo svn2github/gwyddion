@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2005,2009 David Necas (Yeti).
+ *  Copyright (C) 2005,2009,2010 David Necas (Yeti).
  *  Copyright (C) 2003 Petr Klapetek.
  *  E-mail: yeti@gwyddion.net.
  *
@@ -23,7 +23,7 @@
 #include "libgwy/interpolation.h"
 #include "libgwy/libgwy-aliases.h"
 
-enum { SUPPORT_LENGTH_MAX = 4 };
+enum { SUPPORT_LENGTH_MAX = 6 };
 
 static const gdouble synth_func_values_bspline4[] = {
     2.0/3.0, 1.0/6.0,
@@ -38,6 +38,8 @@ gwy_interpolation_get_weights(gdouble x,
                               GwyInterpolationType interpolation,
                               gdouble *w)
 {
+    gdouble t, u, v;
+
     g_return_if_fail(x >= 0.0 && x <= 1.0);
 
     switch (interpolation) {
@@ -68,9 +70,10 @@ gwy_interpolation_get_weights(gdouble x,
         break;
 
         case GWY_INTERPOLATION_BSPLINE4:
-        w[0] = (1.0 - x)*(1.0 - x)*(1.0 - x)/6.0;
+        t = 1.0 - x;
+        w[0] = t*t*t/6.0;
         w[1] = 2.0/3.0 - x*x*(1.0 - x/2.0);
-        w[2] = (1.0/3.0 + x*(1.0 + x*(1.0 - x)))/2.0;
+        w[2] = (1.0/3.0 + x*(1.0 + x*t))/2.0;
         w[3] = x*x*x/6.0;
         break;
 
@@ -112,16 +115,23 @@ gwy_interpolation_get_weights(gdouble x,
         break;
 
         case GWY_INTERPOLATION_SCHAUM4:
-        w[0] = -x*(x - 1.0)*(x - 2.0)/6.0;
-        w[1] = (x*x - 1.0)*(x - 2.0)/2.0;
-        w[2] = -x*(x + 1.0)*(x - 2.0)/2.0;
-        w[3] = x*(x*x - 1.0)/6.0;
+        t = 1.0 - x;
+        u = 1.0 + x;
+        v = 2.0 - x;
+        w[0] = -x*t*v/6.0;
+        w[1] = t*u*v/2.0;
+        w[2] = x*u*v/2.0;
+        w[3] = -x*t*u/6.0;
         break;
 
         case GWY_INTERPOLATION_BSPLINE6:
-        w[0] = (1.0 - x)*(1.0 - x)*(1.0 - x)*(1.0 - x)*(1.0 - x)/120.0;
-        /* TODO: use Maple... */
-        w[5] = x*x*x*x*x/6.0;
+        t = 1.0 - x;
+        w[0] = t*t*t*t*t/120.0;
+        w[1] = 13.0/60.0 - x*(5.0/12.0 - x*(1.0/6.0 + x*(1.0/6.0 - x*(1.0/6.0 - x/24.0))));
+        w[2] = 11.0/20.0 - x*x*(1.0/2.0 - x*x*(1.0/4.0 - x/12.0));
+        w[3] = 13.0/60.0 + x*(5.0/12.0 + x*(1.0/6.0 - x*(1.0/6.0 + x*(1.0/6.0 - 1.0/12.0*x))));
+        w[4] = 1.0/120.0 + x*(1.0/24.0 + x*(1.0/12.0 + x*(1.0/12.0 + x*(1.0/24.0 - x/24.0))));
+        w[5] = x*x*x*x*x/120.0;
         break;
 
         default:
@@ -222,7 +232,7 @@ gwy_interpolate_2d(gdouble x,
  * horizontal convolution filter on a two-dimensional array.  It can be also
  * used for one-dimensional arrays, pass @height=1, @rowstride=@width then.
  *
- * This function acts on a two-dimensional data array, accessing it at linearly
+ * This function acts on a two-dimensional data array, accessing it as linearly
  * as possible for CPU cache utilization reasons.
  **/
 static void
@@ -308,7 +318,7 @@ deconvolve3_rows(guint width,
  * Undoes the effect of mirror-extended with border value repeated (@b, @a, @b)
  * vertical convolution filter on a two-dimensional array.
  *
- * This function acts on a two-dimensional data array, accessing it at linearly
+ * This function acts on a two-dimensional data array, accessing it as linearly
  * as possible for CPU cache utilization reasons.
  **/
 static void
@@ -468,11 +478,7 @@ gwy_interpolation_resolve_coeffs_1d(guint n,
                                     gdouble *data,
                                     GwyInterpolationType interpolation)
 {
-    if (interpolation == GWY_INTERPOLATION_BSPLINE1
-        || interpolation == GWY_INTERPOLATION_BSPLINE2
-        || interpolation == GWY_INTERPOLATION_KEYS
-        || interpolation == GWY_INTERPOLATION_NNA
-        || interpolation == GWY_INTERPOLATION_SCHAUM4)
+    if (gwy_interpolation_has_interpolating_basis(interpolation))
         return;
 
     gdouble *buffer = g_slice_alloc(sizeof(gdouble)*n);
