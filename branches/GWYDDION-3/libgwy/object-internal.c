@@ -50,7 +50,8 @@ _gwy_check_object_component(const GwySerializableItem *item,
                             GwyErrorList **error_list)
 {
     if (G_UNLIKELY(item->value.v_object
-                   && !g_type_is_a(item->value.v_object, component_type))) {
+                   && !G_TYPE_CHECK_INSTANCE_TYPE(item->value.v_object,
+                                                  component_type))) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Component ‘%s’ of %s is of type %s "
