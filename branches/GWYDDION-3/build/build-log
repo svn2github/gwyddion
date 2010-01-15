@@ -59,14 +59,14 @@ function extract_build_documentation() {
 
 function extract_documentation_stats() {
   logfile=build_documentation.log
-  htmlfile=documentation_stats.html
+  htmlfile=documentation-stats.html
   logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\0/\\0-undocumented.txt:g")
   $projectdir/build/documentation-stats.py $logs >$htmlfile
 }
 
 function extract_translation_stats() {
    #logfile=update_translations.err
-   #htmlfile=translation_stats.html
+   #htmlfile=translation-stats.html
    #$projectdir/build/translation-stats.py <$logfile >$htmlfile
    :
 }
