@@ -12,8 +12,16 @@ export LC_ALL=C
 PATH="$HOME/bin:$PATH"
 cd $logdir || exit 1
 
+cat >autogen.ignore <<':'
+^aclocal: installing `m4/pkg.m4' from `/usr/share/aclocal/pkg.m4'
+^configure\.ac:\d+: installing `build/[a-z.-]+'
+^Makefil\.am: installing `\./INSTALL'
+^lib[a-z]*/Makefile\.am: installing `build/depcomp'
+':'
+:
+
 cat >build_documentation.ignore <<':'
-^Writing .* for [^ ]\+(.*)
+^Writing .* for [^ ]+\(.*\)
 ^Computing chunks\.\.\.
 ^.*: warning: no link for: 'gwy-foo
 ':'
@@ -28,14 +36,14 @@ function printerr() {
   | {
     # Exclude errors matching a list of regexps
     if test -s $f.ignore; then
-      grep -v -f $f.ignore
+      grep -Evf $f.ignore
     else
       cat
     fi
   } | {
     # Exclude literal errors, typically those from other part of the build
     if test -n "$1"; then
-      grep -vFf "$1"
+      grep -Fvf "$1"
     else
       cat
     fi
@@ -47,10 +55,10 @@ function printerr() {
 
 function extract_build_documentation() {
   logfile=build_documentation.err
-  grep -v -f build_documentation.ignore <$logfile >$tmplog
+  grep -Evf build_documentation.ignore <$logfile >$tmplog
   logfile=build_documentation.log
   grep -E '\<(warning|error):' <$logfile \
-    | grep -v -f build_documentation.ignore >>$tmplog
+    | grep -Evf build_documentation.ignore >>$tmplog
   if test -s $tmplog -a -z "$h"; then
     echo "=====[ build_documentation ]====="
   fi
