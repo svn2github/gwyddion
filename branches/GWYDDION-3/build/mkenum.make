@@ -35,7 +35,7 @@ $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template)
 	&& echo timestamp >$(mkenum_name).h.stamp
 
 $(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template)
-	$(AM_V_GEN)$(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
+	$(AM_V_GEN) $(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
 		$(mkenum_fix_output) \
 		>$(mkenum_name).c.tmp \
 	&& cp $(mkenum_name).c.tmp $(mkenum_name).c  \

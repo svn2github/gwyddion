@@ -2,10 +2,8 @@
 # @(#) $Id: gwyddion-night-build 10806 2009-12-15 10:31:30Z yeti-dn $
 pkgname=gwyddion
 projectdir=$PWD
-logdir=$projectdir/../buildlog
-installprefix=$projectdir/../inst-gwy3
-gtkdocdir="/share/gtk-doc/html/*"
-gtkdocdirs=(/usr /usr/local /opt/gnome $installprefix $HOME)
+logdir=$projectdir/logs
+installprefix=$projectdir/inst
 libdirs="libgwy"
 podirs="po po-libgwy"
 oks="build documentation install dists"
@@ -18,9 +16,9 @@ PATH="$HOME/bin:$PATH"
 # =====[ subroutines ]=======================================================
 # execute a function/command with logging and some setup
 function call() {
-  cd $projectdir >/dev/null
-  $@
-  #>$logdir/$1.log 2>$logdir/$1.err
+  pushd $projectdir >/dev/null
+  $@ >$logdir/$1.log 2>$logdir/$1.err
+  popd >/dev/null
 }
 
 function set_extra_version() {
@@ -34,7 +32,6 @@ function set_extra_version() {
 
 function autogen() {
   CONFIG_SHELL=/bin/sh ./autogen.sh \
-    --config-cache \
     --enable-gtk-doc \
     --prefix=$installprefix
 }
@@ -42,7 +39,8 @@ function autogen() {
 function build() {
   # Exclude documentation to get a separate log
   sed -ri '/^SUBDIRS *=/s/^/###NIGHT-BUILD###/' docs/Makefile
-  make -k all && touch .ok-build
+  make -k all gwyddion_vim_sources= \
+    && touch .ok-build
   sed -ri 's/^###NIGHT-BUILD###//' docs/Makefile
 }
 
@@ -69,6 +67,7 @@ function update_translations() {
 
 function build_documentation() {
   make -C docs -k docs && touch .ok-documentation
+  make -C data gwyddion.vim
 }
 
 function unit_test() {
@@ -133,6 +132,7 @@ if test -n "$1"; then
   fi
 else
   rm -f .ok-* .releaseme
+  # To set the extra version you have to ask for it explicitly
   disable_set_extra_version=yes
   # LIST-BEGIN
   call set_extra_version
@@ -151,6 +151,6 @@ else
   for x in $oks; do
     test -f .ok-$x || rm -f .releaseme
   done
-  rm -f .ok-*
+  rm -rf .ok-* $installprefix
 fi
 

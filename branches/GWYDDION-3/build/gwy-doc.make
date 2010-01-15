@@ -139,6 +139,10 @@ clean-local:
 	rm -rf *~ *.bak .libs $(DOC_MODULE)-scan.* xml
 	test -f Makefile.am || rm -f $(DOC_MAIN_SGML_FILE)
 
+# VPATH fix
+distclean-local:
+	@test '$(srcdir)' = . || rm -rf html
+
 maintainer-clean-local:
 	rm -rf html
 
@@ -162,7 +166,7 @@ install-data-local:
 	test -n "$$d"
 
 uninstall-local:
-	rm -f $(DESTDIR)$(TARGET_DIR)
+	rm -rf $(DESTDIR)$(TARGET_DIR)
 
 #
 # Require gtk-doc when making dist

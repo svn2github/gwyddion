@@ -13,13 +13,13 @@ pkgconfigdatadir = $(libdir)/pkgconfig
 BUILT_SOURCES += $(library_aliases).c $(library_aliases).h
 
 DISTCLEANFILES += \
-	$(library)$(libsuffix).pc
+	$(library)$(libsuffix).pc \
+	$(library_aliases).c \
+	$(library_aliases).h \
+	$(library_symbols)
 
 EXTRA_DIST += \
-	$(library)$(libsuffix).pc.in \
-	$(library_symbols) \
-	$(library_aliases).c \
-	$(library_aliases).h
+	$(library)$(libsuffix).pc.in
 
 pkgconfigdata_DATA = $(library)$(libsuffix).pc
 
@@ -28,8 +28,8 @@ check-symbols: $(library_la) $(library_decl)
 	    $(library_la) $(library_decl) $(srcdir)
 
 $(library_symbols): $(library_headers)
-	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-symbols.py \
-	     $(library_symbols) $(library_headers)
+	$(AM_V_GEN) $(PYTHON) $(abs_top_srcdir)/build/update-library-symbols.py \
+	        $(library_symbols) $(library_headers)
 
 $(library_def): $(library_symbols)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-def.py \

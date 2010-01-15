@@ -1,0 +1,95 @@
+#!/bin/bash
+# @(#) $Id$
+pkgname=gwyddion
+projectdir=$PWD
+logdir=$projectdir/logs
+tmplog=$logdir/tmplog
+libdirs="libgwy"
+podirs="po po-libgwy"
+
+source $HOME/.bashrc
+export LC_ALL=C
+PATH="$HOME/bin:$PATH"
+cd $logdir || exit 1
+
+cat >build_documentation.ignore <<':'
+^Writing .* for [^ ]\+(.*)
+^Computing chunks\.\.\.
+^.*: warning: no link for: 'gwy-foo
+':'
+:
+
+function printerr() {
+  f=$1
+  shift
+
+  test -s $f.err || return
+  cat --squeeze-blank $f.err \
+  | {
+    # Exclude errors matching a list of regexps
+    if test -s $f.ignore; then
+      grep -v -f $f.ignore
+    else
+      cat
+    fi
+  } | {
+    # Exclude literal errors, typically those from other part of the build
+    if test -n "$1"; then
+      grep -vFf "$1"
+    else
+      cat
+    fi
+  } >$tmplog
+  test -s $tmplog || return
+  echo "=====[ $f ]====="
+  cat $tmplog
+}
+
+function extract_build_documentation() {
+  logfile=build_documentation.err
+  grep -v -f build_documentation.ignore <$logfile >$tmplog
+  logfile=build_documentation.log
+  grep -E '\<(warning|error):' <$logfile \
+    | grep -v -f build_documentation.ignore >>$tmplog
+  if test -s $tmplog -a -z "$h"; then
+    echo "=====[ build_documentation ]====="
+  fi
+  cat $tmplog
+}
+
+function extract_documentation_stats() {
+  logfile=build_documentation.log
+  htmlfile=documentation_stats.html
+  logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\0/\\0-undocumented.txt:g")
+  $projectdir/build/documentation-stats.py $logs >$htmlfile
+}
+
+function extract_translation_stats() {
+   #logfile=update_translations.err
+   #htmlfile=translation_stats.html
+   #$projectdir/build/translation-stats.py <$logfile >$htmlfile
+   :
+}
+
+function extract_coverage_stats() {
+  for dir in $libdirs; do
+    sed -rn '/<table/,/<\/table>/p' $projectdir/$dir/coverage/coverage.html \
+      >coverage-$dir.html
+  done
+}
+
+printerr set_extra_version
+printerr autogen
+printerr build
+extract_build_documentation
+printerr update_translations
+printerr check_debug
+printerr check_symbols
+printerr install build.err
+printerr make_dists build.err
+printerr build_rpm build.err
+extract_translation_stats
+extract_documentation_stats
+extract_coverage_stats
+
+rm -f *.ignore $tmplog

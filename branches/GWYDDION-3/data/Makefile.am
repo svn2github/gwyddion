@@ -17,3 +17,8 @@ gwyddion_vim_sources = $(top_builddir)/docs/libgwy/libgwy-decl.txt
 
 gwyddion.vim: $(gwyddion_vim_sources) $(gwyddion_vim_cfg) $(vim_syn_gen)
 	$(PYTHON) $(vim_syn_gen) $(gwyddion_vim_cfg) gwyddion.vim
+
+# VPATH fix
+distclean-local:
+	@test '$(srcdir)' = . || rm -rf $(MAINTAINERCLEANFILES)
+
