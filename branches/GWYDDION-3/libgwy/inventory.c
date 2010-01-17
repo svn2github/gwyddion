@@ -897,6 +897,46 @@ gwy_inventory_delete_nth(GwyInventory *inventory,
     delete_item(inventory, iter, name, n);
 }
 
+// Emit "items-reordered" for an item moved from position @nold to @nnew in
+// the sequence.
+static void
+emit_reordered_for_move(GwyInventory *inventory,
+                        guint nold,
+                        guint nnew)
+{
+    if (nold == nnew
+        || !g_signal_has_handler_pending(inventory,
+                                         gwy_inventory_signals[ITEMS_REORDERED],
+                                         0, FALSE))
+        return;
+
+    Inventory *priv = inventory->priv;
+    guint nitems = (guint)g_sequence_get_length(priv->items);
+    guint *new_order = g_slice_alloc(sizeof(guint)*nitems);
+    if (nold < nnew) {
+        for (guint i = 0; i < nold; i++)
+            new_order[i] = i;
+        for (guint i = nold; i < nnew; i++)
+            new_order[i] = i + 1;
+        new_order[nnew] = nold;
+        for (guint i = nnew+1; i < nitems; i++)
+            new_order[i] = i;
+    }
+    else {
+        for (guint i = 0; i < nnew; i++)
+            new_order[i] = i;
+        new_order[nnew] = nold;
+        for (guint i = nnew+1; i < nold; i++)
+            new_order[i] = i - 1;
+        for (guint i = nold; i < nitems; i++)
+            new_order[i] = i;
+    }
+
+    g_signal_emit(inventory, gwy_inventory_signals[ITEMS_REORDERED], 0,
+                  new_order);
+    g_slice_free1(sizeof(guint)*nitems, new_order);
+}
+
 /**
  * gwy_inventory_rename:
  * @inventory: An inventory.
@@ -908,11 +948,11 @@ gwy_inventory_delete_nth(GwyInventory *inventory,
  * It is an error to rename an item to @newname that is already present in
  * @inventory.
  *
- * If the item needs to be moved in order to keep the inventory sorted, it is
- * temporarily removed and then inserted in the correct place.  If you use
- * the signals for something else than tree views, keep in mind that between
- * the removal and the insertion the item cannot be found in the inventory
- * under either name.
+ * If the item needs to be moved in order to keep the inventory sorted, this
+ * will cause reordering of the items and emission of
+ * GwyInventory::items-reordered.  Signals GwyInventory::item-updated and
+ * possibly GwyInventory::default-changed will be emitted subsequently, when
+ * the item is already in the final position.
  *
  * Returns: The item, for convenience.
  **/
@@ -960,21 +1000,18 @@ gwy_inventory_rename(GwyInventory *inventory,
                        realnewname);
     }
 
-    guint n = (guint)g_sequence_iter_get_position(iter);
-    /* Remove, if necessary for keeping the sort order. */
-    if (was_sorted && !is_sorted_now) {
-        g_sequence_remove(iter);
-        g_signal_emit(inventory, gwy_inventory_signals[ITEM_DELETED], 0, n);
-    }
     /* Use newname even if the item did not obey. */
     g_hash_table_insert(priv->hash, (gpointer)newname, iter);
-    /* Insert back if it was removed. */
+    /* Move, if necessary for keeping the sort order. */
+    guint n = (guint)g_sequence_iter_get_position(iter);
     if (was_sorted && !is_sorted_now) {
-        GCompareDataFunc compare
-            = (GCompareDataFunc)priv->item_type.compare;
+        guint nold = n;
+        g_sequence_remove(iter);
+        GCompareDataFunc compare = (GCompareDataFunc)priv->item_type.compare;
         iter = g_sequence_insert_sorted(priv->items, item, compare, NULL);
-        n = (guint)g_sequence_iter_get_position(iter);
-        g_signal_emit(inventory, gwy_inventory_signals[ITEM_INSERTED], 0, n);
+        guint nnew = (guint)g_sequence_iter_get_position(iter);
+        emit_reordered_for_move(inventory, nold, nnew);
+        n = nnew;
     }
 
     g_signal_emit(inventory, gwy_inventory_signals[ITEM_UPDATED], 0, n);

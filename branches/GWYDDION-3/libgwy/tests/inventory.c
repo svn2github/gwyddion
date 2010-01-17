@@ -170,9 +170,9 @@ test_inventory_data(void)
     g_assert((itemtest = gwy_inventory_get(inventory, "Fixme")));
     itemtest->value = 3;
     gwy_inventory_rename(inventory, "Fixme", "Third");
-    g_assert_cmphex(insert_log, ==, 0x5);
+    g_assert_cmphex(insert_log, ==, 0x0);
     g_assert_cmphex(update_log, ==, 0x5);
-    g_assert_cmphex(delete_log, ==, 0x3);
+    g_assert_cmphex(delete_log, ==, 0x0);
     insert_log = update_log = delete_log = 0;
 
     g_assert((itemtest = gwy_inventory_get_nth(inventory, 4)));
