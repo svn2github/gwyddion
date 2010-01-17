@@ -65,6 +65,7 @@ struct _GwyResourcePrivate {
 struct _GwyResourceClassPrivate {
     GwyInventory *inventory;
     const gchar *name;
+    GFile *managed_directory;
     GwyInventoryItemType item_type;
     gulong item_inserted_id;
 };
@@ -228,7 +229,7 @@ gwy_resource_class_intern_init(gpointer klass)
 static void
 gwy_resource_class_base_init(GwyResourceClass *klass)
 {
-    // FIXME: In future, they might be a function similar to
+    // FIXME: In future, there might be a function similar to
     // g_type_class_add_private() for class data.
     klass->priv = g_new0(ResourceClass, 1);
     klass->priv->item_type = resource_item_type;
@@ -748,8 +749,9 @@ GwyInventory*
 gwy_resource_type_get_inventory(GType type)
 {
     g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
-    ResourceClass *priv = ensure_class_and_inventory(type);
-    return priv->inventory;
+    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    g_return_val_if_fail(cpriv, NULL);
+    return cpriv->inventory;
 }
 
 /**
@@ -1217,10 +1219,11 @@ void
 gwy_resource_type_load(GType type)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    ResourceClass *priv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    g_return_if_fail(cpriv);
 
-    gchar *userdir = gwy_user_directory(priv->name);
-    gchar **dirs = gwy_data_search_path(priv->name);
+    gchar *userdir = gwy_user_directory(cpriv->name);
+    gchar **dirs = gwy_data_search_path(cpriv->name);
     for (gchar **d = dirs; *d; d++) {
         gboolean writable = userdir && gwy_strequal(*d, userdir);
         gwy_resource_type_load_directory(type, *d, writable, NULL);
@@ -1231,12 +1234,33 @@ gwy_resource_type_load(GType type)
     g_strfreev(dirs);
 }
 
+static void
+set_managed_directory(ResourceClass *cpriv,
+                      GFile *dir,
+                      const gchar *message)
+{
+    if (cpriv->managed_directory) {
+        if (!g_file_equal(cpriv->managed_directory, dir)) {
+            gchar *classdir = g_file_get_path(cpriv->managed_directory);
+            gchar *thisdir = g_file_get_path(dir);
+            g_warning(message, g_type_name(cpriv->item_type.type),
+                      classdir, thisdir);
+            g_free(classdir);
+            g_free(thisdir);
+        }
+    }
+    else
+        cpriv->managed_directory = g_object_ref(dir);
+}
+
 /**
  * gwy_resource_type_load_directory:
  * @type: Resource type of the resources in the directory.
- * @dirname: Directory to load resources from.
+ * @dirname: Directory to load resources from (in system encoding).
  * @modifiable: %TRUE to create resources as modifiable, %FALSE to create them
- *              as fixed.
+ *              as fixed.  At most one directory can be loaded with @modifiable
+ *              as %TRUE.  Newly created and modified resources will be saved
+ *              to this directory.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
  * Loads all resources of given class from a directory.
@@ -1256,6 +1280,7 @@ gwy_resource_type_load_directory(GType type,
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
     ResourceClass *cpriv = ensure_class_and_inventory(type);
+    g_return_if_fail(cpriv);
 
     GFile *gfile = g_file_new_for_path(dirname_sys);
     GFileEnumerator *dir
@@ -1265,6 +1290,13 @@ gwy_resource_type_load_directory(GType type,
                                     G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
                                     G_FILE_ATTRIBUTE_STANDARD_IS_BACKUP,
                                     0, NULL, NULL);
+    if (modifiable) {
+        set_managed_directory(cpriv, gfile,
+                              "Modifiable resources of type %s were already "
+                              "loaded from another directory %s different "
+                              "from %s.  Resource management will be "
+                              "confused.");
+    }
     g_object_unref(gfile);
     if (!dir)
         return;
@@ -1332,6 +1364,56 @@ name_is_unique(GwyResource *resource,
         g_free(ofilename_utf8);
 
     return FALSE;
+}
+
+/**
+ * gwy_resource_type_get_managed_directory:
+ * @type: A resource type.
+ *
+ * Obtains the name of the managed directory for a resource type.
+ *
+ * This is the directory where newly created or moved resources are stored.
+ *
+ * Returns: The name of the managed directory in system encoding as a newly
+ *          allocated string.  %NULL can be returned if the directory has not
+ *          been set yet.
+ **/
+gchar*
+gwy_resource_type_get_managed_directory(GType type)
+{
+    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
+    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    g_return_val_if_fail(cpriv, NULL);
+    return cpriv->managed_directory
+           ? g_file_get_path(cpriv->managed_directory) : NULL;
+}
+
+/**
+ * gwy_resource_type_set_managed_directory:
+ * @type: A resource type.
+ * @dirname: Managed directory name (in system encoding).
+ *
+ * Sets the name of the managed directory for a resource type.
+ *
+ * The directory must not change once set.  It is permitted to call this
+ * function multiple times with the same directory though.
+ *
+ * Note the managed directory can be set implicitly by
+ * gwy_resource_type_load_directory() with @modifiable argument %TRUE, and
+ * consequently also by gwy_resource_type_load() as it marks the user resource
+ * directory as modifiable.
+ **/
+void
+gwy_resource_type_set_managed_directory(GType type,
+                                        const gchar *dirname_sys)
+{
+    g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
+    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    g_return_if_fail(cpriv);
+    GFile *gfile = g_file_new_for_path(dirname_sys);
+    set_managed_directory(cpriv, gfile,
+                          "Managed directory of resource %s has been set to "
+                          "%s and it cannot be changed to %s.");
 }
 
 /**
