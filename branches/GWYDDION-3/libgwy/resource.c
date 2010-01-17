@@ -730,8 +730,9 @@ ensure_class_and_inventory(GType type)
     // Check whether gwy_resource_class_register() has been called.
     g_return_val_if_fail(priv->name, NULL);
     priv->inventory = gwy_inventory_new_with_type(&priv->item_type);
-    g_signal_connect(priv->inventory, "item-inserted",
-                     G_CALLBACK(inventory_item_inserted), klass);
+    priv->item_inserted_id
+        = g_signal_connect(priv->inventory, "item-inserted",
+                           G_CALLBACK(inventory_item_inserted), klass);
     if (klass->setup_inventory)
         klass->setup_inventory(priv->inventory);
     return priv;
