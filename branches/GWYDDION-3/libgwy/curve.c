@@ -447,7 +447,7 @@ gwy_curve_new_alike(const GwyCurve *model)
 
 /**
  * gwy_curve_new_part:
- * @curve: A one-dimensional data curve.
+ * @curve: A curve.
  * @from: Left end of the interval.
  * @to: Righ end of the interval.
  *
@@ -488,6 +488,18 @@ gwy_curve_new_part(const GwyCurve *curve,
     return part;
 }
 
+static void
+copy_line_to_curve(const GwyLine *line,
+                   GwyCurve *curve)
+{
+    for (guint i = 0; i < line->res; i++) {
+        curve->data[i].x = (i + 0.5)/gwy_line_dx(line) + line->off;
+        curve->data[i].y = line->data[i];
+    }
+    ASSIGN_UNITS(curve->priv->unit_x, line->priv->unit_x);
+    ASSIGN_UNITS(curve->priv->unit_y, line->priv->unit_y);
+}
+
 /**
  * gwy_curve_new_from_line:
  * @line: A one-dimensional data line.
@@ -511,19 +523,14 @@ gwy_curve_new_from_line(const GwyLine *line)
     GwyCurve *curve = g_object_newv(GWY_TYPE_CURVE, 0, NULL);
     curve->n = line->res;
     alloc_data(curve);
-    for (guint i = 0; i < line->res; i++) {
-        curve->data[i].x = (i + 0.5)/gwy_line_dx(line) + line->off;
-        curve->data[i].y = line->data[i];
-    }
-    ASSIGN_UNITS(curve->priv->unit_x, line->priv->unit_x);
-    ASSIGN_UNITS(curve->priv->unit_y, line->priv->unit_y);
+    copy_line_to_curve(line, curve);
 
     return curve;
 }
 
 /**
  * gwy_curve_data_changed:
- * @curve: A one-dimensional data curve.
+ * @curve: A curve.
  *
  * Emits signal GwyCurve::data-changed on a curve.
  **/
@@ -553,6 +560,34 @@ gwy_curve_copy(const GwyCurve *src,
     g_return_if_fail(GWY_IS_CURVE(dest));
     g_return_if_fail(dest->n == src->n);
     ASSIGN(dest->data, src->data, 2*src->n);
+}
+
+/**
+ * gwy_curve_set_from_line:
+ * @curve: A curve.
+ * @line: A one-dimensional data line.
+ *
+ * Sets the data and units of a curve from a line.
+ *
+ * See gwy_curve_new_from_line() for details.
+ **/
+void
+gwy_curve_set_from_line(GwyCurve *curve,
+                        const GwyLine *line)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    g_return_if_fail(GWY_IS_LINE(line));
+
+    gboolean notify = FALSE;
+    if (curve->n != line->res) {
+        free_data(curve);
+        curve->n = line->res;
+        alloc_data(curve);
+        notify = TRUE;
+    }
+    copy_line_to_curve(line, curve);
+    if (notify)
+        g_object_notify(G_OBJECT(curve), "n-points");
 }
 
 /**
@@ -654,7 +689,7 @@ gwy_curve_min_max(const GwyCurve *curve,
 
 /**
  * gwy_curve_get_format_y:
- * @curve: A one-dimensional data curve.
+ * @curve: A curve.
  * @style: Output format style.
  * @format: Value format to update or %NULL to create a new format.
  *

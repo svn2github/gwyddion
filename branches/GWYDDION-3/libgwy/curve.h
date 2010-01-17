@@ -62,15 +62,17 @@ struct _GwyCurveClass {
 GType           gwy_curve_get_type     (void)                      G_GNUC_CONST;
 GwyCurve*       gwy_curve_new          (void)                      G_GNUC_MALLOC;
 GwyCurve*       gwy_curve_new_from_data(const GwyXY *points,
-                                        guint n)       G_GNUC_MALLOC;
+                                        guint n)                   G_GNUC_MALLOC;
 GwyCurve*       gwy_curve_new_alike    (const GwyCurve *model)     G_GNUC_MALLOC;
 GwyCurve*       gwy_curve_new_part     (const GwyCurve *curve,
                                         gdouble from,
                                         gdouble to)                G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_from_line(const GwyLine *line) G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_from_line(const GwyLine *line)       G_GNUC_MALLOC;
 void            gwy_curve_data_changed (GwyCurve *curve);
 void            gwy_curve_copy         (const GwyCurve *src,
                                         GwyCurve *dest);
+void            gwy_curve_set_from_line(GwyCurve *curve,
+                                        const GwyLine *line);
 GwyUnit*        gwy_curve_get_unit_x   (GwyCurve *curve)           G_GNUC_PURE;
 GwyUnit*        gwy_curve_get_unit_y   (GwyCurve *curve)           G_GNUC_PURE;
 GwyValueFormat* gwy_curve_get_format_x (GwyCurve *curve,
