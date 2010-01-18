@@ -2,7 +2,7 @@
 # @(#) $Id$
 pkgname=gwyddion
 projectdir=$PWD
-logdir=$projectdir/logs
+logdir=$projectdir/_logs
 tmplog=$logdir/tmplog
 libdirs="libgwy"
 podirs="po po-libgwy"

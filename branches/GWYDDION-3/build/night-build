@@ -2,8 +2,8 @@
 # @(#) $Id: gwyddion-night-build 10806 2009-12-15 10:31:30Z yeti-dn $
 pkgname=gwyddion
 projectdir=$PWD
-logdir=$projectdir/logs
-installprefix=$projectdir/inst
+logdir=$projectdir/_logs
+installprefix=$projectdir/_inst
 libdirs="libgwy"
 podirs="po po-libgwy"
 oks="build documentation install dists"
