@@ -27,6 +27,12 @@ cat >build_documentation.ignore <<':'
 ':'
 :
 
+cat >distcheck.ignore <<':'
+^Writing .* for [^ ]+\(.*\)
+^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
+':'
+:
+
 function printerr() {
   f=$1
   shift
