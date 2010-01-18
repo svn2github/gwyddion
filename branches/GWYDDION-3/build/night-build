@@ -112,6 +112,7 @@ function coverage() {
 }
 
 function build_rpm() {
+  version=$(sed -r 's/^GWY_VERSION_STRING *= *//;t;d' Makefile)
   TAR_OPTIONS=--wildcards rpmbuild -ta --clean $pkgname-$version.tar.xz
 }
 
@@ -151,6 +152,7 @@ else
   call build_rpm
   call distcheck
   # LIST-END
+  touch .releaseme
   for x in $oks; do
     test -f .ok-$x || rm -f .releaseme
   done
