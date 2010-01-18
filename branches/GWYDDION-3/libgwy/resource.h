@@ -72,6 +72,7 @@ struct _GwyResourceClass {
     GObjectClass g_object_class;
     struct _GwyResourceClassPrivate *priv;
 
+    /*< protected >*/
     /* Signals */
     void (*data_changed)(GwyResource *resource);
 

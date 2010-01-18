@@ -108,7 +108,8 @@ static const gchar*      gwy_resource_get_trait_name     (guint i);
 static void              gwy_resource_get_trait_value    (gconstpointer item,
                                                           guint i,
                                                           GValue *value);
-static void              gwy_resource_set_unmanaged      (gpointer item);
+static void              gwy_resource_delete             (gpointer item);
+static void              gwy_resource_set_unmanaged      (GwyResource *resource);
 static void              inventory_item_inserted         (GwyInventory *inventory,
                                                           guint i,
                                                           GwyResourceClass *klass);
@@ -124,7 +125,12 @@ static gboolean          name_is_unique                  (GwyResource *resource,
                                                           ResourceClass *klass,
                                                           GError **error);
 static gchar*            construct_filename              (const gchar *resource_name);
+static void              gwy_resource_notify             (GObject *object,
+                                                          GParamSpec *pspec);
 static void              gwy_resource_data_changed_impl  (GwyResource *resource);
+static void              gwy_resource_manage_create      (GwyResource *resource);
+static void              gwy_resource_manage_delete      (GwyResource *resource);
+static void              gwy_resource_manage_update      (GwyResource *resource);
 
 static gpointer gwy_resource_parent_class = NULL;
 
@@ -148,7 +154,7 @@ static const GwyInventoryItemType resource_item_type = {
     &gwy_resource_is_modifiable_impl,
     &gwy_resource_compare,
     &gwy_resource_rename,
-    &gwy_resource_set_unmanaged,
+    &gwy_resource_delete,
     &gwy_resource_copy,
     &gwy_resource_get_traits,
     &gwy_resource_get_trait_name,
@@ -254,6 +260,7 @@ gwy_resource_class_init(GwyResourceClass *klass)
     gobject_class->finalize = gwy_resource_finalize;
     gobject_class->get_property = gwy_resource_get_property;
     gobject_class->set_property = gwy_resource_set_property;
+    gobject_class->notify = gwy_resource_notify;
 
     klass->data_changed = gwy_resource_data_changed_impl;
 
@@ -561,12 +568,19 @@ gwy_resource_get_trait_value(gconstpointer item,
 }
 
 static void
-gwy_resource_set_unmanaged(gpointer item)
+gwy_resource_delete(gpointer item)
 {
     GwyResource *resource = GWY_RESOURCE(item);
+    gwy_resource_manage_delete(resource);
+    gwy_resource_set_unmanaged(resource);
+}
+
+static void
+gwy_resource_set_unmanaged(GwyResource *resource)
+{
     g_return_if_fail(resource->priv->is_managed);
     resource->priv->is_managed = FALSE;
-    g_object_notify(G_OBJECT(item), "is-managed");
+    g_object_notify(G_OBJECT(resource), "is-managed");
 }
 
 static void
@@ -582,13 +596,14 @@ inventory_item_inserted(GwyInventory *inventory,
         g_object_freeze_notify(object);
         priv->is_managed = TRUE;
         g_object_notify(object, "is-managed");
-        // We must be pesimistic.
+        // We must be pesimistic.  But we would sync it to disk anyway.
         if (!priv->is_modified && priv->is_modifiable) {
             priv->is_modified = priv->is_modifiable;
             g_object_notify(object, "is-modified");
         }
         g_object_thaw_notify(object);
     }
+    gwy_resource_manage_create(resource);
 }
 
 /**
@@ -1206,6 +1221,73 @@ gwy_resource_data_changed_impl(GwyResource *resource)
         priv->is_modified = TRUE;
         g_object_notify(G_OBJECT(resource), "is-modified");
     }
+    gwy_resource_manage_update(resource);
+}
+
+static void
+gwy_resource_notify(GObject *object,
+                    GParamSpec *pspec)
+{
+    if (gwy_stramong(pspec->name,
+                     "file-name", "is-preferred", "is-modifiable", "is-managed",
+                     NULL))
+        return;
+
+    GwyResource *resource = GWY_RESOURCE(object);
+    Resource *priv = resource->priv;
+    if (!priv->is_modifiable || !priv->is_modified)
+        return;
+
+    gwy_resource_manage_update(resource);
+}
+
+static void
+gwy_resource_manage_create(GwyResource *resource)
+{
+    GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
+    g_return_if_fail(GWY_IS_RESOURCE_CLASS(klass));
+    ResourceClass *cpriv = klass->priv;
+
+    if (!cpriv->managed_directory) {
+        // XXX: Remove in production version
+        g_warning("Cannot create resource %s of type %s on disk: "
+                  "No managed directory has been set up.",
+                  resource->priv->name, G_OBJECT_TYPE_NAME(resource));
+        return;
+    }
+
+    GError *err = NULL;
+    if (!gwy_resource_save(resource, NULL, &err)) {
+        g_warning("Cannot create resource on disk: %s", err->message);
+        g_clear_error(&err);
+    }
+}
+
+static void
+gwy_resource_manage_delete(GwyResource *resource)
+{
+    Resource *priv = resource->priv;
+
+    if (!priv->filename) {
+        // XXX: Keep in production version?  How it could happen?
+        g_warning("Cannot remove resource %s of type %s from disk: "
+                  "It has not associated file name.",
+                  resource->priv->name, G_OBJECT_TYPE_NAME(resource));
+        return;
+    }
+
+    if (g_unlink(priv->filename) != 0)
+        g_warning("Cannot remove resource from disk: %s", g_strerror(errno));
+}
+
+static void
+gwy_resource_manage_update(GwyResource *resource)
+{
+    Resource *priv = resource->priv;
+
+    // TODO: Must check if it has a filename assigned.
+    g_printerr("Should queue Resource %s of type %s for saving to %s\n",
+               priv->name, G_OBJECT_TYPE_NAME(resource), priv->filename);
 }
 
 /**
