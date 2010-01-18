@@ -817,10 +817,11 @@ gwy_resource_class_register(GwyResourceClass *klass,
 /**
  * gwy_resource_save:
  * @resource: A resource.
- * @filename_sys: Usually %NULL to save the resource to the file it was loaded
- *                from or to the user resources directory.  If an explicit file
- *                name is passed it becomes the new resource file name and the
- *                resource is saved regardless it has been modified or not.
+ * @filename: Usually %NULL to save the resource to the file it was loaded
+ *            from or to the user resources directory.  If an explicit file
+ *            name is passed it becomes the new resource file name and the
+ *            resource is saved regardless it has been modified or not.  The
+ *            file name is in the GLib encoding.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
  *         #GFileError domains can occur.
  *
@@ -984,7 +985,7 @@ construct_filename(const gchar *resource_name)
 
 /**
  * gwy_resource_load:
- * @filename_sys: Name of resource file to load, in GLib encoding.
+ * @filename: Name of resource file to load, in GLib encoding.
  * @expected_type: Expected resource type.  This must be a valid type, however,
  *                 it is possible to pass %GWY_TYPE_RESOURCE which effectively
  *                 accepts all possible resources.

@@ -98,12 +98,12 @@ gboolean                    gwy_resource_get_is_preferred          (GwyResource 
 void                        gwy_resource_set_is_preferred          (GwyResource *resource,
                                                                     gboolean is_preferred);
 void                        gwy_resource_data_changed              (GwyResource *resource);
-GwyResource*                gwy_resource_load                      (const gchar *filename_sys,
+GwyResource*                gwy_resource_load                      (const gchar *filename,
                                                                     GType expected_type,
                                                                     gboolean modifiable,
                                                                     GError **error)                         G_GNUC_MALLOC;
 gboolean                    gwy_resource_save                      (GwyResource *resource,
-                                                                    const gchar *filename_sys,
+                                                                    const gchar *filename,
                                                                     GError **error);
 void                        gwy_resource_class_register            (GwyResourceClass *klass,
                                                                     const gchar *name,
@@ -118,7 +118,7 @@ void                        gwy_resource_type_load_directory       (GType type,
                                                                     GwyErrorList **error_list);
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
 void                        gwy_resource_type_set_managed_directory(GType type,
-                                                                    const gchar *dirname_sys);
+                                                                    const gchar *dirname);
 void                        gwy_resource_types_finalize            (void);
 GwyResourceLineType         gwy_resource_parse_param_line          (gchar *line,
                                                                     gchar **key,
