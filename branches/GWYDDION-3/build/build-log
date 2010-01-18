@@ -70,6 +70,7 @@ function extract_documentation_stats() {
   htmlfile=documentation-stats.html
   logs=$(echo "$libdirs" | sed -r "s:[a-z0-9]+:$projectdir/docs/\\0/\\0-undocumented.txt:g")
   $projectdir/build/documentation-stats.py $logs >$htmlfile
+  cp $logs $logdir
 }
 
 function extract_translation_stats() {
