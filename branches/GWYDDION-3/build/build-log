@@ -13,9 +13,9 @@ PATH="$HOME/bin:$PATH"
 cd $logdir || exit 1
 
 cat >autogen.ignore <<':'
-^aclocal: installing `m4/pkg.m4' from `/usr/share/aclocal/pkg.m4'
-^configure\.ac:\d+: installing `build/[a-z.-]+'
-^Makefil\.am: installing `\./INSTALL'
+^aclocal: installing `m4/pkg\.m4' from `/usr/share/aclocal/pkg\.m4'
+^configure\.ac:[0-9]+: installing `build/[-a-z.]+'
+^Makefile\.am: installing `\./INSTALL'
 ^lib[a-z]*/Makefile\.am: installing `build/depcomp'
 ':'
 :
@@ -87,6 +87,7 @@ function extract_coverage_stats() {
   done
 }
 
+cat build.err make_dists.err build_documentation.err install.err >all.err
 printerr set_extra_version
 printerr autogen
 printerr build
@@ -97,6 +98,7 @@ printerr check_symbols
 printerr install build.err
 printerr make_dists build.err
 printerr build_rpm build.err
+printerr distcheck all.err
 extract_translation_stats
 extract_documentation_stats
 extract_coverage_stats

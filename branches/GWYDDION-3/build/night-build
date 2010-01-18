@@ -96,9 +96,11 @@ function install() {
 }
 
 function make_dists() {
-  version=$(sed -r 's/^GWY_VERSION_STRING *= *//;t;d' Makefile)
-  rm -f .releaseme
   make dist && touch .ok-dists
+}
+
+function distcheck() {
+  make distcheck
 }
 
 function coverage() {
@@ -147,6 +149,7 @@ else
   call make_dists
   call coverage
   call build_rpm
+  call distcheck
   # LIST-END
   for x in $oks; do
     test -f .ok-$x || rm -f .releaseme
