@@ -20,6 +20,7 @@
 #include "testlibgwy.h"
 #include <stdlib.h>
 #include <locale.h>
+#include <glib/gstdio.h>
 
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
@@ -90,6 +91,35 @@ void test_gl_material_load     (void);
 void test_gl_material_save     (void);
 void test_gl_material_serialize(void);
 void test_gl_material_inventory(void);
+
+static void
+remove_testdata(void)
+{
+    GFile *testdir = g_file_new_for_path(TEST_DATA_DIR);
+    GFileEnumerator *enumerator
+        = g_file_enumerate_children(testdir,
+                                    G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                                    G_FILE_ATTRIBUTE_STANDARD_NAME ",",
+                                    G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                    NULL, NULL);
+    if (enumerator) {
+        GFileInfo *fileinfo;
+        while ((fileinfo = g_file_enumerator_next_file(enumerator,
+                                                       NULL, NULL))) {
+            gchar *path = g_build_filename(TEST_DATA_DIR,
+                                           g_file_info_get_name(fileinfo),
+                                           NULL);
+            if (g_file_info_get_file_type(fileinfo) != G_FILE_TYPE_REGULAR)
+                g_printerr("Cannot remove %s: not a regular file.\n", path);
+            else
+                g_unlink(path);
+            g_free(path);
+            g_object_unref(fileinfo);
+        }
+        g_object_unref(enumerator);
+    }
+    g_rmdir(TEST_DATA_DIR);
+}
 
 /***************************************************************************
  *
@@ -172,7 +202,12 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/gl-material/serialize", test_gl_material_serialize);
     g_test_add_func("/testlibgwy/gl-material/inventory", test_gl_material_inventory);
 
-    return g_test_run();
+    remove_testdata();
+    g_mkdir(TEST_DATA_DIR, 0700);
+    gint status = g_test_run();
+    remove_testdata();
+
+    return status;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

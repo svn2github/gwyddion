@@ -26,6 +26,8 @@
 #include <gwyconfig.h>
 #include "libgwy/libgwy.h"
 
+#define TEST_DATA_DIR "_testdata"
+
 // Helpers
 void          dump_error_list   (GwyErrorList *error_list);
 GObject*      serialize_and_back(GObject *object);

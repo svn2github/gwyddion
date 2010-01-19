@@ -60,6 +60,7 @@ struct _GwyResourcePrivate {
     gboolean is_modified : 1;
     gboolean is_preferred : 1;
     gboolean is_managed : 1;
+    gboolean is_being_loaded : 1;
 };
 
 struct _GwyResourceClassPrivate {
@@ -133,6 +134,8 @@ static void              gwy_resource_manage_delete      (GwyResource *resource)
 static void              gwy_resource_manage_update      (GwyResource *resource);
 
 static gpointer gwy_resource_parent_class = NULL;
+static void (*gwy_resource_parent_notify)(GObject *object,
+                                          GParamSpec *pspec) = NULL;
 
 /* Use a static propery -> trait map.  We could do it generically, too.
  * That g_param_spec_pool_list() is ugly and slow is the minor problem, the
@@ -256,6 +259,8 @@ gwy_resource_class_init(GwyResourceClass *klass)
     GParamSpec *pspec;
 
     g_type_class_add_private(klass, sizeof(Resource));
+
+    gwy_resource_parent_notify = G_OBJECT_CLASS(gwy_resource_parent_class)->notify;
 
     gobject_class->finalize = gwy_resource_finalize;
     gobject_class->get_property = gwy_resource_get_property;
@@ -591,19 +596,22 @@ inventory_item_inserted(GwyInventory *inventory,
     g_return_if_fail(klass->priv->inventory == inventory);
     GwyResource *resource = gwy_inventory_get_nth(inventory, i);
     Resource *priv = resource->priv;
-    if (!priv->is_managed) {
+    priv->is_managed = TRUE;
+    if (!priv->is_being_loaded) {
         GObject *object = G_OBJECT(resource);
         g_object_freeze_notify(object);
-        priv->is_managed = TRUE;
         g_object_notify(object, "is-managed");
         // We must be pesimistic.  But we would sync it to disk anyway.
         if (!priv->is_modified && priv->is_modifiable) {
-            priv->is_modified = priv->is_modifiable;
+            priv->is_modified = TRUE;
             g_object_notify(object, "is-modified");
         }
         g_object_thaw_notify(object);
+        if (priv->is_modified)
+            gwy_resource_manage_create(resource);
     }
-    gwy_resource_manage_create(resource);
+    // FIXME: Resources should not have is-managed set and live outside the
+    // inventory.  Print a warning in that case?
 }
 
 /**
@@ -887,6 +895,8 @@ gwy_resource_save(GwyResource *resource,
                                 NULL);
     g_free(body);
 
+    // FIXME: This is wrong, we cannot set the name arbitrarily for managed
+    // resources.  Must split the function to two.
     if (filename_sys) {
         gchar *oldname = priv->filename;
         if (!oldname || !gwy_strequal(oldname, filename_sys)) {
@@ -897,10 +907,16 @@ gwy_resource_save(GwyResource *resource,
     }
 
     if (!priv->filename) {
-        gchar *dirname = gwy_user_directory(klass->priv->name);
+        ResourceClass *cpriv = klass->priv;
+        if (!cpriv->managed_directory) {
+            g_warning("Cannot construct the path to save, "
+                      "no managed directory has been set.  Crash imminent.");
+        }
         gchar *basename_sys = construct_filename(priv->name);
-        gchar *fname_sys = g_build_filename(dirname, basename_sys, NULL);
-        g_free(dirname);
+        gchar *fname_sys
+            = g_build_filename(g_file_get_path(cpriv->managed_directory),
+                               basename_sys,
+                               NULL);
         g_free(basename_sys);
 
         /* Avoid the numbering loop in the simple case. */
@@ -922,10 +938,14 @@ gwy_resource_save(GwyResource *resource,
         priv->filename = fname_sys;
         emit_filename_changed = TRUE;
     }
+    g_printerr("@@@ <%s>\n", priv->filename);
+
 
     gboolean ok = g_file_set_contents(priv->filename, buffer, -1, error);
     g_free(buffer);
 
+    // FIXME: Maybe this should be avoided when we are called from
+    // gwy_resource_manage_create().  Factor saving to an internal function?
     if (priv->is_modified) {
         priv->is_modified = FALSE;
         g_object_notify(G_OBJECT(resource), "is-modified");
@@ -951,7 +971,7 @@ construct_filename(const gchar *resource_name)
      * We might have troubles filtering them after the conversion.   Be very
      * conservative, the name does not matter. */
     gsize len = strlen(resource_name);
-    gchar *resname = g_slice_alloc(sizeof(gchar)*(len + 1));
+    gchar *resname = g_slice_alloc(len + 1);
 
     gboolean garbage = FALSE;
     gsize j = 0;
@@ -990,7 +1010,7 @@ construct_filename(const gchar *resource_name)
     } while (error && *resource_name);
 
     g_clear_error(&error);
-    g_free(resname);
+    g_slice_free1(len + 1, resname);
 
     if (!str->len || (str->len == 1 && garbage))
         g_string_assign(str, fallback_name);
@@ -1228,17 +1248,21 @@ static void
 gwy_resource_notify(GObject *object,
                     GParamSpec *pspec)
 {
-    if (gwy_stramong(pspec->name,
-                     "file-name", "is-preferred", "is-modifiable", "is-managed",
-                     NULL))
-        return;
+    if (pspec->owner_type == GWY_TYPE_RESOURCE
+        && !gwy_strequal(pspec->name, "name"))
+        goto chain;
 
     GwyResource *resource = GWY_RESOURCE(object);
     Resource *priv = resource->priv;
     if (!priv->is_modifiable || !priv->is_modified)
-        return;
+        goto chain;
 
     gwy_resource_manage_update(resource);
+
+chain:
+    // Most likely no-op but we cannot be sure.
+    if (gwy_resource_parent_notify)
+        gwy_resource_parent_notify(object, pspec);
 }
 
 static void
@@ -1257,6 +1281,7 @@ gwy_resource_manage_create(GwyResource *resource)
     }
 
     GError *err = NULL;
+    resource->priv->is_modified = TRUE;  // FIXME
     if (!gwy_resource_save(resource, NULL, &err)) {
         g_warning("Cannot create resource on disk: %s", err->message);
         g_clear_error(&err);
@@ -1287,7 +1312,8 @@ gwy_resource_manage_update(GwyResource *resource)
 
     // TODO: Must check if it has a filename assigned.
     g_printerr("Should queue Resource %s of type %s for saving to %s\n",
-               priv->name, G_OBJECT_TYPE_NAME(resource), priv->filename);
+               priv->name, G_OBJECT_TYPE_NAME(resource),
+               priv->filename ? priv->filename : "a new file");
 }
 
 /**
@@ -1403,9 +1429,10 @@ gwy_resource_type_load_directory(GType type,
 
         if (G_LIKELY(resource) && name_is_unique(resource, cpriv, &error)) {
             Resource *priv = resource->priv;
-            priv->is_managed = TRUE;
             priv->is_modified = FALSE;
+            priv->is_being_loaded = TRUE;
             gwy_inventory_insert(cpriv->inventory, resource);
+            priv->is_being_loaded = FALSE;
             g_object_unref(resource);
         }
         else {
