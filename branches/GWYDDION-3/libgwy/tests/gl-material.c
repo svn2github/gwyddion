@@ -46,9 +46,16 @@ test_gl_material_load_check(const gchar *filename,
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
+
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
-    g_assert_cmpstr(res_filename, ==, filename);
+    GFile *gfile = g_file_new_for_path(filename);
+    GFile *res_gfile = g_file_new_for_path(res_filename);
+    g_assert(g_file_equal(gfile, res_gfile));
+    g_object_unref(gfile);
+    g_object_unref(res_gfile);
+    g_free(res_filename);
+
     GwyRGBA color;
     color = gwy_gl_material_get_ambient(gl_material);
     g_assert(gwy_serializable_boxed_equal(GWY_TYPE_RGBA,
@@ -153,12 +160,20 @@ test_gl_material_save(void)
     gwy_gl_material_set_shininess(gl_material, 0.1);
 
     GError *error = NULL;
-    g_assert(gwy_resource_save(resource, "AlienGL", &error));
+    gwy_resource_set_filename(resource, "AlienGL");
+    g_assert(gwy_resource_save(resource, &error));
     g_assert(!error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "AlienGL");
+
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
-    g_assert_cmpstr(res_filename, ==, "AlienGL");
+    GFile *gfile = g_file_new_for_path("AlienGL");
+    GFile *res_gfile = g_file_new_for_path(res_filename);
+    g_assert(g_file_equal(gfile, res_gfile));
+    g_object_unref(gfile);
+    g_object_unref(res_gfile);
+    g_free(res_filename);
+
     GWY_OBJECT_UNREF(gl_material);
 
     test_gl_material_load_check("AlienGL", "AlienGL",
@@ -211,6 +226,9 @@ test_gl_material_inventory(void)
     const GwyInventoryItemType *item_type;
     GwyGLMaterial *gl_material;
     GwyResource *resource;
+
+    gwy_resource_type_set_managed(GWY_TYPE_GL_MATERIAL, FALSE);
+    //gwy_resource_type_set_managed_directory(GWY_TYPE_GL_MATERIAL, TEST_DATA_DIR);
 
     GwyInventory *gl_materials = gwy_gl_materials();
     g_assert(GWY_IS_INVENTORY(gl_materials));

@@ -43,9 +43,16 @@ test_gradient_load_check(const gchar *filename,
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, expected_name);
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
+
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
-    g_assert_cmpstr(res_filename, ==, filename);
+    GFile *gfile = g_file_new_for_path(filename);
+    GFile *res_gfile = g_file_new_for_path(res_filename);
+    g_assert(g_file_equal(gfile, res_gfile));
+    g_object_unref(gfile);
+    g_object_unref(res_gfile);
+    g_free(res_filename);
+
     g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, expected_n_points);
     GwyGradientPoint pt;
     pt = gwy_gradient_get(gradient, 0);
@@ -135,12 +142,20 @@ test_gradient_save(void)
                     ==, 0);
 
     GError *error = NULL;
-    g_assert(gwy_resource_save(resource, "Tricolor", &error));
+    gwy_resource_set_filename(resource, "Tricolor");
+    g_assert(gwy_resource_save(resource, &error));
     g_assert(!error);
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Tricolor");
+
     gchar *res_filename = NULL;
     g_object_get(resource, "file-name", &res_filename, NULL);
-    g_assert_cmpstr(res_filename, ==, "Tricolor");
+    GFile *gfile = g_file_new_for_path("Tricolor");
+    GFile *res_gfile = g_file_new_for_path(res_filename);
+    g_assert(g_file_equal(gfile, res_gfile));
+    g_object_unref(gfile);
+    g_object_unref(res_gfile);
+    g_free(res_filename);
+
     GWY_OBJECT_UNREF(gradient);
 
     test_gradient_load_check("Tricolor", "Tricolor", 3,
@@ -193,8 +208,8 @@ test_gradient_inventory(void)
     GwyGradient *gradient;
     GwyResource *resource;
 
-    gwy_resource_type_set_managed_directory(GWY_TYPE_GRADIENT,
-                                            TEST_DATA_DIR);
+    gwy_resource_type_set_managed(GWY_TYPE_GRADIENT, FALSE);
+    //gwy_resource_type_set_managed_directory(GWY_TYPE_GRADIENT, TEST_DATA_DIR);
 
     GwyInventory *gradients = gwy_gradients();
     g_assert(GWY_IS_INVENTORY(gradients));

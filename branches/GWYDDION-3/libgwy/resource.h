@@ -93,6 +93,9 @@ GType                       gwy_resource_get_type                  (void)       
 const gchar*                gwy_resource_get_name                  (GwyResource *resource)                  G_GNUC_PURE;
 void                        gwy_resource_set_name                  (GwyResource *resource,
                                                                     const gchar *name);
+const gchar*                gwy_resource_get_filename              (GwyResource *resource)                  G_GNUC_PURE;
+void                        gwy_resource_set_filename              (GwyResource *resource,
+                                                                    const gchar *filename);
 gboolean                    gwy_resource_is_modifiable             (GwyResource *resource)                  G_GNUC_PURE;
 gboolean                    gwy_resource_is_managed                (GwyResource *resource)                  G_GNUC_PURE;
 gboolean                    gwy_resource_get_is_preferred          (GwyResource *resource)                  G_GNUC_PURE;
@@ -104,7 +107,6 @@ GwyResource*                gwy_resource_load                      (const gchar 
                                                                     gboolean modifiable,
                                                                     GError **error)                         G_GNUC_MALLOC;
 gboolean                    gwy_resource_save                      (GwyResource *resource,
-                                                                    const gchar *filename,
                                                                     GError **error);
 void                        gwy_resource_class_register            (GwyResourceClass *klass,
                                                                     const gchar *name,
@@ -117,6 +119,8 @@ void                        gwy_resource_type_load_directory       (GType type,
                                                                     const gchar *dirname,
                                                                     gboolean modifiable,
                                                                     GwyErrorList **error_list);
+void                        gwy_resource_type_set_managed          (GType type,
+                                                                    gboolean managed);
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
 void                        gwy_resource_type_set_managed_directory(GType type,
                                                                     const gchar *dirname);
