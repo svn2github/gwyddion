@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009,2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -93,6 +93,8 @@ struct _GwyResourcePrivate {
     gboolean is_preferred : 1;
     gboolean is_managed : 1;
     gboolean is_on_disk : 1;
+
+    gdouble mtime;
 };
 
 struct _GwyResourceClassPrivate {
@@ -108,68 +110,73 @@ struct _GwyResourceClassPrivate {
 typedef struct _GwyResourcePrivate      Resource;
 typedef struct _GwyResourceClassPrivate ResourceClass;
 
-static void              gwy_resource_class_init         (GwyResourceClass *klass);
-static void              gwy_resource_class_intern_init  (gpointer klass);
-static void              gwy_resource_class_base_init    (GwyResourceClass *klass);
-static void              gwy_resource_class_base_finalize(GwyResourceClass *klass);
-static void              gwy_resource_init               (GwyResource *resource);
-static void              gwy_resource_dispose            (GObject *object);
-static void              gwy_resource_finalize           (GObject *object);
-static void              gwy_resource_serializable_init  (GwySerializableInterface *iface);
-static gsize             gwy_resource_n_items            (GwySerializable *serializable);
-static gsize             gwy_resource_itemize            (GwySerializable *serializable,
-                                                          GwySerializableItems *items);
-static gboolean          gwy_resource_construct          (GwySerializable *serializable,
-                                                          GwySerializableItems *items,
-                                                          GwyErrorList **error_list);
-static void              gwy_resource_assign_impl        (GwySerializable *destination,
-                                                          GwySerializable *source);
-static void              gwy_resource_set_property       (GObject *object,
-                                                          guint prop_id,
-                                                          const GValue *value,
-                                                          GParamSpec *pspec);
-static void              gwy_resource_get_property       (GObject *object,
-                                                          guint prop_id,
-                                                          GValue *value,
-                                                          GParamSpec *pspec);
-static gboolean          gwy_resource_is_modifiable_impl (gconstpointer item);
-static const gchar*      gwy_resource_get_item_name      (gconstpointer item);
-static gboolean          gwy_resource_compare            (gconstpointer item1,
-                                                          gconstpointer item2);
-static void              gwy_resource_rename             (gpointer item,
-                                                          const gchar *new_name);
-static gpointer          gwy_resource_copy               (gconstpointer item);
-static const GType*      gwy_resource_get_traits         (guint *ntraits);
-static const gchar*      gwy_resource_get_trait_name     (guint i);
-static void              gwy_resource_get_trait_value    (gconstpointer item,
-                                                          guint i,
-                                                          GValue *value);
-static void              gwy_resource_delete             (gpointer item);
-static void              gwy_resource_set_is_managed     (GwyResource *resource,
-                                                          gboolean is_managed);
-static void              inventory_item_inserted         (GwyInventory *inventory,
-                                                          guint i,
-                                                          GwyResourceClass *klass);
-static GwyResourceClass* get_resource_class              (const gchar *typename,
-                                                          GType expected_type,
-                                                          const gchar *filename_sys,
-                                                          GError **error);
-static GwyResource*      parse                           (gchar *text,
-                                                          GType expected_type,
-                                                          const gchar *filename,
-                                                          GError **error);
-static gboolean          name_is_unique                  (GwyResource *resource,
-                                                          ResourceClass *klass,
-                                                          GError **error);
-static GFileOutputStream* output_stream_for_save         (GwyResource *resource,
-                                                          GError **error);
-static GString*          construct_filename              (const gchar *resource_name);
-static void              gwy_resource_notify             (GObject *object,
-                                                          GParamSpec *pspec);
-static void              gwy_resource_data_changed_impl  (GwyResource *resource);
-static void              gwy_resource_manage_create      (GwyResource *resource);
-static void              gwy_resource_manage_delete      (GwyResource *resource);
-static void              gwy_resource_manage_update      (GwyResource *resource);
+static void               gwy_resource_class_init         (GwyResourceClass *klass);
+static void               gwy_resource_class_intern_init  (gpointer klass);
+static void               gwy_resource_class_base_init    (GwyResourceClass *klass);
+static void               gwy_resource_class_base_finalize(GwyResourceClass *klass);
+static void               gwy_resource_init               (GwyResource *resource);
+static void               gwy_resource_dispose            (GObject *object);
+static void               gwy_resource_finalize           (GObject *object);
+static void               gwy_resource_serializable_init  (GwySerializableInterface *iface);
+static gsize              gwy_resource_n_items            (GwySerializable *serializable);
+static gsize              gwy_resource_itemize            (GwySerializable *serializable,
+                                                           GwySerializableItems *items);
+static gboolean           gwy_resource_construct          (GwySerializable *serializable,
+                                                           GwySerializableItems *items,
+                                                           GwyErrorList **error_list);
+static void               gwy_resource_assign_impl        (GwySerializable *destination,
+                                                           GwySerializable *source);
+static void               gwy_resource_set_property       (GObject *object,
+                                                           guint prop_id,
+                                                           const GValue *value,
+                                                           GParamSpec *pspec);
+static void               gwy_resource_get_property       (GObject *object,
+                                                           guint prop_id,
+                                                           GValue *value,
+                                                           GParamSpec *pspec);
+static gboolean           gwy_resource_is_modifiable_impl (gconstpointer item);
+static const gchar*       gwy_resource_get_item_name      (gconstpointer item);
+static gboolean           gwy_resource_compare            (gconstpointer item1,
+                                                           gconstpointer item2);
+static void               gwy_resource_rename             (gpointer item,
+                                                           const gchar *new_name);
+static gpointer           gwy_resource_copy               (gconstpointer item);
+static const GType*       gwy_resource_get_traits         (guint *ntraits);
+static const gchar*       gwy_resource_get_trait_name     (guint i);
+static void               gwy_resource_get_trait_value    (gconstpointer item,
+                                                           guint i,
+                                                           GValue *value);
+static void               gwy_resource_delete             (gpointer item);
+static void               set_is_managed                  (GwyResource *resource,
+                                                           gboolean is_managed);
+static void               inventory_item_inserted         (GwyInventory *inventory,
+                                                           guint i,
+                                                           GwyResourceClass *klass);
+static GwyResourceClass*  get_resource_class              (const gchar *typename,
+                                                           GType expected_type,
+                                                           const gchar *filename_sys,
+                                                           GError **error);
+static GwyResource*       parse                           (gchar *text,
+                                                           GType expected_type,
+                                                           const gchar *filename,
+                                                           GError **error);
+static gboolean           name_is_unique                  (GwyResource *resource,
+                                                           ResourceClass *klass,
+                                                           GError **error);
+static GFileOutputStream* output_stream_for_save          (GwyResource *resource,
+                                                           GError **error);
+static GString*           construct_filename              (const gchar *resource_name);
+static void               gwy_resource_notify             (GObject *object,
+                                                           GParamSpec *pspec);
+static void               gwy_resource_data_changed_impl  (GwyResource *resource);
+static void               manage_create                   (GwyResource *resource);
+static void               manage_delete                   (GwyResource *resource);
+static void               manage_update                   (GwyResource *resource);
+static void               manage_unqueue                  (GwyResource *resource);
+static gdouble            get_timestamp                   (void);
+static gboolean           manage_flush_timeout            (gpointer user_data);
+static gboolean           manage_flush                    (GType type,
+                                                           gdouble older_than);
 
 // Follow the convention of G_DEFINE_TYPE even though we could declare the
 // parent class directly of the correct type.
@@ -186,8 +193,12 @@ static guint gwy_resource_ntraits = 0;
 
 static guint resource_signals[N_SIGNALS];
 
-static GSList *all_resources = NULL;
-G_LOCK_DEFINE(all_resources);
+static GSList *resource_classes = NULL;
+G_LOCK_DEFINE(resource_classes);
+
+static GwyResourceManagementType management_type = GWY_RESOURCE_MANAGEMENT_NONE;
+static GList *update_queue = NULL;
+static guint flush_source_id = 0;
 
 static const GwyInventoryItemType resource_item_type = {
     0,
@@ -640,12 +651,12 @@ static void
 gwy_resource_delete(gpointer item)
 {
     GwyResource *resource = GWY_RESOURCE(item);
-    gwy_resource_manage_delete(resource);
-    gwy_resource_set_is_managed(resource, FALSE);
+    manage_delete(resource);
+    set_is_managed(resource, FALSE);
 }
 
 static void
-gwy_resource_set_is_managed(GwyResource *resource,
+set_is_managed(GwyResource *resource,
                             gboolean is_managed)
 {
     g_return_if_fail(!resource->priv->is_managed != !is_managed);
@@ -663,9 +674,9 @@ inventory_item_inserted(GwyInventory *inventory,
     Resource *priv = resource->priv;
     GObject *object = G_OBJECT(resource);
     g_object_freeze_notify(object);
-    gwy_resource_set_is_managed(resource, TRUE);
+    set_is_managed(resource, TRUE);
     if (priv->is_modifiable)
-        gwy_resource_manage_create(resource);
+        manage_create(resource);
     g_object_thaw_notify(object);
 }
 
@@ -954,10 +965,10 @@ gwy_resource_class_register(GwyResourceClass *klass,
     priv->name = name;
 
     gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
-    G_LOCK(all_resources);
-    if (!g_slist_find(all_resources, type))
-        all_resources = g_slist_prepend(all_resources, type);
-    G_UNLOCK(all_resources);
+    G_LOCK(resource_classes);
+    if (!g_slist_find(resource_classes, type))
+        resource_classes = g_slist_prepend(resource_classes, type);
+    G_UNLOCK(resource_classes);
 }
 
 /**
@@ -990,6 +1001,7 @@ gwy_resource_save(GwyResource *resource,
     g_return_val_if_fail(priv->is_modifiable, FALSE);
     g_return_val_if_fail(priv->is_managed || priv->file, FALSE);
 
+    priv->mtime = 0;
     if (!priv->is_modified)
         return TRUE;
 
@@ -1388,7 +1400,7 @@ gwy_resource_data_changed_impl(GwyResource *resource)
         priv->is_modified = TRUE;
         g_object_notify(G_OBJECT(resource), "is-modified");
     }
-    gwy_resource_manage_update(resource);
+    manage_update(resource);
 }
 
 static void
@@ -1406,16 +1418,33 @@ gwy_resource_notify(GObject *object,
         priv->is_modified = TRUE;
         g_object_notify(G_OBJECT(resource), "is-modified");
     }
-    gwy_resource_manage_update(resource);
+    manage_update(resource);
 
 chain:
     if (parent_class->notify)
         parent_class->notify(object, pspec);
 }
 
-static void
-gwy_resource_manage_create(GwyResource *resource)
+static gdouble
+get_timestamp(void)
 {
+    static glong offset = 0;
+
+    GTimeVal tv;
+    g_get_current_time(&tv);
+    if (!offset)
+        offset = tv.tv_sec;
+
+    return (tv.tv_sec - offset) + (gdouble)tv.tv_usec/G_USEC_PER_SEC;
+}
+
+static void
+manage_create(GwyResource *resource)
+{
+    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+        || !resource->priv->is_managed)
+        return;
+
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
     if (!cpriv->is_managed)
@@ -1439,8 +1468,12 @@ gwy_resource_manage_create(GwyResource *resource)
 }
 
 static void
-gwy_resource_manage_delete(GwyResource *resource)
+manage_delete(GwyResource *resource)
 {
+    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+        || !resource->priv->is_managed)
+        return;
+
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
     if (!cpriv->is_managed)
@@ -1456,10 +1489,7 @@ gwy_resource_manage_delete(GwyResource *resource)
         return;
     }
 
-    // TODO: We must unqueue any pending save.
-    // Even better, do all file operations through the manager that will sort
-    // it out.
-
+    manage_unqueue(resource);
     priv->is_on_disk = FALSE;
     GError *err = NULL;
     if (!g_file_delete(priv->file, NULL, &err)) {
@@ -1469,22 +1499,65 @@ gwy_resource_manage_delete(GwyResource *resource)
 }
 
 static void
-gwy_resource_manage_update(GwyResource *resource)
+manage_update(GwyResource *resource)
 {
+    if (management_type == GWY_RESOURCE_MANAGEMENT_NONE
+        || !resource->priv->is_managed)
+        return;
+
     GwyResourceClass *klass = GWY_RESOURCE_GET_CLASS(resource);
     ResourceClass *cpriv = klass->priv;
     if (!cpriv->is_managed)
         return;
 
     Resource *priv = resource->priv;
-
-    if (!priv->is_managed)
+    if (priv->mtime)
+        update_queue = g_list_prepend(update_queue, resource);
+    priv->mtime = get_timestamp();
+    if (management_type == GWY_RESOURCE_MANAGEMENT_MANUAL)
         return;
 
-    // TODO: Must check if it has a filename assigned.
-    g_printerr("Should queue Resource %s of type %s for saving to %s\n",
-               priv->name, G_OBJECT_TYPE_NAME(resource),
-               priv->file ? g_file_get_path(priv->file) : "a new file");
+    if (!flush_source_id)
+        flush_source_id = g_timeout_add_seconds_full(G_PRIORITY_LOW, 1,
+                                                     manage_flush_timeout,
+                                                     NULL, NULL);
+}
+
+static void
+manage_unqueue(GwyResource *resource)
+{
+    update_queue = g_list_remove(update_queue, resource);
+    resource->priv->mtime = 0;
+}
+
+static gboolean
+manage_flush_timeout(G_GNUC_UNUSED gpointer user_data)
+{
+    // Destroy the timeout source if the queue becomes empty.
+    return manage_flush(0, get_timestamp() - 2.0);
+}
+
+static gboolean
+manage_flush(GType type,
+             gdouble older_than)
+{
+    GList *l = update_queue;
+
+    while (l) {
+        GwyResource *resource = (GwyResource*)l->data;
+        if (resource->priv->mtime > older_than
+            || (type && G_OBJECT_TYPE(resource) != type)) {
+            l = g_list_next(l);
+        }
+        else {
+            gwy_resource_save(resource, NULL);
+            GList *next = g_list_next(l);
+            update_queue = g_list_delete_link(update_queue, l);
+            l = next;
+        }
+    }
+
+    return update_queue != NULL;
 }
 
 /**
@@ -1710,25 +1783,114 @@ gwy_resource_type_set_managed(GType type,
 }
 
 /**
- * gwy_resource_types_finalize:
+ * gwy_resources_get_management_type:
+ *
+ * Reports the resource management type.
+ *
+ * Returns: The current management type.  Note management can be still off for
+ *          individual classes.
+ **/
+GwyResourceManagementType
+gwy_resources_get_management_type(void)
+{
+    return management_type;
+}
+
+/**
+ * gwy_resources_set_management_type:
+ *
+ * Sets if and how are resource managed.
+ *
+ * Resources that have been queued for saving before the type is changed will
+ * be still saved even if the management type is set to
+ * %GWY_RESOURCE_MANAGEMENT_NONE.
+ *
+ * If the current type is %GWY_RESOURCE_MANAGEMENT_MANUAL and the management is
+ * switched off the modified resources simply remain in the queue and can be
+ * saved with gwy_resource_type_flush() or gwy_resources_flush().  If the
+ * management is chaned to %GWY_RESOURCE_MANAGEMENT_MAIN they will be saved
+ * during normal operation.
+ *
+ * This function should be called from the thread running the application main
+ * loop.
+ **/
+void
+gwy_resources_set_management_type(GwyResourceManagementType type)
+{
+    g_return_if_fail(type == GWY_RESOURCE_MANAGEMENT_NONE
+                     || type == GWY_RESOURCE_MANAGEMENT_MANUAL
+                     || type == GWY_RESOURCE_MANAGEMENT_MAIN);
+
+    if (management_type == type)
+        return;
+
+    // MAIN promises the resources will be saved automatically so, fullfill it.
+    if (management_type == GWY_RESOURCE_MANAGEMENT_MAIN) {
+        gwy_resources_flush();
+        if (flush_source_id) {
+            g_source_remove(flush_source_id);
+            flush_source_id = 0;
+        }
+    }
+
+    management_type = type;
+}
+
+/**
+ * gwy_resource_type_flush:
+ * @type: A resource type.
+ *
+ * Immediately saves all modified resources of a type to disk.
+ *
+ * This function can be used with all management methods, it does anything only
+ * if any modifications have been queued for saving.
+ **/
+void
+gwy_resource_type_flush(GType type)
+{
+    g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
+    manage_flush(type, 0.0);
+}
+
+/**
+ * gwy_resources_flush:
+ *
+ * Immediately saves all modified resources of all types to disk.
+ *
+ * It is a good idea to call this function before your application terminates
+ * to save any resources that might be in the queue.
+ **/
+void
+gwy_resources_flush(void)
+{
+    manage_flush(0, 0.0);
+    if (flush_source_id) {
+        g_source_remove(flush_source_id);
+        flush_source_id = 0;
+    }
+}
+
+/**
+ * gwy_resources_finalize:
  *
  * Destroys the inventories of all resource classes.
  *
  * This function makes the affected resource classes unusable.  Its purpose is
  * to facilitate reference leak debugging by destroying a large number of
- * objects that normally live forever.
+ * objects that normally live forever.  No attempt to flush changes to disk
+ * is made, you should do that beforehand.
  *
  * It would quite defeat the purpose of this function if it was called while
  * the program was busy loading more resource classes in other threads.  So, no
  * locking is used and just do not expect it to work in such case.
  **/
 void
-gwy_resource_types_finalize(void)
+gwy_resources_finalize(void)
 {
     GSList *l;
 
-    for (l = all_resources; l; l = g_slist_next(l)) {
-        GType type = (GType)GPOINTER_TO_SIZE(all_resources->data);
+    for (l = resource_classes; l; l = g_slist_next(l)) {
+        GType type = (GType)GPOINTER_TO_SIZE(resource_classes->data);
         GwyResourceClass *klass = g_type_class_peek(type);
         ResourceClass *priv = klass->priv;
         // Disconnect in case someone else holds a reference.
@@ -1739,8 +1901,8 @@ gwy_resource_types_finalize(void)
         g_type_class_unref(klass);
     }
 
-    g_slist_free(all_resources);
-    all_resources = NULL;
+    g_slist_free(resource_classes);
+    resource_classes = NULL;
 }
 
 /**
@@ -1915,6 +2077,9 @@ gwy_resource_dump_data_line(const gdouble *data,
  * a resource file associated and they are not automatically saved.  If you
  * insert a free-standing resource to the class inventory, it becomes managed.
  * Before inserting, you must check whether its name its unique though.
+ *
+ * FIXME: The automated synchronization of managed resources to disk must be
+ * described here.
  **/
 
 /**
@@ -1981,6 +2146,34 @@ gwy_resource_dump_data_line(const gdouble *data,
  *                                values.
  *
  * The type of resource file line parsing result.
+ **/
+
+/**
+ * GwyResourceManagementType:
+ * @GWY_RESOURCE_MANAGEMENT_NONE: Changed resources are not tracked apart from
+ *                                setting GwyResource:is-modified and no
+ *                                changes are written to disk automatically.
+ *                                No queue of resources to save is maintained.
+ * @GWY_RESOURCE_MANAGEMENT_MANUAL: A queue of resources to update on disk is
+ *                                  maintained; creation and deletion of
+ *                                  resources is immediately reflected on disk.
+ *                                  However, resource data modification saving
+ *                                  must be explicitly requested with
+ *                                  gwy_resources_flush().
+ * @GWY_RESOURCE_MANAGEMENT_MAIN: A queue of resources to update on disk is
+ *                                maintained; creation and deletion of
+ *                                resources is immediately reflected on disk.
+ *                                Modified resources are automatically saved to
+ *                                disk in periods of inactivity using
+ *                                <link linkend="glib-The-Main-Event-Loop'>the
+ *                                main event loop</link>.
+ *
+ * The type of resource management.
+ *
+ * The initial state is %GWY_RESOURCE_MANAGEMENT_NONE, i.e. you have to
+ * excplitily enable resource management with
+ * gwy_resources_set_management_type() if you want automated or semiautomated
+ * management.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

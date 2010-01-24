@@ -44,6 +44,12 @@ typedef enum {
     GWY_RESOURCE_LINE_BAD_NUMBER,
 } GwyResourceLineType;
 
+typedef enum {
+    GWY_RESOURCE_MANAGEMENT_NONE = 0,
+    GWY_RESOURCE_MANAGEMENT_MANUAL,
+    GWY_RESOURCE_MANAGEMENT_MAIN,
+} GwyResourceManagementType;
+
 GQuark gwy_resource_error_quark(void);
 
 #define GWY_TYPE_RESOURCE \
@@ -124,7 +130,11 @@ void                        gwy_resource_type_set_managed          (GType type,
 gchar*                      gwy_resource_type_get_managed_directory(GType type);
 void                        gwy_resource_type_set_managed_directory(GType type,
                                                                     const gchar *dirname);
-void                        gwy_resource_types_finalize            (void);
+GwyResourceManagementType   gwy_resources_get_management_type      (void)                                   G_GNUC_PURE;
+void                        gwy_resources_set_management_type      (GwyResourceManagementType type);
+void                        gwy_resource_type_flush                (GType type);
+void                        gwy_resources_flush                    (void);
+void                        gwy_resources_finalize                 (void);
 GwyResourceLineType         gwy_resource_parse_param_line          (gchar *line,
                                                                     gchar **key,
                                                                     gchar **value);
@@ -132,7 +142,7 @@ GwyResourceLineType         gwy_resource_parse_data_line           (const gchar 
                                                                     guint ncolumns,
                                                                     gdouble *data);
 gchar*                      gwy_resource_dump_data_line            (const gdouble *data,
-                                                                    guint ncolumns);
+                                                                    guint ncolumns)                         G_GNUC_MALLOC;
 
 G_END_DECLS
 
