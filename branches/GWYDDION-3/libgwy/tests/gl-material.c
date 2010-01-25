@@ -227,9 +227,6 @@ test_gl_material_inventory(void)
     GwyGLMaterial *gl_material;
     GwyResource *resource;
 
-    gwy_resource_type_set_managed(GWY_TYPE_GL_MATERIAL, FALSE);
-    //gwy_resource_type_set_managed_directory(GWY_TYPE_GL_MATERIAL, TEST_DATA_DIR);
-
     GwyInventory *gl_materials = gwy_gl_materials();
     g_assert(GWY_IS_INVENTORY(gl_materials));
     item_type = gwy_inventory_get_item_type(gl_materials);

@@ -208,9 +208,6 @@ test_gradient_inventory(void)
     GwyGradient *gradient;
     GwyResource *resource;
 
-    gwy_resource_type_set_managed(GWY_TYPE_GRADIENT, FALSE);
-    //gwy_resource_type_set_managed_directory(GWY_TYPE_GRADIENT, TEST_DATA_DIR);
-
     GwyInventory *gradients = gwy_gradients();
     g_assert(GWY_IS_INVENTORY(gradients));
     item_type = gwy_inventory_get_item_type(gradients);
