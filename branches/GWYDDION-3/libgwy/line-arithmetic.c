@@ -104,6 +104,7 @@ gwy_line_multiply(GwyLine *line,
 
 /**
  * SECTION: line-arithmetic
+ * @section_id: GwyLine-arithmetic
  * @title: GwyLine arithmetic
  * @short_description: Arithmetic operations with lines
  **/

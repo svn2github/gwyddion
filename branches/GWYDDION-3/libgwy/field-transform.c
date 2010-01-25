@@ -365,6 +365,7 @@ gwy_field_new_rotated_simple(const GwyField *field,
 
 /**
  * SECTION: field-transform
+ * @section_id: GwyField-transform
  * @title: GwyField transformations
  * @short_description: Geometrical transformations of fields
  *

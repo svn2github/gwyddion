@@ -143,6 +143,7 @@ gwy_line_length(const GwyLine *line)
 
 /**
  * SECTION: line-statistics
+ * @section_id: GwyLine-statistics
  * @title: GwyLine statistics
  * @short_description: Statistical characteristics of lines
  **/

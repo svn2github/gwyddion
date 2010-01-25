@@ -408,6 +408,7 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
 
 /**
  * SECTION: mask-field-transform
+ * @section_id: GwyMaskField-transform
  * @title: GwyMaskField transformations
  * @short_description: Geometrical transformations of mask fields
  *

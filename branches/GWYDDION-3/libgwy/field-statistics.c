@@ -1328,6 +1328,7 @@ gwy_field_surface_area(GwyField *field)
 
 /**
  * SECTION: field-statistics
+ * @section_id: GwyField-statistics
  * @title: GwyField statistics
  * @short_description: Statistical characteristics of fields
  *

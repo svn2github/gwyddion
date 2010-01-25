@@ -889,6 +889,7 @@ gwy_field_find_row_shifts(const GwyField *field,
 
 /**
  * SECTION: field-level
+ * @section_id: GwyField-level
  * @title: GwyField levelling
  * @short_description: Field levelling and background subtraction
  *

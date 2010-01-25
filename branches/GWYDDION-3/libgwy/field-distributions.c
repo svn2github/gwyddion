@@ -1416,6 +1416,7 @@ fail:
 
 /**
  * SECTION: field-distributions
+ * @section_id: GwyField-distributions
  * @title: GwyField distributions
  * @short_description: One-dimensional distributions and functionals of fields
  *

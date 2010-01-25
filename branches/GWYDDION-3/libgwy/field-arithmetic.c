@@ -114,6 +114,7 @@ gwy_field_is_incompatible(GwyField *field1,
 
 /**
  * SECTION: field-arithmetic
+ * @section_id: GwyField-arithmetic
  * @title: GwyField arithmetic
  * @short_description: Arithmetic operations with fields
  **/
