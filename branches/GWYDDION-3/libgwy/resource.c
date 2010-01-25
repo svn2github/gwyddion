@@ -1797,7 +1797,7 @@ gwy_resource_type_set_managed(GType type,
 /**
  * gwy_resources_get_management_type:
  *
- * Reports the resource management type.
+ * Reports the current on-disk resource management type.
  *
  * Returns: The current management type.  Note management can be still off for
  *          individual classes.
@@ -1810,8 +1810,9 @@ gwy_resources_get_management_type(void)
 
 /**
  * gwy_resources_set_management_type:
+ * @type: Requested management type.
  *
- * Sets if and how are resource managed.
+ * Sets if and how are resource managed on disk.
  *
  * Resources that have been queued for saving before the type is changed will
  * be still saved even if the management type is set to
@@ -2168,7 +2169,7 @@ gwy_resource_dump_data_line(const gdouble *data,
  *                                resources is immediately reflected on disk.
  *                                Modified resources are automatically saved to
  *                                disk in periods of inactivity using
- *                                <link linkend="glib-The-Main-Event-Loop'>the
+ *                                <link linkend='glib-The-Main-Event-Loop'>the
  *                                main event loop</link>.
  *
  * The type of resource management.
