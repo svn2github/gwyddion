@@ -375,6 +375,34 @@ gwy_serializable_assign(GwySerializable *destination,
 
 /**
  * GwySerializableValue:
+ * @v_boolean: The value as a #gboolean.
+ * @v_int8: The value as a #gint8.
+ * @v_uint8: The value as a #guint8.
+ * @v_int16: The value as a #gint16.
+ * @v_uint16: The value as a #guint16.
+ * @v_int32: The value as a #gint32.
+ * @v_uint32: The value as a #guint32.
+ * @v_int64: The value as a #gint64.
+ * @v_uint64: The value as a #guint64.
+ * @v_double: The value as a #gdouble.
+ * @v_string: The value as a #gchar pointer.
+ * @v_ustring: The value as a #guchar pointer.
+ * @v_object: The value as an object.
+ * @v_boxed: The value as a boxed type.
+ * @v_size: The value as a #gsize.
+ * @v_type: The value as a #GType.
+ * @v_int8_array: The value as an array of #gint8<!-- -->s.
+ * @v_uint8_array: The value as an array of #guint8<!-- -->s.
+ * @v_int16_array: The value as an array of #gint16<!-- -->s.
+ * @v_uint16_array: The value as an array of #guint16<!-- -->s.
+ * @v_int32_array: The value as an array of #gint32<!-- -->s.
+ * @v_uint32_array: The value as an array of #guint32<!-- -->s.
+ * @v_int64_array: The value as an array of #gint64<!-- -->s.
+ * @v_uint64_array: The value as an array of #guint64<!-- -->s.
+ * @v_double_array: The value as an array of #gdouble<!-- -->s.
+ * @v_string_array: The value as an array of #gchar pointers.
+ * @v_ustring_array: The value as an array of #guchar pointers.
+ * @v_object_array: The value as an array of objects.
  *
  * Representation of individual values of object serializable data.
  *

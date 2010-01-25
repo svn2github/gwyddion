@@ -55,6 +55,7 @@ struct _GwyGradient {
 };
 
 struct _GwyGradientClass {
+    /*< private >*/
     GwyResourceClass resource_class;
 };
 
