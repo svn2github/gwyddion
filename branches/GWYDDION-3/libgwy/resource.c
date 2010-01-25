@@ -175,7 +175,9 @@ static void               manage_update                   (GwyResource *resource
 static void               manage_unqueue                  (GwyResource *resource);
 static gdouble            get_timestamp                   (void);
 static gboolean           manage_flush_timeout            (gpointer user_data);
-static gboolean           manage_flush                    (GType type,
+static void               manage_flush                    (GType type,
+                                                           gdouble older_than);
+static gboolean           manage_flush_check_queue        (GType type,
                                                            gdouble older_than);
 
 // Follow the convention of G_DEFINE_TYPE even though we could declare the
@@ -1534,12 +1536,22 @@ static gboolean
 manage_flush_timeout(G_GNUC_UNUSED gpointer user_data)
 {
     // Destroy the timeout source if the queue becomes empty.
-    return manage_flush(0, get_timestamp() - 2.0);
+    return manage_flush_check_queue(0, get_timestamp() - 2.0);
+}
+
+static void
+manage_flush(GType type,
+             gdouble older_than)
+{
+    if (!manage_flush_check_queue(type, older_than) && flush_source_id) {
+        g_source_remove(flush_source_id);
+        flush_source_id = 0;
+    }
 }
 
 static gboolean
-manage_flush(GType type,
-             gdouble older_than)
+manage_flush_check_queue(GType type,
+                         gdouble older_than)
 {
     GList *l = update_queue;
 
@@ -1825,13 +1837,8 @@ gwy_resources_set_management_type(GwyResourceManagementType type)
         return;
 
     // MAIN promises the resources will be saved automatically so, fullfill it.
-    if (management_type == GWY_RESOURCE_MANAGEMENT_MAIN) {
+    if (management_type == GWY_RESOURCE_MANAGEMENT_MAIN)
         gwy_resources_flush();
-        if (flush_source_id) {
-            g_source_remove(flush_source_id);
-            flush_source_id = 0;
-        }
-    }
 
     management_type = type;
 }
@@ -1864,10 +1871,6 @@ void
 gwy_resources_flush(void)
 {
     manage_flush(0, 0.0);
-    if (flush_source_id) {
-        g_source_remove(flush_source_id);
-        flush_source_id = 0;
-    }
 }
 
 /**
