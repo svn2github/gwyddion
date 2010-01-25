@@ -27,6 +27,7 @@ public_headers = \
 	$(srcdir)/field-statistics.h \
 	$(srcdir)/field-transform.h \
 	$(srcdir)/fitter.h \
+	$(srcdir)/fit-function.h \
 	$(srcdir)/fit-task.h \
 	$(srcdir)/gl-material.h \
 	$(srcdir)/gradient.h \
@@ -92,6 +93,7 @@ libgwy3_la_SOURCES = \
 	field-statistics.c \
 	field-transform.c \
 	fitter.c \
+	fit-function.c \
 	fit-task.c \
 	gl-material.c \
 	gradient.c \
