@@ -30,8 +30,13 @@ enum { N_ITEMS = 6 };
 struct _GwyUserFitFunctionPrivate {
     guint nparams;
     GwyUserFitFunctionParam *param;
-    gchar *formula;
+    gchar *expression;
     gchar *filter;
+
+    gchar **serialize_names;
+    gint *serialize_x_powers;
+    gint *serialize_y_powers;
+    gchar **serialize_estimates;
 };
 
 typedef struct _GwyUserFitFunctionPrivate UserFitFunction;
@@ -40,6 +45,7 @@ static void         gwy_user_fit_function_serializable_init(GwySerializableInter
 static gsize        gwy_user_fit_function_n_items          (GwySerializable *serializable);
 static gsize        gwy_user_fit_function_itemize          (GwySerializable *serializable,
                                                             GwySerializableItems *items);
+static void         gwy_user_fit_function_done             (GwySerializable *serializable);
 static gboolean     gwy_user_fit_function_construct        (GwySerializable *serializable,
                                                             GwySerializableItems *items,
                                                             GwyErrorList **error_list);
@@ -54,12 +60,12 @@ static gboolean     gwy_user_fit_function_parse            (GwyResource *resourc
                                                             GError **error);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "formula",  .ctype = GWY_SERIALIZABLE_STRING,       },
-    /*1*/ { .name = "filter",   .ctype = GWY_SERIALIZABLE_STRING,       },
-    /*2*/ { .name = "param",    .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
-    /*3*/ { .name = "x-power",  .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
-    /*4*/ { .name = "y-power",  .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
-    /*5*/ { .name = "estimate", .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
+    /*0*/ { .name = "expression", .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*1*/ { .name = "filter",     .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*2*/ { .name = "param",      .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
+    /*3*/ { .name = "x-power",    .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
+    /*4*/ { .name = "y-power",    .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
+    /*5*/ { .name = "estimate",   .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
 };
 
 G_DEFINE_TYPE_EXTENDED
@@ -74,6 +80,7 @@ gwy_user_fit_function_serializable_init(GwySerializableInterface *iface)
     gwy_user_fit_function_parent_serializable = g_type_interface_peek_parent(iface);
     iface->n_items   = gwy_user_fit_function_n_items;
     iface->itemize   = gwy_user_fit_function_itemize;
+    iface->done      = gwy_user_fit_function_done;
     iface->construct = gwy_user_fit_function_construct;
     iface->duplicate = gwy_user_fit_function_duplicate_impl;
     iface->assign    = gwy_user_fit_function_assign_impl;
@@ -109,29 +116,88 @@ gwy_user_fit_function_n_items(G_GNUC_UNUSED GwySerializable *serializable)
     return N_ITEMS;
 }
 
+static void
+serialize_params(UserFitFunction *priv)
+{
+    guint n = priv->nparams;
+    priv->serialize_names = g_new(gchar*, n);
+    priv->serialize_x_powers = g_new(gint, n);
+    priv->serialize_y_powers = g_new(gint, n);
+    for (guint i = 0; i < n; i++) {
+        priv->serialize_names[i] = priv->param[i].name;
+        priv->serialize_x_powers[i] = priv->param[i].power_x;
+        priv->serialize_y_powers[i] = priv->param[i].power_y;
+        priv->serialize_estimates[i] = priv->param[i].estimate;
+    }
+}
+
 static gsize
 gwy_user_fit_function_itemize(GwySerializable *serializable,
                               GwySerializableItems *items)
 {
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS+1, 0);
 
     GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(serializable);
-    UserFitFunction *function = userfitfunction->priv;
-    GwySerializableItem it;
+    UserFitFunction *priv = userfitfunction->priv;
+    GwySerializableItem *it = items->items + items->n;
 
     // Our own data
+    *it = serialize_items[0];
+    it->value.v_string = priv->expression;
+    it++, items->n++;
+
+    if (priv->filter) {
+        *it = serialize_items[1];
+        it->value.v_string = priv->filter;
+        it++, items->n++;
+    }
+
+    serialize_params(priv);
+
+    *it = serialize_items[2];
+    it->value.v_string_array = priv->serialize_names;
+    it->array_size = priv->nparams;
+    it++, items->n++;
+
+    *it = serialize_items[3];
+    it->value.v_int32_array = priv->serialize_x_powers;
+    it->array_size = priv->nparams;
+    it++, items->n++;
+
+    *it = serialize_items[4];
+    it->value.v_int32_array = priv->serialize_y_powers;
+    it->array_size = priv->nparams;
+    it++, items->n++;
+
+    *it = serialize_items[5];
+    it->value.v_string_array = priv->serialize_estimates;
+    it->array_size = priv->nparams;
+    it++, items->n++;
 
     // Chain to parent
     g_return_val_if_fail(items->len - items->n, 0);
-    it.ctype = GWY_SERIALIZABLE_PARENT;
-    it.name = g_type_name(GWY_TYPE_RESOURCE);
-    it.array_size = 0;
-    it.value.v_type = GWY_TYPE_RESOURCE;
-    items->items[items->n++] = it;
+    it->ctype = GWY_SERIALIZABLE_PARENT;
+    it->name = g_type_name(GWY_TYPE_RESOURCE);
+    it->array_size = 0;
+    it->value.v_type = GWY_TYPE_RESOURCE;
+    it++, items->n++;
 
     guint n;
     if ((n = gwy_user_fit_function_parent_serializable->itemize(serializable, items)))
         return N_ITEMS+1 + n;
     return 0;
+}
+
+static void
+gwy_user_fit_function_done(GwySerializable *serializable)
+{
+    GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(serializable);
+    UserFitFunction *priv = userfitfunction->priv;
+
+    GWY_FREE(priv->serialize_names);
+    GWY_FREE(priv->serialize_x_powers);
+    GWY_FREE(priv->serialize_y_powers);
+    GWY_FREE(priv->serialize_estimates);
 }
 
 static gboolean
@@ -231,6 +297,7 @@ const gchar*
 gwy_user_fit_function_get_expression(GwyUserFitFunction *userfitfunction)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNCTION(userfitfunction), NULL);
+    return userfitfunction->priv->expression;
 }
 
 const GwyUserFitFunctionParam*
