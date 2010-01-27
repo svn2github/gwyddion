@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/expr.h"
 #include "libgwy/fit-function.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
@@ -62,9 +63,13 @@ struct _GwyFitFunctionPrivate {
     gboolean is_builtin : 1;
     gboolean has_data : 1;
 
-    // Exactly one of them is set
+    // Exactly one of builtin/user is set
     const GwyBuiltinFitFunction *builtin;
+
     GwyUserFitFunction *user;
+    guint nparams;  // Cached namely for user-defined funcs, but set for both.
+    guint *indices;
+    GwyExpr *expr;
 };
 
 typedef struct _GwyFitFunctionPrivate FitFunction;
@@ -131,6 +136,7 @@ gwy_fit_function_constructed(GObject *object)
     if (builtin) {
         priv->is_builtin = TRUE;
         priv->builtin = builtin;
+        priv->nparams = builtin->nparams;
     }
     // TODO: User functions
     G_OBJECT_CLASS(gwy_fit_function_parent_class)->constructed(object);
@@ -140,8 +146,10 @@ static void
 gwy_fit_function_dispose(GObject *object)
 {
     GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
-    GWY_OBJECT_UNREF(fitfunction->priv->fittask);
-    GWY_OBJECT_UNREF(fitfunction->priv->user);
+    FitFunction *priv = fitfunction->priv;
+    GWY_OBJECT_UNREF(priv->fittask);
+    GWY_OBJECT_UNREF(priv->user);
+    GWY_OBJECT_UNREF(priv->expr);
     G_OBJECT_CLASS(gwy_fit_function_parent_class)->dispose(object);
 }
 
@@ -149,7 +157,9 @@ static void
 gwy_fit_function_finalize(GObject *object)
 {
     GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
-    GWY_FREE(fitfunction->priv->name);
+    FitFunction *priv = fitfunction->priv;
+    GWY_FREE(priv->name);
+    GWY_FREE(priv->indices);
     G_OBJECT_CLASS(gwy_fit_function_parent_class)->finalize(object);
 }
 
@@ -376,14 +386,60 @@ gwy_fit_function_estimate(GwyFitFunction *fitfunction,
     return FALSE;
 }
 
+static void
+construct_expr(FitFunction *priv)
+{
+    priv->expr = gwy_expr_new();
+    if (!gwy_expr_compile(priv->expr,
+                          gwy_user_fit_function_get_expression(priv->user),
+                          NULL)) {
+        g_critical("Cannot compile user fitting function expression.");
+        return;
+    }
+
+    guint n;
+    const GwyUserFitFunctionParam *params;
+    params = gwy_user_fit_function_get_params(priv->user, &n);
+    const gchar *names[n+1];
+    for (guint i = 0; i < n; i++)
+        names[i] = params[i].name;
+    names[n] = "x";
+
+    priv->indices = g_new(guint, n+1);
+    if (gwy_expr_resolve_variables(priv->expr, n+1, names, priv->indices)) {
+        g_critical("Cannot resolve variables in user fitting function "
+                   "expression.");
+        return;
+    }
+}
+
 static gboolean
 fit_function_vfunc(guint i,
                    gpointer user_data,
                    gdouble *retval,
                    const gdouble *params)
 {
-    // TODO
-    return FALSE;
+    FitFunction *priv = ((GwyFitFunction*)user_data)->priv;
+    g_return_val_if_fail(i < priv->npoints, FALSE);
+    gdouble x = priv->points[i].x, y = priv->points[i].y;
+
+    if (priv->is_builtin) {
+        const GwyBuiltinFitFunction *builtin = priv->builtin;
+        gdouble v;
+        gboolean ok = builtin->function(x, params, &v);
+        *retval = v - y;
+        return ok;
+    }
+
+    if (!priv->expr)
+        construct_expr(priv);
+
+    gdouble variables[priv->nparams+2];
+    for (guint j = 0; j < priv->nparams; j++)
+        variables[priv->indices[j]] = params[j];
+    variables[priv->indices[priv->nparams]] = x;
+    *retval = gwy_expr_execute(priv->expr, variables) - y;
+    return TRUE;
 }
 
 static void
@@ -452,6 +508,26 @@ gwy_fit_function_set_data(GwyFitFunction *fitfunction,
     priv->has_data = npoints > 0;
     if (priv->fittask)
         update_fit_task(fitfunction);
+}
+
+/**
+ * gwy_fit_function_get_user:
+ * @fitfunction: A fitting function.
+ *
+ * Obtains the user-defined fitting function resource of a fitting function.
+ *
+ * This method can be called both with built-in and user-defined fitting
+ * functions, in fact, is can be used to determine if a function is built-in.
+ *
+ * Returns: The user fitting function resource corresponding to @fitfunction
+ *          (no reference added), or %NULL if the function is built-in.
+ **/
+GwyUserFitFunction*
+gwy_fit_function_get_user(GwyFitFunction *fitfunction)
+{
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), NULL);
+    FitFunction *priv = fitfunction->priv;
+    return priv->is_builtin ? NULL : priv->user;
 }
 
 static void

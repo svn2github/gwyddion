@@ -62,8 +62,11 @@ struct _GwyUserFitFunctionClass {
 #define gwy_user_fit_function_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType               gwy_user_fit_function_get_type(void) G_GNUC_CONST;
-GwyUserFitFunction* gwy_user_fit_function_new     (void) G_GNUC_MALLOC;
+GType                          gwy_user_fit_function_get_type      (void)                                G_GNUC_CONST;
+GwyUserFitFunction*            gwy_user_fit_function_new           (void)                                G_GNUC_MALLOC;
+const gchar*                   gwy_user_fit_function_get_expression(GwyUserFitFunction *userfitfunction) G_GNUC_PURE;
+const GwyUserFitFunctionParam* gwy_user_fit_function_get_params    (GwyUserFitFunction *userfitfunction,
+                                                                    guint *nparams);
 
 #define gwy_user_fit_functions() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_FIT_FUNCTION))

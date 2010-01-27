@@ -51,26 +51,28 @@ struct _GwyFitFunctionClass {
     /*< private >*/
     GObjectClass g_object_class;
 };
-GType           gwy_fit_function_get_type       (void)                        G_GNUC_CONST;
-GwyFitFunction* gwy_fit_function_new            (const gchar *name)           G_GNUC_MALLOC;
-gboolean        gwy_fit_function_get_value      (GwyFitFunction *fitfunction,
-                                                 gdouble x,
-                                                 const gdouble *params,
-                                                 gdouble *value);
-const gchar*    gwy_fit_function_get_formula    (GwyFitFunction *fitfunction) G_GNUC_PURE;
-guint           gwy_fit_function_get_n_params   (GwyFitFunction *fitfunction) G_GNUC_PURE;
-const gchar*    gwy_fit_function_get_param_name (GwyFitFunction *fitfunction,
-                                                 guint i)                     G_GNUC_PURE;
-GwyUnit*        gwy_fit_function_get_param_units(GwyFitFunction *fitfunction,
-                                                 guint i,
-                                                 GwyUnit *unit_x,
-                                                 GwyUnit *unit_y)             G_GNUC_MALLOC;
-gboolean        gwy_fit_function_estimate       (GwyFitFunction *fitfunction,
-                                                 gdouble *params);
-GwyFitTask*     gwy_fit_function_get_fit_task   (GwyFitFunction *fitfunction) G_GNUC_PURE;
-void            gwy_fit_function_set_data       (GwyFitFunction *fitfunction,
-                                                 const GwyXY *points,
-                                                 guint npoints);
+
+GType               gwy_fit_function_get_type       (void)                        G_GNUC_CONST;
+GwyFitFunction*     gwy_fit_function_new            (const gchar *name)           G_GNUC_MALLOC;
+gboolean            gwy_fit_function_get_value      (GwyFitFunction *fitfunction,
+                                                     gdouble x,
+                                                     const gdouble *params,
+                                                     gdouble *value);
+const gchar*        gwy_fit_function_get_formula    (GwyFitFunction *fitfunction) G_GNUC_PURE;
+guint               gwy_fit_function_get_n_params   (GwyFitFunction *fitfunction) G_GNUC_PURE;
+const gchar*        gwy_fit_function_get_param_name (GwyFitFunction *fitfunction,
+                                                     guint i)                     G_GNUC_PURE;
+GwyUnit*            gwy_fit_function_get_param_units(GwyFitFunction *fitfunction,
+                                                     guint i,
+                                                     GwyUnit *unit_x,
+                                                     GwyUnit *unit_y)             G_GNUC_MALLOC;
+gboolean            gwy_fit_function_estimate       (GwyFitFunction *fitfunction,
+                                                     gdouble *params);
+GwyFitTask*         gwy_fit_function_get_fit_task   (GwyFitFunction *fitfunction) G_GNUC_PURE;
+void                gwy_fit_function_set_data       (GwyFitFunction *fitfunction,
+                                                     const GwyXY *points,
+                                                     guint npoints);
+GwyUserFitFunction* gwy_fit_function_get_user       (GwyFitFunction *fitfunction) G_GNUC_PURE;
 
 G_END_DECLS
 

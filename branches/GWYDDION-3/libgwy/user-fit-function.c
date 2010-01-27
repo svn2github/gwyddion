@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
-#include "libgwy/expr.h"
 #include "libgwy/user-fit-function.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
@@ -29,7 +28,6 @@
 enum { N_ITEMS = 6 };
 
 struct _GwyUserFitFunctionPrivate {
-    GwyExpr *expr;
     guint nparams;
     GwyUserFitFunctionParam *param;
     gchar *formula;
@@ -38,8 +36,6 @@ struct _GwyUserFitFunctionPrivate {
 
 typedef struct _GwyUserFitFunctionPrivate UserFitFunction;
 
-static void         gwy_user_fit_function_dispose          (GObject *object);
-static void         gwy_user_fit_function_finalize         (GObject *object);
 static void         gwy_user_fit_function_serializable_init(GwySerializableInterface *iface);
 static gsize        gwy_user_fit_function_n_items          (GwySerializable *serializable);
 static gsize        gwy_user_fit_function_itemize          (GwySerializable *serializable,
@@ -86,13 +82,10 @@ gwy_user_fit_function_serializable_init(GwySerializableInterface *iface)
 static void
 gwy_user_fit_function_class_init(GwyUserFitFunctionClass *klass)
 {
-    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    //GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GwyResourceClass *res_class = GWY_RESOURCE_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(UserFitFunction));
-
-    gobject_class->dispose = gwy_user_fit_function_dispose;
-    gobject_class->finalize = gwy_user_fit_function_finalize;
 
     res_class->copy = gwy_user_fit_function_copy;
     res_class->dump = gwy_user_fit_function_dump;
@@ -108,22 +101,6 @@ gwy_user_fit_function_init(GwyUserFitFunction *userfitfunction)
                                                         GWY_TYPE_USER_FIT_FUNCTION,
                                                         UserFitFunction);
     //TODO *userfitfunction->priv = opengl_default;
-}
-
-static void
-gwy_user_fit_function_dispose(GObject *object)
-{
-    GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(object);
-    GWY_OBJECT_UNREF(userfitfunction->priv->expr);
-    G_OBJECT_CLASS(gwy_user_fit_function_parent_class)->dispose(object);
-}
-
-static void
-gwy_user_fit_function_finalize(GObject *object)
-{
-    GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(object);
-    // TODO:
-    G_OBJECT_CLASS(gwy_user_fit_function_parent_class)->finalize(object);
 }
 
 static gsize
@@ -248,6 +225,22 @@ GwyUserFitFunction*
 gwy_user_fit_function_new(void)
 {
     return g_object_newv(GWY_TYPE_USER_FIT_FUNCTION, 0, NULL);
+}
+
+const gchar*
+gwy_user_fit_function_get_expression(GwyUserFitFunction *userfitfunction)
+{
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNCTION(userfitfunction), NULL);
+}
+
+const GwyUserFitFunctionParam*
+gwy_user_fit_function_get_params(GwyUserFitFunction *userfitfunction,
+                                 guint *nparams)
+{
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNCTION(userfitfunction), NULL);
+    UserFitFunction *priv = userfitfunction->priv;
+    GWY_MAYBE_SET(nparams, priv->nparams);
+    return priv->param;
 }
 
 static gchar*
