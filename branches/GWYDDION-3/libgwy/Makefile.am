@@ -27,7 +27,7 @@ public_headers = \
 	$(srcdir)/field-statistics.h \
 	$(srcdir)/field-transform.h \
 	$(srcdir)/fitter.h \
-	$(srcdir)/fit-function.h \
+	$(srcdir)/fit-func.h \
 	$(srcdir)/fit-task.h \
 	$(srcdir)/gl-material.h \
 	$(srcdir)/gradient.h \
@@ -49,7 +49,7 @@ public_headers = \
 	$(srcdir)/serialize.h \
 	$(srcdir)/strfuncs.h \
 	$(srcdir)/unit.h \
-	$(srcdir)/user-fit-function.h \
+	$(srcdir)/user-fit-func.h \
 	$(srcdir)/value-format.h
 
 public_built_headers = \
@@ -94,7 +94,7 @@ libgwy3_la_SOURCES = \
 	field-statistics.c \
 	field-transform.c \
 	fitter.c \
-	fit-function.c \
+	fit-func.c \
 	fit-task.c \
 	gl-material.c \
 	gradient.c \
@@ -118,7 +118,7 @@ libgwy3_la_SOURCES = \
 	strfuncs.c \
 	types.c \
 	unit.c \
-	user-fit-function.c \
+	user-fit-func.c \
 	value-format.c \
 	version.c
 

@@ -34,6 +34,7 @@
 #include <libgwy/field-statistics.h>
 #include <libgwy/field-transform.h>
 #include <libgwy/fitter.h>
+#include <libgwy/fit-func.h>
 #include <libgwy/fit-task.h>
 #include <libgwy/gl-material.h>
 #include <libgwy/gradient.h>
@@ -55,6 +56,7 @@
 #include <libgwy/strfuncs.h>
 #include <libgwy/types.h>
 #include <libgwy/unit.h>
+#include <libgwy/user-fit-func.h>
 #include <libgwy/version.h>
 
 #endif
