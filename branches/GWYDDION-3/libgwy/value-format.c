@@ -26,7 +26,7 @@
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 
 enum {
     PROP_0,

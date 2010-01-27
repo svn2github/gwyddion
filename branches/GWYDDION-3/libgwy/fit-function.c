@@ -20,338 +20,444 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
-#include "libgwy/serialize.h"
 #include "libgwy/fit-function.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/object-internal.h"
 
-enum { N_ITEMS = 1 };
+enum {
+    PROP_0,
+    PROP_NAME,
+    N_PROPS
+};
 
-// NB: Below we assume this is plain old data that can be bit-wise assigned.
-// If this ceases to hold, the code must be reviewed.
+typedef struct {
+    const gchar *name;
+    gint power_x;
+    gint power_y;
+} GwyFitFunctionParam;
+
+typedef gboolean (*BuiltinFunction)(gdouble x,
+                                    const gdouble *params,
+                                    gdouble *value);
+typedef GwyUnit* (*BuiltinDeriveUnits)(guint param,
+                                       GwyUnit *unit_x,
+                                       GwyUnit *unit_y);
+
+
+typedef struct {
+    const gchar *formula;
+    guint nparams;
+    const GwyFitFunctionParam *param;
+    BuiltinFunction function;
+    BuiltinDeriveUnits derive_units;
+    // TODO: Specialized estimators, filters, weights, differentiation, unit
+    // derivation, ...
+} GwyBuiltinFitFunction;
+
 struct _GwyFitFunctionPrivate {
+    GwyFitTask *fittask;
+    gchar *name;
+    const GwyXY *points;
+    guint npoints;
+    gboolean is_builtin : 1;
+    gboolean has_data : 1;
+
+    // Exactly one of them is set
+    const GwyBuiltinFitFunction *builtin;
+    GwyUserFitFunction *user;
 };
 
 typedef struct _GwyFitFunctionPrivate FitFunction;
 
-static void         gwy_fit_function_serializable_init(GwySerializableInterface *iface);
-static gsize        gwy_fit_function_n_items          (GwySerializable *serializable);
-static gsize        gwy_fit_function_itemize          (GwySerializable *serializable,
-                                                       GwySerializableItems *items);
-static gboolean     gwy_fit_function_construct        (GwySerializable *serializable,
-                                                       GwySerializableItems *items,
-                                                       GwyErrorList **error_list);
-static GObject*     gwy_fit_function_duplicate_impl   (GwySerializable *serializable);
-static void         gwy_fit_function_assign_impl      (GwySerializable *destination,
-                                                       GwySerializable *source);
-static GwyResource* gwy_fit_function_copy             (GwyResource *resource);
-static void         gwy_fit_function_changed          (GwyFitFunction *fit_function);
-static void         gwy_fit_function_setup_inventory  (GwyInventory *inventory);
-static gchar*       gwy_fit_function_dump             (GwyResource *resource);
-static gboolean     gwy_fit_function_parse            (GwyResource *resource,
-                                                       gchar *text,
-                                                       GError **error);
+static void gwy_fit_function_constructed (GObject *object);
+static void gwy_fit_function_dispose     (GObject *object);
+static void gwy_fit_function_finalize    (GObject *object);
+static void gwy_fit_function_set_property(GObject *object,
+                                          guint prop_id,
+                                          const GValue *value,
+                                          GParamSpec *pspec);
+static void gwy_fit_function_get_property(GObject *object,
+                                          guint prop_id,
+                                          GValue *value,
+                                          GParamSpec *pspec);
+static void setup_builtin_functions      (void);
 
-static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "formula",   .ctype = GWY_SERIALIZABLE_STRING,  },
-};
+G_DEFINE_TYPE(GwyFitFunction, gwy_fit_function, G_TYPE_OBJECT)
 
-G_DEFINE_TYPE_EXTENDED
-    (GwyFitFunction, gwy_fit_function, GWY_TYPE_RESOURCE, 0,
-     GWY_IMPLEMENT_SERIALIZABLE(gwy_fit_function_serializable_init))
-
-GwySerializableInterface *gwy_fit_function_parent_serializable = NULL;
-
-static void
-gwy_fit_function_serializable_init(GwySerializableInterface *iface)
-{
-    gwy_fit_function_parent_serializable = g_type_interface_peek_parent(iface);
-    iface->n_items   = gwy_fit_function_n_items;
-    iface->itemize   = gwy_fit_function_itemize;
-    iface->construct = gwy_fit_function_construct;
-    iface->duplicate = gwy_fit_function_duplicate_impl;
-    iface->assign    = gwy_fit_function_assign_impl;
-}
+static GHashTable *builtin_functions = NULL;
 
 static void
 gwy_fit_function_class_init(GwyFitFunctionClass *klass)
 {
-    GwyResourceClass *res_class = GWY_RESOURCE_CLASS(klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(FitFunction));
 
-    res_class->setup_inventory = gwy_fit_function_setup_inventory;
-    res_class->copy = gwy_fit_function_copy;
-    res_class->dump = gwy_fit_function_dump;
-    res_class->parse = gwy_fit_function_parse;
+    gobject_class->constructed = gwy_fit_function_constructed;
+    gobject_class->dispose = gwy_fit_function_dispose;
+    gobject_class->finalize = gwy_fit_function_finalize;
+    gobject_class->get_property = gwy_fit_function_get_property;
+    gobject_class->set_property = gwy_fit_function_set_property;
 
-    gwy_resource_class_register(res_class, "fitfunctions", NULL);
+    g_object_class_install_property
+        (gobject_class,
+         PROP_NAME,
+         g_param_spec_string("name",
+                             "Name",
+                             "Function name, either built-in or user.",
+                             "Constant",
+                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
+                             | STATICP));
+
+    setup_builtin_functions();
 }
 
 static void
-gwy_fit_function_init(GwyFitFunction *fit_function)
+gwy_fit_function_init(GwyFitFunction *fitfunction)
 {
-    fit_function->priv = G_TYPE_INSTANCE_GET_PRIVATE(fit_function,
+    fitfunction->priv = G_TYPE_INSTANCE_GET_PRIVATE(fitfunction,
                                                     GWY_TYPE_FIT_FUNCTION,
                                                     FitFunction);
-    //TODO *fit_function->priv = opengl_default;
 }
 
-static gsize
-gwy_fit_function_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+static void
+gwy_fit_function_constructed(GObject *object)
 {
-    return N_ITEMS;
-}
+    GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
+    FitFunction *priv = fitfunction->priv;
 
-static gsize
-gwy_fit_function_itemize(GwySerializable *serializable,
-                        GwySerializableItems *items)
-{
-
-    GwyFitFunction *fit_function = GWY_FIT_FUNCTION(serializable);
-    FitFunction *function = fit_function->priv;
-    GwySerializableItem it;
-
-    // Our own data
-
-    // Chain to parent
-    g_return_val_if_fail(items->len - items->n, 0);
-    it.ctype = GWY_SERIALIZABLE_PARENT;
-    it.name = g_type_name(GWY_TYPE_RESOURCE);
-    it.array_size = 0;
-    it.value.v_type = GWY_TYPE_RESOURCE;
-    items->items[items->n++] = it;
-
-    guint n;
-    if ((n = gwy_fit_function_parent_serializable->itemize(serializable, items)))
-        return N_ITEMS+1 + n;
-    return 0;
-}
-
-static gboolean
-gwy_fit_function_construct(GwySerializable *serializable,
-                          GwySerializableItems *items,
-                          GwyErrorList **error_list)
-{
-    GwySerializableItem its[N_ITEMS];
-    memcpy(its, serialize_items, sizeof(serialize_items));
-    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items,
-                                            "GwyFitFunction",
-                                            error_list);
-    // Chain to parent
-    if (np < items->n) {
-        np++;
-        GwySerializableItems parent_items = {
-            items->len - np, items->n - np, items->items + np
-        };
-        if (!gwy_fit_function_parent_serializable->construct(serializable,
-                                                            &parent_items,
-                                                            error_list))
-            goto fail;
+    const GwyBuiltinFitFunction *builtin;
+    builtin = g_hash_table_lookup(builtin_functions, priv->name);
+    if (builtin) {
+        priv->is_builtin = TRUE;
+        priv->builtin = builtin;
     }
-
-    // Our own data
-    GwyFitFunction *fit_function = GWY_FIT_FUNCTION(serializable);
-    FitFunction *function = fit_function->priv;
-
-    //gwy_fit_function_sanitize(fit_function);
-
-    return TRUE;
-
-fail:
-    return FALSE;
-}
-
-static GObject*
-gwy_fit_function_duplicate_impl(GwySerializable *serializable)
-{
-    GwyFitFunction *fit_function = GWY_FIT_FUNCTION(serializable);
-    GwyFitFunction *duplicate = g_object_newv(GWY_TYPE_FIT_FUNCTION, 0, NULL);
-
-    gwy_fit_function_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
-                                                 serializable);
-    duplicate->priv = fit_function->priv;
-
-    return G_OBJECT(duplicate);
+    // TODO: User functions
+    G_OBJECT_CLASS(gwy_fit_function_parent_class)->constructed(object);
 }
 
 static void
-gwy_fit_function_assign_impl(GwySerializable *destination,
-                            GwySerializable *source)
+gwy_fit_function_dispose(GObject *object)
 {
-    GwyFitFunction *dest = GWY_FIT_FUNCTION(destination);
-    GwyFitFunction *src = GWY_FIT_FUNCTION(source);
-    gboolean emit_changed = FALSE;
+    GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
+    GWY_OBJECT_UNREF(fitfunction->priv->fittask);
+    GWY_OBJECT_UNREF(fitfunction->priv->user);
+    G_OBJECT_CLASS(gwy_fit_function_parent_class)->dispose(object);
+}
 
-    g_object_freeze_notify(G_OBJECT(dest));
-    gwy_fit_function_parent_serializable->assign(destination, source);
-    /*
-    if (memcmp(dest->priv, src->priv, sizeof(FitFunction)) != 0) {
-        dest->priv = src->priv;
-        emit_changed = TRUE;
+static void
+gwy_fit_function_finalize(GObject *object)
+{
+    GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
+    GWY_FREE(fitfunction->priv->name);
+    G_OBJECT_CLASS(gwy_fit_function_parent_class)->finalize(object);
+}
+
+static void
+gwy_fit_function_set_property(GObject *object,
+                              guint prop_id,
+                              const GValue *value,
+                              GParamSpec *pspec)
+{
+    GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
+    FitFunction *priv = fitfunction->priv;
+
+    switch (prop_id) {
+        case PROP_NAME:
+        priv->name = g_value_dup_string(value);
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
     }
-    */
-    g_object_thaw_notify(G_OBJECT(dest));
-    if (emit_changed)
-        gwy_fit_function_changed(dest);
-}
-
-static GwyResource*
-gwy_fit_function_copy(GwyResource *resource)
-{
-    return GWY_RESOURCE(gwy_fit_function_duplicate_impl(GWY_SERIALIZABLE(resource)));
 }
 
 static void
-gwy_fit_function_changed(GwyFitFunction *fit_function)
+gwy_fit_function_get_property(GObject *object,
+                              guint prop_id,
+                              GValue *value,
+                              GParamSpec *pspec)
 {
-    gwy_resource_data_changed(GWY_RESOURCE(fit_function));
-}
+    GwyFitFunction *fitfunction = GWY_FIT_FUNCTION(object);
+    FitFunction *priv = fitfunction->priv;
 
-static void
-gwy_fit_function_setup_inventory(GwyInventory *inventory)
-{
-    gwy_inventory_set_default_name(inventory, GWY_FIT_FUNCTION_DEFAULT);
-    GwyFitFunction *fit_function;
-    // Constant
-    fit_function = g_object_new(GWY_TYPE_FIT_FUNCTION,
-                                "is-modifiable", FALSE,
-                                "name", GWY_FIT_FUNCTION_DEFAULT,
-                                NULL);
-    gwy_inventory_insert(inventory, fit_function);
-    g_object_unref(fit_function);
+    switch (prop_id) {
+        case PROP_NAME:
+        g_value_set_string(value, priv->name);
+        break;
+
+        default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+        break;
+    }
 }
 
 /**
  * gwy_fit_function_new:
+ * @name: Function name.  It must correspond to either a builtin function or
+ *        user function loaded from #GwyUserFitFunction resources.
  *
- * Creates a new GL function.
+ * Creates a new fitting function.
  *
- * Returns: A new free-standing GL function.
+ * Returns: A new fitting function.
  **/
 GwyFitFunction*
-gwy_fit_function_new(void)
+gwy_fit_function_new(const gchar *name)
 {
-    return g_object_newv(GWY_TYPE_FIT_FUNCTION, 0, NULL);
+    return g_object_new(GWY_TYPE_FIT_FUNCTION, "name", name, NULL);
 }
 
-gdouble
+/**
+ * gwy_fit_function_get_value:
+ * @fitfunction: A fitting function.
+ * @x: Abscissa value to calculate the function value in.
+ * @params: Array of length @nparams holding the parameters.
+ * @value: Location to store the value to.
+ *
+ * Evaluates a fitting function in a single point.
+ *
+ * Returns: %TRUE if the evaluation was successful, %FALSE on error (typically
+ *          a domain error).
+ **/
+gboolean
 gwy_fit_function_get_value(GwyFitFunction *fitfunction,
                            gdouble x,
                            const gdouble *params,
-                           gboolean *fres)
+                           gdouble *value)
 {
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), 0.0);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->is_builtin)
+        return priv->builtin->function(x, params, value);
+    g_warning("Non built-in functions are not implemented.");
     return 0.0;
 }
 
+/**
+ * gwy_fit_function_get_formula:
+ * @fitfunction: A fitting function.
+ *
+ * Obtains the formula of a fitting function.
+ *
+ * Returns: The formula represented in Pango markup.  The returned string is
+ *          owned by @fitfunction.
+ **/
 const gchar*
 gwy_fit_function_get_formula(GwyFitFunction *fitfunction)
 {
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), NULL);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->is_builtin)
+        return priv->builtin->formula;
+    g_warning("Non built-in functions are not implemented.");
     return "";
 }
 
+/**
+ * gwy_fit_function_get_n_params:
+ * @fitfunction: A fitting function.
+ *
+ * Gets the number of parameters of a fitting function.
+ *
+ * This information can also be obtained from @fitfunction's fit task.
+ * However, this method does not instantiate the fit task which is preferable
+ * if you only need to query the functions properties.
+ *
+ * Returns: The number of function parameters.
+ **/
 guint
-gwy_fit_function_get_nparams(GwyFitFunction *fitfunction)
+gwy_fit_function_get_n_params(GwyFitFunction *fitfunction)
 {
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), 0);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->is_builtin)
+        return priv->builtin->nparams;
+    g_warning("Non built-in functions are not implemented.");
     return 0;
 }
 
+/**
+ * gwy_fit_function_get_param_name:
+ * @fitfunction: A fitting function.
+ * @i: Parameter number.
+ *
+ * Obtains the name of a fitting function parameter.
+ *
+ * Returns: The name of @i-th parameter.  The returned string is owned by
+ *          @fitfunction.
+ **/
 const gchar*
 gwy_fit_function_get_param_name(GwyFitFunction *fitfunction,
-                                                guint param)
+                                guint i)
 {
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), NULL);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->is_builtin) {
+        const GwyBuiltinFitFunction *builtin = priv->builtin;
+        g_return_val_if_fail(i < builtin->nparams, NULL);
+        return builtin->param[i].name;
+    }
+    g_warning("Non built-in functions are not implemented.");
     return "";
 }
 
+/**
+ * gwy_fit_function_get_param_units:
+ * @fitfunction: A fitting function.
+ * @i: Parameter number.
+ * @unit_x: Unit of abscissa.
+ * @unit_y: Unit of ordinate.
+ *
+ * Derives the unit of a fitting parameter from the units of the fitted data.
+ *
+ * The derivation is possible only if the parameters are chosen sensibly, i.e.
+ * if their units are integer powers of abscissa and ordinate units.  In some
+ * cases this requires certain forethought.  For instance the units of
+ * parameter @B in function @A+@B*@x<superscript>@C</superscript> depend on
+ * parameter @C, moreover, they can be any irrational power of @x's units.
+ * Where it does not create numerical difficulties it is better to parameterise
+ * the function as @a*(1+(@x/@b)<superscript>@c</superscript>), where
+ * @a=@A, @b=(@A/@B)<superscript>1/@c</superscript>, and @c=@C.  It can be
+ * easily seen that all three new parameters @a, @b, @c have units that are
+ * fixed integer powers of the abscissa and ordinate units.
+ *
+ * Returns: A newly created @GwyUnit with the units of the @i-th parameter.
+ **/
 GwyUnit*
 gwy_fit_function_get_param_units(GwyFitFunction *fitfunction,
-                                                 guint param,
-                                                 GwyUnit *unit_x,
-                                                 GwyUnit *unit_y)
+                                 guint i,
+                                 GwyUnit *unit_x,
+                                 GwyUnit *unit_y)
 {
-    return NULL;
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), NULL);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->is_builtin) {
+        const GwyBuiltinFitFunction *builtin = priv->builtin;
+        g_return_val_if_fail(i < builtin->nparams, NULL);
+        if (builtin->derive_units)
+            return builtin->derive_units(i, unit_x, unit_y);
+        else
+            return gwy_unit_power_multiply(NULL,
+                                           unit_x, builtin->param[i].power_x,
+                                           unit_y, builtin->param[i].power_y);
+    }
+    g_warning("Non built-in functions are not implemented.");
+    return gwy_unit_new();
 }
 
+/**
+ * gwy_fit_function_estimate:
+ * @fitfunction: A fitting function.
+ * @params: Array to fill with estimated parameter values.
+ *
+ * Estimates parameter values of a fitting function.
+ *
+ * The estimate is based on the data previously set with
+ * gwy_fit_function_set_data().
+ *
+ * The initial estimate method depends on the function used.  There is no
+ * absolute guarantee of quality, however if the data points approximately
+ * match the fitted function the fit will typically converge from the returned
+ * estimate.
+ *
+ * The parameters are filled also on failure, though just with some neutral
+ * values that should not give raise to NaNs and infinities.
+ **/
 gboolean
 gwy_fit_function_estimate(GwyFitFunction *fitfunction,
-                                          GwyXY *points,
-                                          guint npoints,
-                                          gdouble *params)
+                          gdouble *params)
 {
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), FALSE);
+    g_return_val_if_fail(params, FALSE);
+    FitFunction *priv = fitfunction->priv;
+    g_return_val_if_fail(priv->has_data, FALSE);
+    // TODO
     return FALSE;
 }
 
+static gboolean
+fit_function_vfunc(guint i,
+                   gpointer user_data,
+                   gdouble *retval,
+                   const gdouble *params)
+{
+    // TODO
+    return FALSE;
+}
+
+static void
+update_fit_task(GwyFitFunction *fitfunction)
+{
+    FitFunction *priv = fitfunction->priv;
+    if (!priv->has_data) {
+        if (priv->fittask)
+            gwy_fit_task_set_vector_data(priv->fittask, fitfunction, 0);
+        return;
+    }
+
+    if (!priv->fittask) {
+        guint nparams = gwy_fit_function_get_n_params(fitfunction);
+        priv->fittask = gwy_fit_task_new();
+        gwy_fit_task_set_vector_vfunction(priv->fittask, nparams,
+                                          fit_function_vfunc, NULL);
+    }
+    gwy_fit_task_set_vector_data(priv->fittask, fitfunction, priv->npoints);
+}
+
+/**
+ * gwy_fit_function_get_fit_task:
+ * @fitfunction: A fitting function.
+ *
+ * Obtains the fit task of a fitting function.
+ *
+ * You can use the parameter, error, residuum, correlation, etc. methods of
+ * the returned fit task freely.  However, the function and data is set by
+ * @fitfunction and must not be changed.
+ *
+ * Returns: The fit task object of a fitting function, it can be %NULL if
+ *          gwy_fit_function_set_data() has not been called yet.  The returned
+ *          object is owned by @fitfunction and no reference is added.
+ **/
 GwyFitTask*
 gwy_fit_function_get_fit_task(GwyFitFunction *fitfunction)
 {
-    return NULL;
+    g_return_val_if_fail(GWY_IS_FIT_FUNCTION(fitfunction), NULL);
+    FitFunction *priv = fitfunction->priv;
+    if (priv->has_data)
+        update_fit_task(fitfunction);
+    return priv->fittask;
 }
 
-static gchar*
-gwy_fit_function_dump(GwyResource *resource)
+/**
+ * gwy_fit_function_set_data:
+ * @fitfunction and must not be changed.
+ * @points: Point data, x-values are abscissas y-values are the data to fit.
+ *          The data must exist during the lifetime of @fitfunction (or until
+ *          another data is set) as @fitfunction does not make a copy.
+ * @npoints: Number of data points.
+ *
+ * Sets the data to fit.
+ **/
+void
+gwy_fit_function_set_data(GwyFitFunction *fitfunction,
+                          const GwyXY *points,
+                          guint npoints)
 {
-    GwyFitFunction *fit_function = GWY_FIT_FUNCTION(resource);
-    /*
-    FitFunction *function = fit_function->priv;
-    gchar *amb, *dif, *spec, *emi;
-
-    amb = gwy_resource_dump_data_line((gdouble*)&function->ambient, 4);
-    dif = gwy_resource_dump_data_line((gdouble*)&function->diffuse, 4);
-    spec = gwy_resource_dump_data_line((gdouble*)&function->specular, 4);
-    emi = gwy_resource_dump_data_line((gdouble*)&function->emission, 4);
-
-    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
-    g_ascii_formatd(buffer, sizeof(buffer), "%g", function->shininess);
-
-    gchar *retval = g_strjoin("\n", amb, dif, spec, emi, buffer, "", NULL);
-    g_free(amb);
-    g_free(dif);
-    g_free(spec);
-    g_free(emi);
-
-    return retval;
-    */
-    return g_strdup("");
+    g_return_if_fail(GWY_IS_FIT_FUNCTION(fitfunction));
+    g_return_if_fail(points || !npoints);
+    FitFunction *priv = fitfunction->priv;
+    priv->points = points;
+    priv->npoints = npoints;
+    priv->has_data = npoints > 0;
+    if (priv->fittask)
+        update_fit_task(fitfunction);
 }
 
-/*
-static gboolean
-parse_component(gchar **text, GwyRGBA *color)
+static void
+setup_builtin_functions(void)
 {
-    GwyResourceLineType ltype;
-    do {
-        gchar *line = gwy_str_next_line(text);
-        if (!line)
-            return FALSE;
-        ltype = gwy_resource_parse_data_line(line, 4, (gdouble*)color);
-        if (ltype == GWY_RESOURCE_LINE_OK)
-            return TRUE;
-    } while (ltype == GWY_RESOURCE_LINE_EMPTY);
-    return FALSE;
-}
-*/
-
-static gboolean
-gwy_fit_function_parse(GwyResource *resource,
-                      gchar *text,
-                      G_GNUC_UNUSED GError **error)
-{
-    GwyFitFunction *fit_function = GWY_FIT_FUNCTION(resource);
-
-    /*
-    if (!parse_component(&text, &fit_function->priv->ambient)
-        || !parse_component(&text, &fit_function->priv->diffuse)
-        || !parse_component(&text, &fit_function->priv->specular)
-        || !parse_component(&text, &fit_function->priv->emission))
-        return FALSE;
-
-    gchar *end;
-    fit_function->priv->shininess = g_ascii_strtod(text, &end);
-    if (end == text)
-        return FALSE;
-
-    gwy_fit_function_sanitize(fit_function);
-    */
-    return TRUE;
+    // TODO
 }
 
 #define __LIBGWY_FIT_FUNCTION_C__
@@ -362,7 +468,7 @@ gwy_fit_function_parse(GwyResource *resource,
 /**
  * SECTION: fit-function
  * @title: GwyFitFunction
- * @short_description: User fitting function
+ * @short_description: Fitting function
  *
  * #GwyFitFunction represents a named fitting function with formula, named
  * parameters, capability to estimate parameters values or derive their units
@@ -372,7 +478,7 @@ gwy_fit_function_parse(GwyResource *resource,
 /**
  * GwyFitFunction:
  *
- * Object represnting a user fitting function.
+ * Object represnting a fitting function.
  *
  * The #GwyFitFunction struct contains private data only and should be accessed
  * using the functions below.
@@ -381,7 +487,7 @@ gwy_fit_function_parse(GwyResource *resource,
 /**
  * GwyFitFunctionClass:
  *
- * Class of user fitting functions.
+ * Class of fitting functions.
  *
  * #GwyFitFunctionClass does not contain any public members.
  **/
@@ -389,7 +495,7 @@ gwy_fit_function_parse(GwyResource *resource,
 /**
  * GWY_FIT_FUNCTION_DEFAULT:
  *
- * Name of the default user fitting function.
+ * Name of the default fitting function.
  *
  * It is guaranteed to always exist.
  *
@@ -399,28 +505,9 @@ gwy_fit_function_parse(GwyResource *resource,
  **/
 
 /**
- * gwy_fit_function_duplicate:
- * @fit_function: A user fitting function.
- *
- * Duplicates a user fitting function.
- *
- * This is a convenience wrapper of gwy_serializable_duplicate().
- **/
-
-/**
- * gwy_fit_function_assign:
- * @dest: Destination user fitting function.
- * @src: Source user fitting function.
- *
- * Copies the value of a user fitting function.
- *
- * This is a convenience wrapper of gwy_serializable_assign().
- **/
-
-/**
  * gwy_fit_functions:
  *
- * Gets inventory with all the user fitting functions.
+ * Gets inventory with all the fitting functions.
  *
  * Returns: User fitting function inventory.
  **/
@@ -430,7 +517,7 @@ gwy_fit_function_parse(GwyResource *resource,
  * @name: User fitting function name.  May be %NULL to get the default
  *        function.
  *
- * Convenience function to get a user fitting function from gwy_fit_functions()
+ * Convenience function to get a fitting function from gwy_fit_functions()
  * by name.
  *
  * Returns: User fitting function identified by @name or the default user

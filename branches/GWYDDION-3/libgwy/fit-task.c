@@ -316,7 +316,7 @@ gwy_fit_task_set_point_weight(GwyFitTask *fittask,
  * @fittask: A fitting task.
  * @data: Point data, x-values are abscissas y-values are the data to fit.
  *        The data must exist during the lifetime of @fittask (or until another
- *        data is set) as @fittask does not make a copy of them.
+ *        data is set) as @fittask does not make a copy.
  * @ndata: Number of data points.
  *
  * Sets the point data for a fit task.

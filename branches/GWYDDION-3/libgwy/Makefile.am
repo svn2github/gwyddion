@@ -49,6 +49,7 @@ public_headers = \
 	$(srcdir)/serialize.h \
 	$(srcdir)/strfuncs.h \
 	$(srcdir)/unit.h \
+	$(srcdir)/user-fit-function.h \
 	$(srcdir)/value-format.h
 
 public_built_headers = \
@@ -117,6 +118,7 @@ libgwy3_la_SOURCES = \
 	strfuncs.c \
 	types.c \
 	unit.c \
+	user-fit-function.c \
 	value-format.c \
 	version.c
 

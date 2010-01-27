@@ -20,13 +20,11 @@
 #ifndef __LIBGWY_FIT_FUNCTION_H__
 #define __LIBGWY_FIT_FUNCTION_H__
 
+#include <libgwy/user-fit-function.h>
 #include <libgwy/fit-task.h>
 #include <libgwy/unit.h>
-#include <libgwy/resource.h>
 
 G_BEGIN_DECLS
-
-#define GWY_FIT_FUNCTION_DEFAULT "Constant"
 
 #define GWY_TYPE_FIT_FUNCTION \
     (gwy_fit_function_get_type())
@@ -45,44 +43,34 @@ typedef struct _GwyFitFunction      GwyFitFunction;
 typedef struct _GwyFitFunctionClass GwyFitFunctionClass;
 
 struct _GwyFitFunction {
-    GwyResource resource;
+    GObject g_object;
     struct _GwyFitFunctionPrivate *priv;
 };
 
 struct _GwyFitFunctionClass {
     /*< private >*/
-    GwyResourceClass resource_class;
+    GObjectClass g_object_class;
 };
-
-#define gwy_fit_function_duplicate(fit_function) \
-        (GWY_FIT_FUNCTION(gwy_serializable_duplicate(GWY_SERIALIZABLE(fit_function))))
-#define gwy_fit_function_assign(dest, src) \
-        (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
-
 GType           gwy_fit_function_get_type       (void)                        G_GNUC_CONST;
-GwyFitFunction* gwy_fit_function_new            (void)                        G_GNUC_MALLOC;
-gdouble         gwy_fit_function_get_value      (GwyFitFunction *fitfunction,
+GwyFitFunction* gwy_fit_function_new            (const gchar *name)           G_GNUC_MALLOC;
+gboolean        gwy_fit_function_get_value      (GwyFitFunction *fitfunction,
                                                  gdouble x,
                                                  const gdouble *params,
-                                                 gboolean *fres);
+                                                 gdouble *value);
 const gchar*    gwy_fit_function_get_formula    (GwyFitFunction *fitfunction) G_GNUC_PURE;
-guint           gwy_fit_function_get_nparams    (GwyFitFunction *fitfunction) G_GNUC_PURE;
+guint           gwy_fit_function_get_n_params   (GwyFitFunction *fitfunction) G_GNUC_PURE;
 const gchar*    gwy_fit_function_get_param_name (GwyFitFunction *fitfunction,
-                                                 guint param)                 G_GNUC_PURE;
+                                                 guint i)                     G_GNUC_PURE;
 GwyUnit*        gwy_fit_function_get_param_units(GwyFitFunction *fitfunction,
-                                                 guint param,
+                                                 guint i,
                                                  GwyUnit *unit_x,
                                                  GwyUnit *unit_y)             G_GNUC_MALLOC;
 gboolean        gwy_fit_function_estimate       (GwyFitFunction *fitfunction,
-                                                 GwyXY *points,
-                                                 guint npoints,
                                                  gdouble *params);
 GwyFitTask*     gwy_fit_function_get_fit_task   (GwyFitFunction *fitfunction) G_GNUC_PURE;
-
-#define gwy_fit_functions() \
-    (gwy_resource_type_get_inventory(GWY_TYPE_FIT_FUNCTION))
-#define gwy_fit_functions_get(name) \
-    ((GwyFitFunction*)gwy_inventory_get_or_default(gwy_fit_functions(), (name)))
+void            gwy_fit_function_set_data       (GwyFitFunction *fitfunction,
+                                                 const GwyXY *points,
+                                                 guint npoints);
 
 G_END_DECLS
 

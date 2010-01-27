@@ -25,6 +25,7 @@
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 
 enum {
     PROP_0,
@@ -665,7 +666,7 @@ gwy_fitter_set_n_params(GwyFitter *fitter,
  * gwy_fitter_get_n_params:
  * @fitter: A non-linear least-squares fitter.
  *
- * Sets the number of parameters in the model of a fitter.
+ * Gets the number of parameters in the model of a fitter.
  *
  * Returns: The number of model parameters.
  **/

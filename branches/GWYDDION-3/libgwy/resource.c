@@ -60,7 +60,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/resource.h"
 #include "libgwy/libgwy-aliases.h"
-#include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 
 #define MAGIC_HEADER2 "Gwyddion resource "
 #define MAGIC_HEADER3 "Gwyddion3 resource "

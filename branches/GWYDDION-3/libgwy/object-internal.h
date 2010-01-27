@@ -27,6 +27,9 @@
 
 G_BEGIN_DECLS
 
+#define STATICP \
+    (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
+
 G_GNUC_INTERNAL
 void _gwy_notify_properties(GObject *object,
                             const gchar **properties,
