@@ -154,7 +154,6 @@ gwy_gradient_itemize(GwySerializable *serializable,
     GwyGradient *gradient = GWY_GRADIENT(serializable);
     GArray *points = gradient->priv->points;
     GwySerializableItem *it = items->items + items->n;
-    guint n;
 
     // Our own data
     *it = serialize_items[0];
@@ -169,6 +168,7 @@ gwy_gradient_itemize(GwySerializable *serializable,
     it->value.v_type = GWY_TYPE_RESOURCE;
     it++, items->n++;
 
+    guint n;
     if ((n = gwy_gradient_parent_serializable->itemize(serializable, items)))
         return N_ITEMS+1 + n;
     return 0;
