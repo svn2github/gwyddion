@@ -78,14 +78,14 @@ static void gwy_fit_func_constructed (GObject *object);
 static void gwy_fit_func_dispose     (GObject *object);
 static void gwy_fit_func_finalize    (GObject *object);
 static void gwy_fit_func_set_property(GObject *object,
-                                          guint prop_id,
-                                          const GValue *value,
-                                          GParamSpec *pspec);
+                                      guint prop_id,
+                                      const GValue *value,
+                                      GParamSpec *pspec);
 static void gwy_fit_func_get_property(GObject *object,
-                                          guint prop_id,
-                                          GValue *value,
-                                          GParamSpec *pspec);
-static void setup_builtin_functions      (void);
+                                      guint prop_id,
+                                      GValue *value,
+                                      GParamSpec *pspec);
+static void setup_builtin_functions  (void);
 
 G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT)
 
@@ -121,8 +121,8 @@ static void
 gwy_fit_func_init(GwyFitFunc *fitfunc)
 {
     fitfunc->priv = G_TYPE_INSTANCE_GET_PRIVATE(fitfunc,
-                                                    GWY_TYPE_FIT_FUNC,
-                                                    FitFunc);
+                                                GWY_TYPE_FIT_FUNC,
+                                                FitFunc);
 }
 
 static void
@@ -165,9 +165,9 @@ gwy_fit_func_finalize(GObject *object)
 
 static void
 gwy_fit_func_set_property(GObject *object,
-                              guint prop_id,
-                              const GValue *value,
-                              GParamSpec *pspec)
+                          guint prop_id,
+                          const GValue *value,
+                          GParamSpec *pspec)
 {
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
@@ -185,9 +185,9 @@ gwy_fit_func_set_property(GObject *object,
 
 static void
 gwy_fit_func_get_property(GObject *object,
-                              guint prop_id,
-                              GValue *value,
-                              GParamSpec *pspec)
+                          guint prop_id,
+                          GValue *value,
+                          GParamSpec *pspec)
 {
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
@@ -232,9 +232,9 @@ gwy_fit_func_new(const gchar *name)
  **/
 gboolean
 gwy_fit_func_get_value(GwyFitFunc *fitfunc,
-                           gdouble x,
-                           const gdouble *params,
-                           gdouble *value)
+                       gdouble x,
+                       const gdouble *params,
+                       gdouble *value)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0.0);
     FitFunc *priv = fitfunc->priv;
@@ -299,7 +299,7 @@ gwy_fit_func_get_n_params(GwyFitFunc *fitfunc)
  **/
 const gchar*
 gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
-                                guint i)
+                            guint i)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -336,9 +336,9 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
  **/
 GwyUnit*
 gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
-                                 guint i,
-                                 GwyUnit *unit_x,
-                                 GwyUnit *unit_y)
+                             guint i,
+                             GwyUnit *unit_x,
+                             GwyUnit *unit_y)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -376,7 +376,7 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
  **/
 gboolean
 gwy_fit_func_estimate(GwyFitFunc *fitfunc,
-                          gdouble *params)
+                      gdouble *params)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
     g_return_val_if_fail(params, FALSE);
@@ -397,18 +397,11 @@ construct_expr(FitFunc *priv)
         return;
     }
 
-    // FIXME: Code duplication with GwyUserFitFunc.  Add a method to do
-    // this in GwyUserFitFunc?
     guint n;
-    const GwyUserFitFuncParam *params;
-    params = gwy_user_fit_func_get_params(priv->user, &n);
-    const gchar *names[n+1];
-    for (guint i = 0; i < n; i++)
-        names[i] = params[i].name;
-    names[n] = "x";
-
+    gwy_user_fit_func_get_params(priv->user, &n);
     priv->indices = g_new(guint, n+1);
-    if (gwy_expr_resolve_variables(priv->expr, n+1, names, priv->indices)) {
+    if (gwy_user_fit_func_resolve_params(priv->user, priv->expr, "x",
+                                         priv->indices)) {
         g_critical("Cannot resolve variables in user fitting function "
                    "expression.");
         return;
@@ -417,9 +410,9 @@ construct_expr(FitFunc *priv)
 
 static gboolean
 fit_func_vfunc(guint i,
-                   gpointer user_data,
-                   gdouble *retval,
-                   const gdouble *params)
+               gpointer user_data,
+               gdouble *retval,
+               const gdouble *params)
 {
     FitFunc *priv = ((GwyFitFunc*)user_data)->priv;
     g_return_val_if_fail(i < priv->npoints, FALSE);
@@ -499,8 +492,8 @@ gwy_fit_func_get_fit_task(GwyFitFunc *fitfunc)
  **/
 void
 gwy_fit_func_set_data(GwyFitFunc *fitfunc,
-                          const GwyXY *points,
-                          guint npoints)
+                      const GwyXY *points,
+                      guint npoints)
 {
     g_return_if_fail(GWY_IS_FIT_FUNC(fitfunc));
     g_return_if_fail(points || !npoints);
