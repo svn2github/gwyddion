@@ -18,8 +18,10 @@
  */
 
 #include <string.h>
+#include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/expr.h"
 #include "libgwy/serialize.h"
 #include "libgwy/user-fit-function.h"
 #include "libgwy/libgwy-aliases.h"
@@ -41,6 +43,7 @@ struct _GwyUserFitFunctionPrivate {
 
 typedef struct _GwyUserFitFunctionPrivate UserFitFunction;
 
+static void         gwy_user_fit_function_finalize         (GObject *object);
 static void         gwy_user_fit_function_serializable_init(GwySerializableInterface *iface);
 static gsize        gwy_user_fit_function_n_items          (GwySerializable *serializable);
 static gsize        gwy_user_fit_function_itemize          (GwySerializable *serializable,
@@ -54,6 +57,7 @@ static void         gwy_user_fit_function_assign_impl      (GwySerializable *des
                                                             GwySerializable *source);
 static GwyResource* gwy_user_fit_function_copy             (GwyResource *resource);
 static void         gwy_user_fit_function_changed          (GwyUserFitFunction *userfitfunction);
+static gboolean     gwy_user_fit_function_validate         (GwyUserFitFunction *userfitfunction);
 static gchar*       gwy_user_fit_function_dump             (GwyResource *resource);
 static gboolean     gwy_user_fit_function_parse            (GwyResource *resource,
                                                             gchar *text,
@@ -89,10 +93,12 @@ gwy_user_fit_function_serializable_init(GwySerializableInterface *iface)
 static void
 gwy_user_fit_function_class_init(GwyUserFitFunctionClass *klass)
 {
-    //GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     GwyResourceClass *res_class = GWY_RESOURCE_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(UserFitFunction));
+
+    gobject_class->finalize = gwy_user_fit_function_finalize;
 
     res_class->copy = gwy_user_fit_function_copy;
     res_class->dump = gwy_user_fit_function_dump;
@@ -108,6 +114,23 @@ gwy_user_fit_function_init(GwyUserFitFunction *userfitfunction)
                                                         GWY_TYPE_USER_FIT_FUNCTION,
                                                         UserFitFunction);
     //TODO *userfitfunction->priv = opengl_default;
+}
+
+static void
+gwy_user_fit_function_finalize(GObject *object)
+{
+    GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(object);
+    UserFitFunction *priv = userfitfunction->priv;
+    for (unsigned i = 0; i < priv->nparams; i++) {
+        GWY_FREE(priv->param[i].name);
+        GWY_FREE(priv->param[i].estimate);
+    }
+    GWY_FREE(priv->param);
+    priv->nparams = 0;
+    GWY_FREE(priv->expression);
+    GWY_FREE(priv->filter);
+
+    G_OBJECT_CLASS(gwy_user_fit_function_parent_class)->finalize(object);
 }
 
 static gsize
@@ -217,20 +240,68 @@ gwy_user_fit_function_construct(GwySerializable *serializable,
             items->len - np, items->n - np, items->items + np
         };
         if (!gwy_user_fit_function_parent_serializable->construct(serializable,
-                                                            &parent_items,
-                                                            error_list))
+                                                                  &parent_items,
+                                                                  error_list))
             goto fail;
     }
 
     // Our own data
     GwyUserFitFunction *userfitfunction = GWY_USER_FIT_FUNCTION(serializable);
-    UserFitFunction *function = userfitfunction->priv;
+    UserFitFunction *priv = userfitfunction->priv;
 
-    //gwy_user_fit_function_sanitize(userfitfunction);
+    guint n = its[2].array_size;
+    if (!n || n > 256) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
+                           _("Invalid number of user fitting function "
+                             "parameters: %lu."),
+                           (gulong)its[0].array_size);
+        goto fail;
+    }
+    if (its[3].array_size != n
+        || its[4].array_size != n
+        || its[5].array_size != n) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
+                           _("The number of parameter attributes do not match "
+                             "the number of parameters."));
+        goto fail;
+    }
 
-    return TRUE;
+    priv->param = g_new(GwyUserFitFunctionParam, n);
+    priv->nparams = n;
+    for (guint i = 0; i < n; i++) {
+        GwyUserFitFunctionParam *param = priv->param + i;
+        param->name = its[2].value.v_string_array[i];
+        param->power_x = its[3].value.v_int32_array[i];
+        param->power_y = its[4].value.v_int32_array[i];
+        param->estimate = its[5].value.v_string_array[i];
+        its[2].value.v_string_array[i] = NULL;
+        its[5].value.v_string_array[i] = NULL;
+    }
+    g_free(its[2].value.v_string_array);
+    g_free(its[3].value.v_int32_array);
+    g_free(its[4].value.v_int32_array);
+    g_free(its[5].value.v_string_array);
+
+    gboolean ok = gwy_user_fit_function_validate(userfitfunction);
+    if (!ok) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_INVALID,
+                           _("Invalid expression or parameters."));
+    }
+
+    return ok;
 
 fail:
+    for (guint i = 0; i < n; i++) {
+        g_free(its[2].value.v_string_array[i]);
+        g_free(its[5].value.v_string_array[i]);
+    }
+    g_free(its[2].value.v_string_array);
+    g_free(its[3].value.v_int32_array);
+    g_free(its[4].value.v_int32_array);
+    g_free(its[5].value.v_string_array);
     return FALSE;
 }
 
@@ -278,6 +349,46 @@ static void
 gwy_user_fit_function_changed(GwyUserFitFunction *userfitfunction)
 {
     gwy_resource_data_changed(GWY_RESOURCE(userfitfunction));
+}
+
+static gboolean
+gwy_user_fit_function_validate(GwyUserFitFunction *userfitfunction)
+{
+    static GwyExpr *test_expr = NULL;
+    G_LOCK_DEFINE_STATIC(test_expr);
+
+    UserFitFunction *priv = userfitfunction->priv;
+    guint n = priv->nparams;
+    for (guint i = 0; i < n; i++) {
+        for (guint j = i+1; j < n; j++) {
+            if (gwy_strequal(priv->param[i].name, priv->param[j].name))
+                return FALSE;
+        }
+    }
+
+    G_LOCK(test_expr);
+    if (!test_expr) {
+        test_expr = gwy_expr_new();
+        gwy_expr_define_constant(test_expr, "pi", G_PI, NULL);
+        gwy_expr_define_constant(test_expr, "π", G_PI, NULL);
+    }
+    if (!gwy_expr_compile(test_expr, priv->expression, NULL)) {
+        G_UNLOCK(test_expr);
+        return FALSE;
+    }
+    const gchar *names[n+1];
+    guint indices[n+2];
+    for (guint i = 0; i < n; i++)
+        names[i] = priv->param[i].name;
+    names[n] = "x";
+    if (gwy_expr_resolve_variables(test_expr, n, names, indices)) {
+        G_UNLOCK(test_expr);
+        return FALSE;
+    }
+    // TODO: Validate estimators
+    G_UNLOCK(test_expr);
+
+    return TRUE;
 }
 
 /**

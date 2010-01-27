@@ -397,6 +397,8 @@ construct_expr(FitFunction *priv)
         return;
     }
 
+    // FIXME: Code duplication with GwyUserFitFunction.  Add a method to do
+    // this in GwyUserFitFunction?
     guint n;
     const GwyUserFitFunctionParam *params;
     params = gwy_user_fit_function_get_params(priv->user, &n);
