@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/serialize.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"

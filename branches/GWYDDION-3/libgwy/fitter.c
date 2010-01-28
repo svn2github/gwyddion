@@ -20,8 +20,9 @@
 #include <string.h>
 #include <glib.h>
 #include "libgwy/macros.h"
-#include "libgwy/fitter.h"
+#include "libgwy/serialize.h"
 #include "libgwy/math.h"
+#include "libgwy/fitter.h"
 #include "libgwy/types.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"

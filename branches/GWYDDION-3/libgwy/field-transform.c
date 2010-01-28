@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-transform.h"
+#include "libgwy/mask-field.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"

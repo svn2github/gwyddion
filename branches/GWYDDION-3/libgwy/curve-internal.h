@@ -22,8 +22,6 @@
 #ifndef __LIBGWY_CURVE_INTERNAL_H__
 #define __LIBGWY_CURVE_INTERNAL_H__
 
-#include "libgwy/curve.h"
-
 G_BEGIN_DECLS
 
 struct _GwyCurvePrivate {

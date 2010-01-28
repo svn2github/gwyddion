@@ -22,9 +22,6 @@
 #ifndef __LIBGWY_OBJECT_INTERNAL_H__
 #define __LIBGWY_OBJECT_INTERNAL_H__
 
-#include "libgwy/error-list.h"
-#include "libgwy/serialize.h"
-
 G_BEGIN_DECLS
 
 #define STATICP \

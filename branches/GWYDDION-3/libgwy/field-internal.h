@@ -22,9 +22,6 @@
 #ifndef __LIBGWY_FIELD_INTERNAL_H__
 #define __LIBGWY_FIELD_INTERNAL_H__
 
-#include "libgwy/field.h"
-#include "libgwy/mask-field.h"
-
 G_BEGIN_DECLS
 
 /* Cache operations */

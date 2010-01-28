@@ -22,8 +22,6 @@
 #ifndef __LIBGWY_MASK_FIELD_INTERNAL_H__
 #define __LIBGWY_MASK_FIELD_INTERNAL_H__
 
-#include "libgwy/mask-field.h"
-
 G_BEGIN_DECLS
 
 typedef struct {

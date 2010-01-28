@@ -22,8 +22,6 @@
 #ifndef __LIBGWY_LINE_INTERNAL_H__
 #define __LIBGWY_LINE_INTERNAL_H__
 
-#include "libgwy/line.h"
-
 G_BEGIN_DECLS
 
 #define ASSIGN_UNITS(dest, src) \
