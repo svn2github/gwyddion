@@ -18,6 +18,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
@@ -64,7 +65,7 @@ static gboolean     gwy_user_fit_func_parse            (GwyResource *resource,
                                                         GError **error);
 
 static const GwyUserFitFuncParam default_param[1] = {
-    { .name = "a", .power_x = 0, .power_y = 1, .estimate = "", },
+    { .name = "a", .power_x = 0, .power_y = 1, .estimate = "1", },
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
@@ -271,14 +272,16 @@ gwy_user_fit_func_done(GwySerializable *serializable)
 
 static gboolean
 gwy_user_fit_func_construct(GwySerializable *serializable,
-                                GwySerializableItems *items,
-                                GwyErrorList **error_list)
+                            GwySerializableItems *items,
+                            GwyErrorList **error_list)
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
     gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items,
                                             "GwyUserFitFunc",
                                             error_list);
+    guint n = its[2].array_size;
+
     // Chain to parent
     if (np < items->n) {
         np++;
@@ -295,7 +298,6 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(serializable);
     UserFitFunc *priv = userfitfunc->priv;
 
-    guint n = its[2].array_size;
     if (!n || n > 256) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
@@ -418,6 +420,11 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     UserFitFunc *priv = userfitfunc->priv;
     guint n = priv->nparams;
     for (guint i = 0; i < n; i++) {
+        if (!priv->param[i].name || !priv->param[i].estimate)
+            return FALSE;
+        if (abs(priv->param[i].power_x) > 12
+            || abs(priv->param[i].power_y) > 12)
+            return FALSE;
         for (guint j = i+1; j < n; j++) {
             if (gwy_strequal(priv->param[i].name, priv->param[j].name))
                 return FALSE;
@@ -438,7 +445,15 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
         G_UNLOCK(test_expr);
         return FALSE;
     }
-    // TODO: Validate estimators, filter
+    if (priv->filter && strlen(priv->filter)) {
+        if (!gwy_expr_compile(test_expr, priv->filter, NULL))
+            return FALSE;
+        const gchar *names[1] = { "x" };
+        guint indices[1];
+        if (gwy_expr_resolve_variables(test_expr, 1, names, indices))
+            return FALSE;
+    }
+    // TODO: Validate estimators
     G_UNLOCK(test_expr);
 
     return TRUE;
@@ -457,6 +472,14 @@ gwy_user_fit_func_new(void)
     return g_object_newv(GWY_TYPE_USER_FIT_FUNC, 0, NULL);
 }
 
+/**
+ * gwy_user_fit_func_get_expression:
+ * @userfitfunc: A user fitting function.
+ *
+ * Gets the formula of a user fitting function.
+ *
+ * Returns: The formula as a string owned by @userfitfunc.
+ **/
 const gchar*
 gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
 {
@@ -464,6 +487,14 @@ gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
     return userfitfunc->priv->expression;
 }
 
+/**
+ * gwy_user_fit_func_get_params:
+ * @userfitfunc: A user fitting function.
+ *
+ * Gets the parameters of a user fitting function.
+ *
+ * Returns: The parameters as an array owned by @userfitfunc.
+ **/
 const GwyUserFitFuncParam*
 gwy_user_fit_func_get_params(GwyUserFitFunc *userfitfunc,
                              guint *nparams)
@@ -474,6 +505,7 @@ gwy_user_fit_func_get_params(GwyUserFitFunc *userfitfunc,
     return priv->param;
 }
 
+// FIXME: This is illogical.  Why should the user pass the compiled expr?
 /**
  * gwy_user_fit_func_resolve_params:
  * @userfitfunc: A user fitting function.
@@ -516,67 +548,97 @@ static gchar*
 gwy_user_fit_func_dump(GwyResource *resource)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(resource);
-    /*
     UserFitFunc *priv = userfitfunc->priv;
-    gchar *amb, *dif, *spec, *emi;
 
-    amb = gwy_resource_dump_data_line((gdouble*)&priv->ambient, 4);
-    dif = gwy_resource_dump_data_line((gdouble*)&priv->diffuse, 4);
-    spec = gwy_resource_dump_data_line((gdouble*)&priv->specular, 4);
-    emi = gwy_resource_dump_data_line((gdouble*)&priv->emission, 4);
+    GString *text = g_string_new(NULL);
+    g_string_append_printf(text, "expression %s\n", priv->expression);
+    if (priv->filter)
+        g_string_append_printf(text, "filter %s\n", priv->filter);
 
-    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
-    g_ascii_formatd(buffer, sizeof(buffer), "%g", priv->shininess);
-
-    gchar *retval = g_strjoin("\n", amb, dif, spec, emi, buffer, "", NULL);
-    g_free(amb);
-    g_free(dif);
-    g_free(spec);
-    g_free(emi);
-
-    return retval;
-    */
-    return g_strdup("");
+    for (unsigned i = 0; i < priv->nparams; i++) {
+        GwyUserFitFuncParam *param = priv->param + i;
+        g_string_append_printf(text, "param %s\n", param->name);
+        g_string_append_printf(text, "power_x %d\n", param->power_x);
+        g_string_append_printf(text, "power_y %d\n", param->power_y);
+        g_string_append_printf(text, "estimate %s\n", param->estimate);
+    }
+    return g_string_free(text, FALSE);;
 }
-
-/*
-static gboolean
-parse_component(gchar **text, GwyRGBA *color)
-{
-    GwyResourceLineType ltype;
-    do {
-        gchar *line = gwy_str_next_line(text);
-        if (!line)
-            return FALSE;
-        ltype = gwy_resource_parse_data_line(line, 4, (gdouble*)color);
-        if (ltype == GWY_RESOURCE_LINE_OK)
-            return TRUE;
-    } while (ltype == GWY_RESOURCE_LINE_EMPTY);
-    return FALSE;
-}
-*/
 
 static gboolean
 gwy_user_fit_func_parse(GwyResource *resource,
-                      gchar *text,
-                      G_GNUC_UNUSED GError **error)
+                        gchar *text,
+                        G_GNUC_UNUSED GError **error)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(resource);
+    UserFitFunc *priv = userfitfunc->priv;
+    GwyUserFitFuncParam param;
+    GArray *params = NULL;
 
-    /*
-    if (!parse_component(&text, &userfitfunc->priv->ambient)
-        || !parse_component(&text, &userfitfunc->priv->diffuse)
-        || !parse_component(&text, &userfitfunc->priv->specular)
-        || !parse_component(&text, &userfitfunc->priv->emission))
+    gwy_memclear(&param, 1);
+    // Do not g_strdup() the parameter strings until the whole thing validates.
+    for (gchar *line = gwy_str_next_line(&text);
+         line;
+         line = gwy_str_next_line(&text)) {
+        gchar *key, *value;
+        GwyResourceLineType ok = gwy_resource_parse_param_line(line,
+                                                               &key, &value);
+        if (ok == GWY_RESOURCE_LINE_EMPTY)
+            continue;
+        if (!ok)
+            break;
+
+        if (gwy_strequal(key, "param")) {
+            if (params) {
+                g_array_append_val(params, param);
+                gwy_memclear(&param, 1);
+                param.name = value;
+            }
+            else
+                params = g_array_new(FALSE, FALSE, sizeof(GwyUserFitFuncParam));
+        }
+        else if (params) {
+            if (gwy_strequal(key, "power_x"))
+                param.power_x = strtol(value, NULL, 10);
+            if (gwy_strequal(key, "power_y"))
+                param.power_y = strtol(value, NULL, 10);
+            else if (gwy_strequal(key, "estimate"))
+                param.estimate = value;
+            else
+                break;
+        }
+        else {
+            if (gwy_strequal(key, "expression")) {
+                g_free(priv->expression);
+                priv->expression = g_strdup(value);
+            }
+            else if (gwy_strequal(key, "filter")) {
+                g_free(priv->filter);
+                priv->filter = g_strdup(value);
+            }
+            else
+                break;
+        }
+    }
+    if (param.name)
+        g_array_append_val(params, param);
+
+    free_params(priv);
+    priv->nparams = params->len;
+    priv->param = (GwyUserFitFuncParam*)g_array_free(params, FALSE);
+
+    if (!gwy_user_fit_func_validate(userfitfunc)) {
+        priv->nparams = 0;
+        GWY_FREE(priv->param);
         return FALSE;
+    }
 
-    gchar *end;
-    userfitfunc->priv->shininess = g_ascii_strtod(text, &end);
-    if (end == text)
-        return FALSE;
+    // Now g_strdup() all the strings.
+    for (guint i = 0; i < priv->nparams; i++) {
+        priv->param[i].name = g_strdup(priv->param[i].name);
+        priv->param[i].estimate = g_strdup(priv->param[i].estimate);
+    }
 
-    gwy_user_fit_func_sanitize(userfitfunc);
-    */
     return TRUE;
 }
 
