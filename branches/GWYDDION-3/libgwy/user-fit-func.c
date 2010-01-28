@@ -17,6 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* TODO: estimators
+ * xmin, xmid, xmax, ymin, ymax, yxmin, yxmid, yxmax, xymax, xymin, ymean
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
@@ -490,6 +494,7 @@ gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
 /**
  * gwy_user_fit_func_get_params:
  * @userfitfunc: A user fitting function.
+ * @nparams: Location to store the number of parameters, possibly %NULL.
  *
  * Gets the parameters of a user fitting function.
  *
@@ -670,6 +675,21 @@ gwy_user_fit_func_parse(GwyResource *resource,
  * Class of user fitting functions.
  *
  * #GwyUserFitFuncClass does not contain any public members.
+ **/
+
+/**
+ * GwyUserFitFuncParam:
+ * @name: Name, it must be a valid identifier (UTF-8 letters such as α are
+ *        permitted).
+ * @estimate: Initial parameter estimate (an expression that can contain the
+ *            estimator variables FIXME).
+ * @power_x: Power of the abscissa contained in the parameter.
+ * @power_y: Power of the ordinate contained in the parameter.
+ *
+ * One parameter of a user fitting function.
+ *
+ * See gwy_fit_func_get_param_units() for a discussion of @power_x, @power_y
+ * and choosing good parametrisation with respect to units.
  **/
 
 /**

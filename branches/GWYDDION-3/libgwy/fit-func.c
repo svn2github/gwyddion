@@ -323,14 +323,16 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
  *
  * The derivation is possible only if the parameters are chosen sensibly, i.e.
  * if their units are integer powers of abscissa and ordinate units.  In some
- * cases this requires certain forethought.  For instance the units of
- * parameter @B in function @A+@B*@x<superscript>@C</superscript> depend on
- * parameter @C, moreover, they can be any irrational power of @x's units.
- * Where it does not create numerical difficulties it is better to parameterise
- * the function as @a*(1+(@x/@b)<superscript>@c</superscript>), where
- * @a=@A, @b=(@A/@B)<superscript>1/@c</superscript>, and @c=@C.  It can be
- * easily seen that all three new parameters @a, @b, @c have units that are
- * fixed integer powers of the abscissa and ordinate units.
+ * cases this requires certain forethought.
+ *
+ * For instance the units of parameter @B in function
+ * @A+@B*@x<superscript>@C</superscript> depend on parameter @C, moreover, they
+ * can be any irrational power of @x's units.  If it does not create
+ * numerical difficulties it is better to parametrise the function as
+ * @a*(1+(@x/@b)<superscript>@c</superscript>), where @a=@A,
+ * @b=(@A/@B)<superscript>1/@c</superscript>, and @c=@C.  It can be easily seen
+ * that all three new parameters @a, @b, @c have units that are fixed integer
+ * powers of the abscissa and ordinate units, namely (0, 1), (1, 0) and (0, 0).
  *
  * Returns: A newly created @GwyUnit with the units of the @i-th parameter.
  **/
