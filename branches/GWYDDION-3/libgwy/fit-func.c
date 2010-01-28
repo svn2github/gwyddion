@@ -24,36 +24,13 @@
 #include "libgwy/fit-func.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/fit-func-builtin.h"
 
 enum {
     PROP_0,
     PROP_NAME,
     N_PROPS
 };
-
-typedef struct {
-    const gchar *name;
-    gint power_x;
-    gint power_y;
-} GwyFitFuncParam;
-
-typedef gboolean (*BuiltinFunction)(gdouble x,
-                                    const gdouble *params,
-                                    gdouble *value);
-typedef GwyUnit* (*BuiltinDeriveUnits)(guint param,
-                                       GwyUnit *unit_x,
-                                       GwyUnit *unit_y);
-
-
-typedef struct {
-    const gchar *formula;
-    guint nparams;
-    const GwyFitFuncParam *param;
-    BuiltinFunction function;
-    BuiltinDeriveUnits derive_units;
-    // TODO: Specialized estimators, filters, weights, differentiation, unit
-    // derivation, ...
-} GwyBuiltinFitFunc;
 
 struct _GwyFitFuncPrivate {
     GwyFitTask *fittask;
@@ -64,7 +41,7 @@ struct _GwyFitFuncPrivate {
     gboolean has_data : 1;
 
     // Exactly one of builtin/user is set
-    const GwyBuiltinFitFunc *builtin;
+    const BuiltinFitFunc *builtin;
 
     GwyUserFitFunc *user;
     guint nparams;  // Cached namely for user-defined funcs, but set for both.
@@ -85,7 +62,6 @@ static void gwy_fit_func_get_property(GObject *object,
                                       guint prop_id,
                                       GValue *value,
                                       GParamSpec *pspec);
-static void setup_builtin_functions  (void);
 
 G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT)
 
@@ -114,7 +90,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                              | STATICP));
 
-    setup_builtin_functions();
+    builtin_functions = _gwy_fit_func_setup_builtins();
 }
 
 static void
@@ -131,7 +107,7 @@ gwy_fit_func_constructed(GObject *object)
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
 
-    const GwyBuiltinFitFunc *builtin;
+    const BuiltinFitFunc *builtin;
     builtin = g_hash_table_lookup(builtin_functions, priv->name);
     if (builtin) {
         priv->is_builtin = TRUE;
@@ -304,7 +280,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     if (priv->is_builtin) {
-        const GwyBuiltinFitFunc *builtin = priv->builtin;
+        const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(i < builtin->nparams, NULL);
         return builtin->param[i].name;
     }
@@ -345,7 +321,7 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     if (priv->is_builtin) {
-        const GwyBuiltinFitFunc *builtin = priv->builtin;
+        const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(i < builtin->nparams, NULL);
         if (builtin->derive_units)
             return builtin->derive_units(i, unit_x, unit_y);
@@ -421,7 +397,7 @@ fit_func_vfunc(guint i,
     gdouble x = priv->points[i].x, y = priv->points[i].y;
 
     if (priv->is_builtin) {
-        const GwyBuiltinFitFunc *builtin = priv->builtin;
+        const BuiltinFitFunc *builtin = priv->builtin;
         gdouble v;
         gboolean ok = builtin->function(x, params, &v);
         *retval = v - y;
@@ -525,12 +501,6 @@ gwy_fit_func_get_user(GwyFitFunc *fitfunc)
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     return priv->is_builtin ? NULL : priv->user;
-}
-
-static void
-setup_builtin_functions(void)
-{
-    // TODO
 }
 
 #define __LIBGWY_FIT_FUNC_C__

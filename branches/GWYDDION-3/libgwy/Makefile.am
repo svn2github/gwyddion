@@ -59,6 +59,7 @@ public_built_headers = \
 private_headers = \
 	curve-internal.h \
 	field-internal.h \
+	fit-func-builtin.h \
 	line-internal.h \
 	mask-field-internal.h \
 	math-internal.h \
@@ -95,6 +96,7 @@ libgwy3_la_SOURCES = \
 	field-transform.c \
 	fitter.c \
 	fit-func.c \
+	fit-func-builtin.c \
 	fit-task.c \
 	gl-material.c \
 	gradient.c \

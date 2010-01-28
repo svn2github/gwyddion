@@ -20,6 +20,7 @@
 #ifndef __LIBGWY_USER_FIT_FUNC_H__
 #define __LIBGWY_USER_FIT_FUNC_H__
 
+#include <libgwy/expr.h>
 #include <libgwy/resource.h>
 
 G_BEGIN_DECLS
