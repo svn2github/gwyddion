@@ -482,7 +482,7 @@ gwy_fit_func_get_fit_task(GwyFitFunc *fitfunc)
 
 /**
  * gwy_fit_func_set_data:
- * @fitfunc and must not be changed.
+ * @fitfunc: A fitting function.
  * @points: Point data, x-values are abscissas y-values are the data to fit.
  *          The data must exist during the lifetime of @fitfunc (or until
  *          another data is set) as @fitfunc does not make a copy.

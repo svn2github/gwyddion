@@ -57,8 +57,8 @@ struct _GwyUserFitFuncClass {
     GwyResourceClass resource_class;
 };
 
-#define gwy_user_fit_func_duplicate(user_fit_func) \
-        (GWY_USER_FIT_FUNC(gwy_serializable_duplicate(GWY_SERIALIZABLE(user_fit_func))))
+#define gwy_user_fit_func_duplicate(userfitfunc) \
+        (GWY_USER_FIT_FUNC(gwy_serializable_duplicate(GWY_SERIALIZABLE(userfitfunc))))
 #define gwy_user_fit_func_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
