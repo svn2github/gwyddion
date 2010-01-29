@@ -24,7 +24,7 @@
 #include "libgwy/libgwy-aliases.h"
 
 /**
- * gwy_strisident:
+ * gwy_ascii_strisident:
  * @s: A NUL-terminated string.
  * @more: List of additional ASCII characters allowed inside identifier, empty
  *        list can be passed as %NULL.
@@ -43,13 +43,13 @@
  * Returns: %TRUE if @s is valid identifier, %FALSE otherwise.
  **/
 gboolean
-gwy_strisident(const gchar *s,
-               const gchar *more,
-               const gchar *startmore)
+gwy_ascii_strisident(const gchar *s,
+                     const gchar *more,
+                     const gchar *startmore)
 {
-    const gchar *m;
-
     g_return_val_if_fail(s, FALSE);
+
+    const gchar *m;
     if (!g_ascii_isalpha(*s)) {
         if (!startmore)
             return FALSE;
@@ -74,6 +74,66 @@ gwy_strisident(const gchar *s,
                 return FALSE;
         }
         s++;
+    }
+
+    return TRUE;
+}
+
+/**
+ * gwy_utf8_strisident:
+ * @s: A NUL-terminated string.
+ * @more: List of additional characters allowed inside identifier, empty
+ *        list can be passed as %NULL.
+ * @startmore: List of additional characters allowed as the first
+ *             identifier characters, empty list can be passed as %NULL.
+ *
+ * Checks whether a string is valid identifier.
+ *
+ * Valid identifier must start with an alphabetic character or a character
+ * from @startmore, and it must continue with alphanumeric characters or
+ * characters from @more.  Both @more and @startmore are passed as UCS-4
+ * strings, not UTF-8.
+ *
+ * Note underscore is not allowed by default, you have to pass it in @more
+ * and/or @startmore.
+ *
+ * Returns: %TRUE if @s is valid identifier, %FALSE otherwise.
+ **/
+gboolean
+gwy_utf8_strisident(const gchar *s,
+                    const gunichar *more,
+                    const gunichar *startmore)
+{
+    g_return_val_if_fail(s, FALSE);
+    if (!g_utf8_validate(s, -1, NULL))
+        return FALSE;
+
+    const gunichar *m;
+    gunichar c;
+    if (!g_unichar_isalpha((c = g_utf8_get_char(s)))) {
+        if (!startmore)
+            return FALSE;
+        for (m = startmore; *m; m++) {
+            if (c == *m)
+                break;
+        }
+        if (!*m)
+            return FALSE;
+    }
+    s = g_utf8_next_char(s);
+
+    while (*s) {
+        if (!g_unichar_isalnum((c = g_utf8_get_char(s)))) {
+            if (!more)
+                return FALSE;
+            for (m = more; *m; m++) {
+                if (c == *m)
+                    break;
+            }
+            if (!*m)
+                return FALSE;
+        }
+        s = g_utf8_next_char(s);
     }
 
     return TRUE;

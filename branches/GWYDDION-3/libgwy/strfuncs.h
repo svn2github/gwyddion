@@ -28,16 +28,19 @@ G_BEGIN_DECLS
 #define gwy_strequal(a, b) \
     (!strcmp((a), (b)))
 
-gboolean gwy_strisident   (const gchar *s,
-                           const gchar *more,
-                           const gchar *startmore) G_GNUC_PURE;
-guint    gwy_stramong     (const gchar *str,
-                           ...)                    G_GNUC_NULL_TERMINATED G_GNUC_PURE;
-gchar*   gwy_str_next_line(gchar **buffer);
-gpointer gwy_memmem       (gconstpointer haystack,
-                           gsize haystack_len,
-                           gconstpointer needle,
-                           gsize needle_len)       G_GNUC_PURE;
+gboolean gwy_ascii_strisident(const gchar *s,
+                              const gchar *more,
+                              const gchar *startmore)    G_GNUC_PURE;
+gboolean gwy_utf8_strisident (const gchar *s,
+                              const gunichar *more,
+                              const gunichar *startmore) G_GNUC_PURE;
+guint    gwy_stramong        (const gchar *str,
+                              ...)                       G_GNUC_NULL_TERMINATED G_GNUC_PURE;
+gchar*   gwy_str_next_line   (gchar **buffer);
+gpointer gwy_memmem          (gconstpointer haystack,
+                              gsize haystack_len,
+                              gconstpointer needle,
+                              gsize needle_len)          G_GNUC_PURE;
 
 G_END_DECLS
 

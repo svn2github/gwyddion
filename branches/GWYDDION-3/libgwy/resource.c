@@ -962,7 +962,7 @@ gwy_resource_class_register(GwyResourceClass *klass,
         g_return_if_fail(item_type->type == G_TYPE_FROM_CLASS(klass));
         klass->priv->item_type = *item_type;
     }
-    if (!gwy_strisident(name, "-_", NULL))
+    if (!gwy_ascii_strisident(name, "-_", NULL))
         g_warning("Resource class name %s is not a valid identifier.", name);
     priv->name = name;
 

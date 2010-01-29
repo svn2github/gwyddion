@@ -962,29 +962,8 @@ parse_expr(Expr *expr,
 static gboolean
 identifier_name_is_valid(const gchar *name)
 {
-    guint i;
-
-    if (!g_utf8_validate(name, -1, NULL))
-        return FALSE;
-
-    glong items_written;
-    gunichar *ucs4name =  g_utf8_to_ucs4_fast(name, -1, &items_written);
-
-    if (!ucs4name)
-        return FALSE;
-
-    if (!g_unichar_isalpha(*ucs4name)) {
-        g_free(ucs4name);
-        return FALSE;
-    }
-
-    for (i = 1; i < items_written; i++) {
-        if (!g_unichar_isalnum(ucs4name[i]) && ucs4name[i] != '_')
-            break;
-    }
-    g_free(ucs4name);
-
-    return i == items_written;
+    static const gunichar more[] = { '_', 0 };
+    return gwy_utf8_strisident(name, more, NULL);
 }
 
 /**
