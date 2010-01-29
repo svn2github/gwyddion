@@ -196,7 +196,7 @@ static guint gwy_resource_ntraits = 0;
 static guint resource_signals[N_SIGNALS];
 
 static GSList *resource_classes = NULL;
-G_LOCK_DEFINE(resource_classes);
+G_LOCK_DEFINE_STATIC(resource_classes);
 
 static GwyResourceManagementType management_type = GWY_RESOURCE_MANAGEMENT_NONE;
 static GList *update_queue = NULL;
