@@ -82,6 +82,9 @@ static const GwySerializableItem serialize_items[N_ITEMS] = {
     /*5*/ { .name = "estimate",   .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
 };
 
+static GwyExpr *test_expr = NULL;
+G_LOCK_DEFINE_STATIC(test_expr);
+
 G_DEFINE_TYPE_EXTENDED
     (GwyUserFitFunc, gwy_user_fit_func, GWY_TYPE_RESOURCE, 0,
      GWY_IMPLEMENT_SERIALIZABLE(gwy_user_fit_func_serializable_init))
@@ -514,8 +517,6 @@ sanitize(GwyUserFitFunc *userfitfunc)
 static gboolean
 gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
 {
-    static GwyExpr *test_expr = NULL;
-    G_LOCK_DEFINE_STATIC(test_expr);
     static const gunichar more[] = { '_', 0 };
 
     UserFitFunc *priv = userfitfunc->priv;
@@ -596,13 +597,83 @@ gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
     return userfitfunc->priv->expression;
 }
 
-/*
+/**
+ * gwy_user_fit_func_set_expression:
+ * @userfitfunc: A user fitting function.
+ * @expression: New fitting function formula.
+ * @error: Return location for the error, or %NULL.  The error can be from
+ *         either %GWY_USER_FIT_FUNC_ERROR or %GWY_EXPR_ERROR domain.
+ *
+ * Sets the formula of a user fitting function.
+ *
+ * The formula is validated and possibly rejected (the function then returns
+ * %FALSE).  If it is accepted the parameters are rebuilt to correspond to the
+ * new formula.  Same-named parameters in the old and new formula are assumed
+ * to be the same parameter and so their properties are retained.  Parameters
+ * not present in the old formula are defined with default properties.
+ *
+ * Returns: %TRUE if the formula was been changed to @expression, %FALSE if
+ *          @expression is invalid and hence it was not set as the new formula.
+ **/
 gboolean
 gwy_user_fit_func_set_expression(GwyUserFitFunc *userfitfunc,
-                                 const gchar *expression)
+                                 const gchar *expression,
+                                 GError **error)
 {
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), FALSE);
+    g_return_val_if_fail(expression, FALSE);
+
+    G_LOCK(test_expr);
+    if (!gwy_expr_compile(test_expr, expression, error)) {
+        G_UNLOCK(test_expr);
+        return FALSE;
+    }
+    const gchar **names;
+    guint n = gwy_expr_get_variables(test_expr, &names);
+    // This is usualy still two parameters too large as the vars contain "x".
+    GwyFitParam *newparam = g_new0(GwyFitParam, n);
+    UserFitFunc *priv = userfitfunc->priv;
+    guint np = 0;
+    for (guint i = 1; i < n; i++) {
+        if (gwy_strequal(names[i], "x"))
+            continue;
+
+        guint j = 0;
+        while (j < priv->nparams) {
+            if (gwy_strequal(names[i], priv->param[j].name))
+                break;
+            j++;
+        }
+        if (j == priv->nparams) {
+            newparam[np].name = g_strdup(names[i]);
+            newparam[np].estimate = g_strdup("1");
+        }
+        else {
+            newparam[np] = priv->param[j];
+            priv->param[j].name = NULL;
+            priv->param[j].estimate = NULL;
+        }
+        np++;
+    }
+    // Must not release it eariler while we still use names[].
+    G_UNLOCK(test_expr);
+
+    if (!np) {
+        g_set_error(error, GWY_USER_FIT_FUNC_ERROR,
+                    GWY_USER_FIT_FUNC_ERROR_NO_PARAM,
+                    _("Fitting function has no parameters."));
+        g_free(newparam);
+        return FALSE;
+    }
+
+    free_params(priv);
+    priv->param = newparam;
+    priv->nparams = np;
+    gwy_user_fit_func_changed(userfitfunc);
+
+    return TRUE;
+
 }
-*/
 
 /**
  * gwy_user_fit_func_get_params:
@@ -756,6 +827,26 @@ gwy_user_fit_func_parse(GwyResource *resource,
     return TRUE;
 }
 
+/**
+ * gwy_user_fit_func_error_quark:
+ *
+ * Returns error domain for user-defined fitting function manipulation.
+ *
+ * See and use %GWY_USER_FIT_FUNC_ERROR.
+ *
+ * Returns: The error domain.
+ **/
+GQuark
+gwy_user_fit_func_error_quark(void)
+{
+    static GQuark error_domain = 0;
+
+    if (!error_domain)
+        error_domain = g_quark_from_static_string("gwy-user-fit-func-error-quark");
+
+    return error_domain;
+}
+
 #define __LIBGWY_USER_FIT_FUNC_C__
 #include "libgwy/libgwy-aliases.c"
 
@@ -766,7 +857,10 @@ gwy_user_fit_func_parse(GwyResource *resource,
  * @title: GwyUserFitFunc
  * @short_description: User-defined fitting function
  *
- * #GwyUserFitFunc represents a user-defined fitting function.
+ * #GwyUserFitFunc is a user-defined fitting function.  It servers only for
+ * user-defined fitting function representation and manipulation, it does not
+ * have any internal state and it does not perform any fitting itself, see
+ * #GwyFitFunc for that.
  **/
 
 /**
@@ -838,6 +932,22 @@ gwy_user_fit_func_parse(GwyResource *resource,
  *
  * Returns: User fitting function identified by @name or the default user
  *          fitting function if @name does not exist.
+ **/
+
+/**
+ * GWY_USER_FIT_FUNC_ERROR:
+ *
+ * Error domain for user-defined fitting function manipulation.  Errors in this
+ * domain will be from the #GwyUserFitFuncError enumeration. See #GError for
+ * information on error domains.
+ **/
+
+/**
+ * GwyUserFitFuncError:
+ * GWY_USER_FIT_FUNC_ERROR_NO_PARAM: Function expression does not contain any
+ *                                   parameters.
+ *
+ * Error codes returned by user-defined fitting function manipulation.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

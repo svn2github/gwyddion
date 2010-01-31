@@ -25,6 +25,14 @@
 
 G_BEGIN_DECLS
 
+#define GWY_USER_FIT_FUNC_ERROR gwy_user_fit_func_error_quark()
+
+typedef enum {
+    GWY_USER_FIT_FUNC_ERROR_NO_PARAM = 1,
+} GwyUserFitFuncError;
+
+GQuark gwy_user_fit_func_error_quark(void) G_GNUC_CONST;
+
 #define GWY_TYPE_FIT_PARAM (gwy_fit_param_get_type())
 
 typedef struct {
@@ -72,6 +80,9 @@ struct _GwyUserFitFuncClass {
 GType              gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
 GwyUserFitFunc*    gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
 const gchar*       gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+gboolean           gwy_user_fit_func_set_expression(GwyUserFitFunc *userfitfunc,
+                                                    const gchar *expression,
+                                                    GError **error);
 const GwyFitParam* gwy_user_fit_func_get_params    (GwyUserFitFunc *userfitfunc,
                                                     guint *nparams);
 guint              gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
