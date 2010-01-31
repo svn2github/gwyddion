@@ -1535,15 +1535,15 @@ gwy_expr_compile(GwyExpr *expr,
  *          variables plus one (for the first reserved item).
  *          On failure, 0 is returned.
  **/
-gint
+guint
 gwy_expr_get_variables(GwyExpr *expr,
-                       gchar ***names)
+                       const gchar ***names)
 {
     g_return_val_if_fail(GWY_IS_EXPR(expr), 0);
     g_return_val_if_fail(expr->priv->in, 0);
 
     if (names)
-        *names = (gchar**)expr->priv->identifiers->pdata;
+        *names = (const gchar**)expr->priv->identifiers->pdata;
 
     return expr->priv->identifiers->len;
 }
@@ -1566,13 +1566,13 @@ gwy_expr_get_variables(GwyExpr *expr,
 guint
 gwy_expr_resolve_variables(GwyExpr *expr,
                            guint n,
-                           const gchar * const *names,
+                           const gchar* const *names,
                            guint *indices)
 {
-    g_return_val_if_fail(GWY_IS_EXPR(expr), 0);
+    g_return_val_if_fail(GWY_IS_EXPR(expr), G_MAXUINT);
+    g_return_val_if_fail(!n || (names && indices), G_MAXUINT);
     Expr *priv = expr->priv;
-    g_return_val_if_fail(priv->in, 0);
-    g_return_val_if_fail(!n || (names && indices), 0);
+    g_return_val_if_fail(priv->in, G_MAXUINT);
 
     GPtrArray *identifiers = priv->identifiers;
     gboolean requested[identifiers->len];

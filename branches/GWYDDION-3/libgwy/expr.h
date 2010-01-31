@@ -80,10 +80,10 @@ gboolean     gwy_expr_compile          (GwyExpr *expr,
                                         GError **err);
 guint        gwy_expr_resolve_variables(GwyExpr *expr,
                                         guint n,
-                                        const gchar * const *names,
+                                        const gchar* const *names,
                                         guint *indices);
-gint         gwy_expr_get_variables    (GwyExpr *expr,
-                                        gchar ***names);
+guint        gwy_expr_get_variables    (GwyExpr *expr,
+                                        const gchar ***names);
 gdouble      gwy_expr_execute          (GwyExpr *expr,
                                         const gdouble *values);
 void         gwy_expr_vector_execute   (GwyExpr *expr,
