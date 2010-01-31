@@ -322,7 +322,7 @@ check_call_table_sanity(G_GNUC_UNUSED gpointer arg)
 /**
  * gwy_expr_error_quark:
  *
- * Returns error domain for expression parsin and evaluation.
+ * Returns error domain for expression parsing and evaluation.
  *
  * See and use %GWY_EXPR_ERROR.
  *
