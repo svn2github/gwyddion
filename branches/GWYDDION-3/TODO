@@ -14,10 +14,6 @@ Resources: Convenience method for resource parsing (possibly dumping too).
            One possibility is using properties, though defining propertis
            for all GwyRawFilePreset parameters seems a bit overkill.
 
-           Write a resource manager that maps resource inventory changes to
-           disk operations.  Needs the main loop running, perhaps add an
-           explicite flush function as fallback.
-
 Value Format: Fields are available as properties but the user cannot be
               expected to call g_object_notify() when something changes.
               Must make it more/less encapsulated for consistency.
@@ -28,6 +24,9 @@ Classes: Review class definitions that have class data (resources, selection,
 
 Serializable boxed: Review type lookup locking once GAtomicArray is available,
                     it might help.
+
+User fit function: No interface to manipulate the filter, parameters may need
+                   markup or constraints.
 
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
