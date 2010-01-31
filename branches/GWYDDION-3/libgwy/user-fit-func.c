@@ -17,20 +17,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* TODO: estimators
- * xmin, xmid, xmax, ymin, ymax, yxmin, yxmid, yxmax, xymax, xymin, ymean
- */
-
 #include <string.h>
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/math.h"
+#include "libgwy/unit.h"
 #include "libgwy/expr.h"
 #include "libgwy/serialize.h"
 #include "libgwy/user-fit-func.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
+#include "libgwy/fit-func-builtin.h"
 
 enum { N_ITEMS = 6 };
 
@@ -472,6 +471,7 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     static const gunichar more[] = { '_', 0 };
 
     UserFitFunc *priv = userfitfunc->priv;
+    // Parameters
     guint n = priv->nparams;
     for (guint i = 0; i < n; i++) {
         if (!gwy_utf8_strisident(priv->param[i].name, more, NULL))
@@ -483,31 +483,41 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     }
 
     G_LOCK(test_expr);
+    gboolean ok = FALSE;
+
+    // Fomula
     if (!test_expr) {
         test_expr = gwy_expr_new();
         gwy_expr_define_constant(test_expr, "pi", G_PI, NULL);
         gwy_expr_define_constant(test_expr, "π", G_PI, NULL);
     }
-    if (!gwy_expr_compile(test_expr, priv->expression, NULL)) {
-        G_UNLOCK(test_expr);
-        return FALSE;
-    }
-    if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, "x", NULL)) {
-        G_UNLOCK(test_expr);
-        return FALSE;
-    }
+    if (!gwy_expr_compile(test_expr, priv->expression, NULL))
+        goto fail;
+    if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, "x", NULL))
+        goto fail;
+
+    // Filter
     if (priv->filter && strlen(priv->filter)) {
         if (!gwy_expr_compile(test_expr, priv->filter, NULL))
-            return FALSE;
+            goto fail;
         const gchar *names[1] = { "x" };
         guint indices[1];
         if (gwy_expr_resolve_variables(test_expr, 1, names, indices))
-            return FALSE;
+            goto fail;
     }
-    // TODO: Validate estimators
-    G_UNLOCK(test_expr);
 
-    return TRUE;
+    // Estimators
+    for (guint i = 0; i < n; i++) {
+        if (!gwy_expr_compile(test_expr, priv->param[i].estimate, NULL))
+            goto fail;
+        if (!_gwy_fit_func_check_estimators(test_expr))
+            goto fail;
+    }
+    ok = TRUE;
+
+fail:
+    G_UNLOCK(test_expr);
+    return ok;
 }
 
 /**

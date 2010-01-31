@@ -32,6 +32,21 @@ enum {
     N_PROPS
 };
 
+// NB: The order must match estimators[]
+enum {
+    ESTIMATOR_XMIN,
+    ESTIMATOR_XMID,
+    ESTIMATOR_XMAX,
+    ESTIMATOR_YMIN,
+    ESTIMATOR_YMAX,
+    ESTIMATOR_YMEAN,
+    ESTIMATOR_YXMIN,
+    ESTIMATOR_YXMID,
+    ESTIMATOR_YXMAX,
+    ESTIMATOR_XYMAX,
+    ESTIMATOR_XYMIN,
+};
+
 struct _GwyFitFuncPrivate {
     GwyFitTask *fittask;
     gchar *name;
@@ -64,6 +79,14 @@ static void gwy_fit_func_get_property(GObject *object,
                                       GParamSpec *pspec);
 
 G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT)
+
+// NB: The order is given by ESTIMATOR_FOO enum values
+static const gchar* const estimators[] = {
+    "xmin", "xmid", "xmax",
+    "ymin", "ymax", "ymean",
+    "yxmin", "yxmid", "yxmax",
+    "xymax", "xymin",
+};
 
 static GHashTable *builtin_functions = NULL;
 
@@ -501,6 +524,37 @@ gwy_fit_func_get_user(GwyFitFunc *fitfunc)
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     return priv->is_builtin ? NULL : priv->user;
+}
+
+/**
+ * _gwy_fit_func_check_estimators:
+ * @expr: Compiled estimation expression.
+ *
+ * Check if all variables in an expression correspond to known estimators.
+ *
+ * Returns: %NULL on success, the name of the first unknown variable on
+ *          failure, empty string on total failure (e.g. an uncompiled
+ *          expression was passed).
+ **/
+const gchar*
+_gwy_fit_func_check_estimators(GwyExpr *expr)
+{
+    const gchar **names;
+    guint n = gwy_expr_get_variables(expr, &names);
+
+    if (!n)
+        return "";
+
+    for (guint i = 1; i < n; i++) {
+        guint j;
+        for (j = 0; j < G_N_ELEMENTS(estimators); j++) {
+            if (gwy_strequal(names[i], estimators[j]))
+                break;
+        }
+        if (j == G_N_ELEMENTS(estimators))
+            return names[i];
+    }
+    return NULL;
 }
 
 #define __LIBGWY_FIT_FUNC_C__

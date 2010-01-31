@@ -54,6 +54,9 @@ typedef struct {
 G_GNUC_INTERNAL
 GHashTable* _gwy_fit_func_setup_builtins(void);
 
+G_GNUC_INTERNAL
+const gchar* _gwy_fit_func_check_estimators(GwyExpr *expr);
+
 G_END_DECLS
 
 #endif /*__GWY_FIT_FUNC_BUILTIN_H__*/
