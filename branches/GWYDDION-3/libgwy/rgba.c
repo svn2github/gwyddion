@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <glib-object.h>
+#include "libgwy/math.h"
 #include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
 #include "libgwy/rgba.h"
@@ -95,21 +96,22 @@ gwy_rgba_construct(GwySerializableItems *items,
     gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyRGBA", error_list);
 
     GwyRGBA *rgba = g_slice_new(GwyRGBA);
-    rgba->r = CLAMP(its[0].value.v_double, 0.0, 1.0);
-    rgba->g = CLAMP(its[1].value.v_double, 0.0, 1.0);
-    rgba->b = CLAMP(its[2].value.v_double, 0.0, 1.0);
-    rgba->a = CLAMP(its[3].value.v_double, 0.0, 1.0);
+    rgba->r = its[0].value.v_double;
+    rgba->g = its[1].value.v_double;
+    rgba->b = its[2].value.v_double;
+    rgba->a = its[3].value.v_double;
+    gwy_rgba_fix(rgba);
     return rgba;
 }
 
 /**
  * gwy_rgba_copy:
- * @rgba: A RGBA colour.
+ * @rgba: An RGBA colour.
  *
- * Makes a copy of a rgba structure. The result must be freed using
- * gwy_rgba_free().
+ * Copies an RGBA colour.
  *
- * Returns: A copy of @rgba.
+ * Returns: A copy of @rgba. The result must be freed using gwy_rgba_free(),
+ *          not g_free().
  **/
 GwyRGBA*
 gwy_rgba_copy(const GwyRGBA *rgba)
@@ -120,9 +122,9 @@ gwy_rgba_copy(const GwyRGBA *rgba)
 
 /**
  * gwy_rgba_free:
- * @rgba: A RGBA colour.
+ * @rgba: An RGBA colour.
  *
- * Frees an rgba structure created with gwy_rgba_copy().
+ * Frees an RGBA colour created with gwy_rgba_copy().
  **/
 void
 gwy_rgba_free(GwyRGBA *rgba)
@@ -131,7 +133,7 @@ gwy_rgba_free(GwyRGBA *rgba)
 }
 
 #define fix_component(rgba,x,ok) \
-    if (G_UNLIKELY(rgba->x < 0.0)) { \
+    if (G_UNLIKELY(rgba->x < 0.0 || !isnormal(rgba->x))) { \
         ok = FALSE; \
         rgba->x = 0.0; \
     } \
@@ -144,7 +146,7 @@ gwy_rgba_free(GwyRGBA *rgba)
 
 /**
  * gwy_rgba_fix:
- * @rgba: A RGBA colour.
+ * @rgba: An RGBA colour.
  *
  * Corrects components of a colour to lie in the range [0,1].
  *
