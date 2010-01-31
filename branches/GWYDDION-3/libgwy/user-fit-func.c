@@ -34,7 +34,7 @@
 enum { N_ITEMS = 6 };
 
 struct _GwyUserFitFuncPrivate {
-    gchar *expression;
+    gchar *formula;
     gchar *filter;
     guint nparams;
     GwyFitParam *param;
@@ -74,7 +74,7 @@ static const GwyFitParam default_param[1] = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "expression", .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*0*/ { .name = "formula", .ctype = GWY_SERIALIZABLE_STRING,       },
     /*1*/ { .name = "filter",     .ctype = GWY_SERIALIZABLE_STRING,       },
     /*2*/ { .name = "param",      .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
     /*3*/ { .name = "x-power",    .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
@@ -222,7 +222,7 @@ gwy_user_fit_func_init(GwyUserFitFunc *userfitfunc)
     UserFitFunc *priv = userfitfunc->priv;
 
     // Constant value, by default.
-    priv->expression = g_strdup("a");
+    priv->formula = g_strdup("a");
     priv->filter = g_strdup("");
     assign_params(priv, G_N_ELEMENTS(default_param), default_param);
 }
@@ -232,7 +232,7 @@ gwy_user_fit_func_finalize(GObject *object)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(object);
     UserFitFunc *priv = userfitfunc->priv;
-    GWY_FREE(priv->expression);
+    GWY_FREE(priv->formula);
     GWY_FREE(priv->filter);
     free_params(priv);
     G_OBJECT_CLASS(gwy_user_fit_func_parent_class)->finalize(object);
@@ -271,7 +271,7 @@ gwy_user_fit_func_itemize(GwySerializable *serializable,
 
     // Our own data
     *it = serialize_items[0];
-    it->value.v_string = priv->expression;
+    it->value.v_string = priv->formula;
     it++, items->n++;
 
     if (priv->filter) {
@@ -395,7 +395,7 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
     if (!ok) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Invalid expression or parameters."));
+                           _("Invalid formula or parameters."));
     }
 
     return ok;
@@ -416,8 +416,8 @@ static void
 assign_info(UserFitFunc *dpriv,
             const UserFitFunc *spriv)
 {
-    GWY_FREE(dpriv->expression);
-    dpriv->expression = g_strdup(spriv->expression);
+    GWY_FREE(dpriv->formula);
+    dpriv->formula = g_strdup(spriv->formula);
     GWY_FREE(dpriv->filter);
     dpriv->filter = g_strdup(spriv->filter);
 }
@@ -496,9 +496,9 @@ sanitize(GwyUserFitFunc *userfitfunc)
     UserFitFunc *priv = userfitfunc->priv;
     gchar *end;
 
-    if (!priv->expression)
-        priv->expression = g_strdup("1");
-    else if (!g_utf8_validate(priv->expression, -1, (const gchar**)&end))
+    if (!priv->formula)
+        priv->formula = g_strdup("1");
+    else if (!g_utf8_validate(priv->formula, -1, (const gchar**)&end))
         *end = '\0';
 
     if (!priv->filter && !g_utf8_validate(priv->filter, -1, (const gchar**)&end))
@@ -540,7 +540,7 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
         gwy_expr_define_constant(test_expr, "pi", G_PI, NULL);
         gwy_expr_define_constant(test_expr, "π", G_PI, NULL);
     }
-    if (!gwy_expr_compile(test_expr, priv->expression, NULL))
+    if (!gwy_expr_compile(test_expr, priv->formula, NULL))
         goto fail;
     if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, "x", NULL))
         goto fail;
@@ -583,7 +583,7 @@ gwy_user_fit_func_new(void)
 }
 
 /**
- * gwy_user_fit_func_get_expression:
+ * gwy_user_fit_func_get_formula:
  * @userfitfunc: A user fitting function.
  *
  * Gets the formula of a user fitting function.
@@ -591,16 +591,16 @@ gwy_user_fit_func_new(void)
  * Returns: The formula as a string owned by @userfitfunc.
  **/
 const gchar*
-gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
+gwy_user_fit_func_get_formula(GwyUserFitFunc *userfitfunc)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
-    return userfitfunc->priv->expression;
+    return userfitfunc->priv->formula;
 }
 
 /**
- * gwy_user_fit_func_set_expression:
+ * gwy_user_fit_func_set_formula:
  * @userfitfunc: A user fitting function.
- * @expression: New fitting function formula.
+ * @formula: New fitting function formula.
  * @error: Return location for the error, or %NULL.  The error can be from
  *         either %GWY_USER_FIT_FUNC_ERROR or %GWY_EXPR_ERROR domain.
  *
@@ -612,19 +612,19 @@ gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)
  * to be the same parameter and so their properties are retained.  Parameters
  * not present in the old formula are defined with default properties.
  *
- * Returns: %TRUE if the formula was been changed to @expression, %FALSE if
- *          @expression is invalid and hence it was not set as the new formula.
+ * Returns: %TRUE if the formula was been changed to @formula, %FALSE if
+ *          @formula is invalid and hence it was not set as the new formula.
  **/
 gboolean
-gwy_user_fit_func_set_expression(GwyUserFitFunc *userfitfunc,
-                                 const gchar *expression,
+gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
+                                 const gchar *formula,
                                  GError **error)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), FALSE);
-    g_return_val_if_fail(expression, FALSE);
+    g_return_val_if_fail(formula, FALSE);
 
     G_LOCK(test_expr);
-    if (!gwy_expr_compile(test_expr, expression, error)) {
+    if (!gwy_expr_compile(test_expr, formula, error)) {
         G_UNLOCK(test_expr);
         return FALSE;
     }
@@ -701,10 +701,10 @@ gwy_user_fit_func_get_params(GwyUserFitFunc *userfitfunc,
  * @expr: An expression, presumably with compiled @userfitfunc's formula.
  * @independent_name: Name of independent variable (abscissa).
  * @indices: Array to store the map from the parameter number to the
- *           expression variable number.  The abscissa goes last after all
+ *           @expr variable number.  The abscissa goes last after all
  *           parameters.
  *
- * Resolves the mapping between paramters and expression variables for a
+ * Resolves the mapping between paramters and formula variables for a
  * user fitting function.
  *
  * See gwy_expr_resolve_variables() for some discussion.
@@ -740,7 +740,7 @@ gwy_user_fit_func_dump(GwyResource *resource)
     UserFitFunc *priv = userfitfunc->priv;
 
     GString *text = g_string_new(NULL);
-    g_string_append_printf(text, "expression %s\n", priv->expression);
+    g_string_append_printf(text, "formula %s\n", priv->formula);
     if (priv->filter)
         g_string_append_printf(text, "filter %s\n", priv->filter);
 
@@ -798,9 +798,9 @@ gwy_user_fit_func_parse(GwyResource *resource,
                 break;
         }
         else {
-            if (gwy_strequal(key, "expression")) {
-                g_free(priv->expression);
-                priv->expression = g_strdup(value);
+            if (gwy_strequal(key, "formula")) {
+                g_free(priv->formula);
+                priv->formula = g_strdup(value);
             }
             else if (gwy_strequal(key, "filter")) {
                 GWY_FREE(priv->filter);
@@ -884,7 +884,7 @@ gwy_user_fit_func_error_quark(void)
  * GwyFitParam:
  * @name: Name, it must be a valid identifier (UTF-8 letters such as α are
  *        permitted).
- * @estimate: Initial parameter estimate (an expression that can contain the
+ * @estimate: Initial parameter estimate (a formula that can contain the
  *            estimator variables FIXME).
  * @power_x: Power of the abscissa contained in the parameter.
  * @power_y: Power of the ordinate contained in the parameter.
@@ -944,7 +944,7 @@ gwy_user_fit_func_error_quark(void)
 
 /**
  * GwyUserFitFuncError:
- * GWY_USER_FIT_FUNC_ERROR_NO_PARAM: Function expression does not contain any
+ * GWY_USER_FIT_FUNC_ERROR_NO_PARAM: Function formula does not contain any
  *                                   parameters.
  *
  * Error codes returned by user-defined fitting function manipulation.

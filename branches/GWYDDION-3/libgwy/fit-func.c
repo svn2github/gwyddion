@@ -392,9 +392,9 @@ construct_expr(FitFunc *priv)
 {
     priv->expr = gwy_expr_new();
     if (!gwy_expr_compile(priv->expr,
-                          gwy_user_fit_func_get_expression(priv->user),
+                          gwy_user_fit_func_get_formula(priv->user),
                           NULL)) {
-        g_critical("Cannot compile user fitting function expression.");
+        g_critical("Cannot compile user fitting function formula.");
         return;
     }
 
@@ -404,7 +404,7 @@ construct_expr(FitFunc *priv)
     if (gwy_user_fit_func_resolve_params(priv->user, priv->expr, "x",
                                          priv->indices)) {
         g_critical("Cannot resolve variables in user fitting function "
-                   "expression.");
+                   "formula.");
         return;
     }
 }

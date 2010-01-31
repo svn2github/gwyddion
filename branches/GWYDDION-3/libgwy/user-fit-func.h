@@ -79,9 +79,9 @@ struct _GwyUserFitFuncClass {
 
 GType              gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
 GwyUserFitFunc*    gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
-const gchar*       gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-gboolean           gwy_user_fit_func_set_expression(GwyUserFitFunc *userfitfunc,
-                                                    const gchar *expression,
+const gchar*       gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+gboolean           gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
+                                                    const gchar *formula,
                                                     GError **error);
 const GwyFitParam* gwy_user_fit_func_get_params    (GwyUserFitFunc *userfitfunc,
                                                     guint *nparams);
