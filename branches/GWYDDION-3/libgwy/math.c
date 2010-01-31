@@ -24,17 +24,213 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/serializable-boxed.h"
+#include "libgwy/serialize.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 #define ISWAP(x, y) GWY_SWAP(guint, x, y)
+#define NORMALIZE(x) (isnormal(x) ? (x) : 0.0)
 
-static void sort_plain(gdouble *array,
-                       gsize n);
-static void sort_with_index(gdouble *array,
-                            guint *index_array,
-                            gsize n);
+enum {
+    N_ITEMS_XY = 2,
+    N_ITEMS_XYZ = 3,
+};
+
+static gsize    gwy_xy_itemize   (gpointer boxed,
+                                  GwySerializableItems *items);
+static gpointer gwy_xy_construct (GwySerializableItems *items,
+                                  GwyErrorList **error_list);
+static gsize    gwy_xyz_itemize  (gpointer boxed,
+                                  GwySerializableItems *items);
+static gpointer gwy_xyz_construct(GwySerializableItems *items,
+                                  GwyErrorList **error_list);
+static void     sort_plain       (gdouble *array,
+                                  gsize n);
+static void     sort_with_index  (gdouble *array,
+                                  guint *index_array,
+                                  gsize n);
+
+static const GwySerializableItem serialize_items_xy[N_ITEMS_XY] = {
+    /*0*/ { .name = "x", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*1*/ { .name = "y", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+};
+
+static const GwySerializableItem serialize_items_xyz[N_ITEMS_XYZ] = {
+    /*0*/ { .name = "x", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*1*/ { .name = "y", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+    /*2*/ { .name = "z", .ctype = GWY_SERIALIZABLE_DOUBLE, },
+};
+
+GType
+gwy_xy_get_type(void)
+{
+    static GType xy_type = 0;
+
+    if (G_UNLIKELY(!xy_type)) {
+        xy_type = g_boxed_type_register_static("GwyXY",
+                                               (GBoxedCopyFunc)gwy_xy_copy,
+                                               (GBoxedFreeFunc)gwy_xy_free);
+        static const GwySerializableBoxedInfo boxed_info = {
+            sizeof(GwyXY), N_ITEMS_XY, gwy_xy_itemize, gwy_xy_construct,
+            NULL, NULL,
+        };
+        gwy_serializable_boxed_register_static(xy_type, &boxed_info);
+    }
+
+    return xy_type;
+}
+
+static gsize
+gwy_xy_itemize(gpointer boxed,
+               GwySerializableItems *items)
+{
+    GwyXY *xy = (GwyXY*)boxed;
+
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS_XY, 0);
+
+    GwySerializableItem *it = items->items + items->n;
+
+    *it = serialize_items_xy[0];
+    it->value.v_double = xy->x;
+    it++, items->n++;
+
+    *it = serialize_items_xy[1];
+    it->value.v_double = xy->y;
+    it++, items->n++;
+
+    return N_ITEMS_XY;
+}
+
+static gpointer
+gwy_xy_construct(GwySerializableItems *items,
+                 GwyErrorList **error_list)
+{
+    GwySerializableItem its[N_ITEMS_XY];
+    memcpy(its, serialize_items_xy, sizeof(serialize_items_xy));
+    gwy_deserialize_filter_items(its, N_ITEMS_XY, items, "GwyXY", error_list);
+
+    GwyXY *xy = g_slice_new(GwyXY);
+    xy->x = NORMALIZE(its[0].value.v_double);
+    xy->y = NORMALIZE(its[1].value.v_double);
+    return xy;
+}
+
+/**
+ * gwy_xy_copy:
+ * @xy: Cartesian coordinates in plane.
+ *
+ * Copies Cartesian coordinates in plane.
+ *
+ * Returns: A copy of @xy. The result must be freed using gwy_xy_free(),
+ *          not g_free().
+ **/
+GwyXY*
+gwy_xy_copy(const GwyXY *xy)
+{
+    g_return_val_if_fail(xy, NULL);
+    return g_slice_copy(sizeof(GwyXY), xy);
+}
+
+/**
+ * gwy_xy_free:
+ * @xy: Cartesian coordinates in plane.
+ *
+ * Frees Cartesian coordinates in plane created with gwy_xy_copy().
+ **/
+void
+gwy_xy_free(GwyXY *xy)
+{
+    g_slice_free1(sizeof(GwyXY), xy);
+}
+
+GType
+gwy_xyz_get_type(void)
+{
+    static GType xyz_type = 0;
+
+    if (G_UNLIKELY(!xyz_type)) {
+        xyz_type = g_boxed_type_register_static("GwyXYZ",
+                                                (GBoxedCopyFunc)gwy_xyz_copy,
+                                                (GBoxedFreeFunc)gwy_xyz_free);
+        static const GwySerializableBoxedInfo boxed_info = {
+            sizeof(GwyXYZ), N_ITEMS_XYZ, gwy_xyz_itemize, gwy_xyz_construct,
+            NULL, NULL,
+        };
+        gwy_serializable_boxed_register_static(xyz_type, &boxed_info);
+    }
+
+    return xyz_type;
+}
+
+static gsize
+gwy_xyz_itemize(gpointer boxed,
+                GwySerializableItems *items)
+{
+    GwyXYZ *xyz = (GwyXYZ*)boxed;
+
+    g_return_val_if_fail(items->len - items->n >= N_ITEMS_XYZ, 0);
+
+    GwySerializableItem *it = items->items + items->n;
+
+    *it = serialize_items_xyz[0];
+    it->value.v_double = xyz->x;
+    it++, items->n++;
+
+    *it = serialize_items_xyz[1];
+    it->value.v_double = xyz->y;
+    it++, items->n++;
+
+    *it = serialize_items_xyz[2];
+    it->value.v_double = xyz->z;
+    it++, items->n++;
+
+    return N_ITEMS_XYZ;
+}
+
+static gpointer
+gwy_xyz_construct(GwySerializableItems *items,
+                  GwyErrorList **error_list)
+{
+    GwySerializableItem its[N_ITEMS_XYZ];
+    memcpy(its, serialize_items_xyz, sizeof(serialize_items_xyz));
+    gwy_deserialize_filter_items(its, N_ITEMS_XYZ, items, "GwyXYZ", error_list);
+
+    GwyXYZ *xyz = g_slice_new(GwyXYZ);
+    xyz->x = NORMALIZE(its[0].value.v_double);
+    xyz->y = NORMALIZE(its[1].value.v_double);
+    xyz->z = NORMALIZE(its[2].value.v_double);
+    return xyz;
+}
+
+/**
+ * gwy_xyz_copy:
+ * @xyz: Cartesian coordinates in space.
+ *
+ * Copies Cartesian coordinates in space.
+ *
+ * Returns: A copy of @xyz. The result must be freed using gwy_xyz_free(),
+ *          not g_free().
+ **/
+GwyXYZ*
+gwy_xyz_copy(const GwyXYZ *xyz)
+{
+    g_return_val_if_fail(xyz, NULL);
+    return g_slice_copy(sizeof(GwyXYZ), xyz);
+}
+
+/**
+ * gwy_xyz_free:
+ * @xyz: Cartesian coordinates in space.
+ *
+ * Frees Cartesian coordinates in space created with gwy_xyz_copy().
+ **/
+void
+gwy_xyz_free(GwyXYZ *xyz)
+{
+    g_slice_free1(sizeof(GwyXYZ), xyz);
+}
 
 /* Quickly find median value in an array
  * based on public domain code by Nicolas Devillard */

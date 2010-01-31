@@ -21,7 +21,7 @@
 #define __LIBGWY_MATH_H__
 
 #include <math.h>
-#include <glib.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -132,6 +132,18 @@ gboolean gwy_linear_fit        (GwyLinearFitFunc function,
                                 guint nparams,
                                 gdouble *residuum,
                                 gpointer user_data);
+
+#define GWY_TYPE_XY (gwy_xy_get_type())
+
+GType  gwy_xy_get_type(void)            G_GNUC_CONST;
+GwyXY* gwy_xy_copy    (const GwyXY *xy) G_GNUC_MALLOC;
+void   gwy_xy_free    (GwyXY *xy);
+
+#define GWY_TYPE_XYZ (gwy_xyz_get_type())
+
+GType   gwy_xyz_get_type(void)              G_GNUC_CONST;
+GwyXYZ* gwy_xyz_copy    (const GwyXYZ *xyz) G_GNUC_MALLOC;
+void    gwy_xyz_free    (GwyXYZ *xyz);
 
 G_END_DECLS
 
