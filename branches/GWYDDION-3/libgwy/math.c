@@ -1143,12 +1143,24 @@ jump_over:
  **/
 
 /**
+ * GWY_TYPE_XY:
+ *
+ * The #GType for a boxed type holding a #GwyXY.
+ **/
+
+/**
  * GwyXYZ:
  * @x: X-coordinate.
  * @y: Y-coordinate.
  * @z: Z-coordinate.
  *
  * Representation of Cartesian coordinates in space.
+ **/
+
+/**
+ * GWY_TYPE_XYZ:
+ *
+ * The #GType for a boxed type holding a #GwyXYZ.
  **/
 
 /**

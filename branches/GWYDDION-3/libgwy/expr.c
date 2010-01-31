@@ -1385,6 +1385,12 @@ transform_to_rpn(Expr *expr,
 }
 
 static void
+free_double(void *pointer)
+{
+    g_slice_free(gdouble, pointer);
+}
+
+static void
 ensure_constants(Expr *expr)
 {
     if (expr->constants)
@@ -1393,7 +1399,7 @@ ensure_constants(Expr *expr)
     /* We could also put constants into scanner's symbol table, but then
      * we have to tell them apart when we get some symbol from scanner. */
     expr->constants = g_hash_table_new_full(g_direct_hash, g_direct_equal,
-                                            NULL, g_free);
+                                            NULL, free_double);
 }
 
 /****************************************************************************
@@ -1690,7 +1696,7 @@ gwy_expr_define_constant(GwyExpr *expr,
     GQuark quark = g_quark_from_string(name);
     ensure_constants(priv);
     g_hash_table_insert(priv->constants, GUINT_TO_POINTER(quark),
-                        g_memdup(&value, sizeof(gdouble)));
+                        g_slice_dup(gdouble, &value));
 
     return TRUE;
 }

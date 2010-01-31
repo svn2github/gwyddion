@@ -1773,7 +1773,7 @@ gwy_resource_type_set_managed_directory(GType type,
 }
 
 /**
- * gwy_resource_type_set_unmanaged:
+ * gwy_resource_type_set_managed:
  * @type: A resource type.
  * @managed: %TRUE to enable automated synchronization of resources to disk,
  *           %FALSE to disable it.

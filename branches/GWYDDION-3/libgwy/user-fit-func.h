@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 typedef enum {
     GWY_USER_FIT_FUNC_ERROR_NO_PARAM = 1,
+    GWY_USER_FIT_FUNC_ERROR_ESTIMATE,
 } GwyUserFitFuncError;
 
 GQuark gwy_user_fit_func_error_quark(void) G_GNUC_CONST;
@@ -83,8 +84,15 @@ const gchar*       gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)
 gboolean           gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
                                                     const gchar *formula,
                                                     GError **error);
-const GwyFitParam* gwy_user_fit_func_get_params    (GwyUserFitFunc *userfitfunc,
-                                                    guint *nparams);
+guint              gwy_user_fit_func_get_n_params  (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+const GwyFitParam* gwy_user_fit_func_get_param     (GwyUserFitFunc *userfitfunc,
+                                                    const gchar *name)             G_GNUC_PURE;
+const GwyFitParam* gwy_user_fit_func_get_nth_param (GwyUserFitFunc *userfitfunc,
+                                                    guint i)                       G_GNUC_PURE;
+void               gwy_user_fit_func_update_param  (GwyUserFitFunc *userfitfunc,
+                                                    const GwyFitParam *param);
+gboolean           gwy_user_fit_func_check_estimate(const gchar *estimate,
+                                                    GError **error);
 guint              gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
                                                     GwyExpr *expr,
                                                     const gchar *independent_name,

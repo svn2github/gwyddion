@@ -542,7 +542,7 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     }
     if (!gwy_expr_compile(test_expr, priv->formula, NULL))
         goto fail;
-    if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, "x", NULL))
+    if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL))
         goto fail;
 
     // Filter
@@ -676,22 +676,124 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
 }
 
 /**
- * gwy_user_fit_func_get_params:
+ * gwy_user_fit_func_get_n_params:
  * @userfitfunc: A user fitting function.
- * @nparams: Location to store the number of parameters, possibly %NULL.
  *
- * Gets the parameters of a user fitting function.
+ * Gets the number of parameters of a user fitting function.
  *
- * Returns: The parameters as an array owned by @userfitfunc.
+ * Returns: The number of parameters.
+ **/
+guint
+gwy_user_fit_func_get_n_params(GwyUserFitFunc *userfitfunc)
+{
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), 0);
+    UserFitFunc *priv = userfitfunc->priv;
+    return priv->nparams;
+}
+
+/**
+ * gwy_user_fit_func_get_param:
+ * @userfitfunc: A user fitting function.
+ * @name: Parameter name.
+ *
+ * Obtains one user fitting function parameter.
+ *
+ * Returns: The parameter, as a pointer to @userfitfunc-owned structure.  It
+ *          must not be modified and it remains valid as long as @userfitfunc
+ *          does not change.
  **/
 const GwyFitParam*
-gwy_user_fit_func_get_params(GwyUserFitFunc *userfitfunc,
-                             guint *nparams)
+gwy_user_fit_func_get_param(GwyUserFitFunc *userfitfunc,
+                            const gchar *name)
+{
+    g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
+    g_return_val_if_fail(name, NULL);
+    UserFitFunc *priv = userfitfunc->priv;
+    for (guint i = 0; i < priv->nparams; i++) {
+        if (gwy_strequal(name, priv->param[i].name))
+            return priv->param + i;
+    }
+    return NULL;
+}
+
+/**
+ * gwy_user_fit_func_get_nth_param:
+ * @userfitfunc: A user fitting function.
+ * @i: Parameter number.
+ *
+ * Obtains one user fitting function parameter given by index.
+ *
+ * Returns: The parameter, as a pointer to @userfitfunc-owned structure.  It
+ *          must not be modified and it remains valid as long as @userfitfunc
+ *          does not change.
+ **/
+const GwyFitParam*
+gwy_user_fit_func_get_nth_param(GwyUserFitFunc *userfitfunc,
+                                guint i)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
     UserFitFunc *priv = userfitfunc->priv;
-    GWY_MAYBE_SET(nparams, priv->nparams);
-    return priv->param;
+    g_return_val_if_fail(i < priv->nparams, NULL);
+    return priv->param + i;
+}
+
+/**
+ * gwy_user_fit_func_update_param:
+ * @userfitfunc: A user fitting function.
+ * @param: Parameter data.  All entries are copied so the caller retains its
+ *         ownership of all @param's data.  It is safe to pass @param
+ *         containing strings obtained from gwy_user_fit_func_get_param() or
+ *         gwy_user_fit_func_get_nth_param().  However, as this function may
+ *         invalidate them (e.g. by freeing them) it is not safe to continue
+ *         using these parameter structs afterwards.
+ *
+ * Updates one user fitting function parameter.
+ *
+ * The parameter to update is identified by the name in the @param struct.
+ * This means the name must be euqal to the name of an existing parameter.  It
+ * is not possible to rename parameters as it does not make any sense;
+ * parameter names are determined by the function formula.
+ *
+ * Returns: The parameter, as a pointer to @userfitfunc-owned structure.  It
+ *          must not be modified and it remains valid as long as @userfitfunc
+ *          does not change.
+ **/
+void
+gwy_user_fit_func_update_param(GwyUserFitFunc *userfitfunc,
+                               const GwyFitParam *param)
+{
+    g_return_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc));
+    g_return_if_fail(param && param->name && param->estimate);
+
+    UserFitFunc *priv = userfitfunc->priv;
+    GwyFitParam *myparam = NULL;
+
+    for (guint i = 0; i < priv->nparams; i++) {
+        myparam = priv->param + i;
+        if (param->name == myparam->name
+            || gwy_strequal(param->name, myparam->name))
+            break;
+    }
+    if (!myparam) {
+        g_warning("Fitting function has no parameter called %s.", param->name);
+        return;
+    }
+
+    myparam->power_x = param->power_x;
+    myparam->power_y = param->power_y;
+    sanitize_param(myparam);
+
+    // We must be careful not to free strings before we use them
+    if (param->estimate != myparam->estimate
+        && !gwy_strequal(param->estimate, myparam->estimate)
+        && gwy_user_fit_func_check_estimate(param->estimate, NULL)) {
+
+        gchar *old = myparam->estimate;
+        myparam->estimate = g_strdup(param->estimate);
+        g_free(old);
+    }
+
+    gwy_user_fit_func_changed(userfitfunc);
 }
 
 // FIXME: This is illogical.  Why should the user pass the compiled expr?
@@ -699,7 +801,8 @@ gwy_user_fit_func_get_params(GwyUserFitFunc *userfitfunc,
  * gwy_user_fit_func_resolve_params:
  * @userfitfunc: A user fitting function.
  * @expr: An expression, presumably with compiled @userfitfunc's formula.
- * @independent_name: Name of independent variable (abscissa).
+ * @independent_name: Name of independent variable (abscissa), pass %NULL for
+ *                    the default "x".
  * @indices: Array to store the map from the parameter number to the
  *           @expr variable number.  The abscissa goes last after all
  *           parameters.
@@ -719,7 +822,8 @@ gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), G_MAXUINT);
     g_return_val_if_fail(GWY_IS_EXPR(expr), G_MAXUINT);
-    g_return_val_if_fail(independent_name, G_MAXUINT);
+    if (!independent_name)
+        independent_name = "x";
     UserFitFunc *priv = userfitfunc->priv;
 
     guint n = priv->nparams;
@@ -731,6 +835,46 @@ gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
         indices = g_newa(guint, n+1);
 
     return gwy_expr_resolve_variables(expr, n+1, names, indices);
+}
+
+/**
+ * gwy_user_fit_func_check_estimate:
+ * @estimate: Initial parameter estimate (a formula that can contain the
+ *            estimator variables).
+ * @error: Return location for the error, or %NULL.  The error can be from
+ *         either %GWY_USER_FIT_FUNC_ERROR or %GWY_EXPR_ERROR domain.
+ *
+ * Check validity of a parameter estimation formula.
+ *
+ * Returns: %TRUE if @estimate is a valid parameter estimation formula.
+ **/
+gboolean
+gwy_user_fit_func_check_estimate(const gchar *estimate,
+                                 GError **error)
+{
+    g_return_val_if_fail(estimate, FALSE);
+
+    G_LOCK(test_expr);
+    if (!gwy_expr_compile(test_expr, estimate, error)) {
+        G_UNLOCK(test_expr);
+        return FALSE;
+    }
+
+    const gchar *name = _gwy_fit_func_check_estimators(test_expr);
+    if (name) {
+        if (*name)
+            g_set_error(error, GWY_USER_FIT_FUNC_ERROR,
+                        GWY_USER_FIT_FUNC_ERROR_ESTIMATE,
+                        _("Estimate expression contains unknown variable %s."),
+                        name);
+        else {
+            g_critical("_gwy_fit_func_check_estimators() returned fatal error "
+                       "for a successfully compiled estimator.");
+        }
+    }
+    G_UNLOCK(test_expr);
+
+    return name == NULL;
 }
 
 static gchar*
@@ -857,10 +1001,84 @@ gwy_user_fit_func_error_quark(void)
  * @title: GwyUserFitFunc
  * @short_description: User-defined fitting function
  *
- * #GwyUserFitFunc is a user-defined fitting function.  It servers only for
+ * #GwyUserFitFunc is a user fitting function definition.  It servers only for
  * user-defined fitting function representation and manipulation, it does not
  * have any internal state and it does not perform any fitting itself, see
  * #GwyFitFunc for that.
+ *
+ * #GwyUserFitFunc holds, of course, namely the fitting formula that can be
+ * obtained with gwy_user_fit_func_get_formula() and modified with
+ * gwy_user_fit_func_set_formula().
+ *
+ * Beside the function #GwyUserFitFunc holds also auxiliary information about
+ * the fitting parameters such as unit powers or initial estimations.
+ * Parameters and their names are determined by the function formula but their
+ * other properties can be manipulated with gwy_user_fit_func_update_param().
+ * To change both the formula and parameters, the formula must be changed first
+ * with gwy_user_fit_func_set_formula() which causes update of the parameter
+ * list.  Then the parameter properties can be updated.  This ensures the
+ * object never gets into an inconsistent state.
+ *
+ * Parameter estimations can be based on the following quantities:
+ * <variablelist>
+ *   <varlistentry>
+ *     <term>@xmin</term>
+ *     <listitem>Minimum abscissa (@x) value.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xmid</term>
+ *     <listitem>Central abscissa (@x) value, equal to
+ *               (@xmin+@max)/2.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xmax</term>
+ *     <listitem>Maximum abscissa (@x) value.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@ymin</term>
+ *     <listitem>Minimum ordinate (@y) value.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@ymax</term>
+ *     <listitem>Maximum ordinate (@y) value.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xmean</term>
+ *     <listitem>Average ordinate (@y) value.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xymin</term>
+ *     <listitem>Position of the minimum, i.e. the abscissa (@x) value at which
+ *               @ymin occurs.  If it occurs at multiple data points, an
+ *               arbitrary one is substituted, usually the first.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xymax</term>
+ *     <listitem>Position of the maximum, i.e. the abscissa (@x) value at which
+ *               @ymax occurs.  If it occurs at multiple data points, an
+ *               arbitrary one is substituted, usually the first.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@yxmin</term>
+ *     <listitem>First value, i.e. the ordinate (@y) value at @xmin.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@yxmid</term>
+ *     <listitem>Central value, i.e. the ordinate (@y) value at
+ *               @xmid.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@yxmax</term>
+ *     <listitem>Last value, i.e. the ordinate (@y) value at @xmax.</listitem>
+ *   </varlistentry>
+ * </variablelist>
+ *
+ * Since the data fitted in different situations can differ by many orders of
+ * mangnitude, a rough estimate based on the data ranges is often much better
+ * than constant-value estimates.  For instance setting the centre of a
+ * Gaussian to @xmid and its half-width to (@xmax-@xmin)/10 with no regard to
+ * the @y values will provide the user at least something to tune, and possibly
+ * even an estimate from which the fit can converge.
  **/
 
 /**
@@ -885,7 +1103,7 @@ gwy_user_fit_func_error_quark(void)
  * @name: Name, it must be a valid identifier (UTF-8 letters such as α are
  *        permitted).
  * @estimate: Initial parameter estimate (a formula that can contain the
- *            estimator variables FIXME).
+ *            estimator variables).
  * @power_x: Power of the abscissa contained in the parameter.
  * @power_y: Power of the ordinate contained in the parameter.
  *
@@ -893,6 +1111,12 @@ gwy_user_fit_func_error_quark(void)
  *
  * See gwy_fit_func_get_param_units() for a discussion of @power_x, @power_y
  * and choosing good parametrisation with respect to units.
+ **/
+
+/**
+ * GWY_TYPE_FIT_PARAM:
+ *
+ * The #GType for a boxed type holding a #GwyFitParam.
  **/
 
 /**
@@ -944,8 +1168,10 @@ gwy_user_fit_func_error_quark(void)
 
 /**
  * GwyUserFitFuncError:
- * GWY_USER_FIT_FUNC_ERROR_NO_PARAM: Function formula does not contain any
- *                                   parameters.
+ * @GWY_USER_FIT_FUNC_ERROR_NO_PARAM: Function formula does not contain any
+ *                                    parameters.
+ * @GWY_USER_FIT_FUNC_ERROR_ESTIMATE: Estimate formula contains unknown
+ *                                    quantities.
  *
  * Error codes returned by user-defined fitting function manipulation.
  **/
