@@ -25,12 +25,18 @@
 
 G_BEGIN_DECLS
 
+#define GWY_TYPE_FIT_PARAM (gwy_fit_param_get_type())
+
 typedef struct {
     gchar *name;
     gchar *estimate;
     gint power_x;
     gint power_y;
-} GwyUserFitFuncParam;
+} GwyFitParam;
+
+GType        gwy_fit_param_get_type(void)                        G_GNUC_CONST;
+GwyFitParam* gwy_fit_param_copy    (const GwyFitParam *fitparam) G_GNUC_MALLOC;
+void         gwy_fit_param_free    (GwyFitParam *fitparam);
 
 #define GWY_TYPE_USER_FIT_FUNC \
     (gwy_user_fit_func_get_type())
@@ -63,15 +69,15 @@ struct _GwyUserFitFuncClass {
 #define gwy_user_fit_func_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType                      gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
-GwyUserFitFunc*            gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
-const gchar*               gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-const GwyUserFitFuncParam* gwy_user_fit_func_get_params    (GwyUserFitFunc *userfitfunc,
-                                                            guint *nparams);
-guint                      gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
-                                                            GwyExpr *expr,
-                                                            const gchar *independent_name,
-                                                            guint *indices);
+GType              gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
+GwyUserFitFunc*    gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
+const gchar*       gwy_user_fit_func_get_expression(GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+const GwyFitParam* gwy_user_fit_func_get_params    (GwyUserFitFunc *userfitfunc,
+                                                    guint *nparams);
+guint              gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
+                                                    GwyExpr *expr,
+                                                    const gchar *independent_name,
+                                                    guint *indices);
 
 #define gwy_user_fit_funcs() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_FIT_FUNC))
