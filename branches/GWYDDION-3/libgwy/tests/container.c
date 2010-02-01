@@ -329,4 +329,20 @@ test_container_boxed(void)
     g_object_unref(container);
 }
 
+gpointer
+serialize_boxed_and_back(gpointer boxed, GType type)
+{
+    GwyContainer *container = gwy_container_new();
+    gwy_container_set_boxed_n(container, "boxed", type, boxed);
+    GwyContainer *copy = (GwyContainer*)serialize_and_back(G_OBJECT(container));
+    g_assert(GWY_IS_CONTAINER(copy));
+    g_object_unref(container);
+    g_assert_cmpuint(gwy_container_item_type_n(copy, "boxed"), ==, type);
+    gconstpointer cboxed = gwy_container_get_boxed_n(copy, "boxed", type);
+    g_assert(cboxed);
+    boxed = g_boxed_copy(type, cboxed);
+    g_object_unref(copy);
+    return boxed;
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
