@@ -53,7 +53,6 @@ struct _GwyFitFuncPrivate {
     gchar *name;
     const GwyXY *points;
     guint npoints;
-    gboolean has_data : 1;
 
     // Exactly one of builtin/user is set
     const BuiltinFitFunc *builtin;
@@ -405,7 +404,8 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
     g_return_val_if_fail(params, FALSE);
     FitFunc *priv = fitfunc->priv;
-    g_return_val_if_fail(priv->has_data, FALSE);
+    gwy_memclear(params, priv->nparams);
+    g_return_val_if_fail(priv->npoints, FALSE);
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(builtin->estimate, FALSE);
@@ -423,7 +423,6 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     }
     for (guint i = 0; i < priv->nparams; i++) {
         const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
-        params[i] = 1.0;
         if (!gwy_expr_evaluate(priv->estimate, p->estimate, params + i, NULL))
             g_critical("Parameter %u estimator does not compile.", i);
     }
@@ -556,7 +555,7 @@ static void
 update_fit_task(GwyFitFunc *fitfunc)
 {
     FitFunc *priv = fitfunc->priv;
-    if (!priv->has_data) {
+    if (!priv->npoints) {
         if (priv->fittask)
             gwy_fit_task_set_vector_data(priv->fittask, fitfunc, 0);
         return;
@@ -590,7 +589,7 @@ gwy_fit_func_get_fit_task(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
-    if (priv->has_data)
+    if (priv->npoints)
         update_fit_task(fitfunc);
     return priv->fittask;
 }
@@ -615,7 +614,6 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     priv->points = points;
     priv->npoints = npoints;
-    priv->has_data = npoints > 0;
     if (priv->fittask)
         update_fit_task(fitfunc);
 }
