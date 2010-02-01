@@ -52,14 +52,14 @@ struct _GwyFitFuncPrivate {
     gchar *name;
     const GwyXY *points;
     guint npoints;
-    gboolean is_builtin : 1;
     gboolean has_data : 1;
 
     // Exactly one of builtin/user is set
     const BuiltinFitFunc *builtin;
-
     GwyUserFitFunc *user;
     guint nparams;  // Cached namely for user-defined funcs, but set for both.
+
+    // User functions only
     guint *indices;
     GwyExpr *expr;
     gulong changed_id;
@@ -141,7 +141,6 @@ gwy_fit_func_constructed(GObject *object)
     const BuiltinFitFunc *builtin;
     builtin = g_hash_table_lookup(builtin_functions, priv->name);
     if (builtin) {
-        priv->is_builtin = TRUE;
         priv->builtin = builtin;
         priv->nparams = builtin->nparams;
     }
@@ -272,7 +271,7 @@ gwy_fit_func_get_formula(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
-    if (priv->is_builtin)
+    if (priv->builtin)
         return priv->builtin->formula;
     else
         return gwy_user_fit_func_get_formula(priv->user);
@@ -316,7 +315,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(i < priv->nparams, NULL);
 
-    if (priv->is_builtin) {
+    if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->param[i].name;
     }
@@ -359,7 +358,7 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
     g_return_val_if_fail(i < priv->nparams, NULL);
 
     gint power_x, power_y;
-    if (priv->is_builtin) {
+    if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         if (builtin->derive_units)
             return builtin->derive_units(i, unit_x, unit_y);
@@ -403,7 +402,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(params, FALSE);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->has_data, FALSE);
-    if (priv->is_builtin) {
+    if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(builtin->estimate, FALSE);
         return builtin->estimate(priv->points, priv->npoints, params);
@@ -450,7 +449,7 @@ evaluate(FitFunc *priv,
          const gdouble *params,
          gdouble *retval)
 {
-    if (priv->is_builtin) {
+    if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->function(x, params, retval);
     }
@@ -565,7 +564,7 @@ gwy_fit_func_get_user(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
-    return priv->is_builtin ? NULL : priv->user;
+    return priv->builtin ? NULL : priv->user;
 }
 
 /**
