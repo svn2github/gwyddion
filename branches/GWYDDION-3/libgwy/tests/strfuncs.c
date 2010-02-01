@@ -110,4 +110,62 @@ test_next_line(void)
     test_next_line_check("X\nY\rZ", "X", "Y", "Z", NULL);
 }
 
+void
+test_strisdent_ascii(void)
+{
+    g_assert(gwy_ascii_strisident("a", NULL, NULL));
+    g_assert(gwy_ascii_strisident("a0", NULL, NULL));
+    g_assert(gwy_ascii_strisident("A", NULL, NULL));
+    g_assert(gwy_ascii_strisident("A123", NULL, NULL));
+    g_assert(gwy_ascii_strisident("a", "a", "a"));
+    g_assert(gwy_ascii_strisident("A_", "_", NULL));
+    g_assert(gwy_ascii_strisident("_A", NULL, "_"));
+    g_assert(gwy_ascii_strisident("__", "_", "_"));
+    g_assert(gwy_ascii_strisident("_12345_", "_", "_"));
+    g_assert(gwy_ascii_strisident("+-", "-", "+"));
+    g_assert(gwy_ascii_strisident("+a-b", "-", "+"));
+
+    g_assert(!gwy_ascii_strisident("", NULL, NULL));
+    g_assert(!gwy_ascii_strisident("123a", NULL, NULL));
+    g_assert(!gwy_ascii_strisident("_", NULL, NULL));
+    g_assert(!gwy_ascii_strisident("_", "_", NULL));
+    g_assert(!gwy_ascii_strisident("_A", "_", NULL));
+    g_assert(!gwy_ascii_strisident("A_", NULL, "_"));
+    g_assert(!gwy_ascii_strisident("z+a-b", "-", "+"));
+}
+
+void
+test_strisdent_utf8(void)
+{
+    // ASCII
+    g_assert(gwy_utf8_strisident("a", NULL, NULL));
+    g_assert(gwy_utf8_strisident("a0", NULL, NULL));
+    g_assert(gwy_utf8_strisident("A", NULL, NULL));
+    g_assert(gwy_utf8_strisident("A123", NULL, NULL));
+
+    g_assert(!gwy_utf8_strisident("", NULL, NULL));
+    g_assert(!gwy_utf8_strisident("123a", NULL, NULL));
+    g_assert(!gwy_utf8_strisident("_", NULL, NULL));
+    g_assert(!gwy_utf8_strisident("×", NULL, NULL));
+    g_assert(!gwy_utf8_strisident("a×b", NULL, NULL));
+
+    // Non-ASCII
+    g_assert(gwy_utf8_strisident("π", NULL, NULL));
+    g_assert(gwy_utf8_strisident("Γ2", NULL, NULL));
+    gunichar underscore[] = { '_', '\0' };
+    g_assert(gwy_utf8_strisident("Γ_α", underscore, NULL));
+    g_assert(gwy_utf8_strisident("_Γα", NULL, underscore));
+    g_assert(!gwy_utf8_strisident("_Γα", underscore, NULL));
+    g_assert(!gwy_utf8_strisident("Γ_α", NULL, underscore));
+    g_assert(gwy_utf8_strisident("_Γα_", underscore, underscore));
+    gunichar times[] = { g_utf8_get_char("×"), '\0' };
+    g_assert(gwy_utf8_strisident("Γ×α", times, NULL));
+    g_assert(gwy_utf8_strisident("×Γα", NULL, times));
+    g_assert(!gwy_utf8_strisident("×Γα", times, NULL));
+    g_assert(!gwy_utf8_strisident("Γ×α", NULL, times));
+    g_assert(gwy_utf8_strisident("×Γα×", times, times));
+    g_assert(gwy_utf8_strisident("×Γ_α_", underscore, times));
+    g_assert(!gwy_utf8_strisident("×Γ_α_", times, underscore));
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
