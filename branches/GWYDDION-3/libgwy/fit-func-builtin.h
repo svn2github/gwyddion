@@ -52,10 +52,13 @@ typedef struct {
 } BuiltinFitFunc;
 
 G_GNUC_INTERNAL
-GHashTable* _gwy_fit_func_setup_builtins(void);
+GHashTable* _gwy_fit_func_setup_builtins(void) G_GNUC_MALLOC;
 
 G_GNUC_INTERNAL
 const gchar* _gwy_fit_func_check_estimators(GwyExpr *expr);
+
+G_GNUC_INTERNAL
+GwyExpr* _gwy_fit_func_new_expr_with_constants(void) G_GNUC_MALLOC;
 
 G_END_DECLS
 

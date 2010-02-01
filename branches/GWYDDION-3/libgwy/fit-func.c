@@ -32,7 +32,7 @@ enum {
     N_PROPS
 };
 
-// NB: The order must match estimators[]
+// The order must match estimators[]
 enum {
     ESTIMATOR_XMIN,
     ESTIMATOR_XMID,
@@ -45,6 +45,7 @@ enum {
     ESTIMATOR_YXMAX,
     ESTIMATOR_XYMAX,
     ESTIMATOR_XYMIN,
+    N_ESTIMATORS
 };
 
 struct _GwyFitFuncPrivate {
@@ -62,6 +63,7 @@ struct _GwyFitFuncPrivate {
     // User functions only
     guint *indices;
     GwyExpr *expr;
+    GwyExpr *estimate;
     gulong changed_id;
 };
 
@@ -78,6 +80,8 @@ static void     gwy_fit_func_get_property(GObject *object,
                                           guint prop_id,
                                           GValue *value,
                                           GParamSpec *pspec);
+static void     evaluate_estimators      (FitFunc *priv,
+                                          gdouble *estim);
 static void     user_func_changed        (GwyFitFunc *fitfunc,
                                           GwyUserFitFunc *userfitfunc);
 static gboolean evaluate                 (FitFunc *priv,
@@ -87,8 +91,8 @@ static gboolean evaluate                 (FitFunc *priv,
 
 G_DEFINE_TYPE(GwyFitFunc, gwy_fit_func, G_TYPE_OBJECT)
 
-// NB: The order is given by ESTIMATOR_FOO enum values
-static const gchar* const estimators[] = {
+// The order is given by ESTIMATOR_FOO enum values
+static const gchar* const estimators[N_ESTIMATORS] = {
     "xmin", "xmid", "xmax",
     "ymin", "ymax", "ymean",
     "yxmin", "yxmid", "yxmax",
@@ -167,6 +171,7 @@ gwy_fit_func_dispose(GObject *object)
     GWY_OBJECT_UNREF(priv->fittask);
     GWY_OBJECT_UNREF(priv->user);
     GWY_OBJECT_UNREF(priv->expr);
+    GWY_OBJECT_UNREF(priv->estimate);
     G_OBJECT_CLASS(gwy_fit_func_parent_class)->dispose(object);
 }
 
@@ -319,8 +324,8 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->param[i].name;
     }
-    const GwyFitParam *param = gwy_user_fit_func_get_nth_param(priv->user, i);
-    return param->name;
+    const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+    return p->name;
 }
 
 /**
@@ -366,11 +371,10 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
         power_y = builtin->param[i].power_y;
     }
     else {
-        const GwyFitParam *param = gwy_user_fit_func_get_nth_param(priv->user,
-                                                                   i);
-        g_assert(param);
-        power_x = param->power_x;
-        power_y = param->power_y;
+        const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+        g_assert(p);
+        power_x = p->power_x;
+        power_y = p->power_y;
     }
     return gwy_unit_power_multiply(NULL, unit_x, power_x, unit_y, power_y);
 }
@@ -407,8 +411,77 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
         g_return_val_if_fail(builtin->estimate, FALSE);
         return builtin->estimate(priv->points, priv->npoints, params);
     }
-    // TODO
-    return FALSE;
+
+    gdouble estim[N_ESTIMATORS];
+    if (!priv->estimate)
+        priv->estimate = _gwy_fit_func_new_expr_with_constants();
+    evaluate_estimators(priv, estim);
+    for (guint i = 0; i < N_ESTIMATORS; i++) {
+        if (!gwy_expr_define_constant(priv->estimate, estimators[i], estim[i],
+                                      NULL))
+            g_critical("Cannot define %s as a GwyExpr constant.", estimators[i]);
+    }
+    for (guint i = 0; i < priv->nparams; i++) {
+        const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+        params[i] = 1.0;
+        if (!gwy_expr_evaluate(priv->estimate, p->estimate, params + i, NULL))
+            g_critical("Parameter %u estimator does not compile.", i);
+    }
+    return TRUE;
+}
+
+static void
+evaluate_estimators(FitFunc *priv, gdouble *estim)
+{
+    g_return_if_fail(priv->npoints && priv->points);
+
+    estim[ESTIMATOR_XMIN]
+        = estim[ESTIMATOR_XMAX]
+        = estim[ESTIMATOR_XMID]
+        = estim[ESTIMATOR_XYMIN]
+        = estim[ESTIMATOR_XYMAX]
+        = priv->points[0].x;
+
+    estim[ESTIMATOR_YMIN]
+        = estim[ESTIMATOR_YMAX]
+        = estim[ESTIMATOR_YMEAN]
+        = estim[ESTIMATOR_YXMIN]
+        = estim[ESTIMATOR_YXMID]
+        = estim[ESTIMATOR_YXMAX]
+        = priv->points[0].y;
+
+    for (guint i = 1; i < priv->npoints; i++) {
+        gdouble x = priv->points[i].x, y = priv->points[i].y;
+        if (x < estim[ESTIMATOR_XMIN]) {
+            estim[ESTIMATOR_XMIN] = x;
+            estim[ESTIMATOR_YXMIN] = y;
+        }
+        if (x > estim[ESTIMATOR_XMAX]) {
+            estim[ESTIMATOR_XMAX] = x;
+            estim[ESTIMATOR_YXMAX] = y;
+        }
+        if (y < estim[ESTIMATOR_YMIN]) {
+            estim[ESTIMATOR_YMIN] = y;
+            estim[ESTIMATOR_XYMIN] = x;
+        }
+        if (y > estim[ESTIMATOR_YMAX]) {
+            estim[ESTIMATOR_YMAX] = y;
+            estim[ESTIMATOR_XYMAX] = x;
+        }
+        estim[ESTIMATOR_YMEAN] += y;
+    }
+    estim[ESTIMATOR_YMEAN] /= priv->npoints;
+
+    gdouble xmid = (estim[ESTIMATOR_XMIN] + estim[ESTIMATOR_XMAX])/2;
+    gdouble mindist = fabs(estim[ESTIMATOR_XMID] - xmid);
+    for (guint i = 1; i < priv->npoints; i++) {
+        gdouble x = priv->points[i].x, y = priv->points[i].y;
+        if (fabs(x - xmid) < mindist) {
+            estim[ESTIMATOR_XMID] = x;
+            estim[ESTIMATOR_YXMID] = y;
+            mindist = fabs(x - xmid);
+        }
+    }
 }
 
 static void
@@ -426,7 +499,7 @@ user_func_changed(GwyFitFunc *fitfunc,
 static void
 construct_expr(FitFunc *priv)
 {
-    priv->expr = gwy_expr_new();
+    priv->expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(priv->expr,
                           gwy_user_fit_func_get_formula(priv->user),
                           NULL)) {
@@ -596,6 +669,15 @@ _gwy_fit_func_check_estimators(GwyExpr *expr)
             return names[i];
     }
     return NULL;
+}
+
+GwyExpr*
+_gwy_fit_func_new_expr_with_constants(void)
+{
+    GwyExpr *expr = gwy_expr_new();
+    gwy_expr_define_constant(expr, "pi", G_PI, NULL);
+    gwy_expr_define_constant(expr, "π", G_PI, NULL);
+    return expr;
 }
 
 #define __LIBGWY_FIT_FUNC_C__

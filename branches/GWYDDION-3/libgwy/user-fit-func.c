@@ -535,11 +535,8 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     gboolean ok = FALSE;
 
     // Fomula
-    if (!test_expr) {
-        test_expr = gwy_expr_new();
-        gwy_expr_define_constant(test_expr, "pi", G_PI, NULL);
-        gwy_expr_define_constant(test_expr, "π", G_PI, NULL);
-    }
+    if (!test_expr)
+        test_expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(test_expr, priv->formula, NULL))
         goto fail;
     if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL))
