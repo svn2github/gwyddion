@@ -69,8 +69,8 @@ static gboolean     gwy_user_fit_func_parse            (GwyResource *resource,
                                                         gchar *text,
                                                         GError **error);
 
-static const GwyFitParam default_param[1] = {
-    { .name = "a", .power_x = 0, .power_y = 1, .estimate = "1", },
+static const GwyFitParam default_param = {
+    .name = "a", .power_x = 0, .power_y = 1, .estimate = "0",
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
@@ -222,9 +222,9 @@ gwy_user_fit_func_init(GwyUserFitFunc *userfitfunc)
     UserFitFunc *priv = userfitfunc->priv;
 
     // Constant value, by default.
-    priv->formula = g_strdup("a");
+    priv->formula = g_strdup(default_param.name);
     priv->filter = g_strdup("");
-    assign_params(priv, G_N_ELEMENTS(default_param), default_param);
+    assign_params(priv, 1, &default_param);
 }
 
 static void
@@ -477,12 +477,12 @@ sanitize_param(GwyFitParam *param)
     gchar *end;
 
     if (!param->name)
-        param->name = g_strdup("a");
+        param->name = g_strdup(default_param.name);
     else if (!g_utf8_validate(param->name, -1, (const gchar**)&end))
         *end = '\0';
 
     if (!param->estimate)
-        param->estimate = g_strdup("1");
+        param->estimate = g_strdup(default_param.estimate);
     else if (!g_utf8_validate(param->estimate, -1, (const gchar**)&end))
         *end = '\0';
 
@@ -497,7 +497,7 @@ sanitize(GwyUserFitFunc *userfitfunc)
     gchar *end;
 
     if (!priv->formula)
-        priv->formula = g_strdup("1");
+        priv->formula = g_strdup("0");
     else if (!g_utf8_validate(priv->formula, -1, (const gchar**)&end))
         *end = '\0';
 
@@ -506,7 +506,7 @@ sanitize(GwyUserFitFunc *userfitfunc)
 
     if (!priv->nparams) {
         free_params(priv);
-        assign_params(priv, G_N_ELEMENTS(default_param), default_param);
+        assign_params(priv, 1, &default_param);
     }
     for (guint i = 0; i < priv->nparams; i++)
         sanitize_param(priv->param + i);
@@ -643,7 +643,7 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
         }
         if (j == priv->nparams) {
             newparam[np].name = g_strdup(names[i]);
-            newparam[np].estimate = g_strdup("1");
+            newparam[np].estimate = g_strdup(default_param.estimate);
         }
         else {
             newparam[np] = priv->param[j];
