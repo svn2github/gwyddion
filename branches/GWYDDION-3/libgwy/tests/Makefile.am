@@ -28,6 +28,7 @@ testlibgwy_SOURCES = \
 	unit.c \
 	value-format.c \
 	version.c \
+	xy.c \
 	testlibgwy.c
 
 AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ @VALGRIND_CFLAGS@ $(WARNINGS)
