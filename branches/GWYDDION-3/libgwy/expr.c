@@ -1768,7 +1768,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  *     /&ast; Handle compilation error &ast;/
  * }
  * g_print("The result: %g\n", result);
- * gwy_expr_free(expr);
+ * g_object_unref(expr);
  * </programlisting></informalexample>
  *
  * One-shot evaluation of expressions with known variables can be performed by
@@ -1789,7 +1789,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  * }
  * g_print("The result: %g\n", result);
  *
- * gwy_expr_free(expr);
+ * g_object_unref(expr);
  * </programlisting></informalexample>
  *
  * When the same expression is evaluated multiple times with different
@@ -1833,7 +1833,7 @@ gwy_expr_undefine_constant(GwyExpr *expr,
  *     vars[var_positions[i]] = var_values2[i];
  * g_print("Second result: %g\n", gwy_expr_execute(expr, vars));
  *
- * gwy_expr_free(expr);
+ * g_object_unref(expr);
  * </programlisting></informalexample>
  *
  * The most general case is when the variables are from a large set (or
