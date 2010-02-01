@@ -432,8 +432,6 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
 static void
 evaluate_estimators(FitFunc *priv, gdouble *estim)
 {
-    g_return_if_fail(priv->npoints && priv->points);
-
     estim[ESTIMATOR_XMIN]
         = estim[ESTIMATOR_XMAX]
         = estim[ESTIMATOR_XMID]
