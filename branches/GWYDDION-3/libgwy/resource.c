@@ -200,7 +200,9 @@ G_LOCK_DEFINE_STATIC(resource_classes);
 
 static GwyResourceManagementType management_type = GWY_RESOURCE_MANAGEMENT_NONE;
 static GList *update_queue = NULL;
+G_LOCK_DEFINE_STATIC(update_queue);
 static guint flush_source_id = 0;
+G_LOCK_DEFINE_STATIC(flush);
 
 static const GwyInventoryItemType resource_item_type = {
     0,
@@ -1513,8 +1515,11 @@ manage_update(GwyResource *resource)
         return;
 
     Resource *priv = resource->priv;
-    if (priv->mtime)
+    if (priv->mtime) {
+        G_LOCK(update_queue);
         update_queue = g_list_prepend(update_queue, resource);
+        G_UNLOCK(update_queue);
+    }
     priv->mtime = get_timestamp();
     if (management_type == GWY_RESOURCE_MANAGEMENT_MANUAL)
         return;
@@ -1528,7 +1533,9 @@ manage_update(GwyResource *resource)
 static void
 manage_unqueue(GwyResource *resource)
 {
+    G_LOCK(update_queue);
     update_queue = g_list_remove(update_queue, resource);
+    G_UNLOCK(update_queue);
     resource->priv->mtime = 0;
 }
 
@@ -1536,7 +1543,12 @@ static gboolean
 manage_flush_timeout(G_GNUC_UNUSED gpointer user_data)
 {
     // Destroy the timeout source if the queue becomes empty.
-    return manage_flush_check_queue(0, get_timestamp() - 2.0);
+    G_LOCK(flush);
+    gboolean retval = manage_flush_check_queue(0, get_timestamp() - 2.0);
+    if (!retval)
+        flush_source_id = 0;
+    G_UNLOCK(flush);
+    return retval;
 }
 
 static void
@@ -1553,23 +1565,33 @@ static gboolean
 manage_flush_check_queue(GType type,
                          gdouble older_than)
 {
-    GList *l = update_queue;
+    GList *to_save = NULL;
 
-    while (l) {
+    // Gather the resources to save and remove them from the queue.
+    // Obviously we must hold the queue lock but also the manage lock because
+    // someone could e.g. remove the resource meanwhile.
+    G_LOCK(update_queue);
+    for (GList *l = update_queue; l; ) {
         GwyResource *resource = (GwyResource*)l->data;
         if (resource->priv->mtime > older_than
             || (type && G_OBJECT_TYPE(resource) != type)) {
             l = g_list_next(l);
         }
         else {
-            gwy_resource_save(resource, NULL);
             GList *next = g_list_next(l);
-            update_queue = g_list_delete_link(update_queue, l);
+            update_queue = g_list_remove_link(update_queue, l);
+            to_save = g_list_concat(l, to_save);
             l = next;
         }
     }
+    gboolean retval = (update_queue != NULL);
+    G_UNLOCK(update_queue);
 
-    return update_queue != NULL;
+    for (GList *l = to_save; l; l = g_list_next(l))
+        gwy_resource_save((GwyResource*)l->data, NULL);
+    g_list_free(to_save);
+
+    return retval;
 }
 
 /**
@@ -1872,6 +1894,40 @@ void
 gwy_resources_flush(void)
 {
     manage_flush(0, 0.0);
+}
+
+/**
+ * gwy_resources_lock:
+ *
+ * Enters a critical section in which managed resources can be modified.
+ *
+ * This avoids collisions with the automated asynchronous saving of modified
+ * resources.
+ *
+ * Locking resources is necessary only in threaded applications that modify
+ * or explicitly flush resources in other threads than main (i.e. the thread
+ * running the Gtk+ main loop) and use the automated resource management.
+ *
+ * Usually you modify resources only in the GUI thread and then no locking
+ * is necessary.
+ **/
+void
+gwy_resources_lock(void)
+{
+    G_LOCK(flush);
+}
+
+/**
+ * gwy_resources_unlock:
+ *
+ * Leaves a critical section in which managed resources can be modified.
+ *
+ * See gwy_resources_lock() for details.
+ **/
+void
+gwy_resources_unlock(void)
+{
+    G_UNLOCK(flush);
 }
 
 /**

@@ -134,6 +134,8 @@ GwyResourceManagementType   gwy_resources_get_management_type      (void)       
 void                        gwy_resources_set_management_type      (GwyResourceManagementType type);
 void                        gwy_resource_type_flush                (GType type);
 void                        gwy_resources_flush                    (void);
+void                        gwy_resources_lock                     (void);
+void                        gwy_resources_unlock                   (void);
 void                        gwy_resources_finalize                 (void);
 GwyResourceLineType         gwy_resource_parse_param_line          (gchar *line,
                                                                     gchar **key,
