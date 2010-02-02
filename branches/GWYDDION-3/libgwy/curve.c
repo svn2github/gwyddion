@@ -246,7 +246,7 @@ gwy_curve_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n, 0);
     it = serialize_items[2];
     it.value.v_double_array = (gdouble*)curve->data;
-    it.array_size = curve->n;
+    it.array_size = 2*curve->n;
     items->items[items->n++] = it;
     n++;
 
