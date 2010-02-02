@@ -7,7 +7,11 @@ Inventory: Make possible to change sort function, make possible to simply state
            that items are sorted by name (which requires GDataCompareFunc, not
            just GCompareFunc).
 
-Math: Review and add other functions.
+Math: Review the mechanism the functions they are brought in as something must
+      request the system extensions but we must not do that automatically as
+      the user may not want it.  Also, the only useful non-C99 function is
+      exp10() which, while frequently used in Gwyddion code, may not worth all
+      the complications to provide it in sane form for out-of-tree users.
 
 Resources: Convenience method for resource parsing (possibly dumping too).
            Make them really convenient, otherwise it does not make sense.
@@ -24,6 +28,9 @@ Classes: Review class definitions that have class data (resources, selection,
 
 Serializable boxed: Review type lookup locking once GAtomicArray is available,
                     it might help.
+
+Fit Function: Handle different sources of fitting functions (even different
+              sources of built-ins).
 
 User fit function: No interface to manipulate the filter, parameters may need
                    markup or constraints.
