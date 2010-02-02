@@ -22,6 +22,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serializable-boxed.h"
@@ -594,7 +595,7 @@ gwy_linear_fit(GwyLinearFitFunc function,
     g_return_val_if_fail(nparams > 0, FALSE);
     g_return_val_if_fail(function && params, FALSE);
 
-    guint matrix_len = MATRIX_LEN(npoints);
+    guint matrix_len = MATRIX_LEN(nparams);
     gdouble hessian[matrix_len];
     gdouble fval[nparams];
     gwy_memclear(hessian, matrix_len);
@@ -607,8 +608,9 @@ gwy_linear_fit(GwyLinearFitFunc function,
             sumy2 += y*y;
             for (guint j = 0; j < nparams; j++) {
                 params[j] += y*fval[j];
-                for (guint k = 0; k <= j; j++)
+                for (guint k = 0; k <= j; k++) {
                     SLi(hessian, j, k) += fval[j]*fval[k];
+                }
             }
         }
     }
