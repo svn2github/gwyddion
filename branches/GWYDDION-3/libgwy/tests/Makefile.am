@@ -11,6 +11,7 @@ testlibgwy_SOURCES = \
 	boxed-serialization.c \
 	cholesky.c \
 	container.c \
+	curve.c \
 	error-list.c \
 	expr.c \
 	field.c \

@@ -40,8 +40,8 @@ test_field_assert_equal(const GwyField *result,
 {
     g_assert(GWY_IS_FIELD(result));
     g_assert(GWY_IS_FIELD(reference));
-    g_assert(result->xres == reference->xres);
-    g_assert(result->yres == reference->yres);
+    g_assert_cmpuint(result->xres, ==, reference->xres);
+    g_assert_cmpuint(result->yres, ==, reference->yres);
 
     for (guint i = 0; i < result->yres; i++) {
         gdouble *result_row = result->data + i*result->xres;

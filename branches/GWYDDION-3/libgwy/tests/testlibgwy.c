@@ -66,6 +66,8 @@ void test_unit_arithmetic      (void);
 void test_unit_serialize       (void);
 void test_unit_garbage         (void);
 void test_value_format_simple  (void);
+void test_curve_props          (void);
+void test_curve_serialize      (void);
 void test_mask_field_props     (void);
 void test_mask_field_copy      (void);
 void test_mask_field_logical   (void);
@@ -180,6 +182,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/unit/serialize", test_unit_serialize);
     g_test_add_func("/testlibgwy/unit/garbage", test_unit_garbage);
     g_test_add_func("/testlibgwy/value-format/simple", test_value_format_simple);
+    g_test_add_func("/testlibgwy/curve/props", test_curve_props);
+    g_test_add_func("/testlibgwy/curve/serialize", test_curve_serialize);
     g_test_add_func("/testlibgwy/mask-field/props", test_mask_field_props);
     g_test_add_func("/testlibgwy/mask-field/copy", test_mask_field_copy);
     g_test_add_func("/testlibgwy/mask-field/logical", test_mask_field_logical);
