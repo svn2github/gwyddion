@@ -129,4 +129,57 @@ test_math_linalg(void)
     g_rand_free(rng);
 }
 
+typedef struct {
+    gdouble K;
+    guint n;
+    guint degree;
+} PolyData1;
+
+// Fits (virtual) symmetric Kx³ data
+static gboolean
+poly1(guint i,
+      gdouble *fvalues,
+      gdouble *value,
+      gpointer user_data)
+{
+    const PolyData1 *polydata = (const PolyData1*)user_data;
+    gdouble x = (i/(gdouble)polydata->n - 1.0)*polydata->K;
+    gdouble p = 1.0;
+    for (guint j = 0; j <= polydata->degree; j++) {
+        fvalues[j] = p;
+        p *= x;
+    }
+    *value = powi(x, 3);
+
+    return TRUE;
+}
+
+void
+test_math_fit_poly(void)
+{
+    for (guint degree = 0; degree <= 4; degree++) {
+        for (guint ndata = (degree + 2) | 1; ndata < 30; ndata += 2) {
+            PolyData1 polydata = { 1.0, ndata/2, degree };
+            gdouble coeffs[degree+1], residuum;
+            gboolean ok = gwy_linear_fit(poly1, ndata, coeffs, degree+1,
+                                         &residuum, &polydata);
+            g_assert(ok);
+
+            gdouble eps = 1e-15;
+            for (guint i = 0; i <= degree; i += 2)
+                g_assert_cmpfloat(fabs(coeffs[i]), <, eps);
+
+            if (degree >= 3) {
+                g_assert_cmpfloat(fabs(coeffs[1]), <, eps);
+                g_assert_cmpfloat(fabs(coeffs[3] - polydata.K), <, eps);
+            }
+            else if (degree == 1 || degree == 2) {
+                gdouble t = 1.0/(ndata/2);
+                t = 3.0/5.0*(1.0 + t*(1.0 - t/3.0));
+                g_assert_cmpfloat(fabs(coeffs[1] - t*polydata.K), <, eps);
+            }
+        }
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
