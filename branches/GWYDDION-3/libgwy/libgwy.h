@@ -24,6 +24,7 @@
 
 #include <libgwy/array.h>
 #include <libgwy/container.h>
+#include <libgwy/curve.h>
 #include <libgwy/error-list.h>
 #include <libgwy/expr.h>
 #include <libgwy/fft.h>
