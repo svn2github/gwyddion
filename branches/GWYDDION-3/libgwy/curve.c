@@ -406,7 +406,8 @@ gwy_curve_new(void)
  * Creates a new curve with preallocated size.
  *
  * The curve will contain the speficied number of points with uninitialized
- * values.
+ * values.  Remember to run gwy_curve_sort() to sort the points if you fill
+ * the data with unsorted points.
  *
  * Returns: A new curve.
  **/
@@ -608,6 +609,23 @@ gwy_curve_set_from_line(GwyCurve *curve,
     copy_line_to_curve(line, curve);
     if (notify)
         g_object_notify(G_OBJECT(curve), "n-points");
+}
+
+/**
+ * gwy_curve_sort:
+ * @curve: A curve.
+ *
+ * Ensures that points in a curve are sorted by abscissa values.
+ *
+ * All #GwyCurve's operations preserve the sorting.  So this method is useful
+ * mainly if you modify the points manually and cannot ensure the ordering
+ * by abscissa values.
+ **/
+void
+gwy_curve_sort(GwyCurve *curve)
+{
+    g_return_if_fail(GWY_IS_CURVE(curve));
+    sort_data(curve);
 }
 
 /**

@@ -73,6 +73,7 @@ GwyCurve*       gwy_curve_new_from_line(const GwyLine *line)       G_GNUC_MALLOC
 void            gwy_curve_data_changed (GwyCurve *curve);
 void            gwy_curve_copy         (const GwyCurve *src,
                                         GwyCurve *dest);
+void            gwy_curve_sort         (GwyCurve *curve);
 void            gwy_curve_set_from_line(GwyCurve *curve,
                                         const GwyLine *line);
 GwyUnit*        gwy_curve_get_unit_x   (GwyCurve *curve)           G_GNUC_PURE;
