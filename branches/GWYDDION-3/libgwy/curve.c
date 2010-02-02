@@ -400,9 +400,29 @@ gwy_curve_new(void)
 }
 
 /**
+ * gwy_curve_new_sized:
+ * @n: Number of points.
+ *
+ * Creates a new curve with preallocated size.
+ *
+ * The curve will contain the speficied number of points with uninitialized
+ * values.
+ *
+ * Returns: A new curve.
+ **/
+GwyCurve*
+gwy_curve_new_sized(guint n)
+{
+    GwyCurve *curve = g_object_newv(GWY_TYPE_CURVE, 0, NULL);
+    curve->n = n;
+    alloc_data(curve);
+    return curve;
+}
+
+/**
  * gwy_curve_new_from_data:
  * @points: Array of @n points with the curve data.
- * @n: Number of data points.
+ * @n: Number of points.
  *
  * Creates a new curve, filling it with provided points.
  *

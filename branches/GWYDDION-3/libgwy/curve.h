@@ -22,6 +22,7 @@
 
 #include <libgwy/serializable.h>
 #include <libgwy/unit.h>
+#include <libgwy/math.h>
 #include <libgwy/line.h>
 
 G_BEGIN_DECLS
@@ -61,6 +62,7 @@ struct _GwyCurveClass {
 
 GType           gwy_curve_get_type     (void)                      G_GNUC_CONST;
 GwyCurve*       gwy_curve_new          (void)                      G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_sized    (guint n)                   G_GNUC_MALLOC;
 GwyCurve*       gwy_curve_new_from_data(const GwyXY *points,
                                         guint n)                   G_GNUC_MALLOC;
 GwyCurve*       gwy_curve_new_alike    (const GwyCurve *model)     G_GNUC_MALLOC;
