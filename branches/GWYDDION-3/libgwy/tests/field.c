@@ -164,6 +164,50 @@ test_field_serialize(void)
 }
 
 void
+record_signal(guint *counter)
+{
+    (*counter)++;
+}
+
+void
+test_field_set_size(void)
+{
+    GwyField *field = gwy_field_new_sized(13, 11, TRUE);
+    guint xres_changed = 0, yres_changed = 0;
+
+    g_signal_connect_swapped(field, "notify::x-res",
+                             G_CALLBACK(record_signal), &xres_changed);
+    g_signal_connect_swapped(field, "notify::y-res",
+                             G_CALLBACK(record_signal), &yres_changed);
+
+    gwy_field_set_size(field, 13, 11, TRUE);
+    g_assert_cmpuint(field->xres, ==, 13);
+    g_assert_cmpuint(field->yres, ==, 11);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+
+    gwy_field_set_size(field, 13, 10, TRUE);
+    g_assert_cmpuint(field->xres, ==, 13);
+    g_assert_cmpuint(field->yres, ==, 10);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 1);
+
+    gwy_field_set_size(field, 11, 10, TRUE);
+    g_assert_cmpuint(field->xres, ==, 11);
+    g_assert_cmpuint(field->yres, ==, 10);
+    g_assert_cmpuint(xres_changed, ==, 1);
+    g_assert_cmpuint(yres_changed, ==, 1);
+
+    gwy_field_set_size(field, 15, 14, TRUE);
+    g_assert_cmpuint(field->xres, ==, 15);
+    g_assert_cmpuint(field->yres, ==, 14);
+    g_assert_cmpuint(xres_changed, ==, 2);
+    g_assert_cmpuint(yres_changed, ==, 2);
+
+    g_object_unref(field);
+}
+
+void
 test_field_range(void)
 {
     enum { max_size = 76 };

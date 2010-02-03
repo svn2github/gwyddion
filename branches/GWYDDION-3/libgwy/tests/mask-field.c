@@ -342,6 +342,44 @@ test_mask_field_serialize(void)
 }
 
 void
+test_mask_field_set_size(void)
+{
+    GwyMaskField *maskfield = gwy_mask_field_new_sized(13, 11, TRUE);
+    guint xres_changed = 0, yres_changed = 0;
+
+    g_signal_connect_swapped(maskfield, "notify::x-res",
+                             G_CALLBACK(record_signal), &xres_changed);
+    g_signal_connect_swapped(maskfield, "notify::y-res",
+                             G_CALLBACK(record_signal), &yres_changed);
+
+    gwy_mask_field_set_size(maskfield, 13, 11, TRUE);
+    g_assert_cmpuint(maskfield->xres, ==, 13);
+    g_assert_cmpuint(maskfield->yres, ==, 11);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 0);
+
+    gwy_mask_field_set_size(maskfield, 13, 10, TRUE);
+    g_assert_cmpuint(maskfield->xres, ==, 13);
+    g_assert_cmpuint(maskfield->yres, ==, 10);
+    g_assert_cmpuint(xres_changed, ==, 0);
+    g_assert_cmpuint(yres_changed, ==, 1);
+
+    gwy_mask_field_set_size(maskfield, 11, 10, TRUE);
+    g_assert_cmpuint(maskfield->xres, ==, 11);
+    g_assert_cmpuint(maskfield->yres, ==, 10);
+    g_assert_cmpuint(xres_changed, ==, 1);
+    g_assert_cmpuint(yres_changed, ==, 1);
+
+    gwy_mask_field_set_size(maskfield, 15, 14, TRUE);
+    g_assert_cmpuint(maskfield->xres, ==, 15);
+    g_assert_cmpuint(maskfield->yres, ==, 14);
+    g_assert_cmpuint(xres_changed, ==, 2);
+    g_assert_cmpuint(yres_changed, ==, 2);
+
+    g_object_unref(maskfield);
+}
+
+void
 test_mask_field_grain_no(void)
 {
     enum { max_size = 83 };

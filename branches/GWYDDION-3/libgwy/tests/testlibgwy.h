@@ -36,6 +36,7 @@ gpointer      serialize_boxed_and_back(gpointer boxed,
 void          record_item_change      (GObject *object,
                                        guint pos,
                                        guint64 *counter);
+void          record_signal           (guint *counter);
 GwyMaskField* random_mask_field       (guint xres,
                                        guint yres,
                                        GRand *rng);
