@@ -67,6 +67,7 @@ function update_translations() {
 
 function build_documentation() {
   make -C docs -k docs && touch .ok-documentation
+  rm -f data/gwyddion.vim
   make -C data gwyddion.vim
 }
 
