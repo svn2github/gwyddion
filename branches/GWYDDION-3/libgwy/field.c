@@ -861,8 +861,8 @@ gwy_field_part_copy(const GwyField *src,
         ASSIGN(dest->data + width*destrow, src->data + width*row, width*height);
     }
     else {
-        const gdouble *src0 = dest->data + dest->xres*destrow + destcol;
-        gdouble *dest0 = src->data + src->xres*row + col;
+        const gdouble *src0 = src->data + src->xres*row + col;
+        gdouble *dest0 = dest->data + dest->xres*destrow + destcol;
         for (guint i = 0; i < height; i++)
             ASSIGN(dest0 + dest->xres*i, src0 + src->xres*i, width);
     }
