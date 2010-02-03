@@ -207,6 +207,71 @@ test_field_set_size(void)
     g_object_unref(field);
 }
 
+static void
+field_part_copy_dumb(const GwyField *src,
+                     guint col,
+                     guint row,
+                     guint width,
+                     guint height,
+                     GwyField *dest,
+                     guint destcol,
+                     guint destrow)
+{
+    for (guint i = 0; i < height; i++) {
+        if (row + i >= src->yres || destrow + i >= dest->yres)
+            continue;
+        for (guint j = 0; j < width; j++) {
+            if (col + j >= src->xres || destcol + j >= dest->xres)
+                continue;
+
+            gdouble val = gwy_field_index(src, col + j, row + i);
+            gwy_field_index(dest, destcol + j, destrow + i) = val;
+        }
+    }
+}
+
+void
+test_field_copy(void)
+{
+    enum { max_size = 19 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 1000 : 200;
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint sxres = g_rand_int_range(rng, 1, max_size);
+        guint syres = g_rand_int_range(rng, 1, max_size/2);
+        guint dxres = g_rand_int_range(rng, 1, max_size);
+        guint dyres = g_rand_int_range(rng, 1, max_size/2);
+        GwyField *source = gwy_field_new_sized(sxres, syres, FALSE);
+        GwyField *dest = gwy_field_new_sized(dxres, dyres, FALSE);
+        GwyField *reference = gwy_field_new_sized(dxres, dyres, FALSE);
+        field_randomize(source, rng);
+        field_randomize(reference, rng);
+        gwy_field_copy(reference, dest);
+        guint width = g_rand_int_range(rng, 0, MAX(sxres, dxres));
+        guint height = g_rand_int_range(rng, 0, MAX(syres, dyres));
+        guint col = g_rand_int_range(rng, 0, sxres);
+        guint row = g_rand_int_range(rng, 0, syres);
+        guint destcol = g_rand_int_range(rng, 0, dxres);
+        guint destrow = g_rand_int_range(rng, 0, dyres);
+        if (sxres == dxres && g_rand_int_range(rng, 0, 2) == 0) {
+            // Check the fast path
+            col = destcol = 0;
+            width = sxres;
+        }
+        gwy_field_part_copy(source, col, row, width, height,
+                            dest, destcol, destrow);
+        field_part_copy_dumb(source, col, row, width, height,
+                             reference, destcol, destrow);
+        test_field_assert_equal(dest, reference);
+        g_object_unref(source);
+        g_object_unref(dest);
+        g_object_unref(reference);
+    }
+    g_rand_free(rng);
+}
+
 void
 test_field_range(void)
 {

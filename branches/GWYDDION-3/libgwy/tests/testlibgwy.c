@@ -81,6 +81,7 @@ void test_mask_field_shrink    (void);
 void test_mask_field_grow      (void);
 void test_field_props          (void);
 void test_field_units          (void);
+void test_field_copy           (void);
 void test_field_serialize      (void);
 void test_field_set_size       (void);
 void test_field_range          (void);
@@ -200,6 +201,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/mask-field/grow", test_mask_field_grow);
     g_test_add_func("/testlibgwy/field/props", test_field_props);
     g_test_add_func("/testlibgwy/field/units", test_field_units);
+    g_test_add_func("/testlibgwy/field/copy", test_field_copy);
     g_test_add_func("/testlibgwy/field/serialize", test_field_serialize);
     g_test_add_func("/testlibgwy/field/set-size", test_field_set_size);
     g_test_add_func("/testlibgwy/field/range", test_field_range);
