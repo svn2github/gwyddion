@@ -273,6 +273,36 @@ test_field_copy(void)
 }
 
 void
+test_field_new_part(void)
+{
+    enum { max_size = 23 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 1000 : 200;
+
+    for (gsize iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/2);
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyField *part = gwy_field_new_part(source, col, row, width, height,
+                                            TRUE);
+        GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        field_part_copy_dumb(source, col, row, width, height,
+                             reference, 0, 0);
+        test_field_assert_equal(part, reference);
+        g_object_unref(source);
+        g_object_unref(part);
+        g_object_unref(reference);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_field_range(void)
 {
     enum { max_size = 76 };
