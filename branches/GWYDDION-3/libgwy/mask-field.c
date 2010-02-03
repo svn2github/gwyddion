@@ -624,7 +624,7 @@ gwy_mask_field_set_size(GwyMaskField *field,
                         guint yres,
                         gboolean clear)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(xres && yres);
 
     const gchar *notify[2];
