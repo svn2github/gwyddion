@@ -871,8 +871,9 @@ gwy_mask_field_part_copy(const GwyMaskField *src,
         && dest->stride == src->stride) {
         /* make it as fast as gwy_data_mask_field_copy() if possible */
         g_assert(col == 0 && destcol == 0);
+        guint rowsize = src->stride * sizeof(guint32);
         memcpy(dest->data + dest->stride*destrow,
-               src->data + src->stride*row, src->stride*height);
+               src->data + src->stride*row, height*rowsize);
     }
     else
         copy_part(src, col, row, width, height, dest, destcol, destrow);
