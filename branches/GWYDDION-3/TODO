@@ -35,6 +35,10 @@ Fit Function: Handle different sources of fitting functions (even different
 User fit function: No interface to manipulate the filter, parameters may need
                    markup or constraints.
 
+                   The interface does not distinguish between code-friednly and
+                   presentational parameters and formula.  This needs some
+                   deliberation.
+
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
 
