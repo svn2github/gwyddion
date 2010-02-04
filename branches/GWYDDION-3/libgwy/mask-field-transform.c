@@ -149,11 +149,11 @@ swap_xy_32x32(const guint32 *src,
     }
 }
 
-// Block sizes are measured in destination, in source, the dims are swapped.
+// Block sizes are measured in destination; in source, the dims are swapped.
 static inline void
-swap_block(const guint32 *sb, guint32 *db,
-           guint xblocksize, guint yblocksize,
-           guint dstride, guint sstride)
+swap_block_both_aligned(const guint32 *sb, guint32 *db,
+                        guint xblocksize, guint yblocksize,
+                        guint dstride, guint sstride)
 {
     guint32 sbuff[0x20], dbuff[0x20];
     const guint32 *s = sb;
@@ -177,11 +177,11 @@ swap_block(const guint32 *sb, guint32 *db,
 // The source is assumed to be large enough to contain all the data we copy to
 // the destination.
 static void
-swap_xy_aligned(const GwyMaskField *source,
-                guint col, guint row,
-                guint width, guint height,
-                GwyMaskField *dest,
-                guint destcol, guint destrow)
+swap_xy_both_aligned(const GwyMaskField *source,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyMaskField *dest,
+                     guint destcol, guint destrow)
 {
     guint dxres = dest->xres, dyres = dest->yres;
     guint sstride = source->stride, dstride = dest->stride;
@@ -190,26 +190,173 @@ swap_xy_aligned(const GwyMaskField *source,
     const guint32 *sbase = source->data + sstride*row + (col >> 5);
     guint32 *dbase = dest->data + dstride*destrow + (destcol >> 5);
 
-    g_assert(((col | row) & 0x1f) == 0);
+    g_assert((col & 0x1f) == 0);
+    g_assert((destcol & 0x1f) == 0);
     for (guint ib = 0; ib < imax; ib++) {
         for (guint jb = 0; jb < jmax; jb++)
-            swap_block(sbase + ((jb << 5)*sstride + ib),
-                       dbase + ((ib << 5)*dstride + jb),
-                       0x20, 0x20, dstride, sstride);
+            swap_block_both_aligned(sbase + ((jb << 5)*sstride + ib),
+                                    dbase + ((ib << 5)*dstride + jb),
+                                    0x20, 0x20, dstride, sstride);
         if (jend)
-            swap_block(sbase + ((jmax << 5)*sstride + ib),
-                       dbase + ((ib << 5)*dstride + jmax),
-                       jend, 0x20, dstride, sstride);
+            swap_block_both_aligned(sbase + ((jmax << 5)*sstride + ib),
+                                    dbase + ((ib << 5)*dstride + jmax),
+                                    jend, 0x20, dstride, sstride);
     }
     if (iend) {
         for (guint jb = 0; jb < jmax; jb++)
-            swap_block(sbase + (jb*dyres + imax),
-                       dbase + (imax*dxres + jb),
-                       0x20, iend, dstride, sstride);
+            swap_block_both_aligned(sbase + (jb*dyres + imax),
+                                    dbase + (imax*dxres + jb),
+                                    0x20, iend, dstride, sstride);
         if (jend)
-            swap_block(sbase + (jmax*dyres + imax),
-                       dbase + (imax*dxres + jmax),
-                       jend, iend, dstride, sstride);
+            swap_block_both_aligned(sbase + (jmax*dyres + imax),
+                                    dbase + (imax*dxres + jmax),
+                                    jend, iend, dstride, sstride);
+    }
+}
+
+// Block sizes are measured in destination; in source, the dims are swapped.
+static inline void
+swap_block_dest_aligned(const guint32 *sb, guint soff, guint32 *db,
+                        guint xblocksize, guint yblocksize,
+                        guint dstride, guint sstride)
+{
+    guint32 sbuff[0x20], dbuff[0x20];
+    const guint32 *s = sb;
+    // Avoid touching s[1] if we do not actually need it, not to optimize but
+    // primarily to avoid buffer overruns.
+    if (yblocksize <= 0x20 - soff) {
+        for (guint i = 0; i < xblocksize; i++, s += sstride)
+            sbuff[i] = (s[0] SHL soff);
+    }
+    else {
+        for (guint i = 0; i < xblocksize; i++, s += sstride)
+            sbuff[i] = (s[0] SHL soff) | (s[1] SHR (0x20 - soff));
+    }
+    swap_xy_32x32(sbuff, dbuff);
+    guint32 *d = db;
+    // Must not overwrite destination data outside the target area.
+    if (xblocksize < 0x20) {
+        guint32 m = MAKE_MASK(0, xblocksize);
+        for (guint i = 0; i < yblocksize; i++, d += dstride)
+            *d = (*d & ~m) | (dbuff[i] & m);
+    }
+    else {
+        for (guint i = 0; i < yblocksize; i++, d += dstride)
+            *d = dbuff[i];
+    }
+}
+
+// No argument checking.  Destination column must be aligned, i.e. a multiple
+// of 0x20.  The source is assumed to be large enough to contain all the data
+// we copy to the destination.
+static void
+swap_xy_dest_aligned(const GwyMaskField *source,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyMaskField *dest,
+                     guint destcol, guint destrow)
+{
+    guint dxres = dest->xres, dyres = dest->yres;
+    guint sstride = source->stride, dstride = dest->stride;
+    // We loop over dst blocks so these are the same as in the aligned case.
+    guint jmax = width >> 5, jend = width & 0x1f;
+    guint imax = height >> 5, iend = height & 0x1f;
+    const guint32 *sbase = source->data + sstride*row + (col >> 5);
+    guint32 *dbase = dest->data + dstride*destrow + (destcol >> 5);
+    guint soff = col & 0x1f;
+
+    g_assert((destcol & 0x1f) == 0);
+    for (guint ib = 0; ib < imax; ib++) {
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block_dest_aligned(sbase + ((jb << 5)*sstride + ib), soff,
+                                    dbase + ((ib << 5)*dstride + jb),
+                                    0x20, 0x20, dstride, sstride);
+        if (jend)
+            swap_block_dest_aligned(sbase + ((jmax << 5)*sstride + ib), soff,
+                                    dbase + ((ib << 5)*dstride + jmax),
+                                    jend, 0x20, dstride, sstride);
+    }
+    if (iend) {
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block_dest_aligned(sbase + (jb*dyres + imax), soff,
+                                    dbase + (imax*dxres + jb),
+                                    0x20, iend, dstride, sstride);
+        if (jend)
+            swap_block_dest_aligned(sbase + (jmax*dyres + imax), soff,
+                                    dbase + (imax*dxres + jmax),
+                                    jend, iend, dstride, sstride);
+    }
+}
+
+// Block sizes are measured in destination; in source, the dims are swapped.
+static inline void
+swap_block_src_aligned(const guint32 *sb, guint32 *db, guint doff,
+                       guint xblocksize, guint yblocksize,
+                       guint dstride, guint sstride)
+{
+    guint32 sbuff[0x20], dbuff[0x20];
+    const guint32 *s = sb;
+    for (guint i = 0; i < xblocksize; i++, s += sstride)
+        sbuff[i] = *s;
+    swap_xy_32x32(sbuff, dbuff);
+    guint32 *d = db;
+    // Must not overwrite destination data outside the target area.
+    if (xblocksize <= 0x20 - doff) {
+        guint32 m = MAKE_MASK(doff, xblocksize);
+        for (guint i = 0; i < yblocksize; i++, d += dstride)
+            *d = (*d & ~m) | ((dbuff[i] SHR doff) & m);
+    }
+    else {
+        guint32 m0d = MAKE_MASK(doff, 0x20 - doff);
+        guint32 m1d = MAKE_MASK(0, xblocksize - doff);
+        for (guint i = 0; i < yblocksize; i++, d += dstride) {
+            // No need to mask in the first line, the unneeded bits are shifted
+            // away.
+            d[0] = (d[0] & ~m0d) | (dbuff[i] SHR doff);
+            d[1] = (d[0] & ~m1d) | ((dbuff[i] SHL (0x20 - doff)) & m1d);
+        }
+    }
+}
+
+// No argument checking.  Source column must be aligned, i.e. a multiple of
+// 0x20.  The source is assumed to be large enough to contain all the data we
+// copy to the destination.
+static void
+swap_xy_src_aligned(const GwyMaskField *source,
+                    guint col, guint row,
+                    guint width, guint height,
+                    GwyMaskField *dest,
+                    guint destcol, guint destrow)
+{
+    guint dxres = dest->xres, dyres = dest->yres;
+    guint sstride = source->stride, dstride = dest->stride;
+    // We loop over src blocks so these are the same as in the aligned case.
+    guint jmax = width >> 5, jend = width & 0x1f;
+    guint imax = height >> 5, iend = height & 0x1f;
+    const guint32 *sbase = source->data + sstride*row + (col >> 5);
+    guint32 *dbase = dest->data + dstride*destrow + (destcol >> 5);
+    guint doff = destcol & 0x1f;
+
+    g_assert((col & 0x1f) == 0);
+    for (guint ib = 0; ib < imax; ib++) {
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block_src_aligned(sbase + ((jb << 5)*sstride + ib),
+                                   dbase + ((ib << 5)*dstride + jb), doff,
+                                   0x20, 0x20, dstride, sstride);
+        if (jend)
+            swap_block_src_aligned(sbase + ((jmax << 5)*sstride + ib),
+                                   dbase + ((ib << 5)*dstride + jmax), doff,
+                                   jend, 0x20, dstride, sstride);
+    }
+    if (iend) {
+        for (guint jb = 0; jb < jmax; jb++)
+            swap_block_src_aligned(sbase + (jb*dyres + imax),
+                                   dbase + (imax*dxres + jb), doff,
+                                   0x20, iend, dstride, sstride);
+        if (jend)
+            swap_block_src_aligned(sbase + (jmax*dyres + imax),
+                                   dbase + (imax*dxres + jmax), doff,
+                                   jend, iend, dstride, sstride);
     }
 }
 
@@ -228,7 +375,7 @@ gwy_mask_field_new_transposed(const GwyMaskField *field)
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(field->yres, field->xres,
                                                       FALSE);
-    swap_xy_aligned(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
+    swap_xy_both_aligned(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
     return newfield;
 }
 
@@ -260,16 +407,10 @@ gwy_mask_field_new_part_transposed(const GwyMaskField *field,
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
 
-    // FIXME: Direct transposition of unaligned data would be nice.  Can it be
-    // written without going insane?
-    if (col & 0x1f) {
-        GwyMaskField *buffer = gwy_mask_field_new_part(field,
-                                                       col, row, width, height);
-        swap_xy_aligned(buffer, 0, 0, width, height, newfield, 0, 0);
-        g_object_unref(buffer);
-    }
+    if (col & 0x1f)
+        swap_xy_dest_aligned(field, col, row, width, height, newfield, 0, 0);
     else
-        swap_xy_aligned(field, col, row, width, height, newfield, 0, 0);
+        swap_xy_both_aligned(field, col, row, width, height, newfield, 0, 0);
 
     return newfield;
 }
@@ -330,29 +471,21 @@ gwy_mask_field_part_transpose(const GwyMaskField *src,
     // FIXME: Direct transposition of unaligned data would be nice.  Can it be
     // written without going insane?
     if ((col & 0x1f) && (destcol & 0x1f)) {
-        GwyMaskField *buffer = gwy_mask_field_new_part(src,
-                                                       col, row, width, height);
-        GwyMaskField *cuffer = gwy_mask_field_new_transposed(buffer);
-        g_object_unref(buffer);
-        gwy_mask_field_part_copy(cuffer, 0, 0, height, width,
-                                 dest, destcol, destrow);
-        g_object_unref(cuffer);
-    }
-    else if (col & 0x1f) {
-        GwyMaskField *buffer = gwy_mask_field_new_part(src,
-                                                       col, row, width, height);
-        swap_xy_aligned(buffer, 0, 0, width, height, dest, destcol, destrow);
-        g_object_unref(buffer);
-    }
-    else if (destcol & 0x1f) {
-        GwyMaskField *buffer = gwy_mask_field_new_part_transposed
-                                                 (src, col, row, width, height);
+        GwyMaskField *buffer
+            = gwy_mask_field_new_part_transposed(src, col, row, width, height);
         gwy_mask_field_part_copy(buffer, 0, 0, height, width,
                                  dest, destcol, destrow);
         g_object_unref(buffer);
     }
+    else if (col & 0x1f)
+        swap_xy_dest_aligned(src, col, row, width, height,
+                             dest, destcol, destrow);
+    else if (destcol & 0x1f)
+        swap_xy_src_aligned(src, col, row, width, height,
+                            dest, destcol, destrow);
     else
-        swap_xy_aligned(src, col, row, width, height, dest, destcol, destrow);
+        swap_xy_both_aligned(src, col, row, width, height,
+                             dest, destcol, destrow);
 
     gwy_mask_field_invalidate(dest);
 }
