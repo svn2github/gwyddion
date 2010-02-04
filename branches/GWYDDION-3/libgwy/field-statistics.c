@@ -124,29 +124,14 @@ gwy_field_part_min_max(GwyField *field,
             field->priv->cached |= CBIT(MIN) | CBIT(MAX);
         }
     }
-    else if (masking == GWY_MASK_INCLUDE) {
-        for (guint i = 0; i < height; i++) {
-            const gdouble *d = base + i*field->xres;
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-            for (guint j = width; j; j--, d++) {
-                if (gwy_mask_iter_get(iter)) {
-                    if (min1 > *d)
-                        min1 = *d;
-                    if (max1 < *d)
-                        max1 = *d;
-                }
-                gwy_mask_iter_next(iter);
-            }
-        }
-    }
     else {
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             GwyMaskIter iter;
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_iter_get(iter)) {
+                if (!gwy_mask_iter_get(iter) == invert) {
                     if (min1 > *d)
                         min1 = *d;
                     if (max1 < *d)
@@ -230,32 +215,17 @@ gwy_field_part_mean(GwyField *field,
     }
     else {
         // Masking is in use.
-        if (masking == GWY_MASK_INCLUDE) {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_iter_get(iter)) {
-                        mean += *d;
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    mean += *d;
+                    n++;
                 }
-            }
-        }
-        else {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_iter_get(iter)) {
-                        mean += *d;
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
-                }
+                gwy_mask_iter_next(iter);
             }
         }
     }
@@ -338,28 +308,15 @@ gwy_field_part_median(GwyField *field,
 
     // Masking is in use.
     gdouble *p = buffer;
-    if (masking == GWY_MASK_INCLUDE) {
-        for (guint i = 0; i < height; i++) {
-            const gdouble *d = base + i*field->xres;
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-            for (guint j = width; j; j--, d++) {
-                if (gwy_mask_iter_get(iter))
-                    *(p++) = *d;
-                gwy_mask_iter_next(iter);
-            }
-        }
-    }
-    else {
-        for (guint i = 0; i < height; i++) {
-            const gdouble *d = base + i*field->xres;
-            GwyMaskIter iter;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-            for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_iter_get(iter))
-                    *(p++) = *d;
-                gwy_mask_iter_next(iter);
-            }
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+        for (guint j = width; j; j--, d++) {
+            if (!gwy_mask_iter_get(iter) == invert)
+                *(p++) = *d;
+            gwy_mask_iter_next(iter);
         }
     }
 
@@ -437,34 +394,18 @@ gwy_field_part_rms(GwyField *field,
     }
     else {
         // Masking is in use.
-        if (masking == GWY_MASK_INCLUDE) {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_iter_get(iter)) {
-                        avg += *d;
-                        rms += (*d)*(*d);
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    avg += *d;
+                    rms += (*d)*(*d);
+                    n++;
                 }
-            }
-        }
-        else {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_iter_get(iter)) {
-                        avg += *d;
-                        rms += (*d)*(*d);
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
-                }
+                gwy_mask_iter_next(iter);
             }
         }
     }
@@ -575,46 +516,24 @@ gwy_field_part_statistics(GwyField *field,
         if (isnan(avg))
             goto fail;
 
-        if (masking == GWY_MASK_INCLUDE) {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (gwy_mask_iter_get(iter)) {
-                        gdouble v = *d - avg;
-                        sumabs += fabs(v);
-                        v *= v;
-                        sum2 += v;
-                        v *= v;
-                        sum3 += v;
-                        v *= v;
-                        sum4 += v;
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    gdouble v = *d - avg;
+                    sumabs += fabs(v);
+                    v *= v;
+                    sum2 += v;
+                    v *= v;
+                    sum3 += v;
+                    v *= v;
+                    sum4 += v;
+                    n++;
                 }
-            }
-        }
-        else {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                for (guint j = width; j; j--, d++) {
-                    if (!gwy_mask_iter_get(iter)) {
-                        gdouble v = *d - avg;
-                        sumabs += fabs(v);
-                        v *= v;
-                        sum2 += v;
-                        v *= v;
-                        sum3 += v;
-                        v *= v;
-                        sum4 += v;
-                        n++;
-                    }
-                    gwy_mask_iter_next(iter);
-                }
+                gwy_mask_iter_next(iter);
             }
         }
     }
