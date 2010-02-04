@@ -1048,6 +1048,50 @@ test_mask_field_shrink(void)
     test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
 }
 
+void
+test_mask_field_flip(void)
+{
+    enum { max_size = 161 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 500 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/4);
+        GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
+        mask_field_randomize(source, pool, max_size, rng);
+        GwyMaskField *dest = gwy_mask_field_duplicate(source);
+
+        gwy_mask_field_flip(dest, FALSE, FALSE);
+        test_mask_field_assert_equal(source, dest);
+
+        gwy_mask_field_flip(dest, TRUE, FALSE);
+        gwy_mask_field_flip(dest, TRUE, FALSE);
+        test_mask_field_assert_equal(source, dest);
+
+        gwy_mask_field_flip(dest, FALSE, TRUE);
+        gwy_mask_field_flip(dest, FALSE, TRUE);
+        test_mask_field_assert_equal(source, dest);
+
+        gwy_mask_field_flip(dest, TRUE, TRUE);
+        gwy_mask_field_flip(dest, TRUE, TRUE);
+        test_mask_field_assert_equal(source, dest);
+
+        gwy_mask_field_flip(dest, TRUE, FALSE);
+        gwy_mask_field_flip(dest, FALSE, TRUE);
+        gwy_mask_field_flip(dest, TRUE, FALSE);
+        gwy_mask_field_flip(dest, FALSE, TRUE);
+        test_mask_field_assert_equal(source, dest);
+
+        g_object_unref(dest);
+        g_object_unref(source);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
 GwyMaskField*
 random_mask_field(guint xres, guint yres, GRand *rng)
 {

@@ -84,6 +84,7 @@ void test_mask_field_set_size  (void);
 void test_mask_field_grain_no  (void);
 void test_mask_field_shrink    (void);
 void test_mask_field_grow      (void);
+void test_mask_field_flip      (void);
 void test_field_props          (void);
 void test_field_units          (void);
 void test_field_copy           (void);
@@ -213,6 +214,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/mask-field/grain-no", test_mask_field_grain_no);
     g_test_add_func("/testlibgwy/mask-field/shrink", test_mask_field_shrink);
     g_test_add_func("/testlibgwy/mask-field/grow", test_mask_field_grow);
+    g_test_add_func("/testlibgwy/mask-field/flip", test_mask_field_flip);
     g_test_add_func("/testlibgwy/field/props", test_field_props);
     g_test_add_func("/testlibgwy/field/units", test_field_units);
     g_test_add_func("/testlibgwy/field/copy", test_field_copy);
