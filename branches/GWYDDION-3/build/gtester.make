@@ -19,7 +19,7 @@ test-report.html: test-report.xml $(top_srcdir)/build/test-report.xsl
 	$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report.xsl test-report.xml >test-report.html
 
 test-report.xml: $(test_program)$(EXEEXT)
-	@$(GTESTER) $(test_program)$(EXEEXT) -k -o test-report.xml
+	@-$(GTESTER) $(test_program)$(EXEEXT) -k -o test-report.xml
 
 # Run the test program but do not execute any tests.  This produces a list of
 # ‘standard’ GLib errors we then filter out.
