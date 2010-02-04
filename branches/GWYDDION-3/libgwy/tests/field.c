@@ -114,7 +114,7 @@ test_field_units(void)
             if (i)
                 g_assert_cmpstr(prev->str, !=, next->str);
         }
-        gdouble dy = gwy_field_dx(field);
+        gdouble dy = gwy_field_dy(field);
         for (gint i = 0; i <= 10; i++) {
             GWY_SWAP(GString*, prev, next);
             g_string_assign(next,
