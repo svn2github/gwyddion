@@ -88,7 +88,7 @@ function extract_translation_stats() {
 
 function extract_coverage_stats() {
   for dir in $libdirs; do
-    cp -f $projectdir/$dir/test-report.xml .
+    cp -f $projectdir/$dir/test-report.xml test-report-$dir.xml
     sed -rn '/<table/,/<\/table>/p' $projectdir/$dir/coverage/coverage.html \
       >coverage-$dir.html
   done
