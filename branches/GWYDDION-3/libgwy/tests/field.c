@@ -465,9 +465,10 @@ test_field_mean(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint n = width*height;
         guint m = gwy_mask_field_part_count(mask, col, row, width, height,
                                             TRUE);
+        guint n = gwy_mask_field_part_count(mask, col, row, width, height,
+                                            FALSE);
         gdouble mean_include
             = gwy_field_part_mean(field, mask, GWY_MASK_INCLUDE,
                                   col, row, width, height);
@@ -478,19 +479,99 @@ test_field_mean(void)
             = gwy_field_part_mean(field, mask, GWY_MASK_IGNORE,
                                   col, row, width, height);
 
-        if (isnan(mean_include))
+        if (isnan(mean_include)) {
+            g_assert_cmpuint(m, ==, 0);
             g_assert_cmpfloat(fabs(mean_exclude
                                     - mean_ignore)/mean_ignore, <=, 1e-9);
-        else if (isnan(mean_exclude))
+        }
+        else if (isnan(mean_exclude)) {
+            g_assert_cmpuint(n, ==, 0);
             g_assert_cmpfloat(fabs(mean_include
                                     - mean_ignore)/mean_ignore, <=, 1e-9);
-        else
-            g_assert_cmpfloat(fabs((m*mean_include + (n-m)*mean_exclude)/n
+        }
+        else {
+            // μ = (Mμ₁ + Nμ₂)/(M+N)
+            g_assert_cmpfloat(fabs((m*mean_include + n*mean_exclude)/(m+n)
                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+        }
 
         g_object_unref(mask);
         g_object_unref(field);
     }
     g_rand_free(rng);
 }
+
+void
+test_field_rms(void)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble alpha = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble beta = g_rand_double_range(rng, -5.0, 5.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+
+        gdouble rms, rms_expected;
+        rms = gwy_field_rms(field);
+        rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
+                                 + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
+        g_assert_cmpfloat(fabs(rms - rms_expected)/rms_expected, <=, 1e-9);
+
+        field_randomize(field, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint m = gwy_mask_field_part_count(mask, col, row, width, height,
+                                            TRUE);
+        guint n = gwy_mask_field_part_count(mask, col, row, width, height,
+                                            FALSE);
+        gdouble mean_include
+            = gwy_field_part_mean(field, mask, GWY_MASK_INCLUDE,
+                                  col, row, width, height);
+        gdouble mean_exclude
+            = gwy_field_part_mean(field, mask, GWY_MASK_EXCLUDE,
+                                  col, row, width, height);
+        gdouble rms_include
+            = gwy_field_part_rms(field, mask, GWY_MASK_INCLUDE,
+                                 col, row, width, height);
+        gdouble rms_exclude
+            = gwy_field_part_rms(field, mask, GWY_MASK_EXCLUDE,
+                                 col, row, width, height);
+        gdouble rms_ignore
+            = gwy_field_part_rms(field, mask, GWY_MASK_IGNORE,
+                                 col, row, width, height);
+
+        if (isnan(mean_include)) {
+            g_assert_cmpuint(m, ==, 0);
+            g_assert_cmpfloat(fabs(rms_exclude
+                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+        }
+        else if (isnan(mean_exclude)) {
+            g_assert_cmpuint(n, ==, 0);
+            g_assert_cmpfloat(fabs(rms_include
+                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+        }
+        else {
+            // σ² = [Mσ₁² + Nσ₂² + MN/(M+N)*(μ₁-μ₂)²]/(M+N)
+            gdouble mean_diff = mean_include - mean_exclude;
+            g_assert_cmpfloat(fabs(sqrt((m*rms_include*rms_include
+                                         + n*rms_exclude*rms_exclude
+                                         + m*n*mean_diff*mean_diff/(m+n))/(m+n))
+                                   - rms_ignore)/rms_ignore, <=, 1e-9);
+        }
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

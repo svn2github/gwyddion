@@ -92,6 +92,7 @@ void test_field_serialize      (void);
 void test_field_set_size       (void);
 void test_field_range          (void);
 void test_field_mean           (void);
+void test_field_rms            (void);
 void test_field_surface_area   (void);
 void test_container_data       (void);
 void test_container_refcount   (void);
@@ -219,6 +220,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/field/set-size", test_field_set_size);
     g_test_add_func("/testlibgwy/field/range", test_field_range);
     g_test_add_func("/testlibgwy/field/mean", test_field_mean);
+    g_test_add_func("/testlibgwy/field/rms", test_field_rms);
     g_test_add_func("/testlibgwy/field/surface-area", test_field_surface_area);
     g_test_add_func("/testlibgwy/container/data", test_container_data);
     g_test_add_func("/testlibgwy/container/refcount", test_container_refcount);
