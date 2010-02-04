@@ -164,12 +164,6 @@ test_field_serialize(void)
 }
 
 void
-record_signal(guint *counter)
-{
-    (*counter)++;
-}
-
-void
 test_field_set_size(void)
 {
     GwyField *field = gwy_field_new_sized(13, 11, TRUE);
