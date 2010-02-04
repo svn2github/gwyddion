@@ -183,11 +183,11 @@ test_mask_field_copy(void)
 void
 test_mask_field_new_part(void)
 {
-    enum { max_size = 233 };
+    enum { max_size = 433 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 1000 : 200;
+    gsize niter = g_test_slow() ? 10000 : 1000;
 
     for (gsize iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
