@@ -32,6 +32,7 @@ field_randomize(GwyField *field,
     gdouble *d = gwy_field_get_data(field);
     for (guint n = field->xres*field->yres; n; n--, d++)
         *d = g_rand_double(rng);
+    gwy_field_invalidate(field);
 }
 
 static void
@@ -371,6 +372,19 @@ planar_field_surface_area(const GwyField *field)
     return area_inner + area_lr + area_td + area_corner;
 }
 
+static GwyField*
+make_planar_field(guint xres, guint yres,
+                  gdouble alpha, gdouble beta)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gdouble *data = gwy_field_get_data(field);
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++)
+            data[i*xres + j] = alpha*(i + 0.5)/yres + beta*(j + 0.5)/xres;
+    }
+    return field;
+}
+
 void
 test_field_surface_area(void)
 {
@@ -382,14 +396,9 @@ test_field_surface_area(void)
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
         guint yres = g_rand_int_range(rng, 1, max_size);
-        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         gdouble alpha = g_rand_double_range(rng, -5.0, 5.0);
         gdouble beta = g_rand_double_range(rng, -5.0, 5.0);
-        gdouble *data = gwy_field_get_data(field);
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++)
-                data[i*xres + j] = alpha*(i + 0.5)/yres + beta*(j + 0.5)/xres;
-        }
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
         gdouble area, area_expected;
         gwy_field_set_xreal(field, xres/sqrt(xres*yres));
         gwy_field_set_yreal(field, yres/sqrt(xres*yres));
@@ -404,11 +413,7 @@ test_field_surface_area(void)
         area_expected = planar_field_surface_area(field);
         g_assert_cmpfloat(fabs(area - area_expected)/area_expected, <=, 1e-9);
 
-        gwy_field_invalidate(field);
-        for (guint i = 0; i < yres; i++) {
-            for (guint j = 0; j < xres; j++)
-                data[i*xres + j] = g_rand_double_range(rng, -1.0, 1.0);
-        }
+        field_randomize(field, rng);
         guint width = g_rand_int_range(rng, 1, xres+1);
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
@@ -433,4 +438,59 @@ test_field_surface_area(void)
     g_rand_free(rng);
 }
 
+void
+test_field_mean(void)
+{
+    enum { max_size = 76 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble alpha = g_rand_double_range(rng, -5.0, 5.0);
+        gdouble beta = g_rand_double_range(rng, -5.0, 5.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+
+        gdouble mean, mean_expected;
+        mean = gwy_field_mean(field);
+        mean_expected = 0.5*(alpha + beta);
+        g_assert_cmpfloat(fabs(mean - mean_expected)/mean_expected, <=, 1e-9);
+
+        field_randomize(field, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        guint n = width*height;
+        guint m = gwy_mask_field_part_count(mask, col, row, width, height,
+                                            TRUE);
+        gdouble mean_include
+            = gwy_field_part_mean(field, mask, GWY_MASK_INCLUDE,
+                                  col, row, width, height);
+        gdouble mean_exclude
+            = gwy_field_part_mean(field, mask, GWY_MASK_EXCLUDE,
+                                  col, row, width, height);
+        gdouble mean_ignore
+            = gwy_field_part_mean(field, mask, GWY_MASK_IGNORE,
+                                  col, row, width, height);
+
+        if (isnan(mean_include))
+            g_assert_cmpfloat(fabs(mean_exclude
+                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+        else if (isnan(mean_exclude))
+            g_assert_cmpfloat(fabs(mean_include
+                                    - mean_ignore)/mean_ignore, <=, 1e-9);
+        else
+            g_assert_cmpfloat(fabs((m*mean_include + (n-m)*mean_exclude)/n
+                                   - mean_ignore)/mean_ignore, <=, 1e-9);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
