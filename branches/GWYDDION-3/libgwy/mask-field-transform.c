@@ -55,21 +55,21 @@ static void
 flip_both(GwyMaskField *field,
           guint32 *buffer)
 {
-    guint xres = field->xres, yres = field->yres;
-    gsize rowsize = field->stride * sizeof(guint32);
+    guint xres = field->xres, yres = field->yres, stride = field->stride;
+    gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres/2; i++) {
         GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, yres-1 - i);
         flip_row(iter, buffer, xres);
         gwy_mask_field_iter_init(field, iter, xres-1, i);
-        flip_row(iter, field->data + (yres-1 - i)*xres, xres);
-        memcpy(field->data + i*xres, buffer, rowsize);
+        flip_row(iter, field->data + (yres-1 - i)*stride, xres);
+        memcpy(field->data + i*stride, buffer, rowsize);
     }
     if (yres % 2) {
         GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, yres/2);
         flip_row(iter, buffer, xres);
-        memcpy(field->data + yres/2*xres, buffer, rowsize);
+        memcpy(field->data + yres/2*stride, buffer, rowsize);
     }
 }
 
@@ -77,13 +77,13 @@ static void
 flip_horizontally(GwyMaskField *field,
                   guint32 *buffer)
 {
-    guint xres = field->xres, yres = field->yres;
-    gsize rowsize = field->stride * sizeof(guint32);
+    guint xres = field->xres, yres = field->yres, stride = field->stride;
+    gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres; i++) {
         GwyMaskIter iter;
         gwy_mask_field_iter_init(field, iter, xres-1, i);
         flip_row(iter, buffer, xres);
-        memcpy(field->data + i*xres, buffer, rowsize);
+        memcpy(field->data + i*stride, buffer, rowsize);
     }
 }
 
@@ -91,12 +91,14 @@ static void
 flip_vertically(GwyMaskField *field,
                 guint32 *buffer)
 {
-    guint xres = field->xres, yres = field->yres;
-    gsize rowsize = field->stride * sizeof(guint32);
+    guint xres = field->xres, yres = field->yres, stride = field->stride;
+    gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres/2; i++) {
-        memcpy(buffer, field->data + (yres-1 - i)*xres, rowsize);
-        memcpy(field->data + (yres-1 - i)*xres, field->data + i*xres, rowsize);
-        memcpy(field->data + i*xres, buffer, rowsize);
+        memcpy(buffer, field->data + (yres-1 - i)*stride, rowsize);
+        memcpy(field->data + (yres-1 - i)*stride,
+               field->data + i*stride,
+               rowsize);
+        memcpy(field->data + i*stride, buffer, rowsize);
     }
 }
 
