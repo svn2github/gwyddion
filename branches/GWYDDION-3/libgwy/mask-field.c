@@ -159,7 +159,8 @@ stride_for_width(guint width)
 {
     // The return value is measured in sizeof(guint32), i.e. doublewords.
     // The row alignment is to start each row on 8byte boudnary.
-    return (width + 0x3f) >> 5;
+    guint stride = (width + 0x1f) >> 5;
+    return stride + (stride & 1);
 }
 
 static void
