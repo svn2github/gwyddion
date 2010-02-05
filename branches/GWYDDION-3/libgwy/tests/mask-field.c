@@ -1048,9 +1048,72 @@ test_mask_field_shrink(void)
     test_mask_field_shrink_one(orig2_str, shrink2_str, bord2_str);
 }
 
+static void
+test_mask_field_flip_one(const gchar *orig_str,
+                         gboolean horizontally, gboolean vertically,
+                         const gchar *reference_str)
+{
+    GwyMaskField *field = mask_field_from_string(orig_str);
+    gwy_mask_field_flip(field, horizontally, vertically);
+    GwyMaskField *reference = mask_field_from_string(reference_str);
+    test_mask_field_assert_equal(field, reference);
+    g_object_unref(field);
+    g_object_unref(reference);
+}
+
 void
 test_mask_field_flip(void)
 {
+    // Even/odd
+    const gchar *orig1_str =
+        "####\n"
+        "#   \n"
+        "#   \n";
+    const gchar *hflip1_str =
+        "####\n"
+        "   #\n"
+        "   #\n";
+    const gchar *vflip1_str =
+        "#   \n"
+        "#   \n"
+        "####\n";
+    const gchar *bflip1_str =
+        "   #\n"
+        "   #\n"
+        "####\n";
+
+    test_mask_field_flip_one(orig1_str, FALSE, FALSE, orig1_str);
+    test_mask_field_flip_one(orig1_str, TRUE, FALSE, hflip1_str);
+    test_mask_field_flip_one(orig1_str, FALSE, TRUE, vflip1_str);
+    test_mask_field_flip_one(orig1_str, TRUE, TRUE, bflip1_str);
+
+    // Odd/even
+    const gchar *orig2_str =
+        "###\n"
+        "#  \n"
+        "#  \n"
+        "#  \n";
+    const gchar *hflip2_str =
+        "###\n"
+        "  #\n"
+        "  #\n"
+        "  #\n";
+    const gchar *vflip2_str =
+        "#  \n"
+        "#  \n"
+        "#  \n"
+        "###\n";
+    const gchar *bflip2_str =
+        "  #\n"
+        "  #\n"
+        "  #\n"
+        "###\n";
+
+    test_mask_field_flip_one(orig2_str, FALSE, FALSE, orig2_str);
+    test_mask_field_flip_one(orig2_str, TRUE, FALSE, hflip2_str);
+    test_mask_field_flip_one(orig2_str, FALSE, TRUE, vflip2_str);
+    test_mask_field_flip_one(orig2_str, TRUE, TRUE, bflip2_str);
+
     enum { max_size = 161 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
