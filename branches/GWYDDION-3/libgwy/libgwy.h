@@ -59,6 +59,7 @@
 #include <libgwy/types.h>
 #include <libgwy/unit.h>
 #include <libgwy/user-fit-func.h>
+#include <libgwy/value-format.h>
 #include <libgwy/version.h>
 
 #endif
