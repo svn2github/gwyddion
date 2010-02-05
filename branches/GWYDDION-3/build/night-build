@@ -85,6 +85,14 @@ function check_debug() {
     | sed -e 's/^/Debugging is on in: /' 1>&2
 }
 
+function check_headers() {
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    make check-headers
+    popd >/dev/null
+  done
+}
+
 function check_symbols() {
   for dir in $libdirs; do
     pushd $dir >/dev/null
@@ -147,6 +155,7 @@ else
   call update_translations
   call unit_test
   call check_debug
+  call check_headers
   call check_symbols
   call install
   call make_dists

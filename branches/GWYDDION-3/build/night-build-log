@@ -101,6 +101,7 @@ printerr build
 extract_build_documentation
 printerr update_translations
 printerr check_debug
+printerr check_headers
 printerr check_symbols
 printerr install build.err
 printerr make_dists build.err
