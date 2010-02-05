@@ -27,6 +27,17 @@ check-symbols: $(library_la) $(library_decl)
 	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
 	    $(library_la) $(library_decl) $(srcdir)
 
+check-headers: $(library_headers)
+	@result=true; \
+	for x in $(library_headers); do \
+	    x='#include <libgwy/'$$(basename $$x)'>'; \
+	    if ! grep -qF "$$x" $(library).h; then \
+	       echo "$(library).h lacks $$x" 1>&2; \
+	       result=false; \
+	    fi; \
+	done; \
+	$$result
+
 $(library_symbols): $(library_headers)
 	$(AM_V_GEN) $(PYTHON) $(abs_top_srcdir)/build/update-library-symbols.py \
 	        $(library_symbols) $(library_headers)
@@ -43,8 +54,8 @@ $(library_aliases).c: $(library_symbols) $(CONFIG_HEADER)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
 	    $(library_aliases).c $(library_symbols) $(CONFIG_HEADER)
 
-.PHONY: check-symbols
+.PHONY: check-symbols check-headers
 # run make check-symbols as part of make check
-check-local: check-symbols
+check-local: check-symbols check-headers
 
 # vim: set ft=make ts=4 sw=4 noet :
