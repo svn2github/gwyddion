@@ -787,11 +787,11 @@ gwy_mask_field_copy(const GwyMaskField *src,
 
 #define LOGICAL_OP_PART(simple, masked) \
     if (width <= 0x20 - doff) \
-        LOGICAL_OP_PART_SINGLE(*q = (*q & ~m) | (vp & m)); \
+        LOGICAL_OP_PART_SINGLE(masked); \
     else if (doff == soff) \
-        LOGICAL_OP_PART_ALIGNED(*q = vp, *q = (*q & ~m) | (vp & m)); \
+        LOGICAL_OP_PART_ALIGNED(simple, masked); \
     else \
-        LOGICAL_OP_PART_GENERAL(*q = vp, *q = (*q & ~m) | (vp & m)) \
+        LOGICAL_OP_PART_GENERAL(simple, masked) \
 
 static void
 copy_part(const GwyMaskField *src,
@@ -1063,15 +1063,15 @@ invert_part(GwyMaskField *field,
     const guint off = col & 0x1f;
     const guint end = (col + width) & 0x1f;
     if (width <= 0x20 - off) {
-        const guint32 m = ~MAKE_MASK(off, width);
+        const guint32 m = MAKE_MASK(off, width);
         for (guint i = 0; i < height; i++) {
             guint32 *p = base + i*field->stride;
             *p ^= m;
         }
     }
     else {
-        const guint32 m0 = ~MAKE_MASK(off, 0x20 - off);
-        const guint32 m1 = ~MAKE_MASK(0, end);
+        const guint32 m0 = MAKE_MASK(off, 0x20 - off);
+        const guint32 m1 = MAKE_MASK(0, end);
         for (guint i = 0; i < height; i++) {
             guint32 *p = base + i*field->stride;
             guint j = width;
@@ -1253,30 +1253,30 @@ logical_part(const GwyMaskField *src,
     const guint kk = 0x20 - k;
     // GWY_LOGICAL_ZERO cannot get here.
     if (op == GWY_LOGICAL_AND)
-        LOGICAL_OP_PART(*q &= vp, *q &= ~*m | (vp & *m));
+        LOGICAL_OP_PART(*q &= vp, *q &= ~m | (vp & m));
     else if (op == GWY_LOGICAL_NIMPL)
-        LOGICAL_OP_PART(*q &= ~vp, *q &= ~*m | (~vp & *m));
+        LOGICAL_OP_PART(*q &= ~vp, *q &= ~m | (~vp & m));
     // GWY_LOGICAL_A cannot get here.
     else if (op == GWY_LOGICAL_NCIMPL)
-        LOGICAL_OP_PART(*q = ~*q & vp, *q = (*q & ~*m) | (~*q & vp & *m));
+        LOGICAL_OP_PART(*q = ~*q & vp, *q = (*q & ~m) | (~*q & vp & m));
     // GWY_LOGICAL_B cannot get here.
     else if (op == GWY_LOGICAL_XOR)
-        LOGICAL_OP_PART(*q ^= vp, *q ^= *m & vp);
+        LOGICAL_OP_PART(*q ^= vp, *q ^= m & vp);
     else if (op == GWY_LOGICAL_OR)
-        LOGICAL_OP_PART(*q |= vp, *q |= *m & vp);
+        LOGICAL_OP_PART(*q |= vp, *q |= m & vp);
     else if (op == GWY_LOGICAL_NOR)
-        LOGICAL_OP_PART(*q = ~(*q | vp), *q = (*q & ~*m) | (~(*q | vp) & *m));
+        LOGICAL_OP_PART(*q = ~(*q | vp), *q = (*q & ~m) | (~(*q | vp) & m));
     else if (op == GWY_LOGICAL_NXOR)
-        LOGICAL_OP_PART(*q = ~(*q ^ vp), *q = (*q & ~*m) | (~(*q ^ vp) & *m));
+        LOGICAL_OP_PART(*q = ~(*q ^ vp), *q = (*q & ~m) | (~(*q ^ vp) & m));
     else if (op == GWY_LOGICAL_NB)
-        LOGICAL_OP_PART(*q = ~vp, *q = (*q & ~*m) | (~vp & *m));
+        LOGICAL_OP_PART(*q = ~vp, *q = (*q & ~m) | (~vp & m));
     else if (op == GWY_LOGICAL_CIMPL)
-        LOGICAL_OP_PART(*q |= ~vp, *q |= ~vp & *m);
+        LOGICAL_OP_PART(*q |= ~vp, *q |= ~vp & m);
     // GWY_LOGICAL_NA cannot get here.
     else if (op == GWY_LOGICAL_IMPL)
-        LOGICAL_OP_PART(*q = ~*q | vp, *q = (*q & ~*m) | ((~*q | vp) & *m));
+        LOGICAL_OP_PART(*q = ~*q | vp, *q = (*q & ~m) | ((~*q | vp) & m));
     else if (op == GWY_LOGICAL_NAND)
-        LOGICAL_OP_PART(*q = ~(*q & vp),  *q = (*q & ~*m) | (~(*q & vp) & *m));
+        LOGICAL_OP_PART(*q = ~(*q & vp),  *q = (*q & ~m) | (~(*q & vp) & m));
     // GWY_LOGICAL_ONE cannot get here.
     else {
         g_assert_not_reached();
@@ -1309,7 +1309,7 @@ logical_part(const GwyMaskField *src,
  *
  * There are no limitations on the row and column indices or dimensions.  Only
  * the part of the rectangle that is corresponds to data inside @field and
- * @operand is copied.  This can also mean nothing is copied at all.
+ * @operand is modified.  This can also mean nothing is modified at all.
  *
  * If @operand is equal to @field, the areas may not overlap.
  **/
@@ -1326,10 +1326,24 @@ gwy_mask_field_part_logical(GwyMaskField *field,
 {
     g_return_if_fail(GWY_IS_MASK_FIELD(field));
     g_return_if_fail(op <= GWY_LOGICAL_ONE);
+
+    // Do this first, some of the simpler operations we reduce to require the
+    // rectangle to be fully contained.
+    if (opcol >= operand->xres || col >= field->xres
+        || oprow >= operand->yres || row >= field->yres)
+        return;
+
+    width = MIN(width, operand->xres - opcol);
+    height = MIN(height, operand->yres - oprow);
+    width = MIN(width, field->xres - col);
+    height = MIN(height, field->yres - row);
+    if (!width || !height)
+        return;
+
     if (op == GWY_LOGICAL_A)
         return;
     if (op == GWY_LOGICAL_ZERO) {
-        gwy_mask_field_part_fill(field, col, row, height, width, FALSE);
+        gwy_mask_field_part_fill(field, col, row, width, height, FALSE);
         return;
     }
     if (op == GWY_LOGICAL_B) {
@@ -1342,20 +1356,11 @@ gwy_mask_field_part_logical(GwyMaskField *field,
         return;
     }
     if (op == GWY_LOGICAL_ONE) {
-        gwy_mask_field_part_fill(field, col, row, height, width, TRUE);
+        gwy_mask_field_part_fill(field, col, row, width, height, TRUE);
         return;
     }
 
-    if (opcol >= operand->xres || col >= field->xres
-        || oprow >= operand->yres || row >= field->yres)
-        return;
-
-    width = MIN(width, operand->xres - opcol);
-    height = MIN(height, operand->yres - oprow);
-    width = MIN(width, field->xres - col);
-    height = MIN(height, field->yres - row);
-    if (!width || !height)
-        return;
+    g_return_if_fail(GWY_IS_MASK_FIELD(operand));
 
     logical_part(operand, opcol, oprow, width, height, field, col, row, op);
     gwy_mask_field_invalidate(field);
