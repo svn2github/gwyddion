@@ -75,11 +75,19 @@ test_container_data(void)
     g_assert_cmpstr(item_key, ==, "/pfx/int");
     g_assert_cmpuint(int_changed, ==, 2);
 
+    gint32 i32;
+    g_assert(gwy_container_gis_int32_n(container, "/pfx/int", &i32));
+    g_assert_cmpint(i32, ==, -3);
+
     item_key = "";
     gwy_container_set_char_n(container, "/pfx/char", '@');
     g_assert(gwy_container_contains_n(container, "/pfx/char"));
     g_assert_cmpint(gwy_container_get_char_n(container, "/pfx/char"), ==, '@');
     g_assert_cmpstr(item_key, ==, "/pfx/char");
+
+    gchar c;
+    g_assert(gwy_container_gis_char_n(container, "/pfx/char", &c));
+    g_assert_cmpint(c, ==, '@');
 
     item_key = "";
     gwy_container_set_int64_n(container, "/pfx/int64",
@@ -89,12 +97,20 @@ test_container_data(void)
              == G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
     g_assert_cmpstr(item_key, ==, "/pfx/int64");
 
+    guint64 i64;
+    g_assert(gwy_container_gis_int64_n(container, "/pfx/int64", (gint64*)&i64));
+    g_assert_cmpuint(i64, ==, G_GUINT64_CONSTANT(0xdeadbeefdeadbeef));
+
     item_key = "";
     gwy_container_set_double_n(container, "/pfx/double", G_LN2);
     g_assert(gwy_container_contains_n(container, "/pfx/double"));
     g_assert_cmpfloat(gwy_container_get_double_n(container, "/pfx/double"),
                       ==, G_LN2);
     g_assert_cmpstr(item_key, ==, "/pfx/double");
+
+    gdouble flt;
+    g_assert(gwy_container_gis_double_n(container, "/pfx/double", &flt));
+    g_assert_cmpfloat(flt, ==, G_LN2);
 
     item_key = "";
     gwy_container_take_string_n(container, "/pfx/string",
@@ -103,6 +119,10 @@ test_container_data(void)
     g_assert_cmpstr(gwy_container_get_string_n(container, "/pfx/string"),
                     ==, "Test Test");
     g_assert_cmpstr(item_key, ==, "/pfx/string");
+
+    const gchar *s = "";
+    g_assert(gwy_container_gis_string_n(container, "/pfx/string", &s));
+    g_assert_cmpstr(s, ==, "Test Test");
 
     /* No value change */
     item_key = "";
