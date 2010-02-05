@@ -295,6 +295,77 @@ test_mask_field_logical(void)
 }
 
 static void
+mask_field_part_logical_dumb(GwyMaskField *maskfield,
+                             guint col, guint row, guint width, guint height,
+                             const GwyMaskField *operand,
+                             guint opcol, guint oprow,
+                             GwyLogicalOperator op)
+{
+    gboolean results[4] = { op & 8, op & 4, op & 2, op & 1 };
+
+    for (guint i = 0; i < height; i++) {
+        if (i + row >= maskfield->yres || i + oprow >= operand->yres)
+            continue;
+        for (guint j = 0; j < width; j++) {
+            if (j + col >= maskfield->xres || j + opcol >= operand->xres)
+                continue;
+            guint a = !!gwy_mask_field_get(maskfield, j + col, i + row);
+            guint b = !!gwy_mask_field_get(operand, j + opcol, i + oprow);
+            guint res = results[2*a + b];
+            gwy_mask_field_set(maskfield, col + j, row + i, res);
+        }
+    }
+}
+
+void
+test_mask_field_logical_part(void)
+{
+    enum { max_size = 333 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 500 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint sxres = g_rand_int_range(rng, 1, max_size);
+        guint syres = g_rand_int_range(rng, 1, max_size/4);
+        guint oxres = g_rand_int_range(rng, 1, max_size);
+        guint oyres = g_rand_int_range(rng, 1, max_size/4);
+        GwyMaskField *source = gwy_mask_field_new_sized(sxres, syres, FALSE);
+        GwyMaskField *operand = gwy_mask_field_new_sized(oxres, oyres, FALSE);
+        GwyMaskField *dest = gwy_mask_field_new_sized(sxres, syres, FALSE);
+        GwyMaskField *reference = gwy_mask_field_new_sized(sxres, syres, FALSE);
+        guint width = g_rand_int_range(rng, 0, MAX(sxres, oxres));
+        guint height = g_rand_int_range(rng, 0, MAX(syres, oyres));
+        guint col = g_rand_int_range(rng, 0, sxres);
+        guint row = g_rand_int_range(rng, 0, syres);
+        guint opcol = g_rand_int_range(rng, 0, oxres);
+        guint oprow = g_rand_int_range(rng, 0, oyres);
+
+        mask_field_randomize(source, pool, max_size, rng);
+        mask_field_randomize(operand, pool, max_size, rng);
+        for (GwyLogicalOperator op = GWY_LOGICAL_ZERO;
+             op <= GWY_LOGICAL_ONE;
+             op++) {
+            gwy_mask_field_copy(source, dest);
+            gwy_mask_field_copy(source, reference);
+            gwy_mask_field_part_logical(dest, col, row, width, height,
+                                        operand, opcol, oprow, op);
+            mask_field_part_logical_dumb(reference, col, row, width, height,
+                                         operand, opcol, oprow, op);
+            test_mask_field_assert_equal(dest, reference);
+        }
+
+        g_object_unref(source);
+        g_object_unref(dest);
+        g_object_unref(operand);
+        g_object_unref(reference);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+static void
 mask_field_part_fill_dumb(GwyMaskField *maskfield,
                           guint col,
                           guint row,
@@ -865,6 +936,52 @@ test_mask_field_count(void)
     g_rand_free(rng);
 }
 
+void
+test_mask_field_count_rows(void)
+{
+    enum { max_size = 333 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 500 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/4);
+        GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+        mask_field_randomize(field, pool, max_size, rng);
+
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+        guint *counts = g_new(guint, height);
+
+        gwy_mask_field_part_count_rows(field, col, row, width, height, TRUE,
+                                       counts);
+        for (guint i = 0; i < height; i++) {
+            g_assert_cmpuint(counts[i],
+                             ==, mask_field_count_dumb(field, NULL,
+                                                       col, row + i, width, 1,
+                                                       TRUE));
+        }
+
+        gwy_mask_field_part_count_rows(field, col, row, width, height, FALSE,
+                                       counts);
+        for (guint i = 0; i < height; i++) {
+            g_assert_cmpuint(counts[i],
+                             ==, mask_field_count_dumb(field, NULL,
+                                                       col, row + i, width, 1,
+                                                       FALSE));
+        }
+
+        g_free(counts);
+        g_object_unref(field);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
 static GwyMaskField*
 mask_field_from_string(const gchar *str)
 {
@@ -1280,8 +1397,6 @@ test_mask_field_rotate_one(const gchar *orig_str,
     GwyMaskField *rotated = gwy_mask_field_new_rotated_simple(field, rotation);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    //mask_field_dump(rotated, "rotated");
-    //mask_field_dump(reference, "reference");
     test_mask_field_assert_equal(rotated, reference);
     g_object_unref(rotated);
     g_object_unref(reference);
