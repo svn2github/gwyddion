@@ -137,11 +137,12 @@ gwy_mask_field_flip(GwyMaskField *field,
 
 static inline void
 swap_xy_32x32(const guint32 *src,
+              guint slen,
               guint32 *dest)
 {
     gwy_memclear(dest, 0x20);
     guint32 bit = FIRST_BIT;
-    for (guint i = 0; i < 0x20; i++) {
+    for (guint i = 0; i < slen; i++) {
         guint32 v = src[i];
         for (guint32 *d = dest; v; d++, v = v SHL 1) {
             if (v & FIRST_BIT)
@@ -161,7 +162,7 @@ swap_block_both_aligned(const guint32 *sb, guint32 *db,
     const guint32 *s = sb;
     for (guint i = 0; i < xblocksize; i++, s += sstride)
         sbuff[i] = *s;
-    swap_xy_32x32(sbuff, dbuff);
+    swap_xy_32x32(sbuff, xblocksize, dbuff);
     guint32 *d = db;
     // Must not overwrite destination data outside the target area.
     if (xblocksize < 0x20) {
@@ -185,10 +186,9 @@ swap_xy_both_aligned(const GwyMaskField *source,
                      GwyMaskField *dest,
                      guint destcol, guint destrow)
 {
-    guint dxres = dest->xres, dyres = dest->yres;
     guint sstride = source->stride, dstride = dest->stride;
-    guint jmax = width >> 5, jend = width & 0x1f;
-    guint imax = height >> 5, iend = height & 0x1f;
+    guint imax = width >> 5, iend = width & 0x1f;
+    guint jmax = height >> 5, jend = height & 0x1f;
     const guint32 *sbase = source->data + sstride*row + (col >> 5);
     guint32 *dbase = dest->data + dstride*destrow + (destcol >> 5);
 
@@ -206,12 +206,12 @@ swap_xy_both_aligned(const GwyMaskField *source,
     }
     if (iend) {
         for (guint jb = 0; jb < jmax; jb++)
-            swap_block_both_aligned(sbase + (jb*dyres + imax),
-                                    dbase + (imax*dxres + jb),
+            swap_block_both_aligned(sbase + ((jb << 5)*sstride + imax),
+                                    dbase + ((imax << 5)*dstride + jb),
                                     0x20, iend, dstride, sstride);
         if (jend)
-            swap_block_both_aligned(sbase + (jmax*dyres + imax),
-                                    dbase + (imax*dxres + jmax),
+            swap_block_both_aligned(sbase + ((jmax << 5)*sstride + imax),
+                                    dbase + ((imax << 5)*dstride + jmax),
                                     jend, iend, dstride, sstride);
     }
 }
@@ -234,7 +234,7 @@ swap_block_dest_aligned(const guint32 *sb, guint soff, guint32 *db,
         for (guint i = 0; i < xblocksize; i++, s += sstride)
             sbuff[i] = (s[0] SHL soff) | (s[1] SHR (0x20 - soff));
     }
-    swap_xy_32x32(sbuff, dbuff);
+    swap_xy_32x32(sbuff, xblocksize, dbuff);
     guint32 *d = db;
     // Must not overwrite destination data outside the target area.
     if (xblocksize < 0x20) {
@@ -300,7 +300,7 @@ swap_block_src_aligned(const guint32 *sb, guint32 *db, guint doff,
     const guint32 *s = sb;
     for (guint i = 0; i < xblocksize; i++, s += sstride)
         sbuff[i] = *s;
-    swap_xy_32x32(sbuff, dbuff);
+    swap_xy_32x32(sbuff, xblocksize, dbuff);
     guint32 *d = db;
     // Must not overwrite destination data outside the target area.
     if (xblocksize <= 0x20 - doff) {
