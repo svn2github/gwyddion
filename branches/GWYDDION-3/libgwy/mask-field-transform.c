@@ -91,7 +91,7 @@ static void
 flip_vertically(GwyMaskField *field,
                 guint32 *buffer)
 {
-    guint xres = field->xres, yres = field->yres, stride = field->stride;
+    guint yres = field->yres, stride = field->stride;
     gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres/2; i++) {
         memcpy(buffer, field->data + (yres-1 - i)*stride, rowsize);
