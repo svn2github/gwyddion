@@ -43,7 +43,7 @@ mask_field_dump(const GwyMaskField *maskfield, const gchar *name)
 void
 test_mask_field_stride(void)
 {
-    for (guint i = 0; i < 133; i++) {
+    for (guint i = 1; i <= 133; i++) {
         GwyMaskField *maskfield = gwy_mask_field_new_sized(i, 1, FALSE);
         g_assert_cmpuint(32*maskfield->stride, >=, i);
         g_assert_cmpuint(maskfield->stride % 2, ==, 0);
@@ -1173,12 +1173,9 @@ test_mask_field_transpose_one(const gchar *orig_str,
                               const gchar *reference_str)
 {
     GwyMaskField *field = mask_field_from_string(orig_str);
-    mask_field_dump(field, "original");
     GwyMaskField *transposed = gwy_mask_field_new_transposed(field);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    mask_field_dump(transposed, "transposed");
-    mask_field_dump(reference, "reference");
     test_mask_field_assert_equal(transposed, reference);
     g_object_unref(transposed);
     g_object_unref(reference);
@@ -1243,47 +1240,35 @@ test_mask_field_transpose(void)
     test_mask_field_transpose_one(orig2_str, trans2_str);
     test_mask_field_transpose_one(trans2_str, orig2_str);
 
-    /*
-    enum { max_size = 161 };
+    enum { max_size = 149 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 500 : 100;
+    gsize niter = g_test_slow() ? 5000 : 1000;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
         guint yres = g_rand_int_range(rng, 1, max_size/4);
         GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
         mask_field_randomize(source, pool, max_size, rng);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyMaskField *dest = gwy_mask_field_duplicate(source);
-
-        gwy_mask_field_flip(dest, FALSE, FALSE);
+        GwyMaskField *part = gwy_mask_field_new_part_transposed(source,
+                                                                col, row,
+                                                                width, height);
+        gwy_mask_field_part_transpose(part, 0, 0, height, width,
+                                      dest, col, row);
         test_mask_field_assert_equal(source, dest);
 
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
+        g_object_unref(part);
         g_object_unref(dest);
         g_object_unref(source);
     }
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
-    */
 }
 
 static void
@@ -1295,8 +1280,8 @@ test_mask_field_rotate_one(const gchar *orig_str,
     GwyMaskField *rotated = gwy_mask_field_new_rotated_simple(field, rotation);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    mask_field_dump(rotated, "rotated");
-    mask_field_dump(reference, "reference");
+    //mask_field_dump(rotated, "rotated");
+    //mask_field_dump(reference, "reference");
     test_mask_field_assert_equal(rotated, reference);
     g_object_unref(rotated);
     g_object_unref(reference);
@@ -1345,7 +1330,6 @@ test_mask_field_rotate(void)
     test_mask_field_rotate_one(r270d1_str, 180, r90d1_str);
     test_mask_field_rotate_one(r270d1_str, 270, r180d1_str);
 
-    /*
     enum { max_size = 161 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
@@ -1357,35 +1341,16 @@ test_mask_field_rotate(void)
         guint yres = g_rand_int_range(rng, 1, max_size/4);
         GwyMaskField *source = gwy_mask_field_new_sized(xres, yres, FALSE);
         mask_field_randomize(source, pool, max_size, rng);
-        GwyMaskField *dest = gwy_mask_field_duplicate(source);
-
-        gwy_mask_field_flip(dest, FALSE, FALSE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        gwy_mask_field_flip(dest, TRUE, FALSE);
-        gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
-
-        g_object_unref(dest);
+        GwyMaskField *rotccw = gwy_mask_field_new_rotated_simple(source, 90);
+        GwyMaskField *rotcw = gwy_mask_field_new_rotated_simple(source, 270);
+        gwy_mask_field_flip(rotcw, TRUE, TRUE);
+        test_mask_field_assert_equal(rotcw, rotccw);
+        g_object_unref(rotcw);
+        g_object_unref(rotccw);
         g_object_unref(source);
     }
     mask_field_random_pool_free(pool);
     g_rand_free(rng);
-    */
 }
 
 GwyMaskField*
