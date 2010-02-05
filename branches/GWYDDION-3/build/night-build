@@ -75,6 +75,7 @@ function unit_test() {
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make test-report
+    cp -f test-report.html $logdir/
     popd >/dev/null
   done
 }
