@@ -96,6 +96,7 @@ void test_field_copy             (void);
 void test_field_new_part         (void);
 void test_field_serialize        (void);
 void test_field_set_size         (void);
+void test_field_flip             (void);
 void test_field_range            (void);
 void test_field_mean             (void);
 void test_field_rms              (void);
@@ -117,6 +118,8 @@ void test_gl_material_save       (void);
 void test_gl_material_serialize  (void);
 void test_gl_material_inventory  (void);
 void test_user_fit_func_load     (void);
+void test_user_fit_func_save     (void);
+void test_user_fit_func_serialize(void);
 
 static void
 remove_testdata(void)
@@ -232,6 +235,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/field/new-part", test_field_new_part);
     g_test_add_func("/testlibgwy/field/serialize", test_field_serialize);
     g_test_add_func("/testlibgwy/field/set-size", test_field_set_size);
+    g_test_add_func("/testlibgwy/field/flip", test_field_flip);
     g_test_add_func("/testlibgwy/field/range", test_field_range);
     g_test_add_func("/testlibgwy/field/mean", test_field_mean);
     g_test_add_func("/testlibgwy/field/rms", test_field_rms);
@@ -253,6 +257,8 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/gl-material/serialize", test_gl_material_serialize);
     g_test_add_func("/testlibgwy/gl-material/inventory", test_gl_material_inventory);
     g_test_add_func("/testlibgwy/user-fit-func/load", test_user_fit_func_load);
+    g_test_add_func("/testlibgwy/user-fit-func/save", test_user_fit_func_save);
+    g_test_add_func("/testlibgwy/user-fit-func/serialize", test_user_fit_func_serialize);
 
     remove_testdata();
     g_mkdir(TEST_DATA_DIR, 0700);
