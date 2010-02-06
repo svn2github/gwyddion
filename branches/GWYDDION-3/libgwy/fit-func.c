@@ -151,7 +151,7 @@ gwy_fit_func_constructed(GObject *object)
         priv->user = gwy_user_fit_funcs_get(priv->name);
         if (priv->user) {
             g_object_ref(priv->user);
-            priv->nparams = gwy_user_fit_func_get_n_params(priv->user);
+            priv->nparams = gwy_user_fit_func_n_params(priv->user);
             priv->changed_id
                 = g_signal_connect_swapped(priv->user, "data-changed",
                                            G_CALLBACK(user_func_changed),
@@ -323,7 +323,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
         const BuiltinFitFunc *builtin = priv->builtin;
         return builtin->param[i].name;
     }
-    const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+    const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
     return p->name;
 }
 
@@ -370,7 +370,7 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
         power_y = builtin->param[i].power_y;
     }
     else {
-        const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
         g_assert(p);
         power_x = p->power_x;
         power_y = p->power_y;
@@ -422,7 +422,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
             g_critical("Cannot define %s as a GwyExpr constant.", estimators[i]);
     }
     for (guint i = 0; i < priv->nparams; i++) {
-        const GwyFitParam *p = gwy_user_fit_func_get_nth_param(priv->user, i);
+        const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
         if (!gwy_expr_evaluate(priv->estimate, p->estimate, params + i, NULL))
             g_critical("Parameter %u estimator does not compile.", i);
     }
@@ -490,7 +490,7 @@ user_func_changed(GwyFitFunc *fitfunc,
     FitFunc *priv = fitfunc->priv;
     GWY_FREE(priv->indices);
     GWY_OBJECT_UNREF(priv->expr);
-    priv->nparams = gwy_user_fit_func_get_n_params(priv->user);
+    priv->nparams = gwy_user_fit_func_n_params(priv->user);
 }
 
 static void

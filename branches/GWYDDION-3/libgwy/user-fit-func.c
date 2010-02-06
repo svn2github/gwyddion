@@ -539,7 +539,7 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
         test_expr = _gwy_fit_func_new_expr_with_constants();
     if (!gwy_expr_compile(test_expr, priv->formula, NULL))
         goto fail;
-    if (!gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL))
+    if (gwy_user_fit_func_resolve_params(userfitfunc, test_expr, NULL, NULL))
         goto fail;
 
     // Filter
@@ -556,7 +556,7 @@ gwy_user_fit_func_validate(GwyUserFitFunc *userfitfunc)
     for (guint i = 0; i < n; i++) {
         if (!gwy_expr_compile(test_expr, priv->param[i].estimate, NULL))
             goto fail;
-        if (!_gwy_fit_func_check_estimators(test_expr))
+        if (_gwy_fit_func_check_estimators(test_expr))
             goto fail;
     }
     ok = TRUE;
@@ -673,7 +673,7 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
 }
 
 /**
- * gwy_user_fit_func_get_n_params:
+ * gwy_user_fit_func_n_params:
  * @userfitfunc: A user fitting function.
  *
  * Gets the number of parameters of a user fitting function.
@@ -681,7 +681,7 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
  * Returns: The number of parameters.
  **/
 guint
-gwy_user_fit_func_get_n_params(GwyUserFitFunc *userfitfunc)
+gwy_user_fit_func_n_params(GwyUserFitFunc *userfitfunc)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), 0);
     UserFitFunc *priv = userfitfunc->priv;
@@ -689,7 +689,7 @@ gwy_user_fit_func_get_n_params(GwyUserFitFunc *userfitfunc)
 }
 
 /**
- * gwy_user_fit_func_get_param:
+ * gwy_user_fit_func_param:
  * @userfitfunc: A user fitting function.
  * @name: Parameter name.
  *
@@ -700,8 +700,8 @@ gwy_user_fit_func_get_n_params(GwyUserFitFunc *userfitfunc)
  *          does not change.
  **/
 const GwyFitParam*
-gwy_user_fit_func_get_param(GwyUserFitFunc *userfitfunc,
-                            const gchar *name)
+gwy_user_fit_func_param(GwyUserFitFunc *userfitfunc,
+                        const gchar *name)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
     g_return_val_if_fail(name, NULL);
@@ -714,7 +714,7 @@ gwy_user_fit_func_get_param(GwyUserFitFunc *userfitfunc,
 }
 
 /**
- * gwy_user_fit_func_get_nth_param:
+ * gwy_user_fit_func_nth_param:
  * @userfitfunc: A user fitting function.
  * @i: Parameter number.
  *
@@ -725,8 +725,8 @@ gwy_user_fit_func_get_param(GwyUserFitFunc *userfitfunc,
  *          does not change.
  **/
 const GwyFitParam*
-gwy_user_fit_func_get_nth_param(GwyUserFitFunc *userfitfunc,
-                                guint i)
+gwy_user_fit_func_nth_param(GwyUserFitFunc *userfitfunc,
+                            guint i)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), NULL);
     UserFitFunc *priv = userfitfunc->priv;
@@ -898,7 +898,7 @@ gwy_user_fit_func_dump(GwyResource *resource)
 static gboolean
 gwy_user_fit_func_parse(GwyResource *resource,
                         gchar *text,
-                        G_GNUC_UNUSED GError **error)
+                        GError **error)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(resource);
     UserFitFunc *priv = userfitfunc->priv;
@@ -910,11 +910,11 @@ gwy_user_fit_func_parse(GwyResource *resource,
          line;
          line = gwy_str_next_line(&text)) {
         gchar *key, *value;
-        GwyResourceLineType ok = gwy_resource_parse_param_line(line,
-                                                               &key, &value);
-        if (ok == GWY_RESOURCE_LINE_EMPTY)
+        GwyResourceLineType type = gwy_resource_parse_param_line(line,
+                                                                 &key, &value);
+        if (type == GWY_RESOURCE_LINE_EMPTY)
             continue;
-        if (!ok)
+        if (type != GWY_RESOURCE_LINE_OK)
             break;
 
         if (gwy_strequal(key, "param")) {
@@ -929,7 +929,7 @@ gwy_user_fit_func_parse(GwyResource *resource,
         else if (params) {
             if (gwy_strequal(key, "power_x"))
                 param.power_x = strtol(value, NULL, 10);
-            if (gwy_strequal(key, "power_y"))
+            else if (gwy_strequal(key, "power_y"))
                 param.power_y = strtol(value, NULL, 10);
             else if (gwy_strequal(key, "estimate")) {
                 GWY_FREE(param.estimate);
@@ -954,6 +954,10 @@ gwy_user_fit_func_parse(GwyResource *resource,
     if (param.name)
         g_array_append_val(params, param);
 
+    // TODO
+    if (!params)
+        return FALSE;
+
     free_params(priv);
     priv->nparams = params->len;
     priv->param = (GwyFitParam*)g_array_free(params, FALSE);
@@ -962,6 +966,7 @@ gwy_user_fit_func_parse(GwyResource *resource,
     if (!gwy_user_fit_func_validate(userfitfunc)) {
         priv->nparams = 0;
         GWY_FREE(priv->param);
+        // TODO
         return FALSE;
     }
 

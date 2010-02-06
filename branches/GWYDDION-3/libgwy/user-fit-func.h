@@ -84,10 +84,10 @@ const gchar*       gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)
 gboolean           gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
                                                     const gchar *formula,
                                                     GError **error);
-guint              gwy_user_fit_func_get_n_params  (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-const GwyFitParam* gwy_user_fit_func_get_param     (GwyUserFitFunc *userfitfunc,
+guint              gwy_user_fit_func_n_params      (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+const GwyFitParam* gwy_user_fit_func_param         (GwyUserFitFunc *userfitfunc,
                                                     const gchar *name)             G_GNUC_PURE;
-const GwyFitParam* gwy_user_fit_func_get_nth_param (GwyUserFitFunc *userfitfunc,
+const GwyFitParam* gwy_user_fit_func_nth_param     (GwyUserFitFunc *userfitfunc,
                                                     guint i)                       G_GNUC_PURE;
 void               gwy_user_fit_func_update_param  (GwyUserFitFunc *userfitfunc,
                                                     const GwyFitParam *param);
