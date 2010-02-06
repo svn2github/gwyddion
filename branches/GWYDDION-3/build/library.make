@@ -1,6 +1,6 @@
 # Generic library symbol rules.
 # $Id$
-# Variables: library
+# Variables: library main_header
 # Adds to: BUILT_SOURCES EXTRA_DIST DISTCLEANFILES
 
 library_symbols = $(library)$(libsuffix).symbols
@@ -31,8 +31,8 @@ check-headers: $(library_headers)
 	@result=true; \
 	for x in $(library_headers); do \
 	    x='#include <libgwy/'$$(basename $$x)'>'; \
-	    if ! grep -qF "$$x" $(library).h; then \
-	       echo "$(library).h lacks $$x" 1>&2; \
+	    if ! grep -qF "$$x" $(main_header); then \
+	       echo "$(main_header) lacks $$x" 1>&2; \
 	       result=false; \
 	    fi; \
 	done; \

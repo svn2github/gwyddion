@@ -11,7 +11,7 @@ libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 test_program = ./tests/testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
-main_header = libgwy.h
+main_header = $(srcdir)/libgwy.h
 
 public_headers = \
 	$(srcdir)/array.h \
