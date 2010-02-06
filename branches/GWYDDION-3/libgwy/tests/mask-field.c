@@ -324,7 +324,7 @@ test_mask_field_logical_part(void)
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 500 : 100;
+    gsize niter = g_test_slow() ? 5000 : 1000;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint sxres = g_rand_int_range(rng, 1, max_size);
@@ -1361,7 +1361,7 @@ test_mask_field_transpose(void)
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 5000 : 1000;
+    gsize niter = g_test_slow() ? 100000 : 2000;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
@@ -1449,7 +1449,7 @@ test_mask_field_rotate(void)
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
     guint32 *pool = mask_field_random_pool_new(rng, max_size);
-    gsize niter = g_test_slow() ? 500 : 100;
+    gsize niter = g_test_slow() ? 5000 : 1000;
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
