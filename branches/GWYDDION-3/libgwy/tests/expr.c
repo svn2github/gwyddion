@@ -85,17 +85,25 @@ test_expr_vector(void)
     g_assert(!error);
     g_clear_error(&error);
 
+    ok = gwy_expr_compile(expr, "1+1", &error);
+    g_assert(ok);
+    g_assert(!error);
+    g_clear_error(&error);
+
+    gsize nvars1 = gwy_expr_get_variables(expr, NULL);
+    g_assert_cmpuint(nvars1, ==, 1);
+
     ok = gwy_expr_compile(expr, "sqrt(a^2+π*β/c₂)-sqrt(a^2+π*c₂/β)", &error);
     g_assert(ok);
     g_assert(!error);
     g_clear_error(&error);
 
-    gsize nvars = gwy_expr_get_variables(expr, NULL);
-    g_assert_cmpuint(nvars, ==, 4);
+    gsize nvars4 = gwy_expr_get_variables(expr, NULL);
+    g_assert_cmpuint(nvars4, ==, 4);
 
     gsize n = 10000;
-    gdouble **input = g_new0(gdouble*, nvars);
-    for (gsize i = 1; i < nvars; i++) {
+    gdouble **input = g_new0(gdouble*, nvars4);
+    for (gsize i = 1; i < nvars4; i++) {
         input[i] = g_new(gdouble, n);
         for (gsize j = 0; j < n; j++) {
             input[i][j] = j/(0.1 + i);
@@ -137,7 +145,7 @@ test_expr_vector(void)
     // Compare.
     g_assert_cmpint(memcmp(input[1], result, n*sizeof(gdouble)), ==, 0);
 
-    for (gsize i = 1; i < nvars; i++)
+    for (gsize i = 1; i < nvars4; i++)
         g_free(input[i]);
     g_free(input);
     g_free(result);
