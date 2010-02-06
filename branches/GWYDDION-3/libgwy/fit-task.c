@@ -954,37 +954,68 @@ gwy_fit_task_get_chi(GwyFitTask *fittask)
  * A fitting task consists of the model function, the data to fit and the
  * set of parameters.  The model function can be defined in three independent
  * manners, listed by increasing abstractness, power and difficulty to use:
- * <itemizedlist>
- *   <listitem>
- *     Scalar-valued one-dimensional function (called point function), i.e.
- *     function that takes the abscissa value and parameters and it calculates
- *     the theoretical value. The data must be represented by #GwyXYs.
- *     This is everything that needs to be supplied.  The calculation of
- *     differences between theoretical and fitted data, derivatives, gradients
- *     and Hessians is done by #GwyFitTask.  Fixed parameters are also handled
- *     by #GwyFitTask.  Optionally, a weighting function can be set.
- *   </listitem>
- *   <listitem>
- *     Scalar-valued function (called indexed-data function) that takes an
- *     integer index and parameters and it calculates the weighted difference
- *     between theoretical and fitted data.  The data is opaque for #GwyFitTask
- *     and it is possible to simulate vector-valued functions by mapping
- *     several indices to one actual data point.  The calculation of
- *     derivatives, gradients and Hessians is done by #GwyFitTask.  Fixed
- *     parameters are also handled by #GwyFitTask.
- *   </listitem>
- *   <listitem>
- *     Scalar-valued function that takes an integer index and array of
- *     parameters and it calculates the weighted difference between theoretical
- *     and fitted data.  It can be coupled with a function calculating the
- *     derivatives by parameters. The data is opaque for #GwyFitTask and it is
- *     possible to simulate vector-valued functions by mapping several indices
- *     to one actual data point.  The calculation of derivatives (optionally),
- *     gradients and Hessians is done by #GwyFitTask.
- *   </listitem>
- * </itemizedlist>
+ * <variablelist>
+ *   <varlistentry>
+ *     <term>
+ *       #GwyFitTaskPointFunc
+ *     </term>
+ *     <listitem>
+ *       <para>
+ *         Scalar-valued one-dimensional function, also called point function,
+ *         that takes the abscissa value and parameters and it calculates the
+ *         theoretical value.
+ *       </para>
+ *       <para>
+ *         The data must be represented by #GwyXYs.  This is everything that
+ *         needs to be supplied.  The calculation of differences between
+ *         theoretical and fitted data, derivatives, gradients and Hessians is
+ *         done by #GwyFitTask.  Fixed parameters are also handled by
+ *         #GwyFitTask.  Optionally, a weighting function can be set.
+ *       </para>
+ *     </listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>
+ *       #GwyFitTaskVectorFunc
+ *     </term>
+ *     <listitem>
+ *       <para>
+ *         Scalar-valued function, also called indexed-data function,
+ *         that takes an integer index and parameters and it calculates
+ *         the weighted difference between theoretical and fitted data.
+ *       </para>
+ *       <para>
+ *         The data is opaque to #GwyFitTask and it is possible to simulate
+ *         vector-valued functions by mapping several indices to one actual
+ *         data point.  The calculation of derivatives, gradients and Hessians
+ *         is done by #GwyFitTask.  Fixed parameters are also handled by
+ *         #GwyFitTask.
+ *       </para>
+ *     </listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>
+ *       #GwyFitTaskVectorVFunc (plus #GwyFitTaskVectorDFunc)
+ *     </term>
+ *     <listitem>
+ *       <para>
+ *         Scalar-valued function with parameters passed as an array.  It takes
+ *         an integer index and array of parameters and it calculates the
+ *         weighted difference between theoretical and fitted data.
+ *       </para>
+ *       <para>
+ *         It can be coupled with a #GwyFitTaskVectorDFunc function calculating
+ *         the derivatives by parameters. The data is opaque for #GwyFitTask
+ *         and it is possible to simulate vector-valued functions by mapping
+ *         several indices to one actual data point.  The calculation of
+ *         derivatives (optionally), gradients and Hessians is done by
+ *         #GwyFitTask.
+ *       </para>
+ *     </listitem>
+ *   </varlistentry>
+ * </variablelist>
  *
- * If weighting is used, note the differences is weighted, not their squares.
+ * If weighting is used, note the differences are weighted, not their squares.
  * Hence in the usual case weights are the inverse standard deviations of the
  * fitted data points (unsquared).
  *
