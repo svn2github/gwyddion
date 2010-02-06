@@ -746,8 +746,8 @@ gwy_user_fit_func_nth_param(GwyUserFitFunc *userfitfunc,
  * @userfitfunc: A user fitting function.
  * @param: Parameter data.  All entries are copied so the caller retains its
  *         ownership of all @param's data.  It is safe to pass @param
- *         containing strings obtained from gwy_user_fit_func_get_param() or
- *         gwy_user_fit_func_get_nth_param().  However, as this function may
+ *         containing strings obtained from gwy_user_fit_func_param() or
+ *         gwy_user_fit_func_nth_param().  However, as this function may
  *         invalidate them (e.g. by freeing them) it is not safe to continue
  *         using these parameter structs afterwards.
  *
