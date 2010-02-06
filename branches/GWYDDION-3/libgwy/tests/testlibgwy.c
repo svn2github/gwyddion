@@ -116,6 +116,7 @@ void test_gl_material_load       (void);
 void test_gl_material_save       (void);
 void test_gl_material_serialize  (void);
 void test_gl_material_inventory  (void);
+void test_user_fit_func_load     (void);
 
 static void
 remove_testdata(void)
@@ -251,6 +252,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/gl-material/save", test_gl_material_save);
     g_test_add_func("/testlibgwy/gl-material/serialize", test_gl_material_serialize);
     g_test_add_func("/testlibgwy/gl-material/inventory", test_gl_material_inventory);
+    g_test_add_func("/testlibgwy/user-fit-func/load", test_user_fit_func_load);
 
     remove_testdata();
     g_mkdir(TEST_DATA_DIR, 0700);

@@ -28,6 +28,7 @@ testlibgwy_SOURCES = \
 	sort.c \
 	strfuncs.c \
 	unit.c \
+	user-fit-func.c \
 	value-format.c \
 	version.c \
 	xy.c \
