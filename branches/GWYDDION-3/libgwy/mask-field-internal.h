@@ -39,7 +39,8 @@ typedef struct {
 /* Note we use run-time conditions for endianess-branching even though it is
  * known at compile time.  This is to get the big-endian branch at least
  * syntax-checked.  A good optimizing compiler then eliminates the unused
- * branch entirely so we do not need to care. */
+ * branch entirely so we do not need to care.  (Verified that GCC 4.4 really
+ * generates identical code with run-time and compile-time branches.) */
 #if (G_BYTE_ORDER != G_LITTLE_ENDIAN && G_BYTE_ORDER != G_BIG_ENDIAN)
 #error Byte order used on this system is not supported.
 #endif
