@@ -297,6 +297,75 @@ test_field_new_part(void)
     g_rand_free(rng);
 }
 
+static void
+test_field_flip_one(const gdouble *orig,
+                    const gdouble *reference,
+                    guint xres, guint yres,
+                    gboolean horizontally, gboolean vertically)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    memcpy(field->data, orig, xres*yres*sizeof(gdouble));
+    gwy_field_flip(field, horizontally, vertically, FALSE);
+    for (guint i = 0; i < xres*yres; i++) {
+        g_assert_cmpfloat(field->data[i], ==, reference[i]);
+    }
+    g_object_unref(field);
+}
+
+void
+test_field_flip(void)
+{
+    enum { xres1 = 3, yres1 = 2 };
+    const gdouble orig1[xres1*yres1] = {
+        1, 2, 3,
+        4, 5, 6,
+    };
+    const gdouble hflip1[xres1*yres1] = {
+        3, 2, 1,
+        6, 5, 4,
+    };
+    const gdouble vflip1[xres1*yres1] = {
+        4, 5, 6,
+        1, 2, 3,
+    };
+    const gdouble bflip1[xres1*yres1] = {
+        6, 5, 4,
+        3, 2, 1,
+    };
+
+    test_field_flip_one(orig1, orig1, xres1, yres1, FALSE, FALSE);
+    test_field_flip_one(orig1, hflip1, xres1, yres1, TRUE, FALSE);
+    test_field_flip_one(orig1, vflip1, xres1, yres1, FALSE, TRUE);
+    test_field_flip_one(orig1, bflip1, xres1, yres1, TRUE, TRUE);
+
+    enum { xres2 = 2, yres2 = 3 };
+    const gdouble orig2[xres2*yres2] = {
+        1, 2,
+        3, 4,
+        5, 6,
+    };
+    const gdouble hflip2[xres2*yres2] = {
+        2, 1,
+        4, 3,
+        6, 5,
+    };
+    const gdouble vflip2[xres2*yres2] = {
+        5, 6,
+        3, 4,
+        1, 2,
+    };
+    const gdouble bflip2[xres2*yres2] = {
+        6, 5,
+        4, 3,
+        2, 1,
+    };
+
+    test_field_flip_one(orig2, orig2, xres2, yres2, FALSE, FALSE);
+    test_field_flip_one(orig2, hflip2, xres2, yres2, TRUE, FALSE);
+    test_field_flip_one(orig2, vflip2, xres2, yres2, FALSE, TRUE);
+    test_field_flip_one(orig2, bflip2, xres2, yres2, TRUE, TRUE);
+}
+
 void
 test_field_range(void)
 {
