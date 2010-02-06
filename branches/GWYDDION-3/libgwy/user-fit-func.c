@@ -74,7 +74,7 @@ static const GwyFitParam default_param = {
 };
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    /*0*/ { .name = "formula", .ctype = GWY_SERIALIZABLE_STRING,       },
+    /*0*/ { .name = "formula",    .ctype = GWY_SERIALIZABLE_STRING,       },
     /*1*/ { .name = "filter",     .ctype = GWY_SERIALIZABLE_STRING,       },
     /*2*/ { .name = "param",      .ctype = GWY_SERIALIZABLE_STRING_ARRAY, },
     /*3*/ { .name = "x-power",    .ctype = GWY_SERIALIZABLE_INT32_ARRAY,  },
@@ -239,18 +239,19 @@ gwy_user_fit_func_finalize(GObject *object)
 }
 
 static gsize
-gwy_user_fit_func_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+gwy_user_fit_func_n_items(GwySerializable *serializable)
 {
-    return N_ITEMS;
+    return N_ITEMS+1 + gwy_user_fit_func_parent_serializable->n_items(serializable);
 }
 
 static void
 serialize_params(UserFitFunc *priv)
 {
     guint n = priv->nparams;
-    priv->serialize_names = g_new(gchar*, n);
-    priv->serialize_x_powers = g_new(gint, n);
-    priv->serialize_y_powers = g_new(gint, n);
+    priv->serialize_names = g_slice_alloc(n*sizeof(gchar*));
+    priv->serialize_x_powers = g_slice_alloc(n*sizeof(gint));
+    priv->serialize_y_powers = g_slice_alloc(n*sizeof(gint));
+    priv->serialize_estimates = g_slice_alloc(n*sizeof(gchar*));
     for (guint i = 0; i < n; i++) {
         priv->serialize_names[i] = priv->param[i].name;
         priv->serialize_x_powers[i] = priv->param[i].power_x;
@@ -321,11 +322,12 @@ gwy_user_fit_func_done(GwySerializable *serializable)
 {
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(serializable);
     UserFitFunc *priv = userfitfunc->priv;
+    guint n = priv->nparams;
 
-    GWY_FREE(priv->serialize_names);
-    GWY_FREE(priv->serialize_x_powers);
-    GWY_FREE(priv->serialize_y_powers);
-    GWY_FREE(priv->serialize_estimates);
+    g_slice_free1(n*sizeof(gchar*), priv->serialize_names);
+    g_slice_free1(n*sizeof(gint), priv->serialize_x_powers);
+    g_slice_free1(n*sizeof(gint), priv->serialize_y_powers);
+    g_slice_free1(n*sizeof(gchar*), priv->serialize_estimates);
 }
 
 static gboolean
@@ -614,11 +616,15 @@ gwy_user_fit_func_get_formula(GwyUserFitFunc *userfitfunc)
  **/
 gboolean
 gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
-                                 const gchar *formula,
-                                 GError **error)
+                              const gchar *formula,
+                              GError **error)
 {
     g_return_val_if_fail(GWY_IS_USER_FIT_FUNC(userfitfunc), FALSE);
     g_return_val_if_fail(formula, FALSE);
+    UserFitFunc *priv = userfitfunc->priv;
+
+    if (gwy_strequal(formula, priv->formula))
+        return TRUE;
 
     G_LOCK(test_expr);
     if (!gwy_expr_compile(test_expr, formula, error)) {
@@ -629,7 +635,6 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
     guint n = gwy_expr_get_variables(test_expr, &names);
     // This is usualy still two parameters too large as the vars contain "x".
     GwyFitParam *newparam = g_new0(GwyFitParam, n);
-    UserFitFunc *priv = userfitfunc->priv;
     guint np = 0;
     for (guint i = 1; i < n; i++) {
         if (gwy_strequal(names[i], "x"))
@@ -666,6 +671,8 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
     free_params(priv);
     priv->param = newparam;
     priv->nparams = np;
+    GWY_FREE(priv->formula);
+    priv->formula = g_strdup(formula);
     gwy_user_fit_func_changed(userfitfunc);
 
     return TRUE;
