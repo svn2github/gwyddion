@@ -962,9 +962,9 @@ unpack_object_array(const guchar *buffer,
     if (*array_size) {
         *value = g_new0(GObject*, *array_size);
         for (gsize i = 0; i < *array_size; i++) {
-            if (!((*value)[i] = gwy_deserialize_memory(buffer + position,
-                                                       size - position, &rbytes,
-                                                       error_list))) {
+            if (!((*value)[i] = deserialize_memory(buffer + position,
+                                                   size - position, &rbytes,
+                                                   FALSE, error_list))) {
                 while (i--)
                     GWY_OBJECT_UNREF((*value)[i]);
                 GWY_FREE(*value);
