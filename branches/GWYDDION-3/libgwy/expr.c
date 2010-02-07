@@ -285,12 +285,8 @@ gwy_expr_finalize(GObject *object)
     Expr *expr = GWY_EXPR(object)->priv;
 
     token_list_delete(expr->tokens);
-    if (expr->identifiers) {
-        GPtrArray *pa = expr->identifiers;
-        for (gsize i = 0; i < pa->len; i++)
-            g_free(g_ptr_array_index(pa, i));
-        g_ptr_array_free(pa, TRUE);
-    }
+    if (expr->identifiers)
+        g_ptr_array_free(expr->identifiers, TRUE);
     if (expr->scanner)
         g_scanner_destroy(expr->scanner);
     if (expr->constants)
@@ -990,15 +986,12 @@ transform_values(Expr *expr,
     guint i;
 
     if (!expr->identifiers) {
-        expr->identifiers = g_ptr_array_new();
+        expr->identifiers = g_ptr_array_new_with_free_func(g_free);
         /* pos 0 is always unused */
         g_ptr_array_add(expr->identifiers, NULL);
     }
-    else {
-        for (i = 1; i < expr->identifiers->len; i++)
-            GWY_FREE(g_ptr_array_index(expr->identifiers, i));
+    else
         g_ptr_array_set_size(expr->identifiers, 1);
-    }
 
     for (t = expr->tokens; t; t = t->next) {
         if (t->token == G_TOKEN_FLOAT) {
@@ -1033,8 +1026,8 @@ transform_values(Expr *expr,
             }
         }
         for (i = 1; i < expr->identifiers->len; i++) {
-            if (strcmp(t->value.v_identifier,
-                       g_ptr_array_index(expr->identifiers, i)) == 0) {
+            if (gwy_strequal(t->value.v_identifier,
+                             g_ptr_array_index(expr->identifiers, i))) {
                 g_free(t->value.v_identifier);
                 break;
             }
@@ -1513,6 +1506,10 @@ gwy_expr_compile(GwyExpr *expr,
     }
     fold_constants(priv);
 
+    // Ensure NULL-terminated identifiers[]
+    g_ptr_array_add(priv->identifiers, NULL);
+    g_ptr_array_set_size(priv->identifiers, priv->identifiers->len-1);
+
     return TRUE;
 }
 
@@ -1523,7 +1520,7 @@ gwy_expr_compile(GwyExpr *expr,
  *         %NULL to get just number of variables).  The string array returned
  *         in this argument in owned by @expr and is valid only until next
  *         gwy_expr_compile() or gwy_expr_evaluate() call or until you release
- *         your reference to @expr.
+ *         your reference to @expr.  The array is %NULL-terminated.
  *
  * Get the number, names, and indices of unresolved identifiers in @expr.
  *
@@ -1884,7 +1881,6 @@ gwy_expr_undefine_constant(GwyExpr *expr,
 
 /**
  * GwyExprClass:
- * @g_object_class: Parent class.
  *
  * Class of item inventories.
  **/
