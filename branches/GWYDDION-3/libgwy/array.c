@@ -541,7 +541,6 @@ gwy_array_set_data(GwyArray *array,
 
 /**
  * GwyArrayClass:
- * @g_object_class: Parent class.
  *
  * Class of arrays.
  **/
