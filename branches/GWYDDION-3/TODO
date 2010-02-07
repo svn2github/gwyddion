@@ -1,3 +1,21 @@
+Global: Use _gwy_assign_string() where appropriate.
+
+Serialization: Rewrite again.  Do not pass GWY file types as the item type,
+               pass GType instead (which is constant only for fundamental
+               types).  Arrays are distinguished by non-zero array_size.
+               Zero-sized arrays are invalid for serialization and skipped
+               with a non-fatal error in deserialization.  This makes arrays
+               of serializable boxed types possible as the GType is passed
+               properly.  It also permits to get rid of
+               _gwy_check_object_component() and do this directly in
+               gwy_deserialize_filter_items() if the caller provides a
+               specific type.
+
+               At present we overload array_size with the GType for boxed types
+               that would stop, and with the number of components for objects
+               and that could continue as the real array size would be in the
+               component, never in a GWY_SERIALIZE_HEADER item.
+
 Packing: Is unfinished.  Might need a review and go with the code-generation
          path instead.
 
