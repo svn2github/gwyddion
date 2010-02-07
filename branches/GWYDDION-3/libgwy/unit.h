@@ -47,6 +47,7 @@ struct _GwyUnit {
 };
 
 struct _GwyUnitClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

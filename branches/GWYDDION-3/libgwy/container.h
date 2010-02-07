@@ -50,6 +50,7 @@ struct _GwyContainer {
 };
 
 struct _GwyContainerClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

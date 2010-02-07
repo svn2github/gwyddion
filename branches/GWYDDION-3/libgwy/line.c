@@ -927,7 +927,6 @@ gwy_line_get_format_y(GwyLine *line,
 
 /**
  * GwyLineClass:
- * @g_object_class: Parent class.
  *
  * Class of one-dimensional data lines.
  **/

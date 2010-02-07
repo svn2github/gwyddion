@@ -1280,7 +1280,6 @@ invent_item_name(Inventory *inventory,
 
 /**
  * GwyInventoryClass:
- * @g_object_class: Parent class.
  *
  * Class of item inventories.
  **/

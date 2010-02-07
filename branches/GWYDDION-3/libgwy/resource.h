@@ -74,11 +74,11 @@ struct _GwyResource {
 };
 
 struct _GwyResourceClass {
-    /*< private >*/
+    /*<private>*/
     GObjectClass g_object_class;
     struct _GwyResourceClassPrivate *priv;
 
-    /*< public >*/  /* XXX: protected, in fact, but gtk-doc omits protected */
+    /*<public>*/  /* XXX: protected, in fact, but gtk-doc omits protected */
     /* Signals */
     void (*data_changed)(GwyResource *resource);
 

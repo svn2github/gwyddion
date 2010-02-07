@@ -65,6 +65,7 @@ struct _GwyExpr {
 };
 
 struct _GwyExprClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

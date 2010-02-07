@@ -1037,7 +1037,6 @@ gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
 
 /**
  * GwyFitterClass:
- * @g_object_class: Parent class.
  *
  * Class of non-linear least-squares fitters.
  **/

@@ -46,6 +46,7 @@ struct _GwyArray {
 };
 
 struct _GwyArrayClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

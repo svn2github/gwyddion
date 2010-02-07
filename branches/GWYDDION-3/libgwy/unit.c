@@ -1410,7 +1410,6 @@ get_prefix(gint power)
 
 /**
  * GwyUnitClass:
- * @g_object_class: Parent class.
  *
  * Class of physical units objects.
  **/

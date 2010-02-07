@@ -56,6 +56,7 @@ struct _GwyField {
 };
 
 struct _GwyFieldClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

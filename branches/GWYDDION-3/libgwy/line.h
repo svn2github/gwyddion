@@ -53,6 +53,7 @@ struct _GwyLine {
 };
 
 struct _GwyLineClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

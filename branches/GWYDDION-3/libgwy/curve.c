@@ -783,7 +783,6 @@ gwy_curve_get_format_y(GwyCurve *curve,
 
 /**
  * GwyCurveClass:
- * @g_object_class: Parent class.
  *
  * Class of curves.
  **/

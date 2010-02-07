@@ -2637,7 +2637,6 @@ next:
 
 /**
  * GwyContainerClass:
- * @g_object_class: Parent class.
  *
  * Class of data containers.
  **/

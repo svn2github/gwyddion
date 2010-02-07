@@ -76,6 +76,7 @@ struct _GwyInventory {
 };
 
 struct _GwyInventoryClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

@@ -54,6 +54,7 @@ struct _GwyValueFormat {
 };
 
 struct _GwyValueFormatClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

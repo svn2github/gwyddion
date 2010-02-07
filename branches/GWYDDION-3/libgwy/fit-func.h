@@ -48,7 +48,7 @@ struct _GwyFitFunc {
 };
 
 struct _GwyFitFuncClass {
-    /*< private >*/
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

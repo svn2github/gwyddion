@@ -70,6 +70,7 @@ struct _GwyFitTask {
 };
 
 struct _GwyFitTaskClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

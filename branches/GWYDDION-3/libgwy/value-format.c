@@ -478,7 +478,6 @@ fix_utf8_minus(GString *str)
 
 /**
  * GwyValueFormatClass:
- * @g_object_class: Parent class.
  *
  * Class of formats of physical quantity values.
  **/

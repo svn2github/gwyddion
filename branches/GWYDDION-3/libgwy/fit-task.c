@@ -1070,7 +1070,6 @@ gwy_fit_task_get_chi(GwyFitTask *fittask)
 
 /**
  * GwyFitTaskClass:
- * @g_object_class: Parent class.
  *
  * Class of non-linear least-squares fitter task.
  **/

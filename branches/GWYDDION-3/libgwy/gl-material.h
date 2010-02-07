@@ -51,7 +51,7 @@ struct _GwyGLMaterial {
 };
 
 struct _GwyGLMaterialClass {
-    /*< private >*/
+    /*<private>*/
     GwyResourceClass resource_class;
 };
 

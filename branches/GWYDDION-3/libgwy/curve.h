@@ -52,6 +52,7 @@ struct _GwyCurve {
 };
 
 struct _GwyCurveClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

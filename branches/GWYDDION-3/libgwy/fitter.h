@@ -71,6 +71,7 @@ struct _GwyFitter {
 };
 
 struct _GwyFitterClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 

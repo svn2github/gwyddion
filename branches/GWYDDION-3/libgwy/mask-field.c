@@ -2031,7 +2031,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
 
 /**
  * GwyMaskFieldClass:
- * @g_object_class: Parent class.
  *
  * Class of two-dimensional bit masks.
  **/

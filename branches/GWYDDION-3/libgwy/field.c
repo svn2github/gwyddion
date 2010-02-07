@@ -1313,7 +1313,6 @@ gwy_field_get_format_z(GwyField *field,
 
 /**
  * GwyFieldClass:
- * @g_object_class: Parent class.
  *
  * Class of two-dimensional data fields.
  **/

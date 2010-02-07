@@ -77,6 +77,7 @@ struct _GwyMaskField {
 };
 
 struct _GwyMaskFieldClass {
+    /*<private>*/
     GObjectClass g_object_class;
 };
 
