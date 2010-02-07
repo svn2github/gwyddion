@@ -20,9 +20,33 @@
 #include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
+
+gboolean
+_gwy_assign_string(gchar **p, const gchar *q)
+{
+    if (*p && q) {
+        if (!gwy_strequal(*p, q)) {
+            gchar *old = *p;
+            *p = g_strdup(q);
+            g_free(old);
+            return TRUE;
+        }
+    }
+    else if (*p) {
+        g_free(*p);
+        *p = NULL;
+        return TRUE;
+    }
+    else if (q) {
+        *p = g_strdup(q);
+        return TRUE;
+    }
+    return FALSE;
+}
 
 void
 _gwy_notify_properties(GObject *object,
@@ -49,20 +73,42 @@ _gwy_check_object_component(const GwySerializableItem *item,
                             GType component_type,
                             GwyErrorList **error_list)
 {
-    if (G_UNLIKELY(item->value.v_object
-                   && !G_TYPE_CHECK_INSTANCE_TYPE(item->value.v_object,
-                                                  component_type))) {
-        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
-                           GWY_DESERIALIZE_ERROR_INVALID,
-                           _("Component ‘%s’ of %s is of type %s "
-                             "instead of %s."),
-                           item->name,
-                           G_OBJECT_TYPE_NAME(object),
-                           G_OBJECT_TYPE_NAME(item->value.v_object),
-                           g_type_name(component_type));
-        return FALSE;
+    if (item->ctype == GWY_SERIALIZABLE_OBJECT) {
+        if (G_UNLIKELY(item->value.v_object
+                       && !G_TYPE_CHECK_INSTANCE_TYPE(item->value.v_object,
+                                                      component_type))) {
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_INVALID,
+                               _("Component ‘%s’ of %s is of type %s "
+                                 "instead of %s."),
+                               item->name,
+                               G_OBJECT_TYPE_NAME(object),
+                               G_OBJECT_TYPE_NAME(item->value.v_object),
+                               g_type_name(component_type));
+            return FALSE;
+        }
+        return TRUE;
     }
-    return TRUE;
+    if (item->ctype == GWY_SERIALIZABLE_OBJECT_ARRAY) {
+        for (gsize i = 0; i < item->array_size; i++) {
+            GObject *iobject = item->value.v_object_array[i];
+            if (G_UNLIKELY(!G_TYPE_CHECK_INSTANCE_TYPE(iobject,
+                                                       component_type))) {
+                gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                                   GWY_DESERIALIZE_ERROR_INVALID,
+                                   _("Object %lu in component ‘%s’ of %s "
+                                     "is of type %s instead of %s."),
+                                   (gulong)i,
+                                   item->name,
+                                   G_OBJECT_TYPE_NAME(object),
+                                   G_OBJECT_TYPE_NAME(iobject),
+                                   g_type_name(component_type));
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
+    g_return_val_if_reached(FALSE);
 }
 
 #define __LIBGWY_OBJECT_C__

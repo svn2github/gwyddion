@@ -28,6 +28,10 @@ G_BEGIN_DECLS
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
 G_GNUC_INTERNAL
+gboolean _gwy_assign_string(gchar **p,
+                            const gchar *q);
+
+G_GNUC_INTERNAL
 void _gwy_notify_properties(GObject *object,
                             const gchar **properties,
                             guint nproperties);
