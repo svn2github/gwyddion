@@ -55,7 +55,7 @@ G_GNUC_INTERNAL
 GHashTable* _gwy_fit_func_setup_builtins(void) G_GNUC_MALLOC;
 
 G_GNUC_INTERNAL
-const gchar* _gwy_fit_func_check_estimators(GwyExpr *expr);
+const gchar* const* _gwy_fit_func_estimators(guint *n) G_GNUC_PURE;
 
 G_GNUC_INTERNAL
 GwyExpr* _gwy_fit_func_new_expr_with_constants(void) G_GNUC_MALLOC;
