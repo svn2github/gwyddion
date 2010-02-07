@@ -28,6 +28,7 @@ public_headers = \
 	$(srcdir)/field-transform.h \
 	$(srcdir)/fitter.h \
 	$(srcdir)/fit-func.h \
+	$(srcdir)/fit-param.h \
 	$(srcdir)/fit-task.h \
 	$(srcdir)/gl-material.h \
 	$(srcdir)/gradient.h \
@@ -97,6 +98,7 @@ libgwy3_la_SOURCES = \
 	fitter.c \
 	fit-func.c \
 	fit-func-builtin.c \
+	fit-param.c \
 	fit-task.c \
 	gl-material.c \
 	gradient.c \

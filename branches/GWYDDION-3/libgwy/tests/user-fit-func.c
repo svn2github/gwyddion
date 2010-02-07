@@ -27,36 +27,27 @@
  *
  ***************************************************************************/
 
-/* XXX: GwyFitParam is not serializable.  Make it so?
-void
-test_fit_param_boxed(void)
-{
-    GwyFitParam fitparam = { (gchar*)"b0", (gchar*)"xmid", 1, 0 };
-    GwyFitParam *copy = serialize_boxed_and_back(&fitparam, GWY_TYPE_FIT_PARAM);
-    g_assert_cmpstr(fitparam.name, ==, copy->name);
-    g_assert_cmpint(fitparam.power_x, ==, copy->power_x);
-    g_assert_cmpint(fitparam.power_y, ==, copy->power_y);
-    g_assert_cmpstr(fitparam.estimate, ==, copy->estimate);
-    g_boxed_free(GWY_TYPE_FIT_PARAM, copy);
-}
-*/
-
 static void
 test_user_fit_func_param_check(GwyUserFitFunc *userfitfunc,
                                guint expected_n_params,
-                               const GwyFitParam *expected_params)
+                               GwyFitParam **expected_params)
 {
     g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc),
                      ==, expected_n_params);
     for (guint i = 0; i < expected_n_params; i++) {
-        const GwyFitParam *expected = expected_params + i;
-        const GwyFitParam *param = gwy_user_fit_func_param(userfitfunc,
-                                                           expected->name);
+        GwyFitParam *expected = expected_params[i];
+        const gchar *expected_name = gwy_fit_param_get_name(expected);
+        GwyFitParam *param = gwy_user_fit_func_param(userfitfunc,
+                                                     expected_name);
         g_assert(param);
-        g_assert_cmpstr(param->name, ==, expected->name);
-        g_assert_cmpstr(param->estimate, ==, expected->estimate);
-        g_assert_cmpint(param->power_x, ==, expected->power_x);
-        g_assert_cmpint(param->power_y, ==, expected->power_y);
+        g_assert_cmpstr(gwy_fit_param_get_name(param),
+                        ==, gwy_fit_param_get_name(expected));
+        g_assert_cmpstr(gwy_fit_param_get_estimate(param),
+                        ==, gwy_fit_param_get_estimate(expected));
+        g_assert_cmpint(gwy_fit_param_get_power_x(param),
+                        ==, gwy_fit_param_get_power_x(expected));
+        g_assert_cmpint(gwy_fit_param_get_power_y(param),
+                        ==, gwy_fit_param_get_power_y(expected));
     }
 }
 
@@ -65,7 +56,7 @@ test_user_fit_func_load_check(const gchar *filename,
                               const gchar *expected_name,
                               const gchar *expected_formula,
                               guint expected_n_params,
-                              const GwyFitParam *expected_params)
+                              GwyFitParam **expected_params)
 {
     GError *error = NULL;
     GwyResource *resource = gwy_resource_load(filename, GWY_TYPE_USER_FIT_FUNC,
@@ -96,9 +87,6 @@ test_user_fit_func_load_check(const gchar *filename,
 void
 test_user_fit_func_load(void)
 {
-    static const GwyFitParam param_a = { "a", "1.0", 0, 1 };
-    static const GwyFitParam param_b = { "b", "0.0", -1, 1 };
-
     static const gchar userfitfunc_v2[] =
         "Gwyddion resource GwyUserFitFunc\n"
         "formula a+b*x\n"
@@ -138,36 +126,45 @@ test_user_fit_func_load(void)
         "    power_y 1\n"
         "    estimate 0.0 \t\t \t\n";
 
-    GwyFitParam params[] = { param_a, param_b };
+    GwyFitParam *params[] = {
+        gwy_fit_param_new_set("a", 0, 1, "1.0"),
+        gwy_fit_param_new_set("b", -1, 1, "0.0"),
+    };
+    enum { np = G_N_ELEMENTS(params) };
     GError *error = NULL;
 
     // Version2 resource
     g_assert(g_file_set_contents("Linear", userfitfunc_v2, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Linear");
     g_assert(!error);
-    test_user_fit_func_load_check("Linear", "Linear", "a+b*x", 2, params);
+    test_user_fit_func_load_check("Linear", "Linear", "a+b*x", np, params);
 
     // Version3 resource
     g_assert(g_file_set_contents("LLL", userfitfunc_v3, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "LLL");
     g_assert(!error);
-    test_user_fit_func_load_check("LLL", "Linear", "a+b*x", 2, params);
+    test_user_fit_func_load_check("LLL", "Linear", "a+b*x", np, params);
 
     // Version3 ugly resource
     g_assert(g_file_set_contents("Ugly-Lin", userfitfunc_v3_ugly, -1, &error));
     g_test_queue_destroy((GDestroyNotify)g_unlink, "Ugly-Lin");
     g_assert(!error);
     test_user_fit_func_load_check("Ugly-Lin", "Linear that is up to x¹",
-                                  "a+b*x", 2, params);
+                                  "a+b*x", np, params);
+
+    for (guint i = 0; i < np; i++)
+        GWY_OBJECT_UNREF(params[i]);
 }
 
 void
 test_user_fit_func_save(void)
 {
-    static const GwyFitParam param_a = { "a", "ymean", 0, 1 };
-    static const GwyFitParam param_b = { "b", "(yxmax-yxmin)/(xmax-xmin)", -1, 1 };
+    GwyFitParam *params[] = {
+        gwy_fit_param_new_set("a", 0, 1, "1.0"),
+        gwy_fit_param_new_set("b", -1, 1, "(yxmax-yxmin)/(xmax-xmin)"),
+    };
+    enum { np = G_N_ELEMENTS(params) };
 
-    GwyFitParam params[] = { param_a, param_b };
     GwyUserFitFunc *userfitfunc = gwy_user_fit_func_new();
     GwyResource *resource = GWY_RESOURCE(userfitfunc);
 
@@ -176,9 +173,14 @@ test_user_fit_func_save(void)
 
     g_assert(gwy_user_fit_func_set_formula(userfitfunc, "a+b*x", NULL));
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
-    g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc), ==, 2);
-    gwy_user_fit_func_update_param(userfitfunc, &param_a);
-    gwy_user_fit_func_update_param(userfitfunc, &param_b);
+    g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc), ==, np);
+    GwyFitParam *param;
+    g_assert(gwy_user_fit_func_param(userfitfunc, "a"));
+    param = gwy_user_fit_func_param(userfitfunc, "a");
+    gwy_fit_param_assign(param, params[0]);
+    g_assert(gwy_user_fit_func_param(userfitfunc, "b"));
+    param = gwy_user_fit_func_param(userfitfunc, "b");
+    gwy_fit_param_assign(param, params[1]);
 
     GError *error = NULL;
     gwy_resource_set_filename(resource, "Linear2");
@@ -197,17 +199,20 @@ test_user_fit_func_save(void)
 
     GWY_OBJECT_UNREF(userfitfunc);
 
-    test_user_fit_func_load_check("Linear2", "Linear 2",
-                                  "a+b*x", 2, params);
+    test_user_fit_func_load_check("Linear2", "Linear 2", "a+b*x", np, params);
+
+    for (guint i = 0; i < np; i++)
+        GWY_OBJECT_UNREF(params[i]);
 }
 
 void
 test_user_fit_func_serialize(void)
 {
-    static const GwyFitParam param_a = { "a", "ymean", 0, 1 };
-    static const GwyFitParam param_b = { "b", "(yxmax-yxmin)/(xmax-xmin)", -1, 1 };
-
-    GwyFitParam params[] = { param_a, param_b };
+    GwyFitParam *params[] = {
+        gwy_fit_param_new_set("a", 0, 1, "1.0"),
+        gwy_fit_param_new_set("b", -1, 1, "(yxmax-yxmin)/(xmax-xmin)"),
+    };
+    enum { np = G_N_ELEMENTS(params) };
 
     GwyUserFitFunc *userfitfunc = gwy_user_fit_func_new();
     GwyResource *resource = GWY_RESOURCE(userfitfunc);
@@ -217,19 +222,26 @@ test_user_fit_func_serialize(void)
 
     g_assert(gwy_user_fit_func_set_formula(userfitfunc, "a+b*x", NULL));
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
-    g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc), ==, 2);
-    gwy_user_fit_func_update_param(userfitfunc, &param_a);
-    gwy_user_fit_func_update_param(userfitfunc, &param_b);
+    g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc), ==, np);
+    GwyFitParam *param;
+    g_assert(gwy_user_fit_func_param(userfitfunc, "a"));
+    param = gwy_user_fit_func_param(userfitfunc, "a");
+    gwy_fit_param_assign(param, params[0]);
+    g_assert(gwy_user_fit_func_param(userfitfunc, "b"));
+    param = gwy_user_fit_func_param(userfitfunc, "b");
+    gwy_fit_param_assign(param, params[1]);
 
     GwyUserFitFunc *newuserfitfunc
         = (GwyUserFitFunc*)serialize_and_back(G_OBJECT(userfitfunc));
     GwyResource *newresource = GWY_RESOURCE(newuserfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear-3");
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
-    test_user_fit_func_param_check(newuserfitfunc, 2, params);
+    test_user_fit_func_param_check(newuserfitfunc, np, params);
 
     g_object_unref(userfitfunc);
     g_object_unref(newuserfitfunc);
+    for (guint i = 0; i < np; i++)
+        GWY_OBJECT_UNREF(params[i]);
 }
 
 #if 0

@@ -21,6 +21,7 @@
 #define __LIBGWY_USER_FIT_FUNC_H__
 
 #include <libgwy/expr.h>
+#include <libgwy/fit-param.h>
 #include <libgwy/resource.h>
 
 G_BEGIN_DECLS
@@ -29,23 +30,9 @@ G_BEGIN_DECLS
 
 typedef enum {
     GWY_USER_FIT_FUNC_ERROR_NO_PARAM = 1,
-    GWY_USER_FIT_FUNC_ERROR_ESTIMATE,
 } GwyUserFitFuncError;
 
 GQuark gwy_user_fit_func_error_quark(void) G_GNUC_CONST;
-
-#define GWY_TYPE_FIT_PARAM (gwy_fit_param_get_type())
-
-typedef struct {
-    gchar *name;
-    gchar *estimate;
-    gint power_x;
-    gint power_y;
-} GwyFitParam;
-
-GType        gwy_fit_param_get_type(void)                        G_GNUC_CONST;
-GwyFitParam* gwy_fit_param_copy    (const GwyFitParam *fitparam) G_GNUC_MALLOC;
-void         gwy_fit_param_free    (GwyFitParam *fitparam);
 
 #define GWY_TYPE_USER_FIT_FUNC \
     (gwy_user_fit_func_get_type())
@@ -69,7 +56,7 @@ struct _GwyUserFitFunc {
 };
 
 struct _GwyUserFitFuncClass {
-    /*< private >*/
+    /*<private>*/
     GwyResourceClass resource_class;
 };
 
@@ -78,25 +65,21 @@ struct _GwyUserFitFuncClass {
 #define gwy_user_fit_func_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType              gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
-GwyUserFitFunc*    gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
-const gchar*       gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-gboolean           gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
-                                                    const gchar *formula,
-                                                    GError **error);
-guint              gwy_user_fit_func_n_params      (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
-const GwyFitParam* gwy_user_fit_func_param         (GwyUserFitFunc *userfitfunc,
-                                                    const gchar *name)             G_GNUC_PURE;
-const GwyFitParam* gwy_user_fit_func_nth_param     (GwyUserFitFunc *userfitfunc,
-                                                    guint i)                       G_GNUC_PURE;
-void               gwy_user_fit_func_update_param  (GwyUserFitFunc *userfitfunc,
-                                                    const GwyFitParam *param);
-gboolean           gwy_user_fit_func_check_estimate(const gchar *estimate,
-                                                    GError **error);
-guint              gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
-                                                    GwyExpr *expr,
-                                                    const gchar *independent_name,
-                                                    guint *indices);
+GType           gwy_user_fit_func_get_type      (void)                          G_GNUC_CONST;
+GwyUserFitFunc* gwy_user_fit_func_new           (void)                          G_GNUC_MALLOC;
+const gchar*    gwy_user_fit_func_get_formula   (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+gboolean        gwy_user_fit_func_set_formula   (GwyUserFitFunc *userfitfunc,
+                                                 const gchar *formula,
+                                                 GError **error);
+guint           gwy_user_fit_func_n_params      (GwyUserFitFunc *userfitfunc)   G_GNUC_PURE;
+GwyFitParam*    gwy_user_fit_func_param         (GwyUserFitFunc *userfitfunc,
+                                                 const gchar *name)             G_GNUC_PURE;
+GwyFitParam*    gwy_user_fit_func_nth_param     (GwyUserFitFunc *userfitfunc,
+                                                 guint i)                       G_GNUC_PURE;
+guint           gwy_user_fit_func_resolve_params(GwyUserFitFunc *userfitfunc,
+                                                 GwyExpr *expr,
+                                                 const gchar *independent_name,
+                                                 guint *indices);
 
 #define gwy_user_fit_funcs() \
     (gwy_resource_type_get_inventory(GWY_TYPE_USER_FIT_FUNC))

@@ -324,7 +324,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
         return builtin->param[i].name;
     }
     const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
-    return p->name;
+    return gwy_fit_param_get_name(p);
 }
 
 /**
@@ -372,8 +372,8 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
     else {
         const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
         g_assert(p);
-        power_x = p->power_x;
-        power_y = p->power_y;
+        power_x = gwy_fit_param_get_power_x(p);
+        power_y = gwy_fit_param_get_power_y(p);
     }
     return gwy_unit_power_multiply(NULL, unit_x, power_x, unit_y, power_y);
 }
@@ -423,7 +423,9 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     }
     for (guint i = 0; i < priv->nparams; i++) {
         const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
-        if (!gwy_expr_evaluate(priv->estimate, p->estimate, params + i, NULL))
+        const gchar *estimate = gwy_fit_param_get_estimate(p);
+        if (estimate
+            && !gwy_expr_evaluate(priv->estimate, estimate, params + i, NULL))
             g_critical("Parameter %u estimator does not compile.", i);
     }
     return TRUE;
@@ -636,35 +638,11 @@ gwy_fit_func_get_user(GwyFitFunc *fitfunc)
     return priv->builtin ? NULL : priv->user;
 }
 
-/**
- * _gwy_fit_func_check_estimators:
- * @expr: Compiled estimation expression.
- *
- * Check if all variables in an expression correspond to known estimators.
- *
- * Returns: %NULL on success, the name of the first unknown variable on
- *          failure, empty string on total failure (e.g. an uncompiled
- *          expression was passed).
- **/
-const gchar*
-_gwy_fit_func_check_estimators(GwyExpr *expr)
+const gchar* const*
+_gwy_fit_func_estimators(guint *n)
 {
-    const gchar **names;
-    guint n = gwy_expr_get_variables(expr, &names);
-
-    if (!n)
-        return "";
-
-    for (guint i = 1; i < n; i++) {
-        guint j;
-        for (j = 0; j < G_N_ELEMENTS(estimators); j++) {
-            if (gwy_strequal(names[i], estimators[j]))
-                break;
-        }
-        if (j == G_N_ELEMENTS(estimators))
-            return names[i];
-    }
-    return NULL;
+    GWY_MAYBE_SET(n, N_ESTIMATORS);
+    return estimators;
 }
 
 GwyExpr*
