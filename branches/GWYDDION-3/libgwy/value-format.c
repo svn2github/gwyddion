@@ -354,14 +354,9 @@ gwy_value_format_set_units(GwyValueFormat *format,
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
-
-    if ((!units && !priv->units)
-        || (units && priv->units && gwy_strequal(units, priv->units)))
-        return;
-
-    gchar *oldunits = priv->units;
-    priv->units = g_strdup(units);
-    g_free(oldunits);
+    if (_gwy_assign_string(&priv->units, units)) {
+        // TODO: Emit something
+    }
 }
 
 /**
@@ -393,14 +388,9 @@ gwy_value_format_set_glue(GwyValueFormat *format,
 {
     g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
     ValueFormat *priv = format->priv;
-
-    if ((!glue && !priv->glue)
-        || (glue && priv->glue && gwy_strequal(glue, priv->glue)))
-        return;
-
-    gchar *oldglue = priv->glue;
-    priv->glue = g_strdup(glue);
-    g_free(oldglue);
+    if (_gwy_assign_string(&priv->glue, glue)) {
+        // TODO: Emit something
+    }
 }
 
 static void

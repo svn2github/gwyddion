@@ -22,8 +22,10 @@
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
+#include "libgwy/serializable.h"
 #include "libgwy/inventory.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/object-internal.h"
 
 enum {
     ITEM_INSERTED,
@@ -586,21 +588,8 @@ gwy_inventory_set_default_name(GwyInventory *inventory,
     g_return_if_fail(GWY_IS_INVENTORY(inventory));
     Inventory *priv = inventory->priv;
     g_return_if_fail(priv->has_item_type);
-    if (!name && !priv->default_key)
-        return;
-
-    if (!name)
-        GWY_FREE(priv->default_key);
-    else if (!priv->default_key)
-        priv->default_key = g_strdup(name);
-    else if (!gwy_strequal(priv->default_key, name)) {
-        g_free(priv->default_key);
-        priv->default_key = g_strdup(name);
-    }
-    else
-        return;
-
-    g_signal_emit(inventory, gwy_inventory_signals[DEFAULT_CHANGED], 0);
+    if (_gwy_assign_string(&priv->default_key, name))
+        g_signal_emit(inventory, gwy_inventory_signals[DEFAULT_CHANGED], 0);
 }
 
 /**

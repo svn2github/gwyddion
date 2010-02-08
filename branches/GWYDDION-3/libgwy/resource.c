@@ -607,14 +607,9 @@ gwy_resource_rename(gpointer item,
     Resource *priv = resource->priv;
 
     g_return_if_fail(priv->is_modifiable);
-
-    gchar *oldname = priv->name;
-    if (oldname && gwy_strequal(oldname, new_name))
-        return;
-
-    priv->name = g_strdup(new_name);
-    GWY_FREE(oldname);
-    g_object_notify(G_OBJECT(item), "name");
+    g_return_if_fail(new_name);
+    if (_gwy_assign_string(&priv->name, new_name))
+        g_object_notify(G_OBJECT(item), "name");
 }
 
 static gpointer
