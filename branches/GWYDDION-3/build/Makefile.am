@@ -14,6 +14,7 @@ EXTRA_DIST = \
 	mkenum.make \
 	Makevars.in \
 	test-report.xsl \
+	test-report-brief.xsl \
 	update-aliases.py \
 	update-library-def.py \
 	update-library-symbols.py \

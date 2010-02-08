@@ -6,14 +6,12 @@
 <xsl:param name='program' select='"unknown"'/>
 <xsl:param name='prefix' select='""'/>
 <xsl:template match='/'>
-    <p>
+    <xsl:element name='p'>
     Test program: <code><xsl:value-of select='$program'/></code>,
-    Successes: <span class='success'><xsl:value-of select='count(//status[@result="success"])'/></span>,
-    Failures: <span class='failed'><xsl:value-of select='count(//status[@result="failed"])'/></span>,
-    <!-- FIXME: Must sum the times over runs.
-    Time: <xsl:value-of select='duration'/> s.
-    -->
-    </p>
+    successes: <span class='success'><xsl:value-of select='count(//status[@result="success"])'/></span>,
+    failures: <span class='failed'><xsl:value-of select='count(//status[@result="failed"])'/></span>,
+    total time: <xsl:value-of select='sum(//testcase/duration)'/>.
+    </xsl:element>
     <xsl:text>&#10;</xsl:text>
     <table>
     <xsl:text>&#10;</xsl:text>
