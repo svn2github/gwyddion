@@ -10,7 +10,7 @@
     Test program: <code><xsl:value-of select='$program'/></code>,
     successes: <span class='success'><xsl:value-of select='count(//status[@result="success"])'/></span>,
     failures: <span class='failed'><xsl:value-of select='count(//status[@result="failed"])'/></span>,
-    total time: <xsl:value-of select='sum(//testcase/duration)'/>.
+    total time: <xsl:value-of select='sum(//testcase/duration)'/> s.
     </xsl:element>
     <xsl:text>&#10;</xsl:text>
     <table>
