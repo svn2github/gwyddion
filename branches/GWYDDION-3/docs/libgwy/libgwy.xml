@@ -61,6 +61,7 @@
     <xi:include href="xml/resource.xml"/>
     <xi:include href="xml/gradient.xml"/>
     <xi:include href="xml/gl-material.xml"/>
+    <xi:include href="xml/fit-param.xml"/>
     <xi:include href="xml/user-fit-func.xml"/>
   </chapter>
   <chapter id='libgwy-utilities'>
