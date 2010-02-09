@@ -7,6 +7,7 @@ WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declarati
 
 library = libgwy
 libsuffix = $(PACKAGE_SUFFIX)
+toplevelincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 test_program = ./tests/testlibgwy
 mkenum_name = types
@@ -79,7 +80,7 @@ BUILT_SOURCES =
 lib_LTLIBRARIES = libgwy3.la
 nodist_libgwyinclude_HEADERS = $(public_built_headers)
 libgwyinclude_HEADERS = $(public_headers)
-pkginclude_HEADERS = $(main_header)
+toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
 libgwy3_la_SOURCES = \
