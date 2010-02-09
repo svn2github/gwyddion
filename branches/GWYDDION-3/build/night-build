@@ -32,7 +32,7 @@ function set_extra_version() {
 
 function autogen() {
   CONFIG_SHELL=/bin/sh ./autogen.sh \
-    --enable-gtk-doc \
+    --enable-gtk-doc --with-valgrind \
     --prefix=$installprefix
 }
 
