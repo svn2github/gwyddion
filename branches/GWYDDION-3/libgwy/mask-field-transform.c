@@ -17,6 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
@@ -24,6 +25,23 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/mask-field-internal.h"
+
+/*
+ * Valgrind follows the validity of individual bits.  However, it cannot follow
+ * them through our twiddling tables.  What it sees as indexing with a value
+ * that contain uninitialized padding bits (and thus an uninitialized memory
+ * use) in fact only redistributes the bits in a complicatd manner and we
+ * subsequently only use the good bits of the result.
+ *
+ * So apply VALGRIND_MAKE_MEM_DEFINED() where necessary.  At this moment the
+ * only such place is swap_xy_32x32() where we simply declare the entire source
+ * buffer as defined.
+ */
+#ifdef HAVE_VALGRIND
+#include <valgrind/memcheck.h>
+#else
+#define VALGRIND_MAKE_MEM_DEFINED(addr, len) /* */
+#endif
 
 static const guint16 flip_table[0x100] = {  // {{{
     0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0,
@@ -358,18 +376,18 @@ static const guint64 swap_table[0x100] = {  // {{{
 // that the individual bits of an original byte are always 8-bits apart and the
 // space between them is occupied by bits of the other bytes.
 static inline guint64
-gather8(const guint8 *scr8)
+gather8(const guint8 *src8)
 {
     if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
-        return (swap_table[scr8[0]] | (swap_table[scr8[4]] << 1)
-                | (swap_table[scr8[8]] << 2) | (swap_table[scr8[12]] << 3)
-                | (swap_table[scr8[16]] << 4) | (swap_table[scr8[20]] << 5)
-                | (swap_table[scr8[24]] << 6) | (swap_table[scr8[28]] << 7));
+        return (swap_table[src8[0]] | (swap_table[src8[4]] << 1)
+                | (swap_table[src8[8]] << 2) | (swap_table[src8[12]] << 3)
+                | (swap_table[src8[16]] << 4) | (swap_table[src8[20]] << 5)
+                | (swap_table[src8[24]] << 6) | (swap_table[src8[28]] << 7));
     if (G_BYTE_ORDER == G_BIG_ENDIAN)
-        return (swap_table[scr8[0]] | (swap_table[scr8[4]] >> 1)
-                | (swap_table[scr8[8]] >> 2) | (swap_table[scr8[12]] >> 3)
-                | (swap_table[scr8[16]] >> 4) | (swap_table[scr8[20]] >> 5)
-                | (swap_table[scr8[24]] >> 6) | (swap_table[scr8[28]] >> 7));
+        return (swap_table[src8[0]] | (swap_table[src8[4]] >> 1)
+                | (swap_table[src8[8]] >> 2) | (swap_table[src8[12]] >> 3)
+                | (swap_table[src8[16]] >> 4) | (swap_table[src8[20]] >> 5)
+                | (swap_table[src8[24]] >> 6) | (swap_table[src8[28]] >> 7));
     g_return_val_if_reached(0);
 }
 
@@ -406,6 +424,7 @@ swap_xy_32x32(const guint32 *src,
               guint slen,
               guint32 *dest)
 {
+    VALGRIND_MAKE_MEM_DEFINED(src, 0x20*sizeof(guint32));
     gwy_memclear(dest, 0x20);
     const guint8 *src8 = (const guint8*)src;
     guint8 *dest8 = (guint8*)dest;
