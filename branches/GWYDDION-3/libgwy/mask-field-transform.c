@@ -25,29 +25,68 @@
 #include "libgwy/line-internal.h"
 #include "libgwy/mask-field-internal.h"
 
-// XXX: Not very efficient, but probably sufficiently efficient.
-static void
-flip_row(GwyMaskIter iter,  // Initialized to the *end* of the row!
-         guint32 *dest,
-         guint width)
+static const guint16 flip_table[0x100] = {  // {{{
+    0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0, 0x10, 0x90, 0x50, 0xd0,
+    0x30, 0xb0, 0x70, 0xf0, 0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
+    0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8, 0x04, 0x84, 0x44, 0xc4,
+    0x24, 0xa4, 0x64, 0xe4, 0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4,
+    0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec, 0x1c, 0x9c, 0x5c, 0xdc,
+    0x3c, 0xbc, 0x7c, 0xfc, 0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2,
+    0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2, 0x0a, 0x8a, 0x4a, 0xca,
+    0x2a, 0xaa, 0x6a, 0xea, 0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa,
+    0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6, 0x16, 0x96, 0x56, 0xd6,
+    0x36, 0xb6, 0x76, 0xf6, 0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
+    0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe, 0x01, 0x81, 0x41, 0xc1,
+    0x21, 0xa1, 0x61, 0xe1, 0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1,
+    0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9, 0x19, 0x99, 0x59, 0xd9,
+    0x39, 0xb9, 0x79, 0xf9, 0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5,
+    0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5, 0x0d, 0x8d, 0x4d, 0xcd,
+    0x2d, 0xad, 0x6d, 0xed, 0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd,
+    0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3, 0x13, 0x93, 0x53, 0xd3,
+    0x33, 0xb3, 0x73, 0xf3, 0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb,
+    0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb, 0x07, 0x87, 0x47, 0xc7,
+    0x27, 0xa7, 0x67, 0xe7, 0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
+    0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef, 0x1f, 0x9f, 0x5f, 0xdf,
+    0x3f, 0xbf, 0x7f, 0xff,
+};  // }}}
+
+static inline guint32
+flip_32(guint32 x)
 {
-    for (guint j = 0; j < width >> 5; j++) {
-        guint32 v = 0;
-        for (guint k = 0; k < 0x20; k++) {
-            if (gwy_mask_iter_get(iter))
-                v |= NTH_BIT(k);
-            gwy_mask_iter_prev(iter);
+    // This is independent on the endianess, in both cases we exchange the
+    // same bits.
+    guint32 v = flip_table[x & 0xff];
+    x >>= 8;
+    v = (v << 8) | flip_table[x & 0xff];
+    x >>= 8;
+    v = (v << 8) | flip_table[x & 0xff];
+    x >>= 8;
+    return (v << 8) | flip_table[x & 0xff];
+}
+
+// Aligned dest is the only case we need.
+static void
+flip_row_dest_aligned(const guint32 *src,
+                      guint32 *dest,
+                      guint width)
+{
+    guint len = (width + 0x1f) >> 5;
+    guint end = width & 0x1f;
+    guint beg = 0x20 - end;
+    // Process src from the end
+    src += len - 1;
+    if (end) {
+        guint32 v0 = *(src--);
+        for (guint i = len-1; i; i--, dest++) {
+            guint32 v1 = *(src--);
+            *dest = flip_32((v0 SHR beg) | (v1 SHL end));
+            v0 = v1;
         }
-        *(dest++) = v;
+        *dest = flip_32(v0 SHR beg);
     }
-    if (width & 0x1f) {
-        guint32 v = 0;
-        for (guint k = 0; k < (width & 0x1f); k++) {
-            if (gwy_mask_iter_get(iter))
-                v |= NTH_BIT(k);
-            gwy_mask_iter_prev(iter);
-        }
-        *dest = v;
+    else {
+        for (guint i = len; i; i--, src--, dest++)
+            *dest = flip_32(*src);
     }
 }
 
@@ -58,18 +97,16 @@ flip_both(GwyMaskField *field,
     guint xres = field->xres, yres = field->yres, stride = field->stride;
     gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres/2; i++) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(field, iter, xres-1, yres-1 - i);
-        flip_row(iter, buffer, xres);
-        gwy_mask_field_iter_init(field, iter, xres-1, i);
-        flip_row(iter, field->data + (yres-1 - i)*stride, xres);
-        memcpy(field->data + i*stride, buffer, rowsize);
+        guint32 *rowu = field->data + i*stride;
+        guint32 *rowd = field->data + (yres-1 - i)*stride;
+        flip_row_dest_aligned(rowd, buffer, xres);
+        flip_row_dest_aligned(rowu, rowd, xres);
+        memcpy(rowu, buffer, rowsize);
     }
     if (yres % 2) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(field, iter, xres-1, yres/2);
-        flip_row(iter, buffer, xres);
-        memcpy(field->data + yres/2*stride, buffer, rowsize);
+        guint32 *rowc = field->data + (yres/2)*stride;
+        flip_row_dest_aligned(rowc, buffer, xres);
+        memcpy(rowc, buffer, rowsize);
     }
 }
 
@@ -80,10 +117,9 @@ flip_horizontally(GwyMaskField *field,
     guint xres = field->xres, yres = field->yres, stride = field->stride;
     gsize rowsize = stride * sizeof(guint32);
     for (guint i = 0; i < yres; i++) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(field, iter, xres-1, i);
-        flip_row(iter, buffer, xres);
-        memcpy(field->data + i*stride, buffer, rowsize);
+        guint32 *rowi = field->data + i*stride;
+        flip_row_dest_aligned(rowi, buffer, xres);
+        memcpy(rowi, buffer, rowsize);
     }
 }
 
@@ -137,8 +173,8 @@ gwy_mask_field_flip(GwyMaskField *field,
 
 #define C64 G_GUINT64_CONSTANT
 
-#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
 static const guint64 swap_table[0x100] = {  // {{{
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
     C64(0x0000000000000000), C64(0x0000000000000001), C64(0x0000000000000100),
     C64(0x0000000000000101), C64(0x0000000000010000), C64(0x0000000000010001),
     C64(0x0000000000010100), C64(0x0000000000010101), C64(0x0000000001000000),
@@ -225,11 +261,8 @@ static const guint64 swap_table[0x100] = {  // {{{
     C64(0x0101010101000001), C64(0x0101010101000100), C64(0x0101010101000101),
     C64(0x0101010101010000), C64(0x0101010101010001), C64(0x0101010101010100),
     C64(0x0101010101010101),
-};  // }}}
 #endif
-
 #if (G_BYTE_ORDER == G_BIG_ENDIAN)
-static const guint64 swap_table[0x100] = {  // {{{
     C64(0x0000000000000000), C64(0x0000000000000080), C64(0x0000000000008000),
     C64(0x0000000000008080), C64(0x0000000000800000), C64(0x0000000000800080),
     C64(0x0000000000808000), C64(0x0000000000808080), C64(0x0000000080000000),
@@ -316,8 +349,8 @@ static const guint64 swap_table[0x100] = {  // {{{
     C64(0x8080808080000080), C64(0x8080808080008000), C64(0x8080808080008080),
     C64(0x8080808080800000), C64(0x8080808080800080), C64(0x8080808080808000),
     C64(0x8080808080808080),
-};  // }}}
 #endif
+};  // }}}
 
 #undef C64
 
