@@ -138,11 +138,17 @@ AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 
 #############################################################################
 # Valgrind
-PKG_CHECK_EXISTS([valgrind],
-                 [gwy_enable_valgrind=yes
-                  PKG_CHECK_MODULES([VALGRIND],[valgrind])
-                  AC_DEFINE([HAVE_VALGRIND],1,[Define if we have valgrind])],
-                 [gwy_enable_valgrind=no])
+AC_ARG_WITH([valgrind],
+            [  --with-valgrind=ARG     compile with Valgrind support for testing (no)],
+            [gwy_enable_valgrind=$withval],
+            [gwy_enable_valgrind=no])
+if test "x$gwy_enable_valgrind" = xyes; then
+  PKG_CHECK_EXISTS([valgrind],
+                   [gwy_enable_valgrind=yes
+                    PKG_CHECK_MODULES([VALGRIND],[valgrind])
+                    AC_DEFINE([HAVE_VALGRIND],1,[Define if we have valgrind])],
+                   [gwy_enable_valgrind=no])
+fi
 AM_CONDITIONAL([HAVE_VALGRIND],[test "x$gwy_enable_valgrind" = xyes])
 
 #############################################################################
