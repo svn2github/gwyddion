@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
@@ -771,7 +770,7 @@ gwy_mask_field_copy(const GwyMaskField *src,
             } \
             if (!dend) \
                 continue; \
-            if (dend > send) { \
+            if (send && dend > send) { \
                 guint32 v1 = *(++p); \
                 guint32 vp = (v0 SHL kk) | (v1 SHR k); \
                 guint32 m = m1d; \
