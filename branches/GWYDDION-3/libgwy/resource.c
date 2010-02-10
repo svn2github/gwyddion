@@ -303,6 +303,7 @@ gwy_resource_class_base_init(GwyResourceClass *klass)
 static void
 gwy_resource_class_base_finalize(GwyResourceClass *klass)
 {
+    g_printerr("BASE FINALIZE %s\n", g_type_name(G_TYPE_FROM_CLASS(klass)));
     GWY_OBJECT_UNREF(klass->priv->inventory);
     g_free(klass->priv);
 }
@@ -869,22 +870,16 @@ gwy_resource_type_get_name(GType type)
 }
 
 static ResourceClass*
-ensure_class_and_inventory(GType type)
+ensure_class_inventory(GType type)
 {
     GwyResourceClass *klass = g_type_class_peek(type);
-    if (klass) {
-        g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-        if (klass->priv->inventory)
-            return klass->priv;
-    }
-    else {
-        /* This reference is released only in gwy_resource_types_finalize().
-         * You can imagine the class inventory holds it... */
-        klass = g_type_class_ref(type);
-        g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    }
+    // If gwy_resource_class_register() has been called we own a reference and
+    // hence klass must be non-NULL.
+    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
+    if (klass->priv->inventory)
+        return klass->priv;
+
     ResourceClass *cpriv = klass->priv;
-    // Check whether gwy_resource_class_register() has been called.
     g_return_val_if_fail(cpriv->name, NULL);
     cpriv->inventory = gwy_inventory_new_with_type(&cpriv->item_type);
     cpriv->item_inserted_id
@@ -906,7 +901,7 @@ ensure_class_and_inventory(GType type)
 GwyInventory*
 gwy_resource_type_get_inventory(GType type)
 {
-    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_val_if_fail(cpriv, NULL);
     return cpriv->inventory;
 }
@@ -963,10 +958,14 @@ gwy_resource_class_register(GwyResourceClass *klass,
         g_warning("Resource class name %s is not a valid identifier.", name);
     priv->name = name;
 
-    gpointer type = GSIZE_TO_POINTER(G_TYPE_FROM_CLASS(klass));
+    // This reference is released only in gwy_resources_finalize().
+    GType type = G_TYPE_FROM_CLASS(klass);
+    g_type_class_ref(type);
+
+    gpointer ptype = GSIZE_TO_POINTER(type);
     G_LOCK(resource_classes);
-    if (!g_slist_find(resource_classes, type))
-        resource_classes = g_slist_prepend(resource_classes, type);
+    if (!g_slist_find(resource_classes, ptype))
+        resource_classes = g_slist_prepend(resource_classes, ptype);
     G_UNLOCK(resource_classes);
 }
 
@@ -1602,7 +1601,7 @@ void
 gwy_resource_type_load(GType type)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
 
     gchar *userdir = gwy_user_directory(cpriv->name);
@@ -1662,7 +1661,7 @@ gwy_resource_type_load_directory(GType type,
                                  GwyErrorList **error_list)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
 
     GFile *gfile = g_file_new_for_path(dirname_sys);
@@ -1755,7 +1754,7 @@ gchar*
 gwy_resource_type_get_managed_directory(GType type)
 {
     g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
-    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_val_if_fail(cpriv, NULL);
     return cpriv->managed_directory
            ? g_file_get_path(cpriv->managed_directory) : NULL;
@@ -1781,7 +1780,7 @@ gwy_resource_type_set_managed_directory(GType type,
                                         const gchar *dirname_sys)
 {
     g_return_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE));
-    ResourceClass *cpriv = ensure_class_and_inventory(type);
+    ResourceClass *cpriv = ensure_class_inventory(type);
     g_return_if_fail(cpriv);
     GFile *gfile = g_file_new_for_path(dirname_sys);
     set_managed_directory(cpriv, gfile,
@@ -1945,12 +1944,11 @@ gwy_resources_finalize(void)
     GSList *l;
 
     for (l = resource_classes; l; l = g_slist_next(l)) {
-        GType type = (GType)GPOINTER_TO_SIZE(resource_classes->data);
+        GType type = (GType)GPOINTER_TO_SIZE(l->data);
         GwyResourceClass *klass = g_type_class_peek(type);
         ResourceClass *priv = klass->priv;
         // Disconnect in case someone else holds a reference.
-        GWY_SIGNAL_HANDLER_DISCONNECT(priv->inventory,
-                                      priv->item_inserted_id);
+        GWY_SIGNAL_HANDLER_DISCONNECT(priv->inventory, priv->item_inserted_id);
         GWY_OBJECT_UNREF(priv->inventory);
         // The eternal reference goes poof too.
         g_type_class_unref(klass);
