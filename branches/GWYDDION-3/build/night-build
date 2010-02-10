@@ -76,8 +76,9 @@ function unit_test() {
     pushd $dir >/dev/null
     make test-report
     cp -f test-report.html test-report-$dir.html
-    sed "s/test-report\\.html/test-report-$dir\\.html/" test-report-brief.html \
-      >test-report-brief-$dir.html
+    sed -e "s/test-report\\.html/test-report-$dir\\.html/" \
+        -e "s/coverage\\.html/coverage-$dir\\.html/" \
+        test-report-brief.html >test-report-brief-$dir.html
     popd >/dev/null
   done
 }
