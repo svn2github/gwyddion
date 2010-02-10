@@ -29,6 +29,9 @@
 enum {
     PROP_0,
     PROP_NAME,
+    PROP_GROUP,
+    PROP_FIT_TASK,
+    PROP_USER_FUNC,
     N_PROPS
 };
 
@@ -49,10 +52,13 @@ enum {
 };
 
 struct _GwyFitFuncPrivate {
-    GwyFitTask *fittask;
     gchar *name;
+    gchar *group;
+    GwyFitTask *fittask;
     const GwyXY *points;
     guint npoints;
+
+    gboolean is_valid;  // Set to %TRUE if the function actually exists.
 
     // Exactly one of builtin/user is set
     const BuiltinFitFunc *builtin;
@@ -115,6 +121,16 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
 
     g_object_class_install_property
         (gobject_class,
+         PROP_GROUP,
+         g_param_spec_string("group",
+                             "Group",
+                             "Group the function belongs to.",
+                             "builtin",
+                             G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
+                             | STATICP));
+
+    g_object_class_install_property
+        (gobject_class,
          PROP_NAME,
          g_param_spec_string("name",
                              "Name",
@@ -122,6 +138,26 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
                              "Constant",
                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY
                              | STATICP));
+
+    g_object_class_install_property
+        (gobject_class,
+         PROP_FIT_TASK,
+         g_param_spec_object("fit-task",
+                             "Fit Task",
+                             "GwyFitTask instance used by this function. "
+                             "May be NULL if no fitting has been done yet.",
+                             GWY_TYPE_FIT_TASK,
+                             G_PARAM_READABLE | STATICP));
+
+    g_object_class_install_property
+        (gobject_class,
+         PROP_USER_FUNC,
+         g_param_spec_object("user-func",
+                             "User function",
+                             "GwyUserFitFunc wrapped by this function. "
+                             "May be NULL if the function is built-in.",
+                             GWY_TYPE_USER_FIT_FUNC,
+                             G_PARAM_READABLE | STATICP));
 
     builtin_functions = _gwy_fit_func_setup_builtins();
 }
@@ -140,14 +176,14 @@ gwy_fit_func_constructed(GObject *object)
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
 
-    // TODO: Permit different function sources
-    const BuiltinFitFunc *builtin;
-    builtin = g_hash_table_lookup(builtin_functions, priv->name);
-    if (builtin) {
-        priv->builtin = builtin;
-        priv->nparams = builtin->nparams;
+    if (gwy_strequal(priv->group, "builtin")) {
+        priv->builtin = g_hash_table_lookup(builtin_functions, priv->name);
+        if (priv->builtin) {
+            priv->nparams = priv->builtin->nparams;
+            priv->is_valid = TRUE;
+        }
     }
-    else {
+    else if (gwy_strequal(priv->group, "userfitfunc")) {
         priv->user = gwy_user_fit_funcs_get(priv->name);
         if (priv->user) {
             g_object_ref(priv->user);
@@ -156,6 +192,7 @@ gwy_fit_func_constructed(GObject *object)
                 = g_signal_connect_swapped(priv->user, "data-changed",
                                            G_CALLBACK(user_func_changed),
                                            fitfunc);
+            priv->is_valid = TRUE;
         }
     }
     G_OBJECT_CLASS(gwy_fit_func_parent_class)->constructed(object);
@@ -179,6 +216,7 @@ gwy_fit_func_finalize(GObject *object)
 {
     GwyFitFunc *fitfunc = GWY_FIT_FUNC(object);
     FitFunc *priv = fitfunc->priv;
+    GWY_FREE(priv->group);
     GWY_FREE(priv->name);
     GWY_FREE(priv->indices);
     G_OBJECT_CLASS(gwy_fit_func_parent_class)->finalize(object);
@@ -196,6 +234,10 @@ gwy_fit_func_set_property(GObject *object,
     switch (prop_id) {
         case PROP_NAME:
         priv->name = g_value_dup_string(value);
+        break;
+
+        case PROP_GROUP:
+        priv->group = g_value_dup_string(value);
         break;
 
         default:
@@ -218,6 +260,18 @@ gwy_fit_func_get_property(GObject *object,
         g_value_set_string(value, priv->name);
         break;
 
+        case PROP_GROUP:
+        g_value_set_string(value, priv->group);
+        break;
+
+        case PROP_FIT_TASK:
+        g_value_set_object(value, priv->fittask);
+        break;
+
+        case PROP_USER_FUNC:
+        g_value_set_object(value, priv->user);
+        break;
+
         default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
         break;
@@ -228,15 +282,28 @@ gwy_fit_func_get_property(GObject *object,
  * gwy_fit_func_new:
  * @name: Function name.  It must correspond to either a builtin function or
  *        user function loaded from #GwyUserFitFunc resources.
+ * @group: Function group.  At present, possible values are "builtin" for
+ *         built-in functions and "userfitfunc" for user fitting functions
+ *         coming from #GwyUserFitFunc resources.
  *
  * Creates a new fitting function.
  *
- * Returns: A new fitting function.
+ * Returns: A new fitting function.  It can return %NULL if @group is invalid
+ *          or no function of called @name is present in the group.
  **/
 GwyFitFunc*
-gwy_fit_func_new(const gchar *name)
+gwy_fit_func_new(const gchar *name,
+                 const gchar *group)
 {
-    return g_object_new(GWY_TYPE_FIT_FUNC, "name", name, NULL);
+    GwyFitFunc *fitfunc = g_object_new(GWY_TYPE_FIT_FUNC,
+                                       "name", name,
+                                       "group", group,
+                                       NULL);
+    if (fitfunc->priv->is_valid)
+        return fitfunc;
+
+    g_object_unref(fitfunc);
+    return NULL;
 }
 
 /**
@@ -257,8 +324,10 @@ gwy_fit_func_get_value(GwyFitFunc *fitfunc,
                        const gdouble *params,
                        gdouble *value)
 {
-    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0.0);
-    return evaluate(fitfunc->priv, x, params, value);
+    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
+    FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, FALSE);
+    return evaluate(priv, x, params, value);
 }
 
 /**
@@ -275,6 +344,7 @@ gwy_fit_func_get_formula(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
     if (priv->builtin)
         return priv->builtin->formula;
     else
@@ -297,8 +367,10 @@ guint
 gwy_fit_func_get_n_params(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0);
+    FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, 0);
     // The cached value for whatever backend
-    return fitfunc->priv->nparams;
+    return priv->nparams;
 }
 
 /**
@@ -317,6 +389,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
     g_return_val_if_fail(i < priv->nparams, NULL);
 
     if (priv->builtin) {
@@ -359,6 +432,7 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
     g_return_val_if_fail(i < priv->nparams, NULL);
 
     gint power_x, power_y;
@@ -404,6 +478,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
     g_return_val_if_fail(params, FALSE);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, FALSE);
     gwy_memclear(params, priv->nparams);
     g_return_val_if_fail(priv->npoints, FALSE);
     if (priv->builtin) {
@@ -589,6 +664,7 @@ gwy_fit_func_get_fit_task(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
     if (priv->npoints)
         update_fit_task(fitfunc);
     return priv->fittask;
@@ -612,6 +688,9 @@ gwy_fit_func_set_data(GwyFitFunc *fitfunc,
     g_return_if_fail(GWY_IS_FIT_FUNC(fitfunc));
     g_return_if_fail(points || !npoints);
     FitFunc *priv = fitfunc->priv;
+    // FIXME: If we permit changing the function after construction, this is no
+    // longer correct.
+    g_return_if_fail(priv->is_valid);
     priv->points = points;
     priv->npoints = npoints;
     if (priv->fittask)
@@ -635,6 +714,7 @@ gwy_fit_func_get_user(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, NULL);
     return priv->builtin ? NULL : priv->user;
 }
 
@@ -670,6 +750,8 @@ _gwy_fit_func_new_expr_with_constants(void)
  *
  * It can wrap either a built-in fitting function or user function resources
  * #GwyUserFitFunc.
+ *
+ * FIXME: Built-in functions should be listed here.  Once we implement some.
  **/
 
 /**

@@ -53,7 +53,8 @@ struct _GwyFitFuncClass {
 };
 
 GType           gwy_fit_func_get_type       (void)                  G_GNUC_CONST;
-GwyFitFunc*     gwy_fit_func_new            (const gchar *name)     G_GNUC_MALLOC;
+GwyFitFunc*     gwy_fit_func_new            (const gchar *name,
+                                             const gchar *group)    G_GNUC_MALLOC;
 gboolean        gwy_fit_func_get_value      (GwyFitFunc *fitfunc,
                                              gdouble x,
                                              const gdouble *params,
