@@ -17,6 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __LIBGWY_ALIASES_H__
+#error Public headers must be included before the aliasing header.
+#endif
+
 #ifndef __LIBGWY_FIT_TASK_H__
 #define __LIBGWY_FIT_TASK_H__
 
