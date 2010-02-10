@@ -24,6 +24,39 @@
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/fit-func-builtin.h"
 
+static const FitFuncParam const_param[] = {
+   { "a",             0, 1, },
+};
+
+static gboolean
+const_function(gdouble x,
+               const gdouble *param,
+               gdouble *v)
+{
+    *v = *param;
+    return TRUE;
+}
+
+static gboolean
+const_estimate(const GwyXY *pts,
+               guint npoints,
+               gdouble *param)
+{
+    gdouble s = 0.0;
+
+    for (guint i = 0; i < npoints; i++)
+        s += pts[i].y;
+    param[0] = s/npoints;
+}
+
+static const BuiltinFitFunc const_builtin = {
+    .formula = "<i>a</i>",
+    .nparams = G_N_ELEMENTS(const_param),
+    .param = const_param,
+    .function = const_function,
+    .estimate = const_estimate,
+};
+
 static const FitFuncParam exp_param[] = {
    { "y<sub>0</sub>", 0, 1, },
    { "a",             0, 1, },
@@ -79,8 +112,7 @@ exp_estimate(const GwyXY *pts,
 }
 
 static const BuiltinFitFunc exp_builtin = {
-    .formula = "<i>f</i>(<i>x</i>) "
-        "= <i>y</i><sub>0</sub> + <i>a</i> exp(<i>x</i>/<i>b</i>)",
+    .formula = "= <i>y</i><sub>0</sub> + <i>a</i> exp(<i>x</i>/<i>b</i>)",
     .nparams = G_N_ELEMENTS(exp_param),
     .param = exp_param,
     .function = exp_function,
@@ -96,6 +128,7 @@ _gwy_fit_func_setup_builtins(void)
     GHashTable *builtins;
 
     builtins = g_hash_table_new(g_str_hash, g_str_equal);
+    add_builtin("Constant", const_builtin);
     add_builtin("Exponential", exp_builtin);
     return builtins;
 }
