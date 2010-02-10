@@ -19,6 +19,10 @@
 
 /*< private_header >*/
 
+#ifndef __LIBGWY_ALIASES_H__
+#error Private headers must be included after the aliasing header.
+#endif
+
 #ifndef __LIBGWY_FIT_FUNC_BUILTIN_H__
 #define __LIBGWY_FIT_FUNC_BUILTIN_H__
 
