@@ -25,7 +25,7 @@
  *
  ***************************************************************************/
 
-static void
+void
 curve_randomize(GwyCurve *curve,
                 GRand *rng)
 {

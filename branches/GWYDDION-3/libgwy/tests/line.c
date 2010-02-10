@@ -25,9 +25,9 @@
  *
  ***************************************************************************/
 
-static void
+void
 line_randomize(GwyLine *line,
-                GRand *rng)
+               GRand *rng)
 {
     gdouble *d = line->data;
     for (guint n = line->res; n; n--, d++)

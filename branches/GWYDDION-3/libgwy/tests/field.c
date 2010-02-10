@@ -25,7 +25,7 @@
  *
  ***************************************************************************/
 
-static void
+void
 field_randomize(GwyField *field,
                 GRand *rng)
 {

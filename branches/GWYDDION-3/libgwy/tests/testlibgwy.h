@@ -40,6 +40,12 @@ void          record_signal           (guint *counter);
 GwyMaskField* random_mask_field       (guint xres,
                                        guint yres,
                                        GRand *rng);
+void          curve_randomize         (GwyCurve *field,
+                                       GRand *rng);
+void          field_randomize         (GwyField *field,
+                                       GRand *rng);
+void          line_randomize          (GwyLine *field,
+                                       GRand *rng);
 
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 
