@@ -1070,6 +1070,9 @@ gwy_inventory_copy(GwyInventory *inventory,
                   "to ‘%s’.", name, newname, realnewname);
     }
     gwy_inventory_insert(inventory, item);
+    // Insert took a reference we don't want two.
+    if (priv->is_object)
+        g_object_unref(item);
 
     return item;
 }
