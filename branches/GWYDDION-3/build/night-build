@@ -117,9 +117,21 @@ function distcheck() {
 }
 
 function coverage() {
+  # Must be run after install, recompiles things with different CFLAGS.
   for dir in $libdirs; do
     pushd $dir >/dev/null
     ../build/coverage-test.sh
+    popd >/dev/null
+  done
+}
+
+function unit_test_valgrind() {
+  # Must be run after install, recompiles things with different CFLAGS.
+  for dir in $libdirs; do
+    pushd $dir >/dev/null
+    make clean
+    make CFLAGS="-O0 -ggdb"
+    make test-valgrind
     popd >/dev/null
   done
 }
@@ -162,6 +174,7 @@ else
   call check_symbols
   call install
   call make_dists
+  call unit_test_valgrind
   call coverage
   call build_rpm
   call distcheck
