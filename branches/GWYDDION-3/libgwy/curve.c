@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/curve.h"
-//#include "libgwy/curve-statistics.h"
+#include "libgwy/curve-statistics.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
@@ -513,8 +513,11 @@ static void
 copy_line_to_curve(const GwyLine *line,
                    GwyCurve *curve)
 {
+    gdouble q = gwy_line_dx(line);
+    gdouble off = 0.5*q + line->off;
+
     for (guint i = 0; i < line->res; i++) {
-        curve->data[i].x = (i + 0.5)/gwy_line_dx(line) + line->off;
+        curve->data[i].x = q*i + off;
         curve->data[i].y = line->data[i];
     }
     ASSIGN_UNITS(curve->priv->unit_x, line->priv->unit_x);
@@ -703,26 +706,6 @@ gwy_curve_get_format_x(GwyCurve *curve,
     unit /= curve->n - 1;
     return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
                                            style, max, unit*unit, format);
-}
-
-// FIXME:
-static void
-gwy_curve_min_max(const GwyCurve *curve,
-                  gdouble *pmin,
-                  gdouble *pmax)
-{
-    gdouble min = HUGE_VAL;
-    gdouble max = -HUGE_VAL;
-
-    const GwyXY *p = curve->data;
-    for (guint i = curve->n; i; i--, p++) {
-        if (p->y < min)
-            min = p->y;
-        if (p->y > max)
-            max = p->y;
-    }
-    GWY_MAYBE_SET(pmin, min);
-    GWY_MAYBE_SET(pmax, max);
 }
 
 /**

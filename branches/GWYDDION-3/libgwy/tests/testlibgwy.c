@@ -73,6 +73,7 @@ void test_line_new_part          (void);
 void test_line_serialize         (void);
 void test_curve_props            (void);
 void test_curve_serialize        (void);
+void test_curve_line_convert     (void);
 void test_mask_field_stride      (void);
 void test_mask_field_props       (void);
 void test_mask_field_copy        (void);
@@ -212,6 +213,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/line/serialize", test_line_serialize);
     g_test_add_func("/testlibgwy/curve/props", test_curve_props);
     g_test_add_func("/testlibgwy/curve/serialize", test_curve_serialize);
+    g_test_add_func("/testlibgwy/curve/line-convert", test_curve_line_convert);
     g_test_add_func("/testlibgwy/mask-field/stride", test_mask_field_stride);
     g_test_add_func("/testlibgwy/mask-field/props", test_mask_field_props);
     g_test_add_func("/testlibgwy/mask-field/copy", test_mask_field_copy);

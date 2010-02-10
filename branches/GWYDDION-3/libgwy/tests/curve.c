@@ -53,6 +53,30 @@ test_curve_assert_equal(const GwyCurve *result,
     }
 }
 
+/*
+static void
+test_curve_assert_similar(const GwyCurve *result,
+                          const GwyCurve *reference)
+{
+    g_assert(GWY_IS_CURVE(result));
+    g_assert(GWY_IS_CURVE(reference));
+    g_assert_cmpuint(result->n, ==, reference->n);
+
+    gdouble tolx = 1e-14*MAX(fabs(curve->data[curve->n-1].x),
+                             fabs(curve->data[0].x));
+    gdouble min, max;
+    gwy_curve_min_max(curve, &min, &max);
+    gdouble toly = 1e-14*MAX(fabs(max), fabs(min));
+
+    for (guint i = 0; i < result->n; i++) {
+        GwyXY resxy = result->data[i];
+        GwyXY refxy = reference->data[i];
+        g_assert_cmpfloat(fabs(resxy.x - refxy.x), <=, tolx);
+        g_assert_cmpfloat(fabs(resxy.y - refxy.y), <=, toly);
+    }
+}
+*/
+
 void
 test_curve_serialize(void)
 {
@@ -100,7 +124,7 @@ test_curve_props(void)
 }
 
 void
-test_curve_line_conversion(void)
+test_curve_line_convert(void)
 {
     enum { max_size = 27 };
     GRand *rng = g_rand_new();
@@ -108,16 +132,24 @@ test_curve_line_conversion(void)
     gsize niter = g_test_slow() ? 50 : 10;
 
     for (guint iter = 0; iter < niter; iter++) {
-        guint res = g_rand_int_range(rng, 1, max_size);
-        gdouble real = g_rand_double_range(rng, -1, 1)
+        guint res = g_rand_int_range(rng, 2, max_size);
+        gdouble real = g_rand_double_range(rng, 1, G_E)
                        * exp(g_rand_double_range(rng, -8, 8));
         gdouble off = g_rand_double_range(rng, -5, 5)*real;
         GwyLine *line = gwy_line_new_sized(res, FALSE);
-        line_randomize(line);
+        line_randomize(line, rng);
         gwy_line_set_real(line, real);
         gwy_line_set_offset(line, off);
 
         GwyCurve *curve = gwy_curve_new_from_line(line);
+        GwyLine *newline = gwy_line_new_from_curve(curve, 0);
+
+        g_assert_cmpfloat((newline->real - line->real), <=, 1e-14*line->real);
+        g_assert_cmpfloat((newline->off - line->off), <=, 1e-14*fabs(line->off));
+
+        g_object_unref(newline);
+        g_object_unref(line);
+        g_object_unref(curve);
     }
 }
 

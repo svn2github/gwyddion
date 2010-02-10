@@ -18,6 +18,7 @@ public_headers = \
 	$(srcdir)/array.h \
 	$(srcdir)/container.h \
 	$(srcdir)/curve.h \
+	$(srcdir)/curve-statistics.h \
 	$(srcdir)/error-list.h \
 	$(srcdir)/expr.h \
 	$(srcdir)/fft.h \
@@ -87,6 +88,7 @@ libgwy3_la_SOURCES = \
 	array.c \
 	container.c \
 	curve.c \
+	curve-statistics.c \
 	error-list.c \
 	expr.c \
 	fft.c \
