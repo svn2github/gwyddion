@@ -17,7 +17,7 @@ GType @enum_name@_get_type(void) G_GNUC_CONST;
 /*** BEGIN file-tail ***/
 G_END_DECLS
 
-#endif /* __@ID@_H__ */
+#endif
 /*** END file-tail ***/
 
 /* vim: set ft=cpp : */
