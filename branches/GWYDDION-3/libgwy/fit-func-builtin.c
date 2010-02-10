@@ -29,7 +29,7 @@ static const FitFuncParam const_param[] = {
 };
 
 static gboolean
-const_function(gdouble x,
+const_function(G_GNUC_UNUSED gdouble x,
                const gdouble *param,
                gdouble *v)
 {
@@ -47,6 +47,7 @@ const_estimate(const GwyXY *pts,
     for (guint i = 0; i < npoints; i++)
         s += pts[i].y;
     param[0] = s/npoints;
+    return TRUE;
 }
 
 static const BuiltinFitFunc const_builtin = {
