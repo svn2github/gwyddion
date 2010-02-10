@@ -144,10 +144,10 @@ test_mask_field_assert_equal(const GwyMaskField *result,
         guint32 *result_row = result->data + i*result->stride;
         guint32 *reference_row = reference->data + i*reference->stride;
         for (guint j = 0; j < result->xres/32; j++)
-            g_assert_cmpuint(result_row[j], ==, reference_row[j]);
+            g_assert_cmphex(result_row[j], ==, reference_row[j]);
         if (end) {
             guint j = result->xres/32;
-            g_assert_cmpuint((result_row[j] & m), ==, (reference_row[j] & m));
+            g_assert_cmphex((result_row[j] & m), ==, (reference_row[j] & m));
         }
     }
 }
