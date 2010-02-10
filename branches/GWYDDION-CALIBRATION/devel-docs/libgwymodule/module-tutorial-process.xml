@@ -1,0 +1,221 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="gwymodule-tutorial-process" revision="@(#) $Id$">
+  <refmeta>
+    <refentrytitle>Data Processing Modules</refentrytitle>
+    <manvolnum>3</manvolnum>
+    <refmiscinfo>Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Data Processing Modules</refname>
+    <refpurpose>
+      More about data processing modules
+    </refpurpose>
+  </refnamediv>
+
+  <refsect1>
+    <title>Run Modes</title>
+    <para>
+      <link linkend="GwyRunType">Run modes</link> specify how a module function
+      can be run. Data processing functions have two possible run modes.
+    </para>
+    <para>
+      If the function presents a (modal) dialog in which the user can for
+      instance adjust parameter values or make selections, include
+      %GWY_RUN_INTERACTIVE flag in its run modes.
+      If it makes sense to be run without asking, include %GWY_RUN_IMMEDIATE
+      flag in its run modes.  When a function is run in immediate mode, it
+      should fetch the last used parameter values from settings as if it is
+      run interactively.
+    </para>
+    <para>
+      Many functions allow both modes and behave according to the mode
+      they were called in.  The logic typically looks as follows:
+    </para>
+    <informalexample><programlisting>
+static void
+function(GwyContainer *data, GwyRunType run)
+{
+    FunctionArgs args;
+    GwyDataField *data_field;
+    GQuark quark;
+    gboolean ok;
+
+    /* Check run mode */
+    g_return_if_fail(run &amp; FUNCTION_RUN_MODES);
+
+    /* Get data field to operate on */
+    gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_KEY, &amp;quark,
+                                     GWY_APP_DATA_FIELD, &amp;data_field,
+                                     0);
+    g_return_if_fail(data_field &amp;&amp; quark);
+
+    load_args(gwy_app_settings_get(), &amp;args);
+
+    /* Present a GUI in interactive mode, quit if cancelled */
+    if (run == GWY_RUN_INTERACTIVE) {
+        ok = function_dialog(&amp;args);
+        save_args(gwy_app_settings_get(), &amp;args);
+        if (!ok)
+            return;
+    }
+
+    /* Perform the processing in immediate mode, or after user confirmation */
+    function_do(data, data_field, quark, &amp;args);
+}
+</programlisting></informalexample>
+  </refsect1>
+
+  <refsect1>
+    <title>Masks</title>
+    <para>
+      To highlight some areas in the data (like the grain modules do) you may
+      want to use a mask.  Masks are data fields too, differing only by a few
+      things from the ordinary ones.  Standalone masks do not exist in the
+      container, they are always associated with some channel data. Mask data
+      field units are irrelevant – the value range is always from 0 to 1;
+      0 being fully transparent and 1 the mask color set by user (may not be
+      fully opaque).  It should be noted that values different from 0 and 1 at
+      present do not have a well-defined meaning and current modules generally
+      produce and handle only values 0 and 1.
+    </para>
+    <para>
+      To attach a mask to a data field with id <symbol>id</symbol>, just create
+      a new data field and put it to the container at the appropriate key which
+      can be obtained with gwy_app_get_mask_key_for_id().
+    </para>
+    <informalexample><programlisting><![CDATA[
+GwyDataField *mask_field;
+GQuark quark;
+
+mask_field = gwy_data_field_new_alike(data_field, TRUE);
+/* Fill mask_field with the mask */
+...
+
+quark = gwy_app_get_mask_key_for_id(id);
+gwy_container_set_object(container, quark, mask_field);
+g_object_unref(mask_field);
+]]></programlisting></informalexample>
+    <para>
+      If you functions takes a mask as an input (e.g., as Grain Statistics
+      does), it should add %GWY_MENU_FLAG_DATA_MASK to its sensitivity flags.
+      The application will then make its menu item and/or toolbox button
+      insensitive when no mask is available.
+    </para>
+    <para>
+      The mask of current channel and its key can be obtained with
+      gwy_app_data_browser_get_current() as usual.
+    </para>
+    <informalexample><programlisting>
+gwy_app_data_browser_get_current(GWY_APP_MASK_FIELD, &amp;mask_field,
+                                 GWY_APP_MASK_FIELD_KEY, &amp;quark,
+                                 0);
+</programlisting></informalexample>
+    <para>
+      The function will set <symbol>mask_field</symbol> to %NULL and
+      <symbol>quark</symbol> to 0 if the mask does not exist.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Presentations</title>
+    <para>
+      Presentations are means to display some data derived from channel data
+      (or even completely unrelated data) to the user instead of the actual
+      data, while all other processing methods and tools still can see and work
+      on the real data.  An example is Shader module.
+    </para>
+    <para>
+      Working with presentations is similar to masks.  One only uses
+      gwy_app_get_show_key_for_id() instead of gwy_app_get_mask_key_for_id()
+      (most functions working with presentations have <literal>show</literal>
+      in their name for <literal>presentation</literal> is just too long) to
+      obtain the presentation key, and uses %GWY_APP_SHOW_FIELD and
+      %GWY_APP_SHOW_FIELD_KEY when requesting the current presentation and its
+      key.  Likewise one should add %GWY_MENU_FLAG_DATA_SHOW to menu
+      sensitivity flags of a function which processes presentations (this is
+      seldom needed as most functions only create presentations).
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Data Previews</title>
+    <para>
+      Data previews in module dialogs are best realized with #GwyDataView
+      widget which is used for two-dimensional data displays everywhere else
+      in <application>Gwyddion</application>.  This widget is a bit complex,
+      but we can often simplify things a lot in a module dialog.  The basic
+      scheme is following:
+    </para>
+    <orderedlist>
+      <listitem>
+        Create a local #GwyContainer that will hold the objects to display.
+        On rare occasions we can directly display data from the application's
+        data container, but normally we are going to modify the data and
+        therefore a local object is needed.
+      </listitem>
+      <listitem>
+        Fill it with objects.  If our function does not change a data field
+        it is easier and more efficient to just put it to the private container
+        too, modifiable objects have to be duplicated.  Since the container is
+        private, we are free to put anything anywhere, but to take advantage
+        of convenience data browser functions, we rather keep the application's
+        naming scheme and make the data field the 0th channel.
+      </listitem>
+      <listitem>
+        Construct the #GwyDataView.  We have to put at least one layer there,
+        namely #GwyLayerBasic and set it up to display our data field.
+        To display mask we must add #GwyLayerMask too, and for interactive
+        selections a <link linkend="standard-vector-layers">vector layer</link>
+        must be added.
+      </listitem>
+      <listitem>
+        When the data of a displayed data field changes, we call
+        gwy_data_field_data_changed() to notify its users.
+      </listitem>
+    </orderedlist>
+    <informalexample><programlisting>
+GtkWidget *data_view;
+GwyPixmapLayer *layer;
+GwyContainer *mydata;
+gdouble zoomval;
+
+/* Create new container */
+mydata = gwy_container_new();
+
+/* Fill it with objects and auxiliary data, dfield and id were obtained
+ * before. */
+gwy_container_set_object_by_name(mydata, "/0/data", dfield);
+gwy_app_sync_data_items(data, mydata, id, 0, FALSE,
+                        GWY_DATA_ITEM_PALETTE,
+                        GWY_DATA_ITEM_MASK_COLOR,
+                        GWY_DATA_ITEM_RANGE,
+                        0);
+
+/* Create the data view and its layers */
+data_view = gwy_data_view_new(mydata);
+layer = gwy_layer_basic_new<!--x-->();
+gwy_pixmap_layer_set_data_key(layer, "/0/data");
+gwy_layer_basic_set_gradient_key(GWY_LAYER_BASIC(layer), "/0/base/palette");
+gwy_data_view_set_base_layer(GWY_DATA_VIEW(data_view), layer);
+
+/* Calculate preview size */
+zoomval = PREVIEW_SIZE/(gdouble)MAX(gwy_data_field_get_xres(dfield),
+                                    gwy_data_field_get_yres(dfield));
+gwy_data_view_set_zoom(GWY_DATA_VIEW(data_view), zoomval);
+
+/* Pack data_view somewhere... */
+</programlisting></informalexample>
+    <para>
+      The foregoing example uses raw data keys as <literal>"/0/data"</literal>.
+      Assuming we keep the standard naming scheme we can partially avoid this
+      with functions like gwy_app_get_data_key_for_id() and
+      g_quark_to_string().  However, such helper functions do not exist for all
+      objects that can appear in a container therefore some knowledge of
+      the naming scheme is usually necessary.
+    </para>
+  </refsect1>
+</refentry>
+

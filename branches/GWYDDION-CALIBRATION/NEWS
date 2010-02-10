@@ -1,0 +1,2184 @@
+2.19 (2009-12-11)
+Application:
+- Translations updated: Czech, French, Russian.
+- Not starting a new instance of Gwyddion with --remote-new on X11 when none
+  is running (affecting most desktop launchers and menus) was fixed.
+- Thumbnails in recent file menu are shown even if menu icons are globally
+  disabled in Gtk+.
+
+Libraries:
+- libgwyddion: GwySIUnit parser ignores starting multiplication sign in units.
+- libgwydgets: Rotating and scaling 3D views with mouse works with Gtk+ 2.18.
+- libgwyapp: Massive leaks of GwyDataField references and, consequently,
+  memory in data browser thumbnail creation (introduced in 2.14) was fixed.
+
+Modules:
+- AIST-NT (new): Imports AIST-NT files.
+- PT3 file (new): Imports PicoHarp 2.0 format as photon count image.
+- Omicron flat (new): Import Omicron flat files.
+- Line correction: New Median difference line correction method was added.
+- NT-MDT: Curves frames are imported, point positions are still wrong though.
+- Nanoeducator: I-Z spectra written by newer software are supported.
+- BCR: Files with long header and header size specified within are supported.
+- MI file: Wrong scaling of 32bit files was corrected.
+- IGOR: Support for Asylum Research files was improved.
+- Profile: Wrong application of thickness in profiles different from
+  horizontal or vertical direction corrected.
+
+
+2.18 (2009-11-03)
+Application:
+- Translations updated: Czech, French, Russian.
+- Only file types that are not detected automaticaly are shown in the file
+  open dialog.
+- A new remote control backend was added: LibUnique.
+
+Libraries:
+- libgwyapp: Functions to parse typical text headers of SPM files were added.
+- libgwyprocess: Delaunay triangulation and XYZ data interpolation functions
+  were added.
+- libgwyprocess: New area statistics functions can either include or exclude
+  the masked area (previously only inclusive masking was possible).
+- libgwyprocess: GwyMaskingType has a public GwyEnum.
+- libgwydgets: gwy_radio_buttons_create() accepts also implicitely terminated
+  value-name tables.
+- libgwyddion: Gaussian fitting parameter b meaning was corrected to correspond
+  to the formula.
+
+Modules:
+- Attocube (new): Imports Attocube Systems ASC files.
+- NanoScan (new): Imports NanoScan XML files.
+- PLT (new): Imports Nanosurf PLT files.
+- Raw XYZ (new): Imports XYZ data and regularizes them to a grid.
+- IGOR: Support for Asylum Research files was substantialy improved.
+- NT-MDT: MDA frame support was improved.
+- NetCDF: Can read GXSM files with data in "FloatField" instead of "H".
+- Statistical quantities: The masked area can also be excluded.
+- Seiko: Supports more file types (with magic header SPIZ000AFM).
+- Nanonis: Missing data, repsetended by NaNs in the SXM files, are masked and
+  replaced with a neutral value upon import.
+- Pixmap export: TIFFs are written in binary mode, fixing broken exported
+  images on MS Windows.
+- Pixmap export: It is possible to export data as 16bit grayscale images (at
+  present for TIFF, PNG and PNM).
+- ASCII export: It is possible to set precision of exported values.
+- Object Synthesis: Cone, box and tent shapes were added.
+- Mark With: Marking result sometimes not corresponding to selected options
+  was fixed.
+
+Other:
+- Inclusion of wrong OpenGL header when building with Quartz backend was fixed.
+- Inclusion of gdkquartz headers when building for X11 on Mac was corrected.
+
+
+2.17 (2009-09-22)
+Application:
+- Translations updated: Czech, French, Russian.
+- OS X integration: menubar, language selection, opening files from Finder.
+- Language falls back to system langauge if gwy_locale is unset on Win32.
+
+Libraries:
+- libgwyprocess: Real length of extracted profiles was corrected for very
+  short lines and different vertical and horizontal measures.
+- libgwyprocess: gwy_data_field_area_fit_poly() reall works with NULL mask.
+- libgwyprocess: FFT functions no longer unpredictably lose input data with
+  FFTW3 -- they now use the FFTW_ESTIMATE planner that preserves the input
+- libgwydgets: Resource selection windows can be closed with Esc.
+
+Modules:
+- Curvature (new): Calculates global curvature of second-order surfaces.
+- RHK-SM4 (new): Imports RHK Technology SM4 files.
+- IGOR (new): Imports IGOR Pro binary waves (highly experimental).
+- Nanonics (new): Imports Nanonics NAN files (highly experimental).
+- FFT Synthesis (new): Generates random surfaces by spectral synthesis.
+- Object Synthesis (new): Generates random surfaces by object placement.
+- Arithmetic: New quantities bx1, by1, bx2, ..., by5 represent the local x-
+  and y-derivatives.
+- Arithmetic: History of previously used expressions is remembered.
+- Omicron MATRIX: Possible crash was fixed.
+- Createc: Support for floating-point files was added, including compressed
+  data.  Module is more robust with respect to broken files.
+- NT-MDT: Support for MDA frames was added.
+- Olympus: Value scales of imported data were corrected.
+- APE file: Support for newer 2.x files was implemented, some units and scales
+  corrected; channels have meaningful names now.
+- MI file: Support for 32bit binary files was added.
+- MicroProf: Can read binary FRT files (the first channel only).
+- Profile: The profile resolution is no longer limited by the data dimensions.
+- Nanoscope: Files broken by line-end transformations are detected and an
+  explanatory error message is given.
+
+Other:
+- Forgotten @LIBTIFF@ was removed from gwyddion pkg-config file.
+- Building RPMs hopefully works on Mandriva again, including working around
+  the utterly broken enforcement of -Werror=format-security in 2009.1.
+
+
+2.16 (2009-06-25)
+Application:
+- Translations updated: Czech, French, Russian.
+- About dialog shows optional features compiled into the specific build.
+
+Libraries:
+- libgwyprocess: Missing data field invalidation after Laplace iteration was
+  added, fixing wrong color scales after Laplace interpolation data removal.
+- libgwyddion: Lorentzian fitting preset parameter estimator was corrected.
+- libgwyprocess: Broken Fourier transformations of large prime sizes with
+  stride larger than one were fixed in simpleFFT (does not affect FFTW).
+- libgwydraw: GwySelection has a new virtual method crop().
+- libgwydraw: Function for filtering objects in GwySelection was added.
+- libgwyapp: Layout of previews in file dialogs, broken by Gtk+ 2.16, was
+  corrected.
+- libgwydgets: GwyDataView provides real offsets of displayed data field.
+- libgwydgets: Truncated logarithmic axes were really fixed.
+
+Modules:
+- Selection manager tool (new): Copies selections to other chanels and files.
+- FFT profile (new): Reads radial FFT modulus profiles.
+- PSIA: Format version 1.0.2 is supported.
+- OLS, JPK: GwyTIFF is used instead of libTIFF for file loading.  This should
+  fix a number of TIFF-related problems, namely on MS Windows.
+- RHK-SM3: Bug that prevented loading of some SM3 files was fixed.
+- WSxM: Files produced by Nanonics AFM are supported.
+- Pixmap export: libTIFF is no longer used, TIFF files are written directly.
+- Rawfile: Support for 64bit integer built-in types was added.
+- Rawfile: Updating the preview with Alt+U uses the new value of just-editted
+  field.
+- Layer modules: Support for crop() method was added.
+- Point layer: Can display selection as vectors from the origin (new property
+  "draw-as-vector").
+
+Other:
+- Win32 installer offers to choose the language to use.
+- Gwyddion no longer directly uses libTIFF on any platform (it used to be
+  optionally linked with libTIFF).
+
+
+2.15 (2009-05-20)
+Application:
+- Translations updated: Czech, French, Russian.
+
+Libraries:
+- libgwyapp: Critical warnings/crashes in data browser when a new object was
+  added was fixed.
+- libgwydgets: Initial state of widgets in GwySensitivityGroup might not be set
+  properly if they were added during a queued update.  This was fixed.
+- libgwydgets: 3D view unqueues full-size redraw when it is unrealized, fixing
+  crashes when the widget is destroyed before the redraw occurs.
+- libgwydgets: Rendering of GwyRuler with Quartz Gtk+ (native OS X) was fixed.
+- libgwyapp: Data browser window has wm role set to "gwyddion-databrowser".
+- libgwydgets: 3D view axes lengths and positions for data with non-square
+  pixels were corrected.
+- libgwyddion: Crash in gwy_memem() after failed partial match was fixed.
+- libgwydgets: More translatability problems were fixed.
+
+Modules:
+- Nanoeducator (new): NT-MDT Nanoeducator file import.
+- OLS: Module omitted in the MS Windows builds was added.
+- OPD file: Import of integer data was corrected.
+- Pygwy: module load() methods are run with the real filename, not with "test".
+- Calibrate: It is possible to shift the data by a numerically entered value.
+- Pixmap export: Inset scale bar is now antialiased.
+- MapVue: Lateral dimensions of imported data were corrected, value scale was
+  possibly fixed.
+- DME file: Flipped data was fixed, calibration factors are taken into
+  account now.
+- Scale: Occasional weird range of permitted scaling ratios was fixed.
+
+
+2.14 (2009-03-18)
+Application:
+- Translations updated: Czech, Russian.
+
+Libraries:
+- libgwyapp: Data browser displays channel thumbnails.
+- libprocess: Profile extraction auto number of samples always corresponds to
+  the number of pixels for horizontal and vertical lines.
+- libgwyapp: A helper function for interpolation of bad pixels upon data import
+  was added.
+- libgwydgets: Wrong x-axis value reported for mouse selection in GwyGraph in
+  x-axis logarithmic mode was corrected.
+- libgwydgets: 3D view shows data with non-suqare pixels with the physical
+  aspect ratio.
+- libgwydgets: 3D window has a button to set the z-scale to physically 1:1.
+- libgwydgets, libgwyapp: 3D view axes drawing can be globally disabled with
+  "/app/3d/axes/disable" boolean True
+  line in ~/.gwyddion/settings to work around broken OpenGL implementations.
+- libgwydgets: GwyAxis no longer enters an infinite resize loop when it
+  encounters completely bogus data such as undefined values and/or infinites.
+- libgwyddion: GwyNLFitPreset estimators always assing some reasonable values
+  to the parameters even if the estimation in fact fails.
+- Some forgotten strings were made translatable and gettext() was applied to
+  some to actually translate them.
+
+Modules:
+- Mark With (new): Create or modify a mask using another mask, data or
+  presentation.
+- Sensolytics (new): Imports Sensolytics file format.
+- SPIP ASC (new): Imports text SPM files that look like exported from SPIP.
+- MapVue (new): Imports MapVue data files (highly experimental).
+- Gradient: New function for local slope azimuth presentation was added.
+- BCR: Possible crash was fixed.
+- Raw graph import: Two-column text files are automatically detected and
+  offered for raw graph import.
+- Mask operations: Attach Mask was removed, superseded by Mark With.
+- Profile, Roughness tools: Subsampling of the profile for some directions of
+  purely horizontal/vertical lines was fixed.
+- Distance, Profile and Path leven tools: The maximum number of lines was
+  increased to 1024.
+- Crop tool: Mask on cropped channels is properly redrawn now.
+- PNI file: Vertical flipping was removed.
+- Many modules: Translation problems were corrected.
+
+
+2.13 (2009-02-09)
+Application:
+- Translations updated: Czech, French, Russian.
+
+Modules:
+- Raw graph import (new): Imports simple two-column text files as graphs.
+- Distance, Stats and Rougness tools: Copy to clipboard buttons actually work
+  (in 2.12 Save button did both actions and Copy did not do anything).
+- Nanoscope: Physical y-size is recalculated to conserve the pixel
+  y-size/x-size ratio in all files now.  This affects non-square images.
+- Stats tool: Angles are exported in degrees as stated, instead of radians.
+- HDF4 file: PSI files are flipped vertically to follow the convention.
+- All tools: Somewhat inconsistent conversion between pixel and real
+  coordinates were unified.
+
+Other:
+- File gwydion-thumbnailer.schemas is no longer distributed with paths from the
+  packager's system, it is created on the build system with the correct paths.
+- Outdated MSVC makefiles released in 2.12 were corrected.
+
+
+2.12 (2009-01-04)
+Application:
+- New translations: Russian.
+- Translations updated: Czech.
+- Tips of the day were added, accessible in Meta -> Tip of the Day.
+
+Libraries:
+- libgwyprocess: Some grain corners had not been counted as described in grain
+  boundary length calculation.  This was corrected.
+- libgwyprocess: New grain quantities boundary minimum and maximum were added.
+- libgwyprocess: GwyMaskingType enum was added.
+- libgwyddion: New nacro gwy_clear() zeroes memory in a sizeof-safe way.
+- libgwyddion: New function gwy_memmem() that wraps or emulates GNU memmem().
+- libgwydgets: GwyColorAxis uses two-line labels if number and units do not fit
+  on one line together.
+- ligwyprocess: DataField methods such as gwy_data_field_set_val() check the
+  type of the data field argument.
+- libgwyapp: gwy_get_foo() binary data functions were changed into a form that
+  hopefully works with strict aliasing rules.
+
+Modules:
+- Pygwy: Is enabled by default (on Unix).
+- Polynomial level: Possible crash when no mask is present was fixed (bug
+  introduced in 2.11).
+- Calibrate: No longer mangles units of the original data, Reset button works
+  again, some user interface corrections.
+- Pixmap export: Inset scale bar position and length can be adjusted.
+- Facet level: If a mask is present, offers a choice to exclude/include data
+  under mask.
+- Lines layer: `Random' line number sizes in pixmap export were fixed.
+- Level and Level Rotate: Previously selected masking type is honoured when
+  re-run with Ctrl-F (if a mask is present).
+- Distance, Stats and Roughness tools: Button copying results table to the
+  clipboard was added.
+- Drift, Polynomial distortion: Mask and presentation are transformed too.
+- Burleigh BII, Quesant: Botched modules were completely rewritten.
+- Sensofar: Module was completely rewritten, fixing crashes on 64bit systems.
+- RHK-SM3: Limited support for line data import was added.
+- Fit sphere: Critical message caused by failed assertions was fixed.
+- Scale, Rotate, Unrotate: Masks are always tranformed with rounding
+  interpolation, i.e. output pixels are either fully masked or not at all.
+- Grain statistics: Can save the statistics table or copy it to clipboard.
+- Grain distributions: Can add an header comment describing the columns.
+- Mask of outliers: No longer creates empty masks.  Should the mask be empty,
+  it is removed/not created instead.
+- Arithmetic: Knows the constant pi.
+- Arc revolution: Cluttered labels were fixed.
+- Row/column statistics: Average value was moved from Options to a place where
+  it is always visible and it is properly reset when no data is loaded.
+- Polynomial distortion, 1D FFT filter: Update button is insensitive when
+  automatic updates are enabled.
+
+Other:
+- New utility gwyddion-thumbnailer creates SPM file thumbnails for desktop
+  environments.  In this release, GNOME, XFce and KDE4 are fully supported with
+  thumbnails created on-the-fly.  In other TMS-conforming environments the
+  thumbnailer must be run manually to batch-create the thumbnails.
+- configure options --enable-python, --enable-perl, --enable-ruby and
+  --enable-pascal were canonicalized to the with-form: --with-python, etc.
+- Registered MIME types were updated, generic extensions such as *.dat or *.xml
+  are no longer used for file format recognition.
+- If `make install' is run with nonempty DESTDIR, freedesktop databases are not
+  updated, i.e. configure --disable-desktop-file-update is no longer needed.
+- Flag -fno-strict-aliasing is no longer added to gcc compilation options.
+- Missing RPM dependencies on Mandriva were fixed.
+- Missing header gwyconfig.h was added to the Win32 packages.
+
+
+2.11 (2008-12-16)
+Application:
+- Translations updated: Czech, French, Italian.
+
+Libraries:
+- libgwyprocess: Median line statistics no longer crashes when area width is
+  larger than its height.
+- libgwyprocess: Several column line statistics taking data subarea always from
+  the left edge instead the given column were fixed.
+- libgwyprocess: Wrong calculation of mean row statistics was fixed.
+- libgwyprocess: New line statistics (Rt, Rz, Ra, Skew and Kurtosis) added.
+- libgwyprocess: Bug in integer erosion (and certainty map therefore) present
+  in 2.9 and 2.10 was fixed.
+
+Modules:
+- Omicron MATRIX (new): Omicron MATRIX file import support.
+- SPMLabF (new): SPMLab floating-point format (.flt) import support.
+- OPD (new): Wyko Vision OPD file import support.
+- Tilt (new): Tilt data using numerically specified coefficients.
+- SPMLab: Can import R7 files now.
+- Pixmap: Image import broken by too hungry jpeg2000 pixbuf loader was fixed.
+- ECS file: Import works also in locales that use decimal comma.
+- Line selection: Can draw orthogonal endpoint markers expressing line width.
+- Omicron: Flipped spectra y-coordinates were fixed.
+- Polynomial level: Can exclude/include mask when fitting the data.
+- Grain statistics: Exports the (previously omitted) last grain too.
+- Row/column statistics: Displays the mean value of selected statistics.
+- Row/column statistics: Added Ra, Rt, Rz, Skew and Kurtosis
+- Facet level: Behaviour for surfaces with very large or small ratio of
+  height range to lateral dimensions was considerably improved.
+
+
+2.10 (2008-06-26)
+Libraries:
+- libgwyddion: Added FD curves
+
+Modules:
+- Queasant (new): Added import module
+- OLS (new): Olympus LEX 3000 file import support.
+- Sensofar (new): Added Sensofar PLu file import module.
+- SICM (new): Added IonScope SCIM file import module.
+- Burleigh BII (new): Added read support for burleigh BII binary file format.
+- Indentor analyze: Re-added.
+- Grain distributions: Possible crashes or bogus resolutions in graph
+  plotting mode were fixed.
+- Graph fitting: It is possible to plot the curve over the full range even
+  when only a subrange is fitted.
+- RHK SPM32 (SM2): Support for spectra was added.
+- MI file: Reading of ASCII image files was actually implemented.
+- Plugin-proxy: Memory overflow in dump file reading was fixed.
+- Surf: Added export to Surf files
+- stpfile: Improved support for extended source modes.
+
+
+2.9 (2007-10-19)
+Application:
+- Gtk+ 2.8 and Pango with Cairo rendering support is now required.
+- New translation: French.
+- Translations updated: Czech, Italian.
+
+Libraries:
+- libgwydgets: Gwy3DView uses PangoCairo instead of Pango FT2 for label
+  rendering now.
+- libgwydgets: Zoom of negative parts of graphs (broken in 2.8) works again.
+- libgwydgets: Graph distance measuring dialog uses the correct precision
+  for x-distances (instead of y-precision) and no longer displays (bogus)
+  angles when x and y are different physical quantities.
+- libgwyapp: A new set of functions for checking the consistency of a data
+  file (not thorough at this moment).
+- libgwyddion: libgwyddion/gwymathfallback.h is the preferred header to
+  define the math fallback functions now, for compatibility
+  libgwyddion/gwymath.h works too.
+- libgwyddion: All the math fallback functions are public inline functions (not
+  macros) named gwy_math_fallback_foo(), so it's possible to take their
+  addresses if necessary.
+- libgwyddion: Defining GWY_MATH_NAMESPACE_CLEAN before including
+  gwymathfallback.h prevents the definition of unprefixed aliases such as
+  cbrt for math functions not provided by the platform
+  (gwy_math_fallback_cbrt() remains available).  Use in the case of possible
+  name clash.
+- libgwydgets: Automatic range (distribution tails cut off) works with
+  presentations, fixed range is ignored for presentations.
+- libgwyddion: GwySIUnit recognizes `Ang' as an Angstroem abbreviation.
+
+Modules:
+- Shimadzu (new): Shimadzu SPM file version 2 file import.
+- Pygwy: Widgets and more data types are supported, miscellaneous bugs were
+  fixed.
+- Nanonis: Version 2 files claiming to be MSBFIRST are imported.
+- Nanonis: Slices extracted from 3D data are imported.
+- NetCDF: GXSM files that use `var_unit' instead of `unit' for the unit string
+  are imported with correct scales.
+- Nanoscope: Crash on data channels that do not refer to any soft scale in
+  their ZScale and use the raw hard scale was fixed.
+- Line layer: Crashes on Win32 while drawing line numbers were fixed, it
+  uses PangoCairo instead of Pango FT2 now.
+- Basic operations: Function to null horizontal offsets, moving the origin
+  to the upper left corner, was added.
+- Pixmap export: Can draw an inset scale bar.
+
+Other:
+- Compilation failure with GLib older than 2.10 (introduced in 2.8) was
+  fixed.
+- Compilation failure with FFTW3 in a non-standard location was fixed.
+
+
+2.8 (2007-08-31)
+Application:
+- Toolbox layout can be customized to certain extent by editing
+  ~/.gwyddion/ui/toolbox.xml (manually, there is no GUI for this).
+
+Libraries:
+- libgwyprocess: gwy_fft_simple() can handle transforms of arbitrary size.
+- libgwyprocess: Resampling was removed from integral transform functions as
+  all sizes are always transformable directly now.
+- libgwyprocess: New grain quantity area at grain half-height.
+- libgwydgets: Icons in Gwyddion user directory (~/.gwyddion/pixmaps) are
+  registered, allowing to install modules with new icons to home.
+- libgwydgets: When basic Gwy3DWindow controls are shown, it is possible to
+  select the mode with keys R(otation), S(cale), V(alue scale), L(ight).
+- libgwyprocess: New class GwyGrainValue represnting built-in and
+  user-defined grain properties.
+- libgwydgets: Functions to display and operate with a grain value tree view.
+- libgwydgets: Graph axes can be set to logarithmic regardless of the data.
+  For the abscissa, display is limited to positive values.  For the ordinate,
+  the absolute value is plotted.
+- Grain mark by threshold and remove by threshold: Also display the real
+  threshold height next to the percentage.
+
+Modules:
+- JPK: A typo causing failure to load any JPK file was fixed.
+- Omicron: Empty spectroscopy files are ignored instead of crashing on them.
+- FFT, CWT, FFT filters: Data are no longer resampled, images of all
+  dimensions are transformed as they are.
+- DWT, DWT anisotropy: Possibly bogus output on data with dimensions not
+  being powers of 2 was fixed.  They honour the selected interpolation type
+  instead of always using linear.
+- DWT: The output resampling option was removed.
+- Grain measure, Grain distributions, Grain correlations: Grain area at
+  half-height was added.
+- Grain correlations, Grain distributions: the selectors now use tree views.
+- Tip operations: Tips with non-matching measures are offered too, with a
+  resampling notice.
+
+Other:
+- Autoconf 2.60 is required to build from svn checkout and/or for development.
+- It builds with builddir != srcdir.
+- libpython should be properly detected on FreeBSD now.
+- Configure option --enable-library-bloat, enforcing linking of libraries
+  (including modules) with all their dependencies, was added.
+- Configure option --enable-gtk-doc behaves as is usual in other packages
+  (enabling build documentation as a part of `all' target).
+- Some more build system clean-ups.
+
+
+2.7 (2007-06-26)
+Application:
+- Metadata browser:  It is possible to save the metadata.
+- Infinite startup notification after remote file opening was fixed.
+- The Tools toolbox was reorganized from a more or less chronological tool
+  order to functionality-based groups.
+- Crash in Metadata browser upon metadata edit when it was repeatedly closed
+  and reopened was fixed.
+- It is possible to merge data from other files into a loaded file.
+- Translations updated: German, Italian.
+
+Libraries:
+- libprocess: New GwySpectra object representing single point spectra.
+- libgwyddion: New class of curve fitting presets: GwyFDCurvePreset.
+- libgwyddion: New math function to test whether a point is inside a polygon.
+- libprocess: gwy_fft_simple() FFT backend can handle transform sizes of form
+  2^n 3^m 5^k.
+- libgwydgets: 3D view shows value units in z labels (instead of lateral).
+- libgwyprocess: Bogus complex 2D FFT transform in the case of
+  gwy_fft_simple() backend was fixed.
+- libgwyapp: Possible crash in Document history when a file is saved under a
+  new name was fixed.
+- libgwydgets: gwy_data_view_export_pixbuf() honours realsquare setting.
+- libgwyapp: Data browser acquired a Spectra tab and its API some SPS related
+  functions.
+- libgwyapp: Up to date thumbnails are no longer overwritten.
+- libgwyprocess: Fractal interpolation works with Microsoft floating point
+  implementation.
+- libgwydgets: Impossibility to edit graph selection boundaries when it was
+  drawn the `wrong' direction was fixed.
+- libgwydgets: Invisible graph label (key) getting in the way of selection was
+  fixed.
+- libprocess: New grain distribution quantities x and y centre position,
+  inclination theta and phi.
+- libgwydgets: GwyLayerBasic has a new "default-range-type" property for color
+  range mapping type used when none is set in the data.
+- libgwyprocess: Wrong type assertions in gwy_data_line_fft_raw() were fixed.
+- libgwyprocess: Complex one-dimensional transforms actually work with FFTW3.
+- libgwyddion: New NL fitter presets Gaussian and Exponential RPSDF.
+- libgwyddion: Exponential PSDF normalization factor was corrected, the
+  wrong one gave about 6% lower sigma.
+- libgwyddion: Initial parameter value estimators for ACF and PSDF functions
+  were improved.
+- libgwydgets: Logarithmic axes sometimes starting at values larger than the
+  minimum were fixed.
+- libgwydgets: GwyGraph's model is registered as property "model".
+- libgwydgets: GwyGraphWindow `logarithmic scale' buttons initial state
+  is set properly and it reflects graph model changes.
+- libgwyprocess: Elliptic area functions invalidate data field properly.
+- libgwyddion: GwyContainer has methods to obtain all keys.
+- libgwyprocess: gwy_data_field_circular_area_extract_with_pos() actually
+  extracts positions with origin in the central pixel.
+- libgwyprocess: Possible array bad memory access in
+  gwy_data_field_get_autorange() was fixed.
+- libgwyprocess: DataField cache is not serialized any more and serialized
+  caches are ignored on deserialization.
+- libgwyprocess: New methods to calculate 2D autocorrelation function.
+- libgwymodule: Module browser displays also modules that failed to load,
+  with the failure reason.
+- libgwydgets: Strage display when physically but not pixelwise square data
+  were rotated by 90 degrees in physically square display mode was corrected.
+
+Modules:
+- Path level tool (new): Levels rows along arbitrary lines.
+- Spectro tool (new): Visualize and extract single point spectra.
+- Grain measure tool (new): Calculate characteristics of individual grains.
+- Rougness tool (new): ISO roughness parameters evaluation.
+- Cut Graph (new): Extracts parts of graph curves.
+- FD Curve Fit (new): Fits force data curvers.
+- ACF 2D (new): Calculates two-dimensional autocorrelation function.
+- Pygwy: Scripts much closer to first-class data processing and file modules
+  are possible now if the script is written a Python module exporting
+  appropriate interface.
+- Pygwy: It is possible to build on MS Windows (not enabled by default, the
+  module status is still experimental).
+- Pygwy: Various changes to how the Python interpreter is embedded, more
+  not automatically generated functions were added.
+- Pixmap import: It is possible to set arbitrary units, the preview is bigger.
+- Pixmap export: Text size can be set independently, zoom can be specified by
+  desired width and height, cases of wrong preview scaling were fixed.
+- Edge: New Step step detection function.
+- 2D FFT: Limitation to rectangular images was removed.
+- Omicron: Imports single point spectra.
+- PSIA: It does not require libTIFF any more, crashes due to PSIA files not
+  being proper TIFF files were fixed.
+- Rawfile: Critical messages on Reset were fixed.
+- Gwyfile: It does not remap channel and graph ids upon load and save.
+- ASCII export: It has options to enforce dot as the decimal separator and to
+  add a comment header with some channel information.
+- SDfile: Can export too (text format only).
+- Nanoscope: The z-scale of imported version 4.x files was corrected and
+  their channel types are used for channel titles now.
+- Nanoscope: Supports Nanoscope III STM files.
+- Nanonis: Supports version 2 files.
+- WSxM: Flipped data was fixed.
+- Polynomial distortion: GtkEntry errors when instant update took too long
+  were fixed.
+- Facet level: Data with undefined inclinations due to incompatible units are
+  rejected now, convergence test was corrected.
+- Grain distributions: New Correlate function to plot one grain quantity as
+  a function of another.
+- Convolution filter: Divisor value is actually used for normalization
+  instead of being ignored.
+- Point layer: Radius indicator scales properly when the layer is scaled.
+- Calibrate: The precision of scale spin buttons was increased.
+- Graph fit, Critical dimensions: Disambiguating `prefixes|' left visible in
+  user interface labels were fixed.
+- File modules: Some sanity checks were added.
+- Distance tool: It is possibile to save the table.
+- Grain distributions: Grain positions and inclinations were added.
+- Slope distribution: Inclination theta distribution was added.
+- 2D FFT filter: Resampled vertical resolution is displayed properly (instead
+  of displaying horizontal resolution again).
+- Read Value, Level3: Show selection check button initial state is set
+  properly.
+- Color Range tool: It is possible to set default color mapping type applied
+  when none is specifically set. Manual range setting was enabled.
+- Statistical functions tool: Radial PSDF was added.
+- Mask editor tool: New option to prevent merging of grains by growing mask.
+- Read Value: Can shift data values to make the currently selected point lie
+  on the zero plane.
+- Level3: New option to make the fitted plane the zero value plane.
+- Mask editor tool: Thin lines were added to the set of possible shapes.
+- Symbol of theta which often rendered wrong on Win32 was replaced with
+  another glyph.
+- Read Value: It no longer displays 123456 as the x pixel coordinate when no
+  data is loaded.
+- Edge: Local Nonlinearity and Inclination output is less blocky as the
+  calculations use circular neighbourhoods now.
+- Nanoscope: Can loads files with `Scan Size' in place of `Scan size' field.
+- 2D FFT filter: Exchanged lateral resolutions and units of FFT output and
+  filtered image were corrected.
+- Graph level: Emits curve data change notification so that the graph can
+  redraw itself properly.
+- RHK-SM2 and RHK-SM3: Horizontally flipped images were corrected.
+- Basicops: Square samples function uses Round interpolation for masks now.
+- Drift compensation: Garbage mask that was briefly displayed on the first
+  update do not appear any more.
+- Crop: Physically square display mode is honoured on the new cut channel.
+- Grain mark, watershed, scars, drift correction, polynomial distortion,
+  FFT filters: physically square display mode is honoured in previews.
+- 1D FFT filter: Various odd effects of the vertical filter on non-square data
+  were corrected.
+
+Other:
+- Freedesktop MIME types conflicting with existing types were removed or
+  otherwise corrected.
+- RPM spec file removes .la files manually again as certain distros
+  aggressively re-generate all autotools files.
+- Distributed API documentation links to on-line versions of other
+  documentation (Gtk+, GLib, ...) instead of random local locations.
+  Packagers are recommended to rebuild the documentation to obtain local
+  links appropriate for their systems.
+- API documentation look and feel matches gwyddion.net, more or less.
+
+
+2.5 (2007-03-10)
+Application:
+- Options for opening files in an already running instance of Gwyddion were
+  added (--remote-new, --remote-existing).
+- It is possible to save a file with graphs only.
+- Drag'n'drop of files onto toolbox actually works now with modern file
+  managers and on Win32.
+- It's possible to copy (compatible) curves among graphs by Drag'n'drop from
+  graph Curves, and delete them by pressing Delete key in Curves.
+- Translations updated: Czech, German, Italian.
+
+Libraries:
+- libgwydgets: New GwyGraphCurves widget showing the curve list with
+  properties, it's used in GwyGraphWindow.
+- libgwydgets: Light source theta and phi determined by the same mouse
+  coordinate were fixed.
+- libgwyprocess: Skewed gwy_data_field_area_fit_local_planes() output for
+  even plane sizes was fixed.
+- libgwyapp: Document history Prune button bug causing Critical Gtk+ messages
+  was fixed.
+- libgwyddion: NL fitter presets can derive parameter units from the units
+  of fitted curves.
+- libgwyddion: New SI Unit function to take root of a unit.
+- libgwyprocess: New function for general xy plane transform/distortion
+  gwy_data_field_distort().
+- libgwyprocess: Critical dimension evaluator can derive parameter units from
+  the units of fitted data.
+- libgwyapp: Drag'n'drop is really possible also with data browser graph list,
+  not just with channels.
+- libgwyapp: Data and graph windows not getting keyboard focus were fixed.
+- libgwyddion: gwy_math_humanize_numbers() tries harder to make numbers
+  around 1 be written without 10^3/10^-3 mupltipliers.
+- libgwydgets: A few more graph symbols were added, useless `double dash'
+  line style was removed (from GUI selectors, it remains in the Gdk enum).
+- libgwydgets: Numeric scale and value scale entries in GwyGraphWindow allow
+  non-integer values.
+- libgwyddion: ROUND() was deprecated, use namespace-clean GWY_ROUND().
+
+Modules:
+- Polynomial Distortion (new): Distorts (or corrects distortion) in xy plane.
+- Nanoscope II (new): Old Nanoscope II file import.
+- Intematix (new): Intematix SDF file import.
+- Pygwy (new): Direct python scripting support.  Currently highly experimental
+  (and disabled by default) and Unix-only.
+- Graph fit, Critical dimension: User interface was improved, fitted parameters
+  have units, fitted curve can be added to the original graph, results saving
+  was integrated into the dialog.
+- Raw file import: It's possible to set arbitrary units, the preview is
+  bigger, user interface improvements.
+- Profile tool: Tool settings are remembered.
+- Omicron: Imported images flipped upside down were fixed.
+
+Other:
+- Freedesktop file type associations were extended to many more file types.
+- File associations created now run `gwyddion --remote-new' instead of just
+  `gwyddion' therefore files are opened in running instances by default.
+- Gwyddion icon is now installed to the corresponding hicolor icon theme
+  directory instead to the top-level icon directory.
+- Flag -fno-strict-aliasing is now automatically added to CFLAGS when
+  compiled with gcc to prevent miscompilation.
+- Gtk-doc 1.8 or newer is required to rebuild the API reference.
+
+
+2.4 (2007-02-01)
+Application:
+- Build failure due to the missing #include <unistd.h> in gwymoduleutils.c
+  (from 2.3) was fixed.
+- Translations updated: Italian, Czech.
+
+Libraries:
+- libgwyapp: Miscellaneous binary data file import problems caused by the
+  new floating point data getters were fixed by reverting to the old
+  implementation.
+- libgwyapp: Fixed crash when a mask or presentation was added to a channel in
+  a multi-channel file and then the channel was immediately deleted.
+- libgwydgets: GwyAxis sometimes using too low precision (from 2.3) was fixed.
+- libgwyprocess: 1D convolution and Gaussian filters were added.
+- libgwyddion: New unit arithmetic function gwy_si_unit_power_multiply() was
+  added.
+- libgwyprocess: 3x3 convolution filters are more efficient due to a
+  specialized implementation.
+- libgwyapp: Changing file type in file open dialog when filtering is enabled
+  updates the list of displayed files to match the new file type.
+- libgwyprocess: Height and angle distribution y-units are x-units^-1 now,
+  so that the full integral is 1 also unit-wise.
+
+Modules:
+- Edge: Zero crossing edge detector was added.
+- Grain statistics: Can calculate total grain volumes.
+- Filters tool: Gaussian smoothing filter was added.
+- Nanonis: Import of non-square images was hopefully fixed.
+- Convolution filter: Minor user interface fixes.
+- Edge: Laplacian no longer clears border lines of pixels of output.
+- Statistical functions tool: The labels on x and y axes match how the
+  quantities are denoted in the user guide.
+
+Other:
+- Confusion between AM_FOO and FOO variables in makefiles was resolved, user
+  variables such as CFLAGS, LIBS can be really used for overriding now.
+
+
+2.3 (2007-01-21)
+Application:
+- Translations updated: Italian, Czech.
+
+Libraries:
+- libgwyapp: Wrong graph and data process toolbox sensitivity after closing
+  a graph was fixed.
+- libgwyapp: File previews were disabled for Gtk+ 2.6 because GtkIconView
+  implements GtkCellLayout only since 2.8.  The version check is run-time,
+  an executable compiled with Gtk+ 2.6 will display previews when run with
+  a newer Gtk+.
+- libgwydgets: Data view checks xreal, yreal changes when updating and
+  recalculates measures.
+- libgwydgets: GwyNullStore iter_nth_child() method sets the iter properly,
+  fixing use in as a combo box model.
+- libgwydgets: Ctrl-C to copy graph image to clipboard actually works.
+- libgwyprocess: Function gwy_data_field_get_grain_bounding_boxes() finds
+  bounding boxes of all grains.
+- libgwydgets: Truncated logarithmic axes were fixed.
+- libgwydgets: Formatting of both logarithmic and linear axis ticks was
+  improved.
+- libgwyprocess: Volume and grain volue calculation functions were added.
+- libgwyapp: Application 3D windows have `Set Defaults' button that makes
+  the current view parameters defaults for new views.
+- libgwyprocess: Slightly wrong grain surface area estimate calculation was
+  fixed.
+- libgwyprocess: Possible write out of array borders due to rounding errors
+  in gwy_data_field_area_dh() was fixed.
+- libgwyapp: Document history view can be filtered by name.
+- libgwyapp: A set of utility functions for file modules was added.
+- libgwyapp: A set of utility functions for saving reports and other auxiliary
+  data was added.
+- libgwyapp: Convenience functions to set `waiting' cursor on windows were
+  added.
+- libgwyapp: File is loaded for preview is reused for the real load instead
+  of throwing it away and loading again.
+- libgwydgets, libgwyapp: Miscellaneous small memory leaks were fixed.
+
+Modules:
+- MicroProf (new): MicroProf FRT data file import.
+- Slope distribution: Coordinates of output were corrected to be really the
+  derivatives, not just propertional to them.
+- Pixmap: Crash with fixed gdk-pixbuf which properly closes pixbuf loaders
+  on failure was fixed.
+- Calibrate: Crash when presentation is present on data was fixed.
+- Merge: Possible crashes and wrong output size on certain input data sizes
+  were fixed.
+- Facet analysis: Phi calculation was unified with other modules, the size of
+  neighbourhood used to calculate local inclinations can be controlled.
+- Mark scars: Instant updates option is available.
+- Fit Sphere: Swapped x and y was fixed, radii smaller than data size work,
+  data offsets are honoured, palette and other attribudes are copied to the
+  result
+- RHK SPM32 (SM2): Support for semi-broken files probably written by Nova
+  software was added.
+- JEOL: Support for more data subtypes was added.
+- Read value tool: Can display the selection marker with averaging radius.
+- Rawfile: Skipping fields works when delimiter is `any whitespace'.
+- Mark scars, Mark grains by threshold, Mark grains by watershed, Remove
+  grains by threshold, Drift, Facet analysis, Immerse: Colour mapping settings
+  from the data window are honoured in the preview.
+- Grain watershed: Initial mask drawing artefacts were fixed.
+- Grain distributions: Grain volumes were added.
+- NT-MDT: Frame title is used for channel title (if present), some more
+  metadata was added.
+- NetCDF: Attribute long_name is used for channel title of GXSM files.
+- Fit Sphere, Graph Fit, Graph CD: Use the new Gtk+ file chooser dialogs
+  instead of GtkFileSelection.
+- Statistical quantities: Export that could become confused over whether
+  lateral and value units are identical by data window switch during the
+  export dialog was fixed.
+- Pixmap: Possible hang in preview was fixed.
+
+Other:
+- ./configure warning about too old FFTW3 version should be printed only on
+  really 64bit systems.
+
+
+2.2 (2006-12-15)
+Application:
+- File open dialogs have a preview (showing all channels in the file).
+- 3D view export uses the new Gtk+ file dialog (as everything else).
+- Translations updated: Italian, Czech.
+
+Libraries:
+- libgwyprocess: Broken B-spline and Omoms interpolations were made identical
+  to Key where they could not be fixed.  A new set of interpolation functions
+  that work with non-interpolating basis too was added.
+- libgwyprocess: Interpolation and convolution filters use mirror-extension
+  for outside data values instead of various kluges.
+- libgwyprocess: Cubic Schaum interpolation was added.
+- libgwyapp: Menu construction hang when two identical items occured was
+  fixed.
+- libgwyprocess: New functions to get row/column statistics.
+- libgwyprocess: New functions to get mean root square of derivatives of data
+  lines.
+- libgwyapp: Crash in tools using rectangular selection when no data was
+  present and the selection was modified manually was fixed (it is not
+  possible to modify the selection when there's no data now).
+- libgwydgets: Several reference leaks, namely in graph widgets, were fixed
+  and proper chaining of destroy() and finalize() method added.
+- libgwydgets: GwyLayerBasic disconnects from previous container item
+  properly when presentation key is changed.
+- libgwydgets: Artifical limitations on possible data view zooms were
+  removed.
+- libgwydgets: GwyDataWindow title displays initial zoom correctly when the
+  window is autosized to fit to the screen.
+
+Modules:
+- DME file (new): DME Rasterscope data file import.
+- JEOL file (new): JEOL SPM data import.
+- NetCDF (new): NetCDF file import, currently only GXSM files.
+- Convolution filter (new): General convolution filter with user-defined
+  matrix.
+- Row/column statistics tool (new): Calculates characteristics of each row
+  or column in selected area.
+- Drift compensation (new): Simple correction of drift seen in the slow
+  scanning axis.
+- Mask operations: It is possible to copy mask from one channel to another.
+- PNI file: Missing value endian conversion was added (affected big-endian
+  machines).
+- Rotate: Units lost with enabled expansion were fixed.
+- Read value tool: Displays local plane inclination angles too.
+- Edge: New method Inclination visualizes local slope angle.
+- Distance: Phi value convention matches other tools and functions now.
+- 2D FFT: Transform output has the origin of coordinates in the centre, as
+  it should be. Transform input is no more normalized and output has proper
+  normalization with respect to input.
+- STMPRG: Import of metadata was fixed.
+- Graph export ASCII: Export crash bug was fixed.
+- Miscellaneous process modules: The look and labels of preview updating
+  buttons were unified.
+- Pixmap: Export honours data field coordinate origin offsets.
+
+Other:
+- Build errors on big-endian systems (from 2.1) were fixed.
+
+
+2.1 (2006-11-05)
+Application:
+- Translations updated: Italian, Czech.
+- Toolbox style was modernized a bit.
+
+Libraries:
+- libgwyapp: File type selection user interface was improved, filtering by
+  file type is possible.
+- libgwyapp: Repeat Last menu item behaving identically to Re-Show was fixed.
+- libgwydgets: Value formatting in graph distance measure window was
+  improved.
+- libgwydgets: Graph area problems (broken selection, zoom) on Gtk+ 2.6 was
+  fixed.
+- libgwydgets: gwy_graph_model_remove_curve_by_description() disconnecting
+  wrong signal handlers was fixed.
+- libgwydgets: Graph selections have per-class headers, gwygraphselections.h
+  includes them all.  They also have standard gwy_selection_graph_foo_new()
+  constructors now.
+- libgwyapp: File name in data browser is properly updated when a file is
+  saved under a different name.
+- libgwyprocess: Correlation iterators sometimes reporting progress (slightly)
+  higher than 1.0 were fixed.
+- libgwyprocess: A set of raw FFT functions, that however still abstract the
+  FFT backend, was added.
+- libgwyprocess: gwy_data_line_new_resampled(), similar to
+  gwy_data_field_new_resampled() was added.
+- libgwyprocess: gwy_data_field_fft_filter_1d() actually works.
+- libgwydgets: A convenience function to pack a radio button group to a table
+  was added.
+- libgwyddion: Function gwy_memcpy_byte_swap() to copy memory swapping bytes
+  along according to given pattern was added.
+- libgwymodule: It is possible to get the score corresponding to the detected
+  file type with gwy_file_detect_with_score().
+- libgwyprocess: Functions to get median of data lines added.
+
+Modules:
+- PSIA (new): Imports PSIA data files.
+- HDF4 (new): Imports HDF4 files, currently only PSI HDF.
+- 1D FFT filter: Was ported to version 2.x and restored.
+- BCR file: Supports a new file subtype with UTF-18 encoded text header.
+- Immerse: User interface was rewritten and speed was improved by several
+  orders so that the module is actually usable now.
+- JPK scan: It's no longer built when too old libtiff is detected.
+- Profile, Distance tools: Individual lines can be deleted by selecting them
+  in the list and pressing Delete key.
+- Graph ASCII (text) export: Crashes on check button changes and broken
+  Close button were fixed.
+- Grain and Scars: Mask color dialog hiding under the main dialog on Win32
+  was fixed.
+- Color Range tool: Fixed range is not lost upon switch to another data and
+  back.
+- Graph fit, Critical dimension: Graphs can be resized by resizing the
+  dialog.
+- Fractal: Saving of parameters to data instead of settings was fixed.
+- Gwyfile: Metadata left out in bogus places in the container on save was
+  fixed.
+- 2D FFT filter: Was fixed for non-nice data field sizes, displays resampling
+  information in the dialog.
+- Scale: It is possible to scale width and height differently.
+- Filters: New Dechecker filter for checker pattern removal.
+- Nanoscope: Tries harder to import something from files with strange
+  dimensions.
+
+Other:
+- Missing file utils/genmarshal.mk was added to distribution.
+- Private header files installed by mistake are no longer installed.
+- Intermediate gtk-doc files are no longer distributed (the resulting HTML
+  API documentation is present in the source tarball as usual).
+- Building and portability problems were fixed (mainly on non-GNU/Linux and
+  from Subversion checkout).
+- Module tutorial was brought up to date and expanded.
+
+
+2.0 (2006-09-30)
+Application:
+- Edit/Mask color menu item and similar right-click menu item are sensitive
+  only when a mask is present (fixing crashes when they were activated without
+  a mask).
+- Data browser window can be closed, Meta/Show Data Browser displays it again
+  and/or raises and deminimizes it.
+- Data browser UI was reorganized.
+- It is possible to copy channels and graphs to new or other open files
+  (using data browser buttons and/or drag'n'drop).
+- 3D window reflects channel title changes.
+- Translations updated: Czech.
+
+Libraries:
+- Library base names was changed to libgwyfoo2 with versions starting
+  from 0 again. Unix shared library versioning was switched from hardcoded
+  versions back to normal.
+- libgwydgets: GwyColorAxis behaviour for bad ranges was improved.
+- libgwydgets: Set Curve Color dialog is updated properly upon switch to
+  another curve.
+- libgwydgets: Curve titles are no longer reset to empty upon switch to
+  another curve.
+- libgwydgets: Wrong position of the bottom axis label on exported pixmaps was
+  fixed.
+- libgwydgets: Posibility to move inivisible graph legend was fixed.
+- libgwyapp: gwy_app_copy_data_items() was renamed to
+  gwy_app_sync_data_items(), it can synchronize more items and deletion is
+  optional now.
+- libgwydgets: Graph widget updates are really model-driven now, various
+  refresh functions were removed.
+- libgwydgets: GwyAxis makes a clear difference between requested and
+  actually used range, the latter no longer affects the former.  Graph axis
+  range API was reworked.
+- libgwydgets: Most getters and setters were removed from GwyGraphModel and
+  GwyGraphCurveModel interfaces in favour of properties.
+- libgwydgets: GwyGraphModel and GwyGraphCurveModel can claculate axis range
+  request themselves and cache the results.
+- libgwydgets: Questionable GwyGraphModel signal "layout-updated" was
+  removed, graph model properly emits notifications on property changes,
+  it has new "curve-data-changed" and "curve-notify" signals that simplify
+  notifications of curve changes.
+- libgwydgets: Auxiliary graph dialog user interface was improved.
+- libgwydgets: Graph vector export crash when on unimplemented point symbol
+  types was fixed.
+- libgwydgets: Dashed line style really works in graphs.
+- There were miscellaneous changes in the graph API with bogus functions or
+  function arguments removed, misnamed functions renamed and argument
+  handling sanitized.
+
+Modules:
+- Shade: Crash on Mix checkbutton click was fixed.
+- Color Range: Crash upon tool switch when there was already a selection
+  was fixed.
+- Assing AFM: Crash on import introduced in 1.99.9 was fixed.
+- Revolve arc, Median background: Bugs causing subsequent application crashes
+  were fixed.
+- Fit sphere: Was ported to 2.0 and reenabled.
+- SPMLab: Channel type is imported and used as the channel title.
+- Crop, Color Range, Filters, Mask editor, Statistical function, Statistical
+  quantities: Wrong selection boundaries when it was drawn `backwards' were
+  fixed.
+- Graph exports: User interface was made more consistent, memory leaks were
+  fixed.
+- Mark Grain by Threshold: Instant updates option is available.
+- Remove Grain by Threshold: Instant updates option is available.
+
+Other:
+- Source files dependent on ./configure-set installation paths are properly
+  rebuilt when ./configure is re-run.
+
+
+1.99.9 (2006-09-07)
+Libraries:
+- libgwydgets: Always insensitive 3D window light position controls were
+  fixed.
+- libgwydgets: 3D window controls not always reflecting 3D view's state were
+  fixed.
+
+Modules:
+- File modules: Many `Unknown channel's were replaced with meaningful channel
+  names, disabled metadata import was restored for most file types.
+- Statistical quantities: Initial sensitivity of Save was fixed, preventing
+  attempts to save nonexistent statistics that led to crashes.
+- SPML import: Miscellaneous small fixes and improvements.
+- Gwyfile: Rectangle, point and line selections are imported from 1.x files.
+- ASCII export: Exports the current channel instead of always the first one.
+- Shade: Mixing GUI was improved.
+
+
+1.99.8 (2006-08-10)
+Application:
+- Crash on app exit when Document history is open was fixed.
+- Recent files menu items have thumbnails.
+- Data browser: Miscellaneous bugs were fixed.
+- Data browser: Channel and graph titles are editable.
+- Color axis does not display ticks/values when they are not applicable.
+- Metadata more or less work again (although most modules have their creation
+  still disabled).
+- Translations updated: Czech.  New translations started: German.
+
+Libraries:
+- libgwyddion: Version information is now available.
+- libgwyapp: Data browser can be used without window creation and its window
+  can be controlled.
+- libgwyapp: Long broken window-list option menu was superseded by
+  GwyDataChooser and removed.
+- libgwyapp: Settings file manipulation function report problems via GError.
+- libgwyapp: gwy_app_init_common() for simplier initialization of Gwyddion
+  applications.
+- libgwyapp: Miscellaneous deprecated functions were removed, some were
+  replaced with similar data-browser based functions.
+- libgwyapp: 3D view was integrated to data-browser, it can display any
+  channel and crashes were fixed.
+- libgwyapp: Enum types are registered to the GObject type system.
+- libgwymodule: Crash when a module did not register any function was fixed.
+- libgwyprocess: Functions to check data field and line compatibility.
+- libgwyprocess: Laplace interpolation speed was improved.
+- libgwyprocess: Grain numbering speed was improved.
+- libgwyprocess: Non-FFT correlation speed was improved.
+- libgwyprocess: Watershed and correlation iterative interfaces were improved.
+- libgwydgets: Gwy3DSetup is a new object which holds 3D scene settings, 3D
+  widgets were updated to use it.
+- libgwydgets: GwyVectorLayer can disable selection editability.
+- libgwydgets: GwyShader is a no-window widget now.
+- libgwyprocess: Inclusion mask argument added to
+  gwy_data_field_area_fit_plane().
+- libgwydgets: GwyVectorLayer no longer automatically instantiates selections.
+- libgwydgets: GwyColorAxis ticks and label style is more controllable.
+- libgwydgets: Many more GwyAxis properties are user-controllable.
+- libgwydgets: Graph and axis size requests and allocations work much more
+  like normal widgets.
+- libgwydgets: Miscellaneous graph fixes and rectifications.
+
+Modules:
+- PNI file (new): Pacific Nanotechnology PNI file import.
+- Nanonis (new): Nanonis SXM file import.
+- Shade: Can mix shaded and original data.
+- Burleigh: Scaling of physical dimensions and values was corrected.
+- Tip dilation, reconstruction and certainty map were merged to one: tipops
+  (but it still provides three distinct functions).
+- 2D FFT Filter: Ported from 1.x, interface reworked to use masks instead of
+  bulky custom marker code, and non-square data is now supported.
+- 2D FFT: fft output now defaults to DFit gradient and "Auto" color range for
+  improved visibility.
+- Level, Level rotate: Option to exclude/include mask area in calculation
+  (only offered if a mask exists).
+- Level3: Instant apply is possible.
+- Crop: Create new channel losing original data information was fixed.
+- Correlation and tip modules: Ported to multidata and enabled again;
+  idiosyncratic source data choosers were removed, only suitable data fields
+  are offered as tips/kernels.
+- Layer modules: Updated to support disabling of editability.
+- Plug-in proxy: Ported to multidata (it passes the current data channel to
+  the plug-in).
+
+Other:
+- MSC nmake compilation rules include proper dependencies.
+- Confusion of host and target systems in configure, breaking for example
+  FreeBSD ports build, was fixed.
+- Problem with installation of translations affecting for instance FreeBSD
+  was fixed.
+
+
+1.99.7 (2006-05-28)
+Application:
+- Gtk+ 2.8 is required on MS Windows.
+- Gwyddion now depends on libxml2 used for SPML import (optionally, if you
+  compile it from source code).
+- It is possible to switch between pixelwise-square and physically-square
+  display modes (via upper left data window corner menu).
+- There were some tool GUI behaviour changes, generally towards more explicit
+  control by the user.
+
+Libraries:
+- libgwydddion: Memory corruption on big-endian machines in serialization and
+  deserialization was fixed (bug #73).
+- libgwyprocess: Fitting of polynomials with limited total degree was added.
+- gwy_math_humanize_numbers() behaves reasonably for zero values (bug #70).
+- libgwyprocess: New elliptic and circular region functions.
+- libgwydgets: GwyNullStore `virtual' GtkTreeModel class.
+- libgwyapp: New classes GwyTool and GwyPlainTool for tool implementation.
+- libgwyapp: Rectangular selection info table was reworked and it allows direct
+  user input.
+- libgwyapp: Tool dialogs can be hidden with Escape and by clicking on the
+  tool button in toolbox.
+- libgwyapp: Unitool is finally gone.
+- libgwyapp: Thumbnail creation/update works again (they show the first data
+  channel).
+- libgwyapp: Miscellaneous deprecated functions were removed.
+- libgwymodule: Unification and clean-up, all module types have foreach
+  functions, headers are includeable individually.
+- libgwyprocess: Remaining data field area functions were converted to
+  (col, row, width, heigh) rectangle specification.
+- libgwyprocess: Pixelwise statistical functions and surface area gained a new
+  argument: mask of pixels to take into account.
+- libgwydddion: New GwyStringList class (forward compatibility stub).
+- libgwydgets: GwyColorAxis draws ticks instead of just the middle marker.
+- libgwydgets: Graph selections are GwySelection based now.
+- libgwydgets: All graph property dialogs apply changes instantly.
+- libgwydgets: Miscellaneous graph fixes and clean-up.
+- libgwyprocess: Grain statistics interface is more general and powerful,
+  a few new grain characteristics were added.
+- libgwydgets: Gwyradiobuttons functions no longer use the arbitrary key
+  parameter.
+- libgwydgets: GwyGraphData works with arbitrary number of curves.
+
+Modules:
+- Several, namely multi-data related, processing modules were temporarily
+  disabled due to excessive brokeness.
+- Omicron (new): Omicron (Scala) file import.
+- SEIKO (new): Seiko XQD file import.
+- Burleigh (new): Burleigh IMG v2.1 file import.
+- ECS (new): ECS IMG file import.
+- Surffile (new): Surf file import.
+- Nanotop (new): Nanotop SPM file import.
+- MetroPro (new): Binary Zygo MetroPro file import.
+- SPML (new): SMPL file import.
+- Hitachi AFM: Import of another strain of Hitachi AFM files was added.
+- BCR file: Void pixel handling was improved (bug #67).
+- RHK SPM32: Value offsets are respected.
+- RHK-SM3: Can import newer files (XPMPro 1.1.0.9) (bug #71).
+- Nanoscope: Import of format versions 3 and 4 was improved (or made possible
+  at all).
+- Polynomial level: Fitting of polynomials with limited total degree is
+  possible.
+- Grain distribution: Reworked; offers selection from several grain quantities,
+  allows to explicitly set sampling, can export raw data to a file (bug #69
+  made irrelevant).
+- Line correction: Step correction function (new, experimental).
+- Read Value, Level3: Value averaging uses circular neighbourhood instead of
+  a square.
+- Distance, Profile: The number of allowed lines was increased.
+- Crop: Can crop image in place or create a new image.
+- Mask Editor: Can remove, invert, fill, grow, and shrink masks; the editor
+  functions work with elliptic selections too.
+- Spot Remove: Only zoom center is selected on data windows, the area to
+  interpolate is selected on zoomed view.
+- Statistical quantities: Can calculate values only from pixels under mask
+  into account, save results to a text file, switch off instant calculation.
+- Statistical functions: Can switch off instant calculation.
+- Mask grow/shrink: Removed, superseded by the new Mask Editor.
+- Filters: Instant apply was removed, it caused more troubles than it worths.
+
+Other:
+- gwyconfig.h no longer requires to include math.h first.
+- The sample C++ plug-in is not built (but still distributed) and the build
+  should no longer require a C++ compiler.
+
+
+1.99.6 (2006-02-26)
+Application:
+- Support for more data channels in one file was added (not finished).
+- New file selection dialogs, with embedded file type options (replacing
+  File Export and Import menus) and possibility to select several files.
+- Toolboxes use larger, colorful icons.
+- File loading/saving errors are reported in the GUI instead of being printed
+  to console.
+- When gwyddion is run with a directory argument, it opens a file selector
+  in this directory.
+- Metadata is editable.
+- Color Gradient Editor allows control point snapping
+
+Libraries:
+- libgwyapp: A data browser was added, taking over most of app.h
+  functionality.
+- libgwymodule: Feature registration and some module function signatures have
+  changed, graph and process modules provide icon and tooltip information
+  now, there were some other inteface changes.
+- libgwyddion: gwy_container_rename() actually works.
+- libgwydgets: API to focus one selection object added to vector layers.
+- libgwymodule: Save operations were split to save and export, the latter
+  does not cause file name change.
+- libgwymodule: File modules report errors via GError, have interactive/
+  /noninteractive run modes.
+- libgwymodule, libgwyapp: Run modes was changed to match reality.
+- libgwydgets: GwySensitivityGroup flag-based widget sensitivity manager.
+- libgwymodule, libgwyapp: Construction of menus from registered modules was
+  moved to app.
+- libgwyapp: Module functions with untranslated menu paths are properly
+  merged into translated menus.
+- libgwydgets: GwyDataWindow can resize when dimension of the displayed data
+  field change.
+- libgwyapp: A class of undo functions that accept quarks was added.
+- libgwydgets: GwyDataView supports 1:1 aspect ratio in real dimensions.
+- libgwyprocess: FFT functions offer more leveling choices, line-wise leveling
+  was fixed.
+- libgwyprocess: Polynomial leveling using Legendre polynomials was added.
+- libgwydgets: GwyCurve support snapping to control points positions.
+- libgwydgets: Miscellaneous graph fixes.
+- libgwyapp: Process function usage statistics are gathered (no effect on
+  GUI yet).
+
+Modules:
+- Immerse (new): Immerse higher-resolution detain into an image.
+- Merge (new): Merge (join) images together.
+- All: Feature registration has changed, more, less, or different information
+  is provided for particular function types during registration.
+- File modules: Import all (importable) data present in files instead of
+  presenting channel choosers.  Metadata were temporarily disabled in most
+  modules.
+- Rawfile: It is possible to switch off automatic import of uknown files as
+  raw data, presets are stored in external files, a few GUI fixes.
+- BCR file: Handling of void pixels was improved (bug #67).
+- Polynomial level: It has a preview now, maximum degree was increased.
+- FFT: Subtract mean value preprocession option was added, correct resampled
+  image size is displayed also when FFTW is used.
+- Rotate 90 deg CW, Rotate 90 deg CCW: Data are changed in place now.
+- Mark, remove scars: It is possible to mark positive and negative at once.
+- Layer modules: Support for focusing one object was added, nearest object
+  search in ellipse and rectangle was fixed.
+- Pixmap: Odd preview of images with an alpha channel was fixed, full support
+  for alpha channel added.
+- Presentationops: Logscale presentation was added.
+
+
+1.99.5 (2005-12-20)
+Application:
+- Unix installations are relocatable via environment variables.
+- FFTW3 is recommended now.
+- Color gradient and GL material editors actually work.
+- Translations updated: Italian, Czech.
+- Names of files drag-and-dropped onto toolbox are preserved.
+
+Libraries:
+- libgwyprocess: FFTW integration was finished, all integral transform methods
+  can use FFTW backend now (with some API changes to accommodate that).
+- libgwydgets: Broken graph curve removal was fixed.
+- libgwydgets: Crashes and other problems with multiple 3D views were fixed
+  (bug #53).
+- libgwyddion: Serialization is two stage now (calculate size, then
+  serialize), fixing repeated memory reallocations.
+- libgwydgets: Ruler tick formatting was improved, it can use non-integer
+  formats when they are suitable.
+- libgwydgets: Just moving mouse over data windows should consume much less
+  CPU.
+- libgwydgets: Changes in data view and vector layers to enable drawing
+  selections on exported images.
+- libgwyapp: Unitool rectangular selection info supports lateral offsets.
+- libgwyapp: Utility GwyResourceEditor base class resource editors are based
+  on now.
+- libgwydgets: GwyHMarkerBox widget, a horizontal box with movable markers,
+  with GwyMarkerBox base class.
+- libgwydgets: GwyValUnit was finally removed.
+- libgwydgets: Gwy3DView now takes container keys instead of direct objects
+  for some properies, but not for all yet.
+- libgwyprocess: GwyDataLine now carries units, like GwyDataField.
+- libgwyprocess: Default GwyDataField and GwyDataLine units are empty
+  (unitless) instead of meters now.
+- libgwyprocess: Methods to copy units between GwyDataLine and GwyDataField
+  were added, most functions creating GwyDataLines from GwyDataFields set
+  correct units on the target.
+- libgwyapp: Too long file names are ellipsized in tool headers, full file
+  name is shown in a tooltip.
+- libgwyddion: Exponential (PSDF) fitting preset was fixed, Power,
+  Lorentzian, sinc function presets added.
+- libgwydgets: Miscellaneous graph widget improvements.
+
+Modules:
+- RHK-SM3 (new): RHK Technology SM3 file import.
+- WITfile (new): WITec WIT file import.
+- SDFile (new): Surfstand Surface Data File (SDF) import.
+- Hitachi AFM (new): Hitachi AFM file import.
+- Unisoku (new): Unisoku HDR + DAT file import.
+- EZDfile: Explict support for NID files was added, some bugs fixed.
+- MI file: Updated to reflect format changes.
+- Rawfile: Always black preview was fixed.
+- Pixmap: Can draw selection on exported image, checkboxes for mask and
+  selection were added.
+- BCR file: Wrong y scale on files that do not have explicit units was fixed.
+- Lines layer: Jagged line number edges were fixed.
+- Layer modules: Support for exporting selections to pixmap images.
+- Level3, Read value: Display properly lateral offsets.
+- Crop: Allows to either keep lateral offsets where the data was cut, or
+  reset them to zero.
+- Calibrate: Can set lateral offsets now.
+- Tip blind estimate, Tip model: Broken controls work again.
+- Basicops: Can resample data in one direction to make samples square.
+- Plugin-proxy: Missing byte reordering on big-endian machines was added
+  (bug #65).
+- Statistical functions: Resolution can be automatic too, as before.
+- Graph function fit: Result param values can be easily copied to initial.
+- Plug-in proxy: No longer writes metadata (but still accepts it back).
+- Grain distribution: Simple grain statistics (count, mean area, ...).
+
+Other:
+- Developer documentation was moved from tmpl files to source code.
+
+
+1.99.4 (2005-10-06)
+Application:
+- GLib and Gtk+ 2.6 is required now.
+- Can optionally use FFTW v3 library (currently only for a few operations).
+- It's possible to build Gwyddion without OpenGL support.
+- System chdir() is no longer used, so that e.g. core is always dumped to the
+  directory where app was started, otherwise directory behaviour has not
+  changed.
+- Color gradient and GL material editors, the only functionality that
+  actually works now is Set default.
+
+Libraries:
+- libgwyprocess: All interpolation is pixel-like instead of function-like now.
+- libgwyddion: New GwyInventory uniform hash-and-array-like container class.
+- libgwyddion: New GwyResource abstract base class for gradients, materials,
+  and other goodies.  Resources can be loaded from and saved to external
+  files.
+- libgwydraw: GwyGradient is based on GwyResource, API reworked.  Gradients
+  were un-hardcoded and are distributed as standalone text files now.
+- libgwydraw, libwydgets: GwyGLMaterial was moved from libwydgets to
+  libgwydraw, based on GwyResource, and more or less reimplemented.
+  GL materials were unhardcoded.  Material pixbuf samples are nicer.
+- libgwydgets: New gradient and GL material selection and tree view
+  constructors.  It's possible to set which gradients are directly displayed
+  in data window color axis right-click menu.
+- libgwydgets: GwySciText uses table-like layout for symbol combo box
+  (bug #60) and was otherwise improved.
+- libgwyprocess: GwyEnum tables of standard enumerations are available in
+  public API.
+- libgwyddion: GwyEnum was split from gwyutils, a some functions added,
+  GwyInventory support was added.
+- libgwydgets: New class GwyInventoryStore wraps GwyInventory in GtkTreeModel
+  interface.
+- libgwydgets: Option menus were replaced with combo boxes.
+- libgwyapp: Undo bug that might cause crashes was fixed.
+- libgwyprocess: Memory leaks in DWT were fixes and it was sped up.
+- libgwyddion: gwywin32unistd.h was removed, use gstdio wrappers.
+- libgwydgets, libgwyapp: A one global GtkTooltips object is used now,
+  API added to widgets to accommodate this.
+- libgwydgets: Crashes when mask/presentation is removed were fixed.
+- libgwyprocess, libgwydgets: Data field and line interpolation was changed to
+  centered data value style.
+- libgwyprocess: Real line length calculation method was added, too small
+  calculated area was fixed.
+- libgwyddion, libgwydgets: GwyWatchable was finally removed.
+- libgwydgets: 3D Window crash on Export from small toolbar was fixed.
+- libgwyprocess: Overloaded gwy_data_line_get_stat_function() was replaced
+  with individual statistical functions, several of them are faster now.
+- libgwyprocess, libgwydgets: GwyDataField and GwyDataLine support
+  presentational offsets of coordinates origin, widgets support them to some
+  extent.
+- libgwyddion: Text entities are in a GwyInventory instead of a raw array.
+- libgwydgets: It's possible to get real GwyDataView zoom, GwyDataWindow
+  displays that in window title instead of requested zoom.
+- libgwyprocess: Minkowski volume, boundary, and connectivity (Euler
+  characteristics) statistical functions were added.
+- libgwydraw, libgwydgets: Experimental adaptive color mapping mode was added.
+- libgwydraw, libgwydgets: GwySelection data selection abstract base class,
+  GwyVectorLayer reworked to use it.
+- libgwyapp: Undo was generalized to work with arbitrary item types; it also
+  exports lower-level functions usable for undo outside main app windows.
+- libgwyprocess: FFT backend argument was removed from FFT functions.
+- libgwydgets: Vertical rulers look like rotated horizontal rulers now.
+- libgwydgets: Graph: API cleaned, logarithmic axis reworked and enabled,
+  offsets introduced, GwySelection implemented, signals properly implemented,
+  set/get properties implemented, export GUI moved to modules, graph selection
+  can be moved while creating it.
+
+Modules:
+- MI file (new): PicoView MI data file import.
+- BCR file: Unit support was improved, support for zmin added.
+- Profile: Maximum profile width was increased to 100.
+- Statistical functions, Profile: Allow to select number of sampling points.
+- Profile: Minkowski functionals were added.
+- Facet analysis: Improvements were merged from 1.12.
+- Layer modules: Reworked to use GwySelection, "pointer" and "points" merged,
+  various other changes, all support selection setting now as a side effect.
+- Rectangular selection: Hold Shift to select exact squares.
+- Line selection: Hold Shift to select lines in `nice' directions.
+- Elliptic (circular) selection layer (new).
+- Slope and grain distribution were ported to new graph API.
+- Distance: Displays value difference too.
+- Pixmap: The same unit selection/formatting is used for false color scale
+  as on data windows (bug #63).
+- Graph export vector, ascii and bitmap: functionality moved from Graph
+  (withing bugs) moved here
+- Graph level: simple line leveling by 1st order polynome
+
+Other:
+- Modules are built with libtool, so it should be possible to build
+  Gwyddion on more systems, but it's impossible to run Gwyddion uninstalled
+  again.
+- Missing Italic stock icon was added.
+- MSVC makefile templates (.gwt) are distributed in source code tarball,
+  allowing to re-generate makefile.msc files.
+- A few new color gradients and GL materials were added.
+
+
+1.99.3 (2005-07-11)
+Application:
+- Bugfixes were merged from 1.11 (bug #49, bug #54) and some from 1.12.
+- Running uninstalled is supported now (with caution).
+- Metadata browser closes with corresponding data window; if a browser for
+  some data already exists, it's presented instead of creating a second one.
+
+Libraries:
+- libgwyddion: GwyContainer emits a signal "item-changed::/item/key" when
+  a item changes.
+- libgwyddion, libgwyprocess, libgwydgets: GwyWatchable interface was
+  deprecated, and will be removed in 1.99.4.  Some previous implementors have
+  their own "value-changed" signal, some have different signal(s), or none.
+- libgwyprocess: GwyDataField and GwyDataLine have "data_changed" signal.
+- libgwydgets: GwyPixmapLayer can display data field identified by arbitrary
+  key (actually it requires to set a key now) and reacts on its
+  "data_changed" signal.
+- libgwydgets, libgwyapp: Explicite updates gwy_data_view_update() and
+  gwy_app_data_view_update() were removed as view updates are now triggered
+  by signals.
+- libgwydgets: GwyLayerBasic and GwyLayerMask no longer have their own
+  properties, they take all values directly from container.
+- libgwydgets, libgwyprocess: GwyLayerBasic color range mode are explicite now,
+  auto-range mode was implemented.
+- libgwyapp: Data processing module return value is ignored, functions have
+  to emit "data_changed" on changed data fields.
+- libgwyddion: A quicksort function specialized for doubles was added.
+- libgwyddion: Marquardt-Levenberg NL fitter derivation function can avoid
+  derivations by fixed parameters, and the default numeric one avoids it.
+- libgwydmodule, libgwyapp: `Interactive' data processing run type was
+  removed.
+- libgwyddion, libgwyprocess: SI Unit value formats styles were exposed in the
+  API, each value format get function now has an addition style parameter.
+- libgwydgets: Shader widget has rudiemntary support for insensitive state.
+- libgwyddion: Deprecated gwy_math_SI_unit_prefix() was removed,
+  gwy_si_unit_get_format_for_pow10() should replace it.
+- libgwydgets: gwy_option_menu_metric_unit() takes a SI Unit instead of
+  a string now.
+- libgwyddion: Expression evaluator allows definition of user constats,
+  adds constant folding and vectorized expression execution.
+- libgwyprocess: gwy_data_field_resize() calculates new physical dimensions
+  correctly.
+- libgwyprocess: Surface area calculation was reimplemented with a faster and
+  more precise method, and it's cached now.
+- libgwyprocess: Basic statistics function on data field parts are diverted
+  to full-field statistics if part is actually complete data field, allowing
+  better cache utilization.
+- libgwyprocess: DataField stats cache is serialized and deserialized.
+- libgwyddion: Support for optional component serialization and
+  desetialization.
+- libgwyapp: All undo functions work on Containers now, some were renamed to
+  acommodate that; object-data trickery was replaced with a proper API.
+- libgwydgets: DataView can resize when base data field size changes.
+- libgwydgets: Unused DataWindow zoom mode setting was removed.
+- libgwydgets: Former GwyGraph was replaced with new widget (called GwyGrapher
+  in previous versions). The new graph widget is constructed to draw
+  directly GwyGraphModel data, is able to handle multiple selections
+  and is constructed to be easily exported to various formats.
+- libgwydgets: GwyGraphWindow is now being constructed as a result
+  of any processing module creating graphs. This widget supports graph zooms
+  and graph measuring that was previously in several graph modules.
+  It is also possible to see the data values directly as a table.
+  GwyGraphWindow currently handles also exports to bitmap, text and postscript,
+  which will be probably moved to modules in next verison.
+- Bugfixes were merged from 1.11.
+
+Modules:
+- JPK Scan (new): JPK data file import (bug #57).
+- Facet Analysis (new): Visualizes, marks and measures facet orientations
+  (not fully forward-ported from 1.12).
+- All: Updated for data (view) notification changes.
+- File import modules use auto-range mode for preview, that should improve
+  preview of data with outliers.
+- IColorange supports auto-range mode.
+- Points layer: Supports set_selection(), if selection is one point it does
+  not have to be dragged, click is enough to move it.
+- Pixmap: Import from TIFF images was enabled on MS Windows too.
+- Bugfixes were merged from 1.11 (bug #44, bug #46, bug #42, bug #52, others).
+- graph_points, graph_measure, graph_zoom, graph_unzoom removed as this
+  functionality is now in the GwyGraphWindow widget directly.
+
+Other:
+- Bugfixes were merged from 1.11 (bug #51).
+- It should build on Win32 again.
+
+
+1.99.2 (2005-04-18)
+Libraries:
+- libgwymodule: File detection functions now get a struct with various file
+  information instead of filename as first argument.
+- libgwyprocess: Data field stats caching was implemented.
+- libgwyprocess, libgwydgets, libgwymodule: All enum types are registered in
+  GObject type system, enum class properties were changed from guints to real
+  enums.
+- libgwyddion: SI Unit GwyWatchable interface actually works.
+- libgwyddion: Marquardt-Levenberg NL fitter supports linked parameters (API
+  changed).
+- libgwyprocess: Proper types and enmus were defined for FFT functions.
+- libgwyprocess: GwyDataLine clean-up, including removal of some bogus
+  interfaces.
+- libgwyddion: GwySerializable has a new method clone to transform an
+  object to duplicate of an existing one.
+- libgwydgets: A function to maintain one global PangoFT2Map was introduced,
+  3DView uses it now.
+- libgwydgets: Vector layer cursor ref/unref helpers were renamed and moved to
+  utils, as they are used elsewhere.
+- Bugfixes were forward-ported from 1.10
+
+Modules:
+- New file modules and improvements were forward-ported from 1.10 (apefile,
+  assing-afm, bcrfile, ezdfile, pixmap, rhk-spm32, spmlab, stpfile,
+  wsxmfile).
+- Nanoindentation modules were forward-ported from 1.10.
+- Pixmap: False color scale export is disabled when presentation is shown.
+- Rectangular select layer: Dot left on image after unselection was fixed.
+- Bugfixes were forward-ported from 1.10
+
+Other:
+- A platform info header gwyconfig.h was introduced, similar to glibconfig.h.
+
+
+1.99.1 (2005-03-22)
+Application:
+- Support for long deprecated binary settings file was removed
+
+Libraries:
+- libgwymodule: Module names are derived from module file names, they were
+  removed from module ABI.
+- libgwydgets: GwySphereCoords and GwyGradSphere were removed (replaced by
+  GwyShader), GwyVectorShade was removed (no replacement).
+- libgwydgets: GwyVMenubar, GwyToolbox were removed (no replacement).
+- libgwydraw: GwyPaletteDef, GwyPalette were removed (replaced by
+  GwyGradient).
+- libgwydgets: Gwy3DLabels were replaced by (conceptually different)
+  Gwy3DLabel, other changes in Gwy3DView data types.
+- libgwyprocess: Circular dependency between datafield.h (dataline.h) and
+  specialized method headers have been broken: datafield.h no longer includes
+  specialized headers.
+- libgwyprocess, libgwydgets, libgwymodule: Enum definitions were extracted to
+  a separate header; enums are registered as GObject types.
+- libgwydgets: Headers no longer directly depends on GL headers,
+  GwyGLMaterial uses ordinary gdoubles.
+- libgwyprocess, libgwydgets: Many deprecated/unimplemented functions were
+  removed, some unimplemented function arguments were removed.
+- libgwyprocess: Angle arguments in degrees were changed to radians.
+- libgwyddion, libgwyprocess, libgwydgets: non-widget object constructors
+  (Container, SIUnit, DataField, ...) return particular types instead of
+  GObject*
+- libgwyprocess: GwySIUnit internal representation changed from plain string to
+  structured.
+- libgwyprocess: Broken conservative filter was fixed.
+- libgwydgets, libgwyapp: 3D windows are properly destroyed when closed.
+
+Modules:
+- Gwyfile saves new file format (can be read by version 1.7+), loads both.
+
+
+1.16 (2006-04-18)
+Application:
+- Gwyddion now depends on libxml2 used for SPML import (optionally, if you
+  compile it from source code).
+- Translations updated: Czech.
+
+Libraries:
+- libgwydddion: Memory corruption on big-endian machines in serialization and
+  deserialization was fixed (bug #73).
+- libgwyprocess: Grain statistics were fixed.
+- libgwyddion: gwy_math_humanize_numbers() behaves reasonably for zero values
+  (bug #70).
+- libgwydgets: Gwy3DView displays correct units on all axes.
+
+Modules:
+- Omicron (new): Omicron (Scala) file import.
+- Surffile (new): Surf file import.
+- Nanotop (new): Nanotop SPM file import.
+- SPML (new): SMPL file import.
+- MetroPro (new): Binary Zygo MetroPro file import.
+- Burleigh (new): Burleigh IMG v2.1 file import (experimental).
+- SDFile: Import support was significantly improved.
+- BCR file: Void pixel handling was improved (bug #67).
+- Grain distribution: Height distribution was added (bug #69).
+- RHK-SPM32: Value offsets are respected.
+- RHK-SM3: Can import newer files (XPMPro 1.1.0.9) (bug #71).
+- Line correction: Step correction function (new, experimental).
+- Nanoscope: No longer crashes when channel name is missing.
+
+Other:
+- JPK import module previously omitted in Win32 binaries was added.
+
+
+1.15 (2006-01-02)
+Application:
+- Compilation on Mac OS X was fixed (bug #64).
+- Translations updated: Italian.
+
+Modules:
+- BCR file: Wrong y scale on files that do not have explicit units was fixed.
+- Hitachi AFM file: Reading raw data as signed instead of unsinged was fixed.
+- Plugin-proxy: Missing byte reordering on big-endian machines was added
+  (bug #65).
+- Basicops: Can resample data in one direction to make samples square.
+- Grain distribution: Simple grain statistics (count, mean area, ...).
+- Rawfile: Message dialogs forced above main dialog (bug #66).
+
+
+1.14 (2005-11-07)
+Application:
+- Unix installations are relocatable via environment variables.
+- Translations updated: Czech.
+
+Libraries:
+- libgwydgets: Crashes and other problems with multiple 3D views were fixed
+  (bug #53).
+- libgwydgets: `Invalid UTF-8 string...' messages in 3D view were fixed
+  (not sure about bug #28 connection).
+- libgwydgets: Just moving mouse over data windows should consume much less
+  CPU.
+
+Modules:
+- RHK-SM3 (new): RHK Technology SM3 file import.
+- WITfile (new): WITec WIT file import.
+- SDFile (new): Surfstand Surface Data File (SDF) import.
+- Hitachi AFM (new): Hitachi AFM file import.
+- Unisoku (new): Unisoku HDR + DAT file import.
+- EZDfile: Explict support for NID files was added, some bugs fixed.
+- MI file: Updated to reflect format changes.
+- Pixmap: The same unit selection/formatting is used for false color scale
+  as on data windows (bug #63).
+
+
+1.13 (2005-09-19)
+Application:
+- Translations updated: Italian.
+
+Libraries:
+- libgwyprocess: Minkowski functionals were added to line stat. function.
+
+Modules:
+- MI file (new): PicoView MI data file import.
+- 2D FFT filtering: Drawing artefacts were fixed, color range was fixed, zoom
+  option added, "Original" and "Difference" display modes added,
+  inclusion/exclusion behavior fixed (more user friendly).
+- SFunctions: Minkowski volume, boundary, and connectivity (Euler
+  characteristics) functionals were added.
+- BCR file: Unit support was improved, support for zmin added.
+- STP file: Channel labels fixed.
+- Statistical functions, Profile: Allow to select number of sampling points.
+- Profile: Maximum profile width was increased to 100.
+
+Other:
+- Modules are built with libtool, fixing portability problems to Mac OS X.
+- Missing Italic stock icon was added.
+
+
+1.12 (2005-07-15)
+Application:
+- Translations updated: Italian, Czech.
+- Invisible keyboard focus in 3D windows was fixed.
+
+Libraries:
+- libgwydgets: Color axis crash when data minimum and maximum were both 0 was
+  fixed (bug #56).
+- libgwyapp: It is possible to apply a filter to data window option menu
+  items.
+- libgwyddion: Possible crash in expression evaluation was fixed.
+
+Modules:
+- JPK Scan (new): JPK data file import (bug #57).
+- 2D FFT filtering (new).
+- Facet Analysis (new): Visualizes, marks and measures facet orientations.
+- Assing AFM: Wrong z scale in import and export was fixed.
+- NT-MDT: Bogus data import when x and y resolution differs was fixed.
+- Color Range: `Instant apply' aggressivity was somewhat reduced (bug #58).
+- Presentation operations: Can attach one data to another as presentation.
+- Points layer: Supports set_selection(), if selection is one point it does
+  not have to be dragged, click is enough to move it.
+- Pixmap: Import from TIFF images was enables on MS Windows too.
+- Nanoindent analyse: Useless controls were removed from the dialog.
+
+
+1.11 (2005-06-03)
+Application:
+- Markup works in metadata browser (bug #49).
+- Toolbox is not restored to off-screen position after quitting app minimized
+  (bug #54).
+- Translations updated: Italian, Czech.
+
+Modules:
+- RHK-SPM32: Supports multipage files.
+- SPMLab: Imports data with correct units (bug #44).
+- NT-MDT: Incorrect data import was fixed (bug #46).
+- STPFile: Incorrect height data import was fixed.
+- NT-MDT: GUI problems with files containing too many channels were mitigated
+  (bug #42).
+- Assing AFM: compilation failure on big endian architectures was fixed
+  (bug #52).
+- Fix zero, zero mean value: Move fixed color range together with data
+  (if it exists).
+
+Libraries:
+- libgwyprocess: Grain size distribution x-scale was corrected.
+
+Other:
+- Wrong libtool detection in autogen.sh was fixed (bug #51).
+
+
+1.10 (2005-04-07)
+Application:
+- Translations updated: Czech, Italian.
+
+Modules:
+- APEfile (new): Applied Physics and Engineering data file import.
+- BCRfile (new): Image Metrology BCR data file import.
+- RHK-SPM32 (new): RHK SPM32 data file import.
+- WSxMfile (new): Nanotec WSxM data file import.
+- EZDFile (new): Nanosurf EZD data file import.
+- Nanoident analyse (new): Analyses nanoindent structures (volume, surfaces,
+  etc.).
+- Nanoindent adjust (new) Adjusts images of two indentor prints.
+- Pixmap: False color scale is correct when explicite color range is set
+  (bug #43).
+- Assing AFM: Supports also save.
+- SPMLab: Supports R6 file format import.
+- Calibrate: Applying calibrating ratios squared was fixed.
+
+Libraries:
+- libgwyddion: Marquardt-Levenberg NL fitter fixed parameters actually work
+  now.
+- libgwyddion: gwy_si_unit_get_unit_strings() recomposes the string from
+  internal representation so that works for nontrivial units too.
+- libgwyprocess: Rotation correction mysteriously broken on Win32 was no less
+  mysteriously fixed.
+- libgwyprocess: Nanoindentation functions.
+- libgwydgets: 3D view reflected with respect to 2D was fixed.
+
+
+1.9 (2005-03-09)
+Application:
+- Startup time improved.
+- Italian translation added (partial).
+
+Modules:
+- Assing AFM file import (new).
+- 1D FFT Filtering (new).
+- Mark, remove scars: Can remove negative scars too.
+- Edge detection: Experimental RMS, RMS Edge, and Local Nonlinearity filters
+  were added.
+- Rotate: Preview showing wrong angle was fixed.
+- Presentation operations: Extract presentation was added.
+- Filter: Kuwahara filter was added.
+- Stats: Displays inclination angles too.
+- Createc: Supports more format versions.
+- Rawfile: Warning message when adding a new preset was fixed, shows only
+  file basename in Info tab.
+- Line correct: Another experimental Median line correct method.
+
+Libraries:
+- libgwymodule: Public functions for obtaining module list and detailed module
+  information.
+- libgwyprocess: Local rms filter, Kuwahara filter, local plane fitting
+  functions.
+- libgwydgets: Shader can focus and is keyboard-controllable.
+- libgwyddion: Simple arithmetic expression evaluator.
+
+Other:
+- Build system fixes and clean-up.
+- Compilation and run-time problems on AMD64 were fixed.
+
+
+1.8 (2005-01-24)
+Application:
+- Option --no-splash recognized anywhere in command line, --debug-objects
+  added.
+- Document history now displays physical dimensions too, starts faster, and
+  rememberes more files.
+
+Modules:
+- NT-MDT file format import (new).
+- CreaTec STM file format import (new).
+- Omicron STMPRG file format import (new).
+- Spmlab R4 a R5 file format import (new).  Note the closed-source plug-in
+  io_tm_common provides better support than this rudimentary reverse-engineered
+  module.
+- Local contrast enhancement display module (new).
+- Fit sphere module (new).
+- Blind tip estimate: Insensitive OK button when full estimate was run without
+  partial estimate first was fixed.
+- DWT Anisotropy: Undo and data corruption were fixed.
+- Nanoscope, Statistical quantities, FFT: SI unit handling improved.
+- FFT, CWT, DWT modules: Display non-square data error immediately.
+- FFT module: data are rescaled to unit range before fitting for more stable
+  results.
+- Unrotate, Rotate: have a preview now.
+- Profile: Corrupted graph titles for separate profiles were fixed.
+- Grain mark by threshold, watershed, and remove by threshold: Option to use
+  inverted surface, GUI reworked.
+- Manual grain removal tool: It is possible to remove underlying data or both
+  now.
+- Mask grow, shrink: Always growing (shrinking) down (up) only one pixel was
+  fixed.
+- Manual grain removal tool: Crash after switch to Pointer tool was fixed.
+- Rawfile: Crash after Reset was fixed.
+- Arithmetic: Not recalling that an operand is scalar was fixed.
+- Crop tool: Slightly skewed new physical dimensions were corrected.
+- All modules: GUI improvements, namely addition of scale controls.
+
+Libraries:
+- libgwyddion: Better SI unit parsing, multiplication, division and powers.
+- libgwydgets: 3D View not honouring data aspect ratio was fixed
+- libgwyddion: Value formatting bug causing data ranges consisting entirely
+  of negative values to be displayed as (NaN, NaN) was fixed
+- libgwyddion, libgwyprocess: Convenience macros and methods for duplication,
+  creation of similar data fields and lines.
+- libgwydraw: New GwyGradient class that will replace GwyPalette and
+  GwyPaletteDef.
+- libgwyprocess: Minumum and maximum filters.
+- libgwydgets: New GwyShader widget that will replace GwyGradSphere and
+  obsolete GwySphereCoords.
+
+Other:
+- Freedesktop compliance improvements, SPM data MIME type definitions.
+- Simple gwyddion(1) manual page.
+
+
+1.7 (2004-12-12)
+Application:
+- Graphs are associated with their data window, it's possible show/hide them
+  and they are saved with data.  Note version 1.4 and older may fail to load
+  files containing graphs due to forward compatibility bugs.
+- Crashing Metadata browser was fixed.
+- Translations work on Win32 too, Czech translation updated.
+
+Modules:
+- Simple mask editor (new).
+- Background removal by arc revolution (new).
+- Median based background removal (new).
+- Discrete wavelet transform module (new)
+- Wavelet based denoising module (new)
+- Wavelet based anisotropy detection module (new)
+- Nanoscope: Import was significantly improved, most files should be read
+  with correct value ranges now (bug #16).
+- Pixmap: `Same resolution' option really works and its value is remembered.
+- Manual grain removal: Undo works.
+- Statistical quantities: Area computation was fixed; minimum, maximum and
+  median values added.
+- Calibrate: GUI was reworked.
+- Level: Zero mean value function (similar to fix zero).
+- Arithmetic: Broken `Physical dimensions differ' check was fixed.
+- Grain mark by watershed: Cancelation behaviour was fixed.
+- Grain mark by threshold: Uses data computed in preview for the final
+  result, if possible.
+
+Libraries:
+- libgwyddion, libgwyprocess: Median calculation functions.
+- libgwyprocess: Data field arithmetic functions.
+- libgwyprocess: vaious functions related with discrete wavelet transform.
+- libgwyprocess: Speed of most grain methods was considerably improved.
+- libgwydgets: 3D View light position marker was fixed to reflect actual light
+  position
+- libgwydgets: Graph colors consistent between different visuals (bug #22)
+- libgwyddion: Serialization packer and unpacker for hash-like objects, new
+  primitive types: string list, object list.
+
+Other:
+- pkg-config file broken by 1.6 build system clean up was updated.
+
+
+1.6 (2004-10-26)
+Application:
+- Crash when a top-level menus is detached was fixed (bug #30).
+- Internationalization support (gettext) was added, currently works only on
+  Unix.
+
+Modules:
+- Interactive color range change tool (new).
+- Distance and angle reading tool (new) (bug #32).
+- Polynomial background removal/extraction (new).
+- Tip convolution, deconvolution, modelling, blind tip estimation and
+  certainty map analysis modules added. All these modules are based on
+  algorithms published by J. Villarrubia.
+- Laplacian, Sobel, Prewitt were moved from Filters tool to separate display
+  modules, Canny edge detector added.
+- Wrong selection boundaries in Filters tool was fixed (bug #35).
+- Pointer and Level3: Units in table header are updated on data update
+  (bug #37).
+- Plug-in proxy: Dump files are always written with POSIX real number format
+  (bug #31).
+- Crop, Filters, Polynom, Statistics, and Spot remove tools: Also display
+  dimensions in pixels.
+- Unrotate: Fixed displayed rotations being 2Pi multiplies of the real ones.
+- Rotate: Fixed crashing on interpolation type change and wrong expanded
+  rotations.
+- Layers: Fixed not redrawing when number of objects (lines, points, etc.)
+  property changes.
+- Lines layer: Identifies lines by numbers.
+- Statistical function, Profiles, Fractal, Grains size distribution, Slope
+  distribution: Graph windows are given meaningful titles (bug #23).
+- All modules: GUI unification and fixes.
+
+Libraries:
+- libgwyapp: Bug #7, Filters confused by tools switch, was fixed.
+- libgwydgets: Gwy3DWindow swtiching from palette to material for the first
+  time no longer displays all-black data.
+- libgwydgets: Gwy3DWindow allows to switch between full and basic controls.
+- libgwyddion: Choleski decomposition and solution functions.
+- libgwyprocess: Two-dimensional polynom fitting.
+- libgwyprocess: Tip convolution, deconvolution, certainty map analysis,
+  modelling and blind tip estimation routines added.
+- libgwyapp: Helper functions to manage rectangular selections in tools.
+- gwyddion/dump Ruby module implementing plug-in proxy dump format.
+- Installation paths of Gwyddion::dump, Gwyddion.dump, and gwyddion/dump were
+  fixed and their import unified via GWYPLUGINLIB environment variable
+  (bug #33).
+
+Other:
+- New sample plug-ins in Ruby: invert_ruby and invert_narray.
+- Various build time problems on FreeBSD were fixed.
+- Sample C++ plug-in mangling units was fixed (bug #36).
+
+
+1.5 (2004-09-21)
+This version requires GtkGLExt in addition to Gtk+ due to the new 3D data
+display capabilities (but it is still backward compatible with 1.4 and 1.3).
+Application:
+- Capable of displaying data in 3D.
+- Document history (File -> Open Recent -> Document History) with much more
+  remembered files, thumbnails, and additional information.  File thumbnails
+  are TMS-compliant and any TMS-aware file manager should display them too.
+- Position of main window is remembered between sessions.
+- Settings that cannot be parsed are no longer silently overwritten and user
+  is informed.
+- Toolbox GUI improvements.
+
+Libraries:
+- libgwydgets: Gwy3DView, Gwy3DWindow, GwyGLMaterial, Gwy3DLabels -- new
+  OpenGL 3D data display widgets.
+- libgwydgets: GwyDataView, GwyGradSphere expose event handling improved,
+  making them much more usable over network.
+- libgwydgets: GwyDataView not displaying the image until resized with
+  Gtk+-2.4.6 and newer was fixed.
+- libgwydgets: GwyVMenuBar vertical menu widget.
+- libgwyddion: MD5 digest, file path canonicalization, and some unistd
+  emulation on Win32 functions were added.
+- libgwyprocess: Fractal interpolation added.
+- libgwyddion: Deserialization made more robust with regard to future
+  extensions and truncated files.
+
+Modules:
+- Calibrate: Crash on startup was fixed (Bug #25).
+- Spot remove tool: Can use Laplace solver, fractal interpolation for data
+  removal.
+- Select layer: Full widget redraws were eliminated, making it much more
+  usable over network.
+- Nanoscope: Basic metadata support was added (see Metadata Browser).
+- Nanoscope: Adds particular data name to window title.
+- Rawfile: Allows to select decimal point or decimal comma in ASCII import.
+
+
+1.4 (2004-08-04)
+Application:
+- Forgetting settings on MS Windows was fixed.
+- Rudimentary Drag'n'Drop support (drag a file to toolbox to load it).
+- Tools show a thumbnail of active data window beside its name.
+- Splash no longer screens eventual initial file open dialogs.
+
+Modules:
+- Calibrate (new): Change XYZ axis real dimensions
+- Graph CD (new): Critical dimension measurements.
+- SIS (new): SIS data file format import.
+- ASCII export (new): Simple export to ASCII data matrix.
+- Line correct (new, experimental): Line corrections, currently featuring
+  modus based step correction.
+- Scars (new, experimental): Scar (line defects) detection and removal.
+- Nanoscope, Pixmap, Rawfile, SIS: Import dialog shows a preview.
+- Pixmap: Export dialog shows a preview.
+- Rawfile: Fixed Load preset damaging file infomation.
+- Nanoscope, Rawfile: Fixed failure to load data when locale real number
+  format differs from POSIX.
+- Shade: A preview was added.
+- Rotate: Can make the result large enough to show all data after rotation.
+- Mask of Outliers: Broken undo was fixed.
+- Graph Measure Distances: Selected points are shown in correct position
+  after window resize (bug #21).
+- Plug-in proxy: Random insensitive plug-in menu items were fixed.
+- Plug-in proxy: Alternate plug-in registration method using RGI files
+  (without running the plug-ins).
+- Grain mark, watershed, remove: Discrepancy between color button color and
+  actual mask color when first used was fixed.
+- Grain mark, watershed, Spot remove: Memory leaks were fixed.
+
+Libraries:
+- libgwydgets: GwyValUnit -- value with unit and selection of unit prefix
+- libgwyprocess: gwy_data_line_get_modus() and gwy_data_line_part_get_modus()
+  approximate modus functions.
+- libgwyprocess: unrotate functionality available as a function
+  gwy_data_field_unrotate_find_corrections()
+- all libraries: Explicite functions initializing deserializable classes.
+- libgwyddion: gwydebugobjects -- an aid in leaking objects debugging.
+- Gwyddion::dump (Perl) and Gwyddion.dump (Python) modules implementing
+  plug-in proxy dump format.
+
+Other:
+- New example plug-ins using Gwyddion::dump, Gwyddion.dump.
+- New example plug-ins in C++ and Pascal.
+- Dump plug-in allowing to load and save plug-in proxy dump files is
+  available on MS Windows too.
+- Standard vector layers were documented.
+
+
+1.3 (2004-06-02)
+This version is binary and source incompatbile with previous ones.  Modules
+have to be recompiled and, in some cases, updated.
+Application:
+- Gtk+-2.4 compatibility issues were fixed (namely crashes and ugly palette
+  menu layout).
+- Modules and plug-ins are searched also in user directory (~/.gwyddion).
+- Option --no-splash disables splash screen.
+- Mask color changes are immediately previewed on corresponding data views.
+
+Modules:
+- All modules: State of controls is remembered also on Cancel.
+- Remove by threshold: Has a mask color change button too.
+- Graph fit: beeping and too small From and To entries were fixed.
+- Mask by correlation: Undo works.
+- Mask by correlation and Crosscorrelation: Misleading placement of `Please
+  wait' window was fixed.
+- Filters: Controls for values that don't make sense are insensitive.
+
+Libraries:
+- libgwyddion: GwySerializable and GwyWatchable borken interface definitions
+  fixed; GwySerializable uses GByteArray now.
+- libgwymodule: Processing modules sensitivity flags moved directly to
+  GwyProcessFuncInfo.
+- libgwyprocess, libgwyapp: Some functions with typos in names and functions
+  that should have never been public were removed from API.
+- libgwydraw: GwyRGBA conversion and container helper functions, it is
+  registered as a GType type.
+- libgwydgets: GwyColorButton reduction to a simple dialogless button using
+  GwyRGBA instead of Gdk colors.  Mask color selector helper
+  gwy_color_selector_for_mask().
+- libgwyapp: Data window option menus directly display thumbnails.
+
+
+1.2 (2004-05-21)
+Application:
+- Recognizes --version and --help options.
+- Data window zoom is keyboard controlable (+, =, -, z).
+- Settings are finally stored in a human readable text file, conversion from
+  the binary dump should be automatic and smooth (however, do backup).
+- Last Used processing function was differentiated to Repeat Last and Re-Show
+  Last, with Ctrl-F and Ctrl-Shfit-F shortcuts.
+- Right click on data window brings a [very simple] context menu.
+
+Modules:
+- Unrotate (new): Automagically correct rotation in xy plane.
+- Graph fit (new): Fit common functions to graph data.
+- Basic mask operations (new): invert, extract, grow, shrink masks.
+- Filters: Speed of mean and median filters was dramatically improved.
+- Slope distribution: Optionally can use local plane fitting for slopes,
+  can create graph of angular slope distribution.
+- Angle distribution: Optionally can use local plane fitting.
+- Data arithmetic, Cross-correlation, and Mask by correlation are regular
+  modules now.
+- Rawfile: Does not forget presets and settings on Cancel and allow easily
+  specify Tab as delimiter.
+- Crop: Properly crops masks and presentations.
+- Mark by threshold, Mark by watershed, Remove grains by threshold, and
+  Laplace: Undo works properly (bug #17, bug #18, bug #19, bug #20).
+- Filters: More cases of bug #7 (preview confused by tool switch) were fixed,
+  preview properly reflects changes in data.
+- Statistical functions: x axis scale fixed for height and slope distributions,
+  PSDF output improved using windowing properly.
+- Profile selection: profile "thickness" introduced - up to 20 pixel thick
+  averaged profile can be interactively selected and processed.
+- All modules: Dialogs have standard (HIG) button orders.
+
+Libraries:
+- libgwyapp: Option menu of data windows.
+- libgwyprocess: Several area functions were given more logical names and
+  `cros' was corrected to `cross' in names; old function names will continue
+  to work.
+- libgwydgets: Radio button group constructor from GwyEnum.
+- libgwyddion: Text dump/restore of GwyContainer.
+- libgwyddion: Presets for common fitting functions for GwyNLFitter, fitting
+  with some parameters fixed is possible.
+
+Other:
+- Icons in API documentation should be properly installed on install.
+- Several new palettes.
+
+
+1.1 (2004-04-13)
+Application:
+- Creating mask by correlation (new).  This can be useful for searching
+  for specific patterns on the surface, for example on interferometric
+  grids.
+- Cross-correlation (new).  Matching between two slightly different images
+  of the same feature can be found.
+- A bug preventing new windows from appearing in Data Artithmetic and
+  correlations in some window managers was fixed.
+- Creating mask by outliers detection. It uses 3*sigma criterium
+  for searching an outlier.
+- Fixed: modules not changing data (and creating new windows instead)
+  never became `Last used'.
+- Undo/redo memory leak was fixed.
+
+Modules:
+- Fractal (new): Fractal dimension of the rough surface can be
+  evaluated using partitioning, cube counting, traingulation and power
+  spectrum method.
+- Laplace (new): Removal of data under mask (of any shape). It uses
+  iterative method similar to solving Laplace equation.
+- Pixmap: Can also import data from common bitmap image formats.
+- Rawfile: Supports named presets of import parameters.
+- Rawfile: No longer resets text/binary parameters when switching to
+  the other type.
+- Watershed: It is possible to change mask color.
+- Facet-level: shows progress bar and is cancelable.
+- Filters tool: Bug #7 (preview confused by tool switch) was mostly fixed.
+- Graph points: Bug #15 (bad value formatting) was mostly fixed.
+- Shade: Bug #11 (not undoable) was fixed.
+- Many modules: Memory leaks fixed.
+
+Libraries:
+- libgwyddion: Marquardt-Levenberg non-linear least square fitter was
+  added (GwyNLFitter).
+- libgwyprocess: Functions for computing fractal dimension and surface area
+  added. Functions for correlation, crosscorrelation, outlier detection
+  and data correction by Laplace solver added.
+- libgwyprocess: Vertical PSDF computation fixed. Some minor bugs having
+  no specific influence on results corrected and code cleaned.
+- libgwymodule: Data process modules can specify sensitivity of their
+  menu entries.
+- libgwyddion: Specific functions for storing enums in GwyContainer were
+  added.
+- libgwyddion: gwy_strkill() and gwy_strreplace() string utility functions
+  were added.
+
+Other:
+- The license of plug-in proxy as a reference dump format implementation
+  was clarified.
+
+
+1.0 (2004-03-10)
+Gwyddion:
+- Data can be exported to bitmaps with rules, units, scale, etc.
+- Physical unit handling was improved.
+- Tons of bugfixes.
+
+
+0.99.1 (2004-03-02)
+Release candidate 1 for v1.0.
+

@@ -1,0 +1,331 @@
+# @(#) $Id$
+# Optional features:
+#   --with-kde4-thumbnailer    Enables the kde4-thumbnailer subpackage (and
+#                              introduces lots of new dependencies).
+%{expand:%global distro_is_fedora %(test ! -f /etc/fedora-release; echo $?)}
+%{expand:%global distro_is_suse %(test ! -f /etc/SuSE-release; echo $?)}
+%{expand:%global distro_is_mdk %(test ! -f /etc/mandriva-release; echo $?)}
+%define enable_kde4_thumbnailer %{?_with_kde4_thumbnailer:1}%{!?_with_kde4_thumbnailer:0}
+
+Name:          @PACKAGE_TARNAME@
+Version:       @PACKAGE_VERSION@
+Release:       1
+Summary:       An SPM data visualization and analysis tool
+
+Group:         Applications/Engineering
+License:       GNU GPL
+URL:           @PACKAGE_URL@
+Source0:       http://gwyddion.net/download/%{version}/%{name}-%{version}.tar.bz2
+BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -un)
+Requires(pre):    /sbin/ldconfig
+Requires(postun): /sbin/ldconfig
+
+BuildRequires: gtk2-devel >= 2.8
+BuildRequires: glib2-devel >= 2.8
+BuildRequires: pango-devel >= 1.10
+BuildRequires: gtkglext-devel
+BuildRequires: libxml2-devel
+BuildRequires: zlib-devel
+BuildRequires: python-devel >= 2.2
+BuildRequires: ruby >= 1.8
+BuildRequires: gettext
+BuildRequires: desktop-file-utils >= 0.9
+BuildRequires: pkgconfig
+BuildRequires: findutils
+
+%if %{distro_is_fedora}
+BuildRequires: libXmu-devel
+BuildRequires: pygtk2-devel
+BuildRequires: gtksourceview2-devel
+%define fftw3 fftw
+%define fftw3devel fftw-devel
+%define kde4libs kdelibs
+%define configureopts %{nil}
+%endif
+
+%if %{distro_is_suse}
+BuildRequires: xorg-x11-Mesa-devel
+BuildRequires: xorg-x11-libXmu-devel
+BuildRequires: python-gtk-devel
+BuildRequires: gtksourceview-devel
+%define fftw3 fftw3
+%define fftw3devel fftw3-devel
+%define kde4libs libkde4
+%define configureopts %{nil}
+%endif
+
+%if %{distro_is_mdk}
+BuildRequires: libxmu-devel
+BuildRequires: pygtk2.0-devel
+BuildRequires: gtksourceview-devel
+%define fftw3 libfftw3
+%define fftw3devel libfftw-devel
+%define kde4libs kdelibs4
+# Mandriva enforces --as-needed and other weirdness on everything.
+# So, give it what it deserves.
+%define configureopts --enable-library-bloat
+%endif
+
+%if %{enable_kde4_thumbnailer}
+BuildRequires: %{kde4libs}-devel >= 4.0
+%endif
+
+%ifarch %ix86
+BuildRequires: %{fftw3devel} >= 3.0
+%else
+BuildRequires: %{fftw3devel} >= 3.1
+%endif
+# Fedora guarantees these two, other may not
+BuildRequires: perl >= 5.005
+BuildRequires: sed
+
+# The only packaged perl module is private, don't expose it.
+%define __perl_provides %{nil}
+
+%define pkglibdir %{_libdir}/%{name}
+%define pkglibexecdir %{_libexecdir}/%{name}
+%define pkgdatadir %{_datadir}/%{name}
+%define pkgincludedir %{_includedir}/%{name}
+%define gtkdocdir %{_datadir}/gtk-doc/html
+%define gconfdir %{_sysconfdir}/gconf/schemas
+
+# gconftool-2 is executed in a silly manner, make macros for that.
+%define gconftool GCONF_CONFIG_SOURCE=$(gconftool-2 --get-default-source) gconftool-2
+%define schemas %{gconfdir}/gwyddion-thumbnailer.schemas
+
+
+%package devel
+Summary:       Headers, libraries and tools for Gwyddion module development
+Group:         Development/Libraries
+Requires:      %{name} = %{version}
+# This pulls everything else
+Requires:      gtk2-devel >= 2.8
+Requires:      gtkglext-devel
+Requires:      %{fftw3devel}
+%if %{distro_is_fedora}
+Requires:      perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Requires:      python-abi = %(%{__python} -c "import sys ; print sys.version[:3]")
+%endif
+
+
+%package thumbnailer-gconf
+Summary:         GConf schemas for gwyddion-thumbnailer integration
+Group:           System Environment/Libraries
+Requires:        %{name} = %{version}
+Requires(pre):   GConf2
+Requires(post):  GConf2
+Requires(preun): GConf2
+
+
+%if %{enable_kde4_thumbnailer}
+%package thumbnailer-kde4
+Summary:         KDE4 gwyddion thumbnailer module
+Group:           System Environment/Libraries
+Requires:        %{name} = %{version}
+# We do not actually link with them, but they own the module directory.
+Requires:        %{kde4libs} >= 4.0
+%endif
+
+
+%description
+Gwyddion is a modular SPM (Scanning Probe Microsopy) data visualization and
+analysis tool written with Gtk+.
+
+It can be used for all most frequently used data processing operations
+including: leveling, false color plotting, shading, filtering, denoising, data
+editing, integral transforms, grain analysis, profile extraction, fractal
+analysis, and many more.  The program is primarily focused on SPM data analysis
+(e.g. data obtained from AFM, STM, NSOM, and similar microscopes).  However, it
+can also be used for analysis of SEM (Scanning Electron Microscopy) data or any
+other 2D data.
+
+
+%description devel
+Header files, libraries and tools for Gwyddion module and plug-in development.
+This package also contains the API docmentation and sample plug-ins in various
+programming languages.
+
+
+%description thumbnailer-gconf
+GConf schemas that register gwyddion-thumbnailer as thumbnailer for SPM files
+in GNOME and XFce.
+
+
+%if %{enable_kde4_thumbnailer}
+%description thumbnailer-kde4
+Gwyddion-thumbnailer based KDE thumbnail creator extension module for SPM
+files.
+%endif
+
+
+%prep
+%setup -q
+# Don't install .la files.
+sed -i -e '/# Install the pseudo-library/,/^$/d' ltmain.sh
+# Replace universal /usr/bin/env shbang with the real thing.
+sed -i -e '1s/env *//' plugins/process/*.{py,rb,pl}
+
+
+%build
+%configure %configureopts --without-pascal --disable-rpath \
+           --without-kde4-thumbnailer %{?_with_kde4_thumbnailer}
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+# Install the icon to the hicolor theme *and* to /usr/share/pixmaps because
+# some distros expect it in one place, some in another.
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/pixmaps
+install pixmaps/%{name}.png $RPM_BUILD_ROOT%{_datadir}/pixmaps
+%find_lang %{name}
+
+# Get rid of .la files if some silly distros (hello Mandriva) overwrote our
+# fixed libtool with some crap.
+find $RPM_BUILD_ROOT -name \*.la -print0 | xargs -0 rm -f
+
+# I cannot express this as %%files in a sensible manner, especially not when
+# python byte-compilation kicks in.  Set permissions in the filesystem.
+find $RPM_BUILD_ROOT%{pkglibexecdir} -type f -print0 | xargs -0 chmod 755
+find $RPM_BUILD_ROOT%{pkglibexecdir} -type f -name \*.rgi -print0 | xargs -0 chmod 644
+
+# Perl, Python, and Ruby modules are private, remove the Perl man page.
+rm -f $RPM_BUILD_ROOT%{_mandir}/man3/Gwyddion::dump.*
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%post
+/sbin/ldconfig
+update-mime-database %{_datadir}/mime &>/dev/null || :
+update-desktop-database &>/dev/null || :
+
+
+%postun
+/sbin/ldconfig
+update-mime-database %{_datadir}/mime &>/dev/null || :
+update-desktop-database &>/dev/null || :
+
+
+%pre thumbnailer-gconf
+if [ "$1" -gt 1 ]; then
+    %{gconftool} --makefile-uninstall-rule %{schemas} >/dev/null || :
+fi
+
+
+%post thumbnailer-gconf
+%{gconftool} --makefile-install-rule %{schemas} >/dev/null || :
+
+
+%preun thumbnailer-gconf
+if [ "$1" -eq 0 ]; then
+    %{gconftool} --makefile-uninstall-rule %{schemas} >/dev/null || :
+fi
+
+
+%files -f %{name}.lang
+%defattr(755,root,root)
+%{_bindir}/%{name}
+%{_bindir}/%{name}-thumbnailer
+%defattr(-,root,root)
+%doc AUTHORS COPYING INSTALL.%{name} NEWS README THANKS
+%{pkgdatadir}/pixmaps/*.png
+%{pkgdatadir}/pixmaps/*.ico
+%{pkgdatadir}/gradients/*
+%{pkgdatadir}/glmaterials/*
+%{pkgdatadir}/pygwy/*
+%{pkgdatadir}/ui/*
+%dir %{pkgdatadir}/pixmaps
+%dir %{pkgdatadir}/gradients
+%dir %{pkgdatadir}/glmaterials
+%dir %{pkgdatadir}/pygwy
+%dir %{pkgdatadir}/ui
+%dir %{pkgdatadir}
+%{_mandir}/man1/%{name}.1*
+%{_mandir}/man1/%{name}-thumbnailer.1*
+%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
+%{_datadir}/pixmaps/%{name}.png
+%{pkglibdir}/modules/file/*.so
+%{pkglibdir}/modules/graph/*.so
+%{pkglibdir}/modules/layer/*.so
+%{pkglibdir}/modules/process/*.so
+%{pkglibdir}/modules/tool/*.so
+%{pkglibdir}/modules/*.so
+%dir %{pkglibdir}/modules/file
+%dir %{pkglibdir}/modules/graph
+%dir %{pkglibdir}/modules/layer
+%dir %{pkglibdir}/modules/process
+%dir %{pkglibdir}/modules/tool
+%dir %{pkglibdir}/modules
+%dir %{pkglibdir}
+%{_libdir}/*.so.*
+%{_datadir}/applications/%{name}.desktop
+%{_datadir}/mime/packages/%{name}.xml
+
+
+%files devel
+%defattr(-,root,root)
+%doc devel-docs/CODING-STANDARDS
+%doc data/%{name}.vim
+%{pkgincludedir}/app/*.h
+%{pkgincludedir}/libdraw/*.h
+%{pkgincludedir}/libprocess/*.h
+%{pkgincludedir}/libgwyddion/*.h
+%{pkgincludedir}/libgwydgets/*.h
+%{pkgincludedir}/libgwymodule/*.h
+%dir %{pkgincludedir}/app
+%dir %{pkgincludedir}/libdraw
+%dir %{pkgincludedir}/libprocess
+%dir %{pkgincludedir}/libgwyddion
+%dir %{pkgincludedir}/libgwydgets
+%dir %{pkgincludedir}/libgwymodule
+%dir %{pkgincludedir}
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/gwyddion.pc
+%dir %{_libdir}/pkgconfig
+# Documentation
+%doc %{gtkdocdir}/libgwyapp/*
+%doc %{gtkdocdir}/libgwydraw/*
+%doc %{gtkdocdir}/libgwyprocess/*
+%doc %{gtkdocdir}/libgwyddion/*
+%doc %{gtkdocdir}/libgwydgets/*
+%doc %{gtkdocdir}/libgwymodule/*
+%doc %dir %{gtkdocdir}/libgwyapp
+%doc %dir %{gtkdocdir}/libgwydraw
+%doc %dir %{gtkdocdir}/libgwyprocess
+%doc %dir %{gtkdocdir}/libgwyddion
+%doc %dir %{gtkdocdir}/libgwydgets
+%doc %dir %{gtkdocdir}/libgwymodule
+%doc %dir %{gtkdocdir}
+%doc %dir %{_datadir}/gtk-doc
+%{pkglibdir}/include/gwyconfig.h
+%dir %{pkglibdir}/include
+# Plug-ins and plug-in devel stuff
+%{pkglibdir}/perl/Gwyddion/*
+%dir %{pkglibdir}/perl/Gwyddion
+%dir %{pkglibdir}/perl
+%{pkglibdir}/python/Gwyddion/*
+%dir %{pkglibdir}/python/Gwyddion
+%dir %{pkglibdir}/python
+%{pkglibdir}/ruby/gwyddion/*
+%dir %{pkglibdir}/ruby/gwyddion
+%dir %{pkglibdir}/ruby
+# Use filesystem permissions here.
+%defattr(-,root,root,755)
+%{pkglibexecdir}/plugins/file/*
+%{pkglibexecdir}/plugins/process/*
+%dir %{pkglibexecdir}/plugins/file
+%dir %{pkglibexecdir}/plugins/process
+%dir %{pkglibexecdir}/plugins
+%dir %{pkglibexecdir}
+
+%files thumbnailer-gconf
+%{gconfdir}/*.schemas
+
+%if %{enable_kde4_thumbnailer}
+%files thumbnailer-kde4
+%{_libdir}/kde4/gwythumbcreator.so
+%endif
