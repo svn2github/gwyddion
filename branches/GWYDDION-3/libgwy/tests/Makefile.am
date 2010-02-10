@@ -24,6 +24,7 @@ testlibgwy_SOURCES = \
 	line.c \
 	mask-field.c \
 	pack.c \
+	resource.c \
 	serialization.c \
 	sort.c \
 	strfuncs.c \

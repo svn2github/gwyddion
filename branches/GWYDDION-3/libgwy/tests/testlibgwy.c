@@ -30,6 +30,7 @@
 
 // Put the declarations here instead of testlibgwy.h to avoid recompilation
 // of everything when a new test is added.
+// Test case declarations {{{
 void test_version                (void);
 void test_error_list             (void);
 void test_memmem                 (void);
@@ -121,6 +122,9 @@ void test_gl_material_inventory  (void);
 void test_user_fit_func_load     (void);
 void test_user_fit_func_save     (void);
 void test_user_fit_func_serialize(void);
+void test_user_fit_func_inventory(void);
+void test_resource_finalize      (void);
+// }}}
 
 static void
 remove_testdata(void)
@@ -170,6 +174,7 @@ main(int argc, char *argv[])
     g_test_init(&argc, &argv, NULL);
     g_type_init();
 
+    // Test cases {{{
     g_test_add_func("/testlibgwy/version", test_version);
     g_test_add_func("/testlibgwy/error-list", test_error_list);
     g_test_add_func("/testlibgwy/str/memmem", test_memmem);
@@ -261,6 +266,10 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/user-fit-func/load", test_user_fit_func_load);
     g_test_add_func("/testlibgwy/user-fit-func/save", test_user_fit_func_save);
     g_test_add_func("/testlibgwy/user-fit-func/serialize", test_user_fit_func_serialize);
+    g_test_add_func("/testlibgwy/user-fit-func/inventory", test_user_fit_func_inventory);
+    // XXX: Should go last, after we create resources of all types.
+    g_test_add_func("/testlibgwy/resource/finalize", test_resource_finalize);
+    // }}}
 
     remove_testdata();
     g_mkdir(TEST_DATA_DIR, 0700);
