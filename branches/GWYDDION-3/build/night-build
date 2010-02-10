@@ -75,10 +75,10 @@ function unit_test() {
   for dir in $libdirs; do
     pushd $dir >/dev/null
     make test-report
-    cp -f test-report.html test-report-$dir.html
-    sed -e "s/test-report\\.html/test-report-$dir\\.html/" \
-        -e "s/coverage\\.html/coverage-$dir\\.html/" \
-        test-report-brief.html >test-report-brief-$dir.html
+    cp -f test-report.html $dir-test-report.html
+    sed -e "s/test-report\\.html/$dir-test-report\\.html/" \
+        -e "s/coverage\\.html/$dir-coverage\\.html/" \
+        test-report-brief.html >$dir-test-report-brief.html
     popd >/dev/null
   done
 }
