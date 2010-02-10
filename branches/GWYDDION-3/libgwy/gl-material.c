@@ -24,6 +24,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/gl-material.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/object-internal.h"
 
 /* FIXME
 #define BITS_PER_SAMPLE 8
@@ -177,18 +178,9 @@ gwy_gl_material_itemize(GwySerializable *serializable,
     it.value.v_double = material->shininess;
     items->items[items->n++] = it;
 
-    // Chain to parent
-    g_return_val_if_fail(items->len - items->n, 0);
-    it.ctype = GWY_SERIALIZABLE_PARENT;
-    it.name = g_type_name(GWY_TYPE_RESOURCE);
-    it.array_size = 0;
-    it.value.v_type = GWY_TYPE_RESOURCE;
-    items->items[items->n++] = it;
-
-    guint n;
-    if ((n = gwy_gl_material_parent_serializable->itemize(serializable, items)))
-        return N_ITEMS+1 + n;
-    return 0;
+    return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
+                                        gwy_gl_material_parent_serializable,
+                                        items, N_ITEMS);
 }
 
 static gboolean

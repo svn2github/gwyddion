@@ -209,19 +209,9 @@ gwy_user_fit_func_itemize(GwySerializable *serializable,
         gwy_serializable_itemize(GWY_SERIALIZABLE(priv->param[i]), items);
     }
 
-    // Chain to parent
-    g_return_val_if_fail(items->len - items->n, 0);
-    it = items->items + items->n;
-    it->ctype = GWY_SERIALIZABLE_PARENT;
-    it->name = g_type_name(GWY_TYPE_RESOURCE);
-    it->array_size = 0;
-    it->value.v_type = GWY_TYPE_RESOURCE;
-    it++, items->n++, nn++;
-
-    guint n;
-    if ((n = gwy_user_fit_func_parent_serializable->itemize(serializable, items)))
-        return nn + n;
-    return 0;
+    return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
+                                        gwy_user_fit_func_parent_serializable,
+                                        items, nn);
 }
 
 static gboolean

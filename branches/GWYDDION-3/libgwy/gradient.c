@@ -26,6 +26,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/gradient.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/object-internal.h"
 
 #define gwy_debug(fmt...)  /* FIXME */
 
@@ -155,23 +156,14 @@ gwy_gradient_itemize(GwySerializable *serializable,
     GArray *points = gradient->priv->points;
     GwySerializableItem *it = items->items + items->n;
 
-    // Our own data
     *it = serialize_items[0];
     it->value.v_double_array = (gdouble*)points->data;
     it->array_size = 5*points->len;
     it++, items->n++;
 
-    // Chain to parent
-    it->ctype = GWY_SERIALIZABLE_PARENT;
-    it->name = g_type_name(GWY_TYPE_RESOURCE);
-    it->array_size = 0;
-    it->value.v_type = GWY_TYPE_RESOURCE;
-    it++, items->n++;
-
-    guint n;
-    if ((n = gwy_gradient_parent_serializable->itemize(serializable, items)))
-        return N_ITEMS+1 + n;
-    return 0;
+    return _gwy_itemize_chain_to_parent(serializable, GWY_TYPE_RESOURCE,
+                                        gwy_gradient_parent_serializable,
+                                        items, N_ITEMS);
 }
 
 static gboolean

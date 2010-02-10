@@ -42,6 +42,13 @@ gboolean _gwy_check_object_component(const GwySerializableItem *item,
                                      GType component_type,
                                      GwyErrorList **error_list);
 
+G_GNUC_INTERNAL
+guint _gwy_itemize_chain_to_parent(GwySerializable *serializable,
+                                   GType parent_type,
+                                   GwySerializableInterface *parent_iface,
+                                   GwySerializableItems *items,
+                                   guint child_items);
+
 G_END_DECLS
 
 #endif

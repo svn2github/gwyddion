@@ -65,6 +65,29 @@ _gwy_notify_properties(GObject *object,
     g_object_thaw_notify(object);
 }
 
+guint
+_gwy_itemize_chain_to_parent(GwySerializable *serializable,
+                             GType parent_type,
+                             GwySerializableInterface *parent_iface,
+                             GwySerializableItems *items,
+                             guint child_items)
+{
+    g_return_val_if_fail(items->len - items->n, 0);
+
+    GwySerializableItem *it = items->items + items->n;
+    it->ctype = GWY_SERIALIZABLE_PARENT;
+    it->name = g_type_name(parent_type);
+    it->array_size = 0;
+    it->value.v_type = parent_type;
+    it++, items->n++;
+
+    guint n;
+    if ((n = parent_iface->itemize(serializable, items)))
+        return child_items + 1 + n;
+
+    return 0;
+}
+
 // Pass the object instead of the type to avoid lookup of the object GType we
 // need only in the case of error.
 gboolean
