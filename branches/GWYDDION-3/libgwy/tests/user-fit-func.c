@@ -156,8 +156,8 @@ test_user_fit_func_load(void)
         GWY_OBJECT_UNREF(params[i]);
 }
 
-void
-test_user_fit_func_save(void)
+static GwyUserFitFunc*
+make_test_fit_func(GwyFitParam **funcparams)
 {
     GwyFitParam *params[] = {
         gwy_fit_param_new_set("a", 0, 1, "1.0"),
@@ -181,6 +181,20 @@ test_user_fit_func_save(void)
     g_assert(gwy_user_fit_func_param(userfitfunc, "b"));
     param = gwy_user_fit_func_param(userfitfunc, "b");
     gwy_fit_param_assign(param, params[1]);
+
+    funcparams[0] = params[0];
+    funcparams[1] = params[1];
+
+    return userfitfunc;
+}
+
+void
+test_user_fit_func_save(void)
+{
+    enum { np = 2 };
+    GwyFitParam *params[np];
+    GwyUserFitFunc *userfitfunc = make_test_fit_func(params);
+    GwyResource *resource = GWY_RESOURCE(userfitfunc);
 
     GError *error = NULL;
     gwy_resource_set_filename(resource, "Linear2");
@@ -208,33 +222,14 @@ test_user_fit_func_save(void)
 void
 test_user_fit_func_serialize(void)
 {
-    GwyFitParam *params[] = {
-        gwy_fit_param_new_set("a", 0, 1, "1.0"),
-        gwy_fit_param_new_set("b", -1, 1, "(yxmax-yxmin)/(xmax-xmin)"),
-    };
-    enum { np = G_N_ELEMENTS(params) };
-
-    GwyUserFitFunc *userfitfunc = gwy_user_fit_func_new();
-    GwyResource *resource = GWY_RESOURCE(userfitfunc);
-
-    gwy_resource_set_name(resource, "Linear-3");
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Linear-3");
-
-    g_assert(gwy_user_fit_func_set_formula(userfitfunc, "a+b*x", NULL));
-    g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
-    g_assert_cmpuint(gwy_user_fit_func_n_params(userfitfunc), ==, np);
-    GwyFitParam *param;
-    g_assert(gwy_user_fit_func_param(userfitfunc, "a"));
-    param = gwy_user_fit_func_param(userfitfunc, "a");
-    gwy_fit_param_assign(param, params[0]);
-    g_assert(gwy_user_fit_func_param(userfitfunc, "b"));
-    param = gwy_user_fit_func_param(userfitfunc, "b");
-    gwy_fit_param_assign(param, params[1]);
+    enum { np = 2 };
+    GwyFitParam *params[np];
+    GwyUserFitFunc *userfitfunc = make_test_fit_func(params);
 
     GwyUserFitFunc *newuserfitfunc
         = (GwyUserFitFunc*)serialize_and_back(G_OBJECT(userfitfunc));
     GwyResource *newresource = GWY_RESOURCE(newuserfitfunc);
-    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear-3");
+    g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear 2");
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
     test_user_fit_func_param_check(newuserfitfunc, np, params);
 
@@ -244,23 +239,31 @@ test_user_fit_func_serialize(void)
         GWY_OBJECT_UNREF(params[i]);
 }
 
-#if 0
 void
 test_user_fit_func_inventory(void)
 {
-    static const GwyUserFitFuncPoint userfitfunc_point_red = { 0.5, { 1, 0, 0, 1 } };
+    enum { np = 2 };
+    GwyFitParam *params[np];
+    GwyUserFitFunc *userfitfunc = make_test_fit_func(params);
+    GwyResource *resource = GWY_RESOURCE(userfitfunc);
+
     const GwyInventoryItemType *item_type;
-    GwyUserFitFunc *userfitfunc;
-    GwyResource *resource;
 
     GwyInventory *userfitfuncs = gwy_user_fit_funcs();
     g_assert(GWY_IS_INVENTORY(userfitfuncs));
+    g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 0);
     item_type = gwy_inventory_get_item_type(userfitfuncs);
     g_assert(item_type);
     g_assert_cmpuint(item_type->type, ==, GWY_TYPE_USER_FIT_FUNC);
     g_assert(gwy_inventory_can_make_copies(userfitfuncs));
-    g_assert_cmpstr(gwy_inventory_get_default_name(userfitfuncs),
-                    ==, GWY_USER_FIT_FUNC_DEFAULT);
+    g_assert(!gwy_inventory_get_default_name(userfitfuncs));
+
+    g_assert(!gwy_resource_is_managed(resource));
+    g_assert(gwy_resource_is_modifiable(resource));
+    gwy_inventory_insert(userfitfuncs, userfitfunc);
+    g_object_unref(userfitfunc);
+    g_assert(gwy_resource_is_managed(resource));
+    g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 1);
 
     item_type = gwy_resource_type_get_item_type(GWY_TYPE_USER_FIT_FUNC);
     g_assert(item_type);
@@ -268,22 +271,14 @@ test_user_fit_func_inventory(void)
     userfitfunc = gwy_user_fit_funcs_get(NULL);
     g_assert(GWY_IS_USER_FIT_FUNC(userfitfunc));
     resource = GWY_RESOURCE(userfitfunc);
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_USER_FIT_FUNC_DEFAULT);
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Linear 2");
     g_assert(gwy_resource_is_managed(resource));
-    g_assert(!gwy_resource_is_modifiable(resource));
+    g_assert(gwy_resource_is_modifiable(resource));
 
     userfitfunc = gwy_inventory_get_default(userfitfuncs);
-    g_assert(GWY_IS_USER_FIT_FUNC(userfitfunc));
-    resource = GWY_RESOURCE(userfitfunc);
-    g_assert_cmpstr(gwy_resource_get_name(resource), ==, GWY_USER_FIT_FUNC_DEFAULT);
-    g_assert(gwy_resource_is_managed(resource));
-    g_assert(!gwy_resource_is_modifiable(resource));
+    g_assert(!userfitfunc);
 
-    g_assert(!gwy_resource_get_is_preferred(resource));
-    gwy_resource_set_is_preferred(resource, TRUE);
-    g_assert(gwy_resource_get_is_preferred(resource));
-
-    gwy_inventory_copy(userfitfuncs, GWY_USER_FIT_FUNC_DEFAULT, "Another");
+    gwy_inventory_copy(userfitfuncs, "Linear 2", "Another");
     g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 2);
     userfitfunc = gwy_inventory_get(userfitfuncs, "Another");
     resource = GWY_RESOURCE(userfitfunc);
@@ -293,8 +288,6 @@ test_user_fit_func_inventory(void)
     g_assert(gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
     g_assert(is_modified);
-    gwy_user_fit_func_insert_sorted(userfitfunc, &userfitfunc_point_red);
-    g_assert_cmpuint(gwy_user_fit_func_n_points(userfitfunc), ==, 3);
 
     g_object_ref(userfitfunc);
     gwy_inventory_delete(userfitfuncs, "Another");
@@ -302,7 +295,9 @@ test_user_fit_func_inventory(void)
     g_assert(!gwy_resource_is_managed(resource));
     g_assert(gwy_resource_is_modifiable(resource));
     g_object_unref(userfitfunc);
+
+    for (guint i = 0; i < np; i++)
+        GWY_OBJECT_UNREF(params[i]);
 }
-#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
