@@ -99,4 +99,26 @@ test_curve_props(void)
     g_object_unref(curve);
 }
 
+void
+test_curve_line_conversion(void)
+{
+    enum { max_size = 27 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 50 : 10;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        gdouble real = g_rand_double_range(rng, -1, 1)
+                       * exp(g_rand_double_range(rng, -8, 8));
+        gdouble off = g_rand_double_range(rng, -5, 5)*real;
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        line_randomize(line);
+        gwy_line_set_real(line, real);
+        gwy_line_set_offset(line, off);
+
+        GwyCurve *curve = gwy_curve_new_from_line(line);
+    }
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

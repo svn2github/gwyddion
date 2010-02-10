@@ -61,57 +61,65 @@ struct _GwyLineClass {
     GObjectClass g_object_class;
 };
 
+G_END_DECLS
+
+#include <libgwy/curve.h>
+
+G_BEGIN_DECLS
+
 #define gwy_line_duplicate(line) \
         (GWY_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(line))))
 #define gwy_line_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType           gwy_line_get_type     (void)                               G_GNUC_CONST;
-GwyLine*        gwy_line_new          (void)                               G_GNUC_MALLOC;
-GwyLine*        gwy_line_new_sized    (guint res,
-                                       gboolean clear)                     G_GNUC_MALLOC;
-GwyLine*        gwy_line_new_alike    (const GwyLine *model,
-                                       gboolean clear)                     G_GNUC_MALLOC;
-GwyLine*        gwy_line_new_part     (const GwyLine *line,
-                                       guint pos,
-                                       guint len,
-                                       gboolean keep_offset)               G_GNUC_MALLOC;
-GwyLine*        gwy_line_new_resampled(const GwyLine *line,
-                                       guint res,
-                                       GwyInterpolationType interpolation) G_GNUC_MALLOC;
-void            gwy_line_set_size     (GwyLine *line,
-                                       guint res,
-                                       gboolean clear);
-void            gwy_line_data_changed (GwyLine *line);
-void            gwy_line_copy         (const GwyLine *src,
-                                       GwyLine *dest);
-void            gwy_line_part_copy    (const GwyLine *src,
-                                       guint pos,
-                                       guint len,
-                                       GwyLine *dest,
-                                       guint destpos);
-void            gwy_line_set_real     (GwyLine *line,
-                                       gdouble real);
-void            gwy_line_set_offset   (GwyLine *line,
-                                       gdouble offset);
-GwyUnit*        gwy_line_get_unit_x   (GwyLine *line)                      G_GNUC_PURE;
-GwyUnit*        gwy_line_get_unit_y   (GwyLine *line)                      G_GNUC_PURE;
-void            gwy_line_clear        (GwyLine *line);
-void            gwy_line_fill         (GwyLine *line,
-                                       gdouble value);
-void            gwy_line_part_clear   (GwyLine *line,
-                                       guint pos,
-                                       guint len);
-void            gwy_line_part_fill    (GwyLine *line,
-                                       guint pos,
-                                       guint len,
-                                       gdouble value);
-GwyValueFormat* gwy_line_get_format_x (GwyLine *line,
-                                       GwyValueFormatStyle style,
-                                       GwyValueFormat *format);
-GwyValueFormat* gwy_line_get_format_y (GwyLine *line,
-                                       GwyValueFormatStyle style,
-                                       GwyValueFormat *format);
+GType           gwy_line_get_type      (void)                               G_GNUC_CONST;
+GwyLine*        gwy_line_new           (void)                               G_GNUC_MALLOC;
+GwyLine*        gwy_line_new_sized     (guint res,
+                                        gboolean clear)                     G_GNUC_MALLOC;
+GwyLine*        gwy_line_new_alike     (const GwyLine *model,
+                                        gboolean clear)                     G_GNUC_MALLOC;
+GwyLine*        gwy_line_new_part      (const GwyLine *line,
+                                        guint pos,
+                                        guint len,
+                                        gboolean keep_offset)               G_GNUC_MALLOC;
+GwyLine*        gwy_line_new_resampled (const GwyLine *line,
+                                        guint res,
+                                        GwyInterpolationType interpolation) G_GNUC_MALLOC;
+GwyLine*        gwy_line_new_from_curve(const GwyCurve *curve,
+                                        guint res)                          G_GNUC_MALLOC;
+void            gwy_line_set_size      (GwyLine *line,
+                                        guint res,
+                                        gboolean clear);
+void            gwy_line_data_changed  (GwyLine *line);
+void            gwy_line_copy          (const GwyLine *src,
+                                        GwyLine *dest);
+void            gwy_line_part_copy     (const GwyLine *src,
+                                        guint pos,
+                                        guint len,
+                                        GwyLine *dest,
+                                        guint destpos);
+void            gwy_line_set_real      (GwyLine *line,
+                                        gdouble real);
+void            gwy_line_set_offset    (GwyLine *line,
+                                        gdouble offset);
+GwyUnit*        gwy_line_get_unit_x    (GwyLine *line)                      G_GNUC_PURE;
+GwyUnit*        gwy_line_get_unit_y    (GwyLine *line)                      G_GNUC_PURE;
+void            gwy_line_clear         (GwyLine *line);
+void            gwy_line_fill          (GwyLine *line,
+                                        gdouble value);
+void            gwy_line_part_clear    (GwyLine *line,
+                                        guint pos,
+                                        guint len);
+void            gwy_line_part_fill     (GwyLine *line,
+                                        guint pos,
+                                        guint len,
+                                        gdouble value);
+GwyValueFormat* gwy_line_get_format_x  (GwyLine *line,
+                                        GwyValueFormatStyle style,
+                                        GwyValueFormat *format);
+GwyValueFormat* gwy_line_get_format_y  (GwyLine *line,
+                                        GwyValueFormatStyle style,
+                                        GwyValueFormat *format);
 
 #define gwy_line_index(line, pos) \
     ((line)->data[pos])

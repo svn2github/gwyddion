@@ -614,6 +614,52 @@ gwy_line_set_size(GwyLine *line,
 }
 
 /**
+ * gwy_line_new_from_curve:
+ * @curve: A curve.  It must have at least one point.
+ * @res: Required line resolution.  Pass 0 to chose a resolution automatically.
+ *
+ * Creates a one-dimensional data line from a curve.
+ *
+ * If the curve has at least two points with different abscissa values, they
+ * are equidistant and the requested number of points matches the @curve's
+ * number of points, then one-to-one data point mapping can be used and the
+ * conversion will be information-preserving.  Otherwise linear interpolation
+ * is used.
+ *
+ * Returns: A new one-dimensional data line.
+ **/
+GwyLine*
+gwy_line_new_from_curve(const GwyCurve *curve,
+                        guint res)
+{
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    g_return_val_if_fail(curve->n, NULL);
+
+    guint last = curve->n - 1;
+    const GwyXY *data = curve->data;
+    gdouble length = data[last].x - data[0].x;
+    if (!length) {
+        // TODO: Special case, usually just one point but possibly a degenerate
+        // curve.
+    }
+
+    if (!res) {
+        gdouble *x = g_new(gdouble, last);
+        for (guint i = 0; i < last; i++)
+            x[i] = curve->data[i+1].x - curve->data[i].x;
+        gdouble dx = gwy_math_median(x, last);
+        res = dx ? gwy_round(length/dx) + 1 : curve->n;
+        res = MIN(res, 4*curve->n);
+    }
+
+    gdouble dx = length/res;
+    GwyLine *line = gwy_line_new_sized(res, FALSE);
+    line->off = dx/2.0;
+
+    return line;
+}
+
+/**
  * gwy_line_data_changed:
  * @line: A one-dimensional data line.
  *
