@@ -783,7 +783,6 @@ find_shifts_of_good_rows(GwyLine *shifts,
             *d -= *(d+1);
         else
             *d = 0.0;
-        gwy_mask_iter_next(iter);
     }
     d = shifts->data + shifts->res-2;
     for (guint i = shifts->res-1; i; i--, d--)
@@ -863,7 +862,7 @@ gwy_field_find_row_shifts(const GwyField *field,
         g_slice_free1(masksize, goodrows);
         g_slice_free1(bufsize, buffer);
     }
-    if (method == GWY_ROW_SHIFT_MEAN_DIFF) {
+    else if (method == GWY_ROW_SHIFT_MEAN_DIFF) {
         shifts->data[0] = 0.0;
         for (guint i = 0; i < field->yres-1; i++)
             fit_row_mean_diff(field, i, mask, masking, maskrow, min_freedom,
