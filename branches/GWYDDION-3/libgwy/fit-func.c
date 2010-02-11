@@ -306,7 +306,7 @@ gwy_fit_func_new(const gchar *name,
 }
 
 /**
- * gwy_fit_func_get_value:
+ * gwy_fit_func_evaluate:
  * @fitfunc: A fitting function.
  * @x: Abscissa value to calculate the function value in.
  * @params: Array of length @nparams holding the parameters.
@@ -318,10 +318,10 @@ gwy_fit_func_new(const gchar *name,
  *          a domain error).
  **/
 gboolean
-gwy_fit_func_get_value(GwyFitFunc *fitfunc,
-                       gdouble x,
-                       const gdouble *params,
-                       gdouble *value)
+gwy_fit_func_evaluate(GwyFitFunc *fitfunc,
+                      gdouble x,
+                      const gdouble *params,
+                      gdouble *value)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), FALSE);
     FitFunc *priv = fitfunc->priv;
