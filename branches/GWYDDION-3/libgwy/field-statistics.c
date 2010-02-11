@@ -374,9 +374,14 @@ gwy_field_part_rms(GwyField *field,
         return 0.0;
 
     const gdouble *base = field->data + row*field->xres + col;
-    gdouble rms = 0.0, avg = 0.0;
+    gdouble avg = gwy_field_part_mean(field, mask, masking,
+                                      col, row, width, height);
+    gdouble rms = 0.0;
     gboolean full_field = FALSE;
     guint n = 0;
+
+    if (isnan(avg))
+        return 0.0;
 
     if (masking == GWY_MASK_IGNORE) {
         // No mask.  If full field is processed we must use the cache.
@@ -386,8 +391,8 @@ gwy_field_part_rms(GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *d = base + i*field->xres;
             for (guint j = width; j; j--, d++) {
-                avg += *d;
-                rms += (*d)*(*d);
+                gdouble v = *d - avg;
+                rms += v*v;
             }
         }
         n = width*height;
@@ -401,8 +406,8 @@ gwy_field_part_rms(GwyField *field,
             gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert) {
-                    avg += *d;
-                    rms += (*d)*(*d);
+                    gdouble v = *d - avg;
+                    rms += v*v;
                     n++;
                 }
                 gwy_mask_iter_next(iter);
@@ -410,13 +415,7 @@ gwy_field_part_rms(GwyField *field,
         }
     }
 
-    if (!n)
-        return 0.0;
-
-    rms /= n;
-    avg /= n;
-    rms -= avg*avg;
-    rms = sqrt(MAX(rms, 0.0));
+    rms = sqrt(rms/n);
     if (full_field) {
         CVAL(field->priv, RMS) = rms;
         field->priv->cached |= CBIT(RMS);
