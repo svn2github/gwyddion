@@ -151,6 +151,8 @@ test_curve_line_convert(void)
         g_object_unref(line);
         g_object_unref(curve);
     }
+
+    g_rand_free(rng);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
