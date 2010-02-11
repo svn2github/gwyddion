@@ -260,7 +260,7 @@ test_gl_material_inventory(void)
     g_assert(gwy_resource_get_is_preferred(resource));
 
     gwy_inventory_copy(gl_materials, GWY_GL_MATERIAL_DEFAULT, "Another");
-    g_assert_cmpuint(gwy_inventory_n_items(gl_materials), ==, 3);
+    g_assert_cmpuint(gwy_inventory_size(gl_materials), ==, 3);
     gl_material = gwy_inventory_get(gl_materials, "Another");
     resource = GWY_RESOURCE(gl_material);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");

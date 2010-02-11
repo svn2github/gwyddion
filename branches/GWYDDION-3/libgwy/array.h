@@ -63,7 +63,7 @@ GwyArray* gwy_array_new_with_data(gsize size,
 void      gwy_array_set_item_type(GwyArray *array,
                                   gsize size,
                                   GDestroyNotify destroy);
-guint     gwy_array_n_items      (GwyArray *array)         G_GNUC_PURE;
+guint     gwy_array_size         (GwyArray *array)         G_GNUC_PURE;
 gpointer  gwy_array_get          (GwyArray *array,
                                   guint n)                 G_GNUC_PURE;
 

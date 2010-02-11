@@ -124,7 +124,7 @@ test_inventory_data(void)
     gwy_inventory_insert(inventory, item_new("Fixme", -1));
     gwy_inventory_insert(inventory, item_new("Second", 2));
     gwy_inventory_insert(inventory, item_new("First", 1));
-    g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 3);
     g_assert_cmphex(insert_log, ==, 0x121);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0);
@@ -157,7 +157,7 @@ test_inventory_data(void)
     g_assert_cmphex(delete_log, ==, 0);
     insert_log = 0;
     gwy_inventory_restore_order(inventory);
-    g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 5);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 5);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0);
@@ -180,7 +180,7 @@ test_inventory_data(void)
 
     gwy_inventory_delete_nth(inventory, 0);
     gwy_inventory_delete(inventory, "Kain");
-    g_assert_cmpuint(gwy_inventory_n_items(inventory), ==, 3);
+    g_assert_cmpuint(gwy_inventory_size(inventory), ==, 3);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0x12);

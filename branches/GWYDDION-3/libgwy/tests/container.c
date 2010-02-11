@@ -52,7 +52,7 @@ test_container_data(void)
     gboolean ok;
     guint n;
 
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 0);
+    g_assert_cmpuint(gwy_container_size(container), ==, 0);
     g_signal_connect(container, "item-changed",
                      G_CALLBACK(container_item_changed), &item_key);
     g_signal_connect(container, "item-changed::/pfx/int",
@@ -139,11 +139,11 @@ test_container_data(void)
                     ==, "Test Test Test");
     g_assert_cmpstr(item_key, ==, "/pfx/string");
 
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 5);
+    g_assert_cmpuint(gwy_container_size(container), ==, 5);
 
     gwy_container_transfer(container, container, "/pfx", "/elsewhere",
                            TRUE, TRUE);
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 10);
+    g_assert_cmpuint(gwy_container_size(container), ==, 10);
 
     ok = gwy_container_remove_n(container, "/pfx/string/ble");
     g_assert(!ok);
@@ -154,13 +154,13 @@ test_container_data(void)
     item_key = "";
     ok = gwy_container_remove_n(container, "/pfx/string");
     g_assert(ok);
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 9);
+    g_assert_cmpuint(gwy_container_size(container), ==, 9);
     g_assert_cmpstr(item_key, ==, "/pfx/string");
 
     item_key = "";
     n = gwy_container_remove_prefix(container, "/pfx/int");
     g_assert_cmpuint(n, ==, 1);
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 8);
+    g_assert_cmpuint(gwy_container_size(container), ==, 8);
     g_assert_cmpstr(item_key, ==, "/pfx/int");
 
     item_key = "";
@@ -174,11 +174,11 @@ test_container_data(void)
 
     n = gwy_container_remove_prefix(container, "/pfx");
     g_assert_cmpuint(n, ==, 3);
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 5);
+    g_assert_cmpuint(gwy_container_size(container), ==, 5);
     g_assert_cmpuint(int_changed, ==, 5);
 
     gwy_container_remove_prefix(container, NULL);
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 0);
+    g_assert_cmpuint(gwy_container_size(container), ==, 0);
 
     g_object_unref(container);
 }
@@ -314,7 +314,7 @@ test_container_text(void)
     GwyContainer *copy = gwy_container_new_from_text(text);
     g_free(text);
     g_assert(GWY_IS_CONTAINER(copy));
-    g_assert_cmpuint(gwy_container_n_items(container), ==, 6);
+    g_assert_cmpuint(gwy_container_size(container), ==, 6);
 
     guint change_count = 0;
     g_signal_connect(container, "item-changed",

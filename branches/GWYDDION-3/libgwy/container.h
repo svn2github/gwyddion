@@ -69,7 +69,7 @@ typedef void (*GwyContainerForeachFunc)(GQuark key,
 
 GType         gwy_container_get_type     (void)                       G_GNUC_CONST;
 GwyContainer* gwy_container_new          (void)                       G_GNUC_MALLOC;
-guint         gwy_container_n_items      (GwyContainer *container)    G_GNUC_PURE;
+guint         gwy_container_size         (GwyContainer *container)    G_GNUC_PURE;
 GQuark*       gwy_container_keys         (GwyContainer *container)    G_GNUC_MALLOC;
 const gchar** gwy_container_keys_n       (GwyContainer *container)    G_GNUC_MALLOC;
 GType         gwy_container_item_type    (GwyContainer *container,

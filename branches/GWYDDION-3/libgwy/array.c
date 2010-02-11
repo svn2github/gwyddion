@@ -244,7 +244,7 @@ gwy_array_set_item_type(GwyArray *array,
 }
 
 /**
- * gwy_array_n_items:
+ * gwy_array_size:
  * @array: An array.
  *
  * Returns the number of items in an array.
@@ -252,7 +252,7 @@ gwy_array_set_item_type(GwyArray *array,
  * Returns: The number of items.
  **/
 guint
-gwy_array_n_items(GwyArray *array)
+gwy_array_size(GwyArray *array)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), 0);
     Array *priv = array->priv;

@@ -54,7 +54,7 @@ struct _GwyContainerPrivate {
 typedef struct _GwyContainerPrivate Container;
 
 static void     gwy_container_serializable_init(GwySerializableInterface *iface);
-static gsize    gwy_container_n_items_impl     (GwySerializable *serializable);
+static gsize    gwy_container_n_items          (GwySerializable *serializable);
 static gsize    gwy_container_itemize          (GwySerializable *serializable,
                                                 GwySerializableItems *items);
 static void     gwy_container_finalize         (GObject *object);
@@ -116,9 +116,7 @@ gwy_container_serializable_init(GwySerializableInterface *iface)
 {
     iface->duplicate = gwy_container_duplicate_impl;
     iface->assign = gwy_container_assign_impl;
-    /* A bit unfortunate naming: gwy_container_n_items() counts the number of
-     * items. */
-    iface->n_items = gwy_container_n_items_impl;
+    iface->n_items = gwy_container_n_items;
     iface->itemize = gwy_container_itemize;
     iface->construct = gwy_container_construct;
 }
@@ -190,7 +188,7 @@ hash_object_dispose(G_GNUC_UNUSED gpointer hkey,
 }
 
 static gsize
-gwy_container_n_items_impl(GwySerializable *serializable)
+gwy_container_n_items(GwySerializable *serializable)
 {
     gsize n_items = 0;
     g_hash_table_foreach(GWY_CONTAINER(serializable)->priv->values,
@@ -407,7 +405,7 @@ value_destroy(gpointer data)
 }
 
 /**
- * gwy_container_n_items:
+ * gwy_container_size:
  * @container: A container.
  *
  * Gets the number of items in a container.
@@ -415,7 +413,7 @@ value_destroy(gpointer data)
  * Returns: The number of items.
  **/
 guint
-gwy_container_n_items(GwyContainer *container)
+gwy_container_size(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), 0);
     return g_hash_table_size(container->priv->values);
@@ -644,7 +642,7 @@ hash_foreach(gpointer hkey, gpointer hvalue, gpointer hdata)
  *
  * Returns: A newly allocated array with quark keys of all @container items,
  *          in no particular order.  The number of items can be obtained
- *          with gwy_container_n_items().  If there are no items, %NULL
+ *          with gwy_container_size().  If there are no items, %NULL
  *          is returned.
  **/
 GQuark*
@@ -679,7 +677,7 @@ keys_foreach(gpointer hkey,
  *
  * Returns: A newly allocated, %NULL-terminated array with string keys of all
  *          @container items, in no particular order.  The number of items can
- *          be obtained with gwy_container_n_items().  If there are no items,
+ *          be obtained with gwy_container_size().  If there are no items,
  *          %NULL is returned.  The array must be freed by caller, however,
  *          the strings are owned by GLib and must not be freed.
  **/

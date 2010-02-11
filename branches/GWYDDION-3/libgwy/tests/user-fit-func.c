@@ -251,7 +251,7 @@ test_user_fit_func_inventory(void)
 
     GwyInventory *userfitfuncs = gwy_user_fit_funcs();
     g_assert(GWY_IS_INVENTORY(userfitfuncs));
-    g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 0);
+    g_assert_cmpuint(gwy_inventory_size(userfitfuncs), ==, 0);
     item_type = gwy_inventory_get_item_type(userfitfuncs);
     g_assert(item_type);
     g_assert_cmpuint(item_type->type, ==, GWY_TYPE_USER_FIT_FUNC);
@@ -263,7 +263,7 @@ test_user_fit_func_inventory(void)
     gwy_inventory_insert(userfitfuncs, userfitfunc);
     g_object_unref(userfitfunc);
     g_assert(gwy_resource_is_managed(resource));
-    g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 1);
+    g_assert_cmpuint(gwy_inventory_size(userfitfuncs), ==, 1);
 
     item_type = gwy_resource_type_get_item_type(GWY_TYPE_USER_FIT_FUNC);
     g_assert(item_type);
@@ -279,7 +279,7 @@ test_user_fit_func_inventory(void)
     g_assert(!userfitfunc);
 
     gwy_inventory_copy(userfitfuncs, "Linear 2", "Another");
-    g_assert_cmpuint(gwy_inventory_n_items(userfitfuncs), ==, 2);
+    g_assert_cmpuint(gwy_inventory_size(userfitfuncs), ==, 2);
     userfitfunc = gwy_inventory_get(userfitfuncs, "Another");
     resource = GWY_RESOURCE(userfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Another");

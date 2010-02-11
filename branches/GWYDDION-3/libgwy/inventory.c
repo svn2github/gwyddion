@@ -309,7 +309,7 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
 }
 
 /**
- * gwy_inventory_n_items:
+ * gwy_inventory_size:
  * @inventory: An inventory.
  *
  * Returns the number of items in an inventory.
@@ -317,7 +317,7 @@ gwy_inventory_set_item_type(GwyInventory *inventory,
  * Returns: The number of items.
  **/
 guint
-gwy_inventory_n_items(GwyInventory *inventory)
+gwy_inventory_size(GwyInventory *inventory)
 {
     g_return_val_if_fail(GWY_IS_INVENTORY(inventory), 0);
     Inventory *priv = inventory->priv;

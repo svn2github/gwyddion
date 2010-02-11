@@ -101,7 +101,7 @@ GwyInventory*               gwy_inventory_new_with_items  (const GwyInventoryIte
                                                            gpointer pitems)                    G_GNUC_MALLOC;
 void                        gwy_inventory_set_item_type   (GwyInventory *inventory,
                                                            const GwyInventoryItemType *itype);
-guint                       gwy_inventory_n_items         (GwyInventory *inventory)            G_GNUC_PURE;
+guint                       gwy_inventory_size            (GwyInventory *inventory)            G_GNUC_PURE;
 const GwyInventoryItemType* gwy_inventory_get_item_type   (GwyInventory *inventory)            G_GNUC_PURE;
 gboolean                    gwy_inventory_can_make_copies (GwyInventory *inventory)            G_GNUC_PURE;
 gpointer                    gwy_inventory_get             (GwyInventory *inventory,

@@ -42,7 +42,7 @@ test_array_data(void)
                                               init_colors,
                                               G_N_ELEMENTS(init_colors));
     g_assert(GWY_IS_ARRAY(array));
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 2);
+    g_assert_cmpuint(gwy_array_size(array), ==, 2);
     guint64 insert_log = 0, update_log = 0, delete_log = 0;
     g_signal_connect(array, "item-inserted",
                      G_CALLBACK(record_item_change), &insert_log);
@@ -58,7 +58,7 @@ test_array_data(void)
     gwy_array_insert1(array, 1, &color1);
     gwy_array_insert1(array, 3, &color2);
     gwy_array_insert1(array, 0, &color3);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 5);
+    g_assert_cmpuint(gwy_array_size(array), ==, 5);
     g_assert_cmphex(insert_log, ==, 0x241);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0);
@@ -88,7 +88,7 @@ test_array_data(void)
     gwy_array_delete1(array, 2);
     gwy_array_delete1(array, 1);
     gwy_array_delete1(array, 1);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 2);
+    g_assert_cmpuint(gwy_array_size(array), ==, 2);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0x322);
@@ -104,7 +104,7 @@ test_array_data(void)
 
     gwy_array_append1(array, &color1);
     gwy_array_replace1(array, 0, &color1);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 3);
+    g_assert_cmpuint(gwy_array_size(array), ==, 3);
     g_assert_cmphex(insert_log, ==, 0x3);
     g_assert_cmphex(update_log, ==, 0x1);
     g_assert_cmphex(delete_log, ==, 0);
@@ -117,7 +117,7 @@ test_array_data(void)
     // Multi-item operations.
     GwyRGBA colors[] = { color1, color2, color3 };
     gwy_array_insert(array, 1, init_colors, 2);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 5);
+    g_assert_cmpuint(gwy_array_size(array), ==, 5);
     g_assert_cmphex(insert_log, ==, 0x23);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0);
@@ -132,7 +132,7 @@ test_array_data(void)
     g_assert_cmpint(memcmp(color, init_colors + 1, sizeof(GwyRGBA)), ==, 0);
 
     gwy_array_replace(array, 2, colors, 3);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 5);
+    g_assert_cmpuint(gwy_array_size(array), ==, 5);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0x345);
     g_assert_cmphex(delete_log, ==, 0);
@@ -151,7 +151,7 @@ test_array_data(void)
     g_assert_cmpint(memcmp(color, &color3, sizeof(GwyRGBA)), ==, 0);
 
     gwy_array_delete(array, 1, 3);
-    g_assert_cmpuint(gwy_array_n_items(array), ==, 2);
+    g_assert_cmpuint(gwy_array_size(array), ==, 2);
     g_assert_cmphex(insert_log, ==, 0);
     g_assert_cmphex(update_log, ==, 0);
     g_assert_cmphex(delete_log, ==, 0x432);
