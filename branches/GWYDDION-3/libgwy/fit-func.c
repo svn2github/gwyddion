@@ -104,12 +104,15 @@ static const gchar* const estimators[N_ESTIMATORS] = {
     "xymax", "xymin",
 };
 
+static GObjectClass *parent_class = NULL;
 static GHashTable *builtin_functions = NULL;
 
 static void
 gwy_fit_func_class_init(GwyFitFuncClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    parent_class = G_OBJECT_CLASS(gwy_fit_func_parent_class);
 
     g_type_class_add_private(klass, sizeof(FitFunc));
 
@@ -194,7 +197,8 @@ gwy_fit_func_constructed(GObject *object)
             priv->is_valid = TRUE;
         }
     }
-    G_OBJECT_CLASS(gwy_fit_func_parent_class)->constructed(object);
+    if (parent_class->constructed)
+        parent_class->constructed(object);
 }
 
 static void
@@ -207,7 +211,7 @@ gwy_fit_func_dispose(GObject *object)
     GWY_OBJECT_UNREF(priv->user);
     GWY_OBJECT_UNREF(priv->expr);
     GWY_OBJECT_UNREF(priv->estimate);
-    G_OBJECT_CLASS(gwy_fit_func_parent_class)->dispose(object);
+    parent_class->dispose(object);
 }
 
 static void
@@ -218,7 +222,7 @@ gwy_fit_func_finalize(GObject *object)
     GWY_FREE(priv->group);
     GWY_FREE(priv->name);
     GWY_FREE(priv->indices);
-    G_OBJECT_CLASS(gwy_fit_func_parent_class)->finalize(object);
+    parent_class->finalize(object);
 }
 
 static void
@@ -459,7 +463,8 @@ gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
  * Estimates parameter values of a fitting function.
  *
  * The estimate is based on the data previously set with
- * gwy_fit_func_set_data().
+ * gwy_fit_func_set_data().  The estimates are set as parameter values of the
+ * underlying #GwyFitter.
  *
  * The initial estimate method depends on the function used.  There is no
  * absolute guarantee of quality, however if the data points approximately
@@ -480,10 +485,15 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(priv->is_valid, FALSE);
     gwy_memclear(params, priv->nparams);
     g_return_val_if_fail(priv->npoints, FALSE);
+    GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(builtin->estimate, FALSE);
-        return builtin->estimate(priv->points, priv->npoints, params);
+        gboolean ok = builtin->estimate(priv->points, priv->npoints, params);
+        gwy_fitter_set_params(fitter, params);
+        return ok;
     }
 
     gdouble estim[N_ESTIMATORS];
@@ -502,6 +512,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
             && !gwy_expr_evaluate(priv->estimate, estimate, params + i, NULL))
             g_critical("Parameter %u estimator does not compile.", i);
     }
+    gwy_fitter_set_params(fitter, params);
     return TRUE;
 }
 
@@ -657,7 +668,7 @@ gwy_fit_func_get_fit_task(GwyFitFunc *fitfunc)
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, NULL);
-    if (priv->npoints)
+    if (!priv->fittask)
         update_fit_task(fitfunc);
     return priv->fittask;
 }
