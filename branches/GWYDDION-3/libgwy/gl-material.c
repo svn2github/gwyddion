@@ -190,9 +190,13 @@ gwy_gl_material_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
+    for (guint i = 0; i < 4; i++)
+        its[i].array_size = GWY_TYPE_RGBA;
     gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items,
                                             "GwyGLMaterial",
                                             error_list);
+    gboolean ok = FALSE;
+
     // Chain to parent
     if (np < items->n) {
         np++;
@@ -222,10 +226,15 @@ gwy_gl_material_construct(GwySerializable *serializable,
 
     gwy_gl_material_sanitize(gl_material);
 
-    return TRUE;
+    ok = TRUE;
 
 fail:
-    return FALSE;
+    // If the items were of another type filter_items() would catch it.
+    for (guint i = 0; i < 4; i++) {
+        if (its[i].value.v_boxed)
+            gwy_rgba_free(its[i].value.v_boxed);
+    }
+    return ok;
 }
 
 static GObject*
