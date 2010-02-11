@@ -127,6 +127,7 @@ void test_user_fit_func_load         (void);
 void test_user_fit_func_save         (void);
 void test_user_fit_func_serialize    (void);
 void test_user_fit_func_inventory    (void);
+void test_fit_func_builtin_constant  (void);
 void test_resource_finalize          (void);
 // }}}
 
@@ -275,6 +276,7 @@ main(int argc, char *argv[])
     g_test_add_func("/testlibgwy/user-fit-func/save", test_user_fit_func_save);
     g_test_add_func("/testlibgwy/user-fit-func/serialize", test_user_fit_func_serialize);
     g_test_add_func("/testlibgwy/user-fit-func/inventory", test_user_fit_func_inventory);
+    g_test_add_func("/testlibgwy/fit-func/builtin/constant", test_fit_func_builtin_constant);
     // XXX: Should go last, after we create resources of all types.
     g_test_add_func("/testlibgwy/resource/finalize", test_resource_finalize);
     // }}}

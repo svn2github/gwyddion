@@ -16,6 +16,7 @@ testlibgwy_SOURCES = \
 	expr.c \
 	field.c \
 	fitting.c \
+	fit-funcs.c \
 	gl-material.c \
 	gradient.c \
 	interpolation.c \
