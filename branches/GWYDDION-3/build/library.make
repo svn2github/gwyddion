@@ -40,24 +40,26 @@ check-headers: $(library_headers)
 
 # FIXME: This should depend on library sources and process only that.
 # Does not work in distcheck (i.e. does not check anything) because *.c is
-# elsewhere.
-check-aliases:
-	@result=true \
-	aliases='#include "$(library)/$(library_aliases)'; \
-	for x in *.c; do \
-	    if grep -qF "$$aliases.h" $$x; then \
-	    macro=$$(echo -n "++$(library)/$$x++" | tr -c '[:alnum:]' _ | tr '[:lower:]' '[:upper:]'); \
-	        if ! grep -qF "#define $$macro" $$x; then \
-	           echo "$$x lacks #define $$macro" 1>&2; \
-	           result=false; \
-	        fi; \
-	        if ! grep -qF "$$aliases.c" $$x; then \
-	           echo "$$x lacks $$aliases.c" 1>&2; \
-	           result=false; \
-	        fi; \
-	    fi; \
-	done; \
-	$$result
+# elsewhere.  More importantly, it should not check files such as
+# object-internal.c because they correctly include H-aliases but as they do not
+# define any public symbols, they do not need to include C-aliases.
+#check-aliases:
+#	@result=true \
+#	aliases='#include "$(library)/$(library_aliases)'; \
+#	for x in *.c; do \
+#	    if grep -qF "$$aliases.h" $$x; then \
+#	    macro=$$(echo -n "++$(library)/$$x++" | tr -c '[:alnum:]' _ | tr '[:lower:]' '[:upper:]'); \
+#	        if ! grep -qF "#define $$macro" $$x; then \
+#	           echo "$$x lacks #define $$macro" 1>&2; \
+#	           result=false; \
+#	        fi; \
+#	        if ! grep -qF "$$aliases.c" $$x; then \
+#	           echo "$$x lacks $$aliases.c" 1>&2; \
+#	           result=false; \
+#	        fi; \
+#	    fi; \
+#	done; \
+#	$$result
 
 $(library_symbols): $(library_headers)
 	$(AM_V_GEN) $(PYTHON) $(abs_top_srcdir)/build/update-library-symbols.py \
@@ -75,8 +77,8 @@ $(library_aliases).c: $(library_symbols) $(CONFIG_HEADER)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
 	    $(library_aliases).c $(library_symbols) $(CONFIG_HEADER)
 
-.PHONY: check-symbols check-headers check-aliases
+.PHONY: check-symbols check-headers
 # run make check-symbols as part of make check
-check-local: check-symbols check-headers check-aliases
+check-local: check-symbols check-headers
 
 # vim: set ft=make ts=4 sw=4 noet :
