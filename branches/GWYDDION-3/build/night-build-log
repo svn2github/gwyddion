@@ -94,7 +94,8 @@ function extract_coverage_stats() {
   done
 }
 
-cat build.err make_dists.err build_documentation.err install.err >all.err
+cat build.err make_dists.err build_documentation.err install.err \
+  check_headers.err check_symbols.err >all.err
 printerr set_extra_version
 printerr autogen
 printerr build
