@@ -1014,14 +1014,6 @@ gwy_resource_save(GwyResource *resource,
         return FALSE;
     }
 
-    gchar *savename = g_strdup(priv->name);
-    if (strchr(savename, '\n') || strchr(savename, '\r')) {
-        g_warning("Resource name %s contains newline characters, it will be "
-                  "sanitized.", priv->name);
-        g_strdelimit(savename, "\n\r", ' ');
-    }
-    g_strstrip(savename);
-
     gchar *body = klass->dump(resource);
     gchar *buffer = g_strconcat(MAGIC_HEADER3,
                                 G_OBJECT_TYPE_NAME(resource),
