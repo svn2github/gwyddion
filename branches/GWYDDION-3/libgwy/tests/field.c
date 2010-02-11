@@ -726,8 +726,8 @@ test_field_statistics(void)
     g_rand_free(rng);
 }
 
-void
-test_field_row_level_mean(void)
+static void
+test_field_row_level_one(GwyRowShiftMethod method)
 {
     enum { max_size = 260 };
     GRand *rng = g_rand_new();
@@ -746,7 +746,7 @@ test_field_row_level_mean(void)
         gwy_field_shift_rows(field, shifts);
         GwyLine *foundshifts = gwy_line_new_sized(yres, FALSE);
         gwy_field_find_row_shifts(field, NULL, GWY_MASK_IGNORE,
-                                  GWY_ROW_SHIFT_MEAN, 1, foundshifts);
+                                  method, 1, foundshifts);
         gwy_line_multiply(foundshifts, -1.0);
         gwy_line_accumulate(foundshifts);
         gwy_field_shift_rows(field, foundshifts);
@@ -755,7 +755,7 @@ test_field_row_level_mean(void)
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
         gwy_field_find_row_shifts(field, mask, GWY_MASK_INCLUDE,
-                                  GWY_ROW_SHIFT_MEAN, 1, foundshifts);
+                                  method, 1, foundshifts);
         gwy_line_multiply(foundshifts, -1.0);
         gwy_line_accumulate(foundshifts);
         gwy_field_shift_rows(field, foundshifts);
@@ -768,6 +768,30 @@ test_field_row_level_mean(void)
         g_object_unref(field);
     }
     g_rand_free(rng);
+}
+
+void
+test_field_row_level_mean(void)
+{
+    test_field_row_level_one(GWY_ROW_SHIFT_MEAN);
+}
+
+void
+test_field_row_level_median(void)
+{
+    test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN);
+}
+
+void
+test_field_row_level_mean_diff(void)
+{
+    test_field_row_level_one(GWY_ROW_SHIFT_MEAN_DIFF);
+}
+
+void
+test_field_row_level_median_diff(void)
+{
+    test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN_DIFF);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
