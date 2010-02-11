@@ -163,15 +163,12 @@ stride_for_width(guint width)
 }
 
 static void
-swap_bits_uint32(guint32 *data,
-                 gsize n)
+swap_bits_uint32_array(guint32 *data,
+                       gsize n)
 {
     while (n--) {
-        guint32 v = *data;
-        v = ((v >> 1) & 0x55555555u) | ((v & 0x55555555u) << 1);
-        v = ((v >> 2) & 0x33333333u) | ((v & 0x33333333u) << 2);
-        v = ((v >> 4) & 0x0f0f0f0fu) | ((v & 0x0f0f0f0fu) << 4);
-        *(data++) = GUINT32_SWAP_LE_BE(v);
+        *data = swap_bits_32(*data);
+        data++;
     }
 }
 
@@ -251,7 +248,7 @@ gwy_mask_field_itemize(GwySerializable *serializable,
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         MaskField *priv = field->priv;
         priv->serialized_swapped = g_new(guint32, n);
-        swap_bits_uint32(priv->serialized_swapped, n);
+        swap_bits_uint32_array(priv->serialized_swapped, n);
         it->value.v_uint32_array = priv->serialized_swapped;
     }
     it->array_size = n;
@@ -309,7 +306,7 @@ gwy_mask_field_construct(GwySerializable *serializable,
     }
     if (G_BYTE_ORDER == G_BIG_ENDIAN) {
         field->data = g_memdup(its[2].value.v_uint32_array, n*sizeof(guint32));
-        swap_bits_uint32(field->data, n);
+        swap_bits_uint32_array(field->data, n);
     }
     field->priv->allocated = TRUE;
 

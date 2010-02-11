@@ -73,6 +73,15 @@ typedef struct {
 #define MAKE_MASK(firstbit, nbits) \
     (nbits ? ((ALL_SET SHL (0x20 - (nbits))) SHR (firstbit)) : 0u)
 
+static inline guint32
+swap_bits_32(guint32 v)
+{
+    v = ((v >> 1) & 0x55555555u) | ((v & 0x55555555u) << 1);
+    v = ((v >> 2) & 0x33333333u) | ((v & 0x33333333u) << 2);
+    v = ((v >> 4) & 0x0f0f0f0fu) | ((v & 0x0f0f0f0fu) << 4);
+    return GUINT32_SWAP_LE_BE(v);
+}
+
 G_END_DECLS
 
 #endif
