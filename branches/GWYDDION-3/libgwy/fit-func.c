@@ -154,8 +154,7 @@ gwy_fit_func_class_init(GwyFitFuncClass *klass)
          PROP_USER_FUNC,
          g_param_spec_object("user-func",
                              "User function",
-                             "GwyUserFitFunc wrapped by this function. "
-                             "May be NULL if the function is built-in.",
+                             "GwyUserFitFunc wrapped by this function.",
                              GWY_TYPE_USER_FIT_FUNC,
                              G_PARAM_READABLE | STATICP));
 
@@ -265,7 +264,7 @@ gwy_fit_func_get_property(GObject *object,
         break;
 
         case PROP_FIT_TASK:
-        g_value_set_object(value, priv->fittask);
+        g_value_set_object(value, gwy_fit_func_get_fit_task(fitfunc));
         break;
 
         case PROP_USER_FUNC:
@@ -630,12 +629,6 @@ static void
 update_fit_task(GwyFitFunc *fitfunc)
 {
     FitFunc *priv = fitfunc->priv;
-    if (!priv->npoints) {
-        if (priv->fittask)
-            gwy_fit_task_set_vector_data(priv->fittask, fitfunc, 0);
-        return;
-    }
-
     if (!priv->fittask) {
         guint nparams = gwy_fit_func_get_n_params(fitfunc);
         priv->fittask = gwy_fit_task_new();
@@ -655,8 +648,7 @@ update_fit_task(GwyFitFunc *fitfunc)
  * the returned fit task freely.  However, the function and data is set by
  * @fitfunc and must not be changed.
  *
- * Returns: The fit task object of a fitting function, it can be %NULL if
- *          gwy_fit_func_set_data() has not been called yet.  The returned
+ * Returns: The fit task object of a fitting function.  The returned
  *          object is owned by @fitfunc and no reference is added.
  **/
 GwyFitTask*
