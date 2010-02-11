@@ -726,4 +726,48 @@ test_field_statistics(void)
     g_rand_free(rng);
 }
 
+void
+test_field_row_level_mean(void)
+{
+    enum { max_size = 260 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    enum { niter = 10 };
+
+    for (guint iter = 0; iter < niter; iter++) {
+        // User large widths to esnure resonably probability; several
+        // algorithms require the mask on pixels in consecutive rows which
+        // means on 1/4 of pixels will be used on average.
+        guint xres = g_rand_int_range(rng, 128, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size/8);
+        GwyField *field = gwy_field_new_sized(xres, yres, TRUE);
+        GwyLine *shifts = gwy_line_new_sized(yres, TRUE);
+        line_randomize(shifts, rng);
+        gwy_field_shift_rows(field, shifts);
+        GwyLine *foundshifts = gwy_line_new_sized(yres, FALSE);
+        gwy_field_find_row_shifts(field, NULL, GWY_MASK_IGNORE,
+                                  GWY_ROW_SHIFT_MEAN, 1, foundshifts);
+        gwy_line_multiply(foundshifts, -1.0);
+        gwy_line_accumulate(foundshifts);
+        gwy_field_shift_rows(field, foundshifts);
+
+        g_assert_cmpfloat(gwy_field_rms(field), <=, 1e-12);
+
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        gwy_field_find_row_shifts(field, mask, GWY_MASK_INCLUDE,
+                                  GWY_ROW_SHIFT_MEAN, 1, foundshifts);
+        gwy_line_multiply(foundshifts, -1.0);
+        gwy_line_accumulate(foundshifts);
+        gwy_field_shift_rows(field, foundshifts);
+
+        g_assert_cmpfloat(gwy_field_rms(field), <=, 1e-11);
+
+        g_object_unref(mask);
+        g_object_unref(foundshifts);
+        g_object_unref(shifts);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
