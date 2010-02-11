@@ -11,7 +11,7 @@ CLEANFILES += \
 
 # Run the test program
 test: all $(test_program)$(EXEEXT)
-	@$(GTESTER) --verbose $(test_program)$(EXEEXT)
+	@$(GTESTER) --verbose $(test_program)$(EXEEXT) $(TEST_FLAGS)
 
 # Produce a test report
 test-report: test-report.html test-report-brief.html
@@ -23,7 +23,7 @@ test-report-brief.html: test-report.xml $(top_srcdir)/build/test-report-brief.xs
 	$(XSLTPROC) --stringparam program $(test_program) $(top_srcdir)/build/test-report-brief.xsl test-report.xml >test-report-brief.html
 
 test-report.xml: $(test_program)$(EXEEXT)
-	@-$(GTESTER) $(test_program)$(EXEEXT) -k -o test-report.xml
+	@-$(GTESTER) $(test_program)$(EXEEXT) $(TEST_FLAGS) -k -o test-report.xml
 
 # Run the test program but do not execute any tests.  This produces a list of
 # ‘standard’ GLib errors we then filter out.
