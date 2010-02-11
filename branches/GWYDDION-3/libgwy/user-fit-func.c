@@ -860,12 +860,6 @@ gwy_user_fit_func_error_quark(void)
  **/
 
 /**
- * GWY_TYPE_FIT_PARAM:
- *
- * The #GType for a boxed type holding a #GwyFitParam.
- **/
-
-/**
  * gwy_user_fit_func_duplicate:
  * @userfitfunc: A user fitting function.
  *
