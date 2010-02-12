@@ -469,6 +469,9 @@ gwy_user_fit_func_set_formula(GwyUserFitFunc *userfitfunc,
         return TRUE;
 
     G_LOCK(test_expr);
+    if (!test_expr)
+        test_expr = _gwy_fit_func_new_expr_with_constants();
+
     if (!gwy_expr_compile(test_expr, formula, error)) {
         G_UNLOCK(test_expr);
         return FALSE;
