@@ -175,6 +175,12 @@ test_fit_func_user(void)
     gwy_fit_param_set_power_y(b, 1);
     test_fit_func_one("Linear", "userfitfunc",
                       G_N_ELEMENTS(param_names), param_names);
+
+    GwyFitFunc *fitfunc = gwy_fit_func_new("Linear", "userfitfunc");
+    g_assert(GWY_IS_FIT_FUNC(fitfunc));
+    GwyUserFitFunc *userfitfunc = gwy_fit_func_get_user(fitfunc);
+    g_assert(userfitfunc == linear);
+    g_object_unref(fitfunc);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
