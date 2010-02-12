@@ -26,15 +26,16 @@
  ***************************************************************************/
 
 static void
-test_fit_func_builtin_one(const gchar *name,
-                          guint expected_nparams,
-                          const gchar* const *param_names)
+test_fit_func_one(const gchar *name,
+                  const gchar *group,
+                  guint expected_nparams,
+                  const gchar* const *param_names)
 {
-    enum { ndata = 100 };
+    enum { ndata = 500 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
 
-    GwyFitFunc *fitfunc = gwy_fit_func_new(name, "builtin");
+    GwyFitFunc *fitfunc = gwy_fit_func_new(name, group);
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
 
     guint nparams = gwy_fit_func_get_n_params(fitfunc);
@@ -106,7 +107,8 @@ test_fit_func_builtin_one(const gchar *name,
     g_assert_cmpuint(gwy_fitter_get_n_params(fitter), ==, expected_nparams);
     gdouble res = gwy_fitter_get_residuum(fitter);
     g_assert_cmpfloat(res, >, 0.0);
-    g_assert_cmpfloat(res, <, res_init);
+    // Cannot use a sharp inequality as Constant has too good `estimate'
+    g_assert_cmpfloat(res, <=, res_init);
     g_assert(gwy_fitter_get_params(fitter, param));
 
     /* Conservative result check */
@@ -117,7 +119,7 @@ test_fit_func_builtin_one(const gchar *name,
 
     /* Error estimate check */
     gdouble error[nparams];
-    eps = 1.0;
+    eps = 0.5;
     g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
     for (guint i = 0; i < nparams; i++) {
         g_assert_cmpfloat(error[i], >=, 0.0);
@@ -133,15 +135,46 @@ test_fit_func_builtin_one(const gchar *name,
 void
 test_fit_func_builtin_constant(void)
 {
-    const gchar *pnames[] = { "a" };
-    test_fit_func_builtin_one("Constant", G_N_ELEMENTS(pnames), pnames);
+    const gchar *param_names[] = { "a" };
+    test_fit_func_one("Constant", "builtin",
+                      G_N_ELEMENTS(param_names), param_names);
 }
 
 void
 test_fit_func_builtin_exponential(void)
 {
-    const gchar *pnames[] = { "a", "b", "y<sub>0</sub>" };
-    test_fit_func_builtin_one("Exponential", G_N_ELEMENTS(pnames), pnames);
+    const gchar *param_names[] = { "a", "b", "y<sub>0</sub>" };
+    test_fit_func_one("Exponential", "builtin",
+                      G_N_ELEMENTS(param_names), param_names);
+}
+
+void
+test_fit_func_user(void)
+{
+    const gchar *param_names[] = { "a", "b" };
+    GwyInventory *userfitfuncs = gwy_user_fit_funcs();
+    g_assert(GWY_IS_INVENTORY(userfitfuncs));
+    if (gwy_inventory_get(userfitfuncs, "Linear"))
+        gwy_inventory_delete(userfitfuncs, "Linear");
+    GwyUserFitFunc *linear = gwy_user_fit_func_new();
+    g_assert(GWY_IS_USER_FIT_FUNC(linear));
+    GwyResource *resource = GWY_RESOURCE(linear);
+    gwy_resource_set_name(resource, "Linear");
+    gwy_inventory_insert(userfitfuncs, linear);
+    g_object_unref(linear);
+    g_assert(gwy_user_fit_func_set_formula(linear, "a+b*x", NULL));
+    GwyFitParam *a = gwy_user_fit_func_param(linear, "a");
+    GwyFitParam *b = gwy_user_fit_func_param(linear, "b");
+    g_assert(GWY_IS_FIT_PARAM(a));
+    g_assert(GWY_IS_FIT_PARAM(b));
+    gwy_fit_param_set_estimate(a, "ymean");
+    gwy_fit_param_set_power_x(a, 0);
+    gwy_fit_param_set_power_y(a, 1);
+    gwy_fit_param_set_estimate(b, "(yxmax-yxmin)/(xmax-xmin)");
+    gwy_fit_param_set_power_x(b, -1);
+    gwy_fit_param_set_power_y(b, 1);
+    test_fit_func_one("Linear", "userfitfunc",
+                      G_N_ELEMENTS(param_names), param_names);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
