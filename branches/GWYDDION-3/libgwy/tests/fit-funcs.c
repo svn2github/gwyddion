@@ -25,18 +25,44 @@
  *
  ***************************************************************************/
 
-void
-test_fit_func_builtin_constant(void)
+static void
+test_fit_func_builtin_one(const gchar *name,
+                          guint expected_nparams,
+                          const gchar* const *param_names)
 {
-    enum { ndata = 100, expected_nparams = 1 };
+    enum { ndata = 100 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
 
-    GwyFitFunc *fitfunc = gwy_fit_func_new("Constant", "builtin");
+    GwyFitFunc *fitfunc = gwy_fit_func_new(name, "builtin");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
 
     guint nparams = gwy_fit_func_get_n_params(fitfunc);
     g_assert_cmpuint(nparams, ==, expected_nparams);
+
+    for (guint i = 0; i < nparams; i++) {
+        const gchar *pname = gwy_fit_func_get_param_name(fitfunc, i);
+        guint j;
+        for (j = 0; j < nparams; j++) {
+            if (gwy_strequal(pname, param_names[j]))
+                break;
+        }
+        if (j == nparams)
+            g_error("Function %s has an unexpected parameter %s.",
+                    name, pname);
+    }
+
+    for (guint i = 0; i < nparams; i++) {
+        guint j;
+        for (j = 0; j < nparams; j++) {
+            const gchar *pname = gwy_fit_func_get_param_name(fitfunc, j);
+            if (gwy_strequal(pname, param_names[i]))
+                break;
+        }
+        if (j == nparams)
+            g_error("Function %s lacks an expected parameter %s.",
+                    name, param_names[i]);
+    }
 
     gdouble param0[nparams];
     for (guint i = 0; i < nparams; i++) {
@@ -91,15 +117,31 @@ test_fit_func_builtin_constant(void)
 
     /* Error estimate check */
     gdouble error[nparams];
+    eps = 1.0;
     g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
     for (guint i = 0; i < nparams; i++) {
-        g_assert_cmpfloat(fabs((param[i] - param0[i])/error[i]), <=, 1.0 + eps);
+        g_assert_cmpfloat(error[i], >=, 0.0);
+        g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, (1.0 + eps)*error[i]);
     }
 
     g_object_unref(curve);
     g_object_unref(curve0);
     g_object_unref(fitfunc);
     g_rand_free(rng);
+}
+
+void
+test_fit_func_builtin_constant(void)
+{
+    const gchar *pnames[] = { "a" };
+    test_fit_func_builtin_one("Constant", G_N_ELEMENTS(pnames), pnames);
+}
+
+void
+test_fit_func_builtin_exponential(void)
+{
+    const gchar *pnames[] = { "a", "b", "y<sub>0</sub>" };
+    test_fit_func_builtin_one("Exponential", G_N_ELEMENTS(pnames), pnames);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
