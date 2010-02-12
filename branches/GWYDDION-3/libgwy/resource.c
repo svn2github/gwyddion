@@ -872,21 +872,23 @@ gwy_resource_type_get_name(GType type)
 static ResourceClass*
 ensure_class_inventory(GType type)
 {
-    GwyResourceClass *klass = g_type_class_peek(type);
-    // If gwy_resource_class_register() has been called we own a reference and
-    // hence klass must be non-NULL.
+    // This possibly causes gwy_resource_class_register() to be called,
+    // creating the eternal reference so the subsequent unref is safe.
+    // Check that gwy_resource_class_register() has been indeed called by
+    // asserting that priv->name exists.
+    GwyResourceClass *klass = g_type_class_ref(type);
     g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    if (klass->priv->inventory)
-        return klass->priv;
-
     ResourceClass *cpriv = klass->priv;
     g_return_val_if_fail(cpriv->name, NULL);
-    cpriv->inventory = gwy_inventory_new_with_type(&cpriv->item_type);
-    cpriv->item_inserted_id
-        = g_signal_connect(cpriv->inventory, "item-inserted",
-                           G_CALLBACK(inventory_item_inserted), klass);
-    if (klass->setup_inventory)
-        klass->setup_inventory(cpriv->inventory);
+    if (!cpriv->inventory) {
+        cpriv->inventory = gwy_inventory_new_with_type(&cpriv->item_type);
+        cpriv->item_inserted_id
+            = g_signal_connect(cpriv->inventory, "item-inserted",
+                               G_CALLBACK(inventory_item_inserted), klass);
+        if (klass->setup_inventory)
+            klass->setup_inventory(cpriv->inventory);
+    }
+    g_type_class_unref(klass);
     return cpriv;
 }
 
@@ -917,10 +919,9 @@ gwy_resource_type_get_inventory(GType type)
 const GwyInventoryItemType*
 gwy_resource_type_get_item_type(GType type)
 {
-    g_return_val_if_fail(g_type_is_a(type, GWY_TYPE_RESOURCE), NULL);
-    GwyResourceClass *klass = g_type_class_peek(type);
-    g_return_val_if_fail(GWY_IS_RESOURCE_CLASS(klass), NULL);
-    return &klass->priv->item_type;
+    ResourceClass *cpriv = ensure_class_inventory(type);
+    g_return_val_if_fail(cpriv, NULL);
+    return &cpriv->item_type;
 }
 
 /**
