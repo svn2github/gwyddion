@@ -70,10 +70,31 @@ test_fit_func_builtin_constant(void)
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
     g_assert(GWY_IS_FIT_TASK(fittask));
 
+    gdouble res_init = gwy_fit_task_eval_residuum(fittask);
+    g_assert_cmpfloat(res_init, >, 0.0);
+
     gboolean fitting_ok = gwy_fit_task_fit(fittask);
     g_assert(fitting_ok);
 
-    // TODO: Check if param[] match param0[]
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    g_assert_cmpuint(gwy_fitter_get_n_params(fitter), ==, expected_nparams);
+    gdouble res = gwy_fitter_get_residuum(fitter);
+    g_assert_cmpfloat(res, >, 0.0);
+    g_assert_cmpfloat(res, <, res_init);
+    g_assert(gwy_fitter_get_params(fitter, param));
+
+    /* Conservative result check */
+    gdouble eps = 0.3;
+    for (guint i = 0; i < nparams; i++) {
+        g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, eps*fabs(param0[i]));
+    }
+
+    /* Error estimate check */
+    gdouble error[nparams];
+    g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
+    for (guint i = 0; i < nparams; i++) {
+        g_assert_cmpfloat(fabs((param[i] - param0[i])/error[i]), <=, 1.0 + eps);
+    }
 
     g_object_unref(curve);
     g_object_unref(curve0);
