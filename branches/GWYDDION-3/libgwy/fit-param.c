@@ -298,10 +298,12 @@ gwy_fit_param_construct(GwySerializable *serializable,
         goto fail;
     }
 
+    g_free(priv->name);
     priv->name = its[0].value.v_string;
     // FIXME
     priv->power_x = CLAMP(its[1].value.v_int32, POWER_MIN, POWER_MAX);
     priv->power_y = CLAMP(its[2].value.v_int32, POWER_MIN, POWER_MAX);
+    g_free(priv->estimate);
     priv->estimate = its[3].value.v_string;
     if (!gwy_fit_param_check_estimate(priv->estimate, NULL)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
