@@ -192,17 +192,11 @@ gwy_gl_material_construct(GwySerializable *serializable,
     memcpy(its, serialize_items, sizeof(serialize_items));
     for (guint i = 0; i < 4; i++)
         its[i].array_size = GWY_TYPE_RGBA;
-    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items,
-                                            "GwyGLMaterial",
-                                            error_list);
-    gboolean ok = FALSE;
 
-    // Chain to parent
-    if (np < items->n) {
-        np++;
-        GwySerializableItems parent_items = {
-            items->len - np, items->n - np, items->items + np
-        };
+    gboolean ok = FALSE;
+    GwySerializableItems parent_items;
+    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                     "GwyGLMaterial", error_list)) {
         if (!gwy_gl_material_parent_serializable->construct(serializable,
                                                             &parent_items,
                                                             error_list))

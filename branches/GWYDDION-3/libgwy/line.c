@@ -288,7 +288,8 @@ gwy_line_construct(GwySerializable *serializable,
     memcpy(its, serialize_items, sizeof(serialize_items));
     its[0].value.v_double = line->real;
     its[1].value.v_double = line->off;
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyLine", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyLine", error_list);
 
     if (!_gwy_check_object_component(its + 2, line, GWY_TYPE_UNIT, error_list))
         goto fail;

@@ -1550,6 +1550,12 @@ free_items(GwySerializableItems *items)
  *             defaults (%NULL for non-atomic types).
  * @n_items: The number of items in the template.
  * @items: Item list passed to construct().
+ * @parent_items: Location to store the list of parent class items to, or
+ *                %NULL if no parent items are expected (note a non-fatal error
+ *                is reported if you pass %NULL and there are some parent class
+ *                items).  This list will be set up as a sublist of
+ *                @items, i.e. no items will be physically copied and the
+ *                sublist must not be freed.
  * @type_name: Name of the deserialized type for error messages.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
@@ -1580,14 +1586,16 @@ free_items(GwySerializableItems *items)
  * only one boxed item of a specific name can be given in @template and the
  * type, if specified as @array_size, must match exactly.
  *
- * Returns: The position of the %GWY_SERIALIZABLE_PARENT item encountered.
- *          If @items are exhausted, a number larger than @items->n is
- *          returned, specifically %G_MAXSIZE.
+ * Returns: The number of parent class items.  This does not include the
+ *          %GWY_SERIALIZABLE_PARENT item that marks the start of these items.
+ *          If zero is returned there are no parent class items although there
+ *          may be a %GWY_SERIALIZABLE_PARENT item not followed by anything.
  **/
 gsize
 gwy_deserialize_filter_items(GwySerializableItem *template_,
                              gsize n_items,
                              GwySerializableItems *items,
+                             GwySerializableItems *parent_items,
                              const gchar *type_name,
                              GwyErrorList **error_list)
 {
@@ -1658,7 +1666,25 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
     }
 
     g_slice_free1(sizeof(guint8)*n_items, seen);
-    return (i < items->n) ? i : G_MAXSIZE;
+
+    // Count %GWY_SERIALIZABLE_PARENT when checking if there are any parent
+    // items but do not include it in @parent_items list.
+    guint np = items->n - i;
+    if (parent_items) {
+        parent_items->len = items->len - (i+1);
+        parent_items->n = np - 1;
+        parent_items->items = items->items + (i+1);
+    }
+    else if (np) {
+        gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                           GWY_DESERIALIZE_ERROR_ITEM,
+                           _("Object ‘%s’ does not expect to have any "
+                             "serializable parent but its representation "
+                             "contain parent class items. "
+                             "They were ignored."),
+                           type_name);
+    }
+    return np - 1;
 }
 
 #define __LIBGWY_SERIALIZE_C__

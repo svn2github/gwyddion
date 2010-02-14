@@ -221,22 +221,15 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items,
-                                            "GwyUserFitFunc",
-                                            error_list);
-    gsize n = its[2].array_size;
-
-    // Chain to parent
-    if (np < items->n) {
-        np++;
-        GwySerializableItems parent_items = {
-            items->len - np, items->n - np, items->items + np
-        };
+    GwySerializableItems parent_items;
+    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                     "GwyUserFitFunc", error_list)) {
         if (!gwy_user_fit_func_parent_serializable->construct(serializable,
                                                               &parent_items,
                                                               error_list))
             goto fail;
     }
+    gsize n = its[2].array_size;
 
     // Our own data
     GwyUserFitFunc *userfitfunc = GWY_USER_FIT_FUNC(serializable);
@@ -275,7 +268,7 @@ gwy_user_fit_func_construct(GwySerializable *serializable,
 fail:
     g_free(its[0].value.v_string);
     g_free(its[1].value.v_string);
-    for (guint i = 0; i < n; i++)
+    for (guint i = 0; i < its[2].array_size; i++)
         g_object_unref(its[2].value.v_object_array[i]);
     g_free(its[2].value.v_object_array);
     return FALSE;

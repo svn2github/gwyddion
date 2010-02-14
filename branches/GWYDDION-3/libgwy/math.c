@@ -110,7 +110,8 @@ gwy_xy_construct(GwySerializableItems *items,
 {
     GwySerializableItem its[N_ITEMS_XY];
     memcpy(its, serialize_items_xy, sizeof(serialize_items_xy));
-    gwy_deserialize_filter_items(its, N_ITEMS_XY, items, "GwyXY", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS_XY, items, NULL,
+                                 "GwyXY", error_list);
 
     GwyXY *xy = g_slice_new(GwyXY);
     xy->x = NORMALIZE(its[0].value.v_double);
@@ -196,7 +197,8 @@ gwy_xyz_construct(GwySerializableItems *items,
 {
     GwySerializableItem its[N_ITEMS_XYZ];
     memcpy(its, serialize_items_xyz, sizeof(serialize_items_xyz));
-    gwy_deserialize_filter_items(its, N_ITEMS_XYZ, items, "GwyXYZ", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS_XYZ, items, NULL,
+                                 "GwyXYZ", error_list);
 
     GwyXYZ *xyz = g_slice_new(GwyXYZ);
     xyz->x = NORMALIZE(its[0].value.v_double);

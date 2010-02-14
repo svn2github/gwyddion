@@ -173,14 +173,9 @@ gwy_gradient_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyGradient",
-                                            error_list);
-    // Chain to parent
-    if (np < items->n) {
-        np++;
-        GwySerializableItems parent_items = {
-            items->len - np, items->n - np, items->items + np
-        };
+    GwySerializableItems parent_items;
+    if (gwy_deserialize_filter_items(its, N_ITEMS, items, &parent_items,
+                                     "GwyGradient", error_list)) {
         if (!gwy_gradient_parent_serializable->construct(serializable,
                                                          &parent_items,
                                                          error_list))

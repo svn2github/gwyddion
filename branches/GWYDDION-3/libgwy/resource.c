@@ -465,11 +465,8 @@ gwy_resource_construct(GwySerializable *serializable,
 {
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gsize np = gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyResource",
-                                            error_list);
-    // There is no serializable parent class so use a hard assertion.
-    g_return_val_if_fail(np == G_MAXSIZE, FALSE);
-
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyResource", error_list);
     GwyResource *resource = GWY_RESOURCE(serializable);
     Resource *priv = resource->priv;
 

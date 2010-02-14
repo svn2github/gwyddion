@@ -273,8 +273,8 @@ gwy_mask_field_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyMaskField",
-                                 error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyMaskField", error_list);
 
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,

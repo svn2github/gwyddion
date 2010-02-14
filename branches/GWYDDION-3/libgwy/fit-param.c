@@ -286,8 +286,8 @@ gwy_fit_param_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyFitParam",
-                                 error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyFitParam", error_list);
 
     if (!its[0].value.v_string
         || !gwy_utf8_strisident(its[0].value.v_string, more, NULL)) {

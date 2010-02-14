@@ -263,7 +263,8 @@ gwy_curve_construct(GwySerializable *serializable,
 
     GwySerializableItem its[N_ITEMS];
     memcpy(its, serialize_items, sizeof(serialize_items));
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyCurve", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyCurve", error_list);
 
     if (!_gwy_check_object_component(its + 0, curve, GWY_TYPE_UNIT, error_list))
         goto fail;

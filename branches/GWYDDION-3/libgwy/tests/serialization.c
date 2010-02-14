@@ -157,8 +157,8 @@ gwy_ser_test_construct(GwySerializable *serializable,
     gpointer child;
 
     memcpy(it, default_items, sizeof(default_items));
-    gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, "GwySerTest",
-                                 error_list);
+    gwy_deserialize_filter_items(it, G_N_ELEMENTS(it), items, NULL,
+                                 "GwySerTest", error_list);
 
     if (it[3].array_size != 4) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,

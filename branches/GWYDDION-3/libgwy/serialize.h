@@ -54,6 +54,7 @@ GObject* gwy_deserialize_memory      (const guchar *buffer,
 gsize    gwy_deserialize_filter_items(GwySerializableItem *template_,
                                       gsize n_items,
                                       GwySerializableItems *items,
+                                      GwySerializableItems *parent_items,
                                       const gchar *type_name,
                                       GwyErrorList **error_list);
 

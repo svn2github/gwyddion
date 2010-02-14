@@ -352,7 +352,8 @@ gwy_field_construct(GwySerializable *serializable,
     its[3].value.v_double = field->yreal;
     its[4].value.v_double = field->xoff;
     its[5].value.v_double = field->yoff;
-    gwy_deserialize_filter_items(its, N_ITEMS, items, "GwyField", error_list);
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
+                                 "GwyField", error_list);
 
     if (G_UNLIKELY(!its[0].value.v_uint32 || !its[1].value.v_uint32)) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
