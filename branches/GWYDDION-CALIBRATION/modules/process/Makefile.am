@@ -17,8 +17,6 @@ process_LTLIBRARIES = \
 	crosscor.la \
 	curvature.la \
 	cwt.la \
-        dafm.la \
-        dafm_zpiezo.la \
 	drift.la \
 	dwt.la \
 	dwtanisotropy.la \
@@ -34,7 +32,6 @@ process_LTLIBRARIES = \
 	fraccor.la \
 	fractal.la \
 	gradient.la \
-        grain_average.la \
 	grain_cross.la \
 	grain_dist.la \
 	grain_mark.la \
@@ -43,7 +40,6 @@ process_LTLIBRARIES = \
 	hough.la \
 	immerse.la \
 	indent_analyze.la \
-	iso_profile_filter.la \
 	laplace.la \
 	level.la \
 	linecorrect.la \
@@ -68,8 +64,7 @@ process_LTLIBRARIES = \
 	tip_blind.la \
 	tip_model.la \
 	tipops.la \
-	unrotate.la \
-        yacoot.la
+	unrotate.la 
 
 # Put sources that are for some reason disabled yet present in svn checkouts
 # here.  This makes them distributed and translations of their messages are
@@ -116,8 +111,6 @@ calibrate_la_SOURCES = calibrate.c
 convolution_filter_la_SOURCES = convolution_filter.c convolutionfilterpreset.h
 crosscor_la_SOURCES = crosscor.c
 cwt_la_SOURCES = cwt.c
-dafm_la_SOURCES = dafm.c
-dafm_zpiezo_la_SOURCES = dafm_zpiezo.c
 drift_la_SOURCES = drift.c
 dwt_la_SOURCES = dwt.c
 dwtanisotropy_la_SOURCES = dwtanisotropy.c
@@ -133,7 +126,6 @@ fit_2d_la_SOURCES = fit_2d.c
 fractal_la_SOURCES = fractal.c
 fraccor_la_SOURCES = fraccor.c
 gradient_la_SOURCES = gradient.c
-grain_average_la_SOURCES = grain_average.c
 grain_mark_la_SOURCES = grain_mark.c
 grain_rem_threshold_la_SOURCES = grain_rem_threshold.c
 grain_wshed_la_SOURCES = grain_wshed.c
@@ -142,7 +134,6 @@ grain_dist_la_SOURCES = grain_dist.c
 hough_la_SOURCES = hough.c
 immerse_la_SOURCES = immerse.c
 indent_analyze_la_SOURCES = indent_analyze.c
-iso_profile_filter_la_SOURCES = iso_profile_filter.c
 laplace_la_SOURCES = laplace.c
 level_la_SOURCES = level.c
 linecorrect_la_SOURCES = linecorrect.c
@@ -169,7 +160,6 @@ tip_blind_la_SOURCES = tip_blind.c
 tip_model_la_SOURCES = tip_model.c
 tipops_la_SOURCES = tipops.c
 unrotate_la_SOURCES = unrotate.c
-yacoot_la_SOURCES = yacoot.c
 
 
 MAINTAINERCLEANFILES = makefile.msc
