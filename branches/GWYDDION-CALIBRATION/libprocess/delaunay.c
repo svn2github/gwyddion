@@ -34,7 +34,7 @@
 /* Set this to be lower than the average distance between points. It is the
    amount that we will shift points by when we detect degenerecies. We
    gradually increase the value until the degenercy is removed                */
-  #define PERTURBATION_VALUE  0.0001
+  #define PERTURBATION_VALUE  1e-9
 
 /* Do we show status of meshing? */
   #define VERBOSE
@@ -1411,7 +1411,7 @@ void initSuperSimplex(vertex *ps, int n, mesh *m)
   getRange(ps, n, &min, &max, &range,1);
   
  //  Make the super simplex bigger! TODO check this !
-  vertexByScalar(range.v, 4, range.v);
+ // vertexByScalar(range.v, 4, range.v);
 
   //printf("range is %g %g %g    %g %g %g\n", min.X, min.Y, min.Z, max.X, max.Y, max.Z);  
 
