@@ -65,6 +65,10 @@
     <xi:include href="xml/fit-param.xml"/>
     <xi:include href="xml/user-fit-func.xml"/>
   </chapter>
+  <chapter id='libgwy-selections'>
+    <title>Selections</title>
+    <xi:include href="xml/selection.xml"/>
+  </chapter>
   <chapter id='libgwy-utilities'>
     <title>Utilities</title>
     <xi:include href="xml/macros.xml"/>

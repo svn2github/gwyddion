@@ -58,7 +58,7 @@ GType     gwy_array_get_type     (void)                    G_GNUC_CONST;
 GwyArray* gwy_array_new          (void)                    G_GNUC_MALLOC;
 GwyArray* gwy_array_new_with_data(gsize size,
                                   GDestroyNotify destroy,
-                                  gpointer items,
+                                  gconstpointer items,
                                   guint nitems)            G_GNUC_MALLOC;
 void      gwy_array_set_item_type(GwyArray *array,
                                   gsize size,
@@ -78,23 +78,23 @@ gpointer  gwy_array_get          (GwyArray *array,
 
 gpointer gwy_array_insert  (GwyArray *array,
                             guint n,
-                            gpointer items,
+                            gconstpointer items,
                             guint nitems);
 gpointer gwy_array_append  (GwyArray *array,
-                            gpointer items,
+                            gconstpointer items,
                             guint nitems);
 void     gwy_array_delete  (GwyArray *array,
                             guint n,
                             guint nitems);
 void     gwy_array_replace (GwyArray *array,
                             guint n,
-                            gpointer items,
+                            gconstpointer items,
                             guint nitems);
 void     gwy_array_updated (GwyArray *array,
                             guint n);
 gpointer gwy_array_get_data(GwyArray *array) G_GNUC_PURE;
 void     gwy_array_set_data(GwyArray *array,
-                            gpointer items,
+                            gconstpointer items,
                             guint nitems);
 
 G_END_DECLS

@@ -272,7 +272,7 @@ gwy_unit_construct(GwySerializable *serializable,
                    GwyErrorList **error_list)
 {
     GwySerializableItem item = serialize_items[0];
-    gwy_deserialize_filter_items(&item, 1, items, NULL,
+    gwy_deserialize_filter_items(&item, N_ITEMS, items, NULL,
                                  "GwyUnit", error_list);
 
     GwyUnit *unit = GWY_UNIT(serializable);
@@ -309,7 +309,6 @@ gwy_unit_assign_impl(GwySerializable *destination,
                         src->priv->units->data, src->priv->units->len);
     g_signal_emit(dest, unit_signals[CHANGED], 0);
 }
-
 
 /**
  * gwy_unit_new:

@@ -21,6 +21,7 @@
 #include "libgwy/macros.h"
 #include "libgwy/array.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/array-internal.h"
 
 #define gwy_array_index(a,i) \
     ((gpointer)((guchar*)((a)->items->data) + (i)*((a)->size)))
@@ -51,7 +52,7 @@ typedef struct _GwyArrayPrivate Array;
 static void         gwy_array_finalize(GObject *object);
 static void         gwy_array_dispose (GObject *object);
 
-static guint gwy_array_signals[N_SIGNALS];
+static guint array_signals[N_SIGNALS];
 
 G_DEFINE_TYPE(GwyArray, gwy_array, G_TYPE_OBJECT)
 
@@ -73,7 +74,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-inserted signal is emitted when an item is inserted into
      * the array.
      **/
-    gwy_array_signals[ITEM_INSERTED]
+    array_signals[ITEM_INSERTED]
         = g_signal_new_class_handler("item-inserted",
                                      GWY_TYPE_ARRAY,
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -89,7 +90,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-deleted signal is emitted when an item is deleted from
      * the array.
      **/
-    gwy_array_signals[ITEM_DELETED]
+    array_signals[ITEM_DELETED]
         = g_signal_new_class_handler("item-deleted",
                                      GWY_TYPE_ARRAY,
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -105,7 +106,7 @@ gwy_array_class_init(GwyArrayClass *klass)
      * The ::item-updated signal is emitted when an item in the array
      * is updated.
      **/
-    gwy_array_signals[ITEM_UPDATED]
+    array_signals[ITEM_UPDATED]
         = g_signal_new_class_handler("item-updated",
                                      GWY_TYPE_ARRAY,
                                      G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -122,7 +123,7 @@ gwy_array_class_init(GwyArrayClass *klass)
 //   * The ::items-reordered signal is emitted when item in the array
 //   * are reordered.
 //   **/
-//  gwy_array_signals[ITEMS_REORDERED]
+//  array_signals[ITEMS_REORDERED]
 //      = g_signal_new("items-reordered",
 //                     GWY_TYPE_ARRAY,
 //                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
@@ -204,7 +205,7 @@ gwy_array_new(void)
 GwyArray*
 gwy_array_new_with_data(gsize size,
                         GDestroyNotify destroy,
-                        gpointer items,
+                        gconstpointer items,
                         guint nitems)
 {
     GwyArray *array = g_object_newv(GWY_TYPE_ARRAY, 0, NULL);
@@ -296,7 +297,7 @@ gwy_array_updated(GwyArray *array,
     g_return_if_fail(priv->items);
     g_return_if_fail(n < priv->items->len);
 
-    g_signal_emit(array, gwy_array_signals[ITEM_UPDATED], 0, n);
+    g_signal_emit(array, array_signals[ITEM_UPDATED], 0, n);
 }
 
 /**
@@ -323,7 +324,7 @@ gwy_array_updated(GwyArray *array,
 gpointer
 gwy_array_insert(GwyArray *array,
                  guint n,
-                 gpointer items,
+                 gconstpointer items,
                  guint nitems)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
@@ -341,7 +342,7 @@ gwy_array_insert(GwyArray *array,
     for (guint i = 0; i < nitems; i++) {
         g_array_insert_vals(priv->items, n + i,
                             gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, gwy_array_signals[ITEM_INSERTED], 0, n + i);
+        g_signal_emit(array, array_signals[ITEM_INSERTED], 0, n + i);
     }
 
     return gwy_array_index(priv, n);
@@ -368,7 +369,7 @@ gwy_array_insert(GwyArray *array,
  **/
 gpointer
 gwy_array_append(GwyArray *array,
-                 gpointer items,
+                 gconstpointer items,
                  guint nitems)
 {
     g_return_val_if_fail(GWY_IS_ARRAY(array), NULL);
@@ -381,7 +382,7 @@ gwy_array_append(GwyArray *array,
     ensure_items(priv);
     for (guint i = 0; i < nitems; i++) {
         g_array_append_vals(priv->items, gwy_data_index(priv, items, i), 1);
-        g_signal_emit(array, gwy_array_signals[ITEM_INSERTED], 0,
+        g_signal_emit(array, array_signals[ITEM_INSERTED], 0,
                       priv->items->len - 1);
     }
 
@@ -420,7 +421,7 @@ gwy_array_delete(GwyArray *array,
         if (priv->destroy)
             priv->destroy(gwy_array_index(priv, j));
         g_array_remove_index(priv->items, j);
-        g_signal_emit(array, gwy_array_signals[ITEM_DELETED], 0, j);
+        g_signal_emit(array, array_signals[ITEM_DELETED], 0, j);
     }
 }
 
@@ -444,7 +445,7 @@ gwy_array_delete(GwyArray *array,
 void
 gwy_array_replace(GwyArray *array,
                   guint n,
-                  gpointer items,
+                  gconstpointer items,
                   guint nitems)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
@@ -460,7 +461,7 @@ gwy_array_replace(GwyArray *array,
             priv->destroy(gwy_array_index(priv, j));
         memcpy(gwy_array_index(priv, j), gwy_data_index(priv, items, i),
                priv->size);
-        g_signal_emit(array, gwy_array_signals[ITEM_UPDATED], 0, j);
+        g_signal_emit(array, array_signals[ITEM_UPDATED], 0, j);
     }
 }
 
@@ -499,7 +500,7 @@ gwy_array_get_data(GwyArray *array)
  **/
 void
 gwy_array_set_data(GwyArray *array,
-                   gpointer items,
+                   gconstpointer items,
                    guint nitems)
 {
     g_return_if_fail(GWY_IS_ARRAY(array));
@@ -516,6 +517,19 @@ gwy_array_set_data(GwyArray *array,
                                                    priv->items->len),
                              nitems - priv->items->len);
     }
+}
+
+/* Set the data without emitting any signals.  Use with care, intended only
+ * for deserialization. */
+void
+_gwy_array_set_data_silent(GwyArray *array,
+                           gconstpointer items,
+                           guint nitems)
+{
+    ensure_items(array->priv);
+    g_array_set_size(array->priv->items, 0);
+    if (items && nitems)
+        g_array_append_vals(array->priv->items, items, nitems);
 }
 
 #define __LIBGWY_ARRAY_C__

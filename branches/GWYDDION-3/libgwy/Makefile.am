@@ -47,6 +47,7 @@ public_headers = \
 	$(srcdir)/pack.h \
 	$(srcdir)/resource.h \
 	$(srcdir)/rgba.h \
+	$(srcdir)/selection.h \
 	$(srcdir)/serializable.h \
 	$(srcdir)/serializable-boxed.h \
 	$(srcdir)/serialize.h \
@@ -60,6 +61,7 @@ public_built_headers = \
 	version.h
 
 private_headers = \
+	array-internal.h \
 	curve-internal.h \
 	field-internal.h \
 	fit-func-builtin.h \
@@ -119,6 +121,7 @@ libgwy3_la_SOURCES = \
 	pack.c \
 	resource.c \
 	rgba.c \
+	selection.c \
 	serializable.c \
 	serializable-boxed.c \
 	serialize.c \
