@@ -91,6 +91,7 @@ typedef struct {
     gboolean crop;
     gboolean update;
     gint calibration;
+    gboolean computed;
 } CCViewArgs;
 
 typedef struct {
@@ -147,6 +148,9 @@ static GtkWidget*   menu_interpolation     (GCallback callback,
                                             GwyCCViewInterpolationType current);
 static void         display_changed        (GtkComboBox *combo,
                                             CCViewControls *controls);
+static void         calculation_changed        (GtkComboBox *combo,
+                                            CCViewControls *controls);
+
 
 static void         update_view            (CCViewControls *controls,
                                             CCViewArgs *args);
@@ -239,6 +243,7 @@ cc_view_dialog(CCViewArgs *args,
     controls.args = args;
     args->crop = 0;
     args->calibration = 0;
+    args->computed = 0;
     args->interpolation_type = GWY_CC_VIEW_INTERPOLATION_3D;
 
 
@@ -260,11 +265,17 @@ cc_view_dialog(CCViewArgs *args,
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,
                        FALSE, FALSE, 4);
 
-
     controls.actual_field = dfield; 
     //controls.view_field = gwy_data_field_new_alike(dfield, 0); 
     controls.view_field = gwy_data_field_new(200, 200, 100, 100, TRUE);
-    
+    controls.xerr = gwy_data_field_new_alike(controls.view_field, TRUE);
+    controls.yerr = gwy_data_field_new_alike(controls.view_field, TRUE);
+    controls.zerr = gwy_data_field_new_alike(controls.view_field, TRUE);
+    controls.xunc = gwy_data_field_new_alike(controls.view_field, TRUE);
+    controls.yunc = gwy_data_field_new_alike(controls.view_field, TRUE);
+    controls.zunc = gwy_data_field_new_alike(controls.view_field, TRUE);
+
+ 
 
     controls.data = data;
     controls.mydata = gwy_container_new();
@@ -331,7 +342,7 @@ cc_view_dialog(CCViewArgs *args,
                      GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
 
     row++;
-    controls.menu_plane = menu_plane(G_CALLBACK(display_changed),
+    controls.menu_plane = menu_plane(G_CALLBACK(calculation_changed),
                                          &controls,
                                          args->display_type);
 
@@ -371,7 +382,7 @@ cc_view_dialog(CCViewArgs *args,
                      GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 2, 2);
 
 
-    controls.menu_interpolation = menu_interpolation(G_CALLBACK(display_changed),
+    controls.menu_interpolation = menu_interpolation(G_CALLBACK(calculation_changed),
                                          &controls,
                                          args->interpolation_type);
 
@@ -401,7 +412,7 @@ cc_view_dialog(CCViewArgs *args,
 
 
     gtk_container_add(GTK_CONTAINER(vbox), table);
-    display_changed(NULL, &controls);
+    calculation_changed(NULL, &controls);
     update_view(&controls, args);
 
     gtk_widget_show_all(dialog);
@@ -493,12 +504,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
     xres = 200; 
     yres = 200;
     zres = 200;
-    controls->xerr = gwy_data_field_new_alike(viewfield, TRUE);
-    controls->yerr = gwy_data_field_new_alike(viewfield, TRUE);
-    controls->zerr = gwy_data_field_new_alike(viewfield, TRUE);
-    controls->xunc = gwy_data_field_new_alike(viewfield, TRUE);
-    controls->yunc = gwy_data_field_new_alike(viewfield, TRUE);
-    controls->zunc = gwy_data_field_new_alike(viewfield, TRUE);
 
     if (!caldata) {
         gwy_data_field_fill(viewfield, 0);
@@ -517,108 +522,111 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                                                         caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
     }
 
-    gwy_app_wait_cursor_start(GTK_WINDOW(controls->dialog));
+    if (!args->computed) {
+        gwy_app_wait_cursor_start(GTK_WINDOW(controls->dialog));
 
-    if (args->interpolation_type == GWY_CC_VIEW_INTERPOLATION_NATURAL)
-    {
-        printf("setup interpolation\n");
-        gwy_caldata_setup_interpolation(caldata);
-        printf("done\n");
-    }
+        if (args->interpolation_type == GWY_CC_VIEW_INTERPOLATION_NATURAL)
+        {
+            printf("setup interpolation\n");
+            gwy_caldata_setup_interpolation(caldata);
+            printf("done\n");
+        }
 
-    if (controls->args->crop) {
-       for (row=0; row<yres; row++)
-       {
-           printf("up crop\n");
-          y = gwy_data_field_get_yoffset(controls->actual_field) + 
-                          row*gwy_data_field_get_yreal(controls->actual_field)/yres;
-          for (col=0; col<xres; col++) {
-             x = gwy_data_field_get_xoffset(controls->actual_field) +
-                                           col*gwy_data_field_get_yreal(controls->actual_field)/xres;
-             z = gwy_data_field_get_dval(controls->actual_field, 
-                                         x - gwy_data_field_get_xoffset(controls->actual_field), 
-                                         y - gwy_data_field_get_yoffset(controls->actual_field),
-                                         GWY_INTERPOLATION_BILINEAR);
-             
-             get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
-             controls->xerr->data[col + xres*row] = xerr;
-             controls->yerr->data[col + xres*row] = yerr;
-             controls->zerr->data[col + xres*row] = zerr;
-             controls->xunc->data[col + xres*row] = xunc;
-             controls->yunc->data[col + xres*row] = yunc;
-             controls->zunc->data[col + xres*row] = zunc;
+        if (controls->args->crop) {
+            for (row=0; row<yres; row++)
+            {
+                printf("up crop\n");
+                y = gwy_data_field_get_yoffset(controls->actual_field) + 
+                    row*gwy_data_field_get_yreal(controls->actual_field)/yres;
+                for (col=0; col<xres; col++) {
+                    x = gwy_data_field_get_xoffset(controls->actual_field) +
+                        col*gwy_data_field_get_yreal(controls->actual_field)/xres;
+                    z = gwy_data_field_get_dval(controls->actual_field, 
+                                                x - gwy_data_field_get_xoffset(controls->actual_field), 
+                                                y - gwy_data_field_get_yoffset(controls->actual_field),
+                                                GWY_INTERPOLATION_BILINEAR);
 
-             
-         }
-       }
-    } else {
-       if (controls->args->plane_type == GWY_CC_VIEW_PLANE_X)
-       {
-          printf("up x\n");
-          gwy_data_field_resample(viewfield, yres, zres, GWY_INTERPOLATION_NONE);
-          x = caldata->x_from + (caldata->x_to-caldata->x_from)*(gdouble)args->xplane/100.0;
-          for (col=0; col<yres; col++)
-          {
-              y = caldata->y_from + (caldata->y_to-caldata->y_from)*(gdouble)col/(double)yres;
-              for (row=0; row<zres; row++) {
-                 z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)row/(double)zres;
+                    get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
+                    controls->xerr->data[col + xres*row] = xerr;
+                    controls->yerr->data[col + xres*row] = yerr;
+                    controls->zerr->data[col + xres*row] = zerr;
+                    controls->xunc->data[col + xres*row] = xunc;
+                    controls->yunc->data[col + xres*row] = yunc;
+                    controls->zunc->data[col + xres*row] = zunc;
 
-                 get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
-                 controls->xerr->data[col + yres*row] = xerr;
-                 controls->yerr->data[col + yres*row] = yerr;
-                 controls->zerr->data[col + yres*row] = zerr;
-                 controls->xunc->data[col + yres*row] = xunc;
-                 controls->yunc->data[col + yres*row] = yunc;
-                 controls->zunc->data[col + yres*row] = zunc;
-              }
-          }
-       }
-       if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Y)
-       {
-           printf("up y\n");
-          gwy_data_field_resample(viewfield, xres, zres, GWY_INTERPOLATION_NONE);
-          y = caldata->y_from + (caldata->y_to-caldata->y_from)*(gdouble)args->yplane/100.0;
-          for (col=0; col<xres; col++)
-          { 
-             x = caldata->x_from + (caldata->x_to-caldata->x_from)*(gdouble)col/(double)xres;
-             for (row=0; row<zres; row++) {
-                 z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)row/(double)zres;
-                 get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
-                 controls->xerr->data[col + xres*row] = xerr;
-                 controls->yerr->data[col + xres*row] = yerr;
-                 controls->zerr->data[col + xres*row] = zerr;
-                 controls->xunc->data[col + xres*row] = xunc;
-                 controls->yunc->data[col + xres*row] = yunc;
-                 controls->zunc->data[col + xres*row] = zunc;
-             }
-          }
-       }
-       if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Z)
-       {
-           printf("up z\n");
-          gwy_data_field_resample(viewfield, xres, yres, GWY_INTERPOLATION_NONE);
-          gwy_data_field_set_xreal(viewfield, caldata->x_to - caldata->x_from);
-          gwy_data_field_set_yreal(viewfield, caldata->y_to - caldata->y_from);
 
-          z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)args->zplane/100.0;
-          for (col=0; col<xres; col++)
-          {
-             x = gwy_data_field_get_yoffset(viewfield) +
-                                           col*gwy_data_field_get_xreal(viewfield)/xres;
-             for (row=0; row<yres; row++) {
-                y = gwy_data_field_get_yoffset(viewfield) +
-                                           row*gwy_data_field_get_yreal(viewfield)/yres;
-
-                get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
-                controls->xerr->data[col + xres*row] = xerr;
-                controls->yerr->data[col + xres*row] = yerr;
-                controls->zerr->data[col + xres*row] = zerr;
-                controls->xunc->data[col + xres*row] = xunc;
-                controls->yunc->data[col + xres*row] = yunc;
-                controls->zunc->data[col + xres*row] = zunc;
+                }
             }
-          }
-       }
+        } else {
+            if (controls->args->plane_type == GWY_CC_VIEW_PLANE_X)
+            {
+                printf("up x\n");
+                gwy_data_field_resample(viewfield, yres, zres, GWY_INTERPOLATION_NONE);
+                x = caldata->x_from + (caldata->x_to-caldata->x_from)*(gdouble)args->xplane/100.0;
+                for (col=0; col<yres; col++)
+                {
+                    y = caldata->y_from + (caldata->y_to-caldata->y_from)*(gdouble)col/(double)yres;
+                    for (row=0; row<zres; row++) {
+                        z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)row/(double)zres;
+
+                        get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
+                        controls->xerr->data[col + yres*row] = xerr;
+                        controls->yerr->data[col + yres*row] = yerr;
+                        controls->zerr->data[col + yres*row] = zerr;
+                        controls->xunc->data[col + yres*row] = xunc;
+                        controls->yunc->data[col + yres*row] = yunc;
+                        controls->zunc->data[col + yres*row] = zunc;
+                    }
+                }
+            }
+            if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Y)
+            {
+                printf("up y\n");
+                gwy_data_field_resample(viewfield, xres, zres, GWY_INTERPOLATION_NONE);
+                y = caldata->y_from + (caldata->y_to-caldata->y_from)*(gdouble)args->yplane/100.0;
+                for (col=0; col<xres; col++)
+                { 
+                    x = caldata->x_from + (caldata->x_to-caldata->x_from)*(gdouble)col/(double)xres;
+                    for (row=0; row<zres; row++) {
+                        z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)row/(double)zres;
+                        get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
+                        controls->xerr->data[col + xres*row] = xerr;
+                        controls->yerr->data[col + xres*row] = yerr;
+                        controls->zerr->data[col + xres*row] = zerr;
+                        controls->xunc->data[col + xres*row] = xunc;
+                        controls->yunc->data[col + xres*row] = yunc;
+                        controls->zunc->data[col + xres*row] = zunc;
+                    }
+                }
+            }
+            if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Z)
+            {
+                printf("up z\n");
+                gwy_data_field_resample(viewfield, xres, yres, GWY_INTERPOLATION_NONE);
+                gwy_data_field_set_xreal(viewfield, caldata->x_to - caldata->x_from);
+                gwy_data_field_set_yreal(viewfield, caldata->y_to - caldata->y_from);
+
+                z = caldata->z_from + (caldata->z_to-caldata->z_from)*(gdouble)args->zplane/100.0;
+                for (col=0; col<xres; col++)
+                {
+                    x = gwy_data_field_get_yoffset(viewfield) +
+                        col*gwy_data_field_get_xreal(viewfield)/xres;
+                    for (row=0; row<yres; row++) {
+                        y = gwy_data_field_get_yoffset(viewfield) +
+                            row*gwy_data_field_get_yreal(viewfield)/yres;
+
+                        get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
+                        controls->xerr->data[col + xres*row] = xerr;
+                        controls->yerr->data[col + xres*row] = yerr;
+                        controls->zerr->data[col + xres*row] = zerr;
+                        controls->xunc->data[col + xres*row] = xunc;
+                        controls->yunc->data[col + xres*row] = yunc;
+                        controls->zunc->data[col + xres*row] = zunc;
+                    }
+                }
+            }
+        }
+        args->computed = TRUE;
     }
 
     if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_CORR)
@@ -832,12 +840,11 @@ menu_interpolation(GCallback callback, gpointer cbdata,
                                   callback, cbdata, current, TRUE);
 }
 
+
 static void
 display_changed(GtkComboBox *combo, CCViewControls *controls)
 {
     controls->args->display_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_display));
-    controls->args->plane_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_plane));
-    controls->args->interpolation_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_interpolation));
 
     if (controls->args->crop) {
         gwy_table_hscale_set_sensitive(controls->xplane, FALSE);
@@ -867,11 +874,47 @@ display_changed(GtkComboBox *combo, CCViewControls *controls)
 
 
 static void
+calculation_changed(GtkComboBox *combo, CCViewControls *controls)
+{
+    controls->args->display_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_display));
+    controls->args->plane_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_plane));
+    controls->args->interpolation_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(controls->menu_interpolation));
+
+    if (controls->args->crop) {
+        gwy_table_hscale_set_sensitive(controls->xplane, FALSE);
+        gwy_table_hscale_set_sensitive(controls->yplane, FALSE);
+        gwy_table_hscale_set_sensitive(controls->zplane, FALSE);
+    }
+    else {
+       if (controls->args->plane_type == GWY_CC_VIEW_PLANE_X) {
+          gwy_table_hscale_set_sensitive(controls->xplane, TRUE);
+          gwy_table_hscale_set_sensitive(controls->yplane, FALSE);
+          gwy_table_hscale_set_sensitive(controls->zplane, FALSE);
+       }
+       else if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Y) {
+          gwy_table_hscale_set_sensitive(controls->xplane, FALSE);
+          gwy_table_hscale_set_sensitive(controls->yplane, TRUE);
+          gwy_table_hscale_set_sensitive(controls->zplane, FALSE);
+       }
+       else if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Z) {
+          gwy_table_hscale_set_sensitive(controls->xplane, FALSE);
+          gwy_table_hscale_set_sensitive(controls->yplane, FALSE);
+          gwy_table_hscale_set_sensitive(controls->zplane, TRUE);
+       }
+    }
+    controls->args->computed = FALSE;
+    if (controls->args->update)
+                          update_view(controls, controls->args);
+}
+
+
+static void
 crop_change_cb(CCViewControls *controls)
 {
     controls->args->crop
               = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(controls->crop));
 
+    controls->args->computed = FALSE;
     display_changed(NULL, controls);
 }
 
@@ -884,6 +927,7 @@ update_change_cb(CCViewControls *controls)
    gtk_dialog_set_response_sensitive(GTK_DIALOG(controls->dialog),
                                             RESPONSE_PREVIEW,
                                            !controls->args->update);
+   controls->args->computed = FALSE;
    if (controls->args->update)
                update_view(controls, controls->args);
 }
@@ -894,6 +938,7 @@ settings_changed(CCViewControls *controls)
    controls->args->xplane = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->xplane));
    controls->args->yplane = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->yplane));
    controls->args->zplane = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->zplane));
+   controls->args->computed = FALSE;
    if (controls->args->update)
        update_view(controls, controls->args);
 }

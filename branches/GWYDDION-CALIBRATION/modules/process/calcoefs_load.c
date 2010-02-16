@@ -39,13 +39,13 @@
 
 typedef struct {
     gchar *name;
+    GwyCalData *caldata;
 } CLoadArgs;
 
 typedef struct {
     GtkWidget *dialog;
     CLoadArgs *args;
     GtkEntry *name;
-    GwyCalData *caldata;
 } CLoadControls;
 
 enum { RESPONSE_LOAD = 1 };
@@ -98,7 +98,6 @@ cload(GwyContainer *data, GwyRunType run)
     gboolean ok;
     gint oldid, newid, i, j, k, n;
     GwyCalibration *calibration;
-    GwyCalData *caldata;
     gchar *filename;
     GString *str;
     GByteArray *barray;
@@ -118,9 +117,6 @@ cload(GwyContainer *data, GwyRunType run)
         if (!ok)
             return;
     }
-
-    /*create the caldata*/
-    caldata = gwy_caldata_new(8);
 
     /*now create and save the resource*/
     if ((calibration = GWY_CALIBRATION(gwy_inventory_get_item(gwy_calibrations(), args.name)))==NULL)
@@ -146,6 +142,7 @@ cload(GwyContainer *data, GwyRunType run)
 
     gwy_resource_data_saved(GWY_RESOURCE(calibration));
 
+
     /*now save the calibration data*/
     if (!g_file_test(g_build_filename(gwy_get_user_dir(), "caldata", NULL), G_FILE_TEST_EXISTS)) {
         g_mkdir(g_build_filename(gwy_get_user_dir(), "caldata", NULL), 0700);
@@ -155,7 +152,7 @@ cload(GwyContainer *data, GwyRunType run)
         g_warning("Cannot save caldata\n");
         return;
     }
-    barray = gwy_serializable_serialize(G_OBJECT(caldata), NULL);
+    barray = gwy_serializable_serialize(G_OBJECT(args.caldata), NULL);
     //g_file_set_contents(fh, barray->data, sizeof(guint8)*barray->len, NULL);
     fwrite(barray->data, sizeof(guint8), barray->len, fh);
     fclose(fh);
@@ -259,7 +256,7 @@ load_caldata(CLoadControls *controls)
 {
     GtkWidget *dialog;
     gchar *filename;
-    GwyCalData *caldata = controls->caldata;
+    GwyCalData *caldata = controls->args->caldata;
     FILE *fr;
     gint i, ndata;
     gdouble xfrom, xto, yfrom, yto, zfrom, zto;
@@ -334,7 +331,7 @@ load_caldata(CLoadControls *controls)
             printf("done.\n");
         }
         g_free (filename);
-        controls->caldata = caldata;
+        controls->args->caldata = caldata;
     }
     gtk_widget_destroy (dialog);
 
