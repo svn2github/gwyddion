@@ -1805,7 +1805,6 @@ gwy_container_serialize(GObject *object,
     container = GWY_CONTAINER(object);
 
     nitems = g_hash_table_size(container->values);
-    printf("%d items\n", nitems);
     sdata.items = g_new0(GwySerializeItem, nitems);
     sdata.i = 0;
     g_hash_table_foreach(container->values, hash_serialize_func, &sdata);
