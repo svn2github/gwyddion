@@ -41,9 +41,11 @@
 #include <app/gwymoduleutils.h>
 #include <app/gwyapp.h>
 
+
 #define CC_VIEW_RUN_MODES GWY_RUN_INTERACTIVE
 
 #define MAX_PARAMS 4
+
 
 enum { PREVIEW_SIZE = 200 };
 
@@ -92,6 +94,7 @@ typedef struct {
     gboolean update;
     gint calibration;
     gboolean computed;
+    gint id;
 } CCViewArgs;
 
 typedef struct {
@@ -209,16 +212,15 @@ cc_view(GwyContainer *data, GwyRunType run)
 {
     CCViewArgs args;
     GwyDataField *dfield;
-    gint id;
     g_return_if_fail(run & CC_VIEW_RUN_MODES);
 
     cc_view_load_args(gwy_app_settings_get(), &args);
     gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD, &dfield,
-                                     GWY_APP_DATA_FIELD_ID, &id,
+                                     GWY_APP_DATA_FIELD_ID, &(args.id),
                                      0);
     g_return_if_fail(dfield);
 
-    cc_view_dialog(&args, data, dfield, id);
+    cc_view_dialog(&args, data, dfield, args.id);
     cc_view_save_args(gwy_app_settings_get(), &args);
 }
 
@@ -266,7 +268,6 @@ cc_view_dialog(CCViewArgs *args,
                        FALSE, FALSE, 4);
 
     controls.actual_field = dfield; 
-    //controls.view_field = gwy_data_field_new_alike(dfield, 0); 
     controls.view_field = gwy_data_field_new(200, 200, 100, 100, TRUE);
     controls.xerr = gwy_data_field_new_alike(controls.view_field, TRUE);
     controls.yerr = gwy_data_field_new_alike(controls.view_field, TRUE);
@@ -427,6 +428,14 @@ cc_view_dialog(CCViewArgs *args,
             break;
 
             case GTK_RESPONSE_OK:
+            if (!args->computed || !args->crop)
+            {
+                printf("recomputing for crop\n");
+                args->crop = TRUE;
+                args->computed = FALSE;
+                update_view(&controls, args);
+                printf("done\n");
+            }
             cc_view_do(&controls);
             break;
 
@@ -515,12 +524,12 @@ update_view(CCViewControls *controls, CCViewArgs *args)
     printf("output caldata\n"); 
     printf("total %d caldata (%g %g %g    %g %g %g)\n", caldata->ndata, caldata->x_from, caldata->y_from, caldata->z_from,
            caldata->x_to, caldata->y_to, caldata->z_to);
-    for (i=0; i<caldata->ndata; i++)
+    /*for (i=0; i<caldata->ndata; i++)
     {
         printf("caldata: %g %g %g %g %g %g %g %g %g\n", caldata->x[i], caldata->y[i], caldata->z[i], 
                                                         caldata->xerr[i], caldata->yerr[i], caldata->zerr[i],
                                                         caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
-    }
+    }*/
 
     if (!args->computed) {
         gwy_app_wait_cursor_start(GTK_WINDOW(controls->dialog));
@@ -535,7 +544,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
         if (controls->args->crop) {
             for (row=0; row<yres; row++)
             {
-                printf("up crop\n");
                 y = gwy_data_field_get_yoffset(controls->actual_field) + 
                     row*gwy_data_field_get_yreal(controls->actual_field)/yres;
                 for (col=0; col<xres; col++) {
@@ -626,6 +634,12 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                 }
             }
         }
+        gwy_data_field_invalidate(controls->xerr);
+        gwy_data_field_invalidate(controls->yerr);
+        gwy_data_field_invalidate(controls->zerr);
+        gwy_data_field_invalidate(controls->xunc);
+        gwy_data_field_invalidate(controls->yunc);
+        gwy_data_field_invalidate(controls->zunc);
         args->computed = TRUE;
     }
 
@@ -650,28 +664,74 @@ update_view(CCViewControls *controls, CCViewArgs *args)
 }
 
 
-/*dialog finished, do nothing for now*/
+void add_calibration(GwyDataField *dfield,
+                     GwyContainer *data,
+                     gint id,
+                     GwyCCViewDisplayType type)
+{
+    gchar key[24];
+
+
+    if (type == GWY_CC_VIEW_DISPLAY_X_CORR)
+       g_snprintf(key, sizeof(key), "/%d/cal_xerr", id);
+    else if (type == GWY_CC_VIEW_DISPLAY_Y_CORR)
+       g_snprintf(key, sizeof(key), "/%d/cal_yerr", id);
+    else if (type == GWY_CC_VIEW_DISPLAY_Z_CORR)
+       g_snprintf(key, sizeof(key), "/%d/cal_zerr", id);
+    else if (type == GWY_CC_VIEW_DISPLAY_X_UNC)
+       g_snprintf(key, sizeof(key), "/%d/cal_xunc", id);
+    else if (type == GWY_CC_VIEW_DISPLAY_Y_UNC)
+       g_snprintf(key, sizeof(key), "/%d/cal_yunc", id);
+    else if (type == GWY_CC_VIEW_DISPLAY_Z_UNC)
+       g_snprintf(key, sizeof(key), "/%d/cal_zunc", id);
+    else {
+        g_critical("No such calibration key.");
+        return;
+    }
+    gwy_container_set_object_by_name(data, key, dfield);
+
+}
+
+
+/*dialog finished, everything should be computed*/
 static void
 cc_view_do(CCViewControls *controls)
 {
-    gint newid = gwy_app_data_browser_add_data_field(controls->view_field, controls->data, TRUE);
-    g_object_unref(controls->view_field);
 
-    /*determine key, calculate fields again for snap and save the with modified key*/
+    add_calibration(controls->xerr, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_X_CORR);
+    add_calibration(controls->yerr, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_Y_CORR);
+    add_calibration(controls->zerr, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_Z_CORR);
+    add_calibration(controls->xunc, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_X_UNC);
+    add_calibration(controls->yunc, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_Y_UNC);
+    add_calibration(controls->zunc, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_Z_UNC);
 
-    if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_CORR) 
-        gwy_app_set_data_field_title(controls->data, newid, "X correction");
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_CORR) 
-        gwy_app_set_data_field_title(controls->data, newid, "Y correction");
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_CORR) 
-        gwy_app_set_data_field_title(controls->data, newid, "Z correction");
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_UNC) 
-        gwy_app_set_data_field_title(controls->data, newid, "X uncertainty");
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_UNC) 
-        gwy_app_set_data_field_title(controls->data, newid, "Y uncertainty");
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_UNC) 
-        gwy_app_set_data_field_title(controls->data, newid, "Z uncertainty");
-      
+    /*now the data should be present in container and user functions can use them*/
+
+/*
+    gint newid = gwy_app_data_browser_add_data_field(controls->xerr, controls->data, TRUE);
+    g_object_unref(controls->xerr);
+    gwy_app_set_data_field_title(controls->data, newid, "X correction");
+
+    newid = gwy_app_data_browser_add_data_field(controls->yerr, controls->data, TRUE);
+    g_object_unref(controls->yerr);
+    gwy_app_set_data_field_title(controls->data, newid, "Y correction");
+
+    newid = gwy_app_data_browser_add_data_field(controls->zerr, controls->data, TRUE);
+    g_object_unref(controls->zerr);
+    gwy_app_set_data_field_title(controls->data, newid, "Z correction");
+
+    newid = gwy_app_data_browser_add_data_field(controls->xunc, controls->data, TRUE);
+    g_object_unref(controls->xunc);
+    gwy_app_set_data_field_title(controls->data, newid, "X uncertainty");
+
+    newid = gwy_app_data_browser_add_data_field(controls->yunc, controls->data, TRUE);
+    g_object_unref(controls->yunc);
+    gwy_app_set_data_field_title(controls->data, newid, "Y uncertainty");
+
+    newid = gwy_app_data_browser_add_data_field(controls->zunc, controls->data, TRUE);
+    g_object_unref(controls->zunc);
+    gwy_app_set_data_field_title(controls->data, newid, "Z uncertainty");
+*/
 
 }
 static void
