@@ -18,6 +18,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  */
 
+#include <stdio.h>
 #include "config.h"
 #include <stdlib.h>
 #include <gtk/gtk.h>
@@ -27,6 +28,8 @@
 #include <libprocess/gwyprocesstypes.h>
 #include <libprocess/datafield.h>
 #include <libprocess/linestats.h>
+#include <libprocess/gwycalibration.h>
+#include <libprocess/gwycaldata.h>
 #include <libgwydgets/gwystock.h>
 #include <libgwydgets/gwynullstore.h>
 #include <libgwydgets/gwycombobox.h>
@@ -80,6 +83,9 @@ struct _GwyToolProfile {
     GtkWidget *interpolation;
     GtkWidget *separate;
     GtkWidget *apply;
+
+    GwyCalibration *calibration;
+    GwyCalData *caldata;
 
     /* potential class data */
     GwySIValueFormat *pixel_format;
@@ -415,6 +421,7 @@ gwy_tool_profile_data_switched(GwyTool *gwytool,
     GwyPlainTool *plain_tool;
     GwyToolProfile *tool;
     gboolean ignore;
+    gchar key[24];
 
     plain_tool = GWY_PLAIN_TOOL(gwytool);
     ignore = (data_view == plain_tool->data_view);
@@ -435,6 +442,13 @@ gwy_tool_profile_data_switched(GwyTool *gwytool,
                                 NULL);
         gwy_selection_set_max_objects(plain_tool->selection, NLINES);
     }
+
+    printf("data swithced\n");
+    g_snprintf(key, sizeof(key), "/%d/cal_xerr", plain_tool->id); 
+    printf("key: %s\n", key);
+    if (gwy_container_gis_object_by_name(plain_tool->container, key, tool->calibration))
+         printf("calibration found\n");
+    else printf("no calibration found\n");
 
     gwy_graph_model_remove_all_curves(tool->gmodel);
     gwy_tool_profile_update_all_curves(tool);
