@@ -251,7 +251,7 @@ void interpolate3_3( double  x, double  y, double  z,
     fprintf(stderr, "There could be a degenerecy in the mesh, either retry "
                     "(since input is randomised this may resolve the problem), "
                     "or try adding a random peterbation to every point.\n");
-    exit(1);
+   // exit(1);
   }
 
   // Put the dead simplicies in the memory pool.
