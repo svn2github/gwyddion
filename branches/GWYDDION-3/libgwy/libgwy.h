@@ -54,6 +54,7 @@
 #include <libgwy/pack.h>
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
+#include <libgwy/selection.h>
 #include <libgwy/serializable.h>
 #include <libgwy/serializable-boxed.h>
 #include <libgwy/serialize.h>
