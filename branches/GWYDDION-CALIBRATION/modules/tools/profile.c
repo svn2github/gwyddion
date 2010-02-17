@@ -162,6 +162,8 @@ static GtkWidget*   menu_display           (GCallback callback,
 static void         display_changed        (GtkComboBox *combo,
                                             GwyToolProfile *tool);
 
+static void export_caldata(GwyToolProfile *tool, GwyDataLine *line, gchar *str);
+
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
@@ -579,7 +581,7 @@ gwy_tool_profile_selection_changed(GwyPlainTool *plain_tool,
     gtk_widget_set_sensitive(tool->apply, n > 0);
 }
 
-void
+static void
 gwy_data_line_sum(GwyDataLine *a, GwyDataLine *b)
 {
     gint i;
@@ -590,7 +592,7 @@ gwy_data_line_sum(GwyDataLine *a, GwyDataLine *b)
     for (i = 0; i < a->res; i++)
             a->data[i] += b->data[i];
 }
-void
+static void
 gwy_data_line_subtract(GwyDataLine *a, GwyDataLine *b)
 {
     gint i;
@@ -652,11 +654,41 @@ gwy_tool_profile_update_curve(GwyToolProfile *tool,
         printf("%d data, range %g,  %g %g\n", gwy_data_line_get_res(tool->line_xerr),
                gwy_data_line_get_real(tool->line_xerr),
                gwy_data_line_get_min(tool->line_xerr), gwy_data_line_get_max(tool->line_xerr));
+
         tool->line_xerr = gwy_data_field_get_profile(tool->xerr, tool->line_xerr,
                                                 xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
                                                 lineres,
                                                 tool->args.thickness,
                                                 tool->args.interpolation);
+        tool->line_yerr = gwy_data_field_get_profile(tool->yerr, tool->line_yerr,
+                                                xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
+                                                lineres,
+                                                tool->args.thickness,
+                                                tool->args.interpolation);
+        tool->line_zerr = gwy_data_field_get_profile(tool->zerr, tool->line_zerr,
+                                                xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
+                                                lineres,
+                                                tool->args.thickness,
+                                                tool->args.interpolation);
+
+        tool->line_xunc = gwy_data_field_get_profile(tool->xunc, tool->line_xunc,
+                                                xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
+                                                lineres,
+                                                tool->args.thickness,
+                                                tool->args.interpolation);
+        tool->line_yunc = gwy_data_field_get_profile(tool->yunc, tool->line_yunc,
+                                                xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
+                                                lineres,
+                                                tool->args.thickness,
+                                                tool->args.interpolation);
+        tool->line_zunc = gwy_data_field_get_profile(tool->zunc, tool->line_zunc,
+                                                xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
+                                                lineres,
+                                                tool->args.thickness,
+                                                tool->args.interpolation);
+
+
+
 
         printf("%d data, range %g,  %g %g\n", gwy_data_line_get_res(tool->line_xerr),
                gwy_data_line_get_real(tool->line_xerr),
@@ -882,7 +914,6 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
     GwyGraphCurveModel *gcmodel;
     GwyGraphModel *gmodel;
     gchar *s;
-    gchar *desc;
     gint i, n;
 
     plain_tool = GWY_PLAIN_TOOL(tool);
@@ -913,27 +944,56 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
         gwy_app_data_browser_add_graph_model(gmodel, plain_tool->container,
                                              TRUE);
         g_object_unref(gmodel);
-    }
 
-    if (tool->has_calibration) {
+        if (tool->has_calibration) {
 
-        printf("exporting calibration data\n");
-        gmodel = gwy_graph_model_new_alike(tool->gmodel);
-        g_object_set(gmodel, "label-visible", TRUE, NULL);
-        gcmodel = gwy_graph_curve_model_new();
-        desc = g_strdup_printf(_("X error %d"), i+1);
-        g_object_set(gcmodel,
-                     "mode", GWY_GRAPH_CURVE_LINE,
-                     "description", desc,
-                     "line-style", GDK_LINE_ON_OFF_DASH,
-                     NULL);
-        g_free(desc);
-        gwy_graph_curve_model_set_data_from_dataline(gcmodel, tool->line_xerr, 0, 0);
-        gwy_graph_model_add_curve(gmodel, gcmodel);
-        gwy_app_data_browser_add_graph_model(gmodel, plain_tool->container,
-                                             TRUE);
- 
+            printf("exporting calibration data\n");
+
+            s = g_strdup_printf(_("X error %d"), i+1);
+            export_caldata(tool, tool->line_xerr, s);
+            g_free(s);
+            s = g_strdup_printf(_("Y error %d"), i+1);
+            export_caldata(tool, tool->line_yerr, s);
+            g_free(s);
+            s = g_strdup_printf(_("Z error %d"), i+1);
+            export_caldata(tool, tool->line_zerr, s);
+            g_free(s);
+            s = g_strdup_printf(_("X uncertainty %d"), i+1);
+            export_caldata(tool, tool->line_xunc, s);
+            g_free(s);
+            s = g_strdup_printf(_("Y uncertainty %d"), i+1);
+            export_caldata(tool, tool->line_yunc, s);
+            g_free(s);
+            s = g_strdup_printf(_("Z uncertainty %d"), i+1);
+            export_caldata(tool, tool->line_zunc, s);
+            g_free(s);
+         }
     }
+}
+
+static void 
+export_caldata(GwyToolProfile *tool, GwyDataLine *line, gchar *str)
+{
+    GwyPlainTool *plain_tool;
+    GwyGraphCurveModel *gcmodel;
+    GwyGraphModel *gmodel;
+    gchar *s;
+    gint i, n;
+
+    plain_tool = GWY_PLAIN_TOOL(tool);
+    gmodel = gwy_graph_model_new_alike(tool->gmodel);
+    g_object_set(gmodel, "label-visible", TRUE, NULL);
+    g_object_set(gmodel, "title", str, NULL);
+    gcmodel = gwy_graph_curve_model_new();
+    g_object_set(gcmodel,
+                 "mode", GWY_GRAPH_CURVE_LINE,
+                 "description", str,
+                 NULL);
+    gwy_graph_curve_model_set_data_from_dataline(gcmodel, line, 0, 0);
+    gwy_graph_model_add_curve(gmodel, gcmodel);
+    gwy_app_data_browser_add_graph_model(gmodel, plain_tool->container,
+                                         TRUE);
+
 }
 
 static GtkWidget*
