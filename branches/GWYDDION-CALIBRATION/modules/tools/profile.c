@@ -28,8 +28,6 @@
 #include <libprocess/gwyprocesstypes.h>
 #include <libprocess/datafield.h>
 #include <libprocess/linestats.h>
-#include <libprocess/gwycalibration.h>
-#include <libprocess/gwycaldata.h>
 #include <libgwydgets/gwystock.h>
 #include <libgwydgets/gwynullstore.h>
 #include <libgwydgets/gwycombobox.h>
@@ -40,6 +38,17 @@
 #define GWY_TOOL_PROFILE(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), GWY_TYPE_TOOL_PROFILE, GwyToolProfile))
 #define GWY_IS_TOOL_PROFILE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), GWY_TYPE_TOOL_PROFILE))
 #define GWY_TOOL_PROFILE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_TOOL_PROFILE, GwyToolProfileClass))
+
+typedef enum {
+    GWY_CC_DISPLAY_NONE = 0, 
+    GWY_CC_DISPLAY_X_CORR  = 1,
+    GWY_CC_DISPLAY_Y_CORR = 2,
+    GWY_CC_DISPLAY_Z_CORR = 3,
+    GWY_CC_DISPLAY_X_UNC = 4,
+    GWY_CC_DISPLAY_Y_UNC = 5,
+    GWY_CC_DISPLAY_Z_UNC = 6,
+} GwyCCDisplayType;
+
 
 enum {
     NLINES = 1024,
@@ -83,9 +92,19 @@ struct _GwyToolProfile {
     GtkWidget *interpolation;
     GtkWidget *separate;
     GtkWidget *apply;
+    GtkWidget *menu_display;
+    GtkWidget *callabel;
 
-    GwyCalibration *calibration;
-    GwyCalData *caldata;
+    GwyDataField *xerr;
+    GwyDataField *yerr;
+    GwyDataField *zerr;
+
+    GwyDataField *xunc;
+    GwyDataField *yunc;
+    GwyDataField *zunc;
+
+    gboolean has_calibration;
+    GwyCCDisplayType display_type;
 
     /* potential class data */
     GwySIValueFormat *pixel_format;
@@ -130,6 +149,11 @@ static void   gwy_tool_profile_separate_changed     (GtkToggleButton *check,
 static void   gwy_tool_profile_interpolation_changed(GtkComboBox *combo,
                                                      GwyToolProfile *tool);
 static void   gwy_tool_profile_apply                (GwyToolProfile *tool);
+static GtkWidget*   menu_display           (GCallback callback,
+                                            gpointer cbdata,
+                                            GwyCCDisplayType current);
+static void         display_changed        (GtkComboBox *combo,
+                                            GwyToolProfile *tool);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
@@ -282,7 +306,7 @@ gwy_tool_profile_init_dialog(GwyToolProfile *tool)
     GtkTreeViewColumn *column;
     GtkCellRenderer *renderer;
     GtkDialog *dialog;
-    GtkWidget *scwin, *label, *hbox, *vbox, *hbox2;
+    GtkWidget *scwin, *label, *hbox, *vbox, *hbox2, *hbox3;
     GtkTable *table;
     GwyNullStore *store;
     guint i, row;
@@ -397,6 +421,23 @@ gwy_tool_profile_init_dialog(GwyToolProfile *tool)
     gtk_box_pack_end(GTK_BOX(hbox2), tool->interpolation, FALSE, FALSE, 0);
     row++;
 
+    hbox3 = gtk_hbox_new(FALSE, 6);
+    gtk_table_attach(table, hbox3,
+                     0, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    tool->callabel = gtk_label_new_with_mnemonic(_("_Calibration data:"));
+    gtk_misc_set_alignment(GTK_MISC(tool->callabel), 0.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox3), tool->callabel, FALSE, FALSE, 0);
+
+    tool->display_type = 0;
+    tool->menu_display = menu_display(G_CALLBACK(display_changed),
+                                      tool,
+                                      tool->display_type);
+
+    gtk_label_set_mnemonic_widget(GTK_LABEL(tool->callabel), tool->menu_display);
+    gtk_box_pack_end(GTK_BOX(hbox3), tool->menu_display, FALSE, FALSE, 0);
+    row++;
+
+
     tool->gmodel = gwy_graph_model_new();
     g_object_set(tool->gmodel, "title", _("Profiles"), NULL);
 
@@ -421,7 +462,12 @@ gwy_tool_profile_data_switched(GwyTool *gwytool,
     GwyPlainTool *plain_tool;
     GwyToolProfile *tool;
     gboolean ignore;
-    gchar key[24];
+    gchar xekey[24];
+    gchar yekey[24];
+    gchar zekey[24];
+    gchar xukey[24];
+    gchar yukey[24];
+    gchar zukey[24];
 
     plain_tool = GWY_PLAIN_TOOL(gwytool);
     ignore = (data_view == plain_tool->data_view);
@@ -443,15 +489,33 @@ gwy_tool_profile_data_switched(GwyTool *gwytool,
         gwy_selection_set_max_objects(plain_tool->selection, NLINES);
     }
 
-    printf("data swithced\n");
-    g_snprintf(key, sizeof(key), "/%d/cal_xerr", plain_tool->id); 
-    printf("key: %s\n", key);
-    if (gwy_container_gis_object_by_name(plain_tool->container, key, tool->calibration))
-         printf("calibration found\n");
-    else printf("no calibration found\n");
+    g_snprintf(xekey, sizeof(xekey), "/%d/cal_xerr", plain_tool->id);
+    g_snprintf(yekey, sizeof(yekey), "/%d/cal_yerr", plain_tool->id);
+    g_snprintf(zekey, sizeof(zekey), "/%d/cal_zerr", plain_tool->id);
+    g_snprintf(xukey, sizeof(xukey), "/%d/cal_xunc", plain_tool->id);
+    g_snprintf(yukey, sizeof(yukey), "/%d/cal_yunc", plain_tool->id);
+    g_snprintf(zukey, sizeof(zukey), "/%d/cal_zunc", plain_tool->id);
+
+    if (gwy_container_gis_object_by_name(plain_tool->container, xekey, &(tool->xerr))
+        && gwy_container_gis_object_by_name(plain_tool->container, yekey, &(tool->yerr))
+        && gwy_container_gis_object_by_name(plain_tool->container, zekey, &(tool->zerr))
+        && gwy_container_gis_object_by_name(plain_tool->container, xukey, &(tool->xunc))
+        && gwy_container_gis_object_by_name(plain_tool->container, yukey, &(tool->yunc))
+        && gwy_container_gis_object_by_name(plain_tool->container, zukey, &(tool->zunc)))
+    {
+        printf("Data have calibration\n");
+        tool->has_calibration = TRUE;
+        gtk_widget_show(tool->menu_display);
+        gtk_widget_show(tool->callabel);
+    } else {
+        printf("Data don't have calibration\n");
+        gtk_widget_hide(tool->menu_display);
+        gtk_widget_hide(tool->callabel);
+    }
 
     gwy_graph_model_remove_all_curves(tool->gmodel);
     gwy_tool_profile_update_all_curves(tool);
+
 }
 
 static void
@@ -737,6 +801,32 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
                                              TRUE);
         g_object_unref(gmodel);
     }
+}
+
+static GtkWidget*
+menu_display(GCallback callback, gpointer cbdata,
+             GwyCCDisplayType current)
+{
+    static const GwyEnum entries[] = {
+        { N_("None"),        GWY_CC_DISPLAY_NONE,      },
+        { N_("X correction"),   GWY_CC_DISPLAY_X_CORR, },
+        { N_("Y correction"),   GWY_CC_DISPLAY_Y_CORR, },
+        { N_("Z correction"),   GWY_CC_DISPLAY_Z_CORR, },
+        { N_("X uncertainty"),  GWY_CC_DISPLAY_X_UNC,  },
+        { N_("Y uncertainty"),  GWY_CC_DISPLAY_Y_UNC,  },
+        { N_("Z uncertainty"),  GWY_CC_DISPLAY_Z_UNC,  },
+
+    };
+    return gwy_enum_combo_box_new(entries, G_N_ELEMENTS(entries),
+                                  callback, cbdata, current, TRUE);
+}
+
+static void
+display_changed(GtkComboBox *combo, GwyToolProfile *tool)
+{
+    tool->display_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(tool->menu_display));
+    printf("Display type changed\n");
+
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
