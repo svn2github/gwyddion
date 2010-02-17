@@ -181,6 +181,17 @@ gwy_selection_assign_impl(GwySerializable *destination,
     gwy_array_set_data(dest, gwy_array_get_data(src), gwy_array_size(src));
 }
 
+/**
+ * gwy_selection_shape_size:
+ * @selection: A group of shapes selected on data.
+ *
+ * Obtains the number of floating point values representing one object or shape
+ * of the selection.
+ *
+ * This value is the same for all selections of a specific type.
+ *
+ * Returns: The number of values a single shape takes.
+ **/
 guint
 gwy_selection_shape_size(GwySelection *selection)
 {
@@ -189,6 +200,12 @@ gwy_selection_shape_size(GwySelection *selection)
     return klass->shape_size;
 }
 
+/**
+ * gwy_selection_clear:
+ * @selection: A group of shapes selected on data.
+ *
+ * Removes all objects in a selection.
+ **/
 void
 gwy_selection_clear(GwySelection *selection)
 {
@@ -197,6 +214,20 @@ gwy_selection_clear(GwySelection *selection)
     gwy_array_delete(array, 0, gwy_array_size(array));
 }
 
+/**
+ * gwy_selection_get:
+ * @selection: A group of shapes selected on data.
+ * @i: Object index.
+ * @data: Array of length at least gwy_selection_shape_size() to store the
+ *        data to.
+ *
+ * Obtains the data of a single selection object.
+ *
+ * The interpretation of the data depends on the selection type.
+ *
+ * Returns: %TRUE if there is an @i-th object and @data filled with values.
+ *          %FALSE if these is no such object and @data was left untouched.
+ **/
 gboolean
 gwy_selection_get(GwySelection *selection,
                   guint i,
@@ -212,15 +243,42 @@ gwy_selection_get(GwySelection *selection,
     return item != NULL;
 }
 
+/**
+ * gwy_selection_set:
+ * @selection: A group of shapes selected on data.
+ * @i: Object index.  It must correspond to an existing selection object or
+ *     it can point after the end of the selection.  In the second case the
+ *     object will be appended to the end.
+ * @data: Data of a single selection object size in an array of size 
+ *        gwy_selection_shape_size().
+ *
+ * Sets the data of a single selection object.
+ **/
 void
 gwy_selection_set(GwySelection *selection,
                   guint i,
                   const gdouble *data)
 {
     g_return_if_fail(GWY_IS_SELECTION(selection));
-    gwy_array_replace1(GWY_ARRAY(selection), i, data);
+    GwyArray *array = GWY_ARRAY(selection);
+    guint n = gwy_array_size(array);
+    if (i < n)
+        gwy_array_replace1(GWY_ARRAY(selection), i, data);
+    else if (i == n)
+        gwy_array_append1(GWY_ARRAY(selection), data);
+    else {
+        g_critical("Selection object index %u is beyond the end of the data.");
+        gwy_array_append1(GWY_ARRAY(selection), data);
+    }
 }
 
+/**
+ * gwy_selection_delete:
+ * @selection: A group of shapes selected on data.
+ * @i: Object index.
+ *
+ * Deletes a signle selection object.
+ **/
 void
 gwy_selection_delete(GwySelection *selection,
                      guint i)
@@ -229,6 +287,12 @@ gwy_selection_delete(GwySelection *selection,
     gwy_array_delete1(GWY_ARRAY(selection), i);
 }
 
+/**
+ * gwy_selection_size:
+ * @selection: A group of shapes selected on data.
+ *
+ * Obtains the number of objects in a selection.
+ **/
 guint
 gwy_selection_size(GwySelection *selection)
 {
@@ -236,6 +300,14 @@ gwy_selection_size(GwySelection *selection)
     return gwy_array_size(GWY_ARRAY(selection));
 }
 
+/**
+ * gwy_selection_get_data:
+ * @selection: A group of shapes selected on data.
+ * @data: Array of sufficient length to to store the complete selection data
+ *        to.
+ *
+ * Obtains the data of an entire selection.
+ **/
 void
 gwy_selection_get_data(GwySelection *selection,
                        gdouble *data)
@@ -250,6 +322,16 @@ gwy_selection_get_data(GwySelection *selection,
     ASSIGN(data, array_data, size*shape_size);
 }
 
+/**
+ * gwy_selection_set_data:
+ * @selection: A group of shapes selected on data.
+ * @n: New selection size (number of objects in @data).
+ * @data: New selection data.
+ *
+ * Sets the data of an entire selection.
+ *
+ * Note this can emit lots of signals, see gwy_array_set_data().
+ **/
 void
 gwy_selection_set_data(GwySelection *selection,
                        guint n,
@@ -260,6 +342,15 @@ gwy_selection_set_data(GwySelection *selection,
     gwy_array_set_data(GWY_ARRAY(selection), data, n);
 }
 
+/**
+ * gwy_selection_filter:
+ * @selection: A group of shapes selected on data.
+ * @filter: Function returning %TRUE for objects that should be kept, %FALSE
+ *          for objects that should be deleted.
+ * @user_data: Data passed to @filter;
+ *
+ * Deletes selection objects matching certain criteria.
+ **/
 void
 gwy_selection_filter(GwySelection *selection,
                      GwySelectionFilterFunc filter,
@@ -267,14 +358,12 @@ gwy_selection_filter(GwySelection *selection,
 {
 }
 
-void
-gwy_selection_changed(GwySelection *selection,
-                      guint i)
-{
-    g_return_if_fail(GWY_IS_SELECTION(selection));
-    gwy_array_updated(GWY_ARRAY(selection), i);
-}
-
+/**
+ * gwy_selection_finished:
+ * @selection: A group of shapes selected on data.
+ *
+ * Emits signal ::finished on a selection.
+ **/
 void
 gwy_selection_finished(GwySelection *selection)
 {
@@ -289,6 +378,19 @@ gwy_selection_finished(GwySelection *selection)
  * SECTION: selection
  * @title: GwySelection
  * @short_description: Base class for shapes selected on data
+ *
+ * Selections are groups of objects or shapes selected on data.  Each object
+ * is represented by a fixed-size (for a specific selection type) chunk of
+ * floating point values, i.e. coordinates and/or dimensions, that describe the
+ * shape.  The meaning of these values differs among individual selection
+ * types.  #GwySelection methods perform common operations that do not require
+ * the knowledge of the data interpretation.
+ *
+ * #GwySelection is a subclass of #GwyArray which offers a wider range of
+ * data managing methods that you can freely use.  The #GwySelection methods
+ * are somewhat more type-safe as they have #gdouble* arguments and they ensure
+ * GwyArray::item-updated is emitted when necessary while you might need to do
+ * this manually with #GwyArrays if you modify the data directly.
  **/
 
 /**
@@ -325,6 +427,18 @@ gwy_selection_finished(GwySelection *selection)
  * Copies the value of a group of shapes selected on data.
  *
  * This is a convenience wrapper of gwy_serializable_assign().
+ **/
+
+/**
+ * GwySelectionFilterFunc:
+ * @selection: A group of shapes selected on data.
+ * @i: Index of the selection object to consider.
+ * @user_data: User data passed to gwy_selection_filter().
+ *
+ * Type of selection filtering function.
+ *
+ * Returns: %TRUE for objects that should be kept, %FALSE for objects that
+ *          should be removed.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

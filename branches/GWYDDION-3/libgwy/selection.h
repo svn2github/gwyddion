@@ -88,8 +88,6 @@ void     gwy_selection_set_data   (GwySelection *selection,
 void     gwy_selection_filter     (GwySelection *selection,
                                    GwySelectionFilterFunc filter,
                                    gpointer user_data);
-void     gwy_selection_changed    (GwySelection *selection,
-                                   guint i);
 void     gwy_selection_finished   (GwySelection *selection);
 
 G_END_DECLS
