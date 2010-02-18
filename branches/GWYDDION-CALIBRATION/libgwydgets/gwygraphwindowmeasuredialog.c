@@ -136,6 +136,14 @@ value_label(GtkWidget *label, gdouble value, gint precision, GString *str)
     gtk_label_set_text(GTK_LABEL(label), str->str);
 }
 
+static void
+value_label_unc(GtkWidget *label, gdouble value, gdouble unc, gint precision, GString *str)
+{
+    g_string_printf(str, "%.*f±%.*f", precision, value, precision, unc);
+    gtk_label_set_text(GTK_LABEL(label), str->str);
+}
+
+
 static GtkWidget *
 header_label(GtkWidget *table, gint row, gint col,
             const gchar *header, const gchar *unit,
@@ -225,6 +233,7 @@ selection_updated_cb(GwySelection *selection,
     gdouble xmin, xmax, xrange, xresolution;
     gdouble ymin, ymax, yrange, yresolution;
     guint width, height;
+    gboolean is_calibration;
 
     graph = GWY_GRAPH(dialog->graph);
     gmodel = GWY_GRAPH_MODEL(gwy_graph_get_model(graph));
@@ -258,8 +267,10 @@ selection_updated_cb(GwySelection *selection,
                        gwy_graph_model_get_curve(gmodel, dialog->curve_index - 1))==NULL)
     {
         printf("No calibration data\n");
+        is_calibration = FALSE;
     } else {
         printf("Yes!!!!!!!!!!!!\n");
+        is_calibration = TRUE;
     }
 
     /* set up some nice formatting for the values */
@@ -323,14 +334,22 @@ selection_updated_cb(GwySelection *selection,
                 continue;
 
             label = g_ptr_array_index(dialog->distx, i);
-            value_label(label, (x - xp)/xformat->magnitude,
+            if (is_calibration) value_label_unc(label, (x - xp)/xformat->magnitude,
+                                            (x - xp)/xformat->magnitude/5,
+                                            xformat->precision, str);
+            else value_label(label, (x - xp)/xformat->magnitude,
                         xformat->precision, str);
 
 
             label = g_ptr_array_index(dialog->disty, i);
-            if (ret && prevret)
+            if (ret && prevret) {
+                if (is_calibration) value_label_unc(label, (y - yp)/yformat->magnitude,
+                                                    (y - yp)/yformat->magnitude/5,
+                                                    yformat->precision, str);
+                else
                 value_label(label, (y - yp)/yformat->magnitude,
                             yformat->precision, str);
+            }
             else
                 gtk_label_set_text(GTK_LABEL(label), NULL);
 
