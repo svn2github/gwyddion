@@ -1012,47 +1012,13 @@ gwy_tool_profile_interpolation_changed(GtkComboBox *combo,
     gwy_tool_profile_update_all_curves(tool);
 }
 
-void 
-add_calibration_profiles(GwyToolProfile *tool,
-                         GwyContainer *data, gint i, gint id)
-{
-    GwyGraphCurveModel *gcmodel;
-    gchar key[24];
-
-    if (!tool->has_calibration) return;
-
-    printf("adding calibration profiles to container\n");
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_xerr", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+1);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_yerr", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+2);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_zerr", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+3);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_xunc", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+4);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_yunc", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+5);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-
-    g_snprintf(key, sizeof(key), "/%d/gcal_zunc", id);
-    gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+6);
-    gwy_container_set_object_by_name(data, key, gcmodel);
-}
 
 static void
 gwy_tool_profile_apply(GwyToolProfile *tool)
 {
     GwyPlainTool *plain_tool;
-    GwyGraphCurveModel *gcmodel;
+    GwyGraphCurveModel *gcmodel, *ccmodel;
+    GwyCurveCalibrationData *ccdata;
     GwyGraphModel *gmodel;
     gchar *s;
     gint i, n;
@@ -1082,6 +1048,28 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
         g_object_set(gmodel, "label-visible", TRUE, NULL);
         gcmodel = gwy_graph_model_get_curve(tool->gmodel, i);
         gcmodel = gwy_graph_curve_model_duplicate(gcmodel);
+
+        /*add calibration data to the curve*/
+        if (tool->has_calibration) 
+        {
+            ccdata = (GwyCurveCalibrationData *)g_malloc(sizeof(GwyCurveCalibrationData));
+
+            ccdata->xerr = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+1)),
+                                            gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+            ccdata->yerr = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+2)),
+                                            gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+            ccdata->zerr = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+3)),
+                                           gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+            ccdata->xunc = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+4)),
+                                            gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+            ccdata->yunc = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+5)),
+                                            gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+            ccdata->zunc = g_memdup(gwy_graph_curve_model_get_ydata(gwy_graph_model_get_curve(tool->gmodel, i+6)),
+                                            gwy_graph_curve_model_get_ndata(gcmodel)*sizeof(gdouble));
+  
+            gwy_graph_curve_model_set_calibration_data(gcmodel, ccdata);
+        }
+
         gwy_graph_model_add_curve(gmodel, gcmodel);
         g_object_unref(gcmodel);
         g_object_get(gcmodel, "description", &s, NULL);
@@ -1091,8 +1079,6 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
                                              TRUE);
         g_object_unref(gmodel);
    
-        add_calibration_profiles(tool,
-                        plain_tool->container, i/multpos, id);
 
         if (tool->args.export && tool->display_type>0) {
             printf("Exporting calibration curve as graph as well\n");
