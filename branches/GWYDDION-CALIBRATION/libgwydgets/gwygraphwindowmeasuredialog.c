@@ -266,10 +266,8 @@ selection_updated_cb(GwySelection *selection,
     if (gwy_graph_curve_model_get_calibration_data(
                        gwy_graph_model_get_curve(gmodel, dialog->curve_index - 1))==NULL)
     {
-        printf("No calibration data\n");
         is_calibration = FALSE;
     } else {
-        printf("Yes!!!!!!!!!!!!\n");
         is_calibration = TRUE;
     }
 
@@ -356,6 +354,10 @@ selection_updated_cb(GwySelection *selection,
             label = g_ptr_array_index(dialog->slope, i);
             if (ret && prevret) {
                 if (gwy_si_unit_equal (xunit, yunit))
+                    if (is_calibration) value_label_unc(label, 180.0/G_PI*atan2((y - yp), (x - xp)),
+                                            180.0/G_PI*atan2((y - yp), (x - xp))/5,
+                                            xformat->precision, str);
+                    else
                     value_label(label, 180.0/G_PI*atan2((y - yp), (x - xp)),
                             2, str);
                 else
