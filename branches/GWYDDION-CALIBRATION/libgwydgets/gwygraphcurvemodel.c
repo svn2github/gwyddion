@@ -316,6 +316,8 @@ gwy_graph_curve_model_init(GwyGraphCurveModel *gcmodel)
 
     gcmodel->line_style = GDK_LINE_SOLID;
     gcmodel->line_width = 1;
+
+    gcmodel->calibration = NULL;
 }
 
 /**
@@ -957,6 +959,30 @@ gwy_graph_curve_model_data_changed(GwyGraphCurveModel *gcmodel)
     gcmodel->cached = 0;
     g_signal_emit(gcmodel, graph_curve_model_signals[DATA_CHANGED], 0);
 }
+
+GwyCurveCalibrationData *
+gwy_graph_curve_model_get_calibration_data(GwyGraphCurveModel *gcmodel)
+{
+    return gcmodel->calibration;
+}
+
+void 
+gwy_graph_curve_model_set_calibration_data(GwyGraphCurveModel *gcmodel,
+                                           GwyCurveCalibrationData *calibration)
+{
+    if (gcmodel->calibration)
+    {
+        g_free(gcmodel->calibration->xerr);
+        g_free(gcmodel->calibration->yerr);
+        g_free(gcmodel->calibration->zerr);
+        g_free(gcmodel->calibration->xunc);
+        g_free(gcmodel->calibration->yunc);
+        g_free(gcmodel->calibration->zunc);
+    }
+    gcmodel->calibration = calibration;
+}
+
+
 
 /************************** Documentation ****************************/
 

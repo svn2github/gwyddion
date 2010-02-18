@@ -254,6 +254,14 @@ selection_updated_cb(GwySelection *selection,
     yaxis = gwy_graph_get_axis(graph, GTK_POS_LEFT);
     yunit = gwy_si_unit_new(gwy_axis_get_magnification_string(yaxis));
 
+    if (gwy_graph_curve_model_get_calibration_data(
+                       gwy_graph_model_get_curve(gmodel, dialog->curve_index - 1))==NULL)
+    {
+        printf("No calibration data\n");
+    } else {
+        printf("Yes!!!!!!!!!!!!\n");
+    }
+
     /* set up some nice formatting for the values */
     gtk_layout_get_size(GTK_LAYOUT(garea), &width, &height);
     gwy_graph_model_get_x_range(gmodel, &xmin, &xmax);
@@ -272,6 +280,7 @@ selection_updated_cb(GwySelection *selection,
                                                      yrange,
                                                      yresolution/6,
                                                      NULL);
+
 
     /* set up header labels */
     header_label_update(GTK_LABEL(dialog->header_x), "X",

@@ -34,6 +34,14 @@ G_BEGIN_DECLS
 #define GWY_IS_GRAPH_CURVE_MODEL_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), GWY_TYPE_GRAPH_CURVE_MODEL))
 #define GWY_GRAPH_CURVE_MODEL_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_GRAPH_CURVE_MODEL, GwyGraphCurveModelClass))
 
+typedef struct {
+    gdouble *xerr;
+    gdouble *yerr;
+    gdouble *zerr;
+    gdouble *xunc;
+    gdouble *yunc;
+    gdouble *zunc;
+} GwyCurveCalibrationData;
 
 typedef struct _GwyGraphCurveModel GwyGraphCurveModel;
 typedef struct _GwyGraphCurveModelClass GwyGraphCurveModelClass;
@@ -69,7 +77,7 @@ struct _GwyGraphCurveModel {
     gint int3;
     gint int4;
     gdouble *cache2;
-    gpointer reserved2;
+    GwyCurveCalibrationData *calibration;
     gpointer reserved3;
     gpointer reserved4;
 };
@@ -114,6 +122,11 @@ gboolean       gwy_graph_curve_model_get_ranges(GwyGraphCurveModel *gcmodel,
                                                 gdouble *x_max,
                                                 gdouble *y_min,
                                                 gdouble *y_max);
+
+GwyCurveCalibrationData *gwy_graph_curve_model_get_calibration_data(GwyGraphCurveModel *gcmodel);
+
+void gwy_graph_curve_model_set_calibration_data(GwyGraphCurveModel *gcmodel, 
+                                                GwyCurveCalibrationData *calibration);
 
 G_END_DECLS
 
