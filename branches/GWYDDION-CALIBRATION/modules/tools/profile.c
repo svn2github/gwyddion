@@ -724,21 +724,6 @@ gwy_tool_profile_update_curve(GwyToolProfile *tool,
                                             tool->args.interpolation);
 
     if (tool->has_calibration) {
-        //FIXME move this to creation of fields in different module !!!
-        gwy_data_field_set_xreal(tool->xerr, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->xerr, gwy_data_field_get_yreal(plain_tool->data_field));
-        gwy_data_field_set_xreal(tool->yerr, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->yerr, gwy_data_field_get_yreal(plain_tool->data_field));
-        gwy_data_field_set_xreal(tool->zerr, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->zerr, gwy_data_field_get_yreal(plain_tool->data_field));
-        gwy_data_field_set_xreal(tool->xunc, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->xunc, gwy_data_field_get_yreal(plain_tool->data_field));
-        gwy_data_field_set_xreal(tool->yunc, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->yunc, gwy_data_field_get_yreal(plain_tool->data_field));
-        gwy_data_field_set_xreal(tool->zunc, gwy_data_field_get_xreal(plain_tool->data_field));
-        gwy_data_field_set_yreal(tool->zunc, gwy_data_field_get_yreal(plain_tool->data_field));
-            //end of fix
-
         tool->line_xerr = gwy_data_field_get_profile(tool->xerr, tool->line_xerr,
                                                 xl1*calxratio, yl1*calyratio, xl2*calxratio, yl2*calyratio,
                                                 lineres,

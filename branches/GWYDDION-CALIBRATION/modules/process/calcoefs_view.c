@@ -268,7 +268,10 @@ cc_view_dialog(CCViewArgs *args,
                        FALSE, FALSE, 4);
 
     controls.actual_field = dfield; 
-    controls.view_field = gwy_data_field_new(200, 200, 100, 100, TRUE);
+    controls.view_field = gwy_data_field_new(200, 200, 
+                                             gwy_data_field_get_xreal(dfield), 
+                                             gwy_data_field_get_yreal(dfield), 
+                                             TRUE);
     controls.xerr = gwy_data_field_new_alike(controls.view_field, TRUE);
     controls.yerr = gwy_data_field_new_alike(controls.view_field, TRUE);
     controls.zerr = gwy_data_field_new_alike(controls.view_field, TRUE);
