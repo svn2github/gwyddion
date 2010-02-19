@@ -251,6 +251,7 @@ get_unix_module_directory(void)
 
         g_strstrip(p);
         path = g_path_get_dirname(p);
+        break;
     }
 
     g_free(buffer);
