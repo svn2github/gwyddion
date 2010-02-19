@@ -24,6 +24,7 @@
 #include <libdraw/gwyrgba.h>
 #include <libgwydgets/gwydgetenums.h>
 #include <libprocess/dataline.h>
+#include <libprocess/gwycaldata.h>
 
 G_BEGIN_DECLS
 
@@ -34,14 +35,6 @@ G_BEGIN_DECLS
 #define GWY_IS_GRAPH_CURVE_MODEL_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE((klass), GWY_TYPE_GRAPH_CURVE_MODEL))
 #define GWY_GRAPH_CURVE_MODEL_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_GRAPH_CURVE_MODEL, GwyGraphCurveModelClass))
 
-typedef struct {
-    gdouble *xerr;
-    gdouble *yerr;
-    gdouble *zerr;
-    gdouble *xunc;
-    gdouble *yunc;
-    gdouble *zunc;
-} GwyCurveCalibrationData;
 
 typedef struct _GwyGraphCurveModel GwyGraphCurveModel;
 typedef struct _GwyGraphCurveModelClass GwyGraphCurveModelClass;
