@@ -21,6 +21,8 @@
 /* XXX: The purpose of this file is to contain all ugliness from the rest of
  * source files.  And indeed it has managed to gather lots of it. */
 
+#include <stdio.h>
+
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
@@ -1669,7 +1671,7 @@ gwy_app_data_browser_channel_render_flags(G_GNUC_UNUSED GtkTreeViewColumn *colum
                                           gpointer userdata)
 {
     GwyAppDataBrowser *browser = (GwyAppDataBrowser*)userdata;
-    gboolean has_mask, has_show;
+    gboolean has_mask, has_show, has_cal;
     GwyContainer *data;
     gchar key[24];
     gint channel;
@@ -1682,10 +1684,14 @@ gwy_app_data_browser_channel_render_flags(G_GNUC_UNUSED GtkTreeViewColumn *colum
     has_mask = gwy_container_contains_by_name(data, key);
     g_snprintf(key, sizeof(key), "/%d/show", channel);
     has_show = gwy_container_contains_by_name(data, key);
+    g_snprintf(key, sizeof(key), "/%d/cal_zunc", channel); //FIXME, all the fields should be present
+    has_cal = gwy_container_contains_by_name(data, key);
 
-    g_snprintf(key, sizeof(key), "%s%s",
+
+    g_snprintf(key, sizeof(key), "%s%s%s",
                has_mask ? "M" : "",
-               has_show ? "P" : "");
+               has_show ? "P" : "",
+               has_cal ? "C" : "");
 
     g_object_set(renderer, "text", key, NULL);
 }
