@@ -35,6 +35,17 @@ G_BEGIN_DECLS
 #define GWY_IS_CALDATA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), GWY_TYPE_CALDATA))
 #define GWY_CALDATA_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), GWY_TYPE_CALDATA, GwyCalDataClass))
 
+typedef struct {
+    gdouble *xerr;
+    gdouble *yerr;
+    gdouble *zerr;
+    gdouble *xunc;
+    gdouble *yunc;
+    gdouble *zunc;
+    gint n;
+} GwyCurveCalibrationData;
+
+
 typedef struct _GwyCalData      GwyCalData;
 typedef struct _GwyCalDataClass GwyCalDataClass;
 
