@@ -29,6 +29,7 @@
 #include <libgwymodule/gwymodule-tool.h>
 #include <libprocess/datafield.h>
 #include <libprocess/stats.h>
+#include <libprocess/stats_uncertainty.h>
 #include <libgwydgets/gwystock.h>
 #include <libgwydgets/gwyradiobuttons.h>
 #include <libgwydgets/gwydgetutils.h>
@@ -65,6 +66,19 @@ typedef struct {
     /* These two are in degrees as we use need only for the user. */
     gdouble theta;
     gdouble phi;
+
+    gdouble uavg;
+    gdouble umin;
+    gdouble umax;
+    gdouble umedian;
+    gdouble ura;
+    gdouble urms;
+    gdouble uskew;
+    gdouble ukurtosis;
+    gdouble uarea;
+    gdouble uprojarea;
+    gdouble utheta;
+    gdouble uphi;
 } ToolResults;
 
 typedef struct {
@@ -594,17 +608,17 @@ gwy_tool_stats_update_labels(GwyToolStats *tool)
         return;
 
     if (tool->has_calibration) {
-        update_label_unc(plain_tool->value_format, tool->ra, tool->results.ra, 0);
-        update_label_unc(plain_tool->value_format, tool->rms, tool->results.rms, 0);
-        g_snprintf(buffer, sizeof(buffer), "%2.3g", tool->results.skew);
+        update_label_unc(plain_tool->value_format, tool->ra, tool->results.ra, tool->results.ura);
+        update_label_unc(plain_tool->value_format, tool->rms, tool->results.rms, tool->results.urms);
+        g_snprintf(buffer, sizeof(buffer), "%2.3g±%2.3g", tool->results.skew, tool->results.uskew);
         gtk_label_set_text(GTK_LABEL(tool->skew), buffer);
-        g_snprintf(buffer, sizeof(buffer), "%2.3g", tool->results.kurtosis);
+        g_snprintf(buffer, sizeof(buffer), "%2.3g±%2.3g", tool->results.kurtosis, tool->results.ukurtosis);
         gtk_label_set_text(GTK_LABEL(tool->kurtosis), buffer);
-        update_label_unc(plain_tool->value_format, tool->avg, tool->results.avg, 0);
-        update_label_unc(plain_tool->value_format, tool->min, tool->results.min, 0);
-        update_label_unc(plain_tool->value_format, tool->max, tool->results.max, 0);
-        update_label_unc(plain_tool->value_format, tool->median, tool->results.median, 0);
-        update_label_unc(tool->area_format, tool->projarea, tool->results.projarea, 0);
+        update_label_unc(plain_tool->value_format, tool->avg, tool->results.avg, tool->results.uavg);
+        update_label_unc(plain_tool->value_format, tool->min, tool->results.min, tool->results.umin);
+        update_label_unc(plain_tool->value_format, tool->max, tool->results.max, tool->results.umax);
+        update_label_unc(plain_tool->value_format, tool->median, tool->results.median, tool->results.umedian);
+        update_label(tool->area_format, tool->projarea, tool->results.projarea);
     } else {
         update_label(plain_tool->value_format, tool->ra, tool->results.ra);
         update_label(plain_tool->value_format, tool->rms, tool->results.rms);
@@ -726,6 +740,24 @@ gwy_tool_stats_calculate(GwyToolStats *tool)
                                             &tool->results.phi);
         tool->results.theta *= 180.0/G_PI;
         tool->results.phi *= 180.0/G_PI;
+    }
+    if (tool->has_calibration) {
+        gwy_data_field_area_get_stats_uncertainties_mask(plain_tool->data_field, tool->zunc, mask, masking,
+                                           isel[0], isel[1], w, h,
+                                           &tool->results.uavg,
+                                           &tool->results.ura,
+                                           &tool->results.urms,
+                                           &tool->results.uskew,
+                                           &tool->results.ukurtosis);
+        gwy_data_field_area_get_min_max_uncertainty_mask(plain_tool->data_field, tool->zunc, mask, masking,
+                                             isel[0], isel[1], w, h,
+                                             &tool->results.umin,
+                                             &tool->results.umax);
+        tool->results.umedian
+            = gwy_data_field_area_get_median_uncertainty_mask(plain_tool->data_field, tool->zunc,
+                                                  mask, masking,
+                                                  isel[0], isel[1], w, h);
+
     }
 
     memcpy(tool->results.isel, isel, sizeof(isel));
