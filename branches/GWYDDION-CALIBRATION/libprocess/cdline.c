@@ -344,17 +344,17 @@ cd_stepheight(const gdouble *x,
         for (i = 0; i < n_dat; i++) {
             if ((i < (imax - iwidth/3) && i > (imax - iwidth))    /* /3 */
                 || (i > (imin + iwidth/3) && i < (imin + iwidth))) {       /* /3 */
-                err[1] += (y[i]-param[1])*(y[i]-param[1])/cdata->zunc[i]/cdata->zunc[i];
+                err[1] += cdata->zunc[i]*cdata->zunc[i];
                 na++;
             } 
             else if (i>(imax + iwidth/3) && i<=(imin - iwidth/3))
             {
-                err[2] += (y[i]-param[2])*(y[i]-param[2])/cdata->zunc[i]/cdata->zunc[i];
+                err[2] += cdata->zunc[i]*cdata->zunc[i];
                 nb++;
             }
         }
-        err[1] = sqrt(1/suma * 1/(na-1)*err[1]);
-        err[2] = sqrt(1/sumb * 1/(nb-1)*err[2]);
+        err[1] = sqrt(err[1]/na);
+        err[2] = sqrt(err[2]/nb);
         err[3] = cdata->xunc[imax];
         err[4] = cdata->xunc[imin];
     }

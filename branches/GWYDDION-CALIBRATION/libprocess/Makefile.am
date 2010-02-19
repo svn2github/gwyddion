@@ -39,6 +39,7 @@ libgwyprocess2include_HEADERS = \
 	simplefft.h \
 	spectra.h \
 	stats.h \
+        stats_uncertainty.h \
 	tip.h \
 	triangulation.h
 
@@ -110,6 +111,7 @@ libgwyprocess2_la_SOURCES = \
 	simplefft.c \
 	spectra.c \
 	stats.c \
+        stats_uncertainty.c \
 	tip.c \
 	triangulation.c
 
