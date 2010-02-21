@@ -349,6 +349,7 @@ cd_stepheight(const gdouble *x,
             } 
             else if (i>(imax + iwidth/3) && i<=(imin - iwidth/3))
             {
+                printf("%g\n", cdata->zunc[i]);
                 err[2] += cdata->zunc[i]*cdata->zunc[i];
                 nb++;
             }

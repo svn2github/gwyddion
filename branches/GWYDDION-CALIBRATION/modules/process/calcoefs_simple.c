@@ -263,7 +263,7 @@ get_object_list(GwyDataField *data, GwyDataField *kernel, gdouble threshold,
     g_free(maxval);
 
 }
-
+static
 void fill_matrix(gdouble *xs, gdouble *ys, gint n, gint tl, 
                  gdouble xxshift, gdouble xyshift,
                  gdouble yxshift, gdouble yyshift, 
@@ -274,6 +274,8 @@ void fill_matrix(gdouble *xs, gdouble *ys, gint n, gint tl,
     gdouble tly = ys[tl];
     gdouble idxpos, idypos;
     gdouble min, dist;
+
+    printf("shifts: x: %g %g  y: %g %g\n", xxshift, xyshift, yxshift , yyshift);
 
     for (j=0; j<nn; j++)
     {
@@ -301,6 +303,81 @@ void fill_matrix(gdouble *xs, gdouble *ys, gint n, gint tl,
 
 }
 
+static
+void fill_matrixb(gdouble *xs, gdouble *ys, gint n, gint tl, 
+                 gdouble xxshift, gdouble xyshift,
+                 gdouble yxshift, gdouble yyshift, 
+                 GwyDataField *x_matrix, GwyDataField *y_matrix, gint nn)
+{
+    gint i, j, k, ii, jj;
+    gdouble tlx = xs[tl];
+    gdouble tly = ys[tl];
+    gdouble nextmin;
+    gint pos, ppos, next, nypos;
+    gdouble min, dist;
+
+    printf("shifts: x: %g %g  y: %g %g\n", xxshift, xyshift, yxshift , yyshift);
+
+    //pos se meni po xy, nypos je tl s updatovanou y-ovou pozici
+    pos = ppos = nypos = tl;
+
+    for (jj=0; jj<(nn); jj++)
+    {
+        for (ii=0; ii<(nn); ii++)
+        {
+            gwy_data_field_set_val(x_matrix, ii, jj, xs[pos]);
+            gwy_data_field_set_val(y_matrix, ii, jj, ys[pos]);
+            fprintf(stderr, "%d %d %g %g\n", ii, jj, xs[pos], ys[pos]);
+
+            ppos = pos;
+            //find next closest object in x direction
+            nextmin = G_MAXDOUBLE;
+            for (i=0; i<n; i++) {
+                if (i==pos || xs[i]<=xs[pos]) continue; 
+                if (ii>0 && fabs(ys[i]-ys[pos])>(0.5*fabs(xxshift))) {
+                    //printf("too far in y (%d  %g > %g) \n", i, fabs(ys[i]-ys[present]), (0.5*fabs(yshift))); 
+                    continue;
+                }
+                if (((xs[i]-xs[pos]) + (ys[i]-ys[pos])*(ys[i]-ys[pos]))<nextmin) {
+                    nextmin = ((xs[i]-xs[pos]) + (ys[i]-ys[pos])*(ys[i]-ys[pos]));
+                    next = i;
+                }
+            }
+            if (nextmin!=G_MAXDOUBLE) {
+                pos = next;
+        //        fprintf(stderr, "%d %g %g\n", ii, xs[pos], ys[pos]);
+
+            } else {
+                fprintf(stderr, "Errrrroooorrr\n");
+                break; //this should never happend
+            }
+        }
+
+        pos = ppos = nypos;
+        /*find next top left (y step)*/    
+        nextmin = G_MAXDOUBLE;
+        for (i=0; i<n; i++) {
+            if (i==pos || ys[i]<=ys[pos]) continue; 
+            if (jj>0 && fabs(xs[i]-xs[pos])>(0.5*fabs(yyshift))) {
+                //printf("too far in y (%d  %g > %g) \n", i, fabs(ys[i]-ys[present]), (0.5*fabs(yshift))); 
+                continue;
+            }
+            if (((ys[i]-ys[pos]) + (xs[i]-xs[pos])*(xs[i]-xs[pos]))<nextmin) {
+                nextmin = ((ys[i]-ys[pos]) + (xs[i]-xs[pos])*(xs[i]-xs[pos]));
+                next = i;
+            }
+        }
+        if (nextmin!=G_MAXDOUBLE) {
+            pos = nypos = next;
+        //    fprintf(stderr, "%d %g %g\n", jj, xs[pos], ys[pos]);
+        } else {
+            fprintf(stderr, "!!! there was and error\n");
+        }
+
+    }
+}
+
+ 
 gdouble 
 get_prod_grid(GwyDataField *a, GwyDataField *b, gdouble period)
 {
@@ -376,14 +453,15 @@ simple_calibration(GwyDataField *x_orig, GwyDataField *y_orig,
     t0y = gwy_data_field_get_avg(u0y);
     theta0 = get_prod_grid(u0y, u0x, period);
     printf("Original post: ts: %g %g, theta %g\n", t0x, t0y, theta0);
+    printf("period determined for %g\n", period);
 
     //determine simple stage error map
     for (j=0; j<yres; j++)
     {
         for (i=0; i<xres; i++)
         {
-            gwy_data_field_set_val(Gx, i, j, gwy_data_field_get_val(u0x, i, j) - (i+shift)*period - (j+shift)*period);
-            gwy_data_field_set_val(Gy, i, j, gwy_data_field_get_val(u0y, i, j) - (i+shift)*period - (j+shift)*period);
+            gwy_data_field_set_val(Gx, i, j, gwy_data_field_get_val(u0x, i, j) - (i+shift)*period);
+            gwy_data_field_set_val(Gy, i, j, gwy_data_field_get_val(u0y, i, j) - (j+shift)*period);
         }
     } 
 
@@ -392,7 +470,8 @@ simple_calibration(GwyDataField *x_orig, GwyDataField *y_orig,
     {
         for (i=0; i<xres; i++)
         {
-            printf("%g %g    %g %g \n", (i+shift)*period, (j+shift)*period, gwy_data_field_get_val(Gx, i, j), gwy_data_field_get_val(Gy, i, j));
+        //    printf("%g %g    %g %g \n", (i+shift)*period, (j+shift)*period, gwy_data_field_get_val(Gx, i, j), gwy_data_field_get_val(Gy, i, j));
+              printf("%g %g    %g %g \n", (i+shift)*period, (j+shift)*period, gwy_data_field_get_val(u0x, i, j), gwy_data_field_get_val(u0y, i, j));
         }
         printf("\n");
     } 
@@ -407,7 +486,7 @@ simple_do(SimpleArgs *args)
     gdouble *xs, *ys;
     GwyDataField *x_orig, *y_orig;
     gint i, j, newid, ndat, mdat, noriginal, nshifted, nrotated;
-    gdouble xxshift, xyshift, yxshift, yyshift, avxshift, avyshift;
+    gdouble xxshift, xyshift, yxshift, yyshift, avxxshift, avxyshift, avyxshift, avyyshift;
     gdouble xmult, ymult;
     gdouble tlmin, nextmin, boundary;
     gdouble original_tlx, original_tly;
@@ -431,7 +510,9 @@ simple_do(SimpleArgs *args)
     noriginal = 10000;
     xs = (gdouble *)g_malloc(noriginal*sizeof(gdouble));
     ys = (gdouble *)g_malloc(noriginal*sizeof(gdouble));
-    get_object_list(original, detail, 0.472, xs, ys, &noriginal, GWY_CORRELATION_NORMAL); //0.8
+    get_object_list(original, detail, 0.193, xs, ys, &noriginal, GWY_CORRELATION_NORMAL); 
+          //0.335 for 2d100_3, 0.333 for 2d_100_4 0.391 for 2d100_5 a 2d100_1
+          //0.333 for 2d300_10, 0.246 for 2d300_9-6, 0.193 for 2d300_7
     printf("%d object locations in original\n", noriginal);
     /*for (i=0; i<noriginal; i++)
     {
@@ -459,8 +540,8 @@ simple_do(SimpleArgs *args)
     //determine number of objects in x direction and xshift. Discriminate objects at the right edge
     nx = 0;
     boundary = 0;
-    xyshift = avyshift = 0;
-    xxshift = avxshift = 0;
+    xyshift = avxyshift = 0;
+    xxshift = avxxshift = 0;
     do {
         //find next closest object in x direction
         nextmin = G_MAXDOUBLE;
@@ -482,18 +563,20 @@ simple_do(SimpleArgs *args)
             nx++;
             //printf("next object to the left is %g %g, shift %g %g\n", xs[next], ys[next], xxshift, xyshift);
             present = next;
-            avxshift += xxshift;
-            avyshift += xyshift;
+            avxxshift += xxshift;
+            avxyshift += xyshift;
         } else break;
 
     } while (nextmin!=G_MAXDOUBLE);
-    printf("Original: found %d objects in x direction, average shift is %g %g\n", nx+1, avxshift/nx, avyshift/nx);
+    printf("Original: found %d objects in x direction, average shift is %g %g\n", nx+1, avxxshift/nx, avxyshift/nx);
+    avxxshift/=nx;
+    avxyshift/=nx;
    
     present = tl;
     //determine number of objects in x direction and xshift, 
     ny = 0;
-    yyshift = 0;
-    yxshift = 0;
+    yyshift = yxshift = 0;
+    avyyshift = avyxshift = 0;
     do {
         //find next closest object in y direction
         nextmin = G_MAXDOUBLE;
@@ -514,13 +597,17 @@ simple_do(SimpleArgs *args)
             ny++;
             //printf("next object to the bottom is %g %g, shift %g %g\n", xs[next], ys[next], yxshift, yyshift);
             present = next;
-        } else break;
+            avyyshift += yxshift;
+            avyyshift += yyshift;
+         } else break;
 
     } while (nextmin!=G_MAXDOUBLE);
     printf("Original: found %d objects in y direction\n", ny+1);
+    avyyshift/=ny;
+    avyxshift/=ny;
 
     //determine final number of objects, it must be odd and same in both the directions
-    nn = MIN(nx+1, ny+1);
+    nn = MIN(nx, ny) - 1;
 
     printf("I will use matrix of %d x %d calibration points\n", nn, nn);
  
@@ -529,7 +616,9 @@ simple_do(SimpleArgs *args)
     y_orig = gwy_data_field_new_alike(x_orig, TRUE);
 
     //fill matrix of original
-    fill_matrix(xs, ys, noriginal, tl, xxshift, xyshift, yxshift, yyshift, x_orig, y_orig, nn);
+    printf("filling matrix\n");
+    fill_matrixb(xs, ys, noriginal, tl, avxxshift, avxyshift, avyxshift, avyyshift, x_orig, y_orig, nn);
+    printf("filled\n");
 
     //make real coordinates from pixel ones
     xmult = gwy_data_field_get_xreal(original)/gwy_data_field_get_xres(original);
@@ -552,7 +641,8 @@ simple_do(SimpleArgs *args)
 //    } 
 
      /*  - create v0x, v0y field from original image matrix*/
-    period = sqrt(xxshift*xxshift + xyshift*xyshift)*xmult; //FIXME this must be known experimentally
+    period = sqrt(avxxshift*avxxshift + avxyshift*avxyshift)*xmult; //FIXME this must be known experimentally
+    period = 0.3e-6;
     simple_calibration(x_orig, y_orig, period); 
 
     /*
