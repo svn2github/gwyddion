@@ -600,8 +600,8 @@ gwy_linear_fit(GwyLinearFitFunc function,
     guint matrix_len = MATRIX_LEN(nparams);
     gdouble hessian[matrix_len];
     gdouble fval[nparams];
-    gwy_memclear(hessian, matrix_len);
-    gwy_memclear(params, nparams);
+    gwy_clear(hessian, matrix_len);
+    gwy_clear(params, nparams);
     gdouble sumy2 = 0.0;
 
     for (guint i = 0; i < npoints; i++) {

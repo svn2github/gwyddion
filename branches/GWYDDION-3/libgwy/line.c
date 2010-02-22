@@ -844,7 +844,7 @@ void
 gwy_line_clear(GwyLine *line)
 {
     g_return_if_fail(GWY_IS_LINE(line));
-    gwy_memclear(line->data, line->res);
+    gwy_clear(line->data, line->res);
 }
 
 /**
@@ -885,7 +885,7 @@ gwy_line_part_clear(GwyLine *line,
     if (!len)
         return;
 
-    gwy_memclear(line->data + pos, len);
+    gwy_clear(line->data + pos, len);
 }
 
 /**

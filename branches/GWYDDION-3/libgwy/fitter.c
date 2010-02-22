@@ -589,7 +589,7 @@ fitter_invert_hessian(Fitter *fitter)
     ASSIGN(fitter->inv_hessian, fitter->hessian, matrix_len);
     /* Make possible inversion of fitter with naively fixed parameters. */
     gboolean zero[nparam];
-    gwy_memclear(zero, nparam);
+    gwy_clear(zero, nparam);
     for (guint i = 0; i < nparam; i++) {
         if (SLi(fitter->inv_hessian, i, i) == 0.0) {
             SLi(fitter->inv_hessian, i, i) = 1.0;

@@ -1050,11 +1050,11 @@ void
 gwy_field_clear(GwyField *field)
 {
     g_return_if_fail(GWY_IS_FIELD(field));
-    gwy_memclear(field->data, field->xres * field->yres);
+    gwy_clear(field->data, field->xres * field->yres);
     Field *priv = field->priv;
     priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
                     | CBIT(MED) | CBIT(ARF) | CBIT(ART));
-    gwy_memclear(priv->cache, GWY_FIELD_CACHE_SIZE);
+    gwy_clear(priv->cache, GWY_FIELD_CACHE_SIZE);
 }
 
 /**
@@ -1119,7 +1119,7 @@ gwy_field_part_clear(GwyField *field,
 
     gdouble *base = field->data + row*field->xres + col;
     for (guint i = 0; i < height; i++)
-        gwy_memclear(base + i*field->xres, width);
+        gwy_clear(base + i*field->xres, width);
 }
 
 /**

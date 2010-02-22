@@ -1579,8 +1579,8 @@ gwy_expr_resolve_variables(GwyExpr *expr,
 
     GPtrArray *identifiers = priv->identifiers;
     gboolean requested[identifiers->len];
-    gwy_memclear(requested, identifiers->len);
-    gwy_memclear(indices, n);
+    gwy_clear(requested, identifiers->len);
+    gwy_clear(indices, n);
     guint i;
 
     for (i = 0; i < n; i++) {

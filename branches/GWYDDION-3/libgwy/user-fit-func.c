@@ -650,7 +650,7 @@ gwy_user_fit_func_parse(GwyResource *resource,
     GwyFitParam *param = NULL;
     GPtrArray *params = NULL;
 
-    gwy_memclear(&param, 1);
+    gwy_clear(&param, 1);
     for (gchar *line = gwy_str_next_line(&text);
          line;
          line = gwy_str_next_line(&text)) {

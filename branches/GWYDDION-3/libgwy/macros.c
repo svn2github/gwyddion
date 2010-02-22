@@ -146,7 +146,7 @@
  **/
 
 /**
- * gwy_memclear:
+ * gwy_clear:
  * @array: Pointer to an array of values to clear.
  *         This argument may be evaluated several times.
  * @n: Number of items to clear.

@@ -47,7 +47,7 @@
 #define GWY_MAYBE_SET(pointer, value) \
     do { if (pointer) *(pointer) = (value); } while (0)
 
-#define gwy_memclear(array, n) \
+#define gwy_clear(array, n) \
     memset((array), 0, (n)*sizeof((array)[0]))
 
 #endif

@@ -386,7 +386,7 @@ swap_xy_32x32(const guint32 *src,
               guint32 *dest)
 {
     VALGRIND_MAKE_MEM_DEFINED(src, 0x20*sizeof(guint32));
-    gwy_memclear(dest, 0x20);
+    gwy_clear(dest, 0x20);
     const guint8 *src8 = (const guint8*)src;
     guint8 *dest8 = (guint8*)dest;
     slen = (slen + 7)/8;

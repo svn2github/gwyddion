@@ -483,7 +483,7 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(params, FALSE);
     FitFunc *priv = fitfunc->priv;
     g_return_val_if_fail(priv->is_valid, FALSE);
-    gwy_memclear(params, priv->nparams);
+    gwy_clear(params, priv->nparams);
     g_return_val_if_fail(priv->npoints, FALSE);
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);

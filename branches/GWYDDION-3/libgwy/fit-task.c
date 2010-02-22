@@ -257,7 +257,7 @@ set_n_params(FitTask *fittask,
     fittask->diff = fittask->mparam + nparam;
     fittask->matrix = fittask->diff + nparam;
     if (nparam)
-        gwy_memclear(fittask->fixed_param, nparam);
+        gwy_clear(fittask->fixed_param, nparam);
     fittask->nparam = nparam;
 
     if (nparam) {
@@ -431,7 +431,7 @@ gwy_fit_task_set_fixed_params(GwyFitTask *fittask,
     if (fixed_params)
         memcpy(priv->fixed_param, fixed_params, nparam*sizeof(gboolean));
     else
-        gwy_memclear(priv->fixed_param, nparam);
+        gwy_clear(priv->fixed_param, nparam);
 }
 
 /**
@@ -633,8 +633,8 @@ fit_task_gradient(const gdouble *param,
     gdouble *h = fittask->h;
     gdouble *mparam = fittask->mparam;
     gdouble *diff = fittask->diff;
-    gwy_memclear(gradient, nparam);
-    gwy_memclear(hessian, MATRIX_LEN(nparam));
+    gwy_clear(gradient, nparam);
+    gwy_clear(hessian, MATRIX_LEN(nparam));
 
     ASSIGN(mparam, param, nparam);
     for (guint j = 0; j < nparam; j++)

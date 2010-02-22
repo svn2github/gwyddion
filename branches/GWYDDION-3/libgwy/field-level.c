@@ -430,7 +430,7 @@ enumerate_powers(const guint *powers, guint nterms,
     *size = (maxpower + 1)*len*sizeof(gdouble);
     gdouble *powertable = g_slice_alloc(*size);
     if (dim == 1) {
-        gwy_memclear(powertable, (maxpower + 1)*len);
+        gwy_clear(powertable, (maxpower + 1)*len);
         return powertable;
     }
     gdouble *p = powertable;
@@ -540,7 +540,7 @@ gwy_field_part_fit_poly(const GwyField *field,
     return TRUE;
 
 fail:
-    gwy_memclear(coeffs, nterms);
+    gwy_clear(coeffs, nterms);
     return FALSE;
 }
 

@@ -988,7 +988,7 @@ row_acf(fftw_plan plan,
         guint width,
         guint size)
 {
-    gwy_memclear(in + width, size - width);
+    gwy_clear(in + width, size - width);
     fftw_execute(plan);   // R2C transform in -> out
     row_hc_cnorm(out, in, size);
     fftw_execute(plan);   // R2C transform in -> out
@@ -1058,7 +1058,7 @@ gwy_field_part_row_acf(GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
     if (masking != GWY_MASK_IGNORE)
-        gwy_memclear(weights, size);
+        gwy_clear(weights, size);
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
@@ -1308,7 +1308,7 @@ gwy_field_part_row_hhcf(GwyField *field,
     fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
                                           _GWY_FFTW_PATIENCE);
     if (masking != GWY_MASK_IGNORE)
-        gwy_memclear(weights, size);
+        gwy_clear(weights, size);
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
         ASSIGN(buffer, d, width);
@@ -1347,7 +1347,7 @@ gwy_field_part_row_hhcf(GwyField *field,
         p = buffer;
         for (guint j = line->res; j; j--, p++, q++)
             *p = (*q)*(*q);
-        gwy_memclear(buffer + width, size - width);
+        gwy_clear(buffer + width, size - width);
         fftw_execute(plan);
         ASSIGN(cached, buffer, size);
         // Then mask.  We need the intermediate result M_ν to combine it with

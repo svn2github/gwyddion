@@ -1313,8 +1313,7 @@ unpack_items(const guchar *buffer,
             items->len = 2*items->len;
             items->items = g_renew(GwySerializableItem, items->items,
                                    items->len);
-            gwy_memclear(items->items + items->n,
-                         items->len - items->n);
+            gwy_clear(items->items + items->n, items->len - items->n);
         }
         item = items->items + items->n;
 
