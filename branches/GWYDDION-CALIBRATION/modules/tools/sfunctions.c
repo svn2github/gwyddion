@@ -494,6 +494,21 @@ gwy_tool_sfunctions_data_switched(GwyTool *gwytool,
     {
         printf("Data have calibration\n");
         tool->has_calibration = TRUE;
+        /*we need to resample uncertainties*/
+        tool->xunc = gwy_data_field_new_resampled(tool->xunc,
+                                                  gwy_data_field_get_xres(plain_tool->data_field),
+                                                  gwy_data_field_get_yres(plain_tool->data_field),
+                                                  GWY_INTERPOLATION_BILINEAR);
+        tool->yunc = gwy_data_field_new_resampled(tool->yunc,
+                                                  gwy_data_field_get_xres(plain_tool->data_field),
+                                                  gwy_data_field_get_yres(plain_tool->data_field),
+                                                  GWY_INTERPOLATION_BILINEAR);
+                                                   
+        tool->zunc = gwy_data_field_new_resampled(tool->zunc,
+                                                  gwy_data_field_get_xres(plain_tool->data_field),
+                                                  gwy_data_field_get_yres(plain_tool->data_field),
+                                                  GWY_INTERPOLATION_BILINEAR);
+ 
     } else {
         printf("Data don't have calibration\n");
         tool->has_calibration = FALSE;
@@ -508,6 +523,8 @@ gwy_tool_sfunctions_response(GwyTool *tool,
 {
     GWY_TOOL_CLASS(gwy_tool_sfunctions_parent_class)->response(tool,
                                                                response_id);
+
+
 
     if (response_id == GTK_RESPONSE_APPLY)
         gwy_tool_sfunctions_apply(GWY_TOOL_SFUNCTIONS(tool));
@@ -577,18 +594,11 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
     GwyPlainTool *plain_tool;
     GwyGraphCurveModel *gcmodel, *ugcmodel;
     gdouble sel[4], *xdata, *ydata;
-    gdouble calxratio, calyratio;
     gint isel[4] = { sizeof("Die, die, GCC!"), 0, 0, 0 };
     gint n, nsel, lineres, w = sizeof("Die, die, GCC!"), h = 0;
     const gchar *title, *xlabel, *ylabel;
 
     plain_tool = GWY_PLAIN_TOOL(tool);
-
-    if (tool->has_calibration) {
-        calxratio = ((gdouble)gwy_data_field_get_xres(tool->xunc))/gwy_data_field_get_xres(plain_tool->data_field);
-        calyratio = ((gdouble)gwy_data_field_get_yres(tool->xunc))/gwy_data_field_get_yres(plain_tool->data_field);
-    }
-
 
     n = gwy_graph_model_get_n_curves(tool->gmodel);
     nsel = 0;
@@ -639,8 +649,7 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
                                            tool->zunc,
                                            plain_tool->mask_field,
                                            tool->uline,
-                                           (gint)((gdouble)isel[0]*calxratio), (gint)((gdouble)isel[1]*calyratio), 
-                                           (gint)((gdouble)w*calxratio), (gint)((gdouble)h*calyratio),
+                                           isel[0], isel[1], w, h,
                                            lineres);
             tool->has_uline = TRUE;
         }
@@ -689,8 +698,7 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
             gwy_data_field_area_acf_uncertainty(plain_tool->data_field,
                                            tool->zunc,
                                            tool->uline,
-                                           (gint)((gdouble)isel[0]*calxratio), (gint)((gdouble)isel[1]*calyratio), 
-                                           (gint)((gdouble)w*calxratio), (gint)((gdouble)h*calyratio),
+                                           isel[0], isel[1], w, h,
                                            tool->args.direction);
             tool->has_uline = TRUE;
         }
@@ -711,8 +719,7 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
             gwy_data_field_area_hhcf_uncertainty(plain_tool->data_field,
                                            tool->zunc,
                                            tool->uline,
-                                           (gint)((gdouble)isel[0]*calxratio), (gint)((gdouble)isel[1]*calyratio), 
-                                           (gint)((gdouble)w*calxratio), (gint)((gdouble)h*calyratio),
+                                           isel[0], isel[1], w, h,
                                            tool->args.direction);
             tool->has_uline = TRUE;
         }
@@ -925,6 +932,9 @@ gwy_tool_sfunctions_apply(GwyToolSFunctions *tool)
     else gwy_app_data_browser_add_graph_model(gmodel, plain_tool->container, TRUE);
 
 
+    g_object_unref(tool->xunc);
+    g_object_unref(tool->yunc);
+    g_object_unref(tool->zunc);
     g_object_unref(gmodel);
 
 
