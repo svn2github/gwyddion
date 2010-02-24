@@ -635,7 +635,12 @@ gwy_tool_stats_update_labels(GwyToolStats *tool)
     }
 
     if (tool->same_units)
-        update_label(tool->area_format, tool->area, tool->results.area);
+    {
+        if (!tool->has_calibration) 
+           update_label(tool->area_format, tool->area, tool->results.area);
+        else
+           update_label_unc(tool->area_format, tool->area, tool->results.area, tool->results.uarea);
+    }
     else
         gtk_label_set_text(GTK_LABEL(tool->area), _("N.A."));
 
@@ -758,6 +763,12 @@ gwy_tool_stats_calculate(GwyToolStats *tool)
                                                   mask, masking,
                                                   isel[0], isel[1], w, h);
 
+        tool->results.uarea
+            = gwy_data_field_area_get_surface_area_uncertainty(plain_tool->data_field, tool->zunc,
+                                                               tool->xunc,
+                                                               tool->yunc,
+                                                               mask,
+                                                               isel[0], isel[1], w, h);
     }
 
     memcpy(tool->results.isel, isel, sizeof(isel));

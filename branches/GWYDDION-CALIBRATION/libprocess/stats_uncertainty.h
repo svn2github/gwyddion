@@ -54,7 +54,7 @@ gdouble    gwy_data_field_area_get_min_uncertainty  (GwyDataField *dfield,
                                                      gint width, gint height);
 
 void       gwy_data_field_get_min_max_uncertainty   (GwyDataField *data_field,
-		                                             GwyDataField *uncz_field,
+		                                     GwyDataField *uncz_field,
                                                      gdouble *min_unc,
                                                      gdouble *max_unc);
 
@@ -149,11 +149,10 @@ void       gwy_data_field_area_acf_uncertainty     (GwyDataField *data_field,
 void       gwy_data_field_acf_uncertainty          (GwyDataField *data_field,
                                                     GwyDataField *uncz_field,
                                                     GwyDataLine *target_line,
-                                                    GwyOrientation orientation,
-                                                    GwyInterpolationType interpolation);
+                                                    GwyOrientation orientation);
 
 void       gwy_data_field_area_hhcf_uncertainty    (GwyDataField *data_field,
-                                                    GwyDataLine *uncz_field,
+                                                    GwyDataField *uncz_field,
                                                     GwyDataLine *target_line,
                                                     gint col, gint row,
                                                     gint width, gint height,
@@ -201,6 +200,20 @@ gdouble    gwy_data_field_area_get_median_uncertainty_mask      (GwyDataField *d
 
 gdouble    gwy_data_field_get_median_uncertainty                (GwyDataField *data_field, 
                                                                  GwyDataField *uncz_field);
+void    gwy_data_field_area_dh_uncertainty                      (GwyDataField *data_field,
+                                                                 GwyDataField *uncz_field,
+                                                                 GwyDataField *mask,
+                                                                 GwyDataLine *target_line,
+                                                                 gint col,
+                                                                 gint row,
+                                                                 gint width,
+                                                                 gint height,
+                                                                 gint nstats);
+void    gwy_data_field_dh_uncertainty                           (GwyDataField *data_field,
+                                                                 GwyDataField *uncz_field,
+                                                                 GwyDataLine *target_line,
+                                                                 gint nstats);
+
 
 /*
    void
