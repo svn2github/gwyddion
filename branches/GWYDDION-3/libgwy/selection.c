@@ -26,7 +26,7 @@
 #include "libgwy/array-internal.h"
 #include "libgwy/math-internal.h"
 
-enum { N_ITEMS = 1 };
+enum { N_ITEMS = 2 };
 
 enum {
     FINISHED,
@@ -34,11 +34,13 @@ enum {
 };
 
 struct _GwySelectionPrivate {
-    guint dummy;
+    GwyUnit **units;
 };
 
 typedef struct _GwySelectionPrivate Selection;
 
+static void     gwy_selection_finalize         (GObject *object);
+static void     gwy_selection_dispose          (GObject *object);
 static void     gwy_selection_serializable_init(GwySerializableInterface *iface);
 static gsize    gwy_selection_n_items          (GwySerializable *serializable);
 static gsize    gwy_selection_itemize          (GwySerializable *serializable,
@@ -50,7 +52,8 @@ static void     gwy_selection_assign_impl      (GwySerializable *destination,
                                                 GwySerializable *source);
 
 static const GwySerializableItem serialize_items[N_ITEMS] = {
-    { .name = "data", .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    { .name = "data",  .ctype = GWY_SERIALIZABLE_DOUBLE_ARRAY, },
+    { .name = "units", .ctype = GWY_SERIALIZABLE_OBJECT_ARRAY, },
 };
 
 static guint selection_signals[N_SIGNALS];
@@ -71,9 +74,12 @@ gwy_selection_serializable_init(GwySerializableInterface *iface)
 static void
 gwy_selection_class_init(GwySelectionClass *klass)
 {
-    G_GNUC_UNUSED GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
 
     g_type_class_add_private(klass, sizeof(Selection));
+
+    gobject_class->dispose = gwy_selection_dispose;
+    gobject_class->finalize = gwy_selection_finalize;
 
     /**
      * GwySelection::finished:
@@ -100,6 +106,31 @@ gwy_selection_init(GwySelection *selection)
                                                   Selection);
 }
 
+static void
+gwy_selection_finalize(GObject *object)
+{
+    GwySelection *selection = GWY_SELECTION(object);
+    Selection *priv = selection->priv;
+    guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
+    if (priv->units) {
+        g_slice_free1(dimension*sizeof(GwyUnit*), priv->units);
+        priv->units = NULL;
+    }
+    G_OBJECT_CLASS(gwy_selection_parent_class)->finalize(object);
+}
+
+static void
+gwy_selection_dispose(GObject *object)
+{
+    GwySelection *selection = GWY_SELECTION(object);
+    Selection *priv = selection->priv;
+    guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
+    for (guint i = 0; i < dimension; i++)
+        GWY_OBJECT_UNREF(priv->units[i]);
+    G_OBJECT_CLASS(gwy_selection_parent_class)->dispose(object);
+}
+
+// TODO: Units
 static gsize
 gwy_selection_n_items(G_GNUC_UNUSED GwySerializable *serializable)
 {
@@ -118,6 +149,8 @@ gwy_selection_itemize(GwySerializable *serializable,
     *it = serialize_items[0];
     it->value.v_double_array = gwy_array_get_data(GWY_ARRAY(selection));
     it++, items->n++;
+
+    // TODO: Units
 
     return N_ITEMS;
 }
@@ -165,6 +198,8 @@ gwy_selection_construct(GwySerializable *serializable,
                                    item.array_size/shape_size);
     }
 
+    // TODO: Units
+
     ok = TRUE;
 
 fail:
@@ -198,6 +233,56 @@ gwy_selection_shape_size(GwySelection *selection)
     GwySelectionClass *klass = GWY_SELECTION_GET_CLASS(selection);
     g_return_val_if_fail(klass, 0);
     return klass->shape_size;
+}
+
+/**
+ * gwy_selection_dimension:
+ * @selection: A group of shapes selected on data.
+ *
+ * Gets the selection dimension.
+ *
+ * Selection dimension is the number of different coordinates (dimensions)
+ * in the selection.  For instance, an x-range or y-range selection on graph is
+ * one-dimensional while a rectangular selection is two-dimensional.  The
+ * dimension is always smaller than or equal to the shape size.
+ *
+ * This value is the same for all selections of a specific type.
+ *
+ * Returns: The number of different dimensions.
+ **/
+guint
+gwy_selection_dimension(GwySelection *selection)
+{
+    GwySelectionClass *klass = GWY_SELECTION_GET_CLASS(selection);
+    g_return_val_if_fail(klass, 0);
+    return klass->dimension;
+}
+
+/**
+ * gwy_selection_unit_map:
+ * @selection: A group of shapes selected on data.
+ *
+ * Obtains the map between shape coordinates and their units.
+ *
+ * The unit map assigns physical units to each of the number describing a
+ * single selected shape (i.e. the coordinate).  The units can be obtained with
+ * gwy_selection_get_units().
+ *
+ * For example, if the second item in the returned item is 0 then the units
+ * of the second number in the selection object can be obtained by
+ * <literal>gwy_selection_get_units(selection, 0);</literal>.
+ *
+ * This map is the same for all selections of a specific type.
+ *
+ * Returns: Array of gwy_selection_shape_size() items owned by the selection
+ *          class, containing the units map.
+ **/
+const guint*
+gwy_selection_unit_map(GwySelection *selection)
+{
+    GwySelectionClass *klass = GWY_SELECTION_GET_CLASS(selection);
+    g_return_val_if_fail(klass, 0);
+    return klass->unit_map;
 }
 
 /**
@@ -267,7 +352,8 @@ gwy_selection_set(GwySelection *selection,
     else if (i == n)
         gwy_array_append1(GWY_ARRAY(selection), data);
     else {
-        g_critical("Selection object index %u is beyond the end of the data.");
+        g_critical("Selection object index %u is beyond the end of the data.",
+                   i);
         gwy_array_append1(GWY_ARRAY(selection), data);
     }
 }
@@ -356,6 +442,26 @@ gwy_selection_filter(GwySelection *selection,
                      GwySelectionFilterFunc filter,
                      gpointer user_data)
 {
+}
+
+/**
+ * gwy_selection_get_units:
+ * @selection: A group of shapes selected on data.
+ * @i: Dimension index.
+ *
+ * Gets the units corresponding to a selection dimension.
+ *
+ * Returns: The units of the @i-th dimension.
+ **/
+GwyUnit*
+gwy_selection_get_units(GwySelection *selection,
+                        guint i)
+{
+    g_return_val_if_fail(GWY_IS_SELECTION(selection), NULL);
+    guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
+    g_return_val_if_fail(i < dimension, NULL);
+    // FIXME: Who ensures initialization of the units array?
+    return selection->priv->units[i];
 }
 
 /**

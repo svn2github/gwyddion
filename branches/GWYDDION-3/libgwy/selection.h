@@ -25,6 +25,7 @@
 #define __LIBGWY_SELECTION_H__
 
 #include <libgwy/serializable.h>
+#include <libgwy/unit.h>
 #include <libgwy/array.h>
 
 G_BEGIN_DECLS
@@ -55,6 +56,8 @@ struct _GwySelectionClass {
     GwyArrayClass array_class;
     /*<public>*/
     guint shape_size;
+    guint dimension;
+    const guint *unit_map;
 };
 
 typedef gboolean (*GwySelectionFilterFunc)(GwySelection *selection,
@@ -66,29 +69,31 @@ typedef gboolean (*GwySelectionFilterFunc)(GwySelection *selection,
 #define gwy_selection_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType    gwy_selection_get_type   (void)                          G_GNUC_CONST;
-guint    gwy_selection_shape_size (GwySelection *selection)       G_GNUC_PURE;
-void     gwy_selection_clear      (GwySelection *selection);
-gboolean gwy_selection_get        (GwySelection *selection,
-                                   guint i,
-                                   gdouble *data);
-void     gwy_selection_set        (GwySelection *selection,
-                                   guint i,
-                                   const gdouble *data);
-// Duplicates gwy_array_delete1()
-void     gwy_selection_delete     (GwySelection *selection,
-                                   guint i);
-// Duplicates gwy_array_size()
-guint    gwy_selection_size       (GwySelection *selection)       G_GNUC_PURE;
-void     gwy_selection_get_data   (GwySelection *selection,
-                                   gdouble *data);
-void     gwy_selection_set_data   (GwySelection *selection,
-                                   guint n,
-                                   const gdouble *data);
-void     gwy_selection_filter     (GwySelection *selection,
-                                   GwySelectionFilterFunc filter,
-                                   gpointer user_data);
-void     gwy_selection_finished   (GwySelection *selection);
+GType        gwy_selection_get_type  (void)                          G_GNUC_CONST;
+guint        gwy_selection_shape_size(GwySelection *selection)       G_GNUC_PURE;
+guint        gwy_selection_dimension (GwySelection *selection)       G_GNUC_PURE;
+const guint* gwy_selection_unit_map  (GwySelection *selection)       G_GNUC_PURE;
+void         gwy_selection_clear     (GwySelection *selection);
+gboolean     gwy_selection_get       (GwySelection *selection,
+                                      guint i,
+                                      gdouble *data);
+void         gwy_selection_set       (GwySelection *selection,
+                                      guint i,
+                                      const gdouble *data);
+void         gwy_selection_delete    (GwySelection *selection,
+                                      guint i);
+guint        gwy_selection_size      (GwySelection *selection)       G_GNUC_PURE;
+void         gwy_selection_get_data  (GwySelection *selection,
+                                      gdouble *data);
+void         gwy_selection_set_data  (GwySelection *selection,
+                                      guint n,
+                                      const gdouble *data);
+void         gwy_selection_filter    (GwySelection *selection,
+                                      GwySelectionFilterFunc filter,
+                                      gpointer user_data);
+void         gwy_selection_finished  (GwySelection *selection);
+GwyUnit*     gwy_selection_get_units (GwySelection *selection,
+                                      guint i)                       G_GNUC_PURE;
 
 G_END_DECLS
 
