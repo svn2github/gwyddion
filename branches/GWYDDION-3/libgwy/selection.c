@@ -442,6 +442,16 @@ gwy_selection_filter(GwySelection *selection,
                      GwySelectionFilterFunc filter,
                      gpointer user_data)
 {
+    g_return_if_fail(GWY_IS_SELECTION(selection));
+    if (!filter)
+        return;
+
+    GwyArray *array = GWY_ARRAY(selection);
+    guint n = gwy_array_size(array);
+    for (guint i = n; i; i--) {
+        if (!filter(selection, i-1, user_data))
+            gwy_array_delete1(array, i-1);
+    }
 }
 
 /**
@@ -542,6 +552,8 @@ gwy_selection_finished(GwySelection *selection)
  * @user_data: User data passed to gwy_selection_filter().
  *
  * Type of selection filtering function.
+ *
+ * The function must not modify the selection.
  *
  * Returns: %TRUE for objects that should be kept, %FALSE for objects that
  *          should be removed.
