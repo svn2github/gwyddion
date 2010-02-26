@@ -24,6 +24,7 @@
 #include "libgwy/mask-field.h"
 #include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 

@@ -28,16 +28,6 @@
 
 G_BEGIN_DECLS
 
-#define ASSIGN_UNITS(dest, src) \
-    do { \
-        if (src && dest) \
-            gwy_unit_assign(dest, src); \
-        else if (dest) \
-            GWY_OBJECT_UNREF(dest); \
-        else if (src) \
-            dest = gwy_unit_duplicate(src); \
-    } while (0)
-
 // Evaluates to TRUE if intervals [pos1, pos1+len1-1] and [pos2, pos2+len2-1]
 // are overlapping.  Arguments are evaluated many times.
 #define OVERLAPPING(pos1, len1, pos2, len2) \

@@ -31,6 +31,16 @@ G_BEGIN_DECLS
 #define STATICP \
     (G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB)
 
+#define ASSIGN_UNITS(dest, src) \
+    do { \
+        if (src && dest) \
+            gwy_unit_assign(dest, src); \
+        else if (dest) \
+            GWY_OBJECT_UNREF(dest); \
+        else if (src) \
+            dest = gwy_unit_duplicate(src); \
+    } while (0)
+
 G_GNUC_INTERNAL
 gboolean _gwy_assign_string(gchar **p,
                             const gchar *q);

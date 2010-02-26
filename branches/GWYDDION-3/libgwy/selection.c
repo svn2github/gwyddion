@@ -23,6 +23,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/selection.h"
 #include "libgwy/libgwy-aliases.h"
+#include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
 #include "libgwy/math-internal.h"
 
@@ -130,11 +131,43 @@ gwy_selection_dispose(GObject *object)
     G_OBJECT_CLASS(gwy_selection_parent_class)->dispose(object);
 }
 
-// TODO: Units
-static gsize
-gwy_selection_n_items(G_GNUC_UNUSED GwySerializable *serializable)
+static void
+ensure_units(Selection *priv,
+             guint dimension,
+             gboolean create_objects)
 {
-    return N_ITEMS;
+    // Fast path without getting class data
+    if (priv->units && !create_objects)
+        return;
+
+    if (!priv->units)
+        priv->units = g_slice_alloc0(dimension*sizeof(GwyUnit*));
+
+    if (!create_objects)
+        return;
+
+    for (guint i = 0; i < dimension; i++) {
+        if (!priv->units[i])
+            priv->units[i] = gwy_unit_new();
+    }
+}
+
+static gsize
+gwy_selection_n_items(GwySerializable *serializable)
+{
+    GwySelection *selection = GWY_SELECTION(serializable);
+    Selection *priv = selection->priv;
+    gsize n = N_ITEMS;
+
+    // We must have all units or none but not something between.
+    if (priv->units) {
+        guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
+        ensure_units(priv, dimension, TRUE);
+        for (guint i = 0; i < dimension; i++)
+            n += gwy_serializable_n_items(GWY_SERIALIZABLE(priv->units[i]));
+    }
+
+    return n;
 }
 
 static gsize
@@ -144,15 +177,32 @@ gwy_selection_itemize(GwySerializable *serializable,
     g_return_val_if_fail(items->len - items->n >= N_ITEMS, 0);
 
     GwySelection *selection = GWY_SELECTION(serializable);
-    GwySerializableItem *it = items->items + items->n;
+    GwySerializableItem it;
+    guint n = 0;
 
-    *it = serialize_items[0];
-    it->value.v_double_array = gwy_array_get_data(GWY_ARRAY(selection));
-    it++, items->n++;
+    it = serialize_items[0];
+    it.value.v_double_array = gwy_array_get_data(GWY_ARRAY(selection));
+    items->items[items->n++] = it;
+    n++;
 
-    // TODO: Units
+    Selection *priv = selection->priv;
+    if (priv->units) {
+        guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
 
-    return N_ITEMS;
+        it = serialize_items[1];
+        it.value.v_object_array = (GObject**)priv->units;
+        it.array_size = dimension;
+        items->items[items->n++] = it;
+        n++;
+
+        for (guint i = 0; i < dimension; i++) {
+            g_return_val_if_fail(items->len - items->n, 0);
+            gwy_serializable_itemize(GWY_SERIALIZABLE(priv->units[i]), items);
+            n++;
+        }
+    }
+
+    return n;
 }
 
 static gboolean
@@ -160,8 +210,8 @@ gwy_selection_construct(GwySerializable *serializable,
                         GwySerializableItems *items,
                         GwyErrorList **error_list)
 {
-    GwySerializableItem item = serialize_items[0];
-    gwy_deserialize_filter_items(&item, N_ITEMS, items, NULL,
+    GwySerializableItem its[N_ITEMS];
+    gwy_deserialize_filter_items(its, N_ITEMS, items, NULL,
                                  "GwySelection", error_list);
 
     gboolean ok = FALSE;
@@ -169,7 +219,7 @@ gwy_selection_construct(GwySerializable *serializable,
     GwySelection *selection = GWY_SELECTION(serializable);
     // XXX: This is a bit tricky.  We know what the real class is, it's the
     // class of @serializable because the object is already fully constructed
-    // as far as GObject is concerned so we can check the number of items.
+    // as far as GObject is concerned.  So we can check the number of items.
     guint shape_size = GWY_SELECTION_GET_CLASS(selection)->shape_size;
     if (!shape_size) {
         g_critical("Object size of selection type %s is zero.",
@@ -181,29 +231,57 @@ gwy_selection_construct(GwySerializable *serializable,
         goto fail;
     }
 
-    if (item.array_size % shape_size) {
+    if (its[0].array_size % shape_size) {
         gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
                            GWY_DESERIALIZE_ERROR_INVALID,
                            _("Selection data length is %lu which is not "
                              "a multiple of %u as is expected for selection "
                              "type ‘%s’."),
-                           (gulong)item.array_size, shape_size,
+                           (gulong)its[0].array_size, shape_size,
                            G_OBJECT_TYPE_NAME(selection));
         goto fail;
     }
-    if (item.array_size) {
+    if (its[0].array_size) {
         GwyArray *array = GWY_ARRAY(selection);
         _gwy_array_set_data_silent(array,
-                                   item.value.v_double_array,
-                                   item.array_size/shape_size);
+                                   its[0].value.v_double_array,
+                                   its[0].array_size/shape_size);
+        its[0].value.v_double_array = NULL;
     }
 
-    // TODO: Units
+    guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
+    if (its[1].array_size) {
+        if (its[1].array_size != dimension) {
+            gwy_error_list_add(error_list, GWY_DESERIALIZE_ERROR,
+                               GWY_DESERIALIZE_ERROR_INVALID,
+                               _("Selection of type type ‘%s’ "
+                                 "contains %lu dimension units that do not "
+                                 "correspond to its dimension %u."),
+                               G_OBJECT_TYPE_NAME(selection),
+                               (gulong)its[0].array_size, dimension);
+            goto fail;
+        }
+        if (!_gwy_check_object_component(its + 1, selection,
+                                         GWY_TYPE_UNIT, error_list))
+            goto fail;
+
+        Selection *priv = selection->priv;
+        ensure_units(priv, dimension, FALSE);
+        for (guint i = 0; i < dimension; i++) {
+            GWY_OBJECT_UNREF(priv->units[i]);
+            priv->units[i] = (GwyUnit*)its[1].value.v_object_array[i];
+            its[1].value.v_object_array[i] = NULL;
+        }
+        its[1].value.v_object_array = NULL;
+    }
 
     ok = TRUE;
 
 fail:
-    GWY_FREE(item.value.v_double_array);
+    GWY_FREE(its[0].value.v_double_array);
+    for (guint i = 0; i < its[1].array_size; i++)
+        GWY_OBJECT_UNREF(its[1].value.v_object_array);
+    GWY_FREE(its[1].value.v_object_array);
     return ok;
 }
 
@@ -214,6 +292,23 @@ gwy_selection_assign_impl(GwySerializable *destination,
     GwyArray *dest = GWY_ARRAY(destination);
     GwyArray *src = GWY_ARRAY(source);
     gwy_array_set_data(dest, gwy_array_get_data(src), gwy_array_size(src));
+
+    Selection *spriv = GWY_SELECTION(source)->priv,
+              *dpriv = GWY_SELECTION(destination)->priv;
+
+    if (!spriv && !dpriv)
+        return;
+
+    guint dimension = GWY_SELECTION_GET_CLASS(destination)->dimension;
+    if (!spriv) {
+        for (guint i = 0; i < dimension; i++)
+            GWY_OBJECT_UNREF(spriv->units[i]);
+    }
+    else {
+        ensure_units(dpriv, dimension, FALSE);
+        for (guint i = 0; i < dimension; i++)
+            ASSIGN_UNITS(dpriv->units[i], spriv->units[i]);
+    }
 }
 
 /**
@@ -521,13 +616,14 @@ gwy_selection_finished(GwySelection *selection)
 /**
  * GwySelectionClass:
  * @shape_size: Number of double values used to described one selected shape.
- *              Concrete subclasses have to set this value.
  * @dimension: Number of different coodinates in the selection.
- *             Concrete subclasses have to set this value.
  * @unit_map: Map assigning unit indices (used with gwy_selection_get_units())
  *            to individual numbers (coordinates) in the selection objects.
  *
  * Class of groups of shapes selected on data.
+ *
+ * Concrete, i.e. instantiable, subclasses have to set the data members
+ * @shape_size, @dimension and @unit_map.
  **/
 
 /**
