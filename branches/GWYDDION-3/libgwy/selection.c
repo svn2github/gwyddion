@@ -520,8 +520,12 @@ gwy_selection_finished(GwySelection *selection)
 
 /**
  * GwySelectionClass:
- * @shape_size: The number of double values used to described one selected
- *              shape.  Concrete subclasses have to set this value.
+ * @shape_size: Number of double values used to described one selected shape.
+ *              Concrete subclasses have to set this value.
+ * @dimension: Number of different coodinates in the selection.
+ *             Concrete subclasses have to set this value.
+ * @unit_map: Map assigning unit indices (used with gwy_selection_get_units())
+ *            to individual numbers (coordinates) in the selection objects.
  *
  * Class of groups of shapes selected on data.
  **/
