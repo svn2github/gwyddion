@@ -565,8 +565,11 @@ gwy_selection_get_units(GwySelection *selection,
     g_return_val_if_fail(GWY_IS_SELECTION(selection), NULL);
     guint dimension = GWY_SELECTION_GET_CLASS(selection)->dimension;
     g_return_val_if_fail(i < dimension, NULL);
-    // FIXME: Who ensures initialization of the units array?
-    return selection->priv->units[i];
+    Selection *priv = selection->priv;
+    ensure_units(priv, dimension, FALSE);
+    if (!priv->units[i])
+        priv->units[i] = gwy_unit_new();
+    return priv->units[i];
 }
 
 /**
