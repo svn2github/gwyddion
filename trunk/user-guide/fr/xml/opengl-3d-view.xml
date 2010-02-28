@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: opengl-3d-view.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='opengl-3d-view' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Affichage 3D OpenGL</title>
+  <indexterm>
+    <primary>3D</primary>
+    <secondary>affichage des données</secondary>
+  </indexterm>
+  <para>
+    L'affichage tri-dimensionnel OpenGL de la fenêtre de données courante peut
+    être lancé à l'aide de l'icône montrant un cube dans la ligne de boutons
+    <guilabel>Vue</guilabel> de la fenêtre principale.
+  </para>
+  <para>
+    Cette fonction est optionnelle, c'est-à-dire qu'elle peut être désactivée
+    lors de la compilation. Il peut aussi arriver que, bien que Gwyddion soit
+    capable d'afficher les données en 3D, votre système en soit incapable. Dans
+    ces deux cas, toute tentative d'affichage en 3D aboutira à un message
+    d'erreur expliquant lequel des deux cas est présent. Dans le premier cas il
+    vous faudra soit demander aux personnes produisant les exécutables de
+    Gwyddion de les compiler avec le support 3D, soit compiler
+    vous-même Gwyddion à partir du code source. Dans le second cas, il faudra
+    vous référer au guide de système d'exploitatoin pour déterminer la manière
+    d'activer les fonctionnalités OpenGL 3D.
+  </para>
+  <para>
+    La fenêtre 3D peut se présenter sous deux formes : avec les contrôles
+    basiques ou étendus. Elle se lance avec les contrôles basiques seulement,
+    cette forme est affichée sur la
+    <link linkend='fig-opengl-3d-view-screenshot'>figure suivante</link>.
+    On peut passer à la forme étendue (et vice-versa) à l'aide du bouton
+    d'expansion situé en haut à droite. Un clic droit sur la vue permet
+    d'afficher le sélecteur de gradient de couleur ou de matériau GL.
+  </para>
+  <informalfigure id='fig-opengl-3d-view-screenshot' float='0'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='opengl-3d-view.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre d'affichage des données en 3D OpenGL avec les contrôles basiques.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='opengl-3d-view-basic-controls'>
+    <title>Contrôles basiques</title>
+    <para>
+      La fenêtre 3D basique affiche les contrôles d'interaction à droite de la
+      vue. Par défaut, le glissement de la souris permet de faire tourner la
+      vue horizontalement et verticalement. Les différents modes disponibles
+      sont donnés ci-dessous :
+      <itemizedlist>
+        <listitem>
+          Rotation – il s'agit du mode par défaut. Un glissement horizontal de
+          la souris fait tourner la vue autour de l'axe
+          <phrase role='mathvar'>z</phrase>, un glissement vertical fait quant
+          à lui tourner la vue autour de l'axe horizontal parallèle au plan de
+          la vue.
+        </listitem>
+        <listitem>
+          Echelle – le glissement de la souris vers la droite ou le bas permet
+          d'agrandir la vue, le glissement dans la direction opposée diminue
+          la vue.
+        </listitem>
+        <listitem>
+          Hauteur – le glissement de la souris vers le haut ou le bas permet
+          d'agrandir et réduire respectivement l'échelle
+          <phrase role='mathvar'>z</phrase>, accentuant ainsi plus ou moins les
+          bosses et les creux.
+        </listitem>
+        <listitem>
+          Rotation de la lumière – ce mode n'est disponible que pour l'affichage
+          avec un matériau GL. Le glissement de la souris modifie la position de
+          la lumière de la même manière que la rotation des données dans le mode
+          rotation.
+        </listitem>
+      </itemizedlist>
+      Les contrôles basiques contiennent aussi un bouton d'export d'image.
+    </para>
+    <para>
+      Avec les contrôles basiques, il est possible de passer d'un mode à un
+      autre en utilisant les touches
+      <keycap>R</keycap> (rotation),
+      <keycap>S</keycap> (échelle),
+      <keycap>V</keycap> (hauteur)
+      and <keycap>L</keycap> (rotation de la lumière).
+    </para>
+  </sect2>
+  <sect2 id='opengl-3d-view-full-controls'>
+    <title>Contrôles complets</title>
+    <para>
+      Avec les contrôles étendus, les boutons d'interaction sont placés en haut,
+      mais leur fonction n'est pas modifiée. En complément, plusieurs onglets
+      apparaissent avec certaines options pour chaque :
+      <itemizedlist>
+        <listitem>
+          <guilabel>Basique</guilabel> – contrôles pour ajuster numériquement la
+          rotation et les échelles, activer les axes et leurs labels, ainsi que
+          pour choisir le mode de perspective.
+        </listitem>
+        <listitem>
+          <guilabel>Lumière &amp; Matériau</guilabel> – réglages de
+          viqualisation. La vue 3D de Gwyddion permet deux modes de
+          visualisation : gradient, pour lequel les données sont juste collorées
+          avec une échelle de couleur de la même manière que la vue 2D ; et
+          matériau, pour lequel les données sont affichées sous la forme d'un
+          matériau OpenGL rendu en fonction de la position de la lumière. Cet
+          onglet permet d'ajuster numériquement la position de la lumière.
+        </listitem>
+        <listitem>
+          <guilabel>Labels</guilabel> – ajustement fin de la taille, de la
+          position ainsi que d'autres propriétés des labels des axes.
+        </listitem>
+      </itemizedlist>
+    </para>
+  </sect2>
+  <sect2 id='opengl-3d-view-saving-images'>
+    <title>Enregistrer des images</title>
+    <para>
+      La vue 3D peut être enregistrée sous forme d'image à l'aide du bouton
+      <guibutton>Save</guibutton>. La sortie est toujours une image au format
+      PNG (Portable Network Graphics) ayant exactement la même taille et le
+      même contenu que celui affiché à l'écran. Le fait d'entrer une extension
+      différente de <filename>.png</filename> générera toujours une image au
+      format PNG, mais avec une extension qui pourrait prêter à confusion.
+    </para>
+    <para>
+      Notez qu'en fonction des particularités des systèmes d'exploitation, des
+      cartes graphiques ou des gestionnaires de fenêtre, certains artefacts
+      peuvent apparaître sur les images exportées au niveau de zones masquées de
+      la vue 3D. Si vous rencontrez ce genre de problème, assurez-vous
+      qu'aucune fenêtre ne vient masquer la vue 3D lors de l'export de l'image.
+    </para>
+  </sect2>
+  <sect2 id='opengl-material-editor'>
+    <title>Editeur de matériau OpenGL</title>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>édition de matériau</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>3D</primary>
+      <secondary>choisir le matériau par défaut</secondary>
+    </indexterm>
+    <para>L'éditeur de matériaux OpenGL peut être lancé à partir de
+      <menuchoice>
+        <guimenu>Editer</guimenu>
+        <guimenuitem>Matériaux GL</guimenuitem>
+      </menuchoice>.
+      Les contrôles présents dans la liste des matériaux sont identiques à ceux
+      de <link linkend='color-gradient-editor'>l'éditeur de gradient</link> et
+      la gestion des matériaux fonctionne de la même manière. L'éditeur en
+      lui-même est évidemment différent. Il permet d'ajuster quatre quantités
+      définissant le matériau :
+      <itemizedlist>
+        <listitem>
+          la couleur ambiante <xi:include href="eqi-k_a-alpha.xml"/>
+          (où <xi:include href="eqi-alpha-is-red-green-blue.xml"/>),
+          qui contrôle la réflection de la lumière ambiante provenant
+          uniformément de toutes les directions,
+        </listitem>
+        <listitem>
+          la couleur diffuse <xi:include href="eqi-k_d-alpha.xml"/>,
+          qui décrit la réflection diffuse, qui est indépendante de la direction
+          de la lumière et dont la brillance apparente est indépendante de
+          l'angle de visée,
+        </listitem>
+        <listitem>
+          la couleur spéculaire <xi:include href="eqi-k_s-alpha.xml"/>,
+          qui contrôle la réflection spéculaire avec une intensité dépendant de
+          l'angle entre la direction d'observation et la direction de la lumière
+          si celle-ci était réfléchie par un miroir idéal ayant la même normale
+          locale, et
+        </listitem>
+        <listitem>
+          la brillance <xi:include href="eqi-s.xml"/>,
+          une valeur numérique déterminant à quel point la réflection spéculaire
+          est proche de celle d'un miroir idéal, une petite valeur correspond à
+          une surface rugueuse, tandis qu'une grande valeur correspond à une
+          surface plus lisse.
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Si nous notons <xi:include href="eqi-vec-L.xml"/> le vecteur 
+      pointant du point de la surface vers la source de lumière,
+      <xi:include href="eqi-vec-V.xml"/> le vecteur normal à l'observateur,
+      <xi:include href="eqi-vec-N.xml"/> le vecteur normal à la surface et
+      <xi:include href="eqi-vec-R.xml"/> le vecteur pointant dans la direction
+      de la réflection donné par un miroir idéal, l'intensité de la lumière
+      observée dans le modèle d'éclairage OpenGL peut être exprimé par
+      <xi:include href="eq-opengl-light-model.xml"/> où
+      <xi:include href="eqi-I_a-alpha.xml"/>,
+      <xi:include href="eqi-I_d-alpha.xml"/> et
+      <xi:include href="eqi-I_s-alpha.xml"/>
+      sont respectivement les couleurs ambiante, diffuse et spéculaire.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
