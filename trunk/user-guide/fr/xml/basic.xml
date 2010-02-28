@@ -1,0 +1,349 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: basic.xml 10448 2009-11-15 12:51:28Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='basic-operations' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Opérations Basiques</title>
+  <para>
+    La lecture de valeur et les opérations géométriques basiques constituent la
+    base de tout logiciel de traitement de données. Gwyddion propose un large
+    choix de fonctions pour mettre à l'échelle, tourner, ré-échantillonner ou
+    extraire un profil des données. Cette section décrit ces fonctions, certes
+    simples, mais essentielles.
+  </para>
+  <sect2 id='modules-basic'>
+    <title>Opérations 2D basiques</title>
+    <para>
+      Grâce aux modules basiques, il est possible de réaliser les opérations
+      suivantes sur des données 2D :
+    </para>
+    <itemizedlist>
+      <listitem id='scale'>
+        <indexterm><primary>mise à l'échelle</primary></indexterm>
+        <indexterm><primary>ré-échantillonnage</primary></indexterm>
+        Ré-échantillonner les données avec les dimensions ou l'échelle choisies,
+        en utilisant la méthode d'interpolation sélectionnée dans
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Echelle</guimenuitem>
+        </menuchoice>
+      </listitem>
+      <listitem id='crop'>
+        <indexterm><primary>rognage</primary></indexterm>
+        Rogner les données en utilisant
+        <link linkend='tool-crop'>l'outil Rogner</link> soit directement sur les
+        données soit en mettant le résultat dans un nouveau canal (avec l'option
+        <guilabel>Créer un nouveau canal</guilabel>). En activant l'option
+        <guilabel>Conserver les décalages latéraux</guilabel>, les coordonnées
+        du coin en haut à gauche de l'image résultante corresponderont à celles
+        du coin en haut à gauche de la sélection, dans le cas contraire les
+        coordonnées seront mises à <xi:include href="eqi-coords-0-0.xml"/>.
+      </listitem>
+      <listitem id='rotate'>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>par multiple de 90°</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>rotation</primary>
+          <secondary>par un angle arbitraire</secondary>
+        </indexterm>
+        Tourner les les données de 90 degrés ou par un angle défini par
+        l'utilisateur à l'aide d'une des fonctions de rotation :
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Rotation sens indirect</guimenuitem>
+        </menuchoice>,
+        <guimenuitem>Rotation sens direct</guimenuitem>
+        ou
+        <guimenuitem>Rotation d'angle</guimenuitem>.
+      </listitem>
+      <listitem id='flip'>
+        <indexterm>
+          <primary>renverser</primary>
+          <secondary>horizontalement</secondary>
+        </indexterm>
+        <indexterm>
+          <primary>renverser</primary>
+          <secondary>verticalement</secondary>
+        </indexterm>
+        Renverser les données horizontalement (i.e. autour de l'axe vertical) et
+        verticalement (i.e. autour de l'axe horizontal) avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Renverser Horizontalement</guimenuitem>
+        </menuchoice>
+        et
+        <guimenuitem>Renverser Verticalement</guimenuitem>,
+        respectivement.
+      </listitem>
+      <listitem id='flip-both'>
+        Renverser les données autour du centre (i.e. autour des deux axes) avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Renverser Horizontalement et Verticalement</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem id='invert-value'>
+        <indexterm><primary>inversion de valeur</primary></indexterm>
+        Inverser les valeurs des données en utiliser la fonction
+        <guimenuitem>Inverser les Valeurs</guimenuitem>:
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Inverser les Valeurs</guimenuitem>
+        </menuchoice>.
+        Les valeurs sont inversées par rapport à la valeur moyenne, ce qui
+        conserve la valeur moyenne.
+      </listitem>
+      <listitem id='square-samples'>
+        <indexterm>
+          <primary>rapport d'aspect</primary>
+          <secondary>ré-échantillonnage vers des pixels carrés</secondary>
+        </indexterm>
+        Sur-échantillonner les données pour rendre les pixels carrés avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Echantillons Carrés</guimenuitem>
+        </menuchoice>.
+        La plupart des scans ont des pixels ayant un rapport d'aspect de 1:1,
+        cette fonction n'a donc aucun effet sur ceux-ci.
+      </listitem>
+    </itemizedlist>
+    <para id='calibrate'>
+      De plus, le module de recalibration peut être utilisé pour changer les
+      dimensions physiques, calibrer les valeurs des données ou même changer les
+      unités de valeurs ou de dimensions latérales :
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Opérations Basiques</guisubmenu>
+        <guimenuitem>Calibrer</guimenuitem>
+      </menuchoice>.
+    </para>
+  </sect2>
+  <sect2 id='basic-value-reading'>
+    <title>Lecture des Valeurs</title>
+    <para>
+      La méthode la plus simple pour lire une valeur est de placer le curseur
+      de la souris sur le point dont on veut connaître la valeur. Les
+      coordonnées et/ou la valeur sont alors affichées dans la barre d'état de
+      la <link linkend='data-windows'>fenêtre de données</link> ou la
+      <link linkend='graph-windows'>la fenêtre de graphe</link>.
+    </para>
+    <sect3 id='read-value'>
+      <title>
+        Outil Lecture de Valeur
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_pointer_measure-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>outil Lecture de Valeur</primary></indexterm>
+      <indexterm><primary>mesure de pente</primary></indexterm>
+      <indexterm>
+        <primary>inclinaison</primary>
+        <secondary>lecture des données</secondary>
+      </indexterm>
+      <para>
+        L'outil <guilabel>Lecture de Valeur</guilabel> offre plus de
+        possibilités : il affiche les coordonnées et valeurs du dernier point
+        de la fenêtre de données sur lequel le bouton de souris a été cliqué. Il
+        peut moyenner la valeur sur une zone circulaire centrée sur ce point,
+        ce que l'on peut contrôler avec l'option
+        <guilabel>Rayon de moyennage</guilabel>. Lorsque le rayon vaut 1, la
+        valeur du pixel seul est affichée. Le bouton
+        <guibutton>Mise à Zéro</guibutton> ajuste la surface de manière à ce que
+        le <xi:include href='eqi-z.xml'/> courant devienne le nouveau niveau
+        zéro.
+      </para>
+      <para>
+        L'outil <guilabel>Lecture de Valeur</guilabel> peut aussi afficher
+        l'inclinaison de la facette locale. Là encore, le
+        <guilabel>Rayon de moyennage</guilabel> détermine le rayon de l'aire à
+        utiliser pour ajuster le plan local.
+      </para>
+    </sect3>
+    <sect3 id='inclinations-coordinates'>
+      <title>Inclinaisons</title>
+      <indexterm>
+        <primary>inclinaison</primary>
+        <secondary>calcul</secondary>
+      </indexterm>
+      <para>
+        Dans tous les outils de Gwyddion, les inclinaisons de facette et de plan
+        sont donnés sous la forme des coordonnées sphériques
+        <xi:include href="eqi-coords-theta-phi.xml"/> du vecteur normal au plan.
+      </para>
+      <para>
+        L'angle <xi:include href="eqi-theta.xml"/> est l'angle entre la
+        direction verticale et la normale, ce qui veut dire que
+        <xi:include href="eqi-theta-is-0.xml"/> pour des facettes horizontales
+        , et qu'il augmente avec la pente. Sa valeur est toujours positive.
+      </para>
+      <para>
+        L'angle <xi:include href="eqi-phi.xml"/> est l'angle direct entre l'axe
+        <xi:include href="eqi-x.xml"/> et la projection de la normale sur le
+        plan <xi:include href="eqi-xy.xml"/>, comme le montre la figure
+        ci-dessous. Dans le cas des facettes, cela signifie que
+        <xi:include href="eqi-phi.xml"/> correspond à la direction de la pente
+        descendante de la facette.
+      </para>
+      <informalfigure id='fig-inclination-coordinates'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='inclination.pdf' format='PDF'/>
+          </imageobject>
+          <imageobject>
+            <imagedata fileref='inclination.png' format='PNG'/>
+          </imageobject>
+          <textobject>
+            <phrase>Mesure de l'orientation des facettes</phrase>
+          </textobject>
+          <caption>
+            Orientation d'un facette (affichée en bleu) mesurée comme
+            l'angle direct entre l'axe <xi:include href="eqi-x.xml"/> et la
+            projection du vecteur normal de la facette
+            <xi:include href="eqi-vec-n.xml"/>
+            sur le plane <xi:include href="eqi-xy.xml"/>.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+    <sect3 id='distance'>
+      <title>
+        Outil Distance
+        <guiicon>
+          <inlinemediaobject>
+            <imageobject>
+              <imagedata fileref='gwy_distance-24.png' format='PNG'/>
+            </imageobject>
+          </inlinemediaobject>
+        </guiicon>
+      </title>
+      <indexterm><primary>Outil Distance</primary></indexterm>
+      <indexterm><primary>mesure de distance</primary></indexterm>
+      <indexterm><primary>mesure d'angle</primary></indexterm>
+      <para>
+        Les distances et différences de hauteur peutvent être mesurées avec
+        l'outil <guilabel>Distance</guilabel>. Il affiche les distances
+        horizontale (<xi:include href="eqi-Delta-x.xml"/>),
+        verticale (<xi:include href="eqi-Delta-y.xml"/>)
+        et totale (<xi:include href="eqi-R.xml"/>) ;
+        l'azimuth <xi:include href="eqi-phi.xml"/>
+        (mesurée de la même manière que l'inclinaison <xi:include href="eqi-phi.xml"/>)
+        et la différence de hauteur du point final
+        <xi:include href="eqi-Delta-z.xml"/>
+        pour un ensemble de lignes sélectionnées sur les données.
+      </para>
+      <para>
+        Les distances peuvent être copiées dans le presse-papier ou sauvegardées
+        dans un fichier texte à l'aide des boutons situés sous la liste.
+      </para>
+      <informalfigure id='fig-distance-screenshot'>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref='distances.png' format='PNG'/>
+          </imageobject>
+          <textobject>
+            <phrase>Outil de mesure de distance</phrase>
+          </textobject>
+          <caption>
+            Outil de mesure de distance montrant trois lignes sélectionnées.
+          </caption>
+        </mediaobject>
+      </informalfigure>
+    </sect3>
+  </sect2>
+  <sect2 id='profile'>
+    <title>
+      Extraction de Profil
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_profile-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>extraction de profil</primary></indexterm>
+    <para>
+      L'outil d'extraction de profil est accessible à partir de la fenêtre
+      d'outils. Vous pouvez utiliser votre souris pour dessiner plusieurs
+      profils sur l'image, que vous pourrez ensuite ajuster ou supprimer. La
+      boîte de dialogue comprend une pré-visualisation en temps réel du profil.
+      Les profils peuvent être de différentes <quote>épaisseurs</quote>, ce qui
+      signifie que des pixels supplémentaires voisins perpendiculairement à la
+      direction du profil sont utilisés pour évaluer un point donné du profil,
+      et ce d'autant plus que l'épaisseur du profil est grande. Cette option
+      peut être très utile pour s'affranchir du bruit lors de la mesure d'un
+      objet ayant une forme régulière.
+    </para>
+    <para>
+      Après avoir sélectionné les profils, ceux-ci peuvent être extraits sous
+      forme de graphes (séparés ou groupés dans une fenêtre de graphes) qui
+      pourront être ensuite analysées à l'aide des fonctions d'analyse de
+      graphes.
+    </para>
+    <informalfigure id='fig-profile-screenshot'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='profiles.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Outil d'extraction de profil</phrase>
+        </textobject>
+        <caption>
+          Outil d'extraction de profil montrant trois profils extraits ainsi
+          que les options disponibles.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+    <para>
+      La courbe du profil est construite à partir de données échantillonnées sur
+      des intervalles réguliers le long de la ligne sélectionnée. Les valeurs
+      des points ne tombant pas exactement sur le centre des pixels (ce qui est
+      normalement le cas pour les lignes obliques) sont interpolées en utilisant
+      la méthode d'<link linkend='interpolation'>interpolation</link> choisie.
+      A moins qu'un nombre explicite d'échantillons soit choisi à l'aide de
+      l'option <guilabel>Résolution fixe</guilabel>, le nombre d'échantillons
+      correspond à la longueur en pixels de la ligne. Ce qui signifie que pour
+      les lignes parfaitement horizontales ou verticales aucune interpolation
+      ne sera appliquée.
+    </para>
+    <informalfigure id='fig-profile-interpolation'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.pdf' format='PDF'/>
+        </imageobject>
+        <imageobject>
+          <imagedata fileref='profile-interpolation.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Schéma d'interpolation d'un profil</phrase>
+        </textobject>
+        <caption>
+          Illustration de l'échantillonnage du profil extrait d'une ligne
+          oblique. Les figures sur la gauche montrent les points le long de la
+          ligne pour laquelle les valeurs sont lues à la résolution naturlelle
+          et à très haute résolution. Les graphes sur la droite montrent les
+          valeurs extraites. La comparaison des profils à résolution haute et
+          naturelle avec l'interpolation arrondie montre que les points de la
+          courbe à la résolution naturelle sont en fait un sous-ensemble des
+          points de la courbe à haute résolution. L'influence de la méthode
+          d'interpolation sur les valeurs des points ne correspondant pas à la
+          grille est démontrée par les deux graphes du bas, en comparant les
+          interpolations arrondi et Key à haute résolution.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
