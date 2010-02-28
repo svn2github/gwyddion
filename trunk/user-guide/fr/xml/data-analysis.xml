@@ -15,7 +15,7 @@
     de base de Gwyddion, tels que décrits dans le
     <link linkend='getting-started'>chapitre précédent</link>.
   </para>
-<!--  <xi:include href='basic.xml'/> -->
+  <xi:include href='basic.xml'/>
 <!--  <xi:include href='interpolation.xml'/> -->
 <!--  <xi:include href='leveling.xml'/> -->
   <xi:include href='filters.xml'/>
