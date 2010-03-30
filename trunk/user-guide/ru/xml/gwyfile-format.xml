@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 9502 2009-07-18 21:47:20Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 11263 2010-03-30 13:03:25Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
@@ -20,11 +20,19 @@
   </sect2>
   <sect2 id="gwyfile-object-layout">
     <title>Размещение объекта</title>
-    <para>Объект состоит из трёх частей (в следующем порядке): <itemizedlist><listitem> Имя типа, сохранённое в виде строки ASCII-символов, заканчивающейся <constant>NUL</constant>. Это имя типа в системе типов GObject. </listitem><listitem> Размер сериализованных данных, сохранённый как 32-битное целое без знака. Он не включает размер имени типа и сам себя. </listitem><listitem> Список компонентов. Компоненты - именованные части данных объекта, каждый определенного типа данных из следующих: атомарный тип, массив атомарных типов, или снова объект. Они сохраняются без определённого порядка. </listitem></itemizedlist></para>
+    <para>Объект состоит из трёх частей (в следующем порядке): <itemizedlist>
+        <listitem>Имя типа, сохранённое в виде завершенной <constant>NUL</constant> строки символов ASCII. Это имя типа в системе типов GObject.</listitem>
+        <listitem>Размер переведённых в последовательную форму данных в виде 32-битного целого без знака. Не включает в себя размер имени типа и размер себя.</listitem>
+        <listitem>Список компонентов. Компонентами называются поименованные части данных объекта, каждая определённого типа данных: атомарного типа, массива атомарных типов или ещё одного объекта. Они сохраняются без определённого порядка.</listitem>
+      </itemizedlist></para>
   </sect2>
   <sect2 id="gwyfile-components">
     <title>Компоненты</title>
-    <para>Каждый компонент состоит из трёх частей (в следующем порядке): <itemizedlist><listitem> Название, сохранённое как строка, завершенная <constant>NUL</constant>. </listitem><listitem> Тип, сохраняется как один байт без знака (символ). Таблица возможных типов компонентов представлена ниже. </listitem><listitem> данные. сохраняются в том виде, который наиболее подходит для определённого их вида. </listitem></itemizedlist></para>
+    <para>Каждый компонент состоит из трёх частей (в следующем порядке): <itemizedlist>
+        <listitem>Имя, сохраненное в виде завершенной <constant>NUL</constant> строки.</listitem>
+        <listitem>Тип, сохранённый как один байт без знака (символ). Таблица возможных типов компонентов приведена ниже.</listitem>
+        <listitem>Данные, сохранённые в формате, который подходит для определённого типа.</listitem>
+      </itemizedlist></para>
   </sect2>
   <sect2 id="gwyfile-data-types">
     <title>Типы данных</title>
@@ -69,7 +77,7 @@
             <row>
               <entry>строка</entry>
               <entry><literal>s</literal></entry>
-              <entry>Заканчивающаяся <constant>NUL</constant></entry>
+              <entry><constant>NUL</constant>-завершенная</entry>
             </row>
             <row>
               <entry>объект</entry>
@@ -96,7 +104,7 @@
             <row>
               <entry>массив символов</entry>
               <entry><literal>C</literal></entry>
-              <entry>Не завершается <constant>NUL</constant></entry>
+              <entry>Не <constant>NUL</constant>-завершенный</entry>
             </row>
             <row>
               <entry>массив 32битных целых</entry>

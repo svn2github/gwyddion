@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id: simple-field-format.xml 11263 2010-03-30 13:03:25Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="gsf">
+  <title>Файлы с простым полем</title>
+  <para><link linkend="gwyfile-format">Встроенный формат файлов</link> Gwyddion сохраняет всю информацию и состояние, которые нужно хранить программе и, следовательно, устроен достаточно сложно. Часто не является разумным сохранять файлы в формате <filename>.gwy</filename> в других программах и скриптах, создающих входные файлы для программы Gwyddion.</para>
+  <para>Вместо этого можно использовать формат файла Простое поле Gwyddion (<filename>.gsf</filename>) для этих целей. Это формат с одним каналом для двумерных данных, который разработан чтобы его можно было просто и эффективно читать и писать, с читаемым человеком заголовком, достаточно выразительный и избегающий специфичных для прибора или приложения полей (хотя опционально формат может их содержать).</para>
+  <para>GSF может быть прочитан и записан Gwyddion версии 2.20 и выше.</para>
+  <sect2 id="gsf-overall-structure">
+    <title>Общая структура</title>
+    <para>Файл GSF состоит из четырёх частей в следующем порядке:</para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend="gsf-magic-line">магическая строка</link>
+        </term>
+        <listitem>
+          <para>Файлы начинаются с <quote>магической строки</quote>, определяющей тип файла.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gsf-text-header">текстовый заголовок</link>
+        </term>
+        <listitem>
+          <para>Заголовок состоит из строк в формате <informalexample><programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting></informalexample>, определяющих отдельные параметры.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gsf-zero-padding">выравнивание с помощью NUL</link>
+        </term>
+        <listitem>
+          <para>Заголовок заканчивается от одного до четырёх байтов NUL, выравнивая начало данных кратно 4. </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend="gsf-binary-data">двоичные данные</link>
+        </term>
+        <listitem>
+          <para>Двоичные данные хранятся в 32-битном формате с плавающей точкой.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id="gsf-magic-line">
+    <title>Магическая строка</title>
+    <para>Файлы GSF начинаются со строки  <informalexample><programlisting>Gwyddion Simple Field 1.0</programlisting></informalexample>, завершенной символом перевода строки (<literal>\n</literal>, ASCII 0x0a).</para>
+  </sect2>
+  <sect2 id="gsf-text-header">
+    <title>Текстовый заголовок</title>
+    <para>Каждая строка заголовка имеет формат <programlisting><replaceable>имя</replaceable> = <replaceable>значение</replaceable></programlisting>, где любой пробельный символ перед именем, вокруг знака равенства и в конце значения игнорируется. Имена полей чувствительны к регистру и следуют обычным правилам для идентификаторов в языках программирования.</para>
+    <para>Подобно магической строке, строки в текстовом заголовке заканчиваются символом перевода строки, как принято в Unix. Это означает, что заголовок должен читаться и писаться в двоичном режиме для сохранения символов перевода строки на других системах (и неизменности размера заголовка, например при преобразовании LF → CRLF).</para>
+    <para>Любые символы не из алфавита ASCII, которые могут попасться, например, в имени канала, представлены в кодировке UTF-8. Символ NUL не может встречаться в заголовке.</para>
+    <para>Поля заголовка:</para>
+    <informaltable frame="none" id="gsf-mandatory-header-fields">
+      <tgroup cols="3" align="left">
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Название</entry>
+            <entry>Тип</entry>
+            <entry>Значение</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Обязательное</entry>
+            <entry>Горизонтальный размер в пикселях, положительное целое.</entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Обязательное</entry>
+            <entry>Вертикальный размер в пикселях, положительное целое.</entry>
+          </row>
+          <row>
+            <entry><literal>XReal</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Горизонтальный размер в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой. По умолчанию равно 1.0 если не задано.</entry>
+          </row>
+          <row>
+            <entry><literal>YReal</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Вертикальный размер в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой. По умолчанию равно 1.0 если не задано.</entry>
+          </row>
+          <row>
+            <entry><literal>XOffset</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Горизонтальное смещение  в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой. По умолчанию равно 0.0 если не задано.</entry>
+          </row>
+          <row>
+            <entry><literal>YOffset</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Вертикальное смещение  в физических единицах (заданных <literal>XYUnits</literal>), положительное число с плавающей точкой. По умолчанию равно 0.0 если не задано.</entry>
+          </row>
+          <row>
+            <entry><literal>Заголовок</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Заголовок данных/канала. Не имеет значения по умолчанию, приложения могут отображать ‘Unknown’ или нечто подобное если не задан.</entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Пространственные единицы, т.е. единицы физических размеров и смещений. Они должны быть заданы как базовые единицы, которыми являются <literal>m</literal> или <literal>A</literal> без префикса, обозначающего степень 10 (Gwyddion с этим справится, но это может создавать проблемы другим программам). По умолчанию величины безразмерные. Это означает, что для данных СЗМ вы обычно захотите задать <literal>XYUnits</literal> как <literal>m</literal> поскольку пространственные размеры измеряются в метрах.</entry>
+          </row>
+          <row>
+            <entry><literal>ZUnits</literal></entry>
+            <entry>Опциональное</entry>
+            <entry>Единицы значения, т.е. единицы значений данных. См. <literal>XYUnits</literal> выше для дополнительной информации.</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>Числа с плавающей точкой могут быть в научном формате, т.е. <literal>1.23e-4</literal>. Они представлены в стандартной локали C/POSIX, десятичным разделителем является точка (не запятая и не другие разделители).</para>
+    <para>Заголовок может содержать другие поля помимо описанных выше. Gwyddion загрузит их в <link linkend="metadata">метаданные</link>. Общие информационные поля могут включать <literal>Комментарий</literal>, <literal>Дату</literal> или <literal>Направление</literal>.</para>
+    <para>Поля могут идти в любом порядке, тем не менее, рекомендуется начинать с обязательных полей, затем привести опциональные и закончить нестандартными.</para>
+    <para>Пример простого заголовка (также включает магическую строку):</para>
+    <informalexample>
+      <programlisting>Gwyddion Simple Field 1.0 XRes = 400 YRes = 400 XReal = 5e-05 YReal = 5e-05 XYUnits = m ZUnits = V Title = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id="gsf-zero-padding">
+    <title>выравнивание с помощью NUL</title>
+    <para>За текстовым заголовком идёт от одного до четырёх байтов NUL (<literal>\0</literal>, ASCII 0x00), которые (a) завершают его и (b) выравнивают начало двоичных данных от начала файла на величину, кратную 4. Точнее, обозначив <include href="eqi-N.xml"/> общую длину магической строки и текстового заголовка, данные начинаются в ближайшем числе, кратном 4 и большем, чем <include href="eqi-N.xml"/>.</para>
+    <para>Это выравнивание по кратному 4 гарантирует выровненный доступ к памяти при отображении файла непосредственно в память. Количество байтов NUL однозначно определяется остатком от деления длины на 4(<include href="eqi-N-mod-4.xml"/>):</para>
+    <informaltable frame="none" id="gsf-zero-padding-table">
+      <tgroup cols="2" align="left">
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Остаток</entry>
+            <entry>Число выравнивающих символов NUL</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>4</entry></row>
+          <row><entry>1</entry><entry>3</entry></row>
+          <row><entry>2</entry><entry>2</entry></row>
+          <row><entry>3</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id="gsf-binary-data">
+    <title>Двоичные данные</title>
+    <para>Значения данных хранятся как 32-битные числа с плавающей точкой IEEE одинарной точности, в формате следования байтов начиная с младшего (LSB, or Intel). Данные сохраняются по строкам, сверху вниз и в каждой строке слева направо.</para>
+    <para>Физические величины этих значений - <literal>ZUnits</literal>.</para>
+    <para>Размер данных изображения точно <literal>4*XRes*YRes</literal> и после них в файле больше нет данных.</para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

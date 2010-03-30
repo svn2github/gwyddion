@@ -11,5 +11,6 @@
   <xi:include href="expressions.xml"/>
   <xi:include href="resources.xml"/>
   <xi:include href="gwyfile-format.xml"/>
+  <xi:include href="simple-field-format.xml"/>
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->
