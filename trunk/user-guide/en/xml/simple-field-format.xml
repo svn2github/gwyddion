@@ -1,0 +1,285 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gsf'>
+  <title>Simple Field Files</title>
+  <para>
+    The Gwyddion <link linkend='gwyfile-format'>native file format</link>
+    captures all the information and state Gwyddion needs to save and
+    consequently it is quite complex.  Often it is not practical to save files
+    in <filename>.gwy</filename> format in custom programs and scripts creating
+    input for Gwyddion.
+  </para>
+  <para>
+    The Gwyddion Simple Field file format (<filename>.gsf</filename>) can be
+    used in these situations instead.  It is a single-channel format for 2D
+    data that was designed to be easy and efficient to read and write, with
+    human-readable header, reasonably expressive, and avoiding instrument or
+    application specific fields (though it can optionally bear them).
+  </para>
+  <para>
+    GSF can be read and written by Gwyddion version 2.20 or later.
+  </para>
+  <sect2 id='gsf-overall-structure'>
+    <title>Overall structure</title>
+    <para>
+      A GSF file consists of four parts, in the following order:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-magic-line'>magic line</link>
+        </term>
+        <listitem>
+          <para>
+            Files begin with a <quote>magic line</quote> identifying the file
+            type.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-text-header'>text header</link>
+        </term>
+        <listitem>
+          <para>
+            The header consists of lines of the form
+            <informalexample>
+              <programlisting><replaceable>name</replaceable> = <replaceable>value</replaceable></programlisting>
+            </informalexample>
+            defining individual parameters.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-zero-padding'>NUL padding</link>
+        </term>
+        <listitem>
+          <para>
+            The header is terminated by one to four NUL bytes, aligning the
+            data start to a multiple of 4.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-binary-data'>binary data</link>
+        </term>
+        <listitem>
+          <para>
+            Binary data is in 32bit floating-point format.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='gsf-magic-line'>
+    <title>Magic line</title>
+    <para>
+      GSF files start with the line
+      <informalexample>
+        <programlisting>Gwyddion Simple Field 1.0</programlisting>
+      </informalexample>
+      terminated by a linefeed character (<literal>\n</literal>, ASCII 0x0a).
+    </para>
+  </sect2>
+  <sect2 id='gsf-text-header'>
+    <title>Text header</title>
+    <para>
+      Each header line has the form
+      <programlisting><replaceable>name</replaceable> = <replaceable>value</replaceable></programlisting>
+      where any whitespace before the name, around the equal sign and at the
+      end of value is ignored.  Field names are case-sensitive and follow the
+      usual rules for identifiers in programming languages.
+    </para>
+    <para>
+      Similarly to the magic line, the lines in the text header are terminated
+      by a linefeed character as is usual on Unix.  This means the header must
+      be read and written in binary mode to ensure preservation of end-of-line
+      characters on other systems (and not changing the header size e.g. by
+      LF → CRLF transformation).
+    </para>
+    <para>
+      Any non-ASCII characters, that can occur for example in the channel
+      title, are represented in UTF-8 encoding.  The NUL character may not
+      occur in the header.
+    </para>
+    <para>
+      Header fields:
+    </para>
+    <informaltable frame='none' id='gsf-mandatory-header-fields'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Name</entry>
+            <entry>Type</entry>
+            <entry>Value</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Mandatory</entry>
+            <entry>
+              The horizontal size in pixels, a positive integer.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Mandatory</entry>
+            <entry>
+              The vertical size in pixels, a positive integer.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XReal</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Horizontal size in physical units (given by
+              <literal>XYUnits</literal>), a positive floating point number.
+              It defaults to 1.0 if not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YReal</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Vertical size in physical units (given by
+              <literal>XYUnits</literal>), a positive floating point number. It
+              defaults to 1.0 if not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XOffset</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Horizontal offset in physical units (given by
+              <literal>XYUnits</literal>), a floating point number. It defaults
+              to 0.0 if not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YOffset</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Vertical offset in physical units (given by
+              <literal>XYUnits</literal>), a floating point number.
+              It defaults to 0.0 if not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Title</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Data/channel title.  It has no default, applications might
+              display ‘Unknown’ or something similar if not given.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Lateral units, i.e. units of physical sizes and offsets.  They
+              must be given as base units, that is <literal>m</literal> or
+              <literal>A</literal> with no power-of-10 prefix (Gwyddion could
+              deal with it but it might present a problem for other software).
+              The default is no units. This means in SPM data, you normally
+              wish to specify <literal>XYUnits</literal> as
+              <literal>m</literal> because the lateral dimensions are in
+              metres.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>ZUnits</literal></entry>
+            <entry>Optional</entry>
+            <entry>
+              Value units, i.e. units of data values.  See
+              <literal>XYUnits</literal> above for details.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Floating point numbers can be in the scientific format, e.g.
+      <literal>1.23e-4</literal>.  They are represented in the standard C/POSIX
+      locale, i.e. decimal dot is used (not comma or other separators).
+    </para>
+    <para>
+      The header may contain other fields beside those listed above.  Gwyddion
+      will load them into <link linkend='metadata'>metadata</link>.
+      Common informational fields can include <literal>Comment</literal>,
+      <literal>Date</literal> or <literal>Direction</literal>.
+    </para>
+    <para>
+      Fields may occur in any order, nevertheless, it is recommended to start
+      with mandatory fields, continue with optional fields and put custom
+      fields last.
+    </para>
+    <para>
+      A simple header example (also including the magic line):
+    </para>
+    <informalexample>
+      <programlisting>Gwyddion Simple Field 1.0
+XRes = 400
+YRes = 400
+XReal = 5e-05
+YReal = 5e-05
+XYUnits = m
+ZUnits = V
+Title = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id='gsf-zero-padding'>
+    <title>NUL padding</title>
+    <para>
+      The text header is followed by one to four NUL (<literal>\0</literal>,
+      ASCII 0x00) bytes that (a) terminate it and (b) align the data start to
+      an offset from the begining of file that is a multiple of 4.  More
+      precisely, denoting <xi:include href='eqi-N.xml'/> the total lenght of
+      the magic line and the text header, the data starts at the nearest
+      multiple of 4 larger than <xi:include href='eqi-N.xml'/>.
+    </para>
+    <para>This padding to a multiple of 4 ensures aligned memory access when
+      mapping the the file directly to memory.  The number of NUL bytes is
+      uniquely determined by the remainder of the length modulo four
+      (<xi:include href='eqi-N-mod-4.xml'/>):
+    </para>
+    <informaltable frame='none' id='gsf-zero-padding-table'>
+      <tgroup cols='2' align='left'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Remainder</entry>
+            <entry>Number of padding NULs</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>4</entry></row>
+          <row><entry>1</entry><entry>3</entry></row>
+          <row><entry>2</entry><entry>2</entry></row>
+          <row><entry>3</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='gsf-binary-data'>
+    <title>Binary data</title>
+    <para>
+      Data values are stored as IEEE 32bit single-precision floating point
+      numbers, in little-endian (LSB, or Intel) byte order.  Values are stored
+      by row, from top to bottom, and in each row from left to right.
+    </para>
+    <para>
+      The physical units of these values are <literal>ZUnits</literal>.
+    </para>
+    <para>
+      The size of the image data is exactly <literal>4*XRes*YRes</literal> and
+      there is no data after it in the file.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
