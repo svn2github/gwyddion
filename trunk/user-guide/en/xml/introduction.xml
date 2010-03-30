@@ -6,7 +6,13 @@
   <title>Introduction</title>
   <para>
     This guide was last updated to version 2.19 of Gwyddion.
-    The latest version this guide can be found at
+  </para>
+  <para>
+    The latest version of this guide is available on-line at
+    <ulink url='http://gwyddion.net/documentation/user-guide-en/'>http://gwyddion.net/documentation/user-guide-en/</ulink>.
+    This guide is available in several languages, namely English, French and
+    Russian.
+    All language versions are listed on-line at
     <ulink url='http://gwyddion.net/documentation/'>http://gwyddion.net/documentation/</ulink>.
   </para>
   <sect1 id='motivation'>
