@@ -3,26 +3,11 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="managing-files">
   <title>Управление файлами</title>
-  <para>
-    Gwyddion uses its <link linkend="gwyfile-format">custom data format</link>
-    (<filename>.gwy</filename>) to store data.  This format has the following
-    important advantages:
-    <itemizedlist>
-      <listitem>
-        Capability to store the complete state of the individual data,
-        including masks, selections and other properties.
-      </listitem>
-      <listitem>
-        Arbitrary number of channels, graphs and spectrum sets, with arbitrary
-        dimensions and units of both dimensions and values.
-      </listitem>
-      <listitem>
-        Double-precision representation of all data, preventing information
-        loss due to rounding.
-      </listitem>
-    </itemizedlist>
-    Therefore, we recommned to use this format for saving of processed files.
-  </para>
+  <para>Gwyddion использует свой <link linkend="gwyfile-format">собственный формат данных</link> (<filename>.gwy</filename>) для сохранения информации. Этот формат обладает следующими важными преимуществами: <itemizedlist>
+      <listitem>Возможность сохранять полное состояние отдельных данных, включая маски, выделенные области и другие свойства.</listitem>
+      <listitem>Произвольное количество каналов, графиков и наборов спектров, с произвольными размерами и единицами как для значений в плоскости, так и по вертикали.</listitem>
+      <listitem>Представление всех данных с двойной точностью, что предотвращает потерю информации в результате округления.</listitem>
+    </itemizedlist> Следовательно, мы рекомендуем использовать именно этот формат для сохранения обработанных файлов.</para>
   <para>Другие форматы файлов данных обрабатываются соответствующими модулями загрузи и сохранения файлов. Помимо большого числа файловых форматов, используемых в сканирующей зондовой микроскопии, могут также быть импортированы графические файлы (PNG, JPEG, TIFF, TARGA) и необработанные двоичные и текстовые данные. Если ваш формат данных СЗМ ещё не поддерживается Gwyddion или загружается некорректно, мы рекомендуем вам или написать модуль импорта (если есть такая возможность), или связаться с разработчиками чтобы помочь им улучшить поддержку.</para>
   <para><link linkend="file-formats">Список поддерживаемых форматов файлов</link> приведён в разделе Сводки и таблицы.</para>
   <sect2 id="file-loading">
@@ -67,61 +52,24 @@
       <primary>недавно открытые</primary>
     </indexterm>
     <para>История недавно открытых файлов доступна в меню <menuchoice><guimenu>Файл</guimenu><guisubmenu>Последние документы</guisubmenu></menuchoice>. Подменю содержит последние десять недавно использованных файлов для быстрого вызова, более подробная история недавно открытых файлов доступна с помощью последнего пункта меню <guimenuitem>Предыдущие документы</guimenuitem>.</para>
-    <para>
-      Document history lists the files sorted by the last access time (the
-      most recently accessed at the top), with previews and some additional
-      information about a selected channel.  The function of the bottom row
-      of buttons is following:
-      <variablelist>
+    <para>История документов выводит файлы отсортированными по времени последнего обращения (последние наверху), с предпросмотром и некоторой дополнительной информацией о выбранном канале. Функции нижнего ряда кнопок следующие: <variablelist>
         <varlistentry>
-          <term><guibutton>Prune</guibutton></term>
-          <listitem>
-            Removes history entries of files that have been deleted or are
-            no longer accessible for other reasons.
-          </listitem>
+          <term><guibutton>Чистить</guibutton></term>
+          <listitem>Удаляет элементы истории для файлов которые были удалены или стали недоступны по другим причинам.</listitem>
         </varlistentry>
         <varlistentry>
-          <term><guibutton>Close</guibutton></term>
-          <listitem>
-            Closes the document history window.
-          </listitem>
+          <term><guibutton>Закрыть</guibutton></term>
+          <listitem>Закрывает окно истории документов.</listitem>
         </varlistentry>
         <varlistentry>
-          <term><guibutton>Open</guibutton></term>
-          <listitem>
-            Opens the selected file.  This can be also achieved by activating
-            the selected row, either by double-clicking or with the keyboard.
-          </listitem>
+          <term><guibutton>Открыть</guibutton></term>
+          <listitem>Открывает выбранный файл. Этого же можно достичь активировав выбранную строку либо двойным щелчком, либо с помощью клавиатуры.</listitem>
         </varlistentry>
-      </variablelist>
-    </para>
-    <para>
-      The history can be searched/filtered by file name using the filter
-      controls above the buttons.  The filter is activated by pressing
-      <keycap>Enter</keycap> in the filter pattern entry.  To display all
-      history entries, clear the entry and activate it.  The filter pattern
-      is interpreted in two ways:
-      <itemizedlist>
-        <listitem>
-          If the pattern contains wildcards, i.e. <literal>*</literal> or
-          <literal>?</literal>, it is interpreted as file glob.  This means
-          <literal>?</literal> represents a signle arbitrary character,
-          <literal>*</literal> represents an arbitrary sequence of zero or
-          more characters, and the file name has to precisely match the
-          pattern.  Note directory separators (<literal>/</literal> or
-          <literal>\</literal>) are not treated specially, therefore in the
-          pattern <literal>*.sis</literal> the initial <literal>*</literal>
-          matches all leading directory components.  The pattern syntax is
-          described in
-          <ulink url="http://library.gnome.org/devel/glib/stable/glib-Glob-style-pattern-matching.html#glib-Glob-style-pattern-matching.description">GPatternSpec</ulink>
-          documentation.
-        </listitem>
-        <listitem>
-          If the pattern does not contain any wildcards, it is directly
-          searched as a part of the file name.
-        </listitem>
-      </itemizedlist>
-    </para>
+      </variablelist></para>
+    <para>В истории можно искать или фильтровать её по имени с помощью строки "Фильтр" над кнопками. Фильтр активируется нажатием <keycap>Enter</keycap> в строке ввода шаблона фильтрации. Чтобы показать все элементы истории, очистите эту стоку и активируйте её. Шаблон поиска интерпретируется двояко: <itemizedlist>
+        <listitem>Если шаблон содержит групповые символы, т.е.<literal>*</literal> или <literal>?</literal>, он интерпретируется как раскрытие имени файла. Это означает, что <literal>?</literal>? заменяет один любой произвольный символ, <literal>*</literal> заменяет произвольную последовательность из нуля и более символов, и имя файла должно точно соответствовать шаблону. Следует отметить, что разделители пути (<literal>/</literal> или <literal>\</literal>) не рассматриваются отдельно, следовательно в шаблоне <literal>*.mdt</literal> начальная <literal>*</literal> соответствует всем предыдущим компонентам имени каталога. Синтаксис шаблона описан в документации по <ulink url="http://library.gnome.org/devel/glib/stable/glib-Glob-style-pattern-matching.html#glib-Glob-style-pattern-matching.description">GPatternSpec</ulink>.</listitem>
+        <listitem>Если шаблон не содержит символов раскрытия, он напрямую ищется как часть имени файла.</listitem>
+      </itemizedlist></para>
     <para>Чувствительность поиска к регистру символов, управляемая опцией <guilabel>С учётом регистра</guilabel>, полезна в основном на системах, разделяющих регистр букв в именах файлов, таких как Unix. На системах не различающих самостоятельно регистр символов рекомендуется держать эту опцию выключенной.</para>
   </sect2>
 </sect1>
