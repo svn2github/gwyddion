@@ -13,16 +13,17 @@ MAN_ENABLE = @MAN_ENABLE@
 PNG_ENABLE = @PNG_ENABLE@
 SVG_ENABLE = @SVG_ENABLE@
 
+BASH = @BASH@
 GMAKE = @GMAKE@
 GSED = @GSED@
 PYTHON = @PYTHON@
 XML2PO = @XML2PO@
 MSGMERGE = @MSGMERGE@
 DBLATEX_CMD = @DBLATEX@ --input-format=xml --texinputs=$(abspath $(COMMON)) --fig-path=$(abspath images) --xslt="@XSLTPROC@" --debug
-INKSCAPE_EXPORT = $(SHELL) $(COMMON)/inkscape-export.sh
+INKSCAPE_EXPORT = $(BASH) $(COMMON)/inkscape-export.sh
 XML_EXTRACT = $(PYTHON) $(COMMON)/xml-extract.py
 XML_UNFOLD = $(PYTHON) $(COMMON)/xmlunfold.py
-RENDER = $(SHELL) $(COMMON)/render.sh
+RENDER = $(BASH) $(COMMON)/render.sh
 
 MAN_PAGES = gwyddion.1 gwyddion-thumbnailer.1
 

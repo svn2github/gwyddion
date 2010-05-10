@@ -49,6 +49,12 @@ if test "$GSED" != no; then
   fi
 fi
 
+AC_CHECK_PROGS([BASH],[bash],[no])
+if test "$GSED" == no; then
+  AC_MSG_ERROR([Bash is required to build the user guide.
+                Get it at http://ftp.gnu.org/pub/gnu/bash/])
+fi
+
 # FIXME: Text processing probably does not actually work with Python3.
 AC_CHECK_PROGS([PYTHON],[python python2.6 python2.5 python2.4 python2 python3 python3.1 python3.2],[no])
 if test "$PYTHON" == no; then
