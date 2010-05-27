@@ -152,7 +152,7 @@ simple_dialog(SimpleArgs *args)
                      GTK_EXPAND | GTK_FILL, 0, 0, 0);
     row++;
 
-    args->name[0] = g_strdup_printf("Graging image");
+    args->name[0] = g_strdup_printf("Grating image");
     args->name[1] = g_strdup_printf("Detail");
       for (i = 0; i < NARGS; i++) {
         label = gtk_label_new_with_mnemonic(args->name[i]);

@@ -36,6 +36,11 @@
 #include <app/gwyapp.h>
 
 #define CNEW_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
+typedef enum {
+   DUPLICATE_NONE = 0,
+   DUPLICATE_OVERWRITE = 1,
+   DUPLICATE_APPEND = 2
+} ResponseDuplicate;
 
 typedef struct {
     gdouble xrange_from;
@@ -57,6 +62,7 @@ typedef struct {
     gint xyuexponent;
     gint zuexponent;
     gchar *name;
+    ResponseDuplicate duplicate;
 } CNewArgs;
 
 typedef struct {
@@ -158,6 +164,7 @@ static const CNewArgs cnew_defaults = {
     -6,
     -6,
     "new calibration",
+    0,
 };
 
 static GwyModuleInfo module_info = {
@@ -196,6 +203,10 @@ cnew(GwyContainer *data, GwyRunType run)
     GwyCalibration *calibration;
     GwyCalData *caldata;
     gchar *filename;
+    gchar *contents;
+    gsize len;
+    GError *err = NULL;
+    gsize pos = 0;
     GString *str;
     GByteArray *barray;
     FILE *fh;
@@ -216,8 +227,41 @@ cnew(GwyContainer *data, GwyRunType run)
     }
 
     /*create the caldata*/
-    caldata = gwy_caldata_new(8);
-    n = 0;
+
+    printf("response duplicate %d\n", args.duplicate);
+
+    if (args.duplicate == DUPLICATE_APPEND) 
+     calibration = gwy_inventory_get_item(gwy_calibrations(), args.name);
+     if (calibration) {
+        filename = g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL);
+        if (!g_file_get_contents(filename,
+                                 &contents, &len, &err))
+        {
+             g_warning("Error loading file: %s\n", err->message);
+             g_clear_error(&err);
+             return;
+        }
+        else {
+            if (len)
+              caldata = GWY_CALDATA(gwy_serializable_deserialize(contents, len, &pos));
+            g_free(contents);
+        }
+        n = caldata->ndata;
+        caldata->x = g_realloc(caldata->x, (n+8)*sizeof(gdouble));
+        caldata->y = g_realloc(caldata->y, (n+8)*sizeof(gdouble));
+        caldata->z = g_realloc(caldata->z, (n+8)*sizeof(gdouble));
+        caldata->xerr = g_realloc(caldata->xerr, (n+8)*sizeof(gdouble));
+        caldata->yerr = g_realloc(caldata->yerr, (n+8)*sizeof(gdouble));
+        caldata->zerr = g_realloc(caldata->zerr, (n+8)*sizeof(gdouble));
+        caldata->xunc = g_realloc(caldata->xunc, (n+8)*sizeof(gdouble));
+        caldata->yunc = g_realloc(caldata->yunc, (n+8)*sizeof(gdouble));
+        caldata->zunc = g_realloc(caldata->zunc, (n+8)*sizeof(gdouble));
+          
+    }   
+    else {
+        caldata = gwy_caldata_new(8);
+        n = 0;
+    }
     for (i=0; i<2; i++)
     {
         for (j=0; j<2; j++)
@@ -305,7 +349,9 @@ cnew_dialog(CNewArgs *args,
     GwySIUnit *unit;
     gint row;
     CNewControls controls;
-    enum { RESPONSE_RESET = 1 };
+    enum { RESPONSE_RESET = 1,
+           RESPONSE_DUPLICATE_OVERWRITE = 2,
+           RESPONSE_DUPLICATE_APPEND = 3 };
     gint response;
 
     controls.args = args;
@@ -597,12 +643,21 @@ cnew_dialog(CNewArgs *args,
                 dialog2 = gtk_message_dialog_new (dialog,
                                                  GTK_DIALOG_DESTROY_WITH_PARENT,
                                                  GTK_MESSAGE_WARNING,
-                                                 GTK_BUTTONS_OK_CANCEL,
-                                                 "Calibration '%s' alerady exists, overwrite?",
+                                                 GTK_BUTTONS_CANCEL,
+                                                 "Calibration '%s' alerady exists",
                                                  args->name);
+                gtk_dialog_add_button(dialog2, "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
+                gtk_dialog_add_button(dialog2, "Append", RESPONSE_DUPLICATE_APPEND);
                 response = gtk_dialog_run(GTK_DIALOG(dialog2));
+                if (response == RESPONSE_DUPLICATE_OVERWRITE) {
+                    args->duplicate = DUPLICATE_OVERWRITE;
+                    response = GTK_RESPONSE_OK;
+                } else if (response == RESPONSE_DUPLICATE_APPEND) {
+                    args->duplicate = DUPLICATE_APPEND;
+                    response = GTK_RESPONSE_OK;
+                }
                 gtk_widget_destroy (dialog2);
-            }
+            } else args->duplicate = DUPLICATE_NONE;
             break;
 
             case RESPONSE_RESET:
