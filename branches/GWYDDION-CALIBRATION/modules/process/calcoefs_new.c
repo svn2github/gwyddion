@@ -199,7 +199,7 @@ cnew(GwyContainer *data, GwyRunType run)
     GwyDataField *dfield;
     CNewArgs args;
     gboolean ok;
-    gint oldid, newid, i, j, k, n;
+    gint oldid, i, j, k, n;
     GwyCalibration *calibration;
     GwyCalData *caldata;
     gchar *filename;
@@ -228,11 +228,9 @@ cnew(GwyContainer *data, GwyRunType run)
 
     /*create the caldata*/
 
-    printf("response duplicate %d\n", args.duplicate);
 
-    if (args.duplicate == DUPLICATE_APPEND) 
-     calibration = gwy_inventory_get_item(gwy_calibrations(), args.name);
-     if (calibration) {
+    if (args.duplicate == DUPLICATE_APPEND && (calibration = gwy_inventory_get_item(gwy_calibrations(), args.name)))
+        {
         filename = g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL);
         if (!g_file_get_contents(filename,
                                  &contents, &len, &err))
@@ -246,18 +244,21 @@ cnew(GwyContainer *data, GwyRunType run)
               caldata = GWY_CALDATA(gwy_serializable_deserialize(contents, len, &pos));
             g_free(contents);
         }
-        n = caldata->ndata;
-        caldata->x = g_realloc(caldata->x, (n+8)*sizeof(gdouble));
-        caldata->y = g_realloc(caldata->y, (n+8)*sizeof(gdouble));
-        caldata->z = g_realloc(caldata->z, (n+8)*sizeof(gdouble));
-        caldata->xerr = g_realloc(caldata->xerr, (n+8)*sizeof(gdouble));
-        caldata->yerr = g_realloc(caldata->yerr, (n+8)*sizeof(gdouble));
-        caldata->zerr = g_realloc(caldata->zerr, (n+8)*sizeof(gdouble));
-        caldata->xunc = g_realloc(caldata->xunc, (n+8)*sizeof(gdouble));
-        caldata->yunc = g_realloc(caldata->yunc, (n+8)*sizeof(gdouble));
-        caldata->zunc = g_realloc(caldata->zunc, (n+8)*sizeof(gdouble));
+        n = caldata->ndata + 8;
+        caldata->x = g_realloc(caldata->x, n*sizeof(gdouble));
+        caldata->y = g_realloc(caldata->y, n*sizeof(gdouble));
+        caldata->z = g_realloc(caldata->z, n*sizeof(gdouble));
+        caldata->xerr = g_realloc(caldata->xerr, n*sizeof(gdouble));
+        caldata->yerr = g_realloc(caldata->yerr, n*sizeof(gdouble));
+        caldata->zerr = g_realloc(caldata->zerr, n*sizeof(gdouble));
+        caldata->xunc = g_realloc(caldata->xunc, n*sizeof(gdouble));
+        caldata->yunc = g_realloc(caldata->yunc, n*sizeof(gdouble));
+        caldata->zunc = g_realloc(caldata->zunc, n*sizeof(gdouble));
+
+        caldata->ndata = n;
           
-    }   
+      
+    } 
     else {
         caldata = gwy_caldata_new(8);
         n = 0;
@@ -615,12 +616,12 @@ cnew_dialog(CNewArgs *args,
                                               G_CALLBACK(zmult_changed_cb), &controls);
 
 
-
-
-
-
     g_signal_connect(controls.xyunits, "clicked", 
                      G_CALLBACK(units_change_cb), &controls);
+
+    g_signal_connect(controls.zunits, "clicked", 
+                     G_CALLBACK(units_change_cb), &controls);
+
 
     controls.in_update = FALSE;
 
@@ -765,9 +766,6 @@ static void
 cnew_dialog_update(CNewControls *controls,
                         CNewArgs *args)
 {
-    gchar buffer[32];
-    gint e;
-
     gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->xrange_from),
                              args->xrange_from/pow10(args->xyexponent));
 

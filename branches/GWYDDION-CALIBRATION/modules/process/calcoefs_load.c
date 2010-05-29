@@ -37,9 +37,17 @@
 
 #define CNEW_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
+typedef enum {
+       DUPLICATE_NONE = 0,
+          DUPLICATE_OVERWRITE = 1,
+             DUPLICATE_APPEND = 2
+} ResponseDuplicate;
+
+
 typedef struct {
     gchar *name;
     GwyCalData *caldata;
+    ResponseDuplicate duplicate;
 } CLoadArgs;
 
 typedef struct {
@@ -62,6 +70,8 @@ static void         load_caldata              (CLoadControls *controls);
 
 static const CLoadArgs cload_defaults = {
     "new calibration",
+    NULL,
+    0,
 };
 
 static GwyModuleInfo module_info = {
@@ -98,7 +108,12 @@ cload(GwyContainer *data, GwyRunType run)
     gboolean ok;
     gint oldid, newid, i, j, k, n;
     GwyCalibration *calibration;
+    GwyCalData *caldata;
     gchar *filename;
+    gchar *contents;
+    gsize len;
+    GError *err = NULL;
+    gsize pos = 0;
     GString *str;
     GByteArray *barray;
     FILE *fh;
@@ -116,6 +131,51 @@ cload(GwyContainer *data, GwyRunType run)
         //cload_save_args(gwy_app_settings_get(), &args);
         if (!ok)
             return;
+    }
+
+    /*if append requested, copy newly created calibration into old one*/
+    if (args.duplicate == DUPLICATE_APPEND && (calibration = gwy_inventory_get_item(gwy_calibrations(), args.name)))
+    {
+        
+        filename = g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL);
+        if (!g_file_get_contents(filename,
+                                 &contents, &len, &err))
+        {
+             g_warning("Error loading file: %s\n", err->message);
+             g_clear_error(&err);
+             return;
+        }
+        else {
+            if (len)
+              caldata = GWY_CALDATA(gwy_serializable_deserialize(contents, len, &pos));
+            g_free(contents);
+        }
+        n = caldata->ndata + args.caldata->ndata;
+
+        //add to args->caldata
+        args.caldata->x = g_realloc(args.caldata->x, n*sizeof(gdouble));
+        args.caldata->y = g_realloc(args.caldata->y, n*sizeof(gdouble));
+        args.caldata->z = g_realloc(args.caldata->z, n*sizeof(gdouble));
+        args.caldata->xerr = g_realloc(args.caldata->xerr, n*sizeof(gdouble));
+        args.caldata->yerr = g_realloc(args.caldata->yerr, n*sizeof(gdouble));
+        args.caldata->zerr = g_realloc(args.caldata->zerr, n*sizeof(gdouble));
+        args.caldata->xunc = g_realloc(args.caldata->xunc, n*sizeof(gdouble));
+        args.caldata->yunc = g_realloc(args.caldata->yunc, n*sizeof(gdouble));
+        args.caldata->zunc = g_realloc(args.caldata->zunc, n*sizeof(gdouble));
+
+        for (i=args.caldata->ndata; i<n; i++)
+        {
+           args.caldata->x[i] = caldata->x[i];
+           args.caldata->y[i] = caldata->y[i];
+           args.caldata->z[i] = caldata->z[i];
+           args.caldata->xerr[i] = caldata->xerr[i];
+           args.caldata->yerr[i] = caldata->yerr[i];
+           args.caldata->zerr[i] = caldata->zerr[i];
+           args.caldata->xunc[i] = caldata->xunc[i];
+           args.caldata->yunc[i] = caldata->yunc[i];
+           args.caldata->zunc[i] = caldata->zunc[i];
+        }
+        args.caldata->ndata = n; 
     }
 
     /*now create and save the resource*/
@@ -167,7 +227,10 @@ cload_dialog(CLoadArgs *args,
     GwySIUnit *unit;
     gint row = 0;
     CLoadControls controls;
-    enum { RESPONSE_RESET = 1 };
+    enum { RESPONSE_RESET = 1,
+        RESPONSE_DUPLICATE_OVERWRITE = 2,
+        RESPONSE_DUPLICATE_APPEND = 3 };
+
     gint response;
 
     controls.args = args;
@@ -176,6 +239,7 @@ cload_dialog(CLoadArgs *args,
                                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
                                          GTK_STOCK_OK, GTK_RESPONSE_OK,
                                          NULL);
+    controls.dialog = dialog;
     gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
 
     gtk_dialog_add_action_widget(GTK_DIALOG(dialog),
@@ -219,14 +283,23 @@ cload_dialog(CLoadArgs *args,
             if (gwy_inventory_get_item(gwy_calibrations(), args->name))
             {
                 dialog2 = gtk_message_dialog_new (dialog,
-                                                 GTK_DIALOG_DESTROY_WITH_PARENT,
-                                                 GTK_MESSAGE_WARNING,
-                                                 GTK_BUTTONS_OK_CANCEL,
-                                                 "Calibration '%s' alerady exists, overwrite?",
-                                                 args->name);
+                                                  GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                  GTK_MESSAGE_WARNING,
+                                                  GTK_BUTTONS_CANCEL,
+                                                  "Calibration '%s' alerady exists",
+                                                  args->name);
+                gtk_dialog_add_button(dialog2, "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
+                gtk_dialog_add_button(dialog2, "Append", RESPONSE_DUPLICATE_APPEND);
                 response = gtk_dialog_run(GTK_DIALOG(dialog2));
+                if (response == RESPONSE_DUPLICATE_OVERWRITE) {
+                    args->duplicate = DUPLICATE_OVERWRITE;
+                    response = GTK_RESPONSE_OK;
+                } else if (response == RESPONSE_DUPLICATE_APPEND) {
+                    args->duplicate = DUPLICATE_APPEND;
+                    response = GTK_RESPONSE_OK;
+                }
                 gtk_widget_destroy (dialog2);
-            }
+            } else args->duplicate = DUPLICATE_NONE;
             break;
 
             case RESPONSE_LOAD:
@@ -263,6 +336,7 @@ load_caldata(CLoadControls *controls)
     gdouble x, y, z, xerr, yerr, zerr, xunc, yunc, zunc;
     gchar six[50], siy[50], siz[50];
 
+    printf("load\n");
     dialog = gtk_file_chooser_dialog_new ("Load calibration data",
                       GTK_WINDOW(controls->dialog),
                       GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -270,6 +344,7 @@ load_caldata(CLoadControls *controls)
                       GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                       NULL);
 
+    printf("kvak\n");
     if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
     {
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));

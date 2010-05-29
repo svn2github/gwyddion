@@ -20,12 +20,14 @@
 
 #include "config.h"
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwymath.h>
 #include <libgwyddion/gwyexpr.h>
 #include <libprocess/datafield.h>
 #include <libprocess/gwyprocess.h>
 #include <libgwydgets/gwystock.h>
+#include <libgwydgets/gwycombobox.h>
 #include <libgwymodule/gwymodule-process.h>
 #include <app/gwyapp.h>
 
@@ -41,6 +43,13 @@ enum {
     SIMPLE_EXPR = 2
 };
 
+typedef enum {
+    DUPLICATE_NONE = 0,
+    DUPLICATE_OVERWRITE = 1,
+    DUPLICATE_APPEND = 2
+} ResponseDuplicate;
+
+
 typedef struct {
     GwyContainer *data;
     gint id;
@@ -50,18 +59,42 @@ typedef struct {
     GwyDataObjectId objects[NARGS];
     gchar *name[NARGS];
     guint pos[NARGS];
+    gdouble xoffset;
+    gdouble yoffset;
+    gdouble zoffset;
+    gdouble xperiod;
+    gdouble yperiod;
+    gint xyexponent;
+    gchar *xyunit;
+    gint zexponent;
+    gchar *zunit;
+    gchar *calname;
+    ResponseDuplicate duplicate;
+    GwyCalData *caldata;
 } SimpleArgs;
 
 typedef struct {
     SimpleArgs *args;
     GtkWidget *dialog;
     GtkWidget *data[NARGS];
+    GtkObject *xoffset;
+    GtkObject *yoffset;
+    GtkObject *zoffset;
+    GtkObject *xperiod;
+    GtkObject *yperiod;
+    gboolean in_update;
+    GtkWidget *xyunits;
+    GtkWidget *zunits;
+    GtkWidget *xyexponent;
+    GtkWidget *zexponent;
+    GtkEntry *name;
 } SimpleControls;
 
 static gboolean     module_register           (void);
 static void         simple                (GwyContainer *data,
                                                GwyRunType run);
-static gboolean     simple_dialog         (SimpleArgs *args);
+static gboolean     simple_dialog         (SimpleArgs *args,
+                                           GwyDataField *dfield);
 static void         simple_data_cb        (GwyDataChooser *chooser,
                                                SimpleControls *controls);
 static const gchar* simple_check          (SimpleArgs *args);
@@ -69,6 +102,26 @@ static void         simple_do             (SimpleArgs *args);
 static void         flip_xy              (GwyDataField *source, 
                                           GwyDataField *dest, 
                                           gboolean minor);
+static void        xyexponent_changed_cb       (GtkWidget *combo,
+                                               SimpleControls *controls);
+static void        zexponent_changed_cb       (GtkWidget *combo,
+                                               SimpleControls *controls);
+static void        units_change_cb             (GtkWidget *button,
+                                               SimpleControls *controls);
+static void        set_combo_from_unit       (GtkWidget *combo,
+                                              const gchar *str,
+                                              gint basepower);
+static void        xoffset_changed_cb          (GtkAdjustment *adj,
+                                               SimpleControls *controls);
+static void        yoffset_changed_cb          (GtkAdjustment *adj,
+                                               SimpleControls *controls);
+static void        zoffset_changed_cb          (GtkAdjustment *adj,
+                                               SimpleControls *controls);
+static void        xperiod_changed_cb          (GtkAdjustment *adj,
+                                               SimpleControls *controls);
+static void        yperiod_changed_cb          (GtkAdjustment *adj,
+                                               SimpleControls *controls);
+
 
 
 static const gchar default_expression[] = "d1 - d2";
@@ -105,11 +158,23 @@ simple(GwyContainer *data, GwyRunType run)
     SimpleArgs args;
     guint i;
     GwyContainer *settings;
-    gint id;
+    GwyDataField *dfield;
+    gint n, ok, id;
+    GwyCalibration *calibration;
+    GwyCalData *caldata;
+    gchar *filename;
+    gchar *contents;
+    gsize len;
+    GError *err = NULL;
+    gsize pos = 0;
+    GString *str;
+    GByteArray *barray;
+    FILE *fh; 
 
     g_return_if_fail(run & SIMPLE_RUN_MODES);
 
-    gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_ID, &id, 0);
+    gwy_app_data_browser_get_current(GWY_APP_DATA_FIELD_ID, &id, 
+                                     GWY_APP_DATA_FIELD, &dfield, 0);
 
     settings = gwy_app_settings_get();
     for (i = 0; i < NARGS; i++) {
@@ -117,19 +182,125 @@ simple(GwyContainer *data, GwyRunType run)
         args.objects[i].id = id;
     }
 
-    if (simple_dialog(&args)) {
+    if (simple_dialog(&args, dfield)) {
         simple_do(&args);
+    } else return; 
+
+
+    /*if append requested, copy newly created calibration into old one*/
+    if (args.duplicate == DUPLICATE_APPEND && (calibration = gwy_inventory_get_item(gwy_calibrations(), args.name)))
+    {
+
+        filename = g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL);
+        if (!g_file_get_contents(filename,
+                                 &contents, &len, &err))
+        {
+             g_warning("Error loading file: %s\n", err->message);
+             g_clear_error(&err);
+             return;
+        }
+        else {
+            if (len)
+              caldata = GWY_CALDATA(gwy_serializable_deserialize(contents, len, &pos));
+            g_free(contents);
+        }
+        n = caldata->ndata + args.caldata->ndata;
+
+        //add to args->caldata
+        args.caldata->x = g_realloc(args.caldata->x, n*sizeof(gdouble));
+        args.caldata->y = g_realloc(args.caldata->y, n*sizeof(gdouble));
+        args.caldata->z = g_realloc(args.caldata->z, n*sizeof(gdouble));
+        args.caldata->xerr = g_realloc(args.caldata->xerr, n*sizeof(gdouble));
+        args.caldata->yerr = g_realloc(args.caldata->yerr, n*sizeof(gdouble));
+        args.caldata->zerr = g_realloc(args.caldata->zerr, n*sizeof(gdouble));
+        args.caldata->xunc = g_realloc(args.caldata->xunc, n*sizeof(gdouble));
+        args.caldata->yunc = g_realloc(args.caldata->yunc, n*sizeof(gdouble));
+        args.caldata->zunc = g_realloc(args.caldata->zunc, n*sizeof(gdouble));
+
+        for (i=args.caldata->ndata; i<n; i++)
+        {
+           args.caldata->x[i] = caldata->x[i];
+           args.caldata->y[i] = caldata->y[i];
+           args.caldata->z[i] = caldata->z[i];
+           args.caldata->xerr[i] = caldata->xerr[i];
+           args.caldata->yerr[i] = caldata->yerr[i];
+           args.caldata->zerr[i] = caldata->zerr[i];
+           args.caldata->xunc[i] = caldata->xunc[i];
+           args.caldata->yunc[i] = caldata->yunc[i];
+           args.caldata->zunc[i] = caldata->zunc[i];
+        }
+        args.caldata->ndata = n;
     }
+
+    /*now create and save the resource*/
+    if ((calibration = GWY_CALIBRATION(gwy_inventory_get_item(gwy_calibrations(), args.name)))==NULL)
+    {
+        calibration = gwy_calibration_new(args.name, 8, g_strconcat(args.name, ".dat", NULL));
+        gwy_inventory_insert_item(gwy_calibrations(), calibration);
+        g_object_unref(calibration);
+    }
+
+    filename = gwy_resource_build_filename(GWY_RESOURCE(calibration));
+    fh = g_fopen(filename, "w");
+    if (!fh) {
+        g_warning("Cannot save preset: %s", filename);
+        g_free(filename);
+        return;
+    }
+    g_free(filename);
+
+    str = gwy_resource_dump(GWY_RESOURCE(calibration));
+    fwrite(str->str, 1, str->len, fh);
+    fclose(fh);
+    g_string_free(str, TRUE);
+
+    gwy_resource_data_saved(GWY_RESOURCE(calibration));
+
+
+    /*now save the calibration data*/
+    if (!g_file_test(g_build_filename(gwy_get_user_dir(), "caldata", NULL), G_FILE_TEST_EXISTS)) {
+        g_mkdir(g_build_filename(gwy_get_user_dir(), "caldata", NULL), 0700);
+    }
+    fh = g_fopen(g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL), "w");
+    if (!fh) {
+        g_warning("Cannot save caldata\n");
+        return;
+    }
+    barray = gwy_serializable_serialize(G_OBJECT(args.caldata), NULL);
+    //g_file_set_contents(fh, barray->data, sizeof(guint8)*barray->len, NULL);
+    fwrite(barray->data, sizeof(guint8), barray->len, fh);
+    fclose(fh);
+
+
+
 }
 
 static gboolean
-simple_dialog(SimpleArgs *args)
+simple_dialog(SimpleArgs *args, GwyDataField *dfield)
 {
     SimpleControls controls;
-    GtkWidget *dialog, *table, *chooser,  *label;
+    GtkWidget *dialog, *dialog2, *table, *chooser,  *label, *spin;
+    GwySIUnit *unit;
     guint i, row, response;
 
+    enum {
+        RESPONSE_DUPLICATE_OVERWRITE = 2,
+        RESPONSE_DUPLICATE_APPEND = 3 };
+
+
     controls.args = args;
+
+    /*FIXME: use defaults*/
+    args->xoffset = 0;
+    args->yoffset = 0;
+    args->zoffset = 0;
+    args->xperiod = 0;
+    args->yperiod = 0;
+    args->xyexponent = -6;
+    args->zexponent = -6;
+    args->xyunit = "m";
+    args->zunit = "m";
+
 
     dialog = gtk_dialog_new_with_buttons(_("Simple error map"), NULL, 0,
                                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -173,21 +344,172 @@ simple_dialog(SimpleArgs *args)
         controls.data[i] = chooser;
 
         row++;
-    }
-    gtk_table_set_row_spacing(GTK_TABLE(table), row-1, 8);
+      }
+    label = gtk_label_new_with_mnemonic(_("_X offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
-    gtk_widget_show_all(dialog);
-    do {
-        response = gtk_dialog_run(GTK_DIALOG(dialog));
-        switch (response) {
-            case GTK_RESPONSE_CANCEL:
-            case GTK_RESPONSE_DELETE_EVENT:
-            gtk_widget_destroy(dialog);
+    controls.xoffset = gtk_adjustment_new(args->xoffset/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.xoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    unit = gwy_data_field_get_si_unit_xy(dfield);
+    controls.xyexponent
+        = gwy_combo_box_metric_unit_new(G_CALLBACK(xyexponent_changed_cb),
+                                        &controls, -15, 6, unit,
+                                        args->xyexponent);
+    gtk_table_attach(GTK_TABLE(table), controls.xyexponent, 2, 3, row, row+2,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+
+    controls.xyunits = gtk_button_new_with_label(_("Change"));
+    g_object_set_data(G_OBJECT(controls.xyunits), "id", (gpointer)"xy");
+    gtk_table_attach(GTK_TABLE(table), controls.xyunits,
+                     3, 4, row, row+2,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+    row++;
+
+    label = gtk_label_new_with_mnemonic(_("_Y offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.yoffset = gtk_adjustment_new(args->yoffset/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.yoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+
+    label = gtk_label_new_with_mnemonic(_("X _period:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.xperiod = gtk_adjustment_new(args->xperiod/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.xperiod), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+
+    label = gtk_label_new_with_mnemonic(_("Y p_eriod:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.yperiod = gtk_adjustment_new(args->yperiod/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.yperiod), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+
+
+    label = gtk_label_new_with_mnemonic(_("_Z offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.zoffset = gtk_adjustment_new(args->zoffset/pow10(args->zexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.zoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    unit = gwy_data_field_get_si_unit_z(dfield);
+    controls.zexponent
+        = gwy_combo_box_metric_unit_new(G_CALLBACK(zexponent_changed_cb),
+                                        &controls, -15, 6, unit,
+                                        args->zexponent);
+    gtk_table_attach(GTK_TABLE(table), controls.zexponent, 2, 3, row, row+1,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+
+    controls.zunits = gtk_button_new_with_label(_("Change"));
+    g_object_set_data(G_OBJECT(controls.zunits), "id", (gpointer)"z");
+    gtk_table_attach(GTK_TABLE(table), controls.zunits,
+                     3, 4, row, row+1,
+                     GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+
+
+    label = gtk_label_new_with_mnemonic(_("Calibration name:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    args->calname = g_strdup("new"); //FIXME this should not be here
+    controls.name = gtk_entry_new();
+    gtk_entry_set_text(controls.name, args->calname);
+    gtk_table_attach(GTK_TABLE(table), controls.name,
+                     1, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+      g_signal_connect(controls.xoffset, "value-changed",
+                       G_CALLBACK(xoffset_changed_cb), &controls);
+      g_signal_connect(controls.yoffset, "value-changed",
+                       G_CALLBACK(yoffset_changed_cb), &controls);
+      g_signal_connect(controls.zoffset, "value-changed",
+                       G_CALLBACK(zoffset_changed_cb), &controls);
+      g_signal_connect(controls.xperiod, "value-changed",
+                       G_CALLBACK(xperiod_changed_cb), &controls);
+      g_signal_connect(controls.yperiod, "value-changed",
+                       G_CALLBACK(yperiod_changed_cb), &controls);
+
+
+     g_signal_connect(controls.xyunits, "clicked",
+                             G_CALLBACK(units_change_cb), &controls);
+
+     g_signal_connect(controls.zunits, "clicked",
+                             G_CALLBACK(units_change_cb), &controls);
+
+     controls.in_update = FALSE;
+
+
+
+      gtk_table_set_row_spacing(GTK_TABLE(table), row-1, 8);
+
+      gtk_widget_show_all(dialog);
+      do {
+          response = gtk_dialog_run(GTK_DIALOG(dialog));
+          switch (response) {
+              case GTK_RESPONSE_CANCEL:
+              case GTK_RESPONSE_DELETE_EVENT:
+              gtk_widget_destroy(dialog);
             case GTK_RESPONSE_NONE:
             return FALSE;
             break;
 
             case GTK_RESPONSE_OK:
+            /*check whether this resource already exists*/
+            args->calname = g_strdup(gtk_entry_get_text(controls.name));
+            if (gwy_inventory_get_item(gwy_calibrations(), args->calname))
+            {
+                dialog2 = gtk_message_dialog_new (dialog,
+                                                  GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                  GTK_MESSAGE_WARNING,
+                                                  GTK_BUTTONS_CANCEL,
+                                                  "Calibration '%s' alerady exists",
+                                                  args->calname);
+                gtk_dialog_add_button(dialog2, "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
+                gtk_dialog_add_button(dialog2, "Append", RESPONSE_DUPLICATE_APPEND);
+                response = gtk_dialog_run(GTK_DIALOG(dialog2));
+                if (response == RESPONSE_DUPLICATE_OVERWRITE) {
+                    args->duplicate = DUPLICATE_OVERWRITE;
+                    response = GTK_RESPONSE_OK;
+                } else if (response == RESPONSE_DUPLICATE_APPEND) {
+                    args->duplicate = DUPLICATE_APPEND;
+                    response = GTK_RESPONSE_OK;
+                }
+                gtk_widget_destroy (dialog2);
+            } else args->duplicate = DUPLICATE_NONE;
+
             break;
 
             default:
@@ -376,6 +698,16 @@ void fill_matrixb(gdouble *xs, gdouble *ys, gint n, gint tl,
 
     }
 }
+
+static void
+simple_dialog_update(SimpleControls *controls,
+                        SimpleArgs *args)
+{
+    gtk_adjustment_set_value(GTK_ADJUSTMENT(controls->xoffset),
+                             args->xoffset/pow10(args->xyexponent));
+
+}
+
 
  
 gdouble 
@@ -655,6 +987,203 @@ simple_do(SimpleArgs *args)
 
 
 }
+
+static void
+xoffset_changed_cb(GtkAdjustment *adj,
+                 SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->xoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+static void
+yoffset_changed_cb(GtkAdjustment *adj,
+                 SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->yoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+static void
+xperiod_changed_cb(GtkAdjustment *adj,
+                 SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->xperiod = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+static void
+yperiod_changed_cb(GtkAdjustment *adj,
+                 SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->yperiod = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+
+static void
+zoffset_changed_cb(GtkAdjustment *adj,
+                 SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->zoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+
+static void
+xyexponent_changed_cb(GtkWidget *combo,
+                      SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->xyexponent = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    args->xoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->xoffset))
+                  * pow10(args->xyexponent);
+    args->yoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->yoffset))
+                  * pow10(args->xyexponent);
+
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+
+static void
+zexponent_changed_cb(GtkWidget *combo,
+                      SimpleControls *controls)
+{
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->zexponent = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    args->zoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->zoffset))
+                  * pow10(args->zexponent);
+
+
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+
+
+static void
+units_change_cb(GtkWidget *button,
+                SimpleControls *controls)
+{
+    GtkWidget *dialog, *hbox, *label, *entry;
+    const gchar *id, *unit;
+    gint response;
+    SimpleArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+
+    id = g_object_get_data(G_OBJECT(button), "id");
+    dialog = gtk_dialog_new_with_buttons(_("Change Units"),
+                                         NULL,
+                                         GTK_DIALOG_MODAL
+                                         | GTK_DIALOG_NO_SEPARATOR,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                         NULL);
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    hbox = gtk_hbox_new(FALSE, 6);
+    gtk_container_set_border_width(GTK_CONTAINER(hbox), 4);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,
+                       FALSE, FALSE, 0);
+
+    label = gtk_label_new_with_mnemonic(_("New _units:"));
+    gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+
+    entry = gtk_entry_new();
+    gtk_entry_set_activates_default(GTK_ENTRY(entry), TRUE);
+    gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
+
+    gtk_widget_show_all(dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (response != GTK_RESPONSE_OK) {
+        gtk_widget_destroy(dialog);
+        controls->in_update = FALSE;
+        return;
+    }
+
+    unit = gtk_entry_get_text(GTK_ENTRY(entry));
+
+    if (gwy_strequal(id, "xy")) {
+        set_combo_from_unit(controls->xyexponent, unit, 0);
+        controls->args->xyunit = g_strdup(unit);
+     }
+    else if (gwy_strequal(id, "z")) {
+        set_combo_from_unit(controls->zexponent, unit, 0);
+        controls->args->zunit = g_strdup(unit);
+    }
+
+    gtk_widget_destroy(dialog);
+
+    simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+static void
+set_combo_from_unit(GtkWidget *combo,
+                    const gchar *str,
+                    gint basepower)
+{
+    GwySIUnit *unit;
+    gint power10;
+
+    unit = gwy_si_unit_new_parse(str, &power10);
+    power10 += basepower;
+    gwy_combo_box_metric_unit_set_unit(GTK_COMBO_BOX(combo),
+                                       power10 - 6, power10 + 6, unit);
+    g_object_unref(unit);
+}
+
 
 //note that this is taken from basicops.c
 static void
