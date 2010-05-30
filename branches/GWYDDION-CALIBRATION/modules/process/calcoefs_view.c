@@ -95,6 +95,14 @@ typedef struct {
     gint calibration;
     gboolean computed;
     gint id;
+    gdouble xoffset;
+    gdouble yoffset;
+    gdouble zoffset;
+    gint xyexponent;
+    gchar *xyunit;
+    gint zexponent;
+    gchar *zunit;
+
 } CCViewArgs;
 
 typedef struct {
@@ -122,6 +130,15 @@ typedef struct {
     GtkObject *yplane;
     GtkObject *zplane;
     CCViewArgs *args;
+    GtkObject *xoffset;
+    GtkObject *yoffset;
+    GtkObject *zoffset;
+    GtkWidget *xyunits;
+    GtkWidget *zunits;
+    GtkWidget *xyexponent;
+    GtkWidget *zexponent;
+    gboolean in_update;
+
 } CCViewControls;
 
 static gboolean     module_register        (void);
@@ -180,6 +197,23 @@ static void         get_value              (GwyCalData *caldata,
                                             gdouble *yunc, 
                                             gdouble *zunc, 
                                             GwyCCViewInterpolationType snap_type);
+static void        xyexponent_changed_cb       (GtkWidget *combo,
+                                                CCViewControls *controls);
+static void        zexponent_changed_cb       (GtkWidget *combo,
+                                               CCViewControls *controls);
+static void        units_change_cb             (GtkWidget *button,
+                                                CCViewControls *controls);
+static void        set_combo_from_unit       (GtkWidget *combo,
+                                              const gchar *str,
+                                              gint basepower);
+static void        xoffset_changed_cb          (GtkAdjustment *adj,
+                                                CCViewControls *controls);
+static void        yoffset_changed_cb          (GtkAdjustment *adj,
+                                                CCViewControls *controls);
+static void        zoffset_changed_cb          (GtkAdjustment *adj,
+                                                CCViewControls *controls);
+
+
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
@@ -230,7 +264,7 @@ cc_view_dialog(CCViewArgs *args,
               GwyDataField *dfield,
               gint id)
 {
-    GtkWidget *dialog, *table, *hbox, *vbox, *alignment;
+    GtkWidget *dialog, *table, *hbox, *vbox, *alignment, *spin;
     CCViewControls controls;
     GwyInventory *inventory;
     GwyInventoryStore *store;
@@ -240,12 +274,24 @@ cc_view_dialog(CCViewArgs *args,
     gint response;
     guint row = 0;
     GtkWidget *label;
+    GwySIUnit *unit;
 
 
     controls.args = args;
     args->crop = 0;
     args->calibration = 0;
     args->computed = 0;
+
+    /*FIXME: use defaults*/
+    args->xoffset = 0;
+    args->yoffset = 0;
+    args->zoffset = 0;
+    args->xyexponent = -6;
+    args->zexponent = -6;
+    args->xyunit = "m";
+    args->zunit = "m";
+
+
     args->interpolation_type = GWY_CC_VIEW_INTERPOLATION_3D;
 
 
@@ -395,6 +441,73 @@ cc_view_dialog(CCViewArgs *args,
 
     row++;
 
+
+    label = gtk_label_new_with_mnemonic(_("_X offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.xoffset = gtk_adjustment_new(args->xoffset/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.xoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    unit = gwy_data_field_get_si_unit_xy(dfield);
+    controls.xyexponent
+        = gwy_combo_box_metric_unit_new(G_CALLBACK(xyexponent_changed_cb),
+                                        &controls, -15, 6, unit,
+                                        args->xyexponent);
+    gtk_table_attach(GTK_TABLE(table), controls.xyexponent, 2, 3, row, row+2,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+
+    controls.xyunits = gtk_button_new_with_label(_("Change"));
+    g_object_set_data(G_OBJECT(controls.xyunits), "id", (gpointer)"xy");
+    gtk_table_attach(GTK_TABLE(table), controls.xyunits,
+                     3, 4, row, row+2,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+    row++;
+    label = gtk_label_new_with_mnemonic(_("_Y offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.yoffset = gtk_adjustment_new(args->yoffset/pow10(args->xyexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.yoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+    label = gtk_label_new_with_mnemonic(_("_Z offset:"));
+    gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), label,
+                     0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    controls.zoffset = gtk_adjustment_new(args->zoffset/pow10(args->zexponent),
+                                        -10000, 10000, 1, 10, 0);
+    spin = gtk_spin_button_new(GTK_ADJUSTMENT(controls.zoffset), 1, 2);
+    gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(spin), TRUE);
+    gtk_table_attach(GTK_TABLE(table), spin,
+                     1, 2, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    unit = gwy_data_field_get_si_unit_z(dfield);
+    controls.zexponent
+        = gwy_combo_box_metric_unit_new(G_CALLBACK(zexponent_changed_cb),
+                                        &controls, -15, 6, unit,
+                                        args->zexponent);
+    gtk_table_attach(GTK_TABLE(table), controls.zexponent, 2, 3, row, row+1,
+                     GTK_EXPAND | GTK_FILL | GTK_SHRINK, 0, 0, 0);
+
+    controls.zunits = gtk_button_new_with_label(_("Change"));
+    g_object_set_data(G_OBJECT(controls.zunits), "id", (gpointer)"z");
+    gtk_table_attach(GTK_TABLE(table), controls.zunits,
+                     3, 4, row, row+1,
+                     GTK_EXPAND | GTK_FILL, 0, 0, 0);
+    row++;
+
+
     controls.crop = gtk_check_button_new_with_mnemonic(_("crop to actual data"));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(controls.crop),
                                                     args->crop);
@@ -417,6 +530,22 @@ cc_view_dialog(CCViewArgs *args,
 
     gtk_container_add(GTK_CONTAINER(vbox), table);
     calculation_changed(NULL, &controls);
+
+    g_signal_connect(controls.xoffset, "value-changed",
+                     G_CALLBACK(xoffset_changed_cb), &controls);
+    g_signal_connect(controls.yoffset, "value-changed",
+                     G_CALLBACK(yoffset_changed_cb), &controls);
+    g_signal_connect(controls.zoffset, "value-changed",
+                     G_CALLBACK(zoffset_changed_cb), &controls);
+    g_signal_connect(controls.xyunits, "clicked",
+                     G_CALLBACK(units_change_cb), &controls);
+
+    g_signal_connect(controls.zunits, "clicked",
+                     G_CALLBACK(units_change_cb), &controls);
+
+    controls.in_update = FALSE;
+
+
     update_view(&controls, args);
 
     gtk_widget_show_all(dialog);
@@ -1005,6 +1134,165 @@ settings_changed(CCViewControls *controls)
    if (controls->args->update)
        update_view(controls, controls->args);
 }
+
+static void
+xoffset_changed_cb(GtkAdjustment *adj,
+                 CCViewControls *controls)
+{
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->xoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+
+static void
+yoffset_changed_cb(GtkAdjustment *adj,
+                 CCViewControls *controls)
+{
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->yoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+static void
+zoffset_changed_cb(GtkAdjustment *adj,
+                 CCViewControls *controls)
+{
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->zoffset = gtk_adjustment_get_value(adj) * pow10(args->xyexponent);
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+
+}
+static void
+xyexponent_changed_cb(GtkWidget *combo,
+                      CCViewControls *controls)
+{
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->xyexponent = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    args->xoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->xoffset))
+                  * pow10(args->xyexponent);
+    args->yoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->yoffset))
+                  * pow10(args->xyexponent);
+
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+
+static void
+zexponent_changed_cb(GtkWidget *combo,
+                      CCViewControls *controls)
+{
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+    args->zexponent = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(combo));
+    args->zoffset = gtk_adjustment_get_value(GTK_ADJUSTMENT(controls->zoffset))
+                  * pow10(args->zexponent);
+
+
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+static void
+units_change_cb(GtkWidget *button,
+                CCViewControls *controls)
+{
+    GtkWidget *dialog, *hbox, *label, *entry;
+    const gchar *id, *unit;
+    gint response;
+    CCViewArgs *args = controls->args;
+
+    if (controls->in_update)
+        return;
+
+    controls->in_update = TRUE;
+
+    id = g_object_get_data(G_OBJECT(button), "id");
+    dialog = gtk_dialog_new_with_buttons(_("Change Units"),
+                                         NULL,
+                                         GTK_DIALOG_MODAL
+                                         | GTK_DIALOG_NO_SEPARATOR,
+                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                         GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                         NULL);
+    gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
+    hbox = gtk_hbox_new(FALSE, 6);
+    gtk_container_set_border_width(GTK_CONTAINER(hbox), 4);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,
+                       FALSE, FALSE, 0);
+
+    label = gtk_label_new_with_mnemonic(_("New _units:"));
+    gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+
+    entry = gtk_entry_new();
+    gtk_entry_set_activates_default(GTK_ENTRY(entry), TRUE);
+    gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
+    gtk_widget_show_all(dialog);
+    response = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (response != GTK_RESPONSE_OK) {
+        gtk_widget_destroy(dialog);
+        controls->in_update = FALSE;
+        return;
+    }
+
+    unit = gtk_entry_get_text(GTK_ENTRY(entry));
+
+    if (gwy_strequal(id, "xy")) {
+        set_combo_from_unit(controls->xyexponent, unit, 0);
+        controls->args->xyunit = g_strdup(unit);
+     }
+    else if (gwy_strequal(id, "z")) {
+        set_combo_from_unit(controls->zexponent, unit, 0);
+        controls->args->zunit = g_strdup(unit);
+    }
+
+    gtk_widget_destroy(dialog);
+
+    //simple_dialog_update(controls, args);
+    controls->in_update = FALSE;
+}
+static void
+set_combo_from_unit(GtkWidget *combo,
+                    const gchar *str,
+                    gint basepower)
+{
+    GwySIUnit *unit;
+    gint power10;
+
+    unit = gwy_si_unit_new_parse(str, &power10);
+    power10 += basepower;
+    gwy_combo_box_metric_unit_set_unit(GTK_COMBO_BOX(combo),
+                                       power10 - 6, power10 + 6, unit);
+    g_object_unref(unit);
+}
+
+
 
 
 static const gchar display_key[]  = "/module/cc_view/display";
