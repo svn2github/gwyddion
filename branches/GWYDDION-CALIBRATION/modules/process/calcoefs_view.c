@@ -282,14 +282,14 @@ cc_view_dialog(CCViewArgs *args,
     args->calibration = 0;
     args->computed = 0;
 
-    /*FIXME: use defaults*/
+    /*FIXME: load something from dfield*/
     args->xoffset = 0;
     args->yoffset = 0;
     args->zoffset = 0;
     args->xyexponent = -6;
     args->zexponent = -6;
-    args->xyunit = "m";
-    args->zunit = "m";
+    args->xyunit = g_strdup(gwy_data_field_get_si_unit_xy(dfield)->units);
+    args->zunit = g_strdup(gwy_data_field_get_si_unit_z(dfield)->units);
 
 
     args->interpolation_type = GWY_CC_VIEW_INTERPOLATION_3D;
