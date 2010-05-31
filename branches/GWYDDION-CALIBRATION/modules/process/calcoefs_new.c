@@ -193,6 +193,24 @@ module_register(void)
     return TRUE;
 }
 
+
+static void
+debugcal(GwyCalData *caldata)
+{
+    gint i;
+
+    printf("######## Calibration data: ###########\n");
+    printf("%d data, range %g %g %g x %g %g %g", caldata->ndata, 
+           caldata->x_from, caldata->y_from, caldata->z_from, 
+           caldata->x_to, caldata->y_to, caldata->z_to);
+    for (i=0; i<caldata->ndata; i++)
+    {
+        printf("%d   %g %g %g   %g %g %g    %g %g %g\n", i, caldata->x[i], caldata->y[i], caldata->z[i], 
+               caldata->xerr[i], caldata->yerr[i], caldata->zerr[i], caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
+    }
+
+}
+
 static void
 cnew(GwyContainer *data, GwyRunType run)
 {
@@ -201,7 +219,7 @@ cnew(GwyContainer *data, GwyRunType run)
     gboolean ok;
     gint oldid, i, j, k, n;
     GwyCalibration *calibration;
-    GwyCalData *caldata;
+    GwyCalData *caldata = NULL;
     gchar *filename;
     gchar *contents;
     gsize len;
@@ -255,9 +273,8 @@ cnew(GwyContainer *data, GwyRunType run)
         caldata->yunc = g_realloc(caldata->yunc, n*sizeof(gdouble));
         caldata->zunc = g_realloc(caldata->zunc, n*sizeof(gdouble));
 
-        caldata->ndata = n;
-          
-      
+        n = caldata->ndata;
+        caldata->ndata += 8;
     } 
     else {
         caldata = gwy_caldata_new(8);
@@ -269,6 +286,7 @@ cnew(GwyContainer *data, GwyRunType run)
         {
             for (k=0; k<2; k++)
             {
+
                 if (i) caldata->x[n] = args.xrange_from;
                 else caldata->x[n] = args.xrange_to;
                 if (j) caldata->y[n] = args.yrange_from;
@@ -300,6 +318,7 @@ cnew(GwyContainer *data, GwyRunType run)
     caldata->z_to = args.zrange_to;
 
 
+    //debugcal(caldata);
 
     /*now create and save the resource*/
 
@@ -374,6 +393,8 @@ cnew_dialog(CNewArgs *args,
                        FALSE, FALSE, 4);
 
     /*x from*/
+    row = 0;
+
     label = gtk_label_new_with_mnemonic(_("_X from:"));
     gtk_misc_set_alignment(GTK_MISC(label), 0.0, 0.5);
     gtk_table_attach(GTK_TABLE(table), label,
