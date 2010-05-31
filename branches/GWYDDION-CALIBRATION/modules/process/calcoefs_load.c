@@ -52,6 +52,7 @@ typedef struct {
 
 typedef struct {
     GtkWidget *dialog;
+    GtkWidget *text;
     CLoadArgs *args;
     GtkEntry *name;
 } CLoadControls;
@@ -99,6 +100,24 @@ module_register(void)
 
     return TRUE;
 }
+
+static void
+debugcal(GwyCalData *caldata)
+{
+    gint i;
+
+    printf("######## Calibration data: ###########\n");
+    printf("%d data, range %g %g %g x %g %g %g", caldata->ndata,
+           caldata->x_from, caldata->y_from, caldata->z_from,
+           caldata->x_to, caldata->y_to, caldata->z_to);
+    for (i=0; i<caldata->ndata; i++)
+    {
+        printf("%d   %g %g %g   %g %g %g    %g %g %g\n", i, caldata->x[i], caldata->y[i], caldata->z[i],
+               caldata->xerr[i], caldata->yerr[i], caldata->zerr[i], caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
+    }
+
+}
+
 
 static void
 cload(GwyContainer *data, GwyRunType run)
@@ -165,15 +184,15 @@ cload(GwyContainer *data, GwyRunType run)
 
         for (i=args.caldata->ndata; i<n; i++)
         {
-           args.caldata->x[i] = caldata->x[i];
-           args.caldata->y[i] = caldata->y[i];
-           args.caldata->z[i] = caldata->z[i];
-           args.caldata->xerr[i] = caldata->xerr[i];
-           args.caldata->yerr[i] = caldata->yerr[i];
-           args.caldata->zerr[i] = caldata->zerr[i];
-           args.caldata->xunc[i] = caldata->xunc[i];
-           args.caldata->yunc[i] = caldata->yunc[i];
-           args.caldata->zunc[i] = caldata->zunc[i];
+           args.caldata->x[i] = caldata->x[i-caldata->ndata];
+           args.caldata->y[i] = caldata->y[i-caldata->ndata];
+           args.caldata->z[i] = caldata->z[i-caldata->ndata];
+           args.caldata->xerr[i] = caldata->xerr[i-caldata->ndata];
+           args.caldata->yerr[i] = caldata->yerr[i-caldata->ndata];
+           args.caldata->zerr[i] = caldata->zerr[i-caldata->ndata];
+           args.caldata->xunc[i] = caldata->xunc[i-caldata->ndata];
+           args.caldata->yunc[i] = caldata->yunc[i-caldata->ndata];
+           args.caldata->zunc[i] = caldata->zunc[i-caldata->ndata];
         }
         args.caldata->ndata = n; 
     }
@@ -202,6 +221,7 @@ cload(GwyContainer *data, GwyRunType run)
 
     gwy_resource_data_saved(GWY_RESOURCE(calibration));
 
+    debugcal(args.caldata);
 
     /*now save the calibration data*/
     if (!g_file_test(g_build_filename(gwy_get_user_dir(), "caldata", NULL), G_FILE_TEST_EXISTS)) {
@@ -265,6 +285,13 @@ cload_dialog(CLoadArgs *args,
     gtk_entry_set_text(controls.name, args->name);
     gtk_table_attach(GTK_TABLE(table), controls.name,
                      1, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+    row++;
+    controls.text = gtk_label_new(_("No data loaded"));
+    gtk_misc_set_alignment(GTK_MISC(controls.text), 0.0, 0.5);
+    gtk_table_attach(GTK_TABLE(table), controls.text,
+                     0, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
 
     gtk_widget_show_all(dialog);
     do {
@@ -332,6 +359,7 @@ load_caldata(CLoadControls *controls)
     GwyCalData *caldata = controls->args->caldata;
     FILE *fr;
     gint i, ndata;
+    gchar text[50];
     gdouble xfrom, xto, yfrom, yto, zfrom, zto;
     gdouble x, y, z, xerr, yerr, zerr, xunc, yunc, zunc;
     gchar six[50], siy[50], siz[50];
@@ -396,14 +424,16 @@ load_caldata(CLoadControls *controls)
                 caldata->xunc[i] = xunc;
                 caldata->yunc[i] = yunc;
                 caldata->zunc[i] = zunc;
-                printf("adding %g %g %g  %g %g %g   %g %g %g\n",
+               /* printf("adding %g %g %g  %g %g %g   %g %g %g\n",
                        caldata->x[i], caldata->y[i], caldata->z[i],
                        caldata->xerr[i], caldata->yerr[i], caldata->zerr[i],
-                       caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
+                       caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);*/
               }
             
             fclose(fr);
-            printf("done.\n");
+            //printf("done.\n");
+            g_snprintf(text, sizeof(text), "Loaded %d data points", caldata->ndata);
+            gtk_label_set_text(controls->text, text);
         }
         g_free (filename);
         controls->args->caldata = caldata;
