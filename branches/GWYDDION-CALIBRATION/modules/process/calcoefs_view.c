@@ -99,9 +99,7 @@ typedef struct {
     gdouble yoffset;
     gdouble zoffset;
     gint xyexponent;
-    gchar *xyunit;
     gint zexponent;
-    gchar *zunit;
 
 } CCViewArgs;
 
@@ -153,8 +151,6 @@ static void         cc_view_load_args       (GwyContainer *container,
 static void         cc_view_save_args       (GwyContainer *container,
                                             CCViewArgs *args);
 static void         cc_view_sanitize_args   (CCViewArgs *args);
-static void         cc_view_run             (CCViewControls *controls,
-                                            CCViewArgs *args);
 static void         cc_view_do              (CCViewControls *controls);
 static void         cc_view_dialog_abandon  (CCViewControls *controls);
 static GtkWidget*   menu_display           (GCallback callback,
@@ -282,14 +278,12 @@ cc_view_dialog(CCViewArgs *args,
     args->calibration = 0;
     args->computed = 0;
 
-    /*FIXME: load something from dfield*/
+    /*FIXME: load more from dfield*/
     args->xoffset = 0;
     args->yoffset = 0;
     args->zoffset = 0;
     args->xyexponent = -6;
     args->zexponent = -6;
-    args->xyunit = g_strdup(gwy_data_field_get_si_unit_xy(dfield)->units);
-    args->zunit = g_strdup(gwy_data_field_get_si_unit_z(dfield)->units);
 
 
     args->interpolation_type = GWY_CC_VIEW_INTERPOLATION_3D;
@@ -359,7 +353,7 @@ cc_view_dialog(CCViewArgs *args,
     gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(controls.calibration), renderer, FALSE);
     gtk_cell_layout_add_attribute(GTK_CELL_LAYOUT(controls.calibration), renderer,
                                   "text", 1);
-    gtk_combo_box_set_active(controls.calibration, args->calibration);
+    gtk_combo_box_set_active(GTK_COMBO_BOX(controls.calibration), args->calibration);
 
     gtk_box_pack_start(GTK_BOX(vbox), controls.calibration, FALSE, FALSE, 4);
 
@@ -405,8 +399,6 @@ cc_view_dialog(CCViewArgs *args,
                                        0.0, 100.0, 1, 100, 0);
     gwy_table_attach_hscale(table, row++, _("X pos:"), "%",
                                        controls.xplane, 0);
-//    label = gwy_table_hscale_get_units(controls.xplane);
-//    gtk_label_set_text(label, "ble");
     g_signal_connect_swapped(controls.xplane, "value-changed",
                                        G_CALLBACK(settings_changed), &controls);
 
@@ -580,7 +572,7 @@ cc_view_dialog(CCViewArgs *args,
         }
     } while (response != GTK_RESPONSE_OK);
 
-    args->calibration = gtk_combo_box_get_active(controls.calibration);
+    args->calibration = gtk_combo_box_get_active(GTK_COMBO_BOX(controls.calibration));
     calibration = gwy_inventory_get_nth_item(inventory, args->calibration);
    // printf("Applying %d %s %s\n", calibration->ndata, calibration->filename, GWY_RESOURCE(calibration)->name->str);
 
@@ -601,11 +593,11 @@ cc_view_dialog_abandon(CCViewControls *controls)
 static void
 update_view(CCViewControls *controls, CCViewArgs *args)
 {
-    gint i, col, row, xres, yres, zres;
+    gint col, row, xres, yres, zres;
     gdouble x, y, z, xerr, yerr, zerr, xunc, yunc, zunc;
     GwyDataField *viewfield;
     GwyCalibration *calibration;
-    GwyCalData *caldata;
+    GwyCalData *caldata = NULL;
     gsize len;
     GError *err = NULL;
     gchar *contents;
@@ -615,7 +607,7 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                                                                   "/0/data"));
    //viewfield = controls->view_field;
 
-    args->calibration = gtk_combo_box_get_active(controls->calibration);
+    args->calibration = gtk_combo_box_get_active(GTK_COMBO_BOX(controls->calibration));
     calibration = gwy_inventory_get_nth_item(gwy_calibrations(), args->calibration);
     if (calibration) {
         filename = g_build_filename(gwy_get_user_dir(), "caldata", calibration->filename, NULL);
@@ -634,12 +626,12 @@ update_view(CCViewControls *controls, CCViewArgs *args)
 
     } else {
         /*output something?*/
-        printf("update view: no calibration data\n");
+        //printf("update view: no calibration data\n");
         caldata = NULL;
         calibration = NULL;
         return;
     }
-    printf("updating view\n");
+    //printf("updating view\n");
 
     /*FIXME determine maximum necessary size of field*/
     xres = 200; 
@@ -649,41 +641,32 @@ update_view(CCViewControls *controls, CCViewArgs *args)
     if (!caldata) {
         gwy_data_field_fill(viewfield, 0);
         gwy_data_field_data_changed(viewfield);
-        printf("update view: no calibration data\n");
+        //printf("update view: no calibration data\n");
         return;
     }
   
-    printf("output caldata\n"); 
-    printf("total %d caldata (%g %g %g    %g %g %g)\n", caldata->ndata, caldata->x_from, caldata->y_from, caldata->z_from,
-           caldata->x_to, caldata->y_to, caldata->z_to);
-    /*for (i=0; i<caldata->ndata; i++)
-    {
-        printf("caldata: %g %g %g %g %g %g %g %g %g\n", caldata->x[i], caldata->y[i], caldata->z[i], 
-                                                        caldata->xerr[i], caldata->yerr[i], caldata->zerr[i],
-                                                        caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
-    }*/
 
     if (!args->computed) {
         gwy_app_wait_cursor_start(GTK_WINDOW(controls->dialog));
 
         if (args->interpolation_type == GWY_CC_VIEW_INTERPOLATION_NATURAL)
         {
-            printf("setup interpolation\n");
+            //printf("setup interpolation\n");
             gwy_caldata_setup_interpolation(caldata);
-            printf("done\n");
+            //printf("done\n");
         }
 
         if (controls->args->crop) {
             for (row=0; row<yres; row++)
             {
-                y = gwy_data_field_get_yoffset(controls->actual_field) + 
+                y = controls->args->yoffset + gwy_data_field_get_yoffset(controls->actual_field) + 
                     row*gwy_data_field_get_yreal(controls->actual_field)/yres;
                 for (col=0; col<xres; col++) {
-                    x = gwy_data_field_get_xoffset(controls->actual_field) +
+                    x = controls->args->xoffset + gwy_data_field_get_xoffset(controls->actual_field) +
                         col*gwy_data_field_get_yreal(controls->actual_field)/xres;
-                    z = gwy_data_field_get_dval(controls->actual_field, 
-                                                x - gwy_data_field_get_xoffset(controls->actual_field), 
-                                                y - gwy_data_field_get_yoffset(controls->actual_field),
+                    z = controls->args->zoffset + gwy_data_field_get_dval(controls->actual_field, 
+                                                col*gwy_data_field_get_yreal(controls->actual_field)/xres, 
+                                                row*gwy_data_field_get_yreal(controls->actual_field)/yres,
                                                 GWY_INTERPOLATION_BILINEAR);
 
                     get_value(caldata, x, y, z, &xerr, &yerr, &zerr, &xunc, &yunc, &zunc, args->interpolation_type);
@@ -700,7 +683,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
         } else {
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_X)
             {
-                printf("up x\n");
                 gwy_data_field_resample(viewfield, yres, zres, GWY_INTERPOLATION_NONE);
                 x = caldata->x_from + (caldata->x_to-caldata->x_from)*(gdouble)args->xplane/100.0;
                 for (col=0; col<yres; col++)
@@ -721,7 +703,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
             }
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Y)
             {
-                printf("up y\n");
                 gwy_data_field_resample(viewfield, xres, zres, GWY_INTERPOLATION_NONE);
                 y = caldata->y_from + (caldata->y_to-caldata->y_from)*(gdouble)args->yplane/100.0;
                 for (col=0; col<xres; col++)
@@ -741,7 +722,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
             }
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Z)
             {
-                printf("up z\n");
                 gwy_data_field_resample(viewfield, xres, yres, GWY_INTERPOLATION_NONE);
                 gwy_data_field_set_xreal(viewfield, caldata->x_to - caldata->x_from);
                 gwy_data_field_set_yreal(viewfield, caldata->y_to - caldata->y_from);
@@ -790,7 +770,6 @@ update_view(CCViewControls *controls, CCViewArgs *args)
  
 
     gwy_app_wait_cursor_finish(GTK_WINDOW(controls->dialog));
-    printf("updated\n");
     gwy_data_field_invalidate(controls->view_field);
     gwy_data_field_data_changed(controls->view_field);
 }
@@ -838,32 +817,6 @@ cc_view_do(CCViewControls *controls)
     add_calibration(controls->zunc, controls->data, controls->args->id, GWY_CC_VIEW_DISPLAY_Z_UNC);
 
     /*now the data should be present in container and user functions can use them*/
-
-/*
-    gint newid = gwy_app_data_browser_add_data_field(controls->xerr, controls->data, TRUE);
-    g_object_unref(controls->xerr);
-    gwy_app_set_data_field_title(controls->data, newid, "X correction");
-
-    newid = gwy_app_data_browser_add_data_field(controls->yerr, controls->data, TRUE);
-    g_object_unref(controls->yerr);
-    gwy_app_set_data_field_title(controls->data, newid, "Y correction");
-
-    newid = gwy_app_data_browser_add_data_field(controls->zerr, controls->data, TRUE);
-    g_object_unref(controls->zerr);
-    gwy_app_set_data_field_title(controls->data, newid, "Z correction");
-
-    newid = gwy_app_data_browser_add_data_field(controls->xunc, controls->data, TRUE);
-    g_object_unref(controls->xunc);
-    gwy_app_set_data_field_title(controls->data, newid, "X uncertainty");
-
-    newid = gwy_app_data_browser_add_data_field(controls->yunc, controls->data, TRUE);
-    g_object_unref(controls->yunc);
-    gwy_app_set_data_field_title(controls->data, newid, "Y uncertainty");
-
-    newid = gwy_app_data_browser_add_data_field(controls->zunc, controls->data, TRUE);
-    g_object_unref(controls->zunc);
-    gwy_app_set_data_field_title(controls->data, newid, "Z uncertainty");
-*/
 
 }
 static void
@@ -942,7 +895,7 @@ get_value(GwyCalData *caldata, gdouble x, gdouble y, gdouble z,
     gdouble sumxerr, sumyerr, sumzerr, sumxunc, sumyunc, sumzunc, sumw;
     gdouble w, dist[500];
 
-    if (!caldata) {printf("no caldata!\n"); return 0.0;}
+    if (!caldata) {/*printf("no caldata!\n");*/ return;}
 
     //printf("request for point %g %g %g\n", x, y, z);
 
@@ -1263,14 +1216,10 @@ units_change_cb(GtkWidget *button,
 
     unit = gtk_entry_get_text(GTK_ENTRY(entry));
 
-    if (gwy_strequal(id, "xy")) {
+    if (gwy_strequal(id, "xy")) 
         set_combo_from_unit(controls->xyexponent, unit, 0);
-        controls->args->xyunit = g_strdup(unit);
-     }
-    else if (gwy_strequal(id, "z")) {
+    else if (gwy_strequal(id, "z")) 
         set_combo_from_unit(controls->zexponent, unit, 0);
-        controls->args->zunit = g_strdup(unit);
-    }
 
     gtk_widget_destroy(dialog);
 

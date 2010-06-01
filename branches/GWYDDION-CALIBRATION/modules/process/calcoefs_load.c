@@ -125,9 +125,9 @@ cload(GwyContainer *data, GwyRunType run)
     GwyDataField *dfield;
     CLoadArgs args;
     gboolean ok;
-    gint oldid, newid, i, j, k, n;
+    gint oldid, i, n;
     GwyCalibration *calibration;
-    GwyCalData *caldata;
+    GwyCalData *caldata = NULL;
     gchar *filename;
     gchar *contents;
     gsize len;
@@ -243,8 +243,7 @@ static gboolean
 cload_dialog(CLoadArgs *args,
             GwyDataField *dfield)
 {
-    GtkWidget *dialog, *dialog2, *table, *spin, *label;
-    GwySIUnit *unit;
+    GtkWidget *dialog, *dialog2, *table, *label;
     gint row = 0;
     CLoadControls controls;
     enum { RESPONSE_RESET = 1,
@@ -281,9 +280,9 @@ cload_dialog(CLoadArgs *args,
                      0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
     args->name = g_strdup("new"); //FIXME this should not be here
-    controls.name = gtk_entry_new();
+    controls.name = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(controls.name, args->name);
-    gtk_table_attach(GTK_TABLE(table), controls.name,
+    gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(controls.name),
                      1, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
     row++;
@@ -309,14 +308,14 @@ cload_dialog(CLoadArgs *args,
             args->name = g_strdup(gtk_entry_get_text(controls.name));
             if (gwy_inventory_get_item(gwy_calibrations(), args->name))
             {
-                dialog2 = gtk_message_dialog_new (dialog,
+                dialog2 = gtk_message_dialog_new (GTK_WINDOW(dialog),
                                                   GTK_DIALOG_DESTROY_WITH_PARENT,
                                                   GTK_MESSAGE_WARNING,
                                                   GTK_BUTTONS_CANCEL,
                                                   "Calibration '%s' alerady exists",
                                                   args->name);
-                gtk_dialog_add_button(dialog2, "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
-                gtk_dialog_add_button(dialog2, "Append", RESPONSE_DUPLICATE_APPEND);
+                gtk_dialog_add_button(GTK_DIALOG(dialog2), "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
+                gtk_dialog_add_button(GTK_DIALOG(dialog2), "Append", RESPONSE_DUPLICATE_APPEND);
                 response = gtk_dialog_run(GTK_DIALOG(dialog2));
                 if (response == RESPONSE_DUPLICATE_OVERWRITE) {
                     args->duplicate = DUPLICATE_OVERWRITE;
@@ -364,7 +363,6 @@ load_caldata(CLoadControls *controls)
     gdouble x, y, z, xerr, yerr, zerr, xunc, yunc, zunc;
     gchar six[50], siy[50], siz[50];
 
-    printf("load\n");
     dialog = gtk_file_chooser_dialog_new ("Load calibration data",
                       GTK_WINDOW(controls->dialog),
                       GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -372,7 +370,6 @@ load_caldata(CLoadControls *controls)
                       GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
                       NULL);
 
-    printf("kvak\n");
     if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
     {
         filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
@@ -388,7 +385,7 @@ load_caldata(CLoadControls *controls)
             fscanf(fr, "%lf", &zfrom);
             fscanf(fr, "%lf", &zto);
 
-            printf("loading %d caldata\n", ndata);
+            //printf("loading %d caldata\n", ndata);
             caldata = gwy_caldata_new(ndata);    //FIXME free it somewhere if allocated previously
             caldata->ndata = ndata;
             caldata->x_from = xfrom;
@@ -397,9 +394,9 @@ load_caldata(CLoadControls *controls)
             caldata->y_to = yto;
             caldata->z_from = zfrom;
             caldata->z_to = zto;
-            fscanf(fr, "%s", &six);
-            fscanf(fr, "%s", &siy);
-            fscanf(fr, "%s", &siz);
+            fscanf(fr, "%s", six);
+            fscanf(fr, "%s", siy);
+            fscanf(fr, "%s", siz);
             caldata->si_unit_x = gwy_si_unit_new(six);
             caldata->si_unit_y = gwy_si_unit_new(siy);
             caldata->si_unit_z = gwy_si_unit_new(siz);
@@ -433,7 +430,7 @@ load_caldata(CLoadControls *controls)
             fclose(fr);
             //printf("done.\n");
             g_snprintf(text, sizeof(text), "Loaded %d data points", caldata->ndata);
-            gtk_label_set_text(controls->text, text);
+            gtk_label_set_text(GTK_LABEL(controls->text), text);
         }
         g_free (filename);
         controls->args->caldata = caldata;

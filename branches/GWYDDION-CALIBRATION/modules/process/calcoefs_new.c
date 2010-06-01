@@ -56,9 +56,7 @@ typedef struct {
     gdouble yunc;
     gdouble zunc;
     gint xyexponent;
-    gchar *xyunit;
     gint zexponent;
-    gchar *zunit;
     gint xyuexponent;
     gint zuexponent;
     gchar *name;
@@ -158,9 +156,7 @@ static const CNewArgs cnew_defaults = {
     1e-8,
     1e-9,
     -6,
-    "m",
     -6,
-    "m",
     -6,
     -6,
     "new calibration",
@@ -194,6 +190,7 @@ module_register(void)
 }
 
 
+/*
 static void
 debugcal(GwyCalData *caldata)
 {
@@ -209,7 +206,7 @@ debugcal(GwyCalData *caldata)
                caldata->xerr[i], caldata->yerr[i], caldata->zerr[i], caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
     }
 
-}
+} */
 
 static void
 cnew(GwyContainer *data, GwyRunType run)
@@ -602,9 +599,9 @@ cnew_dialog(CNewArgs *args,
     gtk_table_attach(GTK_TABLE(table), label,
                      0, 1, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
-    controls.name = gtk_entry_new();
+    controls.name = GTK_ENTRY(gtk_entry_new());
     gtk_entry_set_text(controls.name, args->name);
-    gtk_table_attach(GTK_TABLE(table), controls.name,
+    gtk_table_attach(GTK_TABLE(table), GTK_WIDGET(controls.name),
                      1, 3, row, row+1, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
 
@@ -662,14 +659,14 @@ cnew_dialog(CNewArgs *args,
             args->name = g_strdup(gtk_entry_get_text(controls.name));
             if (gwy_inventory_get_item(gwy_calibrations(), args->name))
             {
-                dialog2 = gtk_message_dialog_new (dialog,
+                dialog2 = gtk_message_dialog_new (GTK_WINDOW(dialog),
                                                  GTK_DIALOG_DESTROY_WITH_PARENT,
                                                  GTK_MESSAGE_WARNING,
                                                  GTK_BUTTONS_CANCEL,
                                                  "Calibration '%s' alerady exists",
                                                  args->name);
-                gtk_dialog_add_button(dialog2, "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
-                gtk_dialog_add_button(dialog2, "Append", RESPONSE_DUPLICATE_APPEND);
+                gtk_dialog_add_button(GTK_DIALOG(dialog2), "Overwrite", RESPONSE_DUPLICATE_OVERWRITE);
+                gtk_dialog_add_button(GTK_DIALOG(dialog2), "Append", RESPONSE_DUPLICATE_APPEND);
                 response = gtk_dialog_run(GTK_DIALOG(dialog2));
                 if (response == RESPONSE_DUPLICATE_OVERWRITE) {
                     args->duplicate = DUPLICATE_OVERWRITE;
@@ -838,12 +835,10 @@ units_change_cb(GtkWidget *button,
 
     if (gwy_strequal(id, "xy")) {
         set_combo_from_unit(controls->xyexponent, unit, 0);
-        controls->args->xyunit = g_strdup(unit);
         set_combo_from_unit(controls->xyuexponent, unit, 0);
      }
     else if (gwy_strequal(id, "z")) {
         set_combo_from_unit(controls->zexponent, unit, 0);
-        controls->args->zunit = g_strdup(unit);
     }
 
     gtk_widget_destroy(dialog);

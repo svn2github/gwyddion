@@ -65,9 +65,7 @@ typedef struct {
     gdouble xperiod;
     gdouble yperiod;
     gint xyexponent;
-    gchar *xyunit;
     gint zexponent;
-    gchar *zunit;
     gchar *calname;
     ResponseDuplicate duplicate;
     GwyCalData *caldata;
@@ -298,8 +296,6 @@ simple_dialog(SimpleArgs *args, GwyDataField *dfield)
     args->yperiod = 0;
     args->xyexponent = -6;
     args->zexponent = -6;
-    args->xyunit = "m";
-    args->zunit = "m";
 
 
     dialog = gtk_dialog_new_with_buttons(_("Simple error map"), NULL, 0,
@@ -631,12 +627,9 @@ void fill_matrixb(gdouble *xs, gdouble *ys, gint n, gint tl,
                  gdouble yxshift, gdouble yyshift, 
                  GwyDataField *x_matrix, GwyDataField *y_matrix, gint nn)
 {
-    gint i, j, k, ii, jj;
-    gdouble tlx = xs[tl];
-    gdouble tly = ys[tl];
+    gint i, ii, jj;
     gdouble nextmin;
     gint pos, ppos, next, nypos;
-    gdouble min, dist;
 
     printf("shifts: x: %g %g  y: %g %g\n", xxshift, xyshift, yxshift , yyshift);
 
@@ -814,16 +807,15 @@ static void
 simple_do(SimpleArgs *args)
 {
     GwyContainer *data;
-    GwyDataField *original, *detail, *score;
+    GwyDataField *original, *detail;
     gdouble *xs, *ys;
     GwyDataField *x_orig, *y_orig;
-    gint i, j, newid, ndat, mdat, noriginal, nshifted, nrotated;
+    gint i, noriginal;
     gdouble xxshift, xyshift, yxshift, yyshift, avxxshift, avxyshift, avyxshift, avyyshift;
     gdouble xmult, ymult;
     gdouble tlmin, nextmin, boundary;
     gdouble original_tlx, original_tly;
-    gdouble sn, cs, icor, jcor, x, y;
-    gint tl, present, next, nx, ny, nn, xres, yres;
+    gint tl, present, next, nx, ny, nn;
     gdouble period = 0;
     GQuark quark;
 
@@ -1157,11 +1149,9 @@ units_change_cb(GtkWidget *button,
 
     if (gwy_strequal(id, "xy")) {
         set_combo_from_unit(controls->xyexponent, unit, 0);
-        controls->args->xyunit = g_strdup(unit);
      }
     else if (gwy_strequal(id, "z")) {
         set_combo_from_unit(controls->zexponent, unit, 0);
-        controls->args->zunit = g_strdup(unit);
     }
 
     gtk_widget_destroy(dialog);
