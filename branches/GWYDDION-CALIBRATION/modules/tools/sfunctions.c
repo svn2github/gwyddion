@@ -699,7 +699,9 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
                                            tool->zunc,
                                            tool->uline,
                                            isel[0], isel[1], w, h,
-                                           tool->args.direction);
+                                           tool->args.direction); 
+/*              gwy_data_field_acf_uncertainty(plain_tool->data_field, tool->zunc,
+                          tool->uline, tool->args.direction); */
             tool->has_uline = TRUE;
         }
 
@@ -716,11 +718,13 @@ gwy_tool_sfunctions_update_curve(GwyToolSFunctions *tool)
         xlabel = "τ";
         ylabel = "H";
         if (tool->has_calibration) {
-            gwy_data_field_area_hhcf_uncertainty(plain_tool->data_field,
+     /*       gwy_data_field_area_hhcf_uncertainty(plain_tool->data_field,
                                            tool->zunc,
                                            tool->uline,
                                            isel[0], isel[1], w, h,
-                                           tool->args.direction);
+                                           tool->args.direction); */
+              gwy_data_field_hhcf_uncertainty(plain_tool->data_field, tool->zunc,
+                          tool->uline, tool->args.direction);
             tool->has_uline = TRUE;
         }
 
