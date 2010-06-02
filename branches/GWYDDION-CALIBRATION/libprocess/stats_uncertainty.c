@@ -1236,18 +1236,18 @@ gwy_data_line_acf_uncertainty(GwyDataLine *data_line, GwyDataLine *uline,
     target_line->off = 0.0;
 
     for (j = 0; j < n; j++) {
-	    for (k = 0; k < n; k++){
-		    val = 2* avg/n;
-		    for (i = 0; i < (n-j); i++) {
-			    val -= data_line->data[i] + data_line->data[i+j];
-			    if (i + j == k) val += data_line->data[i] - avg;
-			    if (i == k) val += data_line->data[i+j] - avg;
+	    for (i = 0; i < n; i++){
+		    val = 0;
+		    for (k = 0; k < (n-j); k++) {
+			    val+=-(data_line->data[k]-avg)/n-(data_line->data[k+j]-avg)/n;
+			    if (k + j == i) val += data_line->data[k] - avg;
+			    if (k == i) val += data_line->data[k+j] - avg;
 		    }
-	    target_line->data[j] += val*val*uline->data[k]*uline->data[k];
+	    target_line->data[j] += val*val*uline->data[i]*uline->data[i];
 	    }
     }
     for (i = 0; i < n; i++)
-        target_line->data[i] /= target_line->data[i]/((n-i)*(n-i));
+        target_line->data[i] = target_line->data[i]/((n-i)*(n-i));
 }
 /**
  * gwy_data_line_hhcf_uncertainty:
@@ -1256,7 +1256,7 @@ gwy_data_line_acf_uncertainty(GwyDataLine *data_line, GwyDataLine *uline,
  * @target_line: Data line to store uncertainty of height-height function to.  It will be
  *               resized to @data_line size.
  *
- * Computes height-height correlation function and stores results in
+ * Computes uncertainty squared of the height-height correlation function and stores results in
  * @target_line.
  **/
 void
@@ -1341,11 +1341,15 @@ gwy_data_field_acf_uncertainty(GwyDataField *data_field,
                                GwyDataLine *target_line,
                                GwyOrientation orientation)
 {
-    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
-    gwy_data_field_area_acf_uncertainty(data_field,uncz_field, target_line, 
-                                        0, 0, data_field->xres, data_field->yres,
-                            orientation);
+
+	g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+	g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
+	g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+	gwy_data_field_area_acf_uncertainty(data_field,uncz_field, target_line, 
+			0, 0, data_field->xres, data_field->yres,
+			orientation);
+	return;
+
 }
 
 
@@ -1374,19 +1378,18 @@ gwy_data_field_area_hhcf_uncertainty(GwyDataField *data_field,
                                      gint width, gint height,
                                      GwyOrientation orientation)
 {
-    GwySIUnit *fieldunit, *lineunit;
+	GwySIUnit *fieldunit, *lineunit;
 
-printf(" area_hhcf_uncertainty \n");
-    gwy_data_field_area_func_lame_uncertainty(data_field, uncz_field, target_line,
-                                  &gwy_data_line_hhcf_uncertainty,
-                                  col, row, width, height,
-                                  orientation);
+	gwy_data_field_area_func_lame_uncertainty(data_field, uncz_field, target_line,
+			&gwy_data_line_hhcf_uncertainty,
+			col, row, width, height,
+			orientation);
 
-    fieldunit = gwy_data_field_get_si_unit_xy(data_field);
-    lineunit = gwy_data_line_get_si_unit_x(target_line);
-    gwy_serializable_clone(G_OBJECT(fieldunit), G_OBJECT(lineunit));
-    lineunit = gwy_data_line_get_si_unit_y(target_line);
-    gwy_si_unit_power(gwy_data_field_get_si_unit_z(data_field), 2, lineunit);
+	fieldunit = gwy_data_field_get_si_unit_xy(data_field);
+	lineunit = gwy_data_line_get_si_unit_x(target_line);
+	gwy_serializable_clone(G_OBJECT(fieldunit), G_OBJECT(lineunit));
+	lineunit = gwy_data_line_get_si_unit_y(target_line);
+	gwy_si_unit_power(gwy_data_field_get_si_unit_z(data_field), 2, lineunit);
 }
 
 /**
@@ -1408,12 +1411,10 @@ gwy_data_field_hhcf_uncertainty(GwyDataField *data_field,
                                 GwyOrientation orientation)
 {
 	GwySIUnit *fieldunit, *lineunit;
-	GwyDataLine *data_line, *uline, *tmp_line;
-	gint i, j,k, xres, yres, size;
+	gint i, j, xres, yres, size;
 	gdouble val;
-	gint m;
+	gint m,k;
 
-	printf(" hhcf_uncertainty \n");
 	g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
 	g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
 	g_return_if_fail(GWY_IS_DATA_LINE(target_line));
@@ -1436,52 +1437,84 @@ gwy_data_field_hhcf_uncertainty(GwyDataField *data_field,
 
 
 	size = (orientation == GWY_ORIENTATION_HORIZONTAL) ? xres : yres;
-//	printf("size %d \n", size);
 	if (orientation ==GWY_ORIENTATION_VERTICAL ) {
-		printf(" vertical \n");
 		return;
 	}
 
 
-	data_line = gwy_data_line_new(size, 1.0, FALSE);
-	uline = gwy_data_line_new(size, 1.0, FALSE);
-	tmp_line = gwy_data_line_new(size, 1.0, FALSE);
 	gwy_data_line_resample(target_line, size, GWY_INTERPOLATION_NONE);
 	gwy_data_line_clear(target_line);
 	gwy_data_line_set_offset(target_line, 0.0);
-	gwy_data_line_set_real(target_line,
-			gwy_data_field_get_xreal(data_field));
+	gwy_data_line_set_real(target_line, gwy_data_field_get_xreal(data_field));
 
 
-	for (m=0;m<xres;m++){
+/*	for (m=0;m<xres;m++){ snad dobre
 		for (j=0;j<yres;j++){
 			const gdouble *drow=data_field->data+j*xres;
 			const gdouble *urow=uncz_field->data+j*xres;
+
 			for (i=0;i<xres;i++){
-				val=0;
-				for (k=0;k<xres-m;k++)
+                          val=0;
+				for (k=0;k<(xres-m);k++)
 				{ 
-//if (m >xres-2) printf("k %d val %g \n",k ,val);
 					if (k+m==i) val+= drow[k+m]-drow[k];
-//if (m >xres-2) printf("k %d val %g \n",k ,val);
 					if (k==i) val-= drow[k+m]-drow[k];
-//if (m >xres-2) printf("k %d val %g \n",k ,val);
-				}
-//if (m>xres-2)
-//printf("m %d i %d j %d val %g u %g \n", m,i,j,val, urow[i]);
+				} 
 				target_line->data[m]+= val*val*urow[i]*urow[i];
 			}
 		}
 		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
-	}
+	} */
+	for (m=0;m<xres;m++){ 
+		for (j=0;j<yres;j++){
+			const gdouble *drow=data_field->data+j*xres;
+			const gdouble *urow=uncz_field->data+j*xres;
+
+			if (m>(xres-1)/2.){
+				for (i=m; i<xres;i++) {
+					val= drow[i]-drow[i-m];
+					target_line->data[m]+= val*val*urow[i]*urow[i];
+				}
+				for (i=0; i<(xres-m);i++) {
+					val= -drow[i+m]+drow[i];
+					target_line->data[m]+= val*val*urow[i]*urow[i];
+				}
+			} 
+			else {
+				for (i=0; i<m;i++) {
+					val= -drow[i+m]+drow[i];
+					target_line->data[m]+= val*val*urow[i]*urow[i];
+				}
+				for (i=m; i<(xres-m);i++) {
+					val= drow[i]-drow[i-m]-drow[i+m]+drow[i];
+					target_line->data[m]+= val*val*urow[i]*urow[i];
+				} 
+				for (i=(xres-m); i<xres;i++){
+					val= drow[i]-drow[i-m];
+					target_line->data[m]+= val*val*urow[i]*urow[i];
+				}
+			} 
+
+		}
+		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
+	} 
 
 
+}
 
-
-
-	g_object_unref(data_line);
-	g_object_unref(uline);
-	g_object_unref(tmp_line);
+/**
+ * square_area1_uncertainty:
+ * @z1: Z-value in first corner.
+ * @z2: Z-value in second corner.
+ * @z3: Z-value in third corner.
+ * @z4: Z-value in fourth corner.
+ * @uz1: uncertainty of Z-value in first corner.
+ * @uz2: uncertainty of Z-value in second corner.
+}
+                                  
+		}
+		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
+	} 
 
 
 }
