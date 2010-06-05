@@ -67,7 +67,6 @@ gwy_calibration_class_init(GwyCalibrationClass *klass)
 static void
 gwy_calibration_init(GwyCalibration *calibration)
 {
-    printf("cal init\n");
     gwy_debug_objects_creation(G_OBJECT(calibration));
 }
 
@@ -121,7 +120,6 @@ void
 _gwy_calibration_class_setup_presets(void)
 {
     GwyResourceClass *klass;
-    GwyCalibration *calibration;
 
     klass = g_type_class_ref(GWY_TYPE_CALIBRATION);
 }
@@ -166,7 +164,6 @@ gwy_calibration_dump(GwyResource *resource,
                   GString *str)
 {
     GwyCalibration *calibration;
-    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     g_return_if_fail(GWY_IS_CALIBRATION(resource));
     calibration = GWY_CALIBRATION(resource);
@@ -180,7 +177,7 @@ gwy_calibration_parse(const gchar *text,
     GwyCalibration *calibration = NULL;
     GwyCalibrationClass *klass;
     guint ndata = 0;
-    gchar *str, *p, *line, *key, *end, *filename, *value;
+    gchar *str, *p, *line, *key, *filename=NULL, *value;
     guint len;
 
     g_return_val_if_fail(text, NULL);

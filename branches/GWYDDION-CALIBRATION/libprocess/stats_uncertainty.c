@@ -1221,33 +1221,66 @@ void
 gwy_data_line_acf_uncertainty(GwyDataLine *data_line, GwyDataLine *uline,
 	       	GwyDataLine *target_line)
 {
-    gint i, j, n, k;
-    gdouble val, avg;
+	gint i, n, k,m;
+	gdouble val, avg,cval;
 
-    g_return_if_fail(GWY_IS_DATA_LINE(data_line));
-    g_return_if_fail(GWY_IS_DATA_LINE(uline));
-    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+	g_return_if_fail(GWY_IS_DATA_LINE(data_line));
+	g_return_if_fail(GWY_IS_DATA_LINE(uline));
+	g_return_if_fail(GWY_IS_DATA_LINE(target_line));
 
-    n = data_line->res;
-    gwy_data_line_resample(target_line, n, GWY_INTERPOLATION_NONE);
-    gwy_data_line_clear(target_line);
-    avg = gwy_data_line_get_avg(data_line);
-    target_line->real = data_line->real;
-    target_line->off = 0.0;
+	n = data_line->res;
+	gwy_data_line_resample(target_line, n, GWY_INTERPOLATION_NONE);
+	gwy_data_line_clear(target_line);
+	avg = gwy_data_line_get_avg(data_line);
+	target_line->real = data_line->real;
+	target_line->off = 0.0;
+	/*
+	   for (m = 0; m < n; m++) {
+	   for (i = 0; i < n; i++){
+	   val = 0;
+	   for (k = 0; k < (n-m); k++) {
+	   val+=-(data_line->data[k]-avg)/n-(data_line->data[k+m]-avg)/n;
+	   if (k + m == i) val += data_line->data[k] - avg;
+	   if (k == i) val += data_line->data[k+m] - avg;
+	   }
+	   target_line->data[m] += val*val*uline->data[i]*uline->data[i];
+	   }
+	   }
+	   for (m = 0; m < n; m++)
+	   target_line->data[m] = target_line->data[m]/((n-m)*(n-m)); */
+	for (m=0;m<n;m++){ 
+		cval=0;
+		for (k=0;k<n-m;k++){
+			cval+=2*avg-data_line->data[k]-data_line->data[k+m];
+}
+		cval=cval/n;
 
-    for (j = 0; j < n; j++) {
-	    for (i = 0; i < n; i++){
-		    val = 0;
-		    for (k = 0; k < (n-j); k++) {
-			    val+=-(data_line->data[k]-avg)/n-(data_line->data[k+j]-avg)/n;
-			    if (k + j == i) val += data_line->data[k] - avg;
-			    if (k == i) val += data_line->data[k+j] - avg;
-		    }
-	    target_line->data[j] += val*val*uline->data[i]*uline->data[i];
-	    }
-    }
-    for (i = 0; i < n; i++)
-        target_line->data[i] = target_line->data[i]/((n-i)*(n-i));
+		if (m>(n-1)/2.){
+			for (i=m; i<n;i++) {
+				val= data_line->data[i-m]-avg+cval;
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+			for (i=0; i<(n-m);i++) {
+				val= data_line->data[i+m]-avg+cval;
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+		} 
+		else {
+			for (i=0; i<m;i++) {
+				val= data_line->data[i+m]-avg+cval;
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+			for (i=m; i<(n-m);i++) {
+				val= data_line->data[i-m]+data_line->data[i+m]-2*avg+cval;
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			} 
+			for (i=(n-m); i<n;i++){
+				val=data_line->data[i-m]-avg+cval;
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+		} 
+	target_line->data[m] = target_line->data[m]/(n-m)/(n-m);
+	}
 }
 /**
  * gwy_data_line_hhcf_uncertainty:
@@ -1262,31 +1295,62 @@ gwy_data_line_acf_uncertainty(GwyDataLine *data_line, GwyDataLine *uline,
 void
 gwy_data_line_hhcf_uncertainty(GwyDataLine *data_line, GwyDataLine *uline,  GwyDataLine *target_line)
 {
-    gint i, j, n,k;
-    gdouble val;
+	gint i, n,m;
+	gdouble val;
 
-    g_return_if_fail(GWY_IS_DATA_LINE(data_line));
-    g_return_if_fail(GWY_IS_DATA_LINE(target_line));
+	g_return_if_fail(GWY_IS_DATA_LINE(data_line));
+	g_return_if_fail(GWY_IS_DATA_LINE(uline));
+	g_return_if_fail(GWY_IS_DATA_LINE(target_line));
 
-    n = data_line->res;
-    gwy_data_line_resample(target_line, n, GWY_INTERPOLATION_NONE);
-    gwy_data_line_clear(target_line);
-    target_line->real = data_line->real;
-    target_line->off = 0.0;
+	n = data_line->res;
+	gwy_data_line_resample(target_line, n, GWY_INTERPOLATION_NONE);
+	gwy_data_line_clear(target_line);
+	target_line->real = data_line->real;
+	target_line->off = 0.0;
 
-    for (j = 0; j < n; j++) {
-	    for (k = 0; k < n; k++){
-		    val=0;
-		    for (i = 0; i < (n-j); i++) {
-			  if (i + j == k) val += data_line->data[i+j] - data_line->data[i];
-			  if (i == k) val += data_line->data[i] - data_line->data[i+j];
-		    }
-	    target_line->data[j] += 4* val*val*uline->data[k]*uline->data[k];
-	    }
-    }
-    for (i = 0; i < n; i++)
-        target_line->data[i] /= target_line->data[i]/((n-i)*(n-i));
-}
+	/*   for (j = 0; j < n; j++) {
+	     for (k = 0; k < n; k++){
+	     val=0;
+	     for (i = 0; i < (n-j); i++) {
+	     if (i + j == k) val += data_line->data[i+j] - data_line->data[i];
+	     if (i == k) val += data_line->data[i] - data_line->data[i+j];
+	     }
+	     target_line->data[j] += 4* val*val*uline->data[k]*uline->data[k];
+	     }
+	     }
+	     for (i = 0; i < n; i++)
+	     target_line->data[i] /= target_line->data[i]/((n-i)*(n-i));
+
+	 */
+	for (m=0;m<n;m++){ 
+		if (m>(n-1)/2.){
+			for (i=m; i<n;i++) {
+				val= data_line->data[i]-data_line->data[i-m];
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+			for (i=0; i<(n-m);i++) {
+				val= -data_line->data[i+m]+data_line->data[i];
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+		} 
+		else {
+			for (i=0; i<m;i++) {
+				val= -data_line->data[i+m]+data_line->data[i];
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+			for (i=m; i<(n-m);i++) {
+				val= data_line->data[i]-data_line->data[i-m]-data_line->data[i+m]+data_line->data[i];
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			} 
+			for (i=(n-m); i<n;i++){
+				val= data_line->data[i]-data_line->data[i-m];
+				target_line->data[m]+= val*val*uline->data[i]*uline->data[i];
+			}
+		} 
+		target_line->data[m] =4*target_line->data[m]/(n-m)/(n-m);
+	}
+} 
+
 /**
  * gwy_data_field_area_acf_uncertainty:
  * @data_field: A data field.
@@ -1410,113 +1474,14 @@ gwy_data_field_hhcf_uncertainty(GwyDataField *data_field,
                                 GwyDataLine *target_line,
                                 GwyOrientation orientation)
 {
-	GwySIUnit *fieldunit, *lineunit;
-	gint i, j, xres, yres, size;
-	gdouble val;
-	gint m,k;
 
 	g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
 	g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
 	g_return_if_fail(GWY_IS_DATA_LINE(target_line));
-	//    gwy_data_field_area_hhcf_uncertainty(data_field,uncz_field, target_line,
-	//                                        0, 0, data_field->xres, data_field->yres,
-	//                                       orientation);
-	// return;
-
-	fieldunit = gwy_data_field_get_si_unit_xy(data_field);
-	lineunit = gwy_data_line_get_si_unit_x(target_line);
-	gwy_serializable_clone(G_OBJECT(fieldunit), G_OBJECT(lineunit));
-	lineunit = gwy_data_line_get_si_unit_y(target_line);
-	gwy_si_unit_power(gwy_data_field_get_si_unit_z(data_field), 2, lineunit);
-
-
-	xres = data_field->xres;
-	yres = data_field->yres;
-	g_return_if_fail(orientation == GWY_ORIENTATION_HORIZONTAL
-			|| orientation == GWY_ORIENTATION_VERTICAL);
-
-
-	size = (orientation == GWY_ORIENTATION_HORIZONTAL) ? xres : yres;
-	if (orientation ==GWY_ORIENTATION_VERTICAL ) {
-		return;
-	}
-
-
-	gwy_data_line_resample(target_line, size, GWY_INTERPOLATION_NONE);
-	gwy_data_line_clear(target_line);
-	gwy_data_line_set_offset(target_line, 0.0);
-	gwy_data_line_set_real(target_line, gwy_data_field_get_xreal(data_field));
-
-
-/*	for (m=0;m<xres;m++){ snad dobre
-		for (j=0;j<yres;j++){
-			const gdouble *drow=data_field->data+j*xres;
-			const gdouble *urow=uncz_field->data+j*xres;
-
-			for (i=0;i<xres;i++){
-                          val=0;
-				for (k=0;k<(xres-m);k++)
-				{ 
-					if (k+m==i) val+= drow[k+m]-drow[k];
-					if (k==i) val-= drow[k+m]-drow[k];
-				} 
-				target_line->data[m]+= val*val*urow[i]*urow[i];
-			}
-		}
-		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
-	} */
-	for (m=0;m<xres;m++){ 
-		for (j=0;j<yres;j++){
-			const gdouble *drow=data_field->data+j*xres;
-			const gdouble *urow=uncz_field->data+j*xres;
-
-			if (m>(xres-1)/2.){
-				for (i=m; i<xres;i++) {
-					val= drow[i]-drow[i-m];
-					target_line->data[m]+= val*val*urow[i]*urow[i];
-				}
-				for (i=0; i<(xres-m);i++) {
-					val= -drow[i+m]+drow[i];
-					target_line->data[m]+= val*val*urow[i]*urow[i];
-				}
-			} 
-			else {
-				for (i=0; i<m;i++) {
-					val= -drow[i+m]+drow[i];
-					target_line->data[m]+= val*val*urow[i]*urow[i];
-				}
-				for (i=m; i<(xres-m);i++) {
-					val= drow[i]-drow[i-m]-drow[i+m]+drow[i];
-					target_line->data[m]+= val*val*urow[i]*urow[i];
-				} 
-				for (i=(xres-m); i<xres;i++){
-					val= drow[i]-drow[i-m];
-					target_line->data[m]+= val*val*urow[i]*urow[i];
-				}
-			} 
-
-		}
-		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
-	} 
-
-
-}
-
-/**
- * square_area1_uncertainty:
- * @z1: Z-value in first corner.
- * @z2: Z-value in second corner.
- * @z3: Z-value in third corner.
- * @z4: Z-value in fourth corner.
- * @uz1: uncertainty of Z-value in first corner.
- * @uz2: uncertainty of Z-value in second corner.
-}
-                                  
-		}
-		target_line->data[m] = sqrt(target_line->data[m])*2/(yres*(xres-m));
-	} 
-
-
+	gwy_data_field_area_hhcf_uncertainty(data_field,uncz_field, target_line,
+			0, 0, data_field->xres, data_field->yres,
+			orientation);
+	return;
 }
 
 /**
@@ -2724,7 +2689,6 @@ gwy_data_field_area_get_surface_area_mask_uncertainty(GwyDataField *data_field,
                          && row + height <= data_field->yres,
                          uarea);
 
-    // The result is the same, but it can be cached. 
     if (!mask
         && row == 0 && col == 0
         && width == data_field->xres && height == data_field->yres)
@@ -3104,168 +3068,694 @@ gwy_data_field_dh_uncertainty(GwyDataField *data_field,
  *
  * Computes squared uncertainty of average normal vector of an area of a data field.
  **/
-/*void
+void
 gwy_data_field_area_get_normal_coeffs_uncertainty(GwyDataField *data_field,
                                                   GwyDataField *uncz_field, 
-                                                  gdouble uncx, 
-                                                  gdouble uncy,
+                                                  GwyDataField *uncx_field, 
+                                                  GwyDataField *uncy_field, 
                                                   gint col, gint row,
                                                   gint width, gint height,
-                                                  gdouble *nx, gdouble *ny, gdouble *nz,
                                                   gdouble *ux, gdouble *uy, gdouble *uz)
 {
-    gint i, j;
-    int ctr = 0;
-    gdouble d1x, d1y, d1z, d2x, d2y, d2z, dcx, dcy, dcz, dd;
-    gdouble sumdx = 0.0, sumdy = 0.0, sumdz = 0.0, sumw = 0.0;
-    gdouble avgdx, avgdy, avgdz;
-    gdouble **nn, **dxz, **dyz;
-    gdouble *u;
+	gint i, j,k,l,xres,yres;
+	int ctr = 0;
+	gdouble d1x, d1y, d1z, d2x, d2y, d2z, dcx, dcy, dcz, dd;
+	gdouble **nn, **dxz, **dyz;
+	gdouble sumdx=0, sumdy=0, sumdz=0;
+	gdouble ***dzdxz;
+	gdouble ***dzdyz;
+	gdouble hx,hy, val;
+	gdouble *upos;
+	gint jup,jlow, iup, ilow;
+	gdouble ***dxdxz;
+	gdouble ***dydxz;
 
-    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
-    g_return_if_fail(col >= 0 && row >= 0
-                     && width > 0 && height > 0
-                     && col + width <= data_field->xres
-                     && row + height <= data_field->yres);
-    ///* This probably should not be enforced */
-    /*
-    //g_return_if_fail(gwy_si_unit_equal(gwy_data_field_get_si_unit_xy(a),
-    //                                   gwy_data_field_get_si_unit_z(a)),
-    //                 FALSE);
-    //                 
+	g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+	g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
+	g_return_if_fail(col >= 0 && row >= 0
+			&& width > 0 && height > 0
+			&& col + width <= data_field->xres
+			&& row + height <= data_field->yres);
 
-    nn = (double **)malloc(width*sizeof(double *));
-    dxz = (double **)malloc(width*sizeof(double *));
-    dyz = (double **)malloc(width*sizeof(double *));
-    for (i = col; i < col + width; i++) {
-       nn[i] = calloc(height, sizeof(double));
-       dxz[i] = calloc(height, sizeof(double));
-       dyz[i] = calloc(height, sizeof(double));
-    }
+	xres=data_field->xres;
+	yres=data_field->yres;
 
-    // normal coefficients and table of x,y derivatives and normal vector sizes 
-    for (i = col; i < col + width; i++) {
-        for (j = row; j < row + height; j++) {
-            d1x = 1.0;
-            d1y = 0.0;
-            d1z = gwy_data_field_get_xder(data_field, i, j);
-	    dxz[i-col][j-row] = d1z;
-            d2x = 0.0;
-            d2y = 1.0;
-            d2z = gwy_data_field_get_yder(data_field, i, j);
-	    dyz[i-col][j-row] = d2z;
-            // Cross product = normal vector 
-            dcx = d1y*d2z - d1z*d2y;
-            dcy = d1z*d2x - d1x*d2z;
-            dcz = d1x*d2y - d1y*d2x; // Always 1 
-            // Normalize and add 
-            dd = sqrt(dcx*dcx + dcy*dcy + dcz*dcz);
-            nn[i-col][j-row] = dd;
-            dcx /= dd;
-            sumdx += dcx;
-            dcy /= dd;
-            sumdy += dcy;
-            dcz /= dd;
-            sumdz += dcz;
-            sumw += 1.0/dd;
-            ctr++;
-        }
-    }
+	nn = (gdouble **)g_malloc(width*sizeof(gdouble *));
+	dxz = (gdouble **)g_malloc(width*sizeof(gdouble *));
+	dyz = (gdouble **)g_malloc(width*sizeof(gdouble *));
+	dzdxz = (gdouble ***)g_malloc(width*sizeof(gdouble **));
+	dzdyz = (gdouble ***)g_malloc(width*sizeof(gdouble **));
+	dxdxz = (gdouble ***)g_malloc(width*sizeof(gdouble **));
+	for (i = 0; i <  width; i++) {
+		nn[i] = (gdouble *) g_malloc0(height*sizeof(gdouble));
+		dxz[i] = (gdouble *)g_malloc0(height* sizeof(gdouble));
+		dyz[i] = (gdouble *)g_malloc0(height* sizeof(gdouble));
+		dzdxz[i] = (gdouble **)g_malloc(height*sizeof(gdouble *));
+		dzdyz[i] = (gdouble **)g_malloc(height*sizeof(gdouble *));
+		dxdxz[i] = (gdouble **)g_malloc(height*sizeof(gdouble *));
+		for (j=0; j < height;j++){
+			dzdxz[i][j] = (gdouble *)g_malloc0(xres* sizeof(gdouble));
+			dzdyz[i][j] = (gdouble *)g_malloc0(yres* sizeof(gdouble));
+			dxdxz[i][j] = (gdouble *)g_malloc0(xres* sizeof(gdouble));
+		}
+	}
+	ilow=(col==0 ? 0: col-1);
+	jlow=(row==0 ? 0: row-1);
+        iup=(col+width==xres ? xres :col+width+1);
+        jup=(row+height==yres ? yres :row+height+1);
 
-    avgdx = sumdx/ctr;
-    avgdy = sumdy/ctr;
-    avgdz = sumdz/ctr;
-
-    if (nx)
-        *nx = avgdx;
-    if (ny)
-        *ny = avgdy;
-    if (nz)
-        *nz = avgdz;
+	
+	// table of x,y derivatives and normal vector sizes 
+	for (i = col; i < col + width; i++) {
+		for (j = row; j < row + height; j++) {
+			d1x = 1.0;
+			d1y = 0.0;
+			d1z = gwy_data_field_get_xder(data_field, i, j);
+			dxz[i-col][j-row] = d1z;
+			d2x = 0.0;
+			d2y = 1.0;
+			d2z = gwy_data_field_get_yder(data_field, i, j);
+			dyz[i-col][j-row] = d2z;
+			// Cross product = normal vector 
+			dcx = d1y*d2z - d1z*d2y;
+			dcy = d1z*d2x - d1x*d2z;
+			dcz = d1x*d2y - d1y*d2x; // Always 1 
+			// Normalize and add 
+			dd = sqrt(dcx*dcx + dcy*dcy + dcz*dcz);
+			nn[i-col][j-row] = dd;
+			ctr++;
+		}
+	}
 
 
-    // uncertainties 
-    hx = dfield->xreal/dfield->xres;
-    hy = dfield->yreal/dfield->yres;
-    sumdx = sumdy = sumdz = 0;
-    upos = uncz_field->data + row*uncz_field->xres + col;
-    for (j = 0; j < height; j++) {
-	    const gdouble *urow = upos + i*uncz_field->xres;
-	    for (i = 0; i < width; i++) {
-		    val = 0;
-		    if (i + col == 0 )
-			    val += - 1./(hx)*( dxz[i][j]*dxz[i][j]/
-				    (nn[i][j]*nn[i][j]*nn[i][j]) - 1./nn[i][j]);
-		    else 
-			    val += -1./(2*hx)*( dxz[i+1][j]*dxz[i+1][j]/
-				    (nn[i+1][j]*nn[i+1][j]*nn[i+1][j]) - 1./nn[i+1][j]);	
-		    if (i + col == 1)
-			    val += 1./(hx)*( dxz[i-1][j]*dxz[i-1][j]/
-				    (nn[i-1][j]*nn[i-1][j]*nn[i-1][j]) - 1./nn[i-1][j]);
-		    else
-			    val += 1./(2*hx)*( dxz[i-1][j]*dxz[i-1][j]/
-				    (nn[i-1][j]*nn[i-1][j]*nn[i-1][j]) - 1./nn[i-1][j]);	
-		    else if (i + col == dfield->xres-2)
-			    else if (i + col == dfield->xres-1)
-					    else{
-			    val += dxz[i-1][j]*dxz[i-1][j]/
-				    (nn[i-1][j]*nn[i-1][j]*nn[i+1][j])-	
-				    dxz[i+1][j]*dxz[i+1][j]/
-				    (nn[i+1][j]*nn[i+1][j+1]*nn[i+1][j])-	
-				    1./nn[i-1][j] + 1./nn[i+1][j];
-			    val /= (2*hx);
-					    }
-			    val -= (dxz[i][j-1]*dyz[i][j-1]/
-					    (nn[i][j-1]*nn[i][j-1]*nn[i][j-1])
-					    -dxz[i][j+1]*dyz[i][j+1]/
-					    (nn[i][j+1]*nn[i][j+1]*nn[i][j+1]))/(2*hy);
-			    val /=ctr;
-			    sumdx += val*val*(*urow)*(*urow);
+	//table of derivatives of x,y derivatives
+	hx = data_field->xreal/xres;
+	hy = data_field->yreal/yres;
 
-		    nn[i][j] = dd;
-            dcx /= dd;
-            sumdx += dcx;
-            dcy /= dd;
-            sumdy += dcy;
-            dcz /= dd;
-            sumdz += dcz;
-            sumw += 1.0/dd;
-	    urow ++;
-        }
-    }
-    sumdx /= ctr*ctr;
-    sumdy /= ctr*ctr;
-    sumdz /= ctr*ctr;
+	//dzdxz
+	if (col ==0){ 
+		for (j=row; j<row+height;j++){
+			dzdxz[0][j-row][0]+=-1/hx;
+			dzdxz[0][j-row][1]+=1/hx;
+		}
+	}
+	else {
+		for (j=row; j<row+height;j++){
+			dzdxz[0][j-row][col-1]+=-1/hx/2;
+			dzdxz[0][j-row][col+1]+=1/hx/2;
+		}
+	}
+
+	if (col +width==xres){ 
+		for (j=row; j<row+height;j++){
+			dzdxz[width-1][j-row][xres-2]+=-1/hx;
+			dzdxz[width-1][j-row][xres-1]+=1/hx;
+		}
+	}
+	else{ 
+		for (j=row; j<row+height;j++){
+			dzdxz[width-1][j-row][col-1]+=-1/hx/2;
+			dzdxz[width-1][j-row][col+1]+=1/hx/2;
+		}
+	}
+
+	for (i = col+1; i < col + width-1; i++) {
+		for (j=row; j<row+height;j++){
+			dzdxz[i-col][j-row][i-1]+=-1/hx/2;
+			dzdxz[i-col][j-row][i+1]+=1/hx/2;
+		}
+	}
+
+
+	if (row ==0){ 
+		for (i=col; i<col+width;i++){
+			dzdyz[i-col][0][0]+=-1/hy;
+			dzdyz[i-col][0][1]+=1/hy;
+		}
+	}
+	else {
+		for (i=col; i<col+width;i++){
+			dzdyz[i-col][0][row-1]+=-1/hy/2;
+			dzdyz[i-col][0][row+1]+=1/hy/2;
+		}
+	}
+
+	if (row +height==yres){ 
+		for (i=col; i<col+width;i++){
+			dzdyz[i-col][height-1][yres-2]+=-1/hy;
+			dzdyz[i-col][height-1][yres-1]+=1/hy;
+		}
+	}
+	else {
+		for (i=col; i<col+width;i++){
+			dzdyz[i-col][height-1][row-1]+=-1/hy/2;
+			dzdyz[i-col][height-1][row+1]+=1/hy/2;
+		}
+	}
+	for (j = row+1; j < row + height-1; j++) {
+		for (i=col; i<col+width;i++){
+			dzdxz[i-col][j-row][j-1]+=-1/hy/2;
+			dzdxz[i-col][j-row][j+1]+=1/hy/2;
+		}
+	}
+/*	//dxdxz
+for (j=0;j< height;j++){
+	if (col==0){
+		for (k=0;k<xres;k++){
+			dxdxz=-dxz[0][j]*dzdxz[0][j][k];
+		}
+	}
+	else{
+		for (k=0;k<xres;k++){
+			dxdxz=-dxz[0][j]*dzdxz[0][j][k]+1/(2*hx*hx)*;
+		}
+	}
+	if (col+width ==xres){
+	}
+	else{
+	}
+
 }
 */
+   printf("dzdxz dzdyz set up\n");
+printf(" widht %d height %d \n", width, height);
+
+	// z uncertainties 
+	sumdx = sumdy = sumdz = 0;
+	upos = uncz_field->data + row*uncz_field->xres + col;
+	//inside
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col; k < col+width; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+						val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+						val-=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+						val+=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dxz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+						val+=-1/nn[k-col][j]*(1-dyz[k-col][j]*dyz[k-col][j]/(nn[k-col][j]*nn[k-col][j])) *dzdyz[k-col][j][l];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("inside\n");
+	//left
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = ilow; k < col; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+				val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+				val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dzdxz[i][l-row][k];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+				val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("left\n");
+	//right
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col+width; k < iup; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+						val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dzdxz[i][l-row][k];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("right\n");
+//top
+	for (l =row+height; l < jup; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col; k < col+width; k++) {
+			val = 0;
+			for (j=0;j<height;j++){
+						val-=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (j=0;j<height;j++){
+						val+=1/(nn[k][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dxz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (j=0;j<height;j++){
+						val+=-1/nn[k-col][j]*(1-dyz[k-col][j]*dyz[k-col][j]/(nn[k-col][j]*nn[k-col][j])) *dzdyz[k-col][j][l];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+//bottom
+	for (l = ilow; l < row; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col; k < col+width; k++) {
+			val = 0;
+			for (j=0;j<height;j++){
+						val-=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (j=0;j<height;j++){
+						val+=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dxz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (j=0;j<height;j++){
+						val+=-1/nn[k-col][j]*(1-dyz[k-col][j]*dyz[k-col][j]/(nn[k-col][j]*nn[k-col][j])) *dzdyz[k-col][j][l];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+
+/*
+// x uncertainty
+	upos = uncx_field->data + row*uncx_field->xres + col;
+//inside
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col; k < col+width; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+						val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dxdxz[i][l-row][k];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("inside\n");
+	//left
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = ilow; k < col; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+				val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+				val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dxdxz[i][l-row][k];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+				val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("left\n");
+	//right
+	for (l =row; l < row+height; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = col+width; k < iup; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+						val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dxdxz[i][l-row][k];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+			val=0;
+			for (i=0;i<width;i++){
+						val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dyz[i][l-row]*dxdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+		}
+	}
+printf("right\n");
+*/
+			
+/*
+	for (l = 0; l < yres; l++) {
+		const gdouble *urow = upos + l*uncz_field->xres;
+		for (k = 0; k < xres; k++) {
+			val = 0;
+			for (i=0;i<width;i++){
+				printf("i %d l %d row %d k %d \n", i, l, row, k);
+				val-=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+				val-=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+
+			val=0;
+			for (i=0;i<width;i++){
+				val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+				val+=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dxz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+
+			val=0;
+			for (j=0;j<height;j++){
+				val+=-1/nn[k-col][j]*(1-dyz[k-col][j]*dyz[k-col][j]/(nn[k-col][j]*nn[k-col][j])) *dzdyz[k-col][j][l];
+			}
+			for (i=0;i<width;i++){
+				val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dyz[i][l-row]*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+			urow ++;
+		}
+	} old only forwhole field*/ 
+        
+
+
+// x uncertainty
+/*	upos = uncx_field->data + row*uncx_field->xres + col;
+	for (l = 0; l < yres; l++) {
+		const gdouble *urow = upos + l*uncx_field->xres;
+		for (k = 0; k < xres; k++) {
+			val = 0;
+if (col==0)
+			val+=1/(nn[0][l-row]*nn[0][l-row]*nn[0][l-row])*dxz[0][l-row]*dxz[0][l-row]*dzdxz[0][l-row][k];
+else
+			val+=1/(nn[0][l-row]*nn[0][l-row]*nn[0][l-row])*dxz[0][l-row]*dxz[0][l-row]*(-dzdxz[0][l-row][k]*dxz[0][l-row]);
+
+			for (i=1;i<width-1;i++){
+				val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dxz[i][l-row]*
+(-dzdxz[i][l-row][k]*dxz[i][l-row]);
+			}
+			val+=1/(nn[0][l-row]*nn[0][l-row]*nn[0][l-row])*dxz[0][l-row]*dxz[0][l-row]*dzdxz[0][l-row][k];
+			for (j=0;j<height;j++){
+				val-=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdz += val*val*(*urow)*(*urow);
+
+			val=0;
+			for (i=0;i<width;i++){
+				val+=-1/nn[i][l-row]*(1-dxz[i][l-row]*dxz[i][l-row]/(nn[i][l-row]*nn[i][l-row])) *dzdxz[i][l-row][k];
+			}
+			for (j=0;j<height;j++){
+				val+=1/(nn[k-col][j]*nn[k-col][j]*nn[k-col][j])*dyz[k-col][j]*dxz[k-col][j]*dzdyz[k-col][j][l];
+			}
+			sumdx += val*val*(*urow)*(*urow);
+
+			val=0;
+			for (j=0;j<height;j++){
+				val+=-1/nn[k-col][j]*(1-dyz[k-col][j]*dyz[k-col][j]/(nn[k-col][j]*nn[k-col][j])) *dzdyz[k-col][j][l];
+			}
+			for (i=0;i<width;i++){
+				val+=1/(nn[i][l-row]*nn[i][l-row]*nn[i][l-row])*dyz[i][l-row]*dxz[i][l-row]*dzdxz[i][l-row][k];
+			}
+			sumdy += val*val*(*urow)*(*urow);
+			urow ++;
+		}
+	}*/
+	sumdx /= ctr*ctr;
+	sumdy /= ctr*ctr;
+	sumdz /= ctr*ctr;
+	if (ux)
+		(*ux)=sumdx;
+	if (uy)
+		(*uy)=sumdy;
+	if (uz)
+		(*uz)=sumdz;
+
+	for (i = 0; i <  width; i++) {
+		for (j = 0; j<height;j++){
+			g_free(dzdxz[i][j]);
+			g_free(dzdyz[i][j]);
+		}
+		g_free(nn[i]);
+		g_free(dxz[i]);
+		g_free(dyz[i]) ;
+		g_free(dzdxz[i]) ;
+		g_free(dzdyz[i]);
+	}
+	g_free(nn);
+	g_free(dxz);
+	g_free(dyz);
+	g_free(dzdxz);
+	g_free(dzdyz);
+}
+
 
 /**
  * gwy_data_field_get_normal_coeffs_uncertainty:
  * @data_field: A data field.
  * @uncz_field: Corresponding uncertainty field.
- * @uncx: The uncertainty in the x direction.
- * @uncy: The uncertainty in the y direction.
- * @nx: Where x-component of average normal vector should be stored, or %NULL.
- * @ny: Where y-component of average normal vector should be stored, or %NULL.
- * @nz: Where z-component of average normal vector should be stored, or %NULL.
+ * @uncx_field: Corresponding uncertainty field.
+ * @uncy_field: Corresponding uncertainty field.
+ * @ux: Where x-component of squared uncertainty of the normal vector should be stored, or %NULL.
+ * @uy: Where x-component of squared uncertainty of the normal vector should be stored, or %NULL.
+ * @uz: Where x-component of squared uncertainty of the normal vector should be stored, or %NULL.
  *
  * Computes squared uncertainty of average normal vector of a data field.
  **/
-/*
+
 void
-gwy_data_field_get_normal_coeffs(GwyDataField *data_field,
-                                 gdouble *nx, gdouble *ny, gdouble *nz,
-                                 gboolean normalize1)
+gwy_data_field_get_normal_coeffs_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gdouble *ux, gdouble *uy, gdouble *uz)
+{
+	g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+	gwy_data_field_area_get_normal_coeffs_uncertainty(data_field,
+			uncz_field, uncx_field, uncy_field, 
+			0, 0,data_field->xres, data_field->yres,
+			ux, uy, uz);
+}
+
+/**
+ * gwy_data_field_area_get_inclination_uncertainty:
+ * @data_field: A data field.
+ * @uncz_field: Corresponding uncertainty field.
+ * @uncx_field: Corresponding uncertainty field.
+ * @uncy_field: Corresponding uncertainty field.
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ * @theta: Where theta angle (in radians) should be stored, or %NULL.
+ * @phi: Where phi angle (in radians) should be stored, or %NULL.
+ *
+ * Calculates the uncertainty of the inclination of the image (polar and azimuth angle).
+ **/
+void
+gwy_data_field_area_get_inclination_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gint col, gint row,
+		gint width, gint height,
+		gdouble *utheta,
+		gdouble *uphi)
+{
+    gdouble nx, ny, nz;
+    gdouble unx, uny, unz;
+
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    g_return_if_fail(GWY_IS_DATA_FIELD(uncz_field));
+    g_return_if_fail(GWY_IS_DATA_FIELD(uncx_field));
+    g_return_if_fail(GWY_IS_DATA_FIELD(uncy_field));
+    g_return_if_fail(col >= 0 && row >= 0
+                     && width > 0 && height > 0
+                     && col + width <= data_field->xres
+                     && row + height <= data_field->yres);
+
+    gwy_data_field_area_get_normal_coeffs(data_field,
+		    col, row, width, height,
+		    &nx, &ny, &nz, TRUE);
+    gwy_data_field_area_get_normal_coeffs_uncertainty(data_field,
+		    uncz_field,uncx_field,uncy_field,
+		    col, row, width, height,
+		    &unx, &uny, &unz);
+
+    if (utheta){
+	    *utheta =nz*nz*(unx*unx*ny*ny+uny*uny*nx*nx)/(nx*nx+ny*ny);
+	    *utheta +=unz*unz*(nx*nx+ny*ny);
+	    *utheta =sqrt(*utheta)/(nx*nx+ny*ny+nz*nz);
+
+    }
+    if (uphi)
+        *uphi = sqrt(unx*unx*ny*ny+uny*uny*nx*nx)/(nx*nx+ny*ny);
+}
+
+
+/**
+ * gwy_data_field_get_inclination_uncertainty:
+ * @data_field: A data field.
+ * @uncz_field: Corresponding uncertainty field.
+ * @uncx_field: Corresponding uncertainty field.
+ * @uncy_field: Corresponding uncertainty field.
+ * @theta: Where theta angle (in radians) should be stored, or %NULL.
+ * @phi: Where phi angle (in radians) should be stored, or %NULL.
+ *
+ * Calculates the uncertainty of the inclination of the image (polar and azimuth angle).
+ **/
+void
+gwy_data_field_get_inclination_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gdouble *utheta,
+		gdouble *uphi)
 {
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
-    gwy_data_field_area_get_normal_coeffs(data_field,
-                                          0, 0,
-                                          data_field->xres, data_field->yres,
-                                          nx, ny, nz, normalize1);
+    gwy_data_field_area_get_inclination_uncertainty(data_field,
+		    uncz_field, uncx_field, uncy_field, 
+		    0, 0,
+		    data_field->xres, data_field->yres,
+		    utheta,
+		    uphi);
 }
-*/
+gdouble
+gwy_data_field_area_get_projected_area_uncertainty(gint nn, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field)
+{
+	gdouble unc;
+	gint xres,yres;
 
+	xres=gwy_data_field_get_xres(uncx_field);
+	yres=gwy_data_field_get_yres(uncy_field);
+
+	unc=(uncx_field->data[xres-1]*uncx_field->data[xres-1]+uncx_field->data[0]*uncx_field->data[0])*gwy_data_field_get_yreal(uncy_field)*gwy_data_field_get_xreal(uncx_field);
+	unc+=(uncy_field->data[yres-1]*uncy_field->data[yres-1]+uncy_field->data[0]*uncy_field->data[0])*gwy_data_field_get_xreal(uncx_field)*gwy_data_field_get_xreal(uncx_field);
+
+	unc=nn/(xres*yres)*sqrt(unc);
+	return unc;
+
+} 
+/**
+ * gwy_data_line_cumulate_uncertainty:
+ * @uncz_line: The uncertainty data line.
+ *
+ * Calculates the uncertainty of a cummulative distribution from the uncertainty of the original distribution. 
+ *
+ **/
+void
+gwy_data_line_cumulate_uncertainty(GwyDataLine *uncz_line)
+{
+	gdouble sum;
+	gdouble *data;
+	gint i;
+
+	g_return_if_fail(GWY_IS_DATA_LINE(uncz_line));
+
+	data = uncz_line->data;
+	sum = 0.0;
+	for (i = 0; i < uncz_line->res; i++) {
+		sum += data[i]*data[i];
+		data[i] = sum;
+	}
+	for (i = 0; i < uncz_line->res; i++) {
+		data[i] = sqrt(data[i]);
+	}
+}
+
+/**
+ * gwy_data_field_area_cdh:
+ * @data_field: A data field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @uncz_field: Corresponding uncertainty data field.
+ * @target_line: A data line to store the distribution to.  It will be
+ *               resampled to requested width.
+ * @col: Upper-left column coordinate.
+ * @row: Upper-left row coordinate.
+ * @width: Area width (number of columns).
+ * @height: Area height (number of rows).
+ * @nstats: The number of samples to take on the distribution function.  If
+ *          nonpositive, a suitable resolution is determined automatically.
+ *
+ * Calculates uncertainty of the cumulative distribution of heights in a rectangular part of the 
+ * data field.
+ **/
+void
+gwy_data_field_area_cdh_uncertainty(GwyDataField *data_field,
+                        GwyDataField *uncz_field,
+                        GwyDataField *mask,
+                        GwyDataLine *target_line,
+                        gint col, gint row,
+                        gint width, gint height,
+                        gint nstats)
+{
+    GwySIUnit *rhounit, *lineunit;
+
+    gwy_data_field_area_dh_uncertainty(data_field,uncz_field, mask, target_line,
+                           col, row, width, height,
+                           nstats);
+    gwy_data_line_cumulate_uncertainty(target_line);
+    gwy_data_line_multiply(target_line, gwy_data_line_itor(target_line, 1));
+
+    /* Update units after integration */
+    lineunit = gwy_data_line_get_si_unit_x(target_line);
+    rhounit = gwy_data_line_get_si_unit_y(target_line);
+    gwy_si_unit_multiply(rhounit, lineunit, rhounit);
+}
+
+/**
+ * gwy_data_field_cdh_uncertainty:
+ * @data_field: A data field.
+ * @uncz_field: Corresponding uncertainty data field.
+ * @target_line: A data line to store the distribution to.  It will be
+ *               resampled to requested width.
+ * @nstats: The number of samples to take on the distribution function.  If
+ *          nonpositive, a suitable resolution is determined automatically.
+ *
+ * Calculates uncertainty of the cumulative distribution of heights in a data field.
+ **/
+void
+gwy_data_field_cdh_uncertainty(GwyDataField *data_field,
+                   GwyDataField *uncz_field,
+                   GwyDataLine *target_line,
+                   gint nstats)
+{
+    g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
+    gwy_data_field_area_cdh_uncertainty(data_field, uncz_field, NULL, target_line,
+                            0, 0, data_field->xres, data_field->yres,
+                            nstats);
+}
 
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

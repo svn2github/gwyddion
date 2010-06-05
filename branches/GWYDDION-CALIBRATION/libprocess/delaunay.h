@@ -20,12 +20,13 @@
 
   [1]  Routines for Arbitrary Precision Floating-point Arithmetic               
        and Fast Robust Geometric Predicates. May 18, 1996.
-       Jonathan Richard Shewchuk.      
+       Jonathan Rigchard Shewchuk.      
        
 */
 /******************************************************************************/
 #ifndef delaunay_h
 #define delaunay_h
+#include <glib.h>
 #include "utils.h"
 /******************************************************************************/
 
@@ -43,33 +44,34 @@
 typedef struct
 {
   // This is the location of this point.
-  double v[3];
+  gdouble v[3];
   
   // This is the point index in the point list.
   // We only store this so that it is convenient for using the
-  // tet-mesh function in Matlab.
+  // tet-GwyDelaunayMesh function in Matlab.
   // We can remove it for when the code is actually used.
-  int    index;
+  gint    index;
 
   // These are the values for our vector field at this location.
-  double data[3];
+  gdouble data[3];
   
   // We use this for caching the voronoi volume of this point.
   // it will provide a good speed-up!
-  double voronoiVolume;
+  gdouble voronoiVolume;
   
-} vertex;
+} GwyDelaunayVertex; //vertex
 
 /*******************************************************************************
 * This is how we represent a Voronoi Cell in memory.                          
 *******************************************************************************/
+
 typedef struct 
 {
   // The number of points on this cell, and the amount
   // of memory allocated for points on this cell.
-  int n, nallocated;
+  gint n, nallocated;
   // The array of points on this cell.
-  double **points;
+  gdouble **points;
 
   // This defines the cell, it contains a list of faces, each one is
   // consistantly oriented relative to itself (so traversing the pionts gives 
@@ -80,14 +82,16 @@ typedef struct
   
 } voronoiCell;
 
+
 /******************************************************************************/
 /* This is how we store an individual simplex: 4 pointers to the coordinates. */
 /* We should try storing this without pointers probably.                      */
 /******************************************************************************/
+
 typedef struct _simplex
 {
   // The verticies of this simplex.
-  vertex  *p[4];
+  GwyDelaunayVertex  *p[4];
   // The neighbouring simlpicies of this simplex.
   // These are ordered in accordance with our 'get face' routine: 
   // so that the i'th face is shared with the i'th neighbour.
@@ -101,6 +105,7 @@ typedef struct _simplex
 /* We want to efficiently change back the neighbour pointers when             */
 /* we remove a point.                                                         */
 /******************************************************************************/
+
 typedef struct
 {
   stack  *ptrs;
@@ -108,12 +113,13 @@ typedef struct
 } neighbourUpdate;
 
 /******************************************************************************/
-// We will keep all details of the mesh in this structure: thus hiding
+// We will keep all details of the GwyDelaunayMesh in this structure: thus hiding
 // the complexities of memory pooling from the user. We also want to store
 // the lists of most recently destroyed and allocated simplicies/neighbour
 // updates, so that we speed up the 'remove last point' operation,
-// which is _crucial_ to fast natural neighbour interpolation.
+// which is _crucial_ to fast natural neighbour ginterpolation.
 /******************************************************************************/
+
 
 typedef struct
 {
@@ -123,7 +129,7 @@ typedef struct
   // The simplex which contains all of the points.
   // its verticies contain no data values.
   simplex *super;
-  vertex   superVerticies[4];
+  GwyDelaunayVertex   superVerticies[4];
   
   // Memory pool.
   stack   *deadSimplicies;
@@ -134,133 +140,26 @@ typedef struct
   arrayList       *updates;
   neighbourUpdate *neighbourUpdates;
   
-  // Keep count of the number of degenerecies we find in the mesh, 
+  // Keep count of the number of degenerecies we find in the GwyDelaunayMesh, 
   // so that we can spot errors, and be aware of particularly degenerate data.
-  int coplanar_degenerecies;
-  int cospherical_degenerecies;
+  gint coplanar_degenerecies;
+  gint cospherical_degenerecies;
 
-} mesh;
+} GwyDelaunayMesh;
+
 
 /******************************************************************************/
-mesh*            newMesh();
-//------------------------------------------------------------------------------
-void             freeMesh(mesh *m);
-//------------------------------------------------------------------------------
-void             removePoint(mesh *m);
-//------------------------------------------------------------------------------
-vertex*          loadPoints(char *filename, int *n);
-//------------------------------------------------------------------------------
-void             getRange(vertex *ps, int n, vertex *min,
-                                             vertex *max, vertex *range, int r);
-//------------------------------------------------------------------------------
-void             initSuperSimplex(vertex *ps, int n, mesh *m);
-//------------------------------------------------------------------------------
-void             writePointsToFile(vertex *ps, int n);
-//------------------------------------------------------------------------------
-void             writeTetsToFile(mesh *m);
-//------------------------------------------------------------------------------
-int              simplexContainsPoint(simplex *s, vertex *p);
-//------------------------------------------------------------------------------
-void             getFaceVerticies(simplex *s, int i, vertex **p1, vertex **p2, 
-                                                     vertex **p3, vertex **p4 );
-//------------------------------------------------------------------------------
-int              vercmp(vertex *v1, vertex *v2);
-//------------------------------------------------------------------------------
-void             faceTest(mesh *m);
-//------------------------------------------------------------------------------
-void             orientationTest(linkedList *tets);
-//------------------------------------------------------------------------------
-void             allTests(linkedList *tets);
-//------------------------------------------------------------------------------
-void             addSimplexToMesh(mesh *m, simplex *s);
-//------------------------------------------------------------------------------
-void             removeSimplexFromMesh(mesh *m, simplex *s);
-//------------------------------------------------------------------------------
-simplex*         findContainingSimplex(mesh *m, vertex *p);
-//------------------------------------------------------------------------------
-int              isDelaunay(simplex *s, vertex *p);
-//------------------------------------------------------------------------------
-simplex**        swapSimplexNeighbour(simplex *s, simplex *old, simplex *new);
-//------------------------------------------------------------------------------
-simplex*         findNeighbour(simplex *s, vertex *p);
-//------------------------------------------------------------------------------
-void             setOrientationBits(simplex *s);
-//------------------------------------------------------------------------------
-void             buildMesh(vertex* ps, int n, mesh *m);
-//------------------------------------------------------------------------------
-void             addPointToMesh(vertex *p, linkedList *tets);
-//------------------------------------------------------------------------------
-int              pointOnSimplex(vertex *p, simplex *s);
-//------------------------------------------------------------------------------
-void             printEdge(vertex *v1, vertex* v2, FILE *stream);
-//------------------------------------------------------------------------------
-int              isConvex(vertex *v1, vertex *v2, vertex *v3, 
-                                      vertex *t,  vertex *b);
-//------------------------------------------------------------------------------
-void             setNeighbourIndex(simplex *s, int i, int newIndex);
-//------------------------------------------------------------------------------
-int              getNeighbourIndex(simplex *s, int i);
-//------------------------------------------------------------------------------
-arrayList*       findNeighbours(vertex *v, simplex *s);
-//------------------------------------------------------------------------------
-simplex*         newSimplex(mesh *m);
-//------------------------------------------------------------------------------
-void             addPoint(vertex *p, mesh *m);
-//------------------------------------------------------------------------------
-int              delaunayTest(mesh *m, vertex *ps, int n);
-//------------------------------------------------------------------------------
-void             circumCenter(simplex *s, double *out);
-//------------------------------------------------------------------------------
-voronoiCell*     getVoronoiCell(vertex *point, simplex *s0, mesh *m);
-//------------------------------------------------------------------------------
-void             setNeighbours(arrayList *newTets);
-//------------------------------------------------------------------------------
-int              shareThreePoints(simplex *s0, int i, simplex *s1);
-//------------------------------------------------------------------------------
-void             vertexAdd(double *a, double *b, double *out);
-//------------------------------------------------------------------------------
-void             vertexByScalar(double *a, double b, double *out);
-//------------------------------------------------------------------------------
-void             vertexSub(double *a, double *b, double *out);
-//------------------------------------------------------------------------------
-void             crossProduct(double *b, double *c, double *out);
-//------------------------------------------------------------------------------
-double           squaredDistance(double *a);
-//------------------------------------------------------------------------------
-double           scalarProduct(double *a, double *b);
-//------------------------------------------------------------------------------
-double           volumeOfTetrahedron(double *a,double *b, double *c, double *d);
-//------------------------------------------------------------------------------
-double           voronoiCellVolume(voronoiCell *vc, vertex *p);
-//------------------------------------------------------------------------------
-void             removeExternalSimplicies(mesh *m);
-//------------------------------------------------------------------------------
-arrayList*       naturalNeighbours(vertex *v, mesh *m);
-//------------------------------------------------------------------------------
-void             writeVoronoiCellToFile(FILE* f, voronoiCell *vc);
-//------------------------------------------------------------------------------
-void             freeVoronoiCell(voronoiCell *vc, mesh *m);
-//------------------------------------------------------------------------------
-neighbourUpdate* initNeighbourUpdates();
-//------------------------------------------------------------------------------
-void             resetNeighbourUpdates(neighbourUpdate *nu);
-//------------------------------------------------------------------------------
-void             undoNeighbourUpdates(neighbourUpdate *nu);
-//------------------------------------------------------------------------------
-void             pushNeighbourUpdate(neighbourUpdate *nu, simplex **ptr,
-                                                          simplex  *old);
-//------------------------------------------------------------------------------
-void             freeNeighbourUpdates(neighbourUpdate *nu);
-//------------------------------------------------------------------------------
-simplex*         findAnyNeighbour(vertex *v, arrayList *tets);
-//------------------------------------------------------------------------------
-int              getNumSimplicies(mesh *m);
-//------------------------------------------------------------------------------
-void             randomPerturbation(vertex *v, int attempt);
-//------------------------------------------------------------------------------
-int              numSphericalDegenerecies(mesh *m);
-//------------------------------------------------------------------------------
-int              numPlanarDegenerecies(mesh *m);
-/******************************************************************************/
+
+GwyDelaunayMesh* gwy_delaunay_new_mesh();
+void             gwy_delaunay_free_GwyDelaunayMesh(GwyDelaunayMesh *m);
+void             gwy_delaunay_remove_point(GwyDelaunayMesh *m);
+void             gwy_delaunay_build_mesh(GwyDelaunayVertex* ps, gint n, GwyDelaunayMesh *m);
+void             gwy_delaunay_add_point(GwyDelaunayVertex *p, GwyDelaunayMesh *m);
+gint             gwy_delaunay_point_on_simplex(GwyDelaunayVertex *p, simplex *s);
+voronoiCell*     gwy_delaunay_get_voronoi_cell(GwyDelaunayVertex *point, simplex *s0, GwyDelaunayMesh *m);
+void             gwy_delaunay_vertex_by_scalar(gdouble *a, gdouble b, gdouble *out);
+gdouble          gwy_delaunay_voronoi_cell_volume(voronoiCell *vc, GwyDelaunayVertex *p);
+void             gwy_delaunay_free_voronoi_cell(voronoiCell *vc, GwyDelaunayMesh *m);
+simplex*         gwy_delaunay_find_any_neighbour(GwyDelaunayVertex *v, arrayList *tets);
 #endif
 

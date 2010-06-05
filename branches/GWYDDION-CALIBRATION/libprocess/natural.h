@@ -16,18 +16,18 @@
 #define natural_h
 
 /******************************************************************************/
-vertex *loadPoints(char *filename, int *n);
+GwyDelaunayVertex *loadPoints(gchar *filename, gint *n);
 //------------------------------------------------------------------------------
-vertex *initPoints(double *x, double *y, double *z, 
-                   double *u, double *v, double *w, int n);
+GwyDelaunayVertex *initPoints(gdouble *x, gdouble *y, gdouble *z, 
+                   gdouble *u, gdouble *v, gdouble *w, gint n);
 //------------------------------------------------------------------------------
-void    writePointsToFile(vertex *ps, int n);
+void    writePointsToFile(GwyDelaunayVertex *ps, gint n);
 //------------------------------------------------------------------------------
-void    lastNaturalNeighbours(vertex *v, mesh *m, arrayList *neighbours, 
+void    lastNaturalNeighbours(GwyDelaunayVertex *v, GwyDelaunayMesh *m, arrayList *neighbours, 
                                                 arrayList *neighbourSimplicies);
 //------------------------------------------------------------------------------                                               
-void     interpolate3_3(double  x, double  y, double  z, 
-                        double *u, double *v, double *w, mesh *m);
+void     interpolate3_3(gdouble  x, gdouble  y, gdouble  z, 
+                        gdouble *u, gdouble *v, gdouble *w, GwyDelaunayMesh *m);
                         
 /******************************************************************************/
 #endif

@@ -73,10 +73,10 @@ struct _GwyCalData {
     GwySIUnit *si_unit_y;
     GwySIUnit *si_unit_z;
 
-    vertex *err_ps;      //as all triangulation works for vectors, there are two separate meshes now which is stupid.
-    vertex *unc_ps;
-    mesh *err_m;
-    mesh *unc_m;
+    GwyDelaunayVertex *err_ps;      //as all triangulation works for vectors, there are two separate meshes now which is stupid.
+    GwyDelaunayVertex *unc_ps;
+    GwyDelaunayMesh *err_m;
+    GwyDelaunayMesh *unc_m;
 
     gpointer reserved1;
     gint int1;
@@ -98,10 +98,10 @@ void           gwy_caldata_copy                  (GwyCalData *caldata,
                                                     GwyCalData *b);
 gint           gwy_caldata_get_ndata            (GwyCalData *caldata);
 gboolean       gwy_caldata_get_point            (GwyCalData *caldata,
-                                                     gdouble x, gdouble y, gdouble ze,
+                                                     gdouble x, gdouble y, gdouble z,
                                                      gdouble *xerr, gdouble *yerr, gdouble *zerr,
                                                      gdouble *xunc, gdouble *yunc, gdouble *zunc);
-GwySIUnit*     gwy_caldata_get_si_unit_x       (GwyCalData *caldata);
+GwySIUnit*     gwy_caldata_get_si_unit_x      (GwyCalData *caldata);
 GwySIUnit*     gwy_caldata_get_si_unit_y       (GwyCalData *caldata);
 GwySIUnit*     gwy_caldata_get_si_unit_z       (GwyCalData *caldata);
 void           gwy_caldata_set_si_unit_x       (GwyCalData *caldata,

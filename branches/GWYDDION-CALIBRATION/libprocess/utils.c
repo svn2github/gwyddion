@@ -2,7 +2,7 @@
 * utils.c
 *
 * Written by Ross Hemsley for McStas, September 2009.
-* All code below is required for the intperolation functions, though many of 
+* All code below is required for the gintperolation functions, though many of 
 * of the routines may be considered general enough for use anywhere they are
 * required. Current utils include an array based list implementation, a doubly
 * linked list implementation and an array based stack implementation.
@@ -19,7 +19,7 @@
 * implementation. Other opertations are O(n).
 *******************************************************************************/
 
-int addToArrayList(arrayList *l, void* element)
+gint addToArrayList(arrayList *l, void* element)
 {
    if (l->num_elements >= l->num_slots)
    {
@@ -58,9 +58,9 @@ arrayList *newArrayList()
 // If this element is in the list, it will return the index of that element.
 // Otherwise we return -1.
 
-int arrayListGetIndex(arrayList *l, void *e)
+gint arrayListGetIndex(arrayList *l, void *e)
 {
-  int i;
+  gint i;
   for (i=0; i<arrayListSize(l); i++)
     if (getFromArrayList(l, i) == e) return i;
   return -1;
@@ -75,10 +75,10 @@ void** getArrayFromArrayList(arrayList *l)
 
 /******************************************************************************/
 
-// a special function, which only works when the arrayList contains only int*
-int arrayListContains(arrayList * l , void * e)
+// a special function, which only works when the arrayList contains only gint*
+gint arrayListContains(arrayList * l , void * e)
 {
-   int i;
+   gint i;
    for (i=0; i< l->num_elements; i++)
       if (e == l->arr[i]) return 1;
    return 0;
@@ -86,14 +86,14 @@ int arrayListContains(arrayList * l , void * e)
 
 /******************************************************************************/
 
-int arrayListSize(arrayList *l)
+gint arrayListSize(arrayList *l)
 {
    return l->num_elements;
 }
 
 /******************************************************************************/
 
-void * getFromArrayList (arrayList *l, int index)
+void * getFromArrayList (arrayList *l, gint index)
 {
    if(index >= 0 && index <  l->num_elements)
       return l->arr[index];
@@ -105,7 +105,7 @@ void * getFromArrayList (arrayList *l, int index)
 
 void freeElements(arrayList *l)
 {
-  int i;
+  gint i;
   
   for (i=0; i<arrayListSize(l); i++)
     free(getFromArrayList(l,i));
@@ -125,7 +125,7 @@ void emptyArrayList(arrayList *l)
 
 void freeArrayList(arrayList *l, void (*destructor)(void *e))
 {
-  int i;
+  gint i;
   
   if (destructor)
     for (i=0;i<arrayListSize(l); i++)
@@ -140,7 +140,7 @@ void freeArrayList(arrayList *l, void (*destructor)(void *e))
 * we want to have faster extractions from very large lists. Using this
 * implementation we expect O(1) from all operations, except accessing an element
 * by index, which is O(n). In most cases this will be much slower than using
-* the array list implementation. (Except fast point removal in large sets) 
+* the array list implementation. (Except fast pogint removal in large sets) 
 * because this implementation will not take advantage of the cache like the
 * array list does.
 *******************************************************************************/
@@ -187,8 +187,11 @@ listNode* addToLinkedList(linkedList *l, void *e)
 
 /******************************************************************************/
 
-void *getFromLinkedList(linkedList *l, int x)
+void *getFromLinkedList(linkedList *l, gint x)
 {
+
+  listNode *thisNode;
+  gint i;
 
   #ifdef DEBUG
   printf("Note: use of access by index in doubly linked list. Is this really "
@@ -202,8 +205,7 @@ void *getFromLinkedList(linkedList *l, int x)
     exit(1);
   }
   
-  listNode *thisNode = topOfLinkedList(l);
-  int i;
+  thisNode = topOfLinkedList(l);
   for (i=0; i<x; i++)
     thisNode = thisNode->next;
   return thisNode->data;
@@ -212,7 +214,7 @@ void *getFromLinkedList(linkedList *l, int x)
 
 /******************************************************************************/
 
-int linkedListSize(linkedList *l)
+gint linkedListSize(linkedList *l)
 {
   return l->nelem;
 }
@@ -221,11 +223,12 @@ int linkedListSize(linkedList *l)
 
 void *prevElement(linkedList *l, listNode **last)
 {
+  void *e;
   // If this is the end, return null.
   if (!*last) return NULL;
   // Move the iterator along to the next element,
   // and then return the data item 
-  void *e = (*last)->data;
+  e = (*last)->data;
   *last = (*last)->prev;
   return e;
 }
@@ -234,18 +237,19 @@ void *prevElement(linkedList *l, listNode **last)
 
 void *nextElement(linkedList *l, listNode **last)
 {
+  void *e;
   // If this is the end, return null.
   if (!*last) return NULL;
   // Move the iterator along to the next element,
   // and then return the data item 
-  void *e = (*last)->data;
+  e = (*last)->data;
   *last = (*last)->next;
   return e;
 }
 
 /******************************************************************************/
 
-int linkedListContains(linkedList *l, void *e)
+gint linkedListContains(linkedList *l, void *e)
 {
   listNode *iter = topOfLinkedList(l);
   void *this;
@@ -273,13 +277,13 @@ void removeFromLinkedList(linkedList *l, listNode *ln)
     exit(1);
   }  
   // This could be the top of the linkedList: if it is: make sure we change the
-  // head pointer to the new value.
+  // head poginter to the new value.
   if (ln->prev)
     ln->prev->next = ln->next;
   else
     l->head = ln->next;
  
-  // This could be the bottom of the linkedList: make sure we change the last pointer.
+  // This could be the bottom of the linkedList: make sure we change the last poginter.
   // if it is.   
   if (ln->next)
     ln->next->prev = ln->prev;
@@ -312,9 +316,9 @@ void freeLinkedList(linkedList *l, void (*destructor)(void *e))
 /*******************************************************************************
 * This is a simple array-based implementation of a stack, implementing
 * pop, push, isEmpty, size and empty.
-* We use isEmpty to tell whether we can keep popping pointers (because we could
-* pop a NULL pointer to the stack). We use the empty function to reset the
-* stack to zero without popping any elements. This maintains the memory
+* We use isEmpty to tell whether we can keep popping poginters (because we could
+* pop a NULL poginter to the stack). We use the empty function to reset the
+* stack to zero without popping any elements. This magintains the memory
 * associated with the stack.
 *******************************************************************************/
 
@@ -331,16 +335,16 @@ stack *newStack()
 
 /******************************************************************************/
 
-int stackSize(stack *s)
+gint stackSize(stack *s)
 {
   return s->top;
 }
 
 /******************************************************************************/
-// When we are storing pointers which could be null, we need to have a check 
+// When we are storing poginters which could be null, we need to have a check 
 // to see if the stack is empty.
 
-int isEmpty(stack *s)
+gint isEmpty(stack *s)
 {
   return (s->top == 0);
 }
@@ -412,7 +416,7 @@ void testStack()
   long *lt;
   long l[5] = {12e3, 982, 1201, 34e3, 3e3};
 
-  int i;
+  gint i;
   for (i=0;i<5;i++)
     push(s, &l[i]);
     
@@ -471,12 +475,12 @@ void testLinkedList()
 
 /******************************************************************************/
 
-int main(int argc, char **argv)
+gint main(gint argc, gchar **argv)
 {
   // Run some test routines.
   testStack();
   testLinkedList();
-  printf("Passed.\n");
+  prgintf("Passed.\n");
 }
 
 /******************************************************************************/

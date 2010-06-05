@@ -259,7 +259,6 @@ gwy_caldata_deserialize(const guchar *buffer,
       { 'D', "zunc", &zunc, &fsize, },
     };
 
-    printf("deserialize\n");
     gwy_debug("");
     g_return_val_if_fail(buffer, NULL);
 
@@ -338,13 +337,6 @@ gwy_caldata_deserialize(const guchar *buffer,
     if (si_unit_z) {
         gwy_object_unref(caldata->si_unit_z);
         caldata->si_unit_z = si_unit_z;
-    }
-    printf("loaded total %d caldata\n", caldata->ndata);
-    for (i=0; i<caldata->ndata; i++)
-    {
-        printf("load caldata: %g %g %g %g %g %g %g %g %g\n", caldata->x[i], caldata->y[i], caldata->z[i],
-               caldata->xerr[i], caldata->yerr[i], caldata->zerr[i],
-               caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
     }
     return (GObject*)caldata;
 }
@@ -502,7 +494,7 @@ gwy_caldata_set_si_unit_z(GwyCalData *caldata,
  **/ 
 gboolean       
 gwy_caldata_get_point(GwyCalData *caldata,
-                          gdouble x, gdouble y, gdouble ze,
+                          gdouble x, gdouble y, gdouble z,
                           gdouble *xerr, gdouble *yerr, gdouble *zerr,
                           gdouble *xunc, gdouble *yunc, gdouble *zunc)
 {
@@ -517,11 +509,11 @@ gwy_caldata_setup_interpolation (GwyCalData *caldata)
     caldata->unc_ps = initPoints(caldata->x, caldata->y, caldata->z,  
                                  caldata->xunc, caldata->yunc, caldata->zunc, caldata->ndata);
 
-    caldata->err_m = newMesh();
-    caldata->unc_m = newMesh();
+    caldata->err_m = gwy_delaunay_new_mesh();
+    caldata->unc_m = gwy_delaunay_new_mesh();
 
-    buildMesh(caldata->err_ps, caldata->ndata, caldata->err_m);
-    buildMesh(caldata->unc_ps, caldata->ndata, caldata->unc_m);
+    gwy_delaunay_build_mesh(caldata->err_ps, caldata->ndata, caldata->err_m);
+    gwy_delaunay_build_mesh(caldata->unc_ps, caldata->ndata, caldata->unc_m);
 }
 
 void           

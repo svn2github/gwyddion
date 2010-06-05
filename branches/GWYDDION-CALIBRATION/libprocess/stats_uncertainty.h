@@ -215,20 +215,46 @@ void    gwy_data_field_dh_uncertainty                           (GwyDataField *d
                                                                  gint nstats);
 
 
-/*
-   void
-   gwy_data_field_area_get_normal_coeffs_uncertainty(GwyDataField *data_field,
-   GwyDataField *uncz_field, gdouble uncx, gdouble uncy,
-   gint col, gint row,
-   gint width, gint height,
-   gdouble *nx, gdouble *ny, gdouble *nz,
-   gdouble *ux, gdouble *uy, gdouble *uz)
 
-   void
-   gwy_data_field_get_normal_coeffs_uncertainty(GwyDataField *data_field,
-   gdouble *nx, gdouble *ny, gdouble *nz,
-                                 gboolean normalize1)
+void gwy_data_field_area_get_normal_coeffs_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gint col, gint row,
+		gint width, gint height,
+		gdouble *ux, gdouble *uy, gdouble *uz);
 
-*/
+void gwy_data_field_get_normal_coeffs_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gdouble *ux, gdouble *uy, gdouble *uz);
+
+void gwy_data_field_area_get_inclination_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gint col, gint row,
+		gint width, gint height,
+		gdouble *utheta,
+		gdouble *uphi);
+
+void gwy_data_field_get_inclination_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, 
+		GwyDataField *uncx_field, 
+		GwyDataField *uncy_field, 
+		gdouble *utheta,
+		gdouble *uphi);
+
+gdouble gwy_data_field_area_get_projected_area_uncertainty(
+		gint nn, GwyDataField *uncx_field, GwyDataField *uncy_field);
+void gwy_data_field_area_cdh_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, GwyDataField *mask,
+		GwyDataLine *target_line, gint col, gint row,
+		gint width, gint height, gint nstats);
+
+void gwy_data_field_cdh_uncertainty(GwyDataField *data_field,
+		GwyDataField *uncz_field, GwyDataLine *target_line,
+		gint nstats);
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -28,7 +28,7 @@
 
 /******************************************************************************/
 
-vertex *loadPoints(char *filename, int *n)
+GwyDelaunayVertex *loadPoints(char *filename, int *n)
 {
   int i;
   FILE *f = fopen(filename, "r");
@@ -44,7 +44,7 @@ vertex *loadPoints(char *filename, int *n)
 
   // Allocate enough memory for all of our points.
   // and also the interpolant.
-  vertex *ps = malloc(sizeof(vertex) **n);
+  GwyDelaunayVertex *ps = malloc(sizeof(GwyDelaunayVertex) **n);
 
   for (i=0; i<*n; i++)
   {
@@ -63,10 +63,10 @@ vertex *loadPoints(char *filename, int *n)
 
 /******************************************************************************/
 
-vertex *initPoints(double *x, double *y, double *z, 
+GwyDelaunayVertex *initPoints(double *x, double *y, double *z, 
                    double *u, double *v, double *w, int n)
 {
-  vertex* ps = malloc(sizeof(vertex) *n);
+  GwyDelaunayVertex* ps = malloc(sizeof(GwyDelaunayVertex) *n);
 
   int i;
   for (i=0; i<n; i++)
@@ -88,7 +88,7 @@ vertex *initPoints(double *x, double *y, double *z,
 
 /******************************************************************************/
 
-void writePointsToFile(vertex *ps, int n)
+void writePointsToFile(GwyDelaunayVertex *ps, int n)
 {
   FILE *f = fopen("./points.mat", "wt");
   if (!f)
@@ -107,7 +107,7 @@ void writePointsToFile(vertex *ps, int n)
 
 /******************************************************************************/
 
-void lastNaturalNeighbours(vertex *v, mesh *m, arrayList *neighbours, 
+void lastNaturalNeighbours(GwyDelaunayVertex *v, GwyDelaunayMesh *m, arrayList *neighbours, 
                                                arrayList *neighbourSimplicies)
 {
   int i, j;
@@ -118,7 +118,7 @@ void lastNaturalNeighbours(vertex *v, mesh *m, arrayList *neighbours,
     {     
       if (this->p[j] != v && (! arrayListContains(neighbours, this->p[j])) )
       {
-        if ((! pointOnSimplex(this->p[j], m->super)))
+        if ((! gwy_delaunay_point_on_simplex(this->p[j], m->super)))
         {
           addToArrayList(neighbours, this->p[j]);      
           addToArrayList(neighbourSimplicies, this);
@@ -134,12 +134,12 @@ void lastNaturalNeighbours(vertex *v, mesh *m, arrayList *neighbours,
 // vector field.
 
 void interpolate3_3( double  x, double  y, double  z, 
-                     double *u, double *v, double *w, mesh *m )
+                     double *u, double *v, double *w, GwyDelaunayMesh *m )
 {
   int i;
   
   // Set up a temporary vertex to add to this mesh.
-  vertex p;
+  GwyDelaunayVertex p;
   p.X             =  x;
   p.Y             =  y;
   p.Z             =  z;
@@ -168,7 +168,7 @@ void interpolate3_3( double  x, double  y, double  z,
   double sum, weight;
   
   // Add the point to the Delaunay Mesh - storing the original state.
-  addPoint(&p, m);    
+  gwy_delaunay_add_point(&p, m);    
 
   // Find the natural neighbours of the inserted point, and also keep 
   // a list of an arbitrary neighbouring simplex, this will give us faster
@@ -183,39 +183,39 @@ void interpolate3_3( double  x, double  y, double  z,
   // Calculate the 'before' volumes of each voronoi cell.
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    vertex  *thisVertex  = getFromArrayList(neighbours, i);
+    GwyDelaunayVertex  *thisVertex  = getFromArrayList(neighbours, i);
     simplex *thisSimplex = getFromArrayList(neighbourSimplicies,i);  
-    voronoiCell *vc      = getVoronoiCell(thisVertex, thisSimplex, m);    
-    neighbourVolumes[i]  = voronoiCellVolume(vc, thisVertex);  
-    freeVoronoiCell(vc,m); 
+    voronoiCell *vc      = gwy_delaunay_get_voronoi_cell(thisVertex, thisSimplex, m);    
+    neighbourVolumes[i]  = gwy_delaunay_voronoi_cell_volume(vc, thisVertex);  
+    gwy_delaunay_free_voronoi_cell(vc,m); 
   }
 
   // Calculate the volume of the new point's Voronoi Cell.
   // We just need any neighbour simplex to use as an entry point into the
   // mesh.
   simplex *s             = getFromArrayList(neighbourSimplicies,0);
-  voronoiCell *pointCell = getVoronoiCell(&p, s, m);
-  pointVolume            = voronoiCellVolume(pointCell, &p);
-  freeVoronoiCell(pointCell,m);
+  voronoiCell *pointCell = gwy_delaunay_get_voronoi_cell(&p, s, m);
+  pointVolume            = gwy_delaunay_voronoi_cell_volume(pointCell, &p);
+  gwy_delaunay_free_voronoi_cell(pointCell,m);
          
   // Remove the last point.
-  removePoint(m);
+  gwy_delaunay_remove_point(m);
 
   // Calculate the 'stolen' volume of each neighbouring Voronoi Cell,
   // by calculating the original volumes, and subtracting the volumes
   // given when the point was added.
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    vertex *thisVertex   = getFromArrayList(neighbours, i);  
+    GwyDelaunayVertex *thisVertex   = getFromArrayList(neighbours, i);  
     
     // All verticies have -1 here to start with, so we can tell if 
     // we have already calculated this value, and use it again here.
     if (thisVertex->voronoiVolume < 0)
     {
-      simplex *s           = findAnyNeighbour(thisVertex, m->conflicts);
-      voronoiCell *vc      = getVoronoiCell(thisVertex, s, m);
-      thisVertex->voronoiVolume = voronoiCellVolume(vc, thisVertex);
-      freeVoronoiCell(vc,m);
+      simplex *s           = gwy_delaunay_find_any_neighbour(thisVertex, m->conflicts);
+      voronoiCell *vc      = gwy_delaunay_get_voronoi_cell(thisVertex, s, m);
+      thisVertex->voronoiVolume = gwy_delaunay_voronoi_cell_volume(vc, thisVertex);
+      gwy_delaunay_free_voronoi_cell(vc,m);
     }
     neighbourVolumes[i]  = thisVertex->voronoiVolume-neighbourVolumes[i];
   }
@@ -226,7 +226,7 @@ void interpolate3_3( double  x, double  y, double  z,
 
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    vertex *thisVertex = getFromArrayList(neighbours, i);
+    GwyDelaunayVertex *thisVertex = getFromArrayList(neighbours, i);
     assert (neighbourVolumes[i]>= -0.001);
     
     // Get the weight of this vertex.
@@ -240,7 +240,7 @@ void interpolate3_3( double  x, double  y, double  z,
   }
   
   // Normalise the output.
-  vertexByScalar(value, (double)1/(double)sum, value);
+  gwy_delaunay_vertex_by_scalar(value, (double)1/(double)sum, value);
 
   // If the sum is 0 or less, we will get meaningless output. 
   // If it is slightly greater than 1, this could be due to rounding errors.
@@ -309,7 +309,7 @@ int main(int argc, char **argv)
   srand ( time(NULL) );
   
   // Create a random pointset for testing.
-  vertex *ps = malloc(sizeof(vertex)*NUM_TEST_POINTS);
+  GwyDelaunayVertex *ps = malloc(sizeof(GwyDelaunayVertex)*NUM_TEST_POINTS);
 
   for (i=0; i<n; i++)
   {
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
     ps[i].voronoiVolume = -1;
   }
 
-  mesh *m = newMesh();
+  GwyDelaunayMesh *m = newMesh();
   buildMesh(ps, n, m);
 
   // Display some information about the mesh.
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
   writePointsToFile(ps, n);
   #endif
 
-  vertex min, max, range;
+  GwyDelaunayVertex min, max, range;
   getRange(ps, n, &min, &max, &range, 0);
 
   // We will store the component-wise sum over all errors, and max error

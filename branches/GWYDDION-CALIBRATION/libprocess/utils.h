@@ -8,6 +8,7 @@
 *******************************************************************************/
 #ifndef utils_h
 #define utils_h
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,8 +17,8 @@
 /* This structure is how we represent a stack. (Very similar to array list). */
 typedef struct 
 {
-  int top;
-  int slots;
+  gint top;
+  gint slots;
   void** arr;
 } stack;
 
@@ -25,8 +26,8 @@ typedef struct
 /* This is how we store an array list. */
 typedef struct
 {
-   int   num_slots;
-   int   num_elements;
+   gint   num_slots;
+   gint   num_elements;
    void** arr;           
 } arrayList;
 
@@ -42,30 +43,30 @@ typedef struct
 {
   listNode *head;
   listNode *last;
-  int nelem;
+  gint nelem;
   stack   *deadNodes;
 } linkedList;
 
 /*******************************************************************************
 * Array list functions.
 *******************************************************************************/
-int         vsetArrayListAt(arrayList *l, void * element, int index);
+gint         vsetArrayListAt(arrayList *l, void * element, gint index);
 //------------------------------------------------------------------------------
-int         addToArrayList(arrayList *l, void* element);
+gint         addToArrayList(arrayList *l, void* element);
 //------------------------------------------------------------------------------
-void*       getFromArrayList (arrayList *l, int index);
+void*       getFromArrayList (arrayList *l, gint index);
 //------------------------------------------------------------------------------
 void**      getArrayFromArrayList(arrayList *l);
 //------------------------------------------------------------------------------
-int         arrayListGetIndex(arrayList *l, void *e);
+gint         arrayListGetIndex(arrayList *l, void *e);
 //------------------------------------------------------------------------------
-int         arrayListSize(arrayList *l);
+gint         arrayListSize(arrayList *l);
 //------------------------------------------------------------------------------
 arrayList*  newArrayList();
 //------------------------------------------------------------------------------
 void        freeArrayList(arrayList *l, void (*destructor)(void *e));
 //------------------------------------------------------------------------------
-int         arrayListContains(arrayList * l , void * element);
+gint         arrayListContains(arrayList * l , void * element);
 //------------------------------------------------------------------------------
 void        freeElements(arrayList *l);
 //------------------------------------------------------------------------------
@@ -77,9 +78,9 @@ linkedList* newLinkedList();
 //------------------------------------------------------------------------------
 listNode*   addToLinkedList(linkedList *l, void *e);
 //------------------------------------------------------------------------------
-void*       getFromLinkedList(linkedList *l, int i);
+void*       getFromLinkedList(linkedList *l, gint i);
 //------------------------------------------------------------------------------
-int         linkedListSize(linkedList *l);
+gint         linkedListSize(linkedList *l);
 //------------------------------------------------------------------------------
 void*       nextElement(linkedList *l, listNode **last);
 //------------------------------------------------------------------------------
@@ -91,7 +92,7 @@ void        removeFromLinkedList(linkedList *l, listNode *ln);
 //------------------------------------------------------------------------------
 void        freeLinkedList(linkedList *l, void (*destructor)(void *e));
 //------------------------------------------------------------------------------
-int         linkedListContains(linkedList *l, void *e);
+gint         linkedListContains(linkedList *l, void *e);
 /*******************************************************************************
 * Stack functions.
 *******************************************************************************/
@@ -101,13 +102,13 @@ void        push(stack *s, void*e);
 //------------------------------------------------------------------------------
 void*       pop(stack *s);
 //------------------------------------------------------------------------------
-int         stackSize(stack *s);
+gint         stackSize(stack *s);
 //------------------------------------------------------------------------------
 void        testStack();
 //------------------------------------------------------------------------------
 void        freeStack(stack *s, void (*destructor)(void *e));
 //------------------------------------------------------------------------------
-int         isEmpty(stack *s);
+gint         isEmpty(stack *s);
 //------------------------------------------------------------------------------
 void        emptyStack(stack *s);
 /******************************************************************************/
