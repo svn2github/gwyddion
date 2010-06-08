@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: gpl.xml 9392 2009-07-10 09:55:51Z yeti-dn $ -->
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<!--               
 <appendix id="gpl">
   <appendixinfo>
     <title>GNU General Public License (Универсальная общественная лицензия GNU)</title>
@@ -15,9 +17,26 @@
       </para>
       <para>Каждый вправе копировать и распространять экземпляры настоящей Лицензии без внесения изменений в ее текст.</para>
     </legalnotice>
-    <releaseinfo>Версия 2, июнь 1991г.</releaseinfo>
+    <releaseinfo>Версия 2, июнь 1991 г.</releaseinfo>
   </appendixinfo>
+  -->
+  <chapter id="gpl">
   <title>GNU General Public License (Универсальная общественная лицензия GNU)</title>
+	<para>
+	    Версия 2, июнь 1991 г.
+	</para>
+	<para>
+		Copyright © 1989, 1991 Free Software Foundation, Inc.
+	</para>
+	<para>
+		Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA02110-1301USA
+	</para>
+	<para>
+		Каждый вправе копировать и распространять экземпляры настоящей Лицензии без внесения изменений в ее текст.
+	</para>
+	<para>
+		Версия 2, июнь 1991г.
+	</para>
 	<para>
 		Это неофициальный русский перевод Универсальной Общественной Лицензии GNU.
 		Он не был опубликован Фондом Свободного ПО и не устанавливает законные условия
@@ -119,30 +138,29 @@
     <para>Если вы разрабатываете новую программу и хотите, чтобы она принесла максимально возможную пользу обществу, лучший способ достичь этого - включить ее в свободное ПО, которое каждый может повторно распространять и изменять согласно данным условиям.</para>
     <para>Чтобы сделать это, добавьте в программу следующие уведомления. Самое безопасное - это добавить их в начало каждого исходного файла, чтобы наиболее эффективно отобразить исключение гарантий; и каждый файл должен содержать по меньшей мере строку, содержащую <quote>знак охраны авторского права</quote> и указание на то, где находится полное уведомление.</para>
     <programlisting>
-      &lt;одна строка, содержащая название программы и краткое описание, что она делает.&gt;
-      Copyright (C) &lt;19гг&gt;   &lt;наименование (имя) автора&gt;
-      Это свободная программа; вы можете повторно распространять ее и/или модифицировать
-      ее в соответствии с Универсальной Общественной Лицензией GNU, опубликованной
-      Фондом Свободного ПО; либо версии 2, либо (по вашему выбору) любой более поздней версии.
+      &lt;one line to give the program's name and a brief idea of what it does.&gt;
+      Copyright (C) &lt;year&gt;    &lt;name of author&gt;
+      This program is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; either version 2 of the License, or
+      (at your option) any later version.
 
-      Эта программа распространяется в надежде, что она будет полезной,
-      но БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ; даже без подразумеваемых гарантий
-      КОММЕРЧЕСКОЙ ЦЕННОСТИ или ПРИГОДНОСТИ ДЛЯ КОНКРЕТНОЙ ЦЕЛИ.
-      Для получения подробных сведений смотрите
-      Универсальную Общественную Лицензию GNU.
+      This program is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
 
-      Вы должны были получить копию Универсальной Общественной Лицензии GNU
-      вместе с этой программой; если нет, напишите в Free Software Foundation, Inc.,
+      You should have received a copy of the GNU General Public License along
+      with this program; if not, write to the Free Software Foundation, Inc.,
       51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
     </programlisting>
     <para>Также укажите, как можно связаться с вами по электронной или обычной почте.</para>
     <para>Если программа работает в интерактивном режиме, сделайте так, чтобы при запуске в интерактивном режиме выводилось короткое сообщение в соответствии с образцом:</para>
     <programlisting>
-      Gnomovision, версия 69, (C) имя автора год
-      Gnomovision поставляется АБСОЛЮТНО БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ;
-       для получения подробностей напечатайте <quote>show w</quote>.
-      Это свободная программа, и вы приглашаетесь повторно распространять ее при определенных условиях;
-      для получения подробностей напечатайте <quote>show c</quote>.
+      Gnomovision version 69, Copyright (C) year name of author Gnomovision
+      comes with ABSOLUTELY NO WARRANTY; for details type <quote>show w</quote>. 
+      This is free software, and you are welcome to redistribute it under
+      certain conditions; type <quote>show c</quote> for details.
     </programlisting>
     <para>При введении предлагаемых команд "show w" и "show c" на экран должны выводиться соответствующие пункты Стандартной Общественной Лицензии. Не обязательно использовать именно команды "show w" и "show c". В зависимости от функций программы, команды могут вызываться нажатием кнопки мыши или быть добавлены в меню программы.</para>
     <para>Если вы создали программу в порядке выполнения служебных обязанностей или служебного задания работодателя либо для образовательного учреждения (школы, ВУЗа и т.д.) в период обучения или работы в данном образовательном учреждении, вам следует получить в случае необходимости письменный отказ от исключительных прав на использование данной программы. Нижеприведенный текст вы можете использовать в качестве образца, заменив соответствующие имена и наименования:</para>
@@ -158,5 +176,8 @@
     </informalexample>
     <para>Стандартная Общественная Лицензия GNU запрещает включать вашу программу в программы, использование которых ограничено их правообладателями. Если ваша программа является библиотекой подпрограмм, вероятно, более полезным будет разрешить связывание программ, использование которых ограничено их правообладателями, с вашей библиотекой. В этом случае вам следует использовать Стандартную Общественную Лицензию GNU для Библиотек вместо настоящей Лицензии.</para>
   </simplesect>
+</chapter>
+<!--
 </appendix>
+-->
 <!-- vim: set ts=2 sw=2 et : -->

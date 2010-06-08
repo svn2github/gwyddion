@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id: fdl.xml 9392 2009-07-10 09:55:51Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<!--
 <appendix id="gfdl">
   <appendixinfo>
     <title>GNU Free Documentation License</title>
@@ -15,7 +16,24 @@
     </legalnotice>
     <releaseinfo>Версия 1.2, ноябрь 2002</releaseinfo>
   </appendixinfo>
+  -->
+<chapter id="gfdl">
   <title>GNU Free Documentation License</title>
+  <para>
+  Версия 1.2, ноябрь 2002
+  </para>
+  <para> 
+	Copyright © 2000,2001,2002 Free Software Foundation, Inc.
+  </para>
+  <para> 
+	Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA02111-1307USA
+  </para>
+  <para> 
+	Каждый вправе копировать и распространять экземпляры настоящей Лицензии без внесения изменений в ее текст.
+  </para>
+  <para> 
+	Версия 1.2, ноябрь 2002
+  </para>
   <para>This is an unofficial translation of the GNU Free Documentation
 	License (GFDL) into Russian. It was not published by the
 	Free Software Foundation, and does not legally state the
@@ -156,5 +174,8 @@
     <para>Если документ содержит Неизменяемые разделы, но не содержит Текстов, помещаемых на обложке, либо какую-нибудь другую комбинацию этих трёх утверждений, скомпонуйте две предложенные альтернативы так, чтобы они подходили к ситуации.</para>
     <para>Если ваш документ содержит имеющие существенное значение примеры программного кода, мы рекомендуем вам выпустить их отдельно в соответствии с условиями одной из лицензий на свободное программное обеспечение, например GNU General Public License, чтобы их можно было использовать как свободное программное обеспечение.</para>
   </simplesect>
+</chapter>
+<!--
 </appendix>
+-->
 <!-- vim: set ts=2 sw=2 et : -->
