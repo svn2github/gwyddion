@@ -101,6 +101,7 @@ module_register(void)
     return TRUE;
 }
 
+/*
 static void
 debugcal(GwyCalData *caldata)
 {
@@ -116,7 +117,7 @@ debugcal(GwyCalData *caldata)
                caldata->xerr[i], caldata->yerr[i], caldata->zerr[i], caldata->xunc[i], caldata->yunc[i], caldata->zunc[i]);
     }
 
-}
+}*/
 
 
 static void
@@ -221,7 +222,7 @@ cload(GwyContainer *data, GwyRunType run)
 
     gwy_resource_data_saved(GWY_RESOURCE(calibration));
 
-    debugcal(args.caldata);
+    //debugcal(args.caldata);
 
     /*now save the calibration data*/
     if (!g_file_test(g_build_filename(gwy_get_user_dir(), "caldata", NULL), G_FILE_TEST_EXISTS)) {

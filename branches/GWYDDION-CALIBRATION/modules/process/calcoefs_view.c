@@ -277,6 +277,7 @@ cc_view_dialog(CCViewArgs *args,
     args->crop = 0;
     args->calibration = 0;
     args->computed = 0;
+    args->update = TRUE;
 
     /*FIXME: load more from dfield*/
     args->xoffset = 0;
@@ -536,7 +537,10 @@ cc_view_dialog(CCViewArgs *args,
                      G_CALLBACK(units_change_cb), &controls);
 
     controls.in_update = FALSE;
-
+   
+    gtk_dialog_set_response_sensitive(GTK_DIALOG(dialog),
+                                      RESPONSE_PREVIEW,
+                                      args->update);
 
     update_view(&controls, args);
 
@@ -554,16 +558,17 @@ cc_view_dialog(CCViewArgs *args,
             case GTK_RESPONSE_OK:
             if (!args->computed || !args->crop)
             {
-                printf("recomputing for crop\n");
+                //printf("recomputing for crop\n");
                 args->crop = TRUE;
                 args->computed = FALSE;
                 update_view(&controls, args);
-                printf("done\n");
+                //printf("done\n");
             }
             cc_view_do(&controls);
             break;
 
             case RESPONSE_PREVIEW:
+            update_view(&controls, args);
             break;
 
             default:
@@ -603,6 +608,7 @@ update_view(CCViewControls *controls, CCViewArgs *args)
     gchar *contents;
     gchar *filename;
     gsize pos = 0;
+    gboolean run = TRUE;
     viewfield = GWY_DATA_FIELD(gwy_container_get_object_by_name(controls->mydata,
                                                                   "/0/data"));
    //viewfield = controls->view_field;
@@ -644,10 +650,11 @@ update_view(CCViewControls *controls, CCViewArgs *args)
         //printf("update view: no calibration data\n");
         return;
     }
-  
+ 
+   printf("ac %d\n", args->computed); 
 
     if (!args->computed) {
-        gwy_app_wait_cursor_start(GTK_WINDOW(controls->dialog));
+        gwy_app_wait_start(GTK_WINDOW(controls->dialog), "Building mesh...\n");
 
         if (args->interpolation_type == GWY_CC_VIEW_INTERPOLATION_NATURAL)
         {
@@ -655,8 +662,10 @@ update_view(CCViewControls *controls, CCViewArgs *args)
             gwy_caldata_setup_interpolation(caldata);
             //printf("done\n");
         }
+        run = gwy_app_wait_set_message("Triangulation...\n");
+        run = gwy_app_wait_set_fraction(0);
 
-        if (controls->args->crop) {
+        if (run && controls->args->crop) {
             for (row=0; row<yres; row++)
             {
                 y = controls->args->yoffset + gwy_data_field_get_yoffset(controls->actual_field) + 
@@ -679,8 +688,9 @@ update_view(CCViewControls *controls, CCViewArgs *args)
 
 
                 }
+                if (!(run = gwy_app_wait_set_fraction((gdouble)row/(gdouble)yres))) break;
             }
-        } else {
+        } else if (run) {
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_X)
             {
                 gwy_data_field_resample(viewfield, yres, zres, GWY_INTERPOLATION_NONE);
@@ -699,6 +709,8 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                         controls->yunc->data[col + yres*row] = yunc;
                         controls->zunc->data[col + yres*row] = zunc;
                     }
+                    if (!(run = gwy_app_wait_set_fraction((gdouble)col/(gdouble)yres))) break;
+               
                 }
             }
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Y)
@@ -718,6 +730,8 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                         controls->yunc->data[col + xres*row] = yunc;
                         controls->zunc->data[col + xres*row] = zunc;
                     }
+                    if (!(run = gwy_app_wait_set_fraction((gdouble)col/(gdouble)xres))) break;
+
                 }
             }
             if (controls->args->plane_type == GWY_CC_VIEW_PLANE_Z)
@@ -743,6 +757,7 @@ update_view(CCViewControls *controls, CCViewArgs *args)
                         controls->yunc->data[col + xres*row] = yunc;
                         controls->zunc->data[col + xres*row] = zunc;
                     }
+                    if (!(run = gwy_app_wait_set_fraction((gdouble)col/(gdouble)xres))) break;
                 }
             }
         }
@@ -752,24 +767,27 @@ update_view(CCViewControls *controls, CCViewArgs *args)
         gwy_data_field_invalidate(controls->xunc);
         gwy_data_field_invalidate(controls->yunc);
         gwy_data_field_invalidate(controls->zunc);
-        args->computed = TRUE;
+        if (run)
+            args->computed = TRUE;
     }
 
-    if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_CORR)
-        gwy_data_field_copy(controls->xerr, viewfield, FALSE);
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_CORR) 
-        gwy_data_field_copy(controls->yerr, viewfield, FALSE); 
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_CORR) 
-        gwy_data_field_copy(controls->zerr, viewfield, FALSE);
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_UNC) 
-        gwy_data_field_copy(controls->xunc, viewfield, FALSE);
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_UNC) 
-        gwy_data_field_copy(controls->yunc, viewfield, FALSE);
-    else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_UNC) 
-        gwy_data_field_copy(controls->zunc, viewfield, FALSE);
- 
+    if (run) 
+    {
+        if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_CORR)
+            gwy_data_field_copy(controls->xerr, viewfield, FALSE);
+        else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_CORR) 
+            gwy_data_field_copy(controls->yerr, viewfield, FALSE); 
+        else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_CORR) 
+            gwy_data_field_copy(controls->zerr, viewfield, FALSE);
+        else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_X_UNC) 
+            gwy_data_field_copy(controls->xunc, viewfield, FALSE);
+        else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Y_UNC) 
+            gwy_data_field_copy(controls->yunc, viewfield, FALSE);
+        else if (controls->args->display_type == GWY_CC_VIEW_DISPLAY_Z_UNC) 
+            gwy_data_field_copy(controls->zunc, viewfield, FALSE);
+    }
 
-    gwy_app_wait_cursor_finish(GTK_WINDOW(controls->dialog));
+    gwy_app_wait_finish();
     gwy_data_field_invalidate(controls->view_field);
     gwy_data_field_data_changed(controls->view_field);
 }
