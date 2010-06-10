@@ -524,10 +524,10 @@ gwy_caldata_interpolate (GwyCalData *caldata,
 {
 
     if (xerr || yerr || zerr)
-       interpolate3_3(x, y, z, xerr, yerr, zerr, caldata->err_m);
+       gwy_delaunay_interpolate3_3(x, y, z, xerr, yerr, zerr, caldata->err_m);
 
     if (xunc || yunc || zunc)
-       interpolate3_3(x, y, z, xunc, yunc, zunc, caldata->unc_m);
+       gwy_delaunay_interpolate3_3(x, y, z, xunc, yunc, zunc, caldata->unc_m);
 }
 
 

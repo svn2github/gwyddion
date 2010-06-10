@@ -27,7 +27,6 @@
 #ifndef delaunay_h
 #define delaunay_h
 #include <glib.h>
-#include "utils.h"
 /******************************************************************************/
 
 /* These macros make code more readable. They allow us to access  
@@ -40,6 +39,40 @@
 #define W data[2]
 
 /******************************************************************************/
+
+typedef struct
+{
+  gint top;
+  gint slots;
+  void** arr;
+} stack;
+
+
+/* This is how we store an array list. */
+typedef struct
+{
+   gint   num_slots;
+   gint   num_elements;
+   void** arr;
+} arrayList;
+
+/* These structs are needed to store a (doubly) linked list. */
+typedef struct _listNode
+{
+  void *data;
+  struct _listNode *next;
+  struct _listNode *prev;
+} listNode;
+
+typedef struct
+{
+  listNode *head;
+  listNode *last;
+  gint nelem;
+  stack   *deadNodes;
+} linkedList;
+
+
 
 typedef struct
 {

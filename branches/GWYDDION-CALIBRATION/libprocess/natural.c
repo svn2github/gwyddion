@@ -8,67 +8,20 @@
 #include <math.h>
 #include "delaunay.h"
 #include "assert.h"
-#include "utils.h"
 #include "natural.h"
-
-/******************************************************************************/
-/* Set this to run tests, and include debugging information.                  */
-// #define DEBUG 0
-
-/* set this to disable all asserts.                                           */
-// #define NDEBUG 0 
-
-//#define _TEST_
-/******************************************************************************/
+#include "utils.c"
 
 #define SQR(x)  (x)*(x)
-#define ABS(x)  (x) >0 ? x : -(x)
-#define MAX(x,y)  x<y ? y : x
-#define MIN(x,y)  x>y ? y : x
 
 /******************************************************************************/
 
-GwyDelaunayVertex *loadPoints(char *filename, int *n)
+GwyDelaunayVertex *initPoints(gdouble *x, gdouble *y, gdouble *z, 
+                   gdouble *u, gdouble *v, gdouble *w, gint n)
 {
-  int i;
-  FILE *f = fopen(filename, "r");
-  
-  if (!f)
-  {
-    fprintf(stderr, "Could not open file: '%s'.\n", filename);
-    exit(1);
-  }
-  
-  // Get the number of points.
-  fscanf(f, "%d", n);
+  GwyDelaunayVertex* ps = g_malloc(sizeof(GwyDelaunayVertex) *n);
 
-  // Allocate enough memory for all of our points.
-  // and also the interpolant.
-  GwyDelaunayVertex *ps = malloc(sizeof(GwyDelaunayVertex) **n);
+  gint i;
 
-  for (i=0; i<*n; i++)
-  {
-    // Initialise the voronoiVolume to an impossible value, so that
-    // we can tell whether or not it has been calculated.
-    ps[i].voronoiVolume = -1;
-    ps[i].index = i;
-    // Load the known point of this vector field at this vertex.
-    fscanf(f, "%lf %lf %lf   %lf %lf %lf", &ps[i].X, &ps[i].Y, &ps[i].Z, 
-                                           &ps[i].U, &ps[i].V, &ps[i].W );
-  }
-  fclose(f);
-  
-  return ps;  
-}
-
-/******************************************************************************/
-
-GwyDelaunayVertex *initPoints(double *x, double *y, double *z, 
-                   double *u, double *v, double *w, int n)
-{
-  GwyDelaunayVertex* ps = malloc(sizeof(GwyDelaunayVertex) *n);
-
-  int i;
   for (i=0; i<n; i++)
   {
     ps[i].X = x[i];
@@ -80,40 +33,22 @@ GwyDelaunayVertex *initPoints(double *x, double *y, double *z,
     ps[i].W = w[i]; 
     
     ps[i].voronoiVolume = -1;   
-    printf("Loading: %d: %g %g %g %g %g %g\n", i, ps[i].X, ps[i].Y, ps[i].Z, ps[i].U, ps[i].V, ps[i].W);
+    //printf("Loading: %d: %g %g %g %g %g %g\n", i, ps[i].X, ps[i].Y, ps[i].Z, ps[i].U, ps[i].V, ps[i].W);
   }
   
   return ps;
 }
 
-/******************************************************************************/
-
-void writePointsToFile(GwyDelaunayVertex *ps, int n)
-{
-  FILE *f = fopen("./points.mat", "wt");
-  if (!f)
-  {
-    fprintf(stderr, "Could not open points file for writing.\n");
-    exit(1);
-  }
-  
-  int i;
-  
-  for (i=0; i<n; i++)
-    fprintf(f, "%lf %lf %lf %lf %lf %lf\n", ps[i].X, ps[i].Y, ps[i].Z, 
-                                            ps[i].U, ps[i].V, ps[i].W);  
-  fclose(f);
-}
-
-/******************************************************************************/
 
 void lastNaturalNeighbours(GwyDelaunayVertex *v, GwyDelaunayMesh *m, arrayList *neighbours, 
                                                arrayList *neighbourSimplicies)
 {
-  int i, j;
+  gint i, j;
+  simplex *this;
+
   for (i=0; i<arrayListSize(m->updates); i++)
   {
-    simplex *this = getFromArrayList(m->updates,i); 
+    this = getFromArrayList(m->updates,i); 
     for (j=0; j<4; j++)
     {     
       if (this->p[j] != v && (! arrayListContains(neighbours, this->p[j])) )
@@ -133,39 +68,29 @@ void lastNaturalNeighbours(GwyDelaunayVertex *v, GwyDelaunayMesh *m, arrayList *
 // This function will interpolate the value of a new vertex in a given 
 // vector field.
 
-void interpolate3_3( double  x, double  y, double  z, 
-                     double *u, double *v, double *w, GwyDelaunayMesh *m )
+void gwy_delaunay_interpolate3_3(gdouble  x, gdouble  y, gdouble  z, 
+                     gdouble *u, gdouble *v, gdouble *w, GwyDelaunayMesh *m )
 {
-  int i;
+  gint i;
   
-  // Set up a temporary vertex to add to this mesh.
+  arrayList *neighbours;
+  arrayList *neighbourSimplicies;
+  gdouble *neighbourVolumes;
+  gdouble pointVolume;
+  gdouble value[3] = {0,0,0};
+  gdouble sum, weight;
+  simplex *s;
+  voronoiCell *pointCell;
+  GwyDelaunayVertex *thisVertex;
+  simplex *thisSimplex;
+  voronoiCell *vc;    
+
   GwyDelaunayVertex p;
   p.X             =  x;
   p.Y             =  y;
   p.Z             =  z;
   p.index         = -1;
   p.voronoiVolume = -1;
-  
-  // The verticies which form the natural neighbours of this point.
-  arrayList *neighbours;
-  // The The list of neighbouring simplicies, attached to each one
-  // of the given neighbours. This means makes neighbour lookup much faster
-  // later on.
-  arrayList *neighbourSimplicies;
-  
-  // The array of neighbour volumes for each voronoi cell of each
-  // natural neighbour.
-  double *neighbourVolumes;
-  
-  // The volume of the point to be interpolated.
-  double pointVolume;
-  
-  // The interpolated value.
-  double value[3] = {0,0,0};
-  
-  // The sum of the weighing function: may sometimes be less than 1, when
-  // we have points on the super simplex.
-  double sum, weight;
   
   // Add the point to the Delaunay Mesh - storing the original state.
   gwy_delaunay_add_point(&p, m);    
@@ -178,14 +103,14 @@ void interpolate3_3( double  x, double  y, double  z,
   lastNaturalNeighbours(&p, m, neighbours, neighbourSimplicies);
 
   // Calculate the volumes of the Voronoi Cells of the natural neighbours.
-  neighbourVolumes = malloc(arrayListSize(neighbours) * sizeof(double));
+  neighbourVolumes = g_malloc(arrayListSize(neighbours) * sizeof(gdouble));
 
   // Calculate the 'before' volumes of each voronoi cell.
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    GwyDelaunayVertex  *thisVertex  = getFromArrayList(neighbours, i);
-    simplex *thisSimplex = getFromArrayList(neighbourSimplicies,i);  
-    voronoiCell *vc      = gwy_delaunay_get_voronoi_cell(thisVertex, thisSimplex, m);    
+    thisVertex  = getFromArrayList(neighbours, i);
+    thisSimplex = getFromArrayList(neighbourSimplicies,i);  
+    vc      = gwy_delaunay_get_voronoi_cell(thisVertex, thisSimplex, m);    
     neighbourVolumes[i]  = gwy_delaunay_voronoi_cell_volume(vc, thisVertex);  
     gwy_delaunay_free_voronoi_cell(vc,m); 
   }
@@ -193,8 +118,8 @@ void interpolate3_3( double  x, double  y, double  z,
   // Calculate the volume of the new point's Voronoi Cell.
   // We just need any neighbour simplex to use as an entry point into the
   // mesh.
-  simplex *s             = getFromArrayList(neighbourSimplicies,0);
-  voronoiCell *pointCell = gwy_delaunay_get_voronoi_cell(&p, s, m);
+  s             = getFromArrayList(neighbourSimplicies,0);
+  pointCell = gwy_delaunay_get_voronoi_cell(&p, s, m);
   pointVolume            = gwy_delaunay_voronoi_cell_volume(pointCell, &p);
   gwy_delaunay_free_voronoi_cell(pointCell,m);
          
@@ -206,14 +131,14 @@ void interpolate3_3( double  x, double  y, double  z,
   // given when the point was added.
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    GwyDelaunayVertex *thisVertex   = getFromArrayList(neighbours, i);  
+    thisVertex   = getFromArrayList(neighbours, i);  
     
     // All verticies have -1 here to start with, so we can tell if 
     // we have already calculated this value, and use it again here.
     if (thisVertex->voronoiVolume < 0)
     {
-      simplex *s           = gwy_delaunay_find_any_neighbour(thisVertex, m->conflicts);
-      voronoiCell *vc      = gwy_delaunay_get_voronoi_cell(thisVertex, s, m);
+      s           = gwy_delaunay_find_any_neighbour(thisVertex, m->conflicts);
+      vc      = gwy_delaunay_get_voronoi_cell(thisVertex, s, m);
       thisVertex->voronoiVolume = gwy_delaunay_voronoi_cell_volume(vc, thisVertex);
       gwy_delaunay_free_voronoi_cell(vc,m);
     }
@@ -226,7 +151,7 @@ void interpolate3_3( double  x, double  y, double  z,
 
   for (i=0; i<arrayListSize(neighbours); i++)
   {
-    GwyDelaunayVertex *thisVertex = getFromArrayList(neighbours, i);
+    thisVertex = getFromArrayList(neighbours, i);
     assert (neighbourVolumes[i]>= -0.001);
     
     // Get the weight of this vertex.
@@ -274,159 +199,5 @@ void interpolate3_3( double  x, double  y, double  z,
 
 }
 
-/******************************************************************************/
 
-/* Unit testing. */
-#ifdef _TEST_
-
-  #include <sys/time.h>
-
-  /* The number of points to create in our test data. */
-  #define NUM_TEST_POINTS 1e4
-  
-  /* How detailed the interpolated output sohuld be: the cube of this value
-     is the number of points we create.                                     */
-  #define INTERPOLATE_DETAIL 20
-  
-  /* Do we print the output to file? */
-  #define OUTPUT_TO_FILE
-
-/******************************************************************************/
-
-double getTime()
-{
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  return tv.tv_sec + tv.tv_usec/1.0e6;
-}
-
-/******************************************************************************/
-
-int main(int argc, char **argv)
-{  
-  int i; 
-  int n = NUM_TEST_POINTS;
-  srand ( time(NULL) );
-  
-  // Create a random pointset for testing.
-  GwyDelaunayVertex *ps = malloc(sizeof(GwyDelaunayVertex)*NUM_TEST_POINTS);
-
-  for (i=0; i<n; i++)
-  {
-    ps[i].X = 100*(double)rand() / ((double)RAND_MAX + 1);
-    ps[i].Y = 100*(double)rand() / ((double)RAND_MAX + 1);
-    ps[i].Z = 100*(double)rand() / ((double)RAND_MAX + 1);
-
-    // We chose the value at every point of the vector field, to be the same
-    // as the coordinate, this will enable us to have a good idea of
-    // the error margins.
-    ps[i].U =  ps[i].X;
-    ps[i].V =  ps[i].Y;
-    ps[i].W =  ps[i].Z;
-    ps[i].index = i;
-    ps[i].voronoiVolume = -1;
-  }
-
-  GwyDelaunayMesh *m = newMesh();
-  buildMesh(ps, n, m);
-
-  // Display some information about the mesh.
-  printf("Number of Verticies: %d.\n", n);
-  printf("Number of Simplicies: %d.\n", getNumSimplicies(m));
-  printf("Co-planar degenerecies fixed: %d.\n", numPlanarDegenerecies(m));
-  printf("Co-spherical degenerecies fixed: %d.\n", numSphericalDegenerecies(m));
-
-  // Write output to files for plotting.
-  #ifdef OUTPUT_TO_FILE
-  writeTetsToFile(m);  
-  writePointsToFile(ps, n);
-  #endif
-
-  GwyDelaunayVertex min, max, range;
-  getRange(ps, n, &min, &max, &range, 0);
-
-  // We will store the component-wise sum over all errors, and max error
-  // so that we can get an idea for the performance of our interpolator.
-  double error_sum = 0;
-
-  double x, y, z, d1, d2, d3;
-  int detail = INTERPOLATE_DETAIL;  
-
-  d1 = range.X / detail;
-  d2 = range.Y / detail;
-  d3 = range.Z / detail;
-  
-  // This will tell us how many steps are in our main loop:
-  // so that we can show an indication as to how far we have gone through
-  // the calculation.
-  int to_do = detail*detail*detail;
-  
-  #ifdef OUTPUT_TO_FILE
-  // Interpolate a set of points.
-  FILE *f = fopen("./out.mat","wt");
-  if (!f)
-  {
-    fprintf(stderr, "Could not open point file for writing.\n");
-    exit(1);
-  }
-  #endif
-
-  int j,k,done=1;
-  double t1 = getTime();
-  for (i=0; i<detail; i++)
-  {
-    for (j=0; j<detail; j++)
-    {
-      for (k=0; k<detail; k++, done++)
-      {
-        double u, v, w;
-        
-        x = min.X + i*d1;
-        y = min.Y + j*d2;
-        z = min.Z + k*d3;
-        
-        // Do the interpolation.        
-        interpolate3_3(x, y, z, &u, &v, &w, m);
-        
-        // Add this error to the sum.
-        error_sum += SQR(x-u) + SQR(y-v) + SQR(z-w);
-
-        // Show status.
-        #ifdef OUTPUT_TO_FILE
-        fprintf(f,"%lf %lf %lf %lf %lf %lf\n", x, y, z, u, v, w);  
-        #endif
-        printf("Interpolating: %d/%d (%d%% complete).\n%c[1A", done,to_do,
-                                         (int)(done/(double)to_do *100), 27);   
-      }
-    }
-  }
-  double t2 = getTime();
-  
-  #ifdef OUTPUT_TO_FILE
-  fclose(f);
-  #endif
-  
-  printf("\n\n");
-
-  int pps = (double)to_do/(double)(t2-t1);
-  
-  printf("Interpolated %d points in %lf seconds (%d points/second).\n\n", 
-                                         to_do, t2-t1,pps);
-    
-  printf("Sum of Squared errors over vector norms: %lf.\n", error_sum);
-
-  #if DEBUG >= 0
-  printf("\nSimplex pool size at end: %d\n", stackSize(m->deadSimplicies));
-  printf("Voronoi pool size at end: %d\n", stackSize(m->deadVoronoiCells));
-  #endif
-  
-  // Free up used memory.
-  freeMesh(m);
-  free(ps);
- 
-  return 0;
-}
-
-/******************************************************************************/
-#endif
 

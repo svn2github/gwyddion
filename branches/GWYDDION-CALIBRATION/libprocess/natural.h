@@ -15,20 +15,11 @@
 #ifndef natural_h
 #define natural_h
 
-/******************************************************************************/
-GwyDelaunayVertex *loadPoints(gchar *filename, gint *n);
-//------------------------------------------------------------------------------
 GwyDelaunayVertex *initPoints(gdouble *x, gdouble *y, gdouble *z, 
                    gdouble *u, gdouble *v, gdouble *w, gint n);
-//------------------------------------------------------------------------------
-void    writePointsToFile(GwyDelaunayVertex *ps, gint n);
-//------------------------------------------------------------------------------
-void    lastNaturalNeighbours(GwyDelaunayVertex *v, GwyDelaunayMesh *m, arrayList *neighbours, 
-                                                arrayList *neighbourSimplicies);
-//------------------------------------------------------------------------------                                               
-void     interpolate3_3(gdouble  x, gdouble  y, gdouble  z, 
+
+void     gwy_delaunay_interpolate3_3(gdouble  x, gdouble  y, gdouble  z, 
                         gdouble *u, gdouble *v, gdouble *w, GwyDelaunayMesh *m);
                         
-/******************************************************************************/
 #endif
 

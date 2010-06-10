@@ -13,7 +13,6 @@ libgwyprocess2include_HEADERS = \
 	arithmetic.h \
         delaunay.h \
         natural.h \
-        utils.h \
 	cdline.h \
 	correct.h \
 	correlation.h \
@@ -84,7 +83,6 @@ libgwyprocess2_la_SOURCES = \
 	arithmetic.c \
         delaunay.c \
         natural.c \
-        utils.c \
 	cdline.c \
 	correct.c \
 	correlation.c \

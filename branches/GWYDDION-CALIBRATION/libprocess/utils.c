@@ -8,10 +8,50 @@
 * linked list implementation and an array based stack implementation.
 *
 *******************************************************************************/
-#include "utils.h"
 
-/* Unit Testing */
-// #define _TEST_
+#include <glib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*******************************************************************************
+* Array list functions.
+*******************************************************************************/
+static gint         addToArrayList(arrayList *l, void* element);
+static void*       getFromArrayList (arrayList *l, gint index);
+static void**      getArrayFromArrayList(arrayList *l);
+static gint         arrayListGetIndex(arrayList *l, void *e);
+static gint         arrayListSize(arrayList *l);
+static arrayList*  newArrayList();
+static void        freeArrayList(arrayList *l, void (*destructor)(void *e));
+static gint         arrayListContains(arrayList * l , void * element);
+static void        freeElements(arrayList *l);
+static void        emptyArrayList(arrayList *l);
+
+/*******************************************************************************
+* Doubly linked list functions.
+*******************************************************************************/
+static linkedList* newLinkedList();
+static listNode*   addToLinkedList(linkedList *l, void *e);
+static void*       getFromLinkedList(linkedList *l, gint i);
+static gint         linkedListSize(linkedList *l);
+static void*       nextElement(linkedList *l, listNode **last);
+static listNode*   topOfLinkedList(linkedList *l);
+static void        removeFromLinkedList(linkedList *l, listNode *ln);
+static void        freeLinkedList(linkedList *l, void (*destructor)(void *e));
+static gint         linkedListContains(linkedList *l, void *e);
+
+/*******************************************************************************
+* Stack functions.
+*******************************************************************************/
+static stack*      newStack();
+static void        push(stack *s, void*e);
+static void*       pop(stack *s);
+static gint         stackSize(stack *s);
+static void        freeStack(stack *s, void (*destructor)(void *e));
+static gint         isEmpty(stack *s);
+static void        emptyStack(stack *s);
+
 
 /*******************************************************************************
 * Array List implementation. We use this whenever we want arrays which can be
@@ -19,7 +59,7 @@
 * implementation. Other opertations are O(n).
 *******************************************************************************/
 
-gint addToArrayList(arrayList *l, void* element)
+static gint addToArrayList(arrayList *l, void* element)
 {
    if (l->num_elements >= l->num_slots)
    {
@@ -44,7 +84,7 @@ gint addToArrayList(arrayList *l, void* element)
 
 /******************************************************************************/
 
-arrayList *newArrayList()
+static arrayList *newArrayList()
 {
    arrayList *l;
    l = malloc(sizeof(arrayList));
@@ -58,7 +98,7 @@ arrayList *newArrayList()
 // If this element is in the list, it will return the index of that element.
 // Otherwise we return -1.
 
-gint arrayListGetIndex(arrayList *l, void *e)
+static gint arrayListGetIndex(arrayList *l, void *e)
 {
   gint i;
   for (i=0; i<arrayListSize(l); i++)
@@ -68,7 +108,7 @@ gint arrayListGetIndex(arrayList *l, void *e)
 
 /******************************************************************************/
 
-void** getArrayFromArrayList(arrayList *l)
+static void** getArrayFromArrayList(arrayList *l)
 {
    return l->arr;
 }
@@ -76,7 +116,7 @@ void** getArrayFromArrayList(arrayList *l)
 /******************************************************************************/
 
 // a special function, which only works when the arrayList contains only gint*
-gint arrayListContains(arrayList * l , void * e)
+static gint arrayListContains(arrayList * l , void * e)
 {
    gint i;
    for (i=0; i< l->num_elements; i++)
@@ -86,14 +126,14 @@ gint arrayListContains(arrayList * l , void * e)
 
 /******************************************************************************/
 
-gint arrayListSize(arrayList *l)
+static gint arrayListSize(arrayList *l)
 {
    return l->num_elements;
 }
 
 /******************************************************************************/
 
-void * getFromArrayList (arrayList *l, gint index)
+static void * getFromArrayList (arrayList *l, gint index)
 {
    if(index >= 0 && index <  l->num_elements)
       return l->arr[index];
@@ -103,7 +143,7 @@ void * getFromArrayList (arrayList *l, gint index)
 
 /******************************************************************************/
 
-void freeElements(arrayList *l)
+static void freeElements(arrayList *l)
 {
   gint i;
   
@@ -116,14 +156,14 @@ void freeElements(arrayList *l)
 // We keep the memory associated with this list, but set it's number of elements
 // to zero. This is effectively the same function as a memory heap.
 
-void emptyArrayList(arrayList *l)
+static void emptyArrayList(arrayList *l)
 {
   l->num_elements=0; 
 }
 
 /******************************************************************************/
 
-void freeArrayList(arrayList *l, void (*destructor)(void *e))
+static void freeArrayList(arrayList *l, void (*destructor)(void *e))
 {
   gint i;
   
@@ -145,7 +185,7 @@ void freeArrayList(arrayList *l, void (*destructor)(void *e))
 * array list does.
 *******************************************************************************/
 
-linkedList *newLinkedList()
+static linkedList *newLinkedList()
 {
   linkedList *l = malloc(sizeof(linkedList));
     
@@ -159,7 +199,7 @@ linkedList *newLinkedList()
 
 /******************************************************************************/
 
-listNode* addToLinkedList(linkedList *l, void *e)
+static listNode* addToLinkedList(linkedList *l, void *e)
 {
 
   listNode *ln;
@@ -187,17 +227,12 @@ listNode* addToLinkedList(linkedList *l, void *e)
 
 /******************************************************************************/
 
-void *getFromLinkedList(linkedList *l, gint x)
+static void *getFromLinkedList(linkedList *l, gint x)
 {
 
   listNode *thisNode;
   gint i;
 
-  #ifdef DEBUG
-  printf("Note: use of access by index in doubly linked list. Is this really "
-         "what you want?\n");
-  #endif
-  
   if (! (0 <= x && x < linkedListSize(l)) )
   {
     fprintf(stderr, "list index out of bounds, linkedList-size: %d, index: %d.\n", 
@@ -214,14 +249,14 @@ void *getFromLinkedList(linkedList *l, gint x)
 
 /******************************************************************************/
 
-gint linkedListSize(linkedList *l)
+static gint linkedListSize(linkedList *l)
 {
   return l->nelem;
 }
 
 /******************************************************************************/
 
-void *prevElement(linkedList *l, listNode **last)
+static void *prevElement(linkedList *l, listNode **last)
 {
   void *e;
   // If this is the end, return null.
@@ -235,7 +270,7 @@ void *prevElement(linkedList *l, listNode **last)
 
 /******************************************************************************/
 
-void *nextElement(linkedList *l, listNode **last)
+static void *nextElement(linkedList *l, listNode **last)
 {
   void *e;
   // If this is the end, return null.
@@ -249,7 +284,7 @@ void *nextElement(linkedList *l, listNode **last)
 
 /******************************************************************************/
 
-gint linkedListContains(linkedList *l, void *e)
+static gint linkedListContains(linkedList *l, void *e)
 {
   listNode *iter = topOfLinkedList(l);
   void *this;
@@ -262,7 +297,7 @@ gint linkedListContains(linkedList *l, void *e)
 
 /******************************************************************************/
 
-listNode *topOfLinkedList(linkedList *l)
+static listNode *topOfLinkedList(linkedList *l)
 {
   return l->head;
 }
@@ -270,7 +305,7 @@ listNode *topOfLinkedList(linkedList *l)
 /******************************************************************************/
 // Note: this does not free the memory associated with the removed element.
 
-void removeFromLinkedList(linkedList *l, listNode *ln)
+static void removeFromLinkedList(linkedList *l, listNode *ln)
 {
   if (!ln){
     fprintf(stderr, "Error: Tried to remove null element from linkedList.\n");
@@ -298,7 +333,7 @@ void removeFromLinkedList(linkedList *l, listNode *ln)
 /******************************************************************************/
 // This will free the elements the linkedList, along with the elemnts
 // using the given destructor.
-void freeLinkedList(linkedList *l, void (*destructor)(void *e))
+static void freeLinkedList(linkedList *l, void (*destructor)(void *e))
 {
   
   listNode *thisNode = l->head;
@@ -322,7 +357,7 @@ void freeLinkedList(linkedList *l, void (*destructor)(void *e))
 * associated with the stack.
 *******************************************************************************/
 
-stack *newStack()
+static stack *newStack()
 {
   stack *s = malloc(sizeof(stack));
   
@@ -335,7 +370,7 @@ stack *newStack()
 
 /******************************************************************************/
 
-gint stackSize(stack *s)
+static gint stackSize(stack *s)
 {
   return s->top;
 }
@@ -344,7 +379,7 @@ gint stackSize(stack *s)
 // When we are storing poginters which could be null, we need to have a check 
 // to see if the stack is empty.
 
-gint isEmpty(stack *s)
+static gint isEmpty(stack *s)
 {
   return (s->top == 0);
 }
@@ -353,14 +388,14 @@ gint isEmpty(stack *s)
 // This will cause the stack to be empty: note, we have NOT freed any memory
 // associated with the elements.
 
-void emptyStack(stack *s)
+static void emptyStack(stack *s)
 {
   s->top = 0;
 }
 
 /******************************************************************************/
 
-void  push(stack *s, void*e)
+static void  push(stack *s, void*e)
 {
   if (s->top >= s->slots)
    {
@@ -381,7 +416,7 @@ void  push(stack *s, void*e)
 
 /******************************************************************************/
 
-void *pop(stack *s)
+static void *pop(stack *s)
 {
   // If the stack is empty
   if (s->top == 0) return NULL;  
@@ -391,7 +426,7 @@ void *pop(stack *s)
 
 /******************************************************************************/
 
-void freeStack(stack *s, void (*destructor)(void *e))
+static void freeStack(stack *s, void (*destructor)(void *e))
 {
   void *e;
   if (destructor)
@@ -402,88 +437,5 @@ void freeStack(stack *s, void (*destructor)(void *e))
   free(s);
 }
 
-/******************************************************************************/
-
-/* Unit Testing */
-#ifdef _TEST_
-#include "assert.h"
-
-/******************************************************************************/
-
-void testStack()
-{
-  stack *s = newStack(); 
-  long *lt;
-  long l[5] = {12e3, 982, 1201, 34e3, 3e3};
-
-  gint i;
-  for (i=0;i<5;i++)
-    push(s, &l[i]);
-    
-  while ((lt = pop(s)) && i--)
-    assert(*lt = l[i]);
-    
-  assert(i==0);
-  freeStack(s,free);
-}
-
-/******************************************************************************/
-
-void testLinkedList()
-{
-  linkedList *l = newLinkedList();
-  
-  long l1, l2, l3;
-  l1 = 1;
-  l2 = 12e3;
-  l3 = 2e6;
-  
-  assert(linkedListSize(l) == 0);
-  
-  addToLinkedList(l,&l1);
-  addToLinkedList(l,&l2);
-  addToLinkedList(l,&l3);
-  
-  assert(linkedListSize(l) == 3);
-  long *l4 = getFromLinkedList(l,2);
-  assert(*l4 == l3);
-  
-  // Test iteration:
-  listNode *iter = topOfLinkedList(l);
-  
-  long *this = nextElement(l,&iter);
-  assert( *this == l1 );
-  this = nextElement(l,&iter);
-  assert( *this == l2 );
-  
-  this = nextElement(l,&iter);
-  assert( *this == l3 );
-  
-  removeFromLinkedList(l,topOfLinkedList(l));
-  assert(linkedListSize(l)==2);
-  
-  iter = topOfLinkedList(l);
-  this = nextElement(l,&iter);
-  assert(*this == l2);
-  removeFromLinkedList(l,iter);
-  
-  assert(linkedListSize(l) == 1);
-  
-  freeLinkedList(l, NULL);
-  
-}
-
-/******************************************************************************/
-
-gint main(gint argc, gchar **argv)
-{
-  // Run some test routines.
-  testStack();
-  testLinkedList();
-  prgintf("Passed.\n");
-}
-
-/******************************************************************************/
-#endif
 
 

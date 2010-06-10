@@ -24,46 +24,33 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "./utils.h"
 #include "delaunay.h"
 #include "predicates.c"
 #include "assert.h"
 #include <time.h>
-
+#include "utils.c"
 
 
 /* These macros make code more readable. They allow us to access  
    the indexed elements of verticies directly.                    */
 
-static GwyDelaunayVertex*          loadPoints(gchar *filename, gint *n);
 static void             getRange(GwyDelaunayVertex *ps, gint n, GwyDelaunayVertex *min,
                                              GwyDelaunayVertex *max, GwyDelaunayVertex *range, gint r);
 static void             initSuperSimplex(GwyDelaunayVertex *ps, gint n, GwyDelaunayMesh *m);
-static void             writePointsToFile(GwyDelaunayVertex *ps, gint n);
-static void             writeTetsToFile(GwyDelaunayMesh *m);
 static gint              simplexContainsPoint(simplex *s, GwyDelaunayVertex *p);
 static void             getFaceVerticies(simplex *s, gint i, GwyDelaunayVertex **p1, GwyDelaunayVertex **p2, 
                                                      GwyDelaunayVertex **p3, GwyDelaunayVertex **p4 );
 static gint              vercmp(GwyDelaunayVertex *v1, GwyDelaunayVertex *v2);
-static void             faceTest(GwyDelaunayMesh *m);
-static void             orientationTest(linkedList *tets);
-static void             allTests(linkedList *tets);
 static void             addSimplexToMesh(GwyDelaunayMesh *m, simplex *s);
 static void             removeSimplexFromMesh(GwyDelaunayMesh *m, simplex *s);
 static simplex*         findContainingSimplex(GwyDelaunayMesh *m, GwyDelaunayVertex *p);
 static gint              isDelaunay(simplex *s, GwyDelaunayVertex *p);
 static simplex**        swapSimplexNeighbour(simplex *s, simplex *old, simplex *new);
 static simplex*         findNeighbour(simplex *s, GwyDelaunayVertex *p);
-static void             setOrientationBits(simplex *s);
-static void             addPointToMesh(GwyDelaunayVertex *p, linkedList *tets);
-static void             prgintEdge(GwyDelaunayVertex *v1, GwyDelaunayVertex* v2, FILE *stream);
 static gint              isConvex(GwyDelaunayVertex *v1, GwyDelaunayVertex *v2, GwyDelaunayVertex *v3, 
                                       GwyDelaunayVertex *t,  GwyDelaunayVertex *b);
-static void             setNeighbourIndex(simplex *s, gint i, gint newIndex);
-static gint              getNeighbourIndex(simplex *s, gint i);
 static arrayList*       findNeighbours(GwyDelaunayVertex *v, simplex *s);
 static simplex*         newSimplex(GwyDelaunayMesh *m);
-static gint              delaunayTest(GwyDelaunayMesh *m, GwyDelaunayVertex *ps, gint n);
 static void             circumCenter(simplex *s, gdouble *out);
 static void             setNeighbours(arrayList *newTets);
 static gint              shareThreePoints(simplex *s0, gint i, simplex *s1);
@@ -212,7 +199,8 @@ static simplex** swapSimplexNeighbour(simplex *s, simplex *old, simplex *new)
     }
   }
 
-  s->s[i] = new;
+  if (found) //FIXME this was not here in original file
+    s->s[i] = new;
 
   assert(found);
   return &s->s[i];
