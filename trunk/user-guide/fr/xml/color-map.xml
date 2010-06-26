@@ -1,0 +1,258 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: color-map.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='color-map'>
+  <title>Affichage en Fausses Couleurs</title>
+  <indexterm>
+    <primary>couleur</primary>
+    <secondary>affichage</secondary>
+  </indexterm>
+  <para>
+    L'affichage en fausses couleurs est une méthode basique de visualisation de
+    données bi-dimensionnelles. Le gradient de couleur (aussi appelé palette) à
+    utiliser peut être sélectionné en faisant un clic droit sur l'échelle de
+    couleurs dans la fenêtre d'affichage des données.
+  </para>
+  <para>
+    Ce menu de sélection rapide affiche la liste des gradients de couleur
+    favoris. Il permet aussi d'appeler la liste complète des gradients en
+    choisissant <menuchoice><guimenuitem>Plus...</guimenuitem></menuchoice>.
+    Les gradients favoris peuvent être choisis en sélectionnant la case
+    correspondante dans la liste complète ou dans la liste de
+    <link linkend='color-gradient-editor'>l'éditeur de gradient</link>.
+    La sélection d'une ligne dans la liste complète applique le gradient choisi,
+    un double-click (ou la touche <keycap>Entrée</keycap>) permet aussi
+    d'appliquer la sélection et de fermet la fenêtre de la liste. Les gradients
+    dont le nom est connu peuvent être sélectionnés rapidement en tapant leur
+    nom. Le gradient à utiliser par défaut (lorsqu'aucun n'est spécifié dans le
+    fichier) peut aussi être choisi dans
+    <link linkend='color-gradient-editor'>l'éditeur de gradient</link>.
+  </para>
+  <para>
+    La manière dont sont appliquées les couleurs sur les valeurs peut être
+    contrôlée avec l'outil
+    <link linkend='color-range'>Visualisation des Couleurs</link>.
+  </para>
+  <informalfigure id='fig-gradient-selectors'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='gradient-selectors.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre de données avec le menu des gradients de couleur affiché après
+        un clic droit, et la liste complète des gradients.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <sect2 id='color-range'>
+    <title>
+      Outil de Visualisation des Couleurs
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_color_range-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      L'outil de visualisation des couleurs est un
+      <link linkend='tools'>outil</link> spécial dont le but n'est pas
+      d'analyser ou de modifier les données, mais de contrôler la manière dont
+      les couleurs sont reliées aux valeurs. Il propose quatre types de
+      visualisation :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Complet
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_full-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Les couleurs sont plaquées linéairement sur les valeurs, la plage
+            complète des données correspond à la plage complète des couleurs. Il
+            s'agit du type par défaut (à moins que vous n'ayez changé le type
+            par défaut).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Fixé
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_fixed-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Les couleurs sont plaquées linéairement sur les valeurs, une plage
+            de données spécifiée par l'utilisateur (qui peut être plus petite
+            ou plus grande que la plage complète) s'applique sur tout le
+            gradient de couleur. Les valeurs en dehors de la plage spécifiée
+            sont affichées avec les couleurs des extrémités du gradient. La
+            plage peut être ajustée de différentes manières :
+          </para>
+          <itemizedlist>
+            <listitem>
+              en entrant les valeurs numériques souhaitées dans la fenêtre de
+              l'outil,
+            </listitem>
+            <listitem>
+              en sélectionnant une plage dans le graphe de distribution des
+              hauteurs dans la fenêtre de l'outil ou
+            </listitem>
+            <listitem>
+              en sélectionnant une zone dans la fenêtre d'affichage des données,
+              la plage est alors réglée sur les valeurs minimale et maximale
+              des données présentes dans la zone sélectionnée.
+            </listitem>
+          </itemizedlist>
+          <para>
+            Si aucune plage n'est sélectionnée, celle-ci correspond à la plage
+            complète.
+          </para>
+          <para>
+            Notez que les opérations de traitement des données modifient souvent
+            la plage des valeurs – et comme la plage fixée reste fixe comme vous
+            l'avez sélectionnée, il se peut que l'image devienne complètement
+            noire. Dans ce cas il vous faudra certainement ajuster la plage
+            manuellement, ou changer de type de visualisation.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Automatique
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_auto-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Les couleurs sont plaquées linéairement sur les valeurs, un
+            intervalle de la plage complète est déterminé de manière heuristique
+            et celui-ci est appliqué sur le gradient. Les valeurs en-dehors de
+            l'intervalle sont là encore affichées avec les couleurs des
+            extrémités du gradient.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Adaptatif
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_color_range_adaptive-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            La plage complète des données correspond au gradient complet,
+            toutefois le plaquage des couleurs n'est pas linéaire. Celui-ci est
+            basé sur la distribution cumulée inverse des hauteurs, ainsi les
+            zones planes obtiennent généralement des parties importantes du
+            gradient, et les petites variations présentes sur celles-ci seront
+            mieux visualisées.
+          </para>
+          <para>
+            L'échelle de fausses couleurs sur la droite de la
+            <link linkend='data-windows'>fenêtre des données</link> n'affiche
+            aucune marque, seules les valeurs minimale et maximale sont
+            affichées.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Un type de visualisation peut être choisi comme défaut en cliquant dans la
+      case <guilabel>défaut</guilabel> lorsque celui-ci est sélectionné. Les
+      nouvelles fenêtres de données utiliseront ce type, mais pas les canaux
+      spécifiant explicitement un autre type de visualisation.
+    </para>
+    <para>
+      La sauvegarde des données au format <filename>.gwy</filename> enregistre
+      aussi les réglages de visualisation des couleurs, de plage sélectionnée et
+      de gradient utilisé. Le gradient n'est toutefois pas enregistré
+      physiquement dans le fichier, seul son nom l'est. En d'autres termes, les
+      gradients de couleur de même nom sont partagés par les fichiers.
+    </para>
+  </sect2>
+  <sect2 id='color-gradient-editor'>
+    <title>Editeur de Gradient</title>
+    <indexterm>
+      <primary>gradient de couleur</primary>
+      <secondary>édition</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>gradient de couleur</primary>
+      <secondary>choix du défaut</secondary>
+    </indexterm>
+    <para>L'éditeur de gradient peut être lancé avec
+      <menuchoice>
+        <guimenu>Edier</guimenu>
+        <guimenuitem>Gradient de Couleur...</guimenuitem>
+      </menuchoice>.
+      Il consiste en une liste des gradients similaire à celle du sélecteur de
+      gradient, avec un panneau de boutons supplémentaires, et l'éditeur en
+      lui-même accessible en double-cliquant sur le gradient que vous souhaitez
+      modifier ou en cliquant sur le bouton <guilabel>Editer</guilabel>. On peut
+      aussi renommer un gradient. Seuls les gradients créés par l'utilisateur
+      peuvent être modifiés ou supprimés, les gradients installés avec Gwyddion
+      sont immuables.
+    </para>
+    <para>
+      Le dernier bouton du panneau de contrôle permet de régler le gradient
+      sélectionné comme défaut. Celui-ci sera utilisé pour toutes les nouvelles
+      données affichées pour lesquelles aucun gradient n'est spécifié.
+    </para>
+    <para>
+      Deux modes d'éditions sont disponibles :
+      <variablelist>
+        <varlistentry>
+          <term>Points</term>
+          <listitem>
+            <para>
+              Le gradient de couleur est défini par un ensemble de points et
+              leurs couleurs associées. Les points sont représentés par des
+              marques triangulaires placées au-dessus du gradient en bas de
+              l'éditeur. Le déplacement de ces marqueurs déplace les points, de
+              nouveaux points peuvent être ajoutés en cliquant dans un espace
+              vide, des points existants peut être supprimés en les déplaçant
+              hors du gradient.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Courbe</term>
+          <listitem>
+            <para>
+              Le gradient de couleur est défini par les courbes rouge, verte et
+              bleue. Les courbes sont segmentées, mais les segments des courbes
+              individuelles n'ont pas besoin de coïncider.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
