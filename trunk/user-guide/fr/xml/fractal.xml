@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: fractal.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='fractal-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Analyse Fractale/title>
+  <para>
+    On rencontre parfois des objets ayant des propriétés aléatoires. On admet
+    en général que ces obbjets présentent les propriétés d'auto-affinité sur
+    une certaine plage d'échelles. L'auto-affinité est une généralisation de
+    l'auto-similarité, qui est la propriété essentielle de la plupart des
+    fractales déterministes. Une partie d'un objet auto-affine est similaire
+    à l'objet entier après une mise à l'échelle anisotrope. On considère que de
+    nombreuses surfaces rugueuses appartiennent aux objets aléatoires ayant des
+    propriétés d'auto-affinité, et sont traités comme des fractales. Ces
+    surfaces peuvent bien évidemment être analysées par microscopie à force
+    atomique (AFM). Les résultats de l'analyse fractale de surfaces aléatoires
+    et auto-affines mesurées par AFM sont en général utilisés pour classifier
+    de telles surfaces préparées selon différents procédés technologiques
+    [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>,<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>].
+  </para>
+  <para id='fractal-dimension'>
+    <indexterm><primary>dimension fractale</primary></indexterm>
+    Gwyddion propose différentes méthodes d'analyse fractale, que l'on retrouve
+    dans
+  <menuchoice>
+    <guimenu>Traitement des Données</guimenu>
+    <guisubmenu>Statistiques</guisubmenu>
+    <guimenuitem>Analyse Fractale</guimenuitem>
+  </menuchoice>.
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        La méthode par comptage de cube
+        [<link linkend='fractal-analysis-ref-1'>1</link>,<link linkend='fractal-analysis-ref-2'>2</link>]
+      </term>
+      <listitem>
+        est directement dérivée de la définition de la dimension fractale par
+        comptage de boîte. L'algorithme est basé sur les étapes suivantes : un
+        maillage cubique de constante de maille <xi:include href="eqi-l.xml"/>
+        est superposé sur la surface selon <xi:include href="eqi-z.xml"/>.
+        Au départ, <xi:include href="eqi-l.xml"/> vaut
+        <xi:include href="eqi-X-over-2.xml"/> (où <xi:include href="eqi-X.xml"/>
+        est la longueur du bord de la surface), ce qui donne un maillage de
+        <xi:include href="eqi-2x2x2-is-8.xml"/> cubes.  Puis
+        <xi:include href="eqi-N-of-l.xml"/> est le nombre de tous les cubes
+        contenant au moins un pixel de l'image. La constante de maille
+        <xi:include href="eqi-l.xml"/> est ensuite réduite par pas de 2 et le
+        procédé se répète jusqu'à ce que <xi:include href="eqi-l.xml"/>
+        égale la distance entre deux pixels adjacents. La pente du graphe de
+        <xi:include href="eqi-log-N-of-l.xml"/> par rapport à
+        <xi:include href="eqi-log-1-over-l.xml"/>
+        donne directement la dimension fractale <xi:include href="eqi-D_f.xml"/>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        La méthode par triangulation
+        [<link linkend='fractal-analysis-ref-1'>1</link>]
+      </term>
+      <listitem>
+        est très similaire à la méthode par comptage de cube et est elle aussi
+        directement basée sur la dimension fractale par comptage de boîte. La
+        méthode fonctionne de la manière suivante : une grille de dimension
+        unitaire <xi:include href="eqi-l.xml"/> est placée sur la surface.
+        Celle-ci définit l'emplacement des vertex d'un certain nombre de
+        triangles. Quand, par exemple,
+        <xi:include href="eqi-l-is-X-over-4.xml"/>, la surface est couverte par
+        32 triangles de différentes aires et inclinés à différents angles par
+        rapport au plan <xi:include href="eqi-xy.xml"/>. Les aires des triangles
+        sont calculées et sommées pour obtenir une approximation de la surface
+        <xi:include href="eqi-S-of-l.xml"/> correspondant à
+        <xi:include href="eqi-l.xml"/>.
+        La taille de la grille est ensuite réduite par succesivement par un
+        facteur 2, comme précédemment, et le processus se déroule jusqu'à ce
+        que <xi:include href="eqi-l.xml"/> correspondeà la distance entre deux
+        pixels adjacents. La pente du graphe de
+        <xi:include href="eqi-log-S-of-l.xml"/> par rapport à
+        <xi:include href="eqi-log-1-over-l.xml"/> correspond alors à
+        <xi:include href="eqi-D_f-minus-2.xml"/>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        La méthode par variance
+        [<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>]
+      </term>
+      <listitem>
+        est basée sur la dépendance d'échelle de la variance du mouvement
+        Brownien fractionnaire. En pratique, dans la méthode par variance on
+        divise la surface en boîtes carrées de taille égale, et la variance (la
+        puissance des valeurs RMS des hauteurs) est calculée pour une taille de
+        boîte particulière. La dimension fractale est calculée à partir de
+        la pente <xi:include href="eqi-beta.xml"/> de la régression linéaire par
+        moindres carrés des points du graphe log-log de la variance, on a alors
+        <xi:include href="eqi-D_f-is-3-minus-beta-over-2.xml"/>.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>
+        La méthode du spectre de puissance
+        [<link linkend='fractal-analysis-ref-3'>3</link>,<link linkend='fractal-analysis-ref-4'>4</link>,<link linkend='fractal-analysis-ref-5'>5</link>]
+      </term>
+      <listitem>
+        est basée sur la dépendance en spectre de puissance du mouvement
+        Brownien fractionnaire. Dans la méthode du spectre de puissance, une
+        tranformée de Fourier est appliquée sur le profil de chaque ligne
+        constituant l'image, permettant d'évaluer le spectre de puissance. Tous
+        les spectres de puissance ainsi calculés sont ensuite moyennés. La
+        dimension fractale est calculée à partir de la pente
+        <xi:include href="eqi-beta.xml"/> de la régression linéaire par
+        moindres carrés des points du graphe log-log du spectre de puissance, on
+        a alors <xi:include href="eqi-D_f-is-7-over-2-minus-beta-over-2.xml"/>.
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    Les axes des graphs de la Dimension Fractale affichent des données
+    logarithmiques, les dépendances linéaires mentionnées plus haut correpondent
+    donc ici à des lignes droites. La mesure des axes doit donc être traitée de
+    manière arbitraires.
+  </para>
+  <para>
+    Notez que les résultats changent en fonction de la méthode utilisée. Ceci
+    vient des erreurs systématiques des approches des différentes analyses
+    fractales.
+  </para>
+  <informalfigure id='fig-fractal-dimension-screenshot'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='fractal.png' format='PNG'/>
+      </imageobject>
+      <caption>
+        Fenêtre de calcul de la dimension fractale.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    De plus, les résultats de l'analyse fractale peuvent être fortement
+    influencés par la convolution de la sonde de mesure. Il est donc recommandé
+    de vérifier la carte d'incertitude avant d'appliquer l'analyse fractale.
+    Dans les cas où l'image de la surface est fortement influencée par l'image
+    de la sonde, les résultats de l'analyse fractale peuvent être perturbés de
+    manière importante.
+  </para>
+  <para>
+    Notez que les algorithmes présents dans le module Analyse Fractale sont
+    aussi utilisés pour le module Correction Fractale et pour l'option
+    Interpolation Fractale de l'outil Supprimer les Points Chauds.
+  </para>
+  <sect2 id='fractal-analysis-ref'>
+    <title>References</title>
+    <para id='fractal-analysis-ref-1'>
+      [1] C. Douketis, Z. Wang, T. L. Haslett, M. Moskovits: Fractal
+      character of cold-deposited silver films determined by low-temperature
+      scanning tunneling microscopy. Physical Review B, Volume 51, Number 16,
+      15 April 1995, 51
+    </para>
+    <para id='fractal-analysis-ref-2'>
+      [2] W. Zahn, A. Zösch: The dependance of fractal dimension on measuring
+      conditions of scanning probe microscopy. Fresenius J Analen Chem (1999)
+      365: 168-172
+    </para>
+    <para id='fractal-analysis-ref-3'>
+      [3] A. Van Put, A. Vertes, D. Wegrzynek, B. Treiger, R. Van Grieken:
+      Quantitative characerization of individual particle sutfaces by fractal
+      analysis of scanning electron microscope images. Fresenius J Analen
+      Chem (1994) 350: 440-447
+    </para>
+    <para id='fractal-analysis-ref-4'>
+      [4] A. Mannelquist, N. Almquist, S. Fredriksson: Influence of tip
+      geometry on fractal analysis of atomic force microscopy images. Appl.
+      Phys. A 66,1998, 891-895
+    </para>
+    <para id='fractal-analysis-ref-5'>
+      [5] W. Zahn, A. Zösch: Characterization of thin film surfaces by
+      fractal geometry. Fresenius J Anal Chem (1997) 358: 119-121
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
