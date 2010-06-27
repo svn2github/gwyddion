@@ -3,7 +3,7 @@
 <!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='fractal-analysis' xmlns:xi='http://www.w3.org/2001/XInclude'>
-  <title>Analyse Fractale/title>
+  <title>Analyse Fractale</title>
   <para>
     On rencontre parfois des objets ayant des propriétés aléatoires. On admet
     en général que ces obbjets présentent les propriétés d'auto-affinité sur
