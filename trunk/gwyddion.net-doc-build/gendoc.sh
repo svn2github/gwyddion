@@ -40,6 +40,7 @@ function setup() {
   pushd $name
   ln -s $xmldir/xml .
   ln -s $xmldir/$driverfile .
+  ln -s $xmldir/$name-sections.txt .
   for x in $xmldir/*.xml; do
     ln -s $x .
   done
