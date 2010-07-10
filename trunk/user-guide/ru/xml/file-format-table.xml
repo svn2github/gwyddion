@@ -19,6 +19,15 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
+    <!-- From module aistfile.c -->
+    <row>
+      <entry>AIST-NT</entry>
+      <entry>.aist</entry>
+      <entry>aistfile</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -64,20 +73,20 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- From module burleigh_bii.c -->
-    <row>
-      <entry>Burleigh BII</entry>
-      <entry>.bii</entry>
-      <entry>burleigh_bii</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
     <!-- From module burleigh.c -->
     <row>
       <entry>Burleigh IMG v2.1</entry>
       <entry>.img</entry>
       <entry>burleigh</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module burleigh_bii.c -->
+    <row>
+      <entry>Burleigh BII</entry>
+      <entry>.bii</entry>
+      <entry>burleigh_bii</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -125,6 +134,15 @@
       <entry>ezdfile</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module gsffile.c -->
+    <row>
+      <entry>Простое поле Gwyddion</entry>
+      <entry>.gsf</entry>
+      <entry>gsffile</entry>
+      <entry>Да</entry>
+      <entry>Да</entry>
       <entry>Нет</entry>
     </row>
     <!-- From module gwyfile.c -->
@@ -271,20 +289,20 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
-    <!-- From module nanoscope.c -->
-    <row>
-      <entry>Veeco Nanoscope III</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
     <!-- From module nanoscope-ii.c -->
     <row>
       <entry>Veeco Nanoscope II</entry>
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope-ii</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module nanoscope.c -->
+    <row>
+      <entry>Veeco Nanoscope III</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -333,6 +351,15 @@
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Да</entry>
+    </row>
+    <!-- From module omicronflat.c -->
+    <row>
+      <entry>Omicron flat format</entry>
+      <entry>.*_flat</entry>
+      <entry>omicronflat</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
     </row>
     <!-- From module omicronmatrix.c -->
     <row>
@@ -392,6 +419,15 @@
       <entry>PSIA</entry>
       <entry>.tiff</entry>
       <entry>psia</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
+    <!-- From module pt3file.c -->
+    <row>
+      <entry>SymPhoTime TTTR v2.0 data</entry>
+      <entry>.pt3</entry>
+      <entry>pt3file</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
@@ -547,6 +583,15 @@
       <entry>Нет</entry>
       <entry>Нет</entry>
     </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
+      <entry>Да</entry>
+      <entry>Нет</entry>
+      <entry>Нет</entry>
+    </row>
     <!-- From module spmlab.c -->
     <row>
       <entry>Thermicroscopes SPMLab R4-R7</entry>
@@ -561,15 +606,6 @@
       <entry>Thermicroscopes SPMLab данные с плавающей точкой</entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
-      <entry>Да</entry>
-      <entry>Нет</entry>
-      <entry>Нет</entry>
-    </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
       <entry>Да</entry>
       <entry>Нет</entry>
       <entry>Нет</entry>
