@@ -20,6 +20,15 @@
     </thead>
     <tbody>
     <!-- This is a GENERATED file. -->
+    <!-- From module aistfile.c -->
+    <row>
+      <entry>AIST-NT</entry>
+      <entry>.aist</entry>
+      <entry>aistfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module apefile.c -->
     <row>
       <entry>APE Research DAT</entry>
@@ -126,6 +135,15 @@
       <entry>ezdfile</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module gsffile.c -->
+    <row>
+      <entry>Gwyddion Simple Field</entry>
+      <entry>.gsf</entry>
+      <entry>gsffile</entry>
+      <entry>Oui</entry>
+      <entry>Oui</entry>
       <entry>Non</entry>
     </row>
     <!-- From module gwyfile.c -->
@@ -272,20 +290,20 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
-    <!-- From module nanoscope.c -->
-    <row>
-      <entry>Veeco Nanoscope III</entry>
-      <entry>.001, .002, etc.</entry>
-      <entry>nanoscope</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
     <!-- From module nanoscope-ii.c -->
     <row>
       <entry>Veeco Nanoscope II</entry>
       <entry>.001, .002, etc.</entry>
       <entry>nanoscope-ii</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module nanoscope.c -->
+    <row>
+      <entry>Veeco Nanoscope III</entry>
+      <entry>.001, .002, etc.</entry>
+      <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -335,6 +353,15 @@
       <entry>Non</entry>
       <entry>Oui</entry>
     </row>
+    <!-- From module omicronflat.c -->
+    <row>
+      <entry>Omicron format flat </entry>
+      <entry>.*_flat</entry>
+      <entry>omicronflat</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module omicronmatrix.c -->
     <row>
       <entry>Omicron MATRIX</entry>
@@ -363,7 +390,7 @@
     </row>
     <!-- From module pixmap.c -->
     <row>
-      <entry>Pixmap images</entry>
+      <entry>Images</entry>
       <entry>.png, .jpeg, .tiff, .tga, .pnm, .bmp</entry>
       <entry>pixmap</entry>
       <entry>Oui<footnote id="table-file-formats-fn2"><para>L'import est basé sur Gdk-Pixbuf et peut donc varier selon les systèmes.
@@ -395,6 +422,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>PSIA</entry>
       <entry>.tiff</entry>
       <entry>psia</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
+    <!-- From module pt3file.c -->
+    <row>
+      <entry>SymPhoTime TTTR v2.0</entry>
+      <entry>.pt3</entry>
+      <entry>pt3file</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
@@ -437,7 +473,7 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
     </row>
     <!-- From module rawxyz.c -->
     <row>
-      <entry>XYZ data</entry>
+      <entry>Coordonnées XYZ</entry>
       <entry>.xyz, .dat</entry>
       <entry>rawxyz</entry>
       <entry>Oui<footnote id="table-file-formats-fn5"><para>Les données XYZ sont interpolés sur une grille régulière lors de l'import.</para></footnote></entry>
@@ -551,6 +587,15 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module spml.c -->
+    <row>
+      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
+      <entry>.xml</entry>
+      <entry>spml</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module spmlab.c -->
     <row>
       <entry>Thermicroscopes SPMLab R4-R7</entry>
@@ -565,15 +610,6 @@ Le format 16bit n'est  pas supporté.</para></footnote></entry>
       <entry>Thermicroscopes SPMLab virgule flottante</entry>
       <entry>.flt</entry>
       <entry>spmlabf</entry>
-      <entry>Oui</entry>
-      <entry>Non</entry>
-      <entry>Non</entry>
-    </row>
-    <!-- From module spml.c -->
-    <row>
-      <entry>SPML (Scanning Probe Microscopy Markup Language)</entry>
-      <entry>.xml</entry>
-      <entry>spml</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
       <entry>Non</entry>
