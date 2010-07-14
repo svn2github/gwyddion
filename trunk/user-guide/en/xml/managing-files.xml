@@ -98,7 +98,7 @@
       File merging, performed by
       <menuchoice>
         <guimenu>File</guimenu>
-        <guisubmenu>Open</guisubmenu>
+        <guisubmenu>Merge</guisubmenu>
       </menuchoice>,
       is similar to normal file loading, except that the selected file (or
       files) is merged into the current open file.  In other words, channels,
