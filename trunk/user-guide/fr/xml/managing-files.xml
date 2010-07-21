@@ -6,21 +6,21 @@
   <title>Gestion des fichiers</title>
   <para>
     Gwyddion utilise son propre <link linkend='gwyfile-format'>format de fichier</link>
-    (<filename>.gwy</filename>) pour enregistrer les données. Ce format présente
+    (<filename>.gwy</filename>) pour enregistrer les donnÃ©es. Ce format prÃ©sente
     les avantages suivants :
     <itemizedlist>
       <listitem>
-        Capacité d'enregistrer l'état complet des données, incluant les masques,
-        sélections ainsi que les autres propriétés.
+        CapacitÃ© d'enregistrer l'Ã©tat complet des donnÃ©es, incluant les masques,
+        sÃ©lections ainsi que les autres propriÃ©tÃ©s.
       </listitem>
       <listitem>
         Nombre aritraire de canaux, de graphes et de spectres, avec des
-        dimensions et des unités arbitraires.
+        dimensions et des unitÃ©s arbitraires.
         Arbitrary number of channels, graphs and spectrum sets, with arbitrary
         dimensions and units of both dimensions and values.
       </listitem>
       <listitem>
-        Représentation de toutes les données en double précision, évitant toute
+        ReprÃ©sentation de toutes les donnÃ©es en double prÃ©cision, Ã©vitant toute
         perte d'information par arrondi.
       </listitem>
     </itemizedlist>
@@ -28,18 +28,18 @@
     subi un quelconque traitement.
   </para>
   <para>
-    D'autres formats de fichiers peuvent être manipulés à l'aide des modules
-    d'import et d'export appropriés. En plus d'un nombre important de formats de
-    fichier utilisés en microscopie, les fichiers image (PNG, JPEG, TIFF, TARGA)
-    et les données brutes au format binaire ou texte peuvent être aussi
-    importés. Dans le cas où le format de vos données ne serait pas déjà
-    supporté, nous vous encourageons à écrire un module d'import (si vous savez
-    programmer) ou contacter les développeurs afin de les aider à en améliorer
+    D'autres formats de fichiers peuvent Ãªtre manipulÃ©s Ã  l'aide des modules
+    d'import et d'export appropriÃ©s. En plus d'un nombre important de formats de
+    fichier utilisÃ©s en microscopie, les fichiers image (PNG, JPEG, TIFF, TARGA)
+    et les donnÃ©es brutes au format binaire ou texte peuvent Ãªtre aussi
+    importÃ©s. Dans le cas oÃ¹ le format de vos donnÃ©es ne serait pas dÃ©jÃ 
+    supportÃ©, nous vous encourageons Ã  Ã©crire un module d'import (si vous savez
+    programmer) ou contacter les dÃ©veloppeurs afin de les aider Ã  en amÃ©liorer
     le support.
   </para>
   <para>
-    La <link linkend='file-formats'>liste de tous les formats de fichier supportés</link>
-    est disponible dans le chapitre Résumés et Tables.
+    La <link linkend='file-formats'>liste de tous les formats de fichier supportÃ©s</link>
+    est disponible dans le chapitre RÃ©sumÃ©s et Tables.
   </para>
   <sect2 id='file-loading'>
     <title>Chargement de fichier</title>
@@ -48,36 +48,36 @@
       <primary>chargement</primary>
     </indexterm>
     <para>
-      Les fichiers peuvent être ouverts avec
+      Les fichiers peuvent Ãªtre ouverts avec
       <menuchoice>
         <guimenu>Fichier</guimenu>
         <guisubmenu>Ouvrir</guisubmenu>
       </menuchoice>.
-      Le type de fichier est automatiquement détecté, en se basant sur le
-      contenu du fichier. Etant données que des extensions telles que
+      Le type de fichier est automatiquement dÃ©tectÃ©, en se basant sur le
+      contenu du fichier. Etant donnÃ©es que des extensions telles que
       <filename>.img</filename>, <filename>.afm</filename> ou
-      <filename>.dat</filename> sont utilisés pour différents types de fichiers
+      <filename>.dat</filename> sont utilisÃ©s pour diffÃ©rents types de fichiers
       SPM, cette approche est plus performante que le fait de tenir compte
       uniquement de l'extension de fichier.
     </para>
     <para>
-      La seule exception concerne l'import de données brutes, qu'elles soient
+      La seule exception concerne l'import de donnÃ©es brutes, qu'elles soient
       uni ou bi-dimensionnelles, pour lequel il faut choisir explicitement le
-      type dans la fenêtre d'ouverture de fichier.
+      type dans la fenÃªtre d'ouverture de fichier.
       Reportez-vous aux sections
-      <link linkend='raw-file-import'>Import de Données Brutes</link>
-      pour plus de détails sur l'import de données brutes et l'extraction de
-      données à partir de formats non supportés, et
-      <link linkend='specific-data-import'>Import de Données Spécifiques</link>
-      pour l'import de coordonnées XYZ, d'images et de graphes.
+      <link linkend='raw-file-import'>Import de DonnÃ©es Brutes</link>
+      pour plus de dÃ©tails sur l'import de donnÃ©es brutes et l'extraction de
+      donnÃ©es Ã  partir de formats non supportÃ©s, et
+      <link linkend='specific-data-import'>Import de DonnÃ©es SpÃ©cifiques</link>
+      pour l'import de coordonnÃ©es XYZ, d'images et de graphes.
     </para>
     <para>
-      La liste des fichiers affichés dans la fenêtre d'ouverture peut être
-      limitée aux seuls fichiers reconnus par Gwyddion en activant l'option
+      La liste des fichiers affichÃ©s dans la fenÃªtre d'ouverture peut Ãªtre
+      limitÃ©e aux seuls fichiers reconnus par Gwyddion en activant l'option
       <guilabel>Ne montrer que les fichiers chargeables</guilabel>.
       Le label de type de fichier indique alors le filtrage en ajoutant le mot
-      <guilabel>filtré</guilabel>. Cette méthode est généralement utile,
-      toutefois elle peut ralentir l'affichage de la liste pour les répertoires
+      <guilabel>filtrÃ©</guilabel>. Cette mÃ©thode est gÃ©nÃ©ralement utile,
+      toutefois elle peut ralentir l'affichage de la liste pour les rÃ©pertoires
       contenant de nombreux fichiers.
     </para>
     <informalfigure id='fig-file-open-screenshot'>
@@ -86,9 +86,9 @@
           <imagedata fileref='file-open.png' format='PNG'/>
         </imageobject>
         <caption>
-          Fenêtre d'ouverture de fichier avec les options de type de fichier et
-          la prévisualisation. Le texte au-dessus des images indique le module
-          utilisé pour charger le fichier ainsi que le nombre de canaux (ch), de
+          FenÃªtre d'ouverture de fichier avec les options de type de fichier et
+          la prÃ©visualisation. Le texte au-dessus des images indique le module
+          utilisÃ© pour charger le fichier ainsi que le nombre de canaux (ch), de
           graphes (gr) et de spectres ponctuels (sps) contenus dans le ficher.
         </caption>
       </mediaobject>
@@ -101,15 +101,15 @@
       <primary>fusion</primary>
     </indexterm>
     <para>
-      La fusion de fichier, réalisée avec 
+      La fusion de fichier, rÃ©alisÃ©e avec 
       <menuchoice>
         <guimenu>Fichier</guimenu>
         <guisubmenu>Fusionner</guisubmenu>
       </menuchoice>,
       est similaire au chargement d'un fichier, toutefois le fichier
-      sélectionné est fusionné avec le fichier courant. En d'autres mots, les
-      canaux, graphes et spectres, ainsi que tous leurs réglages et propriétés
-      sont ajoutés à ceux présents dans le fichier courant.
+      sÃ©lectionnÃ© est fusionnÃ© avec le fichier courant. En d'autres mots, les
+      canaux, graphes et spectres, ainsi que tous leurs rÃ©glages et propriÃ©tÃ©s
+      sont ajoutÃ©s Ã  ceux prÃ©sents dans le fichier courant.
     </para>
   </sect2>
   <sect2 id='file-saving'>
@@ -119,106 +119,106 @@
       <primary>enregistrement</primary>
     </indexterm>
     <para>
-      La majorité des paragraphes précédents s'applique aussi à
-      l'enregistrement des données. L'une des principales différences concerne
-      la détermination du type de fichier. Alors que le chargement examine le
-      contenu du fichier, la sauvegarde quant à elle dépend de l'extension
+      La majoritÃ© des paragraphes prÃ©cÃ©dents s'applique aussi Ã 
+      l'enregistrement des donnÃ©es. L'une des principales diffÃ©rences concerne
+      la dÃ©termination du type de fichier. Alors que le chargement examine le
+      contenu du fichier, la sauvegarde quant Ã  elle dÃ©pend de l'extension
       du nom de fichier. Comme un nombre important de types de fichier utilisent
-      les mêmes extensions telles que <filename>.img</filename>,
-      <filename>.afm</filename> ou <filename>.dat</filename>, on aboutit à des
-      ambiguïté. En cas de doute, il est recommandé de sélectionner
+      les mÃªmes extensions telles que <filename>.img</filename>,
+      <filename>.afm</filename> ou <filename>.dat</filename>, on aboutit Ã  des
+      ambiguÃ¯tÃ©. En cas de doute, il est recommandÃ© de sÃ©lectionner
       explicitement le type de fichier avant la sauvegarde. 
     </para>
     <para>
-      Etant donné que le seul type de fichier capable de représenter
-      complètement les données est le format natif de Gwyddion, la sauvegarde
-      au format <filename>.gwy</filename> est la plus appropriée. La sauvegarde
+      Etant donnÃ© que le seul type de fichier capable de reprÃ©senter
+      complÃ¨tement les donnÃ©es est le format natif de Gwyddion, la sauvegarde
+      au format <filename>.gwy</filename> est la plus appropriÃ©e. La sauvegarde
       sous d'autres formats consiste principalement en l'export d'une partie
-      des données, typiquement le canal actif (sans les masques et sans les
-      présentations). Cela ne change donc <emphasis>pas</emphasis> seulement le
-      nom du fichier nouvellement enregistré.
+      des donnÃ©es, typiquement le canal actif (sans les masques et sans les
+      prÃ©sentations). Cela ne change donc <emphasis>pas</emphasis> seulement le
+      nom du fichier nouvellement enregistrÃ©.
     </para>
   </sect2>
   <sect2 id='document-history'>
     <title>Historique</title>
     <indexterm>
       <primary>fichier</primary>
-      <primary>récemment ouvert</primary>
+      <primary>rÃ©cemment ouvert</primary>
     </indexterm>
     <para>
-      L'historique des fichiers récemment ouverts est accessible avec
+      L'historique des fichiers rÃ©cemment ouverts est accessible avec
       <menuchoice>
         <guimenu>Fichier</guimenu>
-        <guisubmenu>Ouvrir un fichier récent</guisubmenu>
+        <guisubmenu>Ouvrir un fichier rÃ©cent</guisubmenu>
       </menuchoice>.
-      Le sous-menu contient les 10 derniers fichiers utilisés pour un accès
-      rapide, un historique plus exhaustif est disponible en sélectionnant
+      Le sous-menu contient les 10 derniers fichiers utilisÃ©s pour un accÃ¨s
+      rapide, un historique plus exhaustif est disponible en sÃ©lectionnant
       <guimenuitem>Historique</guimenuitem>.
     </para>
     <para>
-      L'historique liste les fichiers de manière chronologique (le plus
-      récemment ouvert en haut de la liste), avec une pré-visualisation ainsi
-      que quelques informations supplémentaires sur le canal sélectionné. Les
-      fonctions des boutons en bas de la fenêtre d'historique sont les
+      L'historique liste les fichiers de maniÃ¨re chronologique (le plus
+      rÃ©cemment ouvert en haut de la liste), avec une prÃ©-visualisation ainsi
+      que quelques informations supplÃ©mentaires sur le canal sÃ©lectionnÃ©. Les
+      fonctions des boutons en bas de la fenÃªtre d'historique sont les
       suivantes :
       <variablelist>
         <varlistentry>
           <term><guibutton>Purger</guibutton></term>
           <listitem>
-            Supprime les entrées de l'historique correspondant à des fichiers
-            supprimés ou non accessibles pour d'autres raisons.
+            Supprime les entrÃ©es de l'historique correspondant Ã  des fichiers
+            supprimÃ©s ou non accessibles pour d'autres raisons.
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><guibutton>Fermer</guibutton></term>
           <listitem>
-            Ferme la fenêtre d'historique.
+            Ferme la fenÃªtre d'historique.
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><guibutton>Ouvrir</guibutton></term>
           <listitem>
-            Ouvre le fichier sélectionné. Cette action peut aussi être réalisée
-            en activant la ligne sélectionnée, que ce soit par un double-clic
-            ou à l'aide du clavier.
+            Ouvre le fichier sÃ©lectionnÃ©. Cette action peut aussi Ãªtre rÃ©alisÃ©e
+            en activant la ligne sÃ©lectionnÃ©e, que ce soit par un double-clic
+            ou Ã  l'aide du clavier.
           </listitem>
         </varlistentry>
       </variablelist>
     </para>
     <para>
-      Une recherche et un filtrage peuvent être réalisés en fonction du nom de
-      fichier en utilisant la fonction de filtre placée au-dessus des boutons.
-      Le filtre est activé en pressant la touche <keycap>Entrée</keycap> dans
-      la zone d'entrée du filtre. Pour afficher à nouveau toutes les entrées
-      de l'historique, il suffit d'effacer la zone d'entrée puis l'activer. Le
-      motif du filtre est interprété de deux manières :
+      Une recherche et un filtrage peuvent Ãªtre rÃ©alisÃ©s en fonction du nom de
+      fichier en utilisant la fonction de filtre placÃ©e au-dessus des boutons.
+      Le filtre est activÃ© en pressant la touche <keycap>EntrÃ©e</keycap> dans
+      la zone d'entrÃ©e du filtre. Pour afficher Ã  nouveau toutes les entrÃ©es
+      de l'historique, il suffit d'effacer la zone d'entrÃ©e puis l'activer. Le
+      motif du filtre est interprÃ©tÃ© de deux maniÃ¨res :
       <itemizedlist>
         <listitem>
-          Si le motif contien des métacaractères, i.e. <literal>*</literal> ou
-          <literal>?</literal>, celui-ci sera interprété comme un motif
-          particulier (glob). Cela signifie que <literal>?</literal> représente
-          représente un caractère arbitraire unique, <literal>*</literal>
-          représente une séquence de zéro, un ou plusieurs caractères, et le nom
-          de fichier doit correspondre précisément au motif. Notez que les
-          séparateurs de dossier (<literal>/</literal> ou <literal>\</literal>)
-          ne sont pas traité de manière particulière, ainsi dans le motif
-          <literal>*.sis</literal> le caractère <literal>*</literal>
-          correspondra à tous les chemins de dossiers possibles. La syntaxe du
-          motif est décrite dans la documentation
+          Si le motif contien des mÃ©tacaractÃ¨res, i.e. <literal>*</literal> ou
+          <literal>?</literal>, celui-ci sera interprÃ©tÃ© comme un motif
+          particulier (glob). Cela signifie que <literal>?</literal> reprÃ©sente
+          reprÃ©sente un caractÃ¨re arbitraire unique, <literal>*</literal>
+          reprÃ©sente une sÃ©quence de zÃ©ro, un ou plusieurs caractÃ¨res, et le nom
+          de fichier doit correspondre prÃ©cisÃ©ment au motif. Notez que les
+          sÃ©parateurs de dossier (<literal>/</literal> ou <literal>\</literal>)
+          ne sont pas traitÃ© de maniÃ¨re particuliÃ¨re, ainsi dans le motif
+          <literal>*.sis</literal> le caractÃ¨re <literal>*</literal>
+          correspondra Ã  tous les chemins de dossiers possibles. La syntaxe du
+          motif est dÃ©crite dans la documentation
           <ulink url='http://library.gnome.org/devel/glib/stable/glib-Glob-style-pattern-matching.html#glib-Glob-style-pattern-matching.description'>GPatternSpec</ulink>.
         </listitem>
         <listitem>
-          Si le motif ne contient aucun métacaractère, celui-ci sera directement
-          recherché comme une partie du nom de fichier.
+          Si le motif ne contient aucun mÃ©tacaractÃ¨re, celui-ci sera directement
+          recherchÃ© comme une partie du nom de fichier.
         </listitem>
       </itemizedlist>
     </para>
     <para>
-      La sensibilité à la casse de la recherche, contrôlée par l'option
-      <guilabel>Sensible à la casse</guilabel>, est surtout utile pour les
-      systèmes d'exploitation distinguant la casse des lettres des noms de
-      fichier, comme par exemple Unix.  Pour les systèmes ne distinguant pas la
-      casse, il est préférable de désactiver la sensibilité à la casse.
+      La sensibilitÃ© Ã  la casse de la recherche, contrÃ´lÃ©e par l'option
+      <guilabel>Sensible Ã  la casse</guilabel>, est surtout utile pour les
+      systÃ¨mes d'exploitation distinguant la casse des lettres des noms de
+      fichier, comme par exemple Unix.  Pour les systÃ¨mes ne distinguant pas la
+      casse, il est prÃ©fÃ©rable de dÃ©sactiver la sensibilitÃ© Ã  la casse.
     </para>
   </sect2>
 </sect1>
