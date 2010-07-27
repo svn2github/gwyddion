@@ -12,11 +12,12 @@
     <link linkend='file-formats'>table des formats de fichier supportés</link>.
   </para>
   <xi:include href='gwyddion.xml'/>
-<!--  <xi:include href='gwyddion-thumbnailer.xml'/> -->
+  <xi:include href='gwyddion-thumbnailer.xml'/>
   <xi:include href='keyboard-shortcuts.xml'/>
   <xi:include href='file-formats.xml'/>
   <xi:include href='expressions.xml'/>
 <!--  <xi:include href='resources.xml'/> -->
   <xi:include href='gwyfile-format.xml'/>
+<!--  <xi:include href='simple-field-format.xml'/> -->
 </chapter>
 <!-- vim: set ts=2 sw=2 et : -->

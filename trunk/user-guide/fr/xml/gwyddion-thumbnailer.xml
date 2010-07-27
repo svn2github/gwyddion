@@ -1,0 +1,256 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: gwyddion-thumbnailer.xml 10421 2009-11-13 20:01:23Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<refentry id='gwyddion-thumbnailer'>
+  <refentryinfo>
+    <productname>gwyddion</productname>
+    <author><othername>Yeti</othername></author>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gwyddion-thumbnailer</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="manual">Gwyddion</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>gwyddion-thumbnailer</refname>
+    <refpurpose>Génère des vignettes d'aperçu des fichiers de données SPM</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv id='gwyddion-thumbnailer-synopsis'>
+    <title>Synopsis</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <group choice='req'>
+        <arg choice='plain'>--version</arg>
+        <arg choice='plain'>--help</arg>
+      </group>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='req'><replaceable>MODE</replaceable></arg>
+      <arg rep='repeat'><replaceable>ARGUMENT</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1 id='gwyddion-thumbnailer-description'>
+    <title>Description</title>
+    <para>
+      Gwyddion-thumbnailer génère des vignettes d'aperçu des données SPM
+      (Scanning Probe Microscope, microscope à balayage). En fonction du mode
+      de fonctionnement, tel que décrit plus bas, les vignettes sont écrites de
+      manière à se conformer à différents standards afin qu'elles soient
+      affichées dans
+      <citerefentry><refentrytitle>nautilus</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+      <citerefentry><refentrytitle>thunar</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+      ou d'autres gestionnaires de fichiers similaires.
+    </para>
+    <para>
+      Gwyddion-thumbnailer charge et fait un rendu des fichiers en utilisant les
+      lirairies et les modules de
+      <citerefentry><refentrytitle>gwyddion</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+      il peut ainsi créer une vignette pour tous les formats de fichier
+      supportés par votre installation de Gwyddion. Cela signifie aussi que
+      celle-ci hérite aussi des réglages de Gwyddion, comme par exemple le
+      gradient de fausses couleurs, et qu'elle est influencée par les mêmes
+      variables d'environnement que Gwyddion.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-informative-options'>
+    <title>Options d'informations</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--help</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche une aide puis se termine.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--version</option>
+        </term>
+        <listitem>
+          <para>
+            Affiche la version puis se termine.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-thumbnailing-options'>
+    <title>Options de création de vignette</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <option>--update</option>
+        </term>
+        <listitem>
+          <para>
+            Crée la vignette si celle-ci n'existe pas ou si elle ne semble pas à
+            jour.  Par défaut, gwyddion-thumbnailer écrit par-dessus les
+            vignettes existantes, même si celles-ci semblent à jour.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-mode'>
+    <title>Mode</title>
+    <para>
+      Trois modes de création de vignettes sont disponiblese :
+      <option>gnome2</option>, <option>tms</option> et <option>kde4</option> ;
+      ainsi qu'un mode spécial : <option>check</option>. Ceux-ci sont décrits
+      ci-dessous.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-gnome2'>
+    <title>Gnome 2</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='plain'>gnome2</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+      <arg choice='plain'><replaceable>OUTPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      Dans le mode <option>gnome2</option>, gwyddion-thumbnailer crée des
+      vignettes au format PNG conformément à la spécification du générateur
+      d'aperçu de Gnome. En utilisant la convention de cette spécification, il
+      faut lancer
+    </para>
+    <informalexample>
+      <programlisting>gwyddion-thumbnailer gnome2 %s %i %o</programlisting>
+    </informalexample>
+    <para>
+      Gwyddion installe les schémas GConf correspondant et permet par défaut
+      de créer les vignettes pour tous les types de fichier qu'il supporte. Ceci
+      doit normalement fonctionner et il n'y a donc pas lieu de faire des
+      réglages manuels.
+    </para>
+    <para>
+      Les vignettes crées avec le mode <option>gnome2</option> sont identiques
+      à celles du mode <option>tms</option>, avec toutes les données auxiliaires
+      liées au format PNG (à condition bien sûr d'utiliser le même
+      <replaceable>MAX-SIZE</replaceable> que dans le mode <option>tms</option>).
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-tms'>
+    <title>TMS</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg rep='repeat'><replaceable>OPTION</replaceable></arg>
+      <arg choice='plain'>tms</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      Dans le mode <option>tms</option>, gwyddion-thumbnailer crée des vignettes
+      au format PNG selon le Thumbnail Managing Standard (standard de gestion
+      des vignettes). L'argument <replaceable>MAX-SIZE</replaceable> doit être
+      <option>128</option> ou <option>normal</option> (les deux signifiant 128
+      pixels) ou <option>256</option> ou <option>large</option> (les deux
+      signifiant 256 pixels).
+    </para>
+    <para>
+      Le nom du fichier de sortie n'est pas donné car il est défini par le TMS.
+      La vignette est placée dans le dossier pour les vignettes normales ou
+      larges en fonctio de la valeur donnée dans
+      <replaceable>MAX-SIZE</replaceable>.
+    </para>
+    <para>
+      Ce mode peut être utile pour la création par lot de vignettes. Par exemple
+      pour créer les vignettes de tous les fichiers <filename>*.afm</filename>
+      dans le dossier <filename>scans</filename> et ses sous-répertoires, vous
+      pouvez lancer 
+    </para>
+    <informalexample>
+      <programlisting><![CDATA[
+find scans -type f -name '*.afm' -print0 \\
+    | xargs -0 -n 1 gwyddion-thumbnailer --update tms normal
+]]></programlisting>
+    </informalexample>
+    <para>
+      et partir vous faire un petit café, car cela risque de prendre un certain
+      temps.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-kde4'>
+    <title>KDE 4</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice='plain'>kde4</arg>
+      <arg choice='plain'><replaceable>MAX-SIZE</replaceable></arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      Dans le mode <option>kde4</option>, gwyddion-thumbnailer crée des
+      vignettes au format PNG destinées à être traitées par le module KDE
+      gwythumbcreator. La vignette, là encore identique à celle des autres
+      modes, est écrite vers la sortie standard.
+    </para>
+    <para>
+      N'utilisez <emphasis>pas</emphasis> ce mode à partir de la ligne de
+      commande. Celui-ci est décrit par souci d'exhaustivité, toutefois le
+      protocole entre gwythumbcreator et gwyddion-thumbnailer doit être
+      considéré comme privé et susceptible de changer à tout moment.
+    </para>
+  </refsect1>
+  <refsect1 id='gwyddion-thumbnailer-check'>
+    <title>Check</title>
+    <cmdsynopsis>
+      <command>gwyddion-thumbnailer</command>
+      <arg choice='plain'>check</arg>
+      <arg choice='plain'><replaceable>INPUT-FILE</replaceable></arg>
+    </cmdsynopsis>
+    <para>
+      Le mode <option>check</option> ne sert pas à la création de vignettes. Il
+      permet en fait à gwyddion-thumbnailer d'afficher des informations sur les
+      vignettes disponibles de <replaceable>INPUT-FILE</replaceable> et les
+      échecs mis en cache pour produire des vignettes par d'autres applications,
+      tel que décrit dans le TMS.
+    </para>
+    <para>
+      Si la vignette de taille normale existe et est à jour, la version grande
+      taille n'existera pas et il y aura un échec mis en cache par
+      gnome-thumbnail-factory, la sortie pourra être par exemple :
+    </para>
+    <informalexample>
+      <literallayout><computeroutput>File:   <replaceable>INPUT-FILE</replaceable>
+URI:    file:///home/me/Pictures/naughty/broken-tip3/<replaceable>INPUT-FILE</replaceable>
+Normal: /home/me/.thumbnails/normal/<replaceable>MD5</replaceable>.png
+        status: OK
+Large:  /home/me/.thumbnails/large/<replaceable>MD5</replaceable>.png
+        status: Thumbnail does not exist or stat() fails on it.
+Failed: /home/me/.thumbnails/fail/gnome-thumbnail-factory/<replaceable>MD5</replaceable>.png</computeroutput></literallayout>
+    </informalexample>
+    <para>
+      URI correspond l'URI canonique du fichier d'entrée,
+      <replaceable>MD5</replaceable> correspond à la représentation hexadécimale
+      de la somme MD5 de l'URI, telle que décrite par le TMS. Aucune ligne
+      Failed ne sera affichée s'il n'y a aucun échec en cache.
+    </para>
+    <para>
+      Cette fonction peut être utilisée pour vérifier les vignettes de toutes
+      sortes, pas nécessairement celles crées par Gwyddion ou
+      gwyddion-thumbnailer. A l'avenir toutefois, il se peut qu'une erreur
+      apparaisse si la vignette ne contient pas d'information spécifique à
+      Gwyddion.
+    </para>
+  </refsect1>
+  <refsect1 id="gwyddion-thumbnailer-see-also">
+    <title>Voir aussi</title>
+    <para>
+      <citerefentry>
+        <refentrytitle>gwyddion</refentrytitle>
+        <manvolnum>1</manvolnum>
+      </citerefentry>,
+    </para>
+  </refsect1>
+</refentry>
