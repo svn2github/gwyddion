@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: multidata.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!-- @(#) $Id: multidata.xml 11389 2010-09-14 07:41:58Z dn2010 $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="multidata">
   <title>Множественные данные</title>
@@ -99,6 +99,21 @@
       </varlistentry>
     </variablelist>
   </sect2>
+  <sect2 id="mutual crop">
+    <title>Взаимное кадрирование</title>
+    <indexterm><primary>взаимное кадрирование двух изображений</primary></indexterm>
+    <indexterm><primary>удаление непересекающихся областей</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Обработка данных</guimenu>
+        <guisubmenu>Множественные данные</guisubmenu>
+        <guimenuitem>Взаимное кадрирование</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>С помощью этого модуля можно кадрировать два слегка сдвинутых друг относительно друга изображения одной и той же области (например, до и после какого-то воздействия), или, другими словами, обрезать непересекающиеся части возле границы изображений.</para>
+    <para>Общая область определяется корреляцией большего изображения с центральной частью меньшего. разрешения обоих изображений (точек на единицу длины) должны быть одинаковы. </para>
+    <para>На текущий момент единственным параметром сейчас является <guilabel>Второй операнд</guilabel> - будет посчитана корреляция между ним и текущим активным изображением и оба поля данных будут обрезаны чтобы удалить неперескающиеся области возле границы.</para>
+  </sect2>
   <sect2 id="cross-correlation">
     <title>Взаимная корреляция</title>
     <indexterm><primary>взаимная корреляция</primary></indexterm>
@@ -178,7 +193,7 @@
         <term>
           <guilabel>Порог</guilabel>
         </term>
-        <listitem>Порог для определения, будет ли локальный максимум считаться <quote>ядром корреляции. найденным здесь</quote>.</listitem>
+        <listitem>Порог для определения, будет ли локальный максимум считаться <quote>ядром корреляции, найденным в этом месте</quote>.</listitem>
       </varlistentry>
     </variablelist>
   </sect2>
