@@ -204,6 +204,34 @@
       </varlistentry>
     </variablelist>
   </sect2>
+  <sect2 id='mutual crop'>
+    <title>Mutual Crop</title>
+    <indexterm><primary>mutual crop of two images</primary></indexterm>
+    <indexterm><primary>remove non-intersecting areas</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Data Process</guimenu>
+        <guisubmenu>Multidata</guisubmenu>
+        <guimenuitem>Mutual Crop</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+		Two slightly different images of the same area (for example,
+		before and after some treatment) can be croped to intersecting
+		area (or non-intersecting parts can be removed) with this module.
+    </para>
+    <para>	
+		Intersecting part is determined by correlation of larger image
+		with center area of smaller image. Images resolution (pixels per
+		linear unit) should be equal. 
+	</para>
+    <para>
+		The only parameter now is <guilabel>Select second operand</guilabel> -
+		correlation between it and current image will be calculated and
+		both data fields will be cropped to remove non-intersecting
+		near-border parts.
+	</para>
+  </sect2>
   <sect2 id='cross-correlation'>
     <title>Cross-Correlation</title>
     <indexterm><primary>cross-correlation</primary></indexterm>
