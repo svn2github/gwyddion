@@ -112,6 +112,17 @@
         Most scans have pixels with 1:1 aspect ratio, therefore this function
         has no effect on them.
       </listitem>
+      <listitem id='tilt'>
+        <indexterm>
+          <primary>tilt</primary>
+        </indexterm>
+        Tilt the data by specified gradient or angle using
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Tilt</guimenuitem>
+        </menuchoice>.
+      </listitem>
     </itemizedlist>
     <para id='calibrate'>
       Moreover, the recalibration module can be used for changing the physical
