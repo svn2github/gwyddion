@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<sect1 id="basic-operations" xmlns:xi="http://www.w3.org/2001/XInclude">
+<sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="basic-operations">
   <title>Базовые действия</title>
-  <para>Считывание значений и базовые геометрические операции представляют собой основу любой программы обработки данных. Gwyddion предлагает большой набор функций для </para>
+  <para>Считывание значений и базовые геометрические операции представляют собой основу любой програмы обработки данных. Gwyddion предлагает большой набор функций для масштабирования данных, вращения. изменения числа точек и извлечения профилей. Этот раздел описывает эти простые, но нужные функции.</para>
   <sect2 id="modules-basic">
     <title>Базовые действия с двумерными данными</title>
     <para>С помощью основных модулей можно совершить следующие операции с двумерным полем данных:</para>
     <itemizedlist>
-      <listitem id="scale"><indexterm><primary>масштабирование</primary></indexterm><indexterm><primary>передискретизация</primary></indexterm>Перемасштабировать данные к выбранным размерам или масштабу используя выбранный метод интерполяции можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Масштабировать</guimenuitem></menuchoice></listitem>
-      <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрировать данные можно с помощью <link linkend="tool-crop">инструмента <quote>Кадрирование</quote></link> как внутри существующего канала, так и перенося результат в новый канал (с помощью опции <guilabel>Создать новый канал</guilabel>). При включении опции <guilabel>Сохранять пространственные смещения</guilabel>, координаты левого верхнего угла получившегося изображения будут соответствовать координатам его же у выбранного, иначе они будут установлены в  <xi:include href="eqi-coords-0-0.xml"/>.</listitem>
-      <listitem id="rotate"><indexterm><primary>поворот</primary><secondary>на угол. кратный прямому</secondary></indexterm><indexterm><primary>поворот</primary><secondary>на произвольный угол</secondary></indexterm> Повернуть данные на угол кратный прямому или на произвольно заданный можно с помощью одной из функций: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Повернуть по часовой</guimenuitem></menuchoice>, <guimenuitem>Повернуть против часовой</guimenuitem> или <guimenuitem>Повернуть на угол</guimenuitem>.</listitem>
-      <listitem id="flip"><indexterm><primary>переворот</primary><secondary>горизонтально</secondary></indexterm><indexterm><primary>переворот</primary><secondary>вертикально</secondary></indexterm> Перевернуть данные горизонтально (т.е. относительно вертикальной оси) и вертикально (т.е. относительно горизонтальной) можно с помощью меню<menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть горизонтально</guimenuitem></menuchoice> и <guimenuitem>Перевернуть вертикально</guimenuitem>, сответственно.</listitem>
-      <listitem id="flip-both">Отразить данные относительно центра (т.е. относительно обеих осей) можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть обе оси</guimenuitem></menuchoice>.</listitem>
-      <listitem id="invert-value"><indexterm><primary>инверсия значений</primary></indexterm> Перевернуть данные можно с помощью функции <guimenuitem>Инвертировать значение</guimenuitem>: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Инвертировать значение</guimenuitem></menuchoice>. Данные инвертируются относительно среднего, поэтому оно остаётся неизменным.</listitem>
-      <listitem id="square-samples"><indexterm><primary>пропорции</primary><secondary>передискретизация в квадратные пиксели</secondary></indexterm> Увеличить число точек данных, чтобы сделать пиксели квадратными можно с помощью команды  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Сделать квадратным</guimenuitem></menuchoice>. В большинстве сканов пиксели и так квадратные, поэтому эта опция на них не действует.</listitem>
+      <listitem id="scale"><indexterm><primary>изменение масштаба</primary></indexterm><indexterm><primary>изменение числа точек</primary></indexterm> Изменить шаг точек данных к выбранным размерам или масштабировать используя выбранный метод интерполяции <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Масштабировать</guimenuitem></menuchoice></listitem>
+      <listitem id="crop"><indexterm><primary>кадрирование</primary></indexterm> Кадрирует данные используя <link linkend="tool-crop">Инструмент кадрирования</link> или на месте, или помещая результат в новый канал (с опцией <guilabel>Создать новый канал</guilabel>). С включенной опцией <guilabel>Сохранять пространственные смещения</guilabel>, координаты верхнего левого угла результирующего изображения соответствуют верхнему левому углу выбранной области, в противном случае, координаты верхнего левого угла устанавливаются в <xi:include href="eqi-coords-0-0.xml"/>..</listitem>
+      <listitem id="rotate"><indexterm><primary>поворот</primary><secondary>на угол, кратный прямому</secondary></indexterm><indexterm><primary>поворот</primary><secondary>на заданный угол</secondary></indexterm> Повернуть данные на угол, кратный прямому или на произвольно заданный можно с помощью одной из функций поворота: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Повернуть по часовой</guimenuitem></menuchoice>, <guimenuitem>Повернуть против часовой</guimenuitem> or <guimenuitem>Поворот</guimenuitem>.</listitem>
+      <listitem id="flip"><indexterm><primary>переворот</primary><secondary>горизонтально</secondary></indexterm><indexterm><primary>переворот</primary><secondary>вертикально</secondary></indexterm> Переворот данных горизонтально (т.е. относительно вертикальной оси) или вертикально (т.е. относительно горизонтальной оси) осуществляется с помощью  <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть горизонтально</guimenuitem></menuchoice> и <guimenuitem>Перевернуть вертикально</guimenuitem>, соответственно.</listitem>
+      <listitem id="flip-both">Отражение данных относительно центра (т.е. относительно обеих осей) осуществляется с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перевернуть оба</guimenuitem></menuchoice>.</listitem>
+      <listitem id="invert-value"><indexterm><primary>инверсия значений</primary></indexterm> Инверсия данных с помощью функции <guimenuitem>Инвертировать значение</guimenuitem>: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Инвертировать значение</guimenuitem></menuchoice>. Данные инвертируются относительно среднего, в результате среднее значение остаётся неизменным.</listitem>
+      <listitem id="square-samples"><indexterm><primary>соотношение сторон</primary><secondary>пересчёт в квадратные пиксели</secondary></indexterm> Увеличить разрешение данных. чтобы сделать пиксели квадратными можно с помощью <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Квадратный образец</guimenuitem></menuchoice>.В большинстве сканов пиксели имеют соотношение сторон 1:1, следовательно эта функция не действует на них.</listitem>
+      <listitem id="tilt"><indexterm><primary>наклон</primary></indexterm> Наклоняет данные на заданный градиент или угол используя <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Наклон</guimenuitem></menuchoice>.</listitem>
     </itemizedlist>
     <para id="calibrate">Более того, модуль перекалибровки может быть использован для изменения физических размеров, калибровки значений данных и даже для того, чтобы изменить единицы измерения значений и пространственных размеров: <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Базовые действия</guisubmenu><guimenuitem>Перекалибровать</guimenuitem></menuchoice>.</para>
   </sect2>
@@ -22,7 +23,7 @@
     <title>Считывание значений</title>
     <para>Простейший способ чтения данных это поместить мышиный курсор поверх точки. в которой необходимо считать значение. Координаты при этом показываются в строке состояния <link linkend="data-windows">окна данных</link> или <link linkend="graph-windows">окна графика</link>.</para>
     <sect3 id="read-value">
-      <title>Инструмент чтения значений <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <title>Инструмент считать значение <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_pointer_measure-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
       <indexterm><primary>Инструмент чтения значения</primary></indexterm>
       <indexterm><primary>измерение уклона</primary></indexterm>
       <indexterm>
@@ -30,7 +31,7 @@
         <secondary>чтение данных</secondary>
       </indexterm>
       <para>Инструмент <guilabel>Считать значение</guilabel> предлагает больше вариантов чтения данных. Он показывает координаты и значения в последней точке окна данных, где была нажата кнопка мыши. Он может усреднить значение в круговой окрестности выбранной точки, это управляется опцией <guilabel>Радиус усреднения</guilabel>. Если этот радиус равен 1, показывается значение в единичной точке (как делает простейший метод). Кнопка <guibutton>Установить ноль</guibutton> сдвигает поверхность таким образом, чтобы сделать текущее <xi:include href="eqi-z.xml"/> новым нулевым уровнем.</para>
-      <para><guilabel>Считать значение</guilabel>также может показывать наклон локальной грани. <guilabel>Радиус усреднения</guilabel> снова определяет радиус области, используемой для аппроксимации плоскостью.</para>
+      <para><guilabel>Считать значение</guilabel> также может показывать наклон локальной грани. <guilabel>Радиус усреднения</guilabel> снова определяет радиус области, используемой для аппроксимации плоскостью.</para>
     </sect3>
     <sect3 id="inclinations-coordinates">
       <title>Наклоны</title>
@@ -40,7 +41,7 @@
       </indexterm>
       <para>Во всех инструментах Gwyddion, наклоны плоскости и грани показываются в сферических углах <xi:include href="eqi-coords-theta-phi.xml"/> вектора нормали к плоскости.</para>
       <para>Угол <xi:include href="eqi-theta.xml"/> является углом между направлением вверх и нормалью, это означает, что <xi:include href="eqi-theta-is-0.xml"/> для горизонтальных граней и увеличивается с наклоном. Угол всегда больше нуля.</para>
-      <para>Угол <xi:include href="eqi-phi.xml"/> - отсчитываемый против часовой угол между осью inlineequation&gt;<mathphrase><phrase role="mathvar">x</phrase></mathphrase><alt>x</alt></para>
+      <para>Угол <xi:include href="eqi-phi.xml"/> - угол между осью <xi:include href="eqi-x.xml"/> и проекцией нормали на плоскость <xi:include href="eqi-xy.xml"/>, отсчитываемый против часовой стрелки, как показано на следующем рисунке. Для граней это означает, что <xi:include href="eqi-phi.xml"/> соответствует направлению грани вниз.</para>
       <informalfigure id="fig-inclination-coordinates">
         <mediaobject>
           <imageobject>
@@ -52,16 +53,16 @@
           <textobject>
             <phrase>Измерение положения граней</phrase>
           </textobject>
-          <caption>Ориентация грани поверхности (показана синим) измеряется как угол против часовой от оси  <xi:include href="eqi-x.xml"/> до проекции вектора нормали к грани <xi:include href="eqi-vec-n.xml"/> на плоскость <xi:include href="eqi-xy.xml"/>.</caption>
+          <caption>Положение грани поверхности (показана синим) измеряется как отсчитываемый против часовой стрелки угол между осью <xi:include href="eqi-x.xml"/> и проекцией вектора нормали грани <xi:include href="eqi-vec-n.xml"/> на плоскость <xi:include href="eqi-xy.xml"/>.</caption>
         </mediaobject>
       </informalfigure>
     </sect3>
     <sect3 id="distance">
-      <title>Инструмент измерения расстояний<guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_distance-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
-      <indexterm><primary>инструмент измерения Расстояний</primary></indexterm>
+      <title>Инструмент измерения расстояний <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_distance-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
+      <indexterm><primary>инструмент Расстояние</primary></indexterm>
       <indexterm><primary>измерение расстояний </primary></indexterm>
       <indexterm><primary>измерение углов</primary></indexterm>
-      <para>Расстояния и разницы могут быть измерены с помощью инструмента <guilabel>Расстояние</guilabel>. Он показывает горизонтальные (<xi:include href="eqi-Delta-x.xml"/>), вертикальные (<xi:include href="eqi-Delta-y.xml"/>) и суммарные расстояния на плоскости(<xi:include href="eqi-R.xml"/>); азимут <xi:include href="eqi-phi.xml"/> (измеренный подобно наклону <xi:include href="eqi-phi.xml"/>) и разность значений конечных точек(<xi:include href="eqi-Delta-z.xml"/>) для набора выбранных линий.</para>
+      <para>Расстояния и разницы могут измеряться с помощью инструмента <guilabel>расстояние</guilabel>. Он показывает горизонтальное (<xi:include href="eqi-Delta-x.xml"/>), вертикальное (<xi:include href="eqi-Delta-y.xml"/>) расстояния и общее расстояние по плоскости (<xi:include href="eqi-R.xml"/>); азимут <xi:include href="eqi-phi.xml"/> (измеряется так же, как наклон <xi:include href="eqi-phi.xml"/>) и разницу значений конечных точек <xi:include href="eqi-Delta-z.xml"/> для набора выбранных на массиве данных линий.</para>
       <para>Расстояния могут быть скопированы в буфер обмена или сохранены в текстовый файл с помощью кнопок под списком.</para>
       <informalfigure id="fig-distance-screenshot">
         <mediaobject>
