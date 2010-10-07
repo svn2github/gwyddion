@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<inlineequation>
+  <mathphrase>(d<phrase role='mathvar'>I</phrase>/d<phrase role='mathvar'>U</phrase>)/(<phrase role='mathvar'>I</phrase>/<phrase role='mathvar'>U</phrase>)(<phrase role='mathvar'>U</phrase>)</mathphrase>
+  <alt>{\d I \over \d U} \over {I \over U}\left(U\right)</alt>
+</inlineequation>
+<!-- vim: set ts=2 sw=2 et : -->

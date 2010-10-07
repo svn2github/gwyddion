@@ -155,5 +155,14 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='graph-dos-spectrum'>
+    <title>DOS spectrum</title>
+    <indexterm><primary>DOS spectrum</primary></indexterm>
+    <para>
+        DOS spectrum module intended to obtain Density-of-States spectra
+        from I-V STM spectroscopy. It calculates 
+        <xi:include href="eqi-graph-dos.xml"/> and plots it as graph.
+    </para>
+  </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
