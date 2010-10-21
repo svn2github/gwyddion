@@ -572,36 +572,42 @@ _gwy_graph_window_measure_dialog_new(GwyGraph *graph)
 
     for (i = 0; i < NMAX; i++) {
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE); 
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 0, 1, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);
         g_ptr_array_add(dialog->labpoint, label);
 
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE);
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 1, 2, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);
         g_ptr_array_add(dialog->pointx, label);
 
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE);
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 2, 3, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);
         g_ptr_array_add(dialog->pointy, label);
 
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE);
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 3, 4, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);
         g_ptr_array_add(dialog->distx, label);
 
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE);
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 4, 5, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);
         g_ptr_array_add(dialog->disty, label);
 
         label = gtk_label_new(NULL);
+        gtk_label_set_selectable(GTK_LABEL(label), TRUE);
         gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
         gtk_table_attach(GTK_TABLE(table), label, 5, 6, i+2, i+3,
                          GTK_FILL | GTK_EXPAND, 0, 4, 2);

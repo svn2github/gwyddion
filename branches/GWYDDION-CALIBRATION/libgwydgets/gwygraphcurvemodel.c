@@ -225,6 +225,7 @@ gwy_graph_curve_model_set_property(GObject *object,
 
         case PROP_MODE:
         gcmodel->mode = g_value_get_enum(value);
+        gwy_graph_curve_model_data_changed(gcmodel);
         break;
 
         case PROP_POINT_TYPE:

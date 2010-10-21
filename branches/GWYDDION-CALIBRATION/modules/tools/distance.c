@@ -63,7 +63,6 @@ struct _GwyToolDistance {
 
     gboolean has_calibration;
 
-
     /* potential class data */
     GwySIValueFormat *angle_format;
     GType layer_type_line;
@@ -308,10 +307,8 @@ gwy_tool_distance_data_switched(GwyTool *gwytool,
         && gwy_container_gis_object_by_name(plain_tool->container, yukey, &(tool->yunc))
         && gwy_container_gis_object_by_name(plain_tool->container, zukey, &(tool->zunc)))
     {
-        printf("Data have calibration\n");
         tool->has_calibration = TRUE;
     } else {
-        printf("Data don't have calibration\n");
         tool->has_calibration = FALSE;
     }
 
@@ -438,6 +435,7 @@ gwy_tool_distance_render_cell(GtkCellLayout *layout,
 
     plain_tool = GWY_PLAIN_TOOL(tool);
     gwy_selection_get_object(plain_tool->selection, idx, line);
+
 
     switch (id) {
         case COLUMN_DX:

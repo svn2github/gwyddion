@@ -557,17 +557,19 @@ gwy_tool_profile_data_switched(GwyTool *gwytool,
         && gwy_container_gis_object_by_name(plain_tool->container, yukey, &(tool->yunc))
         && gwy_container_gis_object_by_name(plain_tool->container, zukey, &(tool->zunc)))
     {
-        printf("Data have calibration\n");
         tool->has_calibration = TRUE;
         tool->line_xerr = gwy_data_line_new(gwy_data_field_get_xres(plain_tool->data_field), 
                                             gwy_data_field_get_xreal(plain_tool->data_field), 0);
         gtk_widget_show(tool->menu_display);
         gtk_widget_show(tool->callabel);
+        gtk_widget_show(tool->both);
+        gtk_widget_show(tool->export);
     } else {
-        printf("Data don't have calibration\n");
         tool->has_calibration = FALSE;
         gtk_widget_hide(tool->menu_display);
         gtk_widget_hide(tool->callabel);
+        gtk_widget_hide(tool->both);
+        gtk_widget_hide(tool->export);
 
     }
 
@@ -685,7 +687,7 @@ gwy_tool_profile_update_curve(GwyToolProfile *tool,
     GwyGraphCurveModel *gcmodel;
     gdouble line[4];
     gint xl1, yl1, xl2, yl2;
-    gint j, n, lineres, multpos;
+    gint n, lineres, multpos;
     gdouble calxratio, calyratio;
     gchar *desc;
     GwyRGBA *color;
@@ -815,7 +817,6 @@ gwy_tool_profile_update_curve(GwyToolProfile *tool,
             gwy_graph_model_set_units_from_data_line(tool->gmodel, tool->line);
 
         if (tool->has_calibration) {
-            printf("adding calibration curves\n");
             
             desc = g_strdup_printf(_("X error %d"), i/multpos+1);
             add_hidden_curve(tool, tool->line_xerr, desc, color, !(tool->display_type==1));
@@ -1002,7 +1003,7 @@ static void
 gwy_tool_profile_apply(GwyToolProfile *tool)
 {
     GwyPlainTool *plain_tool;
-    GwyGraphCurveModel *gcmodel, *ccmodel;
+    GwyGraphCurveModel *gcmodel;
     GwyCurveCalibrationData *ccdata;
     GwyGraphModel *gmodel;
     gchar *s;
@@ -1066,7 +1067,6 @@ gwy_tool_profile_apply(GwyToolProfile *tool)
    
 
         if (tool->args.export && tool->display_type>0) {
-            printf("Exporting calibration curve as graph as well\n");
             gmodel = gwy_graph_model_new_alike(tool->gmodel);
             g_object_set(gmodel, "label-visible", TRUE, NULL);
             gcmodel = gwy_graph_model_get_curve(tool->gmodel, i+tool->display_type);
@@ -1107,10 +1107,8 @@ display_changed(GtkComboBox *combo, GwyToolProfile *tool)
 {
     GwyPlainTool *plain_tool;
     GwyGraphCurveModel *gcmodel;
-    GwyGraphModel *gmodel;
-    gchar *s;
     gint i, n;
-    gint multpos = 9, shift;
+    gint multpos = 9;
 
     if (!tool->has_calibration) return;
 
@@ -1120,7 +1118,6 @@ display_changed(GtkComboBox *combo, GwyToolProfile *tool)
     g_return_if_fail(n);
 
     tool->display_type = gwy_enum_combo_box_get_active(GTK_COMBO_BOX(tool->menu_display));
-    printf("Display type changed %d\n", tool->display_type);
 
     
     /*change the visibility of all the affected curves*/

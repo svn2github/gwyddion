@@ -747,6 +747,8 @@ gwy_tool_stats_calculate(GwyToolStats *tool)
         tool->results.phi *= 180.0/G_PI;
     }
     if (tool->has_calibration) {
+    tool->results.uprojarea = gwy_data_field_area_get_projected_area_uncertainty(nn, tool->xunc, tool->yunc);
+
         gwy_data_field_area_get_stats_uncertainties_mask(plain_tool->data_field, tool->zunc, mask, masking,
                                            isel[0], isel[1], w, h,
                                            &tool->results.uavg,
@@ -769,6 +771,16 @@ gwy_tool_stats_calculate(GwyToolStats *tool)
                                                                tool->yunc,
                                                                mask,
                                                                isel[0], isel[1], w, h);
+        /*gwy_data_field_area_get_inclination_uncertainty(plain_tool->data_field,
+tool->zunc, tool->xunc, tool->yunc,
+                                            isel[0], isel[1], w, h,
+                                            &tool->results.utheta,
+                                            &tool->results.uphi);
+        tool->results.utheta *= 180.0/G_PI;
+        tool->results.uphi *= 180.0/G_PI;*/
+        //printf("inclination_uncertainty  %f %f \n",tool->results.utheta, tool->results.uphi);
+       tool->results.utheta = 0;
+       tool->results.uphi = 0;
     }
 
     memcpy(tool->results.isel, isel, sizeof(isel));
