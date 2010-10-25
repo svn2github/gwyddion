@@ -183,8 +183,8 @@ dist: po-update
 	mkdir $(LANGDISTDIR) $(LANGDISTDIR)/formulas $(LANGDISTDIR)/srcimages $(LANGDISTDIR)/xml
 	cp Makefile.in svg.po $(LANGDISTDIR)/
 	cp xml/*.xml $(LANGDISTDIR)/xml/
-	cp formulas/*.xml $(LANGDISTDIR)/formulas/
-	cp srcimages/*.svg srcimages/*.png $(LANGDISTDIR)/srcimages/
+	-cp formulas/*.xml $(LANGDISTDIR)/formulas/
+	-cp srcimages/*.svg srcimages/*.png $(LANGDISTDIR)/srcimages/
 
 dist-xhtml: xhtml $(PACKAGE).iss
 	rm -rf $(XHTMLDISTNAME)
