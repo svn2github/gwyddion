@@ -137,6 +137,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module gdeffile.c -->
+    <row>
+      <entry>DME GDEF</entry>
+      <entry>.gdf</entry>
+      <entry>gdeffile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    <row>
     <!-- From module gsffile.c -->
     <row>
       <entry>Gwyddion Simple Field</entry>
@@ -209,6 +218,15 @@
       <entry>Non</entry>
       <entry>Non</entry>
     </row>
+    <!-- From module lextfile.c -->
+    <row>
+      <entry>Olympus LEXT 4000</entry>
+      <entry>.lext</entry>
+      <entry>lextfile</entry>
+      <entry>Oui</entry>
+      <entry>Non</entry>
+      <entry>Non</entry>
+    </row>
     <!-- From module mapvue.c -->
     <row>
       <entry>MapVue</entry>
@@ -261,7 +279,7 @@
       <entry>nanoeducator</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>Oui</entry>
     </row>
     <!-- From module nanonics.c -->
     <row>
@@ -306,7 +324,7 @@
       <entry>nanoscope</entry>
       <entry>Oui</entry>
       <entry>Non</entry>
-      <entry>Non</entry>
+      <entry>Limited<footnoteref linkend="table-file-formats-fn1"/></entry>
     </row>
     <!-- From module nanotop.c -->
     <row>
@@ -337,7 +355,7 @@
     </row>
     <!-- From module ols.c -->
     <row>
-      <entry>Olympus LEX 3000</entry>
+      <entry>Olympus LEXT 3000</entry>
       <entry>.ols</entry>
       <entry>ols</entry>
       <entry>Oui</entry>
