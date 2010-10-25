@@ -157,5 +157,17 @@
       </mediaobject>
     </informalfigure>
   </sect2>
+  <sect2 id='graph-dos-spectrum'>
+    <title>Spectre DOS</title>
+    <indexterm><primary>Spectre DOS</primary></indexterm>
+    <para>
+        Le module de spectre DOS sert à obtenir des spectres de densités d'états
+        (Density-of-States) à partir de mesures de spectroscopie STM I-V 
+        (réponse courant-tension obtenue par microscopie à effet tunnel). Il 
+        calcule <xi:include href="eqi-graph-dos.xml"/> et l'affiche sous forme
+        de graphe.
+    </para>
+  </sect2>
+</sect1>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
