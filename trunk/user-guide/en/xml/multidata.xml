@@ -204,7 +204,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2 id='mutual crop'>
+  <sect2 id='mutual-crop'>
     <title>Mutual Crop</title>
     <indexterm><primary>mutual crop of two images</primary></indexterm>
     <indexterm><primary>remove non-intersecting areas</primary></indexterm>

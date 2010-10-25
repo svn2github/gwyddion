@@ -99,7 +99,7 @@
       </varlistentry>
     </variablelist>
   </sect2>
-  <sect2 id="mutual crop">
+  <sect2 id="mutual-crop">
     <title>Взаимное кадрирование</title>
     <indexterm><primary>взаимное кадрирование двух изображений</primary></indexterm>
     <indexterm><primary>удаление непересекающихся областей</primary></indexterm>
