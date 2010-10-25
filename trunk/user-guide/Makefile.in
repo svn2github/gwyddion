@@ -20,7 +20,6 @@ DISTFILES = \
 	docbook-xsl-version.xsl \
 	Makefile.in \
 	README \
-	TODO \
 	version-greater-or-equal.xsl
 
 COMMONDISTFILES =  \
