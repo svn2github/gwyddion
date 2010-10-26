@@ -1,0 +1,124 @@
+
+=== Developers ===
+David Nečas (Yeti) <yeti@gwyddion.net>
+    Infrastructure, main app, module and plug-in system, data windows,
+    file import, utilities, packaging, artwork, developer docs, web site,
+    translation coordination.
+Petr Klapetek <klapetek@gwyddion.net>
+    SPM expertise, 1D and 2D data processing, graphs, most of nontrivial
+    tools and data filters, user guide.
+Christopher Anderson <sidewinder.asu@gmail.com>
+    2D FFT filtering, MI file import, GwyCurve, Gradient editor, user
+    interface improvements, docs, miscellaneous.
+Martin Šiler <silerm@physics.muni.cz>
+    OpenGL 3D data display, Levenberg-Marquardt minimization.
+Jindřich Bílek <bilek@physics.muni.cz>
+    Fractal algorithms.
+Nenad Ocelic <ocelic@biochem.mpg.de>
+    Ruby dump module and plug-ins, Distance tool.
+Rok Zitko <rok.zitko@ijs.si>
+    Createc and stmprg import modules, Kuwahara filter.
+Lukáš Chvátal <chvatal@physics.muni.cz>
+    Nanoindentation modules (the original ones, no longer present).
+Sven Neumann <neumann@jpk.com>
+    JPK file import, miscellaneous improvements.
+Jan Hořák <xhorak@gmail.com>
+    Python interface, Win32 remote control, SPML and other file import modules.
+Александр Ковалев <av_kov@tut.by>
+    Nanotop import module.
+Owain Davies <owain.davies@blueyonder.co.uk>
+    Single point spectra, Win32 maintenance.
+Rolf Würdemann <rowue@digitalis.org>
+    OS X porting, Shader mixer.
+Dirk Kähler <dirk.kaehler@isit.fraunhofer.de>
+    Scale improvements.
+Miroslav Valtr <miraval@seznam.cz>
+    Win32 builds, miscellaneous.
+Martin Hasoň <hasonm@physics.muni.cz>
+    ISO roughness tool.
+Philipp Rahe <hquerquadrat@gmail.com>
+    Omicron MATRIX file import.
+Matthew Caldwell <m.caldwell@ucl.ac.uk>
+    IonScope SICM file import.
+Андрей Груздев <gruzdev@ntmdt.ru>
+    Mac OS X integration.
+Даниил Браташов <dn2010@gmail.com>
+    NT-MDT improvements namely MDA frame import, Mutual crop, DOS modules.
+François Bianco <francois.bianco@unige.ch>
+    Omicron flat file format import.
+Luke Somers <lsomers@sas.upenn.edu>
+    Median difference line correction.
+Vojtěch Salajka <xsalaj02@stud.fit.vutbr.cz>
+    Numbered ticks and other color axis improvements.
+
+
+=== Translators ===
+David Nečas (Yeti) <yeti@gwyddion.net>
+Petr Klapetek <klapetek@gwyddion.net>
+    Czech.
+Livia Della Seta <livia.dellaseta@casaccia.enea.it>
+    Italian.
+Philipp Leufke <philipp.leufke@uni-konstanz.de>
+    German.
+François Riguet <francheu@caramail.com>
+    French.
+Даниил Браташов <dn2010@gmail.com>
+    Russian.
+
+
+=== Copies ===
+Gtk+ and GLib by Peter Mattis, Spencer Kimball, Josh MacDonald, and the GTK+
+and GLib Teams, see the AUTHORS file in Gtk+ and GLib for a complete list.
+    GwyColorButton was originally taken (backported) from Gtk+2.4
+    GtkColorButton.
+    GwyRuler, GwyHRuler, GwyVRuler originated as GtkRuler, GtkHRuler, and
+    GtkVRuler forks.
+    GtkStatusbar resize grip implementation was used as Gwy3DWindow resize
+    grip code base.
+    GwyCurve code was based on GtkCurve from Gtk+2.4.
+
+The GIMP by Spencer Kimball and Peter Mattis and other people, see the
+AUTHORS file in The GIMP for complete list.
+    The splashscreen code was mostly copied from The GIMP.
+    The X11 remote control code too.
+    MD5 code in gwymd5 was copied from The GIMP, which seems to use a public
+    domain implementation by Colin Plumb.  See gwymd5.c for details.
+
+John Villarrubia, National Institute of Standards and Technology
+    Tip algorithms in libprocess/morhp_lib.c, see this file for more.
+
+The Wine project
+    VT_DATE to normal unix date conversion in APE file module was copied
+    from Wine (with minor formal modifications).
+
+The GNU C library
+    gwy_math_sort() is a direct specialization of glibc's quicksort(), written
+    by Douglas C. Schmidt, for doubles, see libgwyddion/gwymath.c for more.
+
+Percy Zahl, Andreas Klust, and other GXSM authors, see file AUTHORS in GXSM
+source tarball.
+    RHK SPM32 plug-in helped us in writing our rhk-spm32 import module,
+    although we wrote it from scratch.
+
+Mindaugas Rackaitis, Penn State University
+    ReadSTP Matlab method helped us in writing our stpfile import module,
+    although we wrote it from scratch.
+
+Markus Pristovsek
+    Several file import modules were written or improved using the source
+    code of Snomputz, particularly:
+    HDF4/PSI, ECS, Hitachi AFM, Omicron, Nanoscope, Seiko.
+    See the respective modules for more information.
+
+Hans-Peter Doerr
+    The Burleigh file module was written using the source code of the readimg
+    library.
+
+The Board of Trustees of the University of Illinois
+    The list of HDF tags in the hdf4file module was taken from libHDF4 header
+    files (the rest is a clean-room implementation).
+
+Gtk+ Mac OS X project
+    OS X menubar integration app/ige-mac-menu.[ch] was copied from this
+    project, see the files for mode.
+

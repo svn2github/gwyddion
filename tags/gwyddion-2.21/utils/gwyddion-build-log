@@ -1,0 +1,160 @@
+#!/bin/bash
+# @(#) $Id$
+pkgname=gwyddion
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+tmplog=tmplog
+
+source $HOME/.bashrc
+cd $logdir
+
+cat >autostuff.ignore <<':'
+^/usr/share/aclocal/.*.m4:[0-9]*: warning: underquoted definition of 
+^  run info '(automake)Extending aclocal'
+^  or see http://sources\.redhat\.com/automake/automake.html#Extending%20aclocal
+^  or see http://sources\.redhat\.com/automake/automake.html#Extending-aclocal
+^configure.ac[:0-9]* installing `\./missing'
+^configure.ac[:0-9]* installing `\./install-sh'
+^configure.ac[:0-9]* installing `\./config.guess'
+^configure.ac[:0-9]* installing `\./config.sub'
+^app/Makefile.am[:0-9]* installing `\./depcomp'
+^python/Makefile.am[:0-9]* installing `\./py-compile'
+':'
+:
+
+cat >build_project_nopygwy.ignore <<':'
+^mkdir: cannot create directory `\.libs': File exists
+^TRANSLATION [a-z]
+^[0-9]\+ translated messages
+\.\.\. done
+^/usr/bin/glib-mkenums: ./.*.h:[0-9]*: lowercase_name is deprecated, use underscore_name
+':'
+:
+
+cat >build_documentation.ignore <<':'
+^Writing .* for [^ ]\+(.*)
+^lib.*-scan\.c: In function
+^lib.*-scan\.c:[0-9]*: warning: unused parameter
+^lib.*-scan\.c:[0-9]*: warning: .* shadows a previous local
+^lib.*-scan\.c:[0-9]*: warning: shadowed declaration is here
+^Computing chunks\.\.\.
+^  These can be found in [a-z]\+-unused\.txt\.
+^  They should be added to [a-z]\+-sections\.txt in the appropriate place\.
+^ID recommended on sect2:
+':'
+:
+
+cat >make_dists.ignore <<':'
+^+
+^cp: cannot stat `\./html/\*\.css': No such file or directory
+^cpio: .*/<built-in>: No such file or directory
+^make\[3\]: \[dist-hook\] Error 1 (ignored)
+^libtool: install: warning: relinking `.*.la'
+^libtool: install: warning: `.*\.la' has not been installed in `/usr/lib
+^libtool: install: warning: remember to run `libtool --finish /usr/lib
+^/usr/bin/ld: skipping incompatible /usr/lib/lib.* when searching for -l.*
+\.\{6,\}
+^[0-9]\+ blocks
+^[0-9]\+ translated message
+':'
+:
+
+cat >install_to_tmp.ignore <<':'
+^libtool: install: warning: relinking `.*.la'
+^libtool: install: warning: remember to run `libtool --finish /usr/lib
+':'
+:
+
+function printerr() {
+  f=$1
+  shift
+
+  test -s $f.err || return
+  cat --squeeze-blank $f.err \
+  | {
+    if test -s $f.ignore; then
+      grep -v -f $f.ignore
+    else
+      cat
+    fi
+  } | {
+    if test -n "$1"; then
+      $@
+    else
+      cat
+    fi
+  } >$tmplog
+  test -s $tmplog || return
+  echo "=====[ $f ]====="
+  cat $tmplog
+}
+
+function exclude_pygwy_from_project() {
+  # Exclude the block of lines that match pygwy build from build_project
+  difffmt='--old-line-format=%L --new-line-format= --unchanged-line-format='
+  diff $difffmt build_project.err build_pygwy.err >build_project_nopygwy.err
+  diff $difffmt build_project.log build_pygwy.log >build_project_nopygwy.log
+}
+
+function extract_build_documentation() {
+  logfile=build_documentation.log
+  h=
+  if test -s $tmplog; then
+      h=1
+  fi
+  python -c \
+"import re, sys
+x = re.findall(r'(?m)^(?:WARNING|ERROR)\\b.*(?:\\n\s+.*)*', sys.stdin.read())
+if x: print '\\n'.join(x)" \
+    <$logfile | grep -v -f build_documentation.ignore >$tmplog
+  if test -s $tmplog -a -z "$h"; then
+    echo "=====[ build_documentation ]====="
+  fi
+  cat $tmplog
+}
+
+function extract_documentation_stats() {
+   logfile=documentation_stats.log
+   htmlfile=documentation_stats.html
+   $projectdir/utils/documentation-stats.py <$logfile >$htmlfile
+}
+
+function extract_translation_stats() {
+   logfile=build_project.err
+   htmlfile=translation_stats.html
+   $projectdir/utils/translation-stats.py <$logfile >$htmlfile
+}
+
+function coding_style_report() {
+  n=20
+  base=coding-style-byfile
+  cut -d: -f1 coding-style.log  | uniq -c | sort -nr >$base.log
+  head -n $n $base.log >$base-top$n.log
+  printf '% 7d total' $(wc -l <coding-style.log) >>$base-top$n.log
+
+  base=coding-style-bytype
+  cut -d: -f3- coding-style.log \
+    | sed -e 's/: .*//' -e 's/ (col [0-9]*)//' | sort | uniq -c | sort -nr \
+    >$base.log
+  head -n $n $base.log >$base-top$n.log
+  printf '% 7d  total' $(wc -l <coding-style.log) >>$base-top$n.log
+}
+
+printerr update_version
+printerr autostuff
+exclude_pygwy_from_project
+printerr build_project_nopygwy
+printerr build_pygwy >pygwy.log
+extract_translation_stats
+printerr build_documentation
+extract_build_documentation
+extract_documentation_stats
+coding_style_report
+printerr install_to_tmp grep -vFf build_project.err
+printerr check_headers
+printerr check_symbols
+printerr check_desktop
+printerr check_coding_style
+printerr make_dists grep -vFf build_project.err
+
+rm *.ignore $tmplog
