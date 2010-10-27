@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: raw-file-import.xml 10418 2009-11-13 14:53:56Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='raw-file-import' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Import de Données Brutes</title>
+  <para>
+    Les fichiers de donnée brutes ASCII ou binaire dont le format n'est pas
+    supporté peuvent être importés avec le module pour données brutes – avec un
+    peu d'effort tout de même.
+    L'import de données brutes peut être invoqué explicitement en sélectionnant
+    le type <guilabel>Données ASCII ou binaires</guilabel> dans la fenêtre
+    d'ouverture de fichier.
+    Cette fenêtre peut aussi apparaître automatiquement lorsque vous essayez
+    d'ouvrir un fichier dont le format est inconnu. Ceci peut être contrôlé avec
+    l'option <guilabel>Proposer automatiquement l'import des fichiers ASCII ou
+    binaires pour les fichiers de type inconnu</guilabel>.
+  </para>
+  <sect2 id='raw-file-import-information'>
+    <title>Information</title>
+    <para>
+      Le premier onglet, <guilabel>Information</guilabel>, permet de régler les
+      informations de base du fichier :
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Taille horizontale</guilabel></term>
+          <term><guilabel>Taille verticale</guilabel></term>
+          <listitem>
+            <para>
+              Résolutions horizontale et verticale des données (nombre
+              d'échantillons).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Echantillon carré</guilabel></term>
+          <listitem>
+            <para>
+              Fixe les résolutions horizontale et verticale à la même valeur.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Largeur</guilabel></term>
+          <term><guilabel>Hauteur</guilabel></term>
+          <listitem>
+            <para>
+              Dimensions physiques des données.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Mesures identiques</guilabel></term>
+          <listitem>
+            <para>
+              Conserve le rapport entre les dimensions physiques et le nombre de
+              pixels égal pour les directions horizontales et verticales,
+              c'est-à-dire que les données sont constituées de pixels carrés.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Echelle Z (par unité d'échantillon)</guilabel></term>
+          <listitem>
+            <para>
+              Facteur de multiplication appliqué sur les données brutes pour
+              obtenir les valeurs physiques.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+  <sect2 id='raw-file-import-data-format'>
+    <title>Format de données</title>
+    <para>
+      Dans le second onglet, <guilabel>Format de données</guilabel>, des formats
+      particuliers de données peuvent être choisis. Il existe deux possibilités
+      indépendantes : <guilabel>Données texte</guilabel> et 
+      <guilabel>Données binaires</guilabel>.
+    </para>
+    <para>
+      Les fichiers texte sont supposés être organisés sous forme de lignes,
+      chacune contenant une ligne de données, celles-ci étant représentées par
+      des entiers ou des nombres à virgule flottante sous une notation standard.
+      Les options suivantes sont disponibles :
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Débuter à la ligne</guilabel></term>
+          <listitem>
+            <para>
+              La ligne à partir de laquelles commencent les données, 
+              c'est-à-dire le nombre de ligne à ignorer à partir du début du 
+              fichier. Tous les types de marqueurs de fin de ligne sont reconnus
+              (Unix, MS-DOS, Macintosh).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Sauter à chaque ligne</guilabel></term>
+          <listitem>
+            <para>
+              Le nombre de champs à ignorer au début de chaque ligne.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Délimiteur de champ</guilabel></term>
+          <term><guilabel>Autre délimiteur</guilabel></term>
+          <listitem>
+            <para>
+              Si le délimiteur est 
+              <guimenuitem>N'importe quel espace</guimenuitem>, tout nombre non
+              nul de caractères espace est considéré comme un délimiteur de 
+              champ. Si un caractère espace est sélectionné, le délimiteur doit
+              être ce caractère. Dans le cas contraire les champs sont séparés
+              par un caractère spécifié ou un mot et tout espace entourant 
+              le délimiteur est ignoré.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Le séparateur de décimale est la virgule</guilabel></term>
+          <listitem>
+            <para>
+              Par défaut, les nombres en virgule flottante sont supposés 
+              utiliser un point pour symboliser la décimale. Cette option change
+              ce symbole par la virgule.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+    <para>
+      Les options suivantes sont disponibles pour les fichiers binaires :
+      <variablelist>
+        <varlistentry>
+          <term><guilabel>Données binaires</guilabel></term>
+          <listitem>
+            <para>
+              Vous pouvez sélectionner un des formats de données standards ou
+              choisir <guimenuitem>Défini par l'utilisateur</guimenuitem> pour
+              spécifier un format ayant un nombre impair de bits par échantillon
+              ou toute autre particularité.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Ordre des octets (byte swap)</guilabel></term>
+          <listitem>
+            <para>
+              Ordre dans lequel sont placés les octets d'un échantillon. Cette
+              option n'est accessible que pour les formats prédéfinis ayant plus
+              d'un octet. Le nombre de bits correspond aux groupes d'octets à
+              inverser : si le <xi:include href="eqi-j.xml"/>-ème bit est
+              défini, les groupes adjacents de 
+              <xi:include href="eqi-2-to-j.xml"/> bits sont inversés.
+            </para>
+            <para>
+              Une valeur de 3 par exemple signifie que l'échantillon sera divisé
+              en paires (bit 1) d'octets et les paires adjacentes d'octets sont
+              inversées, puis en octets individuels (bit 0) et les octets
+              adjacents seront inversés. Le bilan de ces opérations est une 
+              inversion des l'ordre des octets par groupe de quatre octets. De
+              manière générale, si vous souhaitez inverser l'ordre des octets  
+              par groupes de taille <xi:include href="eqi-2-to-j.xml"/>,
+              ce qui correspond au cas le plus courant, utilisez un ordre de
+              <xi:include href="eqi-j-minus-1.xml"/>.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Démarrer avec le décalage</guilabel></term>
+          <listitem>
+            <para>
+              Décalage, en octets, dans le fichier à partir duquel commencent
+              les données.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Taille d'échantillon</guilabel></term>
+          <listitem>
+            <para>
+              Taille en bits d'un échantillon pour les formats définis par 
+              l'utilisateur. Mettez par exemple 4 ici si vous avez un fichier 
+              n'ayant que 4 bits par échantillon. En ce qui concerne les formats
+              prédéfinis, leur taille y est affichée, mais elle n'est pas 
+              modifiable.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Sauter après chaque échantillon</guilabel></term>
+          <listitem>
+            <para>
+              Nombre de bits à sauter après chaque échantillon.
+            </para>
+            <para>
+              En général les échantillons se suivent dans un fichier. Mais
+              parfois il existe certains bits ou octets inutiles entre chaque.
+              Cette option permet de spécifier cette possibilité. Notez que pour
+              les formats prédéfinis cette valeur doit être un multiple de 8 
+              (i.e. seuls des octets complets peuvent être sautés).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Sauter après chaque ligne</guilabel></term>
+          <listitem>
+            <para>
+              Nombre de bits à sauter après chaque ligne en plus des bits à
+              sauter après chaque échantillon.
+            </para>
+            <para>
+              En général les lignes se suivent dans un fichier. Mais
+              parfois il existe certains bits ou octets inutiles entre chacune.
+              Cette option permet de spécifier cette possibilité. Notez que pour
+              les formats prédéfinis cette valeur doit être un multiple de 8 
+              (i.e. seuls des octets complets peuvent être sautés).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Reverse bits in bytes</guilabel></term>
+          <listitem>
+            <para>
+              Whether the order of bits in each byte should be reversed.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Inverser les bits dans les octets</guilabel></term>
+          <listitem>
+            <para>
+              Spécifie si l'ordre des bits dans chaque échantillon doit être 
+              inversé (pour les formats définis par l'utilisateur).
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><guilabel>Les échantillons sont signés</guilabel></term>
+          <listitem>
+            <para>
+              Cette option permet d'interpréter les échantillons comme étant des
+              nombres signés (par opposition aux nombres non signés). Ce 
+              paramètre est affiché pour les formats prédéfinis, mais il n'est
+              pas modifiable.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+  </sect2>
+  <sect2 id='raw-file-import-presets'>
+    <title>Préréglages</title>
+    <para>
+      Les réglages d'import peuvent être enregistrés pour faciliter l'import du
+      même fichier – ou le même type de fichier – ultérieurement.
+    </para>
+    <para>
+      Le bouton <guibutton>Enregistrer</guibutton> sauve les réglages d'import
+      courants sous le nom spécifié dans le champ 
+      <guilabel>Nom du préréglage</guilabel>. Le bouton 
+      <guibutton>Renommer</guibutton> change le nom du réglage sélectionné par
+      le nom spécifié, le bouton <guibutton>Supprimer</guibutton> efface le
+      réglage sélectionné, et le bouton <guibutton>Charger</guibutton> 
+      remplace les réglages d'import courants par ceux du préréglage 
+      sélectionné.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
