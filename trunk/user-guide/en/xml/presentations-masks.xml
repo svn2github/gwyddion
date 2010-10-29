@@ -44,7 +44,7 @@
     <para>
       Since grain marking is the most common use of masks, several functions
       that operate on marked areas are called <quote>grain</quote> functions,
-      e.g.  Grain Statistics.  Also, a contignuous part of mask is sometimes
+      e.g.  Grain Statistics.  Also, a contiguous part of mask is sometimes
       called grain in this guide.  However, since a mask does not bear any
       information how it was created all mask functions can be used with masks of
       any origin.
@@ -326,6 +326,17 @@
             The reduction may or may not occur from the data field borders.
             This is controlled by the <guilabel>Shrink from border</guilabel>
             check box.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guibutton>Fill Voids</guibutton>
+        </term>
+        <listitem>
+          <para>
+            Makes the grains simply compact, i.e. without any holes, by filling
+            the holes in grains.
           </para>
         </listitem>
       </varlistentry>
