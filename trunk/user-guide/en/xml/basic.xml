@@ -98,6 +98,16 @@
         The values are inverted about the mean value which keeps the mean
         value unchanged.
       </listitem>
+      <listitem id='limit-range'>
+        Limit the data range by cutting values outside a specified range by
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Threshold</guimenuitem>
+        </menuchoice>.
+        The range can be set numerically or taken from the false colour map range
+        as set using the <link linkend='color-range'>Color range tool</link>.
+      </listitem>
       <listitem id='square-samples'>
         <indexterm>
           <primary>aspect ratio</primary>
