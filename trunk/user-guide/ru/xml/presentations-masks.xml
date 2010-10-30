@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: presentations-masks.xml 9429 2009-07-14 21:11:45Z yeti-dn $ -->
+<!-- @(#) $Id: presentations-masks.xml 11479 2010-10-29 17:49:19Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="presentations-masks">
   <title>Презентации и маски</title>
@@ -128,6 +128,14 @@
         <listitem>
           <para>Уменьшает маску на <guilabel>Количество</guilabel> пикселей с каждой стороны. Точнее, маска уменьшается на один пиксель с каждой стороны и это повторяется <guilabel>Количество</guilabel> раз.</para>
           <para>Уменьшение может происходить. а может не происходить со стороны границ поля данных. Это управляется с помощью флажка <guilabel>Ужать от границы</guilabel>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guibutton>Заполнить пустоты</guibutton>
+        </term>
+        <listitem>
+          <para>Делает зерна сплошными, без пустот, заполняя пустоты в зёрнах.</para>
         </listitem>
       </varlistentry>
     </variablelist>
