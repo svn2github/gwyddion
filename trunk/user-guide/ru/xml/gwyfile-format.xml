@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyfile-format.xml 11263 2010-03-30 13:03:25Z yeti-dn $ -->
+<!-- @(#) $Id: gwyfile-format.xml 11480 2010-10-29 17:50:37Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="gwyfile-format">
   <title>Формат файлов Gwyddion</title>
-  <para>Родные для <application>Gwyddion</application> файлы данных состоят из древоподобной структуры сериализованных объектов. В общем, эти объекты могут быть различного вида и включать в себя другие объекты (следовательно. структура древоподобная). В понимании работы может сильно помочь <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>, простой демонстратор структуры файла. доступный на сайте проекта, если с ним поработать какое-то время и посмотреть содержимое различных файлов.</para>
+  <para>Родные для <application>Gwyddion</application> файлы данных состоят из древоподобной структуры сериализованных объектов. В общем случае эти объекты могут быть различного вида и включать в себя другие объекты (вследствие древовидной структуры). В понимании работы может сильно помочь <ulink url="http://gwyddion.net/gwydump.php"><command>gwydump</command></ulink>, простой демонстратор структуры файла, который доступен на сайте проекта, если с ним поработать какое-то время и посмотреть содержимое различных файлов.</para>
   <para>Прежде всего, мы описываем физическую структуру файла безотносительно возможной интерпретации содержимого.</para>
   <sect2 id="gwyfile-byte-order">
     <title>Порядок байтов</title>
@@ -136,9 +136,572 @@
       </informaltable>
     </para>
   </sect2>
-  <sect2 id="gwyfile-data-objects">
-    <title>Отдельные объекты</title>
-    <para>Ещё не написано</para>
+  <sect2 id="gwyfile-top-level-container">
+    <title><type>GwyContainer</type> верхнего уровня</title>
+    <para>Имена (ключи) объектов в <type>GwyContainer</type>, представленные в файле Gwyddion сильно напоминают имена файлов в UNIX, т.е. они записываются в виде разделённых <literal>/</literal> путей и образуют древовидную структуру. Например, название первого канала, под номером 0, сохраняется под ключом <literal>/0/data/title</literal>. Следует отметить, что некоторые данные и дополнительная информация сохраняются под ключами с нелогичными названиями, обычно это происходит по историческим причинам.</para>
+    <para>Следующие разделы описывают организацию интересующик нас данных и информации в <type>GwyContainer</type>. Этот список не обязательно будет полным. Однако, поскольку все элементы данных в файле единообразно указывают свои имена, тип и размер в байтах всегда можно пропустить неизвестные типы данных или те типы данных, что не нужны, и извлекать только требуемые.</para>
+  </sect2>
+  <sect2 id="gwyfile-channels">
+    <title>Каналы</title>
+    <para>Следующая таблица содержит общие ключи данных, относящихся к каналам в контейнере верхнего уровня для канала номер 0. Для других каналов число 0 должно быть заменено на соответствующий номер канала. Следует отметить, что каналы нередко нумеруются последовательно начиная с 0, однако, они могут иметь любые номера и множество номеров каналов не обязательно должно быть последовательно и непрерывно.</para>
+    <para>
+      <informaltable id="table-gwyfile-channel-keys">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Ключ</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/0/data</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyDataField"><type>GwyDataField</type></link></entry>
+              <entry>Данные канала.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/title</literal></entry>
+              <entry>строка</entry>
+              <entry>Имя канала, как оно показывается в просмотре данных</entry>
+            </row>
+            <row>
+              <entry><literal>/0/data/visible</literal></entry>
+              <entry>булев</entry>
+              <entry>Должен ли канал показываться в окне при открытии файла данных</entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/palette</literal></entry>
+              <entry>строка</entry>
+              <entry>Имя градиента псевдоцвета используемого при отображении канала.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/range-type</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Тип отображения псевдоцвета (как задано <link linkend="color-range">инструментом <quote>диапазон псевдоцвета</quote></link>), значение из множества <type>GwyLayerBasicRangeType</type>.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/min</literal></entry>
+              <entry>double</entry>
+              <entry>Минимальное значение для заданного пользователем отображаемого диапазона.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/base/max</literal></entry>
+              <entry>double</entry>
+              <entry>Максимальное значение для заданного пользователем отображаемого диапазона.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyDataField"><type>GwyDataField</type></link></entry>
+              <entry>Данные маски. Размеры в пикселях этого поля данных должны соответствовать данным канала.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/red</literal></entry>
+              <entry>double</entry>
+              <entry>Красный компонент цвета маски.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/green</literal></entry>
+              <entry>double</entry>
+              <entry>Зелёный компонент цвета маски.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/blue</literal></entry>
+              <entry>double</entry>
+              <entry>Синий компонент цвета маски.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/mask/alpha</literal></entry>
+              <entry>double</entry>
+              <entry>Компонент Alpha (прозрачность) цвета маски.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/show</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyDataField"><type>GwyDataField</type></link></entry>
+              <entry>Данные презентации. Размеры в пикселях этого поля данных должны соответствовать данным канала.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/meta</literal></entry>
+              <entry><type>GwyContainer</type></entry>
+              <entry>Метаданные канала. Ключи это имена, которые будут отображаться в окне просмотра метаданных, строковые значения – значения данных.</entry>
+            </row>
+            <row>
+              <entry><literal>/0/select/<replaceable>foo</replaceable></literal></entry>
+              <entry>подкласс <type>GwySelection</type></entry>
+              <entry>Данные выделения. Каждый тип выделения имеет (обычно) отдельный тип объекта и сохраняется под отдельным именем; конкретное имя <replaceable>foo</replaceable> будет тем же, что показано в <link linkend="selection-manager">менеджер выделенного</link>.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Каналы представлены как объекты <type>GwyDataField</type>. Компоненты <type>GwyDataField</type> представлены в следующей таблице:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwyDataField">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xres</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Горизонтальный размер в пикселях.</entry>
+            </row>
+            <row>
+              <entry><literal>yres</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Вертикальный размер в пикселях.</entry>
+            </row>
+            <row>
+              <entry><literal>xreal</literal></entry>
+              <entry>double</entry>
+              <entry>Горизонтальный размер в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>yreal</literal></entry>
+              <entry>double</entry>
+              <entry>Вертикальный размер в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>xoff</literal></entry>
+              <entry>double</entry>
+              <entry>Горизонтальное смещение верхнего левого угла в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>yoff</literal></entry>
+              <entry>double</entry>
+              <entry>Вертикальное смещение верхнего левого угла в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_xy</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения горизонтальных размеров.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_z</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения значений данных.</entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>массив double</entry>
+              <entry>Данные поля, сохранённые как плоский массив размера <varname>xres</varname>×<varname>yres</varname>, сверху вниз и слева направо.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id="gwyfile-graphs">
+    <title>Графики</title>
+    <para>Следующая таблица содержит общие ключи данных, относящихся к графикам в контейнере верхнего уровня для графика номер 1. Для других графиков число 1 должно быть заменено на соответствующий номер графика. Следует отметить, что графики нередко нумеруются последовательно начиная с единицы, но они могут иметь любые положительные номера, не обязательно последовательные. Число 0 в префиксе номеров графика является историческим артефактом, ничего сейчас не значит и всегда должно быть 0.</para>
+    <para>
+      <informaltable id="table-gwyfile-graph-keys">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Ключ</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/0/graph/graph/1</literal></entry>
+              <entry><link linkend="table-gwyfile-GwyGraphModel"><type>GwyGraphModel</type></link></entry>
+              <entry>Данные объекта Graph model</entry>
+            </row>
+            <row>
+              <entry><literal>/0/graph/graph/1/visible</literal></entry>
+              <entry>булев</entry>
+              <entry>Должен ли график отображаться при открытии файла.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Графики представлены как объекты <type>GwyGraphModel</type>. Компоненты <type>GwyGraphModel</type> сведены в следующую таблицу:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwyGraphModel">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>curves</literal></entry>
+              <entry>массив <link linkend="table-gwyfile-GwyGraphCurveModel"><type>GwyGraphCurveModel</type></link></entry>
+              <entry>Отдельные кривые графиков.</entry>
+            </row>
+            <row>
+              <entry><literal>title</literal></entry>
+              <entry>строка</entry>
+              <entry>Название графика как оно отображается в окне просмотра данных.</entry>
+            </row>
+            <row>
+              <entry><literal>x_unit</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единицы абсциссы.</entry>
+            </row>
+            <row>
+              <entry><literal>y_unit</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единицы ординаты.</entry>
+            </row>
+            <row>
+              <entry><literal>top_label</literal></entry>
+              <entry>строка</entry>
+              <entry>Подпись верхней оси.</entry>
+            </row>
+            <row>
+              <entry><literal>bottom_label</literal></entry>
+              <entry>строка</entry>
+              <entry>Подпись нижней оси.</entry>
+            </row>
+            <row>
+              <entry><literal>left_label</literal></entry>
+              <entry>строка</entry>
+              <entry>Подпись левой оси.</entry>
+            </row>
+            <row>
+              <entry><literal>right_label</literal></entry>
+              <entry>строка</entry>
+              <entry>Подпись правой оси.</entry>
+            </row>
+            <row>
+              <entry><literal>x_is_logarithmic</literal></entry>
+              <entry>булев</entry>
+              <entry>Логарифмический масштаб абсциссы.</entry>
+            </row>
+            <row>
+              <entry><literal>y_is_logarithmic</literal></entry>
+              <entry>булев</entry>
+              <entry>Логарифмический масштаб ординаты.</entry>
+            </row>
+            <row>
+              <entry><literal>x_min</literal></entry>
+              <entry>double</entry>
+              <entry>Заданное пользователем минимальное значение абсциссы.</entry>
+            </row>
+            <row>
+              <entry><literal>x_min_set</literal></entry>
+              <entry>булев</entry>
+              <entry>Нужно ли использовать заданное пользователем минимальное значение абсциссы (или диапазон определяется автоматически).</entry>
+            </row>
+            <row>
+              <entry><literal>x_max</literal></entry>
+              <entry>double</entry>
+              <entry>Заданное пользователем максимальное значение абсциссы.</entry>
+            </row>
+            <row>
+              <entry><literal>x_max_set</literal></entry>
+              <entry>булев</entry>
+              <entry>Нужно ли использовать заданное пользователем максимальное значение абсциссы (или диапазон определяется автоматически).</entry>
+            </row>
+            <row>
+              <entry><literal>y_min</literal></entry>
+              <entry>double</entry>
+              <entry>Заданное пользователем минимальное значение ординаты.</entry>
+            </row>
+            <row>
+              <entry><literal>y_min_set</literal></entry>
+              <entry>булев</entry>
+              <entry>Нужно ли использовать заданное пользователем минимальное значение ординаты (или диапазон определяется автоматически).</entry>
+            </row>
+            <row>
+              <entry><literal>y_max</literal></entry>
+              <entry>double</entry>
+              <entry>Заданное пользователем максимальное значение ординаты.</entry>
+            </row>
+            <row>
+              <entry><literal>y_max_set</literal></entry>
+              <entry>булев</entry>
+              <entry>Нужно ли использовать заданное пользователем максимальное значение ординаты (или диапазон определяется автоматически).</entry>
+            </row>
+            <row>
+              <entry><literal>grid-type</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Тип отображаемой сетки. Значение из множества <type>GwyGraphGridType</type>.</entry>
+            </row>
+            <row>
+              <entry><literal>label.has_frame</literal></entry>
+              <entry>булев</entry>
+              <entry>Отображать рамку вокруг легенды.</entry>
+            </row>
+            <row>
+              <entry><literal>label.frame_thickness</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Толщина рамки легенды.</entry>
+            </row>
+            <row>
+              <entry><literal>label.reverse</literal></entry>
+              <entry>булев</entry>
+              <entry>Отображать легенду в обратном порядке.</entry>
+            </row>
+            <row>
+              <entry><literal>label.visible</literal></entry>
+              <entry>булев</entry>
+              <entry>нужно ли отображать легенду.</entry>
+            </row>
+            <row>
+              <entry><literal>label.position</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Расположение (угол) в котором будет помещена легенда. Значение из множества <type>GwyGraphLabelPosition</type>.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Кривые графиков представлены как объекты <type>GwyGraphCurveModel</type>. Компоненты <type>GwyGraphCurveModel</type> сведены в следующую таблицу:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwyGraphCurveModel">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>xdata</literal></entry>
+              <entry>массив double</entry>
+              <entry>Точки абсциссы. Число точек должно соответствовать <literal>ydata</literal>.</entry>
+            </row>
+            <row>
+              <entry><literal>ydata</literal></entry>
+              <entry>массив double</entry>
+              <entry>Точки ординаты. Число точек должно соответствовать <literal>xdata</literal>.</entry>
+            </row>
+            <row>
+              <entry><literal>description</literal></entry>
+              <entry>строка</entry>
+              <entry>Описание кривой (имя).</entry>
+            </row>
+            <row>
+              <entry><literal>тип</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Режим отображения кривой (точки, линии и т.п.) Значение из множества <type>GwyGraphCurveType</type>.</entry>
+            </row>
+            <row>
+              <entry><literal>color.red</literal></entry>
+              <entry>double</entry>
+              <entry>Красный компонент цвета кривой.</entry>
+            </row>
+            <row>
+              <entry><literal>color.green</literal></entry>
+              <entry>double</entry>
+              <entry>Зелёный компонент цвета кривой.</entry>
+            </row>
+            <row>
+              <entry><literal>color.blue</literal></entry>
+              <entry>double</entry>
+              <entry>Синий компонент цвета кривой.</entry>
+            </row>
+            <row>
+              <entry><literal>point_type</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Тип символов, представляющих точки данных. Значение из множества <type>GwyGraphPointType</type>.</entry>
+            </row>
+            <row>
+              <entry><literal>point_size</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Размер символов, представляющих точки данных.</entry>
+            </row>
+            <row>
+              <entry><literal>line_type</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Тип линий, соединяющих точки данных. Значение из множества <type>GwyGraphLineType</type>.</entry>
+            </row>
+            <row>
+              <entry><literal>line_size</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Толщина линии, соединяющей точки данных.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id="gwyfile-spectra">
+    <title>Спектры</title>
+    <para>Следующая таблица содержит общие ключи данных, относящихся к спектроскопии в контейнере верхнего уровня для набора спектров номер 0. Для других спектров число 0 надо заменить соответствующим номером набора спектров. Следует отметить. что наборы спектров нередко нумеруются последовательно начиная с 0, хотя они могут иметь любые номера, которые не обязательно должны идти последовательно.</para>
+    <para>
+      <informaltable id="table-gwyfile-spectra-keys">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Ключ</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>/sps/0</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySpectra"><type>GwySpectra</type></link></entry>
+              <entry>Данные спектроскопии.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Наборы спектров одного типа представлены как объекты <type>GwySpectra</type>. Компоненты <type>GwySpectra</type> сведены в следующую таблицу:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwySpectra">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>title</literal></entry>
+              <entry>строка</entry>
+              <entry>Название спектров как оно отображается в окне просмотра данных.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_xy</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единицы измерения координат места, где снимались спектры.</entry>
+            </row>
+            <row>
+              <entry><literal>coords</literal></entry>
+              <entry>массив double</entry>
+              <entry>Координаты точек, где снимались спектры, в физических единицах. Каждый спектр занимает два элемента: горизонтальную и вертикальную координату. Количество координат должно соответствовать числу кривых в <varname>data</varname>.</entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>массив элементов <link linkend="table-gwyfile-GwyDataLine"><type>GwyDataLine</type></link></entry>
+              <entry>Отдельные кривые спектров.</entry>
+            </row>
+            <row>
+              <entry><literal>selected</literal></entry>
+              <entry>массив 32битных целых</entry>
+              <entry>Индексы выбранных кривых спектров.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Отдельные кривые в спектрах представлены как объекты <type>GwyDataLine</type>. Компоненты <type>GwyDataLine</type> сведены в следующую таблицу:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwyDataLine">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>res</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Число точек данных.</entry>
+            </row>
+            <row>
+              <entry><literal>real</literal></entry>
+              <entry>double</entry>
+              <entry>Длина в физических единицах.</entry>
+            </row>
+            <row>
+              <entry><literal>off</literal></entry>
+              <entry>double</entry>
+              <entry>Смещение начала в физических единицах. Обычно записывается только если не равно нулю.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_x</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единицы измерения абсциссы.</entry>
+            </row>
+            <row>
+              <entry><literal>si_unit_y</literal></entry>
+              <entry><link linkend="table-gwyfile-GwySIUnit"><type>GwySIUnit</type></link></entry>
+              <entry>Единица измерения значений данных.</entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>массив double</entry>
+              <entry>Данные линии, сохранённые как массив <varname>res</varname>, слева направо .</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+  </sect2>
+  <sect2 id="gwyfile-auxiliary-objects">
+    <title>Вспомогательные объекты</title>
+    <para>Компоненты <type>GwySIUnit</type> представлены в следующей таблице:</para>
+    <para>
+      <informaltable id="table-gwyfile-GwySIUnit">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>unitstr</literal></entry>
+              <entry>строка</entry>
+              <entry>Текстовое представление единицы измерения, например, <literal>"A"</literal> или <literal>"m^-1"</literal> (как базовые единицы СИ, префиксы игнорируются).</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
+    <para>Компоненты <type>GwySelection</type> сведены в следующую таблицу. Некоторые типы выделенного могут содержать другие элементы данных; обратитесь к документации к конкретному типу выделенного о том, как интерпретировать данные.</para>
+    <para>
+      <informaltable id="table-gwyfile-GwySelection">
+        <tgroup cols="3" align="left">
+          <?dblatex llX?>
+          <thead>
+            <row>
+              <entry>Компонент</entry>
+              <entry>Тип</entry>
+              <entry>Значение</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><literal>max</literal></entry>
+              <entry>32битное целое</entry>
+              <entry>Максимальное число объектов. которое может быть в выделенном (число, установленное <function>gwy_selection_set_max_objects()</function>).</entry>
+            </row>
+            <row>
+              <entry><literal>data</literal></entry>
+              <entry>массив double</entry>
+              <entry>Данные выделения. Число элементов, которые формируют один объект выделения определяется типом выбранного.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
