@@ -157,7 +157,7 @@
   <para>
     All generated surfaces are periodic (i.e. perfectly tilable).
   </para>
-  <sect2 id='spectral-synthetis'>
+  <sect2 id='spectral-synthesis'>
     <title>Spectral</title>
     <para>
       Spectral synthesis module creates randomly rough surfaces by constructing
@@ -262,7 +262,7 @@
       </mediaobject>
     </informalfigure>
   </sect2>
-  <sect2 id='object-synthetis'>
+  <sect2 id='object-synthesis'>
     <title>Objects</title>
     <para>
       The object placement method permits to create random surfaces composed
@@ -296,7 +296,7 @@
           <para>
             The average number of times an object covers a pixel on the image.
             Coverage value of 1 means the surface would be exactly once covered
-            by the objects provived that thay covered it uniformly.  Larger
+            by the objects assuming that they covered it uniformly.  Larger
             values mean more layers of objects – and slower image generation.
           </para>
         </listitem>
@@ -319,7 +319,7 @@
           <para>
             The ratio between the <xi:include href="eqi-x.xml"/> and
             <xi:include href="eqi-y.xml"/> dimensions of an object – with
-            respect to same base proportions.
+            respect to some base proportions.
           </para>
           <para>
             Changing the aspect ratio does not always imply mere geometrical
@@ -379,6 +379,114 @@
         </caption>
       </mediaobject>
     </informalfigure>
+  </sect2>
+  <sect2 id='noise-synthesis'>
+    <title>Noise</title>
+    <para>
+      Random uncorrelated point noise is generated independently in each pixel.
+      Several distributions are available.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Distribution</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The distribution of the noise value.  The possibilities include
+            Gaussian, exponential, uniform and triangular distributions.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Direction</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The noise can be generated as symetrical or one-sided.  The
+            mean value of the distribution of a symmetrical noise is zero,
+            i.e. the mean value of data does not change when a symmetrical
+            noise is added.  One-sided noise only increases (if positivie)
+            or decreases (if negative) the data values.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>RMS</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Root mean square value of the noise distribution.  More precisely,
+            RMS of the corresponding symmetrical distribution in the case the
+            distribution is one-sided.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='pattern-synthesis'>
+    <title>Pattern</title>
+    <para>
+      Regular geometrical patterns represent surfaces often encountered in
+      microscopy as standards or testing samples such as ridges or steps.
+      Each type of pattern has its own set of gometrical parameters determining
+      shape and dimensions of various part of the pattern.  Each parameter has
+      a variance control, similar to <link linkend='object-synthesis'>Object
+        synthesis</link>, that permits to make the pattern not completely
+      regular in some aspects.
+    </para>
+    <para>
+      Controls common to all pattern types include:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Orientation</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The rotation of the pattern with respect to some base orientation,
+            measured counterclockwise.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Enabling variation of the parameters makes the surface somewhat
+      irregular, however, the shape of its features is maintained.  This is
+      complemented by another variation method, called
+      <guilabel>Deformation</guilabel> that enables distortion of the pattern
+      in the <xi:include href="eqi-xy.xml"/> plane.  Deformation has two
+      parametres:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Amplitude</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The magnitude of the lateral deformation.  It is a relative
+            numerical quantity essentially determining how far the deformation
+            can reach.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Lateral scale</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The characteristic size of the deformations.  It descrbies not
+            how far the features are moved but how sharply or slowly the
+            deformation itself changes within the horizontal plane.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
