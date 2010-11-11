@@ -154,16 +154,13 @@
       </listitem>
     </varlistentry>
   </variablelist>
-  <para>
-    All generated surfaces are periodic (i.e. perfectly tilable).
-  </para>
   <sect2 id='spectral-synthesis'>
     <title>Spectral</title>
     <para>
       Spectral synthesis module creates randomly rough surfaces by constructing
       the Fourier transform of the surface according to specified parameters
       and then performing the inverse Fourier transform to obtain the real
-      surface.
+      surface.  The generated surfaces are periodic (i.e. perfectly tilable).
     </para>
     <para>
       The Fourier image parameters define the shape of the PSDF, i.e. the
@@ -274,6 +271,8 @@
       pixel, <xi:include href="eqi-h.xml"/> is the height of the object at this
       pixel (assuming a zero basis) and <xi:include href="eqi-z_0.xml"/>
       is the current minimum height over the basis of the object being placed.
+      The are the objects is taken as periodic, hence, the generated surfaces are
+      also periodic (i.e. perfectly tilable).
     </para>
     <variablelist>
       <varlistentry>
@@ -419,12 +418,121 @@
         <listitem>
           <para>
             Root mean square value of the noise distribution.  More precisely,
-            RMS of the corresponding symmetrical distribution in the case the
-            distribution is one-sided.
+            it is the RMS of the corresponding symmetrical distribution in the
+            case the distribution is one-sided.
           </para>
         </listitem>
       </varlistentry>
     </variablelist>
+  </sect2>
+  <sect2 id='line-noise-synthesis'>
+    <title>Line Noise</title>
+    <para>
+      Line noise represents noise with non-negligible duration that leads to typical
+      steps or scars (also called strokes) in the direction of the fast
+      scanning axis.  Parameters <guilabel>Distribution</guilabel>,
+      <guilabel>Direction</guilabel> and <guilabel>RMS</guilabel> have the same
+      meaning as in <link linkend='noise-synthesis'>Point noise</link>.  Other
+      parameters control the lateral characteristics of the noise.
+    </para>
+    <para>
+      Two basic line defect types are available: steps and scars.  Steps represent abrupt
+      changes in the value that continue to the end of the scan (or until another step
+      occurs).  Scars are changes of the value with a finite duration, i.e. the
+      values return to the original level after some time.
+    </para>
+    <para>
+      Steps have the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Density</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Average number of defects per scan line, including any dead time
+            (as determined by parameter <guilabel>Within line</guilabel>).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Within line</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Fraction of the time to scan one line that corresponds to actual data
+            acquisition.  The rest of time is a dead time.  Value 1 means there is no dead
+            time, i.e. all steps occur within the image.  Value 0 means the data acquisition
+            time is negligible to the total line scan time, consequently, steps only occur
+            between lines.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Cumulative</guilabel>
+        </term>
+        <listitem>
+          <para>
+            For cumulative steps the random step value is always added to the
+            current value offset; for non-cumulative steps the new value offset is directly
+            equal to the random step value.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
+      Scars have the following parameters:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <guilabel>Coverage</guilabel>
+        </term>
+        <listitem>
+          <para>
+            The fraction of the the image covered by defect if they did not
+            overlap.  Since the defect may overlap coverage value of 1.0 does
+            not mean the image is covered completely.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Length</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Scar length in pixels.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <guilabel>Variance</guilabel>
+        </term>
+        <listitem>
+          <para>
+            Variance of the scar length, see <link linkend='object-synthesis'>Objects</link>
+            for description.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <informalfigure id='fig-synthetic-line-noise'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-line-noise.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Different types of line noise added to an artificial pyramidal surface: unmodified
+          surface (left); with relatively unfrequent non-cumulative steps (centre); with
+          scars of mean length of 16 px and high coverage (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
   <sect2 id='pattern-synthesis'>
     <title>Pattern</title>
@@ -487,6 +595,20 @@
         </listitem>
       </varlistentry>
     </variablelist>
+    <informalfigure id='fig-synthetic-pattern'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='synthetic-pattern.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Artificial pattern surfaces: sharp steps oriented at 30 deg, deformed
+          with a deformation with a large autocorrelation length (left);
+          non-unofrmly spaced ridges with moderate slopes between the top and
+          bottom planes, defomed with a deformation with a small
+          autocorrelation length (right).
+        </caption>
+      </mediaobject>
+    </informalfigure>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
