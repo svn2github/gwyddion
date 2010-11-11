@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: presentations-masks.xml 11479 2010-10-29 17:49:19Z yeti-dn $ -->
+<!-- @(#) $Id: presentations-masks.xml 11526 2010-11-11 15:13:31Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="presentations-masks">
   <title>Презентации и маски</title>
@@ -67,8 +67,9 @@
   </sect2>
   <sect2 id="mask-editor">
     <title>Инструмент редактирования маски <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_editor-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
-    <para>Редактор маски - простейший инструмент изменения маски. Он обеспечивает две группы функций: редактирование маски рисованием фигур непосредственно в окне данных и глобальные операции над маской, такие как инверсия, растягивание и сжатие маски. Операции рисования управляются кнопками в группе <guilabel>Редактор</guilabel>.</para>
-    <para>Кнопки в ряду <guilabel>Режим</guilabel>выбирают, как нарисованная фигура будет изменять маску:</para>
+    <para>Редактор маски - универсальный инструмент изменения маски. Он реализует две группы функций: редактирование маски рисованием фигур непосредственно в окне данных и глобальные операции над маской, такие как инверсия, растяжение и сжатие маски.</para>
+    <para>Непосредственное изменение маски управляется кнопками в группе <guilabel>редактор</guilabel>. Оно может осуществляться двумя способами: выбором геометрических фигур, которые последовательно заполняются или удаляются (используя опцию <guilabel>Формы</guilabel> и свободным рисованием с помощью инструментов рисования (опция <guilabel>Инструменты рисования</guilabel>).</para>
+    <para>Кнопки в ряду <guilabel>Режим</guilabel> выбирают, как нарисованная в окне данных геометрическая фигура будет изменять маску:</para>
     <variablelist>
       <varlistentry>
         <term>Установить <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
@@ -96,6 +97,33 @@
       </varlistentry>
     </variablelist>
     <para>Кнопки в ряду <guilabel>Форма</guilabel> контролируют форму изображаемой на маске фигуры. Можно выбрать прямоугольники, эллипсы и тонкие линии.</para>
+    <para>Инструменты свободного рисования выбираются кнопками в ряду <guilabel>инструмент</guilabel>:</para>
+    <variablelist>
+      <varlistentry>
+        <term>Карандаш <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_paint_draw-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Свободное рисование карандашом с радиусом, заданным параметром <guilabel>Радиус</guilabel>. Может быть медленным на небыстрых компьютерах и/или больших областях данных.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Ластик <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_paint_erase-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Свободное стирание ластиком с радиусом, заданным параметром <guilabel>Радиус</guilabel>. Может быть медленным на небыстрых компьютерах и/или больших областях данных.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Заливка <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_fill_draw-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Заливка непрерывной пустой области.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Удаление заливки <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_mask_fill_erase-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></term>
+        <listitem>
+          <para>Удаление заливки непрерывной области под маской.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
     <para>Основные глобальные операции с масками, т.е. инверсия, удаление и заполнение всей области данных маской доступны в ряду <guilabel>Действия</guilabel>. Дополнительные операции включают в себя:</para>
     <variablelist>
       <varlistentry>
@@ -135,7 +163,7 @@
           <guibutton>Заполнить пустоты</guibutton>
         </term>
         <listitem>
-          <para>Делает зерна сплошными, без пустот, заполняя пустоты в зёрнах.</para>
+          <para>Делает зёрна сплошными, без пустот, заполняя пустоты в зёрнах.</para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -149,7 +177,7 @@
         <guimenuitem>Пометить с помощью</guimenuitem>
       </menuchoice>
     </para>
-    <para>Пометить с помощью может создавать или изменять маски используя другие маски или данные того же разрешения. Операции, которые можно производить с текущей маской, те же самые, что и в <link linkend="mask-editor">инструменте редактирования маски</link>: создание, объединение, вычитание, пересечение. Источник другой маски может быть одним из следующих:</para>
+    <para>Инструмент может создавать или изменять маски используя другие маски или данные того же разрешения. Операции, которые можно производить с текущей маской, те же самые, что и в <link linkend="mask-editor">инструменте редактирования маски</link>: создание, объединение, вычитание, пересечение. Источник другой маски может быть одним из следующих:</para>
     <variablelist>
       <varlistentry>
         <term>Маска</term>
@@ -160,7 +188,7 @@
       <varlistentry>
         <term>Данные</term>
         <listitem>
-          <para>В режиме данных, другое поле высот используется как источник другой маски. маска состоит из пикселей, попадающих в диапазон высот, заданный как относительные значения от полного диапазона. Для использования пикселей, не попадающих в определённый диапазон, для маски, установите верхнюю границу меньше, чем нижнюю.</para>
+          <para>В режиме данных, другое поле высот используется как источник другой маски. Маска состоит из пикселей, попадающих в диапазон высот, заданный как относительные значения от полного диапазона. Чтобы использовать пиксели, не попадающие в определённый диапазон, для маскирования, установите верхнюю границу меньше, чем нижнюю.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
