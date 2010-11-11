@@ -183,15 +183,21 @@
       </guiicon>
     </title>
     <para>
-      The Mask Editor is the basic mask modification tool.  It provides two
-      groups of functions: editing of the mask by drawing shapes directly in
+      The Mask Editor is the universal mask modification tool.  It provides two
+      groups of functions: editing of the mask by drawing directly in
       the data window and global operations with the mask such as inversion
-      or growing and shrinking.  The drawing operations are controlled by the
-      buttons in the <guilabel>Editor</guilabel> group.
+      or growing and shrinking.
     </para>
     <para>
-      Buttons in the <guilabel>Mode</guilabel> row select how the shape drawn
-      in the data window will modify the mask:
+      The direct mask modification is controlled by the buttons in the
+      <guilabel>Editor</guilabel> group. It can be done in two ways: by selecting
+      geometrical shapes that are subsequently filled or erased (using the
+      <guilabel>Shapes</guilabel> option), and by freehand drawing operations
+      using drawing tools (option <guilabel>Drawing Tools</guilabel>).
+    </para>
+    <para>
+      Buttons in the <guilabel>Mode</guilabel> row select how the geometrical
+      shape drawn in the data window will modify the mask:
     </para>
     <variablelist>
       <varlistentry>
@@ -274,6 +280,84 @@
       lines.
     </para>
     <para>
+      Freehand drawing tools are selected by buttons in the <guilabel>Tool</guilabel>
+      row:
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Pencil
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_paint_draw-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Freehand drawing with a pencil of radius speficied by parameter
+            <guilabel>Radius</guilabel>.  Note this may be slow on slow computers
+            and/or large data fields.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Eraser
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_paint_erase-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Freehand erasing with an eraser of radius speficied by parameter
+            <guilabel>Radius</guilabel>.  Note this may be slow on slow computers
+            and/or large data fields.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Fill
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_fill_draw-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Bucket-filling of a contiguous unmasked area.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          Unfill
+          <guiicon>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref='gwy_mask_fill_erase-24.png' format='PNG'/>
+              </imageobject>
+            </inlinemediaobject>
+          </guiicon>
+        </term>
+        <listitem>
+          <para>
+            Bucket-unfilling of a contiguous masked area.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <para>
       The basic global operation with masks, i.e. inversion, removal and
       filling the entire data field area with a mask are available in the
       <guilabel>Actions</guilabel> row.  Additional operations include:
@@ -335,7 +419,7 @@
         </term>
         <listitem>
           <para>
-            Makes the grains simply compact, i.e. without any holes, by filling
+            Makes the grains single-connected, i.e. without any holes, by filling
             the holes in grains.
           </para>
         </listitem>
