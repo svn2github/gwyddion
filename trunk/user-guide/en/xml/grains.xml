@@ -443,6 +443,47 @@
           </itemizedlist>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term>Curvature-related properties</term>
+        <listitem>
+          <itemizedlist>
+            <listitem>
+              <guilabel>Curvature center <xi:include href="eqi-x.xml"/></guilabel>,
+              the horizontal position of the center of the quadratic surface
+              fitted to the grain surface.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature center <xi:include href="eqi-y.xml"/></guilabel>,
+              the vertical position of the center of the quadratic surface
+              fitted to the grain surface.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature center <xi:include href="eqi-z.xml"/></guilabel>,
+              the value at the center of the quadratic surface fitted to the
+              grain surface.  Note this is the value at the fitted surface,
+              not at the real grain surface.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature 1</guilabel>,
+              the smaller curvature (i.e. the inverse of the curvature radius)
+              at the center.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature 2</guilabel>,
+              the larger curvature (i.e. the inverse of the curvature radius)
+              at the center.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature angle 1</guilabel>,
+              the direction corresponding to <guilabel>Curvature 1</guilabel>.
+            </listitem>
+            <listitem>
+              <guilabel>Curvature angle 2</guilabel>,
+              the direction corresponding to <guilabel>Curvature 2</guilabel>.
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </varlistentry>
     </variablelist>
     <informalfigure id='fig-grain-bounding-dims'>
       <mediaobject>
@@ -521,6 +562,12 @@
         </caption>
       </mediaobject>
     </informalfigure>
+    <para>
+      Curvature-related properties of individual grains are calculated
+      identically to the global curvature calculated by
+      <link linkend='curvature'>Curvature</link>.  See its description for
+      some discussion.
+    </para>
   </sect2>
   <sect2 id='grain-analysis-ref'>
     <title>References</title>
