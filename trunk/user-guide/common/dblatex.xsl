@@ -116,6 +116,18 @@
 
 <!-- *********************************************************************
 
+         Inline items styling
+
+         ********************************************************************* -->
+
+<xsl:template match="guibutton|guilabel|guimenu|guisubmenu|guimenuitem">
+  <xsl:text>\emph{</xsl:text>
+  <xsl:call-template name="inline.charseq"/>
+  <xsl:text>}</xsl:text>
+</xsl:template>
+
+<!-- *********************************************************************
+
          Tables
 
      ********************************************************************* -->
