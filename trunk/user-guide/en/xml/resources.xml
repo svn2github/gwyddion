@@ -14,14 +14,15 @@
   <para>
     System resources are installed along with the program and they are not
     modifiable. Typically, they are located under a directory such as
-    <filename>/usr/share/gwyddion</filename> (Unix), <filename>Program
-      Files\Gwyddion</filename> (MS Windows) or other directory determined by
+    <filename>/usr/share/gwyddion</filename> (Unix),
+    <filename>Program Files\Gwyddion</filename>
+    (MS Windows) or other directory determined by
     <link linkend='GWYDDION_DATADIR'><envar>GWYDDION_DATADIR</envar></link>.
   </para>
   <para>
     User resources are located in a user's directory, this usually means under
-    <filename>~/.gwyddion</filename> (Unix) or <filename>Documents and
-      Settings\gwyddion</filename> (MS Windows).
+    <filename>~/.gwyddion</filename> (Unix) or
+    <filename>Documents and Settings\gwyddion</filename> (MS Windows).
   </para>
   <para>
     All resource files are simple text files that can be easily examined and
