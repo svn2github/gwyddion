@@ -15,41 +15,131 @@
       </menuchoice>
     </para>
     <para>
-      Data Arithmetic module makes possible to perform arbitrary point-wise
-      operations on a single data field or corresponding points of several
-      data fields (currently up to five).  And although it is not its primary
+      Data Arithmetic module enables to perform arbitrary point-wise operations
+      on a single data field or on the corresponding points of several data
+      fields (currently up to eight).  And although it is not its primary
       function it can be also used as a calculator with immediate expression
-      evaluation.  The expression syntax is described in section
+      evaluation if a plain numerical expression is entered.  The expression
+      syntax is described in section
       <link linkend='expression-syntax'>Expressions</link>.
     </para>
     <para>
-      The data fields to operate on are called <guilabel>Operands</guilabel>
-      and they are denoted <userinput>d1</userinput>, …,
-      <userinput>d5</userinput>.
-      In addition to values, local <xi:include href="eqi-x.xml"/>
-      and <xi:include href="eqi-y.xml"/>-derivatives
-      are denoted <userinput>bx1</userinput>, <userinput>by1</userinput>,
-      <userinput>bx2</userinput>, …, <userinput>by5</userinput>.
+      The expression can contain the following variables representing
+      values from the individual input data fields:
     </para>
     <para>
-      The data fields that actually appear in the expression have to be
-      compatible, i.e. their dimensions (both pixel and physical) have to be
-      identical.  Other data fields (i.e. those not actually entering the
-      expression) are irrelevant.  The result is always put into a newly
-      created data field.
+      <informaltable frame='none' id='table-arithmetic-variables'>
+        <tgroup cols='2'>
+          <?dblatex lX?>
+          <thead>
+            <row>
+              <entry>Variable</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><varname>d1</varname>, …, <varname>d8</varname></entry>
+              <entry>
+                Data value at the pixel.  The value is in base physical units,
+                e.g. for height of 233 nm, the value of <varname>d1</varname>
+                is 2.33e-7.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>m1</varname>, …, <varname>m8</varname></entry>
+              <entry>
+                Mask value at the pixel.  The mask value is either 0 (for
+                unmasked pixels) or 1 (for masked pixels).  The mask variables
+                can be used also if no mask is present; the value is then 0 for
+                all pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>bx1</varname>, …, <varname>bx8</varname></entry>
+              <entry>
+                Horizontal derivative at the pixel.  Again, the value is in
+                physical units.  The derivative is calculated as standard
+                symmetrical derivative, except in edge pixels where one-side
+                derivative is taken.
+              </entry>
+            </row>
+            <row>
+              <entry><varname>by1</varname>, …, <varname>by8</varname></entry>
+              <entry>
+                Vertical derivative at the pixel, definied similarly to the
+                horizontal derivative.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </para>
     <para>
-      Examples:
-      <informalexample>
-        <userinput>-d1</userinput>
-      </informalexample>
-      performs value inversion – very similar to Invert Value, except that
-      Invert Value reflects about the mean value while now we simply change
-      all values to negative,
-      <informalexample>
-        <userinput>(d1 - d2)^2</userinput>
-      </informalexample>
-      calculates squared difference between two data fields.
+      In addition, the constant <xi:include href="eqi-pi.xml"/> is available
+      and can be typed either as <xi:include href="eqi-pi.xml"/> or
+      <userinput>pi</userinput>.
+    </para>
+    <para>
+      All data fields that appear in the expression have to be compatible.
+      This means their dimensions (both pixel and physical) have to be
+      identical.  Other data fields, i.e. those not actually entering the
+      expression, are irrelevant.  The result is always put into a newly
+      created data field in the current file (which may be different from
+      the files of all operands).
+    </para>
+    <para>
+      Since the evaulator does not automatically infer the correct physical
+      units of the result the units have to be explicitly specified.  This can
+      be done by two means: either by selecting a data field that has the same
+      value units as the result should have, or by choosing option
+      <guilabel>Specify units</guilabel> and typing the units manually.
+    </para>
+    <para>
+      The following table lists several simple expression examples:
+    </para>
+    <para>
+      <informaltable frame='none' id='table-arithmetic-examples'>
+        <tgroup cols='2'>
+          <?dblatex lX?>
+          <thead>
+            <row>
+              <entry>Expression</entry>
+              <entry>Meaning</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><userinput>-d1</userinput></entry>
+              <entry>
+                Value inversion.  The result is very similar to Invert Value,
+                except that Invert Value reflects about the mean value while
+                here we simply change all values to negative.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>(d1 - d2)^2</userinput></entry>
+              <entry>
+                Squared difference between two data fields.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>d1 + m1*1e-8</userinput></entry>
+              <entry>
+                Modification of values under mask.  Specifically, the value
+                10<superscript>-8</superscript> is added to all masked pixels.
+              </entry>
+            </row>
+            <row>
+              <entry><userinput>d1*m3 + d2*(1-m3)</userinput></entry>
+              <entry>
+                Combination of two data fields.  Pixels are taken either from
+                data field 1 or 2, depending on the mask on field 3.
+              </entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </para>
     <para>
       In the calculator mode the expression is immediately evaluated as it is
@@ -57,7 +147,10 @@
       action is necessary to switch between data field expressions and
       calculator: expressions containing only numeric quantities are
       immediately evaluated, expressions referring to data fields are used to
-      calculate a new data field.
+      calculate a new data field.  The preview showing the result of an
+      operation with fields is not immediately updated as you type; you can
+      update it either by clicking <guibutton>Update</guibutton> or just
+      pressing <keycap>Enter</keycap> in the expression entry.
     </para>
   </sect2>
   <sect2 id='immerse'>
