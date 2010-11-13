@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: resources.xml 10686 2009-12-06 08:07:22Z yeti-dn $ -->
+<!-- @(#) $Id: resources.xml 11533 2010-11-12 14:13:45Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="resources">
   <title>Ресурсы</title>
   <para>Некоторые небольшие блоки данных, например, <link linkend="color-map">карты псевдоцвета</link> или <link linkend="raw-file-import-presets">предустановки импорта необработанных данных</link>, сохраняются в отдельных файлах, которые все вместе называются файлами ресурсов. Gwyddion ищет ресурсы в двух разных местах: системном и индивидуальном для данного пользователя.</para>
   <para>Системные ресурсы устанавливаются вместе с программой и их нельзя менять. Обычно они расположены в каталоге вроде <filename>/usr/share/gwyddion</filename> (Unix), <filename>Program Files\Gwyddion</filename> (MS Windows) или другом, который определяется <link linkend="GWYDDION_DATADIR"><envar>GWYDDION_DATADIR</envar></link>.</para>
-  <para>Пользовательские ресурсы расположены в его каталоге. Это обычно <filename>~/.gwyddion</filename> (Unix) или <filename>Documents and Settings\gwyddion</filename> (MS Windows).</para>
+  <para>Ресурсы пользователя расположены в его каталоге. Это обычно <filename>~/.gwyddion</filename> (Unix) или <filename>Documents and Settings\gwyddion</filename> (MS Windows).</para>
   <para>Все файлы ресурсов являются простыми текстовыми файлами которые могут легко быть прочитаны и изменены текстовым редактором или пересланы другим пользователям (если они скопированы или отредактированы вручную, необходимо перезапустить Gwyddion чтобы он их заметил). В большинстве случаев в файлах могут быть только символы ASCII. Если там допустим международный текст, то он должен быть в кодировке UTF-8. Численные значения представлены в стандартном формате POSIX, т.е. с десятичной точкой независимо от того, какой разделитель обычно используется в языке пользователя.</para>
   <para>Ресурсы упорядочены в подкаталогах в соответствии с их типом, т.е. градиенты псевдоцвета находятся в подкаталоге <filename>gradients</filename>. Имя файла определяет название ресурса – градиент Gray находится в файле <filename>gradients/Gray</filename>. Модули могут определять свои собственные имена ресурсов; описанные здесь типы наиболее важны, но их список может быть неполон.</para>
-  <para>Каждый файл ресурсов имеет одну и ту же структуру. Он начинается со строки, определяющей тип ресурса : <informalexample><programlisting>Gwyddion resource GwyGradient</programlisting></informalexample>, где <type>GwyGradient</type> - имя типа в <ulink url="http://library.gnome.org/devel/gobject/stable/">системе типов</ulink> (что является достаточно низкоуровневой подробностью, но так обстоит дело), за которой следуют именованные параметры в форме <informalexample><programlisting><replaceable>name</replaceable> <replaceable>value</replaceable></programlisting></informalexample> и данные ресурса. Некоторые ресурсы могут содержать только именованные параметры, другие только данные.</para>
+  <para>Каждый файл ресурсов имеет одну и ту же структуру. Он начинается со строки, определяющей тип ресурса : <informalexample><programlisting>Gwyddion resource GwyGradient</programlisting></informalexample> где <type>GwyGradient</type> – имя типа в <ulink url="http://library.gnome.org/devel/gobject/stable/">системе типов</ulink> (что является достаточно низкоуровневой подробностью, но так обстоит дело), за которой следуют именованные параметры в форме <informalexample><programlisting><replaceable>имя</replaceable> <replaceable>значение</replaceable></programlisting></informalexample> и данные ресурса. Некоторые ресурсы могут содержать только именованные параметры, другие только данные.</para>
   <sect2 id="resource-gradients">
     <title>Градиенты</title>
     <para>Градиенты. т.е. карты псевдоцвета, находятся в каталоге <filename>gradients</filename>, они определяются типом <type>GwyGradient</type> и содержат только данные. Они могут быть отредактированы в программе с использованием <link linkend="color-gradient-editor">редактора градиентов</link>.</para>
-    <para>Данные градиента состоят из строк, соответствующих отдельным точкам градиента:<informalexample><programlisting><replaceable>положение</replaceable> <replaceable>красный</replaceable> <replaceable>зелёный</replaceable> <replaceable>синий</replaceable> <replaceable>альфа</replaceable></programlisting></informalexample>. Положение определяет, где цвет. заданный с помощью четырёх составляющих <replaceable>красный</replaceable>, <replaceable>зелёный</replaceable>, <replaceable>синий</replaceable> и <replaceable>альфа</replaceable> будет находиться на отрезке <xi:include href="eqi-interval-0-1.xml"/>, где 0 соответствует началу отрезка (и градиента), а 1 его концу. Цвет интерполируется линейно между заданными точками.</para>
-    <para>Положения должны образовывать растущую последовательность от 0 до 1 (т.е. минимальное число точек цвета - 2). Диапазон компонентов цвета также <xi:include href="eqi-interval-0-1.xml"/>. Следует отметить, что значение альфа, соответствующее непрозрачности не используется и должно быть задано как 1 (полностью непрозрачному).</para>
+    <para>Данные градиента состоят из строк, соответствующих отдельным точкам градиента:<informalexample><programlisting><replaceable>положение</replaceable> <replaceable>красный</replaceable> <replaceable>зелёный</replaceable> <replaceable>синий</replaceable> <replaceable>альфа</replaceable></programlisting></informalexample> Положение определяет, где цвет, заданный с помощью четырёх составляющих <replaceable>красный</replaceable>, <replaceable>зелёный</replaceable>, <replaceable>синий</replaceable> и <replaceable>альфа</replaceable> будет находиться на отрезке <xi:include href="eqi-interval-0-1.xml"/>, где 0 соответствует началу отрезка (и градиента), а 1 его концу. Цвет интерполируется линейно между заданными точками.</para>
+    <para>Положения должны образовывать растущую последовательность от 0 до 1 (т.е. минимальное число точек цвета – 2). Диапазон компонентов цвета также <xi:include href="eqi-interval-0-1.xml"/>. Следует отметить, что значение альфа, соответствующее непрозрачности не используется и должно быть задано как 1 (полностью непрозрачному).</para>
     <para>Например, стандартный градиент Red переходящий от чёрного (0 0 0) к красному (1 0 0) и затем к белому (1 1 1) определяется следующим образом:<informalexample><programlisting><![CDATA[
 Gwyddion resource GwyGradient
 0.0 0 0 0 1
@@ -24,7 +24,12 @@ Gwyddion resource GwyGradient
   <sect2 id="resource-opengl-materials">
     <title>Материалы OpenGL </title>
     <para>Материалы OpenGL находятся в каталоге <filename>glmaterials</filename>, определяются по типу <type>GwyGLMaterial</type> и содержат только данные. Они могут редактироваться в программе с использованием <link linkend="opengl-material-editor">редактора материалов OpenGL</link>.</para>
-    <para>Данные материала состоят из четырёх строк RGBA, подобно <link linkend="resource-gradients">градиентам</link>, которые соответствуют четырём компонентам материала OpenGL в следующем порядке: <orderedlist><listitem>окружающий,</listitem><listitem>рассеянный,</listitem><listitem>отраженный,</listitem><listitem>излучаемый.</listitem></orderedlist>. См. раздел <link linkend="opengl-material-editor">Редактор материалов OpenGL</link>, где описаны отдельные компоненты. За ними следует строка, содержащая значение блеска как число из интервала <xi:include href="eqi-interval-0-1.xml"/>.</para>
+    <para>Данные материала состоят из четырёх строк RGBA, подобно <link linkend="resource-gradients">градиентам</link>, которые соответствуют четырём компонентам материала OpenGL в следующем порядке: <orderedlist>
+        <listitem>окружающий,</listitem>
+        <listitem>рассеянный,</listitem>
+        <listitem>отраженный,</listitem>
+        <listitem>излучаемый.</listitem>
+      </orderedlist> См. раздел <link linkend="opengl-material-editor">Редактор материалов OpenGL</link>, где описаны отдельные компоненты. За ними следует строка, содержащая значение блеска как число из интервала <xi:include href="eqi-interval-0-1.xml"/>.</para>
     <para>Следует отметить, что компонент, отвечающий за излучение, хоть он и пишется и читается в Gwyddion, но на текущий момент не используется для трёхмерного просмотра. Рекомендуется установить его в 0 0 0 1, т.е. чёрный.</para>
     <para>Например, стандартный материал Red-Rubber с очень тёмным красным цветом окружающего света, серым диффузным рассеянием, красным зеркальным отражением и низким значением блеска определяется следующим образом: <informalexample><programlisting><![CDATA[
 Gwyddion resource GwyGLMaterial
@@ -86,7 +91,7 @@ Gwyddion resource GwyGLMaterial
               <entry><varname>same_units</varname></entry>
               <entry>опционально</entry>
               <entry>0 или 1</entry>
-              <entry>Установите в 1, если величина имеет смысл только если пространственные размеры и высоты являются одинаковыми физическими величинами. Например, это требуется для площади поверхности. Значение по умолчанию 0.</entry>
+              <entry>Установите в 1, если величина имеет смысл только если пространственные размеры и <quote>высоты</quote> являются одинаковыми физическими величинами. Например, это требуется для площади поверхности. Значение по умолчанию 0.</entry>
             </row>
             <row>
               <entry><varname>is_angle</varname></entry>
@@ -145,7 +150,7 @@ expression z_max - z_min
             <row>
               <entry><varname>xyunit</varname></entry>
               <entry>строка</entry>
-              <entry>основные единицы <varname>xreal</varname> и <varname>yreal</varname>, т.е. <literal>"m"</literal></entry>
+              <entry>основные единицы измерения <varname>xreal</varname> и <varname>yreal</varname>, т.е. <literal>"m"</literal></entry>
             </row>
             <row>
               <entry><varname>zscale</varname></entry>
