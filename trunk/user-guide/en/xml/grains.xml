@@ -284,7 +284,7 @@
                 <secondary>on a grain boundary</secondary>
               </indexterm>
               <guilabel>Minimum on boundary</guilabel>,
-              the maximum value (height) occuring on the inner grain boundary.
+              the minimum value (height) occuring on the inner grain boundary.
               This means within the set of pixels that lie inside the grain
               but at least one of their neighbours lies outside.
             </listitem>
