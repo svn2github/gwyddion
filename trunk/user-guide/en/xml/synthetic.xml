@@ -516,7 +516,7 @@
         <listitem>
           <para>
             Variance of the scar length, see <link linkend='object-synthesis'>Objects</link>
-            for description.
+            for description of variances.
           </para>
         </listitem>
       </varlistentry>
@@ -539,11 +539,11 @@
     <para>
       Regular geometrical patterns represent surfaces often encountered in
       microscopy as standards or testing samples such as ridges or steps.
-      Each type of pattern has its own set of gometrical parameters determining
-      shape and dimensions of various part of the pattern.  Each parameter has
-      a variance control, similar to <link linkend='object-synthesis'>Object
-        synthesis</link>, that permits to make the pattern not completely
-      regular in some aspects.
+      Each type of pattern has its own set of geometrical parameters
+      determining shape and dimensions of various part of the pattern.  Each
+      parameter has a variance control, similar to
+      <link linkend='object-synthesis'>Object synthesis</link>, that permits to
+      make the pattern not completely regular in some aspects.
     </para>
     <para>
       Controls common to all pattern types include:
