@@ -128,6 +128,41 @@
         <entry>Slope</entry>
         <entry>Inclination φ</entry>
       </row>
+      <row>
+        <entry><varname>x_0</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature center x position</entry>
+      </row>
+      <row>
+        <entry><varname>y_0</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature center y position</entry>
+      </row>
+      <row>
+        <entry><varname>z_0</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature center z value</entry>
+      </row>
+      <row>
+        <entry><varname>kappa_1</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature 1</entry>
+      </row>
+      <row>
+        <entry><varname>kappa_2</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature 2</entry>
+      </row>
+      <row>
+        <entry><varname>phi_1</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature angle 1</entry>
+      </row>
+      <row>
+        <entry><varname>phi_2</varname></entry>
+        <entry>Curvature</entry>
+        <entry>Curvature angle 2</entry>
+      </row>
     </tbody>
   </tgroup>
 </informaltable>
