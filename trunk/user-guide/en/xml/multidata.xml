@@ -89,7 +89,7 @@
       the files of all operands).
     </para>
     <para>
-      Since the evaulator does not automatically infer the correct physical
+      Since the evaluator does not automatically infer the correct physical
       units of the result the units have to be explicitly specified.  This can
       be done by two means: either by selecting a data field that has the same
       value units as the result should have, or by choosing option
