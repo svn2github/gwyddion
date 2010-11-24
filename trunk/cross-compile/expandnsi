@@ -1,0 +1,76 @@
+#!/usr/bin/python
+# Read an NSIS installer script containing special commands GwyExpandFiles
+# and GwyExpandDeleteAll and expand them.  The first is like File except that
+# it is expanded to a literal list of files prepended with corresponding
+# SetOutPath.  The second must come after the first and outputs commands to
+# delete exactly the files and directories created by GwyExpandFiles and
+# nothing else.
+import sys, re, os, ntpath, glob
+
+basedir = os.path.join(os.environ['HOME'], 'opt', 'gwyddion-mingw32')
+indent = r'^(?P<indent>\s*)'
+delimited = r'(?P<delim>["\'])(?P<value>.*)(?P=delim)'
+define_re = re.compile(indent + r'!define\s+(?P<name>\w+)\s+' + delimited + r'\s*$').match
+expand_files_re = re.compile(indent + r'GwyExpandFiles\s+' + delimited + r'\s*$').match
+expand_delete_all = re.compile(indent + r'GwyExpandDeleteAll\s*$').match
+
+defines = {}
+content = []
+files = []
+directories = set()
+current_path = None
+
+def expand(string):
+    def expand_one(match):
+        name = match.group(1)
+        if name in defines:
+            return defines[name]
+        sys.stderr.write('Line %u: Undefined macro ${%s} was expanded to empty string.\n' % (lineno, name))
+        return ''
+
+    return re.sub(r'\$\{(\w+)\}', expand_one, string)
+
+for lineno, line in enumerate(sys.stdin):
+    m = expand_files_re(line)
+    if m:
+        fileglob = expand(m.group('value'))
+        indent = m.group('indent')
+        unix_fileglob = fileglob.replace('\\', '/')
+        unix_filespec = os.path.join(basedir, unix_fileglob)
+        if unix_fileglob.find('*'):
+            filelist = glob.glob(unix_filespec)
+            if not filelist:
+                sys.stderr.write('Line %u: File glob "%s" does not match anything.\n' % (lineno, fileglob))
+        else:
+            filelist = (unix_filespec,)
+
+        for unix_filename in filelist:
+            filename = unix_filename.replace('/', '\\')[len(basedir)+1:]
+            files.append(filename)
+            path = ntpath.dirname(filename)
+            if path != current_path:
+                sys.stdout.write('\r\n%sSetOutPath "$INSTDIR\\%s"\r\n' % (indent, path))
+                current_path = path
+                while path:
+                    directories.add(path)
+                    path = ntpath.dirname(path)
+            sys.stdout.write('%sFile "%s"\r\n' % (indent, filename))
+        continue
+
+    m = expand_delete_all(line)
+    if m:
+        indent = m.group('indent')
+        for filename in reversed(sorted(files)):
+            sys.stdout.write('%sDelete "$INSTDIR\\%s"\r\n' % (indent, filename))
+        paths = reversed(sorted(directories))
+        for path in paths:
+            sys.stdout.write('%sRMDir "$INSTDIR\\%s"\r\n' % (indent, path))
+        continue
+
+    sys.stdout.write(line)
+
+    m = define_re(line)
+    if m:
+        name, value = m.group('name'), expand(m.group('value'))
+        defines[name] = value
+

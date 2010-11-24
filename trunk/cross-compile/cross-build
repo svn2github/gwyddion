@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+. ./setup
+rm -rf "$target_prefix"
+pushd "$source_dir"
+./autogen.sh --host=i686-pc-mingw32 --prefix="$target_prefix" \
+             --enable-maintainer-mode --disable-gtk-doc \
+             --disable-libtool-lock --disable-dependency-tracking \
+             --disable-schemas-install --disable-desktop-file-update \
+             --without-pascal --without-perl --without-python --without-ruby
+make
+make install
+popd
+./copysysfiles
+cp -v Licenses/*.txt $target_prefix
+./expandnsi <"$source_dir/data/gwyddion.nsit" >"$target_prefix/gwyddion.nsi"
+pushd "$target_prefix"
+wine "$nsis_compiler" gwyddion.nsi

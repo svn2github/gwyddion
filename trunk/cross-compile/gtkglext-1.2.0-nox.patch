@@ -1,0 +1,113 @@
+--- gtkglext-1.2.0.orig/configure.in	2006-02-05 04:17:19.000000000 +0100
++++ gtkglext-1.2.0/configure.in	2010-11-18 22:48:43.000000000 +0100
+@@ -1,5 +1,6 @@
+ # required autoconf version
+ AC_PREREQ([2.54])
++AC_CONFIG_MACRO_DIR([m4])
+ 
+ #
+ # Making releases:
+@@ -59,10 +60,6 @@ m4_define([gmodule_required_version], [2
+ m4_define([pango_pkg], [pango])
+ m4_define([pango_required_version], [1.0.0])
+ 
+-# Pangox
+-m4_define([pangox_pkg], [pangox])
+-m4_define([pangox_required_version], [1.0.0])
+-
+ # PangoFT2
+ m4_define([pangoft2_pkg], [pangoft2])
+ m4_define([pangoft2_required_version], [1.0.0])
+@@ -349,7 +346,6 @@ PKG_CHECK_MODULES([BASE_DEPENDENCIES], [
+ gtk_pkg >= gtk_required_version \
+ gdk_pkg >= gdk_required_version \
+ pango_pkg >= pango_required_version \
+-pangox_pkg >= pangox_required_version \
+ gmodule_pkg >= gmodule_required_version \
+ ])
+ 
+@@ -794,7 +790,7 @@ LIBS="$save_LIBS"
+ # CFLAGS and LIBS
+ ##################################################
+ 
+-GDKGLEXT_PACKAGES="gdk_pkg pango_pkg pangox_pkg gmodule_pkg"
++GDKGLEXT_PACKAGES="gdk_pkg pango_pkg gmodule_pkg"
+ GDKGLEXT_EXTRA_CFLAGS="$GL_CFLAGS $GDKGLEXT_WIN_CFLAGS"
+ GDKGLEXT_EXTRA_LIBS="$GL_LIBS $GDKGLEXT_WIN_LIBS"
+ GDKGLEXT_DEP_CFLAGS="$GDKGLEXT_EXTRA_CFLAGS `$PKG_CONFIG --cflags $GDKGLEXT_PACKAGES`"
+--- gtkglext-1.2.0.orig/gtk/gtkglwidget.c	2004-02-20 10:38:36.000000000 +0100
++++ gtkglext-1.2.0/gtk/gtkglwidget.c	2010-11-18 23:03:38.000000000 +0100
+@@ -127,7 +127,7 @@ gtk_gl_widget_size_allocate (GtkWidget  
+    * Synchronize OpenGL and window resizing request streams.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget) && private->is_realized)
++  if (gtk_widget_get_realized (widget) && private->is_realized)
+     {
+       gldrawable = gdk_window_get_gl_drawable (widget->window);
+       gdk_gl_drawable_wait_gdk (gldrawable);
+@@ -154,7 +154,7 @@ gtk_gl_widget_unrealize (GtkWidget      
+    * Remove OpenGL-capability from widget->window.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget))
++  if (gtk_widget_get_realized (widget))
+     gdk_window_unset_gl_capability (widget->window);
+ 
+   private->is_realized = FALSE;
+@@ -174,7 +174,7 @@ gtk_gl_widget_parent_set (GtkWidget   *w
+    */
+ 
+   toplevel = gtk_widget_get_toplevel (widget);
+-  if (GTK_WIDGET_TOPLEVEL (toplevel) && !GTK_WIDGET_REALIZED (toplevel))
++  if (gtk_widget_is_toplevel (toplevel) && !gtk_widget_get_realized (toplevel))
+     {
+       GTK_GL_NOTE (MISC,
+         g_message (" - Install colormap to the top-level window."));
+@@ -194,7 +194,7 @@ gtk_gl_widget_style_set (GtkWidget *widg
+    * Set a background of "None" on window to avoid AIX X server crash.
+    */
+ 
+-  if (GTK_WIDGET_REALIZED (widget))
++  if (gtk_widget_get_realized (widget))
+     {
+       GTK_GL_NOTE (MISC,
+         g_message (" - window->bg_pixmap = %p",
+@@ -250,8 +250,8 @@ gtk_widget_set_gl_capability (GtkWidget 
+   GTK_GL_NOTE_FUNC ();
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), FALSE);
+-  g_return_val_if_fail (!GTK_WIDGET_NO_WINDOW (widget), FALSE);
+-  g_return_val_if_fail (!GTK_WIDGET_REALIZED (widget), FALSE);
++  g_return_val_if_fail (gtk_widget_get_has_window (widget), FALSE);
++  g_return_val_if_fail (!gtk_widget_get_realized (widget), FALSE);
+   g_return_val_if_fail (GDK_IS_GL_CONFIG (glconfig), FALSE);
+ 
+   /* 
+@@ -432,7 +432,7 @@ gtk_widget_create_gl_context (GtkWidget 
+   GTK_GL_NOTE_FUNC ();
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   gldrawable = gdk_window_get_gl_drawable (widget->window);
+   if (gldrawable == NULL)
+@@ -474,7 +474,7 @@ gtk_widget_get_gl_context (GtkWidget *wi
+   GLWidgetPrivate *private;
+ 
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   private = g_object_get_qdata (G_OBJECT (widget), quark_gl_private);
+   if (private == NULL)
+@@ -501,7 +501,7 @@ GdkGLWindow *
+ gtk_widget_get_gl_window (GtkWidget *widget)
+ {
+   g_return_val_if_fail (GTK_IS_WIDGET (widget), NULL);
+-  g_return_val_if_fail (GTK_WIDGET_REALIZED (widget), NULL);
++  g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
+ 
+   return gdk_window_get_gl_window (widget->window);
+ }

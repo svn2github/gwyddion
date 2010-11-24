@@ -1,0 +1,29 @@
+#!/usr/bin/python
+import sys, os, subprocess
+
+for line in file('setup'):
+    name, value = line.strip().split('=')
+    locals()[name] = os.path.expandvars(value)
+
+packages = 'atk cairo expat fftw fontconfig freetype gdk-pixbuf gettext glib2 gtk2 gtkglext iconv jasper libjpeg libpng libxml2 pango pixman zlib'
+pkglist = ['mingw32-%s' % x for x in packages.split()]
+filelist = subprocess.Popen(['rpm', '-ql'] + pkglist,
+                            stdout=subprocess.PIPE).communicate()[0]
+
+for filename in sorted(set(filelist.split())):
+    if not filename.startswith(mingw32_prefix):
+        continue
+    if not os.path.isfile(filename):
+        continue
+    if filename.endswith('.a') or filename.endswith('.la'):
+        continue
+    basefile = filename[len(mingw32_prefix)+1:]
+    dirname = os.path.join(target_prefix, os.path.dirname(basefile))
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
+    targetfile = os.path.join(target_prefix, basefile)
+    if os.path.islink(targetfile):
+        if os.readlink(targetfile) == filename:
+            continue
+        os.unlink(targetfile)
+    os.symlink(filename, targetfile)
