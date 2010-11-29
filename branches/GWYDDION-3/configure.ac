@@ -30,7 +30,7 @@ AC_CONFIG_FILES([
   data/Makefile
 ])
 
-AM_INIT_AUTOMAKE([1.11 gnu -Wall dist-xz no-dist-gzip std-options nostdinc silent-rules])
+AM_INIT_AUTOMAKE([1.11 gnu -Wall -Wno-portability dist-xz no-dist-gzip std-options nostdinc silent-rules])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_SUBST([GWY_VERSION_MAJOR],[gwy_version_major])
@@ -60,6 +60,24 @@ AC_DEFINE_UNQUOTED([GWY_LIB_PATH],["$gwy_lib_path"],
 PKG_PROG_PKG_CONFIG([0.22])
 
 #############################################################################
+# Win32.
+AC_MSG_CHECKING([for native Win32])
+case "$host_os" in
+  mingw*)
+    os_win32=yes
+    HOST_CFLAGS="-mms-bitfields"
+    HOST_LDFLAGS="-mwindows"
+    ;;
+  *)
+    os_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$os_win32])
+AM_CONDITIONAL([OS_WIN32],[test "$os_win32" = "yes"])
+AC_SUBST(HOST_CFLAGS)
+AC_SUBST(HOST_LDFLAGS)
+
+#############################################################################
 # Compiler
 
 if test "x$ac_cv_prog_cc_c99" = xno; then
@@ -67,6 +85,7 @@ if test "x$ac_cv_prog_cc_c99" = xno; then
 fi
 
 GWY_CHECK_GNUC_VISIBILITY
+# TODO: Must check -fexcess-precision=fast!
 
 #############################################################################
 # Headers
@@ -130,6 +149,8 @@ AC_CHECK_PROGS([GTESTER],[gtester],[false])
 #GOBJECT_QUERY=`$PKG_CONFIG --variable=gobject_query glib-2.0`
 #AC_MSG_RESULT([$GOBJECT_QUERY])
 #AC_SUBST(GOBJECT_QUERY)
+
+GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 #############################################################################
 # Other tools

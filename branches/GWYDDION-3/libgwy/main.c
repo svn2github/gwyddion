@@ -49,7 +49,6 @@
 #endif
 
 #include "libgwy/libgwy.h"
-#include "libgwy/libgwy-aliases.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
@@ -761,8 +760,6 @@ gwy_data_search_path(const gchar *subdir)
     return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
-#define __LIBGWY_MAIN_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: main

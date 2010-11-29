@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-arithmetic.h"
-#include "libgwy/libgwy-aliases.h"
 
 /* for compatibility checks */
 #define EPSILON 1e-6
@@ -109,8 +108,6 @@ gwy_field_is_incompatible(GwyField *field1,
     return result;
 }
 
-#define __LIBGWY_FIELD_ARITHMETIC_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field-arithmetic

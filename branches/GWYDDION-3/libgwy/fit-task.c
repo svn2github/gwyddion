@@ -22,7 +22,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/fit-task.h"
 #include "libgwy/types.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 
 enum { VARARG_PARAM_MAX = 5 };
@@ -943,8 +942,6 @@ gwy_fit_task_get_chi(GwyFitTask *fittask)
     return (res < 0.0) ? res : sqrt(res/(priv->ndata - priv->nparam));
 }
 
-#define __LIBGWY_FIT_TASK_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: fit-task

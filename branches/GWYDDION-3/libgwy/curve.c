@@ -24,7 +24,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/curve.h"
 #include "libgwy/curve-statistics.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
@@ -736,8 +735,6 @@ gwy_curve_get_format_y(GwyCurve *curve,
                                        style, max - min, 3, format);
 }
 
-#define __LIBGWY_CURVE_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: curve

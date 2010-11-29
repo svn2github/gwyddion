@@ -19,7 +19,6 @@
 
 #include <string.h>
 #include "libgwy/serializable.h"
-#include "libgwy/libgwy-aliases.h"
 
 GType
 gwy_serializable_get_type(void)
@@ -169,8 +168,6 @@ gwy_serializable_assign(GwySerializable *destination,
     return iface->assign(destination, source);
 }
 
-#define __LIBGWY_SERIALIZABLE_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: serializable

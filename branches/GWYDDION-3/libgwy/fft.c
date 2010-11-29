@@ -24,7 +24,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/fft.h"
-#include "libgwy/libgwy-aliases.h"
 
 typedef gdouble (*GwyFFTWindowingFunc)(guint i, guint n);
 
@@ -249,8 +248,6 @@ gwy_fft_window_sample(gdouble *data,
         data[i] = window(i, n);
 }
 
-#define __LIBGWY_FFT_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: fft

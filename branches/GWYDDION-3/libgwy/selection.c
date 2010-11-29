@@ -22,7 +22,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
 #include "libgwy/selection.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/array-internal.h"
 #include "libgwy/math-internal.h"
@@ -585,8 +584,6 @@ gwy_selection_finished(GwySelection *selection)
     g_signal_emit(selection, selection_signals[FINISHED], 0);
 }
 
-#define __LIBGWY_SELECTION_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: selection

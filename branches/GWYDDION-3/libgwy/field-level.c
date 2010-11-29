@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-level.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/mask-field-internal.h"
@@ -883,8 +882,6 @@ gwy_field_find_row_shifts(const GwyField *field,
     }
 }
 
-#define __LIBGWY_FIELD_LEVEL_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field-level

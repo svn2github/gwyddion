@@ -21,7 +21,6 @@
 #include <string.h>
 #include "libgwy/math.h"
 #include "libgwy/interpolation.h"
-#include "libgwy/libgwy-aliases.h"
 
 enum { SUPPORT_LENGTH_MAX = 6 };
 
@@ -832,8 +831,6 @@ gwy_interpolation_shift_block_1d(guint length,
         g_slice_free1(sizeof(gdouble)*length, coeffs);
 }
 
-#define __LIBGWY_INTERPOLATION_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: interpolation

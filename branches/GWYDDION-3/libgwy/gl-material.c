@@ -23,7 +23,6 @@
 #include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
 #include "libgwy/gl-material.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 /* FIXME
@@ -623,8 +622,6 @@ gwy_gl_material_parse(GwyResource *resource,
     return TRUE;
 }
 
-#define __LIBGWY_GL_MATERIAL_C__
-#include "libgwy/libgwy-aliases.c"
 
 /************************** Documentation ****************************/
 

@@ -25,7 +25,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
 #include "libgwy/gradient.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 #define gwy_debug(fmt...)  /* FIXME */
@@ -990,8 +989,6 @@ gwy_gradient_setup_inventory(GwyInventory *inventory)
     g_object_unref(gradient);
 }
 
-#define __LIBGWY_GRADIENT_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: gradient

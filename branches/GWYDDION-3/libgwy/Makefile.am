@@ -6,6 +6,8 @@ PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
 WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=implicit-int -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
 
 library = libgwy
+Library = Gwy
+library_minor_version = 0
 libsuffix = $(PACKAGE_SUFFIX)
 toplevelincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
@@ -13,6 +15,8 @@ test_program = ./tests/testlibgwy
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
 main_header = $(srcdir)/libgwy.h
+Gwy3_3_0_gir_INCLUDES = Gio-2.0
+Gwy3_3_0_gir_PACKAGES = gio-2.0
 
 public_headers = \
 	$(srcdir)/array.h \
@@ -78,11 +82,13 @@ EXTRA_DIST = version.h.in
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers)
 MAINTAINERCLEANFILES =
+libgwy3_la_DEPENDENCIES =
 BUILT_SOURCES =
 
+# lib_LTLIBRARIES must be a literal, no variables
 lib_LTLIBRARIES = libgwy3.la
 nodist_libgwyinclude_HEADERS = $(public_built_headers)
-libgwyinclude_HEADERS = $(public_headers)
+libgwyinclude_HEADERS = $(library_headers)
 toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
@@ -132,7 +138,7 @@ libgwy3_la_SOURCES = \
 	value-format.c \
 	version.c
 
-AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ $(WARNINGS)
+AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ @HOST_CFLAGS@ $(WARNINGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
@@ -148,13 +154,13 @@ AM_CPPFLAGS = \
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-if UNSTABLE_LIBRARY_RELEASE
-version_info = -release @GWY_VERSION_STRING@
-else
-version_info = -version-info 0:0:0
-endif
+library_so_version = 0:0:0
 
-libgwy3_la_LDFLAGS = @LIBGWY_DEPS_LIBS@ $(version_info)
+libgwy3_la_LDFLAGS = \
+	@LIBGWY_DEPS_LIBS@ \
+	@HOST_LDFLAGS@ \
+	$(version_info) \
+	$(library_host_ldflags)
 
 include $(top_srcdir)/build/gtester.make
 include $(top_srcdir)/build/library.make

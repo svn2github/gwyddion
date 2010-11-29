@@ -27,7 +27,6 @@
 #include "libgwy/math.h"
 #include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
@@ -1098,8 +1097,6 @@ jump_over:
     }
 }
 
-#define __LIBGWY_MATH_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: math

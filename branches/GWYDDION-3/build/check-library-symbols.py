@@ -1,13 +1,17 @@
 #!/usr/bin/python
-import sys, os, re, glob
+import sys, os, re, glob, shlex, subprocess
 
-if len(sys.argv) != 4:
-  print "Usage: check-library-symbols.py: LIBRARY.la LIBRARY-decl.txt HEADER-DIRECTORY"
+if len(sys.argv) != 5:
+  print "Usage: check-library-symbols.py: NM-PROGRAM LIBRARY.la LIBRARY-decl.txt HEADER-DIRECTORY"
   sys.exit(1)
 
-laname = sys.argv[1]
-declname = sys.argv[2]
-headerdir = sys.argv[3]
+# The output seems to differ
+globalscopes = ('T', 'GLOBAL')
+nmprog = [shlex.split(sys.argv[1])[0], '-f', 'sysv']
+
+laname = sys.argv[2]
+declname = sys.argv[3]
+headerdir = sys.argv[4]
 
 # Read libtool's LIBRARY.la file to learn the real name
 dlname = None
@@ -23,28 +27,24 @@ if not dlname:
 
 # Read the symbols using nm
 dlname = os.path.join(os.path.dirname(laname), dlname)
-input = None
-for nm in 'eu-nm -f sysv "%s"', 'nm -f sysv "%s"':
-    try:
-        input = os.popen(nm % dlname)
-        break
-    except OSError:
-        pass
-if not input:
-    sys.stderr.write('Cannot find nm program to scan symbols.\n')
+try:
+    syminput = subprocess.Popen(nmprog + [dlname], stdout=subprocess.PIPE).stdout
+except OSError as (errno, strerror):
+    sys.stderr.write('Cannot execute %s -f sysv to scan symbols: %s.\n'
+                     % (nmprog, strerror))
     sys.exit(1)
 
 exported_symbols = {}
-for line in input:
+for line in syminput:
     try:
         name, offset, scope, type, size, source, sect = \
             [x.strip() for x in line.split('|')]
     except ValueError:
         continue
 
-    if sect == '.text' and scope == 'GLOBAL' and not name.startswith('_'):
+    if sect == '.text' and scope in globalscopes and not name.startswith('_'):
         exported_symbols[name] = source
-del input
+del syminput
 
 # Read FUNCTIONs from the documentation, this saves us parsing the headers
 function_re = re.compile(r'<FUNCTION>.*?</FUNCTION>', re.S).finditer

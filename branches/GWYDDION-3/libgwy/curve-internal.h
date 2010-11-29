@@ -19,10 +19,6 @@
 
 /*< private_header >*/
 
-#ifndef __LIBGWY_ALIASES_H__
-#error Private headers must be included after the aliasing header.
-#endif
-
 #ifndef __LIBGWY_CURVE_INTERNAL_H__
 #define __LIBGWY_CURVE_INTERNAL_H__
 

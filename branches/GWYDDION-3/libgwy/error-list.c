@@ -19,7 +19,6 @@
 
 #include <stdarg.h>
 #include "libgwy/error-list.h"
-#include "libgwy/libgwy-aliases.h"
 
 /**
  * gwy_error_list_add:
@@ -99,8 +98,6 @@ gwy_error_list_clear(GwyErrorList **list)
     *list = NULL;
 }
 
-#define __LIBGWY_ERROR_LIST_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: error-list

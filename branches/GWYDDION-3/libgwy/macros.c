@@ -18,10 +18,7 @@
  */
 
 #include "libgwy/macros.h"
-#include "libgwy/libgwy-aliases.h"
 
-#define __LIBGWY_MACROS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: macros

@@ -22,7 +22,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 gboolean
@@ -134,7 +133,5 @@ _gwy_check_object_component(const GwySerializableItem *item,
     g_return_val_if_reached(FALSE);
 }
 
-#define __LIBGWY_OBJECT_INTERNAL_C__
-#include "libgwy/libgwy-aliases.c"
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

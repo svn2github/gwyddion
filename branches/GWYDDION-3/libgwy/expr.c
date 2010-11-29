@@ -26,7 +26,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
 #include "libgwy/math.h"
-#include "libgwy/libgwy-aliases.h"
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
 
@@ -775,7 +774,7 @@ scan_tokens(Expr *expr,
 
     scanner = expr->scanner;
     while ((token = g_scanner_get_next_token(scanner))) {
-        switch (token) {
+        switch ((gint)token) {
             case G_TOKEN_LEFT_PAREN:
             case G_TOKEN_RIGHT_PAREN:
             case G_TOKEN_COMMA:
@@ -1727,8 +1726,6 @@ gwy_expr_undefine_constant(GwyExpr *expr,
 
 }
 
-#define __LIBGWY_EXPR_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: expr

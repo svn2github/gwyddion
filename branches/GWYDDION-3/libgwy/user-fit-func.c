@@ -27,7 +27,6 @@
 #include "libgwy/expr.h"
 #include "libgwy/serialize.h"
 #include "libgwy/user-fit-func.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/fit-func-builtin.h"
 
@@ -731,8 +730,6 @@ gwy_user_fit_func_error_quark(void)
     return error_domain;
 }
 
-#define __LIBGWY_USER_FIT_FUNC_C__
-#include "libgwy/libgwy-aliases.c"
 
 /************************** Documentation ****************************/
 
@@ -838,21 +835,6 @@ gwy_user_fit_func_error_quark(void)
  * Class of user fitting functions.
  *
  * #GwyUserFitFuncClass does not contain any public members.
- **/
-
-/**
- * GwyFitParam:
- * @name: Name, it must be a valid identifier (UTF-8 letters such as α are
- *        permitted).
- * @estimate: Initial parameter estimate (a formula that can contain the
- *            estimator variables).
- * @power_x: Power of the abscissa contained in the parameter.
- * @power_y: Power of the ordinate contained in the parameter.
- *
- * One parameter of a user fitting function.
- *
- * See gwy_fit_func_get_param_units() for a discussion of @power_x, @power_y
- * and choosing good parametrisation with respect to units.
  **/
 
 /**

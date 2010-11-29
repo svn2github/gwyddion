@@ -5,6 +5,7 @@ EXTRA_DIST = \
 	check-library-symbols.py \
 	coverage-plot.py \
 	coverage-test.sh \
+	generate-library-def.py \
 	gtester.make \
 	gtkdoc-add-objects.py \
 	gwy-doc.make \
@@ -15,8 +16,5 @@ EXTRA_DIST = \
 	Makevars.in \
 	test-report.xsl \
 	test-report-brief.xsl \
-	update-aliases.py \
-	update-library-def.py \
-	update-library-symbols.py \
 	update-POTFILES.in.sh \
 	vim-syn-gen.py

@@ -19,7 +19,6 @@
 
 #include <string.h>
 #include "libgwy/serializable-boxed.h"
-#include "libgwy/libgwy-aliases.h"
 
 #define serializable_boxed_index(a, i) \
     g_array_index((a), GwySerializableBoxedData, (i))
@@ -230,8 +229,6 @@ gwy_serializable_boxed_construct(GType type,
     return info->construct(items, error_list);
 }
 
-#define __LIBGWY_SERIALIZABLE_BOXED_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: serializable-boxed

@@ -41,4 +41,4 @@ $(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template)
 	&& cp $(mkenum_name).c.tmp $(mkenum_name).c  \
 	&& rm -f $(mkenum_name).c.tmp
 
-# vim: set ft=make noet :
+# vim: set ft=automake noet :

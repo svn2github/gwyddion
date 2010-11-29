@@ -45,4 +45,4 @@ test-valgrind: $(test_program).supp
 # run make test as part of make check
 check-local: test
 
-# vim: set ft=make noet :
+# vim: set ft=automake noet :

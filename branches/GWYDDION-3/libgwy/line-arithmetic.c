@@ -20,7 +20,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/line-arithmetic.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/line-internal.h"
 
 // FIXME: These two may not belong here, but they do not worth a separate
@@ -99,8 +98,6 @@ gwy_line_multiply(GwyLine *line,
         *p *= value;
 }
 
-#define __LIBGWY_LINE_ARITHMETIC_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: line-arithmetic

@@ -25,7 +25,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/unit.h"
-#include "libgwy/libgwy-aliases.h"
 
 #ifdef ENABLE_PARSE_WARNINGS
 #define gwy_unit_warning g_warning
@@ -1354,8 +1353,6 @@ get_prefix(gint power)
     return NULL;
 }
 
-#define __LIBGWY_UNIT_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: unit

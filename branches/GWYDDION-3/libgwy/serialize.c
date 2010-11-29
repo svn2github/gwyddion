@@ -25,7 +25,6 @@
 #include "libgwy/serializable.h"
 #include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
-#include "libgwy/libgwy-aliases.h"
 
 /*
  * XXX assertions:
@@ -1686,8 +1685,6 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
     return np - 1;
 }
 
-#define __LIBGWY_SERIALIZE_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: serialize

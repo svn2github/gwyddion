@@ -24,7 +24,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/field.h"
 #include "libgwy/field-statistics.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
@@ -1221,8 +1220,6 @@ gwy_field_get_format_z(GwyField *field,
                                        style, max - min, 3, format);
 }
 
-#define __LIBGWY_FIELD_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field

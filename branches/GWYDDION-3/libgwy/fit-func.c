@@ -22,7 +22,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
 #include "libgwy/fit-func.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/fit-func-builtin.h"
 
@@ -737,8 +736,6 @@ _gwy_fit_func_new_expr_with_constants(void)
     return expr;
 }
 
-#define __LIBGWY_FIT_FUNC_C__
-#include "libgwy/libgwy-aliases.c"
 
 /************************** Documentation ****************************/
 

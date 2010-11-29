@@ -22,7 +22,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/mask-field-transform.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/mask-field-internal.h"
 
@@ -786,8 +785,6 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
     return newfield;
 }
 
-#define __LIBGWY_MASK_FIELD_TRANSFORM_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: mask-field-transform

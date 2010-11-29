@@ -1,34 +1,58 @@
 # Generic library symbol rules.
 # $Id$
-# Variables: library main_header
-# Adds to: BUILT_SOURCES EXTRA_DIST DISTCLEANFILES
+# Variables: library libsuffix main_header Library library_minor_version
+#            library_so_version
+# Adds to: EXTRA_DIST CLEANFILES DISTCLEANFILES
 
-library_symbols = $(library)$(libsuffix).symbols
-library_la = .libs/$(library)$(libsuffix).la
-library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
-library_aliases = $(library)-aliases
-library_def = $(library)$(libsuffix).def
 pkgconfigdatadir = $(libdir)/pkgconfig
 
-BUILT_SOURCES += $(library_aliases).c $(library_aliases).h
+Library_ver = $(Library)$(libsuffix)-$(libsuffix).$(library_minor_version)
+Library_with_ver = $(Library)$(libsuffix)_$(libsuffix)_$(library_minor_version)
+library_la = .libs/$(library)$(libsuffix).la
+library_decl = $(top_builddir)/docs/$(library)/$(library)-decl.txt
+library_def = $(library)$(libsuffix).def
+library_objects = $($(library)$(libsuffix)_la_OBJECTS)
+$(eval $(library)$(libsuffix)_la_DEPENDENCIES += $(library_def))
+
+INTROSPECTION_GIRS = $(Library_ver).gir
+INTROSPECTION_SCANNER_ARGS = --strip=gwy_ -I..
+$(eval $(Library_with_ver)_gir_LIBS = $(library)$(libsuffix).la)
+$(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers))
+girdir = $(datadir)/gir-1.0
+dist_gir_DATA = $(Library_ver).gir
+typelibdir = $(libdir)/girepository-1.0
+typelib_DATA = $(Library_ver).typelib
+pkgconfigdata_DATA = $(library)$(libsuffix).pc
+
+if OS_WIN32
+library_host_ldflags = -no-undefined -export-symbols $(library)$(libsuffix).def
+endif
+
+if UNSTABLE_LIBRARY_RELEASE
+version_info = -release @GWY_VERSION_STRING@
+else
+version_info = -version-info $(library_so_version)
+endif
+
+-include $(INTROSPECTION_MAKEFILE)
+
+CLEANFILES += \
+	$(dist_gir_DATA) \
+	$(typelib_DATA) \
+	$(library_def)
 
 DISTCLEANFILES += \
-	$(library)$(libsuffix).pc \
-	$(library_aliases).c \
-	$(library_aliases).h \
-	$(library_symbols)
+	$(library)$(libsuffix).pc
 
 EXTRA_DIST += \
 	$(library)$(libsuffix).pc.in
 
-pkgconfigdata_DATA = $(library)$(libsuffix).pc
-
 check-symbols: $(library_la) $(library_decl)
-	$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
-	    $(library_la) $(library_decl) $(srcdir)
+	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
+	    "$(NM)" $(library_la) $(library_decl) $(srcdir)
 
 check-headers: $(library_headers)
-	@result=true; \
+	$(AM_V_at)result=true; \
 	for x in $(library_headers); do \
 	    x='#include <$(library)/'$$(basename $$x)'>'; \
 	    if ! grep -qF "$$x" $(main_header); then \
@@ -38,47 +62,12 @@ check-headers: $(library_headers)
 	done; \
 	$$result
 
-# FIXME: This should depend on library sources and process only that.
-# Does not work in distcheck (i.e. does not check anything) because *.c is
-# elsewhere.  More importantly, it should not check files such as
-# object-internal.c because they correctly include H-aliases but as they do not
-# define any public symbols, they do not need to include C-aliases.
-#check-aliases:
-#	@result=true \
-#	aliases='#include "$(library)/$(library_aliases)'; \
-#	for x in *.c; do \
-#	    if grep -qF "$$aliases.h" $$x; then \
-#	    macro=$$(echo -n "++$(library)/$$x++" | tr -c '[:alnum:]' _ | tr '[:lower:]' '[:upper:]'); \
-#	        if ! grep -qF "#define $$macro" $$x; then \
-#	           echo "$$x lacks #define $$macro" 1>&2; \
-#	           result=false; \
-#	        fi; \
-#	        if ! grep -qF "$$aliases.c" $$x; then \
-#	           echo "$$x lacks $$aliases.c" 1>&2; \
-#	           result=false; \
-#	        fi; \
-#	    fi; \
-#	done; \
-#	$$result
-
-$(library_symbols): $(library_headers)
-	$(AM_V_GEN) $(PYTHON) $(abs_top_srcdir)/build/update-library-symbols.py \
-	        $(library_symbols) $(library_headers)
-
-$(library_def): $(library_symbols)
-	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-library-def.py \
-	     $(library_def) $(library_symbols)
-
-$(library_aliases).h: $(library_symbols) $(CONFIG_HEADER)
-	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library_aliases).h $(library_symbols) $(CONFIG_HEADER)
-
-$(library_aliases).c: $(library_symbols) $(CONFIG_HEADER)
-	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/update-aliases.py \
-	    $(library_aliases).c $(library_symbols) $(CONFIG_HEADER)
+$(library_def): $(library_objects)
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
+	     "$(NM)" $(library_objects)
 
 .PHONY: check-symbols check-headers
 # run make check-symbols as part of make check
 check-local: check-symbols check-headers
 
-# vim: set ft=make ts=4 sw=4 noet :
+# vim: set ft=automake ts=4 sw=4 noet :

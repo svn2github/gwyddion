@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
 #include "libgwy/mask-field.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 #include "libgwy/object-internal.h"
@@ -1963,8 +1962,6 @@ gwy_mask_field_number_grains(GwyMaskField *field,
     return priv->grains;
 }
 
-#define __LIBGWY_MASK_FIELD_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: mask-field

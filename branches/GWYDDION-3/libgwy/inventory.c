@@ -24,7 +24,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/serializable.h"
 #include "libgwy/inventory.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 enum {
@@ -1228,8 +1227,6 @@ invent_item_name(Inventory *inventory,
     return NULL;
 }
 
-#define __LIBGWY_INVENTORY_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: inventory

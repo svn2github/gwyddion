@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/line-statistics.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
 
@@ -138,8 +137,6 @@ gwy_line_length(const GwyLine *line)
     return length;
 }
 
-#define __LIBGWY_LINE_STATISTICS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: line-statistics

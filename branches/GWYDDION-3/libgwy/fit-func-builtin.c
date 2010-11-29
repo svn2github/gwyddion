@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/fit-func.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/fit-func-builtin.h"
 
 static const FitFuncParam const_param[] = {
@@ -134,7 +133,5 @@ _gwy_fit_func_setup_builtins(void)
     return builtins;
 }
 
-#define __LIBGWY_FIT_FUNC_BUILTIN_C__
-#include "libgwy/libgwy-aliases.c"
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

@@ -24,7 +24,6 @@
 #include "libgwy/math.h"
 #include "libgwy/fitter.h"
 #include "libgwy/types.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 
@@ -901,8 +900,6 @@ gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
     return FALSE;
 }
 
-#define __LIBGWY_FITTER_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: fitter

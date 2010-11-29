@@ -19,7 +19,6 @@
 
 #include "config.h"
 #include "libgwy/version.h"
-#include "libgwy/libgwy-aliases.h"
 
 /**
  * gwy_version_major:
@@ -73,8 +72,6 @@ gwy_version_string(void)
     return GWY_VERSION_STRING;
 }
 
-#define __LIBGWY_VERSION_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: version

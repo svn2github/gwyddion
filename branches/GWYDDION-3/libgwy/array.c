@@ -20,7 +20,6 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/array.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/array-internal.h"
 
 #define gwy_array_index(a,i) \
@@ -532,8 +531,6 @@ _gwy_array_set_data_silent(GwyArray *array,
         g_array_append_vals(array->priv->items, items, nitems);
 }
 
-#define __LIBGWY_ARRAY_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: array

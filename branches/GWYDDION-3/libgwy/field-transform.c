@@ -22,7 +22,6 @@
 #include "libgwy/math.h"
 #include "libgwy/field-transform.h"
 #include "libgwy/mask-field.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 #include "libgwy/line-internal.h"
@@ -362,8 +361,6 @@ gwy_field_new_rotated_simple(const GwyField *field,
     return newfield;
 }
 
-#define __LIBGWY_FIELD_TRANSFORM_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field-transform

@@ -27,7 +27,6 @@
 #include "libgwy/serialize.h"
 #include "libgwy/expr.h"
 #include "libgwy/fit-param.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/fit-func-builtin.h"
 #include "libgwy/object-internal.h"
 
@@ -617,8 +616,6 @@ gwy_fit_param_error_quark(void)
     return error_domain;
 }
 
-#define __LIBGWY_FIT_PARAM_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: fit-param

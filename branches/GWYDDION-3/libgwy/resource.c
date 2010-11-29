@@ -59,7 +59,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/serialize.h"
 #include "libgwy/resource.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 #define MAGIC_HEADER2 "Gwyddion resource "
@@ -2089,8 +2088,6 @@ gwy_resource_dump_data_line(const gdouble *data,
     return buffer;
 }
 
-#define __LIBGWY_RESOURCE_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: resource

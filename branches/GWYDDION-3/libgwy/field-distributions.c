@@ -25,7 +25,6 @@
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/field-distributions.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
@@ -1411,8 +1410,6 @@ fail:
     return line;
 }
 
-#define __LIBGWY_FIELD_DISTRIBUTIONS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field-distributions

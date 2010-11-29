@@ -26,7 +26,6 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/object-internal.h"
 
 enum {
@@ -415,8 +414,6 @@ fix_utf8_minus(GString *str)
     }
 }
 
-#define __LIBGWY_VALUE_FORMAT_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: value-format

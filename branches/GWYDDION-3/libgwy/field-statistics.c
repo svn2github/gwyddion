@@ -21,7 +21,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/field-statistics.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
@@ -1241,8 +1240,6 @@ gwy_field_surface_area(GwyField *field)
                                        0, 0, field->xres, field->yres);
 }
 
-#define __LIBGWY_FIELD_STATISTICS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: field-statistics

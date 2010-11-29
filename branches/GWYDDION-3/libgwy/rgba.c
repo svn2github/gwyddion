@@ -23,7 +23,6 @@
 #include "libgwy/serializable-boxed.h"
 #include "libgwy/serialize.h"
 #include "libgwy/rgba.h"
-#include "libgwy/libgwy-aliases.h"
 
 enum { N_ITEMS = 4 };
 
@@ -216,8 +215,6 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
     rgba->b = (x*src2->a*src2->b + (1.0 - x)*src1->a*src1->b)/rgba->a;
 }
 
-#define __LIBGWY_RGBA_C__
-#include "libgwy/libgwy-aliases.c"
 
 /************************** Documentation ****************************/
 

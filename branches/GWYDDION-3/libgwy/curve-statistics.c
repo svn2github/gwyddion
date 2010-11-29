@@ -20,7 +20,6 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/curve-statistics.h"
-#include "libgwy/libgwy-aliases.h"
 #include "libgwy/curve-internal.h"
 
 /**
@@ -108,8 +107,6 @@ gwy_curve_median_dx(const GwyCurve *curve)
     return mdx;
 }
 
-#define __LIBGWY_CURVE_STATISTICS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: curve-statistics

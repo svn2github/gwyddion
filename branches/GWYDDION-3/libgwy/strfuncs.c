@@ -21,7 +21,6 @@
 #include <stdarg.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
-#include "libgwy/libgwy-aliases.h"
 
 /**
  * gwy_ascii_strisident:
@@ -280,8 +279,6 @@ gwy_str_next_line(gchar **buffer)
     return q;
 }
 
-#define __LIBGWY_STRFUNCS_C__
-#include "libgwy/libgwy-aliases.c"
 
 /**
  * SECTION: strfuncs
