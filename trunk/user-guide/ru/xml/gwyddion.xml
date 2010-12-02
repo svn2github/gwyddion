@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyddion.xml 10338 2009-11-02 15:58:14Z yeti-dn $ -->
+<!-- @(#) $Id: gwyddion.xml 11651 2010-12-02 14:11:16Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <refentry id="gwyddion">
   <refentryinfo>
@@ -33,8 +33,9 @@
 
   <refsect1 id="gwyddion-options">
     <title>Опции</title>
-    <para>Программа принимает все стандартные опции Gtk+, Gdk, и GtkGLExt, такие, как <option>--display</option> или <option>--sync</option>. Смотрите документацию по этим пакетам для описания опций тулкитов.</para>
+    <para>Программа принимает все стандартные опции Gtk+, Gdk, и GtkGLExt, такие, как <option>--display</option> или <option>--sync</option>. См. документацию по этим пакетам для описания опций тулкитов.</para>
     <para>Поведение опции удалённого управления  <option>--remote-<replaceable>*</replaceable></option> не определено, когда более, чем один экземпляр Gwyddion запущен на данном дисплее. Они могут выбирать произвольный экземпляр программы для работы с ним.</para>
+    <para>Если каталог задан как аргумент <replaceable>ФАЙЛ</replaceable>, программа открывает диалог выбора файлов в заданном каталоге.</para>
     <para>Опции Gwyddion:</para>
     <variablelist>
       <varlistentry>
@@ -84,18 +85,8 @@
           <option>--remote-query</option>
         </term>
         <listitem>
-          <para>
-            Succeeds if an instance of Gwyddion is already running on the
-            display and prints its instance identifier.  Fails if none is
-            running.
-          </para>
-          <para>
-            The instance identifier depends on the remote control backend in
-            use.  In some cases it is useful as a global window identifier,
-            in some it is not.  With libXmu this option prints the X11
-            <type>Window</type>, on Win32 <type>HWND</type> is printed, while
-            with LibUnique the startup id is printed.
-          </para>
+          <para>Успешно завершается, если Gwyddion уже запущен на дисплее и печатает идентификатор экземпляра. Возвращает ошибку, если Gwyddion не запущен.</para>
+          <para>Идентификатор экземпляра зависит от используемого интерфейса удалённого управления. В некоторых случаях он полезен как глобальный идентификатор окна, в некоторых нет. С libXmu эта опция печатает X11 <type>Window</type>, на Win32 печатается <type>HWND</type>, в то время как с  LibUnique печатается идентификатор запуска.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -111,7 +102,15 @@
           <option>--log-to-file</option>
         </term>
         <listitem>
-          <para>Перенаправляет сообщения от GLib, Gtk+, Gwyddion, и т.д. в <filename>~/.gwyddion/gwyddion.log</filename> или в файл. указанный в переменной окружения <link linkend="GWYDDION_LOGFILE"><envar>GWYDDION_LOGFILE</envar></link>. Следует отметить, что сообщения всегда перенаправляются в файл на платформе Win32, таким образом, эта опция не действует на этой платформе.</para>
+          <para>Перенаправляет сообщения от GLib, Gtk+, Gwyddion, и т.д. в <filename>~/.gwyddion/gwyddion.log</filename> или в файл, указанный в переменной окружения <link linkend="GWYDDION_LOGFILE"><envar>GWYDDION_LOGFILE</envar></link>. Эта опция наиболее полезна в среде Unix, поскольку на платформе Win32 сообщения по умолчанию перенаправляются в файл.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--no-log-to-file</option>
+        </term>
+        <listitem>
+          <para>Предотвращает перенаправление сообщений от GLib, Gtk+, Gwyddion, и т.д. в файл. Наиболее полезна на платформе Win32, где сообщения перенаправляются в файл по умолчанию. При этом stdout и stderr направляются куда-то, где их можно увидеть.</para>
         </listitem>
       </varlistentry>
       <varlistentry>

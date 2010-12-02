@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: statistical.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!-- @(#) $Id: statistical.xml 11651 2010-12-02 14:11:16Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 xmlns:xi="http://www.w3.org/2001/XInclude" id="statistical-analysis">
   <title>Статистический анализ</title>
   <para>При анализе случайно шероховатых поверхностей нередко требуется статистический подход для определения некоторого набора типичных величин. В Gwyddion есть несколько различных путей как это можно сделать. В этом разделе мы опишем различные статистические инструменты и модули, представленные в Gwyddion, а также представим основные формулы, которые использовались для разработки лежащих в их основе алгоритмов.</para>
-  <para>Данные сканирующей зондовой микроскопии обычно представляются как двумерное поле данных размера <xi:include href="eqi-NxM.xml"/>, где  <xi:include href="eqi-N.xml"/> и <xi:include href="eqi-M.xml"/> - число строк и столбцов поля данных, соответственно. Настоящая площадь этого поля обозначается как <xi:include href="eqi-L_x-times-L_y.xml"/>, где <xi:include href="eqi-L_x.xml"/> и <xi:include href="eqi-L_y.xml"/> - размеры вдоль соответствующих осей. Интервал дискретизации (расстояние между двумя соседними точками в скане) обозначается <xi:include href="eqi-Delta.xml"/>. Мы предполагаем, что интервал дискретизации одинаков как в <xi:include href="eqi-x.xml"/>, так и в <xi:include href="eqi-y.xml"/>-направлении и что высота поверхности в заданной точке <xi:include href="eqi-coords-x-y.xml"/> может быть описана случайной функцией <xi:include href="eqi-xi-x-y.xml"/> с заданными статистическими свойствами.</para>
+  <para>Данные сканирующей зондовой микроскопии обычно представляются как двумерное поле данных размера <xi:include href="eqi-NxM.xml"/> где  <xi:include href="eqi-N.xml"/> и <xi:include href="eqi-M.xml"/> - число строк и столбцов поля данных, соответственно. Настоящая площадь этого поля обозначается как <xi:include href="eqi-L_x-times-L_y.xml"/>, где <xi:include href="eqi-L_x.xml"/> и <xi:include href="eqi-L_y.xml"/> - размеры вдоль соответствующих осей. Интервал дискретизации (расстояние между двумя соседними точками в скане) обозначается <xi:include href="eqi-Delta.xml"/>. Мы предполагаем, что интервал дискретизации одинаков как в <xi:include href="eqi-x.xml"/>, так и в <xi:include href="eqi-y.xml"/>-направлении и что высота поверхности в заданной точке <xi:include href="eqi-coords-x-y.xml"/> может быть описана случайной функцией <xi:include href="eqi-xi-x-y.xml"/> с заданными статистическими свойствами.</para>
   <para>Следует заметить, что данные АСМ обычно собираются как линейные сканы вдоль оси <xi:include href="eqi-x.xml"/>, которые объединяются вместе, чтобы сформировать двумерное изображение. Следовательно, скорость сканирования в направлении <xi:include href="eqi-x.xml"/> значительно больше, чем скорость сканирования вдоль оси <xi:include href="eqi-y.xml"/>. В результате, статистические свойства данных АСМ обычно собираются вдоль  профилей, параллельных оси <xi:include href="eqi-x.xml"/>, поскольку на них меньше влияет низкочастотный шум и термический дрейф образца.</para>
   <sect2 id="stat-quantities">
     <title>Инструмент измерения статистических величин <guiicon><inlinemediaobject><imageobject><imagedata fileref="gwy_stat_quantities-24.png" format="PNG"/></imageobject></inlinemediaobject></guiicon></title>
     <indexterm><primary>Инструмент измерения статистических величин</primary></indexterm>
     <para>Статистические величины включают в себя основные свойства распределения значений высоты, включая его дисперсию, коэффициент асимметрии и эксцесс. Следующие величины доступны в меню инструмента <guilabel>Статистические величины</guilabel> программы Gwyddion: </para>
     <itemizedlist>
-      <listitem><indexterm><primary>среднее значение</primary><secondary>области данных</secondary></indexterm><indexterm><primary>срединное значение</primary><secondary>области данных</secondary></indexterm><indexterm><primary>минимум</primary><secondary>области данных</secondary></indexterm><indexterm><primary>максимум</primary><secondary>области данных</secondary></indexterm> Среднее и срединное значение, минимум и максимум.</listitem>
-      <listitem><indexterm><primary>Среднеквадратичное</primary><secondary>области данных</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных.</listitem>
+      <listitem><indexterm><primary>среднее</primary><secondary>области данных</secondary></indexterm><indexterm><primary>срединное</primary><secondary>области данных</secondary></indexterm><indexterm><primary>минимум</primary><secondary>области данных</secondary></indexterm><indexterm><primary>максимум</primary><secondary>области данных</secondary></indexterm> Среднее значение, минимум, максимум, срединное значение.</listitem>
+      <listitem><indexterm><primary>среднеквадратичное (rms)</primary><secondary>области данных</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных.</listitem>
       <listitem><xi:include href="eqi-R_a.xml"/> значение неровностей высоты: эта величина аналогична среднеквадратичному значению с единственной разницей в экспоненте (степени) в сумме отклонений данных. Поскольку для среднеквадратичного эта экспонента равна <xi:include href="eqi-q-is-2.xml"/>, значение <xi:include href="eqi-R_a.xml"/> рассчитывается с экспонентой <xi:include href="eqi-q-is-1.xml"/> и модулем значений данных (нулевым средним). </listitem>
       <listitem>Коэффициент асимметрии распределения высот: вычисляется из третьего центрального момента значений данных.</listitem>
       <listitem>Эксцесс распределения высот:  вычисляется из четвёртого центрального момента значений данных.</listitem>
@@ -57,8 +57,18 @@
     </sect3>
     <sect3 id="autocorrelation-1d">
       <title>Функция автокорреляции</title>
-      <indexterm><primary>одномерная функция автокорреляции</primary></indexterm>
-      <indexterm><primary>двумерная функция автокорреляции</primary></indexterm>
+      <indexterm>
+        <primary>функция автокорреляции</primary>
+        <secondary>одномерная</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>функция автокорреляции</primary>
+        <secondary>двумерная</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>функция автокорреляции</primary>
+        <secondary>радиальная</secondary>
+      </indexterm>
       <para>Функция автокорреляции задаётся как <xi:include href="eq-autocorrelation-definition.xml"/> где <xi:include href="eqi-z_1.xml"/> и <xi:include href="eqi-z_2.xml"/> - значения высоты в точках <xi:include href="eqi-coords-x_1-y_1.xml"/>, <xi:include href="eqi-coords-x_2-y_2.xml"/>; при этом <xi:include href="eqi-tau_x-is-x_1-minus-x_2.xml"/> и <xi:include href="eqi-tau_y-is-y_1-minus-y_2.xml"/>. Функция <xi:include href="eqi-w-z_1-z_2-tau_x-tau_y.xml"/> обозначает двумерную плотность вероятности случайной функции <xi:include href="eqi-xi-x-y.xml"/> соответствующей точкам <xi:include href="eqi-coords-x_1-y_1.xml"/>, <xi:include href="eqi-coords-x_2-y_2.xml"/>, и расстоянию между этими точками <xi:include href="eqi-tau.xml"/>.</para>
       <para id="autocorrelation-2d">Из дискретных данных АСМ можно извлечь эту функцию в виде <xi:include href="eq-autocorrelation-discrete-2d.xml"/> где <xi:include href="eqi-m-is-tau_x-over-Delta-x.xml"/>, <xi:include href="eqi-n-is-tau_y-over-Delta-y.xml"/>. Следовательно, эта функия может быть рассчитана для дискретного набора значений  <xi:include href="eqi-tau_x.xml"/> и <xi:include href="eqi-tau_y.xml"/>, разделённых интервалами дискретизации <xi:include href="eqi-Delta-x.xml"/> и <xi:include href="eqi-Delta-y.xml"/>, соответственно. Двумерная функция автокореляции может быть посчитана с помощью меню <menuchoice><guimenu>Обработка данных</guimenu><guisubmenu>Статистика</guisubmenu><guimenuitem>Двумерная автокорреляция</guimenuitem></menuchoice>.</para>
       <para>Для измерений АСМ мы обычно рассчитываем одномерную функцию автокорреляции основанную на профилях вдоль оси быстрого сканирования. Она может, следовательно, рассчитываться из дискретных данных АСМ как <xi:include href="eq-autocorrelation-discrete-1d.xml"/></para>
@@ -75,6 +85,7 @@
           <caption>Функция автокорреляции, полученная для модели гауссово случайной шероховатой поверхности (т.е. с гауссовой функцией автокорреляции) с <xi:include href="eqi-sigma-approx-20-nm.xml"/> и <xi:include href="eqi-T-approx-300-nm.xml"/>.</caption>
         </mediaobject>
       </informalfigure>
+      <para>Мы можем также ввести радиально усреднённую функцию автокорреляции <xi:include href="eqi-G_r-of-tau.xml"/>, которая, естественно, содержит ту же самую информацию, что и одномерная функция автокорреляции для изотропных шероховатых поверхностей: <xi:include href="eq-autocorrelation-radial.xml"/></para>
       <note>Для оптических измерений (т.е. спектроскопической рефлектометрии, эллипсометрии) гауссова функция автокорреляции обычно ожидается достаточно хорошо совпадающей со свойствами поверхности. Однако, некоторые статьи связанные с ростом поверхности и оксидированием обычно предполагают, что экспоненциальная форма ближе к реальности.</note>
     </sect3>
     <sect3 id="height-height-correlation-1d">
@@ -122,7 +133,7 @@
       </informalfigure>
       <para id="psdf-radial"><indexterm><primary>функция спектральной плотности мощности</primary><secondary>радиальная</secondary></indexterm> Мы можем также ввести радиальную функцию спектральной плотности мощности <xi:include href="eqi-W_r-of-K.xml"/>, которая, естественно, содержит ту же самую информацию, что и одномерная функция спектральной плотности мощности для изотропных шероховатых поверхностей: <xi:include href="eq-power-spectral-density-radial.xml"/></para>
       <para>Для поверхности с гауссовой функцией автокорреляции эта функция может быть выражена как <xi:include href="eq-power-spectral-density-radial-gaussian.xml"/> для поверхностей с экспоненциальной как <xi:include href="eq-power-spectral-density-radial-exponential.xml"/></para>
-      <tip>В Gwyddion можно аппроксимировать все представленные здесь статистические функции их гауссовыми и экспоненциальными формами. Чтобы это сделать, сначала нажмите <guibutton>Применить</guibutton> в окне инструмента <link linkend="sfunctions">Статистические функции</link>. При этом будет создано новое окно графика. При выбранном этом окне, нажмите на <menuchoice><guimenu>График</guimenu><guimenuitem><link linkend="graph-fit">Аппроксимировать функцией</link></guimenuitem></menuchoice>.</tip>
+      <tip>В Gwyddion можно аппроксимировать все представленные здесь статистические функции их гауссовыми и экспоненциальными формами. Чтобы это сделать, сначала нажмите <guibutton>Применить</guibutton> в окне инструмента <link linkend="sfunctions">Статистические функции</link>. При этом будет создано новое окно графика. При выбранном этом окне, нажмите на <menuchoice><guimenu>График</guimenu><guimenuitem><link linkend="graph-fit">Аппроксимировать график</link></guimenuitem></menuchoice>.</tip>
     </sect3>
     <sect3 id="minkowski-functionals">
       <title>Функционалы Минковского</title>
@@ -136,8 +147,8 @@
     <indexterm><primary>Инструмент статистики по строкам/столбцам</primary></indexterm>
     <para>Инструмент рассчитывает численные характеристики каждой строки или столбца и строит их как функции его/её положения. Это делает его в некоторой степени дополнительным к инструменту <link linkend="sfunctions">статистические функции</link>. Доступные величины включают в себя:</para>
     <itemizedlist>
-      <listitem><indexterm><primary>среднее значение</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>срединное значение</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>минимум</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>максимум</primary><secondary>строки/столбца</secondary></indexterm> Среднее и срединное значение, минимум и максимум.</listitem>
-      <listitem><indexterm><primary>Среднеквадратичное</primary><secondary>строки/столбца</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных <xi:include href="eqi-R_q.xml"/>..</listitem>
+      <listitem><indexterm><primary>среднее</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>срединное</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>минимум</primary><secondary>строки/столбца</secondary></indexterm><indexterm><primary>максимум</primary><secondary>строки/столбца</secondary></indexterm> Среднее значение, минимум, максимум, срединное значение.</listitem>
+      <listitem><indexterm><primary>среднеквадратичное (rms)</primary><secondary>строки/столбца</secondary></indexterm> Среднеквадратичное значение неровностей высоты: это значение вычисляется из дисперсии данных <xi:include href="eqi-R_q.xml"/>..</listitem>
       <listitem>Коэффициент асимметрии и эксцесс распределения высот.</listitem>
       <listitem>Длина линии поверхности. Эта величина оценивается как общая длина прямых сегментов, соединяющих значения данных в строке (столбце).</listitem>
       <listitem>Общий уклон, т.е. тангенс средней линии, аппроксимирующей строку (столбец).</listitem>
