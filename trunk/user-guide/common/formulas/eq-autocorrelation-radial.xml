@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+          'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<informalequation id='eq-autocorrelation-radial'>
+  <mediaobject>
+    <imageobject>
+      <imagedata fileref='eq-autocorrelation-radial.png' format='PNG'/>
+    </imageobject>
+    <textobject role='tex'>
+      <phrase>
+<![CDATA[
+G_{\rm r}(\tau) = \int_0^{2\pi} W(\tau\cos\varphi,\tau\sin\varphi)\,\d\varphi
+]]>
+      </phrase>
+    </textobject>
+  </mediaobject>
+</informalequation>
+<!-- vim: set ts=2 sw=2 et : -->

@@ -263,16 +263,17 @@
     <title>Objects</title>
     <para>
       The object placement method permits to create random surfaces composed
-      of features of a particular shape.  The algorithm is simple: the given
+      of features of a specific shape.  The algorithm is simple: the given
       number of objects is placed on random positions at the surface.  For each
       object placed, the new heights are changed to
       <xi:include href="eqi-max-z-z_0-plus-h.xml"/>, where
-      <xi:include href="eqi-z.xml"/> is the current height at a particular
+      <xi:include href="eqi-z.xml"/> is the current height at a specific
       pixel, <xi:include href="eqi-h.xml"/> is the height of the object at this
       pixel (assuming a zero basis) and <xi:include href="eqi-z_0.xml"/>
       is the current minimum height over the basis of the object being placed.
-      The are the objects is taken as periodic, hence, the generated surfaces are
-      also periodic (i.e. perfectly tilable).
+      The algorithm consideres the horizontal plane to be filled with identical
+      copies of the surface, hence, the generated surfaces are also periodic
+      (i.e. perfectly tilable).
     </para>
     <variablelist>
       <varlistentry>
@@ -306,7 +307,7 @@
         </term>
         <listitem>
           <para>
-            The object size, usually the side of a containing square.
+            The lateral object size, usually the side of a containing square.
           </para>
         </listitem>
       </varlistentry>
@@ -318,7 +319,7 @@
           <para>
             The ratio between the <xi:include href="eqi-x.xml"/> and
             <xi:include href="eqi-y.xml"/> dimensions of an object – with
-            respect to some base proportions.
+            respect to some default proportions.
           </para>
           <para>
             Changing the aspect ratio does not always imply mere geometrical

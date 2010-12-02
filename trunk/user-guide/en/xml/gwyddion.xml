@@ -49,6 +49,10 @@
       choose an arbitrary instance to communicate to.
     </para>
     <para>
+      If a directory is given as <replaceable>FILE</replaceable> argument
+      the program opens a file chooser in this directory.
+    </para>
+    <para>
       Gwyddion options:
     </para>
     <variablelist>
@@ -155,8 +159,21 @@
             Redirect messages from GLib, Gtk+, Gwyddion, etc. to
             <filename>~/.gwyddion/gwyddion.log</filename> or file given in
             <link linkend='GWYDDION_LOGFILE'><envar>GWYDDION_LOGFILE</envar></link>
-            environment variable.  Note messages are always redirected to
-            a file on Win32 so, this option has not effect on Win32.
+            environment variable.  This option is most useful on Unix as on
+            Win32 messages are redirected to a file by default.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--no-log-to-file</option>
+        </term>
+        <listitem>
+          <para>
+            Prevents redirection of messages from GLib, Gtk+, Gwyddion, etc.
+            to a file.  This is most useful on Win32 where messages are
+            redirected to a file by default provided that stdout and stderr
+            go somewhere you can see them.
           </para>
         </listitem>
       </varlistentry>

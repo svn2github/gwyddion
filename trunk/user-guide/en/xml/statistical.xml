@@ -249,8 +249,18 @@
     </sect3>
     <sect3 id='autocorrelation-1d'>
       <title>Autocorrelation Function</title>
-      <indexterm><primary>autocorrelation function (1D)</primary></indexterm>
-      <indexterm><primary>autocorrelation function (2D)</primary></indexterm>
+      <indexterm>
+        <primary>autocorrelation function</primary>
+        <secondary>one-dimensional</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>autocorrelation function</primary>
+        <secondary>two-dimensional</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>autocorrelation function</primary>
+        <secondary>radial</secondary>
+      </indexterm>
       <para>
         The autocorrelation function is given by
         <xi:include href="eq-autocorrelation-definition.xml"/>
@@ -320,6 +330,12 @@
           </caption>
         </mediaobject>
       </informalfigure>
+      <para>
+        We can also introduce the radially averaged ACF
+        <xi:include href="eqi-G_r-of-tau.xml"/> which of course contains the same
+        information as the one-dimensional ACF for isotropic surfaces:
+        <xi:include href="eq-autocorrelation-radial.xml"/>
+      </para>
       <note>
         For optical measurements (e. g. spectroscopic reflectometry,
         ellipsometry) the Gaussian autocorrelation function is usually expected

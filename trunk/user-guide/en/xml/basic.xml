@@ -103,10 +103,12 @@
         <menuchoice>
           <guimenu>Data Process</guimenu>
           <guisubmenu>Basic Operations</guisubmenu>
-          <guimenuitem>Threshold</guimenuitem>
+          <guimenuitem>Limit Range</guimenuitem>
         </menuchoice>.
         The range can be set numerically or taken from the false colour map range
-        as set using the <link linkend='color-range'>Color range tool</link>.
+        previously set using the <link linkend='color-range'>Color range tool</link>
+        and it is also possible to cut off outliers farther than a chosen multiple
+        of RMS from the mean value.
       </listitem>
       <listitem id='square-samples'>
         <indexterm>
