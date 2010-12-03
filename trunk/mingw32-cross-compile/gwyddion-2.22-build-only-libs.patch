@@ -1,0 +1,28 @@
+--- gwyddion.orig/Makefile.in	2010-12-02 23:55:55.973863434 +0100
++++ gwyddion/Makefile.in	2010-12-02 23:56:19.994130195 +0100
+@@ -353,24 +353,12 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ SUBDIRS = \
+-	m4 \
+ 	libgwyddion \
+ 	libprocess \
+ 	libdraw \
+ 	libgwydgets \
+ 	libgwymodule \
+-	app \
+-	modules \
+-	plugins \
+-	po \
+-	pixmaps \
+-	perl \
+-	python \
+-	ruby \
+-	data \
+-	utils \
+-	thumbnailer \
+-	devel-docs
++	app
+ 
+ EXTRA_DIST = \
+ 	INSTALL.gwyddion \
