@@ -7,7 +7,8 @@ pushd "$source_dir"
              --enable-maintainer-mode --disable-gtk-doc \
              --disable-libtool-lock --disable-dependency-tracking \
              --disable-schemas-install --disable-desktop-file-update \
-             --without-pascal --without-perl --without-python --without-ruby
+             --without-pascal --without-perl --without-python --without-ruby \
+             --without-kde4-thumbnailer
 make
 make install
 popd
