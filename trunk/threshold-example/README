@@ -1,36 +1,90 @@
-This is an example standalone Gwyddion module.
+
+This is an example of standalone Gwyddion module.
 
 It doesn't do anything extremely useful, but is complex enough to demostrate
-basic principles.
+the basic principles.
+
+Direct questions to gwyddion-devel@lists.sourceforge.net or to
+yeti@gwyddion.net.
 
 
 == Unix ======
 
-If you have Gwyddion installed in a non-standard location (e.g. /home/me/usr)
-do one of following:
-(a) run make with PREFIX=/home/me/usr
-(b) export PKG_CONFIG_PATH=/home/me/usr/lib/pkgconfig
+If you have Gwyddion installed in a non-standard location set PKG_CONFIG_PATH
+to the directory where gwyddion.pc resides:
 
-Otherwise just run make, make install.
+    export PKG_CONFIG_PATH=/home/me/opt/gwyddion/lib/pkgconfig
 
-If you want to install the module to your home Gwyddion module directory
-(supported since Gwyddion-1.3), use make install-user instead.
+Run configure
 
-If you have Gwyddion installed from rpm (with gwyddion-devel too), it should
-be possible to build a rpm with rpm -tb threshold-example-X.Y.tar.bz2
+    ./configure [OPTIONS...]
+
+The build system can handle several common types of installation, controlled
+by --with-dest=WHERE option which can take the following values:
+
+    WHERE=system (the default if you don't specify --prefix)
+        the module to be installed into Gwyddion system module directory
+        according to its type (process, file, ...), i.e. the same directory
+        where the modules that came with Gwyddion reside
+
+    WHERE=prefix (the default if you specify --prefix)
+        the module to be installed into Gwyddion system module directory but
+        under given prefix, i.e. with --prefix=/usr/local the module might be
+        installed into /usr/local/lib/gwyddion/modules/process regardless
+        where Gwyddion itself resides
+
+    WHERE=home
+        the module will be installed into $HOME/.gwyddion/modules according
+        to its type
+
+    WHERE=/foo/bar
+        the module will be installed to exactly this directory
+
+Running
+
+    make
+    make install
+
+compiles and installs the module; running
+
+    make uninstall
+
+uninstalls it.
 
 
-== Windows ======
+== MinGW32 Cross-Compilation for MS Windows ======
 
-Edit the top of make.msc and change MSVC, Gtk+, and Gwyddion paths to reflect
-reality.  Run
+This has only been tested with Fedora cross-compilation support. You need to
+install the mingw32-gwyddion-libs package that contains the cross-compiled
+versions of Gwyddion libraries.
 
-  nmake -f makefile.msc
+Specify the host system to configure:
 
-to compile the module.  Copy the created DLL to Gwyddion module directory
-appropriate for the module type (that is probably something like
-c:/program files/gwyddion/modules/process).
+    ./configure --host=i686-pc-mingw32 [OPTIONS...]
 
-It is also possible to build an exe installer, if you have Inno Setup 4
-installed.
+and then continue as in a normal Unix compilation to produce a MS Windows
+DLL of the module.
+
+
+== SVN Checkout & Development ======
+
+Starting from a fresh subversion checkout is the recommended course of action
+if you are going to use threshold-example as a base for your own standalone
+module as it ensures you have all the build tools.
+
+Check out the latest version from subversion:
+
+    https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/threshold-example
+
+Initialise the build system:
+
+    ./autogen.sh [OPTIONS...]
+
+You will need libtool, automake, autoconf, ..., the usual lot.  Give
+autogen.sh any options you would give to configure (see above).
+
+See the top of configure.ac and Makefile.am for notes about things you will
+probably need to modify if you start developing your own module based on
+threshold-example.
+
 
