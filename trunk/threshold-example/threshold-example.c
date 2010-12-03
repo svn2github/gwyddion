@@ -26,8 +26,9 @@
 #include <libprocess/filters.h>
 #include <libgwydgets/gwydgets.h>
 #include <app/gwyapp.h>
+#include "config.h"
 
-#define THRESHOLD_MOD_NAME PACKAGE
+#define THRESHOLD_MOD_NAME PACKAGE_NAME
 
 #define THRESHOLD_RUN_MODES (GWY_RUN_IMMEDIATE | GWY_RUN_INTERACTIVE)
 
@@ -109,7 +110,7 @@ static GwyModuleInfo module_info = {
     "This is an example module.  Splits the values to only two distinct ones "
         "using either an absolute threshold or a fractile value.",
     "Yeti <yeti@gwyddion.net>",
-    VERSION,
+    PACKAGE_VERSION,
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -388,8 +389,8 @@ mode_changed(GtkToggleButton *button,
     controls->args->mode = gwy_radio_buttons_get_current(controls->mode);
 }
 
-static const gchar *fractile_key = "/module/" THRESHOLD_MOD_NAME "/fractile";
-static const gchar *mode_key = "/module/" THRESHOLD_MOD_NAME "/mode";
+static const gchar fractile_key[] = "/module/" THRESHOLD_MOD_NAME "/fractile";
+static const gchar mode_key[] = "/module/" THRESHOLD_MOD_NAME "/mode";
 
 static void
 threshold_load_args(GwyContainer *container,
