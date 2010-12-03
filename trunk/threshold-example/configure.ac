@@ -20,15 +20,26 @@ AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 #####PKG_CHECK_MODULES(GWYDDION, [gwyddion >= minimum-required-version])
 PKG_CHECK_MODULES(GWYDDION, [gwyddion >= 2.8])
+#############################################################################
+# Handle different installatiom types.
 AC_ARG_WITH([dest],
   [AS_HELP_STRING([--with-dest=WHERE],
      [WHERE is system, prefix, home, or a specific directory])],,
      [if test "x$prefix" = xNONE; then with_dest=system; else with_dest=prefix; fi])
 case "$with_dest" in
-  no|system) GWYDDION_MODULE_DIR=`$PKG_CONFIG --variable=gwymoduledir gwyddion`/$MODULE_TYPE ;;
-  yes|prefix) GWYDDION_MODULE_DIR=`$PKG_CONFIG --define-variable=prefix="$prefix" --variable=gwymoduledir gwyddion`/$MODULE_TYPE ;;
-  home) GWYDDION_MODULE_DIR=$HOME/.gwyddion/modules/$MODULE_TYPE ;;
-  *) GWYDDION_MODULE_DIR="$with_dest" ;;
+  no|system)
+    GWYDDION_MODULE_DIR=`$PKG_CONFIG --variable=gwymoduledir gwyddion`/$MODULE_TYPE
+    ;;
+  yes|prefix)
+    if test "x$prefix" = xNONE; then pfx="$ac_default_prefix"; else pfx="$prefix"; fi
+    GWYDDION_MODULE_DIR=`$PKG_CONFIG --define-variable=prefix="$pfx" --variable=gwymoduledir gwyddion`/$MODULE_TYPE
+    ;;
+  home)
+    GWYDDION_MODULE_DIR=$HOME/.gwyddion/modules/$MODULE_TYPE
+    ;;
+  *)
+    GWYDDION_MODULE_DIR="$with_dest"
+    ;;
 esac
 AC_SUBST([GWYDDION_MODULE_DIR])
 #############################################################################
