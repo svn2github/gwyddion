@@ -1,0 +1,235 @@
+#!/bin/bash
+# @(#) $Id$
+disabled=
+pkgname=gwyddion
+basever=2.22
+projectdir=$PWD
+logdir=$projectdir/../buildlog
+installprefix=$HOME/opt/gwyddion
+gtkdocdir="/share/gtk-doc/html/*"
+gtkdocdirs=(/usr /usr/local /opt/gnome $installprefix $HOME)
+
+source $HOME/.bashrc
+export LC_ALL=C
+export CFLAGS="-ggdb -O2"
+PATH="$HOME/bin:$PATH"
+
+# =====[ subroutines ]=======================================================
+# execute a function/command with logging and some setup
+function call() {
+  exec >$logdir/$1.log
+  exec 2>$logdir/$1.err
+  cd $projectdir
+  for x in $disabled; do
+    if test "$1" = "$x"; then
+      echo disabled
+      return
+    fi
+  done
+  $@
+}
+
+# =====[ components ]========================================================
+function update_version() {
+  version=$basever
+  xver=.$(date +%Y%m%d)
+  version=$version$xver
+  cp -fv NEWS NEWS~
+  cp -fv configure.ac configure.ac~
+  sed -ri -e "1s/^[^ ]*/$version/" NEWS
+  sed -ri -e "/m4_define\\(\[gwy_version_string/s/(minor)\\.?[0-9]*/\\1$xver/" configure.ac
+}
+
+
+function autostuff() {
+  CONFIG_SHELL=/bin/sh ./autogen.sh \
+    --config-cache \
+    --disable-desktop-file-update \
+    --enable-pygwy \
+    --enable-gtk-doc \
+    --prefix=$installprefix
+  make -C po gwyddion.pot
+}
+
+
+function build_project() {
+  # Exclude documentation to get a separate log
+  sed -i -e '/^SUBDIRS =/,/[^\]$/s:^:###NIGHT-BUILD###:' devel-docs/Makefile
+  make -k all
+  make -k ctags
+  pushd po
+  make -k update-gmo
+  for x in $(sed '/^POFILES/s/\(.*=\|\.po\)//g;t;d' Makefile); do
+    echo -n "TRANSLATION $x: " 1>&2
+    msgfmt --statistics $x.po -o /dev/null
+  done
+  echo -n "TRANSLATION total: " 1>&2
+  grep -c ^msgstr $pkgname.pot 1>&2
+  popd
+  ./utils/update-msvc.py
+}
+
+
+function build_pygwy() {
+  # Rebuild pygwy.  This is mainly useful for getting separate logs.  It would
+  # be nice to exclude it from build_project.
+  cd ./modules/pygwy
+  rm -fr pygwywrap.c pygwy-doc
+  make -k all pygwy-doc
+}
+
+
+function build_documentation() {
+  # Note this need build_project() to pass
+  cd ./devel-docs
+  sed -i -e 's:^###NIGHT-BUILD###::' Makefile
+  make -k docs
+  for x in libgwy*; do
+    fully=$(sed 's/^\([0-9]\+\) symbols* documented.*/\1/;t;d' $x/$x-undocumented.txt)
+    partially=$(sed 's/^\([0-9]\+\) symbols* incomplete.*/\1/;t;d' $x/$x-undocumented.txt)
+    missing=$(sed 's/^\([0-9]\+\) \(symbols* \)\?not documented.*/\1/;t;d' $x/$x-undocumented.txt)
+    echo $x ${fully:-0} ${partially:-0} ${missing:-0}
+  done >$logdir/documentation_stats.log
+}
+
+
+function check_coding_style() {
+  # Source coding style
+  # Keep the `GENERATED' string quoted to prevent match here
+  grep -r --include '*.[ch]' -L ' This is a 'GENERATED' file\>' . \
+    | grep -Ev '^\./gwyddion-|/(main|test|wtest)\.c|/ige-mac-menu\.[ch]' \
+    | xargs ./utils/check-coding-style.py \
+    | cat --squeeze-blank >$logdir/coding-style.log
+
+  grep -r --include '*.c' '^ *# *define \+DEBUG\>' . \
+    | sed -e 's/^/Debugging is on in: /' 1>&2
+}
+
+
+function check_symbols() {
+  # Note this need build_documentation() to pass
+
+  # Libraries
+  find . -path \*.libs/libgwy\*.so | grep -v '[0-9]\.[0-9]' | while read lib; do
+    d=${lib##./}
+    d=${d%%/*}
+    l=$(basename $lib .so)
+    l=${l%2}
+    { nm $lib \
+        | sed -re 's/^[0-9a-f]+ T +([A-Za-z0-9_]+)$/\1/;t;d' \
+        | grep -v '^_'; \
+      sed -re 's/^_GWY_STATIC_INLINE +[A-Za-z0-9_* ]+ ([A-Za-z0-9_]+) *\(.*/\1/;t;d' $d/*.h; \
+    } \
+      | sort -u -o evil-symbols-defined.tmp
+    sed -n '/<FUNCTION>/,/<\/FUNCTION>/{s/<\/\?NAME>//g;t1;d;:1;p}' \
+      devel-docs/$l/$l-decl.txt \
+      | sort -u -o evil-symbols-declared.tmp
+    diff evil-symbols-declared.tmp evil-symbols-defined.tmp \
+      | grep '^<' \
+      | sed -re 's/< (.*)/Declared undefined symbol ('$l'): \1/' 1>&2
+    diff evil-symbols-defined.tmp evil-symbols-declared.tmp \
+      | grep '^<' \
+      | sed -re 's/< (.*)/Exported undeclared symbol ('$l'): \1/' 1>&2
+  done
+  rm -f evil-symbols-{defined,declared}.tmp
+
+  # Extra symbols in modules
+  find modules -path \*.libs/\*.so | while read mod; do
+    m=$(basename $mod .so)
+    nm $mod \
+      | sed -re 's/^[0-9a-f]+ T +([A-Za-z0-9_]+)$/Evil symbol ('$m'): \1/;t;d' \
+      | grep -Ev ' _(fini|init|gwy_module_query)$' 1>&2
+  done
+}
+
+
+function check_headers() {
+  # Check whether headers included everything they depend on
+  exceptions=_check_header.exceptions
+  cat >$exceptions <<EOF
+EOF
+  incl=$installprefix/include/$pkgname
+  flags=$(PKG_CONFIG_PATH="$installprefix/lib/pkgconfig:$PKG_CONFIG_PATH" pkg-config --cflags $pkgname)
+  for f in $(find $incl -type f -name '*.h' | sed "s#$incl/##"); do
+    if grep -F $f $exceptions; then
+      continue
+    fi
+    tmp=_check_header_$(sed 's#[^-a-zA-Z0-9]#_#g' <<<$f)
+    echo "#include <$f>" >$tmp.c
+    if ! gcc $flags -c -o $tmp.o $tmp.c; then
+      echo 1>&2
+    fi
+    rm -f $tmp.c $tmp.o
+  done
+  rm -f $exceptions
+}
+
+
+function check_desktop() {
+  # Check desktop integration stuff
+  exceptions=' \(asciiexport\|pixmap\|rawgraph\|rawfile\|rawxyz\)\.c '
+  sed -e 's/^<!-- \(Module .* contains no magic\.\) -->$/\1/;t;d' \
+    data/gwyddion.xml | grep -v "$exceptions" 1>&2
+}
+
+
+function install_to_tmp() {
+  make -k install \
+    KDE4_MODULE_DIR=$installprefix/lib/kde \
+    DISABLE_GCONF_SCHEMAS_INSTALL=yes
+}
+
+
+function make_dists() {
+  rm -f .releaseme
+
+  make dist
+  if test -s $pkgname-$version.tar.bz2; then
+    if which rpmbuild >&/dev/null; then
+      TAR_OPTIONS=--wildcards rpmbuild -ta --with kde4-thumbnailer --clean $pkgname-$version.tar.bz2 \
+        && touch .releaseme
+    else
+      echo "rpmbuild not available" 1>&2
+      touch .releaseme
+    fi
+    mv $pkgname-$version.tar.bz2 $pkgname-head.tar.bz2
+    mv $pkgname-$version.tar.gz $pkgname-head.tar.gz
+  fi
+}
+
+
+function help() {
+  sed <$0 -e '1,/^  # LIST-BEGIN/d' \
+          -e '/^  # LIST-END/,$d' \
+          -e 's/^ *call *//'
+}
+
+# =====[ main ]==============================================================
+test -d $logdir || mkdir $logdir
+
+if test -n "$1"; then
+  if test "$1" == help; then
+    help
+  else
+    for x in $@; do
+      call $x
+    done
+  fi
+else
+  for x in $(help); do
+    rm -f $logdir/$x.{log,err}
+  done
+  # LIST-BEGIN
+  call update_version
+  call autostuff
+  call build_project
+  call build_pygwy
+  call build_documentation
+  call install_to_tmp
+  call check_headers
+  call check_symbols
+  call check_desktop
+  call check_coding_style
+  call make_dists
+  # LIST-END
+fi
