@@ -3219,6 +3219,7 @@ gwy_data_field_area_get_normal_coeffs_uncertainty(GwyDataField *data_field,
 			dzdxz[i-col][j-row][j+1]+=1/hy/2;
 		}
 	}
+
 /*	//dxdxz
 for (j=0;j< height;j++){
 	if (col==0){
