@@ -222,12 +222,14 @@ void gwy_data_field_area_get_normal_coeffs_uncertainty(GwyDataField *data_field,
 		GwyDataField *uncy_field, 
 		gint col, gint row,
 		gint width, gint height,
+		gdouble *x, gdouble *y, gdouble *z,
 		gdouble *ux, gdouble *uy, gdouble *uz);
 
 void gwy_data_field_get_normal_coeffs_uncertainty(GwyDataField *data_field,
 		GwyDataField *uncz_field, 
 		GwyDataField *uncx_field, 
 		GwyDataField *uncy_field, 
+		gdouble *x, gdouble *y, gdouble *z,
 		gdouble *ux, gdouble *uy, gdouble *uz);
 
 void gwy_data_field_area_get_inclination_uncertainty(GwyDataField *data_field,
@@ -257,4 +259,10 @@ void gwy_data_field_cdh_uncertainty(GwyDataField *data_field,
 		GwyDataField *uncz_field, GwyDataLine *target_line,
 		gint nstats);
 
+gdouble gwy_data_field_get_xder_uncertainty(GwyDataField *data_field, GwyDataField *uncz_field, 
+		GwyDataField * uncx_field,GwyDataField *uncy_field, gint col,gint row);
+
+gdouble gwy_data_field_get_yder_uncertainty(GwyDataField *data_field, GwyDataField *uncz_field, 
+		GwyDataField * uncx_field,GwyDataField *uncy_field, gint col,gint row);
+	
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
