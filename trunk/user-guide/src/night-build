@@ -67,6 +67,9 @@ function user_guide_man() {
   make -k man LANGUAGES=$lang
 }
 
+function src_dist() {
+  make -k dist
+}
 
 function help() {
   sed <$0 -e '1,/^  # LIST-BEGIN/d' \
@@ -97,6 +100,7 @@ else
   call_langs user_guide_xhtml
   call_langs user_guide_pdf
   call_langs user_guide_man
+  call src_dist
   # LIST-END
   for lang in $LANGUAGES; do
     cd $lang
