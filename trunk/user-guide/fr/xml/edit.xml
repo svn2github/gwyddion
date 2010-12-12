@@ -1,0 +1,414 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: edit.xml 10415 2009-11-12 17:08:11Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='editing-correction' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title id='editing-correction.title'>Edition et correction des données</title>
+  <indexterm><primary>correction de défauts</primary></indexterm>
+  <para>
+    Plusieurs modules permettent l'édition directe ou indirecte des données SPM.
+    Dans la plupart des cas, les modules de traitement changent les données
+    d'une manière ou d'une autre. Nous allons décrire dans cette section les
+    modules et outils conçus quant à eux spécifiquement pour corriger des 
+    défauts locaux dans l'image. Les fonctions présentées par la suite 
+    permettent de supprimer les <quote>mauvaise</quote> données d'une image, 
+    puis de les remplacer à l'aide d'algorithmes d'interpolations.
+  </para>
+  <sect2 id='remove-spots'>
+    <title>
+      Supprimer les points chauds
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_spot_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      L'outil <link linkend='remove-spots'>Supprimer les Points Chauds</link>
+      peut être utilisé pour supprimer de petites parties de l'image considérées
+      comme des erreurs de mesure, des poussières ou toute autre chose n'ayant
+      rien à faire dans les données. Notez que cette opération peut avoir une
+      influence importance sur les paramètres statistiques des données, soyez
+      donc certain de ne pas supprimer des données existants réellement sur la
+      surface.
+    </para>
+    <para>
+      En utilisant cet outil vous pouvez sélectionner la position du point chaud
+      et observer son voisinage dans la fenêtre d'outil. Vous pouvez ensuite
+      sélectionner dans cette fenêtre un rectangle autour de la zone à 
+      supprimer. Vous pouvez enfin choisir l'une des méthodes d'interpolation
+      disponibles pour recréer des données à la place de l'ancien 
+      <quote>point chaud</quote> :
+    </para>
+    <itemizedlist>
+      <listitem>
+        Applatissement hyperbolique - utilise les données des bords de la zone
+        sélectionnée pour interpoler les données dans la zone sélectionnée.
+      </listitem>
+      <listitem>
+        Pseudo-Laplace et solveur laplacien - résoud l'équation de Laplace pour
+        calculer les données dans la zone ; le bord est traité comme une source
+        virtuelle.
+      </listitem>
+      <listitem>
+        Interpolation fractale - utilise l'image entière pour en déterminer la
+        dimension fractale, puis essaie de créer des données aléatoires ayant
+        la même dimension fractale et les place dans la zone sélectionnée.
+      </listitem>
+    </itemizedlist>
+    <para>
+      L'exécution de l'algorithme se lance en cliquant sur 
+      <guibutton>Appliquer</guibutton>.
+    </para>
+    <para>
+      <note>
+      L'outil de suppression des points chauds ne fonctionnera que pour des 
+      zones inférieures ou égales à 64 × 64 pixels. Pour supprimer de plus
+      grandes zones utilisez l'outil 
+      <link linkend='tool-mask-editor'>Edition de Masque</link>, puis utilisez
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem><link linkend='remove-data-under-mask'>Supprimer les données sous le masque</link></guimenuitem>
+      </menuchoice>.
+      </note>
+    </para>
+  </sect2>
+  <sect2 id='remove-grains'>
+    <title>
+      Suppression de grains
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_grains_remove-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      Cet outil simple permet de supprimer les parties continues d'un masque ou
+      d'interpoler les données situées sous le masque, ou de faire les deux à la 
+      fois. La partie du masque à supprimer peut être sélectionnée en faisant un
+      clic-gauche dessus..
+    </para>
+  </sect2>
+  <sect2 id='remove-scars'>
+    <title>
+      Supprimer les défauts linéaires
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_scars-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>correction des défauts linéaires</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Supprimer les défauts linéaires</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Les défauts linéaires correspondent à des parties de l'image affectées par
+      une errreur commune lors d'une mesure par balayage : une erreur locale
+      de la boucle de rétroaction. Les défauts linéaires sont en général 
+      parallèle à l'axe rapide de balayage sur l'image. Cette fonction trouve
+      et supprime automatiquement ces défauts  en utilisant les lignes 
+      adjacentes pour <quote>remplir</quote> les espaces. Le traitement est
+      lancé en utilisant les derniers réglages utilisés dans la fonction
+      <link linkend='mark-scars'>Marquer les défauts linéaires</link>.
+    </para>
+  </sect2>
+  <sect2 id='mark-scars'>
+    <title>Marquer les défauts linéaires</title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Marquer les défauts linéaires</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      De manière similaire, le module 
+      <classname>Marquer les défauts linéaires</classname> permet de créer un
+      masque sur les points considérés comme des défauts linéaires.  
+      Contrairement à la 
+      <link linkend='remove-scars'>suppression des défauts linéaires</link>
+      qui interpole directement les défauts localisés, ce module vous permet
+      d'ajuster plusieurs paramètres de manière à régler finement la sélection
+      des défauts linéaires :
+    </para>
+    <itemizedlist>
+      <listitem>
+        Largeur maximale – seuls les défauts linéaires de largeur inférieure
+        ou égale à cette valeur (en pixels) seront marqués.
+      </listitem>
+      <listitem>
+        Longueur minimale – seuls les défauts linéaires de longueur supérieure
+        ou égale à cette valeur (en pixels) seront marqués.
+      </listitem>
+      <listitem>
+        Seuil dur – différence minimale des valeurs 
+        the minimum difference of the value from the
+        neighbouring upper and lower lines to be considered a defect.
+        The units are relative to image RMS.
+      </listitem>
+      <listitem>
+        Seuil doux – values differing at least this much do not form
+        defects themselves, but they are attached to defects obtained from
+        the hard threshold if they touch one.
+      </listitem>
+      <listitem>
+        Positif, négatif, les deux – le type de défauts à supprimer. Positif
+        correspond aux défauts ayant des valeurs au-dessus de la normale (pics),
+        et négatif correspond aux défauts ayant des valeurs en-dessous de la
+        normale (trous).
+      </listitem>
+    </itemizedlist>
+    <para>
+      Après avoir cliqué sur <guibutton>Ok</guibutton> le nouveau masque de
+      défauts est appliqué à l'image. D'autres modules ou outils peuvent être
+      utilisés pour modifier ces données.
+    </para>
+    <informalfigure id='fig-scars'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='remove-scars.png' format='PNG'/>
+        </imageobject>
+        <textobject>
+          <phrase>Exemple de suppression des défauts linéaires</phrase>
+        </textobject>
+        <caption>
+          Exemple de marquage et suppression des défauts linéaires :
+          (a) données originales avec défauts,
+          (b) données avec les défauts marqués,
+          (c) données corrigées.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <sect2 id='remove-data-under-mask'>
+    <indexterm>
+      <primary>interpolation</primary>
+      <secondary>des données sous le masque</secondary>
+    </indexterm>
+    <title>
+      Supprimer les données sous le masque
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_remove_under_mask-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Supprimer les données sous le masque</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Cette fonction remplace les donneés situées sous le masque en résolvant
+      l'équation de Laplace. Les données autour des zones masquées servent 
+      de conditions aux limites. La solution est calculée de manière itérative,
+      la convergence peut donc prendre un peu de temps..
+    </para>
+  </sect2>
+  <sect2 id='fractal-correction'>
+    <title>Correction fractale</title>
+    <indexterm><primary>interpolation fractale</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Correction fractale</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Le module de correction fractale, tout comme le module de
+      <link linkend='remove-data-under-mask'>suppression des données sous le masque</link>, 
+      remplace les données situées sous le masque. Il utilise toutefois un
+      algorithme différent pour déterminer les nouvelles données : la dimension
+      fractale de l'image complète est tout d'abord calculée, puis les données
+      sous le masque sont substituées par une surface aléatoire ayant la même
+      dimension fractale. La hauteur quadratique moyenne des irrégularités
+      (rugosité) n'est pas affectée par l'utilisation de ce module.
+    </para>
+    <note>Ce calcul peut prendre un certain temps, soyez donc patients.</note>
+    <warning>
+      Le fait de lancer ce module sur des donnée n'ayant pas de propriétés 
+      fractales n'est pas du tout recommandé car cela peut aboutir à des 
+      résultats totalement irréalistes.
+    </warning>
+  </sect2>
+  <sect2 id='mask-of-outliers'>
+    <title>Masquer les points aberrants</title>
+    <indexterm><primary>correction des points aberrants</primary></indexterm>
+    <para>
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+        <guimenuitem>Masquer les points aberrants</guimenuitem>
+      </menuchoice>
+    </para>
+    <para>
+      Ce module crée un masque des zones ne passant pas le critère
+      <xi:include href="eqi-3sigma.xml"/>. Toutes les valeurs au-delà ou en-deçà
+      de cet intervalle de confiance sont masquées et peuvent ensuite être
+      éditées ou traitées par d'autres modules.
+    </para>
+  </sect2>
+  <sect2 id='line-correction'>
+    <title>
+      Correction des lignes
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_line_level-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>correction des lignes</primary></indexterm>
+    <para>
+      Les profils mesurés le long de l'axe rapide de scan (en génral l'axe
+      <xi:include href="eqi-x.xml"/>) peuvent être décalés les uns 
+      par rapport aux autres ou avoir des pentes légèrement différentes. Les
+      fonctions de base de correction des lignes permettent de corriger ce genre
+      d'erreurs. Plusieurs fonctions peuvent être utilisées : les outils 
+      <link linkend='line-polynomial'>Polynôme</link> 
+      <link linkend='path-level'>Mise à niveau par chemin</link> ainsi que 
+      plusieurs méthodes proposées le menu
+      <menuchoice>
+        <guimenu>Traitement des Données</guimenu>
+        <guisubmenu>Correction des Données</guisubmenu>
+      </menuchoice>.
+    </para>
+    <para id='line-polynomial'>
+      L'outil polynôme ajuste chaque ligne horizontale ou verticale par un 
+      polynôme allant jusqu'au troisième ordre, puis soustrait le polynôme
+      obtenu – une fonction fréquemment utilisée dans le traitement des données
+      SPM brutes. Il permet aussi d'exclure ou d'inclure une zone du calcul.
+      L'inclusion ou l'exclusion ne s'applique qu'aux lignes ayant une
+      intersection avec la zone sélectionnée. Les autres lignes sont toujours 
+      ajustées en utilisant toutes les valeurs des données.
+    </para>
+    <para>
+      Les fonctions de correction de ligne présentes dans le menu
+      <guisubmenu>Correction des Données</guisubmenu> ne réalisent que la 
+      correction des lignes horizontales, il faudra donc appliquer une rotation
+      pour pouvoir corriger les lignes verticales. On dispose des focntions
+      suivantes :
+    </para>
+    <itemizedlist>
+      <listitem>
+        <guimenuitem>Correction des lignes par correspondance</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Correction des lignes par médiane</guimenuitem>,
+      </listitem>
+      <listitem>
+        <guimenuitem>Correction des lignes par valeur dominante</guimenuitem>, 
+      </listitem>
+      <listitem>
+        <guimenuitem>Correction des lignes par différence médiane</guimenuitem>, et
+      </listitem>
+      <listitem>
+        <guimenuitem>Correction des sauts dans les lignes</guimenuitem>.
+      </listitem>
+    </itemizedlist>
+    <para>
+      Les trois premières méthodes sont très similaires, elles alignent toutes
+      les lignes du champ de données de manière à minimiser une certaine 
+      quantité. Comme leur nom l'indique, la
+      <guimenuitem>correction des lignes par médiane</guimenuitem> fait 
+      correspondre les médianes des lignes, tandi que la
+      <guimenuitem>orrection des lignes par valeur dominante</guimenuitem> 
+      fait correspondre les valeurs dominantes (modes) des lignes.
+      La <guimenuitem>correction des lignes par correspondance</guimenuitem> 
+      minimise une fonction de différence de ligne donnant plus de poids aux
+      zones planes, et moins de poids aux zones présentant de fortes pentes. 
+      L'effet de ces trois fonctions est souvent très similaire, cependant 
+      certaines fonctions peuvent être plus appropriées pour certains types de
+      données.
+    </para>
+    <para>
+      La fonction de 
+      <guimenuitem>correction des lignes par différence médiane</guimenuitem>
+      décale les lignes de manière à ce que la médiane des différence (entre 
+      les pixels adjacents verticalement) soit nulle, plutôt que la différence
+      des médiane. Elle préserve ainsi mieux les gros éléments de l'image tout
+      en étant plus sensible aux lignes complètement aberrantes.
+    </para>
+    <para>
+      La fonction de 
+      <guimenuitem>correction des sauts dans les lignes</guimenuitem> diffère 
+      des autres. Elle tente d'identifier les segments désalignés à l'intérieur
+      des lignes et corrige individuellement la hauteur de ces segments. Elle
+      est ainsi souvent capable de corriger des données présentant des 
+      discontinuités au milieu d'une ligne. Cette fonction est assez 
+      expérimentale et son fonctionnement exact est susceptible d'être modifié.
+    </para>
+  </sect2>
+  <sect2 id='path-level'>
+    <title>
+      Outil de mise à niveau par chemin
+      <guiicon>
+        <inlinemediaobject>
+          <imageobject>
+            <imagedata fileref='gwy_path_level-24.png' format='PNG'/>
+          </imageobject>
+        </inlinemediaobject>
+      </guiicon>
+    </title>
+    <indexterm><primary>mise à niveau par chemin</primary></indexterm>
+    <indexterm>
+      <primary>mise à niveau</primary>
+      <secondary>le long d'un chemin</secondary>
+    </indexterm>
+    <para>
+      L'outil de <guilabel>mise à niveau par chemin</guilabel> peut être utilisé
+      pour corriger les hauteurs d'un groupe de lignes dans les images 
+      complexes.
+    </para>
+    <para>
+      On commence d'abord par sélectionner un certain nombre de lignes dans les
+      données. Les intersections de ces lignes avec les lignes de l'image 
+      forment alors un ensemble de points dans chaque ligne utilisée pour la 
+      mise à niveau. Les lignes de l'image sont alors montées ou abaissées pour
+      minimiser la différence de hauteur avec les points des lignes adjacentes.
+      Les lignes de l'image n'ayant aucune intersection avec les lignes de 
+      sélection ne sont pas ajustée (par rapport aux lignes adjacente)
+      First, one selects a number of straight lines on the data.  The
+      intersections of these lines with the rows then form a set of points
+      in each row that is used for leveling.  The rows are moved up or down
+      to minimize the difference between the heights of the points of
+      adjacent rows.  Rows that are not intersected by any line are not
+      moved (relatively to neighbouring rows).
+    </para>
+    <informalfigure id='fig-path-level'>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref='path-level.png' format='PNG'/>
+        </imageobject>
+        <caption>
+          Exemple de mise à niveau par chemin :
+          (a) données non corrigée présentant des sauts que les méthodes 
+          automatiques pourrait échouer à corriger, deux lignes de mise à niveau
+          sont sélectionnées,
+          (b) résultat de la mise à niveau par chemin avec une largeur de ligne 
+          de 5.
+        </caption>
+      </mediaobject>
+    </informalfigure>
+  </sect2>
+  <xi:include href='unrotate.xml'/>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
