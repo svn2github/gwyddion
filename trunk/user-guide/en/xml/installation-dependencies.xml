@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-dependencies'>
+  <title>Build Dependencies</title>
+  <para>
+    The following table lists packages required to build
+    <application>Gwyddion</application> from source code.  The table does not
+    include common software compilation prerequisites like the C compiler or
+    <command>make</command>.  Operating system specifics are described
+    in following sections dedicated to building on particular operating
+    systems.
+  </para>
+  <variablelist>
+    <title>Build Dependencies</title>
+    <varlistentry id='dependency-gtk'>
+      <term>
+        <ulink url='http://www.gtk.org/'>Gtk+</ulink>
+        ≥ 2.8.0
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Required.</emphasis>
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-pkg-config'>
+      <term>
+        <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
+        ≥ 0.16
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Required.</emphasis>
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-gtkglext'>
+      <term>
+        <ulink url='http://gtkglext.sourceforge.net/'>GtkGLExt</ulink>
+        ≥ 1.0
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables OpenGL 3D data views.
+        </para>
+        <para>
+          The MS Windows build system is set up to require GtkGLExt and
+          manual adjustments are necessary to disable it there.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-libxml2'>
+      <term>
+        <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
+        ≥ 2.<varname>x</varname>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables import of SPML files.
+        </para>
+        <para>
+          The MS Windows build system is set up to require LibXML2 and
+          manual adjustments are necessary to disable it there.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-fftw'>
+      <term>
+        <ulink url='http://www.fftw.org/'>FFTW3</ulink>
+        ≥ 3.0 (32bit),
+        ≥ 3.1 (64bit),
+        Unix only
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Speeds up various integral transforms, power spectrum and
+          correlation operations.
+        </para>
+        <para>
+          Building with FFTW3 enabled is currently unsupported on MS Windows,
+          although it is probably possible with some effort and manual
+          adjustments.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-unique'>
+      <term>
+        <ulink url='http://www.gnome.org/~ebassi/source/'>LibUnique</ulink> ≥ 1.0
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables <link linkend='remote-control'>remote control</link> based
+          on D-BUS or whatever technology is currently in.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-libxmu'>
+      <term>
+        <ulink url='http://www.x.org/'>LibXmu</ulink>, X11 only
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables <link linkend='remote-control'>remote control</link> on
+          X11.  This is a standard X Window System library and everyone
+          having X probably has its runtime files.  However, since the
+          modularization of X in Xorg 7.0 it is distributed separately and
+          therefore you might not have its development files installed.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-pygtk2'>
+      <term>
+        <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables pygwy, the Gwyddion Python scripting interface.
+        </para>
+        <para>
+          Note that pygwy is not fully functional on MS Windows at this
+          moment.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-gtksourceview'>
+      <term>
+        <ulink url='http://gtksourceview.sourceforge.net/'>GtkSourceView</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables syntax highlighting in the Python scripting console.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-desktop-file-utils'>
+      <term>
+        <ulink url='http://www.freedesktop.org/software/desktop-file-utils'>desktop-file-utils</ulink>,
+        Unix only
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables basic desktop integration to Freedesktop-conforming
+          environments, such as installation of Gwyddion to the menus and
+          file associations.
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-gconf2'>
+      <term>
+        <ulink url='http://projects.gnome.org/gconf/'>GConf2</ulink>,
+        Unix only
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables better GNOME and XFce integration, in particular automatic
+          generation of SPM file thumbnails in Nautilus and Thunar.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+</sect1>

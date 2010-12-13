@@ -1,0 +1,189 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-osx'>
+  <title>Mac OS X</title>
+  <para>
+    Much of the previous generic
+    <link linkend='installation-unix-source'>Unix/Linux installation
+      section</link> applies also to OS X.  Therefore this section deals
+    mainly with the specifics of OS X installation, some of the steps
+    listed here are explained in more detail in the generic Unix section.
+  </para>
+  <para>
+    Beside building everything on your own (good luck), at this time there
+    are two ways to install <application>Gwyddion</application>:
+    <itemizedlist>
+      <listitem>
+        using <ulink url='http://www.macports.org/'>MacPorts</ulink>
+        (formerly Darwinports) and building from a Portfile.
+      </listitem>
+      <listitem>
+        using <ulink url='http://fink.sourceforge.net/'>Fink</ulink> and
+        compiling <application>Gwyddion</application> the common Unix way,
+      </listitem>
+    </itemizedlist>
+  </para>
+  <sect2 id='installation-osx-preparation'>
+    <title>Preparation</title>
+    <para>
+      To install and run <application>Gwyddion</application> you need the
+      Xcode Tools and X (SDK and App) installed. They where located on your
+      CDs/DVDs. The Xcode Tools where located on the first DVD as
+      XcodeTools.mpkg below Xcode Tools, the X11SDK is located as
+      X11SDK.pkg below the Packages Folder within Xcode Tools. X11 is
+      localted as X11User.pkg below
+      <filename>System/Installation/Packages</filename> even on the first
+      DVD. If you have an CD Set the Discs may differ.
+
+  The people from MacPorts recommending using the newest version of
+  XCode. For further information look at the
+  <ulink url='http://www.macports.org/install.php'>MacPorts Install Page</ulink>.
+
+      <!-- XXX rowue: look where you find it on ppc -->
+  <!-- rowue: 10.4 PPC is one DVD -->
+      Also you should have some experience using
+      <application>Terminal.app</application>.  All the commands in the
+      the rest of this section are to be entered and run in
+      <application>Terminal.app</application>.
+    </para>
+    <para>
+      See <link linkend='installation-dependencies'>installation
+        dependencies</link> section for an overview of required and
+      optional packages to install prior to
+      <application>Gwyddion</application> installation. The following table
+      summarizes how they are called in the two software collections:
+    </para>
+    <informaltable frame='none' id='table-osx-package-names'>
+      <tgroup cols='3'>
+        <?dblatex lll?>
+        <thead>
+          <row>
+            <entry>Package</entry>
+            <entry>Fink</entry>
+            <entry>MacPorts</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>Gtk+</entry>
+            <entry>gtk+2</entry>
+            <entry>gtk2</entry>
+          </row>
+          <row>
+            <entry>GtkGLExt</entry>
+            <entry>gtkglext1</entry>
+            <entry>gtkglext</entry>
+          </row>
+          <row>
+            <entry>FFTW3</entry>
+            <entry>fftw3</entry>
+            <entry>fftw-3</entry>
+          </row>
+          <row>
+            <entry>LibXML2</entry>
+            <entry>libxml2</entry>
+            <entry>libxml2</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='installation-osx-macports'>
+    <title>MacPorts</title>
+    <para>
+      MacPorts is an <application>Port</application> based System for
+      porting and installing Open Source/GNU software to OS X. It's based
+      on using installation files called <quote>Portfiles</quote> which
+      where describing the steps to compile and install an application. So
+      it's far easy to port software to OS X using MacPorts but every
+      computer has to compile the application.
+      Get and install
+      <ulink url='http://www.macports.org/'>MacPorts</ulink>.
+      After you installed MacPorts, run
+      <informalexample>
+        <literallayout><userinput>sudo port selfupdate</userinput></literallayout>
+      </informalexample>
+      to update MacPorts to the latest version.
+    </para>
+
+  <para>
+    Usually installing ports with MacPorts is easy. But since X11 is not
+  the native Desktop for OS X, things went a litte worse. So it is
+  recommended to install an alternative X11 before installing
+  <application>Gwyddion</application>. The recommended alternatives
+  are <ulink url='http://http://xquartz.macosforge.org/'>XQuartz</ulink>
+  on Leopard and the Port <application>xorg-server</application> on
+  Tiger.
+
+  After installing the suggested X11-System, 
+  <application>Gwyddion</application> can be then build and installed
+      simply by
+      <informalexample>
+        <literallayout><userinput>sudo port install gwyddion</userinput></literallayout>
+      </informalexample>
+  To install <application>xorg-server</application> (Tiger) simply type
+      <informalexample>
+        <literallayout><userinput>sudo port install xorg-server</userinput></literallayout>
+      </informalexample>
+  this is <emphasis>needed</emphasis> for the 3D view on tiger.
+
+      After everything is done, you will find the StartUp-Icon
+  below <filename>/Applications/MacPorts</filename>.
+    </para>
+  </sect2>
+  <sect2 id='installation-osx-fink'>
+    <title>Fink</title>
+    <para>
+      <!-- XXX: a few more words about fink -->
+      Get and install
+      <ulink url='http://fink.sourceforge.net/'>Fink</ulink>.
+      After you installed Fink run
+      <informalexample>
+        <literallayout><userinput>apt-get update</userinput></literallayout>
+      </informalexample>
+      to update the database of available packages and install Gwyddion
+      with
+      <informalexample>
+        <literallayout><userinput>apt-get install gwyddion</userinput></literallayout>
+      </informalexample>
+      To install Gwyddion from source code, for instance if you want to
+      install a development version, you need to install the required
+      packages listed in the <link linkend='table-osx-package-names'>above
+        table</link> and then follow the generic
+      <link linkend='installation-unix-source'>Unix installation
+        section</link> instructions.
+    </para>
+  </sect2>
+  <sect2 id='installation-osx-running'>
+    <title>Running</title>
+    <para>
+    On MacPorts you simply click on the StartUp-Icon and
+  wait until <application>Gwyddion</application> appears. Using
+  Fink or an self-compiled version you should follow 
+  the steps below:
+
+      Start <application>X11.app</application> and type
+      in <application>Terminal.app</application>
+      <informalexample>
+        <literallayout><userinput>export DISPLAY=":0"</userinput></literallayout>
+      </informalexample>
+      Then run <application>Gwyddion</application> from the folder it
+      was installed to.  This is typically
+      <filename>/usr/local/bin</filename> for Fink.  So for example for
+      Fink run:
+      <informalexample>
+        <literallayout><userinput>/usr/local/bin/gwyddion</userinput></literallayout>
+      </informalexample>
+      You can also configure <application>X11.app</application>
+      to run <application>Gwyddion</application> via:
+      Locate X11.app in your dock, open the menu, choose Applications,
+      choose Customize from the next menu. Here you can choose add and
+      enter the name (gwyddion for example) as <guilabel>Menu Name</guilabel>
+      and the complete path to gwddion (e.g. /usr/local/bin/gwyddion)
+      as <guilabel>Command</guilabel>. After this you
+      can choose gwyddion from the X11 menue.
+    </para>
+  </sect2>
+</sect1>

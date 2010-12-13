@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-devel'>
+  <title>Subversion Checkout, Development</title>
+  <para>
+    <application>Gwyddion</application> uses
+    <ulink url='http://subversion.tigris.org/'>Subversion</ulink>
+    version control system for source code revision management.  The
+    organization of the repository is described
+    <ulink url='http://gwyddion.net/resources.php#subversion'>on project
+      web pages</ulink>.  For example the current head revision of
+    the program itself can be checked out with
+    <informalexample>
+      <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout>
+    </informalexample>
+  </para>
+  <para>
+    The reposition does not contain any generated files, no matter how
+    exotic tools may be necessary to generate them.  Therefore additional
+    packages are required and there are also certain platform limitations.
+    The additional tools and packages required for development are the same
+    as for compilation from <application>Subversion</application> checkout.
+    More precisely, one needs all the tools to build from a fresh checkout,
+    while development may require only a subset of them or even none,
+    depending on the type and extent of the changes.
+  </para>
+  <itemizedlist>
+    <title>Additional development build dependencies</title>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/autoconf/'>GNU autoconf</ulink> ≥ 2.60
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/automake/'>GNU automake</ulink> ≥ 1.7
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/libtool/'>GNU libtool</ulink> ≥ 1.4
+    </listitem>
+    <listitem>
+      <ulink url='http://www.python.org/'>Python</ulink> ≥ 2.2
+    </listitem>
+    <listitem>
+      <ulink url='http://www.perl.org/'>Perl5</ulink>
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gtk.org/gtk-doc/'>gtk-doc</ulink> ≥ 1.8
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/gettext/'>GNU gettext</ulink> ≥ 0.12, including development stuff
+    </listitem>
+    <listitem>
+      probably GNU versions of most tools: the compiler, binutils, …
+    </listitem>
+  </itemizedlist>
+  <sect2 id='installation-devel-unix'>
+    <title>Linux/Unix</title>
+    <para>
+      After a fresh checkout, run <userinput>./autogen.sh</userinput> with
+      any arguments you would give to <command>configure</command>.
+      Note it automatically adds <option>--enable-maintainer-mode</option>.
+      This option enables <command>make</command> rules for creation and
+      updates of files that are distributed in the source code tarball (and
+      thus they are not generated during normal compilation).  Generally, you
+      should always use this <command>configure</command> option when you
+      intend to change the program in a non-trivial way.
+    </para>
+    <para>
+      <command>autogen.sh</command> can fail even if you have sufficient
+      versions of autotools installed.  Some operating system do not install
+      general <command>autoconf</command> or <command>automake</command>
+      commands, only versioned commands such as
+      <command>autoconf261</command> or <command>automake19</command>.
+      This makes particularly hard to find for example
+      <quote><command>automake</command> 1.9 or newer</quote> and therefore
+      <command>autogen.sh</command> does not attempt it at all.  You can
+      either create unversioned symbolic links to the versioned commands or
+      run <command>autogen.sh</command> as follows:
+      <informalexample>
+        <userinput>
+          AUTOCONF=autoconf261 AUTOHEADER=autoheader261 ./autogen.sh
+        </userinput>
+      </informalexample>
+      You may need to set the following variables:
+      <envar>ACLOCAL</envar>,
+      <envar>AUTOCONF</envar>,
+      <envar>AUTOHEADER</envar>,
+      <envar>AUTOM4TE</envar>,
+      <envar>AUTOMAKE</envar>,
+      <envar>LIBTOOLIZE</envar>.
+      In addition, some operating systems may install
+      <command>autoconf</command> macros in a place
+      <command>aclocal</command> does not find them by default.  This can
+      be fixed by setting variable <envar>ACLOCAL_FLAGS</envar> to give
+      <command>aclocal</command> additional search paths:
+      <informalexample>
+        <userinput>
+          ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh
+        </userinput>
+      </informalexample>
+    </para>
+    <para>
+      It is often necessary to combine these adjustments.
+      For instance on FreeBSD, where all tools are versioned, one typically
+      invokes (broken to lines for easier reading):
+      <informalexample>
+        <literallayout><userinput>AUTOCONF=autoconf261 \
+AUTOHEADER=autoheader261 \
+AUTOM4TE=autom4te261 \
+AUTOMAKE=automake19 \
+ACLOCAL=aclocal19 \
+ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
+CPPFLAGS=-I/usr/local/include \
+LDFLAGS=-L/usr/local/lib \
+./autogen.sh --prefix=<replaceable>...</replaceable></userinput></literallayout>
+      </informalexample>
+    </para>
+    <para>
+      If <command>autogen.sh</command> passes you can compile the program
+      as usual.  However, a few things remain to generate.
+    </para>
+    <para>
+      Developer documentation is built with <userinput>make docs</userinput>.
+      This has to be done explicitly, documentation is never (re)built
+      automatically, option <option>--enable-gtk-doc</option> of
+      <command>configure</command> only makes the <literal>docs</literal>
+      target available (this option is on by default, therefore
+      <literal>docs</literal> is made available when
+      <application>gtk-doc</application> is detected).
+    </para>
+    <para>
+      MSVC files are built with <userinput>./utils/update-msvc.py</userinput>
+      which must be run from the top-level source directory (if you have
+      Python interpreter installed elsewhere than in
+      <filename>/usr/bin</filename>, run it as
+      <userinput>python ./utils/update-msvc.py</userinput>).  This tool
+      takes care of keeping MSVC makefiles and other files up to date with
+      Unix files that are taken as the primary source.  More precisely
+      <command>update-msvc.py</command> reads
+      <itemizedlist>
+        <listitem>
+          lists of source and header files, modules, libraries and data files
+          from <filename>Makefile.am</filename>
+        </listitem>
+        <listitem>
+          compiled libraries in <filename>.libs</filename> directories
+        </listitem>
+        <listitem>
+          <command>gcc</command>-generated compilation dependencies in
+          <filename>.deps</filename> directories
+        </listitem>
+        <listitem>
+          template files to fill, these have extension
+          <filename>.gwt</filename>, for example
+          <filename>makefile.msc.gwt</filename> is a template for
+          <filename>makefile.msc</filename>
+        </listitem>
+      </itemizedlist>
+      and it writes
+      <itemizedlist>
+        <listitem>
+          filled template files (namely makefiles)
+        </listitem>
+        <listitem>
+          <filename>.def</filename> files with lists of symbols to export
+          from individual libraries
+        </listitem>
+      </itemizedlist>
+      Evidently, it is necessary to perform a full project build first (with
+      all optional features enabled) to generate these files properly.
+    </para>
+    <para>
+      One can think of <command>update-msvc.py</command> as a simple custom
+      automake, because its basic task is to generate makefiles
+      from <filename>Makefile.am</filename>.
+    </para>
+  </sect2>
+  <sect2 id='installation-devel-ms-windows'>
+    <title>MS Windows</title>
+    <para>
+      As one can see from the previous section, a direct build from a
+      <application>Subversion</application> checkout is not possible on MS
+      Windows due to the inability to generate certain files there.
+      Development is possible, although certain changes, namely additions
+      of new files and refactorizations, require manual synchronization of
+      files that could be updated automatically on a Unix-like system.
+    </para>
+    <para>
+      Fortunately plenty of free Unix-like systems is available, namely
+      various GNU/Linux distributions.  In the most desperate case one can
+      use such a system for the checkout, build all necessary files, make
+      a tarball and transfer it to MS Windows.  This is equivalent to the
+      use of nightly tarballs except that these tarballs can be generated
+      any time.
+    </para>
+    <para>
+      However, it is also possible – and much more convenient – to build
+      on MS Windows in the very same directory as on a GNU/Linux system.
+      It is only necessary to share the build directory (typically in the
+      home directory) with the Windows system using Samba.  The GNU/Linux
+      system can run either on a different physical computer or it can run
+      on a virtual machine on the same computer as the host Windows system,
+      for example in WMware player.  (This setup can be also reversed by
+      running MS Windows on a virtual machine but this is not the point of
+      this section.)
+    </para>
+    <para>
+      When one runs builds for several operating systems from one
+      directory, certain care has to be taken to avoid confusion due to
+      the use of files corresponding to a different operating system.
+      Fortunately, the only files that overlap between the Unix and MS
+      Windows build systems are configuration headers
+      <filename>config.h</filename> and <filename>gwyconfig.h</filename>.  To
+      update them after switch to MS Windows, just delete them, they will be
+      re-created as a part of the build.  To update them after switch to
+      GNU/Linux, run <userinput>./config.status</userinput>.
+    </para>
+  </sect2>
+</sect1>

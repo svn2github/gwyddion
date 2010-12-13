@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-unix'>
+  <title>Linux/Unix Packages</title>
+  <para>
+    Some GNU/Linux and Unix systems provide binary packages of Gwyddion.
+    The <ulink url='http://gwyddion.net/download.php'>download</ulink> page
+    of the project also tracks known packages and packaging efforts.  For
+    instance, Debian, Ubuntu, Gentoo, openSuSE or FreeBSD
+    offer Gwyddion packages.  If your operating system provides such a
+    package and it is recent enough, install it using the standard means of
+    the operating system.  Otherwise proceed with
+    <link linkend='installation-unix-source'>compilation from source
+    code</link>.
+  </para>
+  <para>
+    On Linux distributions using the
+    <ulink url='http://www.rpm.org/'>RPM Package Manager</ulink>,
+    such as Fedora, openSuSE or Mandriva, you can also build a package
+    yourself from the source code, as
+    <link linkend='installation-unix-source-rpm'>described below</link>.
+  </para>
+</sect1>
