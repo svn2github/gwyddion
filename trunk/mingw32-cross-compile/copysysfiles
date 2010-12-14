@@ -1,9 +1,29 @@
 #!/usr/bin/python
-import sys, os, subprocess
+import sys, os, re, subprocess
 
-for line in file('setup'):
-    name, value = line.strip().split('=')
-    locals()[name] = os.path.expandvars(value)
+nargs = len(sys.argv)
+if nargs > 2 or nargs == 2 and sys.argv[1] in ('-h', '--help'):
+    print 'expandnsi [setup] <gwyddion.nsit >gwyddion.nsi'
+    sys.exit(0)
+
+if nargs == 2:
+    setupfile = sys.argv[1]
+else:
+    setupfile = 'setup'
+
+if not os.access(setupfile, os.R_OK):
+    sys.stderr.write('Cannot find setup file %s.\n' % setupfile)
+    sys.exit(1)
+
+for line in file(setupfile):
+    m = re.match(r'^(?P<name>\w+)=(?P<value>.*?)\s*$', line)
+    if m:
+        locals()[m.group('name')] = os.path.expandvars(m.group('value'))
+
+for name in ('target_prefix', 'mingw32_prefix'):
+    if name not in locals():
+        sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
+        sys.exit(1)
 
 packages = 'atk cairo expat fftw fontconfig freetype gdk-pixbuf gettext glib2 gtk2 gtkglext iconv jasper libjpeg libpng libxml2 pango pixman zlib'
 pkglist = ['mingw32-%s' % x for x in packages.split()]

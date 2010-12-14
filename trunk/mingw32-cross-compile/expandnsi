@@ -21,14 +21,15 @@ if not os.access(setupfile, os.R_OK):
     sys.stderr.write('Cannot find setup file %s.\n' % setupfile)
     sys.exit(1)
 
-basedir = None
 for line in file(setupfile):
     m = re.match(r'^(?P<name>\w+)=(?P<value>.*?)\s*$', line)
-    if m and m.group('name') == 'target_prefix':
-        basedir = os.path.expandvars(m.group('value'))
-if basedir is None:
-    sys.stderr.write('Cannot find target_prefix in %s.\n' % setupfile)
-    sys.exit(1)
+    if m:
+        locals()[m.group('name')] = os.path.expandvars(m.group('value'))
+
+for name in ('target_prefix',):
+    if name not in locals():
+        sys.stderr.write('Cannot find %s in %s.\n' % (name, setupfile))
+        sys.exit(1)
 
 indent = r'^(?P<indent>\s*)'
 delimited = r'(?P<delim>["\'])(?P<value>.*)(?P=delim)'
@@ -58,7 +59,7 @@ for lineno, line in enumerate(sys.stdin):
         fileglob = expand(m.group('value'))
         indent = m.group('indent')
         unix_fileglob = fileglob.replace('\\', '/')
-        unix_filespec = os.path.join(basedir, unix_fileglob)
+        unix_filespec = os.path.join(target_prefix, unix_fileglob)
         if unix_fileglob.find('*'):
             filelist = glob.glob(unix_filespec)
             if not filelist:
@@ -67,7 +68,7 @@ for lineno, line in enumerate(sys.stdin):
             filelist = (unix_filespec,)
 
         for unix_filename in filelist:
-            filename = unix_filename.replace('/', '\\')[len(basedir)+1:]
+            filename = unix_filename.replace('/', '\\')[len(target_prefix)+1:]
             files.append(filename)
             path = ntpath.dirname(filename)
             if path != current_path:
