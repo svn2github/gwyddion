@@ -7,7 +7,29 @@
 # nothing else.
 import sys, re, os, ntpath, glob
 
-basedir = os.path.join(os.environ['HOME'], 'opt', 'gwyddion-mingw32')
+nargs = len(sys.argv)
+if nargs > 2 or nargs == 2 and sys.argv[1] in ('-h', '--help'):
+    print 'expandnsi [setup] <gwyddion.nsit >gwyddion.nsi'
+    sys.exit(0)
+
+if nargs == 2:
+    setupfile = sys.argv[1]
+else:
+    setupfile = 'setup'
+
+if not os.access(setupfile, os.R_OK):
+    sys.stderr.write('Cannot find setup file %s.\n' % setupfile)
+    sys.exit(1)
+
+basedir = None
+for line in file(setupfile):
+    m = re.match(r'^(?P<name>\w+)=(?P<value>.*?)\s*$', line)
+    if m and m.group('name') == 'target_prefix':
+        basedir = os.path.expandvars(m.group('value'))
+if basedir is None:
+    sys.stderr.write('Cannot find target_prefix in %s.\n' % setupfile)
+    sys.exit(1)
+
 indent = r'^(?P<indent>\s*)'
 delimited = r'(?P<delim>["\'])(?P<value>.*)(?P=delim)'
 define_re = re.compile(indent + r'!define\s+(?P<name>\w+)\s+' + delimited + r'\s*$').match
