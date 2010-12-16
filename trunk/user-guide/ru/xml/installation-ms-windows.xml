@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="installation-ms-windows">
+  <title>Сборки для MS Windows</title>
+  <para>Если у вас никогда не было установлено основанных на Gtk+ программ (таких, как графический редактор <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>), вам понадобится установить Gtk+ run-time environment перед тем, как устанавливать <application>Gwyddion</application>. Gtk+ - это библиотека для создания переносимых графических интерфейсов пользователя (содержит описание таких элементов, как окна, кнопки и т.п.), которая доступна для многих операционных систем. Следовательно, приложения, написанные с помощью этой библиотеки, можно переносить на различные операционные системы, включая Microsoft Windows.</para>
+  <para>Следует отметить, что для операционных систем семейства MS Windows в сети Интернет доступно несколько вариантов пакетов Gtk+. Некоторые из них включают все необходимые компоненты (такие как GtkGLExt и LibXML2), некоторые нет. Мы рекомендуем пакеты <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">GladeWin32</ulink>, которые содержат все необходимые компоненты.Мы собираем исполняемые файлы Gwyddion для MS Windows с их использованием.</para>
+  <para>Для установки <application>Gwyddion</application> выполните следующие шаги:</para>
+  <itemizedlist>
+    <listitem>Загрузите пакет установки Gtk+ run-time environment с сайта <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">Gladewin32</ulink>, версии 2.8 или выше и установите его.</listitem>
+    <listitem>Скачайте <ulink url="http://gwyddion.net/download.php#stable-windows">установщик <application>Gwyddion</application> </ulink> и установите <application>Gwyddion</application>.</listitem>
+  </itemizedlist>
+  <para>Пакет установки предлагает выбор языка. который будет использован для интерфейса пользователя. После установки можно сменить язык путём редактирования ключей реестра в <command>regedit</command>. Для пользовательских настроек редактируйте <informalexample><literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> в то время, как <informalexample><literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> может быть установлено для общесистемной настройки. Список доступных языков включает в себя:</para>
+  <informaltable frame="none" id="table-locales">
+    <tgroup cols="2">
+      <?dblatex ll?>
+      <thead>
+        <row>
+          <entry><envar>gwy_locale</envar></entry>
+          <entry>Язык</entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry><literal>cs_CZ.UTF-8</literal></entry>
+          <entry>Чешский (Чехия)</entry>
+        </row>
+        <row>
+          <entry><literal>de_DE.UTF-8</literal></entry>
+          <entry>Немецкий (Германия)</entry>
+        </row>
+        <row>
+          <entry><literal>en_US.UTF-8</literal></entry>
+          <entry>Английский (США)</entry>
+        </row>
+        <row>
+          <entry><literal>fr_FR.UTF-8</literal></entry>
+          <entry>Французский (Франция)</entry>
+        </row>
+        <row>
+          <entry><literal>it_IT.UTF-8</literal></entry>
+          <entry>Итальянский (Италия)</entry>
+        </row>
+        <row>
+          <entry><literal>ru_RU.UTF-8</literal></entry>
+          <entry>Русский (Россия)</entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+</sect1>

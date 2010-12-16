@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @(#) $Id$ -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<sect1 id="installation-dependencies">
+  <title>Зависимости при сборке</title>
+  <para>В следующей таблице перечислены пакеты, которые нужны для сборки <application>Gwyddion</application> из исходных кодов. Таблица не включает в себя обязательные вещи, необходимые для сборки, такие как компилятор C или <command>make</command>. Необходимое для сборки на определённой операционной системе описано в нижеследующих разделах, посвящённых сборке на определённой операционной системе.</para>
+  <variablelist>
+    <title>Зависимости при сборке</title>
+    <varlistentry id="dependency-gtk">
+      <term><ulink url="http://www.gtk.org/">Gtk+</ulink> ≥ 2.8.0</term>
+      <listitem>
+        <para>
+          <emphasis>Необходимо.</emphasis>
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-pkg-config">
+      <term><ulink url="http://pkgconfig.freedesktop.org/">pkg-config</ulink> ≥ 0.16</term>
+      <listitem>
+        <para>
+          <emphasis>Необходимо.</emphasis>
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-gtkglext">
+      <term><ulink url="http://gtkglext.sourceforge.net/">GtkGLExt</ulink> ≥ 1.0</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Разрешает трёхмерные виды данных OpenGL.</para>
+        <para>Система сборки под MS Windows настроена чтобы требовать GtkGLExt и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-libxml2">
+      <term><ulink url="http://xmlsoft.org/">LibXML2</ulink> ≥ 2.<varname>x</varname></term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Разрешает импорт файлов SPML.</para>
+        <para>Система сборки под MS Windows настроена чтобы требовать LibXML2 и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-fftw">
+      <term><ulink url="http://www.fftw.org/">FFTW3</ulink> ≥ 3.0 (32bit), ≥ 3.1 (64bit), только для Unix</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Ускоряет различные интегральные преобразования, операции расчёта спектра мощности и корреляции.</para>
+        <para>Сборка с FFTW3 в настоящее время не поддерживается на MS Windows, хотя вероятно это возможно с некоторыми усилиями и настройкой вручную.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-unique">
+      <term><ulink url="http://www.gnome.org/~ebassi/source/">LibUnique</ulink> ≥ 1.0</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Позволяет <link linkend="remote-control">удалённое управление</link>, основанное на D-BUS или то технологии, которая включена в настоящее время.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-libxmu">
+      <term><ulink url="http://www.x.org/">LibXmu</ulink>, только для X11</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Позволяет <link linkend="remote-control">удалённое управление</link> на системах X11. Это стандартная библиотека X Window System и при наличии в системе X, эта библиотека скорее всего также имеется. Тем не менее, после разделения X на модули начиная с Xorg 7.0 она распространяется отдельно и файлы для разработки с её помощью могут быть не установлены.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-pygtk2">
+      <term><ulink url="http://www.pygtk.org/">PyGTK2</ulink>, включая codegen</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Включает pygwy, скриптовый интерфейс на Python для Gwyddion</para>
+        <para>Следует отметить, что pygwy не работает в полную силу на MS Windows в настоящий момент.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-gtksourceview">
+      <term>
+        <ulink url="http://gtksourceview.sourceforge.net/">GtkSourceView</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Включает подсветку синтаксиса в командной строке оболочки Python.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-desktop-file-utils">
+      <term><ulink url="http://www.freedesktop.org/software/desktop-file-utils">desktop-file-utils</ulink>, только для Unix</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Включает основную интеграцию в окружение рабочего стола на соответствующих стандартам Freedesktop окружениях, такие как установка Gwyddion в меню и ассоциации типов файлов.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-gconf2">
+      <term><ulink url="http://projects.gnome.org/gconf/">GConf2</ulink>, только для Unix</term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Включает лучшую интеграцию с GNOME и XFce. например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+</sect1>
