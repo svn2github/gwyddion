@@ -17,7 +17,7 @@ $(eval $(library)$(libsuffix)_la_DEPENDENCIES += $(library_def))
 INTROSPECTION_GIRS = $(Library_ver).gir
 INTROSPECTION_SCANNER_ARGS = --strip=gwy_ -I..
 $(eval $(Library_with_ver)_gir_LIBS = $(library)$(libsuffix).la)
-$(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers))
+$(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers) $(library)$(libsuffix).la)
 girdir = $(datadir)/gir-1.0
 dist_gir_DATA = $(Library_ver).gir
 typelibdir = $(libdir)/girepository-1.0
