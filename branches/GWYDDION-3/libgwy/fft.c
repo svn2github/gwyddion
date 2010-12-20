@@ -226,15 +226,20 @@ gwy_fft_window_kaiser25(guint i, guint n)
  * @data: Data values.
  * @n: Number of data values.
  * @windowing: Windowing method.
+ * @normalize: 0 to return the windowing function as-defined, 1 to normalise
+ *             the mean value of coefficients to unity, 2 to normalise the mean
+ *             squared value of coefficients to unity.
  *
  * Samples a windowing function for a specific number of data points.
  **/
 void
 gwy_fft_window_sample(gdouble *data,
                       guint n,
-                      GwyWindowingType windowing)
+                      GwyWindowingType windowing,
+                      guint normalize)
 {
     g_return_if_fail(data);
+    g_return_if_fail(normalize <= 2);
     if (G_UNLIKELY(windowing >= G_N_ELEMENTS(windowings))) {
         g_critical("Invalid windowing type %u.", windowing);
         windowing = GWY_WINDOWING_NONE;
@@ -244,8 +249,27 @@ gwy_fft_window_sample(gdouble *data,
         return;
     }
     GwyFFTWindowingFunc window = windowings[windowing];
+    if (!normalize) {
+        for (guint i = 0; i < n; i++)
+            data[i] = window(i, n);
+        return;
+    }
+
+    gdouble wcorr = 0.0;
+    if (normalize == 2) {
+        for (guint i = 0; i < n; i++) {
+            data[i] = window(i, n);
+            wcorr += data[i]*data[i];
+        }
+        wcorr = sqrt(n/wcorr);
+    }
+    else {
+        for (guint i = 0; i < n; i++)
+            wcorr += data[i] = window(i, n);
+        wcorr = n/wcorr;
+    }
     for (guint i = 0; i < n; i++)
-        data[i] = window(i, n);
+        data[i] *= wcorr;
 }
 
 

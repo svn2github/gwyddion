@@ -40,7 +40,8 @@ typedef enum {
 guint gwy_fft_nice_transform_size(guint size);
 void  gwy_fft_window_sample      (gdouble *data,
                                   guint n,
-                                  GwyWindowingType windowing);
+                                  GwyWindowingType windowing,
+                                  guint normalize);
 
 G_END_DECLS
 
