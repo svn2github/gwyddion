@@ -540,58 +540,67 @@ fail:
     return line;
 }
 
-/*
- * PSDF of incomplete data.
- *
- * Apart from normalization, the discrete Fourier coefficients are
- *
- *       1   N-1     -2πijν/N
- * Z  = –––   ∑  z  e                                     (1)
- *  ν   √N   j=0  j
- *
- * and the PSDF is then
- *
- * W  = |Z |²                                             (2)
- *  ν     ν
- *
- * To extend these definitions to incomplete data, we sum only over the
- * available data in (1) and instead of dividing by N we divide by the number
- * of available data P.
- *
- *       1        -2πijν/N
- * Z  = ––– ∑ z  e                                        (3)
- *  ν   √P  j  j
- *
- * Notice that by putting z_j ≡ 0 for unavailable data we obtain
- *
- *       1   N-1      -2πijν/N
- * Z  = –––   ∑   z  e                                    (4)
- *  ν   √P   j=0   j
- *
- * that can be calculated by standard DFT means because only the normalization
- * factor differs.  Formula (2) remains unchanged.  For P = 0 we put Z_ν ≡ 0.
- *
- * This approach is sufficient for a single row, however, as we usually average
- * over multiple rows, is seems more fair to give each input data value equal
- * weight in the result.  So, instead of calculating Z_ν for each row, we
- * gather unnormalized f_ν
- *
- *      N-1      -2πijν/N
- * f  =  ∑   z  e                                         (5)
- *  ν   j=0   j
- *
- * and P separately and calculate Z_ν as follows:
- *
- *       ∑ |f   |²
- *       r   ν,r
- * Z  = ––––––––––                                        (6)
- *  ν     ∑ P
- *        r  r
- *
- * where r indexes the rows.  The index r is omitted in (1-5) as they are all
- * single-row formulas; a similar simplification is used below for ACF and
- * HHCF.
- */
+static inline void
+row_assign_mask(const GwyMaskField *mask,
+                gsize col,
+                gsize row,
+                gsize width,
+                gboolean invert,
+                gdouble *out)
+{
+    GwyMaskIter iter;
+
+    gwy_mask_field_iter_init(mask, iter, col, row);
+    for (gsize j = width; j; j--, out++) {
+        *out = (!gwy_mask_iter_get(iter) == invert);
+        gwy_mask_iter_next(iter);
+    }
+}
+
+static inline void
+row_accumulate(const gdouble *data,
+               gdouble *accum,
+               gsize size)
+{
+    for (gsize j = size; j; j--, accum++, data++)
+        *accum += *data;
+}
+
+// FFTW calculates unnormalized DFT so we divide the result of the first
+// transformation with (1/√size)² = 1/size and keep the second transfrom as-is
+// to obtain exactly g_k.
+
+// Calculate the complex norm of R2HC output items (the result is stored in
+// @out including the redundant even terms).
+static inline void
+row_hc_cnorm(const gdouble *in,
+             gdouble *out,
+             gsize size)
+{
+    const gdouble *in2 = in + size-1;
+    gdouble *out2 = out + size-1;
+
+    *out = (*in)*(*in)/size;
+    out++, in++;
+    for (gsize j = (size + 1)/2 - 1; j; j--, out++, in++, out2--, in2--)
+        *out = *out2 = ((*in)*(*in) + (*in2)*(*in2))/size;
+    if (size % 2 == 0)
+        *out = (*in)*(*in)/size;
+}
+
+// Calculate squared Fourier coefficients of zero-extended data.  The output
+// is in @data again.
+static inline void
+row_extfft_cnorm(fftw_plan plan,
+                 gdouble *data,
+                 gdouble *workspace,
+                 gsize width,
+                 gsize size)
+{
+    gwy_clear(data + width, size - width);
+    fftw_execute(plan);   // R2C transform data -> workspace
+    row_hc_cnorm(workspace, data, size);
+}
 
 // Level a row of data by subtracting the mean value.
 static void
@@ -652,16 +661,6 @@ row_window(gdouble *data, const gdouble *window, guint n)
         *data *= *window;
 }
 
-/* Calculate the sum of squares value of source data row @re. */
-static gdouble
-row_sum_squares(const gdouble *re, guint n)
-{
-    gdouble sum2 = 0.0;
-    for (guint i = n; i; i--, re++)
-        sum2 += *re * *re;
-    return sum2;
-}
-
 /* Level and count the number of valid data in a row */
 static guint
 row_level_and_count(gdouble *buffer,
@@ -685,38 +684,6 @@ row_level_and_count(gdouble *buffer,
     }
     return gwy_mask_field_part_count(mask, maskcol, maskrow, width, 1,
                                      masking == GWY_MASK_INCLUDE);
-}
-
-/* Calculate PSDF from Fourier coefficients, normalizing the sum of squares to
- * the previously calculated value.
- */
-static void
-row_psdf(const gdouble *ffthc,
-         gdouble *psdf,
-         guint n,
-         gdouble sum_norm)
-{
-    /*
-     * The halfcomplex format is as follows:
-     * r0, r1, r2, ..., r(n/2), i((n+1)/2-1), ..., i2, i1
-     * More precisely, for even n = 2k:
-     * r0, r1, r2, ..., rk, i(k-1), i(k-2), ..., i1
-     * while for odd n = 2k+1:
-     * r0, r1, r2, ..., rk, ik, i(k-1), ..., i1
-     */
-    gdouble s = psdf[0] = ffthc[0]*ffthc[0];
-    for (guint i = 1; i < (n + 1)/2; i++)
-        s += psdf[i] = ffthc[i]*ffthc[i] + ffthc[n-i]*ffthc[n-i];
-    if (n % 2 == 0)
-        s += psdf[n/2] = ffthc[n/2]*ffthc[n/2];
-
-    if (s == 0.0)
-        return;
-
-    // Normalize the sum of squares (total energy)
-    gdouble q = sum_norm/s;
-    for (guint i = 0; i <= n/2; i++)
-        psdf[i] *= q;
 }
 
 /**
@@ -751,6 +718,7 @@ row_psdf(const gdouble *ffthc,
  *
  * Returns: A new one-dimensional data line with the PSDF.
  **/
+#if 0
 GwyLine*
 gwy_field_part_row_psdf(GwyField *field,
                         const GwyMaskField *mask,
@@ -828,150 +796,120 @@ fail:
                             gwy_field_get_unit_z(field), 2);
     return line;
 }
-
-/*
- * ACF of incomplete data.
- *
- * The ACF is defined as follows
- *
- *       1  N-1-k
- * G  = –––   ∑   z  z                                    (1)
- *  k   N-k  j=0   j  j+k
- *
- * To extend this definition to incomplete data, we sum only over the available
- * data in (1) and instead of dividing by N-k we divide by the number of terms
- * containing the products of available data, we denote this number P_k.
- *
- *       1   N-1-k
- * G  = –––    ∑    z  z                                  (2)
- *  k    P    j=0    j  j+k
- *        k
- * where, again, we put z_j ≡ 0 for unavailable data. So only the normalization
- * factor differs.  For P_k = 0 we put G_k ≡ 0.  The number of available terms
- * for all values of k can be calculated if we define
- *
- *      ⎧ 1,  if z_k is available
- * m  = ⎨                                                 (3)
- *  k   ⎩ 0,  if z_k is unavailable
- *
- * i.e. m_k is the available data mask.  Then obviously
- *
- *      N-1-k
- * P  =   ∑    m  m                                       (4)
- *  k    j=0    j  j+k
- *
- * since there are as many 1-terms in (4) as there are valid terms in (2).
- *
- * The formula G_k = g_k/P_k is sufficient for a single row, however, as we
- * usually average over multiple rows, is seems more fair to give each input
- * data value equal weight in the result.  So, instead of calculating G_k for
- * each row, we gather g_k and P_k separately and calculate G_k as follows:
- *
- *       ∑ g
- *       r  k,r
- * G  = ––––––––                                          (5)
- *  k    ∑ P
- *       r  k,r
- *
- * where r indexes the rows.
- *
- * G_k can be calculated using DFT, and so can be P_k (with the additional
- * knowledge that it is integer-valued).  This well-known trick is described
- * below.
- *
- * Denoting the unnormalized correlation
- *
- *      N-1-k
- * g  =   ∑   z  z                                        (6)
- *  k    j=0   j  j+k
- *
- * we first extend the data with zeroes to length S ≥ 2N, i.e. z_k ≡ 0 for
- * N ≤ k < S.  And then consider them to be periodic, i.e. let
- *
- * z     = z                                              (7)
- *  k+S     k
- *
- * It can be easily seen that for 0 ≤ k < N it holds (values for other k depend
- * on the precise choice of S but they are permitted to be abtirary)
- *
- *      S-1
- * g  =  ∑   z  z                                         (8)
- *  k   j=0   j  j+k
- *
- * Now we express the values using the DFT coefficients (on the entire S-sized
- * data)
- *
- *       1   S-1     2πijν/S
- * z  = –––   ∑  Z  e                                     (9)
- *  j   √S   ν=0  ν
- *
- * and substitute to (5):
- *
- *      1 S-1  S-1  S-1         2πijν/S  2πi(j+k)μ/S
- * g  = –  ∑    ∑    ∑   Z  Z  e        e                 (10)
- *  k   S j=0  ν=0  μ=0   ν  μ
- *
- * Performing first the summation over j, we obtain
- *
- *      1 S-1  S-1         2πikμ/S
- * g  = –  ∑    ∑   Z  Z  e        S δ'                   (11)
- *  k   S ν=0  μ=0   ν  μ             ν+μ
- *
- * where δ'_{ν+μ} is 1 if ν+μ is an integer multiple of S and zero otherwise.
- * Hence only the terms with μ=S-ν are nonzero, i.e.
- *
- *       S-1          -2πikν/S
- * g  =   ∑  Z  Z    e                                    (12)
- *  k    ν=0  ν  S-ν
- *
- * Considering, finally, that the input data are real and so
- *
- *          *
- * Z     = Z                                              (13)
- *  S-ν     ν
- *
- * we obtain
- *
- *      S-1        -2πikν/S
- * g  =  ∑  |Z |² e                                       (14)
- *  k   ν=0   ν
- *
- * The transform from z_j to Z_ν and from |Z_ν|² to g_k are both in the same
- * direction (forward).  In addition, while the first is of R2C type the second
- * is a discrete cosine transform as |Z_ν|² = |Z_{S-ν}|² and both are real.
- *
- * Analogously, P_k is calculated from the Fourier coefficients M_ν of the mask
- * m_k
- *
- *      S-1        -2πikν/S
- * P  =  ∑  |M |² e                                       (15)
- *  k   ν=0   ν
- *
- * To summarize, the evaluation of ACF of partial data requires two R2C
- * transforms (to calculate Z_ν and M_ν) and two DCT transforms (to calculate
- * g_k and P_k). For full data, only one R2C and one DCT is sufficient.
- */
-
-// FFTW calculates unnormalized DFT so we divide the result of the first
-// transformation with (1/√size)² = 1/size and keep the second transfrom as-is
-// to obtain exactly g_k.
-
-// Calculate the complex norm of R2HC output items (the result is stored in
-// @out including the redundant even terms).
-static inline void
-row_hc_cnorm(const gdouble *in,
-             gdouble *out,
-             gsize size)
+#endif
+GwyLine*
+gwy_field_part_row_psdf(GwyField *field,
+                        const GwyMaskField *mask,
+                        GwyMaskingType masking,
+                        guint col, guint row,
+                        guint width, guint height,
+                        GwyWindowingType windowing,
+                        guint level)
 {
-    const gdouble *in2 = in + size-1;
-    gdouble *out2 = out + size-1;
+    guint maskcol, maskrow;
+    GwyLine *line = NULL;
+    if (!_gwy_field_check_mask(field, mask, &masking,
+                               col, row, width, height, &maskcol, &maskrow))
+        goto fail;
 
-    *out = (*in)*(*in)/size;
-    out++, in++;
-    for (guint j = (size + 1)/2 - 1; j; j--, out++, in++, out2--, in2--)
-        *out = *out2 = ((*in)*(*in) + (*in2)*(*in2))/size;
-    if (size % 2 == 0)
-        *out = (*in)*(*in)/size;
+    if (level > 1) {
+        g_warning("Levelling degree %u is not supported, changing to 1.",
+                  level);
+        level = 1;
+    }
+
+    // An even size is necessary due to alignment constraints in FFTW.
+    // Using this size for all buffers is a bit excessive but safe.
+    line = gwy_line_new_sized(width/2 + 1, TRUE);
+    gsize size = (width + 1)/2*2;
+    const gdouble *base = field->data + row*field->xres + col;
+    const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    gdouble *fftin = fftw_malloc(5*size*sizeof(gdouble));
+    gdouble *ffthcout = fftin + size;
+    gdouble *accum_data = fftin + 2*size;
+    gdouble *accum_mask = fftin + 3*size;
+    gdouble *window = fftin + 4*size;
+    guint nfullrows = 0;
+
+    gwy_clear(accum_data, size);
+    gwy_clear(accum_mask, size);
+
+    gwy_fft_window_sample(window, width, windowing, 2);
+    fftw_plan plan = fftw_plan_dft_r2c_1d(width, fftin, (fftw_complex*)ffthcout,
+                                          _GWY_FFTW_PATIENCE);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *d = base + i*field->xres;
+
+        ASSIGN(fftin, d, width);
+        guint count = row_level_and_count(fftin, width,
+                                          mask, masking, maskcol, maskrow + i,
+                                          level);
+        if (!count)
+            continue;
+
+        // Calculate and gather squared Fourier coefficients of the data.
+        row_window(fftin, window, width);
+        row_extfft_cnorm(plan, fftin, ffthcout, width, width);
+        row_accumulate(fftin, accum_data, width);
+
+        // If all points in the row are included just note that as we can
+        // calculate the corresponding denominators directly.  Otherwise
+        // the mask has to be transformed too.
+        if (masking == GWY_MASK_IGNORE || count == width) {
+            nfullrows++;
+            continue;
+        }
+
+        // Calculate and gather squared Fourier coefficients of the mask.
+        row_assign_mask(mask, maskcol, maskrow + i, width, invert, fftin);
+        row_extfft_cnorm(plan, fftin, ffthcout, width, width);
+        row_accumulate(fftin, accum_mask, width);
+    }
+
+    // Numerator of A_k, i.e. FFT of squared data Fourier coefficients.
+    ASSIGN(fftin, accum_data, size);
+    fftw_execute(plan);
+    // The FFTW halfcomplex format starts with the real data.
+    ASSIGN(accum_data, ffthcout, width);
+    for (guint j = 0; j < width; j++)
+        accum_data[j] /= width;
+
+    // Denominator of A_k, i.e. FFT of squared mask Fourier coefficients.
+    ASSIGN(fftin, accum_mask, size);
+    fftw_execute(plan);
+    // The FFTW halfcomplex format starts with the real data.
+    ASSIGN(accum_mask, ffthcout, width);
+    for (guint j = 0; j < width; j++) {
+        // Denominators must be rounded to integers because they are integers
+        // and this permits to detect zeroes in the denominator.
+        accum_mask[j] += gwy_round(accum_mask[j]/width) + nfullrows*width;
+    }
+
+    for (guint j = 0; j < width; j++)
+        fftin[j] = accum_mask[j] ? accum_data[j]/accum_mask[j] : 0.0;
+
+    // The transform is the other way round – for complex numbers.  Since it
+    // is in fact a DCT here we don't care and run it as a forward transform.
+    fftw_execute(plan);
+    // The FFTW halfcomplex format starts with the real data.
+    ASSIGN(line->data, ffthcout, line->res);
+    fftw_destroy_plan(plan);
+    fftw_free(fftin);
+
+    // TODO
+    gwy_line_multiply(line, gwy_field_dx(field)/(2*G_PI));
+    line->real = G_PI/gwy_field_dx(field);
+    line->off = -0.5*gwy_line_dx(line);
+
+fail:
+    if (!line)
+        line = gwy_line_new();
+
+    gwy_unit_power(gwy_line_get_unit_x(line), gwy_field_get_unit_xy(field), -1);
+    gwy_unit_power_multiply(gwy_line_get_unit_y(line),
+                            gwy_field_get_unit_xy(field), 1,
+                            gwy_field_get_unit_z(field), 2);
+    return line;
 }
 
 // FIXME: As the second transform input is real and even we could use DCT here
@@ -1049,63 +987,71 @@ gwy_field_part_row_acf(GwyField *field,
     gsize size = gwy_fft_nice_transform_size((width + 1)/2*4);
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-    guint nbuffers = (masking == GWY_MASK_IGNORE) ? 2 : 3;
-    gdouble *buffer = fftw_malloc(nbuffers*size*sizeof(gdouble));
-    gdouble *ffthc = buffer + size;
-    gdouble *weights = ffthc + size;    // used only with mask
+    gdouble *fftin = fftw_malloc(4*size*sizeof(gdouble));
+    gdouble *ffthcout = fftin + size;
+    gdouble *accum_data = fftin + 2*size;
+    gdouble *accum_mask = fftin + 3*size;    // used only with mask
+    guint nfullrows = 0;
 
-    fftw_plan plan = fftw_plan_dft_r2c_1d(width, buffer, (fftw_complex*)ffthc,
+    fftw_plan plan = fftw_plan_dft_r2c_1d(width, fftin, (fftw_complex*)ffthcout,
                                           _GWY_FFTW_PATIENCE);
-    if (masking != GWY_MASK_IGNORE)
-        gwy_clear(weights, size);
+    gwy_clear(accum_data, size);
+    gwy_clear(accum_mask, size);
+
+    // Gather squared Fourier coefficients for all rows
     for (guint i = 0; i < height; i++) {
         const gdouble *d = base + i*field->xres;
-        ASSIGN(buffer, d, width);
-        if (!row_level_and_count(buffer, width,
-                                 mask, masking, maskcol, maskrow + i,
-                                 level))
-            continue;
-        row_acf(plan, buffer, ffthc, size, width);
-        gdouble *p = line->data;
-        const gdouble *q = ffthc;
-        for (guint j = line->res; j; j--, p++, q++)
-            *p += *q;
 
-        if (masking == GWY_MASK_IGNORE)
+        ASSIGN(fftin, d, width);
+        guint count = row_level_and_count(fftin, width,
+                                          mask, masking, maskcol, maskrow + i,
+                                          level);
+        if (!count)
             continue;
 
-        // If there is a mask we have to keep track of weights for each g_k
-        // pixel separately.
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
-        p = buffer;
-        for (guint j = width; j; j--, p++) {
-            *p = !gwy_mask_iter_get(iter) == invert;
-            gwy_mask_iter_next(iter);
+        // Calculate and gather squared Fourier coefficients of the data.
+        row_extfft_cnorm(plan, fftin, ffthcout, size, width);
+        row_accumulate(fftin, accum_data, size);
+
+        // If all points in the row are included just note that as we can
+        // calculate the corresponding denominators directly.  Otherwise
+        // the mask has to be transformed too.
+        if (masking == GWY_MASK_IGNORE || count == width) {
+            nfullrows++;
+            continue;
         }
-        row_acf(plan, buffer, ffthc, size, width);
-        p = weights;
-        q = ffthc;
-        // Round to integers, this is most important for correct
-        // preservation of zeroes as we need to treat g_k with no
-        // contributions specially
-        for (guint j = width; j; j--, p++, q++)
-            *p = gwy_round(*q);
+
+        // Calculate and gather squared Fourier coefficients of the mask.
+        row_assign_mask(mask, maskcol, maskrow + i, width, invert, fftin);
+        row_extfft_cnorm(plan, fftin, ffthcout, size, width);
+        row_accumulate(fftin, accum_mask, size);
     }
+
+    // Numerator of G_k, i.e. FFT of squared data Fourier coefficients.
+    ASSIGN(fftin, accum_data, size);
+    fftw_execute(plan);
+    // The FFTW halfcomplex format starts with the real data.
+    ASSIGN(accum_data, ffthcout, width);
+    for (guint j = 0; j < width; j++)
+        accum_data[j] /= size;
+
+    // Denominator of G_k, i.e. FFT of squared mask Fourier coefficients.
+    ASSIGN(fftin, accum_mask, size);
+    fftw_execute(plan);
+    // The FFTW halfcomplex format starts with the real data.
+    ASSIGN(accum_mask, ffthcout, width);
+    for (guint j = 0; j < width; j++) {
+        // Denominators must be rounded to integers because they are integers
+        // and this permits to detect zeroes in the denominator.
+        accum_mask[j] += gwy_round(accum_mask[j]/size) + nfullrows*(width - j);
+    }
+
+    for (guint j = 0; j < line->res; j++) {
+        line->data[j] = accum_mask[j] ? accum_data[j]/accum_mask[j] : 0.0;
+    }
+
     fftw_destroy_plan(plan);
-    if (masking == GWY_MASK_IGNORE) {
-        for (guint j = 0; j < line->res; j++)
-            line->data[j] /= height*(line->res - j);
-    }
-    else {
-        for (guint j = 0; j < line->res; j++) {
-            if (weights[j])
-                line->data[j] /= weights[j];
-            else
-                line->data[j] = 0.0;
-        }
-    }
-    fftw_free(buffer);
+    fftw_free(fftin);
     line->real = gwy_field_dx(field)*line->res;
     line->off = -0.5*gwy_line_dx(line);
 
@@ -1352,7 +1298,7 @@ gwy_field_part_row_hhcf(GwyField *field,
         // Then mask.  We need the intermediate result M_ν to combine it with
         // U_ν so don't use row_acf().
         GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + height);
+        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
         p = buffer;
         for (guint j = width; j; j--, p++) {
             *p = !gwy_mask_iter_get(iter) == invert;
