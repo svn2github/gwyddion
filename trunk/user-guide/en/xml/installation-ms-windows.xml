@@ -4,52 +4,97 @@
                'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
 <sect1 id='installation-ms-windows'>
   <title>MS Windows Packages</title>
+  <note>
+    The packaging of MS Windows executables has changed substantially in
+    version 2.23.  So, if you upgrade from a pre-2.23 version to version 2.23
+    or newer, please read the
+    <ulink url='http://gwyddion.net/switch-to-mingw32.php'>description of the
+      changes</ulink>.
+  </note>
   <para>
-    If you never had any Gtk+ based application on your system (for example
-    bitmap editor
-    <ulink url='http://www.gimp.org/'><application>GIMP</application></ulink>)
-    you will need to install Gtk+ run-time environment on your computer prior
-    to <application>Gwyddion</application> installation.
-    Gtk+ is a library designed for portable creating of graphical user
-    interface (windows, buttons, etc.) that is available on many operating
-    systems. Therefore applications using Gtk+ can be ported to various
-    operating systems, including Microsoft Windows.
+    If you have already installed <application>Gwyddion</application> the
+    installer asks if you want to replace the previous version.
+  </para>
+  <informalfigure id='fig-win32-installer-upgrade-screenshot'>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref='win32-installer-upgrade.png' format='PNG'/>
+      </imageobject>
+      <textobject>
+        <phrase>Win32 installer upgrade question screenshot</phrase>
+      </textobject>
+      <caption>
+        The question what to do with the previous
+        <application>Gwyddion</application> version.
+      </caption>
+    </mediaobject>
+  </informalfigure>
+  <para>
+    You have three options:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>Yes (replace)</term>
+      <listitem>
+        The already installed version will be replaced.  This is the normal
+        upgrade method.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>No (keep)</term>
+      <listitem>
+        The already installed version will be ignored and the installation will
+        proceed as a fresh one.  Generally, this is a bad idea as both versions
+        will share settings and registry keys and if you uninstall one the
+        other will be affected.  In some cases, though, you can find this
+        option useful.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>Cancel</term>
+      <listitem>
+        The installation will be aborted and the old version will be kept
+        untouched.
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  <para>
+    In the following steps the installer reminds you of the software components
+    included in the package and their licenses (that are all Free Software),
+    lets you change the installation directory and offers a choice of languages
+    to use for the user interface.
   </para>
   <para>
-    Note that there are several Gtk+ packages for MS Windows operating
-    systems available on the internet. Some of them include all required
-    components (like GtkGLExt and LibXML2), some do not. We recommend
-    <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe'>GladeWin32</ulink>
-    packages that are known to contain all required components and we
-    build Gwyddion MS Windows executables with them.
+    The installer creates the following useful keys under
+    <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:
   </para>
+  <variablelist>
+    <varlistentry>
+      <term><literal>InstallDir</literal></term>
+      <listitem>
+        Installation directory, e.g. <filename>C:\Program Files\Gwyddion</filename>.
+        Reading this key can be useful for determining where to install
+        extensions.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>Version</literal></term>
+      <listitem>
+        Full Gwyddion version as a string.
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>Locale</literal></term>
+      <listitem>
+        Language of Gwyddion user interface chosen during the installation (more precisely,
+        a locale specification that, among other things, defines the language).  You can
+        modify it using <command>regedit</command> to choose another language
+        as described below.
+      </listitem>
+    </varlistentry>
+  </variablelist>
   <para>
-    For installation of <application>Gwyddion</application> follow these
-    steps:
-  </para>
-  <itemizedlist>
-    <listitem>
-      Download the Gtk+ run-time environment installer from
-      <ulink url='http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe'>Gladewin32</ulink>,
-      version 2.8 or higher, and install it.
-    </listitem>
-    <listitem>
-      Download <ulink url='http://gwyddion.net/download.php#stable-windows'><application>Gwyddion</application> installer</ulink> and install
-      <application>Gwyddion</application>.
-    </listitem>
-  </itemizedlist>
-  <para>
-    The installer offers a choice of languages to use for the user
-    interface.  After installation, the lagnauge can be changed by editting
-    registry keys in <command>regedit</command>.  For user-settings, edit
-    <informalexample>
-      <literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal>
-    </informalexample>
-    while
-    <informalexample>
-      <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal>
-    </informalexample>
-    can be set for system-wide default.  The list of available languages
+    The list of available languages and corresponding <literal>Locale</literal> values
     include:
   </para>
   <informaltable frame='none' id='table-locales'>
@@ -57,7 +102,7 @@
       <?dblatex ll?>
       <thead>
         <row>
-          <entry><envar>gwy_locale</envar></entry>
+          <entry><literal>Locale</literal></entry>
           <entry>Language</entry>
         </row>
       </thead>
@@ -90,3 +135,4 @@
     </tgroup>
   </informaltable>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

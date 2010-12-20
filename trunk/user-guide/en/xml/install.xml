@@ -7,45 +7,25 @@
   <para>
     <application>Gwyddion</application> source code and binaries can be
     downloaded from the
-    <ulink url='http://gwyddion.net/download.php'>download</ulink>
-    web page of the project, or alternatively from raw
-    <ulink url='http://sourceforge.net/project/showfiles.php?group_id=121723'>SourceForge.net download page</ulink>.
-    The installation slightly varies depending on the operating system used.
-    However, basically it consist of two steps:
-    <itemizedlist>
-      <listitem>
-        <para>
-          Installing the <ulink url='http://www.gtk.org/'>Gtk+</ulink> widget
-          toolkit (if not already done).
-        </para>
-      </listitem>
-      <listitem>
-        <para>Installing Gwyddion</para>
-      </listitem>
-    </itemizedlist>
-    The first step is necessary at first <application>Gwyddion</application>
-    installation on operating systems that do not come with Gtk+.
-    The version of Gtk+ necessary for your system (and where to obtain it) is
-    described in the next sections.
+    <ulink url='http://gwyddion.net/download.php'>download web page</ulink>
+    of the project, or alternatively from raw
+    <ulink url='http://sourceforge.net/projects/gwyddion/files/'>SourceForge.net download page</ulink>.
+    The installation varies depending on the operating system and the various
+    installation methods will be descrbied in the following sections.
   </para>
   <para>
-    Generally, one needs Gtk+ libraries (run-time package) for running
-    <application>Gwyddion</application>
-    and a Gtk+ development package for <application>Gwyddion</application>
-    compilation from source code and development.
+    Gwyddion needs or can utilise various software libraries, described in
+    section <link linkend='installation-dependencies'>Build Dependencies</link>.
+    If you install binary packages you usually do not need to concern yourself with
+    the required components as the packager has taken care of it and ensured that
+    all are present.  However, it is important if you compile Gwyddion from source
+    code.
   </para>
   <para>
-    Beside Gtk+, Gwyddion can optionally utilize also other software libraries
-    and components that are described in section
-    <link linkend='installation-dependencies'>Build Dependencies</link>.
-    This is mainly important if you build Gwyddion from the source code and
-    hence can control what features it will include.
-  </para>
-  <para>
-    We recommend to download
+    To play with Gwyddion you might also want to download the
     <ulink url='http://gwyddion.net/download.php#sample-files'>sample
-      <application>Gwyddion</application> files</ulink>
-    too. They are in native <application>Gwyddion</application> format
+      <application>Gwyddion</application> files</ulink>.
+    They are in native <application>Gwyddion</application> format
     and represent typical AFM data.
   </para>
 
@@ -54,6 +34,7 @@
   <xi:include href='installation-dependencies.xml'/>
   <xi:include href='installation-unix-source.xml'/>
   <xi:include href='installation-osx.xml'/>
+  <xi:include href='installation-cross-mingw32.xml'/>
   <xi:include href='installation-ms-windows-source.xml'/>
   <xi:include href='installation-devel.xml'/>
 </chapter>

@@ -6,22 +6,26 @@
   <title>Build Dependencies</title>
   <para>
     The following table lists packages required to build
-    <application>Gwyddion</application> from source code.  The table does not
-    include common software compilation prerequisites like the C compiler or
-    <command>make</command>.  Operating system specifics are described
-    in following sections dedicated to building on particular operating
-    systems.
+    <application>Gwyddion</application> from source code.  If your operating system
+    has separate development packages for libraries you need them too.  The
+    table does not include common software compilation prerequisites like the C
+    compiler or the <command>make</command> utility.  Operating system
+    specifics are described in following sections dedicated to building on
+    particular operating systems.
   </para>
   <variablelist>
     <title>Build Dependencies</title>
     <varlistentry id='dependency-gtk'>
       <term>
-        <ulink url='http://www.gtk.org/'>Gtk+</ulink>
+        <ulink url='http://www.gtk.org/'>GTK+</ulink>
         ≥ 2.8.0
       </term>
       <listitem>
         <para>
           <emphasis>Required.</emphasis>
+        </para>
+        <para>
+          This includes the dependencies of GTK+ such as GLib, Pango or Cairo.
         </para>
       </listitem>
     </varlistentry>
@@ -48,10 +52,6 @@
         <para>
           Enables OpenGL 3D data views.
         </para>
-        <para>
-          The MS Windows build system is set up to require GtkGLExt and
-          manual adjustments are necessary to disable it there.
-        </para>
       </listitem>
     </varlistentry>
     <varlistentry id='dependency-libxml2'>
@@ -65,10 +65,6 @@
         </para>
         <para>
           Enables import of SPML files.
-        </para>
-        <para>
-          The MS Windows build system is set up to require LibXML2 and
-          manual adjustments are necessary to disable it there.
         </para>
       </listitem>
     </varlistentry>
@@ -86,11 +82,6 @@
         <para>
           Speeds up various integral transforms, power spectrum and
           correlation operations.
-        </para>
-        <para>
-          Building with FFTW3 enabled is currently unsupported on MS Windows,
-          although it is probably possible with some effort and manual
-          adjustments.
         </para>
       </listitem>
     </varlistentry>
@@ -125,6 +116,32 @@
         </para>
       </listitem>
     </varlistentry>
+    <varlistentry id='dependency-zlib'>
+      <term>
+        <ulink url='http://www.gzip.org/zlib/'>Zlib</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables compression support in some file formats (Createc).
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-png'>
+      <term>
+        <ulink url='http://www.libpng.org/pub/png/'>Libpng</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Optional.</emphasis>
+        </para>
+        <para>
+          Enables export of heightfields to 16bit grayscale PNG images.
+        </para>
+      </listitem>
+    </varlistentry>
     <varlistentry id='dependency-pygtk2'>
       <term>
         <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, including codegen
@@ -137,7 +154,7 @@
           Enables pygwy, the Gwyddion Python scripting interface.
         </para>
         <para>
-          Note that pygwy is not fully functional on MS Windows at this
+          Note that pygwy is not really functional on MS Windows at this
           moment.
         </para>
       </listitem>
@@ -188,3 +205,4 @@
     </varlistentry>
   </variablelist>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

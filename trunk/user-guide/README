@@ -44,11 +44,11 @@ Some random remarks:
 
 * There are two ways to build a single language:
 
-  (b) make
+  (a) make
       in the corresponding language direcory.  This works only if (b) has been
       run at least one since the common files changed.  When in doubt, use (b).
 
-  (a) make LANGUAGES=en
+  (b) make LANGUAGES=en
       in the top-level directory.  This works always but is less convenient
       when working on a single language.
 
