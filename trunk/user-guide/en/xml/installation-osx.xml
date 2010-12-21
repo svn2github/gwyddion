@@ -33,7 +33,7 @@
       CDs/DVDs. The Xcode Tools where located on the first DVD as
       XcodeTools.mpkg below Xcode Tools, the X11SDK is located as
       X11SDK.pkg below the Packages Folder within Xcode Tools. X11 is
-      localted as X11User.pkg below
+      localed as X11User.pkg below
       <filename>System/Installation/Packages</filename> even on the first
       DVD. If you have an CD Set the Discs may differ.
 
@@ -53,7 +53,7 @@
         dependencies</link> section for an overview of required and
       optional packages to install prior to
       <application>Gwyddion</application> installation. The following table
-      summarizes how they are called in the two software collections:
+      summarises how they are called in the two software collections:
     </para>
     <informaltable frame='none' id='table-osx-package-names'>
       <tgroup cols='3'>
@@ -110,7 +110,7 @@
 
   <para>
     Usually installing ports with MacPorts is easy. But since X11 is not
-  the native Desktop for OS X, things went a litte worse. So it is
+  the native Desktop for OS X, things went a little worse. So it is
   recommended to install an alternative X11 before installing
   <application>Gwyddion</application>. The recommended alternatives
   are <ulink url='http://http://xquartz.macosforge.org/'>XQuartz</ulink>
@@ -181,9 +181,9 @@
       Locate X11.app in your dock, open the menu, choose Applications,
       choose Customize from the next menu. Here you can choose add and
       enter the name (gwyddion for example) as <guilabel>Menu Name</guilabel>
-      and the complete path to gwddion (e.g. /usr/local/bin/gwyddion)
+      and the complete path to gwyddion (e.g. /usr/local/bin/gwyddion)
       as <guilabel>Command</guilabel>. After this you
-      can choose gwyddion from the X11 menue.
+      can choose gwyddion from the X11 menu.
     </para>
   </sect2>
 </sect1>

@@ -8,12 +8,12 @@
     Cross-compiling Gwyddion for MS Windows under Linux is quite similar to
     normal Unix compilation with certain additional setup and extra steps.
     Although the process is quite smooth the initial setup may seem a bit
-    complicated.  If, in addition, you are not faimiliar with the normal Unix
+    complicated.  If, in addition, you are not familiar with the normal Unix
     compilation you might wish to start with that and attempt cross-compilation
     once you familiarise yourself with the basic procedure.
   </para>
   <para>
-    These instructions desrcibe compilation under
+    These instructions describe compilation under
     <ulink url='http://fedoraproject.org/'>Fedora</ulink> using its
     <ulink url='http://fedoraproject.org/wiki/SIGs/MinGW'>MinGW cross-compilation
       support</ulink> as this is what Gwyddion developers use.  Compilation in other
@@ -36,7 +36,7 @@
   <sect2 id='installation-cross-mingw32-setup'>
     <title>Setup</title>
     <para>
-      Before the fist compilation you must set up the cross-compilation
+      Before the first compilation you must set up the cross-compilation
       environment.  This has to be done only once.
     </para>
     <sect3 id='installation-cross-mingw32-setup-base'>
@@ -53,9 +53,9 @@
     <sect3 id='installation-cross-mingw32-setup-wine'>
       <title>Wine</title>
       <para>
-        Wine is the MS Windows compatiblity layer/emulator for Unix.  It is
+        Wine is the MS Windows compatibility layer/emulator for Unix.  It is
         used to run NSIS that creates the Gwyddion Windows installer.  Wine can
-        also be used to run and test the cross-compiled Gwyddion, as desribed
+        also be used to run and test the cross-compiled Gwyddion, as described
         below.
       </para>
       <para>
@@ -87,7 +87,7 @@
       <para>
         The official Gwyddion packages utilise additional libraries that are
         not available in the Fedora MinGW environment, namely GtkGLExt and
-        FFTW.  They can be omittted though you will have to modify some scripts
+        FFTW.  They can be omitted though you will have to modify some scripts
         if you do so.
       </para>
       <para>
@@ -135,7 +135,7 @@
       <para>
         The most important tool you obtain is the <command>cross-build</command>
         script that automates all the cross-compilation steps.  Before you use
-        the it for the first time, review file <filename>setup</filename> that
+        it for the first time, review file <filename>setup</filename> that
         defines where various things are located.  The default contents looks
         as follows:
         <informalexample>
@@ -188,7 +188,7 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
       to find all the necessary DLLs.  This is ensured in a somewhat crude way by
       script <command>copysysfiles</command> that copies all necessary MinGW files
       from system to <varname>$target_prefix</varname>.  Since
-      <command>copysysfiles</command> is excuted by <command>cross-build</command>
+      <command>copysysfiles</command> is executed by <command>cross-build</command>
       you normally do not need to execute it manually.
     </para>
     <para>

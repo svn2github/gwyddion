@@ -8,7 +8,7 @@
     <application>Gwyddion</application> uses
     <ulink url='http://subversion.tigris.org/'>Subversion</ulink>
     version control system for source code revision management.  The
-    organization of the repository is described
+    organisation of the repository is described
     <ulink url='http://gwyddion.net/resources.php#subversion'>on project
       web pages</ulink>.  For example the current head revision of
     the program itself can be checked out with

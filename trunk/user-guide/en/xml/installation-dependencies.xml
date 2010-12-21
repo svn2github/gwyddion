@@ -111,7 +111,7 @@
           Enables <link linkend='remote-control'>remote control</link> on
           X11.  This is a standard X Window System library and everyone
           having X probably has its runtime files.  However, since the
-          modularization of X in Xorg 7.0 it is distributed separately and
+          modularisation of X in Xorg 7.0 it is distributed separately and
           therefore you might not have its development files installed.
         </para>
       </listitem>
@@ -138,7 +138,7 @@
           <emphasis>Optional.</emphasis>
         </para>
         <para>
-          Enables export of heightfields to 16bit grayscale PNG images.
+          Enables export of heightfields to 16bit greyscale PNG images.
         </para>
       </listitem>
     </varlistentry>
