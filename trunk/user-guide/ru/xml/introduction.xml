@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: introduction.xml 11262 2010-03-30 11:54:07Z yeti-dn $ -->
+<!-- @(#) $Id: introduction.xml 11696 2010-12-20 10:55:40Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="introduction">
   <title>Введение</title>
-  <para>Это руководство в последний раз обновлялось для версии Gwyddion 2.19</para>
   <para>Последняя версия этого руководства доступна в сети по адресу <ulink url="http://gwyddion.net/documentation/user-guide-en/">http://gwyddion.net/documentation/user-guide-en/</ulink>. Это руководство доступно на нескольких языках, а именно английском, французском и русском. Все переведенные версии приведены по адресу <ulink url="http://gwyddion.net/documentation/">http://gwyddion.net/documentation/</ulink>.</para>
   <sect1 id="motivation">
     <title>Мотивация</title>

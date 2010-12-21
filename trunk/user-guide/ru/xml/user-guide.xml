@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- @(#) $Id$ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<book xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang='ru' lang='ru'>
+<book xmlns:xi="http://www.w3.org/2001/XInclude" xml:lang="en" lang="en">
   <bookinfo>
     <title>Руководство пользователя Gwyddion</title>
     <author>
@@ -20,7 +20,7 @@
       <year>2004–2007, 2009, 2010</year>
       <holder>Petr Klapetek, David Nečas, Christopher Anderson</holder>
     </copyright>
-    <releaseinfo>Версия 2009-11-11. Работа над этим руководством не закончена.</releaseinfo>
+    <releaseinfo>Работа над этим руководством не закончена.</releaseinfo>
     <legalnotice id="legalnotice">
       <para>Разрешается копировать, распространять и/или модифицировать этот документ на условиях одной из двух лицензий: <itemizedlist>
           <listitem>
