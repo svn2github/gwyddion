@@ -6,3 +6,4 @@
   <para>Некоторые из GNU/Linux- и Unix-систем могут содержать уже собранные пакеты с  Gwyddion. Страница проекта <ulink url="http://gwyddion.net/download.php">download</ulink> отслеживает известные пакеты и попытки сборки. Например, Debian, Ubuntu, Gentoo, openSuSE или FreeBSD предлагают пакеты Gwyddion. Если ваша операционная система предоставляет подобные пакеты и они достаточно свежие, устанавливайте их стандартными средствами операционной системы. Если нет - тогда смотрите <link linkend="installation-unix-source">раздел о компиляции из исходного кода</link>.</para>
   <para>На дистрибутивах Linux, использующих <ulink url="http://www.rpm.org/">систему управления пакетами RPM</ulink>, таких, как Fedora, openSuSE или Mandriva, вы также можете собрать пакет сами из исходных кодов, как <link linkend="installation-unix-source-rpm">описано ниже</link>.</para>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

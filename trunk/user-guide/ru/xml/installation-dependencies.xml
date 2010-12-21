@@ -3,15 +3,16 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="installation-dependencies">
   <title>Зависимости при сборке</title>
-  <para>В следующей таблице перечислены пакеты, которые нужны для сборки <application>Gwyddion</application> из исходных кодов. Таблица не включает в себя обязательные вещи, необходимые для сборки, такие как компилятор C или <command>make</command>. Необходимое для сборки на определённой операционной системе описано в нижеследующих разделах, посвящённых сборке на определённой операционной системе.</para>
+  <para>В следующей таблице перечислены пакеты, которые нужны для сборки <application>Gwyddion</application> из исходных кодов. если в вашей операционной системе пакеты разработки для библиотек поставляются отдельно, их также нужно установить. Таблица не включает в себя обязательные вещи, необходимые для сборки, такие как компилятор C или программу <command>make</command>. Зависящие от операционной системы вещи описаны в следующих разделах, посвящённых сборке на конкретных операционных системах.</para>
   <variablelist>
     <title>Зависимости при сборке</title>
     <varlistentry id="dependency-gtk">
-      <term><ulink url="http://www.gtk.org/">Gtk+</ulink> ≥ 2.8.0</term>
+      <term><ulink url="http://www.gtk.org/">GTK+</ulink> ≥ 2.8.0</term>
       <listitem>
         <para>
           <emphasis>Необходимо.</emphasis>
         </para>
+        <para>Включает в себя зависимости GTK+, такие как GLib, Pango или Cairo.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-pkg-config">
@@ -29,7 +30,6 @@
           <emphasis>Опционально.</emphasis>
         </para>
         <para>Разрешает трёхмерные виды данных OpenGL.</para>
-        <para>Система сборки под MS Windows настроена чтобы требовать GtkGLExt и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-libxml2">
@@ -39,7 +39,6 @@
           <emphasis>Опционально.</emphasis>
         </para>
         <para>Разрешает импорт файлов SPML.</para>
-        <para>Система сборки под MS Windows настроена чтобы требовать LibXML2 и ручная настройка необходима чтобы отключить там эту библиотеку.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-fftw">
@@ -49,7 +48,6 @@
           <emphasis>Опционально.</emphasis>
         </para>
         <para>Ускоряет различные интегральные преобразования, операции расчёта спектра мощности и корреляции.</para>
-        <para>Сборка с FFTW3 в настоящее время не поддерживается на MS Windows, хотя вероятно это возможно с некоторыми усилиями и настройкой вручную.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-unique">
@@ -70,6 +68,28 @@
         <para>Позволяет <link linkend="remote-control">удалённое управление</link> на системах X11. Это стандартная библиотека X Window System и при наличии в системе X, эта библиотека скорее всего также имеется. Тем не менее, после разделения X на модули начиная с Xorg 7.0 она распространяется отдельно и файлы для разработки с её помощью могут быть не установлены.</para>
       </listitem>
     </varlistentry>
+    <varlistentry id="dependency-zlib">
+      <term>
+        <ulink url="http://www.gzip.org/zlib/">Zlib</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Добавляет поддержку сжатия в некоторых форматах файлов (Createc).</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id="dependency-png">
+      <term>
+        <ulink url="http://www.libpng.org/pub/png/">Libpng</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Опционально.</emphasis>
+        </para>
+        <para>Добавляет экспорт полей высот в 16битные серые изображения PNG.</para>
+      </listitem>
+    </varlistentry>
     <varlistentry id="dependency-pygtk2">
       <term><ulink url="http://www.pygtk.org/">PyGTK2</ulink>, включая codegen</term>
       <listitem>
@@ -77,7 +97,7 @@
           <emphasis>Опционально.</emphasis>
         </para>
         <para>Включает pygwy, скриптовый интерфейс на Python для Gwyddion</para>
-        <para>Следует отметить, что pygwy не работает в полную силу на MS Windows в настоящий момент.</para>
+        <para>Следует отметить, что pygwy практически не работает на MS Windows в настоящий момент.</para>
       </listitem>
     </varlistentry>
     <varlistentry id="dependency-gtksourceview">
@@ -106,8 +126,9 @@
         <para>
           <emphasis>Опционально.</emphasis>
         </para>
-        <para>Включает лучшую интеграцию с GNOME и XFce. например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
+        <para>Включает лучшую интеграцию с GNOME и XFce, например, автоматическую генерацию миниатюр для файлов СЗМ в Nautilus и Thunar.</para>
       </listitem>
     </varlistentry>
   </variablelist>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->

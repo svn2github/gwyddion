@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: install.xml 11688 2010-12-13 09:33:59Z yeti-dn $ -->
+<!-- @(#) $Id: install.xml 11696 2010-12-20 10:55:40Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="installation">
   <title>Установка</title>
-  <para>Исходные коды и двоичные файлы <application>Gwyddion</application> можно загрузить со страницы <ulink url="http://gwyddion.net/download.php">download</ulink> сайта проекта или напрямую со <ulink url="http://sourceforge.net/project/showfiles.php?group_id=121723">страницы загрузки SourceForge.net</ulink>. Порядок установки слегка меняется в зависимости от используемой операционной системы. Тем не менее, в основном он состоит из двух шагов: <itemizedlist>
-      <listitem>
-        <para>Установки библиотеки виджетов <ulink url="http://www.gtk.org/">Gtk+</ulink> (если она ещё не установлена).</para>
-      </listitem>
-      <listitem>
-        <para>Установки Gwyddion</para>
-      </listitem>
-    </itemizedlist> Первый шаг нужен при первой установке <application>Gwyddion</application> на операционных системах, где Gtk+ не ставится по умолчанию. Версия Gtk+ требующаяся для вашей системы (и где её найти) описана в следующих разделах.</para>
-  <para>В общем, для работы <application>Gwyddion</application> нужны библиотеки времени исполнения Gtk+, а для сборки из исходного кода и разработки также нужны версии библиотек для разработчика (devel-версии).</para>
-  <para>Помимо Gtk+, Gwyddion опционально может использовать другие библиотеки компоненты, которые описаны в разделе <link linkend="installation-dependencies">зависимости при сборке</link>. Это в основном важно если Gwyddion собирается из исходных кодов и, следовательно, можно контролировать какие из опций будут в него включены.</para>
-  <para>Мы рекомендуем также скачать <ulink url="http://gwyddion.net/download.php#sample-files">образцы файлов <application>Gwyddion</application> </ulink>. Они сохранены в родном формате <application>Gwyddion</application> и представляют собой типичные данные АСМ.</para>
+  <para>Исходные коды и двоичные файлы <application>Gwyddion</application> можно загрузить со страницы <ulink url="http://gwyddion.net/download.php">download</ulink> сайта проекта или напрямую со <ulink url="http://sourceforge.net/projects/gwyddion/files/">страницы загрузки SourceForge.net</ulink>. Порядок установки слегка меняется в зависимости от используемой операционной системы и различных методов установки, описанных в следующих разделах.</para>
+  <para>Gwyddion требует или может использовать различные программные библиотеки, описанные в разделе <link linkend="installation-dependencies">Зависимости при сборке</link>. Если вы устанавливаете собранные пакеты это обычно не должно вас волновать, поскольку это задача сборщика пакета убедиться, что всё нужное доступно в системе. Однако. это является важным если вы собираете Gwyddion из исходного кода.</para>
+  <para>Чтобы попробовать Gwyddion в деле вам, возможно, понадобятся <ulink url="http://gwyddion.net/download.php#sample-files">образцы файлов <application>Gwyddion</application> </ulink>. Они сохранены в родном формате <application>Gwyddion</application> и представляют собой типичные данные АСМ.</para>
 
   <xi:include href="installation-unix.xml"/>
   <xi:include href="installation-ms-windows.xml"/>
   <xi:include href="installation-dependencies.xml"/>
   <xi:include href="installation-unix-source.xml"/>
   <xi:include href="installation-osx.xml"/>
+  <xi:include href="installation-cross-mingw32.xml"/>
   <xi:include href="installation-ms-windows-source.xml"/>
   <xi:include href="installation-devel.xml"/>
 </chapter>

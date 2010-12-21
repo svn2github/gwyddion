@@ -3,20 +3,57 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <sect1 id="installation-ms-windows">
   <title>Сборки для MS Windows</title>
-  <para>Если у вас никогда не было установлено основанных на Gtk+ программ (таких, как графический редактор <ulink url="http://www.gimp.org/"><application>GIMP</application></ulink>), вам понадобится установить Gtk+ run-time environment перед тем, как устанавливать <application>Gwyddion</application>. Gtk+ - это библиотека для создания переносимых графических интерфейсов пользователя (содержит описание таких элементов, как окна, кнопки и т.п.), которая доступна для многих операционных систем. Следовательно, приложения, написанные с помощью этой библиотеки, можно переносить на различные операционные системы, включая Microsoft Windows.</para>
-  <para>Следует отметить, что для операционных систем семейства MS Windows в сети Интернет доступно несколько вариантов пакетов Gtk+. Некоторые из них включают все необходимые компоненты (такие как GtkGLExt и LibXML2), некоторые нет. Мы рекомендуем пакеты <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">GladeWin32</ulink>, которые содержат все необходимые компоненты.Мы собираем исполняемые файлы Gwyddion для MS Windows с их использованием.</para>
-  <para>Для установки <application>Gwyddion</application> выполните следующие шаги:</para>
-  <itemizedlist>
-    <listitem>Загрузите пакет установки Gtk+ run-time environment с сайта <ulink url="http://downloads.sourceforge.net/gladewin32/gtk-2.12.9-win32-2.exe">Gladewin32</ulink>, версии 2.8 или выше и установите его.</listitem>
-    <listitem>Скачайте <ulink url="http://gwyddion.net/download.php#stable-windows">установщик <application>Gwyddion</application> </ulink> и установите <application>Gwyddion</application>.</listitem>
-  </itemizedlist>
-  <para>Пакет установки предлагает выбор языка. который будет использован для интерфейса пользователя. После установки можно сменить язык путём редактирования ключей реестра в <command>regedit</command>. Для пользовательских настроек редактируйте <informalexample><literal>HKEY_CURRENT_USER\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> в то время, как <informalexample><literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\1.0\gwy_locale</literal></informalexample> может быть установлено для общесистемной настройки. Список доступных языков включает в себя:</para>
+  <note>Формат поставки исполняемых файлов MS Windows был сильно изменён в версии 2.23. Если вы обновляетесь с версии до 2.23 на версию 2.23 или более новую, прочтите <ulink url="http://gwyddion.net/switch-to-mingw32.php">описание изменений</ulink>.</note>
+  <para>Если <application>Gwyddion</application> уже установлен, программа установки спросит, хотите ли вы заменить предыдущую версию.</para>
+  <informalfigure id="fig-win32-installer-upgrade-screenshot">
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="win32-installer-upgrade.png" format="PNG"/>
+      </imageobject>
+      <textobject>
+        <phrase>Снимок экрана программы установки под win32 с вопросом об обновлении</phrase>
+      </textobject>
+      <caption>Вопрос о том. что делать с предыдущей версией <application>Gwyddion</application>.</caption>
+    </mediaobject>
+  </informalfigure>
+  <para>Есть три возможных варианта:</para>
+  <variablelist>
+    <varlistentry>
+      <term>Да (заменить)</term>
+      <listitem>Уже установленная версия будет заменена. Это обычный метод обновления.</listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>Нет (оставить)</term>
+      <listitem>Уже установленная версия будет проигнорирована и установка пойдёт как новая. В общем случае, это плохая идея, т.к. обе версии будут использовать общие настройки и пути реестра, и если вы одалите одну из них, другая также будет задета. Хотя в некоторых случаях этот вариант может оказаться полезным.</listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>Отмена</term>
+      <listitem>Установка будет отменена и старая версия останется нетронутой.</listitem>
+    </varlistentry>
+  </variablelist>
+  <para>На следующих шагах программа установки напоминает о включенных в состав пакета программных компонентах и их лицензиях (что они все являются свободным програмным обеспечением), дают поменять каталог установки и предлагают выбрать язык, используемый для отображения интерфейса пользователя.</para>
+  <para>Программа установки создаёт следующие нужные ключи в ветке реестра <literal>HKEY_LOCAL_MACHINE\Software\Gwyddion\2.0</literal>:</para>
+  <variablelist>
+    <varlistentry>
+      <term><literal>InstallDir</literal></term>
+      <listitem>Каталог установки, т.е. <filename>C:\Program Files\Gwyddion</filename>. Чтение этого ключа может быть полезным чтобы определить, куда ставить дополнения.</listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>Version</literal></term>
+      <listitem>Полная версия Gwyddion как строка.</listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>Locale</literal></term>
+      <listitem>Язык интерфейса пользователя Gwyddion, выбранный при установке (точнее, задание локали, которое в том числе определяет и язык). Можно изменить его используя <command>regedit</command> чтобы выбрать другой язык как описано ниже.</listitem>
+    </varlistentry>
+  </variablelist>
+  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:</para>
   <informaltable frame="none" id="table-locales">
     <tgroup cols="2">
       <?dblatex ll?>
       <thead>
         <row>
-          <entry><envar>gwy_locale</envar></entry>
+          <entry><literal>Locale</literal></entry>
           <entry>Язык</entry>
         </row>
       </thead>
@@ -49,3 +86,4 @@
     </tgroup>
   </informaltable>
 </sect1>
+<!-- vim: set ts=2 sw=2 et : -->
