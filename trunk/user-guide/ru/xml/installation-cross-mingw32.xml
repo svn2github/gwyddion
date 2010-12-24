@@ -50,7 +50,7 @@
   <sect2 id="installation-cross-mingw32-running">
     <title>Запуск под Wine</title>
     <para>Собранный Gwyddion может быть запущен под Wine. Предполагая значение по умолчанию <varname>target_prefix</varname>: <informalexample><literallayout><userinput>wine ~/opt/gwyddion-mingw32/bin/gwyddion.exe</userinput></literallayout></informalexample> Чтобы запустить <filename>gwyddion.exe</filename> динамический линкер должен иметь возможность найти все нужные DLL. Это обеспечивается несколько грубым путём в скрипте <command>copysysfiles</command>, который копирует все необходимые файлы MinGW из системы в <varname>$target_prefix</varname>.  Поскольку команда <command>copysysfiles</command> запускается из <command>cross-build</command> обычно не нужно запускать её вручную.</para>
-    <para>Второй шаг. который может понадобиться, это установка ключа реестра <informalexample><literallayout>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\gwyddion.exe</literallayout></informalexample> таким образом, чтобы он указывал на <filename>gwyddion.exe</filename> и значения <literal>Path</literal> чтобы оно указывало на подкаталог <filename>bin</filename>.</para>
+    <para>Второй шаг, который может понадобиться, это установка ключа реестра <informalexample><literallayout>HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\gwyddion.exe</literallayout></informalexample> таким образом, чтобы он указывал на <filename>gwyddion.exe</filename> и значения <literal>Path</literal> чтобы оно указывало на подкаталог <filename>bin</filename>.</para>
   </sect2>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

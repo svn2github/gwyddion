@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: install.xml 11696 2010-12-20 10:55:40Z yeti-dn $ -->
+<!-- @(#) $Id: install.xml 11699 2010-12-21 14:22:10Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter xmlns:xi="http://www.w3.org/2001/XInclude" id="installation">
   <title>Установка</title>
