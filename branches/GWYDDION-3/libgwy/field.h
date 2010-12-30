@@ -23,6 +23,7 @@
 #include <libgwy/serializable.h>
 #include <libgwy/interpolation.h>
 #include <libgwy/unit.h>
+#include <libgwy/rectangle.h>
 
 G_BEGIN_DECLS
 
@@ -41,6 +42,8 @@ G_BEGIN_DECLS
 
 typedef struct _GwyField      GwyField;
 typedef struct _GwyFieldClass GwyFieldClass;
+
+#include <libgwy/mask-field.h>
 
 struct _GwyField {
     GObject g_object;
@@ -73,10 +76,7 @@ GwyField*       gwy_field_new_sized    (guint xres,
 GwyField*       gwy_field_new_alike    (const GwyField *model,
                                         gboolean clear)                     G_GNUC_MALLOC;
 GwyField*       gwy_field_new_part     (const GwyField *field,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height,
+                                        const GwyRectangle *rectangle,
                                         gboolean keep_offsets)              G_GNUC_MALLOC;
 GwyField*       gwy_field_new_resampled(const GwyField *field,
                                         guint xres,
@@ -88,15 +88,12 @@ void            gwy_field_set_size     (GwyField *field,
                                         gboolean clear);
 void            gwy_field_data_changed (GwyField *field);
 void            gwy_field_copy         (const GwyField *src,
-                                        GwyField *dest);
-void            gwy_field_part_copy    (const GwyField *src,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height,
+                                        const GwyRectangle *srcrectangle,
                                         GwyField *dest,
                                         guint destcol,
                                         guint destrow);
+void            gwy_field_copy_full    (const GwyField *src,
+                                        GwyField *dest);
 gdouble*        gwy_field_get_data     (GwyField *field);
 void            gwy_field_invalidate   (GwyField *field);
 void            gwy_field_set_xreal    (GwyField *field,
@@ -107,26 +104,24 @@ void            gwy_field_set_xoffset  (GwyField *field,
                                         gdouble xoffset);
 void            gwy_field_set_yoffset  (GwyField *field,
                                         gdouble yoffset);
-GwyUnit*        gwy_field_get_unit_xy  (GwyField *field)                    G_GNUC_PURE;
-GwyUnit*        gwy_field_get_unit_z   (GwyField *field)                    G_GNUC_PURE;
-void            gwy_field_clear        (GwyField *field);
+GwyUnit*        gwy_field_get_unit_xy  (const GwyField *field)                    G_GNUC_PURE;
+GwyUnit*        gwy_field_get_unit_z   (const GwyField *field)                    G_GNUC_PURE;
+void            gwy_field_clear        (GwyField *field,
+                                        const GwyRectangle *rectangle,
+                                        const GwyMaskField *mask,
+                                        GwyMaskingType masking);
+void            gwy_field_clear_full   (GwyField *field);
 void            gwy_field_fill         (GwyField *field,
+                                        const GwyRectangle *rectangle,
+                                        const GwyMaskField *mask,
+                                        GwyMaskingType masking,
                                         gdouble value);
-void            gwy_field_part_clear   (GwyField *field,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height);
-void            gwy_field_part_fill    (GwyField *field,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height,
+void            gwy_field_fill_full    (GwyField *field,
                                         gdouble value);
-GwyValueFormat* gwy_field_get_format_xy(GwyField *field,
+GwyValueFormat* gwy_field_get_format_xy(const GwyField *field,
                                         GwyValueFormatStyle style,
                                         GwyValueFormat *format);
-GwyValueFormat* gwy_field_get_format_z (GwyField *field,
+GwyValueFormat* gwy_field_get_format_z (const GwyField *field,
                                         GwyValueFormatStyle style,
                                         GwyValueFormat *format);
 

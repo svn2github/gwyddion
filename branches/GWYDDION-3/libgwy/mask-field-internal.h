@@ -78,6 +78,14 @@ swap_bits_32(guint32 v)
     return GUINT32_SWAP_LE_BE(v);
 }
 
+G_GNUC_INTERNAL
+gboolean _gwy_mask_field_check_rectangle(const GwyMaskField *field,
+                                         const GwyRectangle *rectangle,
+                                         guint *col,
+                                         guint *row,
+                                         guint *width,
+                                         guint *height);
+
 G_END_DECLS
 
 #endif

@@ -172,7 +172,7 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * SECTION: serializable
  * @title: GwySerializable
- * @short_description: Serializable value-like object interface
+ * @short_description: Serialisable value-like object interface
  * @see_also: <link linkend="libgwy-serialize">serialize</link>
  *
  * #GwySerializable is an abstract interface for data-like objects that can be
@@ -180,17 +180,17 @@ gwy_serializable_assign(GwySerializable *destination,
  * interface with functions such as gwy_serialize_gio() and the restore
  * (deserialize) it with gwy_deserialize_memory().
  *
- * Gwyddion implements a simple serialization model: only tree-like structures
+ * Gwyddion implements a simple serialisation model: only tree-like structures
  * of objects, formed by ownership, can be serialized and restored.  Any
  * inter-object relations other than plain ownership must be stored in some
  * weak form and there is no explicit support for this.  Moreover, only object
  * values are preserved, their identities are lost (in particular, signals,
- * user data and similar attributes are not subject to serialization and
- * deserialization).  This, on the other hand, means that any saved object can
+ * user data and similar attributes are not subject to serialisation and
+ * deserialisation).  This, on the other hand, means that any saved object can
  * be restored individually and independently and still be in a meaningful
  * state.
  *
- * Beside saving and restoration, all serializable classes implement a
+ * Beside saving and restoration, all serialisable classes implement a
  * copy-constructor that creates a duplicate of an existing object.  This
  * constructor is invoked with gwy_serializable_duplicate().  Furthermore, the
  * value of one such object can be transferred to another object of the same
@@ -204,11 +204,11 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * <refsect2 id='libgwy-serializable-implementing'>
  * <title>Implementing #GwySerializable</title>
- * <para>You can implement serialization and deserialization in your
+ * <para>You can implement serialisation and deserialisation in your
  * classes.  There is a convenience macro %GWY_IMPLEMENT_SERIALIZABLE available
  * declaring implementation of the interface in the type function.  The copy
  * constructor and assignment operators are usually easy so we focus on
- * serialization and deserialization.</para>
+ * serialisation and deserialisation.</para>
  * |[
  * // Standard object structure definitions
  * typedef struct _MyObject      MyObject;
@@ -302,7 +302,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *
  * // Construct the object from item list.  The data item does not need to be
  * // present, in this case the default zero value is used.  Also, for more
- * // complicated objects the deserialization can fail or resources need to be
+ * // complicated objects the deserialisation can fail or resources need to be
  * // released; see GwySerializableInterface for the clean-up rules.
  * static gboolean
  * my_object_construct(GwySerializable *serializable,
@@ -327,7 +327,7 @@ gwy_serializable_assign(GwySerializable *destination,
 /**
  * GwySerializable:
  *
- * Formal type of serializable objects.
+ * Formal type of serialisable objects.
  **/
 
 /**
@@ -335,16 +335,16 @@ gwy_serializable_assign(GwySerializable *destination,
  * @GWY_SERIALIZABLE_HEADER: Denotes object header item.  This has no use in
  *                           interface impementation and does not actually
  *                           appear in files (although this depends on the
- *                           serializer/deserializer implementation).  The
- *                           serializer/deserialized sets @size to the object
+ *                           serialiser/deserialiser implementation).  The
+ *                           serialiser/deserialised sets @size to the object
  *                           data size and @array_size to the number of
  *                           items.
  * @GWY_SERIALIZABLE_PARENT: Denotes parent's data separator, used when
- *                           subclasses want to chain serialization and
- *                           deserialization to the parent class.  The items
+ *                           subclasses want to chain serialisation and
+ *                           deserialisation to the parent class.  The items
  *                           has no data and its name is the parent type name.
  *                           For convenience, the value is set to the
- *                           corresponding #GType in deserialization.  The most
+ *                           corresponding #GType in deserialisation.  The most
  *                           derived child data comes first, then the parents'
  *                           in reverse order of deriving.
  * @GWY_SERIALIZABLE_INT8: Denotes a character (8bit integer).
@@ -362,9 +362,9 @@ gwy_serializable_assign(GwySerializable *destination,
  * @GWY_SERIALIZABLE_STRING_ARRAY: Denotes an array of C strings.
  * @GWY_SERIALIZABLE_OBJECT: Denotes an object.
  * @GWY_SERIALIZABLE_OBJECT_ARRAY: Denotes an array of objects.
- * @GWY_SERIALIZABLE_BOXED: Denotes a serializable boxed type.
+ * @GWY_SERIALIZABLE_BOXED: Denotes a serialisable boxed type.
  *
- * Type of serializable value.
+ * Type of serialisable value.
  *
  * The type is a single byte, i.e. a value smaller than 256.  It is equal to
  * the character used in GWY files to denote the corresponding type.
@@ -401,7 +401,7 @@ gwy_serializable_assign(GwySerializable *destination,
  * @v_ustring_array: The value as an array of #guchar pointers.
  * @v_object_array: The value as an array of objects.
  *
- * Representation of individual values of object serializable data.
+ * Representation of individual values of object serialisable data.
  *
  * See #GwySerializableCType for corresponding type specifiers.
  *
@@ -410,20 +410,20 @@ gwy_serializable_assign(GwySerializable *destination,
  * flattened object tree.
  *
  * Signed and unsigned integer members are provided for convenience, the
- * serialization does not distinguish between signed and unsigned integers.
+ * serialisation does not distinguish between signed and unsigned integers.
  **/
 
 /**
  * GwySerializableItem:
  * @name: Component name.
  * @array_size: Array size of the component if of an array type.  For boxed
- *              types that do not carry type information, deserialization sets
+ *              types that do not carry type information, deserialisation sets
  *              is to the #GType of the boxed type.  Unused otherwise.
  * @value: Item value, the interpreration depends on the @ctype member.
  * @ctype: Item type, one of the #GwySerializableCType enum.
  *
- * Information about one object component that is subject to serialization or
- * deserialization.
+ * Information about one object component that is subject to serialisation or
+ * deserialisation.
  **/
 
 /**
@@ -432,8 +432,8 @@ gwy_serializable_assign(GwySerializable *destination,
  * @n: Number of items present.
  * @items: Array of items of total size @len with @n positions occupied.
  *
- * Flattened tree structure of object data used during serialization and
- * deserialization.
+ * Flattened tree structure of object data used during serialisation and
+ * deserialisation.
  **/
 
 /**
@@ -499,7 +499,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *          is expected to perform a deep copy.  Classes may provide other
  *          methods for shallow copies.</para>
  *
- * Interface implemented by serializable objects.
+ * Interface implemented by serialisable objects.
  *
  * The object class must implement all the methods, except
  * #GwySerializableInterface.request() and #GwySerializableInterface.done()

@@ -87,6 +87,19 @@ test_field_props(void)
     g_object_unref(field);
 }
 
+
+void
+test_field_data_changed(void)
+{
+    GwyField *field = gwy_field_new();
+    guint counter = 0;
+    g_signal_connect_swapped(field, "data-changed",
+                             G_CALLBACK(record_signal), &counter);
+    gwy_field_data_changed(field);
+    g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(field);
+}
+
 void
 test_field_units(void)
 {
@@ -243,7 +256,7 @@ test_field_copy(void)
         GwyField *reference = gwy_field_new_sized(dxres, dyres, FALSE);
         field_randomize(source, rng);
         field_randomize(reference, rng);
-        gwy_field_copy(reference, dest);
+        gwy_field_copy(reference, NULL, dest, 0, 0);
         guint width = g_rand_int_range(rng, 0, MAX(sxres, dxres));
         guint height = g_rand_int_range(rng, 0, MAX(syres, dyres));
         guint col = g_rand_int_range(rng, 0, sxres);
@@ -255,8 +268,8 @@ test_field_copy(void)
             col = destcol = 0;
             width = sxres;
         }
-        gwy_field_part_copy(source, col, row, width, height,
-                            dest, destcol, destrow);
+        GwyRectangle rectangle = { col, row, width, height };
+        gwy_field_copy(source, &rectangle, dest, destcol, destrow);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, destcol, destrow);
         test_field_assert_equal(dest, reference);
@@ -284,8 +297,8 @@ test_field_new_part(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyField *part = gwy_field_new_part(source, col, row, width, height,
-                                            TRUE);
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyField *part = gwy_field_new_part(source, &rectangle, TRUE);
         GwyField *reference = gwy_field_new_sized(width, height, FALSE);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, 0, 0);
@@ -385,27 +398,24 @@ test_field_range(void)
         }
 
         gdouble min, max;
-        gwy_field_min_max(field, &min, &max);
+        gwy_field_min_max_full(field, &min, &max);
         g_assert_cmpfloat(min, <=, max);
         g_assert_cmpfloat(min, >=, -1.0);
         g_assert_cmpfloat(max, <=, 1.0);
         gdouble lower = -0.2;
         gdouble upper = 0.6;
 
-        GwyMaskField *mask = gwy_mask_field_new_from_field(field,
-                                                           0, 0, xres, yres,
+        GwyMaskField *mask = gwy_mask_field_new_from_field(field, NULL,
                                                            lower, upper, FALSE);
         guint count_mask = gwy_mask_field_count(mask, NULL, TRUE);
         guint nabove, nbelow;
-        guint total = gwy_field_part_count_in_range(field, mask,
-                                                    GWY_MASK_INCLUDE,
-                                                    0, 0, xres, yres,
-                                                    upper, lower, TRUE,
-                                                    &nabove, &nbelow);
+        guint total = gwy_field_count_in_range(field, NULL,
+                                               mask, GWY_MASK_INCLUDE,
+                                               upper, lower, TRUE,
+                                               &nabove, &nbelow);
         guint count_field = total - nabove - nbelow;
         g_assert_cmpuint(count_mask, ==, count_field);
-        gwy_field_part_min_max(field, mask, GWY_MASK_INCLUDE,
-                               0, 0, xres, yres, &min, &max);
+        gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
         g_assert_cmpfloat(min, <=, max);
         g_assert_cmpfloat(min, >=, lower);
         g_assert_cmpfloat(max, <=, upper);
@@ -471,14 +481,14 @@ test_field_surface_area(void)
         gdouble area, area_expected;
         gwy_field_set_xreal(field, xres/sqrt(xres*yres));
         gwy_field_set_yreal(field, yres/sqrt(xres*yres));
-        area = gwy_field_surface_area(field);
+        area = gwy_field_surface_area(field, NULL, NULL, GWY_MASK_IGNORE);
         area_expected = planar_field_surface_area(field);
         g_assert_cmpfloat(fabs(area - area_expected)/area_expected, <=, 1e-9);
 
         gwy_field_set_xreal(field, 1.0);
         gwy_field_set_yreal(field, 1.0);
         gwy_field_invalidate(field);
-        area = gwy_field_surface_area(field);
+        area = gwy_field_surface_area(field, NULL, NULL, GWY_MASK_IGNORE);
         area_expected = planar_field_surface_area(field);
         g_assert_cmpfloat(fabs(area - area_expected)/area_expected, <=, 1e-9);
 
@@ -487,17 +497,15 @@ test_field_surface_area(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
         gdouble area_include
-            = gwy_field_part_surface_area(field, mask, GWY_MASK_INCLUDE,
-                                          col, row, width, height);
+            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_INCLUDE);
         gdouble area_exclude
-            = gwy_field_part_surface_area(field, mask, GWY_MASK_EXCLUDE,
-                                          col, row, width, height);
+            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_EXCLUDE);
         gdouble area_ignore
-            = gwy_field_part_surface_area(field, mask, GWY_MASK_IGNORE,
-                                          col, row, width, height);
+            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_IGNORE);
         g_assert_cmpfloat(fabs(area_include + area_exclude
                                - area_ignore)/area_ignore, <=, 1e-9);
 
@@ -523,7 +531,7 @@ test_field_mean(void)
         GwyField *field = make_planar_field(xres, yres, alpha, beta);
 
         gdouble mean, mean_expected;
-        mean = gwy_field_mean(field);
+        mean = gwy_field_mean_full(field);
         mean_expected = 0.5*(alpha + beta);
         g_assert_cmpfloat(fabs(mean - mean_expected)/mean_expected, <=, 1e-9);
 
@@ -532,21 +540,17 @@ test_field_mean(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            TRUE);
-        guint n = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            FALSE);
-        gdouble mean_include
-            = gwy_field_part_mean(field, mask, GWY_MASK_INCLUDE,
-                                  col, row, width, height);
-        gdouble mean_exclude
-            = gwy_field_part_mean(field, mask, GWY_MASK_EXCLUDE,
-                                  col, row, width, height);
-        gdouble mean_ignore
-            = gwy_field_part_mean(field, mask, GWY_MASK_IGNORE,
-                                  col, row, width, height);
+        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
+        gdouble mean_include = gwy_field_mean(field, &rectangle,
+                                              mask, GWY_MASK_INCLUDE);
+        gdouble mean_exclude = gwy_field_mean(field, &rectangle,
+                                              mask, GWY_MASK_EXCLUDE);
+        gdouble mean_ignore = gwy_field_mean(field, &rectangle,
+                                             mask, GWY_MASK_IGNORE);
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
@@ -586,7 +590,7 @@ test_field_rms(void)
         GwyField *field = make_planar_field(xres, yres, alpha, beta);
 
         gdouble rms, rms_expected;
-        rms = gwy_field_rms(field);
+        rms = gwy_field_rms_full(field);
         rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
                                  + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
         g_assert_cmpfloat(fabs(rms - rms_expected)/rms_expected, <=, 1e-9);
@@ -596,27 +600,21 @@ test_field_rms(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            TRUE);
-        guint n = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            FALSE);
-        gdouble mean_include
-            = gwy_field_part_mean(field, mask, GWY_MASK_INCLUDE,
-                                  col, row, width, height);
-        gdouble mean_exclude
-            = gwy_field_part_mean(field, mask, GWY_MASK_EXCLUDE,
-                                  col, row, width, height);
-        gdouble rms_include
-            = gwy_field_part_rms(field, mask, GWY_MASK_INCLUDE,
-                                 col, row, width, height);
-        gdouble rms_exclude
-            = gwy_field_part_rms(field, mask, GWY_MASK_EXCLUDE,
-                                 col, row, width, height);
-        gdouble rms_ignore
-            = gwy_field_part_rms(field, mask, GWY_MASK_IGNORE,
-                                 col, row, width, height);
+        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
+        gdouble mean_include = gwy_field_mean(field, &rectangle,
+                                              mask, GWY_MASK_INCLUDE);
+        gdouble mean_exclude = gwy_field_mean(field, &rectangle,
+                                              mask, GWY_MASK_EXCLUDE);
+        gdouble rms_include = gwy_field_rms(field, &rectangle,
+                                            mask, GWY_MASK_INCLUDE);
+        gdouble rms_exclude = gwy_field_rms(field, &rectangle,
+                                            mask, GWY_MASK_EXCLUDE);
+        gdouble rms_ignore = gwy_field_rms(field, &rectangle,
+                                           mask, GWY_MASK_IGNORE);
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
@@ -660,7 +658,8 @@ test_field_statistics(void)
 
         // TODO: Other characteristics.
         gdouble rms, mean, rms_expected, mean_expected;
-        gwy_field_statistics(field, &mean, NULL, &rms, NULL, NULL);
+        gwy_field_statistics(field, NULL, NULL, GWY_MASK_IGNORE,
+                             &mean, NULL, &rms, NULL, NULL);
         mean_expected = 0.5*(alpha + beta);
         rms_expected = 0.5*sqrt((alpha*alpha*(1.0 - 1.0/yres/yres)
                                  + beta*beta*(1.0 - 1.0/xres/xres))/3.0);
@@ -672,27 +671,23 @@ test_field_statistics(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        guint m = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            TRUE);
-        guint n = gwy_mask_field_part_count(mask, col, row, width, height,
-                                            FALSE);
+        guint m = gwy_mask_field_part_count(mask, &rectangle, TRUE);
+        guint n = gwy_mask_field_part_count(mask, &rectangle, FALSE);
         gdouble mean_include, rms_include;
-        gwy_field_part_statistics(field, mask, GWY_MASK_INCLUDE,
-                                  col, row, width, height,
-                                  &mean_include, NULL, &rms_include,
-                                  NULL, NULL);
+        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_INCLUDE,
+                             &mean_include, NULL, &rms_include,
+                             NULL, NULL);
         gdouble mean_exclude, rms_exclude;
-        gwy_field_part_statistics(field, mask, GWY_MASK_EXCLUDE,
-                                  col, row, width, height,
-                                  &mean_exclude, NULL, &rms_exclude,
-                                  NULL, NULL);
+        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_EXCLUDE,
+                             &mean_exclude, NULL, &rms_exclude,
+                             NULL, NULL);
         gdouble mean_ignore, rms_ignore;
-        gwy_field_part_statistics(field, mask, GWY_MASK_IGNORE,
-                                  col, row, width, height,
-                                  &mean_ignore, NULL, &rms_ignore,
-                                  NULL, NULL);
+        gwy_field_statistics(field, &rectangle, mask, GWY_MASK_IGNORE,
+                             &mean_ignore, NULL, &rms_ignore,
+                             NULL, NULL);
 
         if (isnan(mean_include)) {
             g_assert_cmpuint(m, ==, 0);
@@ -751,7 +746,7 @@ test_field_row_level_one(GwyRowShiftMethod method)
         gwy_line_accumulate(foundshifts);
         gwy_field_shift_rows(field, foundshifts);
 
-        g_assert_cmpfloat(gwy_field_rms(field), <=, 1e-12);
+        g_assert_cmpfloat(gwy_field_rms_full(field), <=, 1e-12);
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
         gwy_field_find_row_shifts(field, mask, GWY_MASK_INCLUDE,
@@ -760,7 +755,7 @@ test_field_row_level_one(GwyRowShiftMethod method)
         gwy_line_accumulate(foundshifts);
         gwy_field_shift_rows(field, foundshifts);
 
-        g_assert_cmpfloat(gwy_field_rms(field), <=, 1e-11);
+        g_assert_cmpfloat(gwy_field_rms_full(field), <=, 1e-11);
 
         g_object_unref(mask);
         g_object_unref(foundshifts);
@@ -792,6 +787,344 @@ void
 test_field_row_level_median_diff(void)
 {
     test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN_DIFF);
+}
+
+void
+test_field_compatibility_res(void)
+{
+    GwyField *field1 = gwy_field_new_sized(2, 3, FALSE);
+    GwyField *field2 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field3 = gwy_field_new_sized(3, 2, FALSE);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_RES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_XRES),
+                     ==, GWY_FIELD_COMPATIBLE_XRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_YRES),
+                     ==, GWY_FIELD_COMPATIBLE_YRES);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, GWY_FIELD_COMPATIBLE_RES);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, 0);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+}
+
+void
+test_field_compatibility_real(void)
+{
+    GwyField *field1 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field2 = gwy_field_new_sized(2, 2, FALSE);
+    GwyField *field3 = gwy_field_new_sized(2, 2, FALSE);
+
+    gwy_field_set_yreal(field1, 1.5);
+    gwy_field_set_xreal(field3, 1.5);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_REAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_XREAL),
+                     ==, GWY_FIELD_COMPATIBLE_XREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_YREAL),
+                     ==, GWY_FIELD_COMPATIBLE_YREAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_REAL),
+                     ==, GWY_FIELD_COMPATIBLE_REAL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DX),
+                     ==, GWY_FIELD_COMPATIBLE_DX);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DY),
+                     ==, GWY_FIELD_COMPATIBLE_DY);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_DXDY),
+                     ==, GWY_FIELD_COMPATIBLE_DXDY);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_RES),
+                     ==, 0);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+}
+
+
+void
+test_field_arithmetic_cache(void)
+{
+    enum { xres = 2, yres = 2 };
+    const gdouble data[xres*yres] = {
+        -1, 0,
+        1, 2,
+    };
+    gdouble min, max;
+
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    memcpy(field->data, data, xres*yres*sizeof(gdouble));
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -1.0);
+    g_assert_cmpfloat(max, ==, 2.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
+    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, 0.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -1.0);
+    g_assert_cmpfloat(max, ==, 2.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 0.5);
+    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, -1.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -2.0);
+    g_assert_cmpfloat(max, ==, 1.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
+    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, 1.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -2.0);
+    g_assert_cmpfloat(max, ==, 1.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, -0.5);
+    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - 0.5*sqrt(5.0)), <, 1e-15);
+    gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, -2.0);
+    gwy_field_min_max_full(field, &min, &max);
+    g_assert_cmpfloat(min, ==, -2.0);
+    g_assert_cmpfloat(max, ==, 4.0);
+    g_assert_cmpfloat(gwy_field_mean_full(field), ==, 1.0);
+    g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - sqrt(5.0)), <, 1e-15);
+    g_object_unref(field);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

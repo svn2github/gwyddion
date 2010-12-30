@@ -33,54 +33,45 @@ typedef enum {
     GWY_ROW_SHIFT_MEDIAN_DIFF,
 } GwyRowShiftMethod;
 
-gboolean gwy_field_part_fit_plane  (const GwyField *field,
-                                    const GwyMaskField *mask,
-                                    GwyMaskingType masking,
-                                    guint col,
-                                    guint row,
-                                    guint width,
-                                    guint height,
-                                    gdouble *a,
-                                    gdouble *bx,
-                                    gdouble *by);
-void     gwy_field_subtract_plane  (GwyField *field,
-                                    gdouble a,
-                                    gdouble bx,
-                                    gdouble by);
-gboolean gwy_field_part_inclination(const GwyField *field,
-                                    const GwyMaskField *mask,
-                                    GwyMaskingType masking,
-                                    guint col,
-                                    guint row,
-                                    guint width,
-                                    guint height,
-                                    gdouble damping,
-                                    gdouble *bx,
-                                    gdouble *by);
-gboolean gwy_field_part_fit_poly   (const GwyField *field,
-                                    const GwyMaskField *mask,
-                                    GwyMaskingType masking,
-                                    guint col,
-                                    guint row,
-                                    guint width,
-                                    guint height,
-                                    const guint *xpowers,
-                                    const guint *ypowers,
-                                    guint nterms,
-                                    gdouble *coeffs);
-void     gwy_field_subtract_poly   (GwyField *field,
-                                    const guint *xpowers,
-                                    const guint *ypowers,
-                                    guint nterms,
-                                    const gdouble *coeffs);
-void     gwy_field_shift_rows      (GwyField *field,
-                                    const GwyLine *shifts);
-void     gwy_field_find_row_shifts (const GwyField *field,
-                                    const GwyMaskField *mask,
-                                    GwyMaskingType masking,
-                                    GwyRowShiftMethod method,
-                                    guint min_freedom,
-                                    GwyLine *shifts);
+gboolean gwy_field_fit_plane      (const GwyField *field,
+                                   const GwyRectangle *rectangle,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   gdouble *a,
+                                   gdouble *bx,
+                                   gdouble *by);
+void     gwy_field_subtract_plane (GwyField *field,
+                                   gdouble a,
+                                   gdouble bx,
+                                   gdouble by);
+gboolean gwy_field_inclination    (const GwyField *field,
+                                   const GwyRectangle *rectangle,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   gdouble damping,
+                                   gdouble *bx,
+                                   gdouble *by);
+gboolean gwy_field_fit_poly       (const GwyField *field,
+                                   const GwyRectangle *rectangle,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   const guint *xpowers,
+                                   const guint *ypowers,
+                                   guint nterms,
+                                   gdouble *coeffs);
+void     gwy_field_subtract_poly  (GwyField *field,
+                                   const guint *xpowers,
+                                   const guint *ypowers,
+                                   guint nterms,
+                                   const gdouble *coeffs);
+void     gwy_field_shift_rows     (GwyField *field,
+                                   const GwyLine *shifts);
+void     gwy_field_find_row_shifts(const GwyField *field,
+                                   const GwyMaskField *mask,
+                                   GwyMaskingType masking,
+                                   GwyRowShiftMethod method,
+                                   guint min_freedom,
+                                   GwyLine *shifts);
 
 G_END_DECLS
 

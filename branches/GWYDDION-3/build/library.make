@@ -29,7 +29,7 @@ library_host_ldflags = -no-undefined -export-symbols $(library)$(libsuffix).def
 endif
 
 if UNSTABLE_LIBRARY_RELEASE
-version_info = -release @GWY_VERSION_STRING@
+version_info = -release $(GWY_VERSION_STRING)
 else
 version_info = -version-info $(library_so_version)
 endif
@@ -49,7 +49,7 @@ EXTRA_DIST += \
 
 check-symbols: $(library_la) $(library_decl)
 	$(AM_V_at)$(PYTHON) $(top_srcdir)/build/check-library-symbols.py \
-	    "$(NM)" $(library_la) $(library_decl) $(srcdir)
+	    "$(EU_NM)" $(library_la) $(library_decl) $(srcdir)
 
 check-headers: $(library_headers)
 	$(AM_V_at)result=true; \
@@ -64,7 +64,7 @@ check-headers: $(library_headers)
 
 $(library_def): $(library_objects)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
-	     "$(NM)" $(library_objects)
+	     "$(EU_NM)" $(library_objects)
 
 .PHONY: check-symbols check-headers
 # run make check-symbols as part of make check

@@ -32,8 +32,8 @@ for objectfile in sys.argv[2:]:
 try:
     syminput = subprocess.Popen(nmprog + objectfiles, stdout=subprocess.PIPE)
 except OSError as (errno, strerror):
-    sys.stderr.write('Cannot execute %s -f sysv to scan symbols: %s.\n'
-                     % (nmprog, strerror))
+    sys.stderr.write('Cannot execute %s to scan symbols: %s.\n'
+                     % (' '.join(nmprog), strerror))
     sys.exit(1)
 
 sys.stdout.write('EXPORTS\n')

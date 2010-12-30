@@ -29,7 +29,7 @@
 /* FIXME: On GNU systems we test the libc memmem() here.  On the other hand,
  * this is the implementation we are going to use, so let's test it. */
 void
-test_memmem(void)
+test_str_memmem(void)
 {
     static const gchar haystack[] = {
         1, 2, 0, 1, 2, 0, 0, 2, 2, 1, 2, 2,
@@ -84,7 +84,7 @@ test_next_line_check(const gchar *text, ...)
 }
 
 void
-test_next_line(void)
+test_str_next_line(void)
 {
     test_next_line_check(NULL, NULL);
     test_next_line_check("", NULL);
@@ -111,7 +111,7 @@ test_next_line(void)
 }
 
 void
-test_strisdent_ascii(void)
+test_str_isident_ascii(void)
 {
     g_assert(gwy_ascii_strisident("a", NULL, NULL));
     g_assert(gwy_ascii_strisident("a0", NULL, NULL));
@@ -135,7 +135,7 @@ test_strisdent_ascii(void)
 }
 
 void
-test_strisdent_utf8(void)
+test_str_isident_utf8(void)
 {
     // ASCII
     g_assert(gwy_utf8_strisident("a", NULL, NULL));

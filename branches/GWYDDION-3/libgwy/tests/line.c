@@ -70,6 +70,18 @@ test_line_props(void)
 }
 
 void
+test_line_data_changed(void)
+{
+    GwyField *line = gwy_line_new();
+    guint counter = 0;
+    g_signal_connect_swapped(line, "data-changed",
+                             G_CALLBACK(record_signal), &counter);
+    gwy_line_data_changed(line);
+    g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(line);
+}
+
+void
 test_line_serialize(void)
 {
     enum { max_size = 55 };

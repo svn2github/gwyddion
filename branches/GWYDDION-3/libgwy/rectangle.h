@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2007,2009 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_LINE_STATISTICS_H__
-#define __LIBGWY_LINE_STATISTICS_H__
+#ifndef __LIBGWY_RECTANGLE_H__
+#define __LIBGWY_RECTANGLE_H__
 
-#include <libgwy/line.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
-void    gwy_line_min_max(const GwyLine *line,
-                         gdouble *min,
-                         gdouble *max);
-gdouble gwy_line_sum    (const GwyLine *line);
-gdouble gwy_line_mean   (const GwyLine *line);
-gdouble gwy_line_median (const GwyLine *line);
-gdouble gwy_line_rms    (const GwyLine *line);
-gdouble gwy_line_length (const GwyLine *line);
+typedef struct {
+    guint col;
+    guint row;
+    guint width;
+    guint height;
+} GwyRectangle;
+
+#define GWY_TYPE_RECTANGLE (gwy_rectangle_get_type())
+
+GType         gwy_rectangle_get_type(void)                          G_GNUC_CONST;
+GwyRectangle* gwy_rectangle_copy    (const GwyRectangle *rectangle) G_GNUC_MALLOC;
+void          gwy_rectangle_free    (GwyRectangle *rectangle);
 
 G_END_DECLS
 

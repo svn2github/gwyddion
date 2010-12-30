@@ -82,7 +82,7 @@ static void                  free_items            (GwySerializableItems *items)
 /**
  * gwy_deserialize_error_quark:
  *
- * Gets the error domain for deserialization.
+ * Gets the error domain for deserialisation.
  *
  * See and use %GWY_DESERIALIZE_ERROR.
  *
@@ -304,12 +304,12 @@ buffer_write64(GwySerializableBuffer *buffer,
 
 /**
  * gwy_serialize_gio:
- * @serializable: A serializable object.
- * @output: Output stream to write the serialized object to.
+ * @serializable: A serialisable object.
+ * @output: Output stream to write the serialised object to.
  * @error: Location to store the error occuring, %NULL to ignore.  Errors from
  *         %G_IO_ERROR domain can occur.
  *
- * Serializes an object to GIO stream in GWY format.
+ * Serialises an object to GIO stream in GWY format.
  *
  * The data writing employs internal buffering.  If the output stream is
  * already buffered (e.g., #GBufferedOutputStream), the output will be
@@ -446,7 +446,7 @@ calculate_sizes(GwySerializableItems *items,
  * @items: List of flattened object tree items.
  * @buffer: Serialization output buffer.
  *
- * Write itemized object tree list into an output stream.
+ * Write itemised object tree list into an output stream.
  *
  * Byte-swapping and similar transforms are done on-the-fly, as necessary.
  *
@@ -1046,7 +1046,7 @@ unpack_boxed(const guchar *buffer,
 
 /**
  * gwy_deserialize_memory:
- * @buffer: Memory containing the serialized representation of one object.
+ * @buffer: Memory containing the serialised representation of one object.
  * @size: Size of @buffer in bytes.  If the buffer is larger than the
  *        object representation, non-fatal %GWY_DESERIALIZE_ERROR_PADDING will
  *        be reported.
@@ -1055,7 +1055,7 @@ unpack_boxed(const guchar *buffer,
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Errors from %GWY_DESERIALIZE_ERROR domain can occur.
  *
- * Deserializes an object in GWY format from plain memory buffer.
+ * Deserialises an object in GWY format from plain memory buffer.
  *
  * Returns: Newly created object on success, %NULL on failure.
  **/
@@ -1065,7 +1065,7 @@ gwy_deserialize_memory(const guchar *buffer,
                        gsize *bytes_consumed,
                        GwyErrorList **error_list)
 {
-    /* This is a bit expensive.  But deserialization is expensive generally. */
+    /* This is a bit expensive.  But deserialisation is expensive generally. */
     gwy_type_init();
     return deserialize_memory(buffer, size, bytes_consumed, TRUE, error_list);
 }
@@ -1190,13 +1190,13 @@ get_parent(const gchar *typename,
  * get_serializable:
  * @typename: Name of the type.
  * @classref: Location to store the reference to the object class on success.
- * @iface: Location to store the serializable interface on success.
+ * @iface: Location to store the serialisable interface on success.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
- * Finds and verifies the type of a serializable object.
+ * Finds and verifies the type of a serialisable object.
  *
  * This is used to verify the %GWY_SERIALIZABLE_HEADER items that denote
- * a serialized object.
+ * a serialised object.
  *
  * Returns: The type corresponding to @typename on success, %NULL on failure.
  **/
@@ -1255,7 +1255,7 @@ get_serializable(const gchar *typename,
  * @typename: Name of the type.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
- * Finds and verifies the type of a serializable boxed type.
+ * Finds and verifies the type of a serialisable boxed type.
  *
  * This is used to verify the %GWY_SERIALIZABLE_BOXED items that denote
  * boxed types.
@@ -1554,7 +1554,7 @@ free_items(GwySerializableItems *items)
  *                items).  This list will be set up as a sublist of
  *                @items, i.e. no items will be physically copied and the
  *                sublist must not be freed.
- * @type_name: Name of the deserialized type for error messages.
+ * @type_name: Name of the deserialised type for error messages.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *              Only non-fatal error %GWY_DESERIALIZE_ERROR_ITEM can occur.
  *
@@ -1578,7 +1578,7 @@ free_items(GwySerializableItems *items)
  *
  * An item template is identified by its name and type.  Multiple items of the
  * same name are permitted in @template as long as their types differ (this can
- * be useful e.g. to accept old serialized representations for compatibility).
+ * be useful e.g. to accept old serialised representations for compatibility).
  *
  * The concrete type of boxed types is not part of the identification, i.e.
  * only one boxed item of a specific name can be given in @template and the
@@ -1689,11 +1689,11 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 /**
  * SECTION: serialize
  * @title: serialize
- * @short_description: Serializers and deserializers
+ * @short_description: Serialisers and deserialisers
  * @see_also: #GwySerializable
  *
  * Methods of #GwySerializable abstract from the precise byte-for-byte
- * representation of serialized objects.  It is conceivable to imagine using
+ * representation of serialised objects.  It is conceivable to imagine using
  * for instance HDF5 or XML as the binary format.  Functions available here at
  * this moment, however, implement the GWY binary data format, version 3.
  *
@@ -1705,12 +1705,12 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * <title>Details of Serialization</title>
  * <para>The following information is not necessary for implementing
  * #GwySerializable interface in your classes, but it can help prevent wrong
- * decision about serialized representation of your objects.  Also, it might
- * help implementing a different serialization backend than GWY files.</para>
+ * decision about serialised representation of your objects.  Also, it might
+ * help implementing a different serialisation backend than GWY files.</para>
  * <para>Serialization occurs in several steps.</para>
  * <para>First, all objects are recursively asked to calulcate the number of
  * named
- * data items they will serialize to (or provide a reasonable upper estimate of
+ * data items they will serialise to (or provide a reasonable upper estimate of
  * this number).  This is done simply by calling gwy_serializable_n_items() on
  * the top-level object, objects that contain other objects must call
  * gwy_serializable_n_items() on these contained objects and sum the
@@ -1725,7 +1725,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  * <para>Third, sizes of each object are calcuated and stored into the
  * object-header items created by gwy_serializable_itemize().  This again is
  * done recursively, but the objects do not participate, the calculation works
- * with the itemized list.  This step might not be necessary for other
+ * with the itemised list.  This step might not be necessary for other
  * storage formats.</para>
  * <para>Subsequently, the object tree flattened into an item list is written
  * to the output stream, byte-swapping or otherwise normalizing the data on the
@@ -1745,7 +1745,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
 /**
  * GWY_DESERIALIZE_ERROR:
  *
- * Error domain for deserialization.
+ * Error domain for deserialisation.
  *
  * Errors in this domain will be from the #GwyDeserializeError enumeration.
  * See #GError for information on error domains.
@@ -1765,7 +1765,7 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  *                                large data in core anyway.  This error is
  *                                fatal.
  * @GWY_DESERIALIZE_ERROR_OBJECT: Representation of an object of unknown or
- *                                deserialization-incapable type was found.
+ *                                deserialisation-incapable type was found.
  *                                This error is fatal.
  * @GWY_DESERIALIZE_ERROR_ITEM: Unexpected item was encountered.  This error
  *                              is non-fatal: such item is just ignored.
@@ -1781,11 +1781,11 @@ gwy_deserialize_filter_items(GwySerializableItem *template_,
  *                                    (fatal give non-zero value when masked
  *                                    with this mask).
  *
- * Error codes returned by deserialization.
+ * Error codes returned by deserialisation.
  *
  * In the error code descriptions, fatal error means aborting of
- * deserialization of the object that is just being unpacked.  Non-fatal errors
- * are competely recoverable.  If the deserialization of a contained object
+ * deserialisation of the object that is just being unpacked.  Non-fatal errors
+ * are competely recoverable.  If the deserialisation of a contained object
  * is aborted, the unpacking of the container object still continues.
  * Therefore, fatal errors are truly fatal only if they occur for the
  * top-level object.

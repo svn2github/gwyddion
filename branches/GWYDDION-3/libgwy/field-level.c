@@ -105,14 +105,11 @@ plane_fit_mask(guint id,
 }
 
 /**
- * gwy_field_part_fit_plane:
+ * gwy_field_fit_plane:
  * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).  It should be at least 2.
- * @height: Rectangle height (number of rows).  It should be at least 2.
  * @a: Location to store the constant coefficient, or %NULL.
  * @bx: Location to store the x coefficient, or %NULL.
  * @by: Location to store the y coefficient, or %NULL.
@@ -128,15 +125,15 @@ plane_fit_mask(guint id,
  *          set in all cases, on failure, they are set to zeroes.
  **/
 gboolean
-gwy_field_part_fit_plane(const GwyField *field,
-                         const GwyMaskField *mask,
-                         GwyMaskingType masking,
-                         guint col, guint row, guint width, guint height,
-                         gdouble *a, gdouble *bx, gdouble *by)
+gwy_field_fit_plane(const GwyField *field,
+                    const GwyRectangle *rectangle,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
+                    gdouble *a, gdouble *bx, gdouble *by)
 {
-    guint maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow)
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
 
@@ -205,14 +202,11 @@ gwy_field_subtract_plane(GwyField *field,
 }
 
 /**
- * gwy_field_part_inclination:
+ * gwy_field_inclination:
  * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).  It should be at least 2.
- * @height: Rectangle height (number of rows).  It should be at least 2.
  * @damping: Damping factor determining the range of deviations of local normal
  *           vectors from (0,0,1) that non-negligibly contribute to the result.
  *           It must be positive, a reasonable value may be e.g. 20.
@@ -225,14 +219,14 @@ gwy_field_subtract_plane(GwyField *field,
  * The coefficients correspond to coordinates normalized to [-1,1], see the
  * introduction for details.
  *
- * Although @bx and @by have the same meaning as in gwy_field_part_fit_plane()
+ * Although @bx and @by have the same meaning as in gwy_field_fit_plane()
  * they are calculated differently.  Instead of fitting a plane through the
  * points, local factes are determined from 2×2 areas and averaged, leading to
  * a mean normal to the surface.
  *
  * If @damping was zero (which is not permitted), the normal would correspond
  * to the mean normal to the mean plane and the coefficients found by this
- * method would be equal to those calculated by gwy_field_part_fit_plane().
+ * method would be equal to those calculated by gwy_field_fit_plane().
  *
  * Positive values of @damping suppress large slopes by weighting the normals
  * by a Gaussian function of the slope magnitude.  This means edges and noise
@@ -249,17 +243,17 @@ gwy_field_subtract_plane(GwyField *field,
  *          set in all cases, on failure, they are set to zeroes.
  **/
 gboolean
-gwy_field_part_inclination(const GwyField *field,
-                           const GwyMaskField *mask,
-                           GwyMaskingType masking,
-                           guint col, guint row, guint width, guint height,
-                           gdouble damping,
-                           gdouble *bx,
-                           gdouble *by)
+gwy_field_inclination(const GwyField *field,
+                      const GwyRectangle *rectangle,
+                      const GwyMaskField *mask,
+                      GwyMaskingType masking,
+                      gdouble damping,
+                      gdouble *bx,
+                      gdouble *by)
 {
-    guint maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow)
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow)
         || width < 2 || height < 2)
         goto fail;
 
@@ -447,14 +441,11 @@ enumerate_powers(const guint *powers, guint nterms,
 }
 
 /**
- * gwy_field_part_fit_poly:
+ * gwy_field_fit_poly:
  * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).  It should be at least 2.
- * @height: Rectangle height (number of rows).  It should be at least 2.
  * @xpowers: Array of length @nterms containing the powers of @x to fit.
  * @ypowers: Array of length @nterms containing the powers of @y to fit.
  * @nterms: Number of polynomial terms, i.e. the length of @xpowers,
@@ -482,20 +473,20 @@ enumerate_powers(const guint *powers, guint nterms,
  *          returned because the terms are no longer numerically independent.
  **/
 gboolean
-gwy_field_part_fit_poly(const GwyField *field,
-                        const GwyMaskField *mask,
-                        GwyMaskingType masking,
-                        guint col, guint row, guint width, guint height,
-                        const guint *xpowers, const guint *ypowers,
-                        guint nterms,
-                        gdouble *coeffs)
+gwy_field_fit_poly(const GwyField *field,
+                   const GwyRectangle *rectangle,
+                   const GwyMaskField *mask,
+                   GwyMaskingType masking,
+                   const guint *xpowers, const guint *ypowers,
+                   guint nterms,
+                   gdouble *coeffs)
 {
     if (!nterms || !coeffs)
         return TRUE;
 
-    guint maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, mask, &masking,
-                               col, row, width, height, &maskcol, &maskrow))
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     g_return_val_if_fail(xpowers && ypowers, FALSE);
@@ -556,7 +547,7 @@ fail:
  *
  * The coefficients correspond to coordinates normalized to [-1,1], see the
  * introduction for details.  The meaning of @xpowers and @ypowers is described
- * in detail in gwy_field_part_fit_poly().
+ * in detail in gwy_field_fit_poly().
  **/
 void
 gwy_field_subtract_poly(GwyField *field,
@@ -815,9 +806,9 @@ gwy_field_find_row_shifts(const GwyField *field,
                           guint min_freedom,
                           GwyLine *shifts)
 {
-    guint maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, mask, &masking,
-                               0, 0, field->xres, field->yres,
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, NULL, mask, &masking,
+                               &col, &row, &width, &height,
                                &maskcol, &maskrow))
         return;
     g_return_if_fail(GWY_IS_LINE(shifts));

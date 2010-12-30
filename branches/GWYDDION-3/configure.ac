@@ -52,6 +52,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
+GWY_CHECK_EU_NM
 
 gwy_lib_path=`echo "$sys_lib_search_path_spec" | sed -e 's/  */:/g'`
 AC_DEFINE_UNQUOTED([GWY_LIB_PATH],["$gwy_lib_path"],
@@ -81,11 +82,20 @@ AC_SUBST(HOST_LDFLAGS)
 # Compiler
 
 if test "x$ac_cv_prog_cc_c99" = xno; then
-  AC_MSG_ERROR([C99 standard conforming C compiler is required])
+  AC_MSG_ERROR([C compiler conforming to the C99 standard is required])
 fi
 
-GWY_CHECK_GNUC_VISIBILITY
-# TODO: Must check -fexcess-precision=fast!
+GWY_PROG_CC_OPTIONS([MATH],[-fexcess-precision=fast -fno-math-errno -fstrict-overflow])
+GWY_PROG_CC_OPTIONS([WARNINGS],[-Wall -Wextra -Wstrict-prototypes -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wredundant-decls -Wlogical-op -Werror=implicit-function-declaration -Werror=implicit-int])
+
+GWY_CFLAGS="$GWY_PROG_CC_MATH $GWY_PROG_CC_WARNINGS"
+AC_SUBST([GWY_CFLAGS])
+
+# We may want to make this controlled by a configure option
+GWY_PROG_CCLD_OPTION([SYMBOLIC_FUNCTIONS],[-Wl,-Bsymbolic-functions])
+
+GWY_LIBRARY_LDFLAGS="$GWY_PROG_CCLD_SYMBOLIC_FUNCTIONS"
+AC_SUBST([GWY_LIBRARY_LDFLAGS])
 
 #############################################################################
 # Headers

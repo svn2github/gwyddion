@@ -2,9 +2,6 @@
 
 SUBDIRS = . tests
 
-PEDANTIC = -pedantic -Wstrict-aliasing=1 -Wstrict-overflow -Winline
-WARNINGS = -Wall -Wextra -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=implicit-int -Wpointer-arith -Wstrict-aliasing -Wundef -Wshadow -Wredundant-decls -Wlogical-op
-
 library = libgwy
 Library = Gwy
 library_minor_version = 0
@@ -29,6 +26,7 @@ public_headers = \
 	$(srcdir)/field.h \
 	$(srcdir)/field-arithmetic.h \
 	$(srcdir)/field-distributions.h \
+	$(srcdir)/field-filter.h \
 	$(srcdir)/field-level.h \
 	$(srcdir)/field-statistics.h \
 	$(srcdir)/field-transform.h \
@@ -49,6 +47,7 @@ public_headers = \
 	$(srcdir)/mask-field-transform.h \
 	$(srcdir)/math.h \
 	$(srcdir)/pack.h \
+	$(srcdir)/rectangle.h \
 	$(srcdir)/resource.h \
 	$(srcdir)/rgba.h \
 	$(srcdir)/selection.h \
@@ -103,6 +102,7 @@ libgwy3_la_SOURCES = \
 	field.c \
 	field-arithmetic.c \
 	field-distributions.c \
+	field-filter.c \
 	field-level.c \
 	field-statistics.c \
 	field-transform.c \
@@ -125,6 +125,7 @@ libgwy3_la_SOURCES = \
 	math.c \
 	object-internal.c \
 	pack.c \
+	rectangle.c \
 	resource.c \
 	rgba.c \
 	selection.c \
@@ -138,11 +139,11 @@ libgwy3_la_SOURCES = \
 	value-format.c \
 	version.c
 
-AM_CFLAGS = @LIBGWY_DEPS_CFLAGS@ @HOST_CFLAGS@ $(WARNINGS)
+AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(HOST_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
-	-DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@-libgwy\" \
+	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)-libgwy\" \
 	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE \
 	-DG_LOG_DOMAIN=\"Gwy\" \
 	-DGWY_LIBDIR=\"$(pkglibdir)\" \
@@ -157,8 +158,9 @@ AM_CPPFLAGS = \
 library_so_version = 0:0:0
 
 libgwy3_la_LDFLAGS = \
-	@LIBGWY_DEPS_LIBS@ \
-	@HOST_LDFLAGS@ \
+	$(LIBGWY_DEPS_LIBS) \
+	$(HOST_LDFLAGS) \
+	$(GWY_LIBRARY_LDFLAGS) \
 	$(version_info) \
 	$(library_host_ldflags)
 
@@ -167,7 +169,7 @@ include $(top_srcdir)/build/library.make
 include $(top_srcdir)/build/mkenum.make
 
 clean-local:
-	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out
+	rm -rf core.* *~ *.gcda *.gcno *.gcov gmon.out tmp-introspect*
 
 distclean-local:
 	rm -rf coverage

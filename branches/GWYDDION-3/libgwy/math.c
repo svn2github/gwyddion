@@ -1165,6 +1165,16 @@ jump_over:
  **/
 
 /**
+ * GwyRealFunc:
+ * @value: Abscissa or, generally, the input value.
+ * @user_data: User data.
+ *
+ * The type of a plain real-valued function.
+ *
+ * Returns: Function value for input value @value.
+ **/
+
+/**
  * gwy_exp10:
  * @x: Exponent of 10.
  *

@@ -210,13 +210,29 @@ gwy_field_init(GwyField *field)
 }
 
 static void
+set_cache_for_flat_field(GwyField *field,
+                         gdouble value)
+{
+    Field *priv = field->priv;
+    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
+                    | CBIT(MED) | CBIT(ARF) | CBIT(ART) | CBIT(ARE));
+    CVAL(priv, MIN) = value;
+    CVAL(priv, MAX) = value;
+    CVAL(priv, AVG) = value;
+    CVAL(priv, RMS) = 0.0;
+    CVAL(priv, MED) = value;
+    CVAL(priv, ARF) = value;
+    CVAL(priv, ART) = value;
+    CVAL(priv, ARE) = field->xreal * field->yreal;
+}
+
+static void
 alloc_data(GwyField *field,
            gboolean clear)
 {
     if (clear) {
         field->data = g_new0(gdouble, field->xres * field->yres);
-        field->priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                               | CBIT(MED) | CBIT(ARF) | CBIT(ART));
+        set_cache_for_flat_field(field, 0.0);
     }
     else {
         field->data = g_new(gdouble, field->xres * field->yres);
@@ -624,18 +640,18 @@ gwy_field_new_alike(const GwyField *model,
 /**
  * gwy_field_new_part:
  * @field: A two-dimensional data field.
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).
- * @height: Rectangle height (number of rows).
+ * @rectangle: Area in @field to extract to the new field.  Passing %NULL
+ *             creates an identical copy of @field, similarly to
+ *             gwy_field_duplicate() (though with @keep_offsets set to %FALSE
+ *             the offsets are reset).
  * @keep_offsets: %TRUE to set the X and Y offsets of the new field
- *                using @col, @row and @field offsets.  %FALSE to set offsets
+ *                using @rectangle and @field offsets.  %FALSE to set offsets
  *                of the new field to zeroes.
  *
  * Creates a new two-dimensional field as a rectangular part of another field.
  *
- * The rectangle of size @width×@height starting at (@col,@row) must be
- * entirely contained in @field.  Both dimensions must be non-zero.
+ * The rectangle specified by @rectangle must be entirely contained in @field.
+ * Both dimensions must be non-zero.
  *
  * Data are physically copied, i.e. changing the new field data does not change
  * @field's data and vice versa.  Physical dimensions of the new field are
@@ -645,16 +661,13 @@ gwy_field_new_alike(const GwyField *model,
  **/
 GwyField*
 gwy_field_new_part(const GwyField *field,
-                   guint col,
-                   guint row,
-                   guint width,
-                   guint height,
+                   const GwyRectangle *rectangle,
                    gboolean keep_offsets)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    g_return_val_if_fail(width && height, NULL);
-    g_return_val_if_fail(col + width <= field->xres, NULL);
-    g_return_val_if_fail(row + height <= field->yres, NULL);
+    guint col, row, width, height;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height))
+        return FALSE;
 
     GwyField *part;
 
@@ -666,7 +679,7 @@ gwy_field_new_part(const GwyField *field,
     }
 
     part = gwy_field_new_sized(width, height, FALSE);
-    gwy_field_part_copy(field, col, row, width, height, part, 0, 0);
+    gwy_field_copy(field, rectangle, part, 0, 0);
     part->xreal = width*gwy_field_dx(field);
     part->yreal = height*gwy_field_dy(field);
     ASSIGN_UNITS(part->priv->unit_xy, field->priv->unit_xy);
@@ -759,7 +772,7 @@ gwy_field_set_size(GwyField *field,
         field->xres = xres;
         field->yres = yres;
         if (clear)
-            gwy_field_clear(field);
+            gwy_field_clear(field, NULL, NULL, GWY_MASK_IGNORE);
         else
             gwy_field_invalidate(field);
     }
@@ -781,68 +794,52 @@ gwy_field_data_changed(GwyField *field)
 
 /**
  * gwy_field_copy:
- * @src: Source two-dimensional data field.
- * @dest: Destination two-dimensional data field.
- *
- * Copies the data of a field to another field of the same dimensions.
- *
- * Only the data are copied.  To make a field completely identical to another,
- * including units, offsets and change of dimensions, you can use
- * gwy_field_assign().
- **/
-void
-gwy_field_copy(const GwyField *src,
-               GwyField *dest)
-{
-    g_return_if_fail(GWY_IS_FIELD(src));
-    g_return_if_fail(GWY_IS_FIELD(dest));
-    g_return_if_fail(dest->xres == src->xres && dest->yres == src->yres);
-    ASSIGN(dest->data, src->data, src->xres * src->yres);
-    ASSIGN(dest->priv->cache, src->priv->cache, GWY_FIELD_CACHE_SIZE);
-    dest->priv->cached = src->priv->cached;
-}
-
-/**
- * gwy_field_part_copy:
  * @src: Source two-dimensional data data field.
- * @col: Column index of the upper-left corner of the rectangle in @src.
- * @row: Row index of the upper-left corner of the rectangle in @src.
- * @width: Rectangle width (number of columns).
- * @height: Rectangle height (number of rows).
+ * @srcrectangle: Area in field @src to copy.  Pass %NULL to copy entire @src.
  * @dest: Destination two-dimensional data field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  *
- * Copies a rectangular part from one field to another.
+ * Copies data from one field to another.
  *
- * The rectangle starts at (@col, @row) in @src and its dimensions are
- * @width×@height. It is copied to @dest starting from (@destcol, @destrow).
+ * The copied rectangle is defined by @srcrectangle and it is copied to @dest
+ * starting from (@destcol, @destrow).
  *
  * There are no limitations on the row and column indices or dimensions.  Only
  * the part of the rectangle that is corrsponds to data inside @src and @dest
- * is copied.  This can also mean nothing is copied at all.
+ * is copied.  This can also mean no data are copied at all.
  *
- * If @src is equal to @dest, the areas may not overlap.
+ * If @src is equal to @dest, the areas may <emphasis>not</emphasis> overlap.
  **/
 void
-gwy_field_part_copy(const GwyField *src,
-                    guint col,
-                    guint row,
-                    guint width,
-                    guint height,
-                    GwyField *dest,
-                    guint destcol,
-                    guint destrow)
+gwy_field_copy(const GwyField *src,
+               const GwyRectangle *srcrectangle,
+               GwyField *dest,
+               guint destcol,
+               guint destrow)
 {
     g_return_if_fail(GWY_IS_FIELD(src));
     g_return_if_fail(GWY_IS_FIELD(dest));
 
-    if (col >= src->xres || destcol >= dest->xres
-        || row >= src->yres || destrow >= dest->yres)
-        return;
+    guint col, row, width, height;
+    if (srcrectangle) {
+        col = srcrectangle->col;
+        row = srcrectangle->row;
+        width = srcrectangle->width;
+        height = srcrectangle->height;
+        if (col >= src->xres || row >= src->yres)
+            return;
+        width = MIN(width, src->xres - col);
+        height = MIN(height, src->yres - row);
+    }
+    else {
+        col = row = 0;
+        width = src->xres;
+        height = src->yres;
+    }
 
-    width = MIN(width, src->xres - col);
-    height = MIN(height, src->yres - row);
+    if (destcol >= dest->xres || destrow >= dest->yres)
+        return;
     width = MIN(width, dest->xres - destcol);
     height = MIN(height, dest->yres - destrow);
     if (!width || !height)
@@ -856,17 +853,44 @@ gwy_field_part_copy(const GwyField *src,
     }
 
     if (width == src->xres && width == dest->xres) {
-        /* make it as fast as gwy_data_field_copy() if possible */
         g_assert(col == 0 && destcol == 0);
         ASSIGN(dest->data + width*destrow, src->data + width*row, width*height);
+        if (height == src->yres && height == dest->yres) {
+            ASSIGN(dest->priv->cache, src->priv->cache, GWY_FIELD_CACHE_SIZE);
+            dest->priv->cached = src->priv->cached;
+            if (dest->xreal != src->xreal || dest->yreal != src->yreal)
+                dest->priv->cached &= ~CBIT(ARE);
+        }
+        else
+            gwy_field_invalidate(dest);
     }
     else {
         const gdouble *src0 = src->data + src->xres*row + col;
         gdouble *dest0 = dest->data + dest->xres*destrow + destcol;
         for (guint i = 0; i < height; i++)
             ASSIGN(dest0 + dest->xres*i, src0 + src->xres*i, width);
+        gwy_field_invalidate(dest);
     }
-    gwy_field_invalidate(dest);
+}
+
+/**
+ * gwy_field_copy_full:
+ * @src: Source two-dimensional data field.
+ * @dest: Destination two-dimensional data field.
+ *
+ * Copies entire data from one field to another.
+ *
+ * The two fields must be of identical dimensions.
+ **/
+void
+gwy_field_copy_full(const GwyField *src,
+                         GwyField *dest)
+{
+    g_return_if_fail(GWY_IS_FIELD(src));
+    g_return_if_fail(GWY_IS_FIELD(dest));
+    // This is a sanity check as gwy_field_copy() can handle anything.
+    g_return_if_fail(src->xres == dest->xres && src->yres == dest->yres);
+    gwy_field_copy(src, NULL, dest, 0, 0);
 }
 
 /**
@@ -903,7 +927,8 @@ gwy_field_get_data(GwyField *field)
  *
  * However, if you mix writing to the field data with calls to methods
  * providing overall field characteristics (minimum, maximum, mean value, etc.)
- * you may have to explicitly invalidate the cached values:
+ * you may have to explicitly invalidate the cached values as the methods have
+ * no means of knowing whether you changed the data meanwhile or not:
  * |[
  * gdouble *data;
  *
@@ -912,7 +937,7 @@ gwy_field_get_data(GwyField *field)
  *     // Change data.
  * }
  * med = gwy_field_median(field);       // This is OK, cache was invalidated.
- *                                      // But now the median is cached.
+ *                                      // But now the new median is cached.
  * for (i = 0; i < xres*yres; i++) {
  *     // Change data more.
  * }
@@ -941,6 +966,8 @@ gwy_field_set_xreal(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(xreal > 0.0);
     if (xreal != field->xreal) {
+        Field *priv = field->priv;
+        priv->cached &= ~CBIT(ARE);
         field->xreal = xreal;
         g_object_notify(G_OBJECT(field), "x-real");
     }
@@ -960,6 +987,8 @@ gwy_field_set_yreal(GwyField *field,
     g_return_if_fail(GWY_IS_FIELD(field));
     g_return_if_fail(yreal > 0.0);
     if (yreal != field->yreal) {
+        Field *priv = field->priv;
+        priv->cached &= ~CBIT(ARE);
         field->yreal = yreal;
         g_object_notify(G_OBJECT(field), "y-real");
     }
@@ -1012,7 +1041,7 @@ gwy_field_set_yoffset(GwyField *field,
  * Returns: The lateral units of @field.
  **/
 GwyUnit*
-gwy_field_get_unit_xy(GwyField *field)
+gwy_field_get_unit_xy(const GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     Field *priv = field->priv;
@@ -1030,7 +1059,7 @@ gwy_field_get_unit_xy(GwyField *field)
  * Returns: The value units of @field.
  **/
 GwyUnit*
-gwy_field_get_unit_z(GwyField *field)
+gwy_field_get_unit_z(const GwyField *field)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     Field *priv = field->priv;
@@ -1039,129 +1068,192 @@ gwy_field_get_unit_z(GwyField *field)
     return priv->unit_z;
 }
 
+gboolean
+_gwy_field_check_rectangle(const GwyField *field,
+                           const GwyRectangle *rectangle,
+                           guint *col, guint *row,
+                           guint *width, guint *height)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    if (rectangle) {
+        if (!rectangle->width || !rectangle->height)
+            return FALSE;
+        // The two separate conditions are to catch integer overflows.
+        g_return_val_if_fail(rectangle->col < field->xres, FALSE);
+        g_return_val_if_fail(rectangle->width <= field->xres - rectangle->col,
+                             FALSE);
+        g_return_val_if_fail(rectangle->row < field->yres, FALSE);
+        g_return_val_if_fail(rectangle->height <= field->yres - rectangle->row,
+                             FALSE);
+        *col = rectangle->col;
+        *row = rectangle->row;
+        *width = rectangle->width;
+        *height = rectangle->height;
+    }
+    else {
+        *col = *row = 0;
+        *width = field->xres;
+        *height = field->yres;
+    }
+
+    return TRUE;
+}
+
+gboolean
+_gwy_field_check_mask(const GwyField *field,
+                      const GwyRectangle *rectangle,
+                      const GwyMaskField *mask,
+                      GwyMaskingType *masking,
+                      guint *col, guint *row,
+                      guint *width, guint *height,
+                      guint *maskcol, guint *maskrow)
+{
+    if (!_gwy_field_check_rectangle(field, rectangle, col, row, width, height))
+        return FALSE;
+    if (mask && (*masking == GWY_MASK_INCLUDE
+                 || *masking == GWY_MASK_EXCLUDE)) {
+        g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), FALSE);
+        if (mask->xres == field->xres && mask->yres == field->yres) {
+            *maskcol = *col;
+            *maskrow = *row;
+        }
+        else if (mask->xres == *width && mask->yres == *height)
+            *maskcol = *maskrow = 0;
+        else {
+            g_critical("Mask dimensions match neither the entire field "
+                       "nor the rectangle.");
+            return FALSE;
+        }
+    }
+    else
+        *masking = GWY_MASK_IGNORE;
+
+    return TRUE;
+}
+
 /**
  * gwy_field_clear:
  * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to clear.  Pass %NULL to clear entire @field.
+ * @mask: Mask specifying which values to modify, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Fills a field with zeroes.
  **/
 void
-gwy_field_clear(GwyField *field)
+gwy_field_clear(GwyField *field,
+                const GwyRectangle *rectangle,
+                const GwyMaskField *mask,
+                GwyMaskingType masking)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
-    gwy_clear(field->data, field->xres * field->yres);
-    Field *priv = field->priv;
-    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                    | CBIT(MED) | CBIT(ARF) | CBIT(ART));
-    gwy_clear(priv->cache, GWY_FIELD_CACHE_SIZE);
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
+        return;
+
+    if (masking == GWY_MASK_IGNORE) {
+        gdouble *base = field->data + row*field->xres + col;
+        for (guint i = 0; i < height; i++)
+            gwy_clear(base + i*field->xres, width);
+        if (width == field->xres && height == field->yres)
+            set_cache_for_flat_field(field, 0.0);
+        else
+            gwy_field_invalidate(field);
+    }
+    else {
+        GwyMaskIter iter;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    *d = 0.0;
+                gwy_mask_iter_next(iter);
+            }
+        }
+        gwy_field_invalidate(field);
+    }
+}
+
+/**
+ * gwy_field_clear_full:
+ * @field: A two-dimensional data field.
+ *
+ * Fills an entire field with zeroes.
+ **/
+void
+gwy_field_clear_full(GwyField *field)
+{
+    gwy_field_clear(field, NULL, NULL, GWY_MASK_IGNORE);
 }
 
 /**
  * gwy_field_fill:
  * @field: A two-dimensional data field.
- * @value: Value to fill @field with.
+ * @rectangle: Area in @field to fill.  Pass %NULL to fill entire @field.
+ * @mask: Mask specifying which values to modify, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @value: Value to fill the rectangle with.
  *
  * Fills a field with the specified value.
  **/
 void
 gwy_field_fill(GwyField *field,
+               const GwyRectangle *rectangle,
+               const GwyMaskField *mask,
+               GwyMaskingType masking,
                gdouble value)
 {
     if (!value) {
-        gwy_field_clear(field);
-        return;
-    }
-    g_return_if_fail(GWY_IS_FIELD(field));
-    gdouble *p = field->data;
-    for (guint i = field->xres * field->yres; i; i--)
-        *(p++) = value;
-    Field *priv = field->priv;
-    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
-                    | CBIT(MED) | CBIT(ARF) | CBIT(ART));
-    CVAL(priv, MIN) = value;
-    CVAL(priv, MAX) = value;
-    CVAL(priv, AVG) = value;
-    CVAL(priv, RMS) = 0.0;
-    CVAL(priv, MED) = value;
-    CVAL(priv, ARF) = value;
-    CVAL(priv, ART) = value;
-}
-
-/**
- * gwy_field_part_clear:
- * @field: A two-dimensional data field.
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).
- * @height: Rectangle height (number of rows).
- *
- * Fills a rectangular part of a field with zeroes.
- **/
-void
-gwy_field_part_clear(GwyField *field,
-                     guint col,
-                     guint row,
-                     guint width,
-                     guint height)
-{
-    g_return_if_fail(GWY_IS_FIELD(field));
-    g_return_if_fail(col + width <= field->xres);
-    g_return_if_fail(row + height <= field->yres);
-
-    if (!width || !height)
-        return;
-    // This is much better because it sets cached statistics
-    if (width == field->xres && height == field->yres) {
-        gwy_field_clear(field);
+        gwy_field_clear(field, rectangle, mask, masking);
         return;
     }
 
-    gdouble *base = field->data + row*field->xres + col;
-    for (guint i = 0; i < height; i++)
-        gwy_clear(base + i*field->xres, width);
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
+        return;
+
+    if (masking == GWY_MASK_IGNORE) {
+        for (guint i = 0; i < height; i++) {
+            gdouble *p = field->data + (i + row)*field->xres + col;
+            for (guint j = width; j; j--)
+                *(p++) = value;
+        }
+        if (width == field->xres && height == field->yres)
+            set_cache_for_flat_field(field, value);
+        else
+            gwy_field_invalidate(field);
+    }
+    else {
+        GwyMaskIter iter;
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            gdouble *d = field->data + (row + i)*field->xres + col;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert)
+                    *d = value;
+                gwy_mask_iter_next(iter);
+            }
+        }
+        gwy_field_invalidate(field);
+    }
 }
 
 /**
- * gwy_field_part_fill:
+ * gwy_field_fill_full:
  * @field: A two-dimensional data field.
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns).
- * @height: Rectangle height (number of rows).
- * @value: Value to fill the rectangle with.
+ * @value: Value to fill the field with.
  *
- * Fills a rectangular part of a field with the specified value.
+ * Fills an entire field with the specified value.
  **/
 void
-gwy_field_part_fill(GwyField *field,
-                    guint col,
-                    guint row,
-                    guint width,
-                    guint height,
+gwy_field_fill_full(GwyField *field,
                     gdouble value)
 {
-    if (!value) {
-        gwy_field_part_clear(field, col, row, width, height);
-        return;
-    }
-
-    g_return_if_fail(GWY_IS_FIELD(field));
-    g_return_if_fail(col + width <= field->xres);
-    g_return_if_fail(row + height <= field->yres);
-
-    if (!width || !height)
-        return;
-    // This is much better because it sets cached statistics
-    if (width == field->xres && height == field->yres) {
-        gwy_field_fill(field, value);
-        return;
-    }
-
-    for (guint i = 0; i < height; i++) {
-        gdouble *p = field->data + (i + row)*field->xres + col;
-        for (guint j = width; j; j--)
-            *(p++) = value;
-    }
+    gwy_field_fill(field, NULL, NULL, GWY_MASK_IGNORE, value);
 }
 
 /**
@@ -1179,7 +1271,7 @@ gwy_field_part_fill(GwyField *field,
  *          %NULL, a newly created #GwyValueFormat.
  **/
 GwyValueFormat*
-gwy_field_get_format_xy(GwyField *field,
+gwy_field_get_format_xy(const GwyField *field,
                         GwyValueFormatStyle style,
                         GwyValueFormat *format)
 {
@@ -1205,13 +1297,13 @@ gwy_field_get_format_xy(GwyField *field,
  *          %NULL, a newly created #GwyValueFormat.
  **/
 GwyValueFormat*
-gwy_field_get_format_z(GwyField *field,
+gwy_field_get_format_z(const GwyField *field,
                        GwyValueFormatStyle style,
                        GwyValueFormat *format)
 {
     g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     gdouble min, max;
-    gwy_field_min_max(field, &min, &max);
+    gwy_field_min_max(field, NULL, NULL, GWY_MASK_IGNORE, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;
@@ -1237,7 +1329,7 @@ gwy_field_get_format_z(GwyField *field,
  * is to access the data directly, bearing a few things in mind:
  * <itemizedlist>
  *   <listitem>All #GwyField struct fields must be considered read-only. You
- *   may write to #GwyField-struct.data <emphasis>content</emphasis> but you
+ *   may write to #GwyField-struct.data  <emphasis>content</emphasis> but you
  *   must not change the field itself.  Use methods such as
  *   gwy_field_set_xreal() to change the field properties.</listitem>
  *   <listitem>For writing, obtain the data with gwy_field_get_data().  This

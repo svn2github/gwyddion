@@ -17,21 +17,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_LINE_STATISTICS_H__
-#define __LIBGWY_LINE_STATISTICS_H__
+#ifndef __LIBGWY_FIELD_FILTER_H__
+#define __LIBGWY_FIELD_FILTER_H__
 
 #include <libgwy/line.h>
+#include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
-void    gwy_line_min_max(const GwyLine *line,
-                         gdouble *min,
-                         gdouble *max);
-gdouble gwy_line_sum    (const GwyLine *line);
-gdouble gwy_line_mean   (const GwyLine *line);
-gdouble gwy_line_median (const GwyLine *line);
-gdouble gwy_line_rms    (const GwyLine *line);
-gdouble gwy_line_length (const GwyLine *line);
+void gwy_field_row_convolve   (GwyField *field,
+                               const GwyRectangle* rectangle,
+                               const GwyLine *kernel);
+void gwy_field_col_convolve   (GwyField *field,
+                               const GwyRectangle* rectangle,
+                               const GwyLine *kernel);
+void gwy_field_filter_gaussian(GwyField *field,
+                               const GwyRectangle* rectangle,
+                               gdouble hsigma,
+                               gdouble vsigma);
 
 G_END_DECLS
 

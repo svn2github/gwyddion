@@ -58,9 +58,9 @@ find_serializable_boxed_info(GType type)
  * gwy_boxed_type_is_serializable:
  * @type: Type to query.  Any #GType may be given, not just boxed types.
  *
- * Determines if a type supports the boxed serializable protocol.
+ * Determines if a type supports the boxed serialisable protocol.
  *
- * Returns: %TRUE if @type was registered as serializable boxed type, %FALSE
+ * Returns: %TRUE if @type was registered as serialisable boxed type, %FALSE
  *          if it was not.
  **/
 gboolean
@@ -72,19 +72,19 @@ gwy_boxed_type_is_serializable(GType type)
 
 /**
  * gwy_serializable_boxed_register_static:
- * @type: Boxed type to register as serializable.
+ * @type: Boxed type to register as serialisable.
  * @info: Information how the type implements the serialization protocol.
  *        It is not not copied; hence @info must be static data or allocated on
  *        heap and never freed.
  *
- * Registers a serializable boxed type.
+ * Registers a serialisable boxed type.
  *
- * A boxed type must be registered before it can be deserialized.  Usually this
+ * A boxed type must be registered before it can be deserialised.  Usually this
  * function is called in gwy_foo_get_type() for the type although it is
- * possible to register foreign boxed types as serializable.  They must be
+ * possible to register foreign boxed types as serialisable.  They must be
  * registered <quote>soon enough</quote> then.
  *
- * Standard Gwyddion boxed serializable types are registered by
+ * Standard Gwyddion boxed serialisable types are registered by
  * gwy_type_init(), i.e. at the very latest when deserialization is attempted.
  **/
 void
@@ -124,7 +124,7 @@ gwy_serializable_boxed_register_static(GType type,
 
 /**
  * gwy_serializable_boxed_assign:
- * @type: Type of @destination and @source.  It must be a serializable boxed
+ * @type: Type of @destination and @source.  It must be a serialisable boxed
  *        type.
  * @destination: Pointer to boxed struct that should be made equal to @source.
  * @source: Pointer to source boxed struct.
@@ -148,7 +148,7 @@ gwy_serializable_boxed_assign(GType type,
 
 /**
  * gwy_serializable_boxed_equal:
- * @type: Type of @a and @b.  It must be a serializable boxed type.
+ * @type: Type of @a and @b.  It must be a serialisable boxed type.
  * @a: Pointer to one boxed struct of type @type.
  * @b: Pointer to another boxed struct of type @type.
  *
@@ -170,9 +170,9 @@ gwy_serializable_boxed_equal(GType type,
 
 /**
  * gwy_serializable_boxed_n_items:
- * @type: Serializable boxed type.
+ * @type: Serialisable boxed type.
  *
- * Obtains the number of items a boxed type serializes to.
+ * Obtains the number of items a boxed type serialises to.
  **/
 gsize
 gwy_serializable_boxed_n_items(GType type)
@@ -184,12 +184,12 @@ gwy_serializable_boxed_n_items(GType type)
 
 /**
  * gwy_serializable_boxed_itemize:
- * @type: Serializable boxed type.
+ * @type: Serialisable boxed type.
  * @boxed: Pointer to boxed struct of type @type.
  * @items: List of flattened object tree items to append the representation of
- *         @serializable to.
+ *         @boxed to.
  *
- * Creates the flattened representation of a serializable boxed struct.
+ * Creates the flattened representation of a serialisable boxed struct.
  **/
 void
 gwy_serializable_boxed_itemize(GType type,
@@ -209,13 +209,13 @@ gwy_serializable_boxed_itemize(GType type,
 
 /**
  * gwy_serializable_boxed_construct:
- * @type: Serializable boxed type.
+ * @type: Serialisable boxed type.
  * @items: List of items to construct the boxed struct from.
  * @error_list: Location to store the errors occuring, %NULL to ignore.
  *
- * Constructs a serializable struct type from its flattened representation.
+ * Constructs a serialisable struct type from its flattened representation.
  *
- * Returns: Newly allocated boxed type with the deserialized data, possibly
+ * Returns: Newly allocated boxed type with the deserialised data, possibly
  *          %NULL on fatal failure.
  **/
 gpointer
@@ -233,16 +233,16 @@ gwy_serializable_boxed_construct(GType type,
 /**
  * SECTION: serializable-boxed
  * @title: serializable-boxed
- * @short_description: Making boxed types serializable
+ * @short_description: Making boxed types serialisable
  *
- * The serializable boxed protocol is an analogue of the serializable object
+ * The serialisable boxed protocol is an analogue of the serialisable object
  * protocol described in section #GwySerializable where more detailed
  * discussion of the concept can be found.  The protocl is intended for simple
  * structs that do not do their own memory management and typically can be
  * bitwise copied.  Complex data should be represented as objects.
  *
- * Boxed structs can be serialized as parts of objects, the top-level item
- * of a serialized representation must be always an object.  Also, serializable
+ * Boxed structs can be serialised as parts of objects, the top-level item
+ * of a serialised representation must be always an object.  Also, serialisable
  * boxed structs may contain only atomic types (FIXME: this is not enforced by
  * the implementation at this moment).
  **/
@@ -254,10 +254,10 @@ gwy_serializable_boxed_construct(GType type,
  *        comparison is performed by direct memory copying and comparing.
  *        If it is zero these operation are performed usinng @assign and @equal
  *        that must be defined.
- * @n_items: Number of items the boxed struct serializes to.
+ * @n_items: Number of items the boxed struct serialises to.
  * @itemize: Appends flattened representation of the boxed struct to the
  *           @items list.
- * @construct: Deserializes a boxed struct from array of flattened data
+ * @construct: Deserialises a boxed struct from array of flattened data
  *             items.  It returns a newly allocated boxed struct that must be
  *             freeable with g_boxed_free().
  * @assign: Makes the content of a boxed struct identical to the content of
@@ -265,18 +265,18 @@ gwy_serializable_boxed_construct(GType type,
  * @equal: Compares two boxed data for equality, returns %TRUE if they are
  *         equal, %FALSE if they differ.
  *
- * Interface implemented by serializable boxed types.
+ * Interface implemented by serialisable boxed types.
  *
  * The fields and methods are similar to #GwySerializableInterface where a more
  * detailed discussion can be found.  Some notes to the differences:
  *
  * The number of items @n_items is a constant, not a method, which is
  * appropriate for plain old data.  However, it is still an upper bound so you
- * can actually serialize less items in #GwySerializableBoxedInfo.itemize().
+ * can actually serialise less items in #GwySerializableBoxedInfo.itemize().
  * For the same reason, no equivalent of #GwySerializableInterface.done()
  * method exists.
  *
- * Duplication is realized by the
+ * Duplication is realised by the
  * <link linkend="gobject-Boxed-Types">GBoxed</link>
  * protocol, namely g_boxed_copy() and hence needs not be specified.
  **/

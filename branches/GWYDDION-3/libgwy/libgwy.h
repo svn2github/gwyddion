@@ -32,6 +32,7 @@
 #include <libgwy/field.h>
 #include <libgwy/field-arithmetic.h>
 #include <libgwy/field-distributions.h>
+#include <libgwy/field-filter.h>
 #include <libgwy/field-level.h>
 #include <libgwy/field-statistics.h>
 #include <libgwy/field-transform.h>
@@ -52,6 +53,7 @@
 #include <libgwy/mask-field-transform.h>
 #include <libgwy/math.h>
 #include <libgwy/pack.h>
+#include <libgwy/rectangle.h>
 #include <libgwy/resource.h>
 #include <libgwy/rgba.h>
 #include <libgwy/selection.h>

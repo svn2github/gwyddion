@@ -58,30 +58,24 @@ static const GwyFFTWindowingFunc windowings[] = {
  *
  * Finds a smooth (highly factorable) number larger or equal to @n.
  *
- * Returns: A smooth number larger or equal to @n.
+ * Returns: An even smooth number larger or equal to @n.
  **/
 static guint
 smooth_upper_bound(guint n)
 {
     static const guint primes[] = { 2, 3, 5, 7 };
 
-    guint j, p, r;
-
-    for (r = 1; ; ) {
-        /* the factorable part */
-        for (j = 0; j < G_N_ELEMENTS(primes); j++) {
-            p = primes[j];
-            while (n % p == 0) {
-                n /= p;
-                r *= p;
-            }
+    n += n & 1;
+    while (TRUE) {
+        guint r = n;
+        for (guint j = 0; j < G_N_ELEMENTS(primes); j++) {
+            guint p = primes[j];
+            while (r % p == 0)
+                r /= p;
         }
-
-        if (n == 1)
-            return r;
-
-        /* gosh... make it factorable again */
-        n++;
+        if (r == 1)
+            return n;
+        n += 2;
     }
 }
 
@@ -93,7 +87,7 @@ smooth_upper_bound(guint n)
  *
  * In this context, <quote>nice</quote> means the following properties are
  * guaranteed:
- * the size is greater than or equal to @size;
+ * the size is even and greater than or equal to @size;
  * the transform of this size is possible;
  * and the transform of this size is fast, i.e. the number is highly
  * factorable.
@@ -109,7 +103,7 @@ guint
 gwy_fft_nice_transform_size(guint size)
 {
     if (size <= 16)
-        return size;
+        return size + (size & 1);
 
     return smooth_upper_bound(size);
 }

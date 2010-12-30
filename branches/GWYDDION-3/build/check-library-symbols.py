@@ -30,14 +30,14 @@ dlname = os.path.join(os.path.dirname(laname), dlname)
 try:
     syminput = subprocess.Popen(nmprog + [dlname], stdout=subprocess.PIPE).stdout
 except OSError as (errno, strerror):
-    sys.stderr.write('Cannot execute %s -f sysv to scan symbols: %s.\n'
-                     % (nmprog, strerror))
+    sys.stderr.write('Cannot execute %s to scan symbols: %s.\n'
+                     % (' '.join(nmprog), strerror))
     sys.exit(1)
 
 exported_symbols = {}
 for line in syminput:
     try:
-        name, offset, scope, type, size, source, sect = \
+        name, offset, scope, typ, size, source, sect = \
             [x.strip() for x in line.split('|')]
     except ValueError:
         continue

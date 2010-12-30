@@ -1,4 +1,5 @@
 dnl Check for GNUC visibility support
+dnl UNUSED
 AC_DEFUN([GWY_CHECK_GNUC_VISIBILITY],
 [
 AC_MSG_CHECKING([for GNUC visibility attribute])

@@ -54,6 +54,25 @@ gwy_line_min_max(const GwyLine *line,
 }
 
 /**
+ * gwy_line_sum:
+ * @line: A one-dimensional data line.
+ *
+ * Calculates the sum of line values.
+ *
+ * Returns: The sum of all values in the data line.
+ **/
+gdouble
+gwy_line_sum(const GwyLine *line)
+{
+    g_return_val_if_fail(GWY_IS_LINE(line), 0.0);
+    const gdouble *d = line->data;
+    gdouble sum = 0.0;
+    for (guint i = line->res; i; i--, d++)
+        sum += *d;
+    return sum;
+}
+
+/**
  * gwy_line_mean:
  * @line: A one-dimensional data line.
  *

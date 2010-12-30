@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __LIBGWY_LINE_STATISTICS_H__
-#define __LIBGWY_LINE_STATISTICS_H__
+#include "testlibgwy.h"
 
-#include <libgwy/line.h>
+/***************************************************************************
+ *
+ * Rectangle
+ *
+ ***************************************************************************/
 
-G_BEGIN_DECLS
-
-void    gwy_line_min_max(const GwyLine *line,
-                         gdouble *min,
-                         gdouble *max);
-gdouble gwy_line_sum    (const GwyLine *line);
-gdouble gwy_line_mean   (const GwyLine *line);
-gdouble gwy_line_median (const GwyLine *line);
-gdouble gwy_line_rms    (const GwyLine *line);
-gdouble gwy_line_length (const GwyLine *line);
-
-G_END_DECLS
-
-#endif
+void
+test_rectangle_boxed(void)
+{
+    GwyRectangle rectangle = { 1, 2, 3, 4 };
+    GwyRectangle *copy = serialize_boxed_and_back(&rectangle,
+                                                  GWY_TYPE_RECTANGLE);
+    g_assert_cmpfloat(rectangle.col, ==, copy->col);
+    g_assert_cmpfloat(rectangle.row, ==, copy->row);
+    g_assert_cmpfloat(rectangle.width, ==, copy->width);
+    g_assert_cmpfloat(rectangle.height, ==, copy->height);
+    g_boxed_free(GWY_TYPE_RECTANGLE, copy);
+}
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

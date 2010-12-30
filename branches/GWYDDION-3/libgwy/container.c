@@ -1942,7 +1942,7 @@ gwy_container_take_string(GwyContainer *container,
  *
  * The container adds its own reference on the object.
  *
- * The object must implement #GwySerializable interface to allow serialization
+ * The object must implement #GwySerializable interface to allow serialisation
  * and other operations with the container.
  * |[
  * GwyUnit *unit = gwy_si_unit_new_from_string("m");
@@ -2011,7 +2011,7 @@ gwy_container_set_object(GwyContainer *container,
  * The container takes the ownership on the object from the caler, i.e. its
  * reference count is not incremented.
  *
- * The object must implement #GwySerializable interface to allow serialization
+ * The object must implement #GwySerializable interface to allow serialisation
  * and other operations with the container.
  * |[
  * GwyUnit *unit = gwy_si_unit_new_from_string("m");
@@ -2081,7 +2081,7 @@ gwy_container_take_object(GwyContainer *container,
  *
  * The boxed type must implement the
  * <link linkend="libgwy-serializable-boxed">serializable boxed</link>.
- * to allow serialization and other operations with the container.
+ * to allow serialisation and other operations with the container.
  * |[
  * GwyRGBA color = { 0, 0, 0, 0 };
  * gwy_container_set_boxed(container, key, GWY_TYPE_RGBA, &color);
@@ -2386,7 +2386,7 @@ pstring_compare(const void *p, const void *q)
  *
  * Creates a text representation of a container contents.
  *
- * Only simple data types are supported as serialization of compound objects is
+ * Only simple data types are supported as serialisation of compound objects is
  * not controllable.
  *
  * Returns: A pointer array, each item containing string with one container
@@ -2592,7 +2592,7 @@ next:
  *
  * #GwyContainer is a general-purpose container, it can hold atomic types,
  * strings and objects. However, objects must implement the #GwySerializable
- * interface, because the container itself is serializable.
+ * interface, because the container itself is serialisable.
  *
  * A new container can be created with gwy_container_new(), items can be stored
  * with functions gwy_container_set_int32(), gwy_container_set_double(), etc.

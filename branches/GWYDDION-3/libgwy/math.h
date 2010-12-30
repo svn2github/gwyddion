@@ -36,6 +36,8 @@ typedef struct {
     gdouble z;
 } GwyXYZ;
 
+typedef gdouble (*GwyRealFunc)(gdouble value, gpointer user_data);
+
 /* This is necessary to fool gtk-doc that ignores static inline functions */
 #define _GWY_STATIC_INLINE static inline
 

@@ -67,6 +67,18 @@ test_mask_field_props(void)
     g_object_unref(maskfield);
 }
 
+void
+test_mask_field_data_changed(void)
+{
+    GwyMaskField *field = gwy_mask_field_new();
+    guint counter = 0;
+    g_signal_connect_swapped(field, "data-changed",
+                             G_CALLBACK(record_signal), &counter);
+    gwy_mask_field_data_changed(field);
+    g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(field);
+}
+
 static void
 mask_field_part_copy_dumb(const GwyMaskField *src,
                           guint col,
@@ -171,15 +183,15 @@ test_mask_field_copy(void)
         GwyMaskField *reference = gwy_mask_field_new_sized(dxres, dyres, FALSE);
         mask_field_randomize(source, pool, max_size, rng);
         mask_field_randomize(reference, pool, max_size, rng);
-        gwy_mask_field_copy(reference, dest);
+        gwy_mask_field_copy_full(reference, dest);
         guint width = g_rand_int_range(rng, 0, MAX(sxres, dxres));
         guint height = g_rand_int_range(rng, 0, MAX(syres, dyres));
         guint col = g_rand_int_range(rng, 0, sxres);
         guint row = g_rand_int_range(rng, 0, syres);
         guint destcol = g_rand_int_range(rng, 0, dxres);
         guint destrow = g_rand_int_range(rng, 0, dyres);
-        gwy_mask_field_part_copy(source, col, row, width, height,
-                                 dest, destcol, destrow);
+        GwyRectangle rectangle = { col, row, width, height };
+        gwy_mask_field_copy(source, &rectangle, dest, destcol, destrow);
         mask_field_part_copy_dumb(source, col, row, width, height,
                                   reference, destcol, destrow);
         test_mask_field_assert_equal(dest, reference);
@@ -209,8 +221,8 @@ test_mask_field_new_part(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
-        GwyMaskField *part = gwy_mask_field_new_part(source,
-                                                     col, row, width, height);
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyMaskField *part = gwy_mask_field_new_part(source, &rectangle);
         GwyMaskField *reference = gwy_mask_field_new_sized(width, height,
                                                            FALSE);
         mask_field_part_copy_dumb(source, col, row, width, height,
@@ -271,14 +283,14 @@ test_mask_field_logical(void)
         for (GwyLogicalOperator op = GWY_LOGICAL_ZERO;
              op <= GWY_LOGICAL_ONE;
              op++) {
-            gwy_mask_field_copy(source, reference);
-            gwy_mask_field_copy(source, dest);
+            gwy_mask_field_copy_full(source, reference);
+            gwy_mask_field_copy_full(source, dest);
             mask_field_logical_dumb(reference, operand, NULL, op);
             gwy_mask_field_logical(dest, operand, NULL, op);
             test_mask_field_assert_equal(dest, reference);
 
-            gwy_mask_field_copy(source, reference);
-            gwy_mask_field_copy(source, dest);
+            gwy_mask_field_copy_full(source, reference);
+            gwy_mask_field_copy_full(source, dest);
             mask_field_logical_dumb(reference, operand, mask, op);
             gwy_mask_field_logical(dest, operand, mask, op);
             test_mask_field_assert_equal(dest, reference);
@@ -347,9 +359,10 @@ test_mask_field_logical_part(void)
         for (GwyLogicalOperator op = GWY_LOGICAL_ZERO;
              op <= GWY_LOGICAL_ONE;
              op++) {
-            gwy_mask_field_copy(source, dest);
-            gwy_mask_field_copy(source, reference);
-            gwy_mask_field_part_logical(dest, col, row, width, height,
+            gwy_mask_field_copy_full(source, dest);
+            gwy_mask_field_copy_full(source, reference);
+            GwyRectangle rectangle = { col, row, width, height };
+            gwy_mask_field_part_logical(dest, &rectangle,
                                         operand, opcol, oprow, op);
             mask_field_part_logical_dumb(reference, col, row, width, height,
                                          operand, opcol, oprow, op);
@@ -399,16 +412,17 @@ test_mask_field_fill(void)
         guint row = g_rand_int_range(rng, 0, yres-height+1);
 
         mask_field_randomize(reference, pool, max_size, rng);
-        gwy_mask_field_copy(reference, dest);
+        gwy_mask_field_copy_full(reference, dest);
 
-        gwy_mask_field_part_fill(dest, col, row, width, height, FALSE);
+        GwyRectangle rectangle = { col, row, width, height };
+        gwy_mask_field_fill(dest, &rectangle, FALSE);
         mask_field_part_fill_dumb(reference,  col, row, width, height, FALSE);
         test_mask_field_assert_equal(dest, reference);
 
         mask_field_randomize(reference, pool, max_size, rng);
-        gwy_mask_field_copy(reference, dest);
+        gwy_mask_field_copy_full(reference, dest);
 
-        gwy_mask_field_part_fill(dest, col, row, width, height, TRUE);
+        gwy_mask_field_fill(dest, &rectangle, TRUE);
         mask_field_part_fill_dumb(reference,  col, row, width, height, TRUE);
         test_mask_field_assert_equal(dest, reference);
 
@@ -915,15 +929,14 @@ test_mask_field_count(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
 
-        g_assert_cmpuint(gwy_mask_field_part_count(field,
-                                                   col, row, width, height,
+        g_assert_cmpuint(gwy_mask_field_part_count(field, &rectangle,
                                                    FALSE),
                          ==, mask_field_count_dumb(field, NULL,
                                                    col, row, width, height,
                                                    FALSE));
-        g_assert_cmpuint(gwy_mask_field_part_count(field,
-                                                   col, row, width, height,
+        g_assert_cmpuint(gwy_mask_field_part_count(field, &rectangle,
                                                    TRUE),
                          ==, mask_field_count_dumb(field, NULL,
                                                    col, row, width, height,
@@ -955,10 +968,10 @@ test_mask_field_count_rows(void)
         guint height = g_rand_int_range(rng, 1, yres+1);
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
+        GwyRectangle rectangle = { col, row, width, height };
         guint *counts = g_new(guint, height);
 
-        gwy_mask_field_part_count_rows(field, col, row, width, height, TRUE,
-                                       counts);
+        gwy_mask_field_count_rows(field, &rectangle, TRUE, counts);
         for (guint i = 0; i < height; i++) {
             g_assert_cmpuint(counts[i],
                              ==, mask_field_count_dumb(field, NULL,
@@ -966,8 +979,7 @@ test_mask_field_count_rows(void)
                                                        TRUE));
         }
 
-        gwy_mask_field_part_count_rows(field, col, row, width, height, FALSE,
-                                       counts);
+        gwy_mask_field_count_rows(field, &rectangle, FALSE, counts);
         for (guint i = 0; i < height; i++) {
             g_assert_cmpuint(counts[i],
                              ==, mask_field_count_dumb(field, NULL,

@@ -86,7 +86,7 @@
  * @type: Type of the data to free, typically a structure name.
  * @ptr: Pointer (must be an l-value).
  *
- * Frees #GSlice-allocated memory if it is allocated.
+ * Frees GSlice‐allocated memory if it is allocated.
  *
  * This is an idempotent wrapper of g_slice_free(): if @ptr is not %NULL
  * g_free() is called on it and @ptr is set to %NULL.

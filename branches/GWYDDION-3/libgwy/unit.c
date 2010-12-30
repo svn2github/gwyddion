@@ -329,7 +329,7 @@ gwy_unit_new(void)
  *
  * Creates a new physical unit from a string representation.
  *
- * Relatively complex notations are recognized in @unit_string, namely
+ * Relatively complex notations are recognised in @unit_string, namely
  * prefixes, powers and inverse powers such as "pA/s" or "km^2".  Beside
  * conversion to the base unit such as "A/s" or "m^2" this constructor also
  * computes the power of 10 one has to multiply the base unit with to get an
@@ -1378,8 +1378,8 @@ get_prefix(gint power)
  * <para>On the other hand, one often thinks about it and attempts to use it as
  * a mere value.  Hence it is almost never a good idea to make one unit object
  * owned by several other objects (the motivation for that could be keeping
- * their units synchronized).  In addition, this relation would be lost in the
- * serialized representation.  To prevent multiple ownership, objects that
+ * their units synchronised).  In addition, this relation would be lost in the
+ * serialised representation.  To prevent multiple ownership, objects that
  * typically own #GwyUnits, such as #GwyField or #GwyLine, do not provide
  * methods to set the units objects.  Instead of</para>
  * |[

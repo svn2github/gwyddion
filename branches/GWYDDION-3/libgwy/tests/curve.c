@@ -124,6 +124,18 @@ test_curve_props(void)
 }
 
 void
+test_curve_data_changed(void)
+{
+    GwyCurve *curve = gwy_curve_new();
+    guint counter = 0;
+    g_signal_connect_swapped(curve, "data-changed",
+                             G_CALLBACK(record_signal), &counter);
+    gwy_curve_data_changed(curve);
+    g_assert_cmpuint(counter, ==, 1);
+    g_object_unref(curve);
+}
+
+void
 test_curve_line_convert(void)
 {
     enum { max_size = 27 };

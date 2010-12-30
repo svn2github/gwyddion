@@ -23,6 +23,19 @@
 #include "libgwy/fit-func.h"
 #include "libgwy/fit-func-builtin.h"
 
+/*
+ * TODO: Estimator helpers:
+ * - mean
+ * - minimum and maximum with positions
+ * - half-width (given minimum and maximum)
+ */
+
+/****************************************************************************
+ *
+ * Constant
+ *
+ ****************************************************************************/
+
 static const FitFuncParam const_param[] = {
    { "a",             0, 1, },
 };
@@ -56,6 +69,12 @@ static const BuiltinFitFunc const_builtin = {
     .function = const_function,
     .estimate = const_estimate,
 };
+
+/****************************************************************************
+ *
+ * Exponential
+ *
+ ****************************************************************************/
 
 static const FitFuncParam exp_param[] = {
    { "y<sub>0</sub>", 0, 1, },

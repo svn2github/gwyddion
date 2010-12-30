@@ -57,6 +57,9 @@ User fit function: No interface to manipulate the filter, parameters may need
                    presentational parameters and formula.  This needs some
                    deliberation.
 
+Field distributions: HHCF does not depend on the mean value so, @level has no
+                     effect.  Either remove it or consider higher degrees.
+
 libgwy: Review directory tests once we install the standard directory structure
         (data and modules).  Deal with lib vs. lib64 vs. lib/64 vs. lib32 mess.
 

@@ -53,12 +53,24 @@ struct _GwyFieldPrivate {
 typedef struct _GwyFieldPrivate Field;
 
 G_GNUC_INTERNAL
+gboolean _gwy_field_check_rectangle(const GwyField *field,
+                                    const GwyRectangle *rectangle,
+                                    guint *col,
+                                    guint *row,
+                                    guint *width,
+                                    guint *height);
+
+G_GNUC_INTERNAL
 gboolean _gwy_field_check_mask(const GwyField *field,
+                               const GwyRectangle *rectangle,
                                const GwyMaskField *mask,
                                GwyMaskingType *masking,
-                               guint col, guint row,
-                               guint width, guint height,
-                               guint *maskcol, guint *maskrow);
+                               guint *col,
+                               guint *row,
+                               guint *width,
+                               guint *height,
+                               guint *maskcol,
+                               guint *maskrow);
 
 G_END_DECLS
 

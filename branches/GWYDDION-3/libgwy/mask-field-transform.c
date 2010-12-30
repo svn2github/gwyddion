@@ -722,8 +722,8 @@ gwy_mask_field_part_transpose(const GwyMaskField *src,
     if ((col & 0x1f) && (destcol & 0x1f)) {
         GwyMaskField *buffer
             = gwy_mask_field_new_part_transposed(src, col, row, width, height);
-        gwy_mask_field_part_copy(buffer, 0, 0, height, width,
-                                 dest, destcol, destrow);
+        gwy_mask_field_copy(buffer, &((GwyRectangle){0, 0, height, width}),
+                            dest, destcol, destrow);
         g_object_unref(buffer);
     }
     else if (col & 0x1f)

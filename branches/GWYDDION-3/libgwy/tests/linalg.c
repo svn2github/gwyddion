@@ -26,9 +26,9 @@
  ***************************************************************************/
 
 static void
-test_linalg_make_vector(gdouble *d,
-                        guint n,
-                        GRand *rng)
+linalg_make_vector(gdouble *d,
+                   guint n,
+                   GRand *rng)
 {
     for (guint j = 0; j < n; j++)
         d[j] = g_rand_double_range(rng, -1.0, 1.0)
@@ -37,7 +37,7 @@ test_linalg_make_vector(gdouble *d,
 
 /* Multiply a vector with a matrix from left. */
 static void
-test_linalg_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
+linalg_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
 {
     for (guint i = 0; i < n; i++) {
         a[i] = 0.0;
@@ -48,7 +48,7 @@ test_linalg_matvec(gdouble *a, const gdouble *m, const gdouble *v, guint n)
 
 /* Multiply two square matrices. */
 static void
-test_linalg_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
+linalg_matmul(gdouble *a, const gdouble *d1, const gdouble *d2, guint n)
 {
     for (guint i = 0; i < n; i++) {
         for (guint j = 0; j < n; j++) {
@@ -80,12 +80,12 @@ test_math_linalg(void)
         gdouble *solution = g_new(gdouble, n);
 
         for (guint iter = 0; iter < niter; iter++) {
-            test_linalg_make_vector(matrix, n*n, rng);
-            test_linalg_make_vector(vector, n, rng);
+            linalg_make_vector(matrix, n*n, rng);
+            linalg_make_vector(vector, n, rng);
             gdouble eps;
 
             /* Solution */
-            test_linalg_matvec(rhs, matrix, vector, n);
+            linalg_matvec(rhs, matrix, vector, n);
             memcpy(decomp, matrix, n*n*sizeof(gdouble));
             g_assert(gwy_linalg_solve(decomp, rhs, solution, n));
             eps = exp10(n - 13.0);
@@ -98,7 +98,7 @@ test_math_linalg(void)
             memcpy(unity, matrix, n*n*sizeof(gdouble));
             g_assert(gwy_linalg_invert(unity, decomp, n));
             /* Multiplication with inverted must give unity */
-            test_linalg_matmul(unity, matrix, decomp, n);
+            linalg_matmul(unity, matrix, decomp, n);
             for (guint j = 0; j < n; j++) {
                 g_assert_cmpfloat(fabs(unity[j*n + j] - 1.0), <=, eps);
                 for (guint i = 0; i < n; i++) {
@@ -127,6 +127,36 @@ test_math_linalg(void)
     }
 
     g_rand_free(rng);
+}
+
+void
+test_math_linalg_fail(void)
+{
+    GRand *rng = g_rand_new();
+    /* Make it realy reproducible. */
+    g_rand_set_seed(rng, 42);
+
+    for (guint n = 2; n <= 10; n++) {
+        gdouble *matrix = g_new(gdouble, n*n);
+        gdouble *rhs = g_new(gdouble, n);
+        gdouble *solution = g_new(gdouble, n);
+        gdouble *lastrow = matrix + n*(n-1);
+
+        for (guint iter = 0; iter < 5; iter++) {
+            linalg_make_vector(matrix, n*n, rng);
+            linalg_make_vector(rhs, n, rng);
+            // Make the last row identical to some other row.
+            // FIXME: It would be nice if arbitrary linear combination failed
+            // but it often passes as `just' an ill-conditioned matrix.
+            memcpy(lastrow, matrix + n*g_rand_int_range(rng, 0, n-1),
+                   n*sizeof(gdouble));
+            g_assert(!gwy_linalg_solve(matrix, rhs, solution, n));
+        }
+
+        g_free(solution);
+        g_free(rhs);
+        g_free(matrix);
+    }
 }
 
 typedef struct {

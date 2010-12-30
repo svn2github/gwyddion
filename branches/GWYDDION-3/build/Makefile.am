@@ -5,6 +5,7 @@ EXTRA_DIST = \
 	check-library-symbols.py \
 	coverage-plot.py \
 	coverage-test.sh \
+	expand-test-list.py \
 	generate-library-def.py \
 	gtester.make \
 	gtkdoc-add-objects.py \

@@ -20,7 +20,9 @@
 #ifndef __LIBGWY_FIELD_ARITHMETIC_H__
 #define __LIBGWY_FIELD_ARITHMETIC_H__
 
+#include <libgwy/math.h>
 #include <libgwy/field.h>
+#include <libgwy/mask-field.h>
 
 G_BEGIN_DECLS
 
@@ -42,6 +44,22 @@ typedef enum {
 GwyFieldCompatibilityFlags gwy_field_is_incompatible(GwyField *field1,
                                                      GwyField *field2,
                                                      GwyFieldCompatibilityFlags check);
+void                       gwy_field_add            (GwyField *field,
+                                                     const GwyRectangle *rectangle,
+                                                     const GwyMaskField *mask,
+                                                     GwyMaskingType masking,
+                                                     gdouble value);
+void                       gwy_field_multiply       (GwyField *field,
+                                                     const GwyRectangle *rectangle,
+                                                     const GwyMaskField *mask,
+                                                     GwyMaskingType masking,
+                                                     gdouble value);
+void                       gwy_field_apply_func     (GwyField *field,
+                                                     const GwyRectangle *rectangle,
+                                                     const GwyMaskField *mask,
+                                                     GwyMaskingType masking,
+                                                     GwyRealFunc func,
+                                                     gpointer user_data);
 
 G_END_DECLS
 

@@ -3,8 +3,6 @@
 # Variables: mkenum_name mkenum_id mkenum_headers library
 # Adds to: BUILT_SOURCES CLEANFILES DISTCLEANFILES
 
-GLIB_MKENUMS = @GLIB_MKENUMS@
-
 mkenum_built_sources = $(mkenum_name).h $(mkenum_name).c
 
 mkenum_stamp_files = $(mkenum_name).h.stamp
@@ -12,7 +10,7 @@ mkenum_c_template = $(top_srcdir)/build/mkenum.c.template
 mkenum_h_template = $(top_srcdir)/build/mkenum.h.template
 # Keep the `GENERATED' string quoted to prevent match here
 mkenum_fix_output = \
-	| sed -e 's/@'ID'@/$(mkenum_id)/g' \
+	| $(SED) -e 's/@'ID'@/$(mkenum_id)/g' \
 	      -e 's/@'SELF'@/$(mkenum_name)/g' \
 	      -e 's/@'LIBRARY'@/$(library)/g' \
 	      -e '1s:.*:/* This is a 'GENERATED' file. */:'

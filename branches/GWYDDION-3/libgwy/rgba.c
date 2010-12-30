@@ -227,8 +227,8 @@ gwy_rgba_interpolate(const GwyRGBA *src1,
  * using floating point values from the [0,1] interval.
  *
  * #GwyRGBA is not an object, but a simple struct that can be allocated on
- * stack on created with g_new() or malloc().  It implements the serializable
- * boxed protocol so it can be put into #GwyContainers and serialized as a
+ * stack on created with g_new() or malloc().  It implements the serialisable
+ * boxed protocol so it can be put into #GwyContainers and serialised as a
  * data member of objects.
  **/
 
