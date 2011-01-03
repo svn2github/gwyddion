@@ -141,7 +141,7 @@ clean-local:
 
 # VPATH fix
 distclean-local:
-	@test '$(srcdir)' = . || rm -rf html
+	-test . = "$(srcdir)" || rm -rf html $(DOC_MODULE)-overrides.txt
 
 maintainer-clean-local:
 	rm -rf html
