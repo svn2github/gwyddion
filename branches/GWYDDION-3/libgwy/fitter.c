@@ -163,8 +163,8 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 
     g_object_class_install_property
         (gobject_class,
-         PROP_ITER_MAX,
-         g_param_spec_double("max-lambda",
+         PROP_LAMBDA_MAX,
+         g_param_spec_double("lambda-max",
                              "Maximum lambda",
                              "Maximum value of Marquardt parameter lambda.",
                              0.0, G_MAXDOUBLE, default_settings.lambda_max,
@@ -203,7 +203,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 
     g_object_class_install_property
         (gobject_class,
-         PROP_LAMBDA_DECREASE,
+         PROP_PARAM_CHANGE_MIN,
          g_param_spec_double("min-param-change",
                              "Minimum param change",
                              "Minimum relative change of at least one "
@@ -214,7 +214,7 @@ gwy_fitter_class_init(GwyFitterClass *klass)
 
     g_object_class_install_property
         (gobject_class,
-         PROP_LAMBDA_DECREASE,
+         PROP_RESIDUUM_CHANGE_MIN,
          g_param_spec_double("min-residuum-change",
                              "Minimum residuum change",
                              "Minimum relative decrease of the residuum "
@@ -257,7 +257,7 @@ gwy_fitter_set_property(GObject *object,
         break;
 
         case PROP_SUCCESSES_TO_GET_BORED:
-        settings->iter_max = g_value_get_uint(value);
+        settings->successes_to_get_bored = g_value_get_uint(value);
         break;
 
         case PROP_LAMBDA_MAX:
@@ -308,7 +308,7 @@ gwy_fitter_get_property(GObject *object,
         break;
 
         case PROP_SUCCESSES_TO_GET_BORED:
-        g_value_set_uint(value, settings->iter_max);
+        g_value_set_uint(value, settings->successes_to_get_bored);
         break;
 
         case PROP_LAMBDA_MAX:
@@ -513,7 +513,7 @@ fitter_minimize(Fitter *fitter,
     fitter->iter = 0;
     fitter->lambda = fitter->settings.lambda_start;
     fitter->valid = MIN(fitter->valid, VALID_PARAMS);
-    ASSIGN(fitter->param, fitter->param_best, nparam);
+    gwy_assign(fitter->param, fitter->param_best, nparam);
 
     if (!eval_residuum_with_check(fitter, user_data)
         || !eval_gradient_with_check(fitter, user_data))
@@ -527,13 +527,14 @@ fitter_minimize(Fitter *fitter,
         scale(fitter);
         while (fitter->lambda <= fitter->settings.lambda_max) {
             fitter->status = GWY_FITTER_STATUS_NONE;
-            ASSIGN(fitter->normal_matrix, fitter->scaled_hessian, matrix_len);
+            gwy_assign(fitter->normal_matrix, fitter->scaled_hessian,
+                       matrix_len);
             add_to_diagonal(nparam, fitter->normal_matrix, fitter->lambda);
             if (!gwy_cholesky_decompose(fitter->normal_matrix, nparam)) {
                 fitter->status = GWY_FITTER_STATUS_CANNOT_STEP;
                 goto step_fail;
             }
-            ASSIGN(fitter->step, fitter->scaled_gradient, nparam);
+            gwy_assign(fitter->step, fitter->scaled_gradient, nparam);
             gwy_cholesky_solve(fitter->normal_matrix, fitter->step, nparam);
             update_param(fitter);
             if ((fitter->constrain
@@ -548,7 +549,7 @@ fitter_minimize(Fitter *fitter,
             fitter->lambda /= fitter->settings.lambda_decrease;
             f_step = fitter->f_best ? 1.0 - fitter->f/fitter->f_best : 0.0;
             fitter->f_best = fitter->f;
-            ASSIGN(fitter->param_best, fitter->param, nparam);
+            gwy_assign(fitter->param_best, fitter->param, nparam);
             fitter->valid = MIN(fitter->valid, VALID_FUNCTION);
             break;
 step_fail:
@@ -585,7 +586,7 @@ fitter_invert_hessian(Fitter *fitter)
 {
     guint nparam = fitter->nparam;
     guint matrix_len = MATRIX_LEN(nparam);
-    ASSIGN(fitter->inv_hessian, fitter->hessian, matrix_len);
+    gwy_assign(fitter->inv_hessian, fitter->hessian, matrix_len);
     /* Make possible inversion of fitter with naively fixed parameters. */
     gboolean zero[nparam];
     gwy_clear(zero, nparam);
@@ -691,7 +692,7 @@ gwy_fitter_set_params(GwyFitter *fitter,
     g_return_if_fail(GWY_IS_FITTER(fitter));
     Fitter *priv = fitter->priv;
     g_return_if_fail(params || !priv->nparam);
-    ASSIGN(priv->param_best, params, priv->nparam);
+    gwy_assign(priv->param_best, params, priv->nparam);
     priv->valid = VALID_PARAMS;
 }
 
@@ -714,7 +715,7 @@ gwy_fitter_get_params(GwyFitter *fitter,
     if (priv->valid < VALID_PARAMS)
         return FALSE;
     if (params && priv->nparam)
-        ASSIGN(params, priv->param_best, priv->nparam);
+        gwy_assign(params, priv->param_best, priv->nparam);
     return TRUE;
 }
 
@@ -863,7 +864,7 @@ gwy_fitter_eval_residuum(GwyFitter *fitter,
     g_return_val_if_fail(priv->eval_residuum, -1.0);
     if (priv->valid < VALID_PARAMS)
         return -1.0;
-    ASSIGN(priv->param, priv->param_best, priv->nparam);
+    gwy_assign(priv->param, priv->param_best, priv->nparam);
     return eval_residuum_with_check(fitter->priv, user_data) ? priv->f : -1.0;
 }
 
@@ -894,7 +895,7 @@ gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
         fitter_invert_hessian(fitter->priv);
     if (priv->valid >= VALID_INV_HESSIAN) {
         if (ihessian)
-            ASSIGN(ihessian, priv->inv_hessian, MATRIX_LEN(priv->nparam));
+            gwy_assign(ihessian, priv->inv_hessian, MATRIX_LEN(priv->nparam));
         return TRUE;
     }
     return FALSE;

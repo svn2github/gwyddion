@@ -326,7 +326,7 @@ gwy_line_duplicate_impl(GwySerializable *serializable)
 {
     GwyLine *line = GWY_LINE(serializable);
     GwyLine *duplicate = gwy_line_new_alike(line, FALSE);
-    ASSIGN(duplicate->data, line->data, line->res);
+    gwy_assign(duplicate->data, line->data, line->res);
     return G_OBJECT(duplicate);
 }
 
@@ -363,7 +363,7 @@ gwy_line_assign_impl(GwySerializable *destination,
         dest->data = g_new(gdouble, src->res);
         dest->priv->allocated = TRUE;
     }
-    ASSIGN(dest->data, src->data, src->res);
+    gwy_assign(dest->data, src->data, src->res);
     copy_info(dest, src);
     _gwy_notify_properties(G_OBJECT(dest), notify, nn);
 }
@@ -456,7 +456,7 @@ gwy_line_new(void)
  * gwy_line_new_sized:
  * @res: Line resolution (width).
  * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Creates a new one-dimensional data line of specified dimension.
  *
@@ -479,12 +479,12 @@ gwy_line_new_sized(guint res,
  * gwy_line_new_alike:
  * @model: A one-dimensional data line to use as the template.
  * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Creates a new one-dimensional data line similar to another line.
  *
  * All properties of the newly created line will be identical to @model,
- * except the data that will be either zeroes or unitialized.  Use
+ * except the data that will be either zeroes or uninitialised.  Use
  * gwy_line_duplicate() to completely duplicate a line including data.
  *
  * Returns: A new one-dimensional data line.
@@ -584,7 +584,7 @@ gwy_line_new_resampled(const GwyLine *line,
  * @line: A one-dimensional data line.
  * @res: Desired resolution.
  * @clear: %TRUE to fill the new line data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Resizes a one-dimensional data line.
  *
@@ -717,7 +717,7 @@ gwy_line_copy(const GwyLine *src,
     g_return_if_fail(GWY_IS_LINE(src));
     g_return_if_fail(GWY_IS_LINE(dest));
     g_return_if_fail(dest->res == src->res);
-    ASSIGN(dest->data, src->data, src->res);
+    gwy_assign(dest->data, src->data, src->res);
 }
 
 /**
@@ -737,7 +737,7 @@ gwy_line_copy(const GwyLine *src,
  * block that is corrsponds to data inside @src and @dest is copied.  This can
  * also mean nothing is copied at all.
  *
- * If @src is equal to @dest, the areas may not overlap.
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_line_part_copy(const GwyLine *src,
@@ -757,7 +757,12 @@ gwy_line_part_copy(const GwyLine *src,
     if (!len)
         return;
 
-    ASSIGN(dest->data + destpos, src->data + pos, len);
+    if (src == dest && OVERLAPPING(pos, len, destpos, len)) {
+        g_warning("Source and destination blocks overlap.  "
+                  "Data corruption is imminent.");
+    }
+
+    gwy_assign(dest->data + destpos, src->data + pos, len);
 }
 
 /**
@@ -919,56 +924,50 @@ gwy_line_part_fill(GwyLine *line,
 }
 
 /**
- * gwy_line_get_format_x:
+ * gwy_line_format_x:
  * @line: A one-dimensional data line.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying coordinates in a data line.
  *
- * The returned format will have sufficient precision to represent coordinates
+ * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
-gwy_line_get_format_x(GwyLine *line,
-                      GwyValueFormatStyle style,
-                      GwyValueFormat *format)
+void
+gwy_line_format_x(GwyLine *line,
+                  GwyValueFormatStyle style,
+                  GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
+    g_return_if_fail(GWY_IS_LINE(line));
     gdouble max = MAX(line->real, fabs(line->real + line->off));
     gdouble unit = gwy_line_dx(line);
-    return gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
-                                           style, max, unit, format);
+    gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
+                                    style, max, unit, format);
 }
 
 /**
- * gwy_line_get_format_y:
+ * gwy_line_format_y:
  * @line: A one-dimensional data line.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying values in a data line.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
-gwy_line_get_format_y(GwyLine *line,
-                      GwyValueFormatStyle style,
-                      GwyValueFormat *format)
+void
+gwy_line_format_y(GwyLine *line,
+                  GwyValueFormatStyle style,
+                  GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
+    g_return_if_fail(GWY_IS_LINE(line));
     gdouble min, max;
     gwy_line_min_max(line, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    return gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
-                                       style, max - min, 3, format);
+    gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
+                                style, max - min, 3, format);
 }
 
 

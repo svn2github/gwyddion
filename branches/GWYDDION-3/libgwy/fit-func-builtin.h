@@ -24,6 +24,26 @@
 
 G_BEGIN_DECLS
 
+// The order must match estimators[] in fit-func.c
+enum {
+    ESTIMATOR_XMIN,
+    ESTIMATOR_XMID,
+    ESTIMATOR_XMAX,
+    ESTIMATOR_YMIN,
+    ESTIMATOR_YMAX,
+    ESTIMATOR_YMEAN,
+    ESTIMATOR_YXMIN,
+    ESTIMATOR_YXMID,
+    ESTIMATOR_YXMAX,
+    ESTIMATOR_XYMAX,
+    ESTIMATOR_XYMIN,
+    ESTIMATOR_XPEAK,
+    ESTIMATOR_APEAK,
+    ESTIMATOR_HWPEAK,
+    ESTIMATOR_Y0PEAK,
+    N_ESTIMATORS
+};
+
 typedef struct {
     const gchar *name;
     gint power_x;
@@ -35,6 +55,7 @@ typedef gboolean (*BuiltinFunction)(gdouble x,
                                     gdouble *value);
 typedef gboolean (*BuiltinEstimate)(const GwyXY *points,
                                     guint npoints,
+                                    const gdouble *estim,
                                     gdouble *param);
 typedef GwyUnit* (*BuiltinDeriveUnits)(guint param,
                                        GwyUnit *unit_x,

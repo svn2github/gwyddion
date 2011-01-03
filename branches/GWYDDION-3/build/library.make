@@ -19,10 +19,12 @@ INTROSPECTION_SCANNER_ARGS = --strip=gwy_ -I..
 $(eval $(Library_with_ver)_gir_LIBS = $(library)$(libsuffix).la)
 $(eval $(Library_with_ver)_gir_FILES = $($(library)$(libsuffix)_la_SOURCES) $(library_headers) $(library)$(libsuffix).la)
 girdir = $(datadir)/gir-1.0
-dist_gir_DATA = $(Library_ver).gir
 typelibdir = $(libdir)/girepository-1.0
+if HAVE_INTROSPECTION
+dist_gir_DATA = $(Library_ver).gir
 typelib_DATA = $(Library_ver).typelib
 pkgconfigdata_DATA = $(library)$(libsuffix).pc
+endif
 
 if OS_WIN32
 library_host_ldflags = -no-undefined -export-symbols $(library)$(libsuffix).def
@@ -64,7 +66,7 @@ check-headers: $(library_headers)
 
 $(library_def): $(library_objects)
 	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/build/generate-library-def.py \
-	     "$(EU_NM)" $(library_objects)
+	     "$(EU_NM)" $(library_objects) >$(library_def)
 
 .PHONY: check-symbols check-headers
 # run make check-symbols as part of make check

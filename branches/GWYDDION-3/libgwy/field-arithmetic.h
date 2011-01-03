@@ -60,6 +60,12 @@ void                       gwy_field_apply_func     (GwyField *field,
                                                      GwyMaskingType masking,
                                                      GwyRealFunc func,
                                                      gpointer user_data);
+void                       gwy_field_add_field      (const GwyField *src,
+                                                     const GwyRectangle *srcrectangle,
+                                                     GwyField *dest,
+                                                     guint destcol,
+                                                     guint destrow,
+                                                     gdouble factor);
 
 G_END_DECLS
 

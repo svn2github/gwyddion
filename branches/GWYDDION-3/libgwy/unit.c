@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gwyconfig.h>
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/macros.h"
@@ -25,6 +25,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/strfuncs.h"
 #include "libgwy/unit.h"
+#include "libgwy/math-internal.h"
 
 #ifdef ENABLE_PARSE_WARNINGS
 #define gwy_unit_warning g_warning
@@ -495,7 +496,7 @@ parse(Unit *unit,
     if (end != string) {
         string = end;
         power10 = gwy_round(log10(q));
-        if (q <= 0 || fabs(log(q/gwy_exp10(power10))) > 1e-13) {
+        if (q <= 0 || fabs(log(q/gwy_powi(10.0, power10))) > 1e-13) {
             gwy_unit_warning("Bad multiplier %g", q);
             power10 = 0;
         }
@@ -969,41 +970,33 @@ canonicalize(Unit *unit)
  * @style: Output format style.
  * @power10: Power of 10, in the same sense as gwy_unit_new_from_string()
  *           returns it.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds format for representing a specific power-of-10 multiple of a physical
  * unit.
  *
  * This function does not set or change the precision of @format.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
+void
 gwy_unit_format_for_power10(GwyUnit *unit,
                             GwyValueFormatStyle style,
                             gint power10,
                             GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-    if (format)
-        g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
-    else
-        format = gwy_value_format_new();
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
 
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), power10,
                 &glue, &units, FALSE);
     g_object_set(format,
                  "style", style,
-                 "base", gwy_exp10(power10),
+                 "base", gwy_powi(10.0, power10),
                  "glue", glue,
                  "units", units,
                  NULL);
     g_free(glue);
     g_free(units);
-
-    return format;
 }
 
 /**
@@ -1013,25 +1006,19 @@ gwy_unit_format_for_power10(GwyUnit *unit,
  * @maximum: Maximum value to be represented.
  * @resolution: Smallest step (approximately) that should make a visible
  *              difference in the representation.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a format for representing a range of values with given resolution.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
+void
 gwy_unit_format_with_resolution(GwyUnit *unit,
                                 GwyValueFormatStyle style,
                                 gdouble maximum,
                                 gdouble resolution,
                                 GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-    if (format)
-        g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
-    else
-        format = gwy_value_format_new();
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
 
     maximum = fabs(maximum);
     resolution = fabs(resolution);
@@ -1053,8 +1040,6 @@ gwy_unit_format_with_resolution(GwyUnit *unit,
                  NULL);
     g_free(glue);
     g_free(units);
-
-    return format;
 }
 
 /**
@@ -1063,32 +1048,26 @@ gwy_unit_format_with_resolution(GwyUnit *unit,
  * @style: Output format style.
  * @maximum: Maximum value to be represented.
  * @sdigits: Number of significant digits the value should have.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a format for representing a values with given number of significant
  * digits.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
+void
 gwy_unit_format_with_digits(GwyUnit *unit,
                             GwyValueFormatStyle style,
                             gdouble maximum,
                             gint sdigits,
                             GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
-    if (format)
-        g_return_val_if_fail(GWY_IS_VALUE_FORMAT(format), NULL);
-    else
-        format = gwy_value_format_new();
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
 
     maximum = fabs(maximum);
     guint precision = sdigits;
     gdouble base = 1.0;
     if (maximum)
-        base = find_number_format(maximum/gwy_exp10(sdigits), maximum,
+        base = find_number_format(maximum/gwy_powi(10.0, sdigits), maximum,
                                   &precision);
 
     gchar *glue, *units;
@@ -1103,8 +1082,6 @@ gwy_unit_format_with_digits(GwyUnit *unit,
                  NULL);
     g_free(glue);
     g_free(units);
-
-    return format;
 }
 
 /**
@@ -1164,7 +1141,7 @@ find_number_format(gdouble step,
         *precision = MIN(*precision, 16);
     }
 
-    return gwy_exp10(mag);
+    return gwy_powi(10.0, mag);
 }
 
 static void
@@ -1273,7 +1250,7 @@ format_unit(const Unit *unit,
             default:
             if (fs->power10_open)
                 g_string_append(ustring, fs->power10_open);
-            g_string_append_printf(ustring, "%d", power10);
+            fs->append_power(ustring, power10);
             if (fs->power_close)
                 g_string_append(ustring, fs->power_close);
             break;
@@ -1300,7 +1277,7 @@ format_unit(const Unit *unit,
         if (u->power != 1) {
             if (fs->power_open)
                 g_string_append(ustring, fs->power_open);
-            g_string_append_printf(ustring, "%d", u->power);
+            fs->append_power(ustring, u->power);
             if (fs->power_close)
                 g_string_append(ustring, fs->power_close);
         }
@@ -1314,7 +1291,7 @@ format_unit(const Unit *unit,
         if (u->power != -1) {
             if (fs->power_open)
                 g_string_append(ustring, fs->power_open);
-            g_string_append_printf(ustring, "%d", -u->power);
+            fs->append_power(ustring, -u->power);
             if (fs->power_close)
                 g_string_append(ustring, fs->power_close);
         }

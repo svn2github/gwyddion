@@ -18,6 +18,15 @@ def parse(fh):
 def xround(x):
     return int(math.floor(x + 0.5))
 
+def total(stats):
+    lines = 0
+    rlines = 0.0
+    for row in stats:
+        lines += row['lines']
+        rlines += row['lines'] * row['r']
+    stat = { 'r': rlines/lines, 'name': 'Total', 'lines': lines }
+    return stat
+
 def format_row(stat, counter=[False]):
     rowfmt = """<tr%s>
 <td class='left'>%s</td>
@@ -25,7 +34,8 @@ def format_row(stat, counter=[False]):
 <td>%d</td>
 <td>%.2f</td>
 <td class='left'>%s</td>
-</tr>"""
+</tr>
+"""
 
     boxfmt = u"""<span class="stat %s" style="padding-right: %dpx;">\ufeff</span>"""
 
@@ -33,9 +43,15 @@ def format_row(stat, counter=[False]):
     coverage = cvg/100.0
     lines = stat['lines']
     name = stat['name']
-    factor = 3.0;
-    if name.endswith('.c'):
+    factor = 3.0
+    if entire_files:
         factor /= 8
+    if name == 'Total':
+        factor /= 8
+    if entire_files and name == 'Total':
+        factor /= 3
+    if name == 'Total' and totalname:
+        name += ' ' + totalname
     badlines = xround(lines * (1.0 - coverage))
     badw = xround(factor * badlines)
     goodw = xround(factor*(lines - badlines))
@@ -48,9 +64,15 @@ def format_row(stat, counter=[False]):
 
     return rowfmt % (cls, name, lines, badlines, 100*coverage, goodbox + badbox)
 
-stats = parse(sys.stdin)
+totalname = None
+if len(sys.argv) > 1:
+    totalname = sys.argv[1]
 
+stats = parse(sys.stdin)
+entire_files = len([x for x in stats if x['name'].endswith('.c')])
+
+sys.stdout.write(format_row(total(stats)).encode('utf-8'))
 for x in stats:
-    print format_row(x).encode('utf-8')
+    sys.stdout.write(format_row(x).encode('utf-8'))
 
 # vim: set ts=4 sw=4 et :

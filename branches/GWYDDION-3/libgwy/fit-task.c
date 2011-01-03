@@ -635,7 +635,7 @@ fit_task_gradient(const gdouble *param,
     gwy_clear(gradient, nparam);
     gwy_clear(hessian, MATRIX_LEN(nparam));
 
-    ASSIGN(mparam, param, nparam);
+    gwy_assign(mparam, param, nparam);
     for (guint j = 0; j < nparam; j++)
         h[j] = param[j] ? 1e-5*fabs(param[j]) : 1e-9;
 

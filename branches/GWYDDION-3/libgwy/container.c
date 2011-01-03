@@ -841,7 +841,7 @@ gis_value_of_type(GwyContainer *container,
  * gwy_container_get_value_n:
  * @container: A container.
  * @name: String item key.
- * @value: #GValue to update, it can be either zero-initialized or containing
+ * @value: #GValue to update, it can be either zero-initialised or containing
  *         a value. If item does not exist, it is left untouched.
  *
  * Gets a generic value from a container using a string identifier.
@@ -854,7 +854,7 @@ gis_value_of_type(GwyContainer *container,
  * gwy_container_get_value:
  * @container: A container.
  * @key: Quark item key.
- * @value: #GValue to update, it can be either zero-initialized or containing
+ * @value: #GValue to update, it can be either zero-initialised or containing
  *         a value. If item does not exist, it is left untouched.
  *
  * Gets a generic value from a container using a quark identifier.

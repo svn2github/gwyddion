@@ -653,6 +653,89 @@ test_deserialize_garbage(void)
     g_rand_free(rng);
 }
 
+static gboolean
+values_are_equal(const GValue *value1,
+                 const GValue *value2)
+{
+    if (!value1 || !value2)
+        return FALSE;
+
+    GType type = G_VALUE_TYPE(value1);
+    if (type != G_VALUE_TYPE(value2))
+        return FALSE;
+
+    switch (type) {
+        case G_TYPE_BOOLEAN:
+        return !g_value_get_boolean(value1) == !g_value_get_boolean(value2);
+
+        case G_TYPE_CHAR:
+        return g_value_get_char(value1) == g_value_get_char(value2);
+
+        case G_TYPE_INT:
+        return g_value_get_int(value1) == g_value_get_int(value2);
+
+        case G_TYPE_UINT:
+        return g_value_get_uint(value1) == g_value_get_uint(value2);
+
+        case G_TYPE_INT64:
+        return g_value_get_int64(value1) == g_value_get_int64(value2);
+
+        case G_TYPE_UINT64:
+        return g_value_get_uint64(value1) == g_value_get_uint64(value2);
+
+        case G_TYPE_DOUBLE:
+        return fabs(g_value_get_double(value1) - g_value_get_double(value2))
+               <= 2e-16*(fabs(g_value_get_double(value1))
+                         + fabs(g_value_get_double(value2)));
+
+        case G_TYPE_STRING:
+        return (!g_value_get_string(value1) && !g_value_get_string(value2))
+               || gwy_strequal(g_value_get_string(value1),
+                               g_value_get_string(value2));
+    }
+
+    if (g_type_is_a(type, G_TYPE_ENUM))
+        return g_value_get_enum(value1) == g_value_get_enum(value2);
+
+    if (g_type_is_a(type, G_TYPE_OBJECT))
+        return compare_properties(g_value_get_object(value1),
+                                  g_value_get_object(value2));
+
+    if (g_type_is_a(type, G_TYPE_BOXED))
+        return gwy_serializable_boxed_equal(type,
+                                            g_value_get_boxed(value1),
+                                            g_value_get_boxed(value2));
+
+    g_warning("Cannot test values of type %s for equality.  Extend me!\n",
+              g_type_name(type));
+    return TRUE;
+}
+
+gboolean
+compare_properties(GObject *object,
+                   GObject *reference)
+{
+    g_assert(G_OBJECT_TYPE(object) == G_OBJECT_TYPE(reference));
+    GObjectClass *klass = G_OBJECT_GET_CLASS(reference);
+    guint nprops;
+    GParamSpec **props = g_object_class_list_properties(klass, &nprops);
+    for (guint i = 0; i < nprops; i++) {
+        GValue value1, value2;
+        //g_printerr("%s\n", props[i]->name);
+        gwy_clear(&value1, 1);
+        gwy_clear(&value2, 1);
+        g_value_init(&value1, props[i]->value_type);
+        g_value_init(&value2, props[i]->value_type);
+        g_object_get_property(object, props[i]->name, &value1);
+        g_object_get_property(reference, props[i]->name, &value2);
+        g_assert(values_are_equal(&value1, &value2));
+        g_value_unset(&value1);
+        g_value_unset(&value2);
+    }
+    g_free(props);
+    return TRUE;
+}
+
 GObject*
 serialize_and_back(GObject *object)
 {
@@ -681,6 +764,7 @@ serialize_and_back(GObject *object)
     g_assert_cmpuint(G_OBJECT_TYPE(retval), ==, G_OBJECT_TYPE(object));
     g_assert_cmpuint(bytes_consumed, ==, datalen);
     g_object_unref(stream);
+    compare_properties(retval, object);
     return retval;
 }
 

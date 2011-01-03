@@ -28,10 +28,6 @@
 #  undef STRICT
 #endif
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -76,13 +72,13 @@ typedef gchar* (*GetModuleDirectoryFunc)(void);
  * Forces the registration of all serializable libgwy types.
  *
  * It calls g_type_init() first to ensure the GLib object system is
- * initialized.
+ * initialised.
  *
  * Calling this function is not necessary to use object types defined in
- * libgwy, except perhaps if you implement custom deserializers.  It is safe to
+ * libgwy, except perhaps if you implement custom deserialisers.  It is safe to
  * call this function more than once, subsequent calls are no-op.  It is safe
  * to call this function from more threads if GLib thread support is
- * initialized.
+ * initialised.
  **/
 void
 gwy_type_init(void)

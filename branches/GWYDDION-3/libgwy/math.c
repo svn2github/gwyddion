@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,
@@ -232,6 +232,42 @@ void
 gwy_xyz_free(GwyXYZ *xyz)
 {
     g_slice_free1(sizeof(GwyXYZ), xyz);
+}
+
+/**
+ * gwy_powi:
+ * @x: Base.
+ * @i: Integer exponent.
+ *
+ * Calculates the integer power of a number.
+ *
+ * This is usually the right function for calculation of (integer) powers of
+ * 10 as exp10() suffers from precision.
+ *
+ * Returns: Value of @x raised to the integer power @i.
+ **/
+// Always define the function.  If the user compiles her code with gcc, they
+// will get the builtin but otherwise the may actually need to link this one.
+#undef gwy_powi
+double
+gwy_powi(double x, int i)
+{
+    gdouble r = 1.0;
+    if (!i)
+        return 1.0;
+    gboolean negative = FALSE;
+    if (i < 0) {
+        negative = TRUE;
+        i = -i;
+    }
+    for ( ; ; ) {
+        if (i & 1)
+            r *= x;
+        if (!(i >>= 1))
+            break;
+        x *= x;
+    }
+    return negative ? 1.0/r : r;
 }
 
 /* Quickly find median value in an array
@@ -618,7 +654,7 @@ gwy_linear_fit(GwyLinearFitFunc function,
     if (!gwy_cholesky_decompose(hessian, nparams))
         return FALSE;
     if (residuum)
-        ASSIGN(fval, params, nparams);
+        gwy_assign(fval, params, nparams);
     gwy_cholesky_solve(hessian, params, nparams);
     if (residuum) {
         for (guint j = 0; j < nparams; j++)
@@ -1097,42 +1133,18 @@ jump_over:
     }
 }
 
-
 /**
  * SECTION: math
  * @title: math
  * @short_description: Mathematical functions
  *
- * A number of less standard but useful mathematical functions is provided to
- * ensure they are available on all platforms.
- * 
- * These functions exist in two flavours:
- * <itemizedlist>
- *   <listitem>
- *     Namespace-clean, that is prefixed with <literal>gwy_</literal>.
- *     For instance, gwy_exp10().  These are defined always.
- *   </listitem>
- *   <listitem>
- *     Bare-named, i.e. with the same name as the C library function, for
- *     instance exp10().  There are defined only when explicitly
- *     requested with:
- * |[#define GWY_MATH_POLLUTE_NAMESPACE]|
- *     to avoid problems when Gwyddion headers are included indirectly or
- *     in combination with other libraries.
- *   </listitem>
- * </itemizedlist>
- *
- * Both kinds of symbols can be either functions or macros expanding to a
- * function name so it it always possible to take their addresses.  The bare
- * names are in no case exported.  If the system C library provides a specific
- * function, both kinds of symbols are defined so that the system
- * implementation is directly used.
- *
- * Note to actually get the functions defined from the system C library you
- * need to define certain preprocessor symbols such as
- * <literal>_GNU_SOURCE</literal>.  This can be done either in your source
- * code or by ensuring that <filename>libgwy.h</filename> gets included before
- * system the headers.
+ * Some of the less standard but useful mathematical functions is provided to
+ * ensure they are available on all platforms.  They are prefixed with
+ * <literal>gwy_</literal> and they may be actually macros, especially if the
+ * platform provides the respective function the
+ * <literal>gwy_</literal>-prefixed version simply resolves to the name of this
+ * system function.  However, it is always possible to take the address of
+ * the symbol.
  **/
 
 /**
@@ -1172,41 +1184,6 @@ jump_over:
  * The type of a plain real-valued function.
  *
  * Returns: Function value for input value @value.
- **/
-
-/**
- * gwy_exp10:
- * @x: Exponent of 10.
- *
- * Calculates the value of 10 raised to given power.
- *
- * Returns: Value of 10 raised to @x.
- **/
-
-/**
- * exp10:
- *
- * System function <literal>exp10</literal> or alias of gwy_exp10().
- *
- * This macro expands to an identifier.
- **/
-
-/**
- * gwy_powi:
- * @x: Base.
- * @i: Integer exponent.
- *
- * Calculates the integer power of a number.
- *
- * Returns: Value of @x raised to the integer power @i.
- **/
-
-/**
- * powi:
- *
- * GNU C function <literal>__builtin_powi</literal> or alias of gwy_powi().
- *
- * This macro expands to an identifier.
  **/
 
 /**

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009 David Necas (Yeti).
+ *  Copyright (C) 2007,2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,61 +38,11 @@ typedef struct {
 
 typedef gdouble (*GwyRealFunc)(gdouble value, gpointer user_data);
 
-/* This is necessary to fool gtk-doc that ignores static inline functions */
-#define _GWY_STATIC_INLINE static inline
-
-/*
- * The empty comments fix gtk-doc.
- * See http://bugzilla.gnome.org/show_bug.cgi?id=481811
- */
-
-#ifdef GWY_HAVE_EXP10
-# define gwy_exp10 exp10
-#else
-_GWY_STATIC_INLINE double gwy_exp10(double x);
-
-static inline double
-gwy_exp10(double x) {
-    return /**/ pow(10.0, x);
-}
-# ifdef GWY_MATH_POLLUTE_NAMESPACE
-#  define exp10 gwy_exp10
-# endif
-#endif
-
 #ifdef __GNUC__
-# define gwy_powi __builtin_powi
-# ifdef GWY_MATH_POLLUTE_NAMESPACE
-#  define powi __builtin_powi
-# endif
+#  define gwy_powi __builtin_powi
 #else
-_GWY_STATIC_INLINE double gwy_powi (double x, int i);
-
-static inline double
-gwy_powi(double x, int i)
-{
-    double r = 1.0;
-    if (!i)
-        return 1.0;
-    if (i < 0) {
-        i = -i;
-        x = 1.0/x;
-    }
-    for ( ; ; ) {
-        if (i & 1)
-            r *= x;
-        if (!(i >>= 1))
-            break;
-        x *= x;
-    }
-    return /**/ r;
-}
-# ifdef GWY_MATH_POLLUTE_NAMESPACE
-#  define powi gwy_powi
-# endif
+double gwy_powi(double x, int i);
 #endif
-
-#undef _GWY_STATIC_INLINE
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 

@@ -24,10 +24,10 @@
 #include "libgwy/fit-func-builtin.h"
 
 /*
- * TODO: Estimator helpers:
- * - mean
- * - minimum and maximum with positions
- * - half-width (given minimum and maximum)
+ * TODO: fit-func.c already implements nice estimators for user functions.
+ * We can utilise them also here.  Having something like half-width (determined
+ * from minimum and maximum) would permite to eliminate most manual estimators
+ * here.  This operates on 1D data and is not so performance-critical.
  */
 
 /****************************************************************************
@@ -50,15 +50,12 @@ const_function(G_GNUC_UNUSED gdouble x,
 }
 
 static gboolean
-const_estimate(const GwyXY *pts,
-               guint npoints,
+const_estimate(G_GNUC_UNUSED const GwyXY *pts,
+               G_GNUC_UNUSED guint npoints,
+               const gdouble *estim,
                gdouble *param)
 {
-    gdouble s = 0.0;
-
-    for (guint i = 0; i < npoints; i++)
-        s += pts[i].y;
-    param[0] = s/npoints;
+    param[0] = estim[ESTIMATOR_YMEAN];
     return TRUE;
 }
 
@@ -93,40 +90,28 @@ exp_function(gdouble x,
 }
 
 static gboolean
-exp_estimate(const GwyXY *pts,
-             guint npoints,
+exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
+             G_GNUC_UNUSED guint npoints,
+             const gdouble *estim,
              gdouble *param)
 {
-    guint imin = 0, imax = 0;
-    gdouble s = pts[0].y;
-
-    for (guint i = 1; i < npoints; i++) {
-        if (pts[i].y > pts[imax].y)
-            imax = i;
-        if (pts[i].y < pts[imin].y)
-            imin = i;
-        s += pts[i].y;
-    }
-
-    if (pts[imax].y == pts[imin].y) {
+    gdouble ymin = estim[ESTIMATOR_YMIN], ymax = estim[ESTIMATOR_YMAX];
+    if (ymin == ymax) {
         param[0] = 0.0;
-        param[1] = pts[imin].y;
-        param[2] = 10*(pts[npoints-1].x - pts[0].x);
+        param[1] = ymin;
+        param[2] = 10*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
         return FALSE;
     }
 
-    s /= npoints;
-    if (2.0*s < pts[imax].y + pts[imin].y)
-        s -= pts[imin].y;
-    else
-        s -= pts[imax].y;
-    s *= pts[imax].x - pts[imin].x;
+    gdouble s = estim[ESTIMATOR_YMEAN];
+    s -= (2.0*s < ymin + ymax) ? ymin : ymax;
 
-    param[2] = s/(pts[imax].y - pts[imin].y);
-    param[1] = (pts[imax].y - pts[imin].y)/(exp(pts[imax].x/param[2])
-                                            - exp(pts[imin].x/param[2]));
-    param[0] = pts[imin].y - param[1]*exp(pts[imin].x/param[2]);
+    gdouble xymin = estim[ESTIMATOR_XYMIN], xymax = estim[ESTIMATOR_XYMAX];
+    s *= xymax - xymin;
 
+    param[2] = s/(ymax - ymin);
+    param[1] = (ymax - ymin)/(exp(xymax/param[2]) - exp(xymin/param[2]));
+    param[0] = ymin - param[1]*exp(xymin/param[2]);
     return TRUE;
 }
 
@@ -137,6 +122,66 @@ static const BuiltinFitFunc exp_builtin = {
     .function = exp_function,
     .estimate = exp_estimate,
 };
+
+/****************************************************************************
+ *
+ * Gaussian
+ *
+ ****************************************************************************/
+
+static const FitFuncParam gauss_param[] = {
+   { "x<sub>0</sub>", 1, 0, },
+   { "y<sub>0</sub>", 0, 1, },
+   { "a",             0, 1, },
+   { "b",             1, 0, },
+};
+
+static gboolean
+gauss_function(gdouble x,
+               const gdouble *param,
+               gdouble *v)
+{
+    gdouble x0 = param[0], y0_ = param[1], a = param[2], b = param[3];
+    gdouble t = (x - x0)/b;
+    *v = a*exp(-t*t) + y0_;
+    return b != 0;
+}
+
+static gboolean
+gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
+               G_GNUC_UNUSED guint npoints,
+               const gdouble *estim,
+               gdouble *param)
+{
+    if (!estim[ESTIMATOR_HWPEAK]) {
+        param[0] = estim[ESTIMATOR_XMID];
+        param[1] = estim[ESTIMATOR_YMIN];
+        param[2] = 0.0;
+        param[3] = 3*(estim[ESTIMATOR_XMAX]- estim[ESTIMATOR_XMIN]);
+        return FALSE;
+    }
+
+    param[0] = estim[ESTIMATOR_XPEAK];
+    param[1] = estim[ESTIMATOR_Y0PEAK];
+    param[2] = estim[ESTIMATOR_APEAK];
+    param[3] = 1.2*estim[ESTIMATOR_HWPEAK];
+    return TRUE;
+}
+
+static const BuiltinFitFunc gauss_builtin = {
+    .formula = "= <i>y</i><sub>0</sub> "
+        "+ <i>a</i> exp[−(<i>x</i> − <i>x</i><sub>0</sub>)<sup>2</sup>/b<sup>2</sup>]",
+    .nparams = G_N_ELEMENTS(gauss_param),
+    .param = gauss_param,
+    .function = gauss_function,
+    .estimate = gauss_estimate,
+};
+
+/****************************************************************************
+ *
+ * Main
+ *
+ ****************************************************************************/
 
 #define add_builtin(name, func) \
     g_hash_table_insert(builtins, (gpointer)name, (gpointer)&func)
@@ -149,8 +194,8 @@ _gwy_fit_func_setup_builtins(void)
     builtins = g_hash_table_new(g_str_hash, g_str_equal);
     add_builtin("Constant", const_builtin);
     add_builtin("Exponential", exp_builtin);
+    add_builtin("Gaussian", gauss_builtin);
     return builtins;
 }
-
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

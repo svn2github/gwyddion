@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gwyconfig.h>
+#include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include "libgwy/macros.h"
@@ -26,6 +26,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/types.h"
 #include "libgwy/value-format.h"
+#include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
 
 enum {
@@ -255,7 +256,7 @@ gwy_value_format_new_set(GwyValueFormatStyle style,
     ValueFormat *priv = format->priv;
 
     priv->style = style;
-    priv->base = gwy_exp10(power10);
+    priv->base = gwy_powi(10.0, power10);
     priv->precision = precision;
     priv->glue = g_strdup(glue);
     priv->units = g_strdup(units);

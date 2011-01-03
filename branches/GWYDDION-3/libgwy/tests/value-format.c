@@ -29,11 +29,11 @@ void
 test_value_format_simple(void)
 {
     GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
-    GwyValueFormat *format;
+    GwyValueFormat *format = gwy_value_format_new();
 
     /* Base cases */
-    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
-                                             1e-6, 1e-9, NULL);
+    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN, 1e-6, 1e-9,
+                                    format);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "0.123 µm");
     g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7),
@@ -71,6 +71,23 @@ test_value_format_simple(void)
                  "units", "deg",
                  NULL);
     g_assert_cmpstr(gwy_value_format_print(format, G_PI/6.0), ==, "30.0 deg");
+
+    GwyValueFormatStyle style;
+    gdouble base;
+    guint precision;
+    gchar *glue, *units;
+    g_object_get(format,
+                 "style", &style,
+                 "base", &base,
+                 "precision", &precision,
+                 "glue", &glue,
+                 "units", &units,
+                 NULL);
+    g_assert_cmpuint(style, ==, GWY_VALUE_FORMAT_PLAIN);
+    g_assert_cmpuint(base, ==, G_PI/180.0);
+    g_assert_cmpuint(precision, ==, 1);
+    g_assert_cmpstr(glue, ==, " ");
+    g_assert_cmpstr(units, ==, "deg");
 
     g_object_unref(format);
     g_object_unref(unit);

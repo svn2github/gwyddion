@@ -284,6 +284,63 @@ gwy_field_apply_func(GwyField *field,
 }
 
 /**
+ * gwy_field_add_field:
+ * @src: Source two-dimensional data data field.
+ * @srcrectangle: Area in field @src to add.  Pass %NULL to add entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ * @factor: Value to multiply @src data with before adding.
+ *
+ * Adds data from one field to another.
+ *
+ * The rectangle of added data is defined by @srcrectangle and the values are
+ * added to @dest starting from (@destcol, @destrow).
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * is added.  This can also mean @dest is not modified at all.
+ *
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
+ *
+ * This function can be used also to subtract fields by passing @factor equal
+ * to -1:
+ * |[
+ * // Add field2 to equally-sized field1
+ * gwy_field_add_field(field2, NULL, field1, 0, 0, 1.0);
+ *
+ * // Subtract it again to get field1 back (rounding errors aside)
+ * gwy_field_add_field(field2, NULL, field1, 0, 0, -1.0);
+ * ]|
+ **/
+void
+gwy_field_add_field(const GwyField *src,
+                    const GwyRectangle *srcrectangle,
+                    GwyField *dest,
+                    guint destcol,
+                    guint destrow,
+                    gdouble factor)
+{
+    guint col, row, width, height;
+    if (!_gwy_field_limit_rectangles(src, srcrectangle,
+                                     dest, destcol, destrow,
+                                     FALSE, &col, &row, &width, &height))
+        return;
+    if (!factor)
+        return;
+
+    const gdouble *srcbase = src->data + src->xres*row + col;
+    gdouble *destbase = dest->data + dest->xres*destrow + destcol;
+    for (guint i = 0; i < height; i++) {
+        const gdouble *srow = srcbase + i*src->xres;
+        gdouble *drow = destbase + i*dest->xres;
+        for (guint j = width; j; j--, srow++, drow++)
+            *drow += factor*(*srow);
+    }
+    gwy_field_invalidate(dest);
+}
+
+/**
  * SECTION: field-arithmetic
  * @section_id: GwyField-arithmetic
  * @title: GwyField arithmetic

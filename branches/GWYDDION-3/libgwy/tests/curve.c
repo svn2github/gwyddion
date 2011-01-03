@@ -44,6 +44,7 @@ test_curve_assert_equal(const GwyCurve *result,
     g_assert(GWY_IS_CURVE(result));
     g_assert(GWY_IS_CURVE(reference));
     g_assert_cmpuint(result->n, ==, reference->n);
+    compare_properties(G_OBJECT(result), G_OBJECT(reference));
 
     for (guint i = 0; i < result->n; i++) {
         GwyXY resxy = result->data[i];

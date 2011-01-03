@@ -132,14 +132,14 @@ test_math_cholesky(void)
             test_cholesky_matvec(solution, matrix, vector, n);
             g_assert(gwy_cholesky_decompose(matrix, n));
             for (guint j = 0; j < matlen; j++) {
-                eps = exp10(j - 15.0);
+                eps = gwy_powi(10.0, (gint)j - 15);
                 g_assert_cmpfloat(fabs(matrix[j] - decomp[j]),
                                   <=,
                                   eps * (fabs(matrix[j]) + fabs(decomp[j])));
             }
 
             /* Solution */
-            eps = exp10(n - 11.0);
+            eps = gwy_powi(10.0, (gint)n - 11);
             gwy_cholesky_solve(matrix, solution, n);
             for (guint j = 0; j < n; j++) {
                 g_assert_cmpfloat(fabs(solution[j] - vector[j]),
@@ -154,15 +154,15 @@ test_math_cholesky(void)
             /* Multiplication with inverted must give unity */
             test_cholesky_matmul(unity, matrix, inverted, n);
             for (guint j = 0; j < n; j++) {
-                eps = exp10(n - 10.0);
+                eps = gwy_powi(10.0, (gint)n - 10);
                 for (guint k = 0; k < j; k++) {
                     g_assert_cmpfloat(fabs(SLi(unity, j, k)), <=, eps);
                 }
-                eps = exp10(n - 11.0);
+                eps = gwy_powi(10.0, (gint)n - 11);
                 g_assert_cmpfloat(fabs(SLi(unity, j, j) - 1.0), <=, eps);
             }
             /* Double inversion must give the original */
-            eps = exp10(n - 12.0);
+            eps = gwy_powi(10.0, (gint)n - 12);
             g_assert(gwy_cholesky_invert(inverted, n));
             for (guint j = 0; j < matlen; j++) {
                 g_assert_cmpfloat(fabs(matrix[j] - inverted[j]),

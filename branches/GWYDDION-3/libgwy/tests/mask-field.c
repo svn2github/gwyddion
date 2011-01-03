@@ -141,6 +141,7 @@ test_mask_field_assert_equal(const GwyMaskField *result,
     g_assert(result->xres == reference->xres);
     g_assert(result->yres == reference->yres);
     g_assert(result->stride == reference->stride);
+    compare_properties(G_OBJECT(result), G_OBJECT(reference));
 
     // NB: The mask may be wrong for end == 0 because on x86 (at least) shift
     // by 32bits is the same as shift by 0 bits.
@@ -1302,7 +1303,7 @@ test_mask_field_transpose_one(const gchar *orig_str,
                               const gchar *reference_str)
 {
     GwyMaskField *field = mask_field_from_string(orig_str);
-    GwyMaskField *transposed = gwy_mask_field_new_transposed(field);
+    GwyMaskField *transposed = gwy_mask_field_new_transposed(field, NULL);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
     test_mask_field_assert_equal(transposed, reference);
@@ -1385,11 +1386,10 @@ test_mask_field_transpose(void)
         guint col = g_rand_int_range(rng, 0, xres-width+1);
         guint row = g_rand_int_range(rng, 0, yres-height+1);
         GwyMaskField *dest = gwy_mask_field_duplicate(source);
-        GwyMaskField *part = gwy_mask_field_new_part_transposed(source,
-                                                                col, row,
-                                                                width, height);
-        gwy_mask_field_part_transpose(part, 0, 0, height, width,
-                                      dest, col, row);
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyMaskField *part = gwy_mask_field_new_transposed(source, &rectangle);
+        rectangle = (GwyRectangle){0, 0, height, width};
+        gwy_mask_field_transpose(part, &rectangle, dest, col, row);
         test_mask_field_assert_equal(source, dest);
 
         g_object_unref(part);
@@ -1486,6 +1486,23 @@ random_mask_field(guint xres, guint yres, GRand *rng)
     GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
     for (guint i = 0; i < yres*field->stride; i++)
         field->data[i] = g_rand_int(rng);
+    return field;
+}
+
+GwyMaskField*
+random_mask_field_prob(guint xres, guint yres, GRand *rng,
+                       gdouble probability)
+{
+    GwyMaskField *field = gwy_mask_field_new_sized(xres, yres, FALSE);
+    for (guint i = 0; i < field->yres; i++) {
+        GwyMaskIter iter;
+        gwy_mask_field_iter_init(field, iter, 0, i);
+        for (guint j = 0; j < field->xres; j++) {
+            gboolean bit = g_rand_double(rng) < probability;
+            gwy_mask_iter_set(iter, bit);
+            gwy_mask_iter_next(iter);
+        }
+    }
     return field;
 }
 

@@ -21,16 +21,20 @@
 #define __TESTLIBGWY_H__ 1
 
 #undef G_DISABLE_ASSERT
-#define GWY_MATH_POLLUTE_NAMESPACE 1
 #include "config.h"
-#include <gwyconfig.h>
 #include "libgwy/libgwy.h"
+
+#ifndef HAVE_EXP10
+#define exp10(x) pow(10.0, (x))
+#endif
 
 #define TEST_DATA_DIR "_testdata"
 
 // Helpers
 void          dump_error_list         (GwyErrorList *error_list);
 GObject*      serialize_and_back      (GObject *object);
+gboolean      compare_properties      (GObject *object,
+                                       GObject *reference);
 gpointer      serialize_boxed_and_back(gpointer boxed,
                                        GType type);
 void          record_item_change      (GObject *object,
@@ -40,6 +44,10 @@ void          record_signal           (guint *counter);
 GwyMaskField* random_mask_field       (guint xres,
                                        guint yres,
                                        GRand *rng);
+GwyMaskField* random_mask_field_prob  (guint xres,
+                                       guint yres,
+                                       GRand *rng,
+                                       gdouble probability);
 void          curve_randomize         (GwyCurve *field,
                                        GRand *rng);
 void          field_randomize         (GwyField *field,

@@ -17,8 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define GWY_MATH_POLLUTE_NAMESPACE
-#include <gwyconfig.h>
+#include "config.h"
 #include <string.h>
 #include <glib.h>
 #include <glib/gi18n-lib.h>
@@ -26,6 +25,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/expr.h"
 #include "libgwy/math.h"
+#include "libgwy/math-internal.h"
 
 #define GWY_EXPR_SCOPE_GLOBAL 0
 
@@ -71,7 +71,6 @@ typedef enum {
     GWY_EXPR_CODE_EXP,
     GWY_EXPR_CODE_LN,
     GWY_EXPR_CODE_LOG,
-    GWY_EXPR_CODE_EXP10,
     GWY_EXPR_CODE_LOG10,
     GWY_EXPR_CODE_COSH,
     GWY_EXPR_CODE_SINH,
@@ -153,7 +152,6 @@ make_function_1_1(cos)
 make_function_1_1(tan)
 make_function_1_1(exp)
 make_function_1_1(log)
-make_function_1_1(exp10)
 make_function_1_1(log10)
 make_function_1_1(exp2)
 make_function_1_1(log2)
@@ -216,7 +214,6 @@ static const GwyExprFunction call_table[] = {
     { gwy_expr_exp,        "exp",    1,  1,  GWY_EXPR_CODE_EXP,      },
     { gwy_expr_log,        "ln",     1,  1,  GWY_EXPR_CODE_LN,       },
     { gwy_expr_log,        "log",    1,  1,  GWY_EXPR_CODE_LOG,      },
-    { gwy_expr_exp10,      "exp10",  1,  1,  GWY_EXPR_CODE_EXP10,    },
     { gwy_expr_log10,      "log10",  1,  1,  GWY_EXPR_CODE_LOG10,    },
     { gwy_expr_cosh,       "cosh",   1,  1,  GWY_EXPR_CODE_COSH,     },
     { gwy_expr_sinh,       "sinh",   1,  1,  GWY_EXPR_CODE_SINH,     },
@@ -896,7 +893,7 @@ rectify_token_list(Expr *expr)
  * initialize_scanner:
  * @expr: An expression evaluator.
  *
- * Initializes scanner, configuring it and setting up function symbol table.
+ * Initialises scanner, configuring it and setting up function symbol table.
  **/
 static void
 initialize_scanner(Expr *expr)

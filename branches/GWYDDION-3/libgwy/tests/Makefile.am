@@ -42,10 +42,10 @@ BUILT_SOURCES = test-list.h test-list.c
 expand_test_list = $(PYTHON) $(top_srcdir)/build/expand-test-list.py
 
 test-list.h: test-list.txt
-	$(expand_test_list) H testlibgwy <test-list.txt >test-list.h
+	$(AM_V_GEN) $(expand_test_list) H testlibgwy <test-list.txt >test-list.h
 
 test-list.c: test-list.txt
-	$(expand_test_list) C testlibgwy <test-list.txt >test-list.c
+	$(AM_V_GEN) $(expand_test_list) C testlibgwy <test-list.txt >test-list.c
 
 AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(VALGRIND_CFLAGS) $(GWY_CFLAGS)
 AM_CPPFLAGS = \

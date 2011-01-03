@@ -88,7 +88,7 @@ test_math_linalg(void)
             linalg_matvec(rhs, matrix, vector, n);
             memcpy(decomp, matrix, n*n*sizeof(gdouble));
             g_assert(gwy_linalg_solve(decomp, rhs, solution, n));
-            eps = exp10(n - 13.0);
+            eps = gwy_powi(10.0, (gint)n - 13);
             for (guint j = 0; j < n; j++) {
                 g_assert_cmpfloat(fabs(solution[j] - vector[j]),
                                   <=,
@@ -179,7 +179,7 @@ poly1(guint i,
         fvalues[j] = p;
         p *= x;
     }
-    *value = powi(x, 3);
+    *value = gwy_powi(x, 3);
 
     return TRUE;
 }

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -548,15 +548,15 @@ row_assign_mask(const GwyMaskField *mask,
 }
 
 static inline void
-row_accumulate(const gdouble *data,
-               gdouble *accum,
+row_accumulate(gdouble *accum,
+               const gdouble *data,
                gsize size)
 {
     for (gsize j = size; j; j--, accum++, data++)
         *accum += *data;
 }
 
-// FFTW calculates unnormalized DFT so we divide the result of the first
+// FFTW calculates unnormalised DFT so we divide the result of the first
 // transformation with (1/√size)² = 1/size and keep the second transfrom as-is
 // to obtain exactly g_k.
 
@@ -726,18 +726,28 @@ row_level_and_count(const gdouble *in,
     if (masking == GWY_MASK_IGNORE) {
         if (level)
             row_level(in, out, width);
+        else
+            gwy_assign(out, in, width);
         return width;
     }
 
-    if (level) {
-        GwyMaskIter iter;
-        gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
-        return row_level_mask(in, out, width, iter,
-                              masking == GWY_MASK_EXCLUDE);
+    GwyMaskIter iter;
+    gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+    gboolean invert = (masking == GWY_MASK_EXCLUDE);
+    if (level)
+        return row_level_mask(in, out, width, iter, invert);
+
+    guint count = 0;
+    for (guint i = width; i; i--, in++, out++) {
+        if (!gwy_mask_iter_get(iter) == invert) {
+           *out = *in;
+           count++;
+        }
+        else
+            *out = 0.0;
+        gwy_mask_iter_next(iter);
     }
-    GwyRectangle rectangle = { maskcol, maskrow, width, 1 };
-    return gwy_mask_field_part_count(mask, &rectangle,
-                                     masking == GWY_MASK_INCLUDE);
+    return count;
 }
 
 /**
@@ -820,7 +830,7 @@ gwy_field_row_psdf(const GwyField *field,
         // Calculate and gather squared Fourier coefficients of the data.
         row_window(fftin, window, width);
         row_extfft_cnorm(plan, fftin, ffthcout, width, width);
-        row_accumulate(fftin, accum_data, width);
+        row_accumulate(accum_data, fftin, width);
 
         // If all points in the row are included just note that as we can
         // calculate the corresponding denominators directly.  Otherwise
@@ -833,18 +843,18 @@ gwy_field_row_psdf(const GwyField *field,
         // Calculate and gather squared Fourier coefficients of the mask.
         row_assign_mask(mask, maskcol, maskrow + i, width, invert, fftin);
         row_extfft_cnorm(plan, fftin, ffthcout, width, width);
-        row_accumulate(fftin, accum_mask, width);
+        row_accumulate(accum_mask, fftin, width);
     }
 
     // Numerator of A_k, i.e. FFT of squared data Fourier coefficients.
-    ASSIGN(fftin, accum_data, width);
+    gwy_assign(fftin, accum_data, width);
     fftw_execute(plan);
     row_hc_real_expand(ffthcout, accum_data, width);
 
     // Denominator of A_k, i.e. FFT of squared mask Fourier coefficients.
     // Don't perform the FFT if there were no partial rows.
     if (nfullrows + nemptyrows < height) {
-        ASSIGN(fftin, accum_mask, width);
+        gwy_assign(fftin, accum_mask, width);
         fftw_execute(plan);
         row_hc_real_expand(ffthcout, accum_mask, width);
     }
@@ -914,8 +924,7 @@ gwy_field_row_acf(const GwyField *field,
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow)
-        || width < 2)
+                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     if (level > 1) {
@@ -954,7 +963,7 @@ gwy_field_row_acf(const GwyField *field,
 
         // Calculate and gather squared Fourier coefficients of the data.
         row_extfft_cnorm(plan, fftin, ffthcout, size, width);
-        row_accumulate(fftin, accum_data, size);
+        row_accumulate(accum_data, fftin, size);
 
         // If all points in the row are included just note that as we can
         // calculate the corresponding denominators directly.  Otherwise
@@ -967,21 +976,21 @@ gwy_field_row_acf(const GwyField *field,
         // Calculate and gather squared Fourier coefficients of the mask.
         row_assign_mask(mask, maskcol, maskrow + i, width, invert, fftin);
         row_extfft_cnorm(plan, fftin, ffthcout, size, width);
-        row_accumulate(fftin, accum_mask, size);
+        row_accumulate(accum_mask, fftin, size);
     }
 
     // Numerator of G_k, i.e. FFT of squared data Fourier coefficients.
     // The FFTW halfcomplex format starts with the real data.
-    ASSIGN(fftin, accum_data, size);
+    gwy_assign(fftin, accum_data, size);
     fftw_execute(plan);
-    ASSIGN(accum_data, ffthcout, width);
+    gwy_assign(accum_data, ffthcout, width);
 
     // Denominator of G_k, i.e. FFT of squared mask Fourier coefficients.
     // Don't perform the FFT if there were no partial rows.
     if (nfullrows + nemptyrows < height) {
-        ASSIGN(fftin, accum_mask, size);
+        gwy_assign(fftin, accum_mask, size);
         fftw_execute(plan);
-        ASSIGN(accum_mask, ffthcout, width);
+        gwy_assign(accum_mask, ffthcout, width);
     }
     // The FFTW halfcomplex format starts with the real data.
     for (guint j = 0; j < width; j++) {
@@ -1044,8 +1053,7 @@ gwy_field_row_hhcf(const GwyField *field,
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow)
-        || width < 2)
+                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
     if (level > 1) {
@@ -1104,7 +1112,7 @@ gwy_field_row_hhcf(const GwyField *field,
             // For partial rows, we will need the data later to calculate FFT
             // of their squares.  Save them to the line that conveniently has
             // the right size.
-            ASSIGN(line->data, fftin, width);
+            gwy_assign(line->data, fftin, width);
         }
 
         // Calculate and gather -2 times squared Fourier coefficients.
@@ -1127,7 +1135,7 @@ gwy_field_row_hhcf(const GwyField *field,
             *p = (*q)*(*q);
         gwy_clear(fftin + width, size - width);
         fftw_execute(plan);
-        ASSIGN(tmp, ffthcout, size);
+        gwy_assign(tmp, ffthcout, size);
 
         // Mask.  We need the intermediate result C_ν to combine it with U_ν.
         row_assign_mask(mask, maskcol, maskrow + i, width, invert, fftin);
@@ -1139,12 +1147,12 @@ gwy_field_row_hhcf(const GwyField *field,
 
         // And accumulate squared mask Fourier coeffs |C_ν|².
         row_hc_cnorm(ffthcout, fftin, size);
-        row_accumulate(fftin, accum_mask, size);
+        row_accumulate(accum_mask, fftin, size);
     }
 
     // Numerator of H_k, excluding non-DFT data in v_k.
     // The FFTW halfcomplex format starts with the real data.
-    ASSIGN(fftin, accum_data, size);
+    gwy_assign(fftin, accum_data, size);
     fftw_execute(plan);
     // Combine it with v_k to get the full numerator in accum_data.
     q = ffthcout;
@@ -1156,9 +1164,9 @@ gwy_field_row_hhcf(const GwyField *field,
     // Denominator of H_k, i.e. FFT of squared mask Fourier coefficients.
     // Don't perform the FFT if there were no partial rows.
     if (nfullrows + nemptyrows < height) {
-        ASSIGN(fftin, accum_mask, size);
+        gwy_assign(fftin, accum_mask, size);
         fftw_execute(plan);
-        ASSIGN(accum_mask, ffthcout, width);
+        gwy_assign(accum_mask, ffthcout, width);
     }
     // The FFTW halfcomplex format starts with the real data.
     for (guint j = 0; j < width; j++) {
@@ -1193,7 +1201,7 @@ fail:
  * @title: GwyField distributions
  * @short_description: One-dimensional distributions and functionals of fields
  *
- * Statistical distribution densities are normalized so that their integral,
+ * Statistical distribution densities are normalised so that their integral,
  * that can also be calculated as gwy_line_mean(line)*line->real, is unity.
  * Cumulative distribution values then always line in the interval [0,1].
  **/

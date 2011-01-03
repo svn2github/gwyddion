@@ -34,22 +34,6 @@ enum {
     N_PROPS
 };
 
-// The order must match estimators[]
-enum {
-    ESTIMATOR_XMIN,
-    ESTIMATOR_XMID,
-    ESTIMATOR_XMAX,
-    ESTIMATOR_YMIN,
-    ESTIMATOR_YMAX,
-    ESTIMATOR_YMEAN,
-    ESTIMATOR_YXMIN,
-    ESTIMATOR_YXMID,
-    ESTIMATOR_YXMAX,
-    ESTIMATOR_XYMAX,
-    ESTIMATOR_XYMIN,
-    N_ESTIMATORS
-};
-
 struct _GwyFitFuncPrivate {
     gchar *name;
     gchar *group;
@@ -101,6 +85,7 @@ static const gchar* const estimators[N_ESTIMATORS] = {
     "ymin", "ymax", "ymean",
     "yxmin", "yxmid", "yxmax",
     "xymax", "xymin",
+    "xpeak", "apeak", "hwpeak", "y0peak",
 };
 
 static GObjectClass *parent_class = NULL;
@@ -486,19 +471,20 @@ gwy_fit_func_estimate(GwyFitFunc *fitfunc,
     g_return_val_if_fail(priv->npoints, FALSE);
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    gdouble estim[N_ESTIMATORS];
+    evaluate_estimators(priv, estim);
 
     if (priv->builtin) {
         const BuiltinFitFunc *builtin = priv->builtin;
         g_return_val_if_fail(builtin->estimate, FALSE);
-        gboolean ok = builtin->estimate(priv->points, priv->npoints, params);
+        gboolean ok = builtin->estimate(priv->points, priv->npoints, estim,
+                                        params);
         gwy_fitter_set_params(fitter, params);
         return ok;
     }
 
-    gdouble estim[N_ESTIMATORS];
     if (!priv->estimate)
         priv->estimate = _gwy_fit_func_new_expr_with_constants();
-    evaluate_estimators(priv, estim);
     for (guint i = 0; i < N_ESTIMATORS; i++) {
         if (!gwy_expr_define_constant(priv->estimate, estimators[i], estim[i],
                                       NULL))
@@ -523,7 +509,10 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
         = estim[ESTIMATOR_XMID]
         = estim[ESTIMATOR_XYMIN]
         = estim[ESTIMATOR_XYMAX]
+        = estim[ESTIMATOR_XPEAK]
         = priv->points[0].x;
+
+    estim[ESTIMATOR_HWPEAK] = 0.0;
 
     estim[ESTIMATOR_YMIN]
         = estim[ESTIMATOR_YMAX]
@@ -531,6 +520,8 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
         = estim[ESTIMATOR_YXMIN]
         = estim[ESTIMATOR_YXMID]
         = estim[ESTIMATOR_YXMAX]
+        = estim[ESTIMATOR_APEAK]
+        = estim[ESTIMATOR_Y0PEAK]
         = priv->points[0].y;
 
     for (guint i = 1; i < priv->npoints; i++) {
@@ -555,6 +546,7 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
     }
     estim[ESTIMATOR_YMEAN] /= priv->npoints;
 
+    // The middle point
     gdouble xmid = (estim[ESTIMATOR_XMIN] + estim[ESTIMATOR_XMAX])/2;
     gdouble mindist = fabs(estim[ESTIMATOR_XMID] - xmid);
     for (guint i = 1; i < priv->npoints; i++) {
@@ -564,6 +556,36 @@ evaluate_estimators(FitFunc *priv, gdouble *estim)
             estim[ESTIMATOR_YXMID] = y;
             mindist = fabs(x - xmid);
         }
+    }
+
+    // Peak.
+    gdouble xymax2l = estim[ESTIMATOR_XMIN], xymax2r = estim[ESTIMATOR_XMAX],
+            xymin2l = estim[ESTIMATOR_XMIN], xymin2r = estim[ESTIMATOR_XMAX];
+    gdouble h = 0.5*(estim[ESTIMATOR_YMIN] + estim[ESTIMATOR_YMAX]);
+    for (guint i = 0; i < priv->npoints; i++) {
+        gdouble x = priv->points[i].x, y = priv->points[i].y;
+        if (y <= h && x < estim[ESTIMATOR_XYMAX] && x > xymax2l)
+            xymax2l = x;
+        if (y <= h && x > estim[ESTIMATOR_XYMAX] && x < xymax2r)
+            xymax2r = x;
+        if (y >= h && x < estim[ESTIMATOR_XYMIN] && x > xymin2l)
+            xymin2l = x;
+        if (y >= h && x > estim[ESTIMATOR_XYMIN] && x < xymin2r)
+            xymin2r = x;
+    }
+    // Choose between upward and downward peak based on which is narrower,
+    // preferring upward slightly.
+    if (0.6*(xymax2r - xymax2l) <= xymin2r - xymin2l) {
+        estim[ESTIMATOR_XPEAK] = estim[ESTIMATOR_XYMAX];
+        estim[ESTIMATOR_APEAK] = estim[ESTIMATOR_YMAX] - estim[ESTIMATOR_YMIN];
+        estim[ESTIMATOR_HWPEAK] = 0.5*(xymax2r - xymax2l);
+        estim[ESTIMATOR_Y0PEAK] = estim[ESTIMATOR_YMIN];
+    }
+    else {
+        estim[ESTIMATOR_XPEAK] = estim[ESTIMATOR_XYMIN];
+        estim[ESTIMATOR_APEAK] = estim[ESTIMATOR_YMIN] - estim[ESTIMATOR_YMAX];
+        estim[ESTIMATOR_HWPEAK] = 0.5*(xymin2r - xymin2l);
+        estim[ESTIMATOR_Y0PEAK] = estim[ESTIMATOR_YMAX];
     }
 }
 

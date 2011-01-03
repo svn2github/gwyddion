@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,6 +40,8 @@ typedef struct {
     gboolean invert;
     // Only with general polynomial
     guint nterms;
+    guint xmaxpower;
+    guint ymaxpower;
     const guint *xpowers;
     const guint *ypowers;
     const gdouble *xp;
@@ -116,7 +118,7 @@ plane_fit_mask(guint id,
  *
  * Fits a plane through a rectangular part of a field.
  *
- * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
  *
  * Returns: %TRUE if the plane was fitted, %FALSE if the there were too few
@@ -182,7 +184,7 @@ fail:
  *
  * Subtracts a plane from a field.
  *
- * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
  **/
 void
@@ -216,7 +218,7 @@ gwy_field_subtract_plane(GwyField *field,
  * Fits a plane through a rectangular part of a field by straighenting up
  * facets.
  *
- * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
  *
  * Although @bx and @by have the same meaning as in gwy_field_fit_plane()
@@ -373,8 +375,8 @@ poly_fit(guint id,
     guint j = id % data->width;
     if (j == 0)
         data->p = data->base + i*data->xres;
-    const gdouble *xp = data->xp + j;
-    const gdouble *yp = data->yp + i;
+    const gdouble *xp = data->xp + j*(data->xmaxpower + 1);
+    const gdouble *yp = data->yp + i*(data->ymaxpower + 1);
     for (guint k = 0; k < data->nterms; k++)
         fvalues[k] = xp[data->xpowers[k]] * yp[data->ypowers[k]];
     *value = *data->p;
@@ -398,8 +400,8 @@ poly_fit_mask(guint id,
     }
     gboolean ok = (!gwy_mask_iter_get(data->iter) == data->invert);
     if (ok) {
-        const gdouble *xp = data->xp + j;
-        const gdouble *yp = data->yp + i;
+        const gdouble *xp = data->xp + j*(data->xmaxpower + 1);
+        const gdouble *yp = data->yp + i*(data->ymaxpower + 1);
         for (guint k = 0; k < data->nterms; k++)
             fvalues[k] = xp[data->xpowers[k]] * yp[data->ypowers[k]];
         *value = *data->p;
@@ -412,31 +414,28 @@ poly_fit_mask(guint id,
 static gdouble*
 enumerate_powers(const guint *powers, guint nterms,
                  guint first, guint len, guint dim,
-                 gsize *size)
+                 guint *pmaxpower)
 {
     guint maxpower = powers[0];
     for (guint k = 1; k < nterms; k++) {
         if (powers[k] > maxpower)
             maxpower = powers[k];
     }
+    *pmaxpower = maxpower;
 
-    *size = (maxpower + 1)*len*sizeof(gdouble);
-    gdouble *powertable = g_slice_alloc(*size);
-    if (dim == 1) {
-        gwy_clear(powertable, (maxpower + 1)*len);
-        return powertable;
-    }
+    gdouble *powertable = g_new(gdouble, (maxpower + 1)*len);
     gdouble *p = powertable;
     for (guint i = 0; i < len; i++) {
         gdouble t = 2*(i + first)/(dim - 1.0) - 1.0;
         gdouble tp = 1.0;
-        for (guint j = 0; j <= maxpower; j++, p++) {
+        for (guint j = 0; j < maxpower; j++, p++) {
             *p = tp;
             tp *= t;
         }
         *p = tp;
         p++;
     }
+
     return powertable;
 }
 
@@ -455,7 +454,7 @@ enumerate_powers(const guint *powers, guint nterms,
  *
  * Fits a general polynomial through a rectangular part of a field.
  *
- * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.
  *
  * The arrays @xpowers and @ypowers define the individual terms to fit.  For
@@ -491,11 +490,11 @@ gwy_field_fit_poly(const GwyField *field,
 
     g_return_val_if_fail(xpowers && ypowers, FALSE);
 
-    gsize xpsize, ypsize;
+    guint xmaxpower, ymaxpower;
     gdouble *xp = enumerate_powers(xpowers, nterms, col, width, field->xres,
-                                   &xpsize);
+                                   &xmaxpower);
     gdouble *yp = enumerate_powers(ypowers, nterms, row, height, field->yres,
-                                   &ypsize);
+                                   &ymaxpower);
 
     PolyFitData data = {
         .width = width,
@@ -507,6 +506,8 @@ gwy_field_fit_poly(const GwyField *field,
         .maskcol = maskcol,
         .maskrow = maskrow,
         .nterms = nterms,
+        .xmaxpower = xmaxpower,
+        .ymaxpower = ymaxpower,
         .xpowers = xpowers,
         .ypowers = ypowers,
         .xp = xp,
@@ -522,8 +523,8 @@ gwy_field_fit_poly(const GwyField *field,
         ok = gwy_linear_fit(poly_fit_mask, width*height, coeffs, nterms, NULL,
                             &data);
     }
-    g_slice_free1(xpsize, xp);
-    g_slice_free1(ypsize, yp);
+    g_free(xp);
+    g_free(yp);
     if (!ok)
         goto fail;
 
@@ -545,7 +546,7 @@ fail:
  *
  * Subtracts a general polynomial from a field.
  *
- * The coefficients correspond to coordinates normalized to [-1,1], see the
+ * The coefficients correspond to coordinates normalised to [-1,1], see the
  * introduction for details.  The meaning of @xpowers and @ypowers is described
  * in detail in gwy_field_fit_poly().
  **/
@@ -561,24 +562,24 @@ gwy_field_subtract_poly(GwyField *field,
     g_return_if_fail(xpowers && ypowers);
     g_return_if_fail(coeffs);
 
-    gsize xpsize, ypsize;
-    gdouble *xp = enumerate_powers(xpowers, nterms, 0, field->xres, field->xres,
-                                   &xpsize);
-    gdouble *yp = enumerate_powers(ypowers, nterms, 0, field->yres, field->yres,
-                                   &ypsize);
+    guint xmaxpower, ymaxpower;
+    gdouble *xp = enumerate_powers(xpowers, nterms,
+                                   0, field->xres, field->xres, &xmaxpower);
+    gdouble *yp = enumerate_powers(ypowers, nterms,
+                                   0, field->yres, field->yres, &ymaxpower);
     gdouble *d = field->data;
     for (guint i = 0; i < field->yres; i++) {
-        const gdouble *y = yp + i;
+        const gdouble *y = yp + i*(ymaxpower + 1);
         for (guint j = 0; j < field->xres; j++, d++) {
-            const gdouble *x = xp + j;
+            const gdouble *x = xp + j*(xmaxpower + 1);
             gdouble s = 0.0;
             for (guint k = 0; k < nterms; k++)
                 s += coeffs[k] * x[xpowers[k]] * y[ypowers[k]];
             *d -= s;
         }
     }
-    g_slice_free1(xpsize, xp);
-    g_slice_free1(ypsize, yp);
+    g_free(xp);
+    g_free(yp);
     gwy_field_invalidate(field);
 }
 
@@ -664,7 +665,7 @@ fit_row_median(const GwyField *field,
     const gdouble *d = field->data + row*field->xres;
     guint count;
     if (masking == GWY_MASK_IGNORE) {
-        ASSIGN(buffer, d, field->xres);
+        gwy_assign(buffer, d, field->xres);
         count = field->xres;
     }
     else {

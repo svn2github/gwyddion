@@ -96,13 +96,13 @@ cat >$report <<EOF
 EOF
 echo -n "FILES "
 print_header File >>$report
-python $plot <$outdir/files.dat | sed 's/\([-a-z0-9]*\)\.c/<a href="#\1">\0\<\/a>/'>>$report
+python $plot $libname <$outdir/files.dat | sed 's/\([-a-z0-9]*\)\.c/<a href="#\1">\0\<\/a>/'>>$report
 for x in $outdir/*.c.dat; do
   b=${x%.c.dat}
   b=${b#*/}
   echo -n "$b "
   print_header Function | sed 's/<tr/<tr id="'$b'"/' >>$report
-  python $plot <$x >>$report
+  python $plot $b.c <$x >>$report
 done
 echo
 print_header Function >>$report

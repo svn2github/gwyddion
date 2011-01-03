@@ -43,6 +43,7 @@ test_field_assert_equal(const GwyField *result,
     g_assert(GWY_IS_FIELD(reference));
     g_assert_cmpuint(result->xres, ==, reference->xres);
     g_assert_cmpuint(result->yres, ==, reference->yres);
+    compare_properties(G_OBJECT(result), G_OBJECT(reference));
 
     for (guint i = 0; i < result->yres; i++) {
         gdouble *result_row = result->data + i*result->xres;
@@ -117,9 +118,8 @@ test_field_units(void)
                      "y-real", -log(1.0 - g_rand_double(rng)),
                      NULL);
         GString *prev = g_string_new(NULL), *next = g_string_new(NULL);
-        GwyValueFormat *format = gwy_field_get_format_xy(field,
-                                                         GWY_VALUE_FORMAT_PLAIN,
-                                                         NULL);
+        GwyValueFormat *format = gwy_value_format_new();
+        gwy_field_format_xy(field, GWY_VALUE_FORMAT_PLAIN, format);
         gdouble dx = gwy_field_dx(field);
         for (gint i = 0; i <= 10; i++) {
             GWY_SWAP(GString*, prev, next);
@@ -277,6 +277,17 @@ test_field_copy(void)
         g_object_unref(dest);
         g_object_unref(reference);
     }
+
+    GwyField *field = gwy_field_new_sized(37, 41, TRUE);
+    gwy_field_fill_full(field, 1.0);
+    field_randomize(field, rng);
+    GwyField *dest = gwy_field_new_alike(field, FALSE);
+    gwy_field_copy_full(field, dest);
+    g_assert_cmpint(memcmp(field->data, dest->data,
+                           field->xres*field->yres*sizeof(gdouble)), ==, 0);
+    g_object_unref(dest);
+    g_object_unref(field);
+
     g_rand_free(rng);
 }
 
@@ -300,6 +311,10 @@ test_field_new_part(void)
         GwyRectangle rectangle = { col, row, width, height };
         GwyField *part = gwy_field_new_part(source, &rectangle, TRUE);
         GwyField *reference = gwy_field_new_sized(width, height, FALSE);
+        gwy_field_set_xreal(reference, source->xreal*width/xres);
+        gwy_field_set_yreal(reference, source->yreal*height/yres);
+        gwy_field_set_xoffset(reference, source->xreal*col/xres);
+        gwy_field_set_yoffset(reference, source->yreal*row/yres);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, 0, 0);
         test_field_assert_equal(part, reference);
@@ -311,14 +326,16 @@ test_field_new_part(void)
 }
 
 static void
-test_field_flip_one(const gdouble *orig,
-                    const gdouble *reference,
-                    guint xres, guint yres,
-                    gboolean horizontally, gboolean vertically)
+field_flip_one(const gdouble *orig,
+               const gdouble *reference,
+               guint xres, guint yres,
+               gboolean horizontally, gboolean vertically)
 {
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    memcpy(field->data, orig, xres*yres*sizeof(gdouble));
+    gwy_assign(field->data, orig, xres*yres);
     gwy_field_flip(field, horizontally, vertically, FALSE);
+    g_assert(field->xres == xres);
+    g_assert(field->yres == yres);
     for (guint i = 0; i < xres*yres; i++) {
         g_assert_cmpfloat(field->data[i], ==, reference[i]);
     }
@@ -346,10 +363,10 @@ test_field_flip(void)
         3, 2, 1,
     };
 
-    test_field_flip_one(orig1, orig1, xres1, yres1, FALSE, FALSE);
-    test_field_flip_one(orig1, hflip1, xres1, yres1, TRUE, FALSE);
-    test_field_flip_one(orig1, vflip1, xres1, yres1, FALSE, TRUE);
-    test_field_flip_one(orig1, bflip1, xres1, yres1, TRUE, TRUE);
+    field_flip_one(orig1, orig1, xres1, yres1, FALSE, FALSE);
+    field_flip_one(orig1, hflip1, xres1, yres1, TRUE, FALSE);
+    field_flip_one(orig1, vflip1, xres1, yres1, FALSE, TRUE);
+    field_flip_one(orig1, bflip1, xres1, yres1, TRUE, TRUE);
 
     enum { xres2 = 2, yres2 = 3 };
     const gdouble orig2[xres2*yres2] = {
@@ -373,10 +390,114 @@ test_field_flip(void)
         2, 1,
     };
 
-    test_field_flip_one(orig2, orig2, xres2, yres2, FALSE, FALSE);
-    test_field_flip_one(orig2, hflip2, xres2, yres2, TRUE, FALSE);
-    test_field_flip_one(orig2, vflip2, xres2, yres2, FALSE, TRUE);
-    test_field_flip_one(orig2, bflip2, xres2, yres2, TRUE, TRUE);
+    field_flip_one(orig2, orig2, xres2, yres2, FALSE, FALSE);
+    field_flip_one(orig2, hflip2, xres2, yres2, TRUE, FALSE);
+    field_flip_one(orig2, vflip2, xres2, yres2, FALSE, TRUE);
+    field_flip_one(orig2, bflip2, xres2, yres2, TRUE, TRUE);
+}
+
+static void
+field_rotate_simple_one(const gdouble *orig,
+                        const gdouble *reference,
+                        guint xres, guint yres,
+                        GwySimpleRotation rotation)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_assign(field->data, orig, xres*yres);
+    GwyField *rotated = gwy_field_new_rotated_simple(field, rotation, FALSE);
+    if (rotation % 180) {
+        g_assert(field->xres == rotated->yres);
+        g_assert(field->yres == rotated->xres);
+    }
+    else {
+        g_assert(field->xres == rotated->xres);
+        g_assert(field->yres == rotated->yres);
+    }
+    for (guint i = 0; i < xres*yres; i++) {
+        g_assert_cmpfloat(rotated->data[i], ==, reference[i]);
+    }
+    g_object_unref(field);
+    g_object_unref(rotated);
+}
+
+void
+test_field_rotate_simple(void)
+{
+    const GwySimpleRotation rotations[] = {
+        GWY_SIMPLE_ROTATE_NONE,
+        GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE,
+        GWY_SIMPLE_ROTATE_UPSIDEDOWN,
+        GWY_SIMPLE_ROTATE_CLOCKWISE,
+    };
+    enum { xres1 = 3, yres1 = 2, n1 = xres1*yres1 };
+    const double data1[][n1] = {
+        {
+            1, 2, 3,
+            4, 5, 6,
+        },
+        {
+            3, 6,
+            2, 5,
+            1, 4,
+        },
+        {
+            6, 5, 4,
+            3, 2, 1,
+        },
+        {
+            4, 1,
+            5, 2,
+            6, 3,
+        },
+    };
+
+    for (guint i = 0; i < G_N_ELEMENTS(rotations); i++) {
+        const gdouble *source = data1[i];
+        for (guint j = 0; j < G_N_ELEMENTS(rotations); j++) {
+            GwySimpleRotation rotation = rotations[j];
+            const gdouble *reference = data1[(i + j) % G_N_ELEMENTS(rotations)];
+            field_rotate_simple_one(source, reference,
+                                    i % 2 ? yres1 : xres1,
+                                    i % 2 ? xres1 : yres1,
+                                    rotation);
+        }
+    }
+
+    enum { xres2 = 5, yres2 = 1, n2 = xres2*yres2 };
+    const double data2[][n2] = {
+        {
+            1, 2, 3, 4, 5,
+        },
+        {
+            5,
+            4,
+            3,
+            2,
+            1,
+        },
+        {
+            5, 4, 3, 2, 1,
+        },
+        {
+            1,
+            2,
+            3,
+            4,
+            5,
+        },
+    };
+
+    for (guint i = 0; i < G_N_ELEMENTS(rotations); i++) {
+        const gdouble *source = data2[i];
+        for (guint j = 0; j < G_N_ELEMENTS(rotations); j++) {
+            GwySimpleRotation rotation = rotations[j];
+            const gdouble *reference = data2[(i + j) % G_N_ELEMENTS(rotations)];
+            field_rotate_simple_one(source, reference,
+                                    i % 2 ? yres2 : xres2,
+                                    i % 2 ? xres2 : yres2,
+                                    rotation);
+        }
+    }
 }
 
 void
@@ -419,6 +540,20 @@ test_field_range(void)
         g_assert_cmpfloat(min, <=, max);
         g_assert_cmpfloat(min, >=, lower);
         g_assert_cmpfloat(max, <=, upper);
+
+        guint nabove1, nbelow1, nabove2, nbelow2;
+        total = gwy_field_count_in_range(field, NULL,
+                                         NULL, GWY_MASK_IGNORE,
+                                         upper, lower, FALSE,
+                                         &nabove1, &nbelow1);
+        g_assert_cmpfloat(total, ==, xres*yres);
+        total = gwy_field_count_in_range(field, NULL,
+                                         NULL, GWY_MASK_IGNORE,
+                                         lower, upper, TRUE,
+                                         &nabove2, &nbelow2);
+        g_assert_cmpfloat(total, ==, xres*yres);
+        g_assert_cmpuint(nabove1 + nbelow2, ==, total);
+        g_assert_cmpuint(nabove2 + nbelow1, ==, total);
 
         g_object_unref(mask);
         g_object_unref(field);
@@ -487,7 +622,6 @@ test_field_surface_area(void)
 
         gwy_field_set_xreal(field, 1.0);
         gwy_field_set_yreal(field, 1.0);
-        gwy_field_invalidate(field);
         area = gwy_field_surface_area(field, NULL, NULL, GWY_MASK_IGNORE);
         area_expected = planar_field_surface_area(field);
         g_assert_cmpfloat(fabs(area - area_expected)/area_expected, <=, 1e-9);
@@ -500,15 +634,29 @@ test_field_surface_area(void)
         GwyRectangle rectangle = { col, row, width, height };
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        gdouble area_include
-            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_INCLUDE);
-        gdouble area_exclude
-            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_EXCLUDE);
-        gdouble area_ignore
-            = gwy_field_surface_area(field, &rectangle, mask, GWY_MASK_IGNORE);
+
+        gwy_field_set_xreal(field, xres/sqrt(xres*yres));
+        gwy_field_set_yreal(field, yres/sqrt(xres*yres));
+        gdouble area_include, area_exclude, area_ignore;
+        area_include = gwy_field_surface_area(field, &rectangle,
+                                              mask, GWY_MASK_INCLUDE);
+        area_exclude = gwy_field_surface_area(field, &rectangle,
+                                              mask, GWY_MASK_EXCLUDE);
+        area_ignore = gwy_field_surface_area(field, &rectangle,
+                                             mask, GWY_MASK_IGNORE);
         g_assert_cmpfloat(fabs(area_include + area_exclude
                                - area_ignore)/area_ignore, <=, 1e-9);
 
+        gwy_field_set_xreal(field, 1.0);
+        gwy_field_set_yreal(field, 1.0);
+        area_include = gwy_field_surface_area(field, &rectangle,
+                                              mask, GWY_MASK_INCLUDE);
+        area_exclude = gwy_field_surface_area(field, &rectangle,
+                                              mask, GWY_MASK_EXCLUDE);
+        area_ignore = gwy_field_surface_area(field, &rectangle,
+                                             mask, GWY_MASK_IGNORE);
+        g_assert_cmpfloat(fabs(area_include + area_exclude
+                               - area_ignore)/area_ignore, <=, 1e-9);
         g_object_unref(mask);
         g_object_unref(field);
     }
@@ -721,6 +869,196 @@ test_field_statistics(void)
     g_rand_free(rng);
 }
 
+void
+test_field_level_plane(void)
+{
+    enum { max_size = 204 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 20;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble alpha = g_rand_double_range(rng, -100.0, 100.0);
+        gdouble beta = g_rand_double_range(rng, -100.0, 100.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+
+        gdouble fa, fbx, fby, m1a, m1bx, m1by, m0a, m0bx, m0by;
+        gdouble a_expected = 0.5*(alpha + beta);
+        gdouble bx_expected = 0.5*beta*(1.0 - 1.0/xres);
+        gdouble by_expected = 0.5*alpha*(1.0 - 1.0/yres);
+        g_assert(gwy_field_fit_plane(field, NULL, NULL, GWY_MASK_IGNORE,
+                                     &fa, &fbx, &fby));
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        g_assert(gwy_field_fit_plane(field, NULL, mask, GWY_MASK_EXCLUDE,
+                                     &m0a, &m0bx, &m0by));
+        g_assert(gwy_field_fit_plane(field, NULL, mask, GWY_MASK_INCLUDE,
+                                     &m1a, &m1bx, &m1by));
+
+        g_assert_cmpfloat(fabs((fa - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((fbx - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((fby - by_expected)/by_expected), <=, 1e-13);
+
+        g_assert_cmpfloat(fabs((m0a - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m0bx - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m0by - by_expected)/by_expected), <=, 1e-13);
+
+        g_assert_cmpfloat(fabs((m1a - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m1bx - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m1by - by_expected)/by_expected), <=, 1e-13);
+
+        gwy_field_subtract_plane(field, a_expected, bx_expected, by_expected);
+        g_assert(gwy_field_fit_plane(field, NULL, NULL, GWY_MASK_IGNORE,
+                                     &fa, &fbx, &fby));
+        g_assert_cmpfloat(fabs(fa), <=, 1e-13);
+        g_assert_cmpfloat(fabs(fbx), <=, 1e-13);
+        g_assert_cmpfloat(fabs(fby), <=, 1e-13);
+        g_assert_cmpfloat(fabs(gwy_field_mean_full(field)), <=, 1e-13);
+        g_assert_cmpfloat(fabs(gwy_field_rms_full(field)), <=, 1e-13);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_level_poly(void)
+{
+    enum { max_size = 204 };
+    const guint x_powers[] = { 0, 1, 0 };
+    const guint y_powers[] = { 0, 0, 1 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 20;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        gdouble alpha = g_rand_double_range(rng, -100.0, 100.0);
+        gdouble beta = g_rand_double_range(rng, -100.0, 100.0);
+        GwyField *field = make_planar_field(xres, yres, alpha, beta);
+
+        gdouble fc[3], m0[3], m1[3];
+        gdouble a_expected = 0.5*(alpha + beta);
+        gdouble bx_expected = 0.5*beta*(1.0 - 1.0/xres);
+        gdouble by_expected = 0.5*alpha*(1.0 - 1.0/yres);
+        g_assert(gwy_field_fit_poly(field, NULL, NULL, GWY_MASK_IGNORE,
+                                    x_powers, y_powers, 3, fc));
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        g_assert(gwy_field_fit_poly(field, NULL, mask, GWY_MASK_EXCLUDE,
+                                    x_powers, y_powers, 3, m0));
+        g_assert(gwy_field_fit_poly(field, NULL, mask, GWY_MASK_INCLUDE,
+                                    x_powers, y_powers, 3, m1));
+
+        g_assert_cmpfloat(fabs((fc[0] - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((fc[1] - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((fc[2] - by_expected)/by_expected), <=, 1e-13);
+
+        g_assert_cmpfloat(fabs((m0[0] - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m0[1] - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m0[2] - by_expected)/by_expected), <=, 1e-13);
+
+        g_assert_cmpfloat(fabs((m1[0] - a_expected)/a_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m1[1] - bx_expected)/bx_expected), <=, 1e-13);
+        g_assert_cmpfloat(fabs((m1[2] - by_expected)/by_expected), <=, 1e-13);
+
+        gdouble c[3] = { a_expected, bx_expected, by_expected };
+        gwy_field_subtract_poly(field, x_powers, y_powers, 3, c);
+        g_assert(gwy_field_fit_poly(field, NULL, NULL, GWY_MASK_IGNORE,
+                                    x_powers, y_powers, 3, fc));
+        g_assert_cmpfloat(fabs(fc[0]), <=, 1e-13);
+        g_assert_cmpfloat(fabs(fc[1]), <=, 1e-13);
+        g_assert_cmpfloat(fabs(fc[2]), <=, 1e-13);
+        g_assert_cmpfloat(fabs(gwy_field_mean_full(field)), <=, 1e-13);
+        g_assert_cmpfloat(fabs(gwy_field_rms_full(field)), <=, 1e-13);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+// FIXME: The masked versions *may* fail if the mask is `unlucky' and does not
+// contain enough contiguous pieces and/or they are located at the edges.
+void
+test_field_level_inclination(void)
+{
+    enum { max_size = 172 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 30;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 100, max_size);
+        guint yres = g_rand_int_range(rng, 100, max_size);
+        gdouble alpha = g_rand_double_range(rng, -1.0, 1.0);
+        gdouble beta = g_rand_double_range(rng, -1.0, 1.0);
+        GwyField *plane = make_planar_field(xres, yres, alpha, beta);
+        gdouble phi = g_rand_double_range(rng, 0, G_PI);
+        gdouble width = g_rand_double_range(rng, 0.25, 1.5);
+        gdouble height = g_rand_double_range(rng, -2.0, 2.0);
+        GwyField *steps = gwy_field_new_sized(xres, yres, FALSE);
+
+        for (guint i = 0; i < yres; i++) {
+            gdouble y = 2*i/(yres - 1.0) - 1.0;
+            for (guint j = 0; j < xres; j++) {
+                gdouble x = 2*j/(xres - 1.0) - 1.0;
+                gdouble z = height*floor((x*cos(phi) - y*sin(phi))/width);
+                steps->data[i*xres + j] = z;
+            }
+        }
+
+        // TODO: use field-arithmetic
+        GwyField *field = gwy_field_duplicate(steps);
+        gwy_field_add_field(plane, NULL, field, 0, 0, 1.0);
+
+        gdouble fbx, fby, m0bx, m0by, m1bx, m1by;
+        gdouble a_expected = 0.5*(alpha + beta);
+        gdouble bx_expected = 0.5*beta*(1.0 - 1.0/xres);
+        gdouble by_expected = 0.5*alpha*(1.0 - 1.0/yres);
+        g_assert(gwy_field_inclination(field, NULL, NULL, GWY_MASK_IGNORE,
+                                       20, &fbx, &fby));
+        GwyMaskField *mask = random_mask_field(xres, yres, rng);
+        g_assert(gwy_field_inclination(field, NULL, mask, GWY_MASK_EXCLUDE,
+                                       20, &m0bx, &m0by));
+        g_assert(gwy_field_inclination(field, NULL, mask, GWY_MASK_INCLUDE,
+                                       20, &m1bx, &m1by));
+        // The required precision is quite low as the method is supposed to
+        // recover the plane only approximately.
+        g_assert_cmpfloat(fabs((fbx - bx_expected)/bx_expected), <=, 0.02);
+        g_assert_cmpfloat(fabs((fby - by_expected)/by_expected), <=, 0.02);
+        g_assert_cmpfloat(fabs((m0bx - bx_expected)/bx_expected), <=, 0.02);
+        g_assert_cmpfloat(fabs((m0by - by_expected)/by_expected), <=, 0.02);
+        g_assert_cmpfloat(fabs((m1bx - bx_expected)/bx_expected), <=, 0.02);
+        g_assert_cmpfloat(fabs((m1by - by_expected)/by_expected), <=, 0.02);
+
+        gwy_field_subtract_plane(field, a_expected, fbx, fby);
+        g_assert(gwy_field_inclination(field, NULL, NULL, GWY_MASK_IGNORE,
+                                       20, &fbx, &fby));
+        g_assert(gwy_field_inclination(field, NULL, mask, GWY_MASK_EXCLUDE,
+                                       20, &m0bx, &m0by));
+        g_assert(gwy_field_inclination(field, NULL, mask, GWY_MASK_INCLUDE,
+                                       20, &m1bx, &m1by));
+        g_assert_cmpfloat(fabs(fbx), <=, 0.02);
+        g_assert_cmpfloat(fabs(fby), <=, 0.02);
+        g_assert_cmpfloat(fabs(m0bx), <=, 0.02);
+        g_assert_cmpfloat(fabs(m0by), <=, 0.02);
+        g_assert_cmpfloat(fabs(m1bx), <=, 0.02);
+        g_assert_cmpfloat(fabs(m1by), <=, 0.02);
+
+        g_object_unref(mask);
+        g_object_unref(field);
+        g_object_unref(steps);
+        g_object_unref(plane);
+    }
+    g_rand_free(rng);
+}
+
+
 static void
 test_field_row_level_one(GwyRowShiftMethod method)
 {
@@ -766,25 +1104,25 @@ test_field_row_level_one(GwyRowShiftMethod method)
 }
 
 void
-test_field_row_level_mean(void)
+test_field_level_row_mean(void)
 {
     test_field_row_level_one(GWY_ROW_SHIFT_MEAN);
 }
 
 void
-test_field_row_level_median(void)
+test_field_level_row_median(void)
 {
     test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN);
 }
 
 void
-test_field_row_level_mean_diff(void)
+test_field_level_row_mean_diff(void)
 {
     test_field_row_level_one(GWY_ROW_SHIFT_MEAN_DIFF);
 }
 
 void
-test_field_row_level_median_diff(void)
+test_field_level_row_median_diff(void)
 {
     test_field_row_level_one(GWY_ROW_SHIFT_MEDIAN_DIFF);
 }
@@ -1082,6 +1420,62 @@ test_field_compatibility_real(void)
     g_object_unref(field3);
 }
 
+void
+test_field_compatibility_units(void)
+{
+    GwyField *field1 = gwy_field_new();
+    GwyField *field2 = gwy_field_new();
+    GwyField *field3 = gwy_field_new();
+
+    gwy_unit_set_from_string(gwy_field_get_unit_xy(field1), "m", NULL);
+    gwy_unit_set_from_string(gwy_field_get_unit_z(field3), "m", NULL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_LATERAL),
+                     ==, GWY_FIELD_COMPATIBLE_LATERAL);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field2,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, 0);
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field1,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, 0);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field2, field3,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field2,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+
+    g_assert_cmpuint(gwy_field_is_incompatible(field1, field3,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+    g_assert_cmpuint(gwy_field_is_incompatible(field3, field1,
+                                               GWY_FIELD_COMPATIBLE_VALUE),
+                     ==, GWY_FIELD_COMPATIBLE_VALUE);
+
+    g_object_unref(field1);
+    g_object_unref(field2);
+    g_object_unref(field3);
+}
 
 void
 test_field_arithmetic_cache(void)
@@ -1094,7 +1488,7 @@ test_field_arithmetic_cache(void)
     gdouble min, max;
 
     GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    memcpy(field->data, data, xres*yres*sizeof(gdouble));
+    gwy_assign(field->data, data, xres*yres);
     gwy_field_min_max_full(field, &min, &max);
     g_assert_cmpfloat(min, ==, -1.0);
     g_assert_cmpfloat(max, ==, 2.0);
@@ -1126,5 +1520,438 @@ test_field_arithmetic_cache(void)
     g_assert_cmpfloat(fabs(gwy_field_rms_full(field) - sqrt(5.0)), <, 1e-15);
     g_object_unref(field);
 }
+
+static void
+level_for_cf(GwyField *field,
+             const GwyMaskField *mask,
+             GwyMaskingType masking)
+{
+    for (guint i = 0; i < field->yres; i++) {
+        GwyRectangle rectangle = { 0, i, field->xres, 1 };
+        gdouble mean = gwy_field_mean(field, &rectangle, mask, masking);
+        if (!isnan(mean))
+            gwy_field_add(field, &rectangle, NULL, GWY_MASK_IGNORE, -mean);
+    }
+}
+
+static GwyLine*
+cf_dumb(const GwyField *field,
+        const GwyRectangle *rectangle,
+        const GwyMaskField *mask,
+        GwyMaskingType masking,
+        gboolean level,
+        gboolean do_hhcf)
+{
+    GwyField *part = gwy_field_new_part(field, rectangle, FALSE);
+    GwyLine *cf = gwy_line_new_sized(part->xres, TRUE);
+    GwyLine *weights = gwy_line_new_sized(part->xres, TRUE);
+
+    GwyMaskField *mpart = NULL;
+    if (mask && masking != GWY_MASK_IGNORE)
+        mpart = gwy_mask_field_new_part(mask, rectangle);
+
+    if (level)
+        level_for_cf(part, mpart, masking);
+
+    for (guint i = 0; i < part->yres; i++) {
+        const gdouble *row = part->data + i*part->xres;
+        for (guint k = 0; k < part->xres; k++) {
+            for (guint j = 0; j < part->xres - k; j++) {
+                gboolean use_this_pixel = TRUE;
+                if (mpart) {
+                    guint m1 = gwy_mask_field_get(mpart, j, i);
+                    guint m2 = gwy_mask_field_get(mpart, j + k, i);
+                    if (masking == GWY_MASK_INCLUDE)
+                        use_this_pixel = m1 && m2;
+                    else
+                        use_this_pixel = !m1 && !m2;
+                }
+                if (use_this_pixel) {
+                    gdouble z1 = row[j];
+                    gdouble z2 = row[j + k];
+                    cf->data[k] += do_hhcf ? (z2 - z1)*(z2 - z1) : z1*z2;
+                    weights->data[k]++;
+                }
+            }
+        }
+    }
+    GWY_OBJECT_UNREF(mpart);
+    g_object_unref(part);
+    for (guint k = 0; k < part->xres; k++)
+        cf->data[k] = weights->data[k] ? cf->data[k]/weights->data[k] : 0.0;
+    g_object_unref(weights);
+
+    return cf;
+}
+
+static void
+line_assert_numerically_equal(const GwyLine *result,
+                              const GwyLine *reference,
+                              gdouble eps)
+{
+    g_assert(GWY_IS_LINE(result));
+    g_assert(GWY_IS_LINE(reference));
+    g_assert_cmpuint(result->res, ==, reference->res);
+
+    for (guint j = 0; j < result->res; j++) {
+        gdouble value = result->data[j], ref = reference->data[j];
+        //g_printerr("[%u] %g %g\n", j, value, ref);
+        g_assert_cmpfloat(fabs(value - ref), <=, eps);
+    }
+}
+
+void
+test_field_distributions_acf_full(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            GwyLine *acf = gwy_field_row_acf(field,
+                                             NULL, NULL, GWY_MASK_IGNORE, lvl);
+            GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+            GwyLine *acf0 = gwy_field_row_acf(field, NULL,
+                                              mask, GWY_MASK_EXCLUDE, lvl);
+            gwy_mask_field_fill(mask, NULL, TRUE);
+            GwyLine *acf1 = gwy_field_row_acf(field, NULL,
+                                              mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_acf = cf_dumb(field, NULL,
+                                        NULL, GWY_MASK_IGNORE, lvl, FALSE);
+
+            line_assert_numerically_equal(acf, dumb_acf, 1e-13);
+            line_assert_numerically_equal(acf0, dumb_acf, 1e-13);
+            line_assert_numerically_equal(acf1, dumb_acf, 1e-13);
+
+            g_object_unref(acf);
+            g_object_unref(acf1);
+            g_object_unref(acf0);
+            g_object_unref(dumb_acf);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_acf_masked(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *acf = gwy_field_row_acf(field, NULL,
+                                             mask, GWY_MASK_IGNORE, lvl);
+            GwyLine *acf0 = gwy_field_row_acf(field, NULL,
+                                              mask, GWY_MASK_EXCLUDE, lvl);
+            GwyLine *acf1 = gwy_field_row_acf(field, NULL,
+                                              mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_acf = cf_dumb(field, NULL,
+                                        mask, GWY_MASK_IGNORE, lvl, FALSE);
+            GwyLine *dumb_acf0 = cf_dumb(field, NULL,
+                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE);
+            GwyLine *dumb_acf1 = cf_dumb(field, NULL,
+                                         mask, GWY_MASK_INCLUDE, lvl, FALSE);
+
+            line_assert_numerically_equal(acf, dumb_acf, 1e-13);
+            line_assert_numerically_equal(acf0, dumb_acf0, 1e-13);
+            line_assert_numerically_equal(acf1, dumb_acf1, 1e-13);
+
+            g_object_unref(acf);
+            g_object_unref(acf0);
+            g_object_unref(acf1);
+            g_object_unref(dumb_acf);
+            g_object_unref(dumb_acf0);
+            g_object_unref(dumb_acf1);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_acf_partial(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            guint width = g_rand_int_range(rng, 1, xres+1);
+            guint height = g_rand_int_range(rng, 1, yres+1);
+            guint col = g_rand_int_range(rng, 0, xres-width+1);
+            guint row = g_rand_int_range(rng, 0, yres-height+1);
+            GwyRectangle rectangle = { col, row, width, height };
+
+            GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *acf = gwy_field_row_acf(field, &rectangle,
+                                             mask, GWY_MASK_IGNORE, lvl);
+            GwyLine *acf0 = gwy_field_row_acf(field, &rectangle,
+                                              mask, GWY_MASK_EXCLUDE, lvl);
+            GwyLine *acf1 = gwy_field_row_acf(field, &rectangle,
+                                              mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_acf = cf_dumb(field, &rectangle,
+                                        mask, GWY_MASK_IGNORE, lvl, FALSE);
+            GwyLine *dumb_acf0 = cf_dumb(field, &rectangle,
+                                         mask, GWY_MASK_EXCLUDE, lvl, FALSE);
+            GwyLine *dumb_acf1 = cf_dumb(field, &rectangle,
+                                         mask, GWY_MASK_INCLUDE, lvl, FALSE);
+
+            line_assert_numerically_equal(acf, dumb_acf, 1e-13);
+            line_assert_numerically_equal(acf0, dumb_acf0, 1e-13);
+            line_assert_numerically_equal(acf1, dumb_acf1, 1e-13);
+
+            g_object_unref(acf);
+            g_object_unref(acf0);
+            g_object_unref(acf1);
+            g_object_unref(dumb_acf);
+            g_object_unref(dumb_acf0);
+            g_object_unref(dumb_acf1);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_hhcf_full(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
+                                               NULL, GWY_MASK_IGNORE, lvl);
+            GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, TRUE);
+            GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
+                                                mask, GWY_MASK_EXCLUDE, lvl);
+            gwy_mask_field_fill(mask, NULL, TRUE);
+            GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
+                                                mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_hhcf = cf_dumb(field, NULL,
+                                         NULL, GWY_MASK_IGNORE, lvl, TRUE);
+
+            line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
+            line_assert_numerically_equal(hhcf0, dumb_hhcf, 1e-13);
+            line_assert_numerically_equal(hhcf1, dumb_hhcf, 1e-13);
+
+            g_object_unref(hhcf);
+            g_object_unref(hhcf1);
+            g_object_unref(hhcf0);
+            g_object_unref(dumb_hhcf);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_hhcf_masked(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
+                                               mask, GWY_MASK_IGNORE, lvl);
+            GwyLine *hhcf0 = gwy_field_row_hhcf(field, NULL,
+                                                mask, GWY_MASK_EXCLUDE, lvl);
+            GwyLine *hhcf1 = gwy_field_row_hhcf(field, NULL,
+                                                mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_hhcf = cf_dumb(field, NULL,
+                                         mask, GWY_MASK_IGNORE, lvl, TRUE);
+            GwyLine *dumb_hhcf0 = cf_dumb(field, NULL,
+                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE);
+            GwyLine *dumb_hhcf1 = cf_dumb(field, NULL,
+                                          mask, GWY_MASK_INCLUDE, lvl, TRUE);
+
+            line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
+            line_assert_numerically_equal(hhcf0, dumb_hhcf0, 1e-13);
+            line_assert_numerically_equal(hhcf1, dumb_hhcf1, 1e-13);
+
+            g_object_unref(hhcf);
+            g_object_unref(hhcf0);
+            g_object_unref(hhcf1);
+            g_object_unref(dumb_hhcf);
+            g_object_unref(dumb_hhcf0);
+            g_object_unref(dumb_hhcf1);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_hhcf_partial(void)
+{
+    enum { max_size = 134 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 60 : 15;
+
+    for (guint lvl = 0; lvl <= 1; lvl++) {
+        for (guint iter = 0; iter < niter; iter++) {
+            guint xres = g_rand_int_range(rng, 2, max_size);
+            guint yres = g_rand_int_range(rng, 2, max_size);
+            GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+            gwy_field_fill_full(field, 1.0);
+            field_randomize(field, rng);
+
+            guint width = g_rand_int_range(rng, 1, xres+1);
+            guint height = g_rand_int_range(rng, 1, yres+1);
+            guint col = g_rand_int_range(rng, 0, xres-width+1);
+            guint row = g_rand_int_range(rng, 0, yres-height+1);
+            GwyRectangle rectangle = { col, row, width, height };
+
+            GwyMaskField *mask = random_mask_field(xres, yres, rng);
+            GwyLine *hhcf = gwy_field_row_hhcf(field, &rectangle,
+                                               mask, GWY_MASK_IGNORE, lvl);
+            GwyLine *hhcf0 = gwy_field_row_hhcf(field, &rectangle,
+                                                mask, GWY_MASK_EXCLUDE, lvl);
+            GwyLine *hhcf1 = gwy_field_row_hhcf(field, &rectangle,
+                                                mask, GWY_MASK_INCLUDE, lvl);
+            GwyLine *dumb_hhcf = cf_dumb(field, &rectangle,
+                                         mask, GWY_MASK_IGNORE, lvl, TRUE);
+            GwyLine *dumb_hhcf0 = cf_dumb(field, &rectangle,
+                                          mask, GWY_MASK_EXCLUDE, lvl, TRUE);
+            GwyLine *dumb_hhcf1 = cf_dumb(field, &rectangle,
+                                          mask, GWY_MASK_INCLUDE, lvl, TRUE);
+
+            line_assert_numerically_equal(hhcf, dumb_hhcf, 1e-13);
+            line_assert_numerically_equal(hhcf0, dumb_hhcf0, 1e-13);
+            line_assert_numerically_equal(hhcf1, dumb_hhcf1, 1e-13);
+
+            g_object_unref(hhcf);
+            g_object_unref(hhcf0);
+            g_object_unref(hhcf1);
+            g_object_unref(dumb_hhcf);
+            g_object_unref(dumb_hhcf0);
+            g_object_unref(dumb_hhcf1);
+            g_object_unref(mask);
+            g_object_unref(field);
+        }
+    }
+
+    g_rand_free(rng);
+}
+
+#if 0
+void
+test_field_min_max(void)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint xres = 1000, yres = 1000;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_field_fill_full(field, 1.0);
+    field_randomize(field, rng);
+    GwyMaskField *mask = NULL;
+    mask = random_mask_field(xres, yres, rng);
+    gdouble min, max;
+
+    g_test_timer_start();
+    min = max = 0.0;
+    for (guint i = 0; i < 100; i++) {
+        gwy_field_invalidate(field);
+        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
+    }
+    g_test_timer_elapsed();
+    g_test_minimized_result(g_test_timer_last(), "min %g", g_test_timer_last());
+
+    g_test_timer_start();
+    min = max = 0.0;
+    for (guint i = 0; i < 100; i++) {
+        gwy_field_invalidate(field);
+        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
+    }
+    g_test_timer_elapsed();
+    g_test_minimized_result(g_test_timer_last(), "max %g", g_test_timer_last());
+
+    g_test_timer_start();
+    min = max = 0.0;
+    for (guint i = 0; i < 100; i++) {
+        gwy_field_invalidate(field);
+        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
+        max += gwy_field_max(field, NULL, mask, GWY_MASK_INCLUDE);
+    }
+    g_test_timer_elapsed();
+    g_test_minimized_result(g_test_timer_last(), "min,max %g", g_test_timer_last());
+
+    g_test_timer_start();
+    min = max = 0.0;
+    for (guint i = 0; i < 100; i++) {
+        gwy_field_invalidate(field);
+        gdouble m, M;
+        gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &m, &M);
+        min += m;
+        max += M;
+    }
+    g_test_timer_elapsed();
+    g_test_minimized_result(g_test_timer_last(), "min&max: %g", g_test_timer_last());
+
+    GWY_OBJECT_UNREF(mask);
+    g_object_unref(field);
+    g_rand_free(rng);
+}
+#endif
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

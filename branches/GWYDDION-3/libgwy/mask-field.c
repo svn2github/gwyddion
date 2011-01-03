@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -428,7 +428,7 @@ gwy_mask_field_new(void)
  * @xres: Horizontal resolution (width).
  * @yres: Vertical resolution (height).
  * @clear: %TRUE to fill the new mask field with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Creates a new two-dimensional mask field of specified dimensions.
  *
@@ -478,6 +478,60 @@ _gwy_mask_field_check_rectangle(const GwyMaskField *field,
     }
 
     return TRUE;
+}
+
+gboolean
+_gwy_mask_field_limit_rectangles(const GwyMaskField *src,
+                                 const GwyRectangle *srcrectangle,
+                                 const GwyMaskField *dest,
+                                 guint destcol, guint destrow,
+                                 gboolean transpose,
+                                 guint *col, guint *row,
+                                 guint *width, guint *height)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(src), FALSE);
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(dest), FALSE);
+
+    if (srcrectangle) {
+        *col = srcrectangle->col;
+        *row = srcrectangle->row;
+        *width = srcrectangle->width;
+        *height = srcrectangle->height;
+        if (*col >= src->xres || *row >= src->yres)
+            return FALSE;
+        *width = MIN(*width, src->xres - *col);
+        *height = MIN(*height, src->yres - *row);
+    }
+    else {
+        *col = *row = 0;
+        *width = src->xres;
+        *height = src->yres;
+    }
+
+    if (destcol >= dest->xres || destrow >= dest->yres)
+        return FALSE;
+
+    if (transpose) {
+        *width = MIN(*width, dest->yres - destrow);
+        *height = MIN(*height, dest->xres - destcol);
+    }
+    else {
+        *width = MIN(*width, dest->xres - destcol);
+        *height = MIN(*height, dest->yres - destrow);
+    }
+
+    if (src == dest) {
+        if ((transpose
+             && OVERLAPPING(*col, *width, destcol, *height)
+             && OVERLAPPING(*row, *height, destrow, *width))
+            || (OVERLAPPING(*col, *width, destcol, *width)
+                && OVERLAPPING(*row, *height, destrow, *height))) {
+            g_warning("Source and destination blocks overlap.  "
+                      "Data corruption is imminent.");
+        }
+    }
+
+    return *width && *height;
 }
 
 /**
@@ -625,7 +679,7 @@ gwy_mask_field_new_from_field(const GwyField *field,
  * @field: A two-dimensional mask field.
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
- * @clear: %TRUE to clear the new field, %FALSE to leave it unitialized.
+ * @clear: %TRUE to clear the new field, %FALSE to leave it uninitialised.
  *
  * Resizes a two-dimensional mask field.
  *
@@ -826,7 +880,7 @@ copy_part(const GwyMaskField *src,
  * the part of the rectangle that is corresponds to data inside @src and @dest
  * is copied.  This can also mean nothing is copied at all.
  *
- * If @src is equal to @dest, the areas may not overlap.
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_mask_field_copy(const GwyMaskField *src,
@@ -835,39 +889,11 @@ gwy_mask_field_copy(const GwyMaskField *src,
                     guint destcol,
                     guint destrow)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(src));
-    g_return_if_fail(GWY_IS_MASK_FIELD(dest));
-
     guint col, row, width, height;
-    if (srcrectangle) {
-        col = srcrectangle->col;
-        row = srcrectangle->row;
-        width = srcrectangle->width;
-        height = srcrectangle->height;
-        if (col >= src->xres || row >= src->yres)
-            return;
-        width = MIN(width, src->xres - col);
-        height = MIN(height, src->yres - row);
-    }
-    else {
-        col = row = 0;
-        width = src->xres;
-        height = src->yres;
-    }
-
-    if (destcol >= dest->xres || destrow >= dest->yres)
+    if (!_gwy_mask_field_limit_rectangles(src, srcrectangle,
+                                          dest, destcol, destrow,
+                                          FALSE, &col, &row, &width, &height))
         return;
-    width = MIN(width, dest->xres - destcol);
-    height = MIN(height, dest->yres - destrow);
-    if (!width || !height)
-        return;
-
-    if (src == dest
-        && OVERLAPPING(col, width, destcol, width)
-        && OVERLAPPING(row, height, destrow, height)) {
-        g_warning("Source and destination blocks overlap.  "
-                  "Data corruption is imminent.");
-    }
 
     if (width == src->xres
         && width == dest->xres
@@ -2145,7 +2171,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * gwy_mask_iter_prev(), respectively.
  *
  * The following example demonstrates the typical use on finding the minimum of
- * masked two-dimensional data.  Notice how the iterator is initialized for
+ * masked two-dimensional data.  Notice how the iterator is initialised for
  * each row because the mask field rows do not form one contiguous block
  * although each individual row is contiguous.
  * |[
@@ -2165,7 +2191,7 @@ gwy_mask_field_number_grains(GwyMaskField *field,
  * ]|
  * The iterator is represented by a very simple structure that is supposed to
  * be allocated as an automatic variable and passed/copied by value.  It can be
- * re-initialized any number of times, even to iterate in completely different
+ * re-initialised any number of times, even to iterate in completely different
  * mask objects.  It can be simply forgotten when no longer useful (i.e. there
  * is no teardown function).
  **/
@@ -2173,11 +2199,11 @@ gwy_mask_field_number_grains(GwyMaskField *field,
 /**
  * gwy_mask_field_iter_init:
  * @field: A two-dimensional mask field.
- * @iter: Mask iterator to initialize.  It must be an identifier.
+ * @iter: Mask iterator to initialise.  It must be an identifier.
  * @col: Column index in @field.
  * @row: Row index in @field.
  *
- * Initializes a mask iterator to point to given pixel in a mask field.
+ * Initialises a mask iterator to point to given pixel in a mask field.
  *
  * The iterator can be subsequently used to move back and forward within the
  * row @row (but not outside).

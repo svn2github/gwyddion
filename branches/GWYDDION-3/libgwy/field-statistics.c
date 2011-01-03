@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -253,7 +253,7 @@ gwy_field_median(const GwyField *field,
         if (full_field && CTEST(field->priv, MED))
             return CVAL(field->priv, MED);
         for (guint i = 0; i < height; i++)
-            ASSIGN(buffer + i*width, base + i*field->xres, width);
+            gwy_assign(buffer + i*width, base + i*field->xres, width);
         gdouble median = gwy_math_median(buffer, width*height);
         g_slice_free1(bufsize, buffer);
         if (full_field) {
@@ -603,65 +603,33 @@ gwy_field_count_in_range(const GwyField *field,
     }
     else {
         // Masking is in use.
-        if (masking == GWY_MASK_INCLUDE) {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                if (strict) {
-                    for (guint j = width; j; j--, d++) {
-                        if (gwy_mask_iter_get(iter)) {
-                            if (*d > lower)
-                                na++;
-                            if (*d < upper)
-                                nb++;
-                            n++;
-                        }
-                        gwy_mask_iter_next(iter);
+        gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            if (strict) {
+                for (guint j = width; j; j--, d++) {
+                    if (!gwy_mask_iter_get(iter) == invert) {
+                        if (*d > lower)
+                            na++;
+                        if (*d < upper)
+                            nb++;
+                        n++;
                     }
-                }
-                else {
-                    for (guint j = width; j; j--, d++) {
-                        if (gwy_mask_iter_get(iter)) {
-                            if (*d >= lower)
-                                na++;
-                            if (*d <= upper)
-                                nb++;
-                            n++;
-                        }
-                        gwy_mask_iter_next(iter);
-                    }
+                    gwy_mask_iter_next(iter);
                 }
             }
-        }
-        else {
-            for (guint i = 0; i < height; i++) {
-                const gdouble *d = base + i*field->xres;
-                GwyMaskIter iter;
-                gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
-                if (strict) {
-                    for (guint j = width; j; j--, d++) {
-                        if (!gwy_mask_iter_get(iter)) {
-                            if (*d > lower)
-                                na++;
-                            if (*d < upper)
-                                nb++;
-                            n++;
-                        }
-                        gwy_mask_iter_next(iter);
+            else {
+                for (guint j = width; j; j--, d++) {
+                    if (!gwy_mask_iter_get(iter) == invert) {
+                        if (*d >= lower)
+                            na++;
+                        if (*d <= upper)
+                            nb++;
+                        n++;
                     }
-                }
-                else {
-                    for (guint j = width; j; j--, d++) {
-                        if (!gwy_mask_iter_get(iter)) {
-                            if (*d >= lower)
-                                na++;
-                            if (*d <= upper)
-                                nb++;
-                            n++;
-                        }
-                        gwy_mask_iter_next(iter);
-                    }
+                    gwy_mask_iter_next(iter);
                 }
             }
         }

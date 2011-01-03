@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,28 +31,21 @@ typedef enum {
     GWY_SIMPLE_ROTATE_CLOCKWISE        = 270,
 } GwySimpleRotation;
 
-void      gwy_field_flip               (GwyField *field,
-                                        gboolean horizontally,
-                                        gboolean vertically,
-                                        gboolean transform_offsets);
-GwyField* gwy_field_new_rotated_simple (const GwyField *field,
-                                        GwySimpleRotation rotation,
-                                        gboolean transform_offsets)  G_GNUC_MALLOC;
-GwyField* gwy_field_new_transposed     (const GwyField *field)       G_GNUC_MALLOC;
-GwyField* gwy_field_new_part_transposed(const GwyField *field,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height,
-                                        gboolean transform_offsets)  G_GNUC_MALLOC;
-void      gwy_field_part_transpose     (const GwyField *src,
-                                        guint col,
-                                        guint row,
-                                        guint width,
-                                        guint height,
-                                        GwyField *dest,
-                                        guint destcol,
-                                        guint destrow);
+void      gwy_field_flip              (GwyField *field,
+                                       gboolean horizontally,
+                                       gboolean vertically,
+                                       gboolean transform_offsets);
+GwyField* gwy_field_new_rotated_simple(const GwyField *field,
+                                       GwySimpleRotation rotation,
+                                       gboolean transform_offsets)       G_GNUC_MALLOC;
+GwyField* gwy_field_new_transposed    (const GwyField *field,
+                                       const GwyRectangle *rectangle,
+                                       gboolean transform_offsets)       G_GNUC_MALLOC;
+void      gwy_field_transpose         (const GwyField *src,
+                                       const GwyRectangle *srcrectangle,
+                                       GwyField *dest,
+                                       guint destcol,
+                                       guint destrow);
 
 G_END_DECLS
 

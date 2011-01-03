@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -425,8 +425,8 @@ gwy_field_duplicate_impl(GwySerializable *serializable)
     GwyField *duplicate = gwy_field_new_alike(field, FALSE);
     Field *dpriv = duplicate->priv;
 
-    ASSIGN(duplicate->data, field->data, field->xres*field->yres);
-    ASSIGN(dpriv->cache, priv->cache, GWY_FIELD_CACHE_SIZE);
+    gwy_assign(duplicate->data, field->data, field->xres*field->yres);
+    gwy_assign(dpriv->cache, priv->cache, GWY_FIELD_CACHE_SIZE);
     dpriv->cached = priv->cached;
 
     return G_OBJECT(duplicate);
@@ -475,9 +475,9 @@ gwy_field_assign_impl(GwySerializable *destination,
         dest->data = g_new(gdouble, src->xres * src->yres);
         dpriv->allocated = TRUE;
     }
-    ASSIGN(dest->data, src->data, src->xres * src->yres);
+    gwy_assign(dest->data, src->data, src->xres * src->yres);
     copy_info(dest, src);
-    ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
+    gwy_assign(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
     dpriv->cached = spriv->cached;
     _gwy_notify_properties(G_OBJECT(dest), notify, nn);
 }
@@ -591,7 +591,7 @@ gwy_field_new(void)
  * @xres: Horizontal resolution (width).
  * @yres: Vertical resolution (height).
  * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Creates a new two-dimensional data field of specified dimensions.
  *
@@ -616,12 +616,12 @@ gwy_field_new_sized(guint xres,
  * gwy_field_new_alike:
  * @model: A two-dimensional data field to use as the template.
  * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Creates a new two-dimensional data field similar to another field.
  *
  * All properties of the newly created field will be identical to @model,
- * except the data that will be either zeroes or unitialized.  Use
+ * except the data that will be either zeroes or uninitialised.  Use
  * gwy_field_duplicate() to completely duplicate a field including data.
  *
  * Returns: A new two-dimensional data field.
@@ -667,27 +667,28 @@ gwy_field_new_part(const GwyField *field,
     guint col, row, width, height;
     if (!_gwy_field_check_rectangle(field, rectangle,
                                     &col, &row, &width, &height))
-        return FALSE;
-
-    GwyField *part;
+        return NULL;
 
     if (width == field->xres && height == field->yres) {
-        part = gwy_field_duplicate(field);
+        GwyField *part = gwy_field_duplicate(field);
         if (!keep_offsets)
             part->xoff = part->yoff = 0.0;
         return part;
     }
 
-    part = gwy_field_new_sized(width, height, FALSE);
+    GwyField *part = gwy_field_new_sized(width, height, FALSE);
     gwy_field_copy(field, rectangle, part, 0, 0);
     part->xreal = width*gwy_field_dx(field);
     part->yreal = height*gwy_field_dy(field);
-    ASSIGN_UNITS(part->priv->unit_xy, field->priv->unit_xy);
-    ASSIGN_UNITS(part->priv->unit_z, field->priv->unit_z);
+
+    Field *spriv = field->priv, *dpriv = part->priv;
+    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
+    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
     if (keep_offsets) {
         part->xoff = field->xoff + col*gwy_field_dx(field);
         part->yoff = field->yoff + row*gwy_field_dy(field);
     }
+
     return part;
 }
 
@@ -733,7 +734,7 @@ gwy_field_new_resampled(const GwyField *field,
  * @xres: Desired X resolution.
  * @yres: Desired Y resolution.
  * @clear: %TRUE to fill the new field data with zeroes, %FALSE to leave it
- *         unitialized.
+ *         uninitialised.
  *
  * Resizes a two-dimensional data field.
  *
@@ -809,7 +810,7 @@ gwy_field_data_changed(GwyField *field)
  * the part of the rectangle that is corrsponds to data inside @src and @dest
  * is copied.  This can also mean no data are copied at all.
  *
- * If @src is equal to @dest, the areas may <emphasis>not</emphasis> overlap.
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
 gwy_field_copy(const GwyField *src,
@@ -818,45 +819,19 @@ gwy_field_copy(const GwyField *src,
                guint destcol,
                guint destrow)
 {
-    g_return_if_fail(GWY_IS_FIELD(src));
-    g_return_if_fail(GWY_IS_FIELD(dest));
-
     guint col, row, width, height;
-    if (srcrectangle) {
-        col = srcrectangle->col;
-        row = srcrectangle->row;
-        width = srcrectangle->width;
-        height = srcrectangle->height;
-        if (col >= src->xres || row >= src->yres)
-            return;
-        width = MIN(width, src->xres - col);
-        height = MIN(height, src->yres - row);
-    }
-    else {
-        col = row = 0;
-        width = src->xres;
-        height = src->yres;
-    }
-
-    if (destcol >= dest->xres || destrow >= dest->yres)
+    if (!_gwy_field_limit_rectangles(src, srcrectangle,
+                                     dest, destcol, destrow,
+                                     FALSE, &col, &row, &width, &height))
         return;
-    width = MIN(width, dest->xres - destcol);
-    height = MIN(height, dest->yres - destrow);
-    if (!width || !height)
-        return;
-
-    if (src == dest
-        && OVERLAPPING(col, width, destcol, width)
-        && OVERLAPPING(row, height, destrow, height)) {
-        g_warning("Source and destination blocks overlap.  "
-                  "Data corruption is imminent.");
-    }
 
     if (width == src->xres && width == dest->xres) {
         g_assert(col == 0 && destcol == 0);
-        ASSIGN(dest->data + width*destrow, src->data + width*row, width*height);
+        gwy_assign(dest->data + width*destrow, src->data + width*row,
+                   width*height);
         if (height == src->yres && height == dest->yres) {
-            ASSIGN(dest->priv->cache, src->priv->cache, GWY_FIELD_CACHE_SIZE);
+            gwy_assign(dest->priv->cache, src->priv->cache,
+                       GWY_FIELD_CACHE_SIZE);
             dest->priv->cached = src->priv->cached;
             if (dest->xreal != src->xreal || dest->yreal != src->yreal)
                 dest->priv->cached &= ~CBIT(ARE);
@@ -868,7 +843,7 @@ gwy_field_copy(const GwyField *src,
         const gdouble *src0 = src->data + src->xres*row + col;
         gdouble *dest0 = dest->data + dest->xres*destrow + destcol;
         for (guint i = 0; i < height; i++)
-            ASSIGN(dest0 + dest->xres*i, src0 + src->xres*i, width);
+            gwy_assign(dest0 + dest->xres*i, src0 + src->xres*i, width);
         gwy_field_invalidate(dest);
     }
 }
@@ -884,7 +859,7 @@ gwy_field_copy(const GwyField *src,
  **/
 void
 gwy_field_copy_full(const GwyField *src,
-                         GwyField *dest)
+                    GwyField *dest)
 {
     g_return_if_fail(GWY_IS_FIELD(src));
     g_return_if_fail(GWY_IS_FIELD(dest));
@@ -1100,6 +1075,60 @@ _gwy_field_check_rectangle(const GwyField *field,
 }
 
 gboolean
+_gwy_field_limit_rectangles(const GwyField *src,
+                            const GwyRectangle *srcrectangle,
+                            const GwyField *dest,
+                            guint destcol, guint destrow,
+                            gboolean transpose,
+                            guint *col, guint *row,
+                            guint *width, guint *height)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(src), FALSE);
+    g_return_val_if_fail(GWY_IS_FIELD(dest), FALSE);
+
+    if (srcrectangle) {
+        *col = srcrectangle->col;
+        *row = srcrectangle->row;
+        *width = srcrectangle->width;
+        *height = srcrectangle->height;
+        if (*col >= src->xres || *row >= src->yres)
+            return FALSE;
+        *width = MIN(*width, src->xres - *col);
+        *height = MIN(*height, src->yres - *row);
+    }
+    else {
+        *col = *row = 0;
+        *width = src->xres;
+        *height = src->yres;
+    }
+
+    if (destcol >= dest->xres || destrow >= dest->yres)
+        return FALSE;
+
+    if (transpose) {
+        *width = MIN(*width, dest->yres - destrow);
+        *height = MIN(*height, dest->xres - destcol);
+    }
+    else {
+        *width = MIN(*width, dest->xres - destcol);
+        *height = MIN(*height, dest->yres - destrow);
+    }
+
+    if (src == dest) {
+        if ((transpose
+             && OVERLAPPING(*col, *width, destcol, *height)
+             && OVERLAPPING(*row, *height, destrow, *width))
+            || (OVERLAPPING(*col, *width, destcol, *width)
+                && OVERLAPPING(*row, *height, destrow, *height))) {
+            g_warning("Source and destination blocks overlap.  "
+                      "Data corruption is imminent.");
+        }
+    }
+
+    return *width && *height;
+}
+
+gboolean
 _gwy_field_check_mask(const GwyField *field,
                       const GwyRectangle *rectangle,
                       const GwyMaskField *mask,
@@ -1257,59 +1286,53 @@ gwy_field_fill_full(GwyField *field,
 }
 
 /**
- * gwy_field_get_format_xy:
+ * gwy_field_format_xy:
  * @field: A two-dimensional data field.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying coordinates in a data field.
  *
- * The returned format will have sufficient precision to represent coordinates
+ * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
-gwy_field_get_format_xy(const GwyField *field,
-                        GwyValueFormatStyle style,
-                        GwyValueFormat *format)
+void
+gwy_field_format_xy(const GwyField *field,
+                    GwyValueFormatStyle style,
+                    GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_if_fail(GWY_IS_FIELD(field));
     gdouble max0 = MAX(field->xreal, field->yreal);
     gdouble maxoff = MAX(fabs(field->xreal + field->xoff),
                          fabs(field->yreal + field->yoff));
     gdouble max = MAX(max0, maxoff);
     gdouble unit = MIN(gwy_field_dx(field), gwy_field_dy(field));
-    return gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
-                                           style, max, unit, format);
+    gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
+                                    style, max, unit, format);
 }
 
 /**
- * gwy_field_get_format_z:
+ * gwy_field_format_z:
  * @field: A two-dimensional data field.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying values in a data field.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
-gwy_field_get_format_z(const GwyField *field,
-                       GwyValueFormatStyle style,
-                       GwyValueFormat *format)
+void
+gwy_field_format_z(const GwyField *field,
+                   GwyValueFormatStyle style,
+                   GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    g_return_if_fail(GWY_IS_FIELD(field));
     gdouble min, max;
     gwy_field_min_max(field, NULL, NULL, GWY_MASK_IGNORE, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    return gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
-                                       style, max - min, 3, format);
+    gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
+                                style, max - min, 3, format);
 }
 
 

@@ -64,6 +64,14 @@ test_array_data(void)
     g_assert_cmphex(delete_log, ==, 0);
     insert_log = 0;
 
+    // Manually emitted signals.
+    gwy_array_updated(array, 1);
+    gwy_array_updated(array, 0);
+    gwy_array_updated(array, 2);
+    g_assert_cmphex(update_log, ==, 0x213);
+    update_log = 0;
+
+    // More single-item operations.
     GwyRGBA *color;
     color = gwy_array_get(array, 0);
     g_assert(color);

@@ -327,7 +327,7 @@ gwy_curve_assign_impl(GwySerializable *destination,
         alloc_data(dest);
         notify = TRUE;
     }
-    ASSIGN(dest->data, src->data, 2*src->n);
+    gwy_assign(dest->data, src->data, src->n);
     copy_info(dest, src);
     if (notify)
         g_object_notify(G_OBJECT(dest), "n-points");
@@ -405,7 +405,7 @@ gwy_curve_new(void)
  *
  * Creates a new curve with preallocated size.
  *
- * The curve will contain the speficied number of points with uninitialized
+ * The curve will contain the speficied number of points with uninitialised
  * values.  Remember to run gwy_curve_sort() to sort the points if you fill
  * the data with unsorted points.
  *
@@ -440,7 +440,7 @@ gwy_curve_new_from_data(const GwyXY *points,
     GwyCurve *curve = g_object_newv(GWY_TYPE_CURVE, 0, NULL);
     curve->n = n;
     alloc_data(curve);
-    ASSIGN(curve->data, points, 2*n);
+    gwy_assign(curve->data, points, n);
     sort_data(curve);
     return curve;
 }
@@ -505,7 +505,7 @@ gwy_curve_new_part(const GwyCurve *curve,
 
     part->n = last+1 - first;
     alloc_data(part);
-    ASSIGN(part->data, curve->data + first, 2*part->n);
+    gwy_assign(part->data, curve->data + first, part->n);
     return part;
 }
 
@@ -583,7 +583,7 @@ gwy_curve_copy(const GwyCurve *src,
     g_return_if_fail(GWY_IS_CURVE(src));
     g_return_if_fail(GWY_IS_CURVE(dest));
     g_return_if_fail(dest->n == src->n);
-    ASSIGN(dest->data, src->data, 2*src->n);
+    gwy_assign(dest->data, src->data, src->n);
 }
 
 /**
@@ -668,26 +668,23 @@ gwy_curve_get_unit_y(GwyCurve *curve)
 }
 
 /**
- * gwy_curve_get_format_x:
+ * gwy_curve_format_x:
  * @curve: A curve.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying abscissa values of a curve.
  *
- * The returned format will usually have sufficient precision to represent
- * abscissa values of neighbour points as different values.  However, if the
- * differences are very unevenly distributed this is not really guaranteed.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
+ * The created format usually has a sufficient precision to represent abscissa
+ * values of neighbour points as different values.  However, if the intervals
+ * differ by several orders of magnitude this is not really guaranteed.
  **/
-GwyValueFormat*
-gwy_curve_get_format_x(GwyCurve *curve,
-                       GwyValueFormatStyle style,
-                       GwyValueFormat *format)
+void
+gwy_curve_format_x(GwyCurve *curve,
+                   GwyValueFormatStyle style,
+                   GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    g_return_if_fail(GWY_IS_CURVE(curve));
     if (!curve->n)
         return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
                                                style, 1.0, 0.1, format);
@@ -704,35 +701,32 @@ gwy_curve_get_format_x(GwyCurve *curve,
     for (guint i = curve->n; i; i--, p++)
         unit += sqrt(p[1].x - p[0].x);
     unit /= curve->n - 1;
-    return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
-                                           style, max, unit*unit, format);
+    gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
+                                    style, max, unit*unit, format);
 }
 
 /**
- * gwy_curve_get_format_y:
+ * gwy_curve_format_y:
  * @curve: A curve.
  * @style: Output format style.
- * @format: Value format to update or %NULL to create a new format.
+ * @format: Value format to update.
  *
  * Finds a suitable format for displaying values in a data curve.
- *
- * Returns: Either @format (with reference count unchanged) or, if it was
- *          %NULL, a newly created #GwyValueFormat.
  **/
-GwyValueFormat*
-gwy_curve_get_format_y(GwyCurve *curve,
-                       GwyValueFormatStyle style,
-                       GwyValueFormat *format)
+void
+gwy_curve_format_y(GwyCurve *curve,
+                   GwyValueFormatStyle style,
+                   GwyValueFormat *format)
 {
-    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
+    g_return_if_fail(GWY_IS_CURVE(curve));
     gdouble min, max;
     gwy_curve_min_max(curve, &min, &max);
     if (!curve->n || max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    return gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
-                                       style, max - min, 3, format);
+    gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
+                                style, max - min, 3, format);
 }
 
 

@@ -417,7 +417,7 @@ gwy_selection_get(GwySelection *selection,
     if (item) {
         g_return_val_if_fail(data, FALSE);
         guint shape_size = GWY_SELECTION_GET_CLASS(selection)->shape_size;
-        ASSIGN(data, item, shape_size);
+        gwy_assign(data, item, shape_size);
     }
     return item != NULL;
 }
@@ -499,7 +499,7 @@ gwy_selection_get_data(GwySelection *selection,
     const gdouble *array_data = gwy_array_get_data(array);
     gsize size = gwy_array_size(array);
     g_assert(array_data);
-    ASSIGN(data, array_data, size*shape_size);
+    gwy_assign(data, array_data, size*shape_size);
 }
 
 /**

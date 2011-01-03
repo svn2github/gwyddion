@@ -427,7 +427,7 @@ gwy_gl_material_set_emission(GwyGLMaterial *gl_material,
  *
  * Gets the shininess value of a GL material.
  *
- * Returns: The shininess value (in normalized range [0,1], not [0,128]).
+ * Returns: The shininess value (in normalised range [0,1], not [0,128]).
  **/
 gdouble
 gwy_gl_material_get_shininess(GwyGLMaterial *gl_material)
@@ -439,7 +439,7 @@ gwy_gl_material_get_shininess(GwyGLMaterial *gl_material)
 /**
  * gwy_gl_material_set_shininess:
  * @gl_material: A GL material.
- * @shininess: Shinniness value (in normalized range [0,1], not [0,128]).
+ * @shininess: Shinniness value (in normalised range [0,1], not [0,128]).
  *
  * Sets the shininess value of a GL material.
  **/
@@ -632,7 +632,7 @@ gwy_gl_material_parse(GwyResource *resource,
  *
  * #GwyGLMaterial represents an OpenGL material.  Its properties directly map
  * to corresponding OpenGL material characteristics.  Note however that all
- * are #GwyGLMaterial properties are normalized to the range [0,1].
+ * are #GwyGLMaterial properties are normalised to the range [0,1].
  *
  * GL material objects can be obtained from gwy_gl_materials_get(). New GL
  * materials can be created with gwy_inventory_copy() on the #GwyInventory

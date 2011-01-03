@@ -25,20 +25,13 @@ Inventory: Make possible to change sort function, make possible to simply state
            that items are sorted by name (which requires GDataCompareFunc, not
            just GCompareFunc).
 
-Math: Review the mechanism the functions they are brought in as something must
-      request the system extensions but we must not do that automatically as
-      the user may not want it.  Also, the only useful non-C99 function is
-      exp10() which, while frequently used in Gwyddion code, may not worth all
-      the complications to provide it in sane form for out-of-tree users.
+Math: Take curvature calculation from Gwyddion 2, though the method of dealing
+      with degeneration may need rethinking.
 
 Resources: Convenience method for resource parsing (possibly dumping too).
            Make them really convenient, otherwise it does not make sense.
            One possibility is using properties, though defining propertis
            for all GwyRawFilePreset parameters seems a bit overkill.
-
-Value Format: Fields are available as properties but the user cannot be
-              expected to call g_object_notify() when something changes.
-              Must make it more/less encapsulated for consistency.
 
 Classes: Review class definitions that have class data (resources, selection,
          ...) and move them to C files once private class data are made
@@ -50,12 +43,22 @@ Serializable boxed: Review type lookup locking once GAtomicArray is available,
 Fit Function: Handle different sources of fitting functions (even different
               sources of built-ins).
 
+Fit Function + Built-in: Make canned user function parameter estimators
+                         available to built-ins.  Add a half-width estimator
+                         (whatever it means)
+
 User fit function: No interface to manipulate the filter, parameters may need
                    markup or constraints.
 
                    The interface does not distinguish between code-friednly and
                    presentational parameters and formula.  This needs some
                    deliberation.
+
+Fields, Lines, Curves, Container: Data transfer functions should take the
+                                  modified field, i.e. the destination, as
+                                  the first argument.   Also consider passing
+                                  *two* GwyRectangles and taking their
+                                  intersection.
 
 Field distributions: HHCF does not depend on the mean value so, @level has no
                      effect.  Either remove it or consider higher degrees.

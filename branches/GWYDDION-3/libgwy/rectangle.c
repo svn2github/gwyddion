@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,
@@ -178,6 +178,11 @@ gwy_rectangle_free(GwyRectangle *rectangle)
  * gwy_field_fill(field, &((GwyRectangle){ col, row, width, height }),
  *                NULL, GWY_MASK_IGNORE, 1.0);
  * ]|
+ *
+ * Most functions taking a #GwyRectangle argument require the rectangle to
+ * be fully contained in the field and have non-zero width and height.  Data
+ * copying functions such ash gwy_field_copy() or gwy_mask_field_copy() are
+ * a notable exception.
  **/
 
 /**

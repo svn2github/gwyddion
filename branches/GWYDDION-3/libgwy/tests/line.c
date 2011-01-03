@@ -36,11 +36,12 @@ line_randomize(GwyLine *line,
 
 static void
 test_line_assert_equal(const GwyLine *result,
-                        const GwyLine *reference)
+                       const GwyLine *reference)
 {
     g_assert(GWY_IS_LINE(result));
     g_assert(GWY_IS_LINE(reference));
     g_assert_cmpuint(result->res, ==, reference->res);
+    compare_properties(G_OBJECT(result), G_OBJECT(reference));
 
     for (guint j = 0; j < result->res; j++)
         g_assert_cmpfloat(result->data[j], ==, reference->data[j]);
@@ -72,7 +73,7 @@ test_line_props(void)
 void
 test_line_data_changed(void)
 {
-    GwyField *line = gwy_line_new();
+    GwyLine *line = gwy_line_new();
     guint counter = 0;
     g_signal_connect_swapped(line, "data-changed",
                              G_CALLBACK(record_signal), &counter);
@@ -200,6 +201,8 @@ test_line_new_part(void)
         guint pos = g_rand_int_range(rng, 0, res-len+1);
         GwyLine *part = gwy_line_new_part(source, pos, len, TRUE);
         GwyLine *reference = gwy_line_new_sized(len, FALSE);
+        gwy_line_set_real(reference, source->real*len/res);
+        gwy_line_set_offset(reference, source->real*pos/res);
         line_part_copy_dumb(source, pos, len, reference, 0);
         test_line_assert_equal(part, reference);
         g_object_unref(source);

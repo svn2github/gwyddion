@@ -42,10 +42,7 @@ AM_CONDITIONAL([UNSTABLE_LIBRARY_RELEASE],[true])
 
 AC_CANONICAL_HOST
 
-GWY_MISSING_TOOLS=
-
 AC_DISABLE_STATIC
-AM_PROG_CC_C_O
 AC_PROG_CC_C99
 AC_PROG_CXX
 AC_USE_SYSTEM_EXTENSIONS
@@ -99,7 +96,7 @@ AC_SUBST([GWY_LIBRARY_LDFLAGS])
 
 #############################################################################
 # Headers
-AC_CHECK_HEADERS([unistd.h])
+## All required headers appear to be standard (on Win32, at least with MinGW).
 
 #############################################################################
 # I18n
@@ -116,18 +113,15 @@ GTK_DOC_CHECK([1.11])
 
 #############################################################################
 # Python
-AM_PATH_PYTHON([2.2],,[GWY_MISSING_TOOLS="$GWY_MISSING_TOOLS python"])
-AM_CONDITIONAL([HAVE_PYTHON],[test "$PYTHON" != :])
+AM_PATH_PYTHON([2.2])
 
 #############################################################################
 # Math Functions
 GWY_CHECK_LIBM
 
-m4_define([gwy_math_funcs],[exp10])
-GWY_CHECK_MATH_FUNCS([gwy_math_funcs])
-
 #############################################################################
 # GLIBC >= 2.1
+# FIXME: Why we don't check with AC_CHECK_FUNCS?
 gl_GLIBC21
 if test "x$GLIBC21" = xyes; then
   AC_DEFINE([HAVE_MEMMEM],1,[Define if we have working memmem()])
@@ -160,11 +154,11 @@ AC_CHECK_PROGS([GTESTER],[gtester],[false])
 #AC_MSG_RESULT([$GOBJECT_QUERY])
 #AC_SUBST(GOBJECT_QUERY)
 
+# FIXME: Once G-IR supports boxed types change this to the required version.
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 #############################################################################
 # Other tools
-
 AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 
 #############################################################################
@@ -181,50 +175,6 @@ if test "x$gwy_enable_valgrind" = xyes; then
                    [gwy_enable_valgrind=no])
 fi
 AM_CONDITIONAL([HAVE_VALGRIND],[test "x$gwy_enable_valgrind" = xyes])
-
-#############################################################################
-# Write gwyconfig.h
-AC_CONFIG_COMMANDS([gwyconfig.h],
-[
-  outfile=gwyconfig.h-tmp
-  g=GENERATED
-  cat > $outfile <<_______EOF
-/*
- * gwyconfig.h
- * This is a $g file.  Please modify 'configure.ac'.
- */
-
-#ifndef __GWY_CONFIG_H__
-#define __GWY_CONFIG_H__
-_______EOF
-
-  GWY_OUTPUT_MATH_FUNCS([gwy_math_funcs], [$outfile])
-
-  cat >>$outfile <<_______EOF
-
-/* Request system extensions.  This is necessary for instance for exp10()
- * to actually appear defined. */
-_______EOF
-
-  for x in _ALL_SOURCE _GNU_SOURCE _POSIX_SOURCE _POSIX_1_SOURCE _TANDEM_SOURCE __EXTENSIONS__ _POSIX_PTHREAD_SEMANTICS; do
-    grep "^# *define  *$x " config.h >>$outfile 2>/dev/null
-  done
-
-  cat >>$outfile <<_______EOF
-
-#endif
-_______EOF
-
-  if cmp -s $outfile gwyconfig.h; then
-    AC_MSG_NOTICE([gwyconfig.h is unchanged])
-    rm -f $outfile
-  else
-    mv $outfile gwyconfig.h
-  fi
-],
-[
-  gwy_math_exp10=$gwy_math_exp10
-])
 
 #############################################################################
 # Translation Makefiles

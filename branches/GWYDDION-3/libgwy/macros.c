@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,6 @@
  */
 
 #include "libgwy/macros.h"
-
 
 /**
  * SECTION: macros
@@ -152,6 +151,20 @@
  *
  * This is a shorthand for memset(), with the number of bytes to fill
  * calculated from the type of the pointer.
+ **/
+
+/**
+ * gwy_assign:
+ * @dest: Destination array.
+ *        This argument may be evaluated several times.
+ * @source: Source array.
+ * @n: Number of items to copy (in @dest units if the array types differ).
+ *
+ * Copies a block of items.
+ *
+ * This is a shorthand for memcpy(), with the number of bytes to fill
+ * calculated from the type of the @dest pointer.  Consequently, the arrays
+ * may not overlap.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

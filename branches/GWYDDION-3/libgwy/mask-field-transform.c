@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 /*
  * Valgrind follows the validity of individual bits.  However, it cannot follow
  * them through our twiddling tables.  What it sees as indexing with a value
- * that contain uninitialized padding bits (and thus an uninitialized memory
+ * that contains uninitialised padding bits (and thus an uninitialised memory
  * use) in fact only redistributes the bits in a complicatd manner and we
  * subsequently only use the good bits of the result.
  *
@@ -374,7 +374,7 @@ distribute8(guint64 q,
  * It probably has a poor performance on 32bit machines, but who gives a damn.
  *
  * The swap table has 2kB which is rather lot but it should fit to the L1 cache
- * ona a reasonable CPU.
+ * on a reasonable CPU.
  *
  * The performace is about 20x better than bit-by-bit transpostion in a 64bit
  * AMD.  Still it consumes about an amortized couple of instructions per bit.
@@ -612,47 +612,21 @@ swap_xy_src_aligned(const GwyMaskField *source,
 /**
  * gwy_mask_field_new_transposed:
  * @field: A two-dimensional mask field.
+ * @rectangle: Area in @field to extract.  Pass %NULL to process entire @field.
  *
- * Transposes a mask field, i.e. field rows become columns and vice versa.
- *
- * Returns: A new two-dimensional mask field.
- **/
-GwyMaskField*
-gwy_mask_field_new_transposed(const GwyMaskField *field)
-{
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
-
-    GwyMaskField *newfield = gwy_mask_field_new_sized(field->yres, field->xres,
-                                                      FALSE);
-    swap_xy_both_aligned(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
-    return newfield;
-}
-
-/**
- * gwy_mask_field_new_part_transposed:
- * @field: A two-dimensional mask field.
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns) in @field, the height of
- *         the newly created mask field.
- * @height: Rectangle height (number of rows) in @field, the width of
- *          the newly created mask field.
- *
- * Transposes a rectangular part of a mask field, making rows columns and vice
- * versa.
+ * Transposes a mask field, making rows columns and vice versa.
  *
  * Returns: A new two-dimensional mask field containing the transposed part
  *          of @field.
  **/
 GwyMaskField*
-gwy_mask_field_new_part_transposed(const GwyMaskField *field,
-                                   guint col, guint row,
-                                   guint width, guint height)
+gwy_mask_field_new_transposed(const GwyMaskField *field,
+                              const GwyRectangle *rectangle)
 {
-    g_return_val_if_fail(GWY_IS_MASK_FIELD(field), NULL);
-    g_return_val_if_fail(width && height, NULL);
-    g_return_val_if_fail(col + width <= field->xres, NULL);
-    g_return_val_if_fail(row + height <= field->yres, NULL);
+    guint col, row, width, height;
+    if (!_gwy_mask_field_check_rectangle(field, rectangle,
+                                         &col, &row, &width, &height))
+        return NULL;
 
     GwyMaskField *newfield = gwy_mask_field_new_sized(height, width, FALSE);
 
@@ -665,65 +639,45 @@ gwy_mask_field_new_part_transposed(const GwyMaskField *field,
 }
 
 /**
- * gwy_mask_field_part_transpose:
+ * gwy_mask_field_transpose:
  * @src: Source two-dimensional mask field.
- * @col: Column index of the upper-left corner of the rectangle in @src.
- * @row: Row index of the upper-left corner of the rectangle in @src.
- * @width: Rectangle width (number of columns) in the source, height in the
- *         destination.
- * @height: Rectangle height (number of rows) in the source, width in the
- *          destination.
+ * @srcrectangle: Area in field @src to transpose.  Pass %NULL to operate on
+ *                entire @src.
  * @dest: Destination two-dimensional mask field.
  * @destcol: Destination column in @dest.
  * @destrow: Destination row in @dest.
  *
- * Copies a rectangular part from one mask field to another, transposing it.
+ * Copies data from one mask field to another, transposing it.
  *
- * The rectangle starts at (@col, @row) in @src and its dimensions are
- * @width×@height. It is transposed to the rectangle @height×@width in @dest
- * starting from (@destcol, @destrow).
+ * The transposed rectangle is defined by @srcrectangle and it is copied to
+ * @dest starting from (@destcol, @destrow).  Its width in the source
+ * corresponds to height in the destination and vice versa.
  *
  * There are no limitations on the row and column indices or dimensions.  Only
  * the part of the rectangle that is corrsponds to data inside @src and @dest
  * is copied.  This can also mean nothing is copied at all.
  *
- * If @src is equal to @dest, the areas may not overlap.
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
-gwy_mask_field_part_transpose(const GwyMaskField *src,
-                              guint col, guint row,
-                              guint width, guint height,
-                              GwyMaskField *dest,
-                              guint destcol, guint destrow)
+gwy_mask_field_transpose(const GwyMaskField *src,
+                         const GwyRectangle *srcrectangle,
+                         GwyMaskField *dest,
+                         guint destcol, guint destrow)
 {
-    g_return_if_fail(GWY_IS_MASK_FIELD(src));
-    g_return_if_fail(GWY_IS_MASK_FIELD(dest));
-
-    if (col >= src->xres || destcol >= dest->xres
-        || row >= src->yres || destrow >= dest->yres)
+    guint col, row, width, height;
+    if (!_gwy_mask_field_limit_rectangles(src, srcrectangle,
+                                          dest, destcol, destrow,
+                                          TRUE, &col, &row, &width, &height))
         return;
-
-    width = MIN(width, src->xres - col);
-    height = MIN(height, src->yres - row);
-    width = MIN(width, dest->yres - destrow);
-    height = MIN(height, dest->xres - destcol);
-    if (!width || !height)
-        return;
-
-    if (src == dest
-        && OVERLAPPING(col, width, destcol, height)
-        && OVERLAPPING(row, height, destrow, width)) {
-        g_warning("Source and destination blocks overlap.  "
-                  "Data corruption is imminent.");
-    }
 
     // FIXME: Direct transposition of unaligned data would be nice.  Can it be
     // written without going insane?
     if ((col & 0x1f) && (destcol & 0x1f)) {
-        GwyMaskField *buffer
-            = gwy_mask_field_new_part_transposed(src, col, row, width, height);
-        gwy_mask_field_copy(buffer, &((GwyRectangle){0, 0, height, width}),
-                            dest, destcol, destrow);
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyMaskField *buffer = gwy_mask_field_new_transposed(src, &rectangle);
+        rectangle = (GwyRectangle){0, 0, height, width};
+        gwy_mask_field_copy(buffer, &rectangle, dest, destcol, destrow);
         g_object_unref(buffer);
     }
     else if (col & 0x1f)
@@ -770,7 +724,7 @@ gwy_mask_field_new_rotated_simple(const GwyMaskField *field,
         return NULL;
     }
 
-    GwyMaskField *newfield = gwy_mask_field_new_transposed(field);
+    GwyMaskField *newfield = gwy_mask_field_new_transposed(field, NULL);
 
     gsize rowsize = field->stride * sizeof(guint32);
     guint32 *buffer = g_slice_alloc(rowsize);

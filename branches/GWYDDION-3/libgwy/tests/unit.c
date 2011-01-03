@@ -211,6 +211,24 @@ test_unit_serialize(void)
 }
 
 void
+test_unit_assign(void)
+{
+    GwyUnit *unit1 = gwy_unit_new_from_string("kg µm ms^-2/nA", NULL);
+    GwyUnit *unit2 = gwy_unit_new();
+    GwyUnit *unit3 = gwy_unit_new();
+
+    g_assert(!gwy_unit_equal(unit1, unit3));
+    gwy_unit_assign(unit3, unit1);
+    g_assert(gwy_unit_equal(unit1, unit3));
+    gwy_unit_assign(unit2, unit1);
+    g_assert(gwy_unit_equal(unit2, unit3));
+
+    g_object_unref(unit1);
+    g_object_unref(unit2);
+    g_object_unref(unit3);
+}
+
+void
 test_unit_garbage(void)
 {
     static const gchar *tokens[] = {
@@ -250,6 +268,71 @@ test_unit_garbage(void)
 
     g_string_free(garbage, TRUE);
     g_rand_free(rng);
+    g_object_unref(unit);
+}
+
+void
+test_unit_format_power10(void)
+{
+    GwyUnit *unit = gwy_unit_new();
+    GwyValueFormat *format = gwy_value_format_new();
+    gdouble base;
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 0, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(base, ==, 1.0);
+    g_assert(!gwy_value_format_get_units(format));
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 3, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 1000.0), <, 1e-13);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10^3");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_UNICODE, 6, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 1000000.0), <, 1e-10);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10⁶");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_UNICODE, -6, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 0.000001), <, 1e-22);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "10⁻⁶");
+
+    gwy_unit_set_from_string(unit, "m", NULL);
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 0, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(base, ==, 1.0);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "m");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 3, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 1000.0), <, 1e-13);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "km");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, -3, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 0.001), <, 1e-19);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "mm");
+
+    gwy_unit_set_from_string(unit, "m s^-1", NULL);
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 0, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(base, ==, 1.0);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "m/s");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, 3, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 1000.0), <, 1e-13);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "km/s");
+
+    gwy_unit_format_for_power10(unit, GWY_VALUE_FORMAT_PLAIN, -3, format);
+    g_object_get(format, "base", &base, NULL);
+    g_assert_cmpfloat(fabs(base - 0.001), <, 1e-19);
+    g_assert_cmpstr(gwy_value_format_get_units(format), ==, "mm/s");
+
+    g_object_unref(format);
     g_object_unref(unit);
 }
 

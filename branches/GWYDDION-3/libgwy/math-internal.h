@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,6 @@
 
 G_BEGIN_DECLS
 
-#define ASSIGN(p, q, n) memcpy((p), (q), (n)*sizeof(gdouble))
 #define SLi gwy_lower_triangular_matrix_index
 #define MATRIX_LEN gwy_triangular_matrix_length
 

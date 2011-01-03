@@ -810,6 +810,27 @@ gwy_user_fit_func_error_quark(void)
  *     <term>@yxmax</term>
  *     <listitem>Last value, i.e. the ordinate (@y) value at @xmax.</listitem>
  *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@xpeak</term>
+ *     <listitem>Peak position, i.e. the abscissa (@x) of peak
+ *               centre.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@apeak</term>
+ *     <listitem>Peak height, i.e. the difference between peak extreme value
+ *               (@y) and <quote>background</quote>.  It is positive for upward
+ *               peaks and negative for downward peaks.</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@hwpeak</term>
+ *     <listitem>Peak half-width at half-maximum (or half-minimum for downward
+                 peaks).</listitem>
+ *   </varlistentry>
+ *   <varlistentry>
+ *     <term>@y0peak</term>
+ *     <listitem>Peak background value (@y).  It is usually equal to @ymin for
+ *               upward peaks and to @ymax for downward peak.</listitem>
+ *   </varlistentry>
  * </variablelist>
  *
  * Since the data fitted in different situations can differ by many orders of

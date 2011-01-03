@@ -392,7 +392,7 @@ deconvolve3_columns(guint width,
  * for interpolation.  For these types gwy_interpolation_resolve_coeffs_1d()
  * and gwy_interpolation_resolve_coeffs_2d() are no-op.
  *
- * Generalized interpolation types (with non-interpolation basis) require to
+ * Generalised interpolation types (with non-interpolation basis) require to
  * preprocess the data values to obtain interpolation coefficients first.  On
  * the ohter hand they typically offer much higher interpolation quality.
  *

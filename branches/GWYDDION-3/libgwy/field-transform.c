@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -169,147 +169,91 @@ swap_xy(const GwyField *source,
 }
 
 /**
- * gwy_field_new_part_transposed:
+ * gwy_field_new_transposed:
  * @field: A two-dimensional data field.
- * @col: Column index of the upper-left corner of the rectangle.
- * @row: Row index of the upper-left corner of the rectangle.
- * @width: Rectangle width (number of columns) in @field, the height of
- *         the newly created field.
- * @height: Rectangle height (number of rows) in @field, the width of
- *          the newly created field.
+ * @rectangle: Area in @field to extract.  Pass %NULL to process entire @field.
  * @transform_offsets: %TRUE to set the X and Y offsets of the new field
  *                     using @col, @row and @field offsets.  %FALSE to set
  *                     offsets of the new field to zeroes.
  *
- * Transposes a rectangular part of a field, making rows columns and vice
- * versa.
+ * Transposes a field, making rows columns and vice versa.
  *
  * The real dimensions and offsets are also transposed (offsets only if
  * requested with @transform_offsets).
- *
- * Returns: A new two-dimensional data field containing the transposed part
- *          of @field.
- **/
-GwyField*
-gwy_field_new_part_transposed(const GwyField *field,
-                              guint col, guint row,
-                              guint width, guint height,
-                              gboolean transform_offsets)
-{
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
-    g_return_val_if_fail(width && height, NULL);
-    g_return_val_if_fail(col + width <= field->xres, NULL);
-    g_return_val_if_fail(row + height <= field->yres, NULL);
-
-    GwyField *newfield = gwy_field_new_sized(height, width, FALSE);
-    newfield->xreal = height*gwy_field_dy(field);
-    newfield->yreal = width*gwy_field_dx(field);
-    if (transform_offsets) {
-        newfield->xoff = field->yoff + row*gwy_field_dy(field);
-        newfield->yoff = field->xoff + col*gwy_field_dx(field);
-    }
-
-    swap_xy(field, col, row, width, height, newfield, 0, 0);
-
-    Field *spriv = field->priv, *dpriv = newfield->priv;
-    ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
-    ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
-
-    return newfield;
-}
-
-/**
- * gwy_field_part_transpose:
- * @src: Source two-dimensional data field.
- * @col: Column index of the upper-left corner of the rectangle in @src.
- * @row: Row index of the upper-left corner of the rectangle in @src.
- * @width: Rectangle width (number of columns) in the source, height in the
- *         destination.
- * @height: Rectangle height (number of rows) in the source, width in the
- *          destination.
- * @dest: Destination two-dimensional data field.
- * @destcol: Destination column in @dest.
- * @destrow: Destination row in @dest.
- *
- * Copies a rectangular part from one field to another, transposing it.
- *
- * The rectangle starts at (@col, @row) in @src and its dimensions are
- * @width×@height. It is transposed to the rectangle @height×@width in @dest
- * starting from (@destcol, @destrow).
- *
- * There are no limitations on the row and column indices or dimensions.  Only
- * the part of the rectangle that is corrsponds to data inside @src and @dest
- * is copied.  This can also mean nothing is copied at all.
- *
- * If @src is equal to @dest, the areas may not overlap.
- **/
-void
-gwy_field_part_transpose(const GwyField *src,
-                         guint col, guint row,
-                         guint width, guint height,
-                         GwyField *dest,
-                         guint destcol, guint destrow)
-{
-    g_return_if_fail(GWY_IS_FIELD(src));
-    g_return_if_fail(GWY_IS_FIELD(dest));
-
-    if (col >= src->xres || destcol >= dest->xres
-        || row >= src->yres || destrow >= dest->yres)
-        return;
-
-    width = MIN(width, src->xres - col);
-    height = MIN(height, src->yres - row);
-    width = MIN(width, dest->yres - destrow);
-    height = MIN(height, dest->xres - destcol);
-    if (!width || !height)
-        return;
-
-    if (src == dest
-        && OVERLAPPING(col, width, destcol, height)
-        && OVERLAPPING(row, height, destrow, width)) {
-        g_warning("Source and destination blocks overlap.  "
-                  "Data corruption is imminent.");
-    }
-
-    swap_xy(src, col, row, width, height, dest, destcol, destrow);
-    gwy_field_invalidate(dest);
-}
-
-/**
- * gwy_field_new_transposed:
- * @field: A two-dimensional data field.
- *
- * Transposes a field, i.e. field rows become columns and vice versa.
  *
  * The transposition is performed by a low cache-miss algorithm.  It may be
  * used to change column-wise operations to row-wise at a relatively low cost
  * and then benefit from the improved memory locality and simplicity of
  * row-wise processing.
  *
- * The real dimensions and offsets are also transposed.
- *
- * Returns: A new two-dimensional data field.
+ * Returns: A new two-dimensional data field containing the transposed part
+ *          of @field.
  **/
 GwyField*
-gwy_field_new_transposed(const GwyField *field)
+gwy_field_new_transposed(const GwyField *field,
+                         const GwyRectangle *rectangle,
+                         gboolean transform_offsets)
 {
-    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
+    guint col, row, width, height;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height))
+        return NULL;
 
-    GwyField *newfield = gwy_field_new_alike(field, FALSE);
-    // The field is new, no need to emit signals.
-    GWY_SWAP(guint, newfield->xres, newfield->yres);
-    DSWAP(newfield->xreal, newfield->yreal);
-    DSWAP(newfield->xoff, newfield->yoff);
+    GwyField *part = gwy_field_new_sized(height, width, FALSE);
+    swap_xy(field, col, row, width, height, part, 0, 0);
+    part->xreal = height*gwy_field_dy(field);
+    part->yreal = width*gwy_field_dx(field);
 
-    swap_xy(field, 0, 0, field->xres, field->yres, newfield, 0, 0);
-
-    Field *spriv = field->priv, *dpriv = newfield->priv;
+    Field *spriv = field->priv, *dpriv = part->priv;
     ASSIGN_UNITS(dpriv->unit_xy, spriv->unit_xy);
     ASSIGN_UNITS(dpriv->unit_z, spriv->unit_z);
-    ASSIGN(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
-    dpriv->cached = spriv->cached;
+    if (transform_offsets) {
+        part->xoff = field->yoff + row*gwy_field_dy(field);
+        part->yoff = field->xoff + col*gwy_field_dx(field);
+    }
+    if (width == field->xres && height == field->yres) {
+        gwy_assign(dpriv->cache, spriv->cache, GWY_FIELD_CACHE_SIZE);
+        dpriv->cached = spriv->cached;
+    }
 
-    return newfield;
+    return part;
+}
+
+/**
+ * gwy_field_transpose:
+ * @src: Source two-dimensional data field.
+ * @srcrectangle: Area in field @src to transpose.  Pass %NULL to operate on
+ *                entire @src.
+ * @dest: Destination two-dimensional data field.
+ * @destcol: Destination column in @dest.
+ * @destrow: Destination row in @dest.
+ *
+ * Copies data from one field to another, transposing it.
+ *
+ * The transposed rectangle is defined by @srcrectangle and it is copied to
+ * @dest starting from (@destcol, @destrow).  Its width in the source
+ * corresponds to height in the destination and vice versa.
+ *
+ * There are no limitations on the row and column indices or dimensions.  Only
+ * the part of the rectangle that is corrsponds to data inside @src and @dest
+ * is copied.  This can also mean nothing is copied at all.
+ *
+ * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
+ **/
+void
+gwy_field_transpose(const GwyField *src,
+                    const GwyRectangle *srcrectangle,
+                    GwyField *dest,
+                    guint destcol, guint destrow)
+{
+    guint col, row, width, height;
+    if (!_gwy_field_limit_rectangles(src, srcrectangle,
+                                     dest, destcol, destrow,
+                                     TRUE, &col, &row, &width, &height))
+        return;
+
+    swap_xy(src, col, row, width, height, dest, destcol, destrow);
+    gwy_field_invalidate(dest);
 }
 
 /**
@@ -351,7 +295,7 @@ gwy_field_new_rotated_simple(const GwyField *field,
         return NULL;
     }
 
-    GwyField *newfield = gwy_field_new_transposed(field);
+    GwyField *newfield = gwy_field_new_transposed(field, NULL, TRUE);
     // The field is new, no need to emit signals.
     if (rotation == GWY_SIMPLE_ROTATE_COUNTERCLOCKWISE)
         flip_vertically(newfield, transform_offsets);
@@ -397,9 +341,9 @@ gwy_field_new_rotated_simple(const GwyField *field,
  * An efficient implementation (which the Gwyddion's is) can be used to convert
  * otherwise slow column-wise operations on fields to row-wise operations.
  *
- * Several transposition functions are available, the simplest are
- * gwy_field_new_transposed() and gwy_field_new_part_transposed() that create
- * a new field as the transposition of another field or its rectangular part.
+ * Several transposition functions are available, the simplest is
+ * gwy_field_new_transposed() that creates a new field as the transposition of
+ * another field or its rectangular part.
  *
  * If the columns can be processed separately or their interrelation is simple
  * you can avoid allocating entire transposed rectangular part and work by
@@ -410,21 +354,19 @@ gwy_field_new_rotated_simple(const GwyField *field,
  * guint i, remainder;
  *
  * for (i = 0; i < width/block_size; i++) {
- *     gwy_field_part_transpose(field,
- *                              col + i*block_size, row,
- *                              block_size, height,
- *                              workspace,
- *                              0, 0);
+ *     GwyRectangle rectangle = {
+ *         col + i*block_size, row, block_size, height
+ *     };
+ *     gwy_field_part_transpose(field, &rectangle, workspace, 0, 0);
  *     // Process block_size rows in workspace row-wise fashion, possibly put
  *     // back the processed data with another gwy_field_part_transpose.
  * }
  * remainder = width % block_size;
  * if (remainder) {
- *     gwy_field_part_transpose(field,
- *                              col + width/block_size*block_size, row,
- *                              remainder, height,
- *                              workspace,
- *                              0, 0);
+ *     GwyRectangle rectangle = {
+ *         col + width/block_size*block_size, row, remainder, height
+ *     };
+ *     gwy_field_part_transpose(field, &rectangle, workspace, 0, 0);
  *     // Process block_size rows in workspace row-wise fashion, possibly put
  *     // back the processed data with another gwy_field_part_transpose.
  * }

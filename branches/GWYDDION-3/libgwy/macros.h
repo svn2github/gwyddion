@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2010 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -45,6 +45,9 @@
 
 #define gwy_clear(array, n) \
     memset((array), 0, (n)*sizeof((array)[0]))
+
+#define gwy_assign(dest, source, n) \
+    memcpy((dest), (source), (n)*sizeof((dest)[0]))
 
 #endif
 

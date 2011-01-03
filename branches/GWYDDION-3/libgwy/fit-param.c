@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gwyconfig.h>
 #include <string.h>
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
@@ -515,7 +514,7 @@ gwy_fit_param_get_estimate(const GwyFitParam *fitparam)
  *            estimator variables).  It can be %NULL for the default zero
  *            estimate.
  *
- * Gets the initial estimate expression of a user-defined fitting function
+ * Sets the initial estimate expression of a user-defined fitting function
  * parameter.
  *
  * The expression must be valid.  If you obtain the expression from an

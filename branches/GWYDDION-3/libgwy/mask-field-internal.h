@@ -86,6 +86,18 @@ gboolean _gwy_mask_field_check_rectangle(const GwyMaskField *field,
                                          guint *width,
                                          guint *height);
 
+G_GNUC_INTERNAL
+gboolean _gwy_mask_field_limit_rectangles(const GwyMaskField *src,
+                                          const GwyRectangle *srcrectangle,
+                                          const GwyMaskField *dest,
+                                          guint destcol,
+                                          guint destrow,
+                                          gboolean transpose,
+                                          guint *col,
+                                          guint *row,
+                                          guint *width,
+                                          guint *height);
+
 G_END_DECLS
 
 #endif

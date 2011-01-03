@@ -26,10 +26,10 @@
  ***************************************************************************/
 
 static void
-test_fit_func_one(const gchar *name,
-                  const gchar *group,
-                  guint expected_nparams,
-                  const gchar* const *param_names)
+fit_func_one(const gchar *name,
+             const gchar *group,
+             guint expected_nparams,
+             const gchar* const *param_names)
 {
     enum { ndata = 500 };
     GRand *rng = g_rand_new();
@@ -37,6 +37,12 @@ test_fit_func_one(const gchar *name,
 
     GwyFitFunc *fitfunc = gwy_fit_func_new(name, group);
     g_assert(GWY_IS_FIT_FUNC(fitfunc));
+    gchar *fname, *fgroup;
+    g_object_get(fitfunc, "name", &fname, "group", &fgroup, NULL);
+    g_assert_cmpstr(fname, ==, name);
+    g_assert_cmpstr(fgroup, ==, group);
+    g_free(fname);
+    g_free(fgroup);
 
     guint nparams = gwy_fit_func_get_n_params(fitfunc);
     g_assert_cmpuint(nparams, ==, expected_nparams);
@@ -71,6 +77,9 @@ test_fit_func_one(const gchar *name,
         // Gaussians and such.  Only use positive values, these are usually
         // safe.
         param0[i] = g_rand_double_range(rng, 0.2, 5.0);
+        if (g_test_verbose())
+            g_printerr("True value %s = %g\n",
+                       gwy_fit_func_get_param_name(fitfunc, i), param0[i]);
     }
 
     GwyCurve *curve0 = gwy_curve_new_sized(ndata);
@@ -86,13 +95,20 @@ test_fit_func_one(const gchar *name,
 
     GwyCurve *curve = gwy_curve_duplicate(curve0);
     // Use multiplicative randomizing to avoid negative values also here
-    for (guint j = 0; j < ndata; j++)
+    for (guint j = 0; j < ndata; j++) {
         curve->data[j].y *= (1.0 + g_rand_double_range(rng, -0.1, 0.1));
+        //g_printerr("%g %g\n", curve->data[j].x, curve->data[j].y);
+    }
     gwy_fit_func_set_data(fitfunc, curve->data, curve->n);
 
     gdouble param[nparams];
     gboolean estimate_ok = gwy_fit_func_estimate(fitfunc, param);
     g_assert(estimate_ok);
+    if (g_test_verbose()) {
+        for (guint i = 0; i < nparams; i++)
+            g_printerr("Estimate %s = %g\n",
+                       gwy_fit_func_get_param_name(fitfunc, i), param[i]);
+    }
 
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
     g_assert(GWY_IS_FIT_TASK(fittask));
@@ -110,6 +126,11 @@ test_fit_func_one(const gchar *name,
     // Cannot use a sharp inequality as Constant has too good `estimate'
     g_assert_cmpfloat(res, <=, res_init);
     g_assert(gwy_fitter_get_params(fitter, param));
+    if (g_test_verbose()) {
+        for (guint i = 0; i < nparams; i++)
+            g_printerr("Fitting result %s = %g\n",
+                       gwy_fit_func_get_param_name(fitfunc, i), param[i]);
+    }
 
     /* Conservative result check */
     gdouble eps = 0.3;
@@ -136,16 +157,24 @@ void
 test_fit_func_builtin_constant(void)
 {
     const gchar *param_names[] = { "a" };
-    test_fit_func_one("Constant", "builtin",
-                      G_N_ELEMENTS(param_names), param_names);
+    fit_func_one("Constant", "builtin",
+                 G_N_ELEMENTS(param_names), param_names);
 }
 
 void
 test_fit_func_builtin_exponential(void)
 {
     const gchar *param_names[] = { "a", "b", "y<sub>0</sub>" };
-    test_fit_func_one("Exponential", "builtin",
-                      G_N_ELEMENTS(param_names), param_names);
+    fit_func_one("Exponential", "builtin",
+                 G_N_ELEMENTS(param_names), param_names);
+}
+
+void
+test_fit_func_builtin_gaussian(void)
+{
+    const gchar *param_names[] = { "a", "b", "x<sub>0</sub>", "y<sub>0</sub>" };
+    fit_func_one("Gaussian", "builtin",
+                 G_N_ELEMENTS(param_names), param_names);
 }
 
 void
@@ -173,8 +202,8 @@ test_fit_func_user(void)
     gwy_fit_param_set_estimate(b, "(yxmax-yxmin)/(xmax-xmin)");
     gwy_fit_param_set_power_x(b, -1);
     gwy_fit_param_set_power_y(b, 1);
-    test_fit_func_one("Linear", "userfitfunc",
-                      G_N_ELEMENTS(param_names), param_names);
+    fit_func_one("Linear", "userfitfunc",
+                 G_N_ELEMENTS(param_names), param_names);
 
     GwyFitFunc *fitfunc = gwy_fit_func_new("Linear", "userfitfunc");
     g_assert(GWY_IS_FIT_FUNC(fitfunc));

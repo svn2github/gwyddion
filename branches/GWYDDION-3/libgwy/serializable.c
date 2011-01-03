@@ -72,7 +72,7 @@ gwy_serializable_n_items(GwySerializable *serializable)
  * Creates the flattened representation of a serializable object.
  *
  * This function wraps the virtual table method itemize().  It deals with
- * recording of the object header item.  Method itemize() then only serializes
+ * recording of the object header item.  Method itemize() then only serialises
  * the actual data of the object.
  **/
 void
@@ -176,12 +176,12 @@ gwy_serializable_assign(GwySerializable *destination,
  * @see_also: <link linkend="libgwy-serialize">serialize</link>
  *
  * #GwySerializable is an abstract interface for data-like objects that can be
- * serialized and deserialized.  You can serialize any object implementing this
+ * serialised and deserialised.  You can serialise any object implementing this
  * interface with functions such as gwy_serialize_gio() and the restore
- * (deserialize) it with gwy_deserialize_memory().
+ * (deserialise) it with gwy_deserialize_memory().
  *
  * Gwyddion implements a simple serialisation model: only tree-like structures
- * of objects, formed by ownership, can be serialized and restored.  Any
+ * of objects, formed by ownership, can be serialised and restored.  Any
  * inter-object relations other than plain ownership must be stored in some
  * weak form and there is no explicit support for this.  Moreover, only object
  * values are preserved, their identities are lost (in particular, signals,
@@ -228,7 +228,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *     (MyObject, my_object, G_TYPE_OBJECT, 0,
  *      GWY_IMPLEMENT_SERIALIZABLE(my_object_serializable_init))
  *
- * // Serialized data specification, used both in itemize() and construct()
+ * // Serialised data specification, used both in itemize() and construct()
  * static const GwySerializableItem default_items[] = {
  *     { .name = "data", .ctype = GWY_SERIALIZABLE_INT32, },
  * };
@@ -473,7 +473,7 @@ gwy_serializable_assign(GwySerializable *destination,
  *        #GwySerializableInterface.itemize().  This method is optional but if
  *        it is defined it is guaranteed to be called after each
  *        #GwySerializableInterface.itemize().</para>
- * @construct: <para>Deserializes an object from array of flattened data
+ * @construct: <para>Deserialises an object from array of flattened data
  *             items.  The first argument is the object of the final class
  *             (i.e. it may be a derived class), consructed with the default
  *             parameterless constructor.</para>

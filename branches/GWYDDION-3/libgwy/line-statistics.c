@@ -105,7 +105,7 @@ gwy_line_median(const GwyLine *line)
     g_return_val_if_fail(GWY_IS_LINE(line), NAN);
     gsize bufsize = line->res*sizeof(gdouble);
     gdouble *buffer = g_slice_alloc(bufsize);
-    ASSIGN(buffer, line->data, line->res);
+    gwy_assign(buffer, line->data, line->res);
     gdouble median = gwy_math_median(buffer, line->res);
     g_slice_free1(bufsize, buffer);
     return median;

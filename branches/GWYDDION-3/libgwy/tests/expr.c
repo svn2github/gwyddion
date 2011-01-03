@@ -159,7 +159,7 @@ test_expr_garbage(void)
     static const gchar *tokens[] = {
         "~", "+", "-", "*", "/", "%", "^", "(", "(", "(", ")", ")", ")",  ",",
         "abs", "acos", "acosh", "asin", "asinh", "atan", "atan2", "atanh",
-        "cbrt", "ceil", "cos", "cosh", "erf", "erfc", "exp", "exp10", "exp2",
+        "cbrt", "ceil", "cos", "cosh", "erf", "erfc", "exp", "exp2",
         "floor", "hypot", "lgamma", "ln", "log", "log10", "log2", "max", "min",
         "mod", "pow", "sin", "sinh", "sqrt", "step", "tan", "tanh",
     };
@@ -194,14 +194,13 @@ test_expr_garbage(void)
             else
                 g_string_append_printf(garbage, "%g", -log(g_rand_double(rng)));
         }
-
         ok = gwy_expr_evaluate(expr, garbage->str, &result, &error);
         g_assert(ok || error);
         g_clear_error(&error);
         if (ok)
             count++;
     }
-    g_assert_cmpuint(count, ==, 38);
+    g_assert_cmpuint(count, ==, 32);
 
     g_string_free(garbage, TRUE);
     g_rand_free(rng);
