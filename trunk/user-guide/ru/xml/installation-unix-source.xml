@@ -8,7 +8,10 @@
     <title>Быстрые инструкции</title>
     <para>Если вам знакома последовательность действий:</para>
     <informalexample>
-      <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2 cd gwyddion-2.23 ./configure make install</userinput></literallayout>
+      <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2
+cd gwyddion-2.23
+./configure
+make install</userinput></literallayout>
     </informalexample>
   </sect2>
   <sect2 id="installation-unix-source-unpacking">
@@ -24,7 +27,12 @@
         <varlistentry>
           <term><envar>PKG_CONFIG_PATH</envar></term>
           <listitem>
-            <para>Большинство пакетов идут вместе с так называемыми файлами <ulink url="http://pkgconfig.freedesktop.org/wiki/">pkg-config</ulink> (<filename>.pc</filename>), которые описывают как программы должны собираться и линковаться с ними. <command>configure</command> использует информацию из этих файлов, следовательно, <envar>PKG_CONFIG_PATH</envar> должна быть установлена таким образом, чтобы там были перечислены все нестандартные какталоги с нужными файлами pkg-config. Чтобы добавить, например, установленную библиотеку GTK+ в <filename>/opt/gnome</filename> и установленную библиотеку FFTW3 в <filename>$HOME/opt/fftw3</filename>, нужно выполнить: <informalexample><literallayout><userinput>PKG_CONFIG_PATH=/opt/gnome/lib/pkgconfig:$HOME/opt/fftw3/lib/pkgconfig export PKG_CONFIG_PATH</userinput></literallayout></informalexample></para>
+            <para>Большинство пакетов идут вместе с так называемыми файлами <ulink url="http://pkgconfig.freedesktop.org/wiki/">pkg-config</ulink> (<filename>.pc</filename>), которые описывают как программы должны собираться и линковаться с ними. <command>configure</command> использует информацию из этих файлов, следовательно, <envar>PKG_CONFIG_PATH</envar> должна быть установлена таким образом, чтобы там были перечислены все нестандартные какталоги с нужными файлами pkg-config. Чтобы добавить, например, установленную библиотеку GTK+ в <filename>/opt/gnome</filename> и установленную библиотеку FFTW3 в <filename>$HOME/opt/fftw3</filename>, нужно выполнить:
+            <informalexample><literallayout><userinput>
+PKG_CONFIG_PATH=/opt/gnome/lib/pkgconfig:$HOME/opt/fftw3/lib/pkgconfig
+export PKG_CONFIG_PATH
+</userinput></literallayout></informalexample>
+</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -36,15 +44,39 @@
         <varlistentry>
           <term><envar>CPPFLAGS</envar>, <envar>LDFLAGS</envar></term>
           <listitem>
-            <para>Может потребоваться настроить эти переменные чтобы включить нестандартные каталоги с заголовочными файлами и библиотеками пакетов, с которыми не шло файлов pkg-config, например, для libTIFF в <filename>/usr/local</filename> можно установить: <informalexample><literallayout><userinput>CPPFLAGS=-I/usr/local/include export CPPFLAGS LDFLAGS=-L/usr/local/lib export LDFLAGS</userinput></literallayout></informalexample></para>
+            <para>Может потребоваться настроить эти переменные чтобы включить
+             нестандартные каталоги с заголовочными файлами и библиотеками
+             пакетов, с которыми не шло файлов pkg-config, например,
+             для libTIFF в <filename>/usr/local</filename> можно установить:
+<informalexample><literallayout><userinput>
+CPPFLAGS=-I/usr/local/include
+export CPPFLAGS
+LDFLAGS=-L/usr/local/lib
+export LDFLAGS
+</userinput></literallayout></informalexample></para>
           </listitem>
         </varlistentry>
       </variablelist></para>
-    <para>Опция <option>--prefix</option> команды <command>configure</command> задаёт базовый каталог установки. Компоненты программы будут установлены в его подкаталоги <filename>bin</filename>, <filename>lib</filename>, <filename>share</filename>, и т.д. (которые будут созданы если они не существуют). Более детальное управление возможно с помощью опций, задающих отдельные подкаталоги, таких как <option>--bindir</option>, <option>--libdir</option>. Префикс по умолчанию – <filename>/usr/local/bin</filename>, чтобы установить <application>Gwyddion</application> в домашний каталог пользователя можно использовать, например команду <informalexample><literallayout><userinput>./configure --prefix=$HOME/opt/gwyddion</userinput></literallayout></informalexample> Если вы устанавливаете Gwyddion для личного использования это является рекомендованным вариантом, поскольку в этом случае не требуется выполнять действий с правами суперпользователя.</para>
+    <para>Опция <option>--prefix</option> команды <command>configure</command>
+     задаёт базовый каталог установки. Компоненты программы будут установлены
+     в его подкаталоги <filename>bin</filename>, <filename>lib</filename>,
+     <filename>share</filename>, и т.д. (которые будут созданы если они не
+     существуют). Более детальное управление возможно с помощью опций,
+     задающих отдельные подкаталоги, таких как <option>--bindir</option>,
+     <option>--libdir</option>. Префикс по умолчанию –
+     <filename>/usr/local/bin</filename>, чтобы установить
+     <application>Gwyddion</application> в домашний каталог пользователя
+     можно использовать, например, команду
+     <informalexample><literallayout><userinput>./configure --prefix=$HOME/opt/gwyddion</userinput></literallayout></informalexample>
+     Если вы устанавливаете Gwyddion для личного использования это является
+     рекомендованным вариантом, поскольку в этом случае не требуется выполнять
+     действий с правами суперпользователя.</para>
   </sect2>
   <sect2 id="installation-unix-source-configuration2">
     <title>Настройки процесса конфигурирования</title>
-    <para>Необязательные возможности можно включить/выключить с помощью опций вроде <option>--with-foo</option>/<option>--without-foo</option> или <option>--enable-foo</option>/<option>--disable-foo</option>. Например, компиляция с FFTW3 может быть отключена командой: <informalexample><literallayout><userinput>./configure --without-fftw3</userinput></literallayout></informalexample> По умолчанию все опциональные возможности включены, если найдены все требуемые библиотеки. Краткая сводка включенных и отключенных опциональных возможностей печатается рядом с концом вывода команды <command>configure</command>.</para>
+    <para>Необязательные возможности можно включить и выключить с помощью опций
+     вроде <option>--with-foo</option> и <option>--without-foo</option> или
+     <option>--enable-foo</option> и <option>--disable-foo</option>. Например, компиляция с FFTW3 может быть отключена командой: <informalexample><literallayout><userinput>./configure --without-fftw3</userinput></literallayout></informalexample> По умолчанию все опциональные возможности включены, если найдены все требуемые библиотеки. Краткая сводка включенных и отключенных опциональных возможностей печатается рядом с концом вывода команды <command>configure</command>.</para>
     <para>Полный список опций и важных переменных <command>configure</command> можно получить с помощью команды: <informalexample><literallayout><userinput>./configure --help</userinput></literallayout></informalexample></para>
     <para>Некоторые вспомогательные действия при установке могут быть отключены при запуске <command>configure</command>: Обновление файлов FreeDesktop может быть отключено с помощью <userinput>--disable-desktop-file-update</userinput>. Установка схем GConf2 может быть отключена с помощью <userinput>--disable-schemas-install</userinput>. Тем не менее, обычной причиной отключения этих действий является то. что Gwyddion устанавливается на временное место вместо финального каталога (что обычно происходит при сборке пакетов в Linux). В этом случае вспомогательные действия отключаются автоматически при непустой переменной <varname>DESTDIR</varname> (см. раздел <link linkend="installation-unix-source-installation">установка</link>) и, следовательно, нет нужды отключать их в <command>configure</command>.</para>
     <para>Если вы собираетесь накладывать патч или иным образом модифицировать исходный код Gwyddion запустите <command>configure</command> с опцией <option>--enable-maintainer-mode</option> чтобы включить различные правила обновления и пересборки, которые не используются при обычной компиляции. В зависимости от вида изменений, могут понадобиться некоторые дополнительные инструменты, описанные в разделе <link linkend="installation-devel">Снимок Subversion, разработка</link>.</para>

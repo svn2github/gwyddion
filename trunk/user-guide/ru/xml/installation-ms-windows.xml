@@ -47,7 +47,9 @@
       <listitem>Язык интерфейса пользователя Gwyddion, выбранный при установке (точнее, задание локали, которое в том числе определяет и язык). Можно изменить его используя <command>regedit</command> чтобы выбрать другой язык как описано ниже.</listitem>
     </varlistentry>
   </variablelist>
-  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:</para>
+  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:
+  </para>
+  <para>
   <informaltable frame="none" id="table-locales">
     <tgroup cols="2">
       <?dblatex ll?>
@@ -85,5 +87,6 @@
       </tbody>
     </tgroup>
   </informaltable>
+  </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->

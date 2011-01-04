@@ -39,7 +39,17 @@
     <sect3 id="installation-cross-mingw32-scripts">
       <title>Скрипты поддержки</title>
       <para>Скрипты поддержки и данные доступны в модуле <filename>mingw32-cross-compile</filename> репозитория subversion программы Gwyddion. запустите <informalexample><literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/mingw32-cross-compile</userinput></literallayout></informalexample> чтобы получить снимок репозитория.</para>
-      <para>Наиболее важным из полученных вами это скрипт <command>cross-build</command> который автоматизирует все шаги кросс-компиляции. Перед тем, как запускать его в первый раз, просмотрите файл <filename>setup</filename> который определяет где народятся различные нужные вещи. По умолчанию его содержимое выглядит следующим образом: <informalexample><programlisting>source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32 mingw32_prefix=/usr/i686-pc-mingw32/sys-root/mingw target_prefix=$HOME/opt/gwyddion-mingw32 nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting></informalexample> Переменная <varname>source_dir</varname> задаёт место. куда был распакован архив или сохранён снимок репозитория исходного кода Gwyddion и эту переменную скорей всего нужно будет изменить. Переменная <varname>target_prefix</varname> указывает каталог установки (временный каталог) для собранного кросс-компиляцией Gwyddion. Значение по умолчанию должно работать и вам не нужно его менять если вы этого не хотите. Оставшиеся две переменные, <varname>mingw32_prefix</varname> и <varname>nsis_compiler</varname>, задают место файлов MinGW и компилятора NSIS, соответственно, и их не надо менять с значений по умолчанию в нормальных условиях. Следует отметить, что <filename>setup</filename> читается оболочкой и, следовательно, вокруг <literal>=</literal> не должно быть пробелов.</para>
+      <para>Наиболее важным из полученных вами является скрипт
+      <command>cross-build</command> который автоматизирует все шаги
+    кросс-компиляции. Перед тем, как запускать его в первый раз,
+    просмотрите файл <filename>setup</filename> который определяет, где
+    находятся различные нужные вещи. По умолчанию его содержимое выглядит
+    следующим образом: <informalexample><programlisting>
+source_dir=$HOME/Projects/Gwyddion/gwyddion-mingw32
+mingw32_prefix=/usr/i686-pc-mingw32/sys-root/mingw
+target_prefix=$HOME/opt/gwyddion-mingw32
+nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe
+</programlisting></informalexample> Переменная <varname>source_dir</varname> задаёт место. куда был распакован архив или сохранён снимок репозитория исходного кода Gwyddion и эту переменную скорей всего нужно будет изменить. Переменная <varname>target_prefix</varname> указывает каталог установки (временный каталог) для собранного кросс-компиляцией Gwyddion. Значение по умолчанию должно работать и вам не нужно его менять если вы этого не хотите. Оставшиеся две переменные, <varname>mingw32_prefix</varname> и <varname>nsis_compiler</varname>, задают место файлов MinGW и компилятора NSIS, соответственно, и их не надо менять с значений по умолчанию в нормальных условиях. Следует отметить, что <filename>setup</filename> читается оболочкой и, следовательно, вокруг <literal>=</literal> не должно быть пробелов.</para>
     </sect3>
   </sect2>
   <sect2 id="installation-cross-mingw32-compilation">
