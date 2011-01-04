@@ -24,7 +24,7 @@ cat >build_documentation.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^Computing chunks\.\.\.
 ^.*: warning: no link for: 'gwy-foo
-^Use of uninitialized value within %DeclarationTypes in lc at /usr/bin/gtkdoc-mkdb line \d+\.
+^Use of uninitialized value within %DeclarationTypes in lc at /usr/bin/gtkdoc-mkdb line [0-9]+\.
 ':'
 :
 
