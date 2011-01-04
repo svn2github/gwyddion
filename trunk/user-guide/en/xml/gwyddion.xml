@@ -171,8 +171,8 @@
         <listitem>
           <para>
             Prevents redirection of messages from GLib, Gtk+, Gwyddion, etc.
-            to a file.  This is most useful on Win32 where messages are
-            redirected to a file by default provided that stdout and stderr
+            to a file.  This is most useful on Win32 (where messages are
+            redirected to a file by default) provided that stdout and stderr
             go somewhere you can see them.
           </para>
         </listitem>
