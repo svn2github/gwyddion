@@ -36,30 +36,32 @@ GwyLine* gwy_field_value_dist(const GwyField *field,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
                               gboolean cumulative,
-                              guint npoints)              G_GNUC_MALLOC;
+                              guint npoints,
+                              gdouble min,
+                              gdouble max)                   G_GNUC_MALLOC;
 GwyLine* gwy_field_slope_dist(const GwyField *field,
                               const GwyRectangle *rectangle,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
                               GwyOrientation orientation,
                               gboolean cumulative,
-                              guint npoints)              G_GNUC_MALLOC;
+                              guint npoints)                 G_GNUC_MALLOC;
 GwyLine* gwy_field_row_psdf  (const GwyField *field,
                               const GwyRectangle *rectangle,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
                               GwyWindowingType windowing,
-                              guint level)                G_GNUC_MALLOC;
+                              guint level)                   G_GNUC_MALLOC;
 GwyLine* gwy_field_row_acf   (const GwyField *field,
                               const GwyRectangle *rectangle,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
-                              guint level)                G_GNUC_MALLOC;
+                              guint level)                   G_GNUC_MALLOC;
 GwyLine* gwy_field_row_hhcf  (const GwyField *field,
                               const GwyRectangle *rectangle,
                               const GwyMaskField *mask,
                               GwyMaskingType masking,
-                              guint level)                G_GNUC_MALLOC;
+                              guint level)                   G_GNUC_MALLOC;
 
 G_END_DECLS
 

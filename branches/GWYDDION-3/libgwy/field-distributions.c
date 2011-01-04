@@ -28,29 +28,6 @@
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
-static GwyLine*
-create_line_for_dist(const GwyMaskField *mask,
-                     GwyMaskingType masking,
-                     guint col, guint row,
-                     guint width, guint height,
-                     guint *npoints)
-{
-    if (!*npoints) {
-        GwyRectangle rectangle = { col, row, width, height };
-        guint ndata = width*height;
-        if (masking == GWY_MASK_INCLUDE)
-            ndata = gwy_mask_field_part_count(mask, &rectangle, TRUE);
-        else if (masking == GWY_MASK_EXCLUDE)
-            ndata = gwy_mask_field_part_count(mask, &rectangle, FALSE);
-
-        if (!ndata)
-            return NULL;
-        *npoints = gwy_round(3.49*cbrt(ndata));
-        *npoints = MAX(*npoints, 1);
-    }
-    return gwy_line_new_sized(*npoints, TRUE);
-}
-
 static void
 sanitize_range(gdouble *min,
                gdouble *max)
@@ -77,8 +54,13 @@ sanitize_range(gdouble *min,
  *              density.
  * @npoints: Distribution resolution, i.e. the number of histogram bins.
  *           Pass zero to choose a suitable resolution automatically.
+ * @min: Minimum value of the range to calculate the distribution in.
+ * @max: Maximum value of the range to calculate the distribution in.
  *
  * Calculates the distribution of values in a field.
+ *
+ * Pass @max <= @min to calculate the distribution in the full data range
+ * (with masking possibly considered).
  *
  * Returns: A new one-dimensional data line with the value distribution.
  **/
@@ -88,21 +70,43 @@ gwy_field_value_dist(const GwyField *field,
                      const GwyMaskField *mask,
                      GwyMaskingType masking,
                      gboolean cumulative,
-                     guint npoints)
+                     guint npoints,
+                     gdouble min, gdouble max)
 {
     guint col, row, width, height, maskcol, maskrow;
     GwyLine *line = NULL;
     if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow)
-        || !(line = create_line_for_dist(mask, masking,
-                                         maskcol, maskrow, width, height,
-                                         &npoints)))
+                               &col, &row, &width, &height, &maskcol, &maskrow))
         goto fail;
 
-    gdouble min, max;
-    gwy_field_min_max(field, rectangle, mask, masking, &min, &max);
-    sanitize_range(&min, &max);
-    npoints = line->res;
+    guint n;
+    if (min < max) {
+        // We know the range but have to figure out how many pixels we have.
+        guint nabove, nbelow;
+        n = gwy_field_count_above_below(field, rectangle, mask, masking,
+                                        max, min, TRUE, &nabove, &nbelow);
+        n -= nabove + nbelow;
+    }
+    else {
+        // We know the number of pixels but have to figure out the range.
+        GwyRectangle rect = { maskcol, maskrow, width, height };
+        if (masking == GWY_MASK_INCLUDE)
+            n = gwy_mask_field_part_count(mask, &rect, TRUE);
+        else if (masking == GWY_MASK_EXCLUDE)
+            n = gwy_mask_field_part_count(mask, &rect, FALSE);
+        else
+            n = width*height;
+
+        gwy_field_min_max(field, rectangle, mask, masking, &min, &max);
+        sanitize_range(&min, &max);
+    }
+    if (!npoints) {
+        npoints = gwy_round(3.49*cbrt(n));
+        npoints = MAX(npoints, 1);
+    }
+    line = gwy_line_new_sized(npoints, TRUE);
+    if (!n)
+        goto fail;
 
     const gdouble *base = field->data + row*field->xres + col;
     gdouble q = (max - min)*npoints;
