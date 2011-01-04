@@ -530,10 +530,10 @@ test_field_range(void)
                                                            lower, upper, FALSE);
         guint count_mask = gwy_mask_field_count(mask, NULL, TRUE);
         guint nabove, nbelow;
-        guint total = gwy_field_count_in_range(field, NULL,
-                                               mask, GWY_MASK_INCLUDE,
-                                               upper, lower, TRUE,
-                                               &nabove, &nbelow);
+        guint total = gwy_field_count_above_below(field, NULL,
+                                                  mask, GWY_MASK_INCLUDE,
+                                                  upper, lower, TRUE,
+                                                  &nabove, &nbelow);
         guint count_field = total - nabove - nbelow;
         g_assert_cmpuint(count_mask, ==, count_field);
         gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &min, &max);
@@ -542,15 +542,15 @@ test_field_range(void)
         g_assert_cmpfloat(max, <=, upper);
 
         guint nabove1, nbelow1, nabove2, nbelow2;
-        total = gwy_field_count_in_range(field, NULL,
-                                         NULL, GWY_MASK_IGNORE,
-                                         upper, lower, FALSE,
-                                         &nabove1, &nbelow1);
+        total = gwy_field_count_above_below(field, NULL,
+                                            NULL, GWY_MASK_IGNORE,
+                                            upper, lower, FALSE,
+                                            &nabove1, &nbelow1);
         g_assert_cmpfloat(total, ==, xres*yres);
-        total = gwy_field_count_in_range(field, NULL,
-                                         NULL, GWY_MASK_IGNORE,
-                                         lower, upper, TRUE,
-                                         &nabove2, &nbelow2);
+        total = gwy_field_count_above_below(field, NULL,
+                                            NULL, GWY_MASK_IGNORE,
+                                            lower, upper, TRUE,
+                                            &nabove2, &nbelow2);
         g_assert_cmpfloat(total, ==, xres*yres);
         g_assert_cmpuint(nabove1 + nbelow2, ==, total);
         g_assert_cmpuint(nabove2 + nbelow1, ==, total);

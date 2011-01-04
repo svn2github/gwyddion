@@ -510,7 +510,7 @@ fail:
 }
 
 /**
- * gwy_field_count_in_range:
+ * gwy_field_count_above_below:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
@@ -525,37 +525,63 @@ fail:
  * @nbelow: Location to store the number of values less than (or equal
  *          to) @upper, or %NULL.
  *
- * Counts the values within or outside certain range in a rectangular part of
- * a field.
+ * Counts the values in a field above and/or below specified bounds.
  *
- * Although the function name suggests counting values that lie in a specific
- * range the counts stored in @nabove and @nbelow are independent.
+ * The counts stored in @nabove and @nbelow are completely independent.
  *
- * Counting values <emphasis>outside</emphasis> the interval [@a,@b] is then
- * straightfoward by passing @upper = @b and @lower = @a and summing
- * @nabove + @nbelow.
+ * Counting values <emphasis>outside</emphasis> the closed interval [@a,@b] is
+ * thus straightfoward:
+ * |[
+ * guint nabove, nbelow, count;
+ * gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ *                               b, a, TRUE, &nabove, &nbelow);
+ * count = nabove + nbelow;
+ * ]|
  *
- * To actually count values <emphasis>inside</emphasis> the interval [@a,@b]
- * you can use the return value:
+ * To count values <emphasis>inside</emphasis> the closed interval [@a,@b]
+ * complement the intervals and use the return value (note @strict = %TRUE as
+ * the complements are open intervals):
  * |[
  * guint ntotal, nabove, nbelow, count;
  * ntotal = gwy_data_field_count_in_range(field, rectangle, mask, masking,
- *                                        a, b, TRUE, &nabove, &nbelow);
+ *                                        b, a, TRUE, &nabove, &nbelow);
  * count = ntotal - (nabove + nbelow);
  * ]|
+ *
+ * Similarly, counting values <emphasis>outside</emphasis> the open interval
+ * (@a,@b) is straightfoward:
+ * |[
+ * guint nabove, nbelow, count;
+ * gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ *                               b, a, FALSE, &nabove, &nbelow);
+ * count = nabove + nbelow;
+ * ]|
+ *
+ * Whereas counting values <emphasis>inside</emphasis> the open interval
+ * (@a,@b) uses complements:
+ * |[
+ * guint ntotal, nabove, nbelow, count;
+ * ntotal = gwy_data_field_count_in_range(field, rectangle, mask, masking,
+ *                                        b, a, TRUE, &nabove, &nbelow);
+ * count = ntotal - (nabove + nbelow);
+ * ]|
+ *
+ * It is also possible obtain the same counts by passing @lower = @a and
+ * @upper = @b and utilising the fact that the values within the interval are
+ * counted twice.  This is left as an excercise to the reader.
  *
  * Returns: The total number of values considered.  This is namely useful with
  *          masking, otherwise the returned value always equals to the number
  *          of pixels in @rectangle (or the entire field).
  **/
 guint
-gwy_field_count_in_range(const GwyField *field,
-                         const GwyRectangle *rectangle,
-                         const GwyMaskField *mask,
-                         GwyMaskingType masking,
-                         gdouble lower, gdouble upper,
-                         gboolean strict,
-                         guint *nabove, guint *nbelow)
+gwy_field_count_above_below(const GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            gdouble lower, gdouble upper,
+                            gboolean strict,
+                            guint *nabove, guint *nbelow)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
