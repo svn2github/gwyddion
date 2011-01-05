@@ -853,9 +853,13 @@ gwy_field_copy(const GwyField *src,
  * @src: Source two-dimensional data field.
  * @dest: Destination two-dimensional data field.
  *
- * Copies entire data from one field to another.
+ * Copies the entire data from one field to another.
  *
  * The two fields must be of identical dimensions.
+ *
+ * Only the data are copied.  To make a field completely identical to another,
+ * including units, offsets and change of dimensions, you can use
+ * gwy_field_assign().
  **/
 void
 gwy_field_copy_full(const GwyField *src,
