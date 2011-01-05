@@ -816,7 +816,7 @@ gwy_field_find_row_shifts(const GwyField *field,
     g_return_if_fail(shifts->res == field->yres);
 
     if (field->yres < 2) {
-        gwy_line_clear(shifts);
+        gwy_line_clear_full(shifts);
         return;
     }
 
@@ -869,7 +869,7 @@ gwy_field_find_row_shifts(const GwyField *field,
     }
     else {
         g_critical("Unknown row shift method %u", method);
-        gwy_line_clear(shifts);
+        gwy_line_clear_full(shifts);
         return;
     }
 }

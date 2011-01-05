@@ -171,11 +171,11 @@ test_line_copy(void)
         GwyLine *reference = gwy_line_new_sized(dres, FALSE);
         line_randomize(source, rng);
         line_randomize(reference, rng);
-        gwy_line_copy(reference, dest);
+        gwy_line_copy_full(reference, dest);
         guint len = g_rand_int_range(rng, 0, MAX(sres, dres));
         guint pos = g_rand_int_range(rng, 0, sres);
         guint destpos = g_rand_int_range(rng, 0, dres);
-        gwy_line_part_copy(source, pos, len, dest, destpos);
+        gwy_line_copy(source, pos, len, dest, destpos);
         line_part_copy_dumb(source, pos, len, reference, destpos);
         test_line_assert_equal(dest, reference);
         g_object_unref(source);

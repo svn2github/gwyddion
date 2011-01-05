@@ -539,7 +539,7 @@ gwy_line_new_part(const GwyLine *line,
     }
 
     part = gwy_line_new_sized(len, FALSE);
-    gwy_line_part_copy(line, pos, len, part, 0);
+    gwy_line_copy(line, pos, len, part, 0);
     part->real = line->real*len/line->res;
     ASSIGN_UNITS(part->priv->unit_x, line->priv->unit_x);
     ASSIGN_UNITS(part->priv->unit_y, line->priv->unit_y);
@@ -612,7 +612,7 @@ gwy_line_set_size(GwyLine *line,
         g_object_notify(G_OBJECT(line), "res");
     }
     else if (clear)
-        gwy_line_clear(line);
+        gwy_line_clear_full(line);
 }
 
 /**
@@ -669,7 +669,7 @@ gwy_line_new_from_curve(const GwyCurve *curve,
         // Special case, usually just one point but possibly a degenerate curve.
         res = MAX(res, 1);
         line = gwy_line_new_sized(res, FALSE);
-        gwy_line_fill(line, gwy_curve_mean(curve));
+        gwy_line_fill_full(line, gwy_curve_mean(curve));
 
         gdouble x = curve->data[0].x;
         if (x)
@@ -700,19 +700,21 @@ gwy_line_data_changed(GwyLine *line)
 }
 
 /**
- * gwy_line_copy:
+ * gwy_line_copy_full:
  * @src: Source one-dimensional data line.
  * @dest: Destination one-dimensional data line.
  *
- * Copies the data of a line to another line of the same dimensions.
+ * Copies the entire data from one line to another.
+ *
+ * The two lines must be of identical dimensions.
  *
  * Only the data are copied.  To make a line completely identical to another,
  * including units, offsets and change of dimensions, you can use
  * gwy_line_assign().
  **/
 void
-gwy_line_copy(const GwyLine *src,
-              GwyLine *dest)
+gwy_line_copy_full(const GwyLine *src,
+                   GwyLine *dest)
 {
     g_return_if_fail(GWY_IS_LINE(src));
     g_return_if_fail(GWY_IS_LINE(dest));
@@ -721,14 +723,14 @@ gwy_line_copy(const GwyLine *src,
 }
 
 /**
- * gwy_line_part_copy:
+ * gwy_line_copy:
  * @src: Source one-dimensional data data line.
  * @pos: Position of the line part start.
  * @len: Part length (number of items).
  * @dest: Destination one-dimensional data line.
  * @destpos: Destination position in @dest.
  *
- * Copies a part from one line to another.
+ * Copies data from one line to another.
  *
  * The copied block starts at @pos in @src and its lenght is @len.  It is
  * copied to @dest starting from @destpos.
@@ -740,11 +742,11 @@ gwy_line_copy(const GwyLine *src,
  * If @src is equal to @dest the areas may <emphasis>not</emphasis> overlap.
  **/
 void
-gwy_line_part_copy(const GwyLine *src,
-                   guint pos,
-                   guint len,
-                   GwyLine *dest,
-                   guint destpos)
+gwy_line_copy(const GwyLine *src,
+              guint pos,
+              guint len,
+              GwyLine *dest,
+              guint destpos)
 {
     g_return_if_fail(GWY_IS_LINE(src));
     g_return_if_fail(GWY_IS_LINE(dest));
@@ -839,13 +841,13 @@ gwy_line_get_unit_y(GwyLine *line)
 }
 
 /**
- * gwy_line_clear:
+ * gwy_line_clear_full:
  * @line: A one-dimensional data line.
  *
- * Fills a line with zeroes.
+ * Fills an entire line with zeroes.
  **/
 void
-gwy_line_clear(GwyLine *line)
+gwy_line_clear_full(GwyLine *line)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     gwy_clear(line->data, line->res);
@@ -856,32 +858,32 @@ gwy_line_clear(GwyLine *line)
  * @line: A one-dimensional data line.
  * @value: Value to fill @line with.
  *
- * Fills a line with the specified value.
+ * Fills an entire line with the specified value.
  **/
 void
-gwy_line_fill(GwyLine *line,
-              gdouble value)
+gwy_line_fill_full(GwyLine *line,
+                   gdouble value)
 {
     if (!value) {
-        gwy_line_clear(line);
+        gwy_line_clear_full(line);
         return;
     }
     g_return_if_fail(GWY_IS_LINE(line));
-    gwy_line_part_fill(line, 0, line->res, value);
+    gwy_line_fill(line, 0, line->res, value);
 }
 
 /**
- * gwy_line_part_clear:
+ * gwy_line_clear:
  * @line: A one-dimensional data line.
  * @pos: Position of the line part start.
  * @len: Part length (number of items).
  *
- * Fills a part of a line with zeroes.
+ * Fills a line with zeroes.
  **/
 void
-gwy_line_part_clear(GwyLine *line,
-                    guint pos,
-                    guint len)
+gwy_line_clear(GwyLine *line,
+               guint pos,
+               guint len)
 {
     g_return_if_fail(GWY_IS_LINE(line));
     g_return_if_fail(pos + len <= line->res);
@@ -893,22 +895,22 @@ gwy_line_part_clear(GwyLine *line,
 }
 
 /**
- * gwy_line_part_fill:
+ * gwy_line_fill:
  * @line: A one-dimensional data line.
  * @pos: Position of the line part start.
  * @len: Part length (number of items).
  * @value: Value to fill the rectangle with.
  *
- * Fills a part of a line with the specified value.
+ * Fills a line with the specified value.
  **/
 void
-gwy_line_part_fill(GwyLine *line,
-                   guint pos,
-                   guint len,
-                   gdouble value)
+gwy_line_fill(GwyLine *line,
+              guint pos,
+              guint len,
+              gdouble value)
 {
     if (!value) {
-        gwy_line_part_clear(line, pos, len);
+        gwy_line_clear(line, pos, len);
         return;
     }
 

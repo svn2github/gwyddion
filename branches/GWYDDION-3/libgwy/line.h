@@ -88,27 +88,27 @@ void     gwy_line_set_size      (GwyLine *line,
                                  gboolean clear);
 void     gwy_line_data_changed  (GwyLine *line);
 void     gwy_line_copy          (const GwyLine *src,
-                                 GwyLine *dest);
-void     gwy_line_part_copy     (const GwyLine *src,
                                  guint pos,
                                  guint len,
                                  GwyLine *dest,
                                  guint destpos);
+void     gwy_line_copy_full     (const GwyLine *src,
+                                 GwyLine *dest);
 void     gwy_line_set_real      (GwyLine *line,
                                  gdouble real);
 void     gwy_line_set_offset    (GwyLine *line,
                                  gdouble offset);
 GwyUnit* gwy_line_get_unit_x    (GwyLine *line)                      G_GNUC_PURE;
 GwyUnit* gwy_line_get_unit_y    (GwyLine *line)                      G_GNUC_PURE;
-void     gwy_line_clear         (GwyLine *line);
-void     gwy_line_fill          (GwyLine *line,
-                                 gdouble value);
-void     gwy_line_part_clear    (GwyLine *line,
+void     gwy_line_clear         (GwyLine *line,
                                  guint pos,
                                  guint len);
-void     gwy_line_part_fill     (GwyLine *line,
+void     gwy_line_clear_full    (GwyLine *line);
+void     gwy_line_fill          (GwyLine *line,
                                  guint pos,
                                  guint len,
+                                 gdouble value);
+void     gwy_line_fill_full     (GwyLine *line,
                                  gdouble value);
 void     gwy_line_format_x      (GwyLine *line,
                                  GwyValueFormatStyle style,
