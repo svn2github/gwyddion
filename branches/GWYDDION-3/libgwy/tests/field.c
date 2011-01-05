@@ -1954,4 +1954,46 @@ test_field_min_max(void)
 }
 #endif
 
+void
+test_field_convolve_row(void)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint xres = 6; xres <= 6000; xres = gwy_fft_nice_transform_size(16*xres/15+1)) {
+        guint yres = MAX(20, 6000/xres);
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        gwy_field_fill_full(source, 1.0);
+        field_randomize(source, rng);
+
+        GwyField *field1 = gwy_field_new_alike(source, FALSE);
+        GwyField *field2 = gwy_field_new_alike(source, FALSE);
+        for (guint kres = 5; kres <= 251; kres += 2) {
+            GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
+            gwy_line_fill_full(kernel, 1.0);
+            line_randomize(kernel, rng);
+
+            g_test_timer_start();
+            gwy_field_row_convolve(field1, NULL, kernel);
+            gdouble tdirect = g_test_timer_elapsed()/yres;
+
+            g_test_timer_start();
+            gwy_field_row_convolve_fft(field2, NULL, kernel);
+            gdouble tfft = g_test_timer_elapsed()/yres;
+
+            /*
+            g_test_minimized_result(MIN(tdirect, tfft), "%u %u %g %g",
+                                    xres, kres, tdirect, tfft);
+                                    */
+            g_printerr("%u %u %g %g\n", xres, kres, tdirect, tfft);
+            g_object_unref(kernel);
+        }
+        g_printerr("\n");
+        g_object_unref(field2);
+        g_object_unref(field1);
+    }
+
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
