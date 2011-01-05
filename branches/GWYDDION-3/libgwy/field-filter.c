@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include <fftw3.h>
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
@@ -28,6 +30,16 @@
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-internal.h"
 
+#ifndef HAVE_SINCOS
+static inline void
+sincos(double x, double *s, double *c)
+{
+    *s = sin(x);
+    *c = cos(x);
+}
+#endif
+
+#if 0
 static void
 gwy_part_row_convolve3(GwyField *field,
                        const gdouble *kdata,
@@ -61,6 +73,143 @@ gwy_part_row_convolve3(GwyField *field,
             buf[2] = kdata[2]*v;
         }
     }
+}
+#endif
+
+// Generally, there are three reasonable strategies:
+// (a) small kernels (kres comparable to log(res)) → direct calculation
+// (b) medium-sized kernels (kres ≤ res) → use explicit extension/mirroring to
+//     a nice-for-FFT size ≥ 2res and cyclic convolution
+// (c) large kernels (kres > res) → fold kernel to 2res size and use implicit
+//     mirroring and DCT-II for data
+
+// FIXME: This is not very clever:
+// - if mirroring does NOT have to be used we can extend the array a bit in
+//   order to get a nice-for-FFT length
+// - if mirroring is used but the kernel is short we may prefer to mirror it
+//   manually into a nice-for-FFT length
+// - only if the kernel is long it is preferable to let it be and use a
+//   data-sized transform whatever it takes
+static void
+input_range_for_convolution(guint pos, guint len, guint size, guint klen,
+                            guint *ipos, guint *ilen)
+{
+    guint k2 = klen/2;
+
+    *ipos = (pos <= k2) ? 0 : pos - k2;
+    *ilen = (pos + len-1 + k2 < size) ? pos + len + k2 - *ipos : size - *ipos;
+}
+
+static void
+mirror_kernel(const gdouble *kernel, guint klen,
+              gdouble *mirrored, guint size)
+{
+    gwy_clear(mirrored, size);
+    for (guint i = klen/2; i < klen; i++)
+        mirrored[(i - klen/2) % size] += kernel[i];
+    for (guint i = klen/2; i; i--)
+        mirrored[size-1 - (klen/2 - i) % size] += kernel[i-1];
+}
+
+// Apply the factor exp[πiν/(2N)] that FFTW leaves out but we need it to make
+// the meaning of R2R transform coefficients the same as in R2C.  So, the
+// factor actually belongs to the RODFT10 of data but it is better to multiply
+// the kernel than each data row.
+static void
+multiply_with_halfexp(gdouble *hc, guint size)
+{
+    guint size2 = 2*size;
+
+    hc[0] /= size2;
+    for (guint i = 1; i < size; i++) {
+        gdouble s, c, re, im;
+        sincos(0.5*G_PI*i/size, &s, &c);
+        re = c*hc[i] - s*hc[size2 - i];
+        im = s*hc[i] + c*hc[size2 - i];
+        hc[i] = re/size2;
+        hc[size2 - i] = im/size2;
+    }
+    hc[size] = 0.0;
+}
+
+static void
+multiply_hc_with_redft10(const gdouble *hcin,
+                         const gdouble *dct,
+                         gdouble *hcout,
+                         guint size)
+{
+    const gdouble *rein = hcin, *imin = hcin + 2*size-1;
+    gdouble *reout = hcout, *imout = hcout + 2*size-1;
+
+    *reout = *dct * *rein;
+    reout++, rein++, dct++;
+    for (guint j = size-1; j; j--, reout++, rein++, dct++, imout--, imin--) {
+        *reout = *dct * *rein;
+        *imout = *dct * *imin;
+    }
+    *reout = 0.0;
+}
+
+void
+gwy_field_row_convolve_fft(GwyField *field,
+                           const GwyRectangle *rectangle,
+                           const GwyLine *kernel)
+{
+    guint col, row, width, height;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height))
+        return;
+
+    g_return_if_fail(GWY_IS_LINE(kernel));
+    g_return_if_fail(kernel->res % 2 == 1);
+
+    guint icol, iwidth;
+    input_range_for_convolution(col, width, field->xres, kernel->res,
+                                &icol, &iwidth);
+
+    // An even size is necessary due to alignment constraints in FFTW.
+    // Using this size for all buffers is a bit excessive but safe.
+    guint size = (iwidth + 1)/2*2;
+    gdouble *data_in = fftw_malloc(2*size*sizeof(gdouble));
+    gdouble *data_dct = data_in + size;
+    // Create all plans before trying to do anything, the planner may destroy
+    // input data!
+    // The DCT-II plan for transforming each data row.
+    fftw_plan dplan = fftw_plan_r2r_1d(iwidth, data_in, data_dct, FFTW_REDFT10,
+                                       _GWY_FFTW_PATIENCE);
+
+    gdouble *kernelhc = fftw_malloc(4*size*sizeof(gdouble));
+    gdouble *convolved = kernelhc + 2*size;
+    // The plan for the HC2R transform of the convolution of each row.
+    // Note how entire data_in[] serves also here as a buffer.
+    fftw_plan cplan = fftw_plan_r2r_1d(2*iwidth, convolved, data_in,
+                                       FFTW_HC2R, _GWY_FFTW_PATIENCE);
+    // The plan for the initial R2HC transform of the kernel.
+    fftw_plan kplan = fftw_plan_r2r_1d(2*iwidth, convolved, kernelhc,
+                                       FFTW_R2HC, _GWY_FFTW_PATIENCE);
+
+    // Transform and premultiply the kernel.
+    mirror_kernel(kernel->data, kernel->res, convolved, 2*iwidth);
+    fftw_execute(kplan);
+    multiply_with_halfexp(kernelhc, iwidth);
+
+    // Convolve rows
+    gdouble *base = field->data + row*field->xres;
+    for (guint i = 0; i < height; i++) {
+        gwy_assign(data_in, base + i*field->xres + icol, iwidth);
+        fftw_execute(dplan);
+        multiply_hc_with_redft10(kernelhc, data_dct, convolved, iwidth);
+        fftw_execute(cplan);
+        gwy_assign(base + i*field->xres + col, data_in + col - icol, width);
+    }
+
+    fftw_destroy_plan(kplan);
+    fftw_destroy_plan(cplan);
+    fftw_destroy_plan(dplan);
+    fftw_free(kernelhc);
+    fftw_free(data_in);
+
+    gwy_field_invalidate(field);
 }
 
 /**
@@ -113,7 +262,7 @@ gwy_field_row_convolve(GwyField *field,
             k = (j + k0 - kres/2) % mres;
             d = drow[k < width ? k : mres-1 - k];
             for (k = 0; k <= j; k++)
-                buf[k] += kdata[j - k]*d;
+                buf[k] += kdata[kres-1 - (j - k)]*d;
         }
         pos = 0;
         /* Middle part and tail with mirror extension again, we do some
@@ -125,15 +274,16 @@ gwy_field_row_convolve(GwyField *field,
             k = (j + k0 + kres - kres/2) % mres;
             d = drow[G_LIKELY(k < width) ? k : mres-1 - k];
             for (k = pos; k < kres; k++)
-                buf[k] += kdata[kres-1 - (k - pos)]*d;
+                buf[k] += kdata[k - pos]*d;
             for (k = 0; k < pos; k++)
-                buf[k] += kdata[pos-1 - k]*d;
+                buf[k] += kdata[kres-1 - (pos-1 - k)]*d;
         }
     }
 
     g_free(buf);
 }
 
+#if 0
 static void
 gwy_field_col_convolve3(GwyField *field,
                         const gdouble *kdata,
@@ -175,6 +325,7 @@ gwy_field_col_convolve3(GwyField *field,
     g_free(buf);
     gwy_field_invalidate(field);
 }
+#endif
 
 /**
  * gwy_field_col_convolve:
@@ -231,7 +382,7 @@ gwy_field_col_convolve(GwyField *field,
             k = (i + k0 - kres/2) % mres;
             d = dcol[k < height ? k*xres : (mres-1 - k)*xres];
             for (k = 0; k <= i; k++)
-                buf[k] += kdata[i - k]*d;
+                buf[k] += kdata[kres-1 - (i - k)]*d;
         }
         pos = 0;
         /* Middle part and tail with mirror extension again, we do some
@@ -243,9 +394,9 @@ gwy_field_col_convolve(GwyField *field,
             k = (i + k0 + kres - kres/2) % mres;
             d = dcol[G_LIKELY(k < height) ? k*xres : (mres-1 - k)*xres];
             for (k = pos; k < kres; k++)
-                buf[k] += kdata[kres-1 - (k - pos)]*d;
+                buf[k] += kdata[k - pos]*d;
             for (k = 0; k < pos; k++)
-                buf[k] += kdata[pos-1 - k]*d;
+                buf[k] += kdata[kres-1 - (pos-1 - k)]*d;
         }
     }
 

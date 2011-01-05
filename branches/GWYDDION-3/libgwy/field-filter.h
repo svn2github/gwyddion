@@ -28,6 +28,9 @@ G_BEGIN_DECLS
 void gwy_field_row_convolve   (GwyField *field,
                                const GwyRectangle* rectangle,
                                const GwyLine *kernel);
+void gwy_field_row_convolve_fft(GwyField *field,
+                                const GwyRectangle *rectangle,
+                                const GwyLine *kernel);
 void gwy_field_col_convolve   (GwyField *field,
                                const GwyRectangle* rectangle,
                                const GwyLine *kernel);
