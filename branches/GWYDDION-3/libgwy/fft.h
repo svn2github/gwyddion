@@ -42,6 +42,8 @@ void  gwy_fft_window_sample      (gdouble *data,
                                   guint n,
                                   GwyWindowingType windowing,
                                   guint normalize);
+void  gwy_fft_load_wisdom        (void);
+void  gwy_fft_save_wisdom        (void);
 
 G_END_DECLS
 

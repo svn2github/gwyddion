@@ -21,9 +21,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <fftw3.h>
 #include "libgwy/macros.h"
+#include "libgwy/strfuncs.h"
 #include "libgwy/math.h"
+#include "libgwy/main.h"
 #include "libgwy/fft.h"
+#include "libgwy/math-internal.h"
+
+#define WISDOM_FILENAME_TEMPLATE "fftw3-wisdom-%s"
 
 typedef gdouble (*GwyFFTWindowingFunc)(guint i, guint n);
 
@@ -37,6 +45,8 @@ static gdouble gwy_fft_window_rect     (guint i, guint n);
 static gdouble gwy_fft_window_nuttall  (guint i, guint n);
 static gdouble gwy_fft_window_flat_top (guint i, guint n);
 static gdouble gwy_fft_window_kaiser25 (guint i, guint n);
+
+static guint fft_rigour = FFTW_ESTIMATE;
 
 /* The order must match GwyWindowingType enum */
 static const GwyFFTWindowingFunc windowings[] = {
@@ -266,6 +276,148 @@ gwy_fft_window_sample(gdouble *data,
         data[i] *= wcorr;
 }
 
+// FIXME: Linux-only at this moment.  This means on other systems we
+// effectively assume the CPU never changes.
+static gchar*
+find_cpu_configuration(void)
+{
+    gchar *buffer = NULL;
+    gsize length = 0;
+
+    /* Do not bother with error reporting, if the file does not exist, we are
+     * on some other Unix than Linux. */
+    if (!g_file_get_contents("/proc/cpuinfo", &buffer, &length, NULL)) {
+        g_warning("Cannot determine the CPU type.");
+        return g_strdup("unknown");
+    }
+
+    // XXX: In principle, the types of invididual processors can differ.
+    guint family = 0, model = 0, cpuno, ncores = 0;
+    gchar *p = buffer;
+    for (gchar *line = gwy_str_next_line(&p);
+         line;
+         line = gwy_str_next_line(&p)) {
+
+        if (sscanf(line, "cpu family	:%u", &family))
+            continue;
+        if (sscanf(line, "model	:%u", &model))
+            continue;
+        if (sscanf(line, "processor	:%u", &cpuno))
+            ncores++;
+    }
+    g_free(buffer);
+
+    return g_strdup_printf("f%u-m%u-c%u", family, model, ncores);
+}
+
+static gchar*
+build_wisdom_file_name(void)
+{
+    gchar *userdir = gwy_user_directory(NULL);
+    g_return_val_if_fail(userdir, NULL);
+
+    gchar *cputype = find_cpu_configuration();
+    gchar *wisdomname = g_strdup_printf(WISDOM_FILENAME_TEMPLATE, cputype);
+    gchar *fullpath = g_build_filename(userdir, wisdomname, NULL);
+    g_free(wisdomname);
+    g_free(cputype);
+    g_free(userdir);
+
+    return fullpath;
+}
+
+static gpointer
+load_wisdom(G_GNUC_UNUSED gpointer arg)
+{
+    // If we can't get a reasonable file name, we won't be able to save the
+    // wisdom either.  So return before changing the planning rigour.
+    gchar *filename = build_wisdom_file_name();
+    if (!filename)
+        return NULL;
+
+    fft_rigour = FFTW_MEASURE;
+
+    // No error reporting, the file simply may not exist.
+    gchar *wisdom = NULL;
+    if (!g_file_get_contents(filename, &wisdom, NULL, NULL))
+        return NULL;
+
+    // Use the string variants of the wisdom functions as passing filehandles
+    // to FFTW might fail on Win32.
+    if (!fftw_import_wisdom_from_string(wisdom))
+        g_warning("FFTW rejected wisdom from %s.", filename);
+
+    g_free(filename);
+    g_free(wisdom);
+
+    return NULL;
+}
+
+/**
+ * gwy_fft_load_wisdom:
+ *
+ * Loads FFTW wisdom from a file user directory.
+ *
+ * This function can be safely called any number of times from arbitrary
+ * threads (if GLib thread support is initialised).  The wisdom will be loaded
+ * just once.
+ *
+ * Unless/until gwy_fft_load_wisdom() is called libgwy3 functions utilising
+ * FFTW set the planning rigour to <constant>FFTW_ESTIMATE</constant>.  This is
+ * done to save the considerable plan optimisation times because the functions
+ * often use many different transform sizes and types.  Calling this function
+ * will change the rigour to <constant>FFTW_MEASURE</constant> based on the
+ * assumption that if wisdom is used the time invested to planning will
+ * eventually return.  In order to make it happen you need to also save the
+ * wisdom with gwy_fft_save_wisdom() at program exit – like wisdom loading,
+ * this is not done automatically.
+ **/
+void
+gwy_fft_load_wisdom(void)
+{
+    static GOnce wisdom_loaded = G_ONCE_INIT;
+    g_once(&wisdom_loaded, load_wisdom, NULL);
+}
+
+/**
+ * gwy_fft_save_wisdom:
+ *
+ * Saves FFTW wisdom into a file in user directory.
+ *
+ * The wisdom file name contains encoded bits of hardware configuration.
+ * Wisdom files not corresponding to the current hardware configuration are
+ * simply ignored and kept in place so wisdom saving and loading should work
+ * reasonably also with shared home directories.
+ *
+ * Unlike gwy_fft_load_wisdom(), this function actually saves the wisdom each
+ * time it is called and this calling it from multiple threads at once might
+ * lead to unhappines.
+ **/
+void
+gwy_fft_save_wisdom(void)
+{
+    gchar *filename = build_wisdom_file_name();
+    if (!filename)
+        return;
+
+    // Use the string variants of the wisdom functions as passing filehandles
+    // to FFTW might fail on Win32.
+    gchar *wisdom = fftw_export_wisdom_to_string();
+    GError *error = NULL;
+    if (!g_file_set_contents(filename, wisdom, -1, &error)) {
+        g_warning("Cannot save FFTW wisdom to %s: %s.",
+                  filename, error->message);
+        g_clear_error(&error);
+    }
+    // g_free() and free() might not be equivalent.
+    free(wisdom);
+}
+
+guint
+_gwy_fft_rigour(void)
+{
+    return fft_rigour;
+}
 
 /**
  * SECTION: fft
