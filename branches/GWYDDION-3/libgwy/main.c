@@ -334,9 +334,16 @@ fix_module_directory(gchar *path)
 static gboolean
 directory_seems_good(const gchar *path, guint mode)
 {
+#if 0
+    g_printerr("absolute: %d\n", g_path_is_absolute(path));
+    g_printerr("is-dir: %d\n", g_file_test(path, G_FILE_TEST_IS_DIR));
+    g_printerr("r-access: %d\n", g_access(path, R_OK) == 0);
+    g_printerr("w-access: %d\n", g_access(path, W_OK) == 0);
+    g_printerr("x-access: %d\n", g_access(path, X_OK) == 0);
+#endif
     return (g_path_is_absolute(path)
             && g_file_test(path, G_FILE_TEST_IS_DIR)
-            && g_access(path, mode));
+            && g_access(path, mode) == 0);
 }
 
 static gboolean
@@ -593,12 +600,28 @@ gwy_locale_directory(const gchar *subdir)
 static gboolean
 userdir_seems_good(const gchar *path)
 {
-    if (!directory_seems_good(path, R_OK | X_OK | W_OK))
+    if (!directory_seems_good(path, R_OK | X_OK | W_OK)) {
         return FALSE;
+    }
 
     /* No further tests? */
 
     return TRUE;
+}
+
+// Return %TRUE if @dir seems to be a fine user directory.  Free @dir and set
+// it to %NULL and return %FALSE if it does not.
+static gboolean
+ensure_user_dir(gchar **dir)
+{
+    if (directory_seems_good(*dir, R_OK | X_OK | W_OK))
+        return TRUE;
+
+    if (g_mkdir(*dir, 0700) == 0)
+        return TRUE;
+
+    GWY_FREE(*dir);
+    return FALSE;
 }
 
 static gpointer
@@ -609,21 +632,24 @@ find_user_dir(G_GNUC_UNUSED gpointer arg)
     /* Explicite variables */
     if ((dir = g_getenv("HOME")) && userdir_seems_good(dir)) {
         userdir = g_build_filename(dir, "." PACKAGEDIR, NULL);
-        return GUINT_TO_POINTER(TRUE);
+        if (ensure_user_dir(&userdir))
+            return GUINT_TO_POINTER(TRUE);
     }
 
     /* GLib */
 #ifdef G_OS_WIN32
     if ((dir = g_get_user_config_dir()) && userdir_seems_good(dir)) {
         userdir = g_build_filename(dir, PACKAGEDIR, NULL);
-        return GUINT_TO_POINTER(TRUE);
+        if (ensure_user_dir(&userdir))
+            return GUINT_TO_POINTER(TRUE);
     }
 #endif
 
 #ifdef G_OS_UNIX
     if ((dir = g_get_home_dir()) && userdir_seems_good(dir)) {
         userdir = g_build_filename(dir, "." PACKAGEDIR, NULL);
-        return GUINT_TO_POINTER(TRUE);
+        if (ensure_user_dir(&userdir))
+            return GUINT_TO_POINTER(TRUE);
     }
 #endif
 
@@ -657,8 +683,11 @@ gwy_user_directory(const gchar *subdir)
     static GOnce found_user = G_ONCE_INIT;
     g_once(&found_user, find_user_dir, NULL);
 
-    if (userdir)
-        return g_build_filename(userdir, subdir, NULL);
+    if (userdir) {
+        gchar *dir = g_build_filename(userdir, subdir, NULL);
+        if (ensure_user_dir(&dir))
+            return dir;
+    }
     return NULL;
 }
 
