@@ -121,11 +121,19 @@ GWY_CHECK_LIBM
 AC_CHECK_FUNCS([sincos])
 
 #############################################################################
-# GLIBC >= 2.1
-# FIXME: Why we don't check with AC_CHECK_FUNCS?
-gl_GLIBC21
-if test "x$GLIBC21" = xyes; then
-  AC_DEFINE([HAVE_MEMMEM],1,[Define if we have working memmem()])
+# According to the manual page, GLIBC memmem() was broken until version 2.1.
+# If we detect the GNU C library check its version, otherwise assume it's OK.
+AC_CHECK_FUNCS([memmem])
+GWY_GLIBC
+memmem_ok=yes
+if test "x$GLIBC" = xyes; then
+  gl_GLIBC21
+  if test "x$GLIBC21" != xyes; then
+     memmem_ok=no
+  fi
+fi
+if test "x$memmem_ok" = xyes; then
+  AC_DEFINE([HAVE_WORKING_MEMMEM],1,[Define if we have working memmem()])
 fi
 
 #############################################################################
