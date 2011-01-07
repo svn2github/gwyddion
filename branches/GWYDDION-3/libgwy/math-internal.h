@@ -27,7 +27,8 @@ G_BEGIN_DECLS
 #define SLi gwy_lower_triangular_matrix_index
 #define MATRIX_LEN gwy_triangular_matrix_length
 
-#define _GWY_FFTW_PATIENCE FFTW_ESTIMATE
+G_GNUC_INTERNAL
+guint _gwy_fft_rigour(void);
 
 G_END_DECLS
 

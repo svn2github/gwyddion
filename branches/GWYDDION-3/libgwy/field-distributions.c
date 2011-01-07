@@ -820,8 +820,8 @@ gwy_field_row_psdf(const GwyField *field,
     gwy_clear(accum_mask, size);
 
     gwy_fft_window_sample(window, width, windowing, 2);
-    fftw_plan plan = fftw_plan_r2r_1d(width, fftin, ffthcout,
-                                      FFTW_R2HC, _GWY_FFTW_PATIENCE);
+    fftw_plan plan = fftw_plan_r2r_1d(width, fftin, ffthcout, FFTW_R2HC,
+                                      FFTW_DESTROY_INPUT | _gwy_fft_rigour());
     for (guint i = 0; i < height; i++) {
         guint count = row_level_and_count(base + i*field->xres, fftin, width,
                                           mask, masking, maskcol, maskrow + i,
@@ -950,8 +950,8 @@ gwy_field_row_acf(const GwyField *field,
     gdouble *accum_mask = fftin + 3*size;
     guint nfullrows = 0, nemptyrows = 0;
 
-    fftw_plan plan = fftw_plan_r2r_1d(size, fftin, ffthcout,
-                                      FFTW_R2HC, _GWY_FFTW_PATIENCE);
+    fftw_plan plan = fftw_plan_r2r_1d(size, fftin, ffthcout, FFTW_R2HC,
+                                      FFTW_DESTROY_INPUT | _gwy_fft_rigour());
     gwy_clear(accum_data, size);
     gwy_clear(accum_mask, size);
 
@@ -1083,8 +1083,8 @@ gwy_field_row_hhcf(const GwyField *field,
     gdouble *p;
     const gdouble *q, *qq;
 
-    fftw_plan plan = fftw_plan_r2r_1d(size, fftin, ffthcout,
-                                      FFTW_R2HC, _GWY_FFTW_PATIENCE);
+    fftw_plan plan = fftw_plan_r2r_1d(size, fftin, ffthcout, FFTW_R2HC,
+                                      FFTW_DESTROY_INPUT | _gwy_fft_rigour());
     gwy_clear(accum_data, size);
     gwy_clear(accum_mask, size);
     gwy_clear(accum_v, size);
