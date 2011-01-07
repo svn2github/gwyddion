@@ -515,15 +515,15 @@ fail:
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @lower: Lower bound to compare the field values to.
- * @upper: Upper bound to compare the field values to.
+ * @above: Lower bound to compare the field values to.
+ * @below: Upper bound to compare the field values to.
  * @strict: %TRUE to use strict inequalities and consequently count values in
  *          open intervals, %FALSE to use non-strict inequalities and count
  *          values in closed intervals.
  * @nabove: Location to store the number of values greater than (or equal
- *          to) @lower, or %NULL.
+ *          to) @above, or %NULL.
  * @nbelow: Location to store the number of values less than (or equal
- *          to) @upper, or %NULL.
+ *          to) @below, or %NULL.
  *
  * Counts the values in a field above and/or below specified bounds.
  *
@@ -566,8 +566,8 @@ fail:
  * count = ntotal - (nabove + nbelow);
  * ]|
  *
- * It is also possible obtain the same counts by passing @lower = @a and
- * @upper = @b and utilising the fact that the values within the interval are
+ * It is also possible obtain the same counts by passing @above = @a and
+ * @below = @b and utilising the fact that the values within the interval are
  * counted twice.  This is left as an excercise to the reader.
  *
  * Returns: The total number of values considered.  This is namely useful with
@@ -579,7 +579,7 @@ gwy_field_count_above_below(const GwyField *field,
                             const GwyRectangle *rectangle,
                             const GwyMaskField *mask,
                             GwyMaskingType masking,
-                            gdouble lower, gdouble upper,
+                            gdouble above, gdouble below,
                             gboolean strict,
                             guint *nabove, guint *nbelow)
 {
@@ -610,17 +610,17 @@ gwy_field_count_above_below(const GwyField *field,
             const gdouble *d = base + i*field->xres;
             if (strict) {
                 for (guint j = width; j; j--, d++) {
-                    if (*d > lower)
+                    if (*d > above)
                         na++;
-                    if (*d < upper)
+                    if (*d < below)
                         nb++;
                 }
             }
             else {
                 for (guint j = width; j; j--, d++) {
-                    if (*d >= lower)
+                    if (*d >= above)
                         na++;
-                    if (*d <= upper)
+                    if (*d <= below)
                         nb++;
                 }
             }
@@ -637,9 +637,9 @@ gwy_field_count_above_below(const GwyField *field,
             if (strict) {
                 for (guint j = width; j; j--, d++) {
                     if (!gwy_mask_iter_get(iter) == invert) {
-                        if (*d > lower)
+                        if (*d > above)
                             na++;
-                        if (*d < upper)
+                        if (*d < below)
                             nb++;
                         n++;
                     }
@@ -649,9 +649,9 @@ gwy_field_count_above_below(const GwyField *field,
             else {
                 for (guint j = width; j; j--, d++) {
                     if (!gwy_mask_iter_get(iter) == invert) {
-                        if (*d >= lower)
+                        if (*d >= above)
                             na++;
-                        if (*d <= upper)
+                        if (*d <= below)
                             nb++;
                         n++;
                     }
