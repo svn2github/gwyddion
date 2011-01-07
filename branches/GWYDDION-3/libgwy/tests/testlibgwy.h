@@ -31,29 +31,35 @@
 #define TEST_DATA_DIR "_testdata"
 
 // Helpers
-void          dump_error_list         (GwyErrorList *error_list);
-GObject*      serialize_and_back      (GObject *object);
-gboolean      compare_properties      (GObject *object,
-                                       GObject *reference);
-gpointer      serialize_boxed_and_back(gpointer boxed,
-                                       GType type);
-void          record_item_change      (GObject *object,
-                                       guint pos,
-                                       guint64 *counter);
-void          record_signal           (guint *counter);
-GwyMaskField* random_mask_field       (guint xres,
-                                       guint yres,
-                                       GRand *rng);
-GwyMaskField* random_mask_field_prob  (guint xres,
-                                       guint yres,
-                                       GRand *rng,
-                                       gdouble probability);
-void          curve_randomize         (GwyCurve *field,
-                                       GRand *rng);
-void          field_randomize         (GwyField *field,
-                                       GRand *rng);
-void          line_randomize          (GwyLine *field,
-                                       GRand *rng);
+void          dump_error_list               (GwyErrorList *error_list);
+GObject*      serialize_and_back            (GObject *object);
+gboolean      compare_properties            (GObject *object,
+                                             GObject *reference);
+gpointer      serialize_boxed_and_back      (gpointer boxed,
+                                             GType type);
+void          record_item_change            (GObject *object,
+                                             guint pos,
+                                             guint64 *counter);
+void          record_signal                 (guint *counter);
+GwyMaskField* random_mask_field             (guint xres,
+                                             guint yres,
+                                             GRand *rng);
+GwyMaskField* random_mask_field_prob        (guint xres,
+                                             guint yres,
+                                             GRand *rng,
+                                             gdouble probability);
+void          curve_randomize               (GwyCurve *field,
+                                             GRand *rng);
+void          field_randomize               (GwyField *field,
+                                             GRand *rng);
+void          field_assert_numerically_equal(const GwyField *result,
+                                             const GwyField *reference,
+                                             gdouble eps);
+void          line_randomize                (GwyLine *field,
+                                             GRand *rng);
+void          line_assert_numerically_equal (const GwyLine *result,
+                                             const GwyLine *reference,
+                                             gdouble eps);
 
 GType gwy_ser_test_get_type(void) G_GNUC_CONST;
 

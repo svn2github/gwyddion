@@ -48,6 +48,22 @@ test_line_assert_equal(const GwyLine *result,
 }
 
 void
+line_assert_numerically_equal(const GwyLine *result,
+                              const GwyLine *reference,
+                              gdouble eps)
+{
+    g_assert(GWY_IS_LINE(result));
+    g_assert(GWY_IS_LINE(reference));
+    g_assert_cmpuint(result->res, ==, reference->res);
+
+    for (guint j = 0; j < result->res; j++) {
+        gdouble value = result->data[j], ref = reference->data[j];
+        //g_printerr("[%u] %g %g\n", j, value, ref);
+        g_assert_cmpfloat(fabs(value - ref), <=, eps);
+    }
+}
+
+void
 test_line_props(void)
 {
     GwyLine *line = gwy_line_new_sized(41, FALSE);

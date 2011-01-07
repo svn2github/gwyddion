@@ -54,6 +54,27 @@ test_field_assert_equal(const GwyField *result,
 }
 
 void
+field_assert_numerically_equal(const GwyField *result,
+                               const GwyField *reference,
+                               gdouble eps)
+{
+    g_assert(GWY_IS_FIELD(result));
+    g_assert(GWY_IS_FIELD(reference));
+    g_assert_cmpuint(result->xres, ==, reference->xres);
+    g_assert_cmpuint(result->yres, ==, reference->yres);
+
+    guint xres = result->xres, yres = result->yres;
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++) {
+            gdouble value = result->data[i*xres + j],
+                    ref = reference->data[i*xres + j];
+            //g_printerr("[%u,%u] %g %g\n", j, i, value, ref);
+            g_assert_cmpfloat(fabs(value - ref), <=, eps);
+        }
+    }
+}
+
+void
 test_field_props(void)
 {
     GwyField *field = gwy_field_new_sized(41, 37, FALSE);
@@ -1584,22 +1605,6 @@ cf_dumb(const GwyField *field,
     return cf;
 }
 
-static void
-line_assert_numerically_equal(const GwyLine *result,
-                              const GwyLine *reference,
-                              gdouble eps)
-{
-    g_assert(GWY_IS_LINE(result));
-    g_assert(GWY_IS_LINE(reference));
-    g_assert_cmpuint(result->res, ==, reference->res);
-
-    for (guint j = 0; j < result->res; j++) {
-        gdouble value = result->data[j], ref = reference->data[j];
-        //g_printerr("[%u] %g %g\n", j, value, ref);
-        g_assert_cmpfloat(fabs(value - ref), <=, eps);
-    }
-}
-
 void
 test_field_distributions_acf_full(void)
 {
@@ -1960,7 +1965,9 @@ test_field_convolve_row(void)
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
 
-    for (guint xres = 6; xres <= 6000; xres = gwy_fft_nice_transform_size(16*xres/15+1)) {
+    gwy_fft_load_wisdom();
+
+    for (guint xres = 4; xres <= 6000; xres = gwy_fft_nice_transform_size(16*xres/15+1)) {
         guint yres = MAX(20, 6000/xres);
         GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
         gwy_field_fill_full(source, 1.0);
@@ -1968,15 +1975,19 @@ test_field_convolve_row(void)
 
         GwyField *field1 = gwy_field_new_alike(source, FALSE);
         GwyField *field2 = gwy_field_new_alike(source, FALSE);
-        for (guint kres = 5; kres <= 251; kres += 2) {
+        for (guint kres = 3; kres <= 251; kres += 2) {
             GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
-            gwy_line_fill_full(kernel, 1.0);
-            line_randomize(kernel, rng);
+            //gwy_line_fill_full(kernel, 1.0);
+            //line_randomize(kernel, rng);
+            gwy_line_clear_full(kernel);
+            kernel->data[0] = 1.0;
 
+            gwy_field_copy_full(source, field1);
             g_test_timer_start();
             gwy_field_row_convolve(field1, NULL, kernel);
             gdouble tdirect = g_test_timer_elapsed()/yres;
 
+            gwy_field_copy_full(source, field2);
             g_test_timer_start();
             gwy_field_row_convolve_fft(field2, NULL, kernel);
             gdouble tfft = g_test_timer_elapsed()/yres;
@@ -1985,12 +1996,14 @@ test_field_convolve_row(void)
             g_test_minimized_result(MIN(tdirect, tfft), "%u %u %g %g",
                                     xres, kres, tdirect, tfft);
                                     */
-            g_printerr("%u %u %g %g\n", xres, kres, tdirect, tfft);
+            //g_printerr("%u %u %g %g\n", xres, kres, tdirect, tfft);
+            field_assert_numerically_equal(field1, field2, 1e-14);
             g_object_unref(kernel);
         }
         g_printerr("\n");
         g_object_unref(field2);
         g_object_unref(field1);
+        g_object_unref(source);
     }
 
     g_rand_free(rng);

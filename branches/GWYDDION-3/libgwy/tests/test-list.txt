@@ -13,6 +13,8 @@ math/linalg
 math/linalg/fail
 math/fit/poly
 interpolation
+fft/nice-size
+fft/load-wisdom
 expr/evaluate
 expr/vector
 expr/garbage
@@ -101,6 +103,7 @@ field/distributions/acf/partial
 field/distributions/hhcf/full
 field/distributions/hhcf/masked
 field/distributions/hhcf/partial
+#field/convolve/row
 container/data
 container/refcount
 container/serialize
@@ -124,5 +127,6 @@ fit-func/builtin/constant
 fit-func/builtin/exponential
 fit-func/builtin/gaussian
 fit-func/user
-# Should go last, after we create resources of all types.
+# Finalisation tests, should go last.
+fft/save-wisdom
 resource/finalize
