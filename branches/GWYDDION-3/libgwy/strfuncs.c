@@ -196,7 +196,7 @@ gwy_memmem(gconstpointer haystack,
            gconstpointer needle,
            gsize needle_len)
 {
-#ifdef HAVE_MEMMEM
+#ifdef HAVE_WORKING_MEMMEM
     return memmem(haystack, haystack_len, needle, needle_len);
 #else
     const guchar *h = haystack;
