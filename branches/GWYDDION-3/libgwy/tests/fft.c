@@ -19,6 +19,12 @@
 
 #include "testlibgwy.h"
 
+#ifdef HAVE_VALGRIND
+#include <valgrind/valgrind.h>
+#else
+#define RUNNING_ON_VALGRIND 0
+#endif
+
 /***************************************************************************
  *
  * FFT
@@ -38,7 +44,7 @@ is_nice_even(guint n)
             n /= primes[j];
     }
 
-    return n == 1;
+    return n == 1 || n == 11 || n == 13;
 }
 
 void
@@ -72,7 +78,10 @@ test_fft_load_wisdom(void)
 void
 test_fft_save_wisdom(void)
 {
-    gwy_fft_save_wisdom();
+    // Saving wisdom found when running under valgrind is not a good idea.
+    // Avoid it.
+    if (!RUNNING_ON_VALGRIND)
+        gwy_fft_save_wisdom();
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
