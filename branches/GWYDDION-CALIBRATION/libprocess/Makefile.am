@@ -48,16 +48,16 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libgwyprocess2.la
 
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwyprocess2.def
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwyprocess2.def
+libgwyprocess2_la_DEPENDENCIES = libgwyprocess2.def
+endif
 
 # Must init
-CLEANFILES =
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwyprocess2.def
+EXTRA_DIST =
+CLEANFILES = libgwyprocess2.def
+MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 MKENUM_NAME = gwyprocesstypes
@@ -67,6 +67,14 @@ MKENUM_HFILES = \
 	$(srcdir)/gwygrainvalue.h
 include $(top_srcdir)/utils/mkenum.mk
 
+libgwyprocess2.def: $(libgwyprocess2_la_OBJECTS)
+	@echo EXPORTS >libgwyprocess2.def
+	@for lo in $(libgwyprocess2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwyprocess2.def
+
 AM_CFLAGS = @COMMON_CFLAGS@ @FFTW3_CFLAGS@
 AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyProcess\"
 
@@ -75,8 +83,9 @@ AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyProcess\"
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -version-info 9:1:9
-#libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 11:0:11
+#libversion = -release @LIBRARY_RELEASE@
+libgwyprocess2_la_LDFLAGS = @BASIC_LIBS@ @FFTW3_LIBS@ -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwyprocess2_la_LIBADD = $(libgwyprocess_libadd)
 
 libgwyprocess2_la_SOURCES = \

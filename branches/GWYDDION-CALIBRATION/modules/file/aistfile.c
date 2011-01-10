@@ -48,11 +48,7 @@
 #include "config.h"
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-
 #include <libgwyddion/gwymacros.h>
 #include <libgwyddion/gwyutils.h>
 #include <libgwyddion/gwymath.h>
@@ -122,7 +118,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports AIST-NT data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.2",
+    "0.3",
     "David Nečas (Yeti)",
     "2009",
 };
@@ -317,8 +313,10 @@ read_aist_raster(const guchar **p, gsize *size, AistContext *context)
                                 FALSE);
     gwy_data_field_set_si_unit_xy(dfield, xyunit);
     gwy_data_field_set_si_unit_z(dfield, zunit);
+    /* Apparently this is not generally wanted.
     gwy_data_field_set_xoffset(dfield, qxy*MIN(raster.left, raster.right));
     gwy_data_field_set_yoffset(dfield, qxy*MIN(raster.top, raster.bottom));
+    */
 
     g_object_unref(xyunit);
     g_object_unref(zunit);

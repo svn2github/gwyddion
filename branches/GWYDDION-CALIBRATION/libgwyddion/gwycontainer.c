@@ -1394,7 +1394,7 @@ gwy_container_try_set_one(GwyContainer *container,
                              FALSE);
     }
 
-    old = (GValue*)g_hash_table_lookup(container->values, GINT_TO_POINTER(key));
+    old = (GValue*)g_hash_table_lookup(container->values, GUINT_TO_POINTER(key));
     if (old) {
         if (!do_replace)
             return FALSE;
@@ -1407,7 +1407,7 @@ gwy_container_try_set_one(GwyContainer *container,
             return FALSE;
         /* old is actually new here, but who cares... */
         old = g_new0(GValue, 1);
-        g_hash_table_insert(container->values, GINT_TO_POINTER(key), old);
+        g_hash_table_insert(container->values, GUINT_TO_POINTER(key), old);
         changed = TRUE;
     }
     g_value_init(old, G_VALUE_TYPE(value));
@@ -2311,18 +2311,19 @@ gwy_container_transfer(GwyContainer *source,
                        "gwy_container_transfer().");
             break;
         }
-        if (!force && g_hash_table_lookup(dest->values, l->data))
+        g_string_truncate(key, dpflen);
+        g_string_append(key,
+                        g_quark_to_string(GPOINTER_TO_UINT(l->data))
+                        + pfdata.prefix_length);
+        quark = g_quark_from_string(key->str);
+
+        if (!force && g_hash_table_lookup(dest->values, GUINT_TO_POINTER(quark)))
             continue;
 
         copy = g_new0(GValue, 1);
         g_value_init(copy, G_VALUE_TYPE(val));
         g_value_copy(val, copy);
 
-        g_string_truncate(key, dpflen);
-        g_string_append(key,
-                        g_quark_to_string(GPOINTER_TO_UINT(l->data))
-                        + pfdata.prefix_length);
-        quark = g_quark_from_string(key->str);
         g_hash_table_insert(dest->values, GUINT_TO_POINTER(quark), copy);
         g_signal_emit(dest, container_signals[ITEM_CHANGED], quark, quark);
         pfdata.count++;

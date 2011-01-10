@@ -1,7 +1,7 @@
 # @(#) $Id$
 dnl Process this file with autoconf to produce a configure script.
 m4_define([gwy_version_major],[2])
-m4_define([gwy_version_minor],[19])
+m4_define([gwy_version_minor],[22])
 m4_define([gwy_version_string],[gwy_version_major.gwy_version_minor])
 AC_INIT([Gwyddion], [gwy_version_string], [klapetek@gwyddion.net])
 # Use -release for unstable version libs instead of -version-info, because
@@ -40,7 +40,6 @@ AC_CONFIG_FILES(\
   data/glmaterials/Makefile \
   data/gradients/Makefile \
   utils/Makefile \
-  utils/gwywin32.bat \
   utils/bundler \
   utils/mkosxlauncher \
   thumbnailer/Makefile \
@@ -58,16 +57,16 @@ AC_CONFIG_FILES(\
   devel-docs/libgwyprocess/Makefile \
   devel-docs/libgwyprocess/releaseinfo.xml \
   gwyddion.spec:data/gwyddion.spec.in \
-  data/gwyddion.iss \
-  data/gwyddion-devel.iss \
   data/gwyddion.pc \
-  data/config.h.win32 \
+  data/gwyddion.nsit \
+  data/mingw32-gwyddion-libs.spec
 )
 AC_CONFIG_HEADER(config.h)
 
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE([1.7 gnu check-news dist-bzip2])
+AM_INIT_AUTOMAKE([1.11 gnu check-news silent-rules dist-bzip2])
 AM_MAINTAINER_MODE
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 GWY_VERSION_MAJOR=gwy_version_major
 GWY_VERSION_MINOR=gwy_version_minor
@@ -114,7 +113,7 @@ case "$host_os" in
   mingw*)
     os_win32=yes
     HOST_CFLAGS="-mms-bitfields"
-    HOST_LDFLAGS="-mwindows"
+    HOST_LDFLAGS="-Wl,-subsystem,windows"
     ;;
   *)
     os_win32=no
@@ -316,21 +315,26 @@ if test "$GCC" = yes; then
   GWY_PROG_CC_OPTION([WREDUNDANT_DECLS],[-Wredundant-decls],,)
   GWY_PROG_CC_OPTION([FNO_TRAP_MATH],[-fno-trapping-math],,)
   GWY_PROG_CC_OPTION([FNO_MATH_ERRNO],[-fno-math-errno],,)
+  GWY_PROG_CC_OPTION([FEXCESS_PRECISION_FAST],[-fexcess-precision=fast],,)
   # Flags we can't use:
   # -Wstrict-protoypes makes gtkitemfactory.h noisy, but they have a
   #    comment there they can't fix it due to compatibility
   # -Wwrite-strings because it makes all struct initializations very noisy
   WARNING_CFLAGS="-Wall -W -Wshadow -Wpointer-arith -Wno-sign-compare -Wundef $PROG_CC_ERR_IFD $PROG_CC_WNO_SYS_HEADERS $PROG_CC_WNO_POINTER_SIGN $PROG_CC_WNO_EMPTY_FMT $PROG_CC_WMIXED_DECL $PROG_CC_WREDUNDANT_DECLS"
   WARNING_NOUNUSED_PAR="$PROG_CC_WNO_UNUSED_PAR"
-  PREMISE_CFLAGS="$PROG_CC_FNO_TRAP_MATH $PROG_CC_FNO_MATH_ERRNO"
+  PREMISE_CFLAGS="$PROG_CC_FNO_TRAP_MATH $PROG_CC_FNO_MATH_ERRNO $FEXCESS_PRECISION_FAST"
 fi
 AC_SUBST(WARNING_NOUNUSED_PAR)
 
 #############################################################################
 # Base libraries: X, Gtk+.
 AC_PATH_XTRA
-test "x$x_includes" = "x" || CPPFLAGS="$CPPFLAGS -I$x_includes"
-test "x$x_libraries" = "x" || LDFLAGS="$LDFLAGS -L$x_libraries"
+if test "x$x_includes" != x && test "x$x_includes" != xNONE; then
+  CPPFLAGS="$CPPFLAGS -I$x_includes"
+fi
+if test "x$x_libraries" != x && test "x$x_libraries" != xNONE; then
+  LDFLAGS="$LDFLAGS -L$x_libraries"
+fi
 
 # A dummy Gtk+ check, we perform another when we know whether to request
 # pangoft2 or not.
@@ -373,6 +377,9 @@ case "$gdk_target" in
   quartz)
     target_quartz=yes
     pangoft2=
+    ;;
+  win32)
+    remote_backend=win32
     ;;
   *)
     ;;
@@ -597,11 +604,7 @@ AC_SUBST(KDE4_LIBS)
 AC_MSG_CHECKING([for anyone actually reading this nonsense])
 AC_MSG_RESULT([no])
 AC_CHECK_HEADERS( \
-  fcntl.h \
   stdbool.h \
-  sys/stat.h \
-  sys/types.h \
-  unistd.h \
   time.h)
 
 #############################################################################
@@ -609,13 +612,8 @@ AC_CHECK_HEADERS( \
 
 #############################################################################
 # Check for library functions.
-AC_FUNC_MMAP
-GWY_CHECK_MATH_FUNCS([cbrt hypot pow10 acosh asinh atanh])
-AC_CHECK_FUNCS([sincos _fpclass memrchr])
-dnl FIXME: We need C99 for this.  But we must be able to switch off its
-dnl aliasing rules which at this moment we can do for GCC only.  That's too
-dnl limited.
-dnl GWY_CHECK_FPCLASSIFY
+GWY_CHECK_MATH_FUNCS([cbrt hypot pow10 acosh asinh atanh isinf isnan])
+AC_CHECK_FUNCS([sincos memrchr memmem])
 
 #############################################################################
 # I18n
@@ -659,8 +657,6 @@ AC_SUBST(PACKAGE_URL)
 #############################################################################
 # Generate gwyconfig
 #
-# NB: When you add definitions here, add them to data/gwyconfig.h.win32 too.
-#
 # FIXME: #define-ing symbols from libc is quite arrogant, even if they are
 # missing on the system.  It can conflict with other packages.  Define
 # something like gwy_foo() and use it instead of foo() in the source code,
@@ -691,7 +687,7 @@ _______EOF
   echo '/* Math functions become available when gwymathfallback.h is included. */' >>$outfile
   echo '/* In 2.x also when gwymath.h is included. */' >>$outfile
 
-GWY_OUTPUT_MATH_FUNCS([cbrt hypot pow10 acosh asinh atanh], [$outfile])
+GWY_OUTPUT_MATH_FUNCS([cbrt hypot pow10 acosh asinh atanh isinf isnan], [$outfile])
   cat >>$outfile <<_______EOF
 
 #endif /* __GWY_CONFIG_H__ */
@@ -713,6 +709,8 @@ _______EOF
   gwy_math_acosh=$gwy_math_acosh
   gwy_math_asinh=$gwy_math_asinh
   gwy_math_atanh=$gwy_math_atanh
+  gwy_math_isinf=$gwy_math_isinf
+  gwy_math_isnan=$gwy_math_isnan
 ])
 
 if test "$os_darwin" = yes; then

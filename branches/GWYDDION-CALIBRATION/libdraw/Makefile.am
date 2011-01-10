@@ -22,13 +22,23 @@ libgwydraw2include_HEADERS = \
 
 lib_LTLIBRARIES = libgwydraw2.la
 
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwydraw2.def
+
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwydraw2.def
+libgwydraw2_la_DEPENDENCIES = libgwydraw2.def
+endif
 
 noinst_HEADERS = \
 	gwydrawinternal.h
+
+libgwydraw2.def: $(libgwydraw2_la_OBJECTS)
+	@echo EXPORTS >libgwydraw2.def
+	@for lo in $(libgwydraw2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwydraw2.def
 
 AM_CFLAGS = @COMMON_CFLAGS@
 AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyDraw\"
@@ -38,8 +48,9 @@ AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyDraw\"
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwydraw2_la_LDFLAGS = @GTK_LIBS@ @BASIC_LIBS@ -version-info 1:0:1
-#libgwydraw2_la_LDFLAGS = @GTK_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 1:0:1
+#libversion = -release @LIBRARY_RELEASE@
+libgwydraw2_la_LDFLAGS = @GTK_LIBS@ @BASIC_LIBS@ -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwydraw2_la_LIBADD = $(libgwydraw_libadd)
 
 libgwydraw2_la_SOURCES = \
@@ -50,9 +61,7 @@ libgwydraw2_la_SOURCES = \
 	gwyrgba.c \
 	gwyselection.c
 
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwydraw2.def
+CLEANFILES = libgwydraw2.def
 
 clean-local:
 	rm -f core.* *~

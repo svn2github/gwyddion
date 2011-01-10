@@ -33,17 +33,16 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libgwyddion2.la
 
-EXTRA_DIST = \
-	gwyversion.h.in \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwyddion2.def
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwyddion2.def
+libgwyddion2_la_DEPENDENCIES = libgwyddion2.def
+endif
 
 # Must init
-CLEANFILES =
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwyddion2.def
+EXTRA_DIST = gwyversion.h.in
+CLEANFILES = libgwyddion2.def
+MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 MKENUM_NAME = gwyddiontypes
@@ -52,6 +51,14 @@ MKENUM_HFILES = \
 	$(srcdir)/gwyddionenums.h \
 	$(srcdir)/gwyexpr.h
 include $(top_srcdir)/utils/mkenum.mk
+
+libgwyddion2.def: $(libgwyddion2_la_OBJECTS)
+	@echo EXPORTS >libgwyddion2.def
+	@for lo in $(libgwyddion2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwyddion2.def
 
 AM_CFLAGS = @COMMON_CFLAGS@
 AM_CPPFLAGS = \
@@ -68,8 +75,9 @@ AM_CPPFLAGS = \
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwyddion2_la_LDFLAGS = @BASIC_LIBS@ -version-info 6:6:6
-#libgwyddion2_la_LDFLAGS = @BASIC_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 7:0:7
+#libversion = -release @LIBRARY_RELEASE@
+libgwyddion2_la_LDFLAGS = @BASIC_LIBS@ -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwyddion2_la_SOURCES = \
 	gwycontainer.c \
 	gwyddion.c \

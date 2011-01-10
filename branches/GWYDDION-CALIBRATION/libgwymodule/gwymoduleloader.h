@@ -27,10 +27,9 @@ G_BEGIN_DECLS
 
 #define GWY_MODULE_ABI_VERSION 2
 
-#define _GWY_MODULE_QUERY _gwy_module_query
 #define GWY_MODULE_QUERY(mod_info) \
     G_MODULE_EXPORT GwyModuleInfo* \
-    _GWY_MODULE_QUERY(void) { return &mod_info; }
+    _gwy_module_query(void) { return &mod_info; }
 
 #define GWY_MODULE_ERROR gwy_module_error_quark()
 

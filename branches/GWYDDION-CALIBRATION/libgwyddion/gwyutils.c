@@ -20,21 +20,6 @@
 
 #include "config.h"
 
-/* To be able to mmap() files.
- * On Linux we have all, on Win32 we have none, on others who knows */
-#if (HAVE_MMAP \
-     && HAVE_UNISTD_H && HAVE_SYS_STAT_H && HAVE_SYS_TYPES_H && HAVE_FCNTL_H)
-#define USE_MMAP 1
-#include <errno.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#else
-#undef USE_MMAP
-#endif
-
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
@@ -57,7 +42,7 @@ G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name);
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-static GQuark error_domain = 0;
+static GHashTable *mapped_files = NULL;
 
 /**
  * gwy_hash_table_to_slist_cb:
@@ -336,7 +321,6 @@ gwy_memmem(gconstpointer haystack,
            gconstpointer needle,
            gsize needle_len)
 {
-#undef HAVE_MEMMEM
 #ifdef HAVE_MEMMEM
     return memmem(haystack, haystack_len, needle, needle_len);
 #else
@@ -386,72 +370,57 @@ gwy_file_get_contents(const gchar *filename,
                       gsize *size,
                       GError **error)
 {
-#ifdef USE_MMAP
-    struct stat st;
-    int fd;
+    GMappedFile *mfile;
 
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("GWY_UTILS_ERROR");
+    mfile = g_mapped_file_new(filename, FALSE, error);
+    if (!mfile) {
+        *buffer = NULL;
+        *size = 0;
+        return FALSE;
+    }
 
-    *buffer = NULL;
-    *size = 0;
-    fd = open(filename, O_RDONLY);
-    if (fd == -1) {
-        g_set_error(error, error_domain, errno, "Cannot open file `%s': %s",
-                    filename, g_strerror(errno));
-        return FALSE;
+    *buffer = g_mapped_file_get_contents(mfile);
+    *size = g_mapped_file_get_length(mfile);
+    if (!mapped_files)
+        mapped_files = g_hash_table_new(g_direct_hash, g_direct_equal);
+
+    if (g_hash_table_lookup(mapped_files, *buffer)) {
+        g_warning("File `%s' was mapped to address %p where we already have "
+                  "mapped a file.  One of the files will leak.",
+                  filename, buffer);
     }
-    if (fstat(fd, &st) == -1) {
-        close(fd);
-        g_set_error(error, error_domain, errno, "Cannot stat file `%s': %s",
-                    filename, g_strerror(errno));
-        return FALSE;
-    }
-    *buffer = (gchar*)mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    close(fd);
-    if (!*buffer) {
-        g_set_error(error, error_domain, errno, "Cannot mmap file `%s': %s",
-                    filename, g_strerror(errno));
-        return FALSE;
-    }
-    *size = st.st_size;
+    g_hash_table_insert(mapped_files, *buffer, mfile);
 
     return TRUE;
-#else
-    return g_file_get_contents(filename, (gchar**)buffer, size, error);
-#endif
 }
 
 /**
  * gwy_file_abandon_contents:
  * @buffer: Buffer with file contents as created by gwy_file_get_contents().
  * @size: Buffer size.
- * @error: Return location for a #GError.
+ * @error: Return location for a #GError.  Since 2.22 no error can occur;
+ *         safely pass %NULL.
  *
  * Frees or unmmaps memory allocated by gwy_file_get_contents().
  *
- * Returns: Whether it succeeded.
+ * Returns: Whether it succeeded.  Since 2.22 it always return %TRUE.
  **/
 gboolean
 gwy_file_abandon_contents(guchar *buffer,
-                          G_GNUC_UNUSED gsize size,
+                          gsize size,
                           G_GNUC_UNUSED GError **error)
 {
-#ifdef USE_MMAP
-    if (!error_domain)
-        error_domain = g_quark_from_static_string("GWY_UTILS_ERROR");
+    GMappedFile *mfile;
 
-    if (munmap(buffer, size) == 1) {
-        g_set_error(error, error_domain, errno, "Cannot unmap memory: %s",
-                    g_strerror(errno));
-        return FALSE;
+    if (!mapped_files || !(mfile = g_hash_table_lookup(mapped_files, buffer))) {
+        g_warning("Don't know anything about mapping to address %p.", buffer);
+        return TRUE;
     }
-    return TRUE;
-#else
-    g_free(buffer);
 
+    g_assert(g_mapped_file_get_length(mfile) == size);
+    g_mapped_file_free(mfile);
+    g_hash_table_remove(mapped_files, buffer);
     return TRUE;
-#endif
 }
 
 /**
@@ -577,17 +546,6 @@ gwy_osx_find_dir_in_bundle(const gchar *dirname)
 gchar*
 gwy_find_self_dir(const gchar *dirname)
 {
-#ifdef G_OS_WIN32
-    static gchar *basedir = NULL;
-
-    if (!basedir)
-        basedir = g_win32_get_package_installation_directory(NULL, dll_name);
-    if (gwy_strequal(dirname, "data"))
-        dirname = NULL;
-
-    return g_build_filename(basedir, dirname, NULL);
-#endif    /* G_OS_WIN32 */
-
 #ifdef G_OS_UNIX
 #ifdef GWY_LIBDIR
     static const struct {
@@ -649,10 +607,72 @@ gwy_find_self_dir(const gchar *dirname)
                   dirname, base, paths[i].dir);
         return g_build_filename(base, paths[i].dir, NULL);
     }
-    g_critical("Cannot find directory for `%s'", dirname);
 #endif    /* GWY_LIBDIR */
-    return NULL;
 #endif    /* G_OS_UNIX */
+
+#ifdef G_OS_WIN32
+    static const struct {
+        const gchar *id;
+        const gchar *env;
+        const gchar *base;
+        const gchar *dir;
+    }
+    paths[] = {
+        {
+            "modules",
+            "GWYDDION_LIBDIR",
+            "lib",
+            "gwyddion/modules"
+        },
+        {
+            "plugins",
+            "GWYDDION_LIBEXECDIR",
+            "libexec",
+            "gwyddion/plugins"
+        },
+        {
+            "pixmaps",
+            "GWYDDION_DATADIR",
+            "share",
+            "gwyddion/pixmaps",
+        },
+        {
+            "data",
+            "GWYDDION_DATADIR",
+            "share",
+            "gwyddion",
+        },
+        {
+            "locale",
+            "GWYDDION_LOCALEDIR",
+            "share",
+            "locale",
+        },
+    };
+    static gchar *topdir = NULL;
+    gsize i;
+    const gchar *base;
+
+    if (!topdir)
+        topdir = g_win32_get_package_installation_directory(NULL, dll_name);
+
+    for (i = 0; i < G_N_ELEMENTS(paths); i++) {
+        if (!gwy_strequal(dirname, paths[i].id))
+            continue;
+
+        if ((base = g_getenv(paths[i].env))) {
+            gwy_debug("for <%s> base = <%s>, dir = <%s>",
+                      dirname, base, paths[i].dir);
+            return g_build_filename(base, paths[i].dir, NULL);
+        }
+        gwy_debug("for <%s> top = <%s>, klass = <%s>, dir = <%s>",
+                  dirname, topdir, paths[i].base, paths[i].dir);
+        return g_build_filename(topdir, paths[i].base, paths[i].dir, NULL);
+    }
+#endif    /* G_OS_WIN32 */
+
+    g_critical("Cannot find directory for `%s'", dirname);
+    return NULL;
 }
 
 /**

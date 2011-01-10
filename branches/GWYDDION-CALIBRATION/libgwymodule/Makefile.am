@@ -32,16 +32,16 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libgwymodule2.la
 
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwymodule2.def
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwymodule2.def
+libgwymodule2_la_DEPENDENCIES = libgwymodule2.def
+endif
 
 # Must init
-CLEANFILES =
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwymodule2.def
+EXTRA_DIST =
+CLEANFILES = libgwymodule2.def
+MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 MKENUM_NAME = gwymoduletypes
@@ -52,6 +52,14 @@ MKENUM_HFILES = \
 	$(srcdir)/gwymodule-file.h
 include $(top_srcdir)/utils/mkenum.mk
 
+libgwymodule2.def: $(libgwymodule2_la_OBJECTS)
+	@echo EXPORTS >libgwymodule2.def
+	@for lo in $(libgwymodule2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwymodule2.def
+
 AM_CFLAGS = @COMMON_CFLAGS@
 AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyModule\"
 
@@ -60,8 +68,9 @@ AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"GwyModule\"
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwymodule2_la_LDFLAGS = @GMODULE_LIBS@ @GTK_LIBS@ @BASIC_LIBS@ -version-info 4:0:4
-#libgwymodule2_la_LDFLAGS = @GMODULE_LIBS@ @GTK_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 4:1:4
+#libversion = -release @LIBRARY_RELEASE@
+libgwymodule2_la_LDFLAGS = @GMODULE_LIBS@ @GTK_LIBS@ @BASIC_LIBS@  -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwymodule2_la_LIBADD = $(libgwymodule_libadd)
 
 libgwymodule2_la_SOURCES = \

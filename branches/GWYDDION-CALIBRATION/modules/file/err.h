@@ -166,6 +166,12 @@ require_keys(GHashTable *hash,
     va_list ap;
     const gchar *key;
 
+    if (!hash) {
+        g_set_error(error, GWY_MODULE_FILE_ERROR, GWY_MODULE_FILE_ERROR_DATA,
+                    _("Missing header."));
+        return FALSE;
+    }
+
     va_start(ap, error);
     while ((key = va_arg(ap, const gchar *))) {
         if (!g_hash_table_lookup(hash, key)) {

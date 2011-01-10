@@ -68,8 +68,18 @@ typedef enum {
     GWY_VISIBILITY_RESET_HIDE_ALL
 } GwyVisibilityResetType;
 
+typedef enum {
+    GWY_DATA_WATCH_EVENT_ADDED,
+    GWY_DATA_WATCH_EVENT_CHANGED,
+    GWY_DATA_WATCH_EVENT_REMOVED
+} GwyDataWatchEventType;
+
 typedef void (*GwyAppDataForeachFunc)(GwyContainer *data,
                                       gpointer user_data);
+typedef void (*GwyAppDataWatchFunc)(GwyContainer *data,
+                                    gint id,
+                                    GwyDataWatchEventType event,
+                                    gpointer user_data);
 
 void   gwy_app_data_browser_add             (GwyContainer *data);
 void   gwy_app_data_browser_remove          (GwyContainer *data);
@@ -96,10 +106,21 @@ void   gwy_app_data_browser_get_current     (GwyAppWhat what,
 gint*  gwy_app_data_browser_get_data_ids    (GwyContainer *data);
 gint*  gwy_app_data_browser_get_graph_ids   (GwyContainer *data);
 gint*  gwy_app_data_browser_get_spectra_ids (GwyContainer *data);
+gint* gwy_app_data_browser_find_data_by_title   (GwyContainer *data,
+                                                 const gchar *titleglob);
+gint* gwy_app_data_browser_find_graphs_by_title (GwyContainer *data,
+                                                 const gchar *titleglob);
+gint* gwy_app_data_browser_find_spectra_by_title(GwyContainer *data,
+                                                 const gchar *titleglob);
 void   gwy_app_data_clear_selections        (GwyContainer *data,
                                              gint id);
 void   gwy_app_data_browser_foreach         (GwyAppDataForeachFunc function,
                                              gpointer user_data);
+
+gulong gwy_app_data_browser_add_channel_watch   (GwyAppDataWatchFunc function,
+                                                 gpointer user_data);
+void   gwy_app_data_browser_remove_channel_watch(gulong id);
+
 void   gwy_app_sync_data_items              (GwyContainer *source,
                                              GwyContainer *dest,
                                              gint from_id,
@@ -137,6 +158,8 @@ void     gwy_app_data_browser_show_3d       (GwyContainer *data,
                                              gint id);
 GtkWindow* gwy_app_find_window_for_channel  (GwyContainer *data,
                                              gint id);
+gboolean gwy_app_data_browser_get_gui_enabled(void);
+void     gwy_app_data_browser_set_gui_enabled(gboolean setting);
 
 G_END_DECLS
 

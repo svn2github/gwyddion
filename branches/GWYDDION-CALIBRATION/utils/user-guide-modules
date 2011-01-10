@@ -1,5 +1,7 @@
 # vim: set ts=28 :
 acf2d	statistical-analysis	autocorrelation-2d
+aistfile	managing-files
+anfatec	managing-files
 angle_dist	statistical-analysis	angle-distribution
 apefile	managing-files
 arithmetic	multidata	data-arithmetic
@@ -19,6 +21,8 @@ crop	basic-operations	crop
 crosscor	multidata	cross-correlation
 curvature	leveling	curvature
 cwt	integral-transforms	cwt
+deposit	synthetic
+deposit_synth	synthetic
 distance	basic-operations	distance
 dmefile	managing-files
 drift	edit-extended	drift-compensation
@@ -39,6 +43,7 @@ filter	filters-presentations	basic-filters
 fit_2d	leveling-and-background	fit-sphere
 fraccor	editing-correction	fractal-correction
 fractal	fractal-analysis	fractal-dimension
+gdeffile	managing-files
 gradient	filters-presentations	gradient
 grain_cross	grain-analysis	grain-correlation
 grain_dist	grain-analysis	grain-distributions
@@ -49,6 +54,7 @@ grainmeasure	grain-analysis	grain-measure
 grainremover	editing-correction
 graph_cd	graph-processing	graph-critical-dimension
 graph_cut	graph-processing
+graph_dos_spectrum	graph-processing	graph-dos-spectrum
 graph_export_ascii	graph-processing
 graph_export_bitmap	graph-processing
 graph_export_vector	graph-processing
@@ -56,6 +62,7 @@ graph_fdfit	graph-processing
 graph_fit	graph-processing	graph-fit
 graph_level	graph-processing
 graph_stats	graph-processing
+gsffile	gsf
 gwyfile	managing-files
 hdf4file	managing-files
 hitachi-afm	managing-files
@@ -69,9 +76,11 @@ jpkscan	managing-files
 laplace	editing-correction	remove-data-under-mask
 level	leveling-and-background	plane-level
 level3	leveling-and-background	three-point-level
+lextfile	managing-files
 line	selections
 linecorrect	editing-correction	line-correction
 linestats	statistical-analysis	line-stats
+lno_synth	synthetic	line-noise-synthetis
 local_contrast	filters-presentations	local-contrast
 mapvue	managing-files
 mark_with	presentations-masks
@@ -79,10 +88,12 @@ maskcor	multidata	mask-by-correlation
 maskedit	modules-tools	tool-mask-editor
 maskops	presentations-masks
 matfile	managing-files
+mcrop	multidata	mutual-crop
 median-bg	leveling-and-background	median-background
 merge	multidata	merge
 metropro	managing-files
 microprof	managing-files
+miffile	managing-files
 mifile	managing-files
 nanoeducator	managing-files
 nanonics	managing-files
@@ -92,13 +103,16 @@ nanoscope	managing-files
 nanoscope-ii	managing-files
 nanotop	managing-files
 netcdf	managing-files
+noise_synth	synthetic	noise-synthetis
 nt-mdt	managing-files
 obj_synth	synthetic	object-synthetis
 ols	managing-files
 omicron	managing-files
+omicronflat	managing-files
 omicronmatrix	managing-files
 opdfile	managing-files
 outliers	editing-correction	mask-of-outliers
+pat_synth	synthetic	pattern-synthetis
 pathlevel	leveling-and-background	path-level
 pixmap	managing-files
 pltfile	managing-files
@@ -111,6 +125,7 @@ polynom	editing-correction	line-polynomial
 presentationops	filters-presentations	presentationops
 profile	basic-operations	profile
 psia	managing-files
+pt3file	managing-files
 quesant	managing-files
 rawfile	raw-file-import
 rawgraph	specific-data-import
@@ -126,7 +141,7 @@ scale	basic-operations	scale
 scars	editing-correction	remove-scars
 sdfile	managing-files
 seiko	managing-files
-selectionmanager	selections
+selectionmanager	selections	selection-manager
 sensofar	managing-files
 sensolytics	managing-files
 sfunctions	statistical-analysis	sfunctions
@@ -146,14 +161,13 @@ stats	statistical-analysis	stat-quantities
 stmprg	managing-files
 stpfile	managing-files
 surffile	managing-files
+threshold	basic-operations	limit-range
 tilt	leveling-and-background
 tip_blind	tip-convolution-artefacts	tip-blind-estimate
 tip_model	tip-convolution-artefacts	tip-model
 tipops	tip-convolution-artefacts	tip-operations
 unisoku	managing-files
 unrotate	editing-correction	unrotate
+wipfile	managing-files
 witfile	managing-files
 wsxmfile	managing-files
-aistfile	managing-files
-pt3file	managing-files
-omicronflat	managing-files

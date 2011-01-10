@@ -38,7 +38,6 @@ ADD_OBJECTS = $(top_srcdir)/devel-docs/add-objects.py
 
 EXTRA_DIST = \
 	$(content_files) \
-	makefile.msc \
 	releaseinfo.xml.in \
 	$(HTML_IMAGES) \
 	$(DOC_MAIN_SGML_FILE) \
@@ -190,8 +189,7 @@ install-data-local:
 	if test -n "$$d"; then \
 		$(mkdir_p) $(DESTDIR)$(TARGET_DIR); \
 		( cd $$d && $(INSTALL_DATA) * "$(DESTDIR)$(TARGET_DIR)"; ); \
-	fi; \
-	test -n "$$d"
+	fi
 
 uninstall-local:
 	rm -f $(DESTDIR)$(TARGET_DIR)/*

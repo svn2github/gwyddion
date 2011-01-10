@@ -54,6 +54,9 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
+#include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include "err.h"
 #include "get.h"
 
@@ -318,13 +321,13 @@ typedef struct {
     const gchar *author;
 
 //  guint32 totLen;
-    gdouble    accuracy ;
-    gdouble    scale ;
-    gdouble    bias ;
+    gdouble    accuracy;
+    gdouble    scale;
+    gdouble    bias;
     guint64    minIndex;
     guint64    maxIndex;
-    gint32    dataType ;
-    guint64 siUnit;
+    gint32     dataType;
+    guint64    siUnit;
 } MDTMDACalibration;
 
 typedef struct {
@@ -399,10 +402,15 @@ static gboolean       mdt_real_load         (const guchar *buffer,
                                              MDTFile *mdtfile,
                                              GError **error);
 static GwyDataField*  extract_scanned_data  (MDTScannedDataFrame *dataframe);
-static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe);
-static GwySpectra* extract_sps_curve (MDTScannedDataFrame *dataframe);
+static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe,
+                                                guint number);
+static GwySpectra*    extract_sps_curve     (MDTScannedDataFrame *dataframe,
+                                             guint number);
 static GwyDataField*  extract_mda_data      (MDTMDAFrame *dataframe);
-static GwyGraphModel* extract_mda_spectrum  (MDTMDAFrame *dataframe);
+static GwyGraphModel* extract_mda_spectrum  (MDTMDAFrame *dataframe,
+                                             guint number);
+static GwyDataField * extract_raman_image   (MDTMDAFrame *dataframe,
+                                             GwyRunType mode);
 
 static void          start_element       (GMarkupParseContext *context,
                                           const gchar *element_name,
@@ -414,7 +422,7 @@ static void          end_element         (GMarkupParseContext *context,
                                           const gchar *element_name,
                                           gpointer user_data,
                                           GError **error);
-static void          parse_text                (GMarkupParseContext *context,
+static void          parse_text          (GMarkupParseContext *context,
                                           const gchar *text,
                                           gsize text_len,
                                           gpointer user_data,
@@ -649,7 +657,7 @@ static GwyModuleInfo module_info = {
     &module_register,
     N_("Imports NT-MDT data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.13",
+    "0.14",
     "David Nečas (Yeti) & Petr Klapetek",
     "2004",
 };
@@ -744,8 +752,9 @@ mdt_load(const gchar *filename,
             if (sdframe->title) {
                 g_string_append(key, "/title");
                 gwy_container_set_string_by_name(data, key->str,
-                                                 g_strndup(sdframe->title,
-                                                           sdframe->title_len));
+                        g_strdup_printf("%.*s (%u)",
+                                        sdframe->title_len,
+                                        sdframe->title, i+1));
             }
             else
                 gwy_app_channel_title_fall_back(data, n);
@@ -777,10 +786,28 @@ mdt_load(const gchar *filename,
                 /* raman spectra */
                 GwyGraphModel *gmodel;
 
-                gmodel = extract_mda_spectrum(mdaframe);
+                gmodel = extract_mda_spectrum(mdaframe, i+1);
                 g_string_printf(key, "/0/graph/graph/%d", n+1);
                 gwy_container_set_object_by_name(data, key->str, gmodel);
                 g_object_unref(gmodel);
+                n++;
+            }
+            else if (mdaframe->nDimensions == 3 && mdaframe->nMesurands == 3) {
+                /* raman images */
+                dfield = extract_raman_image(mdaframe, mode);
+                g_string_printf(key, "/%d/data", n);
+                gwy_container_set_object_by_name(data, key->str, dfield);
+                g_object_unref(dfield);
+                if (mdaframe->title) {
+                g_string_append(key, "/title");
+                    gwy_container_set_string_by_name(data, key->str,
+                            g_strdup_printf("%.*s (%u)",
+                                            mdaframe->title_len,
+                                            mdaframe->title, i+1));
+                }
+                else
+                    gwy_app_channel_title_fall_back(data, n);
+
                 n++;
             }
         }
@@ -789,17 +816,10 @@ mdt_load(const gchar *filename,
             GwyGraphModel *gmodel;
 
             sdframe = (MDTScannedDataFrame*)mdtfile.frames[i].frame_data;
-            gmodel = extract_scanned_spectrum(sdframe);
+            gmodel = extract_scanned_spectrum(sdframe, i+1);
             g_string_printf(key, "/0/graph/graph/%d", n+1);
             gwy_container_set_object_by_name(data, key->str, gmodel);
             g_object_unref(gmodel);
-
-            if (sdframe->title) {
-                g_string_append(key, "/title");
-                gwy_container_set_string_by_name(data, key->str,
-                                                 g_strndup(sdframe->title,
-                                                           sdframe->title_len));
-            }
 
             n++;
         }
@@ -808,17 +828,10 @@ mdt_load(const gchar *filename,
             GwySpectra *gspectra;
 
             sdframe = (MDTScannedDataFrame*)mdtfile.frames[i].frame_data;
-            gspectra = extract_sps_curve(sdframe);
+            gspectra = extract_sps_curve(sdframe, i+1);
             g_string_printf(key, "/sps/%d", n);
             gwy_container_set_object_by_name(data, key->str, gspectra);
             g_object_unref(gspectra);
-
-            if (sdframe->title) {
-                g_string_append(key, "/title");
-                gwy_container_set_string_by_name(data, key->str,
-                                                 g_strndup(sdframe->title,
-                                                           sdframe->title_len));
-            }
 
             n++;
         }
@@ -1474,14 +1487,16 @@ extract_scanned_data(MDTScannedDataFrame *dataframe)
     data = gwy_data_field_get_data(dfield);
     p = (gint16*)dataframe->image;
     for (i = 0; i < dataframe->fm_xres*dataframe->fm_yres; i++)
-        data[i] = zscale*GINT16_FROM_LE(p[i]);
+        data[i] = pow10(power10z)*dataframe->z_scale.offset
+                  + zscale*GINT16_FROM_LE(p[i]);
 
     gwy_data_field_invert(dfield, TRUE, FALSE, FALSE);
 
     return dfield;
 }
 
-static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe)
+static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe,
+                                                guint number)
 {
     GwyGraphCurveModel *spectra;
     GwyGraphModel *gmodel;
@@ -1511,9 +1526,11 @@ static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe)
     zscale = pow10(power10z)*dataframe->z_scale.step;
 
     if (dataframe->title_len && dataframe->title)
-        framename = g_strndup(dataframe->title, dataframe->title_len);
+        framename = g_strdup_printf("%.*s (%u)",
+                                    dataframe->title_len,
+                                    dataframe->title, number);
     else
-        framename = g_strdup("Unknown spectrum");
+        framename = g_strdup_printf("Unknown spectrum (%d)", number);
 
     spectra = gwy_graph_curve_model_new();
     g_object_set(spectra,
@@ -1528,7 +1545,7 @@ static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe)
 
     p = (gint16*)dataframe->image;
     for (i = 0; i < dataframe->fm_xres; i++) {
-        xdata[i] = i*deltax;
+        xdata[i] = i*deltax + pow10(power10x)*dataframe->x_scale.offset;
         ydata[i] = pow10(power10z)*dataframe->z_scale.offset
                  + zscale*GINT16_FROM_LE(p[i]);
     }
@@ -1552,7 +1569,8 @@ static GwyGraphModel* extract_scanned_spectrum (MDTScannedDataFrame *dataframe)
     return gmodel;
 }
 
-static GwySpectra* extract_sps_curve (MDTScannedDataFrame *dataframe)
+static GwySpectra* extract_sps_curve (MDTScannedDataFrame *dataframe,
+                                      guint number)
 {
     GwySpectra *spectra;
     GwyDataLine *dline;
@@ -1648,9 +1666,11 @@ static GwySpectra* extract_sps_curve (MDTScannedDataFrame *dataframe)
     }
 
     if (dataframe->title_len && dataframe->title)
-        framename = g_strndup(dataframe->title, dataframe->title_len);
+        framename = g_strdup_printf("%.*s (%u)",
+                                    dataframe->title_len,
+                                    dataframe->title, number);
     else
-        framename = g_strdup("Unknown spectrum");
+        framename = g_strdup_printf("Unknown spectrum (%d)", number);
     gwy_spectra_set_title(spectra, framename);
     g_free(framename);
 
@@ -1702,7 +1722,8 @@ extract_mda_data(MDTMDAFrame * dataframe)
     gchar *unit;
 
     MDTMDACalibration *xAxis = &dataframe->dimensions[0],
-        *yAxis = &dataframe->dimensions[1], *zAxis = &dataframe->mesurands[0];
+        *yAxis = &dataframe->dimensions[1],
+        *zAxis = &dataframe->mesurands[0];
 
     if (xAxis->unit && xAxis->unitLen) {
         unit = g_strndup(xAxis->unit, xAxis->unitLen);
@@ -1737,9 +1758,9 @@ extract_mda_data(MDTMDAFrame * dataframe)
     dfield = gwy_data_field_new(xAxis->maxIndex - xAxis->minIndex + 1,
                                 yAxis->maxIndex - yAxis->minIndex + 1,
                                 xreal, yreal, FALSE);
-    total =
-        (xAxis->maxIndex - xAxis->minIndex + 1) * (yAxis->maxIndex -
-                                                   yAxis->minIndex + 1);
+    total
+        = (xAxis->maxIndex - xAxis->minIndex + 1) * (yAxis->maxIndex
+                                                 - yAxis->minIndex + 1);
     gwy_data_field_set_si_unit_xy(dfield, siunitxy);
     g_object_unref(siunitxy);
     gwy_data_field_set_si_unit_z(dfield, siunitz);
@@ -1818,8 +1839,6 @@ extract_mda_data(MDTMDAFrame * dataframe)
             const gint64 *tp = (const gint64 *)p;
 
             while (data < end_data) {
-                /* for some reason, MSVC6 spits an unsigned int64 conversion
-                 * error also here */
                 *(data++) = zscale * (gint64)GINT64_FROM_LE(*tp);
                 tp++;
             }
@@ -1831,15 +1850,7 @@ extract_mda_data(MDTMDAFrame * dataframe)
             const guint64 *tp = (const guint64 *)p;
 
             while (data < end_data) {
-                /* Fucking MSVC6 cannot convert unsigned 64bit int to double. */
-#ifdef _MSC_VER
-                guint u32h = *tp >> 32u;
-                guint u32l = *tp & 0xffffffffu;
-                *(data++) = zscale * (4294967296.0*u32h + u32l);
-
-#else
                 *(data++) = zscale * GUINT64_FROM_LE(*tp);
-#endif
                 tp++;
             }
         }
@@ -1864,7 +1875,7 @@ extract_mda_data(MDTMDAFrame * dataframe)
 }
 
 static GwyGraphModel*
-extract_mda_spectrum(MDTMDAFrame *dataframe)
+extract_mda_spectrum(MDTMDAFrame *dataframe, guint number)
 {
     gint res;
     GwyGraphCurveModel *spectra;
@@ -1887,9 +1898,11 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
     GError *err = NULL;
 
     if (dataframe->title_len && dataframe->title)
-        framename = g_strndup(dataframe->title, dataframe->title_len);
+        framename = g_strdup_printf("%.*s (%u)",
+                                    dataframe->title_len,
+                                    dataframe->title, number);
     else
-        framename = g_strdup("Unknown spectrum");
+        framename = g_strdup_printf("Unknown spectrum (%d)", number);
 
     if (dataframe->nDimensions) {
         xAxis = &dataframe->dimensions[0],
@@ -2005,8 +2018,6 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 {
                     const gint64 *tp = (const gint64 *)p;
 
-                    /* for some reason, MSVC6 spits an unsigned int64 conversion
-                     * error also here */
                     xdata[i] = xscale * (gint64)GINT64_FROM_LE(*tp);
                     p += sizeof(gint64)/sizeof(gchar);
                 }
@@ -2015,15 +2026,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 case MDA_DATA_UINT64:
                 {
                     const guint64 *tp = (const guint64 *)p;
-
-                    /* Fucking MSVC6 cannot convert unsigned 64bit int to double. */
-#ifdef _MSC_VER
-                    guint u32h = *tp >> 32u;
-                    guint u32l = *tp & 0xffffffffu;
-                    xdata[i] = xscale * (4294967296.0*u32h + u32l);
-#else
                     xdata[i] = xscale * GUINT64_FROM_LE(*tp);
-#endif
                     p += sizeof(guint64)/sizeof(gchar);
                 }
                 break;
@@ -2055,7 +2058,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 const guchar *tp = (const guchar *)p;
 
                 ydata[i] = yscale * (*tp);
-                p += sizeof(guchar)/sizeof(gchar);
+                p += sizeof(guchar);
             }
             break;
 
@@ -2064,7 +2067,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 const gint16 *tp = (const gint16 *)p;
 
                 ydata[i] = yscale * GINT16_FROM_LE(*tp);
-                p += sizeof(gint16)/sizeof(gchar);
+                p += sizeof(gint16);
             }
             break;
 
@@ -2073,7 +2076,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 const guint16 *tp = (const guint16 *)p;
 
                 ydata[i] = yscale * GUINT16_FROM_LE(*tp);
-                p += sizeof(guint16)/sizeof(gchar);
+                p += sizeof(guint16);
             }
             break;
 
@@ -2082,7 +2085,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
                 const gint32 *tp = (const gint32 *)p;
 
                 ydata[i] = yscale * GINT32_FROM_LE(*tp);
-                p += sizeof(gint32)/sizeof(gchar);
+                p += sizeof(gint32);
             }
             break;
 
@@ -2090,7 +2093,7 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
             {
                 const guint32 *tp = (const guint32 *)p;
                 ydata[i] = yscale * GUINT32_FROM_LE(*tp);
-                p += sizeof(guint32)/sizeof(gchar);
+                p += sizeof(guint32);
             }
             break;
 
@@ -2098,26 +2101,16 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
             {
                 const gint64 *tp = (const gint64 *)p;
 
-                /* for some reason, MSVC6 spits an unsigned int64 conversion
-                 * error also here */
                 ydata[i] = yscale * (gint64)GINT64_FROM_LE(*tp);
-                p += sizeof(gint64)/sizeof(gchar);
+                p += sizeof(gint64);
             }
             break;
 
             case MDA_DATA_UINT64:
             {
                 const guint64 *tp = (const guint64 *)p;
-
-                /* Fucking MSVC6 cannot convert unsigned 64bit int to double. */
-#ifdef _MSC_VER
-                guint u32h = *tp >> 32u;
-                guint u32l = *tp & 0xffffffffu;
-                ydata[i] = yscale * (4294967296.0*u32h + u32l);
-#else
                 ydata[i] = yscale * GUINT64_FROM_LE(*tp);
-#endif
-                p += sizeof(guint64)/sizeof(gchar);
+                p += sizeof(guint64);
             }
             break;
 
@@ -2172,6 +2165,319 @@ extract_mda_spectrum(MDTMDAFrame *dataframe)
     g_free(framename);
 
     return gmodel;
+}
+
+static gboolean
+resize_image(GtkWidget *widget, GdkEvent *event, GtkWidget *window)
+{
+    gint oldwidth, oldheight, newwidth, newheight;
+    gfloat mult;
+
+    GdkPixbuf *pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(widget));
+    if (pixbuf == NULL) {
+        g_printerr("Failed to resize image\n");
+        return 1;
+    }
+
+    oldwidth  = gdk_pixbuf_get_width(pixbuf);
+    oldheight = gdk_pixbuf_get_height(pixbuf);
+    newwidth  = widget->allocation.width;
+    newheight = widget->allocation.height;
+    mult = MIN(((float) newwidth)/oldwidth,
+               ((float) newheight)/oldheight);
+
+    pixbuf = gdk_pixbuf_scale_simple(pixbuf, (int) (mult*oldwidth),
+                      (int) (mult*oldheight), GDK_INTERP_BILINEAR);
+
+    gtk_image_set_from_pixbuf(GTK_IMAGE(widget), pixbuf);
+    g_object_unref(pixbuf);
+
+    return FALSE;
+}
+
+static GwyDataField * extract_raman_image (MDTMDAFrame *dataframe,
+                                           GwyRunType mode)
+{
+    guint xsize, ysize;
+    const guchar *p, *px;
+    guint i, j, k;
+    gint l;
+    gdouble xspectra[1024], yspectra[1024];
+    gdouble r, g, b, x, y, z, xyzsum, wmin, wmax;
+    gdouble ymax;
+
+    GtkWidget *dialog, *image;
+    GdkPixbuf *pixbuf;
+    gint rowstride;
+    guchar *pixels;
+    guint response;
+
+    GwyDataField *dfield;
+    gdouble *data;
+    gdouble xreal, yreal, zscale;
+    gint power10xy, power10z;
+    GwySIUnit *siunitxy, *siunitz;
+    const gchar *cunit;
+    gchar *unit;
+
+    /* CIE 2deg xyz functions for standart observer (360-780 nm)   */
+    /* from http://www.cis.rit.edu/mcsl/online/CIE/StdObsFuncs.htm */
+    static gdouble cie_2deg_xyz[85][3] = {
+    { 0.000130, 0.000004, 0.000606 },
+    { 0.000232, 0.000007, 0.001086 },
+    { 0.000415, 0.000012, 0.001946 },
+    { 0.000742, 0.000022, 0.003486 },
+    { 0.001368, 0.000039, 0.006450 },
+    { 0.002236, 0.000064, 0.010550 },
+    { 0.004243, 0.000120, 0.020050 },
+    { 0.007650, 0.000217, 0.036210 },
+    { 0.014310, 0.000396, 0.067850 },
+    { 0.023190, 0.000640, 0.110200 },
+    { 0.043510, 0.001210, 0.207400 },
+    { 0.077630, 0.002180, 0.371300 },
+    { 0.134380, 0.004000, 0.645600 },
+    { 0.214770, 0.007300, 1.039050 },
+    { 0.283900, 0.011600, 1.385600 },
+    { 0.328500, 0.016840, 1.622960 },
+    { 0.348280, 0.023000, 1.747060 },
+    { 0.348060, 0.029800, 1.782600 },
+    { 0.336200, 0.038000, 1.772110 },
+    { 0.318700, 0.048000, 1.744100 },
+    { 0.290800, 0.060000, 1.669200 },
+    { 0.251100, 0.073900, 1.528100 },
+    { 0.195360, 0.090980, 1.287640 },
+    { 0.142100, 0.112600, 1.041900 },
+    { 0.095640, 0.139020, 0.812950 },
+    { 0.057950, 0.169300, 0.616200 },
+    { 0.032010, 0.208020, 0.465180 },
+    { 0.014700, 0.258600, 0.353300 },
+    { 0.004900, 0.323000, 0.272000 },
+    { 0.002400, 0.407300, 0.212300 },
+    { 0.009300, 0.503000, 0.158200 },
+    { 0.029100, 0.608200, 0.111700 },
+    { 0.063270, 0.710000, 0.078250 },
+    { 0.109600, 0.793200, 0.057250 },
+    { 0.165500, 0.862000, 0.042160 },
+    { 0.225750, 0.914850, 0.029840 },
+    { 0.290400, 0.954000, 0.020300 },
+    { 0.359700, 0.980300, 0.013400 },
+    { 0.433450, 0.994950, 0.008750 },
+    { 0.512050, 1.000000, 0.005750 },
+    { 0.594500, 0.995000, 0.003900 },
+    { 0.678400, 0.978600, 0.002750 },
+    { 0.762100, 0.952000, 0.002100 },
+    { 0.842500, 0.915400, 0.001800 },
+    { 0.916300, 0.870000, 0.001650 },
+    { 0.978600, 0.816300, 0.001400 },
+    { 1.026300, 0.757000, 0.001100 },
+    { 1.056700, 0.694900, 0.001000 },
+    { 1.062200, 0.631000, 0.000800 },
+    { 1.045600, 0.566800, 0.000600 },
+    { 1.002600, 0.503000, 0.000340 },
+    { 0.938400, 0.441200, 0.000240 },
+    { 0.854450, 0.381000, 0.000190 },
+    { 0.751400, 0.321000, 0.000100 },
+    { 0.642400, 0.265000, 0.000050 },
+    { 0.541900, 0.217000, 0.000030 },
+    { 0.447900, 0.175000, 0.000020 },
+    { 0.360800, 0.138200, 0.000010 },
+    { 0.283500, 0.107000, 0.000000 },
+    { 0.218700, 0.081600, 0.000000 },
+    { 0.164900, 0.061000, 0.000000 },
+    { 0.121200, 0.044580, 0.000000 },
+    { 0.087400, 0.032000, 0.000000 },
+    { 0.063600, 0.023200, 0.000000 },
+    { 0.046770, 0.017000, 0.000000 },
+    { 0.032900, 0.011920, 0.000000 },
+    { 0.022700, 0.008210, 0.000000 },
+    { 0.015840, 0.005723, 0.000000 },
+    { 0.011359, 0.004102, 0.000000 },
+    { 0.008111, 0.002929, 0.000000 },
+    { 0.005790, 0.002091, 0.000000 },
+    { 0.004109, 0.001484, 0.000000 },
+    { 0.002899, 0.001047, 0.000000 },
+    { 0.002049, 0.000740, 0.000000 },
+    { 0.001440, 0.000520, 0.000000 },
+    { 0.001000, 0.000361, 0.000000 },
+    { 0.000690, 0.000249, 0.000000 },
+    { 0.000476, 0.000172, 0.000000 },
+    { 0.000332, 0.000120, 0.000000 },
+    { 0.000235, 0.000085, 0.000000 },
+    { 0.000166, 0.000060, 0.000000 },
+    { 0.000117, 0.000042, 0.000000 },
+    { 0.000083, 0.000030, 0.000000 },
+    { 0.000059, 0.000021, 0.000000 },
+    { 0.000042, 0.000015, 0.000000 },
+    };
+
+    gdouble xr = 3.240479;
+    gdouble xg = -0.969256;
+    gdouble xb = 0.055648;
+    gdouble yr = -1.53715;
+    gdouble yg = 1.875992;
+    gdouble yb = -0.204043;
+    gdouble zr = -0.498535;
+    gdouble zg = 0.041556;
+    gdouble zb = 1.057311;
+
+    MDTMDACalibration *xAxis = &dataframe->dimensions[0],
+                      *yAxis = &dataframe->dimensions[1],
+                      *zAxis = &dataframe->mesurands[0];
+
+    if (xAxis->unit && xAxis->unitLen) {
+        unit = g_strndup(xAxis->unit, xAxis->unitLen);
+        siunitxy = gwy_si_unit_new_parse(unit, &power10xy);
+        g_free(unit);
+    }
+    else {
+        cunit = gwy_flat_enum_to_string(unitCodeForSiCode(xAxis->siUnit),
+                                        G_N_ELEMENTS(mdt_units),
+                                        mdt_units, mdt_units_name);
+        siunitxy = gwy_si_unit_new_parse(cunit, &power10xy);
+    }
+    gwy_debug("xy unit power %d", power10xy);
+
+    if (zAxis->unit && zAxis->unitLen) {
+        unit = g_strndup(zAxis->unit, zAxis->unitLen);
+        siunitz = gwy_si_unit_new_parse(unit, &power10z);
+        g_free(unit);
+    }
+    else {
+        cunit = gwy_flat_enum_to_string(unitCodeForSiCode(zAxis->siUnit),
+                                        G_N_ELEMENTS(mdt_units),
+                                        mdt_units, mdt_units_name);
+        siunitz = gwy_si_unit_new_parse(cunit, &power10z);
+    }
+    gwy_debug("z unit power %d", power10xy);
+
+    xreal = pow10(power10xy) * xAxis->scale;
+    yreal = pow10(power10xy) * yAxis->scale;
+    zscale = pow10(power10z) * zAxis->scale;
+
+    xsize = (dataframe->dimensions[0].maxIndex
+           - dataframe->dimensions[0].minIndex + 1);
+    ysize = (dataframe->dimensions[1].maxIndex
+           - dataframe->dimensions[1].minIndex + 1);
+
+    /* FIXME: real size is wrong */
+    dfield = gwy_data_field_new(xsize, ysize,
+                                xreal*xsize, yreal*ysize, FALSE);
+
+    gwy_data_field_set_si_unit_xy(dfield, siunitxy);
+    g_object_unref(siunitxy);
+    gwy_data_field_set_si_unit_z(dfield, siunitz);
+    g_object_unref(siunitz);
+
+    data = gwy_data_field_get_data(dfield);
+
+    if (mode == GWY_RUN_INTERACTIVE) {
+        dialog = gtk_dialog_new_with_buttons(_("Raman Image"), NULL, 0,
+                                 GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                 NULL);
+        gtk_dialog_set_has_separator(GTK_DIALOG(dialog), FALSE);
+        gtk_dialog_set_default_response(GTK_DIALOG(dialog),
+                                        GTK_RESPONSE_OK);
+    }
+
+    image = gtk_image_new();
+
+    pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, FALSE, 8,
+                                xsize, ysize);
+    gdk_pixbuf_fill(pixbuf, 0);
+
+    pixels = gdk_pixbuf_get_pixels(pixbuf);
+    rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+
+    ymax = 0.0;
+
+    p = (guchar *)dataframe->image;
+    px = p + 1024*xsize*ysize*sizeof(gfloat);
+    for (k = 0; k < 1024; k++) {
+            xspectra[k] = (gdouble)gwy_get_gfloat_le(&px);
+        }
+
+    for (i = 0; i < ysize; i++) {
+        for (j = 0; j < xsize; j++) {
+            x = 0;
+            y = 0;
+            z = 0;
+            for (k = 0; k < 1024; k++) {
+                yspectra[k] = (gdouble)gwy_get_gfloat_le(&p);
+                if (yspectra[k] > 1e-9) /* not a black pixel */
+                    yspectra[k] -= 550.0; /* background noise */
+                l = (gint)((xspectra[k] - 360.0)/5);
+                if ((l >= 0) && (l < 85) && (k < 1023)) {
+                    x += yspectra[k]*cie_2deg_xyz[l][0]
+                        *(xspectra[k+1]-xspectra[k]);
+                    y += yspectra[k]*cie_2deg_xyz[l][1]
+                        *(xspectra[k+1]-xspectra[k]);
+                    z += yspectra[k]*cie_2deg_xyz[l][2]
+                        *(xspectra[k+1]-xspectra[k]);
+                }
+            }
+
+            x /= 1024.0;
+            y /= 1024.0;
+            z /= 1024.0;
+            ymax = (y > ymax) ? y : ymax;
+            *(data++) = y;
+            xyzsum = x + y + z;
+            x /= xyzsum;
+            y /= xyzsum;
+            z /= xyzsum;
+            r = xr*x + yr*y + zr*z;
+            g = xg*x + yg*y + zg*z;
+            b = xb*x + yb*y + zb*z;
+            wmin = (r < g) ? r : g;
+            wmin = (wmin < b) ? wmin : b;
+            if (wmin < 0.0) {
+                wmin = -wmin;
+                r += wmin;
+                g += wmin;
+                b += wmin;
+            }
+            wmax = (r > g) ? r : g;
+            wmax = (wmax > b) ? wmax : b;
+            if (wmax > 1.0) {
+                r /= wmax;
+                g /= wmax;
+                b /= wmax;
+            }
+
+            pixels[i*rowstride+3*j]   = (guchar)(r*255.0);
+            pixels[i*rowstride+3*j+1] = (guchar)(g*255.0);
+            pixels[i*rowstride+3*j+2] = (guchar)(b*255.0);
+        }
+    }
+
+    data = gwy_data_field_get_data(dfield);
+    for (i = 0; i < ysize; i++) {
+        for (j = 0; j < xsize; j++) {
+            y = *(data++)/ymax;
+            pixels[i*rowstride+3*j] *= y;
+            pixels[i*rowstride+3*j+1] *= y;
+            pixels[i*rowstride+3*j+2] *= y;
+        }
+    }
+    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+    g_object_unref(pixbuf);
+
+    /* FIXME: this is temporary code to show raman images, need rework */
+    if (mode == GWY_RUN_INTERACTIVE) {
+        g_signal_connect(image, "expose-event", G_CALLBACK(resize_image),
+                        (gpointer)dialog);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), image,
+                           TRUE, TRUE, 0);
+        gtk_widget_show_all(dialog);
+        do {
+            response = gtk_dialog_run(GTK_DIALOG(dialog));
+        } while ((response != GTK_RESPONSE_OK)
+              && (response != GTK_RESPONSE_DELETE_EVENT));
+
+        gtk_widget_destroy(dialog);
+    }
+
+    return dfield;
 }
 
 static void
@@ -2265,7 +2571,9 @@ parse_text(G_GNUC_UNUSED GMarkupParseContext *context,
                 else if (params->units == 2
                       && params->laser_wavelength > 0.0) {
                     /* 1/cm and nonzero laser wavelength */
-                    params->data[i] = 1e9 * (1 / params->laser_wavelength - 1 / wavelength);
+                    params->data[i]
+                        = 1e9 * (1 / params->laser_wavelength
+                        - 1 / wavelength);
                 }
             }
         }

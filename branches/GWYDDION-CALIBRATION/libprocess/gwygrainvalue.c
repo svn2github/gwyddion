@@ -29,7 +29,7 @@
 
 /* We know they are usable as bits */
 enum {
-    MAXBUILTINS = 33,
+    MAXBUILTINS = 64,
     GWY_GRAIN_QUANTITY_ID = MAXBUILTINS-1
 };
 
@@ -271,6 +271,69 @@ grain_values[] = {
         {
             GWY_GRAIN_VALUE_GROUP_SLOPE,
             "<i>φ</i>", "phi", NULL,
+            0, 0, GWY_GRAIN_VALUE_IS_ANGLE, 0,
+        }
+    },
+    {
+        N_("Curvature center x position"),
+        GWY_GRAIN_VALUE_CURVATURE_CENTER_X,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>x</i><sub>0</sub>", "x_0", NULL,
+            1, 0, 0, 0,
+        }
+    },
+    {
+        N_("Curvature center y position"),
+        GWY_GRAIN_VALUE_CURVATURE_CENTER_Y,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>y</i><sub>0</sub>", "y_0", NULL,
+            1, 0, 0, 0,
+        }
+    },
+    {
+        N_("Curvature center z value"),
+        GWY_GRAIN_VALUE_CURVATURE_CENTER_Z,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>z</i><sub>0</sub>", "z_0", NULL,
+            0, 1, 0, 0,
+        }
+    },
+    {
+        N_("Curvature 1"),
+        GWY_GRAIN_VALUE_CURVATURE1,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>κ</i><sub>1</sub>", "kappa_1", NULL,
+            -1, 0, GWY_GRAIN_VALUE_SAME_UNITS, 0,
+        }
+    },
+    {
+        N_("Curvature 2"),
+        GWY_GRAIN_VALUE_CURVATURE2,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>κ</i><sub>2</sub>", "kappa_2", NULL,
+            -1, 0, GWY_GRAIN_VALUE_SAME_UNITS, 0,
+        }
+    },
+    {
+        N_("Curvature angle 1"),
+        GWY_GRAIN_VALUE_CURVATURE_ANGLE1,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>φ</i><sub>1</sub>", "phi_1", NULL,
+            0, 0, GWY_GRAIN_VALUE_IS_ANGLE, 0,
+        }
+    },
+    {
+        N_("Curvature angle 2"),
+        GWY_GRAIN_VALUE_CURVATURE_ANGLE2,
+        {
+            GWY_GRAIN_VALUE_GROUP_CURVATURE,
+            "<i>φ</i><sub>2</sub>", "phi_2", NULL,
             0, 0, GWY_GRAIN_VALUE_IS_ANGLE, 0,
         }
     },
@@ -916,6 +979,7 @@ gwy_grain_value_group_name(GwyGrainValueGroup group)
         N_("Volume"),
         N_("Boundary"),
         N_("Slope"),
+        N_("Curvature"),
     };
 
     if (group == GWY_GRAIN_VALUE_GROUP_USER)
@@ -992,30 +1056,6 @@ gwy_grain_values_get_builtin_grain_value(GwyGrainQuantity quantity)
                               GUINT_TO_POINTER(quantity));
 }
 
-static void
-ensure_grain_quantity(gdouble **quantities,
-                      GwyDataField *data_field,
-                      gint ngrains,
-                      const gint *grains,
-                      GwyGrainQuantity q)
-{
-    if (quantities[q])
-        return;
-
-    if (q == GWY_GRAIN_QUANTITY_ID) {
-        gint i;
-
-        quantities[q] = g_new(gdouble, ngrains+1);
-        for (i = 0; i <= ngrains; i++)
-            quantities[q][i] = i;
-
-        return;
-    }
-
-    quantities[q] = gwy_data_field_grains_get_values(data_field, NULL,
-                                                     ngrains, grains, q);
-}
-
 /**
  * gwy_grain_values_calculate:
  * @nvalues: Number of items in @gvalues.
@@ -1031,7 +1071,7 @@ ensure_grain_quantity(gdouble **quantities,
  *
  * Calculates a set of grain values.
  *
- * See also gwy_data_field_grains_get_values() for a simplier function
+ * See also gwy_data_field_grains_get_quantities() for a simplier function
  * for built-in grain values.
  *
  * Since: 2.8
@@ -1046,32 +1086,40 @@ gwy_grain_values_calculate(gint nvalues,
 {
     GwyGrainValue *gvalue;
     guint vars[MAXBUILTINS];
-    gdouble **quantities, **mapped;
-    GwyGrainQuantity q;  /* can take invalid enum values too */
-    gint i;
+    GwyGrainQuantity builtins[MAXBUILTINS];
+    gdouble *quantities[MAXBUILTINS], *packed_quantities[MAXBUILTINS],
+            *mapped[MAXBUILTINS+1];
+    GList *l, *buffers = NULL;
+    gboolean duplicities = FALSE;
+    guint i, j, n, q;
 
     g_return_if_fail(GWY_IS_DATA_FIELD(data_field));
     if (!nvalues)
         return;
 
-    /* Find out what builtin quantities are necessary to calculate and
-     * calculate them. */
-    quantities = g_new0(gdouble*, 2*MAXBUILTINS + 1);
-    mapped = quantities + MAXBUILTINS;
+    /* Builtins */
+    gwy_clear(quantities, MAXBUILTINS);
+    gwy_clear(mapped, MAXBUILTINS+1);
+    for (i = 0; i < nvalues; i++) {
+        gvalue = gvalues[i];
+        g_return_if_fail(GWY_IS_GRAIN_VALUE(gvalue));
+        if (gvalue->data.group == GWY_GRAIN_VALUE_GROUP_USER)
+            continue;
+
+        q = gvalue->builtin;
+        if (quantities[q])
+            duplicities = TRUE;
+        else
+            quantities[q] = results[i];
+    }
+
+    /* Expressions */
     for (i = 0; i < nvalues; i++) {
         gboolean resolved;
 
         gvalue = gvalues[i];
-        g_return_if_fail(GWY_IS_GRAIN_VALUE(gvalue));
-
-        /* Builtins */
-        if (gvalue->data.group != GWY_GRAIN_VALUE_GROUP_USER) {
-            q = gvalue->builtin;
-            ensure_grain_quantity(quantities, data_field, ngrains, grains, q);
+        if (gvalue->data.group != GWY_GRAIN_VALUE_GROUP_USER)
             continue;
-        }
-
-        /* Expressions */
         resolved = gwy_grain_value_resolve_expression(gvalue->expression, vars,
                                                       NULL);
         g_return_if_fail(resolved);
@@ -1079,23 +1127,37 @@ gwy_grain_values_calculate(gint nvalues,
             if (!vars[q])
                 continue;
 
-            ensure_grain_quantity(quantities, data_field, ngrains, grains, q);
+            if (!quantities[q]) {
+                quantities[q] = g_new(gdouble, ngrains + 1);
+                buffers = g_list_prepend(buffers, quantities[q]);
+            }
         }
     }
 
-    /* Calculate the requested quantities */
+    /* Pack into a flat array */
+    for (i = n = 0; i < MAXBUILTINS; i++) {
+        if (quantities[i]) {
+            if ((guint)i == GWY_GRAIN_QUANTITY_ID) {
+                for (j = 0; j <= ngrains; j++)
+                    quantities[i][j] = j;
+            }
+            else {
+                builtins[n] = i;
+                packed_quantities[n] = quantities[i];
+                n++;
+            }
+        }
+    }
+
+    /* Calculate the built-in quantities */
+    gwy_data_field_grains_get_quantities(data_field, packed_quantities,
+                                         builtins, n, ngrains, grains);
+
+    /* Calculate the user quantities */
     for (i = 0; i < nvalues; i++) {
         gvalue = gvalues[i];
-
-        /* Builtins */
-        if (gvalue->data.group != GWY_GRAIN_VALUE_GROUP_USER) {
-            g_assert(quantities[gvalue->builtin]);
-            memcpy(results[i], quantities[gvalue->builtin],
-                   (ngrains + 1)*sizeof(gdouble));
+        if (gvalue->data.group != GWY_GRAIN_VALUE_GROUP_USER)
             continue;
-        }
-
-        /* Expressions */
         gwy_grain_value_resolve_expression(gvalue->expression, vars, NULL);
         gwy_clear(mapped, MAXBUILTINS + 1);
         for (q = 0; q < MAXBUILTINS; q++) {
@@ -1108,10 +1170,26 @@ gwy_grain_values_calculate(gint nvalues,
                                 results[i]);
     }
 
+    /* Copy duplicities to all instances in @results. */
+    if (duplicities) {
+        for (i = 1; i < nvalues; i++) {
+            gvalue = gvalues[i];
+            for (j = i; j; j--) {
+                if (gvalues[j-1] == gvalue)
+                    break;
+            }
+            if (!j)
+                continue;
+
+            j--;
+            memcpy(quantities[i], quantities[j], (ngrains + 1)*sizeof(gdouble));
+        }
+    }
+
     /* Free */
-    for (q = 0; q < MAXBUILTINS; q++)
-        g_free(quantities[q]);
-    g_free(quantities);
+    for (l = buffers; l; l = g_list_next(l))
+        g_free(l->data);
+    g_list_free(buffers);
 }
 
 /************************** Documentation ****************************/

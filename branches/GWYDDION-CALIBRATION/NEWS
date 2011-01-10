@@ -1,3 +1,135 @@
+2.23 (0000-00-00)
+Other:
+- Compilation with MSVC6 toolchain on MS Windows is no longer supported, use
+  MinGW32.  The recommended compilation method is cross-compilation on Linux.
+
+
+2.22 (2010-12-06)
+Application:
+- Translations updated: Czech, French, Russian.
+- New command line option --no-log-to-file disables redirection of messages
+  to a log file (usefuly namely on Win32).
+- Gwyddion tries to initialise thread support as the very first thing if it
+  finds to be running with GLib 2.24 or newer.
+
+Libraries:
+- libgwyprocess: Odd behaviour of 1D convolution and Gaussian filters for
+  kernels much larger than data were corrected to full mirroring.
+- libgwyprocess: New grain quantities related to curvature were added.
+- libgwyddion: Portable isinf and insnan (gwy_isinf() and gwy_isnan()) were
+  added.
+- libgwyddion: gwy_math_curvature() calculating curvature parameters from a
+  quadratic surface polynomial coefficients was added.
+- libgwyprocess: gwy_data_field_grains_get_quantitites() can calculate
+  multiple built-in grain quantities at once, avoiding repeated work.
+- libgwyprocess: Buffer overflow in gwy_data_field_correct_laplace_iteration()
+  for thin masks touching the data field sides was corrected.
+- libgwyprocess: Laplace basis for grain volume calculation that might not be
+  sufficiently converged is now let to really converge to a stable surface.
+- libgwyprocess: Slope-related grain quantities now fall back to 0 instead of
+  becoming NaN for too small grains.
+- libgwyprocess: Grain boundary minimum and maximum calculation consideres
+  pixels at edges of the image to be boundaries too.
+- libgwyddion: GwySIUnit works correctly if created with g_object_new().
+- libgwyprocesss: New function for radially averaged ACF.
+
+Modules:
+- Anfatec (new): Anfatec data file import.
+- Pattern Synthesis (new): Creates regular patterns such as steps of ridges.
+- Noise Synthesis (new): Generates uncorrelated point noise.
+- Line Noise Synthesis (new): Generates line noise (steps or scars).
+- Particle synthesis (new): Generate (modify) surfaces by particle
+  deposition using a simple dynamic model.
+- Object Synthesis: Objects can be placed onto an existing surface, two
+  new shapes (diamond and Gaussian) were added, other small improvements.
+- Spectral Synthesis: Generated data can be added to an existing surface.
+- Mask Editor tool: New editting tools were added: paintbrush, eraser,
+  and bucket filling and unfilling.
+- Statistical functions tool: Radially averaged ACF was added.
+- Arithmetic: Has a preview, expressions can work with mask values, units of
+  the result can be speficied, the number of fields was increased to 8.
+- Threshold: Renamed to Limit Range in the menus; can cut off outliers given
+  by a multiple of RMS now.
+- BCR: Z-axis scaling for non-topography floating point data was corrected.
+- GDEF: Vertically flipped data was corrected.
+- Color range tool: Critical warning/crashe when Fixed mode is set default
+  and the file is closed was fixed.
+- Plug-in proxy: Channel title read from dump files is retained now.
+- Grain distributions: The comment header option is remembered.
+- Pygwy console: It can be run also if no data is loaded.
+
+Other:
+- If compiled by gcc and it accepts option -fexcess-precision=fast it is passed
+  to the compile to be on the fast side.
+- It is possible to cross-compile Gwyddion for MS Windows using the MinGW32
+  cross-compiler.  The official executables are still made using MSVC6 though.
+
+
+2.21 (2010-10-26)
+Application:
+- Translations updated: Czech, French, Russian.
+
+Libraries:
+- libgwyapp: It is possible to disable undo globally, undo/redo operations
+  then become no-op.
+- libgwyapp: It is possible to disable creation of windows by data-browser.
+- libgwyapp: Channels, graphs and spectra can be searched using a GPatternSpec
+  pattern.
+- libgwyprocess: gwy_data_field_clamp() and gwy_data_field_invert() correctly
+  update cached minimum and maximum field values.
+- libgwyapp: GwyAppDataChooser channel chooser dynamically reflects the set
+  of channels.
+
+Modules:
+- LEXT (new): Olympus LEXT 4000OLS data import.
+- GDEF (new): DME GDEF data import.
+- Mutual Crop (new): Crop two shifted channels to the common area (found using
+  correlation search).
+- Threshold (new): Limit data to specified range by cutting values outside it.
+- Graph DOS spectrum (new): Calculates DOS spectrum from I-V tunneling
+  spectroscopy.
+- IGOR: Support for non-Asylum-Research files was improved.
+- Pixmap export: The horizontal ruler always displays units now, even if the
+  x-range does not include zero.
+- Mask editor tool: New operation Fill Voids fills holes in masked areas.
+- NT-MDT: Offset of x-asis in non-MDA spectroscopy frames was corrected.
+
+
+2.20 (2010-06-30)
+Application:
+- Translations updated: French, Russian.
+- It is possible to export 3D as image also to other support pixmap formats,
+  the format is determined by the extension.
+
+Libraries:
+- libgwyprocess: Deserialization of spectra when there are selected curves
+  actually works now.
+- libgwyprocess: gwy_data_field_fit_poly() and gwy_data_field_area_fit_poly()
+  work without coeffs array preinitialized to zeroes.
+- libgwyprocess: Radial PSDF calculation uses all necessary DFT coefficients,
+  correcting the calculation for anisotropic images.
+- libgwydgets: GwyColorAxis can show numbered ticks.
+
+Modules:
+- GSF (new): Gwyddion Simple Field single-channel file reading and exporting.
+- SICM: Value scale was corrected and some more metadata fields are read now.
+- Facet level: Bugs when masking was used were fixed, namely in Exclude mode.
+- 1D FFT Filter, Color Range tool: square root of the density is shown on
+  graphs to visualize smaller peaks better.
+- Nanonis: Files with multi-line comments can be imported, metadata support
+  was added.
+- Omicron: Metadata values are imported from parameter files.
+- Quesant: Null file part offsets are ignored in the header, fixing import of
+  some files.
+- NT-MDT: Z value offsets are honoured in imported data.
+- Shimadzu: Bogus warning that Z offset units differ from Z scale units was
+  fixed.
+- Nanoscope: Some import support for I-V spectra was added.
+- JPK: Support for 32bit data was added.
+- Pixmap export: False color scale ticks are numbered.
+- Rotate: Rotation angle can be a fractional number.
+
+
 2.19 (2009-12-11)
 Application:
 - Translations updated: Czech, French, Russian.

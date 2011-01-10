@@ -88,6 +88,10 @@ typedef struct {
      * files of 3D data.  We cannot trust direction filed then as it's set to
      * `both' although the file contains one direction only. */
     gboolean bogus_scan_time;
+    /* TRUE if we have just read a comment header and its first line.  If the
+     * next line is not tag, do not complain and consider it to be a part of
+     * the comment as they apparently can be mutiline.  This is a kluge. */
+    gboolean in_comment;
 } SXMFile;
 
 static gboolean      module_register(void);
@@ -96,13 +100,15 @@ static gint          sxm_detect     (const GwyFileDetectInfo *fileinfo,
 static GwyContainer* sxm_load       (const gchar *filename,
                                      GwyRunType mode,
                                      GError **error);
+static GwyContainer* sxm_build_meta (const SXMFile *sxmfile,
+                                     guint id);
 
 static GwyModuleInfo module_info = {
     GWY_MODULE_ABI_VERSION,
     &module_register,
     N_("Imports Nanonis SXM data files."),
     "Yeti <yeti@gwyddion.net>",
-    "0.8",
+    "0.9",
     "David Nečas (Yeti) & Petr Klapetek",
     "2006",
 };
@@ -216,12 +222,26 @@ sxm_read_tag(SXMFile *sxmfile,
 
     len = strlen(line);
     if (len < 3 || line[0] != ':' || line[len-1] != ':') {
+        if (sxmfile->in_comment) {
+            /* Add the line to the comment if we are inside a comment. */
+            gchar *comment, *newcomment;
+
+            comment = g_hash_table_lookup(sxmfile->meta, "COMMENT");
+            g_assert(comment);
+
+            newcomment = g_strconcat(comment, " ", line, NULL);
+            g_hash_table_remove(sxmfile->meta, "COMMENT");
+            g_free(comment);
+            g_hash_table_insert(sxmfile->meta, "COMMENT", newcomment);
+            return TRUE;
+        }
         g_set_error(error, GWY_MODULE_FILE_ERROR, GWY_MODULE_FILE_ERROR_DATA,
                     _("Garbage was found in place of tag header line."));
         return FALSE;
     }
     tag = line+1;
     line[len-1] = '\0';
+    sxmfile->in_comment = FALSE;
     gwy_debug("tag: <%s>", tag);
 
     if (gwy_strequal(tag, "SCANIT_END")) {
@@ -344,6 +364,19 @@ sxm_read_tag(SXMFile *sxmfile,
     if (!(line = get_next_line_with_error(p, error)))
         return FALSE;
 
+    if (gwy_strequal(tag, "COMMENT")) {
+        gchar *comment;
+
+        sxmfile->in_comment = TRUE;
+        if ((comment = g_hash_table_lookup(sxmfile->meta, tag))) {
+            g_hash_table_remove(sxmfile->meta, tag);
+            g_free(comment);
+        }
+        /* XXX: Comments are built per partes and hence we have to allocate
+         * them. */
+        line = g_strdup(line);
+    }
+
     g_hash_table_insert(sxmfile->meta, tag, line);
     gwy_debug("value: <%s>", line);
 
@@ -358,6 +391,7 @@ read_data_field(GwyContainer *container,
                 SXMDirection dir,
                 const guchar **p)
 {
+    GwyContainer *meta;
     GwyDataField *dfield, *mfield = NULL;
     gdouble *data, *mdata;
     gint j;
@@ -420,6 +454,12 @@ read_data_field(GwyContainer *container,
                                 dir == DIR_BACKWARD ? "Backward" : "Forward");
         gwy_container_set_string_by_name(container, key, title);
         /* Don't free title, container eats it */
+    }
+
+    if ((meta = sxm_build_meta(sxmfile, *id))) {
+        g_snprintf(key, sizeof(key), "/%d/meta", *id);
+        gwy_container_set_object_by_name(container, key, meta);
+        g_object_unref(meta);
     }
 
     gwy_app_channel_check_nonsquare(container, *id);
@@ -675,11 +715,67 @@ sxm_load(const gchar *filename,
 
     sxm_free_z_controller(&sxmfile);
     g_free(sxmfile.data_info);
+    if ((s = g_hash_table_lookup(sxmfile.meta, "COMMENT")))
+        g_free(s);
     g_hash_table_destroy(sxmfile.meta);
     g_free(header);
     gwy_file_abandon_contents(buffer, size, NULL);
 
     return container;
+}
+
+static inline gchar*
+reformat_float(const gchar *format,
+               const gchar *value)
+{
+    gdouble v = g_ascii_strtod(value, NULL);
+    return g_strdup_printf(format, v);
+}
+
+static GwyContainer*
+sxm_build_meta(const SXMFile *sxmfile,
+               G_GNUC_UNUSED guint id)
+{
+    GwyContainer *meta = gwy_container_new();
+    const gchar *value;
+
+    if ((value = g_hash_table_lookup(sxmfile->meta, "COMMENT")))
+        gwy_container_set_string_by_name(meta, "Comment", g_strdup(value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "REC_DATE")))
+        gwy_container_set_string_by_name(meta, "Date", g_strdup(value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "REC_TIME")))
+        gwy_container_set_string_by_name(meta, "Time", g_strdup(value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "REC_TEMP")))
+        gwy_container_set_string_by_name(meta, "Temperature",
+                                         reformat_float("%g K", value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "ACQ_TIME")))
+        gwy_container_set_string_by_name(meta, "Acquistion time",
+                                         reformat_float("%g s", value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "SCAN_FILE")))
+        gwy_container_set_string_by_name(meta, "File name", g_strdup(value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "BIAS")))
+        gwy_container_set_string_by_name(meta, "Bias",
+                                         reformat_float("%g V", value));
+    if ((value = g_hash_table_lookup(sxmfile->meta, "SCAN_DIR")))
+        gwy_container_set_string_by_name(meta, "Direction", g_strdup(value));
+
+    if (sxmfile->z_controller_headers && sxmfile->z_controller_values) {
+        gchar **cvalues = sxmfile->z_controller_values;
+        gchar **cheaders = sxmfile->z_controller_headers;
+        guint i;
+
+        for (i = 0; cheaders[i] && cvalues[i]; i++) {
+            gchar *key = g_strconcat("Z controller ", cheaders[i], NULL);
+            gwy_container_set_string_by_name(meta, key, g_strdup(cvalues[i]));
+            g_free(key);
+        }
+    }
+
+    if (gwy_container_get_n_items(meta))
+        return meta;
+
+    g_object_unref(meta);
+    return NULL;
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

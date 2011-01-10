@@ -5,16 +5,13 @@ graphdir = $(pkglibdir)/modules/graph
 graph_LTLIBRARIES = \
 	graph_cd.la \
 	graph_cut.la \
+	graph_dos_spectrum.la \
 	graph_export_ascii.la \
 	graph_export_bitmap.la \
 	graph_export_vector.la \
 	graph_fdfit.la \
 	graph_fit.la \
 	graph_level.la
-
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt
 
 if OS_WIN32
 no_undefined = -no-undefined
@@ -43,8 +40,7 @@ graph_fit_la_SOURCES = graph_fit.c
 graph_cd_la_SOURCES = graph_cd.c
 graph_cut_la_SOURCES = graph_cut.c
 graph_level_la_SOURCES = graph_level.c
-
-MAINTAINERCLEANFILES = makefile.msc
+graph_dos_spectrum_la_SOURCES = graph_dos_spectrum.c
 
 clean-local:
 	rm -f core.* *~

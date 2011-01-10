@@ -114,6 +114,12 @@ typedef struct {
     gint id;
 } GwyApp3DAssociation;
 
+typedef struct {
+    GwyAppDataWatchFunc function;
+    gpointer user_data;
+    gulong id;
+} GwyAppWatcherData;
+
 /* The data browser */
 struct _GwyAppDataBrowser {
     GList *proxy_list;
@@ -191,6 +197,10 @@ static GdkPixbuf* gwy_app_get_graph_thumbnail(GwyContainer *data,
                                               gint id,
                                               gint max_width,
                                               gint max_height);
+static void gwy_app_data_browser_notify_watch(GList *watchers,
+                                              GwyContainer *container,
+                                              gint id,
+                                              GwyDataWatchEventType event);
 
 static GQuark container_quark    = 0;
 static GQuark own_key_quark      = 0;
@@ -201,6 +211,14 @@ static GQuark graph_window_quark = 0;
 
 /* The data browser */
 static GwyAppDataBrowser *gwy_app_data_browser = NULL;
+static gboolean gui_disabled = FALSE;
+
+static gulong watcher_id = 0;
+static GList *channel_watchers = NULL;
+/*
+static GList *graph_watchers = NULL;
+static GList *spectra_watchers = NULL;
+*/
 
 /* Use doubles for timestamps.  They have 53bit mantisa, which is sufficient
  * for microsecond precision. */
@@ -554,8 +572,6 @@ gwy_app_data_proxy_switch_object_data(G_GNUC_UNUSED GwyAppDataProxy *proxy,
  * @proxy: Data proxy.
  *
  * Updates channel display in the data browser when channel data change.
- *
- * (Currently does not do anything.)
  **/
 static void
 gwy_app_data_proxy_channel_changed(GwyDataField *channel,
@@ -579,12 +595,14 @@ gwy_app_data_proxy_channel_changed(GwyDataField *channel,
     gtk_list_store_set(proxy->lists[PAGE_CHANNELS].store, &iter,
                        MODEL_TIMESTAMP, gwy_get_timestamp(),
                        -1);
+    gwy_app_data_browser_notify_watch(channel_watchers, proxy->container, id,
+                                      GWY_DATA_WATCH_EVENT_CHANGED);
 }
 
 /**
  * gwy_app_data_proxy_connect_channel:
  * @proxy: Data proxy.
- * @i: Channel id.
+ * @id: Channel id.
  * @object: The data field to add (passed as #GObject).
  *
  * Adds a data field as channel of specified id, setting qdata and connecting
@@ -592,23 +610,25 @@ gwy_app_data_proxy_channel_changed(GwyDataField *channel,
  **/
 static void
 gwy_app_data_proxy_connect_channel(GwyAppDataProxy *proxy,
-                                   gint i,
+                                   gint id,
                                    GtkTreeIter *iter,
                                    GObject *object)
 {
     gchar key[24];
     GQuark quark;
 
-    gwy_app_data_proxy_add_object(&proxy->lists[PAGE_CHANNELS], i, iter,
+    gwy_app_data_proxy_add_object(&proxy->lists[PAGE_CHANNELS], id, iter,
                                   object);
-    g_snprintf(key, sizeof(key), "/%d/data", i);
-    gwy_debug("%p: %d in %p", object, i, proxy->container);
+    g_snprintf(key, sizeof(key), "/%d/data", id);
+    gwy_debug("%p: %d in %p", object, id, proxy->container);
     quark = g_quark_from_string(key);
     g_object_set_qdata(object, container_quark, proxy->container);
     g_object_set_qdata(object, own_key_quark, GUINT_TO_POINTER(quark));
 
     g_signal_connect(object, "data-changed",
                      G_CALLBACK(gwy_app_data_proxy_channel_changed), proxy);
+    gwy_app_data_browser_notify_watch(channel_watchers, proxy->container, id,
+                                      GWY_DATA_WATCH_EVENT_ADDED);
 }
 
 /**
@@ -624,9 +644,11 @@ gwy_app_data_proxy_disconnect_channel(GwyAppDataProxy *proxy,
                                       GtkTreeIter *iter)
 {
     GObject *object;
+    gint id;
 
     gtk_tree_model_get(GTK_TREE_MODEL(proxy->lists[PAGE_CHANNELS].store), iter,
                        MODEL_OBJECT, &object,
+                       MODEL_ID, &id,
                        -1);
     gwy_debug("%p: from %p", object, proxy->container);
     g_object_set_qdata(object, container_quark, NULL);
@@ -636,6 +658,8 @@ gwy_app_data_proxy_disconnect_channel(GwyAppDataProxy *proxy,
                                          proxy);
     g_object_unref(object);
     gtk_list_store_remove(proxy->lists[PAGE_CHANNELS].store, iter);
+    gwy_app_data_browser_notify_watch(channel_watchers, proxy->container, id,
+                                      GWY_DATA_WATCH_EVENT_REMOVED);
 }
 
 /**
@@ -653,9 +677,11 @@ gwy_app_data_proxy_reconnect_channel(GwyAppDataProxy *proxy,
                                      GObject *object)
 {
     GObject *old;
+    gint id;
 
     gtk_tree_model_get(GTK_TREE_MODEL(proxy->lists[PAGE_CHANNELS].store), iter,
                        MODEL_OBJECT, &old,
+                       MODEL_ID, &id,
                        -1);
     g_signal_handlers_disconnect_by_func(old,
                                          gwy_app_data_proxy_channel_changed,
@@ -667,6 +693,8 @@ gwy_app_data_proxy_reconnect_channel(GwyAppDataProxy *proxy,
     g_signal_connect(object, "data-changed",
                      G_CALLBACK(gwy_app_data_proxy_channel_changed), proxy);
     g_object_unref(old);
+    gwy_app_data_browser_notify_watch(channel_watchers, proxy->container, id,
+                                      GWY_DATA_WATCH_EVENT_CHANGED);
 }
 
 /**
@@ -1225,10 +1253,14 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
         pageno = PAGE_CHANNELS;
         list = &proxy->lists[pageno];
         found = gwy_app_data_proxy_find_object(list->store, id, &iter);
-        if (found)
+        if (found) {
             gtk_tree_model_get(GTK_TREE_MODEL(list->store), &iter,
                                MODEL_WIDGET, &data_view,
                                -1);
+            gwy_app_data_browser_notify_watch(channel_watchers,
+                                              proxy->container, id,
+                                              GWY_DATA_WATCH_EVENT_CHANGED);
+        }
         /* XXX: This is not a good place to do that, DataProxy should be
          * non-GUI */
         if (data_view) {
@@ -1248,10 +1280,14 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
         pageno = PAGE_CHANNELS;
         list = &proxy->lists[pageno];
         found = gwy_app_data_proxy_find_object(list->store, id, &iter);
-        if (found)
+        if (found) {
             gtk_tree_model_get(GTK_TREE_MODEL(list->store), &iter,
                                MODEL_WIDGET, &data_view,
                                -1);
+            gwy_app_data_browser_notify_watch(channel_watchers,
+                                              proxy->container, id,
+                                              GWY_DATA_WATCH_EVENT_CHANGED);
+        }
         /* XXX: This is not a good place to do that, DataProxy should be
          * non-GUI */
         if (data_view) {
@@ -1264,14 +1300,21 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
         break;
 
         case KEY_IS_PALETTE:
+        case KEY_IS_RANGE:
         case KEY_IS_MASK_COLOR:
         case KEY_IS_REAL_SQUARE:
         pageno = PAGE_CHANNELS;
         list = &proxy->lists[pageno];
         found = gwy_app_data_proxy_find_object(list->store, id, &iter);
-        /* Prevent thumbnail update */
-        if (!found)
+        if (found) {
+            gwy_app_data_browser_notify_watch(channel_watchers,
+                                              proxy->container, id,
+                                              GWY_DATA_WATCH_EVENT_CHANGED);
+        }
+        else {
+            /* Prevent thumbnail update */
             pageno = -1;
+        }
         break;
 
         default:
@@ -1285,6 +1328,24 @@ gwy_app_data_proxy_item_changed(GwyContainer *data,
     gtk_list_store_set(list->store, &iter,
                        MODEL_TIMESTAMP, gwy_get_timestamp(),
                        -1);
+}
+
+static void
+gwy_app_data_proxy_watch_remove_all(GList *watchers,
+                                    gint page,
+                                    GwyAppDataProxy *proxy)
+{
+    GtkTreeModel *model = GTK_TREE_MODEL(proxy->lists[page].store);
+    GtkTreeIter iter;
+    gint id;
+
+    if (gtk_tree_model_get_iter_first(model, &iter)) {
+        do {
+            gtk_tree_model_get(model, &iter, MODEL_ID, &id, -1);
+            gwy_app_data_browser_notify_watch(watchers, proxy->container, id,
+                                              GWY_DATA_WATCH_EVENT_REMOVED);
+        } while (gtk_tree_model_iter_next(model, &iter));
+    }
 }
 
 /**
@@ -1305,6 +1366,8 @@ gwy_app_data_proxy_finalize(gpointer user_data)
     GwyAppDataBrowser *browser;
 
     proxy->finalize_id = 0;
+
+    gwy_app_data_proxy_watch_remove_all(channel_watchers, PAGE_CHANNELS, proxy);
 
     if (gwy_app_data_proxy_visible_count(proxy)) {
         g_assert(gwy_app_data_browser_get_proxy(gwy_app_data_browser,
@@ -2620,6 +2683,9 @@ gwy_app_data_browser_show_3d(GwyContainer *data,
     browser = gwy_app_get_data_browser();
     proxy = gwy_app_data_browser_get_proxy(browser, data, FALSE);
     g_return_if_fail(proxy);
+
+    if (gui_disabled)
+        return;
 
     item = gwy_app_data_proxy_get_3d(proxy, id);
     if (item)
@@ -4230,6 +4296,9 @@ gwy_app_data_browser_reset_visibility(GwyContainer *data,
 
     g_return_val_if_fail(GWY_IS_CONTAINER(data), FALSE);
 
+    if (gui_disabled)
+        return FALSE;
+
     if ((browser = gwy_app_data_browser))
         proxy = gwy_app_data_browser_get_proxy(browser, data, FALSE);
 
@@ -4753,7 +4822,7 @@ gwy_app_data_browser_add_data_field(GwyDataField *dfield,
      * Among other things, it will update proxy->lists[PAGE_CHANNELS].last. */
     gwy_container_set_object_by_name(proxy->container, key, dfield);
 
-    if (showit) {
+    if (showit && !gui_disabled) {
         gwy_app_data_proxy_find_object(list->store, list->last, &iter);
         gwy_app_data_proxy_channel_set_visible(proxy, &iter, TRUE);
     }
@@ -4802,7 +4871,7 @@ gwy_app_data_browser_add_graph_model(GwyGraphModel *gmodel,
      * Among other things, it will update proxy->lists[PAGE_GRAPHS].last. */
     gwy_container_set_object(proxy->container, quark, gmodel);
 
-    if (showit) {
+    if (showit && !gui_disabled) {
         gwy_app_data_proxy_find_object(list->store, list->last, &iter);
         gwy_app_data_proxy_graph_set_visible(proxy, &iter, TRUE);
     }
@@ -4853,7 +4922,7 @@ gwy_app_data_browser_add_spectra(GwySpectra *spectra,
      * Among other things, it will update proxy->lists[PAGE_SPECTRA].last. */
     gwy_container_set_object_by_name(proxy->container, key, spectra);
 
-    if (showit) {
+    if (showit && !gui_disabled) {
         gwy_app_data_proxy_find_object(list->store, list->last, &iter);
         /* FIXME */
         g_warning("Cannot make spectra visible");
@@ -5312,8 +5381,10 @@ gwy_app_data_browser_get_current(GwyAppWhat what,
 
 static gint*
 gwy_app_data_list_get_object_ids(GwyContainer *data,
-                                 guint pageno)
+                                 guint pageno,
+                                 const gchar *titleglob)
 {
+    GPatternSpec *pattern = NULL;
     GwyAppDataBrowser *browser;
     GwyAppDataProxy *proxy;
     GtkTreeModel *model;
@@ -5325,64 +5396,91 @@ gwy_app_data_list_get_object_ids(GwyContainer *data,
     proxy = gwy_app_data_browser_get_proxy(browser, data, FALSE);
     if (!proxy) {
         g_warning("Nothing is known about Container %p", data);
-        return NULL;
+        /* Returning NULL would likely make the caller crash, avoid that. */
+        ids = g_new(gint, 1);
+        ids[0] = -1;
+        return ids;
     }
+
+    if (titleglob)
+        pattern = g_pattern_spec_new(titleglob);
 
     model = GTK_TREE_MODEL(proxy->lists[pageno].store);
     n = gtk_tree_model_iter_n_children(model, NULL);
     ids = g_new(gint, n+1);
-    ids[n] = -1;
     if (n) {
         n = 0;
         gtk_tree_model_get_iter_first(model, &iter);
         do {
+            gboolean ok = FALSE;
+
             gtk_tree_model_get(model, &iter, MODEL_ID, ids + n, -1);
-            n++;
+            if (pattern) {
+                if (pageno == PAGE_CHANNELS) {
+                    const gchar *title
+                        = gwy_app_data_browser_figure_out_channel_title(data,
+                                                                        ids[n]);
+                    ok = g_pattern_match_string(pattern, title);
+                }
+                else if (pageno == PAGE_GRAPHS || pageno == PAGE_SPECTRA) {
+                    GObject *object;
+                    gchar *title;
+
+                    gtk_tree_model_get(model, &iter, MODEL_OBJECT, &object, -1);
+                    g_object_get(object, "title", &title, NULL);
+                    ok = g_pattern_match_string(pattern, title);
+                    g_free(title);
+                    g_object_unref(object);
+                }
+            }
+            else
+                ok = TRUE;
+
+            if (ok)
+                n++;
         } while (gtk_tree_model_iter_next(model, &iter));
     }
+    ids[n] = -1;
+
+    if (pattern)
+        g_pattern_spec_free(pattern);
 
     return ids;
 }
 
 /**
  * gwy_app_data_browser_get_data_ids:
- * @data: A data container.
+ * @data: A data container managed by the data-browser.
  *
  * Gets the list of all channels in a data container.
- *
- * The container must be known to the data browser.
  *
  * Returns: A newly allocated array with channel ids, -1 terminated.
  **/
 gint*
 gwy_app_data_browser_get_data_ids(GwyContainer *data)
 {
-    return gwy_app_data_list_get_object_ids(data, PAGE_CHANNELS);
+    return gwy_app_data_list_get_object_ids(data, PAGE_CHANNELS, NULL);
 }
 
 /**
  * gwy_app_data_browser_get_graph_ids:
- * @data: A data container.
+ * @data: A data container managed by the data-browser.
  *
  * Gets the list of all graphs in a data container.
- *
- * The container must be known to the data browser.
  *
  * Returns: A newly allocated array with graph ids, -1 terminated.
  **/
 gint*
 gwy_app_data_browser_get_graph_ids(GwyContainer *data)
 {
-    return gwy_app_data_list_get_object_ids(data, PAGE_GRAPHS);
+    return gwy_app_data_list_get_object_ids(data, PAGE_GRAPHS, NULL);
 }
 
 /**
  * gwy_app_data_browser_get_spectra_ids:
- * @data: A data container.
+ * @data: A data container managed by the data-browser.
  *
  * Gets the list of all spectra in a data container.
- *
- * The container must be known to the data browser.
  *
  * Returns: A newly allocated array with spectrum ids, -1 terminated.
  *
@@ -5391,7 +5489,7 @@ gwy_app_data_browser_get_graph_ids(GwyContainer *data)
 gint*
 gwy_app_data_browser_get_spectra_ids(GwyContainer *data)
 {
-    return gwy_app_data_list_get_object_ids(data, PAGE_SPECTRA);
+    return gwy_app_data_list_get_object_ids(data, PAGE_SPECTRA, NULL);
 }
 
 /**
@@ -5768,6 +5866,9 @@ gwy_app_data_browser_restore(void)
     GwyContainer *settings;
     gboolean visible = TRUE;
 
+    if (gui_disabled)
+        return;
+
     browser = gwy_app_get_data_browser();
     if (!browser->window)
         gwy_app_data_browser_construct_window(browser);
@@ -6058,12 +6159,271 @@ gwy_app_get_graph_thumbnail(GwyContainer *data,
     return NULL;
 }
 
+/**
+ * gwy_app_data_browser_get_gui_enabled:
+ *
+ * Reports whether creation of windows by the data-browser is enabled.
+ *
+ * Returns: %TRUE if the data-browser is permitted to create windows, %FALSE
+ *          if it is not.
+ *
+ * Since: 2.21
+ **/
+gboolean
+gwy_app_data_browser_get_gui_enabled(void)
+{
+    return !gui_disabled;
+}
+
+/**
+ * gwy_app_data_browser_set_gui_enabled:
+ * @setting: %TRUE to enable creation of widgets by the data-browser,
+ *           %FALSE to disable it.
+ *
+ * Globally enables or disables creation of widgets by the data-browser.
+ *
+ * By default, the data-browser creates windows for data objects automatically,
+ * for instance when reconstructing view of a loaded file, after a module
+ * function creates a new channel or graph or when it is explicitly asked so
+ * by gwy_app_data_browser_show_3d().  Non-GUI applications that run module
+ * functions usually wish to disable GUI.
+ *
+ * If GUI is disabled the data browser never creates windows showing data
+ * objects and also gwy_app_data_browser_show() becomes no-op.
+ *
+ * Disabling GUI after widgets have been already created is a bad idea.
+ * Hence you should do so before loading files or calling module functions.
+ *
+ * Since: 2.21
+ **/
+void
+gwy_app_data_browser_set_gui_enabled(gboolean setting)
+{
+    GwyAppDataBrowser *browser;
+
+    browser = gwy_app_data_browser;
+    if (!gui_disabled && !setting && browser && browser->window) {
+        g_warning("Disabling GUI when widgets have been already constructed. "
+                  "This does not really work.");
+        gtk_widget_hide(browser->window);
+    }
+
+    gui_disabled = !setting;
+
+}
+
+/**
+ * gwy_app_data_browser_find_data_by_title:
+ * @data: A data container managed by the data-browser.
+ * @titleglob: Pattern, as used by #GPatternSpec, to match the channel titles
+ *             against.
+ *
+ * Gets the list of all channels in a data container whose titles match the
+ * specified pattern.
+ *
+ * Returns: A newly allocated array with channel ids, -1 terminated.
+ *
+ * Since: 2.21
+ **/
+gint*
+gwy_app_data_browser_find_data_by_title(GwyContainer *data,
+                                        const gchar *titleglob)
+{
+    return gwy_app_data_list_get_object_ids(data, PAGE_CHANNELS, titleglob);
+}
+
+/**
+ * gwy_app_data_browser_find_graphs_by_title:
+ * @data: A data container managed by the data-browser.
+ * @titleglob: Pattern, as used by #GPatternSpec, to match the graph titles
+ *             against.
+ *
+ * Gets the list of all graphs in a data container whose titles match the
+ * specified pattern.
+ *
+ * Returns: A newly allocated array with graph ids, -1 terminated.
+ *
+ * Since: 2.21
+ **/
+gint*
+gwy_app_data_browser_find_graphs_by_title(GwyContainer *data,
+                                          const gchar *titleglob)
+{
+    return gwy_app_data_list_get_object_ids(data, PAGE_GRAPHS, titleglob);
+}
+
+/**
+ * gwy_app_data_browser_find_spectra_by_title:
+ * @data: A data container managed by the data-browser.
+ * @titleglob: Pattern, as used by #GPatternSpec, to match the spectra titles
+ *             against.
+ *
+ * Gets the list of all spectra in a data container whose titles match the
+ * specified pattern.
+ *
+ * Returns: A newly allocated array with spectra ids, -1 terminated.
+ *
+ * Since: 2.21
+ **/
+gint*
+gwy_app_data_browser_find_spectra_by_title(GwyContainer *data,
+                                           const gchar *titleglob)
+{
+    return gwy_app_data_list_get_object_ids(data, PAGE_SPECTRA, titleglob);
+}
+
+static void
+gwy_app_data_browser_notify_watch(GList *watchers,
+                                  GwyContainer *container,
+                                  gint id,
+                                  GwyDataWatchEventType event)
+{
+    while (watchers) {
+        GwyAppWatcherData *wdata = (GwyAppWatcherData*)watchers->data;
+        wdata->function(container, id, event, wdata->user_data);
+        watchers = g_list_next(watchers);
+    }
+}
+
+static gulong
+gwy_app_data_browser_add_watch(GList **watchers,
+                               GwyAppDataWatchFunc function,
+                               gpointer user_data)
+{
+    GwyAppWatcherData *wdata;
+
+    g_return_val_if_fail(function, 0);
+    wdata = g_new(GwyAppWatcherData, 1);
+    wdata->function = function;
+    wdata->user_data = user_data;
+    wdata->id = ++watcher_id;
+    *watchers = g_list_append(*watchers, wdata);
+
+    return wdata->id;
+}
+
+static void
+gwy_app_data_browser_remove_watch(GList **watchers,
+                                  gulong id)
+{
+    GList *l;
+
+    for (l = *watchers; l; l = g_list_next(l)) {
+        GwyAppWatcherData *wdata = (GwyAppWatcherData*)l->data;
+
+        if (wdata->id == id) {
+            *watchers = g_list_delete_link(*watchers, l);
+            return;
+        }
+    }
+    g_warning("Cannot find watch with id %lu.", id);
+}
+
+/**
+ * gwy_app_data_browser_add_channel_watch:
+ * @function: Function to call when a channel changes.
+ * @user_data: User data to pass to @function.
+ *
+ * Adds a watch function called when a channel changes.
+ *
+ * The function is called whenever a channel is added, removed, its data
+ * changes or its metadata such as the title changes.  If a channel is removed
+ * it may longer exist when the function is called.
+ *
+ * Returns: The id of the added watch func that can be used to remove it later
+ *          using gwy_app_data_browser_remove_channel_watch().
+ *
+ * Since 2.21.
+ **/
+gulong
+gwy_app_data_browser_add_channel_watch(GwyAppDataWatchFunc function,
+                                       gpointer user_data)
+{
+    return gwy_app_data_browser_add_watch(&channel_watchers,
+                                          function, user_data);
+}
+
+/**
+ * gwy_app_data_browser_remove_channel_watch:
+ * @id: Watch function id, as returned by
+ *      gwy_app_data_browser_add_channel_watch().
+ *
+ * Removes a channel watch function.
+ *
+ * Since: 2.21
+ **/
+void
+gwy_app_data_browser_remove_channel_watch(gulong id)
+{
+    gwy_app_data_browser_remove_watch(&channel_watchers, id);
+}
+
+/*
+gulong
+gwy_app_data_browser_add_graph_watch(GwyAppDataWatchFunc function,
+                                     gpointer user_data)
+{
+    return gwy_app_data_browser_add_watch(&graph_watchers,
+                                          function, user_data);
+}
+
+void
+gwy_app_data_browser_remove_graph_watch(gulong id)
+{
+    gwy_app_data_browser_remove_watch(&graph_watchers, id);
+}
+
+gulong
+gwy_app_data_browser_add_spectra_watch(GwyAppDataWatchFunc function,
+                                       gpointer user_data)
+{
+    return gwy_app_data_browser_add_watch(&spectra_watchers,
+                                          function, user_data);
+}
+
+void
+gwy_app_data_browser_remove_spectra_watch(gulong id)
+{
+    gwy_app_data_browser_remove_watch(&spectra_watchers, id);
+}
+*/
+
 /************************** Documentation ****************************/
 
 /**
  * SECTION:data-browser
  * @title: data-browser
  * @short_description: Data browser
+ **/
+
+/**
+ * GwyAppDataForeachFunc:
+ * @data: A data container managed by the data-browser.
+ * @user_data: User data passed to gwy_app_data_browser_foreach().
+ *
+ * Type of function passed to gwy_app_data_browser_foreach().
+ **/
+
+/**
+ * GwyAppDataWatchFunc:
+ * @data: A data container managed by the data-browser.
+ * @id: Object (channel) id in the container.
+ * @user_data: User data passed to gwy_app_data_browser_add_channel_watch().
+ *
+ * Type of function passed to gwy_app_data_browser_add_channel_watch().
+ *
+ * Since: 2.21
+ **/
+
+/**
+ * GwyDataWatchEventType:
+ * @GWY_DATA_WATCH_EVENT_ADDED: A new data object has appeared.
+ * @GWY_DATA_WATCH_EVENT_CHANGED: A data object has changed.
+ * @GWY_DATA_WATCH_EVENT_REMOVED: A data object has been removed.
+ *
+ * Type of event reported to #GwyAppDataWatchFunc watcher functions.
+ *
+ * Since: 2.21
  **/
 
 /**

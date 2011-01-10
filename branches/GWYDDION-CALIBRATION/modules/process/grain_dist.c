@@ -78,7 +78,6 @@ typedef struct {
 
     /* To mask impossible quantitities without really resetting the bits */
     gboolean units_equal;
-    guint bitmask;
 } GrainDistArgs;
 
 typedef struct {
@@ -137,7 +136,6 @@ static const GrainDistArgs grain_dist_defaults = {
     FALSE,
     120,
     FALSE,
-    0xffffffffU,
 };
 
 static GwyModuleInfo module_info = {
@@ -146,16 +144,17 @@ static GwyModuleInfo module_info = {
     N_("Evaluates distribution of grains (continuous parts of mask)."),
     "Petr Klapetek <petr@klapetek.cz>, Sven Neumann <neumann@jpk.com>, "
         "Yeti <yeti@gwyddion.net>",
-    "3.7",
+    "3.8",
     "David Nečas (Yeti) & Petr Klapetek & Sven Neumann",
     "2003",
 };
 
-static const gchar fixres_key[]     = "/module/grain_dist/fixres";
-static const gchar mode_key[]       = "/module/grain_dist/mode";
-static const gchar resolution_key[] = "/module/grain_dist/resolution";
-static const gchar selected_key[]   = "/module/grain_dist/selected";
-static const gchar expanded_key[]   = "/module/grain_dist/expanded";
+static const gchar fixres_key[]      = "/module/grain_dist/fixres";
+static const gchar mode_key[]        = "/module/grain_dist/mode";
+static const gchar resolution_key[]  = "/module/grain_dist/resolution";
+static const gchar add_comment_key[] = "/module/grain_dist/add_comment";
+static const gchar selected_key[]    = "/module/grain_dist/selected";
+static const gchar expanded_key[]    = "/module/grain_dist/expanded";
 
 GWY_MODULE_QUERY(module_info)
 
@@ -199,11 +198,6 @@ grain_dist(GwyContainer *data, GwyRunType run)
     siunitxy = gwy_data_field_get_si_unit_xy(dfield);
     siunitz = gwy_data_field_get_si_unit_z(dfield);
     args.units_equal = gwy_si_unit_equal(siunitxy, siunitz);
-    args.bitmask = 0xffffffffU;
-    /* FIXME: Do this generically with gwy_grain_quantity_needs_same_units() */
-    if (!args.units_equal)
-        args.bitmask ^= ((1 << GWY_GRAIN_VALUE_SURFACE_AREA)
-                         | (1 << GWY_GRAIN_VALUE_SLOPE_THETA));
 
     if (run == GWY_RUN_IMMEDIATE)
         grain_dist_run(&args, data, dfield, mfield);
@@ -881,6 +875,8 @@ grain_dist_load_args(GwyContainer *container,
     *args = grain_dist_defaults;
 
     gwy_container_gis_boolean_by_name(container, fixres_key, &args->fixres);
+    gwy_container_gis_boolean_by_name(container, add_comment_key,
+                                      &args->add_comment);
     if (gwy_container_value_type_by_name(container, selected_key) != G_TYPE_INT)
         gwy_container_gis_string_by_name(container, selected_key,
                                          (const guchar**)&args->selected);
@@ -896,6 +892,8 @@ grain_dist_save_args(GwyContainer *container,
                      GrainDistArgs *args)
 {
     gwy_container_set_boolean_by_name(container, fixres_key, args->fixres);
+    gwy_container_set_boolean_by_name(container, add_comment_key,
+                                      args->add_comment);
     /* args->selected is updated immediately in settings */
     gwy_container_set_int32_by_name(container, expanded_key, args->expanded);
     gwy_container_set_int32_by_name(container, resolution_key,

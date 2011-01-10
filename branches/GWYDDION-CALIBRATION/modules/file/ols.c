@@ -20,8 +20,8 @@
 
 /**
  * [FILE-MAGIC-FREEDESKTOP]
- * <mime-type type="application/x-olympus-lex-3000">
- *   <comment>Olympus LEX 3000</comment>
+ * <mime-type type="application/x-olympus-lext-3000">
+ *   <comment>Olympus LEXT 3000</comment>
  *   <magic priority="10">
  *     <match type="string" offset="0" value="II\x2a\x00"/>
  *   </magic>
@@ -32,7 +32,7 @@
 
 /**
  * [FILE-MAGIC-USERGUIDE]
- * Olympus LEX 3000
+ * Olympus LEXT 3000
  * .ols
  * Read
  **/
@@ -173,7 +173,7 @@ ols_load_tiff(const GwyTIFF *tiff, GError **error)
         /* Request a reader, this ensures dimensions and stuff are defined. */
         reader = gwy_tiff_get_image_reader(tiff, dir_num, &err);
         if (!reader) {
-            g_warning("Ignoring directory %u: %s.", dir_num, err->message);
+            g_warning("Ignoring directory %u: %s", dir_num, err->message);
             g_clear_error(&err);
             continue;
         }

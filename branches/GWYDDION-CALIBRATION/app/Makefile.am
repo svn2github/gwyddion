@@ -54,22 +54,21 @@ uidata_DATA = toolbox.xml
 bin_PROGRAMS = gwyddion
 lib_LTLIBRARIES = libgwyapp2.la
 
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwyapp2.def \
-	README.objdata \
-	toolbox.xml
-
 BUILT_SOURCES = \
 	authors.h
 
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwyapp2.def
+libgwyapp2_la_DEPENDENCIES = libgwyapp2.def
+endif
+
 # Must init
-CLEANFILES =
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwyapp2.def \
-	authors.h
+EXTRA_DIST = \
+	README.objdata \
+	toolbox.xml
+CLEANFILES = libgwyapp2.def
+MAINTAINERCLEANFILES = authors.h
 
 MKENUM_NAME = gwyapptypes
 MKENUM_ID = GWY_APP_TYPES
@@ -85,6 +84,14 @@ if OS_DARWIN
 carbon_cflags = -ObjC -framework AppKit -framework Carbon -framework ApplicationServices
 endif
 
+libgwyapp2.def: $(libgwyapp2_la_OBJECTS)
+	$(AM_V_at)echo EXPORTS >libgwyapp2.def
+	$(AM_V_GEN)for lo in $(libgwyapp2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwyapp2.def
+
 AM_CFLAGS = $(carbon_cflags) @FFTW3_CFLAGS@ @UNIQUE_CFLAGS@ @COMMON_CFLAGS@
 AM_CPPFLAGS = -I$(top_srcdir)
 
@@ -93,8 +100,9 @@ AM_CPPFLAGS = -I$(top_srcdir)
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 5:1:5
-#libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 6:1:6
+#libversion = -release @LIBRARY_RELEASE@
+libgwyapp2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwyapp2_la_CPPFLAGS = -DG_LOG_DOMAIN=\"GwyApp\" $(AM_CPPFLAGS)
 libgwyapp2_la_LIBADD = $(libgwyapp_libadd)
 
@@ -135,7 +143,7 @@ gwyddion_SOURCES = \
 	toolbox.c
 
 
-gwyddion_LDADD = @GTKGLEXT_LIBS@ @FFTW3_LIBS@ @UNIQUE_LIBS@ @BASIC_LIBS@ $(LIBXMU) \
+gwyddion_LDADD = @COMMON_LDFLAGS@ @GTKGLEXT_LIBS@ @FFTW3_LIBS@ @UNIQUE_LIBS@ @BASIC_LIBS@ $(LIBXMU) \
 	libgwyapp2.la \
 	$(libgwymodule) \
 	$(libgwydgets) \
@@ -145,7 +153,7 @@ gwyddion_LDADD = @GTKGLEXT_LIBS@ @FFTW3_LIBS@ @UNIQUE_LIBS@ @BASIC_LIBS@ $(LIBXM
 
 # This is ugly a bit, but uses only very basic sed constructs
 authors.h: ${top_srcdir}/AUTHORS
-	{ \
+	$(AM_V_GEN){ \
 		echo '/* This is a GENERATED file */'; \
 		echo '/*< private_header >*/'; \
 		echo 'static const gchar developers[] ='; \

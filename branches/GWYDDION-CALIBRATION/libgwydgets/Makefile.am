@@ -75,16 +75,16 @@ noinst_HEADERS = \
 
 lib_LTLIBRARIES = libgwydgets2.la
 
-EXTRA_DIST = \
-	makefile.msc \
-	makefile.msc.gwt \
-	libgwydgets2.def
+if OS_WIN32
+no_undefined = -no-undefined
+export_symbols = -export-symbols libgwydgets2.def
+libgwydgets2_la_DEPENDENCIES = libgwydgets2.def
+endif
 
 # Must init
-CLEANFILES =
-MAINTAINERCLEANFILES = \
-	makefile.msc \
-	libgwydgets2.def
+EXTRA_DIST =
+CLEANFILES = libgwydgets2.def
+MAINTAINERCLEANFILES =
 BUILT_SOURCES =
 
 MKENUM_NAME = gwydgettypes
@@ -98,6 +98,14 @@ GENMARSHAL_NAME = gwydgetmarshals
 GENMARSHAL_PREFIX = _gwydget_marshal
 include $(top_srcdir)/utils/genmarshal.mk
 
+libgwydgets2.def: $(libgwydgets2_la_OBJECTS)
+	@echo EXPORTS >libgwydgets2.def
+	@for lo in $(libgwydgets2_la_OBJECTS); do \
+		o=`sed "s/^pic_object='\\(.*\\)'/\\1/;t;d" "$$lo"`; \
+		$(NM) --defined-only --demangle --no-sort "$$o" \
+		| awk -F' ' '($$2=="T" && $$3 ~ /^gwy_/){print "     ",$$3}'; \
+	done | sort >>libgwydgets2.def
+
 AM_CFLAGS = @COMMON_CFLAGS@
 AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"Gwydgets\"
 
@@ -106,8 +114,9 @@ AM_CPPFLAGS = -I$(top_srcdir) -DG_LOG_DOMAIN=\"Gwydgets\"
 # Any iface change    C++: 0:   A
 # Adding ifaces       C:   R:   A++
 # Changing ifaces     C:   R:   0
-libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -version-info 8:3:8
-#libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -release @LIBRARY_RELEASE@
+libversion = -version-info 9:0:9
+#libversion = -release @LIBRARY_RELEASE@
+libgwydgets2_la_LDFLAGS = @GTKGLEXT_LIBS@ @BASIC_LIBS@ -export-dynamic $(no_undefined) $(export_symbols) $(libversion)
 libgwydgets2_la_LIBADD = $(libgwydgets_libadd)
 
 libgwydgets2_la_SOURCES = \

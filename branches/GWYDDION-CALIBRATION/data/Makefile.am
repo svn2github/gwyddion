@@ -26,20 +26,14 @@ schema_DATA = gwyddion-thumbnailer.schemas
 endif
 
 EXTRA_DIST = \
-	config.h.win32.in \
-	config.h.win32 \
-	gwyconfig.h.win32 \
-	gwyddion-devel.iss \
-	gwyddion-devel.iss.in \
 	gwyddion-thumbnailer.schemas.in \
-	gwyddion.iss \
-	gwyddion.iss.in \
+	gwyddion.nsit.in \
 	gwyddion.pc.in \
 	gwyddion.spec.in \
 	gwyddion-cfg.py \
 	gwyddion.vim \
 	gwyddion.1 \
-	makefile.msc \
+	mingw32-gwyddion-libs.spec.in \
 	thumbnailer-schemas.xsl \
 	$(gwyddionapp_DATA) \
 	$(gwyddionmime_DATA)
@@ -66,17 +60,17 @@ MAINTAINERCLEANFILES = \
 # Maintainer mode and VPATH are exclusive!
 if MAINTAINER_MODE
 gwyddion.vim: $(gwyddion_vim_sources) $(gwyddion_vim_cfg) $(vim_syn_gen)
-	cd $(top_builddir); \
+	$(AM_V_GEN)cd $(top_builddir); \
 	$(PYTHON) $(vim_syn_gen) $(gwyddion_vim_cfg) >data/gwyddion.vim
 
 # Freedesktop MIME associations
 gwyddion.xml: $(top_srcdir)/utils/extract-file-magic.py $(file_magic_sources)
-	$(PYTHON) $(top_srcdir)/utils/extract-file-magic.py \
+	$(AM_V_GEN)$(PYTHON) $(top_srcdir)/utils/extract-file-magic.py \
 	  FREEDESKTOP $(file_magic_sources) >gwyddion.xml
 
 # Generate Gnome thumbnailer schemas
 gwyddion-thumbnailer.schemas.in: thumbnailer-schemas.xsl $(srcdir)/gwyddion.xml
-	$(XSLTPROC) $(srcdir)/thumbnailer-schemas.xsl $(srcdir)/gwyddion.xml \
+	$(AM_V_GEN)$(XSLTPROC) $(srcdir)/thumbnailer-schemas.xsl $(srcdir)/gwyddion.xml \
 	  >gwyddion-thumbnailer.schemas.in
 endif
 
@@ -86,7 +80,7 @@ endif
 # Depend on Makefile, this may run this rule perhaps too often but ensures
 # the paths are updated every time they should.
 gwyddion-thumbnailer.schemas: gwyddion-thumbnailer.schemas.in Makefile
-	$(SED) -e 's/^\(<gconfschemafile\) .*\(>\)/\1\2/' \
+	$(AM_V_GEN)$(SED) -e 's/^\(<gconfschemafile\) .*\(>\)/\1\2/' \
 	  -e 's#[@]bindir[@]#$(bindir)#' \
 	   $(srcdir)/gwyddion-thumbnailer.schemas.in \
 	   >gwyddion-thumbnailer.schemas

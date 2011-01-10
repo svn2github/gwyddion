@@ -24,6 +24,7 @@ filedir = $(pkglibdir)/modules/file
 
 file_LTLIBRARIES = \
 	aistfile.la \
+	anfatec.la \
 	apefile.la \
 	asciiexport.la \
 	assing-afm.la \
@@ -34,8 +35,10 @@ file_LTLIBRARIES = \
 	burleigh_exp.la \
 	createc.la \
 	dmefile.la \
-	ezdfile.la \
 	ecsfile.la \
+	ezdfile.la \
+	gdeffile.la \
+	gsffile.la \
 	gwyfile.la \
 	hdf4file.la \
 	hitachi-afm.la \
@@ -43,10 +46,12 @@ file_LTLIBRARIES = \
 	intematix.la \
 	jeol.la \
 	jpkscan.la \
+	lextfile.la \
 	mapvue.la \
 	$(matfile_module) \
 	metropro.la \
 	microprof.la \
+	miffile.la \
 	mifile.la \
 	nanoeducator.la \
 	nanonics.la \
@@ -96,11 +101,17 @@ noinst_HEADERS = \
 	err.h \
 	get.h
 
+# Put sources that are for some reason disabled yet present in svn checkouts
+# here.  This makes them distributed and translations of their messages are
+# kept.  If we remove them completely, various bits can get lost.
+disabled_sources = \
+	miffile.c \
+	wipfile.c
+
 EXTRA_DIST = \
+	$(disabled_sources) \
 	1CHECKLIST \
-	$(spml_sources) \
-	makefile.msc \
-	makefile.msc.gwt
+	$(spml_sources)
 
 if OS_WIN32
 no_undefined = -no-undefined
@@ -121,8 +132,9 @@ module_libadd = \
 	@GTK_LIBS@
 endif
 
-apefile_la_SOURCES       = apefile.c
 aistfile_la_SOURCES      = aistfile.c
+anfatec_la_SOURCES       = anfatec.c
+apefile_la_SOURCES       = apefile.c
 asciiexport_la_SOURCES   = asciiexport.c
 assing_afm_la_SOURCES    = assing-afm.c
 attocube_la_SOURCES      = attocube.c
@@ -134,6 +146,8 @@ createc_la_SOURCES       = createc.c
 dmefile_la_SOURCES       = dmefile.c
 ecsfile_la_SOURCES       = ecsfile.c
 ezdfile_la_SOURCES       = ezdfile.c
+gdeffile_la_SOURCES      = gdeffile.c
+gsffile_la_SOURCES       = gsffile.c
 gwyfile_la_SOURCES       = gwyfile.c
 hdf4file_la_SOURCES      = hdf4file.c
 hitachi_afm_la_SOURCES   = hitachi-afm.c
@@ -141,9 +155,11 @@ igorfile_la_SOURCES      = igorfile.c
 intematix_la_SOURCES     = intematix.c gwytiff.h
 jeol_la_SOURCES          = jeol.c
 jpkscan_la_SOURCES       = jpkscan.c jpk.h gwytiff.h
+lextfile_la_SOURCES      = lextfile.c gwytiff.h
 mapvue_la_SOURCES        = mapvue.c
 metropro_la_SOURCES      = metropro.c
 microprof_la_SOURCES     = microprof.c
+miffile_la_SOURCES       = miffile.c
 mifile_la_SOURCES        = mifile.c
 nanoeducator_la_SOURCES  = nanoeducator.c
 nanonics_la_SOURCES      = nanonics.c
@@ -185,6 +201,7 @@ stmprg_la_SOURCES        = stmprg.c
 stpfile_la_SOURCES       = stpfile.c
 surffile_la_SOURCES      = surffile.c
 unisoku_la_SOURCES       = unisoku.c
+#wipfile_la_SOURCES       = wipfile.c
 witfile_la_SOURCES       = witfile.c
 wsxmfile_la_SOURCES      = wsxmfile.c
 
@@ -202,8 +219,6 @@ if HAVE_ZLIB
 #matfile_la_SOURCES       = matfile.c
 #matfile_la_LIBADD        = @ZLIB@
 endif
-
-MAINTAINERCLEANFILES = makefile.msc
 
 clean-local:
 	rm -f core.* *~
