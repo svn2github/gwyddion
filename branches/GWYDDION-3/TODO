@@ -43,10 +43,6 @@ Serializable boxed: Review type lookup locking once GAtomicArray is available,
 Fit Function: Handle different sources of fitting functions (even different
               sources of built-ins).
 
-Fit Function + Built-in: Make canned user function parameter estimators
-                         available to built-ins.  Add a half-width estimator
-                         (whatever it means)
-
 User fit function: No interface to manipulate the filter, parameters may need
                    markup or constraints.
 
@@ -69,3 +65,6 @@ libgwy: Review directory tests once we install the standard directory structure
 Internal headers: Some utility functions and macros do not really belong
                   anywhere.  Their implementations are also placed in quite
                   arbitrary source files.  Review.
+
+Valgrind reports: Figure out who is responsible for the strtod() errors in
+                  /testlibgwy/unit/garbage
