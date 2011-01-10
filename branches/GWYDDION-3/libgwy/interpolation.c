@@ -884,9 +884,17 @@ gwy_interpolation_shift_block_1d(guint length,
  * GwyExteriorType:
  * @GWY_EXTERIOR_UNDEFINED: The values corresponding to or calculated from
  *                          exterior data values are undefined, they may be
- *                          left unset or set to bogus values.  The caller
- *                          must handle them afterwards, for instance by
- *                          resizing the result to consist of valid data only.
+ *                          left unset or set to bogus values, including NaN.
+ *                          The caller must handle them afterwards, for
+ *                          instance by resizing the result to consist of valid
+ *                          data only.  Using undefined exterior is not
+ *                          recommended with convolutions, correlations and
+ *                          other methods thay may employ FFT as the bogus
+ *                          values outside the field, thay may include
+ *                          infinities and NaNs, enter the calculation and can
+ *                          obliterate the result even in parts that should not
+ *                          be affected if a direct, naive, computation method
+ *                          was used.
  * @GWY_EXTERIOR_BORDER_EXTEND: Values of exterior pixels are considered to be
  *                              equal to the values of the nearest interior
  *                              pixels.
@@ -900,10 +908,18 @@ gwy_interpolation_shift_block_1d(guint length,
  *
  * Methods of handling pixels outside data.
  *
- * At preset, only some functions offer the exterior handling method choice.
- * Other functions use a fixed method, for example area calculation uses
- * extension (border and mirror coincide), convolution uses mirror extension
- * and rotation fills exterior with a fixed value.
+ * Not all functions offer the exterior handling method choice.  Generally,
+ * functions that need to extrapolate just a pixel or two outside the field use
+ * a fixed method, namely mirroring which is the recommended method and that
+ * also for a single-pixel extension coincides with border-extending.  For
+ * instance interpolation or surface area calculation uses this method.
+ *
+ * Functions that may need to work with larger exterior, such as convolutions
+ * and correlations offer, generally, the full set of exterior handling
+ * options.
+ *
+ * See also the generic functions gwy_field_extend() that can to apply the
+ * extension methods to a field.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
