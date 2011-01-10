@@ -157,6 +157,7 @@ test_math_linalg_fail(void)
         g_free(rhs);
         g_free(matrix);
     }
+    g_rand_free(rng);
 }
 
 typedef struct {
