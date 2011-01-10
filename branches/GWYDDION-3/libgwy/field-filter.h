@@ -20,24 +20,34 @@
 #ifndef __LIBGWY_FIELD_FILTER_H__
 #define __LIBGWY_FIELD_FILTER_H__
 
+#include <libgwy/interpolation.h>
 #include <libgwy/line.h>
 #include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
-void gwy_field_row_convolve   (GwyField *field,
-                               const GwyRectangle* rectangle,
-                               const GwyLine *kernel);
-void gwy_field_row_convolve_fft(GwyField *field,
-                                const GwyRectangle *rectangle,
-                                const GwyLine *kernel);
-void gwy_field_col_convolve   (GwyField *field,
-                               const GwyRectangle* rectangle,
-                               const GwyLine *kernel);
-void gwy_field_filter_gaussian(GwyField *field,
-                               const GwyRectangle* rectangle,
-                               gdouble hsigma,
-                               gdouble vsigma);
+void      gwy_field_row_convolve   (GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    const GwyLine *kernel,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
+void      gwy_field_col_convolve   (GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    const GwyLine *kernel,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
+void      gwy_field_filter_gaussian(GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    gdouble hsigma,
+                                    gdouble vsigma);
+GwyField* gwy_field_extend         (const GwyField *field,
+                                    const GwyRectangle *rectangle,
+                                    guint left,
+                                    guint right,
+                                    guint up,
+                                    guint down,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value)            G_GNUC_MALLOC;
 
 G_END_DECLS
 

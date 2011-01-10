@@ -806,7 +806,7 @@ gwy_field_row_psdf(const GwyField *field,
     // An even size is necessary due to alignment constraints in FFTW.
     // Using this size for all buffers is a bit excessive but safe.
     line = gwy_line_new_sized(width/2 + 1, TRUE);
-    gsize size = (width + 1)/2*2;
+    gsize size = (width + 3)/4*4;
     const gdouble *base = field->data + row*field->xres + col;
     const gboolean invert = (masking == GWY_MASK_EXCLUDE);
     gdouble *fftin = fftw_malloc(5*size*sizeof(gdouble));

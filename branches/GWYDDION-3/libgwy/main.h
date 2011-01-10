@@ -31,6 +31,8 @@ gchar*  gwy_locale_directory   (const gchar *subdir) G_GNUC_MALLOC;
 gchar*  gwy_user_directory     (const gchar *subdir) G_GNUC_MALLOC;
 gchar** gwy_library_search_path(const gchar *subdir) G_GNUC_MALLOC;
 gchar** gwy_data_search_path   (const gchar *subdir) G_GNUC_MALLOC;
+void    gwy_tune_algorithms    (const gchar *key,
+                                const gchar *value);
 
 G_END_DECLS
 

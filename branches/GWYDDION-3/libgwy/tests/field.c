@@ -300,7 +300,6 @@ test_field_copy(void)
     }
 
     GwyField *field = gwy_field_new_sized(37, 41, TRUE);
-    gwy_field_fill_full(field, 1.0);
     field_randomize(field, rng);
     GwyField *dest = gwy_field_new_alike(field, FALSE);
     gwy_field_copy_full(field, dest);
@@ -1597,9 +1596,9 @@ cf_dumb(const GwyField *field,
         }
     }
     GWY_OBJECT_UNREF(mpart);
-    g_object_unref(part);
     for (guint k = 0; k < part->xres; k++)
         cf->data[k] = weights->data[k] ? cf->data[k]/weights->data[k] : 0.0;
+    g_object_unref(part);
     g_object_unref(weights);
 
     return cf;
@@ -1611,15 +1610,15 @@ test_field_distributions_acf_full(void)
     enum { max_size = 134 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
-    gsize niter = g_test_slow() ? 60 : 15;
+    gsize niter = g_test_slow() ? 100 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             GwyLine *acf = gwy_field_row_acf(field,
@@ -1655,15 +1654,15 @@ test_field_distributions_acf_masked(void)
     enum { max_size = 134 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
-    gsize niter = g_test_slow() ? 60 : 15;
+    gsize niter = g_test_slow() ? 100 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
@@ -1704,14 +1703,14 @@ test_field_distributions_acf_partial(void)
     enum { max_size = 134 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
-    gsize niter = g_test_slow() ? 60 : 15;
+    gsize niter = g_test_slow() ? 100 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             guint width = g_rand_int_range(rng, 1, xres+1);
@@ -1758,15 +1757,15 @@ test_field_distributions_hhcf_full(void)
     enum { max_size = 134 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
-    gsize niter = g_test_slow() ? 60 : 15;
+    gsize niter = g_test_slow() ? 100 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             GwyLine *hhcf = gwy_field_row_hhcf(field, NULL,
@@ -1802,15 +1801,15 @@ test_field_distributions_hhcf_masked(void)
     enum { max_size = 134 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
-    gsize niter = g_test_slow() ? 60 : 15;
+    gsize niter = g_test_slow() ? 100 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
 
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             GwyMaskField *mask = random_mask_field(xres, yres, rng);
@@ -1853,12 +1852,12 @@ test_field_distributions_hhcf_partial(void)
     g_rand_set_seed(rng, 42);
     gsize niter = g_test_slow() ? 60 : 15;
 
+    gwy_fft_load_wisdom();
     for (guint lvl = 0; lvl <= 1; lvl++) {
         for (guint iter = 0; iter < niter; iter++) {
             guint xres = g_rand_int_range(rng, 2, max_size);
             guint yres = g_rand_int_range(rng, 2, max_size);
             GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-            gwy_field_fill_full(field, 1.0);
             field_randomize(field, rng);
 
             guint width = g_rand_int_range(rng, 1, xres+1);
@@ -1899,114 +1898,313 @@ test_field_distributions_hhcf_partial(void)
     g_rand_free(rng);
 }
 
-#if 0
-void
-test_field_min_max(void)
+static inline void
+print_row(const gchar *name, const gdouble *data, gsize size)
 {
-    GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 42);
-    guint xres = 1000, yres = 1000;
-    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
-    gwy_field_fill_full(field, 1.0);
-    field_randomize(field, rng);
-    GwyMaskField *mask = NULL;
-    mask = random_mask_field(xres, yres, rng);
-    gdouble min, max;
-
-    g_test_timer_start();
-    min = max = 0.0;
-    for (guint i = 0; i < 100; i++) {
-        gwy_field_invalidate(field);
-        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
-    }
-    g_test_timer_elapsed();
-    g_test_minimized_result(g_test_timer_last(), "min %g", g_test_timer_last());
-
-    g_test_timer_start();
-    min = max = 0.0;
-    for (guint i = 0; i < 100; i++) {
-        gwy_field_invalidate(field);
-        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
-    }
-    g_test_timer_elapsed();
-    g_test_minimized_result(g_test_timer_last(), "max %g", g_test_timer_last());
-
-    g_test_timer_start();
-    min = max = 0.0;
-    for (guint i = 0; i < 100; i++) {
-        gwy_field_invalidate(field);
-        min += gwy_field_min(field, NULL, mask, GWY_MASK_INCLUDE);
-        max += gwy_field_max(field, NULL, mask, GWY_MASK_INCLUDE);
-    }
-    g_test_timer_elapsed();
-    g_test_minimized_result(g_test_timer_last(), "min,max %g", g_test_timer_last());
-
-    g_test_timer_start();
-    min = max = 0.0;
-    for (guint i = 0; i < 100; i++) {
-        gwy_field_invalidate(field);
-        gdouble m, M;
-        gwy_field_min_max(field, NULL, mask, GWY_MASK_INCLUDE, &m, &M);
-        min += m;
-        max += M;
-    }
-    g_test_timer_elapsed();
-    g_test_minimized_result(g_test_timer_last(), "min&max: %g", g_test_timer_last());
-
-    GWY_OBJECT_UNREF(mask);
-    g_object_unref(field);
-    g_rand_free(rng);
+    g_printerr("%s", name);
+    while (size--)
+        g_printerr(" %g", *(data++));
+    g_printerr("\n");
 }
-#endif
 
-void
-test_field_convolve_row(void)
+// The behaviour for interiors should not depend on the exterior type
+static void
+field_convolve_row_interior_one(GwyExteriorType exterior)
 {
+    enum { yres = 3 };
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
 
-    gwy_fft_load_wisdom();
-
-    for (guint xres = 4; xres <= 6000; xres = gwy_fft_nice_transform_size(16*xres/15+1)) {
-        guint yres = MAX(20, 6000/xres);
-        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
-        gwy_field_fill_full(source, 1.0);
+    for (guint res = 1; res <= 30; res++) {
+        GwyField *source = gwy_field_new_sized(res, yres, FALSE);
         field_randomize(source, rng);
 
-        GwyField *field1 = gwy_field_new_alike(source, FALSE);
-        GwyField *field2 = gwy_field_new_alike(source, FALSE);
-        for (guint kres = 3; kres <= 251; kres += 2) {
+        GwyField *field = gwy_field_new_alike(source, FALSE);
+        for (guint kres = 1; kres <= res; kres++) {
+            guint k0 = (kres - 1)/2;
             GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
-            //gwy_line_fill_full(kernel, 1.0);
-            //line_randomize(kernel, rng);
-            gwy_line_clear_full(kernel);
-            kernel->data[0] = 1.0;
 
-            gwy_field_copy_full(source, field1);
-            g_test_timer_start();
-            gwy_field_row_convolve(field1, NULL, kernel);
-            gdouble tdirect = g_test_timer_elapsed()/yres;
+            GwyRectangle rectangle = { k0, 0, res - kres/2 - k0, yres };
+            for (guint pos = 0; pos < kres; pos++) {
+                gwy_line_clear_full(kernel);
+                kernel->data[pos] = 1.0;
 
-            gwy_field_copy_full(source, field2);
-            g_test_timer_start();
-            gwy_field_row_convolve_fft(field2, NULL, kernel);
-            gdouble tfft = g_test_timer_elapsed()/yres;
+                g_assert_cmpuint(rectangle.col + rectangle.width, <=, res);
+                gwy_field_copy_full(source, field);
+                gwy_field_row_convolve(field, &rectangle, kernel,
+                                       exterior, G_E);
 
-            /*
-            g_test_minimized_result(MIN(tdirect, tfft), "%u %u %g %g",
-                                    xres, kres, tdirect, tfft);
-                                    */
-            //g_printerr("%u %u %g %g\n", xres, kres, tdirect, tfft);
-            field_assert_numerically_equal(field1, field2, 1e-14);
+                // Everything outside @rectangle must be equal to @source.
+                // Data inside @rectangle must be equal to @source data shifted
+                // to the right by kres-1 - pos - (kres-1)/2.
+                guint shift = (kres-1 - pos) - k0;
+                for (guint i = 0; i < yres; i++) {
+                    const gdouble *srow = source->data + i*res;
+                    const gdouble *drow = field->data + i*res;
+                    for (guint j = 0; j < res; j++) {
+                        // Outside
+                        if (j < rectangle.col
+                            || j >= rectangle.col + rectangle.width)
+                            g_assert_cmpfloat(drow[j], ==, srow[j]);
+                        // Inside
+                        else {
+                            g_assert_cmpfloat(fabs(drow[j] - srow[j + shift]),
+                                              <, 1e-14);
+                        }
+                    }
+                }
+            }
             g_object_unref(kernel);
         }
-        g_printerr("\n");
-        g_object_unref(field2);
-        g_object_unref(field1);
+        g_object_unref(field);
         g_object_unref(source);
     }
-
     g_rand_free(rng);
+}
+
+static gdouble
+exterior_value_dumb(const gdouble *data,
+                    guint size,
+                    guint stride,
+                    gint pos,
+                    GwyExteriorType exterior,
+                    gdouble fill_value)
+{
+    // Interior
+    if (pos >= 0 && (guint)pos < size)
+        return data[stride*pos];
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED)
+        return NAN;
+
+    if (exterior == GWY_EXTERIOR_FIXED_VALUE)
+        return fill_value;
+
+    if (exterior == GWY_EXTERIOR_BORDER_EXTEND) {
+        return data[stride*(pos < 0 ? 0 : size-1)];
+    }
+
+    if (exterior == GWY_EXTERIOR_PERIODIC) {
+        pos = (pos + 10000*size) % size;
+        return data[stride*pos];
+    }
+
+    if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
+        guint p = (pos + 10000*2*size) % (2*size);
+        return data[stride*(p < size ? p : 2*size-1 - p)];
+    }
+
+    g_return_val_if_reached(NAN);
+}
+
+static void
+field_convolve_row_exterior_one(GwyExteriorType exterior)
+{
+    enum { yres = 3 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint res = 1; res <= 30; res++) {
+        guint niter = g_test_slow() ? MAX(4, 3*res*res) : MAX(4, res*res/2);
+
+        GwyField *source = gwy_field_new_sized(res, yres, FALSE);
+        field_randomize(source, rng);
+
+        GwyField *field = gwy_field_new_alike(source, FALSE);
+        for (guint iter = 0; iter < niter; iter++) {
+            guint kres = g_rand_int_range(rng, 1, 2*res);
+            guint k0 = (kres - 1)/2;
+            GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
+            guint width = g_rand_int_range(rng, 0, res+1);
+            guint col = g_rand_int_range(rng, 0, res-width+1);
+            guint pos = g_rand_int_range(rng, 0, kres);
+            GwyRectangle rectangle = { col, 0, width, yres };
+
+            gwy_line_clear_full(kernel);
+            kernel->data[pos] = 1.0;
+            gwy_field_copy_full(source, field);
+            gwy_field_row_convolve(field, &rectangle, kernel,
+                                   exterior, G_E);
+
+            // Everything outside @rectangle must be equal to @source.
+            // Data inside @rectangle must be equal to @source data shifted
+            // to the right by kres-1 - pos - (kres-1)/2, possibly extended.
+            gint shift = ((gint)kres-1 - (gint)pos) - (gint)k0;
+            for (guint i = 0; i < yres; i++) {
+                const gdouble *srow = source->data + i*res;
+                const gdouble *drow = field->data + i*res;
+                for (guint j = 0; j < res; j++) {
+                    // Outside
+                    if (j < rectangle.col
+                        || j >= rectangle.col + rectangle.width)
+                        g_assert_cmpfloat(drow[j], ==, srow[j]);
+                    // Inside
+                    else {
+                        gdouble refval = exterior_value_dumb(srow, res, 1,
+                                                             (gint)j + shift,
+                                                             exterior, G_E);
+                        g_assert_cmpfloat(fabs(drow[j] - refval), <, 1e-14);
+                    }
+                }
+            }
+            g_object_unref(kernel);
+        }
+        g_object_unref(field);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+void
+test_field_convolve_row_interior_undef_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_interior_one(GWY_EXTERIOR_UNDEFINED);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_undef_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_interior_one(GWY_EXTERIOR_UNDEFINED);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_mirror_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_interior_one(GWY_EXTERIOR_MIRROR_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_mirror_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_interior_one(GWY_EXTERIOR_MIRROR_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_border_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_interior_one(GWY_EXTERIOR_BORDER_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_border_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_interior_one(GWY_EXTERIOR_BORDER_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_periodic_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_interior_one(GWY_EXTERIOR_PERIODIC);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_periodic_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_interior_one(GWY_EXTERIOR_PERIODIC);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_fixed_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_interior_one(GWY_EXTERIOR_FIXED_VALUE);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_interior_fixed_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_interior_one(GWY_EXTERIOR_FIXED_VALUE);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_mirror_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_exterior_one(GWY_EXTERIOR_MIRROR_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_mirror_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_exterior_one(GWY_EXTERIOR_MIRROR_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_border_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_exterior_one(GWY_EXTERIOR_BORDER_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_border_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_exterior_one(GWY_EXTERIOR_BORDER_EXTEND);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_periodic_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_exterior_one(GWY_EXTERIOR_PERIODIC);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_periodic_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_exterior_one(GWY_EXTERIOR_PERIODIC);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_fixed_direct(void)
+{
+    gwy_tune_algorithms("convolution-method", "direct");
+    field_convolve_row_exterior_one(GWY_EXTERIOR_FIXED_VALUE);
+    gwy_tune_algorithms("convolution-method", "auto");
+}
+
+void
+test_field_convolve_row_exterior_fixed_fft(void)
+{
+    gwy_tune_algorithms("convolution-method", "fft");
+    gwy_fft_load_wisdom();
+    field_convolve_row_exterior_one(GWY_EXTERIOR_FIXED_VALUE);
+    gwy_tune_algorithms("convolution-method", "auto");
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

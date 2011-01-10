@@ -45,6 +45,7 @@
 #endif
 
 #include "libgwy/libgwy.h"
+#include "libgwy/field-internal.h"
 
 static gpointer init_types(G_GNUC_UNUSED gpointer arg);
 
@@ -785,6 +786,29 @@ gwy_data_search_path(const gchar *subdir)
     return (gchar**)g_ptr_array_free(paths, FALSE);
 }
 
+/**
+ * gwy_tune_algorithms:
+ * @key: Identification of the parameter to set.
+ * @value: String representation of new value of the parameter.
+ *
+ * Sets tunable parameters of internal algorithms.
+ *
+ * Do not use this method in applications.  It exists for the purpose of
+ * testing, benchmarking and tuning libgwy algorithms and there is no guarantee
+ * what parameters might exist, what values they might take and what effect
+ * changing them might have.  Tests and benchmarks that use it are always bound
+ * to a specific version of Gwyddion.
+ **/
+void
+gwy_tune_algorithms(const gchar *key,
+                    const gchar *value)
+{
+    g_return_if_fail(key);
+    if (gwy_strequal(key, "convolution-method"))
+        _gwy_tune_convolution_method(value);
+    else
+        g_warning("Unknown tunable parameter %s.", key);
+}
 
 /**
  * SECTION: main

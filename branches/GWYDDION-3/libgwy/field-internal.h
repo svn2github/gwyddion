@@ -84,6 +84,9 @@ gboolean _gwy_field_check_mask(const GwyField *field,
                                guint *maskcol,
                                guint *maskrow);
 
+G_GNUC_INTERNAL
+void _gwy_tune_convolution_method(const gchar *method);
+
 G_END_DECLS
 
 #endif
