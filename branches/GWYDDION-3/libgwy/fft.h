@@ -37,7 +37,7 @@ typedef enum {
     GWY_WINDOWING_KAISER25   = 9
 } GwyWindowingType;
 
-guint gwy_fft_nice_transform_size(guint size);
+guint gwy_fft_nice_transform_size(guint size)                 G_GNUC_CONST;
 void  gwy_fft_window_sample      (gdouble *data,
                                   guint n,
                                   GwyWindowingType windowing,
