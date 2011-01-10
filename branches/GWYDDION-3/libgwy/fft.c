@@ -83,7 +83,7 @@ smooth_upper_bound(guint n)
             while (r % p == 0)
                 r /= p;
         }
-        if (r == 1)
+        if (r == 1 || r == 11 || r == 13)
             return n;
         n += 2;
     }
@@ -362,7 +362,7 @@ load_wisdom(G_GNUC_UNUSED gpointer arg)
  * threads (if GLib thread support is initialised).  The wisdom will be loaded
  * just once.
  *
- * Unless/until gwy_fft_load_wisdom() is called libgwy3 functions utilising
+ * Unless/until gwy_fft_load_wisdom() is called libgwy functions utilising
  * FFTW set the planning rigour to <constant>FFTW_ESTIMATE</constant>.  This is
  * done to save the considerable plan optimisation times because the functions
  * often use many different transform sizes and types.  Calling this function
