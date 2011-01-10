@@ -1,6 +1,6 @@
 # $Id$
 
-SUBDIRS = . tests
+SUBDIRS = . tests benchmarks
 
 library = libgwy
 Library = Gwy

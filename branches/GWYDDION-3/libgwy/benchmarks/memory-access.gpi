@@ -1,0 +1,19 @@
+#!/usr/bin/gnuplot
+fnm = 'memory-access.dat'
+set grid
+set style line 1 lt 1 pt 65 ps 1.2 lw 1.5 lc rgb '#008000'
+set style line 2 lt 1 pt 65 ps 1.2 lw 1.5 lc rgb '#e00000'
+set key top left reverse Left
+set title 'Comparison of mean pixel processing times for column summing'
+set xlabel 'Field dimension'
+set ylabel 'Time per pixel, row-wise [ns]'
+set y2label 'Time per pixel, column-wise [ns]'
+set ytics nomirror
+set y2tics nomirror
+set format y '%.1f'
+set format y2 '%.0f'
+set format x '10^%T'
+set logscale x
+plot [10:10000] \
+    fnm u 1:($2*1e9):($3*1e9) axes x1y1 w yerrorbars ls 1 t 'Row-wise', \
+    fnm u 1:($4*1e9):($5*1e9) axes x1y2 w yerrorbars ls 2 t 'Column-wise'

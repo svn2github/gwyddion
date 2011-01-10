@@ -23,6 +23,7 @@ AC_CONFIG_FILES([
   libgwy/version.h
   libgwy/libgwy3.pc
   libgwy/tests/Makefile
+  libgwy/benchmarks/Makefile
   po/Makefile.in
   po-libgwy/Makefile.in
   docs/Makefile
@@ -173,7 +174,7 @@ AC_CHECK_PROGS([XSLTPROC],[xsltproc],[false])
 #############################################################################
 # Valgrind
 AC_ARG_WITH([valgrind],
-            [  --with-valgrind=ARG     compile with Valgrind support for testing (no)],
+            [AS_HELP_STRING([--with-valgrind=ARG],[compile with Valgrind support for testing (no)])],
             [gwy_enable_valgrind=$withval],
             [gwy_enable_valgrind=no])
 if test "x$gwy_enable_valgrind" = xyes; then
@@ -184,6 +185,14 @@ if test "x$gwy_enable_valgrind" = xyes; then
                    [gwy_enable_valgrind=no])
 fi
 AM_CONDITIONAL([HAVE_VALGRIND],[test "x$gwy_enable_valgrind" = xyes])
+
+#############################################################################
+# Benchmarking and tuning
+AC_ARG_ENABLE([benchmarks],
+              [AS_HELP_STRING([--enable-benchmarks],[compile benchmarking an tuning programs (no)])],
+              [gwy_enable_benchmarks=$enableval],
+              [gwy_enable_benchmarks=no])
+AM_CONDITIONAL([BENCHMARKS],[test "x$gwy_enable_benchmarks" = xyes])
 
 #############################################################################
 # Translation Makefiles

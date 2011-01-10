@@ -5,7 +5,7 @@
 DOC_MODULE = libgwy
 
 # Source files to ignore, put both headers and code here.  Also directories.
-IGNORE_SRC = libgwy.h tests
+IGNORE_SRC = libgwy.h tests benchmarks
 
 # Extra options to pass to add-objects.py
 #ADDOBJECTS_OPTIONS = --standard-files=gwyddiontypes

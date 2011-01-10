@@ -1,0 +1,20 @@
+#!/usr/bin/gnuplot
+fnm = 'convolve-row.dat'
+set grid
+set key top left reverse Left
+set xlabel 'Row size'
+set ylabel 'Kernel size'
+set logscale x
+set pm3d map
+set pm3d corners2color c1
+set origin -0.07,-0.1
+set size 1.1,1.2
+set contour
+set cntrparam levels incremental -6, 1, 5
+set palette functions gray**2,(1.0-gray)**2,2*gray*(1.0-gray)
+xmin = real(system("cut -d' ' -f1 " . fnm . " | sort -gu | grep . | head -n1"))
+xmax = real(system("cut -d' ' -f1 " . fnm . " | sort -gu | grep . | tail -n1"))
+ymin = real(system("cut -d' ' -f2 " . fnm . " | sort -gu | grep . | head -n1"))
+ymax = real(system("cut -d' ' -f2 " . fnm . " | sort -gu | grep . | tail -n1"))
+splot [xmin:xmax] [ymin:ymax] \
+    fnm u 1:2:(log($4/$3)) w pm3d
