@@ -854,7 +854,7 @@ gwy_line_clear_full(GwyLine *line)
 }
 
 /**
- * gwy_line_fill:
+ * gwy_line_fill_full:
  * @line: A one-dimensional data line.
  * @value: Value to fill @line with.
  *
