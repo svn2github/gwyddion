@@ -477,7 +477,7 @@ parse(Unit *unit,
         return FALSE;
     }
 
-    /* If the string is not UTF-8, assume it's Latin 1.  This is was people
+    /* If the string is not UTF-8, assume it's Latin 1.  This is what people
      * usually have in various files. */
     if (!g_utf8_validate(string, -1, NULL))
         string = utf8string = g_convert(string, -1, "UTF-8", "ISO-8859-1",
@@ -492,6 +492,9 @@ parse(Unit *unit,
     else if (strncmp(string, "×", sizeof("×")-1) == 0)
         string += sizeof("×")-1;
 
+    // XXX: Certain non-ASCII characters seem to cause valgrind warnings in
+    // glibc's strtod here.  Not sure why.
+    //g_printerr("[[%s]]\n", g_strescape(string, NULL));
     q = g_ascii_strtod(string, (gchar**)&end);
     if (end != string) {
         string = end;
