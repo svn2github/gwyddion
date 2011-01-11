@@ -1032,7 +1032,6 @@ test_field_level_inclination(void)
             }
         }
 
-        // TODO: use field-arithmetic
         GwyField *field = gwy_field_duplicate(steps);
         gwy_field_add_field(plane, NULL, field, 0, 0, 1.0);
 
@@ -1907,6 +1906,169 @@ print_row(const gchar *name, const gdouble *data, gsize size)
     g_printerr("\n");
 }
 
+static gdouble
+exterior_value_dumb(const gdouble *data,
+                    guint size,
+                    guint stride,
+                    gint pos,
+                    GwyExteriorType exterior,
+                    gdouble fill_value)
+{
+    // Interior
+    if (pos >= 0 && (guint)pos < size)
+        return data[stride*pos];
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED)
+        return NAN;
+
+    if (exterior == GWY_EXTERIOR_FIXED_VALUE)
+        return fill_value;
+
+    if (exterior == GWY_EXTERIOR_BORDER_EXTEND) {
+        pos = CLAMP(pos, 0, (gint)size-1);
+        return data[stride*pos];
+    }
+
+    if (exterior == GWY_EXTERIOR_PERIODIC) {
+        pos = (pos + 10000*size) % size;
+        return data[stride*pos];
+    }
+
+    if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
+        guint p = (pos + 10000*2*size) % (2*size);
+        return data[stride*(p < size ? p : 2*size-1 - p)];
+    }
+
+    g_return_val_if_reached(NAN);
+}
+
+static gdouble
+exterior_value_dumb_2d(GwyField *field,
+                       gint xpos, gint ypos,
+                       GwyExteriorType exterior,
+                       gdouble fill_value)
+{
+    // Interior
+    if (xpos >= 0 && xpos < (gint)field->xres
+        && ypos >= 0 && ypos < (gint)field->yres)
+        return field->data[xpos + ypos*field->xres];
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED)
+        return NAN;
+
+    if (exterior == GWY_EXTERIOR_FIXED_VALUE)
+        return fill_value;
+
+    if (exterior == GWY_EXTERIOR_BORDER_EXTEND) {
+        xpos = CLAMP(xpos, 0, (gint)field->xres-1);
+        ypos = CLAMP(ypos, 0, (gint)field->yres-1);
+        return field->data[xpos + ypos*field->xres];
+    }
+
+    if (exterior == GWY_EXTERIOR_PERIODIC) {
+        xpos = (xpos + 10000*field->xres) % field->xres;
+        ypos = (ypos + 10000*field->yres) % field->yres;
+        return field->data[xpos + ypos*field->xres];
+    }
+
+    if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
+        xpos = (xpos + 10000*2*field->xres) % (2*field->xres);
+        if (xpos >= (gint)field->xres)
+            xpos = 2*field->xres-1 - xpos;
+        ypos = (ypos + 10000*2*field->yres) % (2*field->yres);
+        if (ypos >= (gint)field->yres)
+            ypos = 2*field->yres-1 - ypos;
+        return field->data[xpos + ypos*field->xres];
+    }
+
+    g_return_val_if_reached(NAN);
+}
+
+static void
+field_extend_one(GwyExteriorType exterior)
+{
+    enum { max_size = 35 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = g_test_slow() ? 300 : 100;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        guint left = g_rand_int_range(rng, 0, 2*xres);
+        guint right = g_rand_int_range(rng, 0, 2*xres);
+        guint up = g_rand_int_range(rng, 0, 2*yres);
+        guint down = g_rand_int_range(rng, 0, 2*yres);
+        guint width = g_rand_int_range(rng, 1, xres+1);
+        guint height = g_rand_int_range(rng, 1, yres+1);
+        guint col = g_rand_int_range(rng, 0, xres-width+1);
+        guint row = g_rand_int_range(rng, 0, yres-height+1);
+
+        GwyField *source = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(source, rng);
+
+        GwyRectangle rectangle = { col, row, width, height };
+        GwyField *field = gwy_field_extend(source, &rectangle,
+                                           left, right, up, down,
+                                           exterior, G_E);
+
+        g_assert_cmpuint(field->xres, ==, width + left + right);
+        g_assert_cmpuint(field->yres, ==, height + up + down);
+
+        for (guint i = 0; i < field->yres; i++) {
+            gint ypos = (gint)i + (gint)row - (gint)up;
+            for (guint j = 0; j < field->xres; j++) {
+                gint xpos = (gint)j + (gint)col - (gint)left;
+
+                if (exterior == GWY_EXTERIOR_UNDEFINED
+                    && (xpos != CLAMP(xpos, 0, (gint)source->xres-1)
+                        || ypos != CLAMP(ypos, 0, (gint)source->yres-1)))
+                    continue;
+
+                gdouble value = field->data[i*field->xres + j];
+                gdouble reference = exterior_value_dumb_2d(source, xpos, ypos,
+                                                           exterior, G_E);
+                g_assert_cmpfloat(value, ==, reference);
+            }
+        }
+
+        g_object_unref(field);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_extend_undef(void)
+{
+    field_extend_one(GWY_EXTERIOR_UNDEFINED);
+}
+
+void
+test_field_extend_fixed(void)
+{
+    field_extend_one(GWY_EXTERIOR_FIXED_VALUE);
+}
+
+void
+test_field_extend_mirror(void)
+{
+    field_extend_one(GWY_EXTERIOR_MIRROR_EXTEND);
+}
+
+void
+test_field_extend_border(void)
+{
+    field_extend_one(GWY_EXTERIOR_BORDER_EXTEND);
+}
+
+void
+test_field_extend_periodic(void)
+{
+    field_extend_one(GWY_EXTERIOR_PERIODIC);
+}
+
 // The behaviour for interiors should not depend on the exterior type
 static void
 field_convolve_row_interior_one(GwyExteriorType exterior)
@@ -1960,41 +2122,6 @@ field_convolve_row_interior_one(GwyExteriorType exterior)
         g_object_unref(source);
     }
     g_rand_free(rng);
-}
-
-static gdouble
-exterior_value_dumb(const gdouble *data,
-                    guint size,
-                    guint stride,
-                    gint pos,
-                    GwyExteriorType exterior,
-                    gdouble fill_value)
-{
-    // Interior
-    if (pos >= 0 && (guint)pos < size)
-        return data[stride*pos];
-
-    if (exterior == GWY_EXTERIOR_UNDEFINED)
-        return NAN;
-
-    if (exterior == GWY_EXTERIOR_FIXED_VALUE)
-        return fill_value;
-
-    if (exterior == GWY_EXTERIOR_BORDER_EXTEND) {
-        return data[stride*(pos < 0 ? 0 : size-1)];
-    }
-
-    if (exterior == GWY_EXTERIOR_PERIODIC) {
-        pos = (pos + 10000*size) % size;
-        return data[stride*pos];
-    }
-
-    if (exterior == GWY_EXTERIOR_MIRROR_EXTEND) {
-        guint p = (pos + 10000*2*size) % (2*size);
-        return data[stride*(p < size ? p : 2*size-1 - p)];
-    }
-
-    g_return_val_if_reached(NAN);
 }
 
 static void
@@ -2054,6 +2181,7 @@ field_convolve_row_exterior_one(GwyExteriorType exterior)
     }
     g_rand_free(rng);
 }
+
 void
 test_field_convolve_row_interior_undef_direct(void)
 {

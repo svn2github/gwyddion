@@ -538,7 +538,7 @@ rect_extend_undef(const gdouble *in, guint inrowstride,
     rect_extend_base(in, inrowstride, out, outrowstride,
                      xpos, &ypos, width, &height, xres, yres,
                      extend_left, extend_right, &extend_up, &extend_down,
-                     &row_extend_mirror, value);
+                     &row_extend_undef, value);
     // That's all.  Happily keep uninitialised memory in the rest.
 }
 
@@ -555,7 +555,7 @@ rect_extend_fill(const gdouble *in, guint inrowstride,
     rect_extend_base(in, inrowstride, out, outrowstride,
                      xpos, &ypos, width, &height, xres, yres,
                      extend_left, extend_right, &extend_up, &extend_down,
-                     &row_extend_mirror, value);
+                     &row_extend_fill, value);
     // Forward-extend
     gdouble *out2 = out + outrowstride*(extend_up + height);
     for (guint i = 0; i < extend_down; i++, out2 += outrowstride)

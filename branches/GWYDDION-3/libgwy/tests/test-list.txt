@@ -103,6 +103,11 @@ field/distributions/acf/partial
 field/distributions/hhcf/full
 field/distributions/hhcf/masked
 field/distributions/hhcf/partial
+field/extend/undef
+field/extend/fixed
+field/extend/mirror
+field/extend/periodic
+field/extend/border
 field/convolve/row/interior/undef/direct
 field/convolve/row/interior/undef/fft
 field/convolve/row/interior/mirror/direct
