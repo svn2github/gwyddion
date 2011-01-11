@@ -29,7 +29,9 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE
 AM_LDFLAGS = ../libgwy3.la
-EXTRA_DIST = $(extra_sources)
+EXTRA_DIST = \
+	$(noinst_SCRIPTS) \
+	$(extra_sources)
 
 memory-access.dat: memory-access
 	for x in 0 1 2 3 4 5 6 7 8 9; do \
