@@ -1,6 +1,9 @@
-Gwyddion 3 was written from scratch by Yeti <yeti@gwyddion.net>.
+Gwyddion 3 was written from scratch by Yeti <yeti@gwyddion.net> with the
+following exceptions:
 
-=== Copies ===
-The GNU C library (GLIBC)
-    gwy_math_sort() is a direct specialization of glibc's quicksort(), written
-    by Douglas C. Schmidt, for doubles, see libgwy/gwymath.c for more.
+gwy_math_sort() is a straightforward specialization of GNU C library
+    quicksort(), written by Douglas C. Schmidt, see libgwy/gwymath.c for more.
+
+Kuwahara filter is based on implementation by Rok Zitko for Gwyddion 1, see
+    libgwy/field-filter.c for more.
+

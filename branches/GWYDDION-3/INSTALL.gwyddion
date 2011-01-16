@@ -5,15 +5,12 @@ C99 features used:
 - named struct initializers
 - mixed declarations and code
 - math functions, NAN
-Exptected to be used:
-- compound literals
-- incomplete (AKA flexible) arrays
 - complex
+- compound literals
+Exptected to be used:
+- incomplete (AKA flexible) arrays
 Checked by configure, but not used:
 - _Bool type (we use gboolean)
 
 Python requirements:
 - Python at least 2.3(?)
-- As long as you do not patch anything, python should not be required to build
-  gwyddion.  Most generated files are created with python scripts though so
-  you need python to update them.
