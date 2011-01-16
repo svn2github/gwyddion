@@ -1148,6 +1148,17 @@ jump_over:
  **/
 
 /**
+ * gwycomplex:
+ *
+ * Shorthand for C99 <type>double complex</type> type.
+ *
+ * Provided that <filename class='headerfile'>fftw3.h</filename> is included
+ * after <filename class='headerfile'>complex.h</filename> of Gwyddion headers,
+ * it is also an alias for <type>fftw_complex</type>.  It should be also
+ * bit-wise compatible with the C++ complex template specialised to doubles.
+ **/
+
+/**
  * GwyXY:
  * @x: X-coordinate.
  * @y: Y-coordinate.

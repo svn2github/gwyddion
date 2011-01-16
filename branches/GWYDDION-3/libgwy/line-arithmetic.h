@@ -21,15 +21,18 @@
 #define __LIBGWY_LINE_ARITHMETIC_H__
 
 #include <libgwy/line.h>
+#include <libgwy/field.h>
 
 G_BEGIN_DECLS
 
-void gwy_line_accumulate(GwyLine *line);
-void gwy_line_distribute(GwyLine *line);
-void gwy_line_add       (GwyLine *line,
-                         gdouble value);
-void gwy_line_multiply  (GwyLine *line,
-                         gdouble value);
+void      gwy_line_accumulate   (GwyLine *line);
+void      gwy_line_distribute   (GwyLine *line);
+void      gwy_line_add          (GwyLine *line,
+                                 gdouble value);
+void      gwy_line_multiply     (GwyLine *line,
+                                 gdouble value);
+GwyField* gwy_line_outer_product(const GwyLine *column,
+                                 const GwyLine *row)    G_GNUC_MALLOC;
 
 G_END_DECLS
 

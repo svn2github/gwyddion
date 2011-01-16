@@ -21,9 +21,12 @@
 #define __LIBGWY_MATH_H__
 
 #include <math.h>
+#include <complex.h>
 #include <glib-object.h>
 
 G_BEGIN_DECLS
+
+typedef double complex gwycomplex;
 
 typedef struct {
     gdouble x;

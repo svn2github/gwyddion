@@ -73,6 +73,16 @@ gboolean _gwy_field_limit_rectangles(const GwyField *src,
                                      guint *height);
 
 G_GNUC_INTERNAL
+gboolean _gwy_field_check_target(const GwyField *field,
+                                 const GwyField *target,
+                                 guint col,
+                                 guint row,
+                                 guint width,
+                                 guint height,
+                                 guint *targetcol,
+                                 guint *targetrow);
+
+G_GNUC_INTERNAL
 gboolean _gwy_field_check_mask(const GwyField *field,
                                const GwyRectangle *rectangle,
                                const GwyMaskField *mask,

@@ -26,20 +26,41 @@
 
 G_BEGIN_DECLS
 
-void      gwy_field_row_convolve   (GwyField *field,
+typedef enum {
+    GWY_FILTER_LAPLACE,
+    GWY_FILTER_HSOBEL,
+    GWY_FILTER_VSOBEL,
+    GWY_FILTER_HPREWITT,
+    GWY_FILTER_VPREWITT,
+    GWY_FILTER_DECHECKER,
+    GWY_FILTER_KUWAHARA
+} GwyFilterType;
+
+void      gwy_field_row_convolve   (const GwyField *field,
                                     const GwyRectangle* rectangle,
+                                    GwyField *target,
                                     const GwyLine *kernel,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
-void      gwy_field_col_convolve   (GwyField *field,
+void      gwy_field_convolve       (const GwyField *field,
                                     const GwyRectangle* rectangle,
-                                    const GwyLine *kernel,
+                                    GwyField *target,
+                                    const GwyField *kernel,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
-void      gwy_field_filter_gaussian(GwyField *field,
+void      gwy_field_filter_gaussian(const GwyField *field,
                                     const GwyRectangle* rectangle,
+                                    GwyField *target,
                                     gdouble hsigma,
-                                    gdouble vsigma);
+                                    gdouble vsigma,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
+void      gwy_field_filter_standard(const GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    GwyField *target,
+                                    GwyFilterType filter,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
 GwyField* gwy_field_extend         (const GwyField *field,
                                     const GwyRectangle *rectangle,
                                     guint left,

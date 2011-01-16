@@ -1,7 +1,8 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2010-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
+ *  Copyright (C) 2005 Rok Zitko.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +19,8 @@
  */
 
 #include <string.h>
+// Including before fftw3.h ensures fftw_complex is C99 ‘double complex’.
+#include <complex.h>
 #include <fftw3.h>
 #include "libgwy/macros.h"
 #include "libgwy/strfuncs.h"
@@ -26,8 +29,9 @@
 #include "libgwy/field-filter.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
-#include "libgwy/math-internal.h"
 #include "libgwy/field-arithmetic.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
 typedef void (*RowExtendFunc)(const gdouble *in,
@@ -77,7 +81,7 @@ _gwy_tune_convolution_method(const gchar *method)
     }
 }
 
-// Generally, there are three reasonable strategies:
+// Generally, there are three reasonable convolution strategies:
 // (a) small kernels (kres comparable to log(res)) → direct calculation
 // (b) medium-sized kernels (kres ≤ res) → use explicit extension/mirroring to
 //     a nice-for-FFT size ≥ 2res and cyclic convolution
@@ -85,20 +89,19 @@ _gwy_tune_convolution_method(const gchar *method)
 //     mirroring and DCT-II for data
 //
 // Strategy (c) is not implemented as the conditions are quite exotic,
-// especially if res should be large.
+// especially if res should be large.  Strategy (a) is implemented in a
+// somewhat memory-hungry manner.
 
 // Expand the kernel into an array of size @size, putting the central item
-// at zero.  If the kernel is larger than @size it is periodically folded into
-// the array,
+// at zero (or 0.5 pixel to the left for even sizes).
 static inline void
-mirror_kernel(const gdouble *kernel, guint klen,
-              gdouble *mirrored, guint size)
+extend_kernel_row(const gdouble *kernel, guint klen,
+                  gdouble *extended, guint size)
 {
-    gwy_clear(mirrored, size);
-    for (guint i = klen/2; i < klen; i++)
-        mirrored[(i - klen/2) % size] += kernel[i];
-    for (guint i = klen/2; i; i--)
-        mirrored[size-1 - (klen/2 - i) % size] += kernel[i-1];
+    guint llen = klen/2, rlen = klen - llen;
+    gwy_assign(extended, kernel + llen, rlen);
+    gwy_clear(extended + rlen, size - klen);
+    gwy_assign(extended + size - llen, kernel, llen);
 }
 
 static inline void
@@ -252,30 +255,12 @@ get_row_extend_func(GwyExteriorType exterior)
     g_return_val_if_reached(NULL);
 }
 
-static inline void
-multiply_hc_with_hc(const gdouble *hcin,
-                    gdouble *hcout,
-                    guint size)
-{
-    const gdouble *rein = hcin, *imin = hcin + size-1;
-    gdouble *reout = hcout, *imout = hcout + size-1;
-
-    *reout *= *rein/size;
-    reout++, rein++;
-    for (guint j = (size + 1)/2 - 1; j; j--, reout++, rein++, imout--, imin--) {
-        gdouble re = *rein * *reout - *imin * *imout;
-        gdouble im = *rein * *imout + *imin * *reout;
-        *reout = re/size;
-        *imout = im/size;
-    }
-    // Nice size is always even
-    *reout *= *rein/size;
-}
-
 static void
-row_convolve_direct(GwyField *field,
+row_convolve_direct(const GwyField *field,
                     guint col, guint row,
                     guint width, guint height,
+                    GwyField *target,
+                    guint targetcol, guint targetrow,
                     const GwyLine *kernel,
                     RowExtendFunc extend_row,
                     gdouble fill_value)
@@ -284,82 +269,96 @@ row_convolve_direct(GwyField *field,
     guint kres = kernel->res;
     const gdouble *kdata = kernel->data;
     guint size = width + kres - 1;
-    gdouble *data_in = g_new(gdouble, size);
+    gdouble *extdata = g_new(gdouble, size);
     guint extend_left, extend_right;
     make_symmetrical_extension(width, size, &extend_left, &extend_right);
 
-    // The direct method is used only if kres ≪ xres.  Don't bother optimising
+    // The direct method is used only if kres ≪ res.  Don't bother optimising
     // the boundaries, just make the inner loop tight.
     for (guint i = 0; i < height; i++) {
-        gdouble *drow = field->data + (row + i)*xres + col;
-        extend_row(field->data + (row + i)*xres, data_in,
+        gdouble *trow = target->data + (targetrow + i)*target->xres + targetcol;
+        extend_row(field->data + (row + i)*xres, extdata,
                    col, width, xres, extend_left, extend_right, fill_value);
         for (guint j = 0; j < width; j++) {
-            const gdouble *d = data_in + extend_left + kres/2 + j;
+            const gdouble *d = extdata + extend_left + kres/2 + j;
             gdouble v = 0.0;
             for (guint k = 0; k < kres; k++, d--)
                 v += kdata[k] * *d;
-            drow[j] = v;
+            trow[j] = v;
         }
     }
 
-    g_free(data_in);
+    g_free(extdata);
 }
 
 static void
-row_convolve_fft(GwyField *field,
+row_convolve_fft(const GwyField *field,
                  guint col, guint row,
                  guint width, guint height,
+                 GwyField *target,
+                 guint targetcol, guint targetrow,
                  const GwyLine *kernel,
                  RowExtendFunc extend_row,
                  gdouble fill_value)
 {
     guint xres = field->xres, kres = kernel->res;
     guint size = gwy_fft_nice_transform_size(width + kres - 1);
-    gdouble *data_in = fftw_malloc(3*size*sizeof(gdouble));
-    gdouble *data_hc = data_in + size;
-    gdouble *kernelhc = data_in + 2*size;
-    // The R2HC plan for the initial transform of the kernel.  We put the
-    // 0-extended real-space kernel into data_hc that is unused at that time.
-    fftw_plan kplan = fftw_plan_r2r_1d(size, data_hc, kernelhc,
-                                       FFTW_R2HC,
-                                       FFTW_DESTROY_INPUT | _gwy_fft_rigour());
-    // The R2HC plan for transforming the extended data.
-    fftw_plan dplan = fftw_plan_r2r_1d(size, data_in, data_hc,
-                                       FFTW_R2HC,
-                                       FFTW_DESTROY_INPUT | _gwy_fft_rigour());
-    // The HC2R plan the backward transform of the convolution of each row.
-    fftw_plan cplan = fftw_plan_r2r_1d(size, data_hc, data_in,
-                                       FFTW_HC2R,
-                                       _gwy_fft_rigour());
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    guint cstride = size/2 + 1;
+    gdouble *extdata = fftw_malloc(size*sizeof(gdouble));
+    gwycomplex *datac = fftw_malloc(2*cstride*sizeof(gwycomplex));
+    gwycomplex *kernelc = datac + cstride;
+    // The R2C plan for transforming the extended data row (or kernel).
+    fftw_plan dplan = fftw_plan_dft_r2c_1d(size, extdata, datac,
+                                           FFTW_DESTROY_INPUT
+                                            | _gwy_fft_rigour());
+    // The C2R plan the backward transform of the convolution of each row.
+    fftw_plan cplan = fftw_plan_dft_c2r_1d(size, datac, extdata,
+                                           _gwy_fft_rigour());
 
     // Transform the kernel.
-    mirror_kernel(kernel->data, kres, data_hc, size);
-    fftw_execute(kplan);
+    extend_kernel_row(kernel->data, kres, extdata, size);
+    fftw_execute(dplan);
+    gwy_assign(kernelc, datac, cstride);
 
     // Convolve rows
+    if (extend_row == &row_extend_undef) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        extend_row = row_extend_fill;
+        fill_value = 0.0;
+    }
     guint extend_left, extend_right;
     make_symmetrical_extension(width, size, &extend_left, &extend_right);
     for (guint i = 0; i < height; i++) {
-        extend_row(field->data + (row + i)*xres, data_in,
+        extend_row(field->data + (row + i)*xres, extdata,
                    col, width, xres, extend_left, extend_right, fill_value);
         fftw_execute(dplan);
-        multiply_hc_with_hc(kernelhc, data_hc, size);
+        for (guint j = 0; j < cstride; j++)
+            datac[j] *= kernelc[j]/size;
         fftw_execute(cplan);
-        gwy_assign(field->data + (row + i)*xres + col, data_in + extend_left,
+        gwy_assign(target->data + (targetrow + i)*target->xres + targetcol,
+                   extdata + extend_left,
                    width);
     }
 
-    fftw_destroy_plan(kplan);
     fftw_destroy_plan(cplan);
     fftw_destroy_plan(dplan);
-    fftw_free(data_in);
+    fftw_free(datac);
+    fftw_free(extdata);
 }
 
 /**
  * gwy_field_row_convolve:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
@@ -368,22 +367,25 @@ row_convolve_fft(GwyField *field,
  *
  * The convolution is performed with the kernel centred on the respective field
  * pixels.  For an odd-sized kernel this holds precisely.  For an even-sized
- * kernel this means the kernel centre is placed 0.5 pixel to the right
- * (towards higher column indices) from the respective field pixel.
+ * kernel this means the kernel centre is placed 0.5 pixel to the left
+ * (towards lower column indices) from the respective field pixel.
  *
  * See gwy_field_extend() for what constitutes the exterior and how it is
  * handled.
  **/
 void
-gwy_field_row_convolve(GwyField *field,
+gwy_field_row_convolve(const GwyField *field,
                        const GwyRectangle *rectangle,
+                       GwyField *target,
                        const GwyLine *kernel,
                        GwyExteriorType exterior,
                        gdouble fill_value)
 {
-    guint col, row, width, height;
+    guint col, row, width, height, targetcol, targetrow;
     if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
         return;
 
     g_return_if_fail(GWY_IS_LINE(kernel));
@@ -394,14 +396,30 @@ gwy_field_row_convolve(GwyField *field,
     // The threshold was estimated empirically.  See benchmarks/convolve-row.c
     if (convolution_method == CONVOLUTION_DIRECT
         || (convolution_method == CONVOLUTION_AUTO
-            && (width <= 20 || kernel->res <= 5.0*(log(width) - 1.0))))
-        row_convolve_direct(field, col, row, width, height, kernel,
-                            extend_row, fill_value);
+            && (width <= 12 || kernel->res <= 3.0*(log(width) - 1.0))))
+        row_convolve_direct(field, col, row, width, height,
+                            target, targetcol, targetrow,
+                            kernel, extend_row, fill_value);
     else
-        row_convolve_fft(field, col, row, width, height, kernel,
-                         extend_row, fill_value);
+        row_convolve_fft(field, col, row, width, height,
+                         target, targetcol, targetrow,
+                         kernel, extend_row, fill_value);
 
-    gwy_field_invalidate(field);
+    gwy_field_invalidate(target);
+}
+
+static inline void
+extend_kernel_rect(const gdouble *kernel, guint kxlen, guint kylen,
+                   gdouble *extended, guint xsize, guint ysize, guint rowstride)
+{
+    guint ulen = kylen/2, dlen = kylen - ulen;
+    for (guint i = 0; i < dlen; i++)
+        extend_kernel_row(kernel + (i + ulen)*kxlen, kxlen,
+                          extended + i*rowstride, xsize);
+    gwy_clear(extended + dlen*rowstride, (ysize - kylen)*rowstride);
+    for (guint i = 0; i < ulen; i++)
+        extend_kernel_row(kernel + i*kxlen, kxlen,
+                          extended + (ysize - ulen + i)*rowstride, xsize);
 }
 
 static inline void
@@ -583,145 +601,202 @@ get_rect_extend_func(GwyExteriorType exterior)
 }
 
 static void
-col_convolve_direct(GwyField *field,
-                    guint col, guint row,
-                    guint width, guint height,
-                    const GwyLine *kernel,
-                    RectExtendFunc extend_rect,
-                    gdouble fill_value)
+convolve_direct(const GwyField *field,
+                guint col, guint row,
+                guint width, guint height,
+                GwyField *target,
+                guint targetcol, guint targetrow,
+                const GwyField *kernel,
+                RectExtendFunc extend_rect,
+                gdouble fill_value)
 {
-    guint xres = field->xres, yres = field->yres, kres = kernel->res;
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
     const gdouble *kdata = kernel->data;
-    guint size = height + kres - 1;
-    gdouble *data_in = g_new(gdouble, size*width);
-    guint extend_up, extend_down;
-    make_symmetrical_extension(height, size, &extend_up, &extend_down);
+    guint xsize = width + kxres - 1;
+    guint ysize = height + kyres - 1;
+    gdouble *extdata = g_new(gdouble, xsize*ysize);
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
 
-    extend_rect(field->data, xres, data_in, width,
+    extend_rect(field->data, xres, extdata, xsize,
                 col, row, width, height, xres, yres,
-                0, 0, extend_up, extend_down, fill_value);
-    GwyRectangle rectangle = { col, row, width, height };
-    gwy_field_clear(field, &rectangle, NULL, GWY_MASK_IGNORE);
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+    GwyRectangle rectangle = { targetcol, targetrow, width, height };
+    gwy_field_clear(target, &rectangle, NULL, GWY_MASK_IGNORE);
 
-    // The direct method is used only if kres ≪ yres.  Don't bother optimising
+    // The direct method is used only if kres ≪ res.  Don't bother optimising
     // the boundaries, just make the inner loop tight.
     for (guint i = 0; i < height; i++) {
-        gdouble *drow = field->data + (row + i)*xres + col;
-        const gdouble *d = data_in + (extend_up + kres/2 + i)*width;
-        for (guint k = 0; k < kres; k++, d -= width) {
-            gdouble v = kdata[k];
-            for (guint j = 0; j < width; j++)
-                drow[j] += v * d[j];
+        gdouble *trow = target->data + (targetrow + i)*target->xres + targetcol;
+        const gdouble *id = extdata + (extend_up + kyres/2 + i)*xsize;
+        for (guint ik = 0; ik < kyres; ik++, id -= xsize) {
+            const gdouble *krow = kdata + ik*kxres;
+            for (guint j = 0; j < width; j++) {
+                const gdouble *jd = id + extend_left + kxres/2 + j;
+                gdouble v = 0.0;
+                for (guint jk = 0; jk < kxres; jk++, jd--)
+                    v += krow[jk] * *jd;
+                trow[j] += v;
+            }
         }
     }
 
-    g_free(data_in);
+    g_free(extdata);
 }
 
+/*
 static void
-col_convolve_fft(GwyField *field,
-                 guint col, guint row,
-                 guint width, guint height,
-                 const GwyLine *kernel,
-                 RectExtendFunc extend_rect,
-                 gdouble fill_value)
+print_data(const gchar *name,
+           const gdouble *data, guint xres, guint yres, guint rowstride)
 {
-    guint xres = field->xres, yres = field->yres, kres = kernel->res;
-    guint size = gwy_fft_nice_transform_size(height + kres - 1);
-    guint extend_up, extend_down;
-    make_symmetrical_extension(height, size, &extend_up, &extend_down);
+    g_printerr("=====[ %s ]=====\n", name);
+    for (guint i = 0; i < yres; i++) {
+        g_printerr("[%02u]", i);
+        for (guint j = 0; j < xres; j++) {
+            g_printerr(" % .4f", data[i*rowstride + j]);
+        }
+        g_printerr("\n");
+    }
+}
+*/
+
+static void
+convolve_fft(const GwyField *field,
+             guint col, guint row,
+             guint width, guint height,
+             GwyField *target,
+             guint targetcol, guint targetrow,
+             const GwyField *kernel,
+             RectExtendFunc extend_rect,
+             gdouble fill_value)
+{
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint xsize = gwy_fft_nice_transform_size(width + kxres - 1);
+    guint ysize = gwy_fft_nice_transform_size(height + kyres - 1);
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  If the transform is in-place the
+    // input array needs to be padded.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    guint cstride = xsize/2 + 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
     // Use in-place transforms.  Let FFTW figure out whether allocating
     // temporary buffers worths it or not.
-    gdouble *extdata = fftw_malloc(size*width*sizeof(gdouble));
-    gdouble *kernelhc = fftw_malloc(size);
-    // The R2HC plan for the initial transform of the kernel.  We put the
-    // 0-extended real-space kernel into data_hc that is unused at that time.
-    fftw_plan kplan = fftw_plan_r2r_1d(size, extdata, kernelhc,
-                                       FFTW_R2HC,
-                                       FFTW_DESTROY_INPUT | _gwy_fft_rigour());
-    // The R2HC plan for transforming the extended data.
-    int n[1] = { size };
-    fftw_r2r_kind fkind[1] = { FFTW_R2HC }, bkind[1] = { FFTW_HC2R };
-    fftw_plan dplan = fftw_plan_many_r2r(1, n, width,
-                                         extdata, NULL, width, 1,
-                                         extdata, NULL, width, 1,
-                                         fkind, _gwy_fft_rigour());
-    // The HC2R plan the backward transform of the convolution.
-    fftw_plan cplan = fftw_plan_many_r2r(1, n, width,
-                                         extdata, NULL, width, 1,
-                                         extdata, NULL, width, 1,
-                                         bkind, _gwy_fft_rigour());
+    gwycomplex *datac = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gdouble *extdata = (gdouble*)datac;
+    gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    // The R2C plan for transforming the extended kernel.  The input is in
+    // extdata to make it an out-of-place transform (this also means the input
+    // data row stride is just xsize, not 2*cstride).
+    fftw_plan kplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, kernelc,
+                                           FFTW_DESTROY_INPUT
+                                           | _gwy_fft_rigour());
+    // The R2C plan for transforming the extended data.  This one is in-place.
+    fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
+                                           _gwy_fft_rigour());
+    // The C2R plan the backward transform of the convolution.  The input
+    // is in fact in kernelc to make it an out-of-place transform.  So, again,
+    // the output has cstride of only xsize.
+    fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, kernelc, extdata,
+                                           FFTW_DESTROY_INPUT
+                                           | _gwy_fft_rigour());
 
     // Transform the kernel.
-    mirror_kernel(kernel->data, kres, extdata, size);
+    extend_kernel_rect(kernel->data, kxres, kyres,
+                       extdata, xsize, ysize, xsize);
     fftw_execute(kplan);
 
-    // Convolve rows
-    extend_rect(field->data, xres, extdata, width,
+    // Convolve
+    if (extend_rect == &rect_extend_undef) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        extend_rect = rect_extend_fill;
+        fill_value = 0.0;
+    }
+    extend_rect(field->data, xres, extdata, 2*cstride,
                 col, row, width, height, xres, yres,
-                0, 0, extend_up, extend_down, fill_value);
+                extend_left, extend_right, extend_up, extend_down, fill_value);
     fftw_execute(dplan);
-    // TODO: actually multiply HC data with HC kernel
+
+    for (guint k = 0; k < cstride*ysize; k++)
+        kernelc[k] *= datac[k]/(xsize*ysize);
     fftw_execute(cplan);
 
     for (guint i = 0; i < height; i++)
-        gwy_assign(field->data + (row + i)*xres + col,
-                   extdata + (extend_up + i)*width,
+        gwy_assign(target->data + (targetrow + i)*target->xres + targetcol,
+                   extdata + (extend_up + i)*xsize + extend_left,
                    width);
 
     fftw_destroy_plan(kplan);
     fftw_destroy_plan(cplan);
     fftw_destroy_plan(dplan);
-    fftw_free(kernelhc);
-    fftw_free(extdata);
+    fftw_free(kernelc);
+    fftw_free(datac);
 }
 
 /**
- * gwy_field_col_convolve:
+ * gwy_field_convolve:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
  *
- * Convolve a field with a vertical kernel.
+ * Convolve a field with a two-dimensional kernel.
  *
  * The convolution is performed with the kernel centred on the respective field
- * pixels.  For an odd-sized kernel this holds precisely.  For an even-sized
- * kernel this means the kernel centre is placed 0.5 pixel down (towards higher
- * row indices) from the respective field pixel.
+ * pixels.  For directions in which the kernel has an odd size this holds
+ * precisely.  For an even-sized kernel this means the kernel centre is placed
+ * 0.5 pixel left or up (towards lower indices) from the respective field
+ * pixel.
  *
  * See gwy_field_extend() for what constitutes the exterior and how it is
  * handled.
  **/
 void
-gwy_field_col_convolve(GwyField *field,
-                       const GwyRectangle* rectangle,
-                       const GwyLine *kernel,
-                       GwyExteriorType exterior,
-                       gdouble fill_value)
+gwy_field_convolve(const GwyField *field,
+                   const GwyRectangle* rectangle,
+                   GwyField *target,
+                   const GwyField *kernel,
+                   GwyExteriorType exterior,
+                   gdouble fill_value)
 {
-    guint col, row, width, height;
+    guint col, row, width, height, targetcol, targetrow;
     if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height))
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
         return;
 
-    g_return_if_fail(GWY_IS_LINE(kernel));
+    g_return_if_fail(GWY_IS_FIELD(kernel));
     RectExtendFunc extend_rect = get_rect_extend_func(exterior);
     if (!extend_rect)
         return;
 
-    // The threshold was estimated empirically.  See benchmarks/convolve-col.c
+    // The threshold was estimated empirically.  See benchmarks/convolve.c
     if (convolution_method == CONVOLUTION_DIRECT
         || (convolution_method == CONVOLUTION_AUTO
-            && (width <= 20 || kernel->res <= 5.0*(log(width) - 1.0))))
-        col_convolve_direct(field, col, row, width, height, kernel,
-                            extend_rect, fill_value);
-    else
-        col_convolve_fft(field, col, row, width, height, kernel,
-                         extend_rect, fill_value);
+            && (width <= 12 || kernel->xres <= 3.0*(log(width) - 1.0))
+            && (height <= 12 || kernel->yres <= 3.0*(log(height) - 1.0))))
+        convolve_direct(field, col, row, width, height,
+                        target, targetcol, targetrow,
+                        kernel, extend_rect, fill_value);
+    else {
+        convolve_fft(field, col, row, width, height,
+                     target, targetcol, targetrow,
+                     kernel, extend_rect, fill_value);
+    }
 
-    gwy_field_invalidate(field);
+    gwy_field_invalidate(target);
 }
 
 static gboolean
@@ -748,50 +823,6 @@ make_gaussian_kernel(GwyLine *kernel,
     gwy_line_multiply(kernel, 1.0/s);
 
     return TRUE;
-}
-
-/**
- * gwy_field_filter_gaussian:
- * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @hsigma: Horizontal sigma parameter (square root of dispersion) of the
- *          Gaussian, in pixels.
- * @vsigma: Vertical sigma parameter (square root of dispersion) of the
- *          Gaussian, in pixels.
- *
- * Filters a rectangular part of a field with a Gaussian filter.
- *
- * The Gausian is normalised, i.e. the filter is sum-preserving.
- *
- * Pass the same @hsigma and @vsigma for a pixel-wise rotationally symmetrical
- * Gaussian which is usually wanted.  However, if the horizontal and vertical
- * physical pixel dimensions differ or filtering only in one direction is
- * required then passing different @hsigma and @vsigma can be useful.
- **/
-void
-gwy_field_filter_gaussian(GwyField *field,
-                          const GwyRectangle* rectangle,
-                          gdouble hsigma, gdouble vsigma)
-{
-    /* The field and rectangle are checked by the actual convolution funcs. */
-    g_return_if_fail(hsigma >= 0.0 && vsigma >= 0.0);
-
-    GwyLine *kernel = gwy_line_new();
-    gboolean done = FALSE;
-
-    if (make_gaussian_kernel(kernel, hsigma)) {
-        gwy_field_row_convolve(field, rectangle, kernel,
-                               GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
-        if (vsigma == hsigma) {
-            gwy_field_col_convolve(field, rectangle, kernel,
-                                   GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
-            done = TRUE;
-        }
-    }
-    if (!done && make_gaussian_kernel(kernel, vsigma))
-        gwy_field_col_convolve(field, rectangle, kernel,
-                               GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
-    g_object_unref(kernel);
 }
 
 /**
@@ -844,7 +875,268 @@ gwy_field_extend(const GwyField *field,
                 col, row, width, height, field->xres, field->yres,
                 left, right, up, down, fill_value);
 
+    result->xreal = (width + left + right)*gwy_field_dx(field);
+    result->yreal = (height + up + down)/gwy_field_dy(field);
+    result->xoff = field->xoff + left*gwy_field_dx(field);
+    result->yoff = field->yoff + up*gwy_field_dy(field);
+    ASSIGN_UNITS(result->priv->unit_xy, field->priv->unit_xy);
+    ASSIGN_UNITS(result->priv->unit_z, field->priv->unit_z);
+
     return result;
+}
+
+/**
+ * gwy_field_filter_gaussian:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
+ * @hsigma: Horizontal sigma parameter (square root of dispersion) of the
+ *          Gaussian, in pixels.
+ * @vsigma: Vertical sigma parameter (square root of dispersion) of the
+ *          Gaussian, in pixels.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ *
+ * Filters a rectangular part of a field with a Gaussian filter.
+ *
+ * The Gausian is normalised, i.e. the filter is sum-preserving.
+ *
+ * Pass the same @hsigma and @vsigma for a pixel-wise rotationally symmetrical
+ * Gaussian which is usually wanted.  However, if the horizontal and vertical
+ * physical pixel dimensions differ or filtering only in one direction is
+ * required then passing different @hsigma and @vsigma can be useful.
+ **/
+void
+gwy_field_filter_gaussian(const GwyField *field,
+                          const GwyRectangle* rectangle,
+                          GwyField *target,
+                          gdouble hsigma, gdouble vsigma,
+                          GwyExteriorType exterior,
+                          gdouble fill_value)
+{
+    // The fields and rectangle are checked by the actual convolution funcs.
+    g_return_if_fail(hsigma >= 0.0 && vsigma >= 0.0);
+
+    // The common case.
+    if (hsigma == vsigma) {
+        GwyLine *linekernel = gwy_line_new();
+        if (make_gaussian_kernel(linekernel, hsigma)) {
+            GwyField *kernel = gwy_line_outer_product(linekernel, linekernel);
+            gwy_field_convolve(field, rectangle, target, kernel,
+                               exterior, fill_value);
+            g_object_unref(kernel);
+        }
+        g_object_unref(linekernel);
+        return;
+    }
+
+    // The general case.
+    GwyLine *rowkernel = gwy_line_new(), *colkernel = gwy_line_new();
+    if (make_gaussian_kernel(colkernel, vsigma)) {
+        make_gaussian_kernel(rowkernel, hsigma);
+        GwyField *kernel = gwy_line_outer_product(colkernel, rowkernel);
+        gwy_field_convolve(field, rectangle, target, kernel,
+                           exterior, fill_value);
+        g_object_unref(kernel);
+    }
+    else {
+        gwy_field_row_convolve(field, rectangle, target, rowkernel,
+                               exterior, fill_value);
+    }
+    g_object_unref(colkernel);
+    g_object_unref(rowkernel);
+}
+
+/**
+ * kuwahara_block:
+ * @a: points to a 5x5 matrix (array of 25 doubles)
+ *
+ * Computes a new value of the center pixel according to the Kuwahara filter.
+ *
+ * Returns: Filtered value.
+ */
+static gdouble
+kuwahara_block(const gdouble *a)
+{
+   static const guint r1[] = { 0, 1, 2, 5, 6, 7, 10, 11, 12 };
+   static const guint r2[] = { 2, 3, 4, 7, 8, 9, 12, 13, 14 };
+   static const guint r3[] = { 12, 13, 14, 17, 18, 19, 22, 23, 24 };
+   static const guint r4[] = { 10, 11, 12, 15, 16, 17, 20, 21, 22 };
+   gdouble mean1 = 0.0, mean2 = 0.0, mean3 = 0.0, mean4 = 0.0;
+   gdouble var1 = 0.0, var2 = 0.0, var3 = 0.0, var4 = 0.0;
+
+   for (guint i = 0; i < 9; i++) {
+       gdouble v1 = a[r1[i]], v2 = a[r2[i]], v3 = a[r3[i]], v4 = a[r4[i]];
+       mean1 += v1;
+       mean2 += v2;
+       mean3 += v3;
+       mean4 += v4;
+       var1 += v1*v1;
+       var2 += v2*v2;
+       var3 += v3*v3;
+       var4 += v4*v4;
+   }
+   mean1 /= 9.0;
+   mean2 /= 9.0;
+   mean3 /= 9.0;
+   mean4 /= 9.0;
+   var1 /= 9.0;
+   var2 /= 9.0;
+   var3 /= 9.0;
+   var4 /= 9.0;
+
+   var1 -= mean1 * mean1;
+   var2 -= mean2 * mean2;
+   var3 -= mean3 * mean3;
+   var4 -= mean4 * mean4;
+
+   if (var1 <= var2 && var1 <= var3 && var1 <= var4)
+       return mean1;
+   if (var2 <= var3 && var2 <= var4 && var2 <= var1)
+       return mean2;
+   if (var3 <= var4 && var3 <= var1 && var3 <= var2)
+       return mean3;
+   if (var4 <= var1 && var4 <= var2 && var4 <= var3)
+       return mean4;
+
+   // XXX: IMO this can happen only with NaNs.  Maybe we should return NaN too.
+   return a[12];
+}
+
+static void
+filter_kuwahara(const GwyField *field,
+                const GwyRectangle* rectangle,
+                GwyField *target,
+                GwyExteriorType exterior,
+                gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    guint xres = field->xres, yres = field->yres;
+    guint xsize = width + 4;
+    guint ysize = height + 4;
+    gdouble *extdata = g_new(gdouble, xsize*ysize);
+    gdouble workspace[25];
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres, 2, 2, 2, 2, fill_value);
+
+    for (guint i = 0; i < height; i++) {
+        gdouble *trow = target->data + (targetrow + i)*target->xres + targetcol;
+        for (guint j = 0; j < width; j++, trow++) {
+            for (guint ii = 0; ii < 5; ii++)
+                gwy_assign(workspace + 5*ii, extdata + (i + ii)*xsize + j, 5);
+            *trow = kuwahara_block(workspace);
+        }
+    }
+
+    g_free(extdata);
+    gwy_field_invalidate(target);
+}
+
+static GwyField*
+make_kernel_from_data(const gdouble *data, guint xres, guint yres)
+{
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_assign(field->data, data, xres*yres);
+    return field;
+}
+
+/**
+ * gwy_field_filter_standard:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
+ * @filter: Filter to apply.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ *
+ * Applies a predefined standard filter to a field.
+ **/
+void
+gwy_field_filter_standard(const GwyField *field,
+                          const GwyRectangle* rectangle,
+                          GwyField *target,
+                          GwyFilterType filter,
+                          GwyExteriorType exterior,
+                          gdouble fill_value)
+{
+    static const gdouble laplace[] = {
+        0.0,      1.0/4.0, 0.0,
+        1.0/4.0, -1.0,     1.0/4.0,
+        0.0,      1.0/4.0, 0.0,
+    };
+    static const gdouble hsobel[] = {
+        1.0/4.0, 0.0, -1.0/4.0,
+        1.0/2.0, 0.0, -1.0/2.0,
+        1.0/4.0, 0.0, -1.0/4.0,
+    };
+    static const gdouble vsobel[] = {
+         1.0/4.0,  1.0/2.0,  1.0/4.0,
+         0.0,      0.0,      0.0,
+        -1.0/4.0, -1.0/2.0, -1.0/4.0,
+    };
+    static const gdouble hprewitt[] = {
+        1.0/3.0, 0.0, -1.0/3.0,
+        1.0/3.0, 0.0, -1.0/3.0,
+        1.0/3.0, 0.0, -1.0/3.0,
+    };
+    static const gdouble vprewitt[] = {
+         1.0/3.0,  1.0/3.0,  1.0/3.0,
+         0.0,      0.0,      0.0,
+        -1.0/3.0, -1.0/3.0, -1.0/3.0,
+    };
+    static const gdouble dechecker[] = {
+         0.0,        1.0/144.0, -1.0/72.0,  1.0/144.0,  0.0,
+         1.0/144.0, -1.0/18.0,   1.0/9.0,  -1.0/18.0,   1.0/144.0,
+        -1.0/72.0,   1.0/9.0,    7.0/9.0,   1.0/9.0,   -1.0/72.0,
+         1.0/144.0, -1.0/18.0,   1.0/9.0,  -1.0/18.0,   1.0/144.0,
+         0.0,        1.0/144.0, -1.0/72.0,  1.0/144.0,  0.0,
+    };
+
+    // Special-case the non-convolution filters.
+    if (filter == GWY_FILTER_KUWAHARA) {
+        filter_kuwahara(field, rectangle, target, exterior, fill_value);
+        return;
+    }
+
+    GwyField *kernel;
+    if (filter == GWY_FILTER_LAPLACE)
+        kernel = make_kernel_from_data(laplace, 3, 3);
+    else if (filter == GWY_FILTER_HSOBEL)
+        kernel = make_kernel_from_data(hsobel, 3, 3);
+    else if (filter == GWY_FILTER_VSOBEL)
+        kernel = make_kernel_from_data(vsobel, 3, 3);
+    else if (filter == GWY_FILTER_HPREWITT)
+        kernel = make_kernel_from_data(hprewitt, 3, 3);
+    else if (filter == GWY_FILTER_VPREWITT)
+        kernel = make_kernel_from_data(vprewitt, 3, 3);
+    else if (filter == GWY_FILTER_DECHECKER)
+        kernel = make_kernel_from_data(dechecker, 5, 5);
+    else {
+        g_critical("Bad standard filter type %u.", filter);
+        return;
+    }
+
+    gwy_field_convolve(field, rectangle, target, kernel,
+                       exterior, fill_value);
+    g_object_unref(kernel);
 }
 
 /**
@@ -852,6 +1144,42 @@ gwy_field_extend(const GwyField *field,
  * @section_id: GwyField-filter
  * @title: GwyField filtering
  * @short_description: Field filtering
+ **/
+
+/**
+ * GwyFilterType:
+ * @GWY_FILTER_LAPLACE: Laplacian filter, a convolution filter with
+ *                      3×3 kernel
+ *                      [[0, 1/4, 0], [1/4, -1, 1/4], [0, 1/4, 0]].
+ *                      It represents the limit of Laplacian of Gaussians for
+ *                      small Gaussian size.
+ * @GWY_FILTER_HSOBEL: Horizontal Sobel filter, a convolution filter with
+ *                     3×3 kernel
+ *                     [[1/4, 0, -1/4], [1/2, 0, -1/2], [1/4, 0, -1/4]].
+ *                     It represents the horizontal derivative.
+ * @GWY_FILTER_VSOBEL: Vertical Sobel filter, a convolution filter with
+ *                     3×3 kernel
+ *                     [[1/4, -1/2, -1/4], [0, 0, 0], [1/4, 1/2, -1/4]].
+ *                     It represents the vertical derivative.
+ * @GWY_FILTER_HPREWITT: Horizontal Prewitt filter, a convolution filter with
+ *                       3×3 kernel
+ *                       [[1/3, 0, -1/3], [1/3, 0, -1/3], [1/3, 0, -1/3]].
+ *                       It represents the horizontal derivative.
+ * @GWY_FILTER_VPREWITT: Vertical Prewitt filter, a convolution filter with
+ *                       3×3 kernel
+ *                       [[1/3, -1/3, -1/3], [0, 0, 0], [1/3, 1/3, -1/3]].
+ *                       It represents the vertical derivative.
+ * @GWY_FILTER_DECHECKER: Checker-pattern removal filter, a convolution filter
+ *                        with 5×5 kernel
+ *                        [[0, 1/144, -1/72, 1/144, 0],
+ *                         [1/144, -1/18, 1/9, -1/18, 1/144],
+ *                         [-1/72, 1/9, 7/9, 1/9, -1/72],
+ *                         [1/144, -1/18, 1/9, -1/18, 1/144],
+ *                         [0, 1/144, -1/72, 1/144, 0]].
+ * @GWY_FILTER_KUWAHARA: Kuwahara edge-preserving smoothing filter.  This is
+ *                       a non-linear (non-convolution) filter.
+ *
+ * Predefined standard filter types.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

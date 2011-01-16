@@ -98,6 +98,58 @@ gwy_line_multiply(GwyLine *line,
         *p *= value;
 }
 
+/**
+ * gwy_line_outer_product:
+ * @column: A one-dimensional data line that forms the column vector.
+ * @row: A one-dimensional data line that forms the row vector.
+ *
+ * Performs outer product of two data lines.
+ *
+ * The horizontal size and physical dimensions of the result correspond to
+ * @row while the vertical dimensions to @column.  The value units of the
+ * result are equal to the product of the value units of the two lines.
+ *
+ * Returns: A newly created field.
+ **/
+GwyField*
+gwy_line_outer_product(const GwyLine *column,
+                       const GwyLine *row)
+{
+    g_return_val_if_fail(GWY_IS_LINE(column), NULL);
+    g_return_val_if_fail(GWY_IS_LINE(row), NULL);
+
+    guint xres = row->res, yres = column->res;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    for (guint i = 0; i < yres; i++) {
+        for (guint j = 0; j < xres; j++)
+            field->data[i*xres + j] = row->data[j] * column->data[i];
+    }
+
+    field->xreal = row->real;
+    field->yreal = column->real;
+    field->xoff = row->off;
+    field->yoff = column->off;
+
+    if (row->priv->unit_x || column->priv->unit_x) {
+        if (!row->priv->unit_x
+            || !column->priv->unit_x
+            || !gwy_unit_equal(row->priv->unit_x, column->priv->unit_x)) {
+            g_warning("Multiplied lines have different x-units.");
+        }
+        gwy_unit_assign(gwy_field_get_unit_xy(field), row->priv->unit_x);
+    }
+    if (row->priv->unit_y || column->priv->unit_y) {
+        GwyUnit *zunit = gwy_field_get_unit_z(field);
+        if (!row->priv->unit_y)
+            gwy_unit_assign(zunit, column->priv->unit_y);
+        else if (!column->priv->unit_y)
+            gwy_unit_assign(zunit, row->priv->unit_y);
+        else
+            gwy_unit_multiply(zunit, column->priv->unit_x, row->priv->unit_y);
+    }
+
+    return field;
+}
 
 /**
  * SECTION: line-arithmetic

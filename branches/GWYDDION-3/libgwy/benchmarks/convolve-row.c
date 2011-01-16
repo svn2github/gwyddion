@@ -44,10 +44,9 @@ convolve_rows(guint xres, guint yres,
         GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
         randomize(kernel->data, kres, rng);
 
-        gwy_field_copy_full(source, field);
         gwy_tune_algorithms("convolution-method", "direct");
         gwy_benchmark_timer_start();
-        gwy_field_row_convolve(field, NULL, kernel,
+        gwy_field_row_convolve(source, NULL, field, kernel,
                                GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
         gwy_benchmark_timer_stop();
         gdouble tdirect = gwy_benchmark_timer_get_total()/yres;
@@ -55,7 +54,7 @@ convolve_rows(guint xres, guint yres,
         gwy_field_copy_full(source, field);
         gwy_tune_algorithms("convolution-method", "fft");
         gwy_benchmark_timer_start();
-        gwy_field_row_convolve(field, NULL, kernel,
+        gwy_field_row_convolve(source, NULL, field, kernel,
                                GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
         gwy_benchmark_timer_stop();
         gdouble tfft = gwy_benchmark_timer_get_total()/yres;

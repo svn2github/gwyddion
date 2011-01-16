@@ -1133,6 +1133,34 @@ _gwy_field_limit_rectangles(const GwyField *src,
 }
 
 gboolean
+_gwy_field_check_target(const GwyField *field,
+                        const GwyField *target,
+                        guint col,
+                        guint row,
+                        guint width,
+                        guint height,
+                        guint *targetcol,
+                        guint *targetrow)
+{
+    g_return_val_if_fail(GWY_IS_FIELD(field), FALSE);
+    g_return_val_if_fail(GWY_IS_FIELD(target), FALSE);
+
+    if (target->xres == field->xres && target->yres == field->yres) {
+        *targetcol = col;
+        *targetrow = row;
+        return TRUE;
+    }
+    if (target->xres == width && target->yres == height) {
+        *targetcol = *targetrow = 0;
+        return TRUE;
+    }
+
+    g_critical("Target field dimensions match neither source field nor the "
+               "rectangle.");
+    return FALSE;
+}
+
+gboolean
 _gwy_field_check_mask(const GwyField *field,
                       const GwyRectangle *rectangle,
                       const GwyMaskField *mask,
