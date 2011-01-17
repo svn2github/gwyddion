@@ -31,6 +31,7 @@ cat >build_documentation.ignore <<':'
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
+^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
 ':'
 :
 
