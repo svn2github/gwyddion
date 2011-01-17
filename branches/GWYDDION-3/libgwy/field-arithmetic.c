@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -339,6 +339,64 @@ gwy_field_add_field(const GwyField *src,
             *drow += factor*(*srow);
     }
     gwy_field_invalidate(dest);
+}
+
+/**
+ * gwy_field_clamp:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @lower: Lower limit value (it must not be greater than @upper).
+ * @upper: Upper limit value (it must not be smaller than @lower).
+ *
+ * Limits values in a field to the specified range.
+ *
+ * Returns: The number of changed values, i.e. values that were outside
+ *          the interval [@lower, @upper].
+ **/
+guint
+gwy_field_clamp(GwyField *field,
+                const GwyRectangle *rectangle,
+                gdouble lower, gdouble upper)
+{
+    g_return_val_if_fail(lower <= upper, 0);
+
+    guint col, row, width, height;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height))
+        return 0;
+
+    guint count = 0;
+    for (guint i = 0; i < height; i++) {
+        gdouble *drow = field->data + (row + i)*field->xres + col;
+        for (guint j = width; j; drow++, j--) {
+            if (*drow < lower) {
+                *drow = lower;
+                count++;
+            }
+            else if (*drow > upper) {
+                *drow = upper;
+                count++;
+            }
+        }
+
+    }
+
+    if (!count)
+        return count;
+
+    if (width == field->xres && height == field->yres) {
+        Field *priv = field->priv;
+        gdouble min = CVAL(priv, MIN), max = CVAL(priv, MAX),
+                med = CVAL(priv, MED);
+        priv->cached &= (CBIT(MIN) | CBIT(MAX)
+                         | (med >= lower && med <= upper ? CBIT(MED) : 0));
+        CVAL(priv, MIN) = CLAMP(min, lower, upper);
+        CVAL(priv, MAX) = CLAMP(max, lower, upper);
+    }
+    else
+        gwy_field_invalidate(field);
+
+    return count;
 }
 
 /**

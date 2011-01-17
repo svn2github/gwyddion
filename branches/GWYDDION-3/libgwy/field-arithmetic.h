@@ -66,6 +66,10 @@ void                       gwy_field_add_field      (const GwyField *src,
                                                      guint destcol,
                                                      guint destrow,
                                                      gdouble factor);
+guint                      gwy_field_clamp          (GwyField *field,
+                                                     const GwyRectangle *rectangle,
+                                                     gdouble lower,
+                                                     gdouble upper);
 
 G_END_DECLS
 
