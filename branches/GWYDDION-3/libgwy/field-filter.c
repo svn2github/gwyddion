@@ -26,6 +26,7 @@
 #include "libgwy/strfuncs.h"
 #include "libgwy/math.h"
 #include "libgwy/fft.h"
+#include "libgwy/field-statistics.h"
 #include "libgwy/field-filter.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
@@ -33,6 +34,8 @@
 #include "libgwy/object-internal.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
+
+enum { CORRELATION_ALL = 0x07 };
 
 typedef void (*RowExtendFunc)(const gdouble *in,
                               gdouble *out,
@@ -324,12 +327,6 @@ row_convolve_fft(const GwyField *field,
     gwy_assign(kernelc, datac, cstride);
 
     // Convolve rows
-    if (extend_row == &row_extend_undef) {
-        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
-                  "correlations.  Fixing to zero-filled exterior.");
-        extend_row = row_extend_fill;
-        fill_value = 0.0;
-    }
     guint extend_left, extend_right;
     make_symmetrical_extension(width, size, &extend_left, &extend_right);
     for (guint i = 0; i < height; i++) {
@@ -389,6 +386,13 @@ gwy_field_row_convolve(const GwyField *field,
         return;
 
     g_return_if_fail(GWY_IS_LINE(kernel));
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        exterior = GWY_EXTERIOR_FIXED_VALUE;
+        fill_value = 0.0;
+    }
     RowExtendFunc extend_row = get_row_extend_func(exterior);
     if (!extend_row)
         return;
@@ -697,13 +701,13 @@ convolve_fft(const GwyField *field,
                                            | _gwy_fft_rigour());
     // The R2C plan for transforming the extended data.  This one is in-place.
     fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
-                                           _gwy_fft_rigour());
+                                           FFTW_DESTROY_INPUT
+                                           | _gwy_fft_rigour());
     // The C2R plan the backward transform of the convolution.  The input
     // is in fact in kernelc to make it an out-of-place transform.  So, again,
     // the output has cstride of only xsize.
     fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, kernelc, extdata,
-                                           FFTW_DESTROY_INPUT
-                                           | _gwy_fft_rigour());
+                                           _gwy_fft_rigour());
 
     // Transform the kernel.
     extend_kernel_rect(kernel->data, kxres, kyres,
@@ -711,12 +715,6 @@ convolve_fft(const GwyField *field,
     fftw_execute(kplan);
 
     // Convolve
-    if (extend_rect == &rect_extend_undef) {
-        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
-                  "correlations.  Fixing to zero-filled exterior.");
-        extend_rect = rect_extend_fill;
-        fill_value = 0.0;
-    }
     extend_rect(field->data, xres, extdata, 2*cstride,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
@@ -778,6 +776,13 @@ gwy_field_convolve(const GwyField *field,
         return;
 
     g_return_if_fail(GWY_IS_FIELD(kernel));
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        exterior = GWY_EXTERIOR_FIXED_VALUE;
+        fill_value = 0.0;
+    }
     RectExtendFunc extend_rect = get_rect_extend_func(exterior);
     if (!extend_rect)
         return;
@@ -1139,6 +1144,189 @@ gwy_field_filter_standard(const GwyField *field,
     g_object_unref(kernel);
 }
 
+void
+gwy_field_correlate(const GwyField *field,
+                    const GwyRectangle* rectangle,
+                    GwyField *target,
+                    const GwyField *kernel,
+                    const GwyMaskField *kmask,
+                    GwyCorrelationFlags flags,
+                    GwyExteriorType exterior,
+                    gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    if (kmask) {
+        g_return_if_fail(GWY_IS_MASK_FIELD(kmask));
+        g_return_if_fail(kmask->xres == kernel->xres
+                         && kmask->yres == kernel->yres);
+    }
+
+    if (exterior == GWY_EXTERIOR_UNDEFINED) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        exterior = GWY_EXTERIOR_FIXED_VALUE;
+        fill_value = 0.0;
+    }
+
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    if (flags & ~CORRELATION_ALL)
+        g_warning("Unknown correlation flags 0x%x.", flags & ~CORRELATION_ALL);
+
+    gboolean level = flags & GWY_CORRELATION_LEVEL;
+    gboolean normalise = flags & GWY_CORRELATION_NORMALIZE;
+    gboolean poc = flags & GWY_CORRELATION_PHASE_ONLY;
+    if (poc && (level || normalise)) {
+        g_warning("Levelling and normalisation is ignored for "
+                  "phase-only correlation.");
+        level = normalise = FALSE;
+    }
+
+    // Ensure the kernel has zeroes outside the mask.
+    GwyField *maskedkernel = gwy_field_duplicate(kernel);
+    if (kmask)
+        gwy_field_clear(maskedkernel, NULL, kmask, GWY_MASK_EXCLUDE);
+
+    guint xres = field->xres, yres = field->yres,
+          kxres = maskedkernel->xres, kyres = maskedkernel->yres;
+    gdouble kavg = gwy_field_mean(maskedkernel, NULL, kmask, GWY_MASK_INCLUDE);
+    guint kcount = kmask ? gwy_mask_field_count(kmask, NULL, TRUE) : kxres*kyres;
+    if (!kcount) {
+        g_object_unref(maskedkernel);
+        GwyRectangle rect = { targetcol, targetrow, width, height };
+        gwy_field_fill(target, &rect, NULL, GWY_MASK_IGNORE, 0.0);
+        return;
+    }
+
+    guint xsize = gwy_fft_nice_transform_size(width + kxres - 1);
+    guint ysize = gwy_fft_nice_transform_size(height + kyres - 1);
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  If the transform is in-place the
+    // input array needs to be padded.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    guint cstride = xsize/2 + 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+    gwycomplex *datac = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gdouble *extdata = fftw_malloc(xsize*ysize*sizeof(gdouble));
+    gdouble *extkernel = fftw_malloc(xsize*ysize*sizeof(gdouble));
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    gdouble *extkernelbase = extkernel + extend_up*xsize + extend_left;
+    gdouble *extdatabase = extdata + extend_up*xsize + extend_left;
+    // The out-of-place R2C plan.  We use it with the new-array excution
+    // functions also for extkernel → kernelc.
+    fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
+                                           FFTW_DESTROY_INPUT
+                                           | _gwy_fft_rigour());
+    // The C2R plan the backward transform of the correlation.  Again, it's
+    // used also for kernels.
+    fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, datac, extdata,
+                                           _gwy_fft_rigour());
+
+    // Transform the kernel.
+    extend_kernel_rect(maskedkernel->data, kxres, kyres,
+                       extkernel, xsize, ysize, xsize);
+    fftw_execute_dft_r2c(dplan, extkernel, kernelc);
+
+    // Transform the data.
+    // TODO: if levelling is requested, perform overall levelling first to
+    // reduce the numerical errors.
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+    fftw_execute(dplan);
+
+    // Convolve, putting the result into kernelc as we have no other use for it.
+    for (guint k = 0; k < cstride*ysize; k++)
+        kernelc[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+    if (poc) {
+        for (guint k = 0; k < cstride*ysize; k++) {
+            gdouble c = cabs(kernelc[k]);
+            if (G_LIKELY(c))
+                kernelc[k] /= c;
+        }
+    }
+    fftw_execute_dft_c2r(cplan, kernelc, extkernel);
+
+    // Store the result of the plain correlation to the target.
+    for (guint i = 0; i < height; i++)
+        gwy_assign(targetbase + i*target->xres, extkernelbase + i*xsize, width);
+
+    // Levelling is done by calculating the local mean values by convolution
+    // with 1-filled kernel.  Similarly, the local mean square values are
+    // calculated using convolution of squared data with 1-filled kernel.
+    // So for either we the Fourier image of such kernel.
+    if (level || normalise) {
+        gwy_field_fill(maskedkernel, NULL, kmask, GWY_MASK_INCLUDE, 1.0/kcount);
+        extend_kernel_rect(maskedkernel->data, kxres, kyres,
+                           extkernel, xsize, ysize, xsize);
+        fftw_execute_dft_r2c(dplan, extkernel, kernelc);
+    }
+
+    // Level.  Keep the local means in extkernel we may need it below also for
+    // normalisation.
+    if (level) {
+        for (guint k = 0; k < cstride*ysize; k++)
+            datac[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+        fftw_execute_dft_c2r(cplan, datac, extkernel);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *srow = extkernelbase + i*xsize;
+            gdouble *trow = targetbase + i*target->xres;
+            for (guint j = 0; j < width; j++)
+                trow[i] -= srow[i]*kavg;
+        }
+    }
+
+    // Normalise.
+    if (normalise) {
+        for (guint k = 0; k < xsize*ysize; k++)
+            extdata[k] *= extdata[k];
+        fftw_execute(dplan);
+
+        for (guint k = 0; k < cstride*ysize; k++)
+            datac[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+        fftw_execute(cplan);
+
+        for (guint i = 0; i < height; i++) {
+            const gdouble *srow = extkernelbase + i*xsize;
+            const gdouble *qrow = extdatabase + i*xsize;
+            gdouble *trow = targetbase + i*target->xres;
+            if (level) {
+                for (guint j = 0; j < width; j++) {
+                    gdouble q = qrow[i] - srow[i]*srow[i];
+                    trow[i] = (q > 0.0) ? trow[i]/sqrt(q) : 0.0;
+                }
+            }
+            else {
+                for (guint j = 0; j < width; j++) {
+                    gdouble q = qrow[i];
+                    trow[i] = G_LIKELY(q) ? trow[i]/sqrt(q) : 0.0;
+                }
+            }
+        }
+    }
+
+    fftw_destroy_plan(cplan);
+    fftw_destroy_plan(dplan);
+    fftw_free(kernelc);
+    fftw_free(datac);
+    fftw_free(extkernel);
+    fftw_free(extdata);
+    g_object_unref(maskedkernel);
+
+    gwy_field_invalidate(target);
+}
+
 /**
  * SECTION: field-filter
  * @section_id: GwyField-filter
@@ -1180,6 +1368,32 @@ gwy_field_filter_standard(const GwyField *field,
  *                       a non-linear (non-convolution) filter.
  *
  * Predefined standard filter types.
+ **/
+
+/**
+ * GwyCorrelationFlags:
+ * @GWY_CORRELATION_LEVEL: Subtract the mean value from each kernel-sized
+ *                         rectangle before multiplying it with the kernel to
+ *                         obtain the correlation score.
+ * @GWY_CORRELATION_NORMALIZE: Normalise the rms of each kernel-sized rectangle
+ *                             before multiplying it with the kernel to obtain
+ *                             the correlation score.
+ * @GWY_CORRELATION_PHASE_ONLY: Normalise all Fourier coefficients of both
+ *                              kernel and data to unity before calculating
+ *                              the correlation.
+ *
+ * Flags controlling behaviour of correlation functions.
+ *
+ * Flag %GWY_CORRELATION_PHASE_ONLY is mutually exclusive with the other flag.
+ *
+ * Flag %GWY_CORRELATION_LEVEL should be usually used for data that do not have
+ * well-defined zero level, such as AFM data.
+ *
+ * If kernel masking is in use the levelling and normalisation is applied only
+ * to the corresponding masked area in data.  If both flags are specified local
+ * levelling is performed first, then normalisation.  Note even if levelling
+ * and normalisation are used correlation scores are still calculated using
+ * FFT, just in a slightly more involved way.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

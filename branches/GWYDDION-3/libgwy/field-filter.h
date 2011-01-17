@@ -33,9 +33,23 @@ typedef enum {
     GWY_FILTER_HPREWITT,
     GWY_FILTER_VPREWITT,
     GWY_FILTER_DECHECKER,
-    GWY_FILTER_KUWAHARA
+    GWY_FILTER_KUWAHARA,
 } GwyFilterType;
 
+typedef enum {
+    GWY_CORRELATION_LEVEL      = 1 << 0,
+    GWY_CORRELATION_NORMALIZE  = 1 << 1,
+    GWY_CORRELATION_PHASE_ONLY = 1 << 2,
+} GwyCorrelationFlags;
+
+GwyField* gwy_field_extend         (const GwyField *field,
+                                    const GwyRectangle *rectangle,
+                                    guint left,
+                                    guint right,
+                                    guint up,
+                                    guint down,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value)            G_GNUC_MALLOC;
 void      gwy_field_row_convolve   (const GwyField *field,
                                     const GwyRectangle* rectangle,
                                     GwyField *target,
@@ -61,14 +75,14 @@ void      gwy_field_filter_standard(const GwyField *field,
                                     GwyFilterType filter,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
-GwyField* gwy_field_extend         (const GwyField *field,
-                                    const GwyRectangle *rectangle,
-                                    guint left,
-                                    guint right,
-                                    guint up,
-                                    guint down,
+void      gwy_field_correlate      (const GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    GwyField *target,
+                                    const GwyField *kernel,
+                                    const GwyMaskField *kmask,
+                                    GwyCorrelationFlags flags,
                                     GwyExteriorType exterior,
-                                    gdouble fill_value)            G_GNUC_MALLOC;
+                                    gdouble fill_value);
 
 G_END_DECLS
 
