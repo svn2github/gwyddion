@@ -41,7 +41,7 @@ convolve_rows(guint xres, guint yres,
 
     GwyField *field = gwy_field_new_alike(source, FALSE);
     for (guint kres = kresmin; kres <= kresmax; kres++) {
-        GwyLine *kernel = gwy_line_new_sized(kres, TRUE);
+        GwyLine *kernel = gwy_line_new_sized(kres, FALSE);
         randomize(kernel->data, kres, rng);
 
         gwy_tune_algorithms("convolution-method", "direct");
