@@ -2198,14 +2198,6 @@ field_convolve_row_exterior_one(GwyExteriorType exterior)
 }
 
 void
-test_field_convolve_row_interior_undef_direct(void)
-{
-    gwy_tune_algorithms("convolution-method", "direct");
-    field_convolve_row_interior_one(GWY_EXTERIOR_UNDEFINED);
-    gwy_tune_algorithms("convolution-method", "auto");
-}
-
-void
 test_field_convolve_row_interior_mirror_direct(void)
 {
     gwy_tune_algorithms("convolution-method", "direct");
@@ -2708,14 +2700,6 @@ field_convolve_field_one(GwyExteriorType exterior)
         g_object_unref(source);
     }
     g_rand_free(rng);
-}
-
-void
-test_field_convolve_field_undef_direct(void)
-{
-    gwy_tune_algorithms("convolution-method", "direct");
-    field_convolve_field_one(GWY_EXTERIOR_UNDEFINED);
-    gwy_tune_algorithms("convolution-method", "auto");
 }
 
 void

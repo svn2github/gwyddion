@@ -108,7 +108,6 @@ field/extend/fixed
 field/extend/mirror
 field/extend/periodic
 field/extend/border
-field/convolve/row/interior/undef/direct
 field/convolve/row/interior/mirror/direct
 field/convolve/row/interior/mirror/fft
 field/convolve/row/interior/border/direct
@@ -131,7 +130,6 @@ field/convolve/field/simple/even-even/direct
 field/convolve/field/simple/even-even/fft
 field/convolve/field/simple/odd-even/direct
 field/convolve/field/simple/odd-even/fft
-field/convolve/field/undef/direct
 field/convolve/field/mirror/direct
 field/convolve/field/mirror/fft
 field/convolve/field/border/direct
