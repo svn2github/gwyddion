@@ -20,6 +20,11 @@ cat >autogen.ignore <<':'
 ':'
 :
 
+cat >build.ignore <<':'
+^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
+':'
+:
+
 cat >build_documentation.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^Computing chunks\.\.\.
@@ -31,7 +36,6 @@ cat >build_documentation.ignore <<':'
 cat >distcheck.ignore <<':'
 ^Writing .* for [^ ]+\(.*\)
 ^libtool: install: warning: remember to run `libtool --finish /home/yeti/Projects/Gwyddion/GWYDDION-3-HEAD/gwyddion-[0-9.]+/_inst/lib'$
-^/usr/include/bits/cmathcalls.h:[0-9]+: syntax error, unexpected identifier, expecting .* _Complex
 ':'
 :
 
