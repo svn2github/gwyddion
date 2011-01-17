@@ -26,7 +26,7 @@
 
 G_BEGIN_DECLS
 
-typedef double complex gwycomplex;
+typedef complex double gwycomplex;
 
 typedef struct {
     gdouble x;
