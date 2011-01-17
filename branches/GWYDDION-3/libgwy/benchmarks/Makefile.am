@@ -7,27 +7,27 @@ noinst_SCRIPTS = \
 
 if BENCHMARKS
 noinst_PROGRAMS = \
+	convolve-rect \
 	convolve-row \
 	memory-access \
 	sort
 
 convolve_row_SOURCES = convolve-row.c
+convolve_rect_SOURCES = convolve-rect.c
 memory_access_SOURCES = memory-access.c
 sort_SOURCES = sort.c
 extra_sources =
 
 else
 extra_sources = \
+	convolve-rect.c \
 	convolve-row.c \
 	memory-access.c \
 	sort.c
 endif
 
 AM_CFLAGS = $(LIBGWY_DEPS_CFLAGS) $(VALGRIND_CFLAGS) $(GWY_CFLAGS)
-AM_CPPFLAGS = \
-	-I$(top_builddir) \
-	-I$(top_srcdir) \
-	-DG_DISABLE_DEPRECATED -DG_DISABLE_SINGLE_INCLUDES -DGSEAL_ENABLE
+AM_CPPFLAGS = -I$(top_builddir) -I$(top_srcdir) $(LIBGWY_COMPAT_CPPFLAGS)
 AM_LDFLAGS = ../libgwy3.la
 EXTRA_DIST = \
 	$(noinst_SCRIPTS) \
