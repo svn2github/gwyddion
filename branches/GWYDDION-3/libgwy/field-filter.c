@@ -650,22 +650,6 @@ convolve_direct(const GwyField *field,
     g_free(extdata);
 }
 
-/*
-static void
-print_data(const gchar *name,
-           const gdouble *data, guint xres, guint yres, guint rowstride)
-{
-    g_printerr("=====[ %s ]=====\n", name);
-    for (guint i = 0; i < yres; i++) {
-        g_printerr("[%02u]", i);
-        for (guint j = 0; j < xres; j++) {
-            g_printerr(" % .4f", data[i*rowstride + j]);
-        }
-        g_printerr("\n");
-    }
-}
-*/
-
 static void
 convolve_fft(const GwyField *field,
              guint col, guint row,
@@ -787,7 +771,7 @@ gwy_field_convolve(const GwyField *field,
     if (!extend_rect)
         return;
 
-    // The threshold was estimated empirically.  See benchmarks/convolve.c
+    // The threshold was estimated empirically.  See benchmarks/convolve-rect.c
     if (convolution_method == CONVOLUTION_DIRECT
         || (convolution_method == CONVOLUTION_AUTO
             && (width <= 12 || kernel->xres <= 3.0*(log(width) - 1.0))
@@ -1087,6 +1071,13 @@ gwy_field_filter_standard(const GwyField *field,
         1.0/4.0, -1.0,     1.0/4.0,
         0.0,      1.0/4.0, 0.0,
     };
+    // Derived by expressing the Scharr's optimised Laplacian kernel explicitly
+    // and normalising the sum of values of one sign to unity.
+    static const gdouble laplace_scharr[] = {
+        0.05780595912336862,  0.19219404087663136, 0.05780595912336862,
+        0.19219404087663136, -1.0,                 0.19219404087663136,
+        0.05780595912336862,  0.19219404087663136, 0.05780595912336862,
+    };
     static const gdouble hsobel[] = {
         1.0/4.0, 0.0, -1.0/4.0,
         1.0/2.0, 0.0, -1.0/2.0,
@@ -1106,6 +1097,16 @@ gwy_field_filter_standard(const GwyField *field,
          1.0/3.0,  1.0/3.0,  1.0/3.0,
          0.0,      0.0,      0.0,
         -1.0/3.0, -1.0/3.0, -1.0/3.0,
+    };
+    static const gdouble hscharr[] = {
+         3.0/16.0, 0.0, -3.0/16.0,
+         5.0/8.0,  0.0, -5.0/8.0,
+         3.0/16.0, 0.0, -3.0/16.0,
+    };
+    static const gdouble vscharr[] = {
+          3.0/16.0,  5.0/8.0,  3.0/16.0,
+          0.0,       0.0,      0.0,
+         -3.0/16.0, -5.0/8.0, -3.0/16.0,
     };
     static const gdouble dechecker[] = {
          0.0,        1.0/144.0, -1.0/72.0,  1.0/144.0,  0.0,
