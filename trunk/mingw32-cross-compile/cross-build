@@ -3,7 +3,8 @@ set -e
 . ./setup
 rm -rf "$target_prefix"
 pushd "$source_dir"
-./autogen.sh --host=i686-pc-mingw32 --prefix="$target_prefix" \
+build=$(/usr/share/libtool/config/config.guess)
+./autogen.sh --host=i686-pc-mingw32 --build=$build --prefix="$target_prefix" \
              --enable-maintainer-mode --disable-gtk-doc \
              --disable-libtool-lock --disable-dependency-tracking \
              --disable-schemas-install --disable-desktop-file-update \
