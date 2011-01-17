@@ -214,12 +214,13 @@ set_cache_for_flat_field(GwyField *field,
                          gdouble value)
 {
     Field *priv = field->priv;
-    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS)
+    priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS) | CBIT(MSQ)
                     | CBIT(MED) | CBIT(ARF) | CBIT(ART) | CBIT(ARE));
     CVAL(priv, MIN) = value;
     CVAL(priv, MAX) = value;
     CVAL(priv, AVG) = value;
     CVAL(priv, RMS) = 0.0;
+    CVAL(priv, MSQ) = value*value;
     CVAL(priv, MED) = value;
     CVAL(priv, ARF) = value;
     CVAL(priv, ART) = value;

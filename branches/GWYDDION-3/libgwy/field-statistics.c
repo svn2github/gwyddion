@@ -310,6 +310,9 @@ gwy_field_median_full(const GwyField *field)
  *
  * Calculates the root mean square of a rectangular part of a field.
  *
+ * This function sums the squares of differences from values from the mean
+ * values.  If you need a plain sum of squares see gwy_field_meansq().
+ *
  * The rms value of the entire field is cached, see gwy_field_invalidate().
  *
  * Returns: The root mean square of differences from the mean value.  The rms
@@ -389,6 +392,80 @@ gdouble
 gwy_field_rms_full(const GwyField *field)
 {
     return gwy_field_rms(field, NULL, NULL, GWY_MASK_IGNORE);
+}
+
+/**
+ * gwy_field_meansq:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ *        Its dimensions must match either the dimensions of @field or the
+ *        rectangular part.  In the first case the mask is placed over the
+ *        entire field, in the second case over the rectangle.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ *
+ * Calculates the mean square of a rectangular part of a field.
+ *
+ * Unlike rms, calculated with gwy_field_rms(), this function does not subtract
+ * the mean value.  It calculates squares of the data as-is.
+ *
+ * The mean square value of the entire field is cached, see
+ * gwy_field_invalidate().
+ *
+ * Returns: The mean square of data values.  The mean square of no data is
+ *          zero.
+ **/
+gdouble
+gwy_field_meansq(const GwyField *field,
+                 const GwyRectangle *rectangle,
+                 const GwyMaskField *mask,
+                 GwyMaskingType masking)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
+        return 0.0;
+
+    const gdouble *base = field->data + row*field->xres + col;
+    gdouble meansq = 0.0;
+    gboolean full_field = FALSE;
+    guint n = 0;
+
+    if (masking == GWY_MASK_IGNORE) {
+        // No mask.  If full field is processed we must use the cache.
+        full_field = (width == field->xres && height == field->yres);
+        if (full_field && CTEST(field->priv, RMS))
+            return CVAL(field->priv, RMS);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            for (guint j = width; j; j--, d++)
+                meansq += (*d)*(*d);
+        }
+        n = width*height;
+    }
+    else {
+        // Masking is in use.
+        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
+        for (guint i = 0; i < height; i++) {
+            const gdouble *d = base + i*field->xres;
+            GwyMaskIter iter;
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
+            for (guint j = width; j; j--, d++) {
+                if (!gwy_mask_iter_get(iter) == invert) {
+                    meansq += (*d)*(*d);
+                    n++;
+                }
+                gwy_mask_iter_next(iter);
+            }
+        }
+    }
+
+    meansq = n ? meansq/n : 0.0;
+    if (full_field) {
+        CVAL(field->priv, MSQ) = meansq;
+        field->priv->cached |= CBIT(MSQ);
+    }
+    return meansq;
 }
 
 /**
@@ -491,7 +568,8 @@ gwy_field_statistics(const GwyField *field,
     sum4 = sum4/(sum2*sum2) - 3;
     if (full_field) {
         CVAL(field->priv, RMS) = rms1;
-        field->priv->cached |= CBIT(RMS);
+        CVAL(field->priv, MSQ) = sum2 + avg*avg;
+        field->priv->cached |= CBIT(RMS) | CBIT(MSQ);
     }
 
     GWY_MAYBE_SET(mean, avg);

@@ -49,6 +49,10 @@ gdouble gwy_field_rms              (const GwyField *field,
                                     const GwyMaskField *mask,
                                     GwyMaskingType masking);
 gdouble gwy_field_rms_full         (const GwyField *field);
+gdouble gwy_field_meansq           (const GwyField *field,
+                                    const GwyRectangle *rectangle,
+                                    const GwyMaskField *mask,
+                                    GwyMaskingType masking);
 void    gwy_field_statistics       (const GwyField *field,
                                     const GwyRectangle *rectangle,
                                     const GwyMaskField *mask,
