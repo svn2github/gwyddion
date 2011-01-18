@@ -1125,6 +1125,8 @@ gwy_field_filter_standard(const GwyField *field,
     GwyField *kernel;
     if (filter == GWY_FILTER_LAPLACE)
         kernel = make_kernel_from_data(laplace, 3, 3);
+    if (filter == GWY_FILTER_LAPLACE_SCHARR)
+        kernel = make_kernel_from_data(laplace_scharr, 3, 3);
     else if (filter == GWY_FILTER_HSOBEL)
         kernel = make_kernel_from_data(hsobel, 3, 3);
     else if (filter == GWY_FILTER_VSOBEL)
@@ -1133,9 +1135,14 @@ gwy_field_filter_standard(const GwyField *field,
         kernel = make_kernel_from_data(hprewitt, 3, 3);
     else if (filter == GWY_FILTER_VPREWITT)
         kernel = make_kernel_from_data(vprewitt, 3, 3);
+    else if (filter == GWY_FILTER_HSCHARR)
+        kernel = make_kernel_from_data(hscharr, 3, 3);
+    else if (filter == GWY_FILTER_VSCHARR)
+        kernel = make_kernel_from_data(vscharr, 3, 3);
     else if (filter == GWY_FILTER_DECHECKER)
         kernel = make_kernel_from_data(dechecker, 5, 5);
     else {
+        // TODO: Total derivative filters: Sobel, Prewitt, Scharr
         g_critical("Bad standard filter type %u.", filter);
         return;
     }
@@ -1337,38 +1344,81 @@ gwy_field_correlate(const GwyField *field,
 
 /**
  * GwyFilterType:
- * @GWY_FILTER_LAPLACE: Laplacian filter, a convolution filter with
- *                      3×3 kernel
- *                      [[0, 1/4, 0], [1/4, -1, 1/4], [0, 1/4, 0]].
+ * @GWY_FILTER_LAPLACE: Laplacian filter.
  *                      It represents the limit of Laplacian of Gaussians for
  *                      small Gaussian size.
- * @GWY_FILTER_HSOBEL: Horizontal Sobel filter, a convolution filter with
- *                     3×3 kernel
- *                     [[1/4, 0, -1/4], [1/2, 0, -1/2], [1/4, 0, -1/4]].
+ * @GWY_FILTER_LAPLACE_SCHARR: Scharr's Laplacian filter optimised for
+ *                             rotational symmetry.
+ * @GWY_FILTER_HSOBEL: Horizontal Sobel filter.
  *                     It represents the horizontal derivative.
- * @GWY_FILTER_VSOBEL: Vertical Sobel filter, a convolution filter with
- *                     3×3 kernel
- *                     [[1/4, -1/2, -1/4], [0, 0, 0], [1/4, 1/2, -1/4]].
+ * @GWY_FILTER_VSOBEL: Vertical Sobel filter.
  *                     It represents the vertical derivative.
- * @GWY_FILTER_HPREWITT: Horizontal Prewitt filter, a convolution filter with
- *                       3×3 kernel
- *                       [[1/3, 0, -1/3], [1/3, 0, -1/3], [1/3, 0, -1/3]].
+ * @GWY_FILTER_SOBEL: Sobel filter.
+ *                    It represents the absolute value of the derivative.
+ * @GWY_FILTER_HPREWITT: Horizontal Prewitt filter.
  *                       It represents the horizontal derivative.
- * @GWY_FILTER_VPREWITT: Vertical Prewitt filter, a convolution filter with
- *                       3×3 kernel
- *                       [[1/3, -1/3, -1/3], [0, 0, 0], [1/3, 1/3, -1/3]].
+ * @GWY_FILTER_VPREWITT: Vertical Prewitt filter.
  *                       It represents the vertical derivative.
- * @GWY_FILTER_DECHECKER: Checker-pattern removal filter, a convolution filter
- *                        with 5×5 kernel
- *                        [[0, 1/144, -1/72, 1/144, 0],
- *                         [1/144, -1/18, 1/9, -1/18, 1/144],
- *                         [-1/72, 1/9, 7/9, 1/9, -1/72],
- *                         [1/144, -1/18, 1/9, -1/18, 1/144],
- *                         [0, 1/144, -1/72, 1/144, 0]].
+ * @GWY_FILTER_PREWITT: Prewitt filter.
+ *                      It represents the absolute value of the derivative.
+ * @GWY_FILTER_HSCHARR: Horizontal Scharr filter.
+ *                      It represents the horizontal derivative.
+ * @GWY_FILTER_VSCHARR: Vertical Scharr filter.
+ *                      It represents the vertical derivative.
+ * @GWY_FILTER_SCHARR: Scharr filter.
+ *                     It represents the absolute value of the derivative.
+ * @GWY_FILTER_DECHECKER: Checker-pattern removal filter.
+ *                        It behaves like a slightly smoothing filter except
+ *                        for single-pixel checker pattern that, if present, is
+ *                        almost completely removed.
  * @GWY_FILTER_KUWAHARA: Kuwahara edge-preserving smoothing filter.  This is
  *                       a non-linear (non-convolution) filter.
  *
  * Predefined standard filter types.
+ *
+ * The Laplacian filters have the following 3×3 kernels:
+ * |[
+ * Standard Laplace          Laplace optimised by Scharr
+ * 0     1/4   0             0.0578    0.1922    0.0578
+ * 1/4  -1     1/4           0.1922   -1         0.1922
+ * 0     1/4   0             0.0578    0.1922    0.0578
+ * ]|
+ *
+ * The Sobel derivative filters have the following 3×3 kernels:
+ * |[
+ * Horizontal                Vertical
+ * 1/4   0   -1/4            1/4    1/2    1/4
+ * 1/2   0   -1/2            0      0      0
+ * 1/4   0   -1/4           -1/4   -1/2   -1/2
+ * ]|
+ *
+ * The Prewitt derivative filters have the following 3×3 kernels:
+ * |[
+ * Horizontal                Vertical
+ * 1/3   0   -1/3            1/3    1/3    1/3
+ * 1/3   0   -1/3            0      0      0
+ * 1/3   0   -1/3           -1/3   -1/3   -1/3
+ * ]|
+ *
+ * The Scharr derivative filters have the following 3×3 kernels:
+ * |[
+ * Horizontal                Vertical
+ * 3/16   0   -3/16          3/16   5/8    3/16
+ * 5/8    0   -5/8           0      0      0
+ * 3/16   0   -3/16         -3/16   5/8    3/16
+ * ]|
+ *
+ * The absolute value of the derivative is calculated as hypotenuse of the
+ * derivatives calculated by the corresponding directional filters.
+ *
+ * The dechecker filter is a convolution filter with the following 5×5 kernel:
+ * |[
+ *  0        1/144   -1/72    1/144     0
+ *  1/144   -1/18     1/9    -1/18      1/144
+ * -1/72     1/9      7/9     1/9      -1/72
+ *  1/144   -1/18     1/9    -1/18      1/144
+ *  0        1/144   -1/72    1/144     0
+ * ]|
  **/
 
 /**
