@@ -58,7 +58,7 @@ convolve_rects(guint xres, guint yres,
         gwy_field_convolve(source, NULL, field, kerneltall,
                            GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
         gwy_benchmark_timer_stop();
-        gdouble tdirect = gwy_benchmark_timer_get_total()/yres;
+        gdouble tdirect = gwy_benchmark_timer_get_total();
 
         gwy_tune_algorithms("convolution-method", "direct2");
         gwy_benchmark_timer_start();
@@ -69,7 +69,7 @@ convolve_rects(guint xres, guint yres,
         gwy_field_convolve(source, NULL, field, kerneltall,
                            GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
         gwy_benchmark_timer_stop();
-        gdouble tdirect2 = gwy_benchmark_timer_get_total()/yres;
+        gdouble tdirect2 = gwy_benchmark_timer_get_total();
 
         gwy_tune_algorithms("convolution-method", "fft");
         gwy_benchmark_timer_start();
@@ -80,7 +80,7 @@ convolve_rects(guint xres, guint yres,
         gwy_field_convolve(source, NULL, field, kerneltall,
                            GWY_EXTERIOR_MIRROR_EXTEND, 0.0);
         gwy_benchmark_timer_stop();
-        gdouble tfft = gwy_benchmark_timer_get_total()/yres;
+        gdouble tfft = gwy_benchmark_timer_get_total();
 
         printf("%u %u %g %g %g\n", xres, kres, tdirect, tdirect2, tfft);
         g_object_unref(kerneltall);
