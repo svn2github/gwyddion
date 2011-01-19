@@ -65,6 +65,7 @@ typedef void (*RectExtendFunc)(const gdouble *in,
 enum {
     CONVOLUTION_AUTO,
     CONVOLUTION_DIRECT,
+    CONVOLUTION_DIRECT2,
     CONVOLUTION_FFT
 };
 static guint convolution_method = CONVOLUTION_AUTO;
@@ -77,6 +78,8 @@ _gwy_tune_convolution_method(const gchar *method)
         convolution_method = CONVOLUTION_AUTO;
     else if (gwy_strequal(method, "direct"))
         convolution_method = CONVOLUTION_DIRECT;
+    else if (gwy_strequal(method, "direct2"))
+        convolution_method = CONVOLUTION_DIRECT2;
     else if (gwy_strequal(method, "fft"))
         convolution_method = CONVOLUTION_FFT;
     else {
@@ -651,6 +654,52 @@ convolve_direct(const GwyField *field,
 }
 
 static void
+convolve_direct2(const GwyField *field,
+                guint col, guint row,
+                guint width, guint height,
+                GwyField *target,
+                guint targetcol, guint targetrow,
+                const GwyField *kernel,
+                RectExtendFunc extend_rect,
+                gdouble fill_value)
+{
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    const gdouble *kdata = kernel->data;
+    guint xsize = width + kxres - 1;
+    guint ysize = height + kyres - 1;
+    gdouble *extdata = g_new(gdouble, xsize*ysize);
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+    GwyRectangle rectangle = { targetcol, targetrow, width, height };
+    gwy_field_clear(target, &rectangle, NULL, GWY_MASK_IGNORE);
+
+    // The direct method is used only if kres ≪ res.  Don't bother optimising
+    // the boundaries, just make the inner loop tight.
+    for (guint i = 0; i < height; i++) {
+        gdouble *trow = target->data + (targetrow + i)*target->xres + targetcol;
+        for (guint j = 0; j < width; j++) {
+            const gdouble *id = extdata + (extend_up + kyres/2 + i)*xsize;
+            for (guint ik = 0; ik < kyres; ik++, id -= xsize) {
+                const gdouble *jd = id + extend_left + kxres/2 + j;
+                const gdouble *krow = kdata + ik*kxres;
+                gdouble v = 0.0;
+                for (guint jk = 0; jk < kxres; jk++, jd--)
+                    v += krow[jk] * *jd;
+                trow[j] += v;
+            }
+        }
+    }
+
+    g_free(extdata);
+}
+
+static void
 convolve_fft(const GwyField *field,
              guint col, guint row,
              guint width, guint height,
@@ -772,10 +821,14 @@ gwy_field_convolve(const GwyField *field,
         return;
 
     // The threshold was estimated empirically.  See benchmarks/convolve-rect.c
-    if (convolution_method == CONVOLUTION_DIRECT
-        || (convolution_method == CONVOLUTION_AUTO
-            && (width <= 12 || kernel->xres <= 3.0*(log(width) - 1.0))
-            && (height <= 12 || kernel->yres <= 3.0*(log(height) - 1.0))))
+    if (convolution_method == CONVOLUTION_DIRECT2)
+        convolve_direct2(field, col, row, width, height,
+                        target, targetcol, targetrow,
+                        kernel, extend_rect, fill_value);
+    else if (convolution_method == CONVOLUTION_DIRECT
+             || (convolution_method == CONVOLUTION_AUTO
+                 && (width <= 12 || kernel->xres <= 3.0*(log(width) - 1.0))
+                 && (height <= 12 || kernel->yres <= 3.0*(log(height) - 1.0))))
         convolve_direct(field, col, row, width, height,
                         target, targetcol, targetrow,
                         kernel, extend_rect, fill_value);
