@@ -627,7 +627,7 @@ gwy_fitter_new(void)
 }
 
 /**
- * gwy_fitter_get_status:
+ * gwy_fitter_status:
  * @fitter: A non-linear least-squares fitter.
  *
  * Obtains the status of the last fitting performed with a fitter.
@@ -638,7 +638,7 @@ gwy_fitter_new(void)
  * Returns: The fitting status.
  **/
 guint
-gwy_fitter_get_status(GwyFitter *fitter)
+gwy_fitter_status(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), GWY_FITTER_STATUS_NONE);
     return fitter->priv->status;
@@ -735,7 +735,7 @@ gwy_fitter_get_lambda(GwyFitter *fitter)
 }
 
 /**
- * gwy_fitter_get_iter:
+ * gwy_fitter_iter_number:
  * @fitter: A non-linear least-squares fitter.
  *
  * Gets the number of iterations performed in the last fit.
@@ -743,7 +743,7 @@ gwy_fitter_get_lambda(GwyFitter *fitter)
  * Returns: The number of iterations.
  **/
 guint
-gwy_fitter_get_iter(GwyFitter *fitter)
+gwy_fitter_iter_number(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), 0);
     return fitter->priv->iter;
@@ -820,7 +820,7 @@ gwy_fitter_fit(GwyFitter *fitter,
 }
 
 /**
- * gwy_fitter_get_residuum:
+ * gwy_fitter_residuum:
  * @fitter: A non-linear least-squares fitter.
  *
  * Obtains the sum of squares of a fitter.
@@ -833,7 +833,7 @@ gwy_fitter_fit(GwyFitter *fitter,
  *          the sum of squares is not available.
  **/
 gdouble
-gwy_fitter_get_residuum(GwyFitter *fitter)
+gwy_fitter_residuum(GwyFitter *fitter)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), -1.0);
     Fitter *priv = fitter->priv;
@@ -848,7 +848,7 @@ gwy_fitter_get_residuum(GwyFitter *fitter)
  * Calculates the sum of squares of a fitter.
  *
  * This functions unconditionally recalculates the sum of squares for the
- * current set of parameters.  Use gwy_fitter_get_residuum() to obtain the
+ * current set of parameters.  Use gwy_fitter_residuum() to obtain the
  * value corresponding to the best fit.
  *
  * Returns: The sum of squares of differences.  Negative return value means
@@ -869,7 +869,7 @@ gwy_fitter_eval_residuum(GwyFitter *fitter,
 }
 
 /**
- * gwy_fitter_get_inverse_hessian:
+ * gwy_fitter_inverse_hessian:
  * @fitter: A non-linear least-squares fitter.
  * @ihessian: Array to store the inverse Hessian to.  The elements are stored
  *            as described in gwy_lower_triangular_matrix_index().
@@ -884,8 +884,8 @@ gwy_fitter_eval_residuum(GwyFitter *fitter,
  * Returns: %TRUE if the inverse Hessian was filled, %FALSE if it was not.
  **/
 gboolean
-gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
-                               gdouble *ihessian)
+gwy_fitter_inverse_hessian(GwyFitter *fitter,
+                           gdouble *ihessian)
 {
     g_return_val_if_fail(GWY_IS_FITTER(fitter), FALSE);
     Fitter *priv = fitter->priv;

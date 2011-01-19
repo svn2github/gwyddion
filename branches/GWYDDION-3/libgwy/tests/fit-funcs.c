@@ -44,11 +44,11 @@ fit_func_one(const gchar *name,
     g_free(fname);
     g_free(fgroup);
 
-    guint nparams = gwy_fit_func_get_n_params(fitfunc);
+    guint nparams = gwy_fit_func_n_params(fitfunc);
     g_assert_cmpuint(nparams, ==, expected_nparams);
 
     for (guint i = 0; i < nparams; i++) {
-        const gchar *pname = gwy_fit_func_get_param_name(fitfunc, i);
+        const gchar *pname = gwy_fit_func_param_name(fitfunc, i);
         guint j;
         for (j = 0; j < nparams; j++) {
             if (gwy_strequal(pname, param_names[j]))
@@ -62,7 +62,7 @@ fit_func_one(const gchar *name,
     for (guint i = 0; i < nparams; i++) {
         guint j;
         for (j = 0; j < nparams; j++) {
-            const gchar *pname = gwy_fit_func_get_param_name(fitfunc, j);
+            const gchar *pname = gwy_fit_func_param_name(fitfunc, j);
             if (gwy_strequal(pname, param_names[i]))
                 break;
         }
@@ -79,7 +79,7 @@ fit_func_one(const gchar *name,
         param0[i] = g_rand_double_range(rng, 0.2, 5.0);
         if (g_test_verbose())
             g_printerr("True value %s = %g\n",
-                       gwy_fit_func_get_param_name(fitfunc, i), param0[i]);
+                       gwy_fit_func_param_name(fitfunc, i), param0[i]);
     }
 
     GwyCurve *curve0 = gwy_curve_new_sized(ndata);
@@ -107,7 +107,7 @@ fit_func_one(const gchar *name,
     if (g_test_verbose()) {
         for (guint i = 0; i < nparams; i++)
             g_printerr("Estimate %s = %g\n",
-                       gwy_fit_func_get_param_name(fitfunc, i), param[i]);
+                       gwy_fit_func_param_name(fitfunc, i), param[i]);
     }
 
     GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
@@ -121,7 +121,7 @@ fit_func_one(const gchar *name,
 
     GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
     g_assert_cmpuint(gwy_fitter_get_n_params(fitter), ==, expected_nparams);
-    gdouble res = gwy_fitter_get_residuum(fitter);
+    gdouble res = gwy_fitter_residuum(fitter);
     g_assert_cmpfloat(res, >, 0.0);
     // Cannot use a sharp inequality as Constant has too good `estimate'
     g_assert_cmpfloat(res, <=, res_init);
@@ -129,7 +129,7 @@ fit_func_one(const gchar *name,
     if (g_test_verbose()) {
         for (guint i = 0; i < nparams; i++)
             g_printerr("Fitting result %s = %g\n",
-                       gwy_fit_func_get_param_name(fitfunc, i), param[i]);
+                       gwy_fit_func_param_name(fitfunc, i), param[i]);
     }
 
     /* Conservative result check */
@@ -141,7 +141,7 @@ fit_func_one(const gchar *name,
     /* Error estimate check */
     gdouble error[nparams];
     eps = 0.5;
-    g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
+    g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
     for (guint i = 0; i < nparams; i++) {
         g_assert_cmpfloat(error[i], >=, 0.0);
         g_assert_cmpfloat(fabs(param[i] - param0[i]), <=, (1.0 + eps)*error[i]);

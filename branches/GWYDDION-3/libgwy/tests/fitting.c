@@ -97,7 +97,7 @@ check_fit(GwyFitTask *fittask,
     gdouble res_init = gwy_fit_task_eval_residuum(fittask);
     g_assert_cmpfloat(res_init, >, 0.0);
     g_assert(gwy_fit_task_fit(fittask));
-    gdouble res = gwy_fitter_get_residuum(fitter);
+    gdouble res = gwy_fitter_residuum(fitter);
     g_assert_cmpfloat(res, >, 0.0);
     g_assert_cmpfloat(res, <, 0.01*res_init);
     gdouble param_final[nparam];
@@ -119,7 +119,7 @@ check_fit(GwyFitTask *fittask,
     /* Error estimate check */
     gdouble error[nparam];
     eps = 0.3;
-    g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
+    g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
     g_assert_cmpfloat(fabs((param_final[0] - param_good[0])/error[0]),
                       <=,
                       1.0 + eps);
@@ -216,7 +216,7 @@ test_fit_task_fixed(void)
         gdouble res_init = gwy_fit_task_eval_residuum(fittask);
         g_assert_cmpfloat(res_init, >, 0.0);
         g_assert(gwy_fit_task_fit(fittask));
-        gdouble res = gwy_fitter_get_residuum(fitter);
+        gdouble res = gwy_fitter_residuum(fitter);
         g_assert_cmpfloat(res, >, 0.0);
         g_assert_cmpfloat(res, <, 0.1*res_init);
         /* Fixed params are not touched. */
@@ -224,7 +224,7 @@ test_fit_task_fixed(void)
         g_assert(gwy_fitter_get_params(fitter, param_final));
         g_assert_cmpfloat(param_final[i], ==, param_init[i]);
         gdouble error[nparam];
-        g_assert(gwy_fit_task_get_param_errors(fittask, TRUE, error));
+        g_assert(gwy_fit_task_param_errors(fittask, TRUE, error));
         g_assert_cmpfloat(error[i], ==, 0);
         gwy_fit_task_set_fixed_param(fittask, i, FALSE);
     }

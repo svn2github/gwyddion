@@ -107,15 +107,15 @@ gboolean    gwy_fit_task_get_fixed_param      (GwyFitTask *fittask,
 gboolean    gwy_fit_task_fit                  (GwyFitTask *fittask);
 gdouble     gwy_fit_task_eval_residuum        (GwyFitTask *fittask);
 GwyFitter*  gwy_fit_task_get_fitter           (GwyFitTask *fittask)               G_GNUC_PURE;
-gboolean    gwy_fit_task_get_param_errors     (GwyFitTask *fittask,
+gboolean    gwy_fit_task_param_errors         (GwyFitTask *fittask,
                                                gboolean variance_covariance,
                                                gdouble *errors);
-gdouble     gwy_fit_task_get_param_error      (GwyFitTask *fittask,
+gdouble     gwy_fit_task_param_error          (GwyFitTask *fittask,
                                                guint i,
                                                gboolean variance_covariance)      G_GNUC_PURE;
-gboolean    gwy_fit_task_get_correlations     (GwyFitTask *fittask,
+gboolean    gwy_fit_task_correlations         (GwyFitTask *fittask,
                                                gdouble *corr_matrix);
-gdouble     gwy_fit_task_get_chi              (GwyFitTask *fittask)               G_GNUC_PURE;
+gdouble     gwy_fit_task_chi                  (GwyFitTask *fittask)               G_GNUC_PURE;
 
 G_END_DECLS
 

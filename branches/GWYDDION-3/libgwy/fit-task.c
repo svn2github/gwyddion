@@ -821,7 +821,7 @@ gwy_fit_task_get_fitter(GwyFitTask *fittask)
 }
 
 /**
- * gwy_fit_task_get_param_errors:
+ * gwy_fit_task_param_errors:
  * @fittask: A fitting task.
  * @variance_covariance: %TRUE for unweighted parameters, i.e. to estimate the
  *                       data statistical errors from the final fit.  %FALSE
@@ -836,20 +836,20 @@ gwy_fit_task_get_fitter(GwyFitTask *fittask)
  *          is not possible to invert the Hessian.
  **/
 gboolean
-gwy_fit_task_get_param_errors(GwyFitTask *fittask,
-                              gboolean variance_covariance,
-                              gdouble *errors)
+gwy_fit_task_param_errors(GwyFitTask *fittask,
+                          gboolean variance_covariance,
+                          gdouble *errors)
 {
     g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     FitTask *priv = fittask->priv;
     GwyFitter *fitter = priv->fitter;
     gdouble *matrix = priv->matrix;
-    if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
+    if (!fitter || !gwy_fitter_inverse_hessian(fitter, matrix))
         return FALSE;
     /* If we have valid inverse Hessian we must have residuum too. */
     gdouble res = 1.0;
     if (variance_covariance) {
-        res = gwy_fitter_get_residuum(fitter);
+        res = gwy_fitter_residuum(fitter);
         g_return_val_if_fail(res >= 0.0, FALSE);
     }
     guint nparam = priv->nparam;
@@ -859,7 +859,7 @@ gwy_fit_task_get_param_errors(GwyFitTask *fittask,
 }
 
 /**
- * gwy_fit_task_get_param_error:
+ * gwy_fit_task_param_error:
  * @fittask: A fitting task.
  * @i: Parameter number.
  * @variance_covariance: %TRUE for unweighted parameters, i.e. to estimate the
@@ -873,20 +873,20 @@ gwy_fit_task_get_param_errors(GwyFitTask *fittask,
  *          failure.
  **/
 gdouble
-gwy_fit_task_get_param_error(GwyFitTask *fittask,
-                             guint i,
-                             gboolean variance_covariance)
+gwy_fit_task_param_error(GwyFitTask *fittask,
+                         guint i,
+                         gboolean variance_covariance)
 {
     g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), -1.0);
     FitTask *priv = fittask->priv;
     g_return_val_if_fail(i < priv->nparam, -1.0);
-    if (!gwy_fit_task_get_param_errors(fittask, variance_covariance, priv->h))
+    if (!gwy_fit_task_param_errors(fittask, variance_covariance, priv->h))
         return -1.0;
     return priv->h[i];
 }
 
 /**
- * gwy_fit_task_get_correlations:
+ * gwy_fit_task_correlations:
  * @fittask: A fitting task.
  * @corr_matrix: Array to store the correlation matrix to.  The elements are
  *               stored as described in gwy_lower_triangular_matrix_index().
@@ -897,14 +897,14 @@ gwy_fit_task_get_param_error(GwyFitTask *fittask,
  *          is not possible to invert the Hessian.
  **/
 gboolean
-gwy_fit_task_get_correlations(GwyFitTask *fittask,
-                              gdouble *corr_matrix)
+gwy_fit_task_correlations(GwyFitTask *fittask,
+                          gdouble *corr_matrix)
 {
     g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     FitTask *priv = fittask->priv;
     GwyFitter *fitter = priv->fitter;
     gdouble *matrix = priv->matrix;
-    if (!fitter || !gwy_fitter_get_inverse_hessian(fitter, matrix))
+    if (!fitter || !gwy_fitter_inverse_hessian(fitter, matrix))
         return FALSE;
     guint nparam = priv->nparam;
     gdouble *h = priv->h;
@@ -919,7 +919,7 @@ gwy_fit_task_get_correlations(GwyFitTask *fittask,
 }
 
 /**
- * gwy_fit_task_get_chi:
+ * gwy_fit_task_chi:
  * @fittask: A fitting task.
  *
  * Evaluates the chi value of a fitting task after fit.
@@ -931,14 +931,14 @@ gwy_fit_task_get_correlations(GwyFitTask *fittask,
  * Returns: The value of chi, a negative value on failure.
  **/
 gdouble
-gwy_fit_task_get_chi(GwyFitTask *fittask)
+gwy_fit_task_chi(GwyFitTask *fittask)
 {
     g_return_val_if_fail(GWY_IS_FIT_TASK(fittask), FALSE);
     FitTask *priv = fittask->priv;
     GwyFitter *fitter = priv->fitter;
     if (!fitter)
         return -1.0;
-    gdouble res = gwy_fitter_get_residuum(fitter);
+    gdouble res = gwy_fitter_residuum(fitter);
     return (res < 0.0) ? res : sqrt(res/(priv->ndata - priv->nparam));
 }
 

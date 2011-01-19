@@ -318,7 +318,7 @@ gwy_fit_func_evaluate(GwyFitFunc *fitfunc,
 }
 
 /**
- * gwy_fit_func_get_formula:
+ * gwy_fit_func_formula:
  * @fitfunc: A fitting function.
  *
  * Obtains the formula of a fitting function.
@@ -327,7 +327,7 @@ gwy_fit_func_evaluate(GwyFitFunc *fitfunc,
  *          owned by @fitfunc.
  **/
 const gchar*
-gwy_fit_func_get_formula(GwyFitFunc *fitfunc)
+gwy_fit_func_formula(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -339,7 +339,7 @@ gwy_fit_func_get_formula(GwyFitFunc *fitfunc)
 }
 
 /**
- * gwy_fit_func_get_n_params:
+ * gwy_fit_func_n_params:
  * @fitfunc: A fitting function.
  *
  * Gets the number of parameters of a fitting function.
@@ -351,7 +351,7 @@ gwy_fit_func_get_formula(GwyFitFunc *fitfunc)
  * Returns: The number of function parameters.
  **/
 guint
-gwy_fit_func_get_n_params(GwyFitFunc *fitfunc)
+gwy_fit_func_n_params(GwyFitFunc *fitfunc)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), 0);
     FitFunc *priv = fitfunc->priv;
@@ -361,7 +361,7 @@ gwy_fit_func_get_n_params(GwyFitFunc *fitfunc)
 }
 
 /**
- * gwy_fit_func_get_param_name:
+ * gwy_fit_func_param_name:
  * @fitfunc: A fitting function.
  * @i: Parameter number.
  *
@@ -371,8 +371,8 @@ gwy_fit_func_get_n_params(GwyFitFunc *fitfunc)
  *          @fitfunc (or possibly its #GwyUserFitFunc).
  **/
 const gchar*
-gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
-                            guint i)
+gwy_fit_func_param_name(GwyFitFunc *fitfunc,
+                        guint i)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -388,7 +388,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
 }
 
 /**
- * gwy_fit_func_get_param_units:
+ * gwy_fit_func_param_units:
  * @fitfunc: A fitting function.
  * @i: Parameter number.
  * @unit_x: Unit of abscissa.
@@ -412,7 +412,7 @@ gwy_fit_func_get_param_name(GwyFitFunc *fitfunc,
  * Returns: A newly created @GwyUnit with the units of the @i-th parameter.
  **/
 GwyUnit*
-gwy_fit_func_get_param_units(GwyFitFunc *fitfunc,
+gwy_fit_func_param_units(GwyFitFunc *fitfunc,
                              guint i,
                              GwyUnit *unit_x,
                              GwyUnit *unit_y)
@@ -662,7 +662,7 @@ update_fit_task(GwyFitFunc *fitfunc)
 {
     FitFunc *priv = fitfunc->priv;
     if (!priv->fittask) {
-        guint nparams = gwy_fit_func_get_n_params(fitfunc);
+        guint nparams = gwy_fit_func_n_params(fitfunc);
         priv->fittask = gwy_fit_task_new();
         gwy_fit_task_set_vector_vfunction(priv->fittask, nparams,
                                           fit_func_vfunc, NULL);

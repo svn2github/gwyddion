@@ -75,30 +75,30 @@ struct _GwyFitterClass {
     GObjectClass g_object_class;
 };
 
-GType      gwy_fitter_get_type           (void)                                 G_GNUC_CONST;
-GwyFitter* gwy_fitter_new                (void)                                 G_GNUC_MALLOC;
-void       gwy_fitter_set_n_params       (GwyFitter *fitter,
-                                          guint nparams);
-guint      gwy_fitter_get_n_params       (GwyFitter *fitter)                    G_GNUC_PURE;
-void       gwy_fitter_set_params         (GwyFitter *fitter,
-                                          const gdouble *params);
-gboolean   gwy_fitter_get_params         (GwyFitter *fitter,
-                                          gdouble *params);
-void       gwy_fitter_set_functions      (GwyFitter *fitter,
-                                          GwyFitterResiduumFunc eval_residuum,
-                                          GwyFitterGradientFunc eval_gradient);
-void       gwy_fitter_set_constraint     (GwyFitter *fitter,
-                                          GwyFitterConstrainFunc constrain);
-gdouble    gwy_fitter_get_lambda         (GwyFitter *fitter)                    G_GNUC_PURE;
-guint      gwy_fitter_get_iter           (GwyFitter *fitter)                    G_GNUC_PURE;
-gboolean   gwy_fitter_fit                (GwyFitter *fitter,
-                                          gpointer user_data);
-guint      gwy_fitter_get_status         (GwyFitter *fitter)                    G_GNUC_PURE;
-gdouble    gwy_fitter_get_residuum       (GwyFitter *fitter)                    G_GNUC_PURE;
-gdouble    gwy_fitter_eval_residuum      (GwyFitter *fitter,
-                                          gpointer user_data);
-gboolean   gwy_fitter_get_inverse_hessian(GwyFitter *fitter,
-                                          gdouble *ihessian);
+GType      gwy_fitter_get_type       (void)                                 G_GNUC_CONST;
+GwyFitter* gwy_fitter_new            (void)                                 G_GNUC_MALLOC;
+void       gwy_fitter_set_n_params   (GwyFitter *fitter,
+                                      guint nparams);
+guint      gwy_fitter_get_n_params   (GwyFitter *fitter)                    G_GNUC_PURE;
+void       gwy_fitter_set_params     (GwyFitter *fitter,
+                                      const gdouble *params);
+gboolean   gwy_fitter_get_params     (GwyFitter *fitter,
+                                      gdouble *params);
+void       gwy_fitter_set_functions  (GwyFitter *fitter,
+                                      GwyFitterResiduumFunc eval_residuum,
+                                      GwyFitterGradientFunc eval_gradient);
+void       gwy_fitter_set_constraint (GwyFitter *fitter,
+                                      GwyFitterConstrainFunc constrain);
+gdouble    gwy_fitter_get_lambda     (GwyFitter *fitter)                    G_GNUC_PURE;
+guint      gwy_fitter_iter_number    (GwyFitter *fitter)                    G_GNUC_PURE;
+gboolean   gwy_fitter_fit            (GwyFitter *fitter,
+                                      gpointer user_data);
+guint      gwy_fitter_status         (GwyFitter *fitter)                    G_GNUC_PURE;
+gdouble    gwy_fitter_residuum       (GwyFitter *fitter)                    G_GNUC_PURE;
+gdouble    gwy_fitter_eval_residuum  (GwyFitter *fitter,
+                                      gpointer user_data);
+gboolean   gwy_fitter_inverse_hessian(GwyFitter *fitter,
+                                      gdouble *ihessian);
 
 G_END_DECLS
 
