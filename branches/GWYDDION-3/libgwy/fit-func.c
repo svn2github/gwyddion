@@ -388,6 +388,43 @@ gwy_fit_func_param_name(GwyFitFunc *fitfunc,
 }
 
 /**
+ * gwy_fit_func_param_number:
+ * @fitfunc: A fitting function.
+ * @name: Parameter name.
+ *
+ * Finds a fitting function parameter by name.
+ *
+ * Returns: The parameter number.  If the paramter is no found a number larger
+ *          than the number of parameters is returned, specificallly
+ *          %G_MAXUINT.
+ **/
+guint
+gwy_fit_func_param_number(GwyFitFunc *fitfunc,
+                          const gchar *name)
+{
+    g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), G_MAXUINT);
+    g_return_val_if_fail(name, G_MAXUINT);
+    FitFunc *priv = fitfunc->priv;
+    g_return_val_if_fail(priv->is_valid, G_MAXUINT);
+
+    if (priv->builtin) {
+        const BuiltinFitFunc *builtin = priv->builtin;
+        for (guint i = 0; i < priv->nparams; i++) {
+            if (gwy_strequal(builtin->param[i].name, name))
+                return i;
+        }
+    }
+    else {
+        for (guint i = 0; i < priv->nparams; i++) {
+            const GwyFitParam *p = gwy_user_fit_func_nth_param(priv->user, i);
+            if (gwy_strequal(gwy_fit_param_get_name(p), name))
+                return i;
+        }
+    }
+    return G_MAXUINT;
+}
+
+/**
  * gwy_fit_func_param_units:
  * @fitfunc: A fitting function.
  * @i: Parameter number.

@@ -59,6 +59,8 @@ const gchar*    gwy_fit_func_formula     (GwyFitFunc *fitfunc)   G_GNUC_PURE;
 guint           gwy_fit_func_n_params    (GwyFitFunc *fitfunc)   G_GNUC_PURE;
 const gchar*    gwy_fit_func_param_name  (GwyFitFunc *fitfunc,
                                           guint i)               G_GNUC_PURE;
+guint           gwy_fit_func_param_number(GwyFitFunc *fitfunc,
+                                          const gchar *name)     G_GNUC_PURE;
 GwyUnit*        gwy_fit_func_param_units (GwyFitFunc *fitfunc,
                                           guint i,
                                           GwyUnit *unit_x,
