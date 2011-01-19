@@ -152,6 +152,21 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <option>--disable-gl</option>
+        </term>
+        <listitem>
+          <para>
+            Disables OpenGL entirely, including any checks whether it is
+            available.  This option, of course, has any effect only if
+            Gwyddion was built with OpenGL support and one of the most visible
+            effects is that 3D view becomes unavailable.  However, you may
+            find it useful if you encounter a system so broken that even
+            checking for OpenGL capabilities leads to X server errors.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <option>--log-to-file</option>
         </term>
         <listitem>
