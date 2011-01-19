@@ -1280,6 +1280,27 @@ gwy_field_filter_standard(const GwyField *field,
     }
 }
 
+/**
+ * gwy_field_correlate:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
+ * @kernel: Kernel, i.e. the detail for which the correlation score is
+ *          calculated.
+ * @kmask: Kernel mask.  If non-%NULL it must have the same dimensions as
+ *         @kernel and only kernel pixels covered by the mask then contribute
+ *         to the correlation score.  This makes possible to search for a
+ *         non-rectangular detail.
+ * @flags: Flags controlling correlation score calculation.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ *
+ * Calculates correlation scores for a detail searched in a field.
+ **/
 void
 gwy_field_correlate(const GwyField *field,
                     const GwyRectangle* rectangle,
