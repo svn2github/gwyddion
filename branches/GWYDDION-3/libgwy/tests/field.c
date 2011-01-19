@@ -2881,4 +2881,137 @@ test_field_filter_standard_step(void)
     g_object_unref(patline);
 }
 
+static void
+fit_gaussian_psdf(const GwyLine *psdf,
+                  gdouble *sigma,
+                  gdouble *T)
+{
+    GwyFitFunc *fitfunc = gwy_fit_func_new("Gaussian", "builtin");
+    g_assert(GWY_IS_FIT_FUNC(fitfunc));
+
+    guint n = psdf->res;
+    GwyXY *xydata = g_new(GwyXY, n);
+    for (guint i = 0; i < n; i++) {
+        xydata[i].x = (i + 0.5)*gwy_line_dx(psdf);
+        xydata[i].y = psdf->data[i];
+    }
+    gwy_fit_func_set_data(fitfunc, xydata, n);
+
+    gboolean ok;
+    gdouble params[4], errors[4];
+    ok = gwy_fit_func_estimate(fitfunc, params);
+    g_assert(ok);
+
+    // Don't fit x0 and y0; they must be zeroes.
+    guint x0_id = gwy_fit_func_param_number(fitfunc, "x₀");
+    g_assert_cmpuint(x0_id, <, gwy_fit_func_n_params(fitfunc));
+    params[x0_id] = 0.0;
+
+    guint y0_id = gwy_fit_func_param_number(fitfunc, "y₀");
+    g_assert_cmpuint(y0_id, <, gwy_fit_func_n_params(fitfunc));
+    params[y0_id] = 0.0;
+
+    GwyFitTask *fittask = gwy_fit_func_get_fit_task(fitfunc);
+    g_assert(GWY_IS_FIT_TASK(fittask));
+    gwy_fit_task_set_fixed_param(fittask, x0_id, TRUE);
+    gwy_fit_task_set_fixed_param(fittask, y0_id, TRUE);
+
+    GwyFitter *fitter = gwy_fit_task_get_fitter(fittask);
+    g_assert(GWY_IS_FITTER(fitter));
+    gwy_fitter_set_params(fitter, params);
+
+    ok = gwy_fit_task_fit(fittask);
+    g_assert(ok);
+    gwy_fitter_get_params(fitter, params);
+    ok = gwy_fit_task_param_errors(fittask, TRUE, errors);
+    g_assert(ok);
+
+    guint a_id = gwy_fit_func_param_number(fitfunc, "a");
+    g_assert_cmpuint(a_id, <, gwy_fit_func_n_params(fitfunc));
+    guint b_id = gwy_fit_func_param_number(fitfunc, "b");
+    g_assert_cmpuint(b_id, <, gwy_fit_func_n_params(fitfunc));
+
+    gdouble a = params[a_id], b = params[b_id];
+
+    g_object_unref(fitfunc);
+    g_free(xydata);
+
+    *sigma = sqrt(a*b*sqrt(G_PI));
+    *T = 2.0/b;
+}
+
+void
+test_field_distributions_psdf_full(void)
+{
+    enum { size = 400 };
+    gdouble dx = 50e-9;
+    gdouble sigma = 20e-9;
+    gdouble T = 300e-9;
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    GwyField *field = gwy_field_new_sized(size, size, FALSE);
+    gwy_field_set_xreal(field, size*dx);
+    gwy_field_set_yreal(field, size*dx);
+    for (guint i = 0; i < size*size; i++)
+        field->data[i] = 2.0*G_PI*sigma*T/dx*g_rand_double(rng);
+
+    gwy_field_filter_gaussian(field, NULL, field, 0.5*T/dx, 0.5*T/dx,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+
+    GwyLine *psdf = gwy_field_row_psdf(field, NULL, NULL, GWY_MASK_IGNORE,
+                                       GWY_WINDOWING_NONE, 1);
+
+    // There is no independent method to verify the PSDF.  Try to fit it and
+    // check if we find reasonable surface roughness parameters.
+    gdouble sigma_fit, T_fit;
+    fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
+    g_assert_cmpfloat(fabs(sigma_fit - sigma)/sigma, <=, 0.1);
+    g_assert_cmpfloat(fabs(T_fit - T)/T, <=, 0.1);
+
+    g_object_unref(psdf);
+    g_object_unref(field);
+    g_rand_free(rng);
+}
+
+void
+test_field_distributions_psdf_masked(void)
+{
+    enum { size = 400 };
+    gdouble dx = 50e-9;
+    gdouble sigma = 20e-9;
+    gdouble T = 300e-9;
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    GwyField *field = gwy_field_new_sized(size, size, FALSE);
+    gwy_field_set_xreal(field, size*dx);
+    gwy_field_set_yreal(field, size*dx);
+    for (guint i = 0; i < size*size; i++)
+        field->data[i] = 2.0*G_PI*sigma*T/dx*g_rand_double(rng);
+
+    gwy_field_filter_gaussian(field, NULL, field, 0.5*T/dx, 0.5*T/dx,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+
+    // Only 1/4 of pixels is used.
+    GwyMaskField *mask = random_mask_field_prob(size, size, rng, 0.25);
+
+    GwyLine *psdf = gwy_field_row_psdf(field, NULL, mask, GWY_MASK_INCLUDE,
+                                       GWY_WINDOWING_NONE, 1);
+
+    // There is no independent method to verify the PSDF.  Try to fit it and
+    // check if we find reasonable surface roughness parameters.
+    gdouble sigma_fit, T_fit;
+    fit_gaussian_psdf(psdf, &sigma_fit, &T_fit);
+    g_assert_cmpfloat(fabs(sigma_fit - sigma)/sigma, <=, 0.1);
+    g_assert_cmpfloat(fabs(T_fit - T)/T, <=, 0.1);
+
+    g_object_unref(psdf);
+    g_object_unref(mask);
+    g_object_unref(field);
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

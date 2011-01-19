@@ -98,12 +98,6 @@ field/level/row/median-diff
 field/level/plane
 field/level/poly
 field/level/inclination
-field/distributions/acf/full
-field/distributions/acf/masked
-field/distributions/acf/partial
-field/distributions/hhcf/full
-field/distributions/hhcf/masked
-field/distributions/hhcf/partial
 field/extend/undef
 field/extend/fixed
 field/extend/mirror
@@ -143,6 +137,14 @@ field/filter/standard/sobel
 field/filter/standard/prewitt
 field/filter/standard/scharr
 field/filter/standard/step
+field/distributions/acf/full
+field/distributions/acf/masked
+field/distributions/acf/partial
+field/distributions/hhcf/full
+field/distributions/hhcf/masked
+field/distributions/hhcf/partial
+field/distributions/psdf/full
+field/distributions/psdf/masked
 container/data
 container/refcount
 container/serialize
