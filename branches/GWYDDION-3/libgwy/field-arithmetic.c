@@ -343,10 +343,10 @@ gwy_field_add_field(const GwyField *src,
 
 /**
  * gwy_field_hypot_field:
- * @result: A two-dimensional data data field.
+ * @field: A two-dimensional data data field.
  *          It may be one of @operand1, @operand2.
  * @operand1: A two-dimensional data field forming one of the operands.
- * @operand1: A two-dimensional data field forming another of the operands.
+ * @operand2: A two-dimensional data field forming another of the operands.
  *
  * Calculates the hypotenuse of two fields.
  **/
