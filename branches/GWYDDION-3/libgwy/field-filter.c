@@ -1066,7 +1066,7 @@ step_block(gdouble *a)
     a[4] = a[22];
     a[20] = a[23];
     gwy_math_sort(a, NULL, 21);
-    return a[14] - a[6];
+    return a[15] - a[5];
 }
 
 static void
@@ -1551,7 +1551,7 @@ gwy_field_correlate(const GwyField *field,
  *
  * The step filter also works on blocks 5×5, excluding their corners so that
  * an approximately circular area is processed.  The 21 remaining values are
- * then sorted and the difference between the 15th and 7h values forms the
+ * then sorted and the difference between the 16th and 6th value forms the
  * filter result.
  **/
 
