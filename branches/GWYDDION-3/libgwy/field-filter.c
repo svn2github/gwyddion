@@ -60,7 +60,7 @@ typedef void (*RectExtendFunc)(const gdouble *in,
                                guint extend_up,
                                guint extend_down,
                                gdouble value);
-typedef gdouble (*CombineResultsFunc)(const gdouble *results);
+typedef gdouble (*DoubleArrayFunc)(gdouble *results);
 
 // Permit to choose the algorithm explicitly in testing and benchmarking.
 enum {
@@ -642,7 +642,7 @@ multiconvolve_direct(const GwyField *field,
                      guint targetcol, guint targetrow,
                      const GwyField **kernel,
                      guint nkernel,
-                     CombineResultsFunc combine_results,
+                     DoubleArrayFunc combine_results,
                      RectExtendFunc extend_rect,
                      gdouble fill_value)
 {
@@ -1008,7 +1008,7 @@ gwy_field_filter_gaussian(const GwyField *field,
  * Returns: Filtered value.
  */
 static gdouble
-kuwahara_block(const gdouble *a)
+kuwahara_block(gdouble *a)
 {
    static const guint r1[] = { 0, 1, 2, 5, 6, 7, 10, 11, 12 };
    static const guint r2[] = { 2, 3, 4, 7, 8, 9, 12, 13, 14 };
@@ -1017,6 +1017,8 @@ kuwahara_block(const gdouble *a)
    gdouble mean1 = 0.0, mean2 = 0.0, mean3 = 0.0, mean4 = 0.0;
    gdouble var1 = 0.0, var2 = 0.0, var3 = 0.0, var4 = 0.0;
 
+   // TODO: improve numerical stability by calculating the means first and
+   // then subtracting them when calculating the variances.
    for (guint i = 0; i < 9; i++) {
        gdouble v1 = a[r1[i]], v2 = a[r2[i]], v3 = a[r3[i]], v4 = a[r4[i]];
        mean1 += v1;
@@ -1055,12 +1057,25 @@ kuwahara_block(const gdouble *a)
    return a[12];
 }
 
+static gdouble
+step_block(gdouble *a)
+{
+    // We don't use the four corner elements, replace them from values from
+    // the end of the array we actually use.
+    a[0] = a[21];
+    a[4] = a[22];
+    a[20] = a[23];
+    gwy_math_sort(a, NULL, 21);
+    return a[14] - a[6];
+}
+
 static void
-filter_kuwahara(const GwyField *field,
-                const GwyRectangle* rectangle,
-                GwyField *target,
-                GwyExteriorType exterior,
-                gdouble fill_value)
+filter_5x5(const GwyField *field,
+           const GwyRectangle* rectangle,
+           GwyField *target,
+           DoubleArrayFunc process_block,
+           GwyExteriorType exterior,
+           gdouble fill_value)
 {
     guint col, row, width, height, targetcol, targetrow;
     if (!_gwy_field_check_rectangle(field, rectangle,
@@ -1086,7 +1101,7 @@ filter_kuwahara(const GwyField *field,
         for (guint j = 0; j < width; j++, trow++) {
             for (guint ii = 0; ii < 5; ii++)
                 gwy_assign(workspace + 5*ii, extdata + (i + ii)*xsize + j, 5);
-            *trow = kuwahara_block(workspace);
+            *trow = process_block(workspace);
         }
     }
 
@@ -1103,7 +1118,7 @@ make_kernel_from_data(const gdouble *data, guint xres, guint yres)
 }
 
 static gdouble
-combine_results_hypot(const gdouble *results)
+combine_results_hypot(gdouble *results)
 {
     return hypot(results[0], results[1]);
 }
@@ -1218,7 +1233,11 @@ gwy_field_filter_standard(const GwyField *field,
 
 
     if (filter == GWY_FILTER_KUWAHARA)
-        filter_kuwahara(field, rectangle, target, exterior, fill_value);
+        filter_5x5(field, rectangle, target, kuwahara_block,
+                   exterior, fill_value);
+    if (filter == GWY_FILTER_STEP)
+        filter_5x5(field, rectangle, target, step_block,
+                   exterior, fill_value);
     else if (filter == GWY_FILTER_SOBEL)
         combined_gradient_filter(field, rectangle, target,
                                  hsobel, vsobel, 3, 3,
@@ -1476,6 +1495,9 @@ gwy_field_correlate(const GwyField *field,
  *                        almost completely removed.
  * @GWY_FILTER_KUWAHARA: Kuwahara edge-preserving smoothing filter.  This is
  *                       a non-linear (non-convolution) filter.
+ * @GWY_FILTER_STEP: Non-linear rank-based step detection filter.  It is
+ *                   somewhat more smoothing than Sobel, Prewitt and Scharr but
+ *                   considerably more noise-resistant.
  *
  * Predefined standard filter types.
  *
@@ -1522,6 +1544,15 @@ gwy_field_correlate(const GwyField *field,
  *  1/144   -1/18     1/9    -1/18      1/144
  *  0        1/144   -1/72    1/144     0
  * ]|
+ *
+ * The Kuwahara filter works on blocks 5×5.  In each such block the corner 3×3
+ * sub-block with the lowest variance is chosen and its mean value is the
+ * filter result.
+ *
+ * The step filter also works on blocks 5×5, excluding their corners so that
+ * an approximately circular area is processed.  The 21 remaining values are
+ * then sorted and the difference between the 15th and 7h values forms the
+ * filter result.
  **/
 
 /**

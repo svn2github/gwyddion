@@ -40,6 +40,7 @@ typedef enum {
     GWY_FILTER_SCHARR,
     GWY_FILTER_DECHECKER,
     GWY_FILTER_KUWAHARA,
+    GWY_FILTER_STEP,
 } GwyFilterType;
 
 typedef enum {
