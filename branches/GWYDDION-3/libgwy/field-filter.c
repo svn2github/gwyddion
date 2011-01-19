@@ -60,6 +60,7 @@ typedef void (*RectExtendFunc)(const gdouble *in,
                                guint extend_up,
                                guint extend_down,
                                gdouble value);
+typedef gdouble (*CombineResultsFunc)(const gdouble *results);
 
 // Permit to choose the algorithm explicitly in testing and benchmarking.
 enum {
@@ -604,19 +605,51 @@ get_rect_extend_func(GwyExteriorType exterior)
     g_return_val_if_reached(NULL);
 }
 
+/**
+ * multiconvolve_direct:
+ * @field: A two-dimensional data field.
+ * @col: First ROI column.
+ * @row: First RIO row.
+ * @width: ROI width.
+ * @height: RIO height.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field itself.
+ * @targetcol: Column to place the result into @target.
+ * @targetrow: Target to place the result into @target.
+ * @kernel: Array of @nkernel equally-sized kernel.
+ * @nkernel: Number of items in @kernel.
+ * @combine_results: Function to combine results of individual convolutions
+ *                   to the final result put to @target.  May be %NULL if
+ *                   @nkernel is 1.
+ * @extend_rect: Rectangle extending method.
+ * @fill_value: The value to use with fixed-value exterior.
+ *
+ * Performs convolution of a field with a number of equally-sized kenrels,
+ * combining the results of individual convolutions into a single value.
+ */
 static void
-convolve_direct(const GwyField *field,
-                guint col, guint row,
-                guint width, guint height,
-                GwyField *target,
-                guint targetcol, guint targetrow,
-                const GwyField *kernel,
-                RectExtendFunc extend_rect,
-                gdouble fill_value)
+multiconvolve_direct(const GwyField *field,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyField *target,
+                     guint targetcol, guint targetrow,
+                     const GwyField **kernel,
+                     guint nkernel,
+                     CombineResultsFunc combine_results,
+                     RectExtendFunc extend_rect,
+                     gdouble fill_value)
 {
+    g_return_if_fail(nkernel);
+    g_return_if_fail(kernel);
+    g_return_if_fail(nkernel == 1 || combine_results);
+
     guint xres = field->xres, yres = field->yres,
-          kxres = kernel->xres, kyres = kernel->yres;
-    const gdouble *kdata = kernel->data;
+          kxres = kernel[0]->xres, kyres = kernel[0]->yres;
+    for (guint kno = 1; kno < nkernel; kno++) {
+        g_return_if_fail(kernel[kno]->xres == kxres
+                         && kernel[kno]->yres == kyres);
+    }
+
     guint xsize = width + kxres - 1;
     guint ysize = height + kyres - 1;
     gdouble *extdata = g_new(gdouble, xsize*ysize);
@@ -627,22 +660,47 @@ convolve_direct(const GwyField *field,
     extend_rect(field->data, xres, extdata, xsize,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
-    GwyRectangle rectangle = { targetcol, targetrow, width, height };
-    gwy_field_clear(target, &rectangle, NULL, GWY_MASK_IGNORE);
 
     // The direct method is used only if kres ≪ res.  Don't bother optimising
     // the boundaries, just make the inner loop tight.
-    for (guint i = 0; i < height; i++) {
-        gdouble *trow = target->data + (targetrow + i)*target->xres + targetcol;
-        for (guint j = 0; j < width; j++) {
-            const gdouble *id = extdata + (extend_up + kyres/2 + i)*xsize;
-            for (guint ik = 0; ik < kyres; ik++, id -= xsize) {
-                const gdouble *jd = id + extend_left + kxres/2 + j;
-                const gdouble *krow = kdata + ik*kxres;
+    if (nkernel == 1) {
+        const gdouble *kdata = kernel[0]->data;
+        for (guint i = 0; i < height; i++) {
+            gdouble *trow = target->data + ((targetrow + i)*target->xres
+                                            + targetcol);
+            for (guint j = 0; j < width; j++) {
+                const gdouble *id = extdata + (extend_up + kyres/2 + i)*xsize;
                 gdouble v = 0.0;
-                for (guint jk = 0; jk < kxres; jk++, jd--)
-                    v += krow[jk] * *jd;
-                trow[j] += v;
+                for (guint ik = 0; ik < kyres; ik++, id -= xsize) {
+                    const gdouble *jd = id + extend_left + kxres/2 + j;
+                    const gdouble *krow = kdata + ik*kxres;
+                    for (guint jk = 0; jk < kxres; jk++, jd--)
+                        v += krow[jk] * *jd;
+                }
+                trow[j] = v;
+            }
+        }
+    }
+    else {
+        for (guint i = 0; i < height; i++) {
+            gdouble *trow = target->data + ((targetrow + i)*target->xres
+                                            + targetcol);
+            for (guint j = 0; j < width; j++) {
+                gdouble results[nkernel];
+                for (guint kno = 0; kno < nkernel; kno++) {
+                    const gdouble *id = extdata + (extend_up
+                                                   + kyres/2 + i)*xsize;
+                    const gdouble *kdata = kernel[kno]->data;
+                    gdouble v = 0.0;
+                    for (guint ik = 0; ik < kyres; ik++, id -= xsize) {
+                        const gdouble *jd = id + extend_left + kxres/2 + j;
+                        const gdouble *krow = kdata + ik*kxres;
+                        for (guint jk = 0; jk < kxres; jk++, jd--)
+                            v += krow[jk] * *jd;
+                    }
+                    results[kno] = v;
+                }
+                trow[j] = combine_results(results);
             }
         }
     }
@@ -775,9 +833,9 @@ gwy_field_convolve(const GwyField *field,
     guint size = height*width;
     if (convolution_method == CONVOLUTION_DIRECT
         || (convolution_method == CONVOLUTION_AUTO && size <= 25))
-        convolve_direct(field, col, row, width, height,
-                        target, targetcol, targetrow,
-                        kernel, extend_rect, fill_value);
+        multiconvolve_direct(field, col, row, width, height,
+                             target, targetcol, targetrow,
+                             &kernel, 1, NULL, extend_rect, fill_value);
     else {
         convolve_fft(field, col, row, width, height,
                      target, targetcol, targetrow,
