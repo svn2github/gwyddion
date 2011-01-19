@@ -142,6 +142,7 @@ field/convolve/field/fixed/fft
 field/filter/standard/sobel
 field/filter/standard/prewitt
 field/filter/standard/scharr
+field/filter/standard/step
 container/data
 container/refcount
 container/serialize

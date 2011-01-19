@@ -2846,4 +2846,39 @@ test_field_filter_standard_scharr(void)
                               signature);
 }
 
+void
+test_field_filter_standard_step(void)
+{
+    static const gdouble step_pattern[] = {
+        -1.0, -1.0, -1.0, -1.0, 0.0, 1.0, 1.0, 1.0, 1.0
+    };
+    static const gdouble expected[] = {
+        0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 1.0, 2.0, 1.0, 1.0, 0.0, 0.0,
+        1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0,
+        2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
+        1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0,
+        0.0, 0.0, 1.0, 1.0, 2.0, 1.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 0.0,
+    };
+
+    GwyLine *patline = gwy_line_new_sized(9, FALSE);
+    gwy_assign(patline->data, step_pattern, 9);
+
+    GwyField *pattern = gwy_line_outer_product(patline, patline);
+    GwyField *field = gwy_field_new_alike(pattern, FALSE);
+    GwyField *reference = gwy_field_new_alike(pattern, FALSE);
+    gwy_assign(reference->data, expected, 9*9);
+    gwy_field_filter_standard(pattern, NULL, field, GWY_FILTER_STEP,
+                              GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+    field_assert_numerically_equal(field, reference, 1e-14);
+
+    g_object_unref(reference);
+    g_object_unref(field);
+    g_object_unref(pattern);
+    g_object_unref(patline);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
