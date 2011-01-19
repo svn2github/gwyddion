@@ -2766,4 +2766,22 @@ test_field_convolve_field_fixed_fft(void)
     gwy_tune_algorithms("convolution-method", "auto");
 }
 
+/*
+void
+test_field_filter_standard(void)
+{
+    GwyField *field = gwy_field_new_sized(6, 6, FALSE);
+    gwy_field_fill_full(field, 1.0);
+    GwyRectangle rectangle = { 0, 0, 3, 3 };
+    gwy_field_fill(field, &rectangle, NULL, GWY_MASK_IGNORE, -1.0);
+    rectangle.row = rectangle.col = 3;
+    gwy_field_fill(field, &rectangle, NULL, GWY_MASK_IGNORE, -1.0);
+
+    GwyField *target = gwy_field_new_alike(field);
+    gwy_field_filter_standard(field, NULL, target, GWY_FILTER_HSOBEL,
+                              GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+
+}
+*/
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
