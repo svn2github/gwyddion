@@ -1010,51 +1010,43 @@ gwy_field_filter_gaussian(const GwyField *field,
 static gdouble
 kuwahara_block(gdouble *a)
 {
-   static const guint r1[] = { 0, 1, 2, 5, 6, 7, 10, 11, 12 };
-   static const guint r2[] = { 2, 3, 4, 7, 8, 9, 12, 13, 14 };
-   static const guint r3[] = { 12, 13, 14, 17, 18, 19, 22, 23, 24 };
-   static const guint r4[] = { 10, 11, 12, 15, 16, 17, 20, 21, 22 };
-   gdouble mean1 = 0.0, mean2 = 0.0, mean3 = 0.0, mean4 = 0.0;
-   gdouble var1 = 0.0, var2 = 0.0, var3 = 0.0, var4 = 0.0;
+   static const guint r[4][9] = {
+       { 0,  1,  2,  5,  6,  7,  10, 11, 12, },
+       { 2,  3,  4,  7,  8,  9,  12, 13, 14, },
+       { 12, 13, 14, 17, 18, 19, 22, 23, 24, },
+       { 10, 11, 12, 15, 16, 17, 20, 21, 22, },
+   };
+   gdouble mean[4], var[4];
 
-   // TODO: improve numerical stability by calculating the means first and
-   // then subtracting them when calculating the variances.
+   gwy_clear(mean, 4);
    for (guint i = 0; i < 9; i++) {
-       gdouble v1 = a[r1[i]], v2 = a[r2[i]], v3 = a[r3[i]], v4 = a[r4[i]];
-       mean1 += v1;
-       mean2 += v2;
-       mean3 += v3;
-       mean4 += v4;
-       var1 += v1*v1;
-       var2 += v2*v2;
-       var3 += v3*v3;
-       var4 += v4*v4;
+       for (guint j = 0; j < 4; j++) {
+           gdouble z = a[r[j][i]];
+           mean[j] += z;
+       }
    }
-   mean1 /= 9.0;
-   mean2 /= 9.0;
-   mean3 /= 9.0;
-   mean4 /= 9.0;
-   var1 /= 9.0;
-   var2 /= 9.0;
-   var3 /= 9.0;
-   var4 /= 9.0;
+   for (guint j = 0; j < 4; j++)
+       mean[j] /= 9.0;
+   gwy_clear(var, 4);
+   for (guint i = 0; i < 9; i++) {
+       for (guint j = 0; j < 4; j++) {
+           gdouble z = a[r[j][i]] - mean[j];
+           var[j] += z*z;
+       }
+   }
 
-   var1 -= mean1 * mean1;
-   var2 -= mean2 * mean2;
-   var3 -= mean3 * mean3;
-   var4 -= mean4 * mean4;
-
-   if (var1 <= var2 && var1 <= var3 && var1 <= var4)
-       return mean1;
-   if (var2 <= var3 && var2 <= var4 && var2 <= var1)
-       return mean2;
-   if (var3 <= var4 && var3 <= var1 && var3 <= var2)
-       return mean3;
-   if (var4 <= var1 && var4 <= var2 && var4 <= var3)
-       return mean4;
-
-   // XXX: IMO this can happen only with NaNs.  Maybe we should return NaN too.
-   return a[12];
+   if (var[0] <= var[1]) {
+       if (var[0] <= var[2])
+           return (var[0] <= var[3]) ? mean[0] : mean[3];
+       else
+           return (var[2] <= var[3]) ? mean[2] : mean[3];
+   }
+   else {
+       if (var[1] <= var[2])
+           return (var[1] <= var[3]) ? mean[1] : mean[3];
+       else
+           return (var[2] <= var[3]) ? mean[2] : mean[3];
+   }
 }
 
 static gdouble
