@@ -85,6 +85,18 @@ _gwy_tune_convolution_method(const gchar *method)
     }
 }
 
+static void
+ensure_defined_exterior(GwyExteriorType *exterior,
+                        gdouble *fill_value)
+{
+    if (*exterior == GWY_EXTERIOR_UNDEFINED) {
+        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
+                  "correlations.  Fixing to zero-filled exterior.");
+        *exterior = GWY_EXTERIOR_FIXED_VALUE;
+        *fill_value = 0.0;
+    }
+}
+
 // Generally, there are three reasonable convolution strategies:
 // (a) small kernels (kres comparable to log(res)) → direct calculation
 // (b) medium-sized kernels (kres ≤ res) → use explicit extension/mirroring to
@@ -388,12 +400,7 @@ gwy_field_row_convolve(const GwyField *field,
 
     g_return_if_fail(GWY_IS_LINE(kernel));
 
-    if (exterior == GWY_EXTERIOR_UNDEFINED) {
-        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
-                  "correlations.  Fixing to zero-filled exterior.");
-        exterior = GWY_EXTERIOR_FIXED_VALUE;
-        fill_value = 0.0;
-    }
+    ensure_defined_exterior(&exterior, &fill_value);
     RowExtendFunc extend_row = get_row_extend_func(exterior);
     if (!extend_row)
         return;
@@ -819,12 +826,7 @@ gwy_field_convolve(const GwyField *field,
 
     g_return_if_fail(GWY_IS_FIELD(kernel));
 
-    if (exterior == GWY_EXTERIOR_UNDEFINED) {
-        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
-                  "correlations.  Fixing to zero-filled exterior.");
-        exterior = GWY_EXTERIOR_FIXED_VALUE;
-        fill_value = 0.0;
-    }
+    ensure_defined_exterior(&exterior, &fill_value);
     RectExtendFunc extend_rect = get_rect_extend_func(exterior);
     if (!extend_rect)
         return;
@@ -1100,6 +1102,47 @@ make_kernel_from_data(const gdouble *data, guint xres, guint yres)
     return field;
 }
 
+static gdouble
+combine_results_hypot(const gdouble *results)
+{
+    return hypot(results[0], results[1]);
+}
+
+static void
+combined_gradient_filter(const GwyField *field,
+                         const GwyRectangle* rectangle,
+                         GwyField *target,
+                         const gdouble *kdata1, const gdouble *kdata2,
+                         guint kxres, guint kyres,
+                         GwyExteriorType exterior,
+                         gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    ensure_defined_exterior(&exterior, &fill_value);
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    GwyField *kernels[2] = {
+        make_kernel_from_data(kdata1, kxres, kyres),
+        make_kernel_from_data(kdata2, kxres, kyres),
+    };
+    multiconvolve_direct(field, col, row, width, height,
+                         target, targetcol, targetrow,
+                         (const GwyField**)kernels, 2, combine_results_hypot,
+                         extend_rect, fill_value);
+
+    g_object_unref(kernels[0]);
+    g_object_unref(kernels[1]);
+    gwy_field_invalidate(target);
+}
+
 /**
  * gwy_field_filter_standard:
  * @field: A two-dimensional data field.
@@ -1173,40 +1216,49 @@ gwy_field_filter_standard(const GwyField *field,
          0.0,        1.0/144.0, -1.0/72.0,  1.0/144.0,  0.0,
     };
 
-    // Special-case the non-convolution filters.
-    if (filter == GWY_FILTER_KUWAHARA) {
+
+    if (filter == GWY_FILTER_KUWAHARA)
         filter_kuwahara(field, rectangle, target, exterior, fill_value);
-        return;
-    }
-
-    GwyField *kernel;
-    if (filter == GWY_FILTER_LAPLACE)
-        kernel = make_kernel_from_data(laplace, 3, 3);
-    if (filter == GWY_FILTER_LAPLACE_SCHARR)
-        kernel = make_kernel_from_data(laplace_scharr, 3, 3);
-    else if (filter == GWY_FILTER_HSOBEL)
-        kernel = make_kernel_from_data(hsobel, 3, 3);
-    else if (filter == GWY_FILTER_VSOBEL)
-        kernel = make_kernel_from_data(vsobel, 3, 3);
-    else if (filter == GWY_FILTER_HPREWITT)
-        kernel = make_kernel_from_data(hprewitt, 3, 3);
-    else if (filter == GWY_FILTER_VPREWITT)
-        kernel = make_kernel_from_data(vprewitt, 3, 3);
-    else if (filter == GWY_FILTER_HSCHARR)
-        kernel = make_kernel_from_data(hscharr, 3, 3);
-    else if (filter == GWY_FILTER_VSCHARR)
-        kernel = make_kernel_from_data(vscharr, 3, 3);
-    else if (filter == GWY_FILTER_DECHECKER)
-        kernel = make_kernel_from_data(dechecker, 5, 5);
+    else if (filter == GWY_FILTER_SOBEL)
+        combined_gradient_filter(field, rectangle, target,
+                                 hsobel, vsobel, 3, 3,
+                                 exterior, fill_value);
+    else if (filter == GWY_FILTER_PREWITT)
+        combined_gradient_filter(field, rectangle, target,
+                                 hprewitt, vprewitt, 3, 3,
+                                 exterior, fill_value);
+    else if (filter == GWY_FILTER_SCHARR)
+        combined_gradient_filter(field, rectangle, target,
+                                 hscharr, vscharr, 3, 3,
+                                 exterior, fill_value);
     else {
-        // TODO: Total derivative filters: Sobel, Prewitt, Scharr
-        g_critical("Bad standard filter type %u.", filter);
-        return;
+        GwyField *kernel;
+        if (filter == GWY_FILTER_LAPLACE)
+            kernel = make_kernel_from_data(laplace, 3, 3);
+        if (filter == GWY_FILTER_LAPLACE_SCHARR)
+            kernel = make_kernel_from_data(laplace_scharr, 3, 3);
+        else if (filter == GWY_FILTER_HSOBEL)
+            kernel = make_kernel_from_data(hsobel, 3, 3);
+        else if (filter == GWY_FILTER_VSOBEL)
+            kernel = make_kernel_from_data(vsobel, 3, 3);
+        else if (filter == GWY_FILTER_HPREWITT)
+            kernel = make_kernel_from_data(hprewitt, 3, 3);
+        else if (filter == GWY_FILTER_VPREWITT)
+            kernel = make_kernel_from_data(vprewitt, 3, 3);
+        else if (filter == GWY_FILTER_HSCHARR)
+            kernel = make_kernel_from_data(hscharr, 3, 3);
+        else if (filter == GWY_FILTER_VSCHARR)
+            kernel = make_kernel_from_data(vscharr, 3, 3);
+        else if (filter == GWY_FILTER_DECHECKER)
+            kernel = make_kernel_from_data(dechecker, 5, 5);
+        else {
+            g_critical("Bad standard filter type %u.", filter);
+            return;
+        }
+        gwy_field_convolve(field, rectangle, target, kernel,
+                           exterior, fill_value);
+        g_object_unref(kernel);
     }
-
-    gwy_field_convolve(field, rectangle, target, kernel,
-                       exterior, fill_value);
-    g_object_unref(kernel);
 }
 
 void
@@ -1232,13 +1284,7 @@ gwy_field_correlate(const GwyField *field,
                          && kmask->yres == kernel->yres);
     }
 
-    if (exterior == GWY_EXTERIOR_UNDEFINED) {
-        g_warning("Do not use GWY_EXTERIOR_UNDEFINED for convolutions and "
-                  "correlations.  Fixing to zero-filled exterior.");
-        exterior = GWY_EXTERIOR_FIXED_VALUE;
-        fill_value = 0.0;
-    }
-
+    ensure_defined_exterior(&exterior, &fill_value);
     RectExtendFunc extend_rect = get_rect_extend_func(exterior);
     if (!extend_rect)
         return;
