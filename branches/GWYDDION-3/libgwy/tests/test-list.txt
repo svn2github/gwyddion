@@ -50,6 +50,7 @@ line/data-changed
 line/copy
 line/new-part
 line/serialize
+line/outer-product
 curve/props
 curve/data-changed
 curve/serialize
@@ -138,6 +139,9 @@ field/convolve/field/periodic/direct
 field/convolve/field/periodic/fft
 field/convolve/field/fixed/direct
 field/convolve/field/fixed/fft
+field/filter/standard/sobel
+field/filter/standard/prewitt
+field/filter/standard/scharr
 container/data
 container/refcount
 container/serialize

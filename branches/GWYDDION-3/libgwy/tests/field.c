@@ -35,9 +35,9 @@ field_randomize(GwyField *field,
     gwy_field_invalidate(field);
 }
 
-static void
-test_field_assert_equal(const GwyField *result,
-                        const GwyField *reference)
+void
+field_assert_equal(const GwyField *result,
+                   const GwyField *reference)
 {
     g_assert(GWY_IS_FIELD(result));
     g_assert(GWY_IS_FIELD(reference));
@@ -181,16 +181,16 @@ test_field_serialize(void)
         GwyField *copy;
 
         copy = gwy_field_duplicate(original);
-        test_field_assert_equal(copy, original);
+        field_assert_equal(copy, original);
         g_object_unref(copy);
 
         copy = gwy_field_new();
         gwy_field_assign(copy, original);
-        test_field_assert_equal(copy, original);
+        field_assert_equal(copy, original);
         g_object_unref(copy);
 
         copy = GWY_FIELD(serialize_and_back(G_OBJECT(original)));
-        test_field_assert_equal(copy, original);
+        field_assert_equal(copy, original);
         g_object_unref(copy);
 
         g_object_unref(original);
@@ -293,7 +293,7 @@ test_field_copy(void)
         gwy_field_copy(source, &rectangle, dest, destcol, destrow);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, destcol, destrow);
-        test_field_assert_equal(dest, reference);
+        field_assert_equal(dest, reference);
         g_object_unref(source);
         g_object_unref(dest);
         g_object_unref(reference);
@@ -337,7 +337,7 @@ test_field_new_part(void)
         gwy_field_set_yoffset(reference, source->yreal*row/yres);
         field_part_copy_dumb(source, col, row, width, height,
                              reference, 0, 0);
-        test_field_assert_equal(part, reference);
+        field_assert_equal(part, reference);
         g_object_unref(source);
         g_object_unref(part);
         g_object_unref(reference);
@@ -2766,22 +2766,84 @@ test_field_convolve_field_fixed_fft(void)
     gwy_tune_algorithms("convolution-method", "auto");
 }
 
-/*
-void
-test_field_filter_standard(void)
+static void
+field_filter_gradient_one(GwyFilterType hfilter,
+                          GwyFilterType vfilter,
+                          GwyFilterType absfilter,
+                          const gdouble *signature)
 {
-    GwyField *field = gwy_field_new_sized(6, 6, FALSE);
-    gwy_field_fill_full(field, 1.0);
-    GwyRectangle rectangle = { 0, 0, 3, 3 };
-    gwy_field_fill(field, &rectangle, NULL, GWY_MASK_IGNORE, -1.0);
-    rectangle.row = rectangle.col = 3;
-    gwy_field_fill(field, &rectangle, NULL, GWY_MASK_IGNORE, -1.0);
+    static const gdouble step_pattern[] = { -1.0, -1.0, 0.0, 1.0, 1.0 };
+    static const gdouble step_gradient[] = { 0.0, 1.0, 2.0, 1.0, 0.0 };
 
-    GwyField *target = gwy_field_new_alike(field);
-    gwy_field_filter_standard(field, NULL, target, GWY_FILTER_HSOBEL,
+    GwyLine *patline = gwy_line_new_sized(5, FALSE);
+    gwy_assign(patline->data, step_pattern, 5);
+
+    GwyLine *gradline = gwy_line_new_sized(5, FALSE);
+    gwy_assign(gradline->data, step_gradient, 5);
+
+    GwyLine *sigline = gwy_line_new_sized(5, FALSE);
+    gwy_assign(sigline->data, signature, 5);
+
+    GwyField *pattern = gwy_line_outer_product(patline, patline);
+    GwyField *hfield = gwy_field_new_alike(pattern, FALSE);
+    GwyField *hreference = gwy_line_outer_product(sigline, gradline);
+    gwy_field_filter_standard(pattern, NULL, hfield, hfilter,
                               GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+    field_assert_numerically_equal(hfield, hreference, 1e-14);
 
+    GwyField *vreference = gwy_line_outer_product(gradline, sigline);
+    GwyField *vfield = gwy_field_new_alike(pattern, FALSE);
+    gwy_field_filter_standard(pattern, NULL, vfield, vfilter,
+                              GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+    field_assert_numerically_equal(vfield, vreference, 1e-14);
+
+    GwyField *absreference = gwy_field_new_alike(pattern, FALSE);
+    gwy_field_hypot_field(absreference, hreference, vreference);
+    GwyField *absfield = gwy_field_new_alike(pattern, FALSE);
+    gwy_field_filter_standard(pattern, NULL, absfield, absfilter,
+                              GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+    field_assert_numerically_equal(absfield, absreference, 1e-14);
+
+    g_object_unref(absreference);
+    g_object_unref(vreference);
+    g_object_unref(hreference);
+    g_object_unref(absfield);
+    g_object_unref(vfield);
+    g_object_unref(hfield);
+    g_object_unref(pattern);
+    g_object_unref(sigline);
+    g_object_unref(gradline);
+    g_object_unref(patline);
 }
-*/
+
+void
+test_field_filter_standard_sobel(void)
+{
+    static const gdouble signature[] = { -1.0, -3.0/4.0, 0.0, 3.0/4.0, 1.0 };
+    field_filter_gradient_one(GWY_FILTER_HSOBEL,
+                              GWY_FILTER_VSOBEL,
+                              GWY_FILTER_SOBEL,
+                              signature);
+}
+
+void
+test_field_filter_standard_prewitt(void)
+{
+    static const gdouble signature[] = { -1.0, -2.0/3.0, 0.0, 2.0/3.0, 1.0 };
+    field_filter_gradient_one(GWY_FILTER_HPREWITT,
+                              GWY_FILTER_VPREWITT,
+                              GWY_FILTER_PREWITT,
+                              signature);
+}
+
+void
+test_field_filter_standard_scharr(void)
+{
+    static const gdouble signature[] = { -1.0, -13.0/16.0, 0.0, 13.0/16.0, 1.0 };
+    field_filter_gradient_one(GWY_FILTER_HSCHARR,
+                              GWY_FILTER_VSCHARR,
+                              GWY_FILTER_SCHARR,
+                              signature);
+}
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

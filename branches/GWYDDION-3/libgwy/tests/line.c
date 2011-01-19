@@ -228,4 +228,33 @@ test_line_new_part(void)
     g_rand_free(rng);
 }
 
+void
+test_line_outer_product(void)
+{
+    enum { xres = 2, yres = 3 };
+    static const gdouble xdata[xres] = { 1, 2 };
+    static const gdouble ydata[yres] = { 3, 4, 5 };
+    static const gdouble expected[xres*yres] = {
+        3, 6,
+        4, 8,
+        5, 10,
+    };
+
+    GwyLine *xline = gwy_line_new_sized(xres, FALSE);
+    gwy_assign(xline->data, xdata, xres);
+
+    GwyLine *yline = gwy_line_new_sized(yres, FALSE);
+    gwy_assign(yline->data, ydata, yres);
+
+    GwyField *field = gwy_line_outer_product(yline, xline);
+    GwyField *reference = gwy_field_new_sized(xres, yres, FALSE);
+    gwy_assign(reference->data, expected, xres*yres);
+    field_assert_equal(field, reference);
+
+    g_object_unref(reference);
+    g_object_unref(field);
+    g_object_unref(yline);
+    g_object_unref(xline);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

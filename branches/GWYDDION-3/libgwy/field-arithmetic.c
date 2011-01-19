@@ -342,6 +342,34 @@ gwy_field_add_field(const GwyField *src,
 }
 
 /**
+ * gwy_field_hypot_field:
+ * @result: A two-dimensional data data field.
+ *          It may be one of @operand1, @operand2.
+ * @operand1: A two-dimensional data field forming one of the operands.
+ * @operand1: A two-dimensional data field forming another of the operands.
+ *
+ * Calculates the hypotenuse of two fields.
+ **/
+void
+gwy_field_hypot_field(GwyField *field,
+                      const GwyField *operand1,
+                      const GwyField *operand2)
+{
+    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_if_fail(GWY_IS_FIELD(operand1));
+    g_return_if_fail(GWY_IS_FIELD(operand2));
+    g_return_if_fail(field->xres == operand1->xres
+                     && field->xres == operand2->xres);
+    g_return_if_fail(field->yres == operand1->yres
+                     && field->yres == operand2->yres);
+
+    for (guint k = 0; k < field->xres*field->yres; k++)
+        field->data[k] = hypot(operand1->data[k], operand2->data[k]);
+
+    gwy_field_invalidate(field);
+}
+
+/**
  * gwy_field_clamp:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
@@ -404,6 +432,10 @@ gwy_field_clamp(GwyField *field,
  * @section_id: GwyField-arithmetic
  * @title: GwyField arithmetic
  * @short_description: Arithmetic operations with fields
+ *
+ * Arithmetic operations with fields are, in a wider sense, pixel-wise
+ * operations with field data or operations that combine the corresponding
+ * pixels of several equally-sized fields.
  **/
 
 /**

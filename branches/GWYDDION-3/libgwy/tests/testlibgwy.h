@@ -52,6 +52,8 @@ void          curve_randomize               (GwyCurve *field,
                                              GRand *rng);
 void          field_randomize               (GwyField *field,
                                              GRand *rng);
+void          field_assert_equal            (const GwyField *result,
+                                             const GwyField *reference);
 void          field_assert_numerically_equal(const GwyField *result,
                                              const GwyField *reference,
                                              gdouble eps);
