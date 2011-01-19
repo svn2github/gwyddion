@@ -1052,8 +1052,8 @@ kuwahara_block(gdouble *a)
 static gdouble
 step_block(gdouble *a)
 {
-    // We don't use the four corner elements, replace them from values from
-    // the end of the array we actually use.
+    // We don't use the four corner elements, replace them by values from
+    // the end of the array that we use.
     a[0] = a[21];
     a[4] = a[22];
     a[20] = a[23];
@@ -1382,11 +1382,16 @@ gwy_field_correlate(const GwyField *field,
     fftw_execute_dft_r2c(dplan, extkernel, kernelc);
 
     // Transform the data.
-    // TODO: if levelling is requested, perform overall levelling first to
-    // reduce the numerical errors.
     extend_rect(field->data, xres, extdata, xsize,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
+    // If levelling is requested, shift the global mean value to zero first to
+    // reduce numerical errors.
+    if (level) {
+        gdouble mean = gwy_field_mean(field, rectangle, NULL, GWY_MASK_IGNORE);
+        for (guint k = 0; k < cstride*ysize; k++)
+            extdata[k] -= mean;
+    }
     fftw_execute(dplan);
 
     // Convolve, putting the result into kernelc as we have no other use for it.
