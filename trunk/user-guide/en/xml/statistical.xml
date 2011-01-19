@@ -431,6 +431,7 @@
       <para>
         If we choose the Gaussian ACF, the corresponding Gaussian
         relation for the PSDF is
+        <xi:include href="eq-power-spectral-density-1d-gaussian.xml"/>
       </para>
       <para>
         For the surface with exponential ACF we have
