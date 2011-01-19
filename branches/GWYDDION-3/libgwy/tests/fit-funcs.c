@@ -164,7 +164,7 @@ test_fit_func_builtin_constant(void)
 void
 test_fit_func_builtin_exponential(void)
 {
-    const gchar *param_names[] = { "a", "b", "y<sub>0</sub>" };
+    const gchar *param_names[] = { "a", "b", "y₀" };
     fit_func_one("Exponential", "builtin",
                  G_N_ELEMENTS(param_names), param_names);
 }
@@ -172,7 +172,7 @@ test_fit_func_builtin_exponential(void)
 void
 test_fit_func_builtin_gaussian(void)
 {
-    const gchar *param_names[] = { "a", "b", "x<sub>0</sub>", "y<sub>0</sub>" };
+    const gchar *param_names[] = { "a", "b", "x₀", "y₀" };
     fit_func_one("Gaussian", "builtin",
                  G_N_ELEMENTS(param_names), param_names);
 }

@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 static const FitFuncParam const_param[] = {
-   { "a",             0, 1, },
+   { "a", 0, 1, },
 };
 
 static gboolean
@@ -74,9 +74,9 @@ static const BuiltinFitFunc const_builtin = {
  ****************************************************************************/
 
 static const FitFuncParam exp_param[] = {
-   { "y<sub>0</sub>", 0, 1, },
-   { "a",             0, 1, },
-   { "b",             1, 0, },
+   { "y₀", 0, 1, },
+   { "a",  0, 1, },
+   { "b",  1, 0, },
 };
 
 static gboolean
@@ -116,7 +116,7 @@ exp_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc exp_builtin = {
-    .formula = "= <i>y</i><sub>0</sub> + <i>a</i> exp(<i>x</i>/<i>b</i>)",
+    .formula = "= <i>y</i>₀ + <i>a</i> exp(<i>x</i>/<i>b</i>)",
     .nparams = G_N_ELEMENTS(exp_param),
     .param = exp_param,
     .function = exp_function,
@@ -130,10 +130,10 @@ static const BuiltinFitFunc exp_builtin = {
  ****************************************************************************/
 
 static const FitFuncParam gauss_param[] = {
-   { "x<sub>0</sub>", 1, 0, },
-   { "y<sub>0</sub>", 0, 1, },
-   { "a",             0, 1, },
-   { "b",             1, 0, },
+   { "x₀", 1, 0, },
+   { "y₀", 0, 1, },
+   { "a",  0, 1, },
+   { "b",  1, 0, },
 };
 
 static gboolean
@@ -169,8 +169,7 @@ gauss_estimate(G_GNUC_UNUSED const GwyXY *pts,
 }
 
 static const BuiltinFitFunc gauss_builtin = {
-    .formula = "= <i>y</i><sub>0</sub> "
-        "+ <i>a</i> exp[−(<i>x</i> − <i>x</i><sub>0</sub>)<sup>2</sup>/b<sup>2</sup>]",
+    .formula = "= <i>y</i>₀ + <i>a</i> exp[−(<i>x</i> − <i>x</i>₀)²/b²]",
     .nparams = G_N_ELEMENTS(gauss_param),
     .param = gauss_param,
     .function = gauss_function,
