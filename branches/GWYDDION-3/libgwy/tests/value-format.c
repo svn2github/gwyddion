@@ -89,6 +89,8 @@ test_value_format_simple(void)
     g_assert_cmpstr(glue, ==, " ");
     g_assert_cmpstr(units, ==, "deg");
 
+    g_free(glue);
+    g_free(units);
     g_object_unref(format);
     g_object_unref(unit);
 
