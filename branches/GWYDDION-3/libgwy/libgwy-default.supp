@@ -1,0 +1,80 @@
+# $Id$
+
+###########################################################################
+# GNU libc
+
+{
+   glibc-2.12-x86_64-strtod-buffer-overrun-cond
+   Memcheck:Cond
+   fun:__GI___strncasecmp_l
+   fun:____strtod_l_internal
+   fun:g_ascii_strtod
+   fun:parse
+   fun:gwy_unit_set_from_string
+}
+
+{
+   glibc-2.12-x86_64-strtod-buffer-overrun-value
+   Memcheck:Value8
+   fun:__GI___strncasecmp_l
+   fun:____strtod_l_internal
+   fun:g_ascii_strtod
+   fun:parse
+   fun:gwy_unit_set_from_string
+}
+
+###########################################################################
+# GObject type registration ‘leaks’.  The types are registered forever and
+# the corresponding data not intended to be freed.
+
+{
+   glib2-static-type-registration-1
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   fun:freelist_alloc
+   fun:_g_atomic_array_copy
+   fun:type_node_any_new_W
+   fun:g_type_register_static
+   fun:g_type_register_static_simple
+}
+
+{
+   glib2-static-interface-registration-1
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   fun:freelist_alloc
+   fun:_g_atomic_array_copy
+   fun:iface_node_set_offset_L
+   fun:type_node_add_iface_entry_W
+   fun:type_add_interface_Wm
+   fun:g_type_add_interface_static
+}
+
+{
+   glib2-static-interface-registration-2
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   fun:freelist_alloc
+   fun:_g_atomic_array_copy
+   fun:type_node_add_iface_entry_W
+   fun:type_add_interface_Wm
+   fun:g_type_add_interface_static
+}
+
+{
+   glib2-static-enum-registration-1
+   Memcheck:Leak
+   fun:malloc
+   fun:realloc
+   fun:g_realloc
+   fun:type_node_any_new_W
+   fun:g_type_register_static
+   fun:g_enum_register_static
+}
+

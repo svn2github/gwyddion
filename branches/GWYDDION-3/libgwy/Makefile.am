@@ -9,6 +9,7 @@ libsuffix = $(PACKAGE_SUFFIX)
 toplevelincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)
 libgwyincludedir = $(pkgincludedir)$(PACKAGE_SUFFIX)/$(library)
 test_program = ./tests/testlibgwy
+test_default_suppressions = libgwy-default.supp
 mkenum_name = types
 mkenum_id = LIBGWY_TYPES
 main_header = $(srcdir)/libgwy.h
@@ -77,7 +78,7 @@ library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
 
 # Must init
-EXTRA_DIST = version.h.in
+EXTRA_DIST = version.h.in $(test_default_suppressions)
 CLEANFILES = $(library)$(libsuffix).supp
 DISTCLEANFILES = $(public_built_headers)
 MAINTAINERCLEANFILES =
