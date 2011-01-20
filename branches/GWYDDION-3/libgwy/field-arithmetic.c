@@ -435,7 +435,14 @@ gwy_field_clamp(GwyField *field,
  *
  * Arithmetic operations with fields are, in a wider sense, pixel-wise
  * operations with field data or operations that combine the corresponding
- * pixels of several equally-sized fields.
+ * pixels of several equally-sized fields.  The first class includes methods
+ * such as gwy_field_add() or gwy_field_apply_func() while the second includes
+ * methods that usually have <quote>field</quote> repeated in their name such
+ * as gwy_field_add_field() or gwy_field_hypot_field().
+ *
+ * Non-pixel-wise operations that work also on the neighbourhood pixels
+ * are described in section <link linkend='GwyField-filter'>GwyField
+ * filtering</link>.
  **/
 
 /**

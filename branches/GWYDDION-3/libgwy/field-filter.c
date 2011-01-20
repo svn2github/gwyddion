@@ -1480,6 +1480,13 @@ gwy_field_correlate(const GwyField *field,
  * @section_id: GwyField-filter
  * @title: GwyField filtering
  * @short_description: Field filtering
+ *
+ * This section describes various filters operating on pixels and their
+ * neigbourhood such as smoothing or gradients, and also general convolutions
+ * and correlations.
+ *
+ * Pixel-wise operations, also called arithmetic operations, are described in
+ * section <link linkend='GwyField-arithmetic'>GwyField arithmetic</link>.
  **/
 
 /**
