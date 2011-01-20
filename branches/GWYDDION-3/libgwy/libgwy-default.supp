@@ -3,6 +3,8 @@
 ###########################################################################
 # GNU libc
 
+# http://sourceware.org/bugzilla/show_bug.cgi?id=12424
+
 {
    glibc-2.12-x86_64-strtod-buffer-overrun-cond
    Memcheck:Cond
