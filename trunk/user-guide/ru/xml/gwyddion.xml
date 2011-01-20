@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- @(#) $Id: gwyddion.xml 11715 2011-01-04 13:21:28Z yeti-dn $ -->
+<!-- @(#) $Id: gwyddion.xml 11804 2011-01-19 22:42:43Z yeti-dn $ -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <refentry id="gwyddion">
   <refentryinfo>
@@ -28,11 +28,11 @@
 
   <refsect1 id="gwyddion-description">
     <title>Описание</title>
-    <para>Gwyddion - графическая программа отображения и анализа данных СЗМ (Сканирующей Зондовой Микроскопии), написанная с использованием Gtk+.</para>
+    <para>Gwyddion – графическая программа отображения и анализа данных СЗМ (Сканирующей Зондовой Микроскопии), написанная с использованием Gtk+.</para>
   </refsect1>
 
   <refsect1 id="gwyddion-options">
-    <title>Опции</title>
+    <title>Параметры</title>
     <para>Программа принимает все стандартные опции Gtk+, Gdk, и GtkGLExt, такие, как <option>--display</option> или <option>--sync</option>. См. документацию по этим пакетам для описания опций тулкитов.</para>
     <para>Поведение опции удалённого управления  <option>--remote-<replaceable>*</replaceable></option> не определено, когда более, чем один экземпляр Gwyddion запущен на данном дисплее. Они могут выбирать произвольный экземпляр программы для работы с ним.</para>
     <para>Если каталог задан как аргумент <replaceable>ФАЙЛ</replaceable>, программа открывает диалог выбора файлов в заданном каталоге.</para>
@@ -99,6 +99,14 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <option>--disable-gl</option>
+        </term>
+        <listitem>
+          <para>Полностью отключает OpenGL, включая все проверки на его доступность. Эта опция, разумеется, будет действовать только в том случае, если Gwyddion был собран с поддержкой OpenGL и наиболее заметным эффектом от её использование будет недоступность трёхмерного просмотра. Однако. эта опция может оказаться полезной в том случае. если система сломана настолько. что даже проверка поддержки OpenGL приводит к ошибкам X-сервера.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <option>--log-to-file</option>
         </term>
         <listitem>
@@ -151,7 +159,7 @@
         </term>
         <listitem>
           <para>Основной каталог модулей, куда они были установлены. Gwyddion ищет модули в его подкаталоге  <filename>gwyddion/modules</filename>.</para>
-          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${libdir}</varname> обычно установленное в <filename>/usr/local/lib</filename> или <filename>/usr/local/lib64</filename>.</para>
+          <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${libdir}</varname>, обычно установленное в <filename>/usr/local/lib</filename> или <filename>/usr/local/lib64</filename>.</para>
         </listitem>
       </varlistentry>
       <varlistentry id="GWYDDION_LIBEXECDIR">
@@ -159,7 +167,7 @@
           <envar>GWYDDION_LIBEXECDIR</envar>
         </term>
         <listitem>
-          <para>Основной каталог lib-exec, куда были установлены подключаемые модули. Gwyddion ищет подключаемые модули в его подкаталоге  <filename>gwyddion/modules</filename>.</para>
+          <para>Основной каталог lib-exec, куда были установлены подключаемые модули. Gwyddion ищет подключаемые модули в его подкаталоге  <filename>gwyddion/plugins</filename>.</para>
           <para>Если не установлен, по умолчанию используется вкомпилированное значение <varname>${libexecdir}</varname> обычно установленное в <filename>/usr/local/libexec</filename>.</para>
         </listitem>
       </varlistentry>
@@ -220,7 +228,7 @@
       <varlistentry>
         <term><filename><envar>$GWYDDION_DATADIR</envar>/gwyddion/pixmaps</filename>,</term>
         <listitem>
-          <para>То же для общесистемных иконок</para>
+          <para>То же самое для общесистемных иконок</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -228,13 +236,13 @@
           <filename>~/.gwyddion/modules</filename>
         </term>
         <listitem>
-          <para>Каталог для пользовательских модулей. Они должны находиться в подкаталогах <filename>file</filename>, <filename>graph</filename>,  <filename>process</filename> и <filename>tools</filename> в зависимости от их вида, хотя это больше обычай, чем обязательное правило.</para>
+          <para>Каталог для пользовательских модулей. Они должны находиться в подкаталогах <filename>file</filename>, <filename>graph</filename>,  <filename>process</filename>, <filename>layer</filename> и <filename>tools</filename> в зависимости от их вида, хотя это больше традиция, чем обязательное правило.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
         <term><filename><envar>$GWYDDION_LIBDIR</envar>/gwyddion/modules</filename>,</term>
         <listitem>
-          <para>То же для общесистемных модулей.</para>
+          <para>То же самое для общесистемных модулей.</para>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -248,7 +256,7 @@
       <varlistentry>
         <term><filename><envar>$GWYDDION_LIBEXECDIR</envar>/gwyddion/plugins</filename>,</term>
         <listitem>
-          <para>То же для общесистемных подключаемых модулей</para>
+          <para>То же самое для общесистемных подключаемых модулей</para>
         </listitem>
       </varlistentry>
       <varlistentry>
