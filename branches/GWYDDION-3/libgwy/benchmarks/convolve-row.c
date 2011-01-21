@@ -107,7 +107,7 @@ main(int argc, char *argv[])
          xres <= xres_max;
          xres = MAX(xres + 1, (guint)(xres_step*xres + 0.5))) {
 
-        guint yres = MAX(20, 100000/xres);
+        guint yres = MAX(100, 100000/xres);
         convolve_rows(xres, yres, kres_min, kres_max, rng);
     }
 
