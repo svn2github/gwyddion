@@ -86,6 +86,9 @@ main(int argc, char *argv[])
     gint status = g_test_run();
     remove_testdata();
 
+    // Good on Valgrind, but do it consistently always.
+    fftw_forget_wisdom();
+
     return status;
 }
 

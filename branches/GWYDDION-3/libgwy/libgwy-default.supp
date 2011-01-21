@@ -27,6 +27,36 @@
 }
 
 ###########################################################################
+# GLib quark/interned string handling.  These created forever and the
+# corresponding data not intended to be freed.
+
+{
+   glib2-static-quark-1
+   Memcheck:Leak
+   fun:realloc
+   fun:g_realloc
+   fun:g_quark_from_string
+}
+
+{
+   glib2-static-quark-2
+   Memcheck:Leak
+   fun:malloc
+   fun:g_malloc
+   fun:g_quark_from_string
+}
+
+{
+   glib2-static-quark-3
+   Memcheck:Leak
+   fun:calloc
+   fun:g_malloc0
+   fun:g_hash_table_resize
+   fun:g_hash_table_insert_internal
+   fun:g_quark_from_string
+}
+
+###########################################################################
 # GObject type registration ‘leaks’.  The types are registered forever and
 # the corresponding data not intended to be freed.
 
