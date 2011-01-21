@@ -50,6 +50,7 @@ line/data-changed
 line/copy
 line/new-part
 line/serialize
+line/distribute
 line/outer-product
 curve/props
 curve/data-changed

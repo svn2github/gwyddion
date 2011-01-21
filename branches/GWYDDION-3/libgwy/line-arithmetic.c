@@ -59,7 +59,7 @@ void
 gwy_line_distribute(GwyLine *line)
 {
     g_return_if_fail(GWY_IS_LINE(line));
-    gdouble *p = line->data + line->res-1;
+    gdouble *p = line->data + line->res-2;
     for (guint i = line->res-1; i; i--, p--)
         p[1] -= p[0];
 }

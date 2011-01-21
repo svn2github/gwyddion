@@ -25,6 +25,16 @@
  *
  ***************************************************************************/
 
+G_GNUC_UNUSED
+static void
+print_line(const gchar *name, const GwyLine *line)
+{
+    g_printerr("%s", name);
+    for (guint i = 0; i < line->res; i++)
+        g_printerr(" %g", line->data[i]);
+    g_printerr("\n");
+}
+
 void
 line_randomize(GwyLine *line,
                GRand *rng)
@@ -255,6 +265,27 @@ test_line_outer_product(void)
     g_object_unref(field);
     g_object_unref(yline);
     g_object_unref(xline);
+}
+
+void
+test_line_distribute(void)
+{
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint res = 1; res <= 13; res++) {
+        GwyLine *source = gwy_line_new_sized(res, FALSE);
+        line_randomize(source, rng);
+
+        GwyLine *line = gwy_line_duplicate(source);
+        gwy_line_accumulate(line);
+        gwy_line_distribute(line);
+        line_assert_numerically_equal(line, source, 1e-14);
+
+        g_object_unref(line);
+        g_object_unref(source);
+    }
+    g_rand_free(rng);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
