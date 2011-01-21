@@ -65,6 +65,31 @@ function printerr() {
   cat $tmplog
 }
 
+function filtererr() {
+  f=$1
+  shift
+
+  test -s $f.err || return
+  cat --squeeze-blank $f.err \
+  | {
+    # Exclude errors matching a list of regexps
+    if test -s $f.ignore; then
+      grep -Evf $f.ignore
+    else
+      cat
+    fi
+  } | {
+    # Exclude literal errors, typically those from other part of the build
+    if test -n "$1"; then
+      grep -Fvf "$1"
+    else
+      cat
+    fi
+  } >$tmplog
+  cat $tmplog >$f.err
+  rm -f $tmplog
+}
+
 function extract_build_documentation() {
   logfile=build_documentation.err
   grep -Evf build_documentation.ignore <$logfile >$tmplog
@@ -114,6 +139,7 @@ printerr install build.err
 printerr make_dists build.err
 printerr build_rpm build.err
 printerr distcheck all.err
+filtererr unit_test_valgrind all.err
 extract_translation_stats
 extract_documentation_stats
 extract_coverage_stats
