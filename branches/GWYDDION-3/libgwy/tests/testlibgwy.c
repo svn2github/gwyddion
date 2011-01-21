@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <glib/gstdio.h>
+#include <fftw3.h>
 
 #ifdef HAVE_VALGRIND
 #include <valgrind/valgrind.h>
