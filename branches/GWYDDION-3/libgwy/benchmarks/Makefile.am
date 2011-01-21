@@ -36,7 +36,7 @@ EXTRA_DIST = \
 memory-access.dat: memory-access
 	for x in 0 1 2 3 4 5 6 7 8 9; do \
 		echo "Run $$x"; \
-		./memory-access | tee memory-access-$$x.dat; \
+		./memory-access$(EXEEXT) | tee memory-access-$$x.dat; \
 	done
 	$(PYTHON) average.py 1 memory-access-?.dat >memory-access.dat
 
