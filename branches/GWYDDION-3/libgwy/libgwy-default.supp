@@ -44,13 +44,12 @@
 }
 
 {
-   glib2-static-boxed-registration-1
+   glib2-static-type-registration-2
    Memcheck:Leak
    fun:realloc
    fun:g_realloc
    fun:type_node_any_new_W
    fun:g_type_register_static
-   fun:g_boxed_type_register_static
 }
 
 {
@@ -61,34 +60,10 @@
    fun:g_slice_alloc
    fun:freelist_alloc
    fun:_g_atomic_array_copy
-   fun:iface_node_set_offset_L
+   ...
    fun:type_node_add_iface_entry_W
    fun:type_add_interface_Wm
    fun:g_type_add_interface_static
-}
-
-{
-   glib2-static-interface-registration-2
-   Memcheck:Leak
-   fun:malloc
-   fun:g_malloc
-   fun:g_slice_alloc
-   fun:freelist_alloc
-   fun:_g_atomic_array_copy
-   fun:type_node_add_iface_entry_W
-   fun:type_add_interface_Wm
-   fun:g_type_add_interface_static
-}
-
-{
-   glib2-static-enum-registration-1
-   Memcheck:Leak
-   fun:malloc
-   fun:realloc
-   fun:g_realloc
-   fun:type_node_any_new_W
-   fun:g_type_register_static
-   fun:g_enum_register_static
 }
 
 {
