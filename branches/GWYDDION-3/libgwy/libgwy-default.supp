@@ -4,6 +4,7 @@
 # GNU libc
 
 # http://sourceware.org/bugzilla/show_bug.cgi?id=12424
+# Ulrich Drepper says it's OK and should be ignored.
 
 {
    glibc-2.12-x86_64-strtod-buffer-overrun-cond

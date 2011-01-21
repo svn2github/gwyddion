@@ -492,9 +492,6 @@ parse(Unit *unit,
     else if (strncmp(string, "×", sizeof("×")-1) == 0)
         string += sizeof("×")-1;
 
-    // XXX: Certain non-ASCII characters seem to cause valgrind warnings in
-    // glibc's strtod here.  Not sure why.
-    //g_printerr("[[%s]]\n", g_strescape(string, NULL));
     q = g_ascii_strtod(string, (gchar**)&end);
     if (end != string) {
         string = end;
