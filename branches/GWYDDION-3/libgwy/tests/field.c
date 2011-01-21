@@ -1096,26 +1096,28 @@ test_field_row_level_one(GwyRowShiftMethod method)
         GwyLine *shifts = gwy_line_new_sized(yres, TRUE);
         line_randomize(shifts, rng);
         gwy_field_shift_rows(field, shifts);
-        GwyLine *foundshifts = gwy_line_new_sized(yres, FALSE);
-        gwy_field_find_row_shifts(field, NULL, GWY_MASK_IGNORE,
-                                  method, 1, foundshifts);
-        gwy_line_multiply(foundshifts, -1.0);
-        gwy_line_accumulate(foundshifts);
-        gwy_field_shift_rows(field, foundshifts);
+        GwyLine *foundshifts1 = gwy_field_find_row_shifts(field,
+                                                          NULL, GWY_MASK_IGNORE,
+                                                          method, 1);
+        gwy_line_multiply(foundshifts1, -1.0);
+        gwy_line_accumulate(foundshifts1);
+        gwy_field_shift_rows(field, foundshifts1);
+        g_object_unref(foundshifts1);
 
         g_assert_cmpfloat(gwy_field_rms_full(field), <=, 1e-12);
 
         GwyMaskField *mask = random_mask_field(xres, yres, rng);
-        gwy_field_find_row_shifts(field, mask, GWY_MASK_INCLUDE,
-                                  method, 1, foundshifts);
-        gwy_line_multiply(foundshifts, -1.0);
-        gwy_line_accumulate(foundshifts);
-        gwy_field_shift_rows(field, foundshifts);
+        GwyLine *foundshifts2 = gwy_field_find_row_shifts(field,
+                                                          mask, GWY_MASK_INCLUDE,
+                                                          method, 1);
+        gwy_line_multiply(foundshifts2, -1.0);
+        gwy_line_accumulate(foundshifts2);
+        gwy_field_shift_rows(field, foundshifts2);
+        g_object_unref(foundshifts2);
 
         g_assert_cmpfloat(gwy_field_rms_full(field), <=, 1e-11);
 
         g_object_unref(mask);
-        g_object_unref(foundshifts);
         g_object_unref(shifts);
         g_object_unref(field);
     }

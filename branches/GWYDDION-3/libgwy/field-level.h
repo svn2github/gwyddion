@@ -66,12 +66,11 @@ void     gwy_field_subtract_poly  (GwyField *field,
                                    const gdouble *coeffs);
 void     gwy_field_shift_rows     (GwyField *field,
                                    const GwyLine *shifts);
-void     gwy_field_find_row_shifts(const GwyField *field,
+GwyLine* gwy_field_find_row_shifts(const GwyField *field,
                                    const GwyMaskField *mask,
                                    GwyMaskingType masking,
                                    GwyRowShiftMethod method,
-                                   guint min_freedom,
-                                   GwyLine *shifts);
+                                   guint min_freedom);
 
 G_END_DECLS
 

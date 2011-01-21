@@ -22,6 +22,8 @@
 #include "libgwy/math.h"
 #include "libgwy/field-level.h"
 #include "libgwy/math-internal.h"
+#include "libgwy/object-internal.h"
+#include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/mask-field-internal.h"
 
@@ -791,33 +793,32 @@ find_shifts_of_good_rows(GwyLine *shifts,
  *               by the specific method, required to shift it.  Rows that do
  *               not contain at least this number of free points due to masking
  *               are not shifted relatively to their neighbours.
- * @shifts: Line of the same dimension as @field's y-resolution to store the
- *          calculated relative shifts to.
  *
  * Finds shifts of field rows relative to their neighbour rows.
  *
  * Note this method calculates relative shifts, although gwy_field_shift_rows()
  * takes absolute shifts.
+ *
+ * Returns: A newly created one-dimensional data line with the same dimension
+ *          as the field vertical size, containing the relative shifts.
  **/
-void
+GwyLine*
 gwy_field_find_row_shifts(const GwyField *field,
                           const GwyMaskField *mask,
                           GwyMaskingType masking,
                           GwyRowShiftMethod method,
-                          guint min_freedom,
-                          GwyLine *shifts)
+                          guint min_freedom)
 {
     guint col, row, width, height, maskcol, maskrow;
     if (!_gwy_field_check_mask(field, NULL, mask, &masking,
                                &col, &row, &width, &height,
                                &maskcol, &maskrow))
-        return;
-    g_return_if_fail(GWY_IS_LINE(shifts));
-    g_return_if_fail(shifts->res == field->yres);
+        return NULL;
 
+    GwyLine *shifts = gwy_line_new_sized(field->yres, FALSE);
     if (field->yres < 2) {
         gwy_line_clear_full(shifts);
-        return;
+        goto fail;
     }
 
     gsize bufsize = field->xres * sizeof(gdouble);
@@ -870,8 +871,15 @@ gwy_field_find_row_shifts(const GwyField *field,
     else {
         g_critical("Unknown row shift method %u", method);
         gwy_line_clear_full(shifts);
-        return;
     }
+
+fail:
+    shifts->res = field->yres;
+    shifts->off = field->yoff;
+    ASSIGN_UNITS(shifts->priv->unit_x, field->priv->unit_xy);
+    ASSIGN_UNITS(shifts->priv->unit_y, field->priv->unit_z);
+
+    return shifts;
 }
 
 
