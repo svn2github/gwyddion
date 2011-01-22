@@ -712,7 +712,7 @@ gint
 gwy_double_direct_compare(gconstpointer pa,
                           gconstpointer pb)
 {
-    struct { gdouble d; gpointer p; } a = { .p = pa }, b = { .p = pb };
+    struct { gdouble d; gconstpointer p; } a = { .p = pa }, b = { .p = pb };
 
     if (a.d < b.d)
         return -1;
