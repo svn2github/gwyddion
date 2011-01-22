@@ -49,11 +49,15 @@ double gwy_powi(double x, int i);
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
-void    gwy_math_sort  (gdouble *array,
-                        guint *index_array,
-                        gsize n);
-gdouble gwy_math_median(gdouble *array,
-                        gsize n);
+gint    gwy_double_compare       (gconstpointer a,
+                                  gconstpointer b)    G_GNUC_PURE;
+gint    gwy_double_direct_compare(gconstpointer a,
+                                  gconstpointer b)    G_GNUC_CONST;
+void    gwy_math_sort            (gdouble *array,
+                                  guint *index_array,
+                                  gsize n);
+gdouble gwy_math_median          (gdouble *array,
+                                  gsize n);
 
 #define gwy_triangular_matrix_length(n) \
     (((n) + 1)*(n)/2)

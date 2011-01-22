@@ -665,6 +665,63 @@ gwy_linear_fit(GwyLinearFitFunc function,
 }
 
 /**
+ * gwy_double_compare:
+ * @a: Pointer to the first double value.
+ * @b: Pointer to the second double value.
+ *
+ * Compares two doubles given pointer to them.
+ *
+ * This function is intended to be passed as #GCompareFunc or #GCompareDataFunc
+ * (typecased) to GLib functions.  It does not treat NaNs specifically.
+ *
+ * Returns: A negative integer if the first value comes before the second, 0 if
+ *          they are equal, or a positive integer if the first value comes
+ *          after the second.
+ **/
+gint
+gwy_double_compare(gconstpointer pa,
+                   gconstpointer pb)
+{
+    gdouble a = *(const gdouble*)pa;
+    gdouble b = *(const gdouble*)pb;
+
+    if (a < b)
+        return -1;
+    if (a > b)
+        return 1;
+    return 0;
+}
+
+/**
+ * gwy_double_direct_compare:
+ * @a: The first double value, typecast to #gpointer.
+ * @b: The second double value, typecast to #gpointer.
+ *
+ * Compares two doubles typecast to pointers.
+ *
+ * Unlike gwy_double_compare() which takes pointers to double values, this
+ * function compares doubles that are directly stored in the pointers (i.e.
+ * have benn typecast to them).  This obviously works only if pointers are
+ * at least 64bit.
+ *
+ * Returns: A negative integer if the first value comes before the second, 0 if
+ *          they are equal, or a positive integer if the first value comes
+ *          after the second.
+ **/
+gint
+gwy_double_direct_compare(gconstpointer pa,
+                          gconstpointer pb)
+{
+    struct { gdouble d; gpointer p; } a = { .p = pa }, b = { .p = pb };
+
+    if (a.d < b.d)
+        return -1;
+    if (a.d > b.d)
+        return 1;
+    return 0;
+}
+
+/**
  * gwy_math_sort:
  * @n: Number of items in @array.
  * @array: Array of doubles to sort in place.
