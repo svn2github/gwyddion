@@ -86,10 +86,10 @@ static gdouble      find_number_format        (gdouble step,
 static gboolean     parse                     (Unit *unit,
                                                const gchar *string,
                                                gint *power10);
-static Unit*        power_impl                (Unit *unit,
-                                               Unit *op,
+static void         power_impl                (Unit *unit,
+                                               const Unit *op,
                                                gint power);
-static Unit*        canonicalize              (Unit *unit);
+static void         canonicalize              (Unit *unit);
 static const gchar* get_prefix                (gint power);
 static void         append_power_plain        (GString *str,
                                                gint power);
@@ -396,7 +396,7 @@ find_style_spec(GwyValueFormatStyle style)
  *          prefixes).
  **/
 gchar*
-gwy_unit_to_string(GwyUnit *unit,
+gwy_unit_to_string(const GwyUnit *unit,
                    GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
@@ -415,7 +415,7 @@ gwy_unit_to_string(GwyUnit *unit,
  * Returns: %TRUE iff units are equal.
  **/
 gboolean
-gwy_unit_equal(GwyUnit *unit, GwyUnit *op)
+gwy_unit_equal(const GwyUnit *unit, const GwyUnit *op)
 {
     g_return_val_if_fail(GWY_IS_UNIT(unit), FALSE);
     g_return_val_if_fail(GWY_IS_UNIT(op), FALSE);
@@ -685,43 +685,35 @@ parse(Unit *unit,
 /**
  * gwy_unit_multiply:
  * @unit: A physical unit.
+ *        It is set to the product of units @op1 and @op2.
+ *        It may be one of @op1, @op2.
  * @op1: One multiplication operand.
  * @op2: Other multiplication operand.
  *
  * Multiplies two physical units.
- *
- * It is safe to pass one of @op1, @op2 as @unit.
- *
- * It is even possible to pass %NULL as @unit.   A new unit is then created and
- * returned.  In this case, and only in this case, the caller acquires a new
- * reference on the returned object and must dispose of it accordingly.
- *
- * Returns: Product of physical units @op1 and @op2.
  **/
-GwyUnit*
+void
 gwy_unit_multiply(GwyUnit *unit,
-                  GwyUnit *op1,
-                  GwyUnit *op2)
+                  const GwyUnit *op1,
+                  const GwyUnit *op2)
 {
-    return gwy_unit_power_multiply(unit, op1, 1, op2, 1);
+    gwy_unit_power_multiply(unit, op1, 1, op2, 1);
 }
 
 /**
  * gwy_unit_divide:
  * @unit: A physical unit.
+ *        It is set to the ratio of units @op1 and @op2.
+ *        It may be one of @op1, @op2.
  * @op1: Numerator operand.
  * @op2: Denominator operand.
  *
  * Divides two physical units.
- *
- * See gwy_unit_multiply() for argument discussion.
- *
- * Returns: Ratio of physical units @op1 and @op2.
  **/
-GwyUnit*
+void
 gwy_unit_divide(GwyUnit *unit,
-                GwyUnit *op1,
-                GwyUnit *op2)
+                const GwyUnit *op1,
+                const GwyUnit *op2)
 {
     return gwy_unit_power_multiply(unit, op1, 1, op2, -1);
 }
@@ -729,38 +721,31 @@ gwy_unit_divide(GwyUnit *unit,
 /**
  * gwy_unit_power:
  * @unit: A physical unit.
+ *        It is set to unit @op raised to power @power.
+ *        It may be @op itself.
  * @op: Base operand.
  * @power: Power to raise @op to.
  *
  * Computes the power of a physical unit.
- *
- * See gwy_unit_multiply() for argument discussion.
- *
- * Returns: Physical unit @op raised to @power.
  **/
-GwyUnit*
+void
 gwy_unit_power(GwyUnit *unit,
-               GwyUnit *op,
+               const GwyUnit *op,
                gint power)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(op), NULL);
-    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
-
-    if (!unit)
-        unit = gwy_unit_new();
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_UNIT(op));
 
     power_impl(unit->priv, op->priv, power);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
-
-    return unit;
 }
 
-static Unit*
+static void
 power_impl(Unit *unit,
-           Unit *op,
+           const Unit *op,
            gint power)
 {
-    /* Perform power in place */
+    /* Perform power in-place */
     if (unit == op) {
         if (power) {
             for (guint j = 0; j < unit->units->len; j++) {
@@ -770,8 +755,7 @@ power_impl(Unit *unit,
         }
         else
             g_array_set_size(unit->units, 0);
-
-        return unit;
+        return;
     }
 
     GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
@@ -787,8 +771,6 @@ power_impl(Unit *unit,
     g_array_set_size(unit->units, 0);
     g_array_append_vals(unit->units, units->data, units->len);
     g_array_free(units, TRUE);
-
-    return unit;
 }
 
 static void
@@ -817,28 +799,28 @@ multiply_impl(Unit *unit, Unit *op, gint power)
 /**
  * gwy_unit_nth_root:
  * @unit: A physical unit.
+ *        It is set to unit @op raised to power 1/@ipower or kept intact.
+ *        It may be @op itself.
  * @op: Base operand.
- * @ipower: Root to take: 2 means a quadratic root, 3 means cubic root,
- *          etc.
+ * @ipower: Root to take (a non-zero integer): 2 means a quadratic root, 3
+ *          means cubic root, etc.
  *
- * Calulates n-th root of a physical unit.
+ * Calulates the n-th root of a physical unit, if possible.
  *
  * This operation fails if the result would have fractional powers that
- * are not representable by #GwyUnit.
+ * are not representable by #GwyUnit.  The function returns %FALSE in such case
+ * and leaves @unit untouched.
  *
- * See gwy_unit_multiply() for argument discussion.
- *
- * Returns: On success, @ipower-th root of physical unit @op.  On failure,
- *          %NULL.
+ * Returns: %TRUE if the root was successfully calculated, %FALSE on failure.
  **/
-GwyUnit*
+gboolean
 gwy_unit_nth_root(GwyUnit *unit,
-                  GwyUnit *op,
+                  const GwyUnit *op,
                   gint ipower)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(op), NULL);
-    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
-    g_return_val_if_fail(ipower > 0, NULL);
+    g_return_val_if_fail(GWY_IS_UNIT(unit), FALSE);
+    g_return_val_if_fail(GWY_IS_UNIT(op), FALSE);
+    g_return_val_if_fail(ipower, FALSE);
 
     Unit *privop = op->priv;
 
@@ -846,14 +828,11 @@ gwy_unit_nth_root(GwyUnit *unit,
     for (guint j = 0; j < privop->units->len; j++) {
         GwySimpleUnit *u = &simple_unit_index(privop->units, j);
         if (u->power % ipower != 0)
-            return NULL;
+            return FALSE;
     }
 
-    GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
-
-    if (!unit)
-        unit = gwy_unit_new();
     Unit *priv = unit->priv;
+    GArray *units = g_array_new(FALSE, FALSE, sizeof(GwySimpleUnit));
 
     g_array_append_vals(units, privop->units->data, privop->units->len);
     for (guint j = 0; j < units->len; j++) {
@@ -867,12 +846,15 @@ gwy_unit_nth_root(GwyUnit *unit,
 
     g_signal_emit(unit, unit_signals[CHANGED], 0);
 
-    return unit;
+    return TRUE;
 }
 
 /**
  * gwy_unit_power_multiply:
  * @unit: A physical unit.
+ *        It is set to the product of units @op1 and @op2 raised to powers
+ *        @power1 and @power2, respectively.
+ *        It may be one of @op1, @op2.
  * @op1: First operand.
  * @power1: Power to raise @op1 to.
  * @op2: Second operand.
@@ -880,58 +862,44 @@ gwy_unit_nth_root(GwyUnit *unit,
  *
  * Computes the product of two physical units raised to arbitrary powers.
  *
- * See gwy_unit_multiply() for argument discussion.
- *
- * This is the most complex unit arithmetic function.  It can be easily
- * chained when more than two units are to be multiplied.
- *
- * Returns: Product of physical units @op1 and @op2 raised to specified powers.
+ * This is the most complex unit arithmetic function.
  **/
-GwyUnit*
+void
 gwy_unit_power_multiply(GwyUnit *unit,
-                        GwyUnit *op1,
+                        const GwyUnit *op1,
                         gint power1,
-                        GwyUnit *op2,
+                        const GwyUnit *op2,
                         gint power2)
 {
-    g_return_val_if_fail(GWY_IS_UNIT(op1), NULL);
-    g_return_val_if_fail(GWY_IS_UNIT(op2), NULL);
-    g_return_val_if_fail(!unit || GWY_IS_UNIT(unit), NULL);
+    g_return_if_fail(GWY_IS_UNIT(unit));
+    g_return_if_fail(GWY_IS_UNIT(op1));
+    g_return_if_fail(GWY_IS_UNIT(op2));
 
-    /* Ensure unit is different from at least one of op1, op2 */
+    /* Ensure @unit is different from at least one of @op1, @op2. */
     if (unit == op1 && unit == op2)
         return gwy_unit_power(unit, unit, power1 + power2);
 
-    if (!unit)
-        unit = gwy_unit_new();
-
-    /* Try to avoid hard work by making op2 the simplier one, but primarily
-     * make it different from unit. */
+    /* Try to avoid hard work by making @op2 the simplier argument, but
+     * primarily make it different from @unit. */
     if (op2 == unit) {
-        GWY_SWAP(GwyUnit*, op1, op2);
+        GWY_SWAP(const GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
     else if (op1 != unit && (op1->priv->units->len < op2->priv->units->len
                              || (power2 && !power1))) {
-        GWY_SWAP(GwyUnit*, op1, op2);
+        GWY_SWAP(const GwyUnit*, op1, op2);
         GWY_SWAP(gint, power1, power2);
     }
     g_assert(op2 != unit);
 
     power_impl(unit->priv, op1->priv, power1);
-    if (!power2) {
-        canonicalize(unit->priv);
-        return unit;
-    }
-
-    multiply_impl(unit->priv, op2->priv, power2);
+    if (power2)
+        multiply_impl(unit->priv, op2->priv, power2);
     canonicalize(unit->priv);
     g_signal_emit(unit, unit_signals[CHANGED], 0);
-
-    return unit;
 }
 
-static Unit*
+static void
 canonicalize(Unit *unit)
 {
     guint i, j;
@@ -960,8 +928,6 @@ canonicalize(Unit *unit)
         else
             g_array_remove_index(unit->units, i);
     }
-
-    return unit;
 }
 
 /**
@@ -970,33 +936,34 @@ canonicalize(Unit *unit)
  * @style: Output format style.
  * @power10: Power of 10, in the same sense as gwy_unit_new_from_string()
  *           returns it.
- * @format: Value format to update.
  *
  * Finds format for representing a specific power-of-10 multiple of a physical
  * unit.
  *
- * This function does not set or change the precision of @format.
+ * The precision of the returned format is left at the default value (3).
+ *
+ * Returns: A newly created value format.
  **/
-void
-gwy_unit_format_for_power10(GwyUnit *unit,
+GwyValueFormat*
+gwy_unit_format_for_power10(const GwyUnit *unit,
                             GwyValueFormatStyle style,
-                            gint power10,
-                            GwyValueFormat *format)
+                            gint power10)
 {
-    g_return_if_fail(GWY_IS_UNIT(unit));
-    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), power10,
                 &glue, &units, FALSE);
-    g_object_set(format,
-                 "style", style,
-                 "base", gwy_powi(10.0, power10),
-                 "glue", glue,
-                 "units", units,
-                 NULL);
+    GwyValueFormat *format = g_object_new(GWY_TYPE_VALUE_FORMAT,
+                                          "style", style,
+                                          "base", gwy_powi(10.0, power10),
+                                          "glue", glue,
+                                          "units", units,
+                                          NULL);
     g_free(glue);
     g_free(units);
+
+    return format;
 }
 
 /**
@@ -1006,19 +973,18 @@ gwy_unit_format_for_power10(GwyUnit *unit,
  * @maximum: Maximum value to be represented.
  * @resolution: Smallest step (approximately) that should make a visible
  *              difference in the representation.
- * @format: Value format to update.
  *
  * Finds a format for representing a range of values with given resolution.
+ *
+ * Returns: A newly created value format.
  **/
-void
-gwy_unit_format_with_resolution(GwyUnit *unit,
+GwyValueFormat*
+gwy_unit_format_with_resolution(const GwyUnit *unit,
                                 GwyValueFormatStyle style,
                                 gdouble maximum,
-                                gdouble resolution,
-                                GwyValueFormat *format)
+                                gdouble resolution)
 {
-    g_return_if_fail(GWY_IS_UNIT(unit));
-    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
     maximum = fabs(maximum);
     resolution = fabs(resolution);
@@ -1031,15 +997,17 @@ gwy_unit_format_with_resolution(GwyUnit *unit,
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), gwy_round(log10(base)),
                 &glue, &units, FALSE);
-    g_object_set(format,
-                 "style", style,
-                 "base", base,
-                 "precision", precision,
-                 "glue", glue,
-                 "units", units,
-                 NULL);
+    GwyValueFormat *format = g_object_new(GWY_TYPE_VALUE_FORMAT,
+                                          "style", style,
+                                          "base", base,
+                                          "precision", precision,
+                                          "glue", glue,
+                                          "units", units,
+                                          NULL);
     g_free(glue);
     g_free(units);
+
+    return format;
 }
 
 /**
@@ -1048,20 +1016,19 @@ gwy_unit_format_with_resolution(GwyUnit *unit,
  * @style: Output format style.
  * @maximum: Maximum value to be represented.
  * @sdigits: Number of significant digits the value should have.
- * @format: Value format to update.
  *
  * Finds a format for representing a values with given number of significant
  * digits.
+ *
+ * Returns: A newly created value format.
  **/
-void
-gwy_unit_format_with_digits(GwyUnit *unit,
+GwyValueFormat*
+gwy_unit_format_with_digits(const GwyUnit *unit,
                             GwyValueFormatStyle style,
                             gdouble maximum,
-                            gint sdigits,
-                            GwyValueFormat *format)
+                            gint sdigits)
 {
-    g_return_if_fail(GWY_IS_UNIT(unit));
-    g_return_if_fail(GWY_IS_VALUE_FORMAT(format));
+    g_return_val_if_fail(GWY_IS_UNIT(unit), NULL);
 
     maximum = fabs(maximum);
     guint precision = sdigits;
@@ -1073,15 +1040,17 @@ gwy_unit_format_with_digits(GwyUnit *unit,
     gchar *glue, *units;
     format_unit(unit->priv, find_style_spec(style), gwy_round(log10(base)),
                 &glue, &units, FALSE);
-    g_object_set(format,
-                 "style", style,
-                 "base", base,
-                 "precision", precision,
-                 "glue", glue,
-                 "units", units,
-                 NULL);
+    GwyValueFormat *format = g_object_new(GWY_TYPE_VALUE_FORMAT,
+                                          "style", style,
+                                          "base", base,
+                                          "precision", precision,
+                                          "glue", glue,
+                                          "units", units,
+                                          NULL);
     g_free(glue);
     g_free(units);
+
+    return format;
 }
 
 /**

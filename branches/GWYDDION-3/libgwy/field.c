@@ -1322,50 +1322,50 @@ gwy_field_fill_full(GwyField *field,
  * gwy_field_format_xy:
  * @field: A two-dimensional data field.
  * @style: Output format style.
- * @format: Value format to update.
  *
  * Finds a suitable format for displaying coordinates in a data field.
  *
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_field_format_xy(const GwyField *field,
-                    GwyValueFormatStyle style,
-                    GwyValueFormat *format)
+                    GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     gdouble max0 = MAX(field->xreal, field->yreal);
     gdouble maxoff = MAX(fabs(field->xreal + field->xoff),
                          fabs(field->yreal + field->yoff));
     gdouble max = MAX(max0, maxoff);
     gdouble unit = MIN(gwy_field_dx(field), gwy_field_dy(field));
-    gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
-                                    style, max, unit, format);
+    return gwy_unit_format_with_resolution(gwy_field_get_unit_xy(field),
+                                           style, max, unit);
 }
 
 /**
  * gwy_field_format_z:
  * @field: A two-dimensional data field.
  * @style: Output format style.
- * @format: Value format to update.
  *
  * Finds a suitable format for displaying values in a data field.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_field_format_z(const GwyField *field,
-                   GwyValueFormatStyle style,
-                   GwyValueFormat *format)
+                   GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_FIELD(field));
+    g_return_val_if_fail(GWY_IS_FIELD(field), NULL);
     gdouble min, max;
     gwy_field_min_max(field, NULL, NULL, GWY_MASK_IGNORE, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
-                                style, max - min, 3, format);
+    return gwy_unit_format_with_digits(gwy_field_get_unit_z(field),
+                                       style, max - min, 3);
 }
 
 

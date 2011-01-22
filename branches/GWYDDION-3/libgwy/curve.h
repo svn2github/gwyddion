@@ -66,30 +66,28 @@ G_BEGIN_DECLS
 #define gwy_curve_assign(dest, src) \
         (gwy_serializable_assign(GWY_SERIALIZABLE(dest), GWY_SERIALIZABLE(src)))
 
-GType     gwy_curve_get_type     (void)                      G_GNUC_CONST;
-GwyCurve* gwy_curve_new          (void)                      G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_sized    (guint n)                   G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_from_data(const GwyXY *points,
-                                  guint n)                   G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_alike    (const GwyCurve *model)     G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_part     (const GwyCurve *curve,
-                                  gdouble from,
-                                  gdouble to)                G_GNUC_MALLOC;
-GwyCurve* gwy_curve_new_from_line(const GwyLine *line)       G_GNUC_MALLOC;
-void      gwy_curve_data_changed (GwyCurve *curve);
-void      gwy_curve_copy         (const GwyCurve *src,
-                                  GwyCurve *dest);
-void      gwy_curve_sort         (GwyCurve *curve);
-void      gwy_curve_set_from_line(GwyCurve *curve,
-                                  const GwyLine *line);
-GwyUnit*  gwy_curve_get_unit_x   (GwyCurve *curve)           G_GNUC_PURE;
-GwyUnit*  gwy_curve_get_unit_y   (GwyCurve *curve)           G_GNUC_PURE;
-void      gwy_curve_format_x     (GwyCurve *curve,
-                                  GwyValueFormatStyle style,
-                                  GwyValueFormat *format);
-void      gwy_curve_format_y     (GwyCurve *curve,
-                                  GwyValueFormatStyle style,
-                                  GwyValueFormat *format);
+GType           gwy_curve_get_type     (void)                      G_GNUC_CONST;
+GwyCurve*       gwy_curve_new          (void)                      G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_sized    (guint n)                   G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_from_data(const GwyXY *points,
+                                        guint n)                   G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_alike    (const GwyCurve *model)     G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_part     (const GwyCurve *curve,
+                                        gdouble from,
+                                        gdouble to)                G_GNUC_MALLOC;
+GwyCurve*       gwy_curve_new_from_line(const GwyLine *line)       G_GNUC_MALLOC;
+void            gwy_curve_data_changed (GwyCurve *curve);
+void            gwy_curve_copy         (const GwyCurve *src,
+                                        GwyCurve *dest);
+void            gwy_curve_sort         (GwyCurve *curve);
+void            gwy_curve_set_from_line(GwyCurve *curve,
+                                        const GwyLine *line);
+GwyUnit*        gwy_curve_get_unit_x   (GwyCurve *curve)           G_GNUC_PURE;
+GwyUnit*        gwy_curve_get_unit_y   (GwyCurve *curve)           G_GNUC_PURE;
+GwyValueFormat* gwy_curve_format_x     (GwyCurve *curve,
+                                        GwyValueFormatStyle style) G_GNUC_MALLOC;
+GwyValueFormat* gwy_curve_format_y     (GwyCurve *curve,
+                                        GwyValueFormatStyle style) G_GNUC_MALLOC;
 
 #define gwy_curve_index(curve, pos) \
     ((curve)->data[pos])

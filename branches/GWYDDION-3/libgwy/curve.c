@@ -670,28 +670,28 @@ gwy_curve_get_unit_y(GwyCurve *curve)
 /**
  * gwy_curve_format_x:
  * @curve: A curve.
- * @style: Output format style.
- * @format: Value format to update.
+ * @style: Value format style.
  *
  * Finds a suitable format for displaying abscissa values of a curve.
  *
  * The created format usually has a sufficient precision to represent abscissa
  * values of neighbour points as different values.  However, if the intervals
  * differ by several orders of magnitude this is not really guaranteed.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_curve_format_x(GwyCurve *curve,
-                   GwyValueFormatStyle style,
-                   GwyValueFormat *format)
+                   GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_CURVE(curve));
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     if (!curve->n)
         return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
-                                               style, 1.0, 0.1, format);
+                                               style, 1.0, 0.1);
     if (curve->n == 1) {
         gdouble m = curve->data[0].x ? fabs(curve->data[0].x) : 1.0;
         return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
-                                               style, m, m/10.0, format);
+                                               style, m, m/10.0);
     }
     gdouble max = MAX(fabs(curve->data[0].x), fabs(curve->data[curve->n-1].x));
     gdouble unit = 0.0;
@@ -701,32 +701,32 @@ gwy_curve_format_x(GwyCurve *curve,
     for (guint i = curve->n; i; i--, p++)
         unit += sqrt(p[1].x - p[0].x);
     unit /= curve->n - 1;
-    gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
-                                    style, max, unit*unit, format);
+    return gwy_unit_format_with_resolution(gwy_curve_get_unit_x(curve),
+                                           style, max, unit*unit);
 }
 
 /**
  * gwy_curve_format_y:
  * @curve: A curve.
- * @style: Output format style.
- * @format: Value format to update.
+ * @style: Value format style.
  *
  * Finds a suitable format for displaying values in a data curve.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_curve_format_y(GwyCurve *curve,
-                   GwyValueFormatStyle style,
-                   GwyValueFormat *format)
+                   GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_CURVE(curve));
+    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     gdouble min, max;
     gwy_curve_min_max(curve, &min, &max);
     if (!curve->n || max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
-                                style, max - min, 3, format);
+    return gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
+                                       style, max - min, 3);
 }
 
 

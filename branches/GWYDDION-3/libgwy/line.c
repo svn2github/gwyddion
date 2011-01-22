@@ -929,49 +929,48 @@ gwy_line_fill(GwyLine *line,
  * gwy_line_format_x:
  * @line: A one-dimensional data line.
  * @style: Output format style.
- * @format: Value format to update.
  *
  * Finds a suitable format for displaying coordinates in a data line.
  *
  * The created format has a sufficient precision to represent coordinates
  * of neighbour pixels as different values.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_line_format_x(GwyLine *line,
-                  GwyValueFormatStyle style,
-                  GwyValueFormat *format)
+                 GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble max = MAX(line->real, fabs(line->real + line->off));
     gdouble unit = gwy_line_dx(line);
-    gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
-                                    style, max, unit, format);
+    return gwy_unit_format_with_resolution(gwy_line_get_unit_x(line),
+                                           style, max, unit);
 }
 
 /**
  * gwy_line_format_y:
  * @line: A one-dimensional data line.
  * @style: Output format style.
- * @format: Value format to update.
  *
  * Finds a suitable format for displaying values in a data line.
+ *
+ * Returns: A newly created value format.
  **/
-void
+GwyValueFormat*
 gwy_line_format_y(GwyLine *line,
-                  GwyValueFormatStyle style,
-                  GwyValueFormat *format)
+                  GwyValueFormatStyle style)
 {
-    g_return_if_fail(GWY_IS_LINE(line));
+    g_return_val_if_fail(GWY_IS_LINE(line), NULL);
     gdouble min, max;
     gwy_line_min_max(line, &min, &max);
     if (max == min) {
         max = ABS(max);
         min = 0.0;
     }
-    gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
-                                style, max - min, 3, format);
+    return gwy_unit_format_with_digits(gwy_line_get_unit_y(line),
+                                       style, max - min, 3);
 }
-
 
 /**
  * SECTION: line

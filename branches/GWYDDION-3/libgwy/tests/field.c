@@ -139,8 +139,8 @@ test_field_units(void)
                      "y-real", -log(1.0 - g_rand_double(rng)),
                      NULL);
         GString *prev = g_string_new(NULL), *next = g_string_new(NULL);
-        GwyValueFormat *format = gwy_value_format_new();
-        gwy_field_format_xy(field, GWY_VALUE_FORMAT_PLAIN, format);
+        GwyValueFormat *format = gwy_field_format_xy(field,
+                                                     GWY_VALUE_FORMAT_PLAIN);
         gdouble dx = gwy_field_dx(field);
         for (gint i = 0; i <= 10; i++) {
             GWY_SWAP(GString*, prev, next);

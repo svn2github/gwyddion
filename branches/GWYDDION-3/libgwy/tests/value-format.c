@@ -29,40 +29,46 @@ void
 test_value_format_simple(void)
 {
     GwyUnit *unit = gwy_unit_new_from_string("m", NULL);
-    GwyValueFormat *format = gwy_value_format_new();
+    GwyValueFormat *format;
 
     /* Base cases */
-    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN, 1e-6, 1e-9,
-                                    format);
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-6, 1e-9);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "0.123 µm");
     g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7),
                     ==, "0.123");
+    g_object_unref(format);
 
-    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
-                                    1e-7, 1e-10, format);
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-7, 1e-10);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "123.5 nm");
     g_assert_cmpstr(gwy_value_format_print_number(format, 1.23456e-7),
                     ==, "123.5");
+    g_object_unref(format);
 
-    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
-                                    1e-7, 1e-9, format);
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-7, 1e-9);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "123 nm");
+    g_object_unref(format);
 
     /* Near-base cases, ensure values differing by step are distinguishable */
-    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
-                                    1e-7, 1.01e-10, format);
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-7, 1.01e-10);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "123.5 nm");
+    g_object_unref(format);
 
-    gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
-                                    1e-7, 0.99e-10, format);
+    format = gwy_unit_format_with_resolution(unit, GWY_VALUE_FORMAT_PLAIN,
+                                             1e-7, 0.99e-10);
     g_assert_cmpstr(gwy_value_format_print(format, 1.23456e-7),
                     ==, "123.46 nm");
+    g_object_unref(format);
 
     /* Fancy formatting with base not a power of 10 */
+    format = gwy_value_format_new();
     g_object_set(format,
                  "style", GWY_VALUE_FORMAT_PLAIN,
                  "base", G_PI/180.0,

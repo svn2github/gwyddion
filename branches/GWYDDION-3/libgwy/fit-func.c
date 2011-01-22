@@ -450,9 +450,9 @@ gwy_fit_func_param_number(GwyFitFunc *fitfunc,
  **/
 GwyUnit*
 gwy_fit_func_param_units(GwyFitFunc *fitfunc,
-                             guint i,
-                             GwyUnit *unit_x,
-                             GwyUnit *unit_y)
+                         guint i,
+                         GwyUnit *unit_x,
+                         GwyUnit *unit_y)
 {
     g_return_val_if_fail(GWY_IS_FIT_FUNC(fitfunc), NULL);
     FitFunc *priv = fitfunc->priv;
@@ -473,7 +473,9 @@ gwy_fit_func_param_units(GwyFitFunc *fitfunc,
         power_x = gwy_fit_param_get_power_x(p);
         power_y = gwy_fit_param_get_power_y(p);
     }
-    return gwy_unit_power_multiply(NULL, unit_x, power_x, unit_y, power_y);
+    GwyUnit *unit = gwy_unit_new();
+    gwy_unit_power_multiply(unit, unit_x, power_x, unit_y, power_y);
+    return unit;
 }
 
 /**
