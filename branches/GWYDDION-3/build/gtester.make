@@ -38,7 +38,7 @@ $(test_program).supp: $(test_program)$(EXEEXT)
 test-valgrind: $(test_program).supp
 	$(LIBTOOL) --mode=execute valgrind --tool=memcheck --leak-check=full \
 	    --show-reachable=no --suppressions=$(test_program).supp \
-	    --suppressions=$(test_default_suppressions) \
+	    --suppressions=$(srcdir)/$(test_default_suppressions) \
 	    --track-origins=yes --read-var-info=yes --num-callers=20 \
 	    $(test_program)$(EXEEXT) $(TEST_FLAGS)
 
