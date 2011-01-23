@@ -806,6 +806,8 @@ gwy_tune_algorithms(const gchar *key,
     g_return_if_fail(key);
     if (gwy_strequal(key, "convolution-method"))
         _gwy_tune_convolution_method(value);
+    if (gwy_strequal(key, "median-filter-method"))
+        _gwy_tune_median_filter_method(value);
     else
         g_warning("Unknown tunable parameter %s.", key);
 }

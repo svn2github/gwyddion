@@ -68,7 +68,15 @@ enum {
     CONVOLUTION_DIRECT,
     CONVOLUTION_FFT
 };
+
+enum {
+    MEDIAN_FILTER_AUTO,
+    MEDIAN_FILTER_DIRECT,
+    MEDIAN_FILTER_GSEQUENCE,
+};
+
 static guint convolution_method = CONVOLUTION_AUTO;
+static guint median_filter_method = MEDIAN_FILTER_AUTO;
 
 void
 _gwy_tune_convolution_method(const gchar *method)
@@ -82,6 +90,21 @@ _gwy_tune_convolution_method(const gchar *method)
         convolution_method = CONVOLUTION_FFT;
     else {
         g_warning("Unknown convolution method %s.", method);
+    }
+}
+
+void
+_gwy_tune_median_filter_method(const gchar *method)
+{
+    g_return_if_fail(method);
+    if (gwy_strequal(method, "auto"))
+        median_filter_method = MEDIAN_FILTER_AUTO;
+    else if (gwy_strequal(method, "direct"))
+        median_filter_method = MEDIAN_FILTER_DIRECT;
+    else if (gwy_strequal(method, "gsequence"))
+        median_filter_method = MEDIAN_FILTER_GSEQUENCE;
+    else {
+        g_warning("Unknown median filter method %s.", method);
     }
 }
 
@@ -1475,29 +1498,181 @@ gwy_field_correlate(const GwyField *field,
     gwy_field_invalidate(target);
 }
 
-/**
- * gwy_field_filter_median:
- * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @target: A two-dimensional data field where the result will be placed.
- *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
- *          the result fills the entire @target.
- * @kernel: Kernel mask defining the shape of the area of which the median
- *          is taken.  XXX: At present its content is ignored, the shape is
- *          always a rectangle of @kernel dimensions.
- * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
- *
- * Processes a field with median filter.
- **/
+/* Find the median of an array of pointers to doubles, shuffling the pointers
+ * but leaving the double values intact. */
+static gdouble
+median_from_pointers(const gdouble **array, gsize n)
+{
+    gsize lo, hi;
+    gsize median;
+    gsize middle, ll, hh;
+
+    g_return_val_if_fail(n, NAN);
+
+    lo = 0;
+    hi = n - 1;
+    median = n/2;
+    while (TRUE) {
+        if (hi <= lo)        /* One element only */
+            return *array[median];
+
+        if (hi == lo + 1) {  /* Two elements only */
+            if (*array[lo] > *array[hi])
+                GWY_SWAP(const gdouble*, array[lo], array[hi]);
+            return *array[median];
+        }
+
+        /* Find median of lo, middle and hi items; swap into position lo */
+        middle = (lo + hi)/2;
+        if (*array[middle] > *array[hi])
+            GWY_SWAP(const gdouble*, array[middle], array[hi]);
+        if (*array[lo] > *array[hi])
+            GWY_SWAP(const gdouble*, array[lo], array[hi]);
+        if (*array[middle] > *array[lo])
+            GWY_SWAP(const gdouble*, array[middle], array[lo]);
+
+        /* Swap low item (now in position middle) into position (lo+1) */
+        GWY_SWAP(const gdouble*, array[middle], array[lo + 1]);
+
+        /* Nibble from each end towards middle, swapping items when stuck */
+        ll = lo + 1;
+        hh = hi;
+        while (TRUE) {
+            do {
+                ll++;
+            } while (*array[lo] > *array[ll]);
+            do {
+                hh--;
+            } while (*array[hh] > *array[lo]);
+
+            if (hh < ll)
+                break;
+
+            GWY_SWAP(const gdouble*, array[ll], array[hh]);
+        }
+
+        /* Swap middle item (in position lo) back into correct position */
+        GWY_SWAP(const gdouble*, array[lo], array[hh]);
+
+        /* Re-set active partition */
+        if (hh <= median)
+            lo = ll;
+        if (hh >= median)
+            hi = hh - 1;
+    }
+}
+
 void
-gwy_field_filter_median(const GwyField *field,
-                        const GwyRectangle* rectangle,
+filter_median_direct(const GwyField *field,
+                     guint col, guint row,
+                     guint width, guint height,
+                     GwyField *target,
+                     guint targetcol, guint targetrow,
+                     const GwyMaskField *kernel,
+                     RectExtendFunc extend_rect,
+                     gdouble fill_value)
+{
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint kn = kxres*kyres;
+    guint xsize = xres + kxres - 1, ysize = yres + kyres - 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+    gdouble *extdata = g_new(gdouble, xsize*ysize);
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+
+    gdouble *workspace = g_new(gdouble, kn);
+    // Declare @pointers with const to get an error if something tries to
+    // modify @workspace through them.
+    const gdouble **pointers = g_new(const gdouble*, kn);
+
+    // Fill the workspace with the contents of the initial kernel.
+    for (guint ki = 0; ki < kyres; ki++) {
+        for (guint kj = 0; kj < kxres; kj++) {
+            guint k = ki*kxres + kj;
+            workspace[k] = extdata[ki*xsize + kj];
+            pointers[k] = workspace + k;
+        }
+    }
+
+    // Scan.  A bit counterintiutively, we scan by column because this means
+    // the samples added/removed to the workspace in each step form a
+    // contiguous block in a single row.
+    guint i = 0, j = 0;
+    while (TRUE) {
+        // Downward pass of the zig-zag pattern.
+        while (TRUE) {
+            // Extract the median
+            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
+            if (i == height-1)
+                break;
+
+            // Move down
+            gdouble *replrow = workspace + (i % kyres)*kxres;
+            const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
+            gwy_assign(replrow, extdatarow, kxres);
+            i++;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the bottom)
+        {
+            gdouble *replcol = workspace + (j % kxres);
+            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            for (guint ki = 0; ki < kyres; ki++)
+                replcol[ki*kxres] = extdatacol[ki*xsize];
+        }
+        j++;
+
+        // Upward pass of the zig-zag pattern.
+        while (TRUE) {
+            // Extract the median
+            targetbase[i*target->xres + j] = median_from_pointers(pointers, kn);
+            if (i == 0)
+                break;
+
+            // Move up
+            gdouble *replrow = workspace + (i % kyres)*kxres;
+            const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
+            gwy_assign(replrow, extdatarow, kxres);
+            i--;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the top)
+        {
+            gdouble *replcol = workspace + (j % kxres);
+            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            for (guint ki = 0; ki < kyres; ki++)
+                replcol[ki*kxres] = extdatacol[ki*xsize];
+        }
+        j++;
+    }
+
+    g_free(pointers);
+    g_free(workspace);
+    g_free(extdata);
+}
+
+// XXX: This is quite slow to compared to the direct method even at medium
+// sizes.  The trouble is (a) GSequence is not well suited to this specific
+// problem (b) using a generic container and comparison-by-func-call makes
+// everything take twice the time it could.
+void
+filter_median_gsequence(const GwyField *field,
+                        guint col, guint row,
+                        guint width, guint height,
                         GwyField *target,
+                        guint targetcol, guint targetrow,
                         const GwyMaskField *kernel,
-                        GwyExteriorType exterior,
+                        RectExtendFunc extend_rect,
                         gdouble fill_value)
 {
     typedef union { gdouble d; gpointer p; } DPMangle;
@@ -1508,18 +1683,6 @@ gwy_field_filter_median(const GwyField *field,
     if (sizeof(gdouble) > sizeof(gpointer))
         g_warning("A double-precission value does not fit into a pointer. "
                   "Proceeding with fingers crossed.");
-
-    guint col, row, width, height, targetcol, targetrow;
-    if (!_gwy_field_check_rectangle(field, rectangle,
-                                    &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
-        return;
-
-    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
-    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
-    if (!extend_rect)
-        return;
 
     guint xres = field->xres, yres = field->yres,
           kxres = kernel->xres, kyres = kernel->yres;
@@ -1637,6 +1800,55 @@ gwy_field_filter_median(const GwyField *field,
     g_free(iters);
     g_sequence_free(workspace);
     g_free(extdata);
+}
+
+/**
+ * gwy_field_filter_median:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
+ * @kernel: Kernel mask defining the shape of the area of which the median
+ *          is taken.  XXX: At present its content is ignored, the shape is
+ *          always a rectangle of @kernel dimensions.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ *
+ * Processes a field with median filter.
+ **/
+void
+gwy_field_filter_median(const GwyField *field,
+                        const GwyRectangle* rectangle,
+                        GwyField *target,
+                        const GwyMaskField *kernel,
+                        GwyExteriorType exterior,
+                        gdouble fill_value)
+{
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    if (median_filter_method == MEDIAN_FILTER_GSEQUENCE
+        || (median_filter_method == MEDIAN_FILTER_AUTO
+            && kernel->xres*kernel->yres > 10000))
+        filter_median_gsequence(field, col, row, width, height,
+                                target, targetcol, targetrow, kernel,
+                                extend_rect, fill_value);
+    else
+        filter_median_direct(field, col, row, width, height,
+                             target, targetcol, targetrow, kernel,
+                             extend_rect, fill_value);
 
     gwy_field_invalidate(target);
 }
