@@ -1616,6 +1616,7 @@ filter_median_direct(const GwyField *field,
             gdouble *replrow = workspace + (i % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
+            gwy_math_sort(replrow, NULL, kxres);
             i++;
         }
         if (j == width-1)
@@ -1641,6 +1642,7 @@ filter_median_direct(const GwyField *field,
             gdouble *replrow = workspace + (i % kyres)*kxres;
             const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
             gwy_assign(replrow, extdatarow, kxres);
+            gwy_math_sort(replrow, NULL, kxres);
             i--;
         }
         if (j == width-1)
