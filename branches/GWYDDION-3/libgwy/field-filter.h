@@ -82,6 +82,12 @@ void      gwy_field_filter_standard(const GwyField *field,
                                     GwyFilterType filter,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
+void      gwy_field_filter_median  (const GwyField *field,
+                                    const GwyRectangle* rectangle,
+                                    GwyField *target,
+                                    const GwyMaskField *kernel,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
 void      gwy_field_correlate      (const GwyField *field,
                                     const GwyRectangle* rectangle,
                                     GwyField *target,

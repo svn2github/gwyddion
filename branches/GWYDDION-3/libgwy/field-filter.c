@@ -1476,6 +1476,172 @@ gwy_field_correlate(const GwyField *field,
 }
 
 /**
+ * gwy_field_filter_median:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @target: A two-dimensional data field where the result will be placed.
+ *          It may be @field for an in-place modification.  Its dimensions may
+ *          match either @field or @rectangle.  In the former case the
+ *          placement of result is determined by @rectangle; in the latter case
+ *          the result fills the entire @target.
+ * @kernel: Kernel mask defining the shape of the area of which the median
+ *          is taken.  XXX: At present its content is ignored, the shape is
+ *          always a rectangle of @kernel dimensions.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ *
+ * Processes a field with median filter.
+ **/
+void
+gwy_field_filter_median(const GwyField *field,
+                        const GwyRectangle* rectangle,
+                        GwyField *target,
+                        const GwyMaskField *kernel,
+                        GwyExteriorType exterior,
+                        gdouble fill_value)
+{
+    typedef union { gdouble d; gpointer p; } DPMangle;
+    GCompareDataFunc compare = (GCompareDataFunc)&gwy_double_direct_compare;
+
+    // We can use pointers to point to the orig floating-point data instead of
+    // storing the data within the sequence directly.  But why bother.
+    if (sizeof(gdouble) > sizeof(gpointer))
+        g_warning("A double-precission value does not fit into a pointer. "
+                  "Proceeding with fingers crossed.");
+
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    guint xres = field->xres, yres = field->yres,
+          kxres = kernel->xres, kyres = kernel->yres;
+    guint xsize = xres + kxres - 1, ysize = yres + kyres - 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+    gdouble *extdata = g_new(gdouble, xsize*ysize);
+    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+
+    extend_rect(field->data, xres, extdata, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+
+    // All the really fast algorithms are, unfortunately, histogram-based and
+    // work only for tiny-precision data.
+    GSequence *workspace = g_sequence_new(NULL);
+    GSequenceIter **iters = g_new(GSequenceIter*, kxres*kyres);
+
+    // Fill the workspace with the contents of the initial kernel.
+    for (guint ki = 0; ki < kyres; ki++) {
+        for (guint kj = 0; kj < kxres; kj++) {
+            DPMangle dp = { .d = extdata[ki*xsize + kj] };
+            GSequenceIter *si = g_sequence_insert_sorted(workspace, dp.p,
+                                                         compare, NULL);
+            iters[ki*kxres + kj] = si;
+        }
+    }
+
+    // Scan.  A bit counterintiutively, we scan by column because this means
+    // the samples added/removed to the workspace in each step form a
+    // contiguous block in a single row.
+    guint medpos = kxres*kyres/2;
+    guint i = 0, j = 0;
+    while (TRUE) {
+        // Downward pass of the zig-zag pattern.
+        while (TRUE) {
+            // Extract the median
+            GSequenceIter *si = g_sequence_get_iter_at_pos(workspace, medpos);
+            DPMangle dp = { .p = g_sequence_get(si) };
+            //g_printerr("[%u][%u] %g %p\n", j, i, dp.d, dp.p);
+            targetbase[i*target->xres + j] = dp.d;
+            if (i == height-1)
+                break;
+
+            // Move down
+            GSequenceIter **replrow = iters + (i % kyres)*kxres;
+            for (guint kj = 0; kj < kxres; kj++)
+                g_sequence_remove(replrow[kj]);
+            const gdouble *extdatarow = extdata + (i + kyres)*xsize + j;
+            for (guint kj = 0; kj < kxres; kj++) {
+                dp.d = extdatarow[kj];
+                replrow[kj] = g_sequence_insert_sorted(workspace, dp.p,
+                                                       compare, NULL);
+            }
+            i++;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the bottom)
+        {
+            GSequenceIter **replcol = iters + (j % kxres);
+            for (guint ki = 0; ki < kyres; ki++)
+                g_sequence_remove(replcol[ki*kxres]);
+            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            for (guint ki = 0; ki < kyres; ki++) {
+                DPMangle dp = { .d = extdatacol[ki*xsize] };
+                replcol[ki*kxres] = g_sequence_insert_sorted(workspace, dp.p,
+                                                             compare, NULL);
+            }
+        }
+        j++;
+
+        // Upward pass of the zig-zag pattern.
+        while (TRUE) {
+            // Extract the median
+            GSequenceIter *si = g_sequence_get_iter_at_pos(workspace, medpos);
+            DPMangle dp = { .p = g_sequence_get(si) };
+            //g_printerr("[%u][%u] %g %p\n", j, i, dp.d, dp.p);
+            targetbase[i*target->xres + j] = dp.d;
+            if (i == 0)
+                break;
+
+            // Move up
+            GSequenceIter **replrow = iters + (i % kyres)*kxres;
+            for (guint kj = 0; kj < kxres; kj++)
+                g_sequence_remove(replrow[kj]);
+            const gdouble *extdatarow = extdata + (i - 1)*xsize + j;
+            for (guint kj = 0; kj < kxres; kj++) {
+                dp.d = extdatarow[kj];
+                replrow[kj] = g_sequence_insert_sorted(workspace, dp.p,
+                                                       compare, NULL);
+            }
+            i--;
+        }
+        if (j == width-1)
+            break;
+
+        // Move right (at the top)
+        {
+            GSequenceIter **replcol = iters + (j % kxres);
+            for (guint ki = 0; ki < kyres; ki++)
+                g_sequence_remove(replcol[ki*kxres]);
+            const gdouble *extdatacol = extdata + (i*xsize + j + kxres);
+            for (guint ki = 0; ki < kyres; ki++) {
+                DPMangle dp = { .d = extdatacol[ki*xsize] };
+                replcol[ki*kxres] = g_sequence_insert_sorted(workspace, dp.p,
+                                                             compare, NULL);
+            }
+        }
+        j++;
+    }
+
+    g_free(iters);
+    g_sequence_free(workspace);
+    g_free(extdata);
+
+    gwy_field_invalidate(target);
+}
+
+/**
  * SECTION: field-filter
  * @section_id: GwyField-filter
  * @title: GwyField filtering
