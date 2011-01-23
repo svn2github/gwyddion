@@ -1,0 +1,297 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: simple-field-format.xml 11263 2010-03-30 13:03:25Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                      'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='gsf'>
+  <title>Fichiers à Champ Simple</title>
+  <para>
+    Le <link linkend='gwyfile-format'>format Gwyddion natif</link> contient
+    toutes les informations et états que Gwyddion doit sauver, il est par
+    conséquent assez complexe. Il est en général peu pratique de sauver des
+    fichiers au format <filename>.gwy</filename> pour des logiciels tiers ou
+    pour des scripts générant des données pour Gwyddion.
+  </para>
+  <para>
+    Le format Gwyddion à Champ Simple (<filename>.gsf</filename>, Gwyddion 
+    Simple Field) peut être utilisé dans ce genre de situation. Il s'agit
+    d'un format à un seul canal pur des données 2D, qui a été conçu de manière
+    à être simple et efficace à lire et écrire, avec un en-tête facilement
+    lisible, suffisamment expressif, et ne nécessitant pas de champs spécifiques
+    à un instrument ou une application (il peut toutefois les supporter de 
+    manière optionnelle).
+  </para>
+  <para>
+    Le format GSF peut être lu ou écrit à partir de la version 2.20.
+  </para>
+  <sect2 id='gsf-overall-structure'>
+    <title>Structure générale</title>
+    <para>
+      Un fichier GSF consiste en quatre parties, dans l'ordre suivant :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-magic-line'>ligne magique</link>
+        </term>
+        <listitem>
+          <para>
+            Le fichier commence par une <quote>ligne magique</quote> qui permet
+            d'identifier le type de fichier.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-text-header'>texte d'en-tête</link>
+        </term>
+        <listitem>
+          <para>
+            L'en-tête est constitué de lignes sous la forme
+            <informalexample>
+              <programlisting><replaceable>nom</replaceable> = <replaceable>valeur</replaceable></programlisting>
+            </informalexample>
+            permet de définir différents paramètres.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-zero-padding'>remplissage par octets NUL</link>
+        </term>
+        <listitem>
+          <para>
+            L'en-tête se termine par un à quatre octets NUL, permettant 
+            d'aligner le début des données sur un multiples de 4.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <link linkend='gsf-binary-data'>données binaires</link>
+        </term>
+        <listitem>
+          <para>
+            Les données binaires sont données au format 32 bits à virgule
+            flottante.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+  <sect2 id='gsf-magic-line'>
+    <title>Ligne magique</title>
+    <para>
+      Les fichiers GSF démarrent avec la ligne
+      <informalexample>
+        <programlisting>Gwyddion Simple Field 1.0</programlisting>
+      </informalexample>
+      terminé par le caractère saut de ligne (<literal>\n</literal>, ASCII 0x0a).
+    </para>
+  </sect2>
+  <sect2 id='gsf-text-header'>
+    <title>Texte d'en-tête</title>
+    <para>
+      Chaque ligne d'en-tête est données sous la forme
+      <programlisting><replaceable>nom</replaceable> = <replaceable>valeur</replaceable></programlisting>
+      dans laquelle tout espace avant le nom, autour du signe égal, et en fin de
+      ligne est ignoré. Les noms des champs sont sensibles à la casse et suivent
+      les règles usuelles des langages de programmation concernant les 
+      identifiants.
+    </para>
+    <para>
+      De la même manière que pour la ligne magique, les lignes d'en-tête se 
+      terminent par le caractère saut de ligne, comme utilisé sur les système 
+      Unix. Cela signifie que l'en-tête doit être lu et écrit en mode binaire
+      pour garantir la préservation des caractères de fin de ligne sur d'autres
+      systèmes d'exploitation (et ne pas changer la taille de l'en-tête, par 
+      exemple par une transformation LF → CRLF).
+    </para>
+    <para>
+      Tous caractères non ASCII pouvant apparaître par exemple dans le titre des
+      données sont encodés au format UTF-8. Le caractère NUL ne peut apparaître 
+      dans l'en-tête.
+    </para>
+    <para>
+      Champs d'en-tête :
+    </para>
+    <informaltable frame='none' id='gsf-mandatory-header-fields'>
+      <tgroup cols='3' align='left'>
+        <?dblatex llX?>
+        <thead>
+          <row>
+            <entry>Nom</entry>
+            <entry>Type</entry>
+            <entry>Valeur</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><literal>XRes</literal></entry>
+            <entry>Obligatoire</entry>
+            <entry>
+              Taille horizontale en pixels, entier positif.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YRes</literal></entry>
+            <entry>Obligatoire</entry>
+            <entry>
+              Taille verticale en pixels, entier positif.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XReal</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Taille horizontale en unités physiques (données par
+              <literal>XYUnits</literal>), nombre positif en virgule flottante.
+              Il vaut par défaut 1.0 s'il n'est pas précisé.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YReal</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Taille verticale en unités physiques (données par
+              <literal>XYUnits</literal>), nombre positif en virgule flottante.
+              Il vaut par défaut 1.0 s'il n'est pas précisé.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XOffset</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Décalage horizontal en unités physiques (données par
+              <literal>XYUnits</literal>), nombre en virgule flottante.
+              Il vaut par défaut 0.0 s'il n'est pas précisé.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>YOffset</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Décalage vertical en unités physiques (données par
+              <literal>XYUnits</literal>), nombre en virgule flottante.
+              Il vaut par défaut 0.0 s'il n'est pas précisé.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>Titre</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Titre des données du canal. Il n'y a pas de valeur par défaut, les
+              applications peuvent afficher ‘Inconnu’ ou quelque chose de 
+              similaire s'il n'est pas donné.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>XYUnits</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Unités latérales, i.e. les unités physiques des dimensions et des
+              décalages. Elle doivent être données en unités de base, 
+              c'est-à-dire <literal>m</literal> ou <literal>A</literal> sans 
+              préfixe en puissance de 10 (Gwyddion peut le gérer mais cela
+              pourrait poser un problème pour d'autres logiciels).
+              Il n'y a pas d'unité par défaut. Cela signifie que pour des 
+              données SPM vous spécifierez normalement <literal>m</literal>  
+              pour <literal>XYUnits</literal> car les dimensions latérales sont
+              en mètres.
+            </entry>
+          </row>
+          <row>
+            <entry><literal>ZUnits</literal></entry>
+            <entry>Optionnel</entry>
+            <entry>
+              Unités de hauteur, i.e. des valeurs des données. Voir
+              <literal>XYUnits</literal> ci-dessus pour plus de détails.
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>
+      Les nombres en virgule flottante peuvent être donnés au format 
+      scientifique, par exemple <literal>1.23e-4</literal>. Ils doivent être
+      donnés selon le standard C/POSIX, i.e. le point est utilisé comme 
+      séparateur de décimale (et non la virgule ou d'autres séparateurs).
+    </para>
+    <para>
+      L'en-tête peut contenir d'autres champs, en plus de ceux listés
+      précédemment. Gwyddion les chargera dans les 
+      <link linkend='metadata'>metadonnées</link>.
+      Les champs les plus communs peuvent être par exemple
+       <literal>Commentaire</literal>,
+      <literal>Date</literal> ou <literal>Direction</literal>.
+    </para>
+    <para>
+      Les champs peuvent être donnés dans n'importe quel ordre, il est toutefois
+      recommandé de démarrer avec les champs oligatoires, puis continuer avec 
+      champs optionnels et enfin terminer avec les champs utilisateur.
+    </para>
+    <para>
+      Voici un exemple d'en-tête simple (incluant aussi la ligne magique) :
+    </para>
+    <informalexample>
+      <programlisting>Gwyddion Simple Field 1.0
+XRes = 400
+YRes = 400
+XReal = 5e-05
+YReal = 5e-05
+XYUnits = m
+ZUnits = V
+Title = ADC2</programlisting>
+    </informalexample>
+  </sect2>
+  <sect2 id='gsf-zero-padding'>
+    <title>Remplissage par octets NUL</title>
+    <para>
+      Le texte d'en-tête est suivi de un à quatre octets NUL (<literal>\0</literal>,
+      ASCII 0x00) qui (a) le termine et (b) aligne le début des données avec
+      un décalage par rapport au début de fichier égal à un multiple de 4. Plus
+      précisément, soit <xi:include href='eqi-N.xml'/> la longueur totale de la
+      ligne magique et du texte d'en-tête, les données débutent au multiple de 
+      4 supérieur à <xi:include href='eqi-N.xml'/> le plus proche.
+    </para>
+    <para>
+      Ce remplissage au multiple de 4 garantit un alignement de l'accès mémoire
+      lorsque le fichier est mis en mémoire. Le nombre d'octets NUL est 
+      uniquement déterminé par le reste de la longueur modulo quatre
+      (<xi:include href='eqi-N-mod-4.xml'/>):
+    </para>
+    <informaltable frame='none' id='gsf-zero-padding-table'>
+      <tgroup cols='2' align='left'>
+        <?dblatex ll?>
+        <thead>
+          <row>
+            <entry>Rest</entry>
+            <entry>Nombre d'octets NUL</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row><entry>0</entry><entry>4</entry></row>
+          <row><entry>1</entry><entry>3</entry></row>
+          <row><entry>2</entry><entry>2</entry></row>
+          <row><entry>3</entry><entry>1</entry></row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect2>
+  <sect2 id='gsf-binary-data'>
+    <title>Données binaires</title>
+    <para>
+      Les valeurs des données sont enregistrées en virgule flottante simple
+      précision IEEE 32bit, avec un arrangement des octets petit-boutiste 
+      (LSB ou Intel). Les valeurs sont enreigistrées par ligne, en allant du 
+      haut vers le bas, chanque ligne allant de gauche à droite.
+    </para>
+    <para>
+      L'unité physique de ces valeurs est donnée par <literal>ZUnits</literal>.
+    </para>
+    <para>
+      La tailles des données de l'image vaut exactement 
+      <literal>4*XRes*YRes</literal> et il n'y a aucune données après celles-ci.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
