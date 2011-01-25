@@ -96,7 +96,7 @@
         <ulink url='http://sourceforge.net/projects/gwyddion/files/mingw32-cross-compile/'>Gwyddion SourceForge pages</ulink>.
         Build binary packages using <command>rpmbuild</command>:
         <informalexample>
-          <literallayout><userinput>rpmbuild -bb mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
+          <literallayout><userinput>rpmbuild --rebuild mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
         </informalexample>
         replacing the file name with the name of the downloaded file.  The
         created package can then be installed as root:
