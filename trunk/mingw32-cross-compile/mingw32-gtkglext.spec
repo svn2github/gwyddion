@@ -7,7 +7,7 @@
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -22,7 +22,7 @@ BuildArch:      noarch
 BuildRequires:  mingw32-filesystem >= 52
 BuildRequires:  mingw32-gcc
 BuildRequires:  mingw32-binutils
-BuildRequires:  mingw32-dlfcn
+BuildRequires:  mingw32-dlcfn
 BuildRequires:  mingw32-gtk2
 BuildRequires:  mingw32-glib2
 BuildRequires:  mingw32-w32api
