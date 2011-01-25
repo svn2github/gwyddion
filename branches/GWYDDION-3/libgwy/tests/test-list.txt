@@ -6,6 +6,8 @@ str/next-line
 str/isident/ascii
 str/isident/utf8
 pack
+math/powi/actual
+math/powi/our
 math/sort
 math/median
 math/cholesky
