@@ -7,7 +7,7 @@
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -15,6 +15,7 @@ Group:          Development/Libraries
 URL:            http://gtkglext.sourceforge.net/
 Source0:        http://dl.sourceforge.net/sourceforge/gtkglext/gtkglext-%{version}.tar.bz2
 Patch0:         gtkglext-1.2.0-nox.patch
+Patch1:         gtkglext-1.2.0-deprecated.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -28,6 +29,9 @@ BuildRequires:  mingw32-glib2
 BuildRequires:  mingw32-w32api
 
 BuildRequires:  pkgconfig
+BuildRequires:  autoconf
+BuildRequires:  automake
+BuildRequires:  libtool
 # Native version required for glib-genmarshal
 # FIXME: Is it actually used?
 BuildRequires:  glib2-devel
@@ -44,15 +48,16 @@ MinGW Windows GtkGLExt library.
 %prep
 %setup -q -n gtkglext-%{version}
 %patch0 -p1 -b .nox
+%patch1 -p1 -b .deprecated
 
 
 %build
 # patch0 patched configure.in
 libtoolize --automake --force
-aclocal -I m4
+aclocal
 automake --add-missing --force
 autoconf
-%{_mingw32_configure} --enable-shared --disable-static --disable-gtkdoc --disable-glibtest --disable-gtktest
+%{_mingw32_configure} --enable-shared --disable-static --disable-gtk-doc --disable-glibtest --disable-gtktest
 make %{?_smp_mflags}
 
 
@@ -88,5 +93,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jan 25 2011 Yeti <yeti@gwyddion.net> - 1.2.0-2
+- Updated to build with modern Gtk+
+- Corrected gtkdoc typo
+
 * Tue Nov 23 2010 Yeti <yeti@gwyddion.net> - 1.2.0-1
 - Created
