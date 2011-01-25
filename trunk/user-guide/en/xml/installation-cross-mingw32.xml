@@ -98,8 +98,10 @@
         <informalexample>
           <literallayout><userinput>rpmbuild --rebuild mingw32-fftw-3.2.2-1.src.rpm</userinput></literallayout>
         </informalexample>
-        replacing the file name with the name of the downloaded file.  The
-        created package can then be installed as root:
+        replacing the file name with the name of the downloaded file.  If the
+        <command>rpmbuild</command> command complains about missing dependences install
+        them using <command>yum install</command> as before.  The created
+        package can then be installed as root:
         <informalexample>
           <literallayout><userinput>yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
         </informalexample>
