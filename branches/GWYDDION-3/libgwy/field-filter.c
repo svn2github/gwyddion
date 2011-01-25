@@ -1562,7 +1562,7 @@ median_from_pointers(const gdouble **array, gsize n)
     }
 }
 
-void
+static void
 filter_median_direct(const GwyField *field,
                      guint col, guint row,
                      guint width, guint height,
@@ -1667,7 +1667,7 @@ filter_median_direct(const GwyField *field,
 // sizes.  The trouble is (a) GSequence is not well suited to this specific
 // problem (b) using a generic container and comparison-by-func-call makes
 // everything take twice the time it could.
-void
+static void
 filter_median_gsequence(const GwyField *field,
                         guint col, guint row,
                         guint width, guint height,
