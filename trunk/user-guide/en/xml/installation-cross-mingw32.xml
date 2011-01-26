@@ -16,9 +16,11 @@
     These instructions describe compilation under
     <ulink url='http://fedoraproject.org/'>Fedora</ulink> using its
     <ulink url='http://fedoraproject.org/wiki/SIGs/MinGW'>MinGW cross-compilation
-      support</ulink> as this is what Gwyddion developers use.  Compilation in other
-    distributions or in native MinGW should be also possible – reports of success (or
-    failure) and additions to these instructions for other systems are welcome.
+      support</ulink> as this is what Gwyddion developers use.  Instructions for
+    <ulink url='http://opensuse.org/'>openSUSE</ulink> are also provided.
+    Compilation in other distributions or in native MinGW should be also
+    possible – reports of success (or failure) and additions to these
+    instructions for other systems are welcome.
   </para>
   <para>
     Full cross-compilation has the following steps:
@@ -42,9 +44,20 @@
     <sect3 id='installation-cross-mingw32-setup-base'>
       <title>Base MinGW32 Packages</title>
       <para>
+        On Fedora, everything is in the default <quote>Everything</quote>
+        repository.  On openSUSE, it is necessary to add additional package
+        repositories <filename>windows:mingw:win32/openSUSE_11.3</filename> and
+        <filename>devel:tools/openSUSE_11.3</filename>, where 11.3 is of course to
+        be replaced with the actual openSUSE version.
+      </para>
+      <para>
         Run as root:
         <informalexample>
-          <literallayout><userinput>yum install mingw32-{gcc-c++,gtk2,libxml2}</userinput></literallayout>
+          <literallayout><userinput># Fedora
+yum install mingw32-{gcc-c++,gtk2,libxml2}
+
+# openSUSE
+zypper install mingw32-{cross-gcc,cross-gcc-c++,cross-pkg-config,gtk2-devel,libxml2-devel,fftw3-devel}</userinput></literallayout>
         </informalexample>
         to install the necessary mingw32 packages (several more packages will
         be installed as dependencies of those explicitly given here).
@@ -54,14 +67,19 @@
       <title>Wine</title>
       <para>
         Wine is the MS Windows compatibility layer/emulator for Unix.  It is
-        used to run NSIS that creates the Gwyddion Windows installer.  Wine can
-        also be used to run and test the cross-compiled Gwyddion, as described
-        below.
+        used to run NSIS that creates the executable Gwyddion Windows
+        installer.  Wine can also be used to run and test the cross-compiled
+        Gwyddion, as <link linkend='installation-cross-mingw32-running'>described
+          below</link>.
       </para>
       <para>
         Run
         <informalexample>
-          <literallayout><userinput>yum install wine</userinput></literallayout>
+          <literallayout><userinput># Fedora
+yum install wine
+
+# openSUSE
+zypper install wine</userinput></literallayout>
         </informalexample>
         to install Wine.
       </para>
@@ -86,9 +104,10 @@
       <title>Extra MinGW32 Packages</title>
       <para>
         The official Gwyddion packages utilise additional libraries that are
-        not available in the Fedora MinGW environment, namely GtkGLExt and
-        FFTW.  They can be omitted though you will have to modify some scripts
-        if you do so.
+        not available in the Fedora and/or openSUSE MinGW environment, namely
+        GtkGLExt and FFTW.  They can be omitted though you will have to modify
+        some scripts if you do so.  At the time of writing this, Fedora lacks
+        both packages while openSuSE lacks only GtkGLExt.
       </para>
       <para>
         The source packages <filename>mingw32-fftw</filename> and
@@ -106,8 +125,8 @@
           <literallayout><userinput>yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
         </informalexample>
         The same applies to <filename>mingw32-gtkglext</filename> (all built
-        RPMs can be installed at once with a single <command>yum</command>
-        invocation).
+        RPMs can be installed at once with a single <command>yum</command> or
+        <command>zypper</command> invocation).
       </para>
       <para>
         If you have never built any RPM the package building support has to be
@@ -153,9 +172,12 @@ nsis_compiler=C:\\Program\ Files\ \(x86\)\\NSIS\\makensis.exe</programlisting>
         The default value should be reasonable and you do not need to change it
         unless you want to.  The remaining two variables,
         <varname>mingw32_prefix</varname> and <varname>nsis_compiler</varname>,
-        specify the location of MinGW files and NSIS compiler, respectively,
-        and they do not need to be changed from the default values under normal
-        circumstances.  Note <filename>setup</filename> is read by shell so
+        specify the location of MinGW files and NSIS compiler, respectively.
+        They do not need to be changed from the default values under normal
+        circumstances although NSIS can be installed in either
+        <filename>Program Files (x86)</filename> or
+        <filename>Program Files</filename> by default depending on Wine
+        configuration. Note <filename>setup</filename> is read by shell so
         there must not be any spaces around <literal>=</literal>.
       </para>
     </sect3>
