@@ -22,10 +22,14 @@
 #ifndef __LIBGWY_MATH_INTERNAL_H__
 #define __LIBGWY_MATH_INTERNAL_H__
 
+#include <complex.h>
+
 G_BEGIN_DECLS
 
 #define SLi gwy_lower_triangular_matrix_index
 #define MATRIX_LEN gwy_triangular_matrix_length
+
+typedef complex double gwycomplex;
 
 G_GNUC_INTERNAL
 guint _gwy_fft_rigour(void);
