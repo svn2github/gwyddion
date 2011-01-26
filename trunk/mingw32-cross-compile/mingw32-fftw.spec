@@ -1,13 +1,22 @@
+%{expand:%global distro_is_redhat %(test ! -f /etc/redhat-release; echo $?)}
+%{expand:%global distro_is_suse %(test ! -f /etc/SuSE-release; echo $?)}
+
 %global __strip %{_mingw32_strip}
 %global __objdump %{_mingw32_objdump}
 %global _use_internal_dependency_generator 0
 %global __find_requires %{_mingw32_findrequires}
 %global __find_provides %{_mingw32_findprovides}
+%if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
+%endif
+%if %{distro_is_suse}
+%define __os_install_post %{_mingw32_debug_install_post} \
+                          %{_mingw32_install_post}
+%endif
 
 Name:           mingw32-fftw
 Version:        3.2.2
-Release:        1%{?dist}
+Release:        2
 Summary:        MinGW Windows FFTW library
 
 License:        GPLv2+
@@ -19,9 +28,16 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 BuildRequires:  mingw32-filesystem >= 52
+%if %{distro_is_redhat}
 BuildRequires:  mingw32-gcc
 BuildRequires:  mingw32-binutils
 BuildRequires:  mingw32-w32api
+%endif
+%if %{distro_is_suse}
+BuildRequires:  mingw32-cross-gcc
+BuildRequires:  mingw32-cross-binutils
+BuildRequires:  mingw32-headers
+%endif
 
 
 %description
@@ -60,7 +76,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mingw32_bindir}/fftw-wisdom-to-conf
 %{_mingw32_bindir}/fftw-wisdom.exe
 %{_mingw32_includedir}/fftw3.h
+# Apparently Fedora leaves the .la files there.  Not sure if they are necessary.
+%if %{distro_is_redhat}
 %{_mingw32_libdir}/libfftw3.la
+%endif
 %{_mingw32_libdir}/libfftw3.dll.a
 %{_mingw32_libdir}/pkgconfig/fftw3.pc
 

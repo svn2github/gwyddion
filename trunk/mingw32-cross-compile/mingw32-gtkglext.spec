@@ -1,13 +1,22 @@
+%{expand:%global distro_is_redhat %(test ! -f /etc/redhat-release; echo $?)}
+%{expand:%global distro_is_suse %(test ! -f /etc/SuSE-release; echo $?)}
+
 %global __strip %{_mingw32_strip}
 %global __objdump %{_mingw32_objdump}
 %global _use_internal_dependency_generator 0
 %global __find_requires %{_mingw32_findrequires}
 %global __find_provides %{_mingw32_findprovides}
+%if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
+%endif
+%if %{distro_is_suse}
+%define __os_install_post %{_mingw32_debug_install_post} \
+                          %{_mingw32_install_post}
+%endif
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        2%{?dist}
+Release:        3
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -21,12 +30,21 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 BuildRequires:  mingw32-filesystem >= 52
+BuildRequires:  mingw32-gtk2
+BuildRequires:  mingw32-atk
+BuildRequires:  mingw32-glib2
+%if %{distro_is_redhat}
 BuildRequires:  mingw32-gcc
 BuildRequires:  mingw32-binutils
 BuildRequires:  mingw32-dlfcn
-BuildRequires:  mingw32-gtk2
-BuildRequires:  mingw32-glib2
 BuildRequires:  mingw32-w32api
+%endif
+%if %{distro_is_suse}
+BuildRequires:  mingw32-cross-gcc
+BuildRequires:  mingw32-cross-binutils
+BuildRequires:  mingw32-cross-pkg-config
+BuildRequires:  mingw32-headers
+%endif
 
 BuildRequires:  pkgconfig
 BuildRequires:  autoconf
@@ -84,8 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_mingw32_libdir}/libgdkglext-win32-1.0.dll.a
 %{_mingw32_libdir}/gtkglext-1.0
 %{_mingw32_libdir}/libgtkglext-win32-1.0.dll.a
+# Apparently Fedora leaves the .la files there.  Not sure if they are necessary.
+%if %{distro_is_redhat}
 %{_mingw32_libdir}/libgdkglext-win32-1.0.la
 %{_mingw32_libdir}/libgtkglext-win32-1.0.la
+%endif
 %{_mingw32_libdir}/pkgconfig/gtkglext-1.0.pc
 %{_mingw32_libdir}/pkgconfig/gdkglext-1.0.pc
 %{_mingw32_libdir}/pkgconfig/gdkglext-win32-1.0.pc
