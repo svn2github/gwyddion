@@ -135,17 +135,19 @@
           <guimenuitem>Tilt</guimenuitem>
         </menuchoice>.
       </listitem>
+      <listitem id='dimensions-and-units'>
+        Change physical dimensions, units or value scales and also lateral
+        offsets using
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic operations</guisubmenu>
+          <guimenuitem>Dimensions and Units</guimenuitem>
+        </menuchoice>.
+        This is useful to correct raw data that have been imported with wrong
+        physical scales or as a simple manual recalibration of dimensions and
+        values.
+      </listitem>
     </itemizedlist>
-    <para id='calibrate'>
-      Moreover, the recalibration module can be used for changing the physical
-      dimensions, data value calibration and even to change the units of
-      values and lateral dimensions:
-      <menuchoice>
-        <guimenu>Data Process</guimenu>
-        <guisubmenu>Basic operations</guisubmenu>
-        <guimenuitem>Calibrate</guimenuitem>
-      </menuchoice>.
-    </para>
   </sect2>
   <sect2 id='basic-value-reading'>
     <title>Reading Values</title>
