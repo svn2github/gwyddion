@@ -114,6 +114,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jan 26 2011 Yeti <yeti@gwyddion.net> - 1.2.0-3
+- Modified to build on openSUSE
+
 * Tue Jan 25 2011 Yeti <yeti@gwyddion.net> - 1.2.0-2
 - Updated to build with modern Gtk+
 - Corrected gtkdoc typo

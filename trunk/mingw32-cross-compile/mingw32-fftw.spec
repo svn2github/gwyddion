@@ -85,5 +85,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jan 26 2011 Yeti <yeti@gwyddion.net> - 3.2.2-2
+- Modified to build on openSUSE
+
 * Tue Nov 23 2010 Yeti <yeti@gwyddion.net> - 3.2.2-1
 - Created
