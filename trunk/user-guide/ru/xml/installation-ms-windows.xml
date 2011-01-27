@@ -47,9 +47,7 @@
       <listitem>Язык интерфейса пользователя Gwyddion, выбранный при установке (точнее, задание локали, которое в том числе определяет и язык). Можно изменить его используя <command>regedit</command> чтобы выбрать другой язык как описано ниже.</listitem>
     </varlistentry>
   </variablelist>
-  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:
-  </para>
-  <para>
+  <para>Список доступных языков и соответствующих значений <literal>Locale</literal> включает:</para>
   <informaltable frame="none" id="table-locales">
     <tgroup cols="2">
       <?dblatex ll?>
@@ -87,6 +85,6 @@
       </tbody>
     </tgroup>
   </informaltable>
-  </para>
+  <para>Если вы хотите удалить Gwyddion, перейдите в <menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Установка и удаление программ</guimenuitem></menuchoice> (<menuchoice><guimenu>Пуск</guimenu><guisubmenu>Панель управления</guisubmenu><guimenuitem>Программы и компоненты</guimenuitem></menuchoice> в некоторых версиях Windows) и выберите <application>Gwyddion</application>. Этот путь может отличаться в других версиях Windows.</para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
