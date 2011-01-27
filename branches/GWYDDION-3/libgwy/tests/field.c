@@ -2883,6 +2883,37 @@ test_field_filter_standard_step(void)
     g_object_unref(patline);
 }
 
+void
+test_field_filter_standard_dechecker(void)
+{
+    guint res = 66;
+
+    // A smooth function
+    GwyField *source = gwy_field_new_sized(66, 66, FALSE);
+    for (guint i = 0; i < res; i++) {
+        for (guint j = 0; j < res; j++) {
+            gdouble x = 2.0*G_PI*(j + 0.5)/res, y = 2.0*G_PI*(i + 0.5)/res;
+            source->data[i*res + j] = cos(x)*cos(y);
+        }
+    }
+
+    // With checker pattern added
+    GwyField *field = gwy_field_duplicate(source);
+    for (guint i = 0; i < res; i++) {
+        for (guint j = 0; j < res; j++)
+            field->data[i*res + j] += (i + j) % 2 ? 1 : -1;
+    }
+    gwy_field_invalidate(field);
+
+    gwy_field_filter_standard(field, NULL, field, GWY_FILTER_DECHECKER,
+                              GWY_EXTERIOR_PERIODIC, 0.0);
+    // Large tolerance, the reconstruction is approximate
+    field_assert_numerically_equal(field, source, 3e-4);
+
+    g_object_unref(field);
+    g_object_unref(source);
+}
+
 static void
 fit_gaussian_psdf(const GwyLine *psdf,
                   gdouble *sigma,

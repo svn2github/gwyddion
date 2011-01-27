@@ -140,6 +140,7 @@ field/filter/standard/sobel
 field/filter/standard/prewitt
 field/filter/standard/scharr
 field/filter/standard/step
+field/filter/standard/dechecker
 field/distributions/acf/full
 field/distributions/acf/masked
 field/distributions/acf/partial
