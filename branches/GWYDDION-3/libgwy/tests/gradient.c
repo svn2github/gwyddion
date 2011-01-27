@@ -184,8 +184,11 @@ test_gradient_serialize(void)
     g_assert_cmpint(memcmp(&pt, &gradient_point_blue1,
                            sizeof(GwyGradientPoint)), ==, 0);
 
+    serializable_duplicate(GWY_SERIALIZABLE(gradient), NULL);
+    serializable_assign(GWY_SERIALIZABLE(gradient), NULL);
+
     GwyGradient *newgradient
-        = (GwyGradient*)serialize_and_back(G_OBJECT(gradient));
+        = (GwyGradient*)serialize_and_back(G_OBJECT(gradient), NULL);
     GwyResource *newresource = GWY_RESOURCE(newgradient);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Red-Blue");
 

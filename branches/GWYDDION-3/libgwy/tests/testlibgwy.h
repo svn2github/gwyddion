@@ -30,11 +30,20 @@
 
 #define TEST_DATA_DIR "_testdata"
 
+typedef void (*CompareObjectDataFunc)(GObject *object, GObject *reference);
+
 // Helpers
 void          dump_error_list               (GwyErrorList *error_list);
-GObject*      serialize_and_back            (GObject *object);
+gboolean      values_are_equal              (const GValue *value1,
+                                             const GValue *value2);
+GObject*      serialize_and_back            (GObject *object,
+                                             CompareObjectDataFunc compare);
 gboolean      compare_properties            (GObject *object,
                                              GObject *reference);
+void          serializable_duplicate        (GwySerializable *serializable,
+                                             CompareObjectDataFunc compare);
+void          serializable_assign           (GwySerializable *serializable,
+                                             CompareObjectDataFunc compare);
 gpointer      serialize_boxed_and_back      (gpointer boxed,
                                              GType type);
 void          record_item_change            (GObject *object,

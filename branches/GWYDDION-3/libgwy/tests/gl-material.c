@@ -200,8 +200,11 @@ test_gl_material_serialize(void)
     gwy_gl_material_set_emission(gl_material, &green);
     gwy_gl_material_set_shininess(gl_material, 0.67);
 
+    serializable_duplicate(GWY_SERIALIZABLE(gl_material), NULL);
+    serializable_assign(GWY_SERIALIZABLE(gl_material), NULL);
+
     GwyGLMaterial *newgl_material
-        = (GwyGLMaterial*)serialize_and_back(G_OBJECT(gl_material));
+        = (GwyGLMaterial*)serialize_and_back(G_OBJECT(gl_material), NULL);
     GwyResource *newresource = GWY_RESOURCE(newgl_material);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "WRBG");
 

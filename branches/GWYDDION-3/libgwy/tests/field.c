@@ -53,6 +53,12 @@ field_assert_equal(const GwyField *result,
     }
 }
 
+static void
+field_assert_equal_object(GObject *object, GObject *reference)
+{
+    field_assert_equal(GWY_FIELD(object), GWY_FIELD(reference));
+}
+
 void
 field_assert_numerically_equal(const GwyField *result,
                                const GwyField *reference,
@@ -180,17 +186,12 @@ test_field_serialize(void)
         field_randomize(original, rng);
         GwyField *copy;
 
-        copy = gwy_field_duplicate(original);
-        field_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = gwy_field_new();
-        gwy_field_assign(copy, original);
-        field_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = GWY_FIELD(serialize_and_back(G_OBJECT(original)));
-        field_assert_equal(copy, original);
+        serializable_duplicate(GWY_SERIALIZABLE(original),
+                               field_assert_equal_object);
+        serializable_assign(GWY_SERIALIZABLE(original),
+                            field_assert_equal_object);
+        copy = GWY_FIELD(serialize_and_back(G_OBJECT(original),
+                                            field_assert_equal_object));
         g_object_unref(copy);
 
         g_object_unref(original);

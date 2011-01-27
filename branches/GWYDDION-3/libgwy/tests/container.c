@@ -237,6 +237,34 @@ test_container_refcount(void)
     g_object_unref(st2);
 }
 
+static void
+check_value(GQuark key, const GValue *value, gpointer user_data)
+{
+    GwyContainer *reference = (GwyContainer*)user_data;
+    g_assert(gwy_container_contains(reference, key));
+
+    GValue refvalue;
+    gwy_clear(&refvalue, 1);
+    gwy_container_get_value(reference, key, &refvalue);
+    g_assert(values_are_equal(value, &refvalue));
+    g_value_unset(&refvalue);
+}
+
+static void
+container_assert_equal(GwyContainer *container, GwyContainer *reference)
+{
+    g_assert_cmpuint(gwy_container_size(container),
+                     ==,
+                     gwy_container_size(reference));
+    gwy_container_foreach(container, NULL, check_value, reference);
+}
+
+static void
+container_assert_equal_object(GObject *object, GObject *reference)
+{
+    container_assert_equal(GWY_CONTAINER(object), GWY_CONTAINER(reference));
+}
+
 void
 test_container_serialize(void)
 {
@@ -250,6 +278,11 @@ test_container_serialize(void)
     gwy_container_set_double_n(container, "double", G_E);
     GwyUnit *unit = gwy_unit_new_from_string("uPa", NULL);
     gwy_container_take_object_n(container, "unit", unit);
+
+    serializable_duplicate(GWY_SERIALIZABLE(container),
+                           container_assert_equal_object);
+    serializable_assign(GWY_SERIALIZABLE(container),
+                        container_assert_equal_object);
 
     GOutputStream *stream;
     GMemoryOutputStream *memstream;
@@ -274,6 +307,8 @@ test_container_serialize(void)
     g_assert_cmpuint(bytes_consumed, ==, len);
     g_object_unref(stream);
     gwy_error_list_clear(&error_list);
+
+    container_assert_equal(copy, container);
 
     GwyUnit *unitcopy = NULL;
     g_assert(gwy_container_gis_object_n(container, "unit", &unitcopy));
@@ -354,7 +389,8 @@ serialize_boxed_and_back(gpointer boxed, GType type)
 {
     GwyContainer *container = gwy_container_new();
     gwy_container_set_boxed_n(container, "boxed", type, boxed);
-    GwyContainer *copy = (GwyContainer*)serialize_and_back(G_OBJECT(container));
+    GwyContainer *copy = (GwyContainer*)serialize_and_back(G_OBJECT(container),
+                                                           NULL);
     g_assert(GWY_IS_CONTAINER(copy));
     g_object_unref(container);
     g_assert_cmpuint(gwy_container_item_type_n(copy, "boxed"), ==, type);

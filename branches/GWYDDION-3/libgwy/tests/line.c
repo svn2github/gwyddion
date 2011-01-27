@@ -45,8 +45,8 @@ line_randomize(GwyLine *line,
 }
 
 static void
-test_line_assert_equal(const GwyLine *result,
-                       const GwyLine *reference)
+line_assert_equal(const GwyLine *result,
+                  const GwyLine *reference)
 {
     g_assert(GWY_IS_LINE(result));
     g_assert(GWY_IS_LINE(reference));
@@ -55,6 +55,12 @@ test_line_assert_equal(const GwyLine *result,
 
     for (guint j = 0; j < result->res; j++)
         g_assert_cmpfloat(result->data[j], ==, reference->data[j]);
+}
+
+static void
+line_assert_equal_object(GObject *object, GObject *reference)
+{
+    line_assert_equal(GWY_LINE(object), GWY_LINE(reference));
 }
 
 void
@@ -122,17 +128,12 @@ test_line_serialize(void)
         line_randomize(original, rng);
         GwyLine *copy;
 
-        copy = gwy_line_duplicate(original);
-        test_line_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = gwy_line_new();
-        gwy_line_assign(copy, original);
-        test_line_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = GWY_LINE(serialize_and_back(G_OBJECT(original)));
-        test_line_assert_equal(copy, original);
+        serializable_duplicate(GWY_SERIALIZABLE(original),
+                               line_assert_equal_object);
+        serializable_assign(GWY_SERIALIZABLE(original),
+                            line_assert_equal_object);
+        copy = GWY_LINE(serialize_and_back(G_OBJECT(original),
+                                           line_assert_equal_object));
         g_object_unref(copy);
 
         g_object_unref(original);
@@ -203,7 +204,7 @@ test_line_copy(void)
         guint destpos = g_rand_int_range(rng, 0, dres);
         gwy_line_copy(source, pos, len, dest, destpos);
         line_part_copy_dumb(source, pos, len, reference, destpos);
-        test_line_assert_equal(dest, reference);
+        line_assert_equal(dest, reference);
         g_object_unref(source);
         g_object_unref(dest);
         g_object_unref(reference);
@@ -230,7 +231,7 @@ test_line_new_part(void)
         gwy_line_set_real(reference, source->real*len/res);
         gwy_line_set_offset(reference, source->real*pos/res);
         line_part_copy_dumb(source, pos, len, reference, 0);
-        test_line_assert_equal(part, reference);
+        line_assert_equal(part, reference);
         g_object_unref(source);
         g_object_unref(part);
         g_object_unref(reference);

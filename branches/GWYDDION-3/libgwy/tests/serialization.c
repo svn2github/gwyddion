@@ -653,11 +653,14 @@ test_deserialize_garbage(void)
     g_rand_free(rng);
 }
 
-static gboolean
+gboolean
 values_are_equal(const GValue *value1,
                  const GValue *value2)
 {
     if (!value1 || !value2)
+        return FALSE;
+
+    if (!G_IS_VALUE(value1) || !G_IS_VALUE(value2))
         return FALSE;
 
     GType type = G_VALUE_TYPE(value1);
@@ -737,7 +740,8 @@ compare_properties(GObject *object,
 }
 
 GObject*
-serialize_and_back(GObject *object)
+serialize_and_back(GObject *object,
+                   CompareObjectDataFunc compare)
 {
     enum { buffer_size = 0x10000 };
 
@@ -765,7 +769,37 @@ serialize_and_back(GObject *object)
     g_assert_cmpuint(bytes_consumed, ==, datalen);
     g_object_unref(stream);
     compare_properties(retval, object);
+    if (compare)
+        compare(retval, object);
     return retval;
+}
+
+void
+serializable_duplicate(GwySerializable *serializable,
+                       CompareObjectDataFunc compare)
+{
+    g_assert(GWY_IS_SERIALIZABLE(serializable));
+    GwySerializable *copy = GWY_SERIALIZABLE(gwy_serializable_duplicate(serializable));
+    g_assert(GWY_IS_SERIALIZABLE(copy));
+    compare_properties(G_OBJECT(copy), G_OBJECT(serializable));
+    if (compare)
+        compare(G_OBJECT(copy), G_OBJECT(serializable));
+    g_object_unref(copy);
+}
+
+void
+serializable_assign(GwySerializable *serializable,
+                    CompareObjectDataFunc compare)
+{
+    g_assert(GWY_IS_SERIALIZABLE(serializable));
+    GType type = G_OBJECT_TYPE(serializable);
+    g_assert(type);
+    GwySerializable *copy = GWY_SERIALIZABLE(g_object_new(type, NULL));
+    gwy_serializable_assign(copy, serializable);
+    compare_properties(G_OBJECT(copy), G_OBJECT(serializable));
+    if (compare)
+        compare(G_OBJECT(copy), G_OBJECT(serializable));
+    g_object_unref(copy);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */

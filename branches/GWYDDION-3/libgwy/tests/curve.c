@@ -38,8 +38,8 @@ curve_randomize(GwyCurve *curve,
 }
 
 static void
-test_curve_assert_equal(const GwyCurve *result,
-                        const GwyCurve *reference)
+curve_assert_equal(const GwyCurve *result,
+                   const GwyCurve *reference)
 {
     g_assert(GWY_IS_CURVE(result));
     g_assert(GWY_IS_CURVE(reference));
@@ -54,9 +54,15 @@ test_curve_assert_equal(const GwyCurve *result,
     }
 }
 
+static void
+curve_assert_equal_object(GObject *object, GObject *reference)
+{
+    curve_assert_equal(GWY_CURVE(object), GWY_CURVE(reference));
+}
+
 /*
 static void
-test_curve_assert_similar(const GwyCurve *result,
+curve_assert_similar(const GwyCurve *result,
                           const GwyCurve *reference)
 {
     g_assert(GWY_IS_CURVE(result));
@@ -92,17 +98,12 @@ test_curve_serialize(void)
         curve_randomize(original, rng);
         GwyCurve *copy;
 
-        copy = gwy_curve_duplicate(original);
-        test_curve_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = gwy_curve_new();
-        gwy_curve_assign(copy, original);
-        test_curve_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = GWY_CURVE(serialize_and_back(G_OBJECT(original)));
-        test_curve_assert_equal(copy, original);
+        serializable_duplicate(GWY_SERIALIZABLE(original),
+                               curve_assert_equal_object);
+        serializable_assign(GWY_SERIALIZABLE(original),
+                            curve_assert_equal_object);
+        copy = GWY_CURVE(serialize_and_back(G_OBJECT(original),
+                                            curve_assert_equal_object));
         g_object_unref(copy);
 
         g_object_unref(original);

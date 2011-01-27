@@ -133,8 +133,8 @@ mask_field_randomize(GwyMaskField *maskfield,
 }
 
 static void
-test_mask_field_assert_equal(const GwyMaskField *result,
-                             const GwyMaskField *reference)
+mask_field_assert_equal(const GwyMaskField *result,
+                        const GwyMaskField *reference)
 {
     g_assert(GWY_IS_MASK_FIELD(result));
     g_assert(GWY_IS_MASK_FIELD(reference));
@@ -163,6 +163,12 @@ test_mask_field_assert_equal(const GwyMaskField *result,
             g_assert_cmphex((result_row[j] & m), ==, (reference_row[j] & m));
         }
     }
+}
+
+static void
+mask_field_assert_equal_object(GObject *object, GObject *reference)
+{
+    mask_field_assert_equal(GWY_MASK_FIELD(object), GWY_MASK_FIELD(reference));
 }
 
 void
@@ -195,7 +201,7 @@ test_mask_field_copy(void)
         gwy_mask_field_copy(source, &rectangle, dest, destcol, destrow);
         mask_field_part_copy_dumb(source, col, row, width, height,
                                   reference, destcol, destrow);
-        test_mask_field_assert_equal(dest, reference);
+        mask_field_assert_equal(dest, reference);
         g_object_unref(source);
         g_object_unref(dest);
         g_object_unref(reference);
@@ -228,7 +234,7 @@ test_mask_field_new_part(void)
                                                            FALSE);
         mask_field_part_copy_dumb(source, col, row, width, height,
                                   reference, 0, 0);
-        test_mask_field_assert_equal(part, reference);
+        mask_field_assert_equal(part, reference);
         g_object_unref(source);
         g_object_unref(part);
         g_object_unref(reference);
@@ -288,13 +294,13 @@ test_mask_field_logical(void)
             gwy_mask_field_copy_full(source, dest);
             mask_field_logical_dumb(reference, operand, NULL, op);
             gwy_mask_field_logical(dest, operand, NULL, op);
-            test_mask_field_assert_equal(dest, reference);
+            mask_field_assert_equal(dest, reference);
 
             gwy_mask_field_copy_full(source, reference);
             gwy_mask_field_copy_full(source, dest);
             mask_field_logical_dumb(reference, operand, mask, op);
             gwy_mask_field_logical(dest, operand, mask, op);
-            test_mask_field_assert_equal(dest, reference);
+            mask_field_assert_equal(dest, reference);
         }
 
         g_object_unref(source);
@@ -367,7 +373,7 @@ test_mask_field_logical_part(void)
                                         operand, opcol, oprow, op);
             mask_field_part_logical_dumb(reference, col, row, width, height,
                                          operand, opcol, oprow, op);
-            test_mask_field_assert_equal(dest, reference);
+            mask_field_assert_equal(dest, reference);
         }
 
         g_object_unref(source);
@@ -418,14 +424,14 @@ test_mask_field_fill(void)
         GwyRectangle rectangle = { col, row, width, height };
         gwy_mask_field_fill(dest, &rectangle, FALSE);
         mask_field_part_fill_dumb(reference,  col, row, width, height, FALSE);
-        test_mask_field_assert_equal(dest, reference);
+        mask_field_assert_equal(dest, reference);
 
         mask_field_randomize(reference, pool, max_size, rng);
         gwy_mask_field_copy_full(reference, dest);
 
         gwy_mask_field_fill(dest, &rectangle, TRUE);
         mask_field_part_fill_dumb(reference,  col, row, width, height, TRUE);
-        test_mask_field_assert_equal(dest, reference);
+        mask_field_assert_equal(dest, reference);
 
         g_object_unref(dest);
         g_object_unref(reference);
@@ -450,17 +456,12 @@ test_mask_field_serialize(void)
         mask_field_randomize(original, pool, max_size, rng);
         GwyMaskField *copy;
 
-        copy = gwy_mask_field_duplicate(original);
-        test_mask_field_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = gwy_mask_field_new();
-        gwy_mask_field_assign(copy, original);
-        test_mask_field_assert_equal(copy, original);
-        g_object_unref(copy);
-
-        copy = GWY_MASK_FIELD(serialize_and_back(G_OBJECT(original)));
-        test_mask_field_assert_equal(copy, original);
+        serializable_duplicate(GWY_SERIALIZABLE(original),
+                               mask_field_assert_equal_object);
+        serializable_assign(GWY_SERIALIZABLE(original),
+                            mask_field_assert_equal_object);
+        copy = GWY_MASK_FIELD(serialize_and_back(G_OBJECT(original),
+                                                 mask_field_assert_equal_object));
         g_object_unref(copy);
 
         g_object_unref(original);
@@ -1050,12 +1051,12 @@ test_mask_field_grow_one(const gchar *orig_str,
 
     orig = mask_field_from_string(orig_str);
     gwy_mask_field_grow(orig, FALSE);
-    test_mask_field_assert_equal(orig, grow);
+    mask_field_assert_equal(orig, grow);
     g_object_unref(orig);
 
     orig = mask_field_from_string(orig_str);
     gwy_mask_field_grow(orig, TRUE);
-    test_mask_field_assert_equal(orig, keep);
+    mask_field_assert_equal(orig, keep);
     g_object_unref(orig);
 
     g_object_unref(keep);
@@ -1126,12 +1127,12 @@ test_mask_field_shrink_one(const gchar *orig_str,
 
     orig = mask_field_from_string(orig_str);
     gwy_mask_field_shrink(orig, FALSE);
-    test_mask_field_assert_equal(orig, shrink);
+    mask_field_assert_equal(orig, shrink);
     g_object_unref(orig);
 
     orig = mask_field_from_string(orig_str);
     gwy_mask_field_shrink(orig, TRUE);
-    test_mask_field_assert_equal(orig, bord);
+    mask_field_assert_equal(orig, bord);
     g_object_unref(orig);
 
     g_object_unref(bord);
@@ -1199,7 +1200,7 @@ test_mask_field_flip_one(const gchar *orig_str,
     GwyMaskField *field = mask_field_from_string(orig_str);
     gwy_mask_field_flip(field, horizontally, vertically);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    test_mask_field_assert_equal(field, reference);
+    mask_field_assert_equal(field, reference);
     g_object_unref(field);
     g_object_unref(reference);
 }
@@ -1271,25 +1272,25 @@ test_mask_field_flip(void)
         GwyMaskField *dest = gwy_mask_field_duplicate(source);
 
         gwy_mask_field_flip(dest, FALSE, FALSE);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         gwy_mask_field_flip(dest, TRUE, FALSE);
         gwy_mask_field_flip(dest, TRUE, FALSE);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         gwy_mask_field_flip(dest, FALSE, TRUE);
         gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         gwy_mask_field_flip(dest, TRUE, TRUE);
         gwy_mask_field_flip(dest, TRUE, TRUE);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         gwy_mask_field_flip(dest, TRUE, FALSE);
         gwy_mask_field_flip(dest, FALSE, TRUE);
         gwy_mask_field_flip(dest, TRUE, FALSE);
         gwy_mask_field_flip(dest, FALSE, TRUE);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         g_object_unref(dest);
         g_object_unref(source);
@@ -1306,7 +1307,7 @@ test_mask_field_transpose_one(const gchar *orig_str,
     GwyMaskField *transposed = gwy_mask_field_new_transposed(field, NULL);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    test_mask_field_assert_equal(transposed, reference);
+    mask_field_assert_equal(transposed, reference);
     g_object_unref(transposed);
     g_object_unref(reference);
 }
@@ -1390,7 +1391,7 @@ test_mask_field_transpose(void)
         GwyMaskField *part = gwy_mask_field_new_transposed(source, &rectangle);
         rectangle = (GwyRectangle){0, 0, height, width};
         gwy_mask_field_transpose(part, &rectangle, dest, col, row);
-        test_mask_field_assert_equal(source, dest);
+        mask_field_assert_equal(source, dest);
 
         g_object_unref(part);
         g_object_unref(dest);
@@ -1409,7 +1410,7 @@ test_mask_field_rotate_one(const gchar *orig_str,
     GwyMaskField *rotated = gwy_mask_field_new_rotated_simple(field, rotation);
     g_object_unref(field);
     GwyMaskField *reference = mask_field_from_string(reference_str);
-    test_mask_field_assert_equal(rotated, reference);
+    mask_field_assert_equal(rotated, reference);
     g_object_unref(rotated);
     g_object_unref(reference);
 }
@@ -1471,7 +1472,7 @@ test_mask_field_rotate(void)
         GwyMaskField *rotccw = gwy_mask_field_new_rotated_simple(source, 90);
         GwyMaskField *rotcw = gwy_mask_field_new_rotated_simple(source, 270);
         gwy_mask_field_flip(rotcw, TRUE, TRUE);
-        test_mask_field_assert_equal(rotcw, rotccw);
+        mask_field_assert_equal(rotcw, rotccw);
         g_object_unref(rotcw);
         g_object_unref(rotccw);
         g_object_unref(source);

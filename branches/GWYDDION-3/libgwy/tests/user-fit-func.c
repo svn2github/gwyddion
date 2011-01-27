@@ -226,8 +226,11 @@ test_user_fit_func_serialize(void)
     GwyFitParam *params[np];
     GwyUserFitFunc *userfitfunc = make_test_fit_func(params);
 
+    serializable_duplicate(GWY_SERIALIZABLE(userfitfunc), NULL);
+    serializable_assign(GWY_SERIALIZABLE(userfitfunc), NULL);
+
     GwyUserFitFunc *newuserfitfunc
-        = (GwyUserFitFunc*)serialize_and_back(G_OBJECT(userfitfunc));
+        = (GwyUserFitFunc*)serialize_and_back(G_OBJECT(userfitfunc), NULL);
     GwyResource *newresource = GWY_RESOURCE(newuserfitfunc);
     g_assert_cmpstr(gwy_resource_get_name(newresource), ==, "Linear 2");
     g_assert_cmpstr(gwy_user_fit_func_get_formula(userfitfunc), ==, "a+b*x");
