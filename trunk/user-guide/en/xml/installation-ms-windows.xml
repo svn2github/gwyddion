@@ -134,5 +134,8 @@
       </tbody>
     </tgroup>
   </informaltable>
+  <para>
+    The old uninstallation method (pre-2.23 versions) is no longer available. If you want to uninstall Gwyddion go to Start->Control Panel->Add or Remove Programs and choose Gwyddioni. Note that this is valid for Windows XP. The path to the Add/Remove window may be slightly different on other Windows OS.
+  </para>
 </sect1>
 <!-- vim: set ts=2 sw=2 et : -->
