@@ -8,15 +8,17 @@
 %global __find_provides %{_mingw32_findprovides}
 %if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
+%define %{develdep} %{nil}
 %endif
 %if %{distro_is_suse}
 %define __os_install_post %{_mingw32_debug_install_post} \
                           %{_mingw32_install_post}
+%define %{develdep} -devel
 %endif
 
 Name:           mingw32-gtkglext
 Version:        1.2.0
-Release:        3
+Release:        4
 Summary:        MinGW Windows GtkGLExt library
 
 License:        LGPLv2+
@@ -30,9 +32,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
 BuildRequires:  mingw32-filesystem >= 52
-BuildRequires:  mingw32-gtk2
-BuildRequires:  mingw32-atk
-BuildRequires:  mingw32-glib2
 %if %{distro_is_redhat}
 BuildRequires:  mingw32-gcc
 BuildRequires:  mingw32-binutils
@@ -45,7 +44,9 @@ BuildRequires:  mingw32-cross-binutils
 BuildRequires:  mingw32-cross-pkg-config
 BuildRequires:  mingw32-headers
 %endif
-
+BuildRequires:  mingw32-gtk2%{develdep}
+BuildRequires:  mingw32-atk%{develdep}
+BuildRequires:  mingw32-glib2%{develdep}
 BuildRequires:  pkgconfig
 BuildRequires:  autoconf
 BuildRequires:  automake
@@ -114,6 +115,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jan 27 2011 Yeti <yeti@gwyddion.net> - 1.2.0-4
+- BuilRequire -devel packages on openSUSE
+
 * Wed Jan 26 2011 Yeti <yeti@gwyddion.net> - 1.2.0-3
 - Modified to build on openSUSE
 

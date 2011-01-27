@@ -8,10 +8,12 @@
 %global __find_provides %{_mingw32_findprovides}
 %if %{distro_is_redhat}
 %define __debug_install_post %{_mingw32_debug_install_post}
+%define %{develdep} %{nil}
 %endif
 %if %{distro_is_suse}
 %define __os_install_post %{_mingw32_debug_install_post} \
                           %{_mingw32_install_post}
+%define %{develdep} -devel
 %endif
 
 Name:           mingw32-fftw
