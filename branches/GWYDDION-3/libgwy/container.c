@@ -1601,7 +1601,7 @@ gwy_container_set_value(GwyContainer *container,
 
     GHashTable *values = container->priv->values;
     GValue *gvalue = g_hash_table_lookup(values, GUINT_TO_POINTER(key));
-    GType newtype = G_VALUE_TYPE(gvalue);
+    GType newtype = G_VALUE_TYPE(value);
     if (gvalue) {
         GType type = G_VALUE_TYPE(gvalue);
         if (type == newtype) {
