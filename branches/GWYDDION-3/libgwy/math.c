@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Necas (Yeti).
+ *  Copyright (C) 2007,2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  The quicksort algorithm was copied from GNU C library,
@@ -268,6 +268,121 @@ gwy_powi(double x, int i)
         x *= x;
     }
     return negative ? 1.0/r : r;
+}
+
+/*
+ * gwy_math_curvature:
+ * @coeffs: Array of the six polynomial coefficients of a quadratic surface in
+ *          the following order: 1, x, y, x², xy, y².
+ * @kappa1: Location to store the smaller curvature to.
+ * @kappa2: Location to store the larger curvature to.
+ * @phi1: Location to store the direction of the smaller curvature to.
+ * @phi2: Location to store the direction of the larger curvature to.
+ * @xc: Location to store x-coordinate of the centre of the quadratic surface.
+ * @yc: Location to store y-coordinate of the centre of the quadratic surface.
+ * @zc: Location to store value at the centre of the quadratic surface.
+ * @returns: The number of curved dimensions (0 to 2).
+ *
+ * Calculates curvature parameters from two-dimensional quadratic polynomial
+ * coefficients.
+ *
+ * The coefficients should be scaled so that the lateral dimensions of the
+ * relevant area (e.g. fitting area if the coefficients were obtained by
+ * fitting a quadratic surface) do not differ from 1 by many orders.  Otherwise
+ * recognition of flat surfaces will not work.
+ *
+ * Curvatures have signs, positive mean a concave (cup-like) surface, negative
+ * mean a convex (cap-like) surface.  They are ordered including the sign.
+ *
+ * Directions are angles from the interval (-π/2, π/2].
+ *
+ * If the quadratic surface is degenerate, i.e. flat in at least one direction,
+ * the centre is undefined.  The centre is then chosen as the closest point
+ * the origin of coordinates.  For flat surfaces this means the origin is
+ * simply returned as the centre position.  Consequently, you should use
+ * Cartesian coordinates with origin in a natural centre, for instance centre
+ * of image or grain.
+ **/
+guint
+gwy_math_curvature(const gdouble *coeffs,
+                   gdouble *pkappa1,
+                   gdouble *pkappa2,
+                   gdouble *pphi1,
+                   gdouble *pphi2,
+                   gdouble *pxc,
+                   gdouble *pyc,
+                   gdouble *pzc)
+{
+    gdouble a = coeffs[0], bx = coeffs[1], by = coeffs[2],
+            cxx = coeffs[3], cxy = coeffs[4], cyy = coeffs[5];
+
+    /* Eliminate the mixed term */
+    if (fabs(cxx) + fabs(cxy) + fabs(cyy) <= 1e-10*(fabs(bx) + fabs(by))) {
+        /* Linear gradient */
+        GWY_MAYBE_SET(pkappa1, 0.0);
+        GWY_MAYBE_SET(pkappa2, 0.0);
+        GWY_MAYBE_SET(pxc, 0.0);
+        GWY_MAYBE_SET(pyc, 0.0);
+        GWY_MAYBE_SET(pzc, a);
+        GWY_MAYBE_SET(pphi1, 0.0);
+        GWY_MAYBE_SET(pphi2, G_PI/2.0);
+        return 0;
+    }
+
+    /* At least one quadratic term */
+    gdouble cm = cxx - cyy;
+    gdouble cp = cxx + cyy;
+    gdouble phi = 0.5*atan2(cxy, cm);
+    gdouble cx = cp + hypot(cm, cxy);
+    gdouble cy = cp - hypot(cm, cxy);
+    gdouble bx1 = bx*cos(phi) + by*sin(phi);
+    gdouble by1 = -bx*sin(phi) + by*cos(phi);
+    guint degree = 2;
+    gdouble xc, yc;
+
+    /* Eliminate linear terms */
+    if (fabs(cx) < 1e-10*fabs(cy)) {
+        /* Only y quadratic term */
+        xc = 0.0;
+        yc = -by1/cy;
+        degree = 1;
+    }
+    else if (fabs(cy) < 1e-10*fabs(cx)) {
+        /* Only x quadratic term */
+        xc = -bx1/cx;
+        yc = 0.0;
+        degree = 1;
+    }
+    else {
+        /* Two quadratic terms */
+        xc = -bx1/cx;
+        yc = -by1/cy;
+    }
+
+    GWY_MAYBE_SET(pxc, xc*cos(phi) - yc*sin(phi));
+    GWY_MAYBE_SET(pyc, xc*sin(phi) + yc*cos(phi));
+    GWY_MAYBE_SET(pzc, a + xc*bx1 + yc*by1 + xc*xc*cx + yc*yc*cy);
+
+    if (cx > cy) {
+        GWY_SWAP(gdouble, cx, cy);
+        phi += G_PI/2.0;
+    }
+    /* Compenstate the left-handed coordinate system */
+    phi = -phi;
+
+    GWY_MAYBE_SET(pkappa1, cx);
+    GWY_MAYBE_SET(pkappa2, cy);
+
+    if (pphi1) {
+        gdouble phi1 = fmod(phi, G_PI);
+        *pphi1 = (phi1 > G_PI/2.0) ? phi1 - G_PI : phi1;
+    }
+    if (pphi2) {
+        gdouble phi2 = fmod(phi + G_PI/2.0, G_PI);
+        *pphi2 = (phi2 > G_PI/2.0) ? phi2 - G_PI : phi2;
+    }
+
+    return degree;
 }
 
 /* Quickly find median value in an array

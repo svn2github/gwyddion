@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2007,2009-2010 David Necas (Yeti).
+ *  Copyright (C) 2007,2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -46,6 +46,14 @@ double gwy_powi(double x, int i);
 
 #define gwy_round(x) ((glong)floor((x) + 0.5))
 
+guint  gwy_math_curvature        (const gdouble *coeffs,
+                                  gdouble *pkappa1,
+                                  gdouble *pkappa2,
+                                  gdouble *pphi1,
+                                  gdouble *pphi2,
+                                  gdouble *pxc,
+                                  gdouble *pyc,
+                                  gdouble *pzc);
 gint    gwy_double_compare       (gconstpointer a,
                                   gconstpointer b)    G_GNUC_PURE;
 gint    gwy_double_direct_compare(gconstpointer a,
