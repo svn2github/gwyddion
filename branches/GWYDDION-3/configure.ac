@@ -95,6 +95,16 @@ GWY_PROG_CCLD_OPTION([SYMBOLIC_FUNCTIONS],[-Wl,-Bsymbolic-functions])
 GWY_LIBRARY_LDFLAGS="$GWY_PROG_CCLD_SYMBOLIC_FUNCTIONS"
 AC_SUBST([GWY_LIBRARY_LDFLAGS])
 
+AC_CHECK_SIZEOF([double])
+AC_CHECK_SIZEOF([void*])
+AC_CHECK_SIZEOF([int64_t],,[#include <stdint.h>])
+if test $ac_cv_sizeof_double != $ac_cv_sizeof_int64_t; then
+  AC_MSG_WARN([Sizes of double and int64 differ.  Serialisation of doubles will be broken.])
+fi
+if test $ac_cv_sizeof_voidp -lt $ac_cv_sizeof_double; then
+  AC_MSG_WARN([Double does not fit into a pointer.  Median filter will be broken.])
+fi
+
 #############################################################################
 # Headers
 ## All required headers appear to be standard (on Win32, at least with MinGW).
