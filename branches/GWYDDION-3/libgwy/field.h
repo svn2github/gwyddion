@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -106,18 +106,6 @@ void            gwy_field_set_yoffset  (GwyField *field,
                                         gdouble yoffset);
 GwyUnit*        gwy_field_get_unit_xy  (const GwyField *field)              G_GNUC_PURE;
 GwyUnit*        gwy_field_get_unit_z   (const GwyField *field)              G_GNUC_PURE;
-void            gwy_field_clear        (GwyField *field,
-                                        const GwyRectangle *rectangle,
-                                        const GwyMaskField *mask,
-                                        GwyMaskingType masking);
-void            gwy_field_clear_full   (GwyField *field);
-void            gwy_field_fill         (GwyField *field,
-                                        const GwyRectangle *rectangle,
-                                        const GwyMaskField *mask,
-                                        GwyMaskingType masking,
-                                        gdouble value);
-void            gwy_field_fill_full    (GwyField *field,
-                                        gdouble value);
 GwyValueFormat* gwy_field_format_xy    (const GwyField *field,
                                         GwyValueFormatStyle style)          G_GNUC_MALLOC;
 GwyValueFormat* gwy_field_format_z     (const GwyField *field,

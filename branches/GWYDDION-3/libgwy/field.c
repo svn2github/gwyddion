@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/field.h"
+#include "libgwy/field-arithmetic.h"
 #include "libgwy/field-statistics.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
@@ -209,9 +210,9 @@ gwy_field_init(GwyField *field)
     field->data = g_slice_new(gdouble);
 }
 
-static void
-set_cache_for_flat_field(GwyField *field,
-                         gdouble value)
+void
+_gwy_field_set_cache_for_flat(GwyField *field,
+                              gdouble value)
 {
     Field *priv = field->priv;
     priv->cached = (CBIT(MIN) | CBIT(MAX) | CBIT(AVG) | CBIT(RMS) | CBIT(MSQ)
@@ -233,7 +234,7 @@ alloc_data(GwyField *field,
 {
     if (clear) {
         field->data = g_new0(gdouble, field->xres * field->yres);
-        set_cache_for_flat_field(field, 0.0);
+        _gwy_field_set_cache_for_flat(field, 0.0);
     }
     else {
         field->data = g_new(gdouble, field->xres * field->yres);
@@ -1191,131 +1192,6 @@ _gwy_field_check_mask(const GwyField *field,
         *masking = GWY_MASK_IGNORE;
 
     return TRUE;
-}
-
-/**
- * gwy_field_clear:
- * @field: A two-dimensional data field.
- * @rectangle: Area in @field to clear.  Pass %NULL to clear entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
- * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- *
- * Fills a field with zeroes.
- **/
-void
-gwy_field_clear(GwyField *field,
-                const GwyRectangle *rectangle,
-                const GwyMaskField *mask,
-                GwyMaskingType masking)
-{
-    guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
-        return;
-
-    if (masking == GWY_MASK_IGNORE) {
-        gdouble *base = field->data + row*field->xres + col;
-        for (guint i = 0; i < height; i++)
-            gwy_clear(base + i*field->xres, width);
-        if (width == field->xres && height == field->yres)
-            set_cache_for_flat_field(field, 0.0);
-        else
-            gwy_field_invalidate(field);
-    }
-    else {
-        GwyMaskIter iter;
-        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        for (guint i = 0; i < height; i++) {
-            gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
-            for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_iter_get(iter) == invert)
-                    *d = 0.0;
-                gwy_mask_iter_next(iter);
-            }
-        }
-        gwy_field_invalidate(field);
-    }
-}
-
-/**
- * gwy_field_clear_full:
- * @field: A two-dimensional data field.
- *
- * Fills an entire field with zeroes.
- **/
-void
-gwy_field_clear_full(GwyField *field)
-{
-    gwy_field_clear(field, NULL, NULL, GWY_MASK_IGNORE);
-}
-
-/**
- * gwy_field_fill:
- * @field: A two-dimensional data field.
- * @rectangle: Area in @field to fill.  Pass %NULL to fill entire @field.
- * @mask: Mask specifying which values to modify, or %NULL.
- * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @value: Value to fill the rectangle with.
- *
- * Fills a field with the specified value.
- **/
-void
-gwy_field_fill(GwyField *field,
-               const GwyRectangle *rectangle,
-               const GwyMaskField *mask,
-               GwyMaskingType masking,
-               gdouble value)
-{
-    if (!value) {
-        gwy_field_clear(field, rectangle, mask, masking);
-        return;
-    }
-
-    guint col, row, width, height, maskcol, maskrow;
-    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
-                               &col, &row, &width, &height, &maskcol, &maskrow))
-        return;
-
-    if (masking == GWY_MASK_IGNORE) {
-        for (guint i = 0; i < height; i++) {
-            gdouble *p = field->data + (i + row)*field->xres + col;
-            for (guint j = width; j; j--)
-                *(p++) = value;
-        }
-        if (width == field->xres && height == field->yres)
-            set_cache_for_flat_field(field, value);
-        else
-            gwy_field_invalidate(field);
-    }
-    else {
-        GwyMaskIter iter;
-        const gboolean invert = (masking == GWY_MASK_EXCLUDE);
-        for (guint i = 0; i < height; i++) {
-            gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
-            for (guint j = width; j; j--, d++) {
-                if (!gwy_mask_iter_get(iter) == invert)
-                    *d = value;
-                gwy_mask_iter_next(iter);
-            }
-        }
-        gwy_field_invalidate(field);
-    }
-}
-
-/**
- * gwy_field_fill_full:
- * @field: A two-dimensional data field.
- * @value: Value to fill the field with.
- *
- * Fills an entire field with the specified value.
- **/
-void
-gwy_field_fill_full(GwyField *field,
-                    gdouble value)
-{
-    gwy_field_fill(field, NULL, NULL, GWY_MASK_IGNORE, value);
 }
 
 /**

@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009,2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,35 +44,48 @@ typedef enum {
 GwyFieldCompatibilityFlags gwy_field_is_incompatible(GwyField *field1,
                                                      GwyField *field2,
                                                      GwyFieldCompatibilityFlags check);
-void                       gwy_field_add            (GwyField *field,
-                                                     const GwyRectangle *rectangle,
-                                                     const GwyMaskField *mask,
-                                                     GwyMaskingType masking,
-                                                     gdouble value);
-void                       gwy_field_multiply       (GwyField *field,
-                                                     const GwyRectangle *rectangle,
-                                                     const GwyMaskField *mask,
-                                                     GwyMaskingType masking,
-                                                     gdouble value);
-void                       gwy_field_apply_func     (GwyField *field,
-                                                     const GwyRectangle *rectangle,
-                                                     const GwyMaskField *mask,
-                                                     GwyMaskingType masking,
-                                                     GwyRealFunc func,
-                                                     gpointer user_data);
-void                       gwy_field_add_field      (const GwyField *src,
-                                                     const GwyRectangle *srcrectangle,
-                                                     GwyField *dest,
-                                                     guint destcol,
-                                                     guint destrow,
-                                                     gdouble factor);
-void                       gwy_field_hypot_field    (GwyField *field,
-                                                     const GwyField *operand1,
-                                                     const GwyField *operand2);
-guint                      gwy_field_clamp          (GwyField *field,
-                                                     const GwyRectangle *rectangle,
-                                                     gdouble lower,
-                                                     gdouble upper);
+
+void  gwy_field_clear      (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking);
+void  gwy_field_clear_full (GwyField *field);
+void  gwy_field_fill       (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            gdouble value);
+void  gwy_field_fill_full  (GwyField *field,
+                            gdouble value);
+void  gwy_field_add        (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            gdouble value);
+void  gwy_field_multiply   (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            gdouble value);
+guint gwy_field_clamp      (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            gdouble lower,
+                            gdouble upper);
+void  gwy_field_apply_func (GwyField *field,
+                            const GwyRectangle *rectangle,
+                            const GwyMaskField *mask,
+                            GwyMaskingType masking,
+                            GwyRealFunc func,
+                            gpointer user_data);
+void  gwy_field_add_field  (const GwyField *src,
+                            const GwyRectangle *srcrectangle,
+                            GwyField *dest,
+                            guint destcol,
+                            guint destrow,
+                            gdouble factor);
+void  gwy_field_hypot_field(GwyField *field,
+                            const GwyField *operand1,
+                            const GwyField *operand2);
 
 G_END_DECLS
 

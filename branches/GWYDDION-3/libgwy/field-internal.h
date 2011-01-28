@@ -96,6 +96,10 @@ gboolean _gwy_field_check_mask(const GwyField *field,
                                guint *maskrow);
 
 G_GNUC_INTERNAL
+void _gwy_field_set_cache_for_flat(GwyField *field,
+                                   gdouble value);
+
+G_GNUC_INTERNAL
 void _gwy_tune_convolution_method(const gchar *method);
 
 G_GNUC_INTERNAL
