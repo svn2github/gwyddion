@@ -219,7 +219,7 @@ gwy_gradient_duplicate_impl(GwySerializable *serializable)
     GArray *points = gradient->priv->points;
 
     GwyGradient *duplicate = g_object_newv(GWY_TYPE_GRADIENT, 0, NULL);
-    GArray *dpoints = gradient->priv->points;
+    GArray *dpoints = duplicate->priv->points;
 
     gwy_gradient_parent_serializable->assign(GWY_SERIALIZABLE(duplicate),
                                              serializable);
