@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include "libgwy/serialize.h"
 #include "libgwy/curve-statistics.h"
 #include "libgwy/line.h"
+#include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
@@ -838,91 +839,6 @@ gwy_line_get_unit_y(GwyLine *line)
     if (!priv->unit_y)
         priv->unit_y = gwy_unit_new();
     return priv->unit_y;
-}
-
-/**
- * gwy_line_clear_full:
- * @line: A one-dimensional data line.
- *
- * Fills an entire line with zeroes.
- **/
-void
-gwy_line_clear_full(GwyLine *line)
-{
-    g_return_if_fail(GWY_IS_LINE(line));
-    gwy_clear(line->data, line->res);
-}
-
-/**
- * gwy_line_fill_full:
- * @line: A one-dimensional data line.
- * @value: Value to fill @line with.
- *
- * Fills an entire line with the specified value.
- **/
-void
-gwy_line_fill_full(GwyLine *line,
-                   gdouble value)
-{
-    if (!value) {
-        gwy_line_clear_full(line);
-        return;
-    }
-    g_return_if_fail(GWY_IS_LINE(line));
-    gwy_line_fill(line, 0, line->res, value);
-}
-
-/**
- * gwy_line_clear:
- * @line: A one-dimensional data line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
- *
- * Fills a line with zeroes.
- **/
-void
-gwy_line_clear(GwyLine *line,
-               guint pos,
-               guint len)
-{
-    g_return_if_fail(GWY_IS_LINE(line));
-    g_return_if_fail(pos + len <= line->res);
-
-    if (!len)
-        return;
-
-    gwy_clear(line->data + pos, len);
-}
-
-/**
- * gwy_line_fill:
- * @line: A one-dimensional data line.
- * @pos: Position of the line part start.
- * @len: Part length (number of items).
- * @value: Value to fill the rectangle with.
- *
- * Fills a line with the specified value.
- **/
-void
-gwy_line_fill(GwyLine *line,
-              guint pos,
-              guint len,
-              gdouble value)
-{
-    if (!value) {
-        gwy_line_clear(line, pos, len);
-        return;
-    }
-
-    g_return_if_fail(GWY_IS_LINE(line));
-    g_return_if_fail(pos + len <= line->res);
-
-    if (!len)
-        return;
-
-    gdouble *p = line->data + pos;
-    for (guint j = len; j; j--)
-        *(p++) = value;
 }
 
 /**

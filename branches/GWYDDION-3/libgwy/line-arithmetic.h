@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,16 @@ void      gwy_line_distribute   (GwyLine *line);
 void      gwy_line_add          (GwyLine *line,
                                  gdouble value);
 void      gwy_line_multiply     (GwyLine *line,
+                                 gdouble value);
+void      gwy_line_clear        (GwyLine *line,
+                                 guint pos,
+                                 guint len);
+void      gwy_line_clear_full   (GwyLine *line);
+void      gwy_line_fill         (GwyLine *line,
+                                 guint pos,
+                                 guint len,
+                                 gdouble value);
+void      gwy_line_fill_full    (GwyLine *line,
                                  gdouble value);
 GwyField* gwy_line_outer_product(const GwyLine *column,
                                  const GwyLine *row)    G_GNUC_MALLOC;

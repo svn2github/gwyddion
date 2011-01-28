@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -100,16 +100,6 @@ void            gwy_line_set_offset    (GwyLine *line,
                                         gdouble offset);
 GwyUnit*        gwy_line_get_unit_x    (GwyLine *line)                      G_GNUC_PURE;
 GwyUnit*        gwy_line_get_unit_y    (GwyLine *line)                      G_GNUC_PURE;
-void            gwy_line_clear         (GwyLine *line,
-                                        guint pos,
-                                        guint len);
-void            gwy_line_clear_full    (GwyLine *line);
-void            gwy_line_fill          (GwyLine *line,
-                                        guint pos,
-                                        guint len,
-                                        gdouble value);
-void            gwy_line_fill_full     (GwyLine *line,
-                                        gdouble value);
 GwyValueFormat* gwy_line_format_x      (GwyLine *line,
                                         GwyValueFormatStyle style)          G_GNUC_MALLOC;
 GwyValueFormat* gwy_line_format_y      (GwyLine *line,

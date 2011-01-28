@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
+#include "libgwy/line-arithmetic.h"
 #include "libgwy/field-level.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
