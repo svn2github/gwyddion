@@ -161,7 +161,7 @@
     <para>
         DOS spectrum module intended to obtain Density-of-States spectra
         from I-V STM spectroscopy. It calculates 
-        <xi:include href="eqi-graph-dos.xml"/> and plots it as graph.
+        <xi:include href="eq-graph-dos.xml"/> and plots it as graph.
     </para>
   </sect2>
 </sect1>

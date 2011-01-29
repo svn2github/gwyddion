@@ -164,7 +164,7 @@
         Le module de spectre DOS sert à obtenir des spectres de densités d'états
         (Density-of-States) à partir de mesures de spectroscopie STM I-V 
         (réponse courant-tension obtenue par microscopie à effet tunnel). Il 
-        calcule <xi:include href="eqi-graph-dos.xml"/> et l'affiche sous forme
+        calcule <xi:include href="eq-graph-dos.xml"/> et l'affiche sous forme
         de graphe.
     </para>
   </sect2>
