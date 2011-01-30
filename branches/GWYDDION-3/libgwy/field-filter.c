@@ -27,6 +27,7 @@
 #include "libgwy/math.h"
 #include "libgwy/fft.h"
 #include "libgwy/field-statistics.h"
+#include "libgwy/field-transform.h"
 #include "libgwy/field-filter.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
@@ -1371,6 +1372,7 @@ gwy_field_correlate(const GwyField *field,
         gwy_field_fill(target, &rect, NULL, GWY_MASK_IGNORE, 0.0);
         return;
     }
+    gwy_field_flip(maskedkernel, TRUE, TRUE, FALSE);
 
     guint xsize = gwy_fft_nice_transform_size(width + kxres - 1);
     guint ysize = gwy_fft_nice_transform_size(height + kyres - 1);
@@ -1380,6 +1382,8 @@ gwy_field_correlate(const GwyField *field,
     // gwycomplex, multiply it by 2 for doubles.
     guint cstride = xsize/2 + 1;
     guint extend_left, extend_right, extend_up, extend_down;
+    // Can overflow guint.
+    gdouble qnorm = 1.0/xsize/ysize/kcount;
     make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
     make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
     gwycomplex *datac = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
@@ -1419,7 +1423,7 @@ gwy_field_correlate(const GwyField *field,
 
     // Convolve, putting the result into kernelc as we have no other use for it.
     for (guint k = 0; k < cstride*ysize; k++)
-        kernelc[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+        kernelc[k] = qnorm*kernelc[k]*datac[k];
     if (poc) {
         for (guint k = 0; k < cstride*ysize; k++) {
             gdouble c = cabs(kernelc[k]);
@@ -1438,7 +1442,7 @@ gwy_field_correlate(const GwyField *field,
     // calculated using convolution of squared data with 1-filled kernel.
     // So for either we the Fourier image of such kernel.
     if (level || normalise) {
-        gwy_field_fill(maskedkernel, NULL, kmask, GWY_MASK_INCLUDE, 1.0/kcount);
+        gwy_field_fill(maskedkernel, NULL, kmask, GWY_MASK_INCLUDE, 1.0);
         extend_kernel_rect(maskedkernel->data, kxres, kyres,
                            extkernel, xsize, ysize, xsize);
         fftw_execute_dft_r2c(dplan, extkernel, kernelc);
@@ -1448,7 +1452,7 @@ gwy_field_correlate(const GwyField *field,
     // normalisation.
     if (level) {
         for (guint k = 0; k < cstride*ysize; k++)
-            datac[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+            datac[k] = qnorm*kernelc[k]*datac[k];
         fftw_execute_dft_c2r(cplan, datac, extkernel);
         for (guint i = 0; i < height; i++) {
             const gdouble *srow = extkernelbase + i*xsize;
@@ -1465,7 +1469,7 @@ gwy_field_correlate(const GwyField *field,
         fftw_execute(dplan);
 
         for (guint k = 0; k < cstride*ysize; k++)
-            datac[k] = conj(kernelc[k])*datac[k]/(xsize*ysize);
+            datac[k] = qnorm*kernelc[k]*datac[k];
         fftw_execute(cplan);
 
         for (guint i = 0; i < height; i++) {
