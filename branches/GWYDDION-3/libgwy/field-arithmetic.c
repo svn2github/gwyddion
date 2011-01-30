@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "libgwy/macros.h"
+#include "libgwy/field-statistics.h"
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-internal.h"
 
@@ -26,6 +27,8 @@
 
 /* for compatibility checks */
 #define EPSILON 1e-6
+
+enum { NORMALIZE_ALL = 0x07 };
 
 /**
  * gwy_field_is_incompatible:
@@ -360,6 +363,65 @@ gwy_field_multiply(GwyField *field,
 }
 
 /**
+ * gwy_field_normalize:
+ * @field: A two-dimensional data field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: Mask specifying which values to modify, or %NULL.
+ * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
+ * @mean: New mean value.
+ * @rms: New rms value.
+ * @flags: Flags controlling normalisation.
+ *
+ * Normalises a field to speficied mean and rms.
+ *
+ * Returns: %TRUE if the normalisation was successfull.  It can fail in two
+ *          circumstances: if the mask is empty or if the current rms is zero
+ *          but the requested rms is non-zero.
+ **/
+gboolean
+gwy_field_normalize(GwyField *field,
+                    const GwyRectangle *rectangle,
+                    const GwyMaskField *mask,
+                    GwyMaskingType masking,
+                    gdouble mean,
+                    gdouble rms,
+                    GwyNormalizeFlags flags)
+{
+    guint col, row, width, height, maskcol, maskrow;
+    if (!_gwy_field_check_mask(field, rectangle, mask, &masking,
+                               &col, &row, &width, &height, &maskcol, &maskrow))
+        return FALSE;
+
+    gboolean retval = TRUE;
+    if (flags & ~NORMALIZE_ALL)
+        g_warning("Unknown normalization flags 0x%x.", flags & ~NORMALIZE_ALL);
+
+    gdouble fmean = gwy_field_mean(field, rectangle, mask, masking);
+    gdouble frms = gwy_field_rms(field, rectangle, mask, masking);
+    // Cleverly do the correct thing if rms == frms == 0.
+    gdouble q = 1.0;
+    if ((flags & GWY_NORMALIZE_RMS) && frms != rms) {
+        if (frms) {
+            q = rms/frms;
+            if (flags & GWY_NORMALIZE_ENTIRE_DATA)
+                gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE, q);
+            else
+                gwy_field_multiply(field, rectangle, mask, masking, q);
+        }
+        else
+            retval = FALSE;
+    }
+    if ((flags & GWY_NORMALIZE_MEAN) && q*fmean != mean) {
+        if (flags & GWY_NORMALIZE_ENTIRE_DATA)
+            gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE, mean - q*fmean);
+        else
+            gwy_field_add(field, rectangle, mask, masking, mean - q*fmean);
+    }
+
+    return retval;
+}
+
+/**
  * gwy_field_apply_func:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
@@ -586,6 +648,18 @@ gwy_field_clamp(GwyField *field,
  * @GWY_FIELD_COMPATIBLE_ALL: All defined properties.
  *
  * Field properties that can be checked for compatibility.
+ **/
+
+/**
+ * GwyNormalizeFlags:
+ * @GWY_NORMALIZE_MEAN: Normalise the mean value to speficied.
+ * @GWY_NORMALIZE_RMS: Nomalise the root mean square to speficied.
+ * @GWY_NORMALIZE_ENTIRE_DATA: Apply the normalisation to entire data if
+ *                             masking is used, i.e. masking and rectangle are
+ *                             used only for the calculation of the mean or rms
+ *                             value.
+ *
+ * Flags controlling behaviour of normalisation functions.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
