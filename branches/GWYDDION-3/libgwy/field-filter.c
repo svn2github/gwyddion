@@ -1306,7 +1306,9 @@ gwy_field_filter_standard(const GwyField *field,
  *          placement of result is determined by @rectangle; in the latter case
  *          the result fills the entire @target.
  * @kernel: Kernel, i.e. the detail for which the correlation score is
- *          calculated.
+ *          calculated.  It is always used as-is.  If you want it to have zero
+ *          mean and rms of unity (which you often want) it is easy to ensure
+ *          it beforehand using gwy_field_normalize().
  * @kmask: Kernel mask.  If non-%NULL it must have the same dimensions as
  *         @kernel and only kernel pixels covered by the mask then contribute
  *         to the correlation score.  This makes possible to search for a
