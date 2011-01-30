@@ -147,7 +147,7 @@ gwy_field_clear(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
                     *d = 0.0;
@@ -213,7 +213,7 @@ gwy_field_fill(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
                     *d = value;
@@ -287,7 +287,7 @@ gwy_field_add(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
                     *d += value;
@@ -351,7 +351,7 @@ gwy_field_multiply(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
                     *d *= value;
@@ -369,7 +369,7 @@ gwy_field_multiply(GwyField *field,
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @mean: New mean value.
- * @rms: New rms value.
+ * @rms: New rms value (it must be non-negative).
  * @flags: Flags controlling normalisation.
  *
  * Normalises a field to speficied mean and rms.
@@ -398,6 +398,11 @@ gwy_field_normalize(GwyField *field,
 
     gdouble fmean = gwy_field_mean(field, rectangle, mask, masking);
     gdouble frms = gwy_field_rms(field, rectangle, mask, masking);
+    // If only rms is requested we must correct the shift to keep the mean.
+    if ((flags & GWY_NORMALIZE_RMS) && !(flags & GWY_NORMALIZE_MEAN)) {
+        mean = fmean;
+        flags |= GWY_NORMALIZE_MEAN;
+    }
     // Cleverly do the correct thing if rms == frms == 0.
     gdouble q = 1.0;
     if ((flags & GWY_NORMALIZE_RMS) && frms != rms) {
@@ -460,7 +465,7 @@ gwy_field_apply_func(GwyField *field,
         const gboolean invert = (masking == GWY_MASK_EXCLUDE);
         for (guint i = 0; i < height; i++) {
             gdouble *d = field->data + (row + i)*field->xres + col;
-            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow);
+            gwy_mask_field_iter_init(mask, iter, maskcol, maskrow + i);
             for (guint j = width; j; j--, d++) {
                 if (!gwy_mask_iter_get(iter) == invert)
                     *d = func(*d, user_data);
