@@ -394,7 +394,7 @@ row_convolve_fft(const GwyField *field,
  *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Convolve a field with a horizontal kernel.
  *
@@ -819,7 +819,7 @@ convolve_fft(const GwyField *field,
  *          the result fills the entire @target.
  * @kernel: Kenrel to convolve @field with.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Convolve a field with a two-dimensional kernel.
  *
@@ -906,7 +906,7 @@ make_gaussian_kernel(GwyLine *kernel,
  * @up: Number of pixels to extend up (towards lower row indices).
  * @down: Number of pixels to extend down (towards higher row indices).
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Extends a field using the specified method of exterior handling.
  *
@@ -970,7 +970,7 @@ gwy_field_extend(const GwyField *field,
  * @vsigma: Vertical sigma parameter (square root of dispersion) of the
  *          Gaussian, in pixels.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Filters a rectangular part of a field with a Gaussian filter.
  *
@@ -1184,7 +1184,7 @@ combined_gradient_filter(const GwyField *field,
  *          the result fills the entire @target.
  * @filter: Filter to apply.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Applies a predefined standard filter to a field.
  **/
@@ -1312,7 +1312,7 @@ gwy_field_filter_standard(const GwyField *field,
  *         non-rectangular detail.
  * @flags: Flags controlling correlation score calculation.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Calculates correlation scores for a detail searched in a field.
  **/
@@ -1817,7 +1817,7 @@ filter_median_gsequence(const GwyField *field,
  *          is taken.  XXX: At present its content is ignored, the shape is
  *          always a rectangle of @kernel dimensions.
  * @exterior: Exterior pixels handling.
- * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Processes a field with median filter.
  **/

@@ -29,6 +29,7 @@ public_headers = \
 	$(srcdir)/field-distributions.h \
 	$(srcdir)/field-filter.h \
 	$(srcdir)/field-level.h \
+	$(srcdir)/field-read.h \
 	$(srcdir)/field-statistics.h \
 	$(srcdir)/field-transform.h \
 	$(srcdir)/fitter.h \
@@ -105,6 +106,7 @@ libgwy3_la_SOURCES = \
 	field-distributions.c \
 	field-filter.c \
 	field-level.c \
+	field-read.c \
 	field-statistics.c \
 	field-transform.c \
 	fitter.c \

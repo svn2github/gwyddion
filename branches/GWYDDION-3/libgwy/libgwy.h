@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@
 #include <libgwy/field-distributions.h>
 #include <libgwy/field-filter.h>
 #include <libgwy/field-level.h>
+#include <libgwy/field-read.h>
 #include <libgwy/field-statistics.h>
 #include <libgwy/field-transform.h>
 #include <libgwy/fitter.h>

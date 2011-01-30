@@ -4,6 +4,9 @@ following exceptions:
 gwy_math_sort() is a straightforward specialization of GNU C library
     quicksort(), written by Douglas C. Schmidt, see libgwy/gwymath.c for more.
 
+Interpolation is partially based on code originally written by Petr Klapetek
+    for Gwyddion 1, see libgwy/interpolation.c for more.
+
 Kuwahara filter is based on implementation by Rok Zitko for Gwyddion 1, see
     libgwy/field-filter.c for more.
 
