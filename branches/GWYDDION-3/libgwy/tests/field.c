@@ -3087,16 +3087,10 @@ field_correlate_one(GwyCorrelationFlags flags)
 
         GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
         field_randomize(field, rng);
-        gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE,
-                           1.0/gwy_field_rms_full(field));
-        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE,
-                      -gwy_field_mean_full(field));
+        gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0, 0);
         GwyField *kernel = gwy_field_new_sized(kxres, kyres, FALSE);
         field_randomize(kernel, rng);
-        gwy_field_add(kernel, NULL, NULL, GWY_MASK_IGNORE,
-                      -gwy_field_mean_full(kernel));
-        gwy_field_multiply(kernel, NULL, NULL, GWY_MASK_IGNORE,
-                           1.0/gwy_field_rms_full(kernel));
+        gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0, 0);
         gwy_field_copy(kernel, NULL, field, col, row);
         GwyField *score = gwy_field_new_alike(field, FALSE);
 
