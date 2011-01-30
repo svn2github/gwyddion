@@ -1316,6 +1316,13 @@ gwy_field_filter_standard(const GwyField *field,
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
  *
  * Calculates correlation scores for a detail searched in a field.
+ *
+ * Similarly to correlations, the scores in @target correspond to kernel placed
+ * centered on the respective pixels.  This has the advantage that the detail
+ * can be found even if it stick out of the image a bit.  However, it also
+ * means that the top-left corner of the detail is shifted by
+ * (@kernel->yres-1)/2 upward and (@kernel->xres-1)/2 to the left with respect
+ * to the correspond score pixel.
  **/
 void
 gwy_field_correlate(const GwyField *field,
@@ -1372,6 +1379,7 @@ gwy_field_correlate(const GwyField *field,
         gwy_field_fill(target, &rect, NULL, GWY_MASK_IGNORE, 0.0);
         return;
     }
+    // Turn convolution into correlation.
     gwy_field_flip(maskedkernel, TRUE, TRUE, FALSE);
 
     guint xsize = gwy_fft_nice_transform_size(width + kxres - 1);
