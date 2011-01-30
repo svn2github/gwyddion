@@ -94,6 +94,7 @@ field/compatibility/res
 field/compatibility/real
 field/compatibility/units
 field/arithmetic/cache
+field/arithmetic/normalize
 field/level/row/mean
 field/level/row/median
 field/level/row/mean-diff
@@ -142,6 +143,8 @@ field/filter/standard/scharr
 field/filter/standard/step
 field/filter/standard/dechecker
 field/correlate/plain
+field/correlate/level
+field/correlate/normalize
 field/distributions/acf/full
 field/distributions/acf/masked
 field/distributions/acf/partial
