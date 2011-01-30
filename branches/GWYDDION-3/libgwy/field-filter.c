@@ -1426,7 +1426,7 @@ gwy_field_correlate(const GwyField *field,
     // reduce numerical errors.
     if (level) {
         gdouble mean = gwy_field_mean(field, rectangle, NULL, GWY_MASK_IGNORE);
-        for (guint k = 0; k < cstride*ysize; k++)
+        for (guint k = 0; k < xsize*ysize; k++)
             extdata[k] -= mean;
     }
     fftw_execute(dplan);
