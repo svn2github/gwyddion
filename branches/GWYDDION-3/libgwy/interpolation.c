@@ -160,8 +160,6 @@ gwy_interpolate_1d(gdouble x,
 {
     g_return_val_if_fail(x >= 0.0 && x <= 1.0, 0.0);
     guint suplen = gwy_interpolation_get_support_size(interpolation);
-    if (G_UNLIKELY(suplen == 0))
-        return 0.0;
     g_return_val_if_fail(suplen > 0, 0.0);
 
     gdouble w[SUPPORT_LENGTH_MAX];
@@ -200,8 +198,6 @@ gwy_interpolate_2d(gdouble x,
 
     g_return_val_if_fail(x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0, 0.0);
     suplen = gwy_interpolation_get_support_size(interpolation);
-    if (G_UNLIKELY(suplen == 0))
-        return 0.0;
     g_return_val_if_fail(suplen > 0, 0.0);
     gwy_interpolation_get_weights(x, interpolation, wx);
     gwy_interpolation_get_weights(y, interpolation, wy);
