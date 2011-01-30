@@ -846,6 +846,12 @@ gwy_interpolation_shift_block_1d(guint length,
  * #GwyField and #GwyLine methods offer the same functionality with a
  * more convenient interface.
  *
+ * Using interpolations with a non-interpolating basis requires some care.
+ * If the basis is interpolating the coefficients are identical to data values.
+ * However, for a non-interpolating basis they differ and have to be
+ * precalculated using functions such as gwy_interpolation_resolve_coeffs_2d()
+ * or their high-level equivalents such as gwy_field_interpolation_coeffs().
+ *
  * At present, Gwyddion implements two-point and four-point interpolations.
  * However, do not rely on this.  Generic code that works with any
  * interpolation type should always use gwy_interpolation_get_support_size()
@@ -887,14 +893,7 @@ gwy_interpolation_shift_block_1d(guint length,
  *                          left unset or set to bogus values, including NaN.
  *                          The caller must handle them afterwards, for
  *                          instance by resizing the result to consist of valid
- *                          data only.  Using undefined exterior is not
- *                          recommended with convolutions, correlations and
- *                          other methods thay may employ FFT as the bogus
- *                          values outside the field, thay may include
- *                          infinities and NaNs, enter the calculation and can
- *                          obliterate the result even in parts that should not
- *                          be affected if a direct, naive, computation method
- *                          was used.
+ *                          data only.
  * @GWY_EXTERIOR_BORDER_EXTEND: Values of exterior pixels are considered to be
  *                              equal to the values of the nearest interior
  *                              pixels.
@@ -920,6 +919,16 @@ gwy_interpolation_shift_block_1d(guint length,
  *
  * See also the generic functions gwy_field_extend() that can to apply the
  * extension methods to a field.
+ *
+ * <warning>Undefined exterior is sometimes the fastest method if you are not
+ * interested in the border values.  But it is often dangerous if the undefined
+ * values enter the calculation.  Then, even if the precise mathematical result
+ * does not depend on the exterior values, the actual result calculated using
+ * finite-precision floating point numbers can be still completely ruined.
+ * This occurs namely if the undefined exterior happens to contain NaNs or
+ * values such as 10³⁰⁰.  Therefore, convolutions and correlations that may be
+ * calculated using FFT and interpolations with non-interpolating basis must
+ * always be used only with a defined exterior.</warning>
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
