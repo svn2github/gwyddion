@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -2636,7 +2636,7 @@ field_convolve_field_one(GwyExteriorType exterior)
     enum { max_size = 30, niter = 200 };
 
     GRand *rng = g_rand_new();
-    g_rand_set_seed(rng, 46);
+    g_rand_set_seed(rng, 42);
 
     for (guint iter = 0; iter < niter; iter++) {
         guint xres = g_rand_int_range(rng, 1, max_size);
@@ -3046,6 +3046,81 @@ test_field_distributions_psdf_masked(void)
     g_object_unref(mask);
     g_object_unref(field);
     g_rand_free(rng);
+}
+
+static gdouble
+find_max(const GwyField *field,
+         guint *col, guint *row)
+{
+    gdouble max = -G_MAXDOUBLE;
+
+    *col = *row = 0;
+    for (guint k = 0; k < field->xres*field->yres; k++) {
+        if (field->data[k] > max) {
+            max = field->data[k];
+            *col = k % field->xres;
+            *row = k/field->xres;
+        }
+    }
+    return max;
+}
+
+static void
+field_correlate_one(GwyCorrelationFlags flags)
+{
+    enum { max_size = 54, niter = 200 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 48);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        // With too small kernels we can get higher correlation score elsewhere
+        // by a mere chance (at least without normalising).
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        guint kxres = g_rand_int_range(rng, 4, xres/2+1);
+        guint kyres = g_rand_int_range(rng, 4, yres/2+1);
+        guint col = g_rand_int_range(rng, 0, xres-kxres+1);
+        guint row = g_rand_int_range(rng, 0, yres-kyres+1);
+        guint kx0 = (kxres - 1)/2;
+        guint ky0 = (kyres - 1)/2;
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE,
+                           1.0/gwy_field_rms_full(field));
+        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE,
+                      -gwy_field_mean_full(field));
+        GwyField *kernel = gwy_field_new_sized(kxres, kyres, FALSE);
+        field_randomize(kernel, rng);
+        gwy_field_add(kernel, NULL, NULL, GWY_MASK_IGNORE,
+                      -gwy_field_mean_full(kernel));
+        gwy_field_multiply(kernel, NULL, NULL, GWY_MASK_IGNORE,
+                           1.0/gwy_field_rms_full(kernel));
+        gwy_field_copy(kernel, NULL, field, col, row);
+        GwyField *score = gwy_field_new_alike(field, FALSE);
+
+        gwy_field_correlate(field, NULL, score, kernel, NULL, flags,
+                            GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+
+        guint scol, srow;
+        gdouble maxscore = find_max(score, &scol, &srow);
+        g_assert_cmpuint(scol, ==, col + kx0);
+        g_assert_cmpuint(srow, ==, row + ky0);
+        g_assert_cmpfloat(maxscore, >=, 0.999);
+        g_assert_cmpfloat(maxscore, <, 1.001);
+
+        g_object_unref(score);
+        g_object_unref(kernel);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_correlate_plain(void)
+{
+    field_correlate_one(0);
 }
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
