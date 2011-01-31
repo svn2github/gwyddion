@@ -144,6 +144,7 @@ field/filter/standard/step
 field/filter/standard/dechecker
 field/correlate/plain
 field/correlate/level
+field/correlate/scale-rms
 field/correlate/normalize
 field/distributions/acf/full
 field/distributions/acf/masked

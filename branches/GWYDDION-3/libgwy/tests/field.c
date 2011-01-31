@@ -2704,13 +2704,6 @@ field_convolve_field_one(GwyExteriorType exterior)
         GwyRectangle rectangle = { col, row, width, height };
         gwy_field_convolve(field, &rectangle, field, kernel, exterior, G_E);
 
-        /*
-        print_field("source", source);
-        print_field("kernel", kernel);
-        g_printerr("col=%u, row=%u, width=%u, height=%u\n", col, row, width, height);
-        print_field("result", field);
-        */
-
         // Everything outside @rectangle must be equal to @source.
         // Data inside @rectangle must be equal to @source data shifted
         // down by kyres-1 - ypos - (ykres-1)/2
@@ -3110,7 +3103,7 @@ find_max(const GwyField *field,
 void
 test_field_correlate_plain(void)
 {
-    enum { max_size = 54, niter = 150 };
+    enum { max_size = 54, niter = 40 };
 
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
@@ -3159,7 +3152,7 @@ test_field_correlate_plain(void)
 void
 test_field_correlate_level(void)
 {
-    enum { max_size = 54, niter = 150 };
+    enum { max_size = 54, niter = 40 };
 
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
@@ -3208,9 +3201,9 @@ test_field_correlate_level(void)
 }
 
 void
-test_field_correlate_normalize(void)
+test_field_correlate_scale_rms(void)
 {
-    enum { max_size = 54, niter = 150 };
+    enum { max_size = 54, niter = 40 };
 
     GRand *rng = g_rand_new();
     g_rand_set_seed(rng, 42);
@@ -3242,6 +3235,59 @@ test_field_correlate_normalize(void)
 
         gwy_field_correlate(field, NULL, score, kernel, NULL,
                             GWY_CORRELATION_NORMALIZE,
+                            GWY_EXTERIOR_BORDER_EXTEND, 0.0);
+
+        guint scol, srow;
+        gdouble maxscore = find_max(score, &scol, &srow);
+        g_assert_cmpuint(scol, ==, col + kx0);
+        g_assert_cmpuint(srow, ==, row + ky0);
+        g_assert_cmpfloat(maxscore, >=, 0.999);
+        g_assert_cmpfloat(maxscore, <, 1.001);
+
+        g_object_unref(score);
+        g_object_unref(kernel);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
+void
+test_field_correlate_normalize(void)
+{
+    enum { max_size = 54, niter = 40 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        // With too small kernels we can get higher correlation score elsewhere
+        // by a mere chance (at least without normalising).
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        guint kxres = g_rand_int_range(rng, 4, xres/2+1);
+        guint kyres = g_rand_int_range(rng, 4, yres/2+1);
+        guint col = g_rand_int_range(rng, 0, xres-kxres+1);
+        guint row = g_rand_int_range(rng, 0, yres-kyres+1);
+        guint kx0 = (kxres - 1)/2;
+        guint ky0 = (kyres - 1)/2;
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
+                            GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
+        GwyField *kernel = gwy_field_new_sized(kxres, kyres, FALSE);
+        field_randomize(kernel, rng);
+        gwy_field_normalize(kernel, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
+                            GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
+        gwy_field_copy(kernel, NULL, field, col, row);
+        gwy_field_multiply(field, NULL, NULL, GWY_MASK_IGNORE,
+                           -log(g_rand_double(rng)));
+        gwy_field_add(field, NULL, NULL, GWY_MASK_IGNORE,
+                      20.0*(g_rand_double(rng) - 0.5));
+        GwyField *score = gwy_field_new_alike(field, FALSE);
+
+        gwy_field_correlate(field, NULL, score, kernel, NULL,
+                            GWY_CORRELATION_LEVEL | GWY_CORRELATION_NORMALIZE,
                             GWY_EXTERIOR_BORDER_EXTEND, 0.0);
 
         guint scol, srow;
