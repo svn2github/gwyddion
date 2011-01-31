@@ -48,7 +48,9 @@
         repository.  On openSUSE, it is necessary to add additional package
         repositories <filename>windows:mingw:win32/openSUSE_11.3</filename> and
         <filename>devel:tools/openSUSE_11.3</filename>, where 11.3 is of course to
-        be replaced with the actual openSUSE version.
+        be replaced with the actual openSUSE version.  In unsure, you can also look
+        up the packages in the on-line
+        <ulink url='http://software.opensuse.org/'>openSUSE package search</ulink>.
       </para>
       <para>
         Run as root:
@@ -57,7 +59,9 @@
 yum install mingw32-{gcc-c++,gtk2,libxml2}
 
 # openSUSE
-zypper install mingw32-{cross-gcc,cross-gcc-c++,cross-pkg-config,gtk2-devel,libxml2-devel,fftw3-devel}</userinput></literallayout>
+zypper install mingw32-cross-{gcc,gcc-c++,pkg-config} \
+               mingw32-{gtk2,expat,libxml2,fftw3,libjasper,libcairo2} \
+               mingw32-{gtk2,libxml2,fftw3,libjasper,libcairo2}-devel</userinput></literallayout>
         </informalexample>
         to install the necessary mingw32 packages (several more packages will
         be installed as dependencies of those explicitly given here).
@@ -122,7 +126,11 @@ zypper install wine</userinput></literallayout>
         them using <command>yum install</command> as before.  The created
         package can then be installed as root:
         <informalexample>
-          <literallayout><userinput>yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
+          <literallayout><userinput>#Fedora
+yum localinstall --nogpgcheck ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm
+
+# openSUSE
+zypper install ~/rpmbuild/RPM/RPMS/noarch/mingw32-3.2.2-1.noarch.rpm</userinput></literallayout>
         </informalexample>
         The same applies to <filename>mingw32-gtkglext</filename> (all built
         RPMs can be installed at once with a single <command>yum</command> or
@@ -132,9 +140,14 @@ zypper install wine</userinput></literallayout>
         If you have never built any RPM the package building support has to be
         installed and initialised first.  Run as root:
         <informalexample>
-          <literallayout><userinput>yum install rpm-build rpmdevtools</userinput></literallayout>
+          <literallayout><userinput># Fedora
+yum install rpm-build rpmdevtools
+
+# openSUSE
+zypper install rpmdevtools
+          </userinput></literallayout>
         </informalexample>
-        and then as the user who is going to build the RPMs:
+        and then as a normal user (who is going to build the RPMs):
         <informalexample>
           <literallayout><userinput>rpmdev-setuptree</userinput></literallayout>
         </informalexample>
