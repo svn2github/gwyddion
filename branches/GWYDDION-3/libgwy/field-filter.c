@@ -1468,7 +1468,7 @@ gwy_field_correlate(const GwyField *field,
             const gdouble *srow = extkernelbase + i*xsize;
             gdouble *trow = targetbase + i*target->xres;
             for (guint j = 0; j < width; j++)
-                trow[i] -= srow[i]*kavg;
+                trow[j] -= srow[j]*kavg;
         }
     }
 
@@ -1488,14 +1488,14 @@ gwy_field_correlate(const GwyField *field,
             gdouble *trow = targetbase + i*target->xres;
             if (level) {
                 for (guint j = 0; j < width; j++) {
-                    gdouble q = qrow[i] - srow[i]*srow[i];
-                    trow[i] = (q > 0.0) ? trow[i]/sqrt(q) : 0.0;
+                    gdouble q = qrow[j] - srow[j]*srow[j];
+                    trow[j] = (q > 0.0) ? trow[j]/sqrt(q) : 0.0;
                 }
             }
             else {
                 for (guint j = 0; j < width; j++) {
-                    gdouble q = qrow[i];
-                    trow[i] = G_LIKELY(q) ? trow[i]/sqrt(q) : 0.0;
+                    gdouble q = qrow[j];
+                    trow[j] = G_LIKELY(q) ? trow[j]/sqrt(q) : 0.0;
                 }
             }
         }
