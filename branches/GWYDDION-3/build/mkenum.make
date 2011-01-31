@@ -30,7 +30,8 @@ $(mkenum_name).h.stamp: $(mkenum_headers) $(mkenum_h_template)
 	&& ( cmp -s $(mkenum_name).h.tmp $(mkenum_name).h \
 		|| cp $(mkenum_name).h.tmp $(mkenum_name).h ) \
 	&& rm -f $(mkenum_name).h.tmp \
-	&& echo timestamp >$(mkenum_name).h.stamp
+	&& echo timestamp >$(mkenum_name).h.stamp \
+	&& touch $(mkenum_name).h
 
 $(mkenum_name).c: $(mkenum_headers) $(mkenum_c_template)
 	$(AM_V_GEN) $(GLIB_MKENUMS) --template $(mkenum_c_template) $(mkenum_headers) \
