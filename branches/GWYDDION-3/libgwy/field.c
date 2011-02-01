@@ -731,6 +731,38 @@ gwy_field_new_resampled(const GwyField *field,
 }
 
 /**
+ * gwy_field_new_from_mask:
+ * @mask: Two-dimensional mask field used as a template for the created field.
+ * @zero: Field value that will correspond to zeroes in the mask.
+ * @one: Field value that will correspond to ones in the mask.
+ *
+ * Creates a new two-dimensional data field from a mask field.
+ *
+ * Returns: A new two-dimensional data field.
+ **/
+GwyField*
+gwy_field_new_from_mask(const GwyMaskField *mask,
+                        gdouble zero,
+                        gdouble one)
+{
+    g_return_val_if_fail(GWY_IS_MASK_FIELD(mask), NULL);
+
+    guint xres = mask->xres, yres = mask->yres;
+    GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+    GwyMaskIter iter;
+    for (guint i = 0; i < yres; i++) {
+        gdouble *d = field->data + i*xres;
+        gwy_mask_field_iter_init(mask, iter, 0, i);
+        for (guint j = xres; j; j--, d++) {
+            *d = gwy_mask_iter_get(iter) ? one : zero;
+            gwy_mask_iter_next(iter);
+        }
+    }
+
+    return field;
+}
+
+/**
  * gwy_field_set_size:
  * @field: A two-dimensional data field.
  * @xres: Desired X resolution.

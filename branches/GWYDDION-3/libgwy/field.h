@@ -82,6 +82,9 @@ GwyField*       gwy_field_new_resampled(const GwyField *field,
                                         guint xres,
                                         guint yres,
                                         GwyInterpolationType interpolation) G_GNUC_MALLOC;
+GwyField*       gwy_field_new_from_mask(const GwyMaskField *mask,
+                                        gdouble zero,
+                                        gdouble one)                        G_GNUC_MALLOC;
 void            gwy_field_set_size     (GwyField *field,
                                         guint xres,
                                         guint yres,
