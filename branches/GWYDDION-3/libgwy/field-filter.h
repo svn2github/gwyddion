@@ -50,6 +50,11 @@ typedef enum {
     GWY_CORRELATION_PHASE_ONLY = 1 << 2,
 } GwyCorrelationFlags;
 
+typedef enum {
+    GWY_CROSSCORRELATION_LEVEL      = 1 << 0,
+    GWY_CROSSCORRELATION_NORMALIZE  = 1 << 1,
+} GwyCrosscorrelationFlags;
+
 GwyField* gwy_field_extend         (const GwyField *field,
                                     const GwyRectangle *rectangle,
                                     guint left,
@@ -57,7 +62,7 @@ GwyField* gwy_field_extend         (const GwyField *field,
                                     guint up,
                                     guint down,
                                     GwyExteriorType exterior,
-                                    gdouble fill_value)            G_GNUC_MALLOC;
+                                    gdouble fill_value)             G_GNUC_MALLOC;
 void      gwy_field_row_convolve   (const GwyField *field,
                                     const GwyRectangle* rectangle,
                                     GwyField *target,
@@ -91,10 +96,22 @@ void      gwy_field_filter_median  (const GwyField *field,
                                     gdouble fill_value);
 void      gwy_field_correlate      (const GwyField *field,
                                     const GwyRectangle* rectangle,
-                                    GwyField *target,
+                                    GwyField *score,
                                     const GwyField *kernel,
                                     const GwyMaskField *kmask,
                                     GwyCorrelationFlags flags,
+                                    GwyExteriorType exterior,
+                                    gdouble fill_value);
+void      gwy_field_crosscorrelate (const GwyField *field,
+                                    const GwyField *reference,
+                                    const GwyRectangle* rectangle,
+                                    GwyField *score,
+                                    GwyField *xoff,
+                                    GwyField *yoff,
+                                    const GwyMaskField *kernel,
+                                    guint colsearch,
+                                    guint rowsearch,
+                                    GwyCrosscorrelationFlags flags,
                                     GwyExteriorType exterior,
                                     gdouble fill_value);
 

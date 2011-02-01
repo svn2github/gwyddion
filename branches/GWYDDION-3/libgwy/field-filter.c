@@ -36,7 +36,10 @@
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
-enum { CORRELATION_ALL = 0x07 };
+enum {
+    CORRELATION_ALL = 0x07,
+    CROSSCORRELATION_ALL = 0x0b,
+};
 
 typedef void (*RowExtendFunc)(const gdouble *in,
                               gdouble *out,
@@ -1354,11 +1357,11 @@ gwy_field_filter_standard(const GwyField *field,
  * gwy_field_correlate:
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @target: A two-dimensional data field where the result will be placed.
+ * @score: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the
  *          placement of result is determined by @rectangle; in the latter case
- *          the result fills the entire @target.
+ *          the result fills the entire @score.
  * @kernel: Kernel, i.e. the detail for which the correlation score is
  *          calculated.  It is always used as-is.  If you want it to have zero
  *          mean and rms of unity (which you often want) it is easy to ensure
@@ -1373,7 +1376,7 @@ gwy_field_filter_standard(const GwyField *field,
  *
  * Calculates correlation scores for a detail searched in a field.
  *
- * Similarly to correlations, the scores in @target correspond to kernel placed
+ * Similarly to correlations, the scores in @scores correspond to kernel placed
  * centered on the respective pixels.  This has the advantage that the detail
  * can be found even if it stick out of the image a bit.  However, it also
  * means that the top-left corner of the detail is shifted by
@@ -1383,18 +1386,18 @@ gwy_field_filter_standard(const GwyField *field,
 void
 gwy_field_correlate(const GwyField *field,
                     const GwyRectangle* rectangle,
-                    GwyField *target,
+                    GwyField *score,
                     const GwyField *kernel,
                     const GwyMaskField *kmask,
                     GwyCorrelationFlags flags,
                     GwyExteriorType exterior,
                     gdouble fill_value)
 {
-    guint col, row, width, height, targetcol, targetrow;
+    guint col, row, width, height, scorecol, scorerow;
     if (!_gwy_field_check_rectangle(field, rectangle,
                                     &col, &row, &width, &height)
-        || !_gwy_field_check_target(field, target, col, row, width, height,
-                                    &targetcol, &targetrow))
+        || !_gwy_field_check_target(field, score, col, row, width, height,
+                                    &scorecol, &scorerow))
         return;
 
     if (kmask) {
@@ -1409,7 +1412,8 @@ gwy_field_correlate(const GwyField *field,
         return;
 
     if (flags & ~CORRELATION_ALL)
-        g_warning("Unknown correlation flags 0x%x.", flags & ~CORRELATION_ALL);
+        g_warning("Unknown correlation flags 0x%x.",
+                  flags & ~CORRELATION_ALL);
 
     gboolean level = flags & GWY_CORRELATION_LEVEL;
     gboolean normalise = flags & GWY_CORRELATION_NORMALIZE;
@@ -1431,8 +1435,8 @@ gwy_field_correlate(const GwyField *field,
     guint kcount = kmask ? gwy_mask_field_count(kmask, NULL, TRUE) : kxres*kyres;
     if (!kcount) {
         g_object_unref(maskedkernel);
-        GwyRectangle rect = { targetcol, targetrow, width, height };
-        gwy_field_fill(target, &rect, NULL, GWY_MASK_IGNORE, 0.0);
+        GwyRectangle rect = { scorecol, scorerow, width, height };
+        gwy_field_clear(score, &rect, NULL, GWY_MASK_IGNORE);
         return;
     }
     // Turn convolution into correlation.
@@ -1454,7 +1458,7 @@ gwy_field_correlate(const GwyField *field,
     gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
     gdouble *extdata = fftw_malloc(xsize*ysize*sizeof(gdouble));
     gdouble *extkernel = fftw_malloc(xsize*ysize*sizeof(gdouble));
-    gdouble *targetbase = target->data + targetrow*target->xres + targetcol;
+    gdouble *scorebase = score->data + scorerow*score->xres + scorecol;
     gdouble *extkernelbase = extkernel + extend_up*xsize + extend_left;
     gdouble *extdatabase = extdata + extend_up*xsize + extend_left;
     // The out-of-place R2C plan.  We use it with the new-array excution
@@ -1497,9 +1501,9 @@ gwy_field_correlate(const GwyField *field,
     }
     fftw_execute_dft_c2r(cplan, kernelc, extkernel);
 
-    // Store the result of the plain correlation to the target.
+    // Store the result of the plain correlation to the score.
     for (guint i = 0; i < height; i++)
-        gwy_assign(targetbase + i*target->xres, extkernelbase + i*xsize, width);
+        gwy_assign(scorebase + i*score->xres, extkernelbase + i*xsize, width);
 
     // Levelling is done by calculating the local mean values by convolution
     // with 1-filled kernel.  Similarly, the local mean square values are
@@ -1520,7 +1524,7 @@ gwy_field_correlate(const GwyField *field,
         fftw_execute_dft_c2r(cplan, datac, extkernel);
         for (guint i = 0; i < height; i++) {
             const gdouble *srow = extkernelbase + i*xsize;
-            gdouble *trow = targetbase + i*target->xres;
+            gdouble *trow = scorebase + i*score->xres;
             for (guint j = 0; j < width; j++)
                 trow[j] -= srow[j]*kavg;
         }
@@ -1539,7 +1543,7 @@ gwy_field_correlate(const GwyField *field,
         for (guint i = 0; i < height; i++) {
             const gdouble *srow = extkernelbase + i*xsize;
             const gdouble *qrow = extdatabase + i*xsize;
-            gdouble *trow = targetbase + i*target->xres;
+            gdouble *trow = scorebase + i*score->xres;
             if (level) {
                 for (guint j = 0; j < width; j++) {
                     gdouble q = qrow[j] - srow[j]*srow[j];
@@ -1563,20 +1567,162 @@ gwy_field_correlate(const GwyField *field,
     fftw_free(extdata);
     g_object_unref(maskedkernel);
 
-    if (target != field)
-        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
+    if (score != field)
+        ASSIGN_UNITS(score->priv->unit_xy, field->priv->unit_xy);
 
     if (normalise) {
-        ASSIGN_UNITS(target->priv->unit_z, kernel->priv->unit_z);
+        ASSIGN_UNITS(score->priv->unit_z, kernel->priv->unit_z);
     }
-    else if (target->priv->unit_z || field->priv->unit_z) {
+    else if (score->priv->unit_z || field->priv->unit_z) {
         // Force instantiation of units
-        gwy_unit_multiply(gwy_field_get_unit_z(target),
+        gwy_unit_multiply(gwy_field_get_unit_z(score),
                           gwy_field_get_unit_z(kernel),
                           gwy_field_get_unit_z(field));
     }
 
-    gwy_field_invalidate(target);
+    gwy_field_invalidate(score);
+}
+
+void
+gwy_field_crosscorrelate(const GwyField *field,
+                         const GwyField *reference,
+                         const GwyRectangle* rectangle,
+                         GwyField *score,
+                         GwyField *xoff,
+                         GwyField *yoff,
+                         const GwyMaskField *kernel,
+                         guint colsearch,
+                         guint rowsearch,
+                         GwyCrosscorrelationFlags flags,
+                         GwyExteriorType exterior,
+                         gdouble fill_value)
+{
+    // Check if all target fields are compatible; @target is set to whatever
+    // of them is non-NULL.
+    GwyField *target = NULL;
+    if (score) {
+        g_return_if_fail(GWY_IS_FIELD(score));
+        target = score;
+    }
+    if (xoff) {
+        g_return_if_fail(GWY_IS_FIELD(xoff));
+        if (target)
+            g_return_if_fail(target->xres == xoff->xres
+                             && target->yres == xoff->yres);
+        else
+            target = xoff;
+    }
+    if (yoff) {
+        g_return_if_fail(GWY_IS_FIELD(yoff));
+        if (target)
+            g_return_if_fail(target->xres == yoff->xres
+                             && target->yres == yoff->yres);
+        else
+            target = yoff;
+    }
+    if (!target)
+        return;
+
+    guint col, row, width, height, targetcol, targetrow;
+    if (!_gwy_field_check_rectangle(field, rectangle,
+                                    &col, &row, &width, &height)
+        || !_gwy_field_check_target(field, target, col, row, width, height,
+                                    &targetcol, &targetrow))
+        return;
+
+    g_return_if_fail(GWY_IS_FIELD(kernel));
+    g_return_if_fail(GWY_IS_FIELD(reference));
+    g_return_if_fail(reference->xres == field->xres
+                     && reference->yres == field->yres);
+
+    ensure_defined_exterior(&exterior, &fill_value);
+    RectExtendFunc extend_rect = get_rect_extend_func(exterior);
+    if (!extend_rect)
+        return;
+
+    if (flags & ~CROSSCORRELATION_ALL)
+        g_warning("Unknown correlation flags 0x%x.",
+                  flags & ~CROSSCORRELATION_ALL);
+
+    gboolean level = flags & GWY_CROSSCORRELATION_LEVEL;
+    gboolean normalise = flags & GWY_CROSSCORRELATION_NORMALIZE;
+
+    guint kcount = gwy_mask_field_count(kernel, NULL, TRUE);
+
+    if (!kcount) {
+        GwyRectangle rect = { targetcol, targetrow, width, height };
+        if (score)
+            gwy_field_clear(score, &rect, NULL, GWY_MASK_IGNORE);
+        if (xoff)
+            gwy_field_clear(xoff, &rect, NULL, GWY_MASK_IGNORE);
+        if (yoff)
+            gwy_field_clear(yoff, &rect, NULL, GWY_MASK_IGNORE);
+        return;
+    }
+
+    // Turn convolution into correlation.
+    GwyField *unitkernel = gwy_field_new_from_mask(kernel, 0.0, 1.0);
+    gwy_field_flip(unitkernel, TRUE, TRUE, FALSE);
+
+    guint xres = field->xres, yres = field->yres,
+          kxres = unitkernel->xres, kyres = unitkernel->yres;
+
+    GwyField *fieldmean = NULL, *referencemean = NULL,
+             *fieldrms = NULL, *referencerms = NULL;
+
+    // TODO
+    guint xsize = gwy_fft_nice_transform_size(width + 2*colsearch + kxres - 1);
+    guint ysize = gwy_fft_nice_transform_size(height + 2*rowsearch + kyres - 1);
+    // The innermost (contiguous) dimension of R2C the complex output is
+    // slightly larger than the real input.  If the transform is in-place the
+    // input array needs to be padded.  Note @cstride is measured in
+    // gwycomplex, multiply it by 2 for doubles.
+    guint cstride = xsize/2 + 1;
+    guint extend_left, extend_right, extend_up, extend_down;
+    // Can overflow guint.
+    gdouble qnorm = 1.0/xsize/ysize/kcount;
+    make_symmetrical_extension(width, xsize, &extend_left, &extend_right);
+    make_symmetrical_extension(height, ysize, &extend_up, &extend_down);
+    gwycomplex *datac = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
+    gdouble *extdata = fftw_malloc(xsize*ysize*sizeof(gdouble));
+    gdouble *extkernel = fftw_malloc(xsize*ysize*sizeof(gdouble));
+    gdouble *extkernelbase = extkernel + extend_up*xsize + extend_left;
+    gdouble *extdatabase = extdata + extend_up*xsize + extend_left;
+
+    // The plan:
+    // 1. Create FFTW plans.
+    // 2. Transform the kernel.
+    // 3a. Calculate fieldmean by transforming field, multiplying with kernel
+    //     and transforming back.
+    // 3b. Calculate fieldrms by transforming squared field, multiplying with
+    //     kernel and transforming back.
+    // 3c. Similarly, calculate referencemean.
+    // 3d. Similarly, calculate referencerms.
+    // 4. For each coulple of offsets within the ellpse,
+    //    multiply field with shifted reference (or the other way round)
+    //    and convolve the result with the kernel.
+    //    Possibly modify the result using precalculated mean and rms (they
+    //    must be used shifted for one of the fields).
+    // 5. Profit!
+    //
+    // XXX: We cannot do subpixel precision this way as it would require insane
+    // storage.  We could perform all the DFTs second time after finding the
+    // maxima but that's perhaps too much.
+    // XXX: What about passing the offsets as integers?
+
+
+    GWY_OBJECT_UNREF(referencerms);
+    GWY_OBJECT_UNREF(fieldrms);
+    GWY_OBJECT_UNREF(referencemean);
+    GWY_OBJECT_UNREF(fieldmean);
+    g_object_unref(unitkernel);
+    if (score)
+        gwy_field_invalidate(score);
+    if (xoff)
+        gwy_field_invalidate(xoff);
+    if (yoff)
+        gwy_field_invalidate(yoff);
 }
 
 /* Find the median of an array of pointers to doubles, shuffling the pointers
@@ -2055,10 +2201,10 @@ gwy_field_filter_median(const GwyField *field,
 
 /**
  * GwyCorrelationFlags:
- * @GWY_CORRELATION_LEVEL: Subtract the mean value from each kernel-sized
- *                         rectangle before multiplying it with the kernel to
+ * @GWY_CORRELATION_LEVEL: Subtract the local mean value from each kernel-sized
+ *                         area before multiplying it with the kernel to
  *                         obtain the correlation score.
- * @GWY_CORRELATION_NORMALIZE: Normalise the rms of each kernel-sized rectangle
+ * @GWY_CORRELATION_NORMALIZE: Normalise the rms of each kernel-sized area
  *                             before multiplying it with the kernel to obtain
  *                             the correlation score.
  * @GWY_CORRELATION_PHASE_ONLY: Normalise all Fourier coefficients of both
@@ -2073,6 +2219,27 @@ gwy_field_filter_median(const GwyField *field,
  * well-defined zero level, such as AFM data.
  *
  * If kernel masking is in use the levelling and normalisation is applied only
+ * to the corresponding masked area in data.  If both flags are specified local
+ * levelling is performed first, then normalisation.  Note even if levelling
+ * and normalisation are used correlation scores are still calculated using
+ * FFT, just in a slightly more involved way.
+ **/
+
+/**
+ * GwyCorrelationFlags:
+ * @GWY_CROSSCORRELATION_LEVEL: Subtract the local mean values from the
+ *                              kernel-sized areas before multiplying them to
+ *                              obtain the correlation score.
+ * @GWY_CROSSCORRELATION_NORMALIZE: Normalise the rms of the kernel-sized areas
+ *                                  before multiplying them to obtain
+ *                                  the correlation score.
+ *
+ * Flags controlling behaviour of cross-correlation functions.
+ *
+ * Flag %GWY_CORRELATION_LEVEL should be usually used for data that do not have
+ * well-defined zero level, such as AFM data.
+ *
+ * The levelling and normalisation is applied only
  * to the corresponding masked area in data.  If both flags are specified local
  * levelling is performed first, then normalisation.  Note even if levelling
  * and normalisation are used correlation scores are still calculated using
