@@ -1085,11 +1085,47 @@ step_block(gdouble *a)
     return a[15] - a[5];
 }
 
+static gdouble
+nonlinearity_block(gdouble *a,
+                   gdouble dx,
+                   gdouble dy)
+{
+    gdouble m = (a[1] + a[2] + a[3]
+                 + a[5] + a[6] + a[7] + a[8] + a[9]
+                 + a[10] + a[11] + a[12] + a[13] + a[14]
+                 + a[15] + a[16] + a[17] + a[18] + a[19]
+                 + a[21] + a[22] + a[23])/21.0;
+    gdouble bx = (((a[3] - a[1]) + (a[8] - a[6]) + (a[13] - a[11])
+                   + (a[18] - a[16]) + (a[23] - a[21]))/32.0
+                  + ((a[9] - a[5]) + (a[14] - a[10])
+                     + (a[19] - a[15]))/16.0)/dx;
+    gdouble by = (((a[15] - a[5]) + (a[16] - a[6]) + (a[17] - a[7])
+                   + (a[18] - a[8]) + (a[19] - a[9]))/32.0
+                  + ((a[21] - a[1]) + (a[22] - a[2])
+                     + (a[23] - a[3]))/16.0)/dy;
+    gdouble w2 = bx*bx + by*by;
+    gdouble s2 = ((a[1] - m)*(a[1] - m) + (a[2] - m)*(a[2] - m)
+                  + (a[3] - m)*(a[3] - m) + (a[5] - m)*(a[5] - m)
+                  + (a[6] - m)*(a[6] - m) + (a[7] - m)*(a[7] - m)
+                  + (a[8] - m)*(a[8] - m) + (a[9] - m)*(a[9] - m)
+                  + (a[10] - m)*(a[10] - m) + (a[11] - m)*(a[11] - m)
+                  + (a[12] - m)*(a[12] - m) + (a[13] - m)*(a[13] - m)
+                  + (a[14] - m)*(a[14] - m) + (a[15] - m)*(a[15] - m)
+                  + (a[16] - m)*(a[16] - m) + (a[17] - m)*(a[17] - m)
+                  + (a[18] - m)*(a[18] - m) + (a[19] - m)*(a[19] - m)
+                  + (a[21] - m)*(a[21] - m) + (a[22] - m)*(a[22] - m)
+                  + (a[23] - m)*(a[23] - m))/21.0;
+    gdouble nlin = (s2 - w2)/(1.0 + w2);
+
+    // It should be > 0 except for rounding errors.
+    return nlin > 0.0 ? sqrt(nlin) : 0.0;
+}
+
 static void
 filter_5x5(const GwyField *field,
            const GwyRectangle* rectangle,
            GwyField *target,
-           DoubleArrayFunc process_block,
+           GwyFilterType filter,
            GwyExteriorType exterior,
            gdouble fill_value)
 {
@@ -1107,6 +1143,7 @@ filter_5x5(const GwyField *field,
     guint xres = field->xres, yres = field->yres;
     guint xsize = width + 4;
     guint ysize = height + 4;
+    gdouble dx = gwy_field_dx(field), dy = gwy_field_dy(field);
     gdouble *extdata = g_new(gdouble, xsize*ysize);
     gdouble workspace[25];
     extend_rect(field->data, xres, extdata, xsize,
@@ -1117,7 +1154,16 @@ filter_5x5(const GwyField *field,
         for (guint j = 0; j < width; j++, trow++) {
             for (guint ii = 0; ii < 5; ii++)
                 gwy_assign(workspace + 5*ii, extdata + (i + ii)*xsize + j, 5);
-            *trow = process_block(workspace);
+
+            if (filter == GWY_FILTER_KUWAHARA)
+                *trow = kuwahara_block(workspace);
+            else if (filter == GWY_FILTER_STEP)
+                *trow = step_block(workspace);
+            else if (filter == GWY_FILTER_NONLINEARITY)
+                *trow = nonlinearity_block(workspace, dx, dy);
+            else {
+                g_return_if_reached();
+            }
         }
     }
 
@@ -1248,12 +1294,10 @@ gwy_field_filter_standard(const GwyField *field,
     };
 
 
-    if (filter == GWY_FILTER_KUWAHARA)
-        filter_5x5(field, rectangle, target, kuwahara_block,
-                   exterior, fill_value);
-    if (filter == GWY_FILTER_STEP)
-        filter_5x5(field, rectangle, target, step_block,
-                   exterior, fill_value);
+    if (filter == GWY_FILTER_KUWAHARA
+        || filter == GWY_FILTER_STEP
+        || filter == GWY_FILTER_NONLINEARITY)
+        filter_5x5(field, rectangle, target, filter, exterior, fill_value);
     else if (filter == GWY_FILTER_SOBEL)
         combined_gradient_filter(field, rectangle, target,
                                  hsobel, vsobel, 3, 3,
@@ -1917,6 +1961,9 @@ gwy_field_filter_median(const GwyField *field,
  * @GWY_FILTER_STEP: Non-linear rank-based step detection filter.  It is
  *                   somewhat more smoothing than Sobel, Prewitt and Scharr but
  *                   considerably more noise-resistant.
+ * @GWY_FILTER_NONLINEARITY: Local non-linearity edge detection filter.
+ *                           It really detects edges, not steps as most other
+ *                           filters do.
  *
  * Predefined standard filter types.
  *
@@ -1972,6 +2019,10 @@ gwy_field_filter_median(const GwyField *field,
  * an approximately circular area is processed.  The 21 remaining values are
  * then sorted and the difference between the 16th and 6th value forms the
  * filter result.
+ *
+ * The local non-linearity filter works on the same neighbourhoods as the step
+ * filter.  It calculates the residuum after fitting a plane through the
+ * neighbourhood, but normalised by the area of this plane.
  **/
 
 /**
