@@ -868,6 +868,16 @@ gwy_field_convolve(const GwyField *field,
                      kernel, extend_rect, fill_value);
     }
 
+    if (target != field)
+        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
+
+    if (target->priv->unit_z || field->priv->unit_z) {
+        // Force instantiation of units
+        gwy_unit_multiply(gwy_field_get_unit_z(target),
+                          gwy_field_get_unit_z(kernel),
+                          gwy_field_get_unit_z(field));
+    }
+
     gwy_field_invalidate(target);
 }
 
@@ -1553,6 +1563,19 @@ gwy_field_correlate(const GwyField *field,
     fftw_free(extdata);
     g_object_unref(maskedkernel);
 
+    if (target != field)
+        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
+
+    if (normalise) {
+        ASSIGN_UNITS(target->priv->unit_z, kernel->priv->unit_z);
+    }
+    else if (target->priv->unit_z || field->priv->unit_z) {
+        // Force instantiation of units
+        gwy_unit_multiply(gwy_field_get_unit_z(target),
+                          gwy_field_get_unit_z(kernel),
+                          gwy_field_get_unit_z(field));
+    }
+
     gwy_field_invalidate(target);
 }
 
@@ -1909,6 +1932,11 @@ gwy_field_filter_median(const GwyField *field,
         filter_median_direct(field, col, row, width, height,
                              target, targetcol, targetrow, kernel,
                              extend_rect, fill_value);
+
+    if (target != field) {
+        ASSIGN_UNITS(target->priv->unit_xy, field->priv->unit_xy);
+        ASSIGN_UNITS(target->priv->unit_z, field->priv->unit_z);
+    }
 
     gwy_field_invalidate(target);
 }
