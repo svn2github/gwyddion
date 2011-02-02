@@ -89,7 +89,7 @@ BUILT_SOURCES =
 # lib_LTLIBRARIES must be a literal, no variables
 lib_LTLIBRARIES = libgwy3.la
 nodist_libgwyinclude_HEADERS = $(public_built_headers)
-libgwyinclude_HEADERS = $(library_headers)
+libgwyinclude_HEADERS = $(public_headers)
 toplevelinclude_HEADERS = $(main_header)
 noinst_HEADERS = $(private_headers)
 
