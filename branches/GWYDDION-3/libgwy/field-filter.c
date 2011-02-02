@@ -2311,7 +2311,7 @@ gwy_field_filter_median(const GwyField *field,
  **/
 
 /**
- * GwyCorrelationFlags:
+ * GwyCrosscorrelationFlags:
  * @GWY_CROSSCORRELATION_LEVEL: Subtract the local mean values from the
  *                              kernel-sized areas before multiplying them to
  *                              obtain the correlation score.
@@ -2321,14 +2321,14 @@ gwy_field_filter_median(const GwyField *field,
  *
  * Flags controlling behaviour of cross-correlation functions.
  *
- * Flag %GWY_CORRELATION_LEVEL should be usually used for data that do not have
- * well-defined zero level, such as AFM data.
+ * Flag %GWY_CROSSCORRELATION_LEVEL should be usually used for data that do not
+ * have well-defined zero level, such as AFM data.
  *
- * The levelling and normalisation is applied only
- * to the corresponding masked area in data.  If both flags are specified local
- * levelling is performed first, then normalisation.  Note even if levelling
- * and normalisation are used correlation scores are still calculated using
- * FFT, just in a slightly more involved way.
+ * The levelling and normalisation is applied only to the corresponding masked
+ * area in data.  If both flags are specified local levelling is performed
+ * first, then normalisation.  Note even if levelling and normalisation are
+ * used correlation scores are still calculated using FFT, just in a slightly
+ * more involved way.
  **/
 
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
