@@ -1583,6 +1583,54 @@ gwy_field_correlate(const GwyField *field,
     gwy_field_invalidate(score);
 }
 
+static void
+calculate_local_mean_and_rms(fftw_plan dplan, fftw_plan cplan,
+                             gdouble *extdata, gdouble *extdatabase,
+                             const gdouble *extfield,
+                             const gwycomplex *kernelc,
+                             gwycomplex *datac,
+                             GwyField **fieldmean, GwyField **fieldrms,
+                             guint width, guint height,
+                             guint xsize, guint ysize, guint cstride,
+                             gdouble qnorm,
+                             gboolean level, gboolean normalise)
+{
+    if (!level && !normalise)
+        return;
+
+    *fieldmean = gwy_field_new_sized(width, height, FALSE);
+    gwy_assign(extdata, extfield, xsize*ysize);
+    fftw_execute(dplan);
+    for (guint k = 0; k < cstride*ysize; k++)
+        datac[k] *= qnorm*kernelc[k];
+    fftw_execute(cplan);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *srow = extdatabase + i*xsize;
+        gdouble *trow = (*fieldmean)->data + i*width;
+        gwy_assign(trow, srow, width);
+    }
+
+    if (!normalise)
+        return;
+
+    *fieldrms = gwy_field_new_sized(width, height, FALSE);
+    for (guint k = 0; k < xsize*ysize; k++)
+        extdata[k] = extfield[k]*extfield[k];
+    fftw_execute(dplan);
+    for (guint k = 0; k < cstride*ysize; k++)
+        datac[k] *= qnorm*kernelc[k];
+    fftw_execute(cplan);
+    for (guint i = 0; i < height; i++) {
+        const gdouble *srow = extdatabase + i*xsize;
+        const gdouble *mrow = (*fieldmean)->data + i*width;
+        gdouble *trow = (*fieldrms)->data + i*width;
+        for (guint j = 0; j < width; j++) {
+            gdouble q = srow[j] - mrow[j]*mrow[j];
+            trow[j] = (q > 0.0) ? sqrt(q) : 0.0;
+        }
+    }
+}
+
 void
 gwy_field_crosscorrelate(const GwyField *field,
                          const GwyField *reference,
@@ -1687,8 +1735,46 @@ gwy_field_crosscorrelate(const GwyField *field,
     gwycomplex *kernelc = fftw_malloc(cstride*ysize*sizeof(gwycomplex));
     gdouble *extdata = fftw_malloc(xsize*ysize*sizeof(gdouble));
     gdouble *extkernel = fftw_malloc(xsize*ysize*sizeof(gdouble));
+    gdouble *extfield = g_new(gdouble, xsize*ysize);
+    gdouble *extreference = g_new(gdouble, xsize*ysize);
     gdouble *extkernelbase = extkernel + extend_up*xsize + extend_left;
     gdouble *extdatabase = extdata + extend_up*xsize + extend_left;
+    // The out-of-place R2C plan.  We use it with the new-array excution
+    // functions also for extkernel → kernelc.
+    fftw_plan dplan = fftw_plan_dft_r2c_2d(ysize, xsize, extdata, datac,
+                                           FFTW_DESTROY_INPUT
+                                           | _gwy_fft_rigour());
+    // The C2R plan the backward transform of the correlation.  Again, it's
+    // used also for kernels.
+    fftw_plan cplan = fftw_plan_dft_c2r_2d(ysize, xsize, datac, extdata,
+                                           _gwy_fft_rigour());
+
+    // Transform the kernel.
+    extend_kernel_rect(unitkernel->data, kxres, kyres,
+                       extkernel, xsize, ysize, xsize);
+    fftw_execute_dft_r2c(dplan, extkernel, kernelc);
+
+    // Calculate local means/mean squares of field.
+    extend_rect(field->data, xres, extfield, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+    calculate_local_mean_and_rms(dplan, cplan,
+                                 extdata, extdatabase, extfield,
+                                 kernelc, datac,
+                                 &fieldmean, &fieldrms,
+                                 width, height, xsize, ysize, cstride,
+                                 qnorm, level, normalise);
+
+    // Calculate local means/mean squares of reference.
+    extend_rect(reference->data, xres, extreference, xsize,
+                col, row, width, height, xres, yres,
+                extend_left, extend_right, extend_up, extend_down, fill_value);
+    calculate_local_mean_and_rms(dplan, cplan,
+                                 extdata, extdatabase, extreference,
+                                 kernelc, datac,
+                                 &referencemean, &referencerms,
+                                 width, height, xsize, ysize, cstride,
+                                 qnorm, level, normalise);
 
     // The plan:
     // 1. Create FFTW plans.
@@ -1710,7 +1796,6 @@ gwy_field_crosscorrelate(const GwyField *field,
     // storage.  We could perform all the DFTs second time after finding the
     // maxima but that's perhaps too much.
     // XXX: What about passing the offsets as integers?
-
 
     GWY_OBJECT_UNREF(referencerms);
     GWY_OBJECT_UNREF(fieldrms);
