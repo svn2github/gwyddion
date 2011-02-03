@@ -192,6 +192,10 @@ void         gwy_mask_field_invalidate   (GwyMaskField *field);
 void         gwy_mask_field_fill         (GwyMaskField *field,
                                           const GwyRectangle *rectangle,
                                           gboolean value);
+void         gwy_mask_field_fill_ellipse (GwyMaskField *field,
+                                          const GwyRectangle *rectangle,
+                                          gboolean entire_rectangle,
+                                          gboolean value);
 void         gwy_mask_field_logical      (GwyMaskField *field,
                                           const GwyMaskField *operand,
                                           const GwyMaskField *mask,

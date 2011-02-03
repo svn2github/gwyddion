@@ -20,6 +20,7 @@
 #include <glib/gi18n-lib.h>
 #include "libgwy/macros.h"
 #include "libgwy/serialize.h"
+#include "libgwy/math.h"
 #include "libgwy/mask-field.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/line-internal.h"
@@ -1074,6 +1075,69 @@ gwy_mask_field_fill(GwyMaskField *field,
     gwy_mask_field_invalidate(field);
 }
 
+/**
+ * gwy_mask_field_fill_ellipse:
+ * @field: A two-dimensional mask field.
+ * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @entire_rectangle: Pass %TRUE to set or clear all pixels in @rectangle.
+ *                    Pixels inside the ellipse will be set and those outside
+ *                    will be cleared (or the other way round, depending on
+ *                    @value).  Passing %FALSE means only pixels inside the
+ *                    ellipse are modified.
+ * @value: Value to fill the ellipse with.
+ *
+ * Fills an elliptical part of a mask field.
+ *
+ * The ellipse to fill is bound by @rectangle.
+ *
+ * Note discretised ellipses with one dimension very small and even and the
+ * other large (at least hundred times larger than the small one) may not
+ * actually touch the distant sides because the pixel centres in the boundary
+ * row/column lie outside the exact ellipse.
+ *
+ * Parameter @entire_rectangle is namely useful if you need an empty mask field
+ * with a maximum-sized ellipse as it ensures all pixels are initialised
+ * (either set or cleared) in a single step:
+ * |[
+ * GwyMaskField *mask = gwy_mask_field_new_sized(xres, yres, FALSE);
+ * gwy_mask_field_fill_ellipse(mask, NULL, TRUE, TRUE);
+ * ]|
+ **/
+void
+gwy_mask_field_fill_ellipse(GwyMaskField *field,
+                            const GwyRectangle *rectangle,
+                            gboolean entire_rectangle,
+                            gboolean value)
+{
+    guint col, row, width, height;
+    if (!_gwy_mask_field_check_rectangle(field, rectangle,
+                                         &col, &row, &width, &height))
+        return;
+
+    // We could use Bresenham but we need to fill the ellipse so it would
+    // complicate things.  One floating point calculation per row is fine.
+    gdouble rx = 0.5*width, ry = 0.5*height;
+    for (guint i = 0; i < height; i++) {
+        gdouble eta = (i + 0.5)/ry;
+        guint xlen = gwy_round(rx*(1.0 - sqrt(eta*fmax(2.0 - eta, 0.0))));
+        g_assert(2*xlen <= width);
+        if (value) {
+            if (entire_rectangle && xlen)
+                clear_part(field, col, row + i, xlen, 1);
+            set_part(field, col + xlen, row + i, width - 2*xlen, 1);
+            if (entire_rectangle && xlen)
+                clear_part(field, col + width - xlen, row + i, xlen, 1);
+        }
+        else {
+            if (entire_rectangle && xlen)
+                set_part(field, col, row + i, xlen, 1);
+            clear_part(field, col + xlen, row + i, width - 2*xlen, 1);
+            if (entire_rectangle && xlen)
+                set_part(field, col + width - xlen, row + i, xlen, 1);
+        }
+    }
+}
+
 static void
 invert_part(GwyMaskField *field,
             guint col,
@@ -1202,7 +1266,7 @@ gwy_mask_field_logical(GwyMaskField *field,
     }
 
     guint n = field->stride * field->yres;
-    const guint32 *p = operand->data;
+    const guint32 *p = operand ? operand->data : NULL;
     guint32 *q = field->data;
 
     // GWY_LOGICAL_ZERO cannot have mask.
