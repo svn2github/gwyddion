@@ -7,19 +7,19 @@ independent of Gwyddion.
 
 File versions 1, 2 and 3 are supported, and also raw serialized objects (only
 new 2 and 3 styles).  It can print offsets, component names, types, and even
-values of atomic components.
+values of atomic components and intial portions of arrays.
 
 Web: http://gwyddion.net/gwydump.php
 
 
-== Installation (Unix) ======
+== Installation on Unix/Linux ======
 
 1. Install GLib, including development parts.
 2. Run `make'.
 
 
-== Installation (MSVC) ======
+== Cross-compilation for MS Windows ======
 
-1. Install GLib, including development parts.
-2. Run `nmake -f makefile.msc'
+1. Install cross-compiled GLib, including development parts.
+2. Run `make CROSSPREFIX=i686-pc-mingw32- EXEEXT=.exe'
 

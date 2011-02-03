@@ -1,48 +1,48 @@
 #!/usr/bin/make
+PACKAGE = gwydump
+VERSION = 2.1
+SOURCES = gwydump.c
+HEADERS =
+EXTRA_DIST = README
 
-include pkg.mak
+EXEEXT =
+CROSSPREFIX =
 
-# PREFIX is only used to search for the gwyddion.pc file.
-# Keep it as it is if you have Gwyddion in a standard location.
-# For non-standard locations run
-#
-#   make PREFIX=/foo/bar/usr install
-#
 PREFIX = /usr/local
-PKGCONFIG = PKG_CONFIG_PATH=\${PKG_CONFIG_PATH}:$(PREFIX)/lib/pkgconfig:$(PREFIX)/lib64/pkgconfig pkg-config
+PKGCONFIG = $(CROSSPREFIX)pkg-config
 GLIB = glib-2.0
 
-GWY_CFLAGS = $(shell $(PKGCONFIG) $(GLIB) --cflags)
-GWY_LDFLAGS = $(shell $(PKGCONFIG) $(GLIB) --libs)
-EXTRA_CFLAGS = -Wall -O2 -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
+DEPS_CFLAGS := $(shell $(PKGCONFIG) $(GLIB) --cflags)
+DEPS_LDFLAGS := $(shell $(PKGCONFIG) $(GLIB) --libs)
+EXTRA_CFLAGS = -Wall -O2 -static -DVERSION=\"$(VERSION)\" -DPACKAGE=\"$(PACKAGE)\"
+EXTRA_LDFLAGS =
 OBJECTS = $(SOURCES:.c=.o)
-LDFLAGS = $(GWY_LDFLAGS)
 
 bindir = $(shell $(PKGCONFIG) $(GLIB) --prefix)/bin
 
 DNAME = $(PACKAGE)-$(VERSION)
-STD_DIST = Makefile COPYING pkg.mak makefile.msc
-COMPILE = gcc
-LINK = gcc
+STD_DIST = Makefile COPYING
+COMPILE = $(CROSSPREFIX)gcc
+LINK = $(CROSSPREFIX)gcc
 INSTALL = install
 
-all: $(PACKAGE)
+all: $(PACKAGE)$(EXEEXT)
 
 clean:
-	-rm -f *~ *.o *.lo *.la *.so .libs/* core core.* $(PACKAGE)
+	-rm -f *~ *.o *.lo *.la *.so .libs/* core core.* $(PACKAGE)$(EXEEXT)
 
-%.o: %.c $(HEADERS) pkg.mak
-	$(COMPILE) $(GWY_CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS) -c $< -o $@
+%.o: %.c $(HEADERS)
+	$(COMPILE) $(DEPS_CFLAGS) $(EXTRA_CFLAGS) $(CFLAGS) -c $< -o $@
 
-$(PACKAGE): $(OBJECTS)
-	$(LINK) $(LDFLAGS) -o $@ $^
+$(PACKAGE)$(EXEEXT): $(OBJECTS)
+	$(LINK) $(EXTRA_LDFLAGS) -o $@ $^ $(DEPS_LDFLAGS) $(LDFLAGS)
 
 install: all
 	mkdir -p $(DESTDIR)$(bindir)
-	$(INSTALL) -s -c $(PACKAGE) $(DESTDIR)$(bindir)
+	$(INSTALL) -s -c $(PACKAGE)$(EXEEXT) $(DESTDIR)$(bindir)
 
 uninstall:
-	-rm -f $(DESTDIR)$(bindir)/$(PACKAGE)
+	-rm -f $(DESTDIR)$(bindir)/$(PACKAGE)$(EXEEXT)
 
 dist:
 	-rm -rf $(DNAME)
