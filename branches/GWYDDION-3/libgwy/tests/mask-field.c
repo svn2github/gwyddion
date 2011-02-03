@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -1476,6 +1476,37 @@ test_mask_field_rotate(void)
         g_object_unref(rotcw);
         g_object_unref(rotccw);
         g_object_unref(source);
+    }
+    mask_field_random_pool_free(pool);
+    g_rand_free(rng);
+}
+
+void
+test_mask_field_fill_ellipse(void)
+{
+    enum { max_size = 214 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    guint32 *pool = mask_field_random_pool_new(rng, max_size);
+    gsize niter = g_test_slow() ? 10000 : 200;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint xres = g_rand_int_range(rng, 1, max_size);
+        guint yres = g_rand_int_range(rng, 1, max_size);
+        GwyMaskField *ellipse = gwy_mask_field_new_sized(xres, yres, FALSE);
+        GwyMaskField *reference = gwy_mask_field_new_sized(xres, yres, FALSE);
+        gwy_mask_field_fill_ellipse(ellipse, NULL, TRUE, TRUE);
+        // Fill with the other value and invert
+        gwy_mask_field_fill_ellipse(reference, NULL, TRUE, FALSE);
+        gwy_mask_field_logical(reference, NULL, NULL, GWY_LOGICAL_NA);
+        mask_field_assert_equal(ellipse, reference);
+        // Check symmetry
+        gwy_mask_field_flip(reference, TRUE, FALSE);
+        mask_field_assert_equal(ellipse, reference);
+        gwy_mask_field_flip(reference, FALSE, TRUE);
+        mask_field_assert_equal(ellipse, reference);
+        g_object_unref(reference);
+        g_object_unref(ellipse);
     }
     mask_field_random_pool_free(pool);
     g_rand_free(rng);

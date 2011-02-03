@@ -76,6 +76,7 @@ mask-field/grow
 mask-field/flip
 mask-field/transpose
 mask-field/rotate
+mask-field/fill-ellipse
 field/props
 field/data-changed
 field/units
