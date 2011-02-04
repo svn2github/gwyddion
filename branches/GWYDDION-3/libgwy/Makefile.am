@@ -46,6 +46,7 @@ public_headers = \
 	$(srcdir)/macros.h \
 	$(srcdir)/main.h \
 	$(srcdir)/mask-field.h \
+	$(srcdir)/mask-field-arithmetic.h \
 	$(srcdir)/mask-field-transform.h \
 	$(srcdir)/math.h \
 	$(srcdir)/pack.h \
@@ -124,6 +125,7 @@ libgwy3_la_SOURCES = \
 	macros.c \
 	main.c \
 	mask-field.c \
+	mask-field-arithmetic.c \
 	mask-field-transform.c \
 	math.c \
 	object-internal.c \

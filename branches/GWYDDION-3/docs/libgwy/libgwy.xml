@@ -51,6 +51,7 @@
     <xi:include href="xml/field-statistics.xml"/>
     <xi:include href="xml/field-transform.xml"/>
     <xi:include href="xml/mask-field.xml"/>
+    <xi:include href="xml/mask-field-arithmetic.xml"/>
     <xi:include href="xml/mask-field-transform.xml"/>
   </chapter>
   <chapter id='libgwy-data-containers'>

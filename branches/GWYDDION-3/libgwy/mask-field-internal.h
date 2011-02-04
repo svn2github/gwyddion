@@ -24,6 +24,19 @@
 
 G_BEGIN_DECLS
 
+// XXX: gwy_mask_field_grow() needs to invalidate the mask *except* @grains and
+// @ngrains which it correctly updates.  It must be revised when fields are
+// added here to invalidate them too.
+struct _GwyMaskFieldPrivate {
+    guint *grains;
+    guint *graindata;
+    guint ngrains;
+    gboolean allocated;
+    guint32 *serialized_swapped;    // serialisation-only
+};
+
+typedef struct _GwyMaskFieldPrivate MaskField;
+
 typedef struct {
     guint row;
     guint col;

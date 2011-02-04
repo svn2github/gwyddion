@@ -1,6 +1,6 @@
 /*
  *  $Id$
- *  Copyright (C) 2009-2010 David Necas (Yeti).
+ *  Copyright (C) 2009-2011 David Necas (Yeti).
  *  E-mail: yeti@gwyddion.net.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,25 +30,6 @@ typedef enum {
     GWY_MASK_INCLUDE = 1,
     GWY_MASK_EXCLUDE = 2,
 } GwyMaskingType;
-
-typedef enum {
-    GWY_LOGICAL_ZERO,
-    GWY_LOGICAL_AND,
-    GWY_LOGICAL_NIMPL,
-    GWY_LOGICAL_A,
-    GWY_LOGICAL_NCIMPL,
-    GWY_LOGICAL_B,
-    GWY_LOGICAL_XOR,
-    GWY_LOGICAL_OR,
-    GWY_LOGICAL_NOR,
-    GWY_LOGICAL_NXOR,
-    GWY_LOGICAL_NB,
-    GWY_LOGICAL_CIMPL,
-    GWY_LOGICAL_NA,
-    GWY_LOGICAL_IMPL,
-    GWY_LOGICAL_NAND,
-    GWY_LOGICAL_ONE,
-} GwyLogicalOperator;
 
 #define GWY_TYPE_MASK_FIELD \
     (gwy_mask_field_get_type())
@@ -189,27 +170,6 @@ void         gwy_mask_field_copy_full    (const GwyMaskField *src,
                                           GwyMaskField *dest);
 guint32*     gwy_mask_field_get_data     (GwyMaskField *field);
 void         gwy_mask_field_invalidate   (GwyMaskField *field);
-void         gwy_mask_field_fill         (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
-                                          gboolean value);
-void         gwy_mask_field_fill_ellipse (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
-                                          gboolean entire_rectangle,
-                                          gboolean value);
-void         gwy_mask_field_logical      (GwyMaskField *field,
-                                          const GwyMaskField *operand,
-                                          const GwyMaskField *mask,
-                                          GwyLogicalOperator op);
-void         gwy_mask_field_part_logical (GwyMaskField *field,
-                                          const GwyRectangle *rectangle,
-                                          const GwyMaskField *operand,
-                                          guint opcol,
-                                          guint oprow,
-                                          GwyLogicalOperator op);
-void         gwy_mask_field_shrink       (GwyMaskField *field,
-                                          gboolean from_borders);
-void         gwy_mask_field_grow         (GwyMaskField *field,
-                                          gboolean separate_grains);
 guint        gwy_mask_field_count        (const GwyMaskField *field,
                                           const GwyMaskField *mask,
                                           gboolean value);
