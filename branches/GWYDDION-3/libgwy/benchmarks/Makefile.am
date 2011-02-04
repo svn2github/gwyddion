@@ -9,11 +9,13 @@ if BENCHMARKS
 noinst_PROGRAMS = \
 	convolve-rect \
 	convolve-row \
+	count-bits \
 	memory-access \
 	sort
 
 convolve_row_SOURCES = convolve-row.c
 convolve_rect_SOURCES = convolve-rect.c
+count_bits_SOURCES = count-bits.c
 memory_access_SOURCES = memory-access.c
 sort_SOURCES = sort.c
 extra_sources =
@@ -22,6 +24,7 @@ else
 extra_sources = \
 	convolve-rect.c \
 	convolve-row.c \
+	count-bits.c \
 	memory-access.c \
 	sort.c
 endif
