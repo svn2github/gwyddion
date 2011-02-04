@@ -766,11 +766,10 @@ gwy_mask_field_invalidate(GwyMaskField *field)
     GWY_FREE(field->priv->graindata);
 }
 
-// GCC has a built-in __builtin_popcount() but for some reason it does not
-// inline the code.  So whatever clever it does, this makes the built-in to be
-// more than three times slower than this expanded implementation.  See
-// tests/mask-field.c if you want to play with the table size and/or table item
-// size.
+// GCC has a built-in __builtin_popcount().  However it is either 3x faster
+// (if something like -march=amdfam10 is given) or 3x slower.  It would be nice
+// to use it if it's actually faster.  See benchmarks/bit-count.c for some
+// benchmarks.
 static inline guint
 count_set_bits(guint32 x)
 {
