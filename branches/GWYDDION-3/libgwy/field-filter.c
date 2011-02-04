@@ -1631,6 +1631,46 @@ calculate_local_mean_and_rms(fftw_plan dplan, fftw_plan cplan,
     }
 }
 
+// Shift field by (xshift, yshift) and point-wise multiply with reference,
+// storing the result into data.  Irrelevant border values are cleared to make
+// the behaviour well-defined.
+static void
+multiply_shifted_rects(const gdouble *extfield,
+                       const gdouble *extreference,
+                       gdouble *extdata,
+                       guint xsize, guint ysize,
+                       gint xshift, gint yshift)
+{
+    guint absxs = ABS(xshift), absys = ABS(yshift);
+
+    for (guint i = 0; i < ysize; i++) {
+        if ((yshift > 0 && i < absys) || (yshift < 0 && i >= ysize - absys)) {
+            gwy_clear(extdata + i*xsize, xsize);
+            continue;
+        }
+
+        const gdouble *rrow = extreference + i*xsize;
+        const gdouble *frow = extfield + (i - yshift)*xsize;
+        gdouble *drow = extdata + i*xsize;
+
+        if (xshift > 0) {
+            gwy_clear(drow, absxs);
+            drow += absxs;
+            rrow += absxs;
+        }
+        else
+            frow += absxs;
+
+        for (guint j = xsize - absxs; j; j--, drow++, frow++, rrow++)
+            *drow = (*frow)*(*rrow);
+
+        if (xshift < 0)
+            gwy_clear(drow, absxs);
+    }
+}
+
+// FIXME: Instead of colsearch and rowsearch we could also accept an arbitrary
+// mask.  It would be actually easier...
 void
 gwy_field_crosscorrelate(const GwyField *field,
                          const GwyField *reference,
@@ -1718,7 +1758,6 @@ gwy_field_crosscorrelate(const GwyField *field,
     GwyField *fieldmean = NULL, *referencemean = NULL,
              *fieldrms = NULL, *referencerms = NULL;
 
-    // TODO
     guint xsize = gwy_fft_nice_transform_size(width + 2*colsearch + kxres - 1);
     guint ysize = gwy_fft_nice_transform_size(height + 2*rowsearch + kyres - 1);
     // The innermost (contiguous) dimension of R2C the complex output is
@@ -1737,7 +1776,6 @@ gwy_field_crosscorrelate(const GwyField *field,
     gdouble *extkernel = fftw_malloc(xsize*ysize*sizeof(gdouble));
     gdouble *extfield = g_new(gdouble, xsize*ysize);
     gdouble *extreference = g_new(gdouble, xsize*ysize);
-    gdouble *extkernelbase = extkernel + extend_up*xsize + extend_left;
     gdouble *extdatabase = extdata + extend_up*xsize + extend_left;
     // The out-of-place R2C plan.  We use it with the new-array excution
     // functions also for extkernel → kernelc.
@@ -1776,34 +1814,82 @@ gwy_field_crosscorrelate(const GwyField *field,
                                  width, height, xsize, ysize, cstride,
                                  qnorm, level, normalise);
 
-    // The plan:
-    // 1. Create FFTW plans.
-    // 2. Transform the kernel.
-    // 3a. Calculate fieldmean by transforming field, multiplying with kernel
-    //     and transforming back.
-    // 3b. Calculate fieldrms by transforming squared field, multiplying with
-    //     kernel and transforming back.
-    // 3c. Similarly, calculate referencemean.
-    // 3d. Similarly, calculate referencerms.
-    // 4. For each coulple of offsets within the ellpse,
-    //    multiply field with shifted reference (or the other way round)
-    //    and convolve the result with the kernel.
-    //    Possibly modify the result using precalculated mean and rms (they
-    //    must be used shifted for one of the fields).
-    // 5. Profit!
-    //
+    g_object_unref(unitkernel);
+    fftw_free(extkernel);
+
+    GwyRectangle targetrect = { targetcol, targetrow, width, height };
+    if (xoff)
+        gwy_field_clear(xoff, &targetrect, NULL, GWY_MASK_IGNORE);
+    if (yoff)
+        gwy_field_clear(yoff, &targetrect, NULL, GWY_MASK_IGNORE);
+    // We need to keep the scores somewhere to find the highest score.
+    if (score)
+        g_object_ref(score);
+    else
+        score = gwy_field_new_alike(target, FALSE);
+    gwy_field_fill(score, &targetrect, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
+
+    // Scan the elliptical neighbourhood.
+    for (gint ii = -(gint)rowsearch; ii <= (gint)rowsearch; ii++) {
+        gdouble ay = ii/(rowsearch + 0.5);
+        for (gint jj = -(gint)colsearch; jj <= (gint)colsearch; jj++) {
+            gdouble ax = jj/(colsearch + 0.5);
+            if (ax*ax + ay*ay > 1.0)
+                continue;
+
+            multiply_shifted_rects(extfield, extreference, extdata,
+                                   xsize, ysize, jj, ii);
+            fftw_execute(dplan);
+            for (guint k = 0; k < cstride*ysize; k++)
+                datac[k] *= qnorm*kernelc[k];
+            fftw_execute(cplan);
+
+            // TODO: This is wrong, fieldmean needs to be taken from the
+            // shifted position - which requires to make it larger than
+            // width×height.  The same for rms.
+            for (guint i = 0; i < height; i++) {
+                for (guint j = 0; j < width; j++) {
+                    gdouble s = extdatabase[i*xsize + j];
+
+                    if (level)
+                        s -= (fieldmean->data[i*width + j]
+                              * referencemean->data[i*width + j]);
+
+                    if (normalise) {
+                        gdouble q = (fieldrms->data[i*width + j]
+                                     * referencerms->data[i*width + j]);
+                        s = q ? s/q : 0.0;
+                    }
+
+                    guint k = (i + targetrow)*score->xres + (targetcol + j);
+                    if (s > score->data[k]) {
+                        score->data[k] = s;
+                        if (xoff)
+                            xoff->data[k] = jj;
+                        if (yoff)
+                            yoff->data[k] = ii;
+                    }
+                }
+            }
+        }
+    }
+
     // XXX: We cannot do subpixel precision this way as it would require insane
     // storage.  We could perform all the DFTs second time after finding the
     // maxima but that's perhaps too much.
     // XXX: What about passing the offsets as integers?
 
+    g_free(extreference);
+    g_free(extfield);
+    fftw_free(extdata);
+    fftw_free(kernelc);
+    fftw_free(datac);
     GWY_OBJECT_UNREF(referencerms);
     GWY_OBJECT_UNREF(fieldrms);
     GWY_OBJECT_UNREF(referencemean);
     GWY_OBJECT_UNREF(fieldmean);
-    g_object_unref(unitkernel);
-    if (score)
-        gwy_field_invalidate(score);
+    gwy_field_invalidate(score);
+    g_object_unref(score);
     if (xoff)
         gwy_field_invalidate(xoff);
     if (yoff)
