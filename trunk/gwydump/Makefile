@@ -5,6 +5,9 @@ SOURCES = gwydump.c
 HEADERS =
 EXTRA_DIST = README
 
+# Edit these for MS Windows cross-compilation, e.g.
+#EXEEXT = .exe
+#CROSSPREFIX = i686-pc-mingw32-
 EXEEXT =
 CROSSPREFIX =
 
@@ -50,8 +53,7 @@ dist:
 	chmod a+rx $(DNAME)
 	cp $(SOURCES) $(HEADERS) $(STD_DIST) $(EXTRA_DIST) $(DNAME)
 	chmod a+r $(DNAME)/*
-	tar cf - $(DNAME) | gzip > $(DNAME).tar.gz
-	tar cf - $(DNAME) | bzip2 > $(DNAME).tar.bz2
+	tar cf - $(DNAME) | xz > $(DNAME).tar.xz
 	rm -rf $(DNAME)
 
 .PHONY: all clean dist install uninstall distclean
