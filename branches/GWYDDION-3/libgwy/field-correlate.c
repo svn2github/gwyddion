@@ -282,8 +282,6 @@ calculate_local_mean_and_rms(fftw_plan dplan, fftw_plan cplan,
     if (!level && !normalise)
         return;
 
-    // TODO: IF levelling is requesed, subtract the global mean first.
-
     *fieldmean = gwy_field_new_sized(width, height, FALSE);
     gwy_assign(extdata, extfield, xsize*ysize);
     fftw_execute(dplan);
@@ -485,6 +483,11 @@ gwy_field_crosscorrelate(const GwyField *field,
     extend_rect(field->data, xres, extfield, xsize,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
+    if (level) {
+        gdouble mean = gwy_field_mean(field, rectangle, NULL, GWY_MASK_IGNORE);
+        for (guint k = 0; k < xsize*ysize; k++)
+            extfield[k] -= mean;
+    }
     calculate_local_mean_and_rms(dplan, cplan,
                                  extdata,
                                  extdata + (extend_up - rowsearch)*xsize
@@ -499,6 +502,12 @@ gwy_field_crosscorrelate(const GwyField *field,
     extend_rect(reference->data, xres, extreference, xsize,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
+    if (level) {
+        gdouble mean = gwy_field_mean(reference,
+                                      rectangle, NULL, GWY_MASK_IGNORE);
+        for (guint k = 0; k < xsize*ysize; k++)
+            extreference[k] -= mean;
+    }
     calculate_local_mean_and_rms(dplan, cplan,
                                  extdata, extdatabase, extreference,
                                  kernelc, datac,
