@@ -43,6 +43,7 @@
     <title>Two-Dimensional Data</title>
     <xi:include href="xml/rectangle.xml"/>
     <xi:include href="xml/field.xml"/>
+    <xi:include href="xml/field-correlate.xml"/>
     <xi:include href="xml/field-arithmetic.xml"/>
     <xi:include href="xml/field-distributions.xml"/>
     <xi:include href="xml/field-filter.xml"/>

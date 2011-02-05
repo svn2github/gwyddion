@@ -29,6 +29,7 @@
 #include <libgwy/fft.h>
 #include <libgwy/field.h>
 #include <libgwy/field-arithmetic.h>
+#include <libgwy/field-correlate.h>
 #include <libgwy/field-distributions.h>
 #include <libgwy/field-filter.h>
 #include <libgwy/field-level.h>

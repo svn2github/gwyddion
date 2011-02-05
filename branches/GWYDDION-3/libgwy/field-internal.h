@@ -22,6 +22,9 @@
 #ifndef __LIBGWY_FIELD_INTERNAL_H__
 #define __LIBGWY_FIELD_INTERNAL_H__
 
+#include <libgwy/interpolation.h>
+#include <libgwy/field.h>
+
 G_BEGIN_DECLS
 
 /* Cache operations */
@@ -52,6 +55,22 @@ struct _GwyFieldPrivate {
 };
 
 typedef struct _GwyFieldPrivate Field;
+
+typedef void (*RectExtendFunc)(const gdouble *in,
+                               guint inrowstride,
+                               gdouble *out,
+                               guint outrowstride,
+                               guint xpos,
+                               guint ypos,
+                               guint width,
+                               guint height,
+                               guint xres,
+                               guint yres,
+                               guint extend_left,
+                               guint extend_right,
+                               guint extend_up,
+                               guint extend_down,
+                               gdouble value);
 
 G_GNUC_INTERNAL
 gboolean _gwy_field_check_rectangle(const GwyField *field,
@@ -98,6 +117,28 @@ gboolean _gwy_field_check_mask(const GwyField *field,
 G_GNUC_INTERNAL
 void _gwy_field_set_cache_for_flat(GwyField *field,
                                    gdouble value);
+
+G_GNUC_INTERNAL
+void _gwy_ensure_defined_exterior(GwyExteriorType *exterior,
+                                  gdouble *fill_value);
+
+G_GNUC_INTERNAL
+void _gwy_make_symmetrical_extension(guint size,
+                                     guint extsize,
+                                     guint *extend_begining,
+                                     guint *extend_end);
+
+G_GNUC_INTERNAL
+RectExtendFunc _gwy_get_rect_extend_func(GwyExteriorType exterior);
+
+G_GNUC_INTERNAL
+void _gwy_extend_kernel_rect(const gdouble *kernel,
+                             guint kxlen,
+                             guint kylen,
+                             gdouble *extended,
+                             guint xsize,
+                             guint ysize,
+                             guint rowstride);
 
 G_GNUC_INTERNAL
 void _gwy_tune_convolution_method(const gchar *method);

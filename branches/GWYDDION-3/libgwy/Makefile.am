@@ -26,6 +26,7 @@ public_headers = \
 	$(srcdir)/fft.h \
 	$(srcdir)/field.h \
 	$(srcdir)/field-arithmetic.h \
+	$(srcdir)/field-correlate.h \
 	$(srcdir)/field-distributions.h \
 	$(srcdir)/field-filter.h \
 	$(srcdir)/field-level.h \
@@ -104,6 +105,7 @@ libgwy3_la_SOURCES = \
 	fft.c \
 	field.c \
 	field-arithmetic.c \
+	field-correlate.c \
 	field-distributions.c \
 	field-filter.c \
 	field-level.c \
