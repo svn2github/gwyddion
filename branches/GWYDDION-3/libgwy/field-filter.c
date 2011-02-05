@@ -1792,15 +1792,21 @@ gwy_field_crosscorrelate(const GwyField *field,
                        extkernel, xsize, ysize, xsize);
     fftw_execute_dft_r2c(dplan, extkernel, kernelc);
 
-    // Calculate local means/mean squares of field.
+    // Calculate local means/mean squares of field.  We need to have them for
+    // larger area than just width×height as field is shifted within the
+    // search range.
+    guint fxres = width + 2*colsearch, fyres = height + 2*rowsearch;
     extend_rect(field->data, xres, extfield, xsize,
                 col, row, width, height, xres, yres,
                 extend_left, extend_right, extend_up, extend_down, fill_value);
     calculate_local_mean_and_rms(dplan, cplan,
-                                 extdata, extdatabase, extfield,
+                                 extdata,
+                                 extdata + (extend_up - rowsearch)*xsize
+                                 + (extend_left - colsearch),
+                                 extfield,
                                  kernelc, datac,
                                  &fieldmean, &fieldrms,
-                                 width, height, xsize, ysize, cstride,
+                                 fxres, fyres, xsize, ysize, cstride,
                                  qnorm, level, normalise);
 
     // Calculate local means/mean squares of reference.
@@ -1829,7 +1835,10 @@ gwy_field_crosscorrelate(const GwyField *field,
         score = gwy_field_new_alike(target, FALSE);
     gwy_field_fill(score, &targetrect, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
 
-    // Scan the elliptical neighbourhood.
+    // Scan the elliptical neighbourhood.  Vars ii and jj represent the shifts
+    // of the field with respect to reference.  Consequently, if jj is positive
+    // the field is shifted to the right and values are taken from *smaller*
+    // indices than in reference.
     for (gint ii = -(gint)rowsearch; ii <= (gint)rowsearch; ii++) {
         gdouble ay = ii/(rowsearch + 0.5);
         for (gint jj = -(gint)colsearch; jj <= (gint)colsearch; jj++) {
@@ -1844,19 +1853,16 @@ gwy_field_crosscorrelate(const GwyField *field,
                 datac[k] *= qnorm*kernelc[k];
             fftw_execute(cplan);
 
-            // TODO: This is wrong, fieldmean needs to be taken from the
-            // shifted position - which requires to make it larger than
-            // width×height.  The same for rms.
             for (guint i = 0; i < height; i++) {
                 for (guint j = 0; j < width; j++) {
                     gdouble s = extdatabase[i*xsize + j];
 
                     if (level)
-                        s -= (fieldmean->data[i*width + j]
+                        s -= (fieldmean->data[(i - ii)*fxres + (j - jj)]
                               * referencemean->data[i*width + j]);
 
                     if (normalise) {
-                        gdouble q = (fieldrms->data[i*width + j]
+                        gdouble q = (fieldrms->data[(i - ii)*fxres + (j - jj)]
                                      * referencerms->data[i*width + j]);
                         s = q ? s/q : 0.0;
                     }
