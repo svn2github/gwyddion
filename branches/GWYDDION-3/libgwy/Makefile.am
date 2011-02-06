@@ -59,6 +59,7 @@ public_headers = \
 	$(srcdir)/serializable-boxed.h \
 	$(srcdir)/serialize.h \
 	$(srcdir)/strfuncs.h \
+	$(srcdir)/surface.h \
 	$(srcdir)/unit.h \
 	$(srcdir)/user-fit-func.h \
 	$(srcdir)/value-format.h
@@ -75,7 +76,8 @@ private_headers = \
 	line-internal.h \
 	mask-field-internal.h \
 	math-internal.h \
-	object-internal.h
+	object-internal.h \
+	surface-internal.h
 
 library_headers = $(public_headers) $(public_built_headers)
 mkenum_headers = $(public_headers)
@@ -140,6 +142,7 @@ libgwy3_la_SOURCES = \
 	serializable-boxed.c \
 	serialize.c \
 	strfuncs.c \
+	surface.c \
 	types.c \
 	unit.c \
 	user-fit-func.c \
