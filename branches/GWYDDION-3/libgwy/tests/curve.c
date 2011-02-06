@@ -156,14 +156,54 @@ test_curve_line_convert(void)
         gwy_line_set_offset(line, off);
 
         GwyCurve *curve = gwy_curve_new_from_line(line);
-        GwyLine *newline = gwy_line_new_from_curve(curve, 0);
+        g_assert_cmpuint(curve->n, ==, line->res);
+        g_assert(gwy_unit_equal(gwy_curve_get_unit_x(curve),
+                                gwy_line_get_unit_x(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
+                                gwy_line_get_unit_y(line)));
 
-        g_assert_cmpfloat((newline->real - line->real), <=, 1e-14*line->real);
-        g_assert_cmpfloat((newline->off - line->off), <=, 1e-14*fabs(line->off));
+        GwyLine *newline = gwy_line_new_from_curve(curve, 0);
+        g_assert_cmpuint(newline->res, ==, curve->n);
+        g_assert_cmpfloat(fabs(newline->real - line->real),
+                          <=,
+                          1e-14*line->real);
+        g_assert_cmpfloat(fabs(newline->off - line->off),
+                          <=,
+                          1e-14*fabs(line->off));
+        g_assert(gwy_unit_equal(gwy_line_get_unit_x(newline),
+                                gwy_curve_get_unit_x(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_unit_y(newline),
+                                gwy_curve_get_unit_y(curve)));
+        line_assert_numerically_equal(newline, line, 1e-14);
 
         g_object_unref(newline);
-        g_object_unref(line);
         g_object_unref(curve);
+
+        curve = gwy_curve_new();
+        gwy_curve_set_from_line(curve, line);
+        g_assert_cmpuint(curve->n, ==, line->res);
+        g_assert(gwy_unit_equal(gwy_curve_get_unit_x(curve),
+                                gwy_line_get_unit_x(line)));
+        g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
+                                gwy_line_get_unit_y(line)));
+
+        newline = gwy_line_new_from_curve(curve, 0);
+        g_assert_cmpuint(newline->res, ==, curve->n);
+        g_assert_cmpfloat(fabs(newline->real - line->real),
+                          <=,
+                          1e-14*line->real);
+        g_assert_cmpfloat(fabs(newline->off - line->off),
+                          <=,
+                          1e-14*fabs(line->off));
+        g_assert(gwy_unit_equal(gwy_line_get_unit_x(newline),
+                                gwy_curve_get_unit_x(curve)));
+        g_assert(gwy_unit_equal(gwy_line_get_unit_y(newline),
+                                gwy_curve_get_unit_y(curve)));
+        line_assert_numerically_equal(newline, line, 1e-14);
+
+        g_object_unref(newline);
+        g_object_unref(curve);
+        g_object_unref(line);
     }
 
     g_rand_free(rng);
