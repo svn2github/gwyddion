@@ -811,7 +811,8 @@ gwy_line_set_offset(GwyLine *line,
  *
  * Obtains the lateral units of a one-dimensional data line.
  *
- * Returns: The lateral units of @line.
+ * Returns: (transfer none):
+ *          The lateral units of @line.
  **/
 GwyUnit*
 gwy_line_get_unit_x(GwyLine *line)
@@ -829,7 +830,8 @@ gwy_line_get_unit_x(GwyLine *line)
  *
  * Obtains the value units of a one-dimensional data line.
  *
- * Returns: The value units of @line.
+ * Returns: (transfer none):
+ *          The value units of @line.
  **/
 GwyUnit*
 gwy_line_get_unit_y(GwyLine *line)

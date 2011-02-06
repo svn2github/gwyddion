@@ -49,8 +49,10 @@ sanitize_range(gdouble *min,
 /**
  * gwy_field_value_dist:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
  *              density.
@@ -425,8 +427,10 @@ slope_dist_vert_gather_mask(const GwyField *field,
 /**
  * gwy_field_slope_dist:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @orientation: Orientation in which to compute the derivatives.
  * @cumulative: %TRUE to calculate cumulative distribution, %FALSE to calculate
@@ -815,8 +819,10 @@ row_level_and_count(const gdouble *in,
 /**
  * gwy_field_row_acf:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @level: The first polynomial degree to keep in the rows, lower degrees than
  *         @level are subtracted.  Note only values 0 (no levelling) and 1
@@ -937,8 +943,10 @@ fail:
 /**
  * gwy_field_row_psdf:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @windowing: Windowing type to use.
  * @level: The first polynomial degree to keep in the rows, lower degrees than
@@ -1073,8 +1081,10 @@ fail:
 /**
  * gwy_field_row_hhcf:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @level: The first polynomial degree to keep in the rows, lower degrees than
  *         @level are subtracted.  Note only values 0 (no levelling) and 1

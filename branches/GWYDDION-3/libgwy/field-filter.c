@@ -370,7 +370,8 @@ row_convolve_fft(const GwyField *field,
 /**
  * gwy_field_row_convolve:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the
@@ -797,7 +798,8 @@ convolve_fft(const GwyField *field,
 /**
  * gwy_field_convolve:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the
@@ -895,7 +897,8 @@ make_gaussian_kernel(GwyLine *kernel,
 /**
  * gwy_field_extend:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to extend.  Pass %NULL to extend entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to extend.  Pass %NULL to extend entire @field.
  * @left: Number of pixels to extend to the left (towards lower column indices).
  * @right: Number of pixels to extend to the right (towards higher column
  *         indices).
@@ -955,7 +958,8 @@ gwy_field_extend(const GwyField *field,
 /**
  * gwy_field_filter_gaussian:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the
@@ -1218,7 +1222,8 @@ combined_gradient_filter(const GwyField *field,
 /**
  * gwy_field_filter_standard:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the
@@ -1644,7 +1649,8 @@ filter_median_gsequence(const GwyField *field,
 /**
  * gwy_field_filter_median:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @target: A two-dimensional data field where the result will be placed.
  *          It may be @field for an in-place modification.  Its dimensions may
  *          match either @field or @rectangle.  In the former case the

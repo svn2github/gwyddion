@@ -171,7 +171,8 @@ swap_xy(const GwyField *source,
 /**
  * gwy_field_new_transposed:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to extract.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to extract.  Pass %NULL to process entire @field.
  * @transform_offsets: %TRUE to set the X and Y offsets of the new field
  *                     using @col, @row and @field offsets.  %FALSE to set
  *                     offsets of the new field to zeroes.

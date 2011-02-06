@@ -637,7 +637,8 @@ gwy_curve_sort(GwyCurve *curve)
  *
  * Obtains the abscissa units of a curve.
  *
- * Returns: The abscissa units of @curve.
+ * Returns: (transfer none):
+ *          The abscissa units of @curve.
  **/
 GwyUnit*
 gwy_curve_get_unit_x(GwyCurve *curve)
@@ -655,7 +656,8 @@ gwy_curve_get_unit_x(GwyCurve *curve)
  *
  * Obtains the ordinate units of a curve.
  *
- * Returns: The ordinate units of @curve.
+ * Returns: (transfer none):
+ *          The ordinate units of @curve.
  **/
 GwyUnit*
 gwy_curve_get_unit_y(GwyCurve *curve)

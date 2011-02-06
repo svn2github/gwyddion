@@ -27,14 +27,18 @@
 /**
  * gwy_field_min_max:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @min: Location to store the minimum to, or %NULL.
- * @max: Location to store the maximum to, or %NULL.
+ * @min: (out) (allow-none)
+ *       Location to store the minimum to, or %NULL.
+ * @max: (out) (allow-none)
+ *       Location to store the maximum to, or %NULL.
  *
  * Finds the minimum and maximum value of a field.
  *
@@ -115,8 +119,10 @@ gwy_field_min_max(const GwyField *field,
 /**
  * gwy_field_min_max_full:
  * @field: A two-dimensional data field.
- * @min: Location to store the minimum to, or %NULL.
- * @max: Location to store the maximum to, or %NULL.
+ * @min: (out) (allow-none):
+ *       Location to store the minimum to, or %NULL.
+ * @max: (out) (allow-none):
+ *       Location to store the maximum to, or %NULL.
  *
  * Finds the minimum and maximum value of an entire field.
  *
@@ -133,8 +139,10 @@ gwy_field_min_max_full(const GwyField *field,
 /**
  * gwy_field_mean:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
@@ -219,8 +227,10 @@ gwy_field_mean_full(const GwyField *field)
 /**
  * gwy_field_median:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
@@ -301,8 +311,10 @@ gwy_field_median_full(const GwyField *field)
 /**
  * gwy_field_rms:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
@@ -397,8 +409,10 @@ gwy_field_rms_full(const GwyField *field)
 /**
  * gwy_field_meansq:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
@@ -471,20 +485,26 @@ gwy_field_meansq(const GwyField *field,
 /**
  * gwy_field_statistics:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  *        Its dimensions must match either the dimensions of @field or the
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @mean: Location to store the mean value (Ra) to, or %NULL.
- * @ra: Location to store the mean difference from the mean value (Ra) to,
+ * @ra: (out) (allow-none):
+ *      Location to store the mean difference from the mean value (Ra) to,
  *      or %NULL.
- * @rms: Location to store the root mean square of difference from the mean
+ * @rms: (out) (allow-none):
+ *       Location to store the root mean square of difference from the mean
  *       value (Rq) to, or %NULL.
- * @skew: Location to store the skew (symmetry of value distribution) to,
+ * @skew: (out) (allow-none):
+ *        Location to store the skew (symmetry of value distribution) to,
  *        or %NULL.
- * @kurtosis: Location to store the kurtosis (peakedness of value ditribution)
+ * @kurtosis: (out) (allow-none):
+ *            Location to store the kurtosis (peakedness of value ditribution)
  *            to, or %NULL.
  *
  * Calculates numerical statistical characteristics of a rectangular part of a
@@ -590,18 +610,22 @@ fail:
 /**
  * gwy_field_count_above_below:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @above: Lower bound to compare the field values to.
  * @below: Upper bound to compare the field values to.
  * @strict: %TRUE to use strict inequalities and consequently count values in
  *          open intervals, %FALSE to use non-strict inequalities and count
  *          values in closed intervals.
- * @nabove: Location to store the number of values greater than (or equal
- *          to) @above, or %NULL.
- * @nbelow: Location to store the number of values less than (or equal
- *          to) @below, or %NULL.
+ * @nabove: (out) (allow-none):
+ *          Location to store the number of values greater than (or equal to)
+ *          @above, or %NULL.
+ * @nbelow: (out) (allow-none):
+ *          Location to store the number of values less than (or equal to)
+ *          @below, or %NULL.
  *
  * Counts the values in a field above and/or below specified bounds.
  *
@@ -1146,8 +1170,10 @@ surface_area_mask2(const GwyField *field,
 /**
  * gwy_field_surface_area:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
  * Calculates the surface area of a rectangular part of a field.

@@ -116,7 +116,8 @@ gwy_field_is_incompatible(GwyField *field1,
 /**
  * gwy_field_clear:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to clear.  Pass %NULL to clear entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to clear.  Pass %NULL to clear entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  *
@@ -173,7 +174,8 @@ gwy_field_clear_full(GwyField *field)
 /**
  * gwy_field_fill:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to fill.  Pass %NULL to fill entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to fill.  Pass %NULL to fill entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to fill the rectangle with.
@@ -241,7 +243,8 @@ gwy_field_fill_full(GwyField *field,
 /**
  * gwy_field_add:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to add to the data.
@@ -301,7 +304,8 @@ gwy_field_add(GwyField *field,
 /**
  * gwy_field_multiply:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @value: Value to multiply the data with.
@@ -365,7 +369,8 @@ gwy_field_multiply(GwyField *field,
 /**
  * gwy_field_normalize:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @mean: New mean value.
@@ -429,7 +434,8 @@ gwy_field_normalize(GwyField *field,
 /**
  * gwy_field_apply_func:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @mask: Mask specifying which values to modify, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @func: Function to apply to the value of each pixel (or each pixel under/
@@ -564,7 +570,8 @@ gwy_field_hypot_field(GwyField *field,
 /**
  * gwy_field_clamp:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @lower: Lower limit value (it must not be greater than @upper).
  * @upper: Upper limit value (it must not be smaller than @lower).
  *

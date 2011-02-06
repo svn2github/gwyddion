@@ -295,7 +295,8 @@ clear_part(GwyMaskField *field,
 /**
  * gwy_mask_field_fill:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @value: Value to fill the rectangle with.
  *
  * Fills a rectangular part of a mask field with the specified value.
@@ -328,7 +329,8 @@ gwy_mask_field_fill(GwyMaskField *field,
 /**
  * gwy_mask_field_fill_ellipse:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @entire_rectangle: Pass %TRUE to set or clear all pixels in @rectangle.
  *                    Pixels inside the ellipse will be set and those outside
  *                    will be cleared (or the other way round, depending on
@@ -428,7 +430,8 @@ invert_part(GwyMaskField *field,
 /**
  * gwy_mask_field_invert:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  *
  * Inverts values in a mask field.
  **/
@@ -614,7 +617,8 @@ logical_part(const GwyMaskField *src,
  * gwy_mask_field_part_logical:
  * @field: A two-dimensional mask field to modify and the first operand of
  *         the logical operation.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @operand: A two-dimensional mask field representing second operand of the
  *           logical operation.  It can be %NULL for degenerate operations that
  *           do not depend on the second operand.

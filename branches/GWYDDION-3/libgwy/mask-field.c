@@ -526,7 +526,8 @@ _gwy_mask_field_limit_rectangles(const GwyMaskField *src,
 /**
  * gwy_mask_field_new_part:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to extract to the new field.  Passing %NULL
+ * @rectangle: (allow-none):
+ *             Area in @field to extract to the new field.  Passing %NULL
  *             creates an identical copy of @field, similarly to
  *             gwy_mask_field_duplicate().
  *
@@ -589,7 +590,8 @@ gwy_mask_field_new_resampled(const GwyMaskField *field,
 /**
  * gwy_mask_field_new_from_field:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to extract to the new mask field.  Passing %NULL
+ * @rectangle: (allow-none):
+ *             Area in @field to extract to the new mask field.  Passing %NULL
  *             processes entire @field.
  * @upper: Upper bound to compare the field values to.
  * @lower: Lower bound to compare the field values to.
@@ -881,7 +883,8 @@ count_row(const guint32 *row,
 /**
  * gwy_mask_field_part_count:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  *
  * Counts set or unset bits in a rectangular part of a mask field.
@@ -934,7 +937,8 @@ gwy_mask_field_part_count(const GwyMaskField *field,
 /**
  * gwy_mask_field_count_rows:
  * @field: A two-dimensional mask field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @value: %TRUE to count ones, %FALSE to count zeroes.
  * @counts: Array of length @height to store the counts in individual rows to.
  *

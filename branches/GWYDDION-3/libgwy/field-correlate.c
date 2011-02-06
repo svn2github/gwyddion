@@ -40,7 +40,8 @@ enum {
 /**
  * gwy_field_correlate:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
  * @score: A two-dimensional data field where the result will be placed.
  *         It may be @field for an in-place modification.  Its dimensions may
  *         match either @field or @rectangle.  In the former case the
@@ -50,7 +51,8 @@ enum {
  *          calculated.  It is always used as-is.  If you want it to have zero
  *          mean and rms of unity (which you often want) it is easy to ensure
  *          it beforehand using gwy_field_normalize().
- * @kmask: Kernel mask.  If non-%NULL it must have the same dimensions as
+ * @kmask: (allow-none):
+ *         Kernel mask.  If non-%NULL it must have the same dimensions as
  *         @kernel and only kernel pixels covered by the mask then contribute
  *         to the correlation score.  This makes possible to search for a
  *         non-rectangular detail.
@@ -358,13 +360,17 @@ multiply_shifted_rects(const gdouble *extfield,
  * @field: A two-dimensional data field.
  * @reference: A field to cross-corelate with @field.  It must have the same
  *             dimensions as @field.
- * @rectangle: Area in @field and @reference to process.  Pass %NULL to process
+ * @rectangle: (allow-none):
+ *             Area in @field and @reference to process.  Pass %NULL to process
  *             entire fields.
- * @score: A two-dimensional data field where the scores will be placed,
+ * @score: (out caller-allocates) (allow-none):
+ *         A two-dimensional data field where the scores will be placed,
  *         or %NULL.
- * @xoff: A two-dimensional data field where the horizontal shifts
+ * @xoff: (out caller-allocates) (allow-none):
+ *        A two-dimensional data field where the horizontal shifts
  *        corresponding to the maximum scores will be placed, or %NULL.
- * @yoff: A two-dimensional data field where the horizontal shifts
+ * @yoff: (out caller-allocates) (allow-none):
+ *        A two-dimensional data field where the horizontal shifts
  *        corresponding to the maximum scores will be placed, or %NULL.
  * @kernel: Mask defining the shape of the detail correlated, with ones in
  *          pixels to consider and zeroes in pixels to ignore.  A suitable

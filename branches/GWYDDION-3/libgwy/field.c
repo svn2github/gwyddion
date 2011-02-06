@@ -642,7 +642,8 @@ gwy_field_new_alike(const GwyField *model,
 /**
  * gwy_field_new_part:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to extract to the new field.  Passing %NULL
+ * @rectangle: (allow-none):
+ *             Area in @field to extract to the new field.  Passing %NULL
  *             creates an identical copy of @field, similarly to
  *             gwy_field_duplicate() (though with @keep_offsets set to %FALSE
  *             the offsets are reset).
@@ -1051,7 +1052,8 @@ gwy_field_set_yoffset(GwyField *field,
  *
  * Obtains the lateral units of a two-dimensional data field.
  *
- * Returns: The lateral units of @field.
+ * Returns: (transfer none):
+ *          The lateral units of @field.
  **/
 GwyUnit*
 gwy_field_get_unit_xy(const GwyField *field)
@@ -1069,7 +1071,8 @@ gwy_field_get_unit_xy(const GwyField *field)
  *
  * Obtains the value units of a two-dimensional data field.
  *
- * Returns: The value units of @field.
+ * Returns: (transfer none):
+ *          The value units of @field.
  **/
 GwyUnit*
 gwy_field_get_unit_z(const GwyField *field)

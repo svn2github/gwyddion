@@ -227,7 +227,8 @@ gwy_fft_window_kaiser25(guint i, guint n)
 
 /**
  * gwy_fft_window_sample:
- * @data: Data values.
+ * @data: (out) (array length=n):
+ *        Data values.
  * @n: Number of data values.
  * @windowing: Windowing method.
  * @normalize: 0 to return the windowing function as-defined, 1 to normalise

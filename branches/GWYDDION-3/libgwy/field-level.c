@@ -112,8 +112,10 @@ plane_fit_mask(guint id,
 /**
  * gwy_field_fit_plane:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @a: Location to store the constant coefficient, or %NULL.
  * @bx: Location to store the x coefficient, or %NULL.
@@ -209,8 +211,10 @@ gwy_field_subtract_plane(GwyField *field,
 /**
  * gwy_field_inclination:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @damping: Damping factor determining the range of deviations of local normal
  *           vectors from (0,0,1) that non-negligibly contribute to the result.
@@ -445,14 +449,19 @@ enumerate_powers(const guint *powers, guint nterms,
 /**
  * gwy_field_fit_poly:
  * @field: A two-dimensional data field.
- * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @rectangle: (allow-none):
+ *             Area in @field to process.  Pass %NULL to process entire @field.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @xpowers: Array of length @nterms containing the powers of @x to fit.
- * @ypowers: Array of length @nterms containing the powers of @y to fit.
+ * @xpowers: (array length=nterms):
+ *           Array of length @nterms containing the powers of @x to fit.
+ * @ypowers: (array length=nterms):
+ *           Array of length @nterms containing the powers of @y to fit.
  * @nterms: Number of polynomial terms, i.e. the length of @xpowers,
  *          @ypowers and @coeffs.
- * @coeffs: Array of length @nterms to store the individual term coefficients
+ * @coeffs: (out) (array length=nterms):
+ *          Array of length @nterms to store the individual term coefficients
  *          to.
  *
  * Fits a general polynomial through a rectangular part of a field.
@@ -541,11 +550,14 @@ fail:
 /**
  * gwy_field_subtract_poly:
  * @field: A two-dimensional data field.
- * @xpowers: Array of length @nterms containing the powers of @x to subtract.
- * @ypowers: Array of length @nterms containing the powers of @y to subtract.
+ * @xpowers: (array length=nterms):
+ *           Array of length @nterms containing the powers of @x to subtract.
+ * @ypowers: (array length=nterms):
+ *           Array of length @nterms containing the powers of @y to subtract.
  * @nterms: Number of polynomial terms, i.e. the length of @xpowers,
  *          @ypowers and @coeffs.
- * @coeffs: Array of length @nterms with the individual term coefficients.
+ * @coeffs: (array length=nterms):
+ *          Array of length @nterms with the individual term coefficients.
  *
  * Subtracts a general polynomial from a field.
  *
@@ -787,7 +799,8 @@ find_shifts_of_good_rows(GwyLine *shifts,
 /**
  * gwy_field_find_row_shifts:
  * @field: A two-dimensional data field.
- * @mask: Mask specifying which values to take into account/exclude, or %NULL.
+ * @mask: (allow-none):
+ *        Mask specifying which values to take into account/exclude, or %NULL.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
  * @method: Row shift finding method.
  * @min_freedom: Minimum number of points in a row, above the number required
