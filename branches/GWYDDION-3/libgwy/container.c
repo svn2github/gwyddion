@@ -674,7 +674,7 @@ keys_foreach(gpointer hkey,
  *
  * Gets all string keys of a container.
  *
- * Returns: A newly allocated, %NULL-terminated array with string keys of all
+ * Returns: A newly allocated array with string keys of all
  *          @container items, in no particular order.  The number of items can
  *          be obtained with gwy_container_size().  If there are no items,
  *          %NULL is returned.  The array must be freed by caller, however,
