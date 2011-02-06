@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: installation-dependencies.xml 11699 2010-12-21 14:22:10Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-dependencies'>
+  <title>Dépendances de Compilation</title>
+  <para>
+    Le tableau suivant liste les paquets nécessaires à la compilation de
+    <application>Gwyddion</application> à partir du code source. Il ne donne
+    pas les outils communs de compilation comme un compilateur C ou
+    <command>make</command>. Les outils spécifiques à un système
+    d'exploitation sont décrits dans les sections dédiées à la compilation
+    sur un système particulier.
+  </para>
+    <variablelist>
+    <title>Dépendances de Compilation</title>
+    <varlistentry id='dependency-gtk'>
+      <term>
+        <ulink url='http://www.gtk.org/'>Gtk+</ulink>
+        ≥ 2.8.0
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Nécessaire.</emphasis>
+        </para>
+        <para>
+          Cela inclut les dépendances de GTK+ telles que GLib, Pango ou Cairo.
+        </para>
+      </listitem>
+    </varlistentry>
+       <varlistentry id='dependency-pkg-config'>
+        <term>
+          <ulink url='http://pkgconfig.freedesktop.org/'>pkg-config</ulink>
+          ≥ 0.16
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Nécessaire.</emphasis>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gtkglext'>
+        <term>
+          <ulink url='http://gtkglext.sourceforge.net/'>GtkGLExt</ulink>
+          ≥ 1.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet l'affichage des vues en 3D OpenGL.
+          </para>
+     </listitem>
+    </varlistentry>
+      <varlistentry id='dependency-libxml2'>
+        <term>
+          <ulink url='http://xmlsoft.org/'>LibXML2</ulink>
+          ≥ 2.<varname>x</varname>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet l'import des fichiers SPML.
+          </para>
+          <para>
+            Le paquet de compilation MS Windows est réglé de manière à
+            nécessiter LibXML2, et un ajustement manuel est nécessaire pour le
+            désactiver.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-fftw'>
+        <term>
+          <ulink url='http://www.fftw.org/'>FFTW3</ulink>
+          ≥ 3.0 (32bit),
+          ≥ 3.1 (64bit),
+          Uniquement pour Unix
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Accélère le calcul des transformées, des densités spectrales de
+            puissance et des fonctions de corrélation.
+          </para>
+      </listitem>
+    </varlistentry>
+      <varlistentry id='dependency-unique'>
+        <term>
+          <ulink url='http://www.gnome.org/~ebassi/source/'>LibUnique</ulink> ≥ 1.0
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet le <link linkend='remote-control'>contrôle à distance</link>
+            basé sur D-BUS or whatever technology is currently in.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-libxmu'>
+        <term>
+          <ulink url='http://www.x.org/'>LibXmu</ulink>, uniquement pour X11
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet le <link linkend='remote-control'>contrôle à distance</link>
+            sur X11. il s'agit d'une librairie standard du système X Window
+            et toute personne ayant X possède dispose sûrement des fichiers
+            d'exécution. Toutefois, depuis la modularisation de X dans Xorg 7.0,
+            elle est distribuée séparément et il se peut que les fichiers de
+            développement ne soient pas installés.
+          </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-zlib'>
+      <term>
+        <ulink url='http://www.gzip.org/zlib/'>Zlib</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Facultatif.</emphasis>
+        </para>
+        <para>
+          Support de la compression pour certains formats de fichier (Createc).
+        </para>
+      </listitem>
+    </varlistentry>
+    <varlistentry id='dependency-png'>
+      <term>
+        <ulink url='http://www.libpng.org/pub/png/'>Libpng</ulink>
+      </term>
+      <listitem>
+        <para>
+          <emphasis>Facultatif.</emphasis>
+        </para>
+        <para>
+          Permet l'export des données sous forme d'image en niveaux de gris au
+          format PNG 16 bits.
+        </para>
+      </listitem>
+    </varlistentry>
+      <varlistentry id='dependency-pygtk2'>
+        <term>
+          <ulink url='http://www.pygtk.org/'>PyGTK2</ulink>, y compris codegen
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet d'utiliser pygwy, l'interface de script Python pour Gwyddion.
+          </para>
+          <para>
+            Notez que pygwy n'est pour l'instant pas encore complètement
+            fonctionnel sur MS Windows.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gtksourceview'>
+        <term>
+          <ulink url='http://gtksourceview.sourceforge.net/'>GtkSourceView</ulink>
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet la coloration syntaxique dans la console de script Python.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-desktop-file-utils'>
+        <term>
+          <ulink url='http://www.freedesktop.org/software/desktop-file-utils'>desktop-file-utils</ulink>,
+          Unix only
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet une intégration des bureaux conformes à l'environnement
+            Freedesktop, telles que l'installation de Gwyddion dans les menus
+            et l'association de fichiers.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='dependency-gconf2'>
+        <term>
+          <ulink url='http://projects.gnome.org/gconf/'>GConf2</ulink>,
+          Uniquement pour Unix
+        </term>
+        <listitem>
+          <para>
+            <emphasis>Facultatif.</emphasis>
+          </para>
+          <para>
+            Permet une meilleure intérgation dans les environnements graphiques
+            GNOME et XFce, en particulier la génération automatique
+            de vignettes d'aperçu des fichiers SPM dans Nautilus et Thunar.
+          </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

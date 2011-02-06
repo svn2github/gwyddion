@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: installation-devel.xml 11699 2010-12-21 14:22:10Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-devel'>
+  <title>Subversion Checkout, Development</title>
+  <para>
+      <application>Gwyddion</application> utilise le système de contrôle de
+      version
+      <ulink url='http://subversion.tigris.org/'>Subversion</ulink> pour la
+      gestion des modifications du code source. L'organisation de ce dépôt est
+      décrit sur
+      <ulink url='http://gwyddion.net/resources.php#subversion'>la page web du projet</ulink>.
+      La dernière révision peut ainsi être contrôlée avec
+      <informalexample>
+        <literallayout><userinput>svn checkout https://gwyddion.svn.sourceforge.net/svnroot/gwyddion/trunk/gwyddion</userinput></literallayout>
+      </informalexample>
+    </para>
+    <para>
+      Le dépôt ne contient aucun fichier généré, quels que soient les outils
+      nécessaires pour les générer. Des paquets additionnels peuvent donc être
+      nécessaire, et il peut aussi y avoir des limitations liées aux plateformes
+      utilisées. Les outils et paquets additionnels nécessaires pour le
+      développement sont les mêmes que pour la compilation à partir de la
+      dernière révision <application>Subversion</application>.
+      Plus précisément, il vous faudra tous les outils pour compiler une
+      révision, alors que le développement ne nécessitera qu'une partie de
+      ceux-ci, ou même aucun, en fonction du type et de l'importance des
+      modifications.
+    </para>
+    <itemizedlist>
+      <title>Dépendances de compilation supplémentaires</title>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/autoconf/'>GNU autoconf</ulink> ≥ 2.60
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/automake/'>GNU automake</ulink> ≥ 1.11
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/libtool/'>GNU libtool</ulink> ≥ 1.4
+    </listitem>
+    <listitem>
+      <ulink url='http://www.python.org/'>Python</ulink> ≥ 2.2
+    </listitem>
+    <listitem>
+      <ulink url='http://www.perl.org/'>Perl5</ulink>
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gtk.org/gtk-doc/'>gtk-doc</ulink> ≥ 1.12
+    </listitem>
+    <listitem>
+      <ulink url='http://www.gnu.org/software/gettext/'>GNU gettext</ulink> ≥ 0.12, y compris les paquets de développement
+    </listitem>
+    <listitem>
+      et probablement les versions GNU de la plupart des outils : le compilateur, binutils…
+    </listitem>
+  </itemizedlist>
+  <para>
+    Après avoir importé la dernière révision, lancez
+    <userinput>./autogen.sh</userinput> avec tous les arguments que vous
+    donneriez à <command>configure</command>. Notez que cela ajoute
+    automatiquement l'option <option>--enable-maintainer-mode</option> et
+    <option>--enable-gtk-doc</option> pour activer les règles de création et
+    de mise à jour de différents fichiers. De manière générale, il faut 
+    toujours utiliser <option>--enable-maintainer-mode</option> lorsque vous
+    souhaiter ajouter une modification au programme.
+  </para>
+  <para>
+    Sur certains systèmes <command>autogen.sh</command> peut échouer même si les 
+    versions des autotools installés sont suffisamment récentes. Certains 
+    systèmes d'exploitation n'installent pas les commandes
+    <command>autoconf</command> ou <command>automake</command>, seulement
+    des commandes versionnées telles que <command>autoconf261</command> ou
+    <command>automake19</command>.
+    Il peut ainsi être difficile de trouver par exemple
+    <quote><command>automake</command> 1.9 ou plus</quote> et donc
+    <command>autogen.sh</command> ne le cherchera pas. Vous pouvez soit
+    créer des liens symboliques non versionnés vers les commandes
+    versionnées ou lancer <command>autogen.sh</command> de la manière
+    suivante :
+    <informalexample>
+      <userinput>
+        AUTOCONF=autoconf261 AUTOHEADER=autoheader261 ./autogen.sh
+      </userinput>
+    </informalexample>
+        Il vous faudra peut-être définir les variables suivantes :
+    <envar>ACLOCAL</envar>,
+    <envar>AUTOCONF</envar>,
+    <envar>AUTOHEADER</envar>,
+    <envar>AUTOM4TE</envar>,
+    <envar>AUTOMAKE</envar>,
+    <envar>LIBTOOLIZE</envar>.
+    De plus, certains systèmes d'exploitation peuvent installer les macros
+    <command>autoconf</command> à un emplacement que
+    <command>aclocal</command> ne pourra trouver par défaut. Ceci peut être
+    corrigé en définissant la variable <envar>ACLOCAL_FLAGS</envar> de
+    manière à donner des chemins supplémentaires à
+    <command>aclocal</command> :
+    <informalexample>
+      <userinput>
+        ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh
+      </userinput>
+    </informalexample>
+  </para>
+  <para>
+    Il est souvent nécessaire de combiner ces modifications. Par exemple
+    sous FreeBSD, où tous les outils sont versionnés, il faudra ajouter (la
+    ligne complète est décomposée pour faciliter la lecture) :
+    <informalexample>
+      <literallayout><userinput>AUTOCONF=autoconf261 \
+AUTOHEADER=autoheader261 \
+AUTOM4TE=autom4te261 \
+AUTOMAKE=automake19 \
+ACLOCAL=aclocal19 \
+ACLOCAL_FLAGS="-I /usr/local/share/aclocal" \
+CPPFLAGS=-I/usr/local/include \
+LDFLAGS=-L/usr/local/lib \
+./autogen.sh --prefix=<replaceable>...</replaceable></userinput></literallayout>
+    </informalexample>
+  </para>
+  <para>
+    Si <command>autogen.sh</command> réussit vous pouvez alors compiler le
+    programme.
+  </para>
+  <sect2 id='installation-devel-ms-windows'>
+    <title>MS Windows</title>
+    <para>
+      Comme la méthode standard de création d'exécutables MS Windows est la
+      compilation croisée sous Linux, la méthode recommandée pour développer 
+      pour MS Windows est aussi de compiler sous Linux. Cela peut être réalisé
+      soit sur un ordinateur différent à l'aide de <command>ssh</command>, ou
+      sur une machine virtuelle fonctionnant sur le même ordinateur en tant 
+      qu'hôte du système MS Windows. Dans les deux cas le répertoire de 
+      compilation de Gwyddion (ainsi que les autres répertoire) peuvent être
+      partagés entre les systèmes Linux et MS Windows en utilisant soit Samba 
+      soit un moyen de partager les dossiers de la machine virtuelle, les 
+      fichiers exécutables peuvent alors être directement testés sous MS Windows 
+      sans avoir à transférer des fichiers.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->

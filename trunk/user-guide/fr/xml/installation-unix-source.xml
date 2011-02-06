@@ -1,0 +1,340 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: installation-unix-source.xml 11696 2010-12-20 10:55:40Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='installation-unix-source'>
+  <title>Compilation sous Linux/Unix</title>
+  <para>
+      La compilation de <application>Gwyddion</application> sur les systèmes
+      Unix est basée sur GNU autotools
+      (<ulink url='http://www.gnu.org/software/autoconf/'>autoconf</ulink>,
+      <ulink url='http://www.gnu.org/software/automake/'>automake</ulink>,
+      <ulink url='http://www.gnu.org/software/libtool/'>libtool</ulink>), comme
+      pour la plupart des logiciels Unix libres. Si vous avez déjà compilé un
+      logiciel à partir du code source, vous avez alors sûrement déjà eu affaire
+      avec autotools et vous connaissez donc la manière de procéder. Cette
+      section décrit toutefois la procédure de compilation en détail pour les
+      non initiés.
+      Le fichier <ulink url='http://gwyddion.svn.sourceforge.net/viewvc/*checkout*/gwyddion/trunk/gwyddion/INSTALL'><filename>INSTALL</filename></ulink>
+      dans le répertoire racine de archives sources contient les instructions
+      génériques d'installation pour GNU autotools.
+  </para>
+  <sect2 id='installation-unix-source-quick'>
+      <title>Instructions Rapides</title>
+      <para>
+        Si vous connaissez l'exercice :
+      </para>
+      <informalexample>
+        <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2
+cd gwyddion-2.23
+./configure
+make install</userinput></literallayout>
+      </informalexample>
+    </sect2>
+    <sect2 id='installation-unix-source-unpacking'>
+      <title>Dépaquetage des Sources</title>
+      <para>
+        Dépaqueter les archives du code source avec
+        <informalexample>
+          <literallayout><userinput>tar -jxvf gwyddion-2.23.tar.bz2</userinput></literallayout>
+        </informalexample>
+        en remplaçant 2.23 par le numéro de version actuel. Cette commande
+        créera le dossier <filename>gwyddion-2.23</filename> (là encore avec
+        le numéro de version actuel en lieu et place de 2.23),
+        <command>cd</command> vers ce dossier.
+        Toutes les autres étapes de la compilation se dérouleront à cet endroit.
+      </para>
+      <para>
+        Si votre système d'exploitation ne possède pas bzip2 vous pouvez
+        télécharger <filename>gwyddion-2.23.tar.gz</filename> (compressé avec
+        gzip) à la place et dépaqueter avec
+        <informalexample>
+          <userinput>tar -zxvf gwyddion-2.23.tar.gz</userinput>
+        </informalexample>
+        Cependant, les systèmes Unix ou basés sur Unix récents possèdent à la
+        fois bzip2 et gzip, étant donnée sa taille plus petite,
+        <filename>gwyddion-2.23.tar.bz2</filename> devrait être logiquement
+        préféré.
+      </para>
+    </sect2>
+    <sect2 id='installation-unix-source-configuration'>
+      <title>Configuration</title>
+      <para>
+        Lancez
+        <informalexample>
+          <literallayout><userinput>./configure</userinput></literallayout>
+        </informalexample>
+        pour configurer <application>Gwyddion</application>.
+      </para>
+      <para>
+        Le script <command>configure</command> tente de déterminer les valeurs
+        correctes de diverses variables du système utilisées lors de la
+        compilation. Il utilise ces valeurs pour créer un
+        <filename>Makefile</filename> dans chaque répertoire du paquet,
+        quelques fichiers d'en-tête <filename>.h</filename> contenant des
+        définition propres au système ainsi que quelques fichiers auxiliaires.
+        Il crée finalement un script <command>config.status</command> que vous
+        pourrez lancer pour recréer la configuration actuelle, et un fichier
+        <filename>config.log</filename>. Ce fichier contient les détails du
+        processus de détection, qu'il est utile d'include dans les rapports de
+        bug liés à la compilation.
+        <command>configure</command> affiche finalement un résumé des 
+        fonctionnalités optionnelles activées ou désactivées, en précisant les 
+        raisons pour lesquelles certaines fonctionnalités ont été désactivées.
+    </para>
+    <para>
+         Si <command>configure</command> annonce que certains paquets nécessaires
+        manquent, installez les et re-lancer le. Cela s'applique aussi dans le
+        cas où <command>configure</command> termine correctement mais vous
+        vous rendez compte qu'il manque un paquet optionnel avec lequel vous
+        souhaitez compiler <application>Gwyddion</application>. Il est possible
+        qu'un paquet ne soit mal ou pas détecté du tout bien que vous l'ayez
+        installé, typiquement si celui est installé dans un répertoire non
+        standard. Il est nécessaire dans ce cas de modifier certaines variables
+        d'environnement afin que <command>configure</command> soit capable
+        de trouver ces paquets :
+        <variablelist>
+          <varlistentry>
+            <term><envar>PKG_CONFIG_PATH</envar></term>
+            <listitem>
+              <para>
+                La plupart des paquets sont fournis avec des fichiers
+                <ulink url='http://pkgconfig.freedesktop.org/wiki/'>pkg-config</ulink>
+                (<filename>.pc</filename>) qui décrivent la manière dont les
+                programmes doivent se compiler et se lier entre eux.
+                <command>configure</command> utilise les informations fournies
+                dans ces fichiers, il faut donc que
+                <envar>PKG_CONFIG_PATH</envar> soit ajusté de façon à ce qu'il
+                liste tous les répertoires non standard contenant les fichiers
+                pkg-config utiles.
+                Ainsi pour installer Gtk+ dans
+                <filename>/opt/gnome</filename> et FFTW3 dans
+                <filename>$HOME/opt/fftw3</filename> on pourra faire
+              <informalexample>
+                <literallayout><userinput>PKG_CONFIG_PATH=/opt/gnome/lib/pkgconfig:$HOME/opt/fftw3/lib/pkgconfig
+export PKG_CONFIG_PATH</userinput></literallayout>
+              </informalexample>
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <envar>PATH</envar>,
+            <envar>LD_LIBRARY_PATH</envar>
+          </term>
+          <listitem>
+            <para>
+                Il peut être nécessaire de modifier ces variables pour inclure
+                des répertoires non standards contenant respectivement des
+                exécutables et des librairies utiles.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            <envar>CPPFLAGS</envar>,
+            <envar>LDFLAGS</envar>
+          </term>
+          <listitem>
+            <para>
+                Il peut être nécessaire de modifier ces variables pour inclure
+                des répertoires non standards contenant des fichiers d'en-tête
+                et des librairies de paquets n'ayant pas de fichiers pkg-config,
+                par exemple pour libTIFF dans <filename>/usr/local</filename> on
+                pourra faire :
+              <informalexample>
+                <literallayout><userinput>CPPFLAGS=-I/usr/local/include
+export CPPFLAGS
+LDFLAGS=-L/usr/local/lib
+export LDFLAGS</userinput></literallayout>
+              </informalexample>
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </para>
+    <para>
+        L'option <option>--prefix</option> de <command>configure</command>
+        règle le répertoire de base de
+        l'installation. Les composants du logiciels seront installés dans les
+        sous-répertoires
+        <filename>bin</filename>, <filename>lib</filename>,
+        <filename>share</filename>, etc. (ils seront créés s'ils n'existent
+        pas). Un contrôle plus fin est possible en utilisant des options
+        spécifiant des sous-répertoires particuliers tels que
+        <option>--bindir</option>, <option>--libdir</option>. Le préfixe par
+        défaut est <filename>/usr/local/bin</filename>, pour installer
+        <application>Gwyddion</application> dans votre répertoire home vous
+        pouvez par exemple utiliser
+        <informalexample>
+          <literallayout><userinput>./configure --prefix=$HOME/opt/gwyddion</userinput></literallayout>
+        </informalexample>
+        Si vous installez Gwyddion pour une utilisation personnelle, nous vous
+        recommandons d'utiliser un répertoire d'installation similaire, car dans
+        ce cas aucune étape ne nécessitera des droits root.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-configuration2'>
+    <title>Configuration tweaks</title>
+    <para>
+        Des fonctionnalités optionnelles peuvent être activées/désactivées avec
+        des options telles que
+      <option>--with-foo</option>/<option>--without-foo</option>
+      ou
+      <option>--enable-foo</option>/<option>--disable-foo</option>.
+      La compilation avec FFTW3 peut par exemple être désactivée avec :
+      <informalexample>
+        <literallayout><userinput>./configure --without-fftw3</userinput></literallayout>
+      </informalexample>
+        Toutes les fonctionnalitées optionnelles sont activées par défaut si les
+        pre-requis sont présents. Un résumé des fonctionnalités activées et
+        désactivées sont affichées vers la fin de la sortie de
+        <command>configure</command>.
+    </para>
+    <para>
+      La liste complète des options de <command>configure</command> et des 
+      variables importantes peut être obtenues avec :
+      <informalexample>
+        <literallayout><userinput>./configure --help</userinput></literallayout>
+      </informalexample>
+    </para>
+    <para>
+        Certaines actions auxiliaires de l'installation peuvent être
+        désactivées dans <command>configure</command> : la mise à jour des
+        fichiers Freedesktop peut être désactivée avec
+        <userinput>--disable-desktop-file-update</userinput>.
+        L'installation des schémas GConf2 peut être désactivée avec
+        <userinput>--disable-schemas-install</userinput>.  Cependant, la raison
+        habituelle pour désactiver ces actions est l'installation de Gwyddion
+        dans un répertoire temporaire au lieu du répertoire final (c'est souvent
+        le cas lors de la compilation de paquets Linux). Dans ce cas ces
+        actions auxiliaires sont automatiquement déastivées par un
+        <varname>DESTDIR</varname> non vide (voir
+        <link linkend='installation-unix-source-installation'>installation</link>)
+        et n'ont donc pas à être désactivées dans <command>configure</command>.
+    </para>
+    <para>
+      Si vous souhaiter créer un patch ou modifier d'une manière ou d'une autre 
+      le code source de Gwyddion, passez l'option 
+      <option>--enable-maintainer-mode</option> à <command>configure</command>
+      pour activer diverses mises à jour et recompiler les règles non utilisées
+      dans la compilation de base. En fonction de la nature des modifications, 
+      certains des outils supplémentaires décrits dans la section
+      <link linkend='installation-devel'>Subversion, Développement</link>
+      peuvent être nécessaires.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-compilation'>
+    <title>Compilation</title>
+    <para>
+        Lancez
+        <informalexample>
+          <literallayout><userinput>make</userinput></literallayout>
+        </informalexample>
+        et attendez jusqu'à ce que <application>Gwyddion</application> soit
+        compilé. Si <command>configure</command> s'est terminé sans erreur alors
+        la compilation devrait se dérouler sans problème.
+      </para>
+      <para>
+        S'il vous faut faire des choses inhabituelles pour compiler le paquet,
+        essayez de déterminer comment <command>configure</command> permettrait
+        de régler le problème, et envoyer par e-mail des correctifs ou des
+        instructions à l'adresse de rapport de bug, de manière à ce qu'ils
+        soient pris en compte pour la version suivante.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-installation'>
+    <title>Installation</title>
+    <para>
+      <application>Gwyddion</application> doit être installé pour
+        pouvoir être lancé, il est impossible de le faire tourner s'il n'est pas
+        installé.
+    </para>
+    <para>
+         Lancez
+        <informalexample>
+          <literallayout><userinput>make install</userinput></literallayout>
+        </informalexample>
+        pour installer <application>Gwyddion</application> dans le dossier
+        ciblé. Si vous installez <application>Gwyddion</application> dans un
+        dossier système, vous devez avoir les privilèges root pour lancer cette
+        commande, en utilisant par exemple <command>sudo</command> :
+      <informalexample>
+        <literallayout><userinput>sudo make install</userinput></literallayout>
+      </informalexample>
+    </para>
+    <para>
+        Pour installer <application>Gwyddion</application> dans un répertoire
+        temporaire, pour créer un paquet par exemple, modifiez la variable
+        <command>make</command> <varname>DESTDIR</varname> avec un préfixe
+        qui sera utilisé pour tous les répertoires cibles :
+        <informalexample>
+          <literallayout><userinput>make install DESTDIR=/var/tmp/gwyddion-buildroot</userinput></literallayout>
+        </informalexample>
+        <emphasis>Ne</emphasis> modifiez <emphasis>pas</emphasis> les variables
+        des dossiers individuels telles que
+        <varname>bindir</varname>, <varname>libdir</varname>.
+      </para>
+      <para>
+        Si vous n'installez pas dans un dossier système, par exemple avec
+        l'installation dans un sous-dossier ou votre dossier home, il vous
+        faudra peut être ajuster les variables suivantes durant l'installation :
+        <itemizedlist>
+          <listitem>
+            <varname>GCONF_SCHEMA_CONFIG_SOURCE</varname> – emplacement des
+            schémas GConf2
+          </listitem>
+          <listitem>
+            <varname>KDE4_MODULE_DIR</varname> – emplacement des modules KDE4
+          </listitem>
+        </itemizedlist>
+        Il se peut que la variable <varname>XDG_DATA_DIRS</varname> doive être
+        modifiée après l'installation pour obtenir une intégration complète dans
+        le bureau.
+    </para>
+    <para>
+      Si vous installez Gwyddion dans <filename>/usr/local</filename> et obtenez
+      le message comme quoi <filename>libgwyapp.so.0</filename> ne peut être
+      trouvé, il y a de fortes chances que votre système ne possède pas certains 
+      répertoires de librairies standards dans la configuration de l'éditeur de
+      liens dynamiques. Cela arrive par exmple sous Ubuntu. Editez le fichier
+      <filename>/etc/ld.so.conf</filename> et ajoutez-y la ligne suivante :
+      <informalexample>
+        <programlisting>/usr/local/lib</programlisting>
+      </informalexample>.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-deinstallation'>
+      <title>Désinstallation</title>
+      <para>
+        Lancez
+        <informalexample>
+          <literallayout><userinput>make uninstall</userinput></literallayout>
+        </informalexample>
+        dans le dossier où <application>Gwyddion</application> a été compilé
+        afin de le supprimer. Dans le cas où vous auriez perdu le répertoire
+        original, vous pouvez essayer d'extraire les fichiers de compilation,
+        configurer et compiler de la même manière que lors de l'installation
+        puis lancer <userinput>make uninstall</userinput>, mais le succès de
+        cette opération dépend de votre capacité à reproduire le processus de
+        compilation.
+    </para>
+  </sect2>
+  <sect2 id='installation-unix-source-rpm'>
+      <title>Paquets RPM</title>
+      <para>
+        Il est possible de compiler des paquets RPM sur les distributions
+        GNU/Linux basées sur RPM directement à partir des archives du code
+        source grâce à la commande
+        <informalexample>
+          <literallayout><userinput>rpmbuild -tb gwyddion-2.23.tar.bz2</userinput></literallayout>
+        </informalexample>,
+        où 2.23 doit être remplacé par le numéro de version actuel. Cette
+        méthode a été testée sur Fedora, openSuSE et Mandriva, et le fichier de
+        spécifications RPM contient certaines informations pour ces systèmes. Un
+        support spécifique à d'autres systèmes basés sur RPM peut être ajouté
+        sur demande.
+    </para>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
