@@ -802,7 +802,7 @@ multiply_impl(Unit *unit, Unit *op, gint power)
  *        It is set to unit @op raised to power 1/@ipower or kept intact.
  *        It may be @op itself.
  * @op: Base operand.
- * @ipower: Root to take (a non-zero integer): 2 means a quadratic root, 3
+ * @ipower: Root to take (a non-zero integer); 2 means a quadratic root, 3
  *          means cubic root, etc.
  *
  * Calulates the n-th root of a physical unit, if possible.
