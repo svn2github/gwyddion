@@ -50,6 +50,11 @@
       de manière arbitraire une session avec laquelle elles communiquent.
     </para>
     <para>
+      Si un répertoire est donné en tant qu'argument 
+      <replaceable>FILE</replaceable>, le programme ouvre une fenêtre
+      d'ouverture de fichier pointant sur ce répertoire.
+    </para>
+    <para>
       Options Gwyddion :
     </para>
     <variablelist>
@@ -152,6 +157,22 @@
       </varlistentry>
       <varlistentry>
         <term>
+          <option>--disable-gl</option>
+        </term>
+        <listitem>
+          <para>
+            Désactive complètement OpenGL, en incluant toute vérification de sa
+            disponibilité. Bien évidemment cette option n'a d'effet que si 
+            Gwyddion a été compilé avec le support OpenGL, et la conséquence la 
+            plus visible est que la vue 3D devient indisponible. Cela peut 
+            toutefois être nécessaire si vous rencontrez un problème avec votre
+            système d'exploitation, où la simple véréfication des 
+            possibilités d'OpenGL crée des erreur du serveur X.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
           <option>--log-to-file</option>
         </term>
         <listitem>
@@ -163,6 +184,18 @@
             Notez que sous Win32 ces messages sont toujours dirigés vers un
             fichier, cette option n'a donc aucun effet sous cet OS.
           </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          <option>--no-log-to-file</option>
+        </term>
+        <listitem>
+          <para>
+            Supprime l'écriture des messages provenant de GLib, Gtk+, Gwyddion, 
+            etc. vers un fichier. C'est option est pratique surtout sous Win32 
+            (où les messages sont dirigés par défaut dans un fichier) à 
+            condition que stdout et stderr pointent vers un endroit accessible.
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -216,7 +249,8 @@
           <para>
             Lorqu'il n'est pas défini, la valeur par défaut correspond au
             dossier pré-défini dans la variable <varname>${datadir}</varname>,
-            qui est en général <filename>/usr/local/share</filename>.
+            qui est en général <filename>/usr/local/share</filename> ou
+            <filename>/usr/local/lib64</filename>.
           </para>
         </listitem>
       </varlistentry>
@@ -295,7 +329,7 @@
             Settings de l'utilisateur, peut être modifié par
             <envar>GWYDDION_LOGFILE</envar>. Sous Unix, les messages vont par
             défaut vers le terminal et cette variable d'environnement n'a
-            d'effet que si <option>--log-to-file</option> est donné.
+            d'effet que si <option>--log-to-file</option> est utilisé.
           </para>
         </listitem>
       </varlistentry>
