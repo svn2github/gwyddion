@@ -639,21 +639,20 @@ hash_foreach(gpointer hkey, gpointer hvalue, gpointer hdata)
  *
  * Gets all quark keys of a container.
  *
- * Returns: A newly allocated array with quark keys of all @container items,
- *          in no particular order.  The number of items can be obtained
- *          with gwy_container_size().  If there are no items, %NULL
- *          is returned.
+ * Returns: (array zero-terminated=1):
+ *          A newly allocated 0-terminated array with quark keys of all
+ *          @container items, in no particular order.  The number of items can
+ *          be obtained with gwy_container_size().
  **/
 GQuark*
 gwy_container_keys(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
     guint n = g_hash_table_size(container->priv->values);
-    if (!n)
-        return NULL;
-
-    GArray *array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n);
+    GArray *array = g_array_sized_new(FALSE, FALSE, sizeof(GQuark), n+1);
     g_hash_table_foreach(container->priv->values, keys_foreach, array);
+    GQuark sentinel = 0;
+    g_array_append_val(array, sentinel);
     return (GQuark*)g_array_free(array, FALSE);
 }
 
@@ -674,22 +673,21 @@ keys_foreach(gpointer hkey,
  *
  * Gets all string keys of a container.
  *
- * Returns: A newly allocated array with string keys of all
+ * Returns: (transfer container) (array zero-terminated=1):
+ *          A newly allocated %NULL-terminated array with string keys of all
  *          @container items, in no particular order.  The number of items can
- *          be obtained with gwy_container_size().  If there are no items,
- *          %NULL is returned.  The array must be freed by caller, however,
- *          the strings are owned by GLib and must not be freed.
+ *          be obtained with gwy_container_size().  The array must be freed by
+ *          caller, however, the strings are owned by GLib and must not be
+ *          freed.
  **/
 const gchar**
 gwy_container_keys_n(GwyContainer *container)
 {
     g_return_val_if_fail(GWY_IS_CONTAINER(container), NULL);
     guint n = g_hash_table_size(container->priv->values);
-    if (!n)
-        return NULL;
-
-    GPtrArray *array = g_ptr_array_sized_new(n);
+    GPtrArray *array = g_ptr_array_sized_new(n + 1);
     g_hash_table_foreach(container->priv->values, keys_by_name_foreach, array);
+    g_ptr_array_add(array, NULL);
     return (const gchar**)g_ptr_array_free(array, FALSE);
 }
 
@@ -922,7 +920,8 @@ gwy_container_get_boolean(GwyContainer *container, GQuark key)
  * gwy_container_gis_boolean:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the boolean to update.
+ * @value: (inout):
+ *         Pointer to the boolean to update.
  *
  * Updates a boolean from a container using a quark identifier.
  *
@@ -985,7 +984,8 @@ gwy_container_get_char(GwyContainer *container, GQuark key)
  * gwy_container_gis_char:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the character to update.
+ * @value: (inout):
+ *         Pointer to the character to update.
  *
  * Updates a character from a container using a quark identifier.
  *
@@ -1048,7 +1048,8 @@ gwy_container_get_int32(GwyContainer *container, GQuark key)
  * gwy_container_gis_int32:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the 32bit integer to update.
+ * @value: (inout):
+ *         Pointer to the 32bit integer to update.
  *
  * Updates a 32bit integer from a container using a quark identifier.
  *
@@ -1114,7 +1115,8 @@ gwy_container_get_enum(GwyContainer *container, GQuark key)
  * gwy_container_gis_enum:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the enum to update.
+ * @value: (inout):
+ *         Pointer to the enum to update.
  *
  * Updates an enum from a container using a quark identifier.
  *
@@ -1181,7 +1183,8 @@ gwy_container_get_int64(GwyContainer *container, GQuark key)
  * gwy_container_gis_int64:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the 64bit integer to update.
+ * @value: (inout):
+ *         Pointer to the 64bit integer to update.
  *
  * Updates a 64bit integer from a container using a quark identifier.
  *
@@ -1244,7 +1247,8 @@ gwy_container_get_double(GwyContainer *container, GQuark key)
  * gwy_container_gis_double:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the double to update.
+ * @value: (inout):
+ *         Pointer to the double to update.
  *
  * Updates a double from a container using a quark identifier.
  *
@@ -1314,7 +1318,8 @@ gwy_container_get_string(GwyContainer *container, GQuark key)
  * gwy_container_gis_string:
  * @container: A container.
  * @key: Quark item key.
- * @value: Pointer to the string pointer to update.
+ * @value: (inout):
+ *         Pointer to the string pointer to update.
  *
  * Updates a string from a container using a quark identifier.
  *
@@ -1880,7 +1885,8 @@ gwy_container_set_string(GwyContainer *container,
  * gwy_container_take_string:
  * @container: A container.
  * @key: Quark item key.
- * @value: A nul-terminated string.
+ * @value: (out) (transfer full):
+ *         A nul-terminated string.
  *
  * Stores a string identified by a quark into a container.
  *
@@ -1936,7 +1942,8 @@ gwy_container_take_string(GwyContainer *container,
  * gwy_container_set_object:
  * @container: A container.
  * @key: Quark item key.
- * @value: Object to store into the container.
+ * @value: (out) (type Object) (transfer none):
+ *         Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
  *
@@ -2004,7 +2011,8 @@ gwy_container_set_object(GwyContainer *container,
  * gwy_container_take_object:
  * @container: A container.
  * @key: Quark item key.
- * @value: Object to store into the container.
+ * @value: (out) (type Object) (transfer full):
+ *         Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
  *
@@ -2390,7 +2398,7 @@ pstring_compare(const void *p, const void *q)
  * not controllable.
  *
  * Returns: A pointer array, each item containing string with one container
- * item representation (name, type, value).  The array is sorted by name.
+ *          item representation (name, type, value).  The array is sorted by name.
  **/
 gchar**
 gwy_container_dump_to_text(GwyContainer *container)

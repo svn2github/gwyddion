@@ -241,8 +241,14 @@ void
 test_container_keys(void)
 {
     GwyContainer *container = gwy_container_new();
-    g_assert(!gwy_container_keys(container));
-    g_assert(!gwy_container_keys_n(container));
+    GQuark *qkeys = gwy_container_keys(container);
+    g_assert(qkeys);
+    g_assert(!qkeys[0]);
+    g_free(qkeys);
+    const gchar **skeys = gwy_container_keys_n(container);
+    g_assert(skeys);
+    g_assert(!skeys[0]);
+    g_free(skeys);
 
     gwy_container_set_enum_n(container, "test", GWY_WINDOWING_RECT);
     gwy_container_set_enum_n(container, "rect", GWY_WINDOWING_RECT);
@@ -256,7 +262,7 @@ test_container_keys(void)
                      ==,
                      G_N_ELEMENTS(expected_keys));
 
-    GQuark *qkeys = gwy_container_keys(container);
+    qkeys = gwy_container_keys(container);
     g_assert(qkeys);
     for (guint i = 0; i < G_N_ELEMENTS(expected_keys); i++) {
         g_assert(qkeys[i]);
@@ -271,9 +277,10 @@ test_container_keys(void)
         }
         g_assert(found);
     }
+    g_assert(!qkeys[G_N_ELEMENTS(expected_keys)]);
     g_free(qkeys);
 
-    const gchar **skeys = gwy_container_keys_n(container);
+    skeys = gwy_container_keys_n(container);
     g_assert(skeys);
     for (guint i = 0; i < G_N_ELEMENTS(expected_keys); i++) {
         g_assert(skeys[i]);
@@ -288,6 +295,7 @@ test_container_keys(void)
         }
         g_assert(found);
     }
+    g_assert(!skeys[G_N_ELEMENTS(expected_keys)]);
     g_free(skeys);
 
     g_object_unref(container);
