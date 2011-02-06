@@ -100,6 +100,18 @@
         Les valeurs sont inversées par rapport à la valeur moyenne, ce qui
         conserve la valeur moyenne.
       </listitem>
+      <listitem id='limit-range'>
+        Limit the data range by cutting values outside a specified range by
+        <menuchoice>
+          <guimenu>Data Process</guimenu>
+          <guisubmenu>Basic Operations</guisubmenu>
+          <guimenuitem>Limit Range</guimenuitem>
+        </menuchoice>.
+        The range can be set numerically or taken from the false colour map range
+        previously set using the <link linkend='color-range'>Color range tool</link>
+        and it is also possible to cut off outliers farther than a chosen multiple
+        of RMS from the mean value.
+      </listitem>
       <listitem id='square-samples'>
         <indexterm>
           <primary>rapport d'aspect</primary>
@@ -114,17 +126,30 @@
         La plupart des scans ont des pixels ayant un rapport d'aspect de 1:1,
         cette fonction n'a donc aucun effet sur ceux-ci.
       </listitem>
+      <listitem id='tilt'>
+        <indexterm>
+          <primary>inclinaison</primary>
+        </indexterm>
+        Incliner les données selon un gradient spécifié ou un angle avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Inclinaison</guimenuitem>
+        </menuchoice>.
+      </listitem>
+      <listitem id='dimensions-and-units'>
+        Modifier les dimensions physiques, les unités ou l'échelle, ainsi que
+        les décalages latéraux avec
+        <menuchoice>
+          <guimenu>Traitement des Données</guimenu>
+          <guisubmenu>Opérations Basiques</guisubmenu>
+          <guimenuitem>Dimensions et Unités</guimenuitem>
+        </menuchoice>.
+        Cette fonction est très utile lorsque des données brutes ont été 
+        importées avec des échelles erronées ou tout simplement pour recalibrer
+        les dimensions et/ou les hauteurs.
+      </listitem>
     </itemizedlist>
-    <para id='calibrate'>
-      De plus, le module de recalibration peut être utilisé pour changer les
-      dimensions physiques, calibrer les valeurs des données ou même changer les
-      unités de valeurs ou de dimensions latérales :
-      <menuchoice>
-        <guimenu>Traitement des Données</guimenu>
-        <guisubmenu>Opérations Basiques</guisubmenu>
-        <guimenuitem>Calibrer</guimenuitem>
-      </menuchoice>.
-    </para>
   </sect2>
   <sect2 id='basic-value-reading'>
     <title>Lecture des Valeurs</title>
