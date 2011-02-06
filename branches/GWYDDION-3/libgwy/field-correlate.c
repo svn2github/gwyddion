@@ -402,7 +402,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                                     &targetcol, &targetrow))
         return;
 
-    g_return_if_fail(GWY_IS_FIELD(kernel));
+    g_return_if_fail(GWY_IS_MASK_FIELD(kernel));
     g_return_if_fail(GWY_IS_FIELD(reference));
     g_return_if_fail(reference->xres == field->xres
                      && reference->yres == field->yres);
@@ -550,14 +550,15 @@ gwy_field_crosscorrelate(const GwyField *field,
 
             for (guint i = 0; i < height; i++) {
                 for (guint j = 0; j < width; j++) {
+                    guint ifa = i + rowsearch - ii, jfa = j + colsearch - jj;
                     gdouble s = extdatabase[i*xsize + j];
 
                     if (level)
-                        s -= (fieldmean->data[(i - ii)*fxres + (j - jj)]
+                        s -= (fieldmean->data[ifa*fxres + jfa]
                               * referencemean->data[i*width + j]);
 
                     if (normalise) {
-                        gdouble q = (fieldrms->data[(i - ii)*fxres + (j - jj)]
+                        gdouble q = (fieldrms->data[ifa*fxres + jfa]
                                      * referencerms->data[i*width + j]);
                         s = q ? s/q : 0.0;
                     }
