@@ -3304,4 +3304,78 @@ test_field_correlate_normalize(void)
     g_rand_free(rng);
 }
 
+static void
+field_move_periodically(GwyField *field,
+                        gint xmove, gint ymove)
+{
+    GwyField *extended = gwy_field_extend(field, NULL,
+                                          MAX(xmove, 0), MAX(-xmove, 0),
+                                          MAX(ymove, 0), MAX(-ymove, 0),
+                                          GWY_EXTERIOR_PERIODIC, 0.0);
+    GwyRectangle rectangle = {
+        MAX(-xmove, 0), MAX(-ymove, 0), field->xres, field->yres
+    };
+    gwy_field_copy(extended, &rectangle, field, 0, 0);
+    g_object_unref(extended);
+}
+
+void
+test_field_correlate_crosscorrelate(void)
+{
+    enum { max_size = 44, maxsearch = 5, niter = 40 };
+
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+
+    for (guint iter = 0; iter < niter; iter++) {
+        // With too small kernels we can get higher correlation score elsewhere
+        // by a mere chance (at least without normalising).  And with too large
+        // moves the wrapped-around copy can be nearer than the supposedly
+        // closest one.
+        guint xres = g_rand_int_range(rng, 8, max_size);
+        guint yres = g_rand_int_range(rng, 8, max_size);
+        guint kxres = 2*g_rand_int_range(rng, 2, xres/4+1) + 1;
+        guint kyres = 2*g_rand_int_range(rng, 2, yres/4+1) + 1;
+        guint colsearch = g_rand_int_range(rng, 1, MIN(maxsearch+1, xres/2));
+        guint rowsearch = g_rand_int_range(rng, 1, MIN(maxsearch+1, yres/2));
+        gint xmove = g_rand_int_range(rng, -(gint)colsearch, colsearch+1);
+        gint ymove = g_rand_int_range(rng, -(gint)rowsearch, rowsearch+1);
+
+        GwyMaskField *kernel = gwy_mask_field_new_sized(kxres, kyres, FALSE);
+        gwy_mask_field_fill_ellipse(kernel, NULL, TRUE, TRUE);
+
+        GwyField *field = gwy_field_new_sized(xres, yres, FALSE);
+        field_randomize(field, rng);
+        gwy_field_normalize(field, NULL, NULL, GWY_MASK_IGNORE, 0.0, 1.0,
+                            GWY_NORMALIZE_MEAN | GWY_NORMALIZE_RMS);
+        GwyField *moved = gwy_field_duplicate(field);
+        field_move_periodically(moved, xmove, ymove);
+
+        GwyField *score = gwy_field_new_alike(field, FALSE);
+        GwyField *xoff = gwy_field_new_alike(field, FALSE);
+        GwyField *yoff = gwy_field_new_alike(field, FALSE);
+
+        gwy_field_crosscorrelate(moved, field, NULL, score, xoff, yoff,
+                                 kernel, colsearch,rowsearch,
+                                 GWY_CROSSCORRELATION_LEVEL
+                                 | GWY_CROSSCORRELATION_NORMALIZE,
+                                 GWY_EXTERIOR_PERIODIC, 0.0);
+
+        for (guint i = 0; i < xres*yres; i++) {
+            g_assert_cmpfloat(fabs(score->data[i] - 1.0), <, 0.001);
+            // This should be safe to require exactly, integeres are preserved.
+            g_assert_cmpfloat(xoff->data[i], ==, xmove);
+            g_assert_cmpfloat(yoff->data[i], ==, ymove);
+        }
+
+        g_object_unref(yoff);
+        g_object_unref(xoff);
+        g_object_unref(score);
+        g_object_unref(kernel);
+        g_object_unref(moved);
+        g_object_unref(field);
+    }
+    g_rand_free(rng);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
