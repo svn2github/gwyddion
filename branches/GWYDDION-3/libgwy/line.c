@@ -442,7 +442,7 @@ gwy_line_get_property(GObject *object,
  * Creates a new one-dimensional data line.
  *
  * The line dimensions will be 1×1 and it will be zero-filled.  This
- * paremterless constructor exists mainly for language bindings,
+ * parameterless constructor exists mainly for language bindings,
  * gwy_line_new_sized() and gwy_line_new_alike() are usually more useful.
  *
  * Returns: A new one-dimensional data line.

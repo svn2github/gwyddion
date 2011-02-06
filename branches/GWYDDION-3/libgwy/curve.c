@@ -374,7 +374,7 @@ gwy_curve_get_property(GObject *object,
  *
  * Creates a new empty curve.
  *
- * The curve will not contain any points. This paremterless constructor exists
+ * The curve will not contain any points. This parameterless constructor exists
  * mainly for language bindings, gwy_curve_new_from_data() is usually more
  * useful.
  *

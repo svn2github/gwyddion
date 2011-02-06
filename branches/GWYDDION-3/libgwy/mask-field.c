@@ -401,7 +401,7 @@ gwy_mask_field_get_property(GObject *object,
  * Creates a new two-dimensional mask field.
  *
  * The mask field dimensions will be 1×1 and it will be zero-filled.  This
- * paremterless constructor exists mainly for language bindings,
+ * parameterless constructor exists mainly for language bindings,
  * gwy_mask_field_new_sized() is usually more useful.
  *
  * Returns: A new two-dimensional mask field.

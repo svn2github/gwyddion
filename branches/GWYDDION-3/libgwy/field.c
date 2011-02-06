@@ -577,7 +577,7 @@ gwy_field_get_property(GObject *object,
  * Creates a new two-dimensional data field.
  *
  * The field dimensions will be 1×1 and it will be zero-filled.  This
- * paremterless constructor exists mainly for language bindings,
+ * parameterless constructor exists mainly for language bindings,
  * gwy_field_new_sized() and gwy_field_new_alike() are usually more useful.
  *
  * Returns: A new two-dimensional data field.
