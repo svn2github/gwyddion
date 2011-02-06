@@ -731,7 +731,7 @@ gwy_curve_format_y(GwyCurve *curve,
  * values.  The points must be always ordered by the abscissa values, most
  * methods will not work properly if this is not satisfied.
  *
- * Unlike #GwyLine, curves can also be empty, i.e. contain zero points.
+ * Unlike #GwyLine, a curve can also be empty, i.e. contain zero points.
  **/
 
 /**
