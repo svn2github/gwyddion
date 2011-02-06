@@ -237,6 +237,62 @@ test_container_refcount(void)
     g_object_unref(st2);
 }
 
+void
+test_container_keys(void)
+{
+    GwyContainer *container = gwy_container_new();
+    g_assert(!gwy_container_keys(container));
+    g_assert(!gwy_container_keys_n(container));
+
+    gwy_container_set_enum_n(container, "test", GWY_WINDOWING_RECT);
+    gwy_container_set_enum_n(container, "rect", GWY_WINDOWING_RECT);
+    gwy_container_set_enum_n(container, "welch", GWY_WINDOWING_WELCH);
+    gwy_container_set_enum_n(container, "blackmann", GWY_WINDOWING_LANCZOS);
+    gwy_container_remove_n(container, "test");
+    gwy_container_set_enum_n(container, "blackmann", GWY_WINDOWING_BLACKMANN);
+
+    const gchar *expected_keys[] = { "rect", "welch", "blackmann" };
+    g_assert_cmpuint(gwy_container_size(container),
+                     ==,
+                     G_N_ELEMENTS(expected_keys));
+
+    GQuark *qkeys = gwy_container_keys(container);
+    g_assert(qkeys);
+    for (guint i = 0; i < G_N_ELEMENTS(expected_keys); i++) {
+        g_assert(qkeys[i]);
+        for (guint j = 0; j < i; j++)
+            g_assert_cmpuint(qkeys[j], !=, qkeys[i]);
+        gboolean found = FALSE;
+        for (guint j = 0; j < G_N_ELEMENTS(expected_keys); j++) {
+            if (qkeys[i] == g_quark_from_string(expected_keys[j])) {
+                found = TRUE;
+                break;
+            }
+        }
+        g_assert(found);
+    }
+    g_free(qkeys);
+
+    const gchar **skeys = gwy_container_keys_n(container);
+    g_assert(skeys);
+    for (guint i = 0; i < G_N_ELEMENTS(expected_keys); i++) {
+        g_assert(skeys[i]);
+        for (guint j = 0; j < i; j++)
+            g_assert_cmpstr(skeys[j], !=, skeys[i]);
+        gboolean found = FALSE;
+        for (guint j = 0; j < G_N_ELEMENTS(expected_keys); j++) {
+            if (gwy_strequal(skeys[i], expected_keys[j])) {
+                found = TRUE;
+                break;
+            }
+        }
+        g_assert(found);
+    }
+    g_free(skeys);
+
+    g_object_unref(container);
+}
+
 static void
 check_value(GQuark key, const GValue *value, gpointer user_data)
 {
