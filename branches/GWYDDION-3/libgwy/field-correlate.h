@@ -34,6 +34,7 @@ typedef enum {
 typedef enum {
     GWY_CROSSCORRELATION_LEVEL      = 1 << 0,
     GWY_CROSSCORRELATION_NORMALIZE  = 1 << 1,
+    GWY_CROSSCORRELATION_ELLIPTICAL = 1 << 3,
 } GwyCrosscorrelationFlags;
 
 void      gwy_field_correlate      (const GwyField *field,

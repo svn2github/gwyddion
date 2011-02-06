@@ -369,12 +369,10 @@ multiply_shifted_rects(const gdouble *extfield,
  * @kernel: Mask defining the shape of the detail correlated, with ones in
  *          pixels to consider and zeroes in pixels to ignore.  A suitable
  *          kernel can often be created with gwy_mask_field_fill_ellipse().
- * @colsearch: Column half-axis of the elliptical neighbourhood searched for
- *             the kernel-sized detail.  Half-axis of 0 means no shift in this
- *             direction is considered.
- * @rowsearch: Row half-axis of the elliptical neighbourhood searched for
- *             the kernel-sized detail.  Half-axis of 0 means no shift in this
- *             direction is considered.
+ * @colsearch: Horizontal search range; the detail is searched no farther than
+ *             @colsearch left or right from the position in @field.
+ * @rowsearch: Vertical search range; the detail is searched no farther than
+ *             @rowsearch upward or downward from the position in @field.
  * @flags: Flags controlling cross-correlation score calculation.
  * @exterior: Exterior pixels handling.
  * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
@@ -465,6 +463,7 @@ gwy_field_crosscorrelate(const GwyField *field,
 
     gboolean level = flags & GWY_CROSSCORRELATION_LEVEL;
     gboolean normalise = flags & GWY_CROSSCORRELATION_NORMALIZE;
+    gboolean elliptical = flags & GWY_CROSSCORRELATION_ELLIPTICAL;
 
     guint kcount = gwy_mask_field_count(kernel, NULL, TRUE);
 
@@ -562,6 +561,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                                  width, height, xsize, ysize, cstride,
                                  qnorm, level, normalise);
 
+    // We no longer need these.
     g_object_unref(unitkernel);
     fftw_free(extkernel);
 
@@ -577,17 +577,19 @@ gwy_field_crosscorrelate(const GwyField *field,
         score = gwy_field_new_alike(target, FALSE);
     gwy_field_fill(score, &targetrect, NULL, GWY_MASK_IGNORE, -G_MAXDOUBLE);
 
-    // Scan the elliptical neighbourhood.  Vars ii and jj represent the shifts
-    // of the field with respect to reference.  Consequently, if jj is positive
-    // the field is shifted to the right and values are taken from smaller
-    // indices than in reference.  But to detect it, we have to move it in the
-    // other direction.  Yeah, it's a bit confusing.
+    // Scan the neighbourhood.  Vars ii and jj represent the shifts of the
+    // field with respect to reference.  Consequently, if jj is positive the
+    // field is shifted to the right and values are taken from smaller indices
+    // than in reference.  But to detect it, we have to move it in the other
+    // direction.  Yeah, it's a bit confusing.
     for (gint ii = -(gint)rowsearch; ii <= (gint)rowsearch; ii++) {
-        gdouble ay = ii/(rowsearch + 0.5);
         for (gint jj = -(gint)colsearch; jj <= (gint)colsearch; jj++) {
-            gdouble ax = jj/(colsearch + 0.5);
-            if (ax*ax + ay*ay > 1.0)
-                continue;
+            if (elliptical) {
+                gdouble ay = ii/(rowsearch + 0.5);
+                gdouble ax = jj/(colsearch + 0.5);
+                if (ax*ax + ay*ay > 1.0)
+                    continue;
+            }
 
             multiply_shifted_rects(extfield, extreference, extdata,
                                    xsize, ysize, -jj, -ii);
@@ -682,6 +684,9 @@ gwy_field_crosscorrelate(const GwyField *field,
  * @GWY_CROSSCORRELATION_NORMALIZE: Normalise the rms of the kernel-sized areas
  *                                  before multiplying them to obtain
  *                                  the correlation score.
+ * @GWY_CROSSCORRELATION_ELLIPTICAL: Search the elliptical neighbourhood
+ *                                   inscribed to the search range rectangle
+ *                                   instead of the full rectangle.
  *
  * Flags controlling behaviour of cross-correlation functions.
  *
