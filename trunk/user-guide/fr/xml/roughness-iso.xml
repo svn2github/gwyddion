@@ -1,0 +1,314 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- @(#) $Id: roughness-iso.xml 10420 2009-11-13 15:28:58Z yeti-dn $ -->
+<!DOCTYPE book PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+               'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<sect1 id='roughness-iso' xmlns:xi='http://www.w3.org/2001/XInclude'>
+  <title>Paramètres de rugosité uni-dimensionnelle</title>
+  <indexterm>
+    <primary>rugosité</primary>
+    <secondary>paramètres ISO</secondary>
+  </indexterm>
+  <para>
+    Les paramètres de rugosité uni-dimensionnelle standardisés peuvent être
+    évalués avec l'<link linkend='tool-roughness'>outil rugosité</link>.
+  </para>
+  <para>
+    La texture uni-dimensionnelle est séparée en ondulation (la composante de 
+    basse fréquence définissant la forme globale) et la rugosité (la composante
+    de haute fréquence) à la fréquence de coupure. Celle-ci est spécifiée en 
+    unités de fréquence de Nyquist, c'est-à-dire qu'une valeur de 1.0 
+    correspond à la fréquence de Nyquist.
+  </para>
+  <para>
+    Dans les formules qui suivent, nous supposons que la valeur moyenne de 
+    <xi:include href="eqi-r_j.xml"/> est nulle, i.e. nous avons
+    <xi:include href="eq-roughness-iso-rj.xml"/>
+  </para>
+  <sect2 id='roughness-iso-amplitude'>
+    <title>Paramètres d'amplitude de rugosité</title>
+    <variablelist>
+      <varlistentry id='iso-Ra'>
+        <term>
+          Rugosité moyenne <xi:include href="eqi-R_a.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997, ISO
+            4287/1-1997.
+          </para>
+          <para>
+            Ecart moyen arithmétique. Il s'agit de l'écart moyen de tous les 
+            points du profil de rugosité par rapport à une ligne moyenne sur la 
+            longueur d'évaluation
+            <xi:include href="eq-roughness-iso-Ra.xml"/>
+          </para>
+          <para>
+            Une manière plus ancienne de spécifier une plage de 
+            <xi:include href="eqi-R_a.xml"/> s'appelle RHR. Il s'agit d'un 
+            symbole placé sur un dessin et spécifiant la valeur minimale et 
+            maximale de <xi:include href="eqi-R_a.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rq'>
+        <term>
+          Rugosité moyenne quadratique <xi:include href="eqi-R_q.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ISO 4287-1997, ISO 4287/1-1997.
+          </para>
+          <para>
+            Moyenne quadratique des écarts de hauteur sur la longueur 
+            d'évaluation et mesurés par rapport à la ligne moyenne
+            <xi:include href="eq-roughness-iso-Rq.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rt'>
+        <term>
+          Hauteur maximale du profil <xi:include href="eqi-R_t.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ISO 4287-1997.
+          </para>
+          <para>
+            Hauteur crête-à-crête maximale. Il s'agit de la valeur absolue entre
+            les hauteurs maximum et minimum
+            <xi:include href="eq-roughness-iso-Rt.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rm-Rv'>
+        <term>
+          Profondeur minimale des vallées <xi:include href="eqi-R_v.xml"/>,
+          <xi:include href="eqi-R_m.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997,
+            ISO 4287/1-1997.
+          </para>
+          <para>
+            Vallée la plus profonde. Il s'agit de la profondeur de la vallée
+            la plus profonde du profil de rugosité sur la longueur d'évaluation
+            <xi:include href="eq-roughness-iso-Rv.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rp'>
+        <term>
+          Hauteur maximale des pics <xi:include href="eqi-R_p.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ASME B46.1-1985, ISO 4287-1997,
+            ISO 4287/1-1997.
+          </para>
+          <para>
+            Pic le plus élevé. Il s'agit de la hauteur du pic le plus élevé du
+            profil de rugosité sur la longueur d'évaluation
+            <xi:include href="eq-roughness-iso-Rp.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rtm'>
+        <term>
+          Amplitude moyenne
+          <xi:include href="eqi-R_tm.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ASME B46.1-1995, ISO 4287-1997.
+          </para>
+          <para>
+            Rugosité crête-à-crête moyenne. Elle est déterminée par la 
+            différence entre le pic le plus élevé et la vallée la plus profonde 
+            sur plusieurs échantillons le long de la longueur d'évaluation
+            <xi:include href="eq-roughness-iso-Rtm.xml"/>
+            où <xi:include href="eqi-R_vm.xml"/> et
+            <xi:include href="eqi-R_pm.xml"/> sont définis plus bas.
+          </para>
+          <para>
+            Pour les profils de données elle est basée sur cinq longueur 
+            d'échantillon
+            (<xi:include href="eqi-m-is-5.xml"/>).
+            Le nombre d'échantillons correspond à la norme ISO.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rvm'>
+        <term>
+          Profondeur moyenne des vallées
+          <xi:include href="eqi-R_vm.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Profondeur de vallée moyenne basée sur une vallée par longueur
+            échantillonnée. La vallée la plus profonde est déterminée pour cinq
+            longueurs échantillonnées
+            (<xi:include href="eqi-m-is-5.xml"/>) puis ces valeurs sont
+            moyennées
+            <xi:include href="eq-roughness-iso-Rvm.xml"/>
+            où
+            <xi:include href="eq-roughness-iso-Rvi.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rpm'>
+        <term>
+          Hauteur moyenne des pics
+          <xi:include href="eqi-R_pm.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Hauteur de pic moyenne basée sur une vallée par longueur
+            échantillonnée. La vallée la plus profonde est déterminée pour cinq
+            longueurs échantillonnées
+            (<xi:include href="eqi-m-is-5.xml"/>) puis ces valeurs sont
+            moyennées
+            <xi:include href="eq-roughness-iso-Rpm.xml"/>
+            où
+            <xi:include href="eq-roughness-iso-Rpi.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-R3z'>
+        <term>
+          Profondeur de rugosité de base <xi:include href="eqi-R_3z.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Distance entre le troisième plus haut pic et la troisième plus basse
+            vallée. Un pic correspond à une portion de la surface située 
+            au-dessus de la ligne moyenne.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-R3zISO'>
+        <term>
+          Profondeur de rugosité moyenne <xi:include href="eqi-R_3zISO.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Distance entre le troisième plus haut pic et la troisième plus basse
+            vallée par longueur échantillonnée. La profondeur de rugosité de
+            base est déterminée pour cinq longueurs échantillonnées puis les
+            valeurs obtenues sont moyennées.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rz'>
+        <term>
+          Hauteur maximale moyenne <xi:include href="eqi-R_z.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997
+          </para>
+          <para>
+            Moyenne des valeurs absolues des cinq plus hauts pics et des cinq
+            plus basses vallées sur la longueur d'évaluation.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-RzISO'>
+        <term>
+          Amplitude crête-à-crête moyenne
+          <xi:include href="eqi-R_zISO.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Rugosité crête-à-crête moyenne basée sur un pic et une vallée par 
+            longueur échantillonnée. L'amplitude la plus élevée est déterminée
+            pour cinq longueurs échantillonnées puis ces valeurs sont moyennées. 
+            Elle est identique à
+            <xi:include href="eqi-R_tm.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-ADF'>
+        <term>
+          Fonction de distribution d'amplitude 
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            La distribution d'amplitude est une fonction de donnant la
+            probabilité qu'un profil de la surface ait une certaine hauteur
+            <xi:include href="eqi-z.xml"/> pour toute position
+            <xi:include href="eqi-x.xml"/>.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-BRC'>
+        <term>
+          Distribution d'amplitude cumulée
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            La distribution d'amplitude cumulée est liée à la distribution
+            d'amplitude, il s'agit de la distribution de probabilité cumulée
+            correspondante et elle a un intérêt bien plus grand pour 
+            caractériser un état de surface. La distribution d'amplitude cumulée
+            est l'intégrale de la distribution d'amplitude.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rsk'>
+        <term>
+          Asymétrie <xi:include href="eqi-R_sk.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            L'asymétrie est un paramètre décrivant la forme de la distribution
+            d'amplitude. Il s'agit d'une mesure de la symétrie de la variation
+            d'un profil autour de sa ligne moyenne
+            <xi:include href="eq-roughness-iso-Rsk.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry id='iso-Rku'>
+        <term>
+          Kurtosis <xi:include href="eqi-R_ku.xml"/>
+        </term>
+        <listitem>
+          <para>
+            Normes : ISO 4287-1997.
+          </para>
+          <para>
+            Le kurtosis est un paramètre de forme de la distribution d'ampltude.
+            Il s'agit de l'uniformité de la distribution d'amplitude, ou de 
+            manière équivalente de l'aplatissement du profil.
+            <xi:include href="eq-roughness-iso-Rku.xml"/>
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </sect2>
+</sect1>
+<!-- vim: set ts=2 sw=2 et : -->
