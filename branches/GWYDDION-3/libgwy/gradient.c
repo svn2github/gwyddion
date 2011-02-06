@@ -620,7 +620,7 @@ fix_position(GArray *points,
     if (x >= xsucc)
         x = xsucc - EPS;
     // Very, very closely spaced points.
-    if (x <= xprec)
+    if (xsucc - xprec <= EPS)
         x = 0.5*(xprec + xsucc);
 
     return x;

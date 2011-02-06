@@ -166,6 +166,7 @@ gradient/load
 gradient/save
 gradient/serialize
 gradient/inventory
+gradient/manipulate
 gl-material/load
 gl-material/save
 gl-material/serialize

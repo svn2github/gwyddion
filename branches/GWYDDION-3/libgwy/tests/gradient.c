@@ -262,4 +262,74 @@ test_gradient_inventory(void)
     g_object_unref(gradient);
 }
 
+void
+test_gradient_manipulate(void)
+{
+    static const GwyGradientPoint gradient_point_red0 = { 0, { 0.8, 0, 0, 1 } };
+    static const GwyGradientPoint gradient_point_p1 = { 0.5, { 0, 0.6, 0, 1 } };
+    static const GwyGradientPoint gradient_point_p2 = { 0.6, { 0, 0.5, 0, 1 } };
+    static const GwyGradientPoint gradient_point_blue1 = { 1, { 0, 0, 1, 1 } };
+
+    GwyGradient *gradient = gwy_gradient_new();
+    GwyResource *resource = GWY_RESOURCE(gradient);
+
+    gwy_resource_set_name(resource, "Unstable");
+    g_assert_cmpstr(gwy_resource_get_name(resource), ==, "Unstable");
+
+    gwy_gradient_set_color(gradient, 0, &gradient_point_red0.color);
+    gwy_gradient_set_color(gradient, 1, &gradient_point_blue1.color);
+    gwy_gradient_insert(gradient, 1, &gradient_point_p2);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 3);
+    GwyGradientPoint pt = gwy_gradient_get(gradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_p2, sizeof(GwyGradientPoint)),
+                    ==, 0);
+
+    gwy_gradient_insert(gradient, 1, &gradient_point_p1);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 4);
+    pt = gwy_gradient_get(gradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_p1, sizeof(GwyGradientPoint)),
+                    ==, 0);
+    pt = gwy_gradient_get(gradient, 2);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_p2, sizeof(GwyGradientPoint)),
+                    ==, 0);
+
+    GwyRGBA color;
+    gwy_gradient_get_color(gradient, gradient_point_red0.x, &color);
+    g_assert_cmpint(memcmp(&color, &gradient_point_red0.color, sizeof(GwyRGBA)),
+                    ==, 0);
+    gwy_gradient_get_color(gradient, gradient_point_p1.x, &color);
+    g_assert_cmpint(memcmp(&color, &gradient_point_p1.color, sizeof(GwyRGBA)),
+                    ==, 0);
+    gwy_gradient_get_color(gradient, gradient_point_p2.x, &color);
+    g_assert_cmpint(memcmp(&color, &gradient_point_p2.color, sizeof(GwyRGBA)),
+                    ==, 0);
+    gwy_gradient_get_color(gradient, gradient_point_blue1.x, &color);
+    g_assert_cmpint(memcmp(&color, &gradient_point_blue1.color, sizeof(GwyRGBA)),
+                    ==, 0);
+
+    guint n;
+    const GwyGradientPoint *gdata = gwy_gradient_get_data(gradient, &n);
+    g_assert_cmpuint(n, ==, 4);
+    g_assert(gdata);
+    GwyGradientPoint *mydata = g_memdup(gdata, n*sizeof(GwyGradientPoint));
+
+    gwy_gradient_delete(gradient, 1);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 3);
+    pt = gwy_gradient_get(gradient, 1);
+    g_assert_cmpint(memcmp(&pt, &gradient_point_p2, sizeof(GwyGradientPoint)),
+                    ==, 0);
+
+    gwy_gradient_delete(gradient, 1);
+    g_assert_cmpuint(gwy_gradient_n_points(gradient), ==, 2);
+
+    gwy_gradient_set_data(gradient, n, mydata);
+    gdata = gwy_gradient_get_data(gradient, &n);
+    g_assert_cmpuint(n, ==, 4);
+    g_assert(gdata);
+    g_assert_cmpint(memcmp(gdata, mydata, n*sizeof(GwyGradientPoint)), ==, 0);
+
+    g_free(mydata);
+    g_object_unref(gradient);
+}
+
 /* vim: set cin et ts=4 sw=4 cino=>1s,e0,n0,f0,{0,}0,^0,\:1s,=0,g1s,h0,t0,+1s,c3,(0,u0 : */
