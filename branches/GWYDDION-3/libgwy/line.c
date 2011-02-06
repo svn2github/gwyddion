@@ -659,7 +659,7 @@ gwy_line_new_from_curve(const GwyCurve *curve,
         guint j = 0;
         for (guint i = 1; i < res-1; i++) {
             gdouble x = i*dx + cdata[0].x;
-            while (cdata[j].x > x)
+            while (j+1 < res && cdata[j+1].x < x)
                 j++;
             gdouble r = (x - cdata[j].x)/(cdata[j+1].x - cdata[j].x);
             *(ldata++) = r*cdata[j+1].y + (1.0 - r)*cdata[j].y;
