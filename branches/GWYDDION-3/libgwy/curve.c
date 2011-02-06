@@ -161,26 +161,13 @@ free_data(GwyCurve *curve)
     GWY_FREE(curve->data);
 }
 
-static int
-compare_double(const void *pa,
-               const void *pb)
-{
-    gdouble a = *(gdouble*)pa;
-    gdouble b = *(gdouble*)pb;
-    if (a < b)
-        return -1;
-    if (a > b)
-        return 1;
-    return 0;
-}
-
 static void
 sort_data(GwyCurve *curve)
 {
     // If the data is already sorted this should be a quick O(n) operation with
     // a reasonable qsort() implementation, e.g. the glibc one.
     if (curve->n > 1)
-        qsort(curve->data, curve->n, sizeof(GwyXY), compare_double);
+        qsort(curve->data, curve->n, sizeof(GwyXY), &gwy_double_compare);
 }
 
 static void
