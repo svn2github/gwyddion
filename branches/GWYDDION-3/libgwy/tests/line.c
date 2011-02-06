@@ -115,6 +115,37 @@ test_line_data_changed(void)
 }
 
 void
+test_line_units(void)
+{
+    enum { max_size = 411 };
+    GRand *rng = g_rand_new();
+    g_rand_set_seed(rng, 42);
+    gsize niter = 50;
+
+    for (guint iter = 0; iter < niter; iter++) {
+        guint res = g_rand_int_range(rng, 1, max_size);
+        GwyLine *line = gwy_line_new_sized(res, FALSE);
+        g_object_set(line, "real", -log(1.0 - g_rand_double(rng)), NULL);
+        GString *prev = g_string_new(NULL), *next = g_string_new(NULL);
+        GwyValueFormat *format = gwy_line_format_x(line,
+                                                   GWY_VALUE_FORMAT_PLAIN);
+        gdouble dx = gwy_line_dx(line);
+        for (gint i = 0; i <= 10; i++) {
+            GWY_SWAP(GString*, prev, next);
+            g_string_assign(next,
+                            gwy_value_format_print_number(format, (i - 5)*dx));
+            if (i)
+                g_assert_cmpstr(prev->str, !=, next->str);
+        }
+        g_object_unref(format);
+        g_object_unref(line);
+        g_string_free(prev, TRUE);
+        g_string_free(next, TRUE);
+    }
+    g_rand_free(rng);
+}
+
+void
 test_line_serialize(void)
 {
     enum { max_size = 55 };
