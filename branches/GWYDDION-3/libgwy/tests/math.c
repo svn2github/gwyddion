@@ -33,8 +33,8 @@ test_math_powi_actual(void)
     long double x = -G_PI;
     long double pp = 1.0, pm = 1.0;
     for (gint i = 0; i < 40; i++) {
-        g_assert_cmpfloat(fabs(gwy_powi(x, i) - pp), <=, 5e-16*fabs(pp));
-        g_assert_cmpfloat(fabs(gwy_powi(x, -i) - pm), <=, 5e-16*fabs(pm));
+        g_assert_cmpfloat(fabs(gwy_powi(x, i) - pp), <=, 8e-16*fabs(pp));
+        g_assert_cmpfloat(fabs(gwy_powi(x, -i) - pm), <=, 8e-16*fabs(pm));
         pp *= x;
         pm /= x;
     }
@@ -53,8 +53,8 @@ test_math_powi_our(void)
     long double pp = 1.0, pm = 1.0;
     double arg = x;
     for (gint i = 0; i < 40; i++) {
-        g_assert_cmpfloat(fabs(gwy_powi(arg, i) - pp), <=, 5e-16*fabs(pp));
-        g_assert_cmpfloat(fabs(gwy_powi(arg, -i) - pm), <=, 5e-16*fabs(pm));
+        g_assert_cmpfloat(fabs(gwy_powi(arg, i) - pp), <=, 8e-16*fabs(pp));
+        g_assert_cmpfloat(fabs(gwy_powi(arg, -i) - pm), <=, 8e-16*fabs(pm));
         pp *= x;
         pm /= x;
     }
