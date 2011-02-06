@@ -42,10 +42,10 @@ enum {
  * @field: A two-dimensional data field.
  * @rectangle: Area in @field to process.  Pass %NULL to process entire @field.
  * @score: A two-dimensional data field where the result will be placed.
- *          It may be @field for an in-place modification.  Its dimensions may
- *          match either @field or @rectangle.  In the former case the
- *          placement of result is determined by @rectangle; in the latter case
- *          the result fills the entire @score.
+ *         It may be @field for an in-place modification.  Its dimensions may
+ *         match either @field or @rectangle.  In the former case the
+ *         placement of result is determined by @rectangle; in the latter case
+ *         the result fills the entire @score.
  * @kernel: Kernel, i.e. the detail for which the correlation score is
  *          calculated.  It is always used as-is.  If you want it to have zero
  *          mean and rms of unity (which you often want) it is easy to ensure
@@ -353,8 +353,55 @@ multiply_shifted_rects(const gdouble *extfield,
     }
 }
 
+/**
+ * gwy_field_crosscorrelate:
+ * @field: A two-dimensional data field.
+ * @reference: A field to cross-corelate with @field.  It must have the same
+ *             dimensions as @field.
+ * @rectangle: Area in @field and @reference to process.  Pass %NULL to process
+ *             entire fields.
+ * @score: A two-dimensional data field where the scores will be placed,
+ *         or %NULL.
+ * @xoff: A two-dimensional data field where the horizontal shifts
+ *        corresponding to the maximum scores will be placed, or %NULL.
+ * @yoff: A two-dimensional data field where the horizontal shifts
+ *        corresponding to the maximum scores will be placed, or %NULL.
+ * @kernel: Mask defining the shape of the detail correlated, with ones in
+ *          pixels to consider and zeroes in pixels to ignore.  A suitable
+ *          kernel can often be created with gwy_mask_field_fill_ellipse().
+ * @colsearch: Column half-axis of the elliptical neighbourhood searched for
+ *             the kernel-sized detail.  Half-axis of 0 means no shift in this
+ *             direction is considered.
+ * @rowsearch: Row half-axis of the elliptical neighbourhood searched for
+ *             the kernel-sized detail.  Half-axis of 0 means no shift in this
+ *             direction is considered.
+ * @flags: Flags controlling cross-correlation score calculation.
+ * @exterior: Exterior pixels handling.
+ * @fill_value: The value to use with %GWY_EXTERIOR_FIXED_VALUE exterior.
+ *
+ * Cross-correlates two fields, calculating scores and/or offsets.
+ *
+ * Cross-correlation is an algorithm for matching two different images of the
+ * same object under changes.  Conceptually, it searches @kernel-sized details
+ * of @field in near positions in @reference and finds the best matches and
+ * their shifts.  This search is performed for details at all possible
+ * positions in @field.  In practice, this all is of course done using FFT.
+ *
+ * An offset is considered positive if the detail is placed down or to the
+ * right in @reference with respect to @field; it is positive if the detail is
+ * placed up or to the left in @reference with respect to @field.
+ *
+ * The dimensions of of @score, @xoff and @yoff fields may match either @field
+ * or @rectangle (all three must have the same dimensions though).  In the
+ * former case the placement of result is determined by @rectangle; in the
+ * latter case the result fills the entire target field.
+ **/
 // FIXME: Instead of colsearch and rowsearch we could also accept an arbitrary
 // mask.  It would be actually easier...
+// XXX: We cannot do subpixel precision this way as it would require insane
+// storage.  We could perform all the DFTs second time after finding the
+// maxima but that's perhaps too much.  What about passing the offsets as
+// integers then?
 void
 gwy_field_crosscorrelate(const GwyField *field,
                          const GwyField *reference,
@@ -369,7 +416,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                          GwyExteriorType exterior,
                          gdouble fill_value)
 {
-    // Check if all target fields are compatible; @target is set to whatever
+    // Check if all target fields are compatible; @target is set to whichever
     // of them is non-NULL.
     GwyField *target = NULL;
     if (score) {
@@ -532,8 +579,9 @@ gwy_field_crosscorrelate(const GwyField *field,
 
     // Scan the elliptical neighbourhood.  Vars ii and jj represent the shifts
     // of the field with respect to reference.  Consequently, if jj is positive
-    // the field is shifted to the right and values are taken from *smaller*
-    // indices than in reference.
+    // the field is shifted to the right and values are taken from smaller
+    // indices than in reference.  But to detect it, we have to move it in the
+    // other direction.  Yeah, it's a bit confusing.
     for (gint ii = -(gint)rowsearch; ii <= (gint)rowsearch; ii++) {
         gdouble ay = ii/(rowsearch + 0.5);
         for (gint jj = -(gint)colsearch; jj <= (gint)colsearch; jj++) {
@@ -542,7 +590,7 @@ gwy_field_crosscorrelate(const GwyField *field,
                 continue;
 
             multiply_shifted_rects(extfield, extreference, extdata,
-                                   xsize, ysize, jj, ii);
+                                   xsize, ysize, -jj, -ii);
             fftw_execute(dplan);
             for (guint k = 0; k < cstride*ysize; k++)
                 datac[k] *= qnorm*kernelc[k];
@@ -550,7 +598,7 @@ gwy_field_crosscorrelate(const GwyField *field,
 
             for (guint i = 0; i < height; i++) {
                 for (guint j = 0; j < width; j++) {
-                    guint ifa = i + rowsearch - ii, jfa = j + colsearch - jj;
+                    guint ifa = i + rowsearch + ii, jfa = j + colsearch + jj;
                     gdouble s = extdatabase[i*xsize + j];
 
                     if (level)
@@ -575,11 +623,6 @@ gwy_field_crosscorrelate(const GwyField *field,
             }
         }
     }
-
-    // XXX: We cannot do subpixel precision this way as it would require insane
-    // storage.  We could perform all the DFTs second time after finding the
-    // maxima but that's perhaps too much.
-    // XXX: What about passing the offsets as integers?
 
     g_free(extreference);
     g_free(extfield);
