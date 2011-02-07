@@ -23,7 +23,7 @@
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
 #include "libgwy/surface.h"
-//#include "libgwy/surface-statistics.h"
+#include "libgwy/surface-statistics.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 #include "libgwy/object-internal.h"
@@ -731,26 +731,25 @@ gwy_surface_format_xy(GwySurface *surface,
     if (!surface->n)
         return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
                                                style, 1.0, 0.1);
-    /*
+    // XXX: If we have the triangulation a better estimate can be made.  Maybe.
     if (surface->n == 1) {
-        gdouble m = surface->data[0].x ? fabs(surface->data[0].x) : 1.0;
+        gdouble m = MAX(fabs(surface->data[0].x), fabs(surface->data[0].y));
+        if (!m)
+            m = 1.0;
         return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
                                                style, m, m/10.0);
     }
-    gdouble max = MAX(fabs(surface->data[0].x), fabs(surface->data[surface->n-1].x));
-    gdouble unit = 0.0;
-    const GwyXYZ *p = surface->data;
-    // Give more weight to the smaller differences but do not let the precision
-    // grow faster than quadratically with the number of surface points.
-    for (guint i = surface->n; i; i--, p++)
-        unit += sqrt(p[1].x - p[0].x);
-    unit /= surface->n - 1;
+    gdouble xmin, xmax, ymin, ymax;
+    gwy_surface_xrange(surface, &xmin, &xmax);
+    gwy_surface_yrange(surface, &ymin, &ymax);
+    gdouble max = MAX(MAX(fabs(xmax), fabs(xmin)), MAX(fabs(ymax), fabs(ymin)));
+    if (!max)
+        max = 1.0;
+    gdouble unit = hypot(ymax - ymin, xmax - xmin)/sqrt(surface->n);
+    if (!unit)
+        unit = max/10.0;
     return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
-                                           style, max, unit*unit);
-    */
-    g_warning("Implement me!");
-    return gwy_unit_format_with_resolution(gwy_surface_get_unit_xy(surface),
-                                           style, 1.0, 0.01);
+                                           style, max, 0.3*unit);
 }
 
 /**
@@ -767,19 +766,20 @@ gwy_surface_format_z(GwySurface *surface,
                      GwyValueFormatStyle style)
 {
     g_return_val_if_fail(GWY_IS_SURFACE(surface), NULL);
-    /*
     gdouble min, max;
-    gwy_surface_min_max(surface, &min, &max);
-    if (!surface->n || max == min) {
-        max = ABS(max);
+    if (surface->n) {
+        gwy_surface_min_max_full(surface, &min, &max);
+        if (max == min) {
+            max = ABS(max);
+            min = 0.0;
+        }
+    }
+    else {
         min = 0.0;
+        max = 1.0;
     }
     return gwy_unit_format_with_digits(gwy_surface_get_unit_z(surface),
                                        style, max - min, 3);
-                                       */
-    g_warning("Implement me!");
-    return gwy_unit_format_with_digits(gwy_surface_get_unit_z(surface),
-                                       style, 1.0, 3);
 }
 
 
