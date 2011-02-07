@@ -30,6 +30,7 @@ testlibgwy_SOURCES = \
 	serialization.c \
 	sort.c \
 	strfuncs.c \
+	surface.c \
 	unit.c \
 	user-fit-func.c \
 	value-format.c \

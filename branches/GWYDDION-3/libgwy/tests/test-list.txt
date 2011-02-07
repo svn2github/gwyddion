@@ -157,6 +157,9 @@ field/distributions/hhcf/masked
 field/distributions/hhcf/partial
 field/distributions/psdf/full
 field/distributions/psdf/masked
+surface/serialize
+surface/props
+surface/data-changed
 container/data
 container/refcount
 container/keys
