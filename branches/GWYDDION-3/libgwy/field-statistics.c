@@ -39,9 +39,9 @@
  *        rectangular part.  In the first case the mask is placed over the
  *        entire field, in the second case over the rectangle.
  * @masking: Masking mode to use (has any effect only with non-%NULL @mask).
- * @min: (out) (allow-none)
+ * @min: (out) (allow-none):
  *       Location to store the minimum to, or %NULL.
- * @max: (out) (allow-none)
+ * @max: (out) (allow-none):
  *       Location to store the maximum to, or %NULL.
  *
  * Finds the minimum and maximum value of a field.

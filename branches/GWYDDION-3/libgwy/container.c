@@ -1942,7 +1942,7 @@ gwy_container_take_string(GwyContainer *container,
  * gwy_container_set_object:
  * @container: A container.
  * @key: Quark item key.
- * @value: (out) (type Object) (transfer none):
+ * @value: (out) (type GObject.Object) (transfer none):
  *         Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
@@ -2011,7 +2011,7 @@ gwy_container_set_object(GwyContainer *container,
  * gwy_container_take_object:
  * @container: A container.
  * @key: Quark item key.
- * @value: (out) (type Object) (transfer full):
+ * @value: (out) (type GObject.Object) (transfer full):
  *         Object to store into the container.
  *
  * Stores an object identified by a quark into a container.
