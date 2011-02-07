@@ -785,10 +785,16 @@ gwy_curve_format_y(GwyCurve *curve,
 {
     g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
     gdouble min, max;
-    gwy_curve_min_max(curve, &min, &max);
-    if (!curve->n || max == min) {
-        max = ABS(max);
+    if (curve->n) {
+        gwy_curve_min_max(curve, &min, &max);
+        if (max == min) {
+            max = ABS(max);
+            min = 0.0;
+        }
+    }
+    else {
         min = 0.0;
+        max = 1.0;
     }
     return gwy_unit_format_with_digits(gwy_curve_get_unit_y(curve),
                                        style, max - min, 3);
