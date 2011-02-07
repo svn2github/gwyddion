@@ -138,7 +138,7 @@ test_curve_data_changed(void)
 }
 
 void
-test_curve_line_convert(void)
+test_curve_regularize(void)
 {
     enum { max_size = 27 };
     GRand *rng = g_rand_new();
@@ -162,7 +162,7 @@ test_curve_line_convert(void)
         g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
                                 gwy_line_get_unit_y(line)));
 
-        GwyLine *newline = gwy_line_new_from_curve(curve, 0);
+        GwyLine *newline = gwy_curve_regularize(curve, 0);
         g_assert_cmpuint(newline->res, ==, curve->n);
         g_assert_cmpfloat(fabs(newline->real - line->real),
                           <=,
@@ -187,7 +187,7 @@ test_curve_line_convert(void)
         g_assert(gwy_unit_equal(gwy_curve_get_unit_y(curve),
                                 gwy_line_get_unit_y(line)));
 
-        newline = gwy_line_new_from_curve(curve, 0);
+        newline = gwy_curve_regularize(curve, 0);
         g_assert_cmpuint(newline->res, ==, curve->n);
         g_assert_cmpfloat(fabs(newline->real - line->real),
                           <=,

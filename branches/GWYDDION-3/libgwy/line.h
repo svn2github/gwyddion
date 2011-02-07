@@ -57,12 +57,6 @@ struct _GwyLineClass {
     GObjectClass g_object_class;
 };
 
-G_END_DECLS
-
-#include <libgwy/curve.h>
-
-G_BEGIN_DECLS
-
 #define gwy_line_duplicate(line) \
         (GWY_LINE(gwy_serializable_duplicate(GWY_SERIALIZABLE(line))))
 #define gwy_line_assign(dest, src) \
@@ -81,8 +75,6 @@ GwyLine*        gwy_line_new_part      (const GwyLine *line,
 GwyLine*        gwy_line_new_resampled (const GwyLine *line,
                                         guint res,
                                         GwyInterpolationType interpolation) G_GNUC_MALLOC;
-GwyLine*        gwy_line_new_from_curve(const GwyCurve *curve,
-                                        guint res)                          G_GNUC_MALLOC;
 void            gwy_line_set_size      (GwyLine *line,
                                         guint res,
                                         gboolean clear);

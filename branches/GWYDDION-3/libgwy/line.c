@@ -22,13 +22,11 @@
 #include "libgwy/macros.h"
 #include "libgwy/math.h"
 #include "libgwy/serialize.h"
-#include "libgwy/curve-statistics.h"
 #include "libgwy/line.h"
 #include "libgwy/line-arithmetic.h"
 #include "libgwy/line-statistics.h"
 #include "libgwy/math-internal.h"
 #include "libgwy/object-internal.h"
-#include "libgwy/curve-internal.h"
 #include "libgwy/line-internal.h"
 
 enum { N_ITEMS = 5 };
@@ -614,77 +612,6 @@ gwy_line_set_size(GwyLine *line,
     }
     else if (clear)
         gwy_line_clear_full(line);
-}
-
-/**
- * gwy_line_new_from_curve:
- * @curve: A curve.  It must have at least one point.
- * @res: Required line resolution.  Pass 0 to chose a resolution automatically.
- *
- * Creates a one-dimensional data line from a curve.
- *
- * If the curve has at least two points with different abscissa values, they
- * are equidistant and the requested number of points matches the @curve's
- * number of points, then one-to-one data point mapping can be used and the
- * conversion will be information-preserving.  Otherwise linear interpolation
- * is used.
- *
- * Returns: A new one-dimensional data line.
- **/
-GwyLine*
-gwy_line_new_from_curve(const GwyCurve *curve,
-                        guint res)
-{
-    g_return_val_if_fail(GWY_IS_CURVE(curve), NULL);
-    g_return_val_if_fail(curve->n, NULL);
-
-    guint last = curve->n - 1;
-    const GwyXY *cdata = curve->data;
-    gdouble length = cdata[last].x - cdata[0].x;
-    GwyLine *line;
-
-    if (length) {
-        if (!res) {
-            gdouble mdx = gwy_curve_median_dx(curve);
-            res = mdx ? gwy_round(length/mdx) + 1 : curve->n;
-            res = MIN(res, 4*curve->n);
-        }
-        line = gwy_line_new_sized(res, FALSE);
-        gdouble dx = length/(res - 1);
-        gdouble *ldata = line->data;
-        line->off = cdata[0].x - dx/2.0;
-        line->real = res*dx;
-
-        *(ldata++) = cdata[0].y;
-        guint j = 0;
-        for (guint i = 1; i < res-1; i++) {
-            gdouble x = i*dx + cdata[0].x;
-            while (j+1 < res && cdata[j+1].x < x)
-                j++;
-            gdouble r = (x - cdata[j].x)/(cdata[j+1].x - cdata[j].x);
-            *(ldata++) = r*cdata[j+1].y + (1.0 - r)*cdata[j].y;
-        }
-        *ldata = cdata[last].y;
-    }
-    else {
-        // Special case, usually just one point but possibly a degenerate curve.
-        res = MAX(res, 1);
-        line = gwy_line_new_sized(res, FALSE);
-        gwy_line_fill_full(line, gwy_curve_mean(curve));
-
-        gdouble x = curve->data[0].x;
-        if (x)
-            line->real = 2*x;
-        else {
-            line->real = 2.0;
-            line->off = -1.0;
-        }
-    }
-
-    ASSIGN_UNITS(line->priv->unit_x, curve->priv->unit_x);
-    ASSIGN_UNITS(line->priv->unit_y, curve->priv->unit_y);
-
-    return line;
 }
 
 /**

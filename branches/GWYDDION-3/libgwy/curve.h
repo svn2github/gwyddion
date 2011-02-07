@@ -23,6 +23,7 @@
 #include <libgwy/serializable.h>
 #include <libgwy/unit.h>
 #include <libgwy/math.h>
+#include <libgwy/line.h>
 
 G_BEGIN_DECLS
 
@@ -55,12 +56,6 @@ struct _GwyCurveClass {
     GObjectClass g_object_class;
 };
 
-G_END_DECLS
-
-#include <libgwy/line.h>
-
-G_BEGIN_DECLS
-
 #define gwy_curve_duplicate(curve) \
         (GWY_CURVE(gwy_serializable_duplicate(GWY_SERIALIZABLE(curve))))
 #define gwy_curve_assign(dest, src) \
@@ -82,6 +77,8 @@ void            gwy_curve_copy         (const GwyCurve *src,
 void            gwy_curve_sort         (GwyCurve *curve);
 void            gwy_curve_set_from_line(GwyCurve *curve,
                                         const GwyLine *line);
+GwyLine*        gwy_curve_regularize   (const GwyCurve *curve,
+                                        guint res)                 G_GNUC_MALLOC;
 GwyUnit*        gwy_curve_get_unit_x   (GwyCurve *curve)           G_GNUC_PURE;
 GwyUnit*        gwy_curve_get_unit_y   (GwyCurve *curve)           G_GNUC_PURE;
 GwyValueFormat* gwy_curve_format_x     (GwyCurve *curve,

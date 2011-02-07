@@ -58,7 +58,7 @@ line/outer-product
 curve/props
 curve/data-changed
 curve/serialize
-curve/line-convert
+curve/regularize
 mask-field/stride
 mask-field/props
 mask-field/data-changed
