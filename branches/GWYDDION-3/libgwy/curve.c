@@ -619,6 +619,7 @@ gwy_curve_set_from_line(GwyCurve *curve,
  *          A new one-dimensional data line or %NULL if the curve contains no
  *          points.
  **/
+// TODO: This needs the possibility to specify a sub-range.
 GwyLine*
 gwy_curve_regularize(const GwyCurve *curve,
                      guint res)

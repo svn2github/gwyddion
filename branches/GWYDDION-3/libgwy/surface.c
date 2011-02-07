@@ -658,6 +658,7 @@ gwy_surface_set_from_field(GwySurface *surface,
  *          A new two-dimensional data field or %NULL if the surface contains
  *          no points.
  **/
+// TODO: This needs the possibility to specify a sub-range.
 GwyField*
 gwy_surface_regularize(const GwySurface *surface,
                        guint xres,
