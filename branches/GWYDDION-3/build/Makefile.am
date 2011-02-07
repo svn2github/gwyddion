@@ -3,6 +3,7 @@
 
 EXTRA_DIST = \
 	check-library-symbols.py \
+	check-serializable-types.py \
 	coverage-plot.py \
 	coverage-test.sh \
 	expand-test-list.py \
