@@ -24,6 +24,10 @@
 #include "libgwy/math-internal.h"
 #include "libgwy/field-internal.h"
 
+#define CVAL GWY_FIELD_CVAL
+#define CBIT GWY_FIELD_CBIT
+#define CTEST GWY_FIELD_CTEST
+
 /**
  * gwy_field_min_max:
  * @field: A two-dimensional data field.

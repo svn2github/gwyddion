@@ -28,9 +28,9 @@
 G_BEGIN_DECLS
 
 /* Cache operations */
-#define CVAL(arg, bit)  ((arg)->cache[GWY_FIELD_CACHE_##bit])
-#define CBIT(bit)       (1 << GWY_FIELD_CACHE_##bit)
-#define CTEST(arg, bit) ((arg)->cached & CBIT(bit))
+#define GWY_FIELD_CVAL(arg, bit)  ((arg)->cache[GWY_FIELD_CACHE_##bit])
+#define GWY_FIELD_CBIT(bit)       (1 << GWY_FIELD_CACHE_##bit)
+#define GWY_FIELD_CTEST(arg, bit) ((arg)->cached & GWY_FIELD_CBIT(bit))
 
 typedef enum {
     GWY_FIELD_CACHE_MIN = 0,
@@ -39,8 +39,8 @@ typedef enum {
     GWY_FIELD_CACHE_RMS,
     GWY_FIELD_CACHE_MSQ,
     GWY_FIELD_CACHE_MED,
-    GWY_FIELD_CACHE_ARF,
-    GWY_FIELD_CACHE_ART,
+    GWY_FIELD_CACHE_ARF,  // Not implemented yet
+    GWY_FIELD_CACHE_ART,  // Not implemented yet
     GWY_FIELD_CACHE_ARE,
     GWY_FIELD_CACHE_SIZE
 } GwyFieldCached;

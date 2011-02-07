@@ -30,6 +30,10 @@
 #include "libgwy/line-internal.h"
 #include "libgwy/field-internal.h"
 
+#define CVAL GWY_FIELD_CVAL
+#define CBIT GWY_FIELD_CBIT
+#define CTEST GWY_FIELD_CTEST
+
 enum { N_ITEMS = 9 };
 
 enum {

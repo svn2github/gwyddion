@@ -23,6 +23,10 @@
 #include "libgwy/field-arithmetic.h"
 #include "libgwy/field-internal.h"
 
+#define CVAL GWY_FIELD_CVAL
+#define CBIT GWY_FIELD_CBIT
+#define CTEST GWY_FIELD_CTEST
+
 #define DSWAP(x, y) GWY_SWAP(gdouble, x, y)
 
 /* for compatibility checks */
